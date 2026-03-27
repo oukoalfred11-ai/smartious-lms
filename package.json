@@ -1,0 +1,18 @@
+{
+  "name": "smartious-lms",
+  "version": "1.0.0",
+  "description": "Smartious Homeschool LMS — React + Vite + Node.js + MongoDB",
+  "private": true,
+  "scripts": {
+    "install:all":    "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "dev":            "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend":   "cd frontend && npm run dev",
+    "dev:backend":    "cd backend && npm run dev",
+    "build":          "cd frontend && npm run build",
+    "seed":           "cd backend && npm run seed",
+    "start:backend":  "cd backend && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
