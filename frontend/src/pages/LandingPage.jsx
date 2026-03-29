@@ -77,11 +77,11 @@ const styles = `
   .lp .h-sub{font-size:17px;color:rgba(247,243,237,.52);max-width:480px;line-height:1.8;margin-bottom:44px}
   .lp .h-act{display:flex;gap:12px;flex-wrap:wrap}
   .lp .h-stats{position:absolute;right:48px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:12px}
-  .lp .hs{background:rgba(247,243,237,.04);border:1px solid rgba(184,150,12,.16);border-radius:10px;padding:14px 16px;backdrop-filter:blur(16px);min-width:140px;max-width:200px;position:relative;overflow:hidden}
+  .lp .hs{background:rgba(247,243,237,.04);border:1px solid rgba(184,150,12,.16);border-radius:10px;padding:14px 16px;backdrop-filter:blur(16px);min-width:140px;max-width:210px;position:relative;overflow:hidden}
   .lp .hs::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,${V.gold3},transparent)}
-  .lp .hs-n{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lp .hs-n{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:${V.white};line-height:1.2;word-break:break-word;white-space:normal}
   .lp .hs-n em{color:${V.gold3};font-style:normal}
-  .lp .hs-l{font-size:11px;color:rgba(247,243,237,.38);margin-top:5px;letter-spacing:.04em}
+  .lp .hs-l{font-size:10.5px;color:rgba(247,243,237,.5);margin-top:5px;letter-spacing:.04em;line-height:1.4}
   /* MOBILE HERO STATS — hidden by default, shown on mobile */
   .lp .h-mob-stats{display:none;grid-template-columns:1fr 1fr;gap:10px;margin-top:36px;max-width:340px}
   .lp .hms{background:rgba(247,243,237,.05);border:1px solid rgba(184,150,12,.16);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden}
@@ -290,22 +290,45 @@ const styles = `
   .lp .lpf{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;text-align:center}
   .lp .lpf-l{font-size:11.5px;font-weight:700;color:rgba(247,243,237,.6);margin-top:8px}
   .lp .lpf-s{font-size:10.5px;color:rgba(247,243,237,.28);margin-top:2px}
+  /* CONSULTATION PAGE */
+  .lp .consult-wrap{max-width:760px;margin:0 auto}
+  .lp .consult-card{background:${V.white};border:1px solid ${V.bone3};border-radius:24px;padding:48px;box-shadow:0 8px 40px rgba(10,8,6,.08)}
+  .lp .consult-field{margin-bottom:20px}
+  .lp .consult-label{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${V.sl};margin-bottom:7px}
+  .lp .consult-input{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Syne',sans-serif;outline:none;transition:border-color .2s}
+  .lp .consult-input:focus{border-color:${V.cr};background:${V.white}}
+  .lp .consult-select{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Syne',sans-serif;outline:none;appearance:none;cursor:pointer;transition:border-color .2s}
+  .lp .consult-select:focus{border-color:${V.cr}}
+  .lp .consult-textarea{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Syne',sans-serif;outline:none;resize:vertical;min-height:120px;line-height:1.65;transition:border-color .2s}
+  .lp .consult-textarea:focus{border-color:${V.cr};background:${V.white}}
+  .lp .consult-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .lp .consult-success{text-align:center;padding:48px 32px}
+  .lp .consult-success-icon{width:72px;height:72px;border-radius:50%;background:rgba(139,26,46,.08);border:2px solid rgba(139,26,46,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 24px}
+  /* CONTACT PAGE */
+  .lp .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px}
+  .lp .contact-info-card{background:${V.ink};border-radius:20px;padding:40px;display:flex;flex-direction:column;gap:28px}
+  .lp .contact-method{display:flex;align-items:flex-start;gap:16px}
+  .lp .contact-icon{width:44px;height:44px;border-radius:10px;background:rgba(139,26,46,.25);border:1px solid rgba(139,26,46,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .lp .contact-method-label{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(247,243,237,.3);margin-bottom:5px}
+  .lp .contact-method-value{font-size:14.5px;color:${V.white};font-weight:600;line-height:1.5}
+  .lp .contact-method-sub{font-size:12px;color:rgba(247,243,237,.4);margin-top:3px}
+  .lp .contact-email-card{background:${V.white};border:1px solid ${V.bone3};border-radius:20px;padding:40px}
   /* FOOTER */
   .lp footer{background:${V.ink2};padding:72px 0 28px;border-top:1px solid rgba(184,150,12,.08)}
   .lp .ft-grid{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:52px;margin-bottom:52px}
-  .lp .ft-h{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:${V.white}}
+  .lp .ft-h{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:#FEFDFB}
   .lp .ft-h em{color:${V.gold3};font-style:italic}
-  .lp .ft-tag{font-size:8.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(247,243,237,.18);margin-top:2px;margin-bottom:14px}
-  .lp .ft-d{font-size:13px;color:rgba(247,243,237,.3);line-height:1.78;margin-bottom:20px;max-width:270px}
-  .lp .ft-ch{font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(247,243,237,.2);margin-bottom:16px}
+  .lp .ft-tag{font-size:8.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#A89F94;margin-top:2px;margin-bottom:14px}
+  .lp .ft-d{font-size:13px;color:#C0B5A8;line-height:1.78;margin-bottom:20px;max-width:270px}
+  .lp .ft-ch{font-size:9.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#C8BFB4;margin-bottom:16px}
   .lp .ft-lk{list-style:none;display:flex;flex-direction:column;gap:9px}
-  .lp .ft-lk a{font-size:13px;color:rgba(247,243,237,.34);transition:color .15s;cursor:pointer;display:block}
+  .lp .ft-lk a{font-size:13px;color:#C0B5A8;transition:color .15s;cursor:pointer;display:block}
   .lp .ft-lk a:hover{color:${V.white}}
-  .lp .ft-ct{font-size:12.5px;color:rgba(247,243,237,.3);line-height:2.1}
+  .lp .ft-ct{font-size:12.5px;color:#C0B5A8;line-height:2.1}
   .lp .ft-bot{border-top:1px solid rgba(255,255,255,.05);padding-top:22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-  .lp .ft-copy{font-size:11.5px;color:rgba(247,243,237,.18)}
+  .lp .ft-copy{font-size:11.5px;color:#A89F94}
   .lp .ft-acs{display:flex;gap:6px;flex-wrap:wrap}
-  .lp .ft-ac{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:3px 10px;font-size:10px;font-weight:600;color:rgba(247,243,237,.22)}
+  .lp .ft-ac{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:3px 10px;font-size:10px;font-weight:600;color:#A89F94}
   /* PROG CARDS */
   .lp .prog-card{background:${V.white};border:1px solid ${V.bone3};border-radius:24px;overflow:hidden;margin-bottom:28px}
   .lp .prog-bar{height:4px;background:linear-gradient(90deg,${V.cr},${V.gold2})}
@@ -375,7 +398,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','services','global','pricing','programs','faq','blog','enroll','login']
+const PAGES = ['home','about','curricula','services','global','pricing','programs','faq','blog','enroll','login','consult','contact']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -530,7 +553,7 @@ export default function LandingPage() {
               <div className="h-act">
                 <button className="btn-p" onClick={() => P('enroll')}>Begin Enrollment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 <button className="btn-o lt" onClick={goPortal} style={{borderColor:'rgba(184,150,12,.5)',color:V.gold2}}>Book a Free Demo</button>
-                <button className="btn-o lt" style={{borderColor:'rgba(139,26,46,.45)',color:V.cr}} onClick={() => showToast('Contact info@smartious.ac.ke for a free consultation.')}>Free Consultation</button>
+                <button className="btn-o lt" style={{borderColor:'rgba(139,26,46,.45)',color:V.cr}} onClick={() => P('consult')}>Free Consultation</button>
                 <button className="btn-o lt" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.85)'}} onClick={() => P('curricula')}>Explore Curricula</button>
                 <button className="btn-o lt" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.85)'}} onClick={() => P('pricing')}>View Pricing</button>
               </div>
@@ -1267,6 +1290,62 @@ export default function LandingPage() {
       {/* ══════════════════════════════════════════
           LOGIN
       ══════════════════════════════════════════ */}
+      {/* ══ CONSULTATION PAGE ══ */}
+      {page === 'consult' && (
+        <div>
+          <div className="pg-hero"><div className="wrap">
+            <div className="eyebrow">Free Consultation</div>
+            <h1 className="pg-h">Book a Free <em>Consultation</em></h1>
+            <p className="pg-sub">Speak with our admissions team about the right curriculum and learning plan for your child. No commitment required.</p>
+          </div></div>
+          <section className="sec"><div className="wrap"><div className="consult-wrap">
+            <ConsultForm P={P} />
+          </div></div></section>
+          <Footer P={P}/>
+        </div>
+      )}
+
+      {/* ══ CONTACT PAGE ══ */}
+      {page === 'contact' && (
+        <div>
+          <div className="pg-hero"><div className="wrap">
+            <div className="eyebrow">Get in Touch</div>
+            <h1 className="pg-h">Contact <em>Smartious</em></h1>
+            <p className="pg-sub">We are here to help. Reach out by email, phone, WhatsApp or visit us in Nairobi.</p>
+          </div></div>
+          <section className="sec"><div className="wrap">
+            <div className="contact-grid">
+              {/* Left — contact info */}
+              <div className="contact-info-card">
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',color:'#FEFDFB',marginBottom:8}}>Our <em style={{color:'#F0CC5A',fontStyle:'italic'}}>Details</em></div>
+                {[
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Email', value:'info@smartious.ac.ke', sub:'Response within 2 hours', href:'mailto:info@smartious.ac.ke'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Phone', value:'+254 712 345 678', sub:'Mon–Fri, 8am–6pm EAT', href:'tel:+254712345678'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>, label:'WhatsApp', value:'+254 712 345 678', sub:'Quick responses · Tap to chat', href:'https://wa.me/254712345678'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I, Parklands', sub:'Nairobi, Kenya · 4th Avenue', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
+                ].map(({icon,label,value,sub,href}) => (
+                  <a key={label} href={href} target="_blank" rel="noreferrer" style={{textDecoration:'none'}} className="contact-method">
+                    <div className="contact-icon">{icon}</div>
+                    <div>
+                      <div className="contact-method-label">{label}</div>
+                      <div className="contact-method-value">{value}</div>
+                      <div className="contact-method-sub">{sub}</div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+              {/* Right — email form */}
+              <div className="contact-email-card">
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.4rem',color:'#0A0806',marginBottom:6}}>Send us a <em style={{color:'#8B1A2E',fontStyle:'italic'}}>Message</em></div>
+                <p style={{fontSize:13.5,color:'#6B5E52',marginBottom:28,lineHeight:1.7}}>Fill in the form below and we will respond within 2 working hours.</p>
+                <ContactForm />
+              </div>
+            </div>
+          </div></section>
+          <Footer P={P}/>
+        </div>
+      )}
+
       {page === 'login' && (
         <div className="login-bg">
           <div style={{position:'absolute',top:'-20%',left:'-10%',width:'60%',height:'120%',borderRadius:'50%',background:'radial-gradient(ellipse,rgba(139,26,46,.14) 0%,transparent 70%)'}}/>
@@ -1353,6 +1432,174 @@ function PriceCard({ lbl, ti, am, pr, fs, gold, badge, cta = 'Enroll Now', P }) 
   )
 }
 
+// ── Consultation Form ─────────────────────────────────────
+function ConsultForm({ P }) {
+  const [form, setForm] = useState({name:'',email:'',phone:'',country:'',curriculum:'',message:''})
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [err, setErr] = useState('')
+  const set = (k,v) => setForm(f => ({...f,[k]:v}))
+
+  const submit = async () => {
+    if (!form.name || !form.email || !form.phone) { setErr('Please fill in all required fields.'); return }
+    setSending(true); setErr('')
+    try {
+      await fetch(`https://formsubmit.co/ajax/info@smartious.ac.ke`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body: JSON.stringify({
+          _subject: `Free Consultation Request — ${form.name}`,
+          _template: 'table',
+          _captcha: 'false',
+          Name: form.name,
+          Email: form.email,
+          Phone: form.phone,
+          Country: form.country,
+          Curriculum: form.curriculum,
+          Message: form.message || 'No additional message provided.',
+        })
+      })
+      setSent(true)
+    } catch {
+      setErr('Failed to send. Please email us directly at info@smartious.ac.ke')
+    }
+    setSending(false)
+  }
+
+  if (sent) return (
+    <div className="consult-card consult-success">
+      <div className="consult-success-icon">
+        <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#8B1A2E" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.8rem',color:'#0A0806',marginBottom:12}}>Request <em style={{color:'#8B1A2E',fontStyle:'italic'}}>Received!</em></div>
+      <p style={{fontSize:15,color:'#6B5E52',lineHeight:1.8,marginBottom:32,maxWidth:420,margin:'0 auto 32px'}}>Thank you {form.name}. Our admissions team will reach you at <strong>{form.email}</strong> within 2 working hours to schedule your free consultation.</p>
+      <button className="btn-p" onClick={() => P('home')}>Back to Home</button>
+    </div>
+  )
+
+  return (
+    <div className="consult-card">
+      <div style={{marginBottom:32}}>
+        <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.6rem',color:'#0A0806',marginBottom:8}}>Tell us about <em style={{color:'#8B1A2E',fontStyle:'italic'}}>your child</em></div>
+        <p style={{fontSize:14,color:'#6B5E52',lineHeight:1.7}}>Fill in the form below. Our team will contact you within 2 working hours to schedule a free 30-minute consultation call.</p>
+      </div>
+      <div className="consult-grid">
+        <div className="consult-field">
+          <label className="consult-label">Your Full Name *</label>
+          <input className="consult-input" placeholder="Jane Osei" value={form.name} onChange={e=>set('name',e.target.value)}/>
+        </div>
+        <div className="consult-field">
+          <label className="consult-label">Email Address *</label>
+          <input className="consult-input" type="email" placeholder="jane@email.com" value={form.email} onChange={e=>set('email',e.target.value)}/>
+        </div>
+        <div className="consult-field">
+          <label className="consult-label">WhatsApp / Phone *</label>
+          <input className="consult-input" type="tel" placeholder="+254 712 345 678" value={form.phone} onChange={e=>set('phone',e.target.value)}/>
+        </div>
+        <div className="consult-field">
+          <label className="consult-label">Country of Residence</label>
+          <select className="consult-select" value={form.country} onChange={e=>set('country',e.target.value)}>
+            <option value="">Select country…</option>
+            {['Kenya','Nigeria','South Africa','Uganda','Tanzania','UAE','United Kingdom','United States','Canada','Australia','Other'].map(c=><option key={c}>{c}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="consult-field">
+        <label className="consult-label">Curriculum of Interest</label>
+        <select className="consult-select" value={form.curriculum} onChange={e=>set('curriculum',e.target.value)}>
+          <option value="">Select curriculum…</option>
+          {['IGCSE (Cambridge)','Cambridge A-Level','IB Diploma','CBC / KCSE','British National Curriculum','American Curriculum','Not sure — need guidance'].map(c=><option key={c}>{c}</option>)}
+        </select>
+      </div>
+      <div className="consult-field">
+        <label className="consult-label">Any questions or context? (Optional)</label>
+        <textarea className="consult-textarea" placeholder="Tell us about your child's age, current grade, learning goals, or any specific needs…" value={form.message} onChange={e=>set('message',e.target.value)}/>
+      </div>
+      {err && <div style={{color:'#8B1A2E',fontSize:13,marginBottom:16,padding:'10px 14px',background:'rgba(139,26,46,.06)',borderRadius:6,border:'1px solid rgba(139,26,46,.15)'}}>{err}</div>}
+      <button className="btn-p" style={{width:'100%',justifyContent:'center',padding:'14px',fontSize:14.5}} onClick={submit} disabled={sending}>
+        {sending ? 'Sending…' : <>
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Book Free Consultation
+        </>}
+      </button>
+      <p style={{fontSize:12,color:'#ADA094',textAlign:'center',marginTop:14}}>No commitment · Our team contacts you within 2 hours · 100% free</p>
+    </div>
+  )
+}
+
+// ── Contact Form ───────────────────────────────────────────
+function ContactForm() {
+  const [form, setForm] = useState({name:'',email:'',subject:'',message:''})
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [err, setErr] = useState('')
+  const set = (k,v) => setForm(f => ({...f,[k]:v}))
+
+  const submit = async () => {
+    if (!form.name || !form.email || !form.message) { setErr('Please fill in all required fields.'); return }
+    setSending(true); setErr('')
+    try {
+      await fetch(`https://formsubmit.co/ajax/info@smartious.ac.ke`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body: JSON.stringify({
+          _subject: `Website Message — ${form.subject || 'General Enquiry'}`,
+          _template: 'table',
+          _captcha: 'false',
+          Name: form.name,
+          Email: form.email,
+          Subject: form.subject || 'General Enquiry',
+          Message: form.message,
+        })
+      })
+      setSent(true)
+    } catch {
+      setErr('Failed to send. Email us directly at info@smartious.ac.ke')
+    }
+    setSending(false)
+  }
+
+  if (sent) return (
+    <div style={{textAlign:'center',padding:'32px 0'}}>
+      <div style={{width:56,height:56,borderRadius:'50%',background:'rgba(139,26,46,.08)',border:'2px solid rgba(139,26,46,.2)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px'}}>
+        <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#8B1A2E" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.4rem',color:'#0A0806',marginBottom:8}}>Message Sent!</div>
+      <p style={{fontSize:14,color:'#6B5E52',lineHeight:1.7}}>We will reply to <strong>{form.email}</strong> within 2 working hours.</p>
+    </div>
+  )
+
+  return (
+    <div style={{display:'flex',flexDirection:'column',gap:16}}>
+      <div className="consult-grid">
+        <div className="consult-field" style={{marginBottom:0}}>
+          <label className="consult-label">Full Name *</label>
+          <input className="consult-input" placeholder="Your name" value={form.name} onChange={e=>set('name',e.target.value)}/>
+        </div>
+        <div className="consult-field" style={{marginBottom:0}}>
+          <label className="consult-label">Email *</label>
+          <input className="consult-input" type="email" placeholder="your@email.com" value={form.email} onChange={e=>set('email',e.target.value)}/>
+        </div>
+      </div>
+      <div className="consult-field" style={{marginBottom:0}}>
+        <label className="consult-label">Subject</label>
+        <input className="consult-input" placeholder="e.g. IGCSE enquiry, pricing, tutor availability…" value={form.subject} onChange={e=>set('subject',e.target.value)}/>
+      </div>
+      <div className="consult-field" style={{marginBottom:0}}>
+        <label className="consult-label">Message *</label>
+        <textarea className="consult-textarea" placeholder="How can we help you?" value={form.message} onChange={e=>set('message',e.target.value)}/>
+      </div>
+      {err && <div style={{color:'#8B1A2E',fontSize:13,padding:'10px 14px',background:'rgba(139,26,46,.06)',borderRadius:6,border:'1px solid rgba(139,26,46,.15)'}}>{err}</div>}
+      <button className="btn-p" style={{width:'100%',justifyContent:'center',padding:13,fontSize:14}} onClick={submit} disabled={sending}>
+        {sending ? 'Sending…' : <>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send Message
+        </>}
+      </button>
+    </div>
+  )
+}
+
 // ── Footer ────────────────────────────────────────────────
 function Footer({ P }) {
   const { siteConfig: cfg } = useStore()
@@ -1376,9 +1623,22 @@ function Footer({ P }) {
           <div>
             <div className="ft-ch">Contact</div>
             <div className="ft-ct">
-              <div>{cfg.footerEmail || 'info@smartious.ac.ke'}</div>
-              <div>{cfg.footerPhone || '+254 712 345 678'}</div>
-              <div>{cfg.footerAddress || 'Diamond Plaza I, Parklands, Nairobi, Kenya'}</div>
+              <a href={`mailto:${cfg.footerEmail || 'info@smartious.ac.ke'}`} style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                {cfg.footerEmail || 'info@smartious.ac.ke'}
+              </a>
+              <a href={`tel:${(cfg.footerPhone || '+254712345678').replace(/\s/g,'')}`} style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                {cfg.footerPhone || '+254 712 345 678'}
+              </a>
+              <a href={`https://wa.me/${(cfg.footerPhone || '254712345678').replace(/[^0-9]/g,'')}`} target="_blank" rel="noreferrer" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#25D366'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                WhatsApp Chat
+              </a>
+              <div style={{display:'flex',alignItems:'center',gap:7}}>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {cfg.footerAddress || 'Diamond Plaza I, Parklands, Nairobi, Kenya'}
+              </div>
             </div>
           </div>
         </div>
