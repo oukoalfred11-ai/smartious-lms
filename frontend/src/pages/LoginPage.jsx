@@ -148,32 +148,22 @@ export default function LoginPage() {
           <div style={{ flex:1, height:1, background:'rgba(255,255,255,.07)' }} />
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
-          {DEMO.slice(0,3).map(d => (
-            <button key={d.role} onClick={()=>quickLogin(d)}
-              style={{ padding:'11px 8px', background:'rgba(255,255,255,.04)', border:`1px solid rgba(255,255,255,.06)`, borderRadius:10, cursor:'pointer', textAlign:'center', transition:'all .2s', fontFamily:"'Syne',sans-serif" }}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=d.col;e.currentTarget.style.background=d.col+'12'}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(255,255,255,.06)';e.currentTarget.style.background='rgba(255,255,255,.04)'}}>
-              <div style={{ width:30, height:30, borderRadius:'50%', background:d.col+'20', border:`1.5px solid ${d.col}50`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 7px' }}>
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke={d.col} strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:d.svg}} />
+        {/* Demo only — one click access */}
+        {(() => {
+          const demo = DEMO.find(d => d.role === 'demo')
+          return (
+            <button onClick={() => quickLogin(demo)}
+              style={{ width:'100%', padding:'14px 8px', background:'rgba(139,26,46,.08)', border:'1px solid rgba(139,26,46,.25)', borderRadius:10, cursor:'pointer', textAlign:'center', transition:'all .2s', fontFamily:"'Syne',sans-serif" }}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor='#8B1A2E';e.currentTarget.style.background='rgba(139,26,46,.18)'}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(139,26,46,.25)';e.currentTarget.style.background='rgba(139,26,46,.08)'}}>
+              <div style={{ width:36, height:36, borderRadius:'50%', background:'rgba(139,26,46,.25)', border:'1.5px solid rgba(139,26,46,.5)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 8px' }}>
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#8B1A2E" strokeWidth="2" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
               </div>
-              <div style={{ fontSize:12, fontWeight:700, color:'rgba(247,243,237,.7)' }}>{d.label}</div>
+              <div style={{ fontSize:13, fontWeight:700, color:'rgba(247,243,237,.8)', marginBottom:3 }}>Try Demo</div>
+              <div style={{ fontSize:11, color:'rgba(247,243,237,.35)' }}>One-click access · No sign up needed</div>
             </button>
-          ))}
-        </div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginTop:8 }}>
-          {DEMO.slice(3).map(d => (
-            <button key={d.role} onClick={()=>quickLogin(d)}
-              style={{ padding:'11px 8px', background:'rgba(255,255,255,.04)', border:`1px solid rgba(255,255,255,.06)`, borderRadius:10, cursor:'pointer', textAlign:'center', transition:'all .2s', fontFamily:"'Syne',sans-serif" }}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=d.col;e.currentTarget.style.background=d.col+'12'}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(255,255,255,.06)';e.currentTarget.style.background='rgba(255,255,255,.04)'}}>
-              <div style={{ width:30, height:30, borderRadius:'50%', background:d.col+'20', border:`1.5px solid ${d.col}50`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 7px' }}>
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke={d.col} strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:d.svg}} />
-              </div>
-              <div style={{ fontSize:12, fontWeight:700, color:'rgba(247,243,237,.7)' }}>{d.label}</div>
-            </button>
-          ))}
-        </div>
+          )
+        })()}
       </div>
 
       <div style={{ marginTop:20, textAlign:'center', position:'relative', zIndex:1 }}>

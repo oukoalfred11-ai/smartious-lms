@@ -17,6 +17,14 @@ const styles = `
   .lp button{font-family:'Syne',sans-serif;cursor:pointer;border:none;background:none;outline:none}
   .lp ::-webkit-scrollbar{width:4px}
   .lp ::-webkit-scrollbar-thumb{background:${V.cr};border-radius:2px}
+  /* SCROLL REVEAL ANIMATIONS */
+  .lp .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.23,1,.32,1),transform .7s cubic-bezier(.23,1,.32,1)}
+  .lp .reveal.visible{opacity:1;transform:none}
+  .lp .reveal.delay-1{transition-delay:.1s}
+  .lp .reveal.delay-2{transition-delay:.2s}
+  .lp .reveal.delay-3{transition-delay:.3s}
+  .lp .reveal.delay-4{transition-delay:.4s}
+  .lp .reveal.delay-5{transition-delay:.5s}
   /* SHARED */
   .lp .sec{padding:96px 0}
   .lp .wrap{max-width:1440px;margin:0 auto;padding:0 48px}
@@ -34,7 +42,11 @@ const styles = `
   .lp .btn-o.lt:hover{border-color:${V.gold3};color:${V.gold3}}
   .lp .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.06em;background:rgba(139,26,46,.08);color:${V.cr};border:1px solid rgba(139,26,46,.15)}
   /* NAV */
-  .lp nav{position:sticky;top:0;z-index:800;background:rgba(10,8,6,.96);border-bottom:1px solid rgba(184,150,12,.12);backdrop-filter:blur(24px)}
+  .lp .lp-header{position:fixed;top:0;left:0;right:0;z-index:800;transition:box-shadow .3s}
+  .lp nav{background:rgba(10,8,6,.96);border-bottom:1px solid rgba(184,150,12,.12);backdrop-filter:blur(24px)}
+  .lp .lp-header.scrolled{box-shadow:0 4px 30px rgba(0,0,0,.5)}
+  .lp .lp-header.scrolled #topbar{display:none}
+  .lp #hero{padding-top:36px}
   .lp .nav-wrap{max-width:1440px;margin:0 auto;padding:0 48px;height:64px;display:flex;align-items:center;gap:0}
   .lp .logo-lockup{display:flex;align-items:center;gap:13px;cursor:pointer;flex-shrink:0}
   .lp .logo-emblem{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,${V.cr},${V.cr2});display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(139,26,46,.4)}
@@ -46,6 +58,7 @@ const styles = `
   .lp .nl:hover{color:${V.white}}.lp .nl.on{color:${V.white}}
   .lp .nl.on::after{content:'';position:absolute;bottom:-1px;left:12px;right:12px;height:1.5px;background:${V.gold3};border-radius:2px}
   .lp .nav-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
+
   .lp .nav-login{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:6px;font-size:12.5px;font-weight:600;color:rgba(247,243,237,.55);border:1px solid rgba(247,243,237,.12);transition:all .2s;cursor:pointer;background:none;font-family:'Syne',sans-serif}
   .lp .nav-login:hover{color:${V.white};border-color:rgba(247,243,237,.28)}
   .lp .nav-cta{display:flex;align-items:center;gap:7px;padding:9px 20px;border-radius:6px;font-size:12.5px;font-weight:700;background:${V.cr};color:${V.white};box-shadow:0 4px 14px rgba(139,26,46,.35);transition:all .2s;cursor:pointer;font-family:'Syne',sans-serif}
@@ -64,11 +77,18 @@ const styles = `
   .lp .h-sub{font-size:17px;color:rgba(247,243,237,.52);max-width:480px;line-height:1.8;margin-bottom:44px}
   .lp .h-act{display:flex;gap:12px;flex-wrap:wrap}
   .lp .h-stats{position:absolute;right:48px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:12px}
-  .lp .hs{background:rgba(247,243,237,.04);border:1px solid rgba(184,150,12,.16);border-radius:10px;padding:16px 20px;backdrop-filter:blur(16px);min-width:160px;position:relative;overflow:hidden}
+  .lp .hs{background:rgba(247,243,237,.04);border:1px solid rgba(184,150,12,.16);border-radius:10px;padding:14px 16px;backdrop-filter:blur(16px);min-width:140px;max-width:200px;position:relative;overflow:hidden}
   .lp .hs::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,${V.gold3},transparent)}
-  .lp .hs-n{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:${V.white};line-height:1}
+  .lp .hs-n{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .lp .hs-n em{color:${V.gold3};font-style:normal}
   .lp .hs-l{font-size:11px;color:rgba(247,243,237,.38);margin-top:5px;letter-spacing:.04em}
+  /* MOBILE HERO STATS — hidden by default, shown on mobile */
+  .lp .h-mob-stats{display:none;grid-template-columns:1fr 1fr;gap:10px;margin-top:36px;max-width:340px}
+  .lp .hms{background:rgba(247,243,237,.05);border:1px solid rgba(184,150,12,.16);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden}
+  .lp .hms::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,${V.gold3},transparent)}
+  .lp .hms-n{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1}
+  .lp .hms-n em{color:${V.gold3};font-style:normal}
+  .lp .hms-l{font-size:10px;color:rgba(247,243,237,.38);margin-top:4px;letter-spacing:.04em}
   /* MARQUEE */
   .lp .marq{background:${V.cr};padding:13px 0;overflow:hidden;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}
   .lp .marq-in{display:flex;white-space:nowrap;animation:lp-marq 30s linear infinite}
@@ -335,6 +355,8 @@ const styles = `
   }
   @media(max-width:768px){
     .lp .nav-links,.lp .nav-actions{display:none}
+    .lp .h-stats{display:none}
+    .lp .h-mob-stats{display:grid!important}
     .lp .mob-burger{display:flex!important}
     .lp .mob-page-strip{display:block!important}
     .lp .wrap,.lp .nav-wrap,.lp .h-body,.lp .cta-in{padding-left:20px;padding-right:20px}
@@ -365,7 +387,23 @@ export default function LandingPage() {
   const store = useStore()
   const cfg   = store.siteConfig  // live site config from admin editor
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const [page, setPage] = useState('home')
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible') })
+    }, { threshold: 0.12 })
+    document.querySelectorAll('.lp .reveal').forEach(el => observer.observe(el))
+    return () => observer.disconnect()
+  }, [page])
   const [faqOpen, setFaqOpen] = useState(null)
   const [priceTabs, setPriceTab] = useState('hs')
   const [blogCat, setBlogCat] = useState('all')
@@ -414,13 +452,12 @@ export default function LandingPage() {
     <div className="lp" ref={topRef}>
       <style>{styles}</style>
 
-      {/* ── TOPBAR ── */}
-      <div id="topbar" style={{background:V.ink,color:'rgba(247,243,237,.55)',fontSize:'11.5px',fontWeight:500,letterSpacing:'.04em',padding:'9px 0',textAlign:'center'}}>
-        <strong style={{color:V.gold3}}>$15 placement assessment</strong> · IGCSE · Cambridge · IB · British · American · CBC · From $85/month · 12+ countries
-      </div>
-
-      {/* ── NAV ── */}
-      <nav>
+      {/* ── FIXED HEADER: topbar + nav ── */}
+      <div className={`lp-header${scrolled?' scrolled':''}`}>
+        <div id="topbar" style={{background:V.ink,color:'rgba(247,243,237,.55)',fontSize:'11.5px',fontWeight:500,letterSpacing:'.04em',padding:'9px 0',textAlign:'center'}}>
+          <strong style={{color:V.gold3}}>$15 placement assessment</strong> · IGCSE · Cambridge · IB · British · American · CBC · From $85/month · 12+ countries
+        </div>
+        <nav>
         <div className="nav-wrap">
           <div className="logo-lockup" onClick={() => P('home')}>
             <div className="logo-emblem">
@@ -452,7 +489,8 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-      </nav>
+        </nav>
+      </div>{/* /lp-header */}
 
       {/* Mobile slide-down menu */}
       {mobileMenuOpen && (
@@ -493,8 +531,17 @@ export default function LandingPage() {
                 <button className="btn-p" onClick={() => P('enroll')}>Begin Enrollment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 <button className="btn-o lt" onClick={goPortal} style={{borderColor:'rgba(184,150,12,.5)',color:V.gold2}}>Book a Free Demo</button>
                 <button className="btn-o lt" style={{borderColor:'rgba(139,26,46,.45)',color:V.cr}} onClick={() => showToast('Contact info@smartious.ac.ke for a free consultation.')}>Free Consultation</button>
-                <button className="btn-o lt" onClick={() => P('curricula')}>Explore Curricula</button>
-                <button className="btn-o lt" onClick={() => P('pricing')}>View Pricing</button>
+                <button className="btn-o lt" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.85)'}} onClick={() => P('curricula')}>Explore Curricula</button>
+                <button className="btn-o lt" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.85)'}} onClick={() => P('pricing')}>View Pricing</button>
+              </div>
+              {/* Mobile 2×2 stat grid */}
+              <div className="h-mob-stats">
+                {[[cfg.stat1||'2,418+','Students'],[cfg.stat2||'127','Teachers'],[cfg.stat3||'6','Curricula'],['12+','Countries']].map(([n,l]) => (
+                  <div key={l} className="hms">
+                    <div className="hms-n">{n.includes('+')?<>{n.replace('+','')}<em>+</em></>:n}</div>
+                    <div className="hms-l">{l}</div>
+                  </div>
+                ))}
               </div>
             </div>
             <div className="h-stats">
@@ -529,7 +576,7 @@ export default function LandingPage() {
           {/* HIGHLIGHTS */}
           <section className="sec" style={{background:V.bone}}>
             <div className="wrap">
-              <div className="sec-hd">
+              <div className="sec-hd reveal">
                 <div className="eyebrow">Everything You Need</div>
                 <h2 className="display">Explore <em>Smartious</em></h2>
                 <p className="lead" style={{marginTop:14}}>A world-class education platform for ambitious families across 12+ countries. Tap any card to explore in full.</p>
@@ -545,7 +592,7 @@ export default function LandingPage() {
                   {n:'10',h:'FAQ',p:'Enrolment, exams, pricing & Mshauri AI answered',pg:'faq',svg:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
                   {n:'9',h:'Blog',p:'IGCSE guides · IB tips · Study abroad · AI learning',pg:'blog',svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'},
                 ].map(({n,h,p,pg,svg}) => (
-                  <div key={h} className="hl" onClick={() => P(pg)}>
+                  <div key={h} className="hl reveal" onClick={() => P(pg)}>
                     <div className="hl-ico">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={`${V.cr}`} strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:svg}}/>
                     </div>
@@ -561,7 +608,7 @@ export default function LandingPage() {
           {/* TESTIMONIALS */}
           <section className="sec" style={{background:V.white}}>
             <div className="wrap">
-              <div className="sec-hd">
+              <div className="sec-hd reveal">
                 <div className="eyebrow">Student & Parent Voices</div>
                 <h2 className="display">Stories That <em>Inspire</em></h2>
                 <p className="lead" style={{marginTop:14}}>From London to Lagos, Nairobi to Toronto — real families, real results.</p>
@@ -575,7 +622,7 @@ export default function LandingPage() {
                   {av:'SM',c:'#7C3AED',q:'"My son passed 9 IGCSE subjects at a Cambridge centre. Tutor quality was outstanding."',n:'Sarah Mohale — Johannesburg',r:'Parent · IGCSE Homeschool'},
                   {av:'KM',c:V.cr,q:'"I failed KCSE Mathematics twice. Smartious enrolled me in Cambridge A-Level Maths and I finished with an A. Mshauri AI at 11pm changed my life."',n:'Kofi Mensah — Lagos',r:'Student · A-Level → University'},
                 ].map((t,i) => (
-                  <div key={i} className="tc">
+                  <div key={i} className="tc reveal">
                     <Stars/>
                     <p className="t-q">{t.q}</p>
                     <div className="t-au">
@@ -627,7 +674,7 @@ export default function LandingPage() {
             </div>
           </div></section>
           <section className="sec" style={{background:V.white}}><div className="wrap">
-            <div className="sec-hd"><div className="eyebrow">Simple Process</div><h2 className="display">From First Inquiry to <em>First Lesson</em></h2><p className="lead" style={{marginTop:12}}>Getting started with Smartious takes less than 48 hours.</p></div>
+            <div className="sec-hd reveal"><div className="eyebrow">Simple Process</div><h2 className="display">From First Inquiry to <em>First Lesson</em></h2><p className="lead" style={{marginTop:12}}>Getting started with Smartious takes less than 48 hours.</p></div>
             <div className="proc-grid">
               {[
                 {n:'01 / 04',svg:'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',h:'Enroll & Choose',p:'Complete our 4-step form in 10 minutes. Select curriculum, learning mode and subjects. A $15 assessment fee secures your slot.',arr:true},
@@ -646,10 +693,10 @@ export default function LandingPage() {
             </div>
           </div></section>
           <section className="sec" style={{background:V.bone}}><div className="wrap">
-            <div className="sec-hd"><div className="eyebrow">Student & Parent Voices</div><h2 className="display">Stories That <em>Inspire</em></h2></div>
+            <div className="sec-hd reveal"><div className="eyebrow">Student & Parent Voices</div><h2 className="display">Stories That <em>Inspire</em></h2></div>
             <div className="tgrid">
               {[{av:'JO',c:V.cr,q:'"My daughter went from a C to an A* in IGCSE Chemistry in one term."',n:'Janet Osei — London',r:'Parent · IGCSE Year 11'},{av:'AM',c:'#0891B2',q:'"Smartious made the curriculum transition seamless — British to IGCSE."',n:'Ahmed Al-Mansouri — Dubai',r:'Parent · British → IGCSE'},{av:'ZK',c:'#15803D',q:'"I scored 38 IB points and got into UCL."',n:'Zara Kamau — Nairobi',r:'Student · IB → UCL'},{av:'CA',c:'#B45309',q:'"My kids in Toronto and cousins in Lagos study the same IGCSE online."',n:'Chioma Adeyemi — Toronto',r:'Parent · Virtual IGCSE'}].map((t,i) => (
-                <div key={i} className="tc"><Stars/><p className="t-q">{t.q}</p><div className="t-au"><div className="t-av" style={{background:t.c}}>{t.av}</div><div><div className="t-nm">{t.n}</div><div className="t-rl">{t.r}</div></div></div></div>
+                <div key={i} className="tc reveal"><Stars/><p className="t-q">{t.q}</p><div className="t-au"><div className="t-av" style={{background:t.c}}>{t.av}</div><div><div className="t-nm">{t.n}</div><div className="t-rl">{t.r}</div></div></div></div>
               ))}
             </div>
           </div></section>
@@ -715,7 +762,7 @@ export default function LandingPage() {
                 {svg:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>',h:'Mshauri AI Tutor',p:'Mshauri is built on Anthropic\'s Claude. Available 24/7 in English and Swahili. Uses the Socratic method — guiding questions, not direct answers. Creates study plans, flashcards, quizzes, lesson summaries.',tags:['24/7 Available','English & Swahili','Powered by Claude','Socratic Method'],lnk:'Included in Premium plans'},
                 {svg:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',h:'Exam Preparation',p:'Intensive prep for IGCSE, Cambridge A-Level, IB, KCSE, SAT, ACT and Edexcel. Full past paper library (2015–2024), official marking schemes, weekly mock exams with expert marking.',tags:['Past Papers 2015–2024','Mock Exams','Expert Marking','Weakness Analysis'],lnk:'View pricing'},
               ].map((s,i) => (
-                <div key={i} className="sc">
+                <div key={i} className="sc reveal">
                   <div className="sc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:s.svg}}/></div>
                   <div className="sc-h">{s.h}</div>
                   <div className="sc-p">{s.p}</div>
@@ -982,7 +1029,7 @@ export default function LandingPage() {
                 <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:'#fff',opacity:.6,marginBottom:14,letterSpacing:'.05em',textTransform:'uppercase'}}>From Our Teachers</h3>
                 <div className="blog-grid">
                   {store.articles.filter(a => a.status === 'Published').map((a) => (
-                    <div key={a.id} className="bc" onClick={() => showToast('Article: ' + a.title)}>
+                    <div key={a.id} className="bc reveal" onClick={() => showToast('Article: ' + a.title)}>
                       <div className="bc-img" style={{background:a.img}}/>
                       <div className="bc-body">
                         <span className="bc-tag">{a.cat || 'IGCSE'}</span>
@@ -998,7 +1045,7 @@ export default function LandingPage() {
             )}
             <div className="blog-grid">
               {visibleBlog.map((b,i) => (
-                <div key={i} className="bc" onClick={() => showToast('Full article coming soon.')}>
+                <div key={i} className="bc reveal" onClick={() => showToast('Full article coming soon.')}>
                   <div className="bc-img" style={{background:b.img}}>
                     <span className="bc-cat">{b.cat === 'study-abroad' ? 'Study Abroad' : b.cat.toUpperCase()}</span>
                   </div>
@@ -1234,26 +1281,16 @@ export default function LandingPage() {
               <div style={{fontSize:'8.5px',fontWeight:600,letterSpacing:'.12em',textTransform:'uppercase',color:'rgba(247,243,237,.2)',marginTop:2}}>HOMESCHOOL · GLOBAL</div>
             </div>
 
-            {/* Role tabs */}
-            <div className="lrt-wrap">
-              {[['student','Student'],['teacher','Teacher'],['parent','Parent'],['admin','Admin']].map(([r,l]) => (
-                <button key={r} className={`lrt${loginRole===r?' on':''}`} onClick={() => setLoginRole(r)}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:r==='student'?'<path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/>':r==='teacher'?'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>':r==='parent'?'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>':'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'}}/>
-                  {l}
-                </button>
-              ))}
-            </div>
-
             <div className="login-h">Welcome back</div>
-            <div className="login-sub">Sign in to your {loginRole} portal to continue learning.</div>
+            <div className="login-sub">Sign in to your portal to continue learning.</div>
 
             <label className="login-fl">Email</label>
-            <input className="login-inp" type="email" placeholder={`${loginRole}@smartious.ac.ke`}/>
+            <input className="login-inp" type="email" placeholder="your@email.com"/>
             <label className="login-fl">Password</label>
             <input className="login-inp" type="password" placeholder="••••••••"/>
             <button className="login-btn" onClick={goPortal}>
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-              Sign In to {loginRole.charAt(0).toUpperCase()+loginRole.slice(1)} Portal
+              Sign In to Portal
             </button>
             <div style={{display:'flex',alignItems:'center',gap:12,margin:'20px 0'}}>
               <div style={{flex:1,height:1,background:'rgba(255,255,255,.07)'}}/>
@@ -1266,15 +1303,18 @@ export default function LandingPage() {
             </button>
           </div>
 
-          {/* Quick demo cards */}
-          <div className="lpfs">
-            {[['Student','amara.osei@student...','Student@2024','student'],['Teacher','j.muthomi@smartious...','Teacher@2024','teacher'],['Parent','janet.osei@gmail.com','Parent@2024','parent'],['Admin','admin@smartious.ac.ke','Admin@2024','admin'],['Demo','demo@smartious.ac.ke','Demo@2024','demo']].map(([r,e,p,role]) => (
-              <div key={r} className="lpf" style={{cursor:'pointer'}} onClick={goPortal}>
-                <div style={{fontWeight:700,fontSize:13,color:V.white}}>{r}</div>
-                <div className="lpf-l">{e}</div>
-                <div className="lpf-s">{p}</div>
+          {/* Quick demo card — Demo only */}
+          <div style={{display:'flex',justifyContent:'center',marginTop:8}}>
+            <div className="lpf" style={{cursor:'pointer',minWidth:200,textAlign:'center'}} onClick={goPortal}>
+              <div style={{display:'flex',justifyContent:'center',marginBottom:8}}>
+                <div style={{width:40,height:40,borderRadius:10,background:'rgba(139,26,46,.3)',border:'1px solid rgba(139,26,46,.5)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={V.cr} strokeWidth="2" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
               </div>
-            ))}
+              <div style={{fontWeight:700,fontSize:14,color:V.white,marginBottom:4}}>Try Demo</div>
+              <div className="lpf-l">demo@smartious.ac.ke</div>
+              <div className="lpf-s">One-click access · No sign up needed</div>
+            </div>
           </div>
         </div>
       )}
