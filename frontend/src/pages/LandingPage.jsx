@@ -638,12 +638,12 @@ export default function LandingPage() {
               </div>
               <div className="tgrid">
                 {[
-                  {av:'JO',c:V.cr,q:'"My daughter went from a C to an A* in IGCSE Chemistry in one term. More focused support than in a classroom of 40."',n:'Janet Osei — London',r:'Parent · IGCSE Year 11'},
-                  {av:'AM',c:'#0891B2',q:'"We relocated from Dubai mid-year. Smartious made the curriculum transition seamless — British to IGCSE — without missing a single topic."',n:'Ahmed Al-Mansouri — Dubai',r:'Parent · British → IGCSE'},
-                  {av:'ZK',c:'#15803D',q:'"I scored 38 IB points and got into UCL. Smartious prepared me better than any school I had attended."',n:'Zara Kamau — Nairobi',r:'Student · IB Diploma → UCL'},
-                  {av:'CA',c:'#B45309',q:'"My kids in Toronto and cousins in Lagos study the same IGCSE online together. The parent dashboard gives visibility from 9,000km away."',n:'Chioma Adeyemi — Toronto',r:'Parent · Virtual IGCSE'},
-                  {av:'SM',c:'#7C3AED',q:'"My son passed 9 IGCSE subjects at a Cambridge centre. Tutor quality was outstanding."',n:'Sarah Mohale — Johannesburg',r:'Parent · IGCSE Homeschool'},
-                  {av:'KM',c:V.cr,q:'"I failed KCSE Mathematics twice. Smartious enrolled me in Cambridge A-Level Maths and I finished with an A. Mshauri AI at 11pm changed my life."',n:'Kofi Mensah — Lagos',r:'Student · A-Level → University'},
+                  {av:'JO',c:V.cr,q:'"My daughter moved from a C to an A* in IGCSE Chemistry in one term. The one-on-one attention she gets is something no classroom of 40 could ever offer."',n:'Janet Osei — London, UK',r:'Parent · IGCSE Year 11'},
+                  {av:'AM',c:'#0891B2',q:'"We relocated from Dubai mid-year and I was worried about continuity. Smartious handled the British to IGCSE transition without my son missing a single topic."',n:'Ahmed Al-Mansouri — Dubai, UAE',r:'Parent · British Curriculum → IGCSE'},
+                  {av:'ZK',c:'#15803D',q:'"I scored 38 IB points and received an offer from UCL. My Smartious tutors knew the syllabus inside out and pushed me further than I thought I could go."',n:'Zara Kamau — Nairobi, Kenya',r:'Student · IB Diploma Graduate'},
+                  {av:'CA',c:'#B45309',q:'"My son struggled with the Nigerian curriculum and we needed a globally recognised qualification. IGCSE through Smartious gave him exactly that — he now studies Engineering in the UK."',n:'Chioma Adeyemi — Lagos, Nigeria',r:'Parent · IGCSE → UK University'},
+                  {av:'SM',c:'#7C3AED',q:'"My daughter sat her Cambridge IGCSE examinations at a registered centre in Johannesburg and passed all eight subjects. Smartious made homeschooling feel completely professional."',n:'Sarah Mohale — Johannesburg, South Africa',r:'Parent · IGCSE Homeschool'},
+                  {av:'BN',c:'#0E7490',q:'"I completed my A-Level Mathematics through Smartious while working full time in Nairobi. The flexible schedule and Mshauri AI tutor at night made it possible. I got a B and I am proud of it."',n:'Brian Njoroge — Nairobi, Kenya',r:'Adult Learner · Cambridge A-Level'},
                 ].map((t,i) => (
                   <div key={i} className="tc reveal">
                     <Stars/>
