@@ -33,8 +33,19 @@ export default function App() {
         <ToastProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/"          element={<LandingPage />} />
-              <Route path="/login"     element={<LoginPage />} />
+              <Route path="/"            element={<LandingPage />} />
+              <Route path="/about"       element={<LandingPage />} />
+              <Route path="/curricula"   element={<LandingPage />} />
+              <Route path="/services"    element={<LandingPage />} />
+              <Route path="/global"      element={<LandingPage />} />
+              <Route path="/pricing"     element={<LandingPage />} />
+              <Route path="/programs"    element={<LandingPage />} />
+              <Route path="/faq"         element={<LandingPage />} />
+              <Route path="/blog"        element={<LandingPage />} />
+              <Route path="/enroll"      element={<LandingPage />} />
+              <Route path="/consult"     element={<LandingPage />} />
+              <Route path="/contact"     element={<LandingPage />} />
+              <Route path="/login"       element={<LoginPage />} />
               <Route path="/portal"    element={<RoleRedirect />} />
               <Route path="/admin/*"   element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
               <Route path="/teacher/*" element={<Guard roles={['teacher','admin']}><TeacherPortal /></Guard>} />
