@@ -1,6 +1,6 @@
 import { useStore } from '../context/ctx.jsx'
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 /* ── CSS variables matching smartious-global.html exactly ── */
 const V = {
@@ -418,7 +418,11 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const [page, setPage] = useState('home')
+  const pathToPage = (p) => {
+    const slug = p.replace(/^\//, '') || 'home'
+    return PAGES.includes(slug) ? slug : 'home'
+  }
+  const [page, setPage] = useState(() => pathToPage(window.location.pathname))
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -437,6 +441,7 @@ export default function LandingPage() {
   const [toast, setToast] = useState(null)
   const [wizDone, setWizDone] = useState(false)
   const nav = useNavigate()
+  const location = useLocation()
   const topRef = useRef(null)
 
   const P = (id) => {
@@ -446,7 +451,15 @@ export default function LandingPage() {
     setWizDone(false)
     window.scrollTo(0, 0)
     topRef.current?.scrollIntoView()
+    const url = id === 'home' ? '/' : '/' + id
+    if (window.location.pathname !== url) nav(url)
   }
+
+  // Sync page state when browser back/forward is used
+  useEffect(() => {
+    setPage(pathToPage(location.pathname))
+    window.scrollTo(0, 0)
+  }, [location.pathname])
 
   const showToast = (msg) => {
     setToast(msg)
