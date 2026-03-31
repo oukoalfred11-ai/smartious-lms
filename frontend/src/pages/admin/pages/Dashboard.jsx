@@ -946,7 +946,7 @@ function WebsiteEditorPage({ toast }) {
                   </div>
                 </div>
                 <div className="fg"><label className="fl">School Name</label><input className="fi" value={schoolName} onChange={e => setSchoolName(e.target.value)} /></div>
-                <div className="fg" style={{ marginBottom: 0 }}><label className="fl">Contact Email</label><input className="fi" defaultValue="info@smartious.co.ke" /></div>
+                <div className="fg" style={{ marginBottom: 0 }}><label className="fl">Contact Email</label><input className="fi" defaultValue="hellosmartious@gmail.com" /></div>
               </div>
             </div>
           )}
@@ -968,7 +968,7 @@ function SettingsPage({ toast }) {
           <div className="fg"><label className="fl">School Name</label><input className="fi" defaultValue="Smartious E-School" /></div>
           <div className="fg"><label className="fl">Tagline</label><input className="fi" defaultValue="World-Class Education, Delivered to Your Home" /></div>
           <div className="fg"><label className="fl">Support Email</label><input className="fi" type="email" defaultValue="support@smartious.co.ke" /></div>
-          <div className="fg"><label className="fl">Admin Phone</label><input className="fi" defaultValue="+254 712 345 678" /></div>
+          <div className="fg"><label className="fl">Admin Phone</label><input className="fi" defaultValue="+254 745 021 212" /></div>
           <div className="fg"><label className="fl">Platform Language</label><select className="fsel"><option>English</option><option>Swahili</option><option>French</option></select></div>
           <div className="fg" style={{ marginBottom: 0 }}><label className="fl">Timezone</label><select className="fsel"><option>Africa/Nairobi (EAT +3)</option><option>UTC</option><option>Europe/London</option></select></div>
         </div>
