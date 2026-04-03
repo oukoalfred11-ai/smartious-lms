@@ -2,6 +2,39 @@ import { useStore } from '../context/ctx.jsx'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
+/* ── Curated education images ── */
+const IMG = {
+  hero: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1920&q=80',
+  learner1: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=600&q=80',
+  learner2: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80',
+  learner3: 'https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=600&q=80',
+  classroom: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1200&q=80',
+  tutoring: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80',
+  library: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=600&q=80',
+  students: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=600&q=80',
+  graduation: 'https://images.unsplash.com/photo-1523050854058-8df90110c8f1?auto=format&fit=crop&w=600&q=80',
+  onlineLearn: 'https://images.unsplash.com/photo-1610484826967-09c5720778c7?auto=format&fit=crop&w=600&q=80',
+  labWork: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=600&q=80',
+  writing: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80',
+}
+
+/* ── Meta descriptions per page ── */
+const META = {
+  home: 'Smartious Homeschool delivers IGCSE, Cambridge A-Level, IB, British, American & CBC education to 2,000+ students across 12 countries. Expert tutors, AI-powered learning and proven results from Nairobi to the world.',
+  about: 'Discover how Smartious Homeschool has achieved a 98% IGCSE pass rate, served 2,000+ students across 12 countries, and grown 340% since 2018. Real results from real families.',
+  curricula: 'Explore 9 internationally accredited curricula at Smartious — IGCSE, Cambridge A-Level, IB Diploma, Pearson Edexcel, British, American, CBC and our signature Smartious Blended programme.',
+  services: 'Six flexible learning models — homeschool tutor visits, virtual school, learning centre, private tuition, Mshauri AI tutor and exam prep. Smartious adapts to every family.',
+  global: 'Smartious Homeschool educates students across 13+ countries and 4 continents from our Nairobi headquarters. Explore our global footprint and local learning centres.',
+  pricing: 'Transparent pricing from $85/month for homeschooling. No contracts, cancel anytime. One-time $15 placement assessment. View all Smartious Homeschool tuition fees.',
+  programs: 'Join the Smartious IUFP for direct university entry to 200+ partner universities, or apply for Study Abroad placements in the UK, USA, Australia, Germany, UAE and Canada.',
+  faq: 'Find answers to common questions about Smartious Homeschool — enrollment, curricula, pricing, learning modes, exam preparation and university pathways.',
+  blog: 'Expert articles and guides on IGCSE preparation, IB Diploma success, homeschooling tips, AI-powered learning and study abroad opportunities from Smartious educators.',
+  enroll: 'Enroll at Smartious Homeschool in under 10 minutes. $15 placement assessment, first lesson within 48 hours. Choose from 9 curricula and 6 learning modes.',
+  consult: 'Book a free consultation with Smartious admissions. Get personalised curriculum advice, learning plan recommendations and pricing guidance. No commitment required.',
+  contact: 'Contact Smartious Homeschool — email info@smartious.ac.ke, call +254 712 345 678, WhatsApp us, or visit Diamond Plaza I, Parklands, Nairobi.',
+  login: 'Sign in to your Smartious Homeschool portal — student dashboard, teacher workspace, parent overview or admin centre. Secure access to your learning journey.',
+}
+
 /* ── CSS variables matching smartious-global.html exactly ── */
 const V = {
   cr:'#8B1A2E', cr2:'#A8203A', gold:'#B8960C', gold2:'#D4AF37', gold3:'#F0CC5A',
@@ -365,6 +398,34 @@ const styles = `
   /* TOAST */
   #lp-toast{position:fixed;bottom:22px;right:22px;background:${V.ink2};color:${V.white};padding:14px 18px;border-radius:10px;font-size:13.5px;font-weight:500;box-shadow:0 20px 50px rgba(10,8,6,.28);z-index:9999;border-left:3px solid ${V.cr};display:none;max-width:340px;line-height:1.5;font-family:'Syne',sans-serif}
   #lp-toast.show{display:block;animation:lp-fadeUp .3s ease}
+  /* HERO IMAGE */
+  .lp .h-bg-img{position:absolute;inset:0;z-index:1}
+  .lp .h-bg-img img{width:100%;height:100%;object-fit:cover}
+  .lp .h-collage{position:absolute;right:48px;bottom:80px;z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:8px;width:320px}
+  .lp .h-collage img{width:100%;height:140px;object-fit:cover;border-radius:12px;border:2px solid rgba(240,204,90,.18);box-shadow:0 8px 32px rgba(0,0,0,.4);transition:transform .3s}
+  .lp .h-collage img:hover{transform:scale(1.05)}
+  .lp .h-collage img:first-child{grid-column:1/-1;height:160px}
+  /* PHOTO STRIP */
+  .lp .photo-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:48px 0 0}
+  .lp .photo-strip img{width:100%;height:220px;object-fit:cover;border-radius:16px;transition:transform .3s,box-shadow .3s}
+  .lp .photo-strip img:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(10,8,6,.18)}
+  /* IMAGE BANNER */
+  .lp .img-banner{position:relative;border-radius:24px;overflow:hidden;margin:48px 0 0;height:320px}
+  .lp .img-banner img{width:100%;height:100%;object-fit:cover}
+  .lp .img-banner-ov{position:absolute;inset:0;background:linear-gradient(to right,rgba(10,8,6,.85) 0%,rgba(10,8,6,.3) 60%,transparent 100%);display:flex;flex-direction:column;justify-content:center;padding:48px}
+  .lp .img-banner-ov h3{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#FEFDFB;margin-bottom:10px}
+  .lp .img-banner-ov p{font-size:15px;color:rgba(247,243,237,.6);max-width:400px;line-height:1.7}
+  /* GALLERY MOSAIC */
+  .lp .gallery-mosaic{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:200px 200px;gap:10px;margin:48px 0 0}
+  .lp .gallery-mosaic img{width:100%;height:100%;object-fit:cover;border-radius:14px;transition:transform .3s}
+  .lp .gallery-mosaic img:first-child{grid-row:1/3}
+  .lp .gallery-mosaic img:hover{transform:scale(1.02)}
+  /* ABOUT IMAGE ROW */
+  .lp .about-img-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:48px 0 0}
+  .lp .about-img-card{position:relative;border-radius:20px;overflow:hidden;height:260px}
+  .lp .about-img-card img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+  .lp .about-img-card:hover img{transform:scale(1.06)}
+  .lp .about-img-card .about-img-label{position:absolute;bottom:0;left:0;right:0;padding:16px 20px;background:linear-gradient(to top,rgba(10,8,6,.8),transparent);color:#FEFDFB;font-size:13px;font-weight:700}
   /* ANIMATIONS */
   @keyframes lp-marq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
   @keyframes lp-fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
@@ -373,13 +434,19 @@ const styles = `
   /* MEDIA */
   @media(max-width:1200px){
     .lp .h-stats{display:none}
+    .lp .h-collage{display:none}
     .lp .ft-grid{grid-template-columns:1fr 1fr;gap:36px}
     .lp .cur-grid,.lp .svc-grid,.lp .tgrid,.lp .blog-grid,.lp .price-grid{grid-template-columns:repeat(2,1fr)}
     .lp .hl-grid,.lp .stat-grid,.lp .proc-grid,.lp .prog-info-grid,.lp .prog-path-grid,.lp .sa-grid{grid-template-columns:repeat(2,1fr)}
+    .lp .photo-strip{grid-template-columns:repeat(2,1fr)}
+    .lp .gallery-mosaic{grid-template-columns:1fr 1fr;grid-template-rows:180px 180px 180px}
+    .lp .gallery-mosaic img:first-child{grid-row:auto}
+    .lp .about-img-row{grid-template-columns:1fr 1fr}
   }
   @media(max-width:768px){
     .lp .nav-links,.lp .nav-actions{display:none}
     .lp .h-stats{display:none}
+    .lp .h-collage{display:none}
     .lp .h-mob-stats{display:grid!important}
     .lp .mob-burger{display:flex!important}
     .lp .mob-page-strip{display:block!important}
@@ -393,6 +460,12 @@ const styles = `
     .lp .wiz-body{padding:24px 18px}
     .lp .bfc{grid-template-columns:1fr}.lp .bfc-l{min-height:180px}
     .lp .lpfs{grid-template-columns:repeat(3,1fr)}
+    .lp .photo-strip{grid-template-columns:1fr 1fr}.lp .photo-strip img{height:160px}
+    .lp .img-banner{height:240px}
+    .lp .gallery-mosaic{grid-template-columns:1fr;grid-template-rows:auto}
+    .lp .gallery-mosaic img{height:180px}
+    .lp .gallery-mosaic img:first-child{grid-row:auto}
+    .lp .about-img-row{grid-template-columns:1fr}.lp .about-img-card{height:200px}
   }
   @media(max-width:480px){
     .lp .fg{grid-template-columns:1fr}.lp .pay-o{grid-template-columns:1fr 1fr}.lp .wst{min-width:100%}.lp .hl-grid{grid-template-columns:1fr 1fr}
@@ -432,6 +505,27 @@ export default function LandingPage() {
     document.querySelectorAll('.lp .reveal').forEach(el => observer.observe(el))
     return () => observer.disconnect()
   }, [page])
+
+  /* ── Update meta description per page ── */
+  useEffect(() => {
+    const desc = META[page] || META.home
+    let meta = document.querySelector('meta[name="description"]')
+    if (!meta) {
+      meta = document.createElement('meta')
+      meta.setAttribute('name', 'description')
+      document.head.appendChild(meta)
+    }
+    meta.setAttribute('content', desc)
+    /* Open Graph description */
+    let og = document.querySelector('meta[property="og:description"]')
+    if (!og) {
+      og = document.createElement('meta')
+      og.setAttribute('property', 'og:description')
+      document.head.appendChild(og)
+    }
+    og.setAttribute('content', desc)
+  }, [page])
+
   const [faqOpen, setFaqOpen] = useState(null)
   const [priceTabs, setPriceTab] = useState('hs')
   const [blogCat, setBlogCat] = useState('all')
@@ -551,7 +645,13 @@ export default function LandingPage() {
       {page === 'home' && (
         <>
           <section id="hero">
-            <img className="h-bg-img" src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1920&q=80" alt="Children learning" loading="eager"/>
+<div className="h-bg-img">
+  <img 
+    src="/20260307_110945.jpg" 
+    alt="Smartious Homeschool students learning" 
+    loading="eager"
+  />
+</div>
             <div className="h-ov"/>
             <div className="h-vig"/>
             <div className="h-body">
@@ -589,6 +689,11 @@ export default function LandingPage() {
                   <div className="hs-l">{l}</div>
                 </div>
               ))}
+            </div>
+            <div className="h-collage">
+              <img src={IMG.classroom} alt="Smartious learning centre with students engaged in group study" loading="eager"/>
+              <img src={IMG.learner1} alt="Student studying with focus and determination" loading="eager"/>
+              <img src={IMG.tutoring} alt="One-on-one tutoring session between teacher and student" loading="eager"/>
             </div>
           </section>
 
@@ -642,6 +747,32 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
+
+          {/* LEARNING ENVIRONMENT IMAGE BANNER */}
+          <section style={{padding:'0 0',background:V.bone}}><div className="wrap" style={{paddingTop:0,paddingBottom:48}}>
+            <div className="img-banner reveal">
+              <img src={IMG.classroom} alt="Smartious learning centre — bright, modern classrooms designed for focused study" loading="lazy"/>
+              <div className="img-banner-ov">
+                <h3>A Learning Environment<br/>Built for <em style={{color:V.gold3,fontStyle:'italic'}}>Excellence</em></h3>
+                <p>From our Parklands campus in Nairobi to virtual classrooms across 12 countries — every Smartious student learns in an environment designed for focus, curiosity and achievement.</p>
+              </div>
+            </div>
+          </div></section>
+
+          {/* GALLERY — Our Learners & Activities */}
+          <section style={{padding:'48px 0 0',background:V.bone}}><div className="wrap">
+            <div className="sec-hd reveal" style={{marginBottom:0}}>
+              <div className="eyebrow">Our Community</div>
+              <h2 className="display" style={{fontSize:'clamp(1.6rem,3vw,2.4rem)'}}>Learners, Activities & <em>Growth</em></h2>
+            </div>
+            <div className="gallery-mosaic reveal">
+              <img src={IMG.learner3} alt="Young students engaged in collaborative learning activities" loading="lazy"/>
+              <img src={IMG.writing} alt="Student writing and studying at a desk with notes" loading="lazy"/>
+              <img src={IMG.library} alt="Library space with books for research and study" loading="lazy"/>
+              <img src={IMG.labWork} alt="Hands-on science experiment in the Smartious STEM programme" loading="lazy"/>
+              <img src={IMG.graduation} alt="Students celebrating academic milestones and graduation" loading="lazy"/>
+            </div>
+          </div></section>
 
           {/* TESTIMONIALS */}
           <section className="sec" style={{background:V.white}}>
@@ -710,6 +841,13 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
+            {/* Photo strip — our learners */}
+            <div className="photo-strip reveal">
+              <img src={IMG.learner1} alt="Smartious student focused on academic work" loading="lazy"/>
+              <img src={IMG.learner2} alt="Students collaborating in a classroom setting" loading="lazy"/>
+              <img src={IMG.students} alt="Young learners engaged in guided study" loading="lazy"/>
+              <img src={IMG.onlineLearn} alt="Student learning online with tablet and notes" loading="lazy"/>
+            </div>
           </div></section>
           <section className="sec" style={{background:V.white}}><div className="wrap">
             <div className="sec-hd reveal"><div className="eyebrow">Simple Process</div><h2 className="display">From First Inquiry to <em>First Lesson</em></h2><p className="lead" style={{marginTop:12}}>Getting started with Smartious takes less than 48 hours.</p></div>
@@ -728,6 +866,12 @@ export default function LandingPage() {
                   {p.arr && <div className="ps-arr"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>}
                 </div>
               ))}
+            </div>
+            {/* Learning environment images */}
+            <div className="about-img-row reveal">
+              <div className="about-img-card"><img src={IMG.classroom} alt="Students in a bright, modern learning environment at Smartious" loading="lazy"/><div className="about-img-label">Our Learning Centre</div></div>
+              <div className="about-img-card"><img src={IMG.labWork} alt="Hands-on STEM activities in the Smartious science lab" loading="lazy"/><div className="about-img-label">Hands-On Activities</div></div>
+              <div className="about-img-card"><img src={IMG.graduation} alt="Smartious graduates celebrating their academic achievements" loading="lazy"/><div className="about-img-label">Graduation Day</div></div>
             </div>
           </div></section>
           <section className="sec" style={{background:V.bone}}><div className="wrap">
@@ -814,6 +958,14 @@ export default function LandingPage() {
             <div style={{textAlign:'center',marginTop:48,display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
               <button className="btn-p" onClick={() => P('enroll')}>Enroll Now <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
               <button className="btn-o lt" onClick={() => P('pricing')}>Compare Prices</button>
+            </div>
+            {/* Services image banner */}
+            <div className="img-banner reveal" style={{marginTop:48}}>
+              <img src={IMG.tutoring} alt="Students and tutor working together in a collaborative learning session" loading="lazy"/>
+              <div className="img-banner-ov">
+                <h3>Personalised Learning<br/>That <em style={{color:V.gold3,fontStyle:'italic'}}>Works</em></h3>
+                <p>Whether at home, in our centre, or online — every Smartious student receives a learning experience tailored to their pace, goals and curriculum.</p>
+              </div>
             </div>
           </div></section>
           <Footer P={P}/>
@@ -929,6 +1081,14 @@ export default function LandingPage() {
         <>
           <div className="pg-hero"><div className="wrap"><div className="eyebrow">Special Programmes</div><h1 className="pg-h">IUFP & <em>Study Abroad</em></h1><p className="pg-sub" style={{marginTop:12}}>Two transformative programmes designed to open doors to the world's best universities.</p></div></div>
           <section className="sec" style={{background:V.bone}}><div className="wrap">
+            {/* Programs hero image */}
+            <div className="img-banner reveal" style={{marginTop:0,marginBottom:48}}>
+              <img src={IMG.graduation} alt="Students celebrating graduation and university acceptance" loading="lazy"/>
+              <div className="img-banner-ov">
+                <h3>Your Path to<br/><em style={{color:V.gold3,fontStyle:'italic'}}>World-Class Universities</em></h3>
+                <p>200+ partner universities across the UK, USA, Australia, Germany and Canada. Our IUFP and Study Abroad programmes open doors globally.</p>
+              </div>
+            </div>
             {/* IUFP */}
             <div className="prog-card">
               <div className="prog-bar"/>
