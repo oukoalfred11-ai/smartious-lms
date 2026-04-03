@@ -98,7 +98,8 @@ const styles = `
   .lp .nav-cta:hover{background:${V.cr2};transform:translateY(-1px)}
   /* HERO */
   .lp #hero{position:relative;min-height:calc(100vh - 64px);background:${V.ink};display:flex;flex-direction:column;overflow:hidden}
-  .lp .h-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(150deg,rgba(10,8,6,.95) 0%,rgba(50,12,20,.72) 50%,rgba(10,8,6,.88) 100%)}
+  .lp .h-bg-img{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover}
+  .lp .h-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(150deg,rgba(10,8,6,.72) 0%,rgba(50,12,20,.48) 50%,rgba(10,8,6,.65) 100%)}
   .lp .h-vig{position:absolute;bottom:0;left:0;right:0;z-index:2;height:280px;background:linear-gradient(to top,${V.bone} 0%,transparent 100%)}
   .lp .h-body{position:relative;z-index:3;flex:1;display:flex;flex-direction:column;justify-content:center;max-width:1440px;margin:0 auto;padding:80px 48px 60px;width:100%}
   .lp .h-line{display:flex;align-items:center;gap:12px;margin-bottom:30px}
@@ -644,7 +645,13 @@ export default function LandingPage() {
       {page === 'home' && (
         <>
           <section id="hero">
-            <div className="h-bg-img"><img src={IMG.hero} alt="Students learning in a bright classroom environment" loading="eager"/></div>
+<div className="h-bg-img">
+  <img 
+    src="/20260307_110945.jpg" 
+    alt="Smartious Homeschool students learning" 
+    loading="eager"
+  />
+</div>
             <div className="h-ov"/>
             <div className="h-vig"/>
             <div className="h-body">
@@ -809,7 +816,7 @@ export default function LandingPage() {
               <div className="cta-btns">
                 <button className="btn-p" onClick={() => P('enroll')}>Begin Enrollment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 <button className="btn-o lt" onClick={() => P('pricing')}>View Pricing</button>
-                <button className="btn-o lt" onClick={() => showToast('WhatsApp: +254 700 000 000')}>
+                <button className="btn-o lt" onClick={() => showToast('WhatsApp: +254 745 021 212')}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1 19.79 19.79 0 0 1 1.64 4.46 2 2 0 0 1 3.62 2.26h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.08 6.08l.97-.97a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.72 16.92z"/></svg>WhatsApp
                 </button>
               </div>
@@ -1135,7 +1142,7 @@ export default function LandingPage() {
                 </div>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                   <button className="btn-p" onClick={() => P('enroll')}>Apply for Study Abroad <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                  <button className="btn-o" onClick={() => showToast('WhatsApp: +254 700 000 000 for Study Abroad details.')}>WhatsApp for Details</button>
+                  <button className="btn-o" onClick={() => showToast('WhatsApp: +254 745 021 212 for Study Abroad details.')}>WhatsApp for Details</button>
                 </div>
               </div>
             </div>
@@ -1176,7 +1183,7 @@ export default function LandingPage() {
             <div style={{textAlign:'center',marginTop:44}}>
               <p style={{fontSize:15,color:V.sl,marginBottom:18}}>Still have questions? We answer within 2 hours.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button className="btn-p" onClick={() => showToast('WhatsApp: +254 700 000 000')}>
+                <button className="btn-p" onClick={() => showToast('WhatsApp: +254 745 021 212')}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1 19.79 19.79 0 0 1 1.64 4.46 2 2 0 0 1 3.62 2.26h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.08 6.08l.97-.97a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.72 16.92z"/></svg>WhatsApp Us
                 </button>
                 <button className="btn-o" onClick={() => P('enroll')}>Enroll Now</button>
@@ -1487,9 +1494,9 @@ export default function LandingPage() {
               <div className="contact-info-card">
                 <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',color:'#FEFDFB',marginBottom:8}}>Our <em style={{color:'#F0CC5A',fontStyle:'italic'}}>Details</em></div>
                 {[
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Email', value:'info@smartious.ac.ke', sub:'Response within 2 hours', href:'mailto:info@smartious.ac.ke'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Phone', value:'+254 712 345 678', sub:'Mon–Fri, 8am–6pm EAT', href:'tel:+254712345678'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>, label:'WhatsApp', value:'+254 712 345 678', sub:'Quick responses · Tap to chat', href:'https://wa.me/254712345678'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Email', value:'hellosmartious@gmail.com', sub:'Response within 2 hours', href:'mailto:hellosmartious@gmail.com'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Phone', value:'+254 745 021 212', sub:'Mon–Fri, 8am–6pm EAT', href:'tel:+254745021212'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>, label:'WhatsApp', value:'+254 745 021 212', sub:'Quick responses · Tap to chat', href:'https://wa.me/254745021212'},
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I, Parklands', sub:'Nairobi, Kenya · 4th Avenue', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
                 ].map(({icon,label,value,sub,href}) => (
                   <a key={label} href={href} target="_blank" rel="noreferrer" style={{textDecoration:'none'}} className="contact-method">
@@ -1612,7 +1619,7 @@ function ConsultForm({ P }) {
     if (!form.name || !form.email || !form.phone) { setErr('Please fill in all required fields.'); return }
     setSending(true); setErr('')
     try {
-      await fetch(`https://formsubmit.co/ajax/info@smartious.ac.ke`, {
+      await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
         method:'POST',
         headers:{'Content-Type':'application/json','Accept':'application/json'},
         body: JSON.stringify({
@@ -1629,7 +1636,7 @@ function ConsultForm({ P }) {
       })
       setSent(true)
     } catch {
-      setErr('Failed to send. Please email us directly at info@smartious.ac.ke')
+      setErr('Failed to send. Please email us directly at hellosmartious@gmail.com')
     }
     setSending(false)
   }
@@ -1662,7 +1669,7 @@ function ConsultForm({ P }) {
         </div>
         <div className="consult-field">
           <label className="consult-label">WhatsApp / Phone *</label>
-          <input className="consult-input" type="tel" placeholder="+254 712 345 678" value={form.phone} onChange={e=>set('phone',e.target.value)}/>
+          <input className="consult-input" type="tel" placeholder="+254 745 021 212" value={form.phone} onChange={e=>set('phone',e.target.value)}/>
         </div>
         <div className="consult-field">
           <label className="consult-label">Country of Residence</label>
@@ -1707,7 +1714,7 @@ function ContactForm() {
     if (!form.name || !form.email || !form.message) { setErr('Please fill in all required fields.'); return }
     setSending(true); setErr('')
     try {
-      await fetch(`https://formsubmit.co/ajax/info@smartious.ac.ke`, {
+      await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
         method:'POST',
         headers:{'Content-Type':'application/json','Accept':'application/json'},
         body: JSON.stringify({
@@ -1722,7 +1729,7 @@ function ContactForm() {
       })
       setSent(true)
     } catch {
-      setErr('Failed to send. Email us directly at info@smartious.ac.ke')
+      setErr('Failed to send. Email us directly at hellosmartious@gmail.com')
     }
     setSending(false)
   }
@@ -1791,15 +1798,15 @@ function Footer({ P }) {
           <div>
             <div className="ft-ch">Contact</div>
             <div className="ft-ct">
-              <a href={`mailto:${cfg.footerEmail || 'info@smartious.ac.ke'}`} style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+              <a href={`mailto:${cfg.footerEmail || 'hellosmartious@gmail.com'}`} style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                {cfg.footerEmail || 'info@smartious.ac.ke'}
+                {cfg.footerEmail || 'hellosmartious@gmail.com'}
               </a>
-              <a href={`tel:${(cfg.footerPhone || '+254712345678').replace(/\s/g,'')}`} style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+              <a href={`tel:${(cfg.footerPhone || '+254745021212').replace(/\s/g,'')}`} style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                {cfg.footerPhone || '+254 712 345 678'}
+                {cfg.footerPhone || '+254 745 021 212'}
               </a>
-              <a href={`https://wa.me/${(cfg.footerPhone || '254712345678').replace(/[^0-9]/g,'')}`} target="_blank" rel="noreferrer" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#25D366'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+              <a href={`https://wa.me/${(cfg.footerPhone || '254745021212').replace(/[^0-9]/g,'')}`} target="_blank" rel="noreferrer" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#25D366'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                 WhatsApp Chat
               </a>
