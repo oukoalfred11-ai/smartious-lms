@@ -1320,8 +1320,8 @@ export default function LandingPage() {
                 <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',color:'#FEFDFB',marginBottom:8}}>Our <em style={{color:'#F0CC5A',fontStyle:'italic'}}>Details</em></div>
                 {[
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Email', value:'info@smartious.ac.ke', sub:'Response within 2 hours', href:'mailto:info@smartious.ac.ke'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Phone', value:'+254 712 345 678', sub:'Mon–Fri, 8am–6pm EAT', href:'tel:+254712345678'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>, label:'WhatsApp', value:'+254 712 345 678', sub:'Quick responses · Tap to chat', href:'https://wa.me/254712345678'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Phone', value:'+254 745 021 212', sub:'Mon–Fri, 8am–6pm EAT', href:'tel:+254712345678'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>, label:'WhatsApp', value:'+254 745 021 212', sub:'Quick responses · Tap to chat', href:'https://wa.me/2547450212212'},
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I, Parklands', sub:'Nairobi, Kenya · 4th Avenue', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
                 ].map(({icon,label,value,sub,href}) => (
                   <a key={label} href={href} target="_blank" rel="noreferrer" style={{textDecoration:'none'}} className="contact-method">
@@ -1494,7 +1494,7 @@ function ConsultForm({ P }) {
         </div>
         <div className="consult-field">
           <label className="consult-label">WhatsApp / Phone *</label>
-          <input className="consult-input" type="tel" placeholder="+254 712 345 678" value={form.phone} onChange={e=>set('phone',e.target.value)}/>
+          <input className="consult-input" type="tel" placeholder="+254 745 021 212" value={form.phone} onChange={e=>set('phone',e.target.value)}/>
         </div>
         <div className="consult-field">
           <label className="consult-label">Country of Residence</label>
@@ -1629,9 +1629,9 @@ function Footer({ P }) {
               </a>
               <a href={`tel:${(cfg.footerPhone || '+254712345678').replace(/\s/g,'')}`} style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                {cfg.footerPhone || '+254 712 345 678'}
+                {cfg.footerPhone || '+254 745 021 212'}
               </a>
-              <a href={`https://wa.me/${(cfg.footerPhone || '254712345678').replace(/[^0-9]/g,'')}`} target="_blank" rel="noreferrer" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#25D366'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+              <a href={`https://wa.me/${(cfg.footerPhone || '254745021212').replace(/[^0-9]/g,'')}`} target="_blank" rel="noreferrer" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#25D366'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                 WhatsApp Chat
               </a>

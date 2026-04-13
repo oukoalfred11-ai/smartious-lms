@@ -3,6 +3,7 @@ import { useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
 import LiveClassroom from '../../components/ui/LiveClassroom.jsx'
+import TeacherProfile from './TeacherProfile.jsx'
 
 // ── SVG icon helper ──────────────────────────────────────
 const Ico = ({ d, w = 18, col = 'currentColor', sw = 2 }) => (
@@ -304,7 +305,7 @@ export default function TeacherPortal() {
     dashboard:'Dashboard', classroom:'Live Classroom', students:'My Students',
     resources:'Resource Library', exambuilder:'Exam Builder', blog:'Blog & Earnings',
     liveclass:'Live Lessons', allocations:'My Allocations', payslips:'Payslips & Earnings',
-    marking:'AI Marking & Integrity', reports:'Reports & Analytics'
+    marking:'AI Marking & Integrity', reports:'Reports & Analytics', profile:'My Profile'
   }
 
   const sendChat = () => {
@@ -334,6 +335,9 @@ export default function TeacherPortal() {
       {id:'payslips',    label:'Payslips',            icon:'rect:2:5:20:14:2|line:2:10:22:10|line:6:15:10:15|line:14:15:18:15'},
       {id:'marking',     label:'AI Marking',          icon:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'},
       {id:'reports',     label:'Reports & Analytics', icon:'pline:22 12 18 12 15 21 9 3 6 12 2 12'},
+    ]},
+    { section:'Account', items:[
+      {id:'profile',     label:'My Profile',          icon:'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2|circle:12:7:4'},
     ]},
   ]
 
@@ -1304,6 +1308,11 @@ export default function TeacherPortal() {
                 </div>
               ))}
             </div>
+          )}
+
+          {/* ── PROFILE ── */}
+          {page === 'profile' && (
+            <TeacherProfile />
           )}
 
         </div>

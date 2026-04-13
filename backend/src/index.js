@@ -35,25 +35,25 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // ── Rate limiting ─────────────────────────────────────────
-// Global limiter: 200 req / 15 min per IP
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,  // Increased from 20 for better user experience
+  message: { success: false, message: 'Too many login attempts — please wait 15 minutes.' },
+});
+
+// Global limiter: 1000 req / 15 min per IP
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many requests — please try again later.' },
 }));
 
-// Stricter limiter on auth routes: 20 req / 15 min per IP
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  message: { success: false, message: 'Too many login attempts — please wait 15 minutes.' },
-});
-
 // ── Routes ────────────────────────────────────────────────
 app.use('/api/auth',          authLimiter, require('./routes/auth'));
 app.use('/api/users',         require('./routes/users'));
+app.use('/api/teacher',       require('./routes/teacher'));
 app.use('/api/lessons',       require('./routes/lessons'));
 app.use('/api/exams',         require('./routes/exams'));
 app.use('/api/progress',      require('./routes/progress'));
