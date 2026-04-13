@@ -6,6 +6,17 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Serve sitemap and robots.txt directly (before SPA catch-all)
+[[redirects]]
+  from   = "/sitemap.xml"
+  to     = "/sitemap.xml"
+  status = 200
+
+[[redirects]]
+  from   = "/robots.txt"
+  to     = "/robots.txt"
+  status = 200
+
 # React Router: redirect all routes to index.html
 [[redirects]]
   from   = "/*"

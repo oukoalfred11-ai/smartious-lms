@@ -112,7 +112,7 @@ const DEFAULT_SITE = {
   stat3:         '6 Curricula',
   stat4:         'Kenya · UAE · UK',
   footerCopy:    '© 2026 Smartious E-School Ltd. Nairobi, Kenya. All rights reserved.',
-  footerEmail:   'hellosmartious@gmail.com',
+  footerEmail:   'oukoalfred11@gmail.com',
   footerPhone:   '+254 745 021 212',
   footerAddress: 'Diamond Plaza I, Parklands, Nairobi, Kenya',
   phone2:        '+254 745 021 212',
