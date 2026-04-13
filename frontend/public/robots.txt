@@ -7,4 +7,4 @@ Disallow: /parent
 Disallow: /demo
 Disallow: /portal
 
-Sitemap: https://smartioushomeschool.netlify.app/sitemap.xml
+Sitemap: https://smartioushomeschool.com/sitemap.xml
