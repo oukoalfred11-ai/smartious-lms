@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /teacher
+Disallow: /student
+Disallow: /parent
+Disallow: /demo
+Disallow: /portal
+
+Sitemap: https://smartioushomeschool.netlify.app/sitemap.xml

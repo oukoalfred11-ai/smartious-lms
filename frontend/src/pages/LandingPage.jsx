@@ -20,19 +20,19 @@ const IMG = {
 
 /* ── Meta descriptions per page ── */
 const META = {
-  home: 'Smartious Homeschool delivers IGCSE, Cambridge A-Level, IB, British, American & CBC education to 2,000+ students across 12 countries. Expert tutors, AI-powered learning and proven results from Nairobi to the world.',
-  about: 'Discover how Smartious Homeschool has achieved a 98% IGCSE pass rate, served 2,000+ students across 12 countries, and grown 340% since 2018. Real results from real families.',
-  curricula: 'Explore 9 internationally accredited curricula at Smartious — IGCSE, Cambridge A-Level, IB Diploma, Pearson Edexcel, British, American, CBC and our signature Smartious Blended programme.',
-  services: 'Six flexible learning models — homeschool tutor visits, virtual school, learning centre, private tuition, Mshauri AI tutor and exam prep. Smartious adapts to every family.',
-  global: 'Smartious Homeschool educates students across 13+ countries and 4 continents from our Nairobi headquarters. Explore our global footprint and local learning centres.',
-  pricing: 'Transparent pricing from $85/month for homeschooling. No contracts, cancel anytime. One-time $15 placement assessment. View all Smartious Homeschool tuition fees.',
-  programs: 'Join the Smartious IUFP for direct university entry to 200+ partner universities, or apply for Study Abroad placements in the UK, USA, Australia, Germany, UAE and Canada.',
-  faq: 'Find answers to common questions about Smartious Homeschool — enrollment, curricula, pricing, learning modes, exam preparation and university pathways.',
-  blog: 'Expert articles and guides on IGCSE preparation, IB Diploma success, homeschooling tips, AI-powered learning and study abroad opportunities from Smartious educators.',
-  enroll: 'Enroll at Smartious Homeschool in under 10 minutes. $15 placement assessment, first lesson within 48 hours. Choose from 9 curricula and 6 learning modes.',
-  consult: 'Book a free consultation with Smartious admissions. Get personalised curriculum advice, learning plan recommendations and pricing guidance. No commitment required.',
-  contact: 'Contact Smartious Homeschool — email info@smartious.ac.ke, call +254 712 345 678, WhatsApp us, or visit Diamond Plaza I, Parklands, Nairobi.',
-  login: 'Sign in to your Smartious Homeschool portal — student dashboard, teacher workspace, parent overview or admin centre. Secure access to your learning journey.',
+  home: 'Smartious Homeschool — the best homeschool and virtual school in Kenya, UAE, Dubai, and the UK. IGCSE, Cambridge A-Level, IB Diploma, British, American & CBC curricula with expert tutors and AI-powered personalised learning for 2,000+ students across 12+ countries. 98% IGCSE pass rate. Better results than Elimu Plus, Impact Homeschool, and Caplora Homeschool. From $85/month. Enroll today at the top-rated homeschool in Africa and the Middle East.',
+  about: 'Discover why Smartious is rated the best homeschool in Kenya and the leading virtual school in UAE, Dubai, and UK. 98% IGCSE pass rate, 2,000+ students, 12+ countries, 340% growth since 2018. The top-rated alternative to Elimu Plus, Impact Homeschool and Caplora Homeschool. Expert tutors, AI-powered learning, and 9 international curricula.',
+  curricula: 'Explore 9 internationally accredited homeschool curricula at Smartious — IGCSE, Cambridge A-Level, IB Diploma, IB PYP/MYP, Pearson Edexcel, British National, American, CBC/KCSE and Smartious Blended. Best homeschool curriculum options in Kenya, UAE, Dubai, UK, Nigeria, South Africa. More curricula than Elimu Plus, Impact Homeschool or Caplora Homeschool.',
+  services: 'Six flexible homeschool learning models — home tutor visits in Nairobi, virtual school, learning centre Parklands, private tuition, Mshauri AI tutor and exam prep. The best homeschool service in Kenya, UAE, Dubai, UK. Better learning modes than Elimu Plus and Impact Homeschool. Smartious adapts to every family worldwide.',
+  global: 'Smartious Homeschool educates students across 13+ countries and 4 continents. The best virtual school for families in Kenya, UAE, Dubai, UK, Saudi Arabia, Qatar, Nigeria, South Africa, Uganda, Tanzania, USA, Canada, and Australia. International homeschool education from Africa to the world.',
+  pricing: 'Affordable homeschool fees from $85/month — the best value homeschool in Kenya, UAE, Dubai, and UK. No contracts, cancel anytime. One-time $15 placement assessment. Compare pricing with Elimu Plus, Impact Homeschool, and Caplora Homeschool — Smartious offers more curricula, better pass rates, and AI-powered learning at competitive prices.',
+  programs: 'Join the Smartious IUFP for direct university entry to 200+ partner universities. Study Abroad placements in UK, USA, Australia, Germany, UAE and Canada. The best university foundation programme for homeschool students in Kenya, Africa and the Middle East. Guaranteed university placement.',
+  faq: 'Frequently asked questions about the best homeschool in Kenya, UAE, Dubai, and UK — enrollment, IGCSE, Cambridge A-Level, IB curricula, pricing, virtual school, online learning modes, exam preparation, university pathways, how Smartious compares to Elimu Plus, Impact Homeschool and Caplora Homeschool.',
+  blog: 'Expert articles on the best homeschool practices in Kenya, UAE, Dubai, and UK. IGCSE preparation guides, IB Diploma tips, Cambridge A-Level study techniques, homeschooling advice, AI-powered learning insights, study abroad opportunities and homeschool curriculum comparisons from Smartious educators.',
+  enroll: 'Enrol at the best homeschool in Kenya, UAE, Dubai, and UK in under 10 minutes. $15 placement assessment, first lesson within 48 hours. Choose from 9 curricula and 6 learning modes. Smartious Homeschool — better than Elimu Plus, Impact Homeschool and Caplora Homeschool. WhatsApp +254 745 021 212.',
+  consult: 'Book a free consultation with the best homeschool in Kenya, UAE, Dubai, and UK. Get personalised curriculum advice for IGCSE, Cambridge A-Level, IB, British, American or CBC. Smartious Homeschool — expert guidance, no commitment required. Call +254 745 021 212 or email oukoalfred11@gmail.com.',
+  contact: 'Contact Smartious Homeschool — email oukoalfred11@gmail.com, call +254 745 021 212, WhatsApp +254 745 021 212. Best homeschool in Kenya, UAE, Dubai, and the UK. Diamond Plaza I, Parklands, Nairobi, Kenya. Response within 2 hours.',
+  login: 'Sign in to your Smartious Homeschool portal — student dashboard, teacher workspace, parent overview or admin centre. The best homeschool platform in Kenya, UAE, Dubai, and UK with AI-powered learning tools.',
 }
 
 /* ── CSS variables matching smartious-global.html exactly ── */
@@ -535,6 +535,63 @@ export default function LandingPage() {
   const [payMethod, setPayMethod] = useState('mpesa')
   const [toast, setToast] = useState(null)
   const [wizDone, setWizDone] = useState(false)
+  const [enrollForm, setEnrollForm] = useState({programme:'homeschool',curriculum:'',learningMode:'',studentFirstName:'',studentLastName:'',parentEmail:'',whatsappNumber:'',studentDOB:'',country:'',howHeard:'',pathway:'',targetCountry:'',destination:'',duration:''})
+  const setEF = (k,v) => setEnrollForm(f => ({...f,[k]:v}))
+  const [enrollSending, setEnrollSending] = useState(false)
+
+  const submitEnrollment = async () => {
+    const ef = enrollForm
+    if (!ef.studentFirstName || !ef.parentEmail || !ef.whatsappNumber) return
+    setEnrollSending(true)
+    try {
+      const data = {
+        'form-name': 'enrollment',
+        programme: ef.programme,
+        curriculum: ef.curriculum,
+        learningMode: ef.learningMode,
+        studentFirstName: ef.studentFirstName,
+        studentLastName: ef.studentLastName,
+        parentEmail: ef.parentEmail,
+        whatsappNumber: ef.whatsappNumber,
+        studentDOB: ef.studentDOB,
+        country: ef.country,
+        howHeard: ef.howHeard,
+      }
+      // Submit to Netlify Forms
+      await fetch('/__forms.html', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(data).toString(),
+      })
+      // Send email notification
+      await fetch('https://formsubmit.co/ajax/oukoalfred11@gmail.com', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body: JSON.stringify({
+          _subject: `New Enrollment Application — ${ef.studentFirstName} ${ef.studentLastName}`,
+          _template: 'table',
+          _captcha: 'false',
+          Programme: ef.programme,
+          Curriculum: ef.curriculum || 'N/A',
+          'Learning Mode': ef.learningMode || 'N/A',
+          'Student First Name': ef.studentFirstName,
+          'Student Last Name': ef.studentLastName,
+          'Parent Email': ef.parentEmail,
+          'WhatsApp Number': ef.whatsappNumber,
+          'Student DOB': ef.studentDOB,
+          Country: ef.country,
+          'How Heard': ef.howHeard || 'N/A',
+        })
+      })
+      // Auto-open WhatsApp with enrollment details so admin gets notified immediately
+      const waMsg = `*New Enrollment — Smartious Homeschool*\n\n*Student:* ${ef.studentFirstName} ${ef.studentLastName}\n*Programme:* ${ef.programme}\n*Curriculum:* ${ef.curriculum || 'N/A'}\n*Learning Mode:* ${ef.learningMode || 'N/A'}\n*Parent Email:* ${ef.parentEmail}\n*WhatsApp:* ${ef.whatsappNumber}\n*DOB:* ${ef.studentDOB}\n*Country:* ${ef.country}\n*How Heard:* ${ef.howHeard || 'N/A'}`
+      window.open(`https://wa.me/254745021212?text=${encodeURIComponent(waMsg)}`, '_blank')
+    } catch (e) {
+      console.error('Enrollment submit error:', e)
+    }
+    setEnrollSending(false)
+  }
+
   const nav = useNavigate()
   const location = useLocation()
   const topRef = useRef(null)
@@ -1304,7 +1361,7 @@ export default function LandingPage() {
                         {id:'iufp',svg:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',h:'IUFP — University Foundation',p:'International University Foundation Programme. Direct entry to UK, US, Australian & European universities. 200+ partner universities.',from:'$2,400'},
                         {id:'studyabroad',svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',h:'Study Abroad Placement',p:'School & university placements in UK, USA, Australia, Germany, UAE & Canada. Includes visa guidance & pastoral support.',from:'$5,200'},
                       ].map(c => (
-                        <div key={c.id} className={`prog-sel-card${currentProg===c.id?' on':''}`} onClick={() => setCurrentProg(c.id)}>
+                        <div key={c.id} className={`prog-sel-card${currentProg===c.id?' on':''}`} onClick={() => { setCurrentProg(c.id); setEF('programme',c.id) }}>
                           <div className="psc-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:c.svg}}/></div>
                           <div className="psc-h">{c.h}</div>
                           <div className="psc-p">{c.p}</div>
@@ -1316,10 +1373,10 @@ export default function LandingPage() {
                       {currentProg === 'homeschool' && (
                         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
                           <div><label className="fl">Preferred Curriculum *</label>
-                            <select className="fi-i"><option value="">Select curriculum...</option>{['IGCSE (Cambridge)','Cambridge A-Level','IB Diploma (DP)','IB PYP / MYP','Pearson Edexcel','British National Curriculum','American Curriculum','CBC / KCSE (Kenya)','Smartious Blended'].map(o => <option key={o}>{o}</option>)}</select>
+                            <select className="fi-i" value={enrollForm.curriculum} onChange={e=>setEF('curriculum',e.target.value)}><option value="">Select curriculum...</option>{['IGCSE (Cambridge)','Cambridge A-Level','IB Diploma (DP)','IB PYP / MYP','Pearson Edexcel','British National Curriculum','American Curriculum','CBC / KCSE (Kenya)','Smartious Blended'].map(o => <option key={o}>{o}</option>)}</select>
                           </div>
                           <div><label className="fl">Learning Mode *</label>
-                            <select className="fi-i"><option value="">Select mode...</option>{['Homeschool — Tutor Visits Home (Nairobi)','Homeschool — Online Video Sessions','Smartious Learning Centre — Parklands, Nairobi','Virtual School — 100% Online','Private Tuition — Online','Private Tuition — Home Visit (Nairobi)'].map(o => <option key={o}>{o}</option>)}</select>
+                            <select className="fi-i" value={enrollForm.learningMode} onChange={e=>setEF('learningMode',e.target.value)}><option value="">Select mode...</option>{['Homeschool — Tutor Visits Home (Nairobi)','Homeschool — Online Video Sessions','Smartious Learning Centre — Parklands, Nairobi','Virtual School — 100% Online','Private Tuition — Online','Private Tuition — Home Visit (Nairobi)'].map(o => <option key={o}>{o}</option>)}</select>
                           </div>
                         </div>
                       )}
@@ -1357,19 +1414,17 @@ export default function LandingPage() {
                     <div className="wiz-h">Your Details</div>
                     <div className="wiz-sub">Tell us about the student and parent / guardian.</div>
                     <div className="fg" style={{marginBottom:16}}>
-                      {[["Student's First Name *","",""],["Student's Last Name *","",""],["Parent / Guardian Email *","email",""],["WhatsApp Number *","tel",""],["Student's Date of Birth *","date",""],["Country of Residence *","","","select",['Kenya','Nigeria','South Africa','Uganda','Tanzania','UAE','United Kingdom','United States','Canada','Australia','Other']]].map(([l,type,ph,kind,opts]) => (
-                        <div key={l} className={kind === 'select' ? '' : ''}>
-                          <label className="fl">{l}</label>
-                          {kind === 'select' ? (
-                            <select className="fi-i"><option value="">Select country...</option>{(opts||[]).map(o => <option key={o}>{o}</option>)}</select>
-                          ) : (
-                            <input className="fi-i" type={type||'text'} placeholder={ph}/>
-                          )}
-                        </div>
-                      ))}
+                      <div><label className="fl">Student's First Name *</label><input className="fi-i" value={enrollForm.studentFirstName} onChange={e=>setEF('studentFirstName',e.target.value)}/></div>
+                      <div><label className="fl">Student's Last Name *</label><input className="fi-i" value={enrollForm.studentLastName} onChange={e=>setEF('studentLastName',e.target.value)}/></div>
+                      <div><label className="fl">Parent / Guardian Email *</label><input className="fi-i" type="email" value={enrollForm.parentEmail} onChange={e=>setEF('parentEmail',e.target.value)}/></div>
+                      <div><label className="fl">WhatsApp Number *</label><input className="fi-i" type="tel" placeholder="+254 7XX XXX XXX" value={enrollForm.whatsappNumber} onChange={e=>setEF('whatsappNumber',e.target.value)}/></div>
+                      <div><label className="fl">Student's Date of Birth *</label><input className="fi-i" type="date" value={enrollForm.studentDOB} onChange={e=>setEF('studentDOB',e.target.value)}/></div>
+                      <div><label className="fl">Country of Residence *</label>
+                        <select className="fi-i" value={enrollForm.country} onChange={e=>setEF('country',e.target.value)}><option value="">Select country...</option>{['Kenya','Nigeria','South Africa','Uganda','Tanzania','UAE','United Kingdom','United States','Canada','Australia','Other'].map(o => <option key={o}>{o}</option>)}</select>
+                      </div>
                     </div>
                     <div style={{gridColumn:'1/-1'}}><label className="fl">How did you hear about Smartious?</label>
-                      <select className="fi-i" style={{width:'100%'}}><option value="">Select...</option>{['Google Search','WhatsApp','Facebook / Instagram','Friend / Family Referral','LinkedIn','TikTok','School Recommendation','Other'].map(o => <option key={o}>{o}</option>)}</select>
+                      <select className="fi-i" style={{width:'100%'}} value={enrollForm.howHeard} onChange={e=>setEF('howHeard',e.target.value)}><option value="">Select...</option>{['Google Search','WhatsApp','Facebook / Instagram','Friend / Family Referral','LinkedIn','TikTok','School Recommendation','Other'].map(o => <option key={o}>{o}</option>)}</select>
                     </div>
                     <div className="wiz-nav">
                       <button className="wb wb-bk" onClick={() => setWizStep(1)}>&larr; Back</button>
@@ -1436,7 +1491,7 @@ export default function LandingPage() {
                     ))}
                     <div className="wiz-nav">
                       <button className="wb wb-bk" onClick={() => setWizStep(3)}>&larr; Back</button>
-                      <button className="wb wb-nx" onClick={() => { setWizStep(5); setWizDone(true) }}>Submit & Complete <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                      <button className="wb wb-nx" onClick={() => { submitEnrollment(); setWizStep(5); setWizDone(true) }}>Submit & Complete <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                     </div>
                   </div>
                 )}
@@ -1448,9 +1503,13 @@ export default function LandingPage() {
                       <svg width="34" height="34" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginBottom:8}}>Enrollment Submitted!</div>
-                    <p style={{fontSize:14.5,color:V.sl,marginBottom:28,lineHeight:1.8,maxWidth:480,margin:'0 auto 28px'}}>Thank you! We have received your enrollment application and $15 assessment fee. Our admissions team will contact you within 2 hours to review your placement test and introduce your tutor.</p>
+                    <p style={{fontSize:14.5,color:V.sl,marginBottom:28,lineHeight:1.8,maxWidth:480,margin:'0 auto 28px'}}>Thank you! We have received your enrollment application. Our admissions team will contact you within 2 hours via email or WhatsApp to review your placement and introduce your tutor.</p>
                     <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
                       <button className="btn-p" onClick={goPortal}>Go to Your Portal <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                      <a href={`https://wa.me/254745021212?text=${encodeURIComponent(`Hi Smartious! I just enrolled.\nStudent: ${enrollForm.studentFirstName} ${enrollForm.studentLastName}\nProgramme: ${enrollForm.programme}\nEmail: ${enrollForm.parentEmail}\nPhone: ${enrollForm.whatsappNumber}`)}`} target="_blank" rel="noreferrer" className="btn-o" style={{display:'inline-flex',alignItems:'center',gap:7,textDecoration:'none',color:'#25D366',borderColor:'#25D366'}}>
+                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                        Confirm via WhatsApp
+                      </a>
                       <button className="btn-o" onClick={() => { setWizStep(1); P('home') }}>Back to Home</button>
                     </div>
                   </div>
@@ -1494,7 +1553,7 @@ export default function LandingPage() {
               <div className="contact-info-card">
                 <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',color:'#FEFDFB',marginBottom:8}}>Our <em style={{color:'#F0CC5A',fontStyle:'italic'}}>Details</em></div>
                 {[
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Email', value:'hellosmartious@gmail.com', sub:'Response within 2 hours', href:'mailto:hellosmartious@gmail.com'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Email', value:'oukoalfred11@gmail.com', sub:'Response within 2 hours', href:'mailto:oukoalfred11@gmail.com'},
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Phone', value:'+254 745 021 212', sub:'Mon–Fri, 8am–6pm EAT', href:'tel:+254745021212'},
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>, label:'WhatsApp', value:'+254 745 021 212', sub:'Quick responses · Tap to chat', href:'https://wa.me/254745021212'},
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I, Parklands', sub:'Nairobi, Kenya · 4th Avenue', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
@@ -1619,7 +1678,23 @@ function ConsultForm({ P }) {
     if (!form.name || !form.email || !form.phone) { setErr('Please fill in all required fields.'); return }
     setSending(true); setErr('')
     try {
-      await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
+      // Submit to Netlify Forms
+      const netlifyData = new URLSearchParams({
+        'form-name': 'consultation',
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        country: form.country,
+        curriculum: form.curriculum,
+        message: form.message || 'No additional message provided.',
+      })
+      await fetch('/__forms.html', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: netlifyData.toString(),
+      })
+      // Also send email notification directly
+      await fetch('https://formsubmit.co/ajax/oukoalfred11@gmail.com', {
         method:'POST',
         headers:{'Content-Type':'application/json','Accept':'application/json'},
         body: JSON.stringify({
@@ -1634,9 +1709,12 @@ function ConsultForm({ P }) {
           Message: form.message || 'No additional message provided.',
         })
       })
+      // Auto-open WhatsApp with consultation details so admin gets notified immediately
+      const waMsg = `*New Consultation Request — Smartious Homeschool*\n\n*Name:* ${form.name}\n*Email:* ${form.email}\n*Phone:* ${form.phone}\n*Country:* ${form.country || 'N/A'}\n*Curriculum:* ${form.curriculum || 'N/A'}\n*Message:* ${form.message || 'No additional message provided.'}`
+      window.open(`https://wa.me/254745021212?text=${encodeURIComponent(waMsg)}`, '_blank')
       setSent(true)
     } catch {
-      setErr('Failed to send. Please email us directly at hellosmartious@gmail.com')
+      setErr('Failed to send. Please try again or WhatsApp us at +254 745 021 212')
     }
     setSending(false)
   }
@@ -1648,7 +1726,13 @@ function ConsultForm({ P }) {
       </div>
       <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.8rem',color:'#0A0806',marginBottom:12}}>Request <em style={{color:'#8B1A2E',fontStyle:'italic'}}>Received!</em></div>
       <p style={{fontSize:15,color:'#6B5E52',lineHeight:1.8,marginBottom:32,maxWidth:420,margin:'0 auto 32px'}}>Thank you {form.name}. Our admissions team will reach you at <strong>{form.email}</strong> within 2 working hours to schedule your free consultation.</p>
-      <button className="btn-p" onClick={() => P('home')}>Back to Home</button>
+      <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+        <button className="btn-p" onClick={() => P('home')}>Back to Home</button>
+        <a href={`https://wa.me/254745021212?text=${encodeURIComponent(`Hi Smartious! I just submitted a consultation request.\nName: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\nCurriculum: ${form.curriculum || 'Not specified'}`)}`} target="_blank" rel="noreferrer" className="btn-o" style={{display:'inline-flex',alignItems:'center',gap:7,textDecoration:'none',color:'#25D366',borderColor:'#25D366'}}>
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Also WhatsApp Us
+        </a>
+      </div>
     </div>
   )
 
@@ -1714,7 +1798,21 @@ function ContactForm() {
     if (!form.name || !form.email || !form.message) { setErr('Please fill in all required fields.'); return }
     setSending(true); setErr('')
     try {
-      await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
+      // Submit to Netlify Forms
+      const netlifyData = new URLSearchParams({
+        'form-name': 'contact',
+        name: form.name,
+        email: form.email,
+        subject: form.subject || 'General Enquiry',
+        message: form.message,
+      })
+      await fetch('/__forms.html', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: netlifyData.toString(),
+      })
+      // Also send email notification directly
+      await fetch('https://formsubmit.co/ajax/oukoalfred11@gmail.com', {
         method:'POST',
         headers:{'Content-Type':'application/json','Accept':'application/json'},
         body: JSON.stringify({
@@ -1727,9 +1825,12 @@ function ContactForm() {
           Message: form.message,
         })
       })
+      // Auto-open WhatsApp with message details so admin gets notified immediately
+      const waMsg = `*New Contact Message — Smartious Homeschool*\n\n*Name:* ${form.name}\n*Email:* ${form.email}\n*Subject:* ${form.subject || 'General Enquiry'}\n*Message:* ${form.message}`
+      window.open(`https://wa.me/254745021212?text=${encodeURIComponent(waMsg)}`, '_blank')
       setSent(true)
     } catch {
-      setErr('Failed to send. Email us directly at hellosmartious@gmail.com')
+      setErr('Failed to send. WhatsApp us at +254 745 021 212 or email oukoalfred11@gmail.com')
     }
     setSending(false)
   }
@@ -1777,7 +1878,6 @@ function ContactForm() {
 
 // ── Footer ────────────────────────────────────────────────
 function Footer({ P }) {
-  const { siteConfig: cfg } = useStore()
   return (
     <footer>
       <div className="wrap">
@@ -1785,7 +1885,7 @@ function Footer({ P }) {
           <div>
             <div className="ft-h">Smart<em>ious</em></div>
             <div className="ft-tag">Homeschool · Global</div>
-            <div className="ft-d">Kenya's leading homeschool education provider. IGCSE, Cambridge, IB, British, American and CBC curricula. Expert tutors. AI-powered. 12+ countries.</div>
+            <div className="ft-d">The best homeschool and virtual school in Kenya, UAE, Dubai, and the UK. IGCSE, Cambridge A-Level, IB Diploma, British, American and CBC curricula. Expert tutors. AI-powered personalised learning. 2,000+ students across 12+ countries. 98% IGCSE pass rate. Better than Elimu Plus, Impact Homeschool and Caplora Homeschool. From $85/month.</div>
           </div>
           <div>
             <div className="ft-ch">Programmes</div>
@@ -1798,27 +1898,27 @@ function Footer({ P }) {
           <div>
             <div className="ft-ch">Contact</div>
             <div className="ft-ct">
-              <a href={`mailto:${cfg.footerEmail || 'hellosmartious@gmail.com'}`} style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+              <a href="mailto:oukoalfred11@gmail.com" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                {cfg.footerEmail || 'hellosmartious@gmail.com'}
+                oukoalfred11@gmail.com
               </a>
-              <a href={`tel:${(cfg.footerPhone || '+254745021212').replace(/\s/g,'')}`} style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+              <a href="tel:+254745021212" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                {cfg.footerPhone || '+254 745 021 212'}
+                +254 745 021 212
               </a>
-              <a href={`https://wa.me/${(cfg.footerPhone || '254745021212').replace(/[^0-9]/g,'')}`} target="_blank" rel="noreferrer" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#25D366'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+              <a href="https://wa.me/254745021212" target="_blank" rel="noreferrer" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#25D366'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                WhatsApp Chat
+                +254 745 021 212 (WhatsApp)
               </a>
               <div style={{display:'flex',alignItems:'center',gap:7}}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                {cfg.footerAddress || 'Diamond Plaza I, Parklands, Nairobi, Kenya'}
+                Diamond Plaza I, Parklands, Nairobi, Kenya
               </div>
             </div>
           </div>
         </div>
         <div className="ft-bot">
-          <div className="ft-copy">{cfg.footerCopy || '© 2026 Smartious E-School Ltd. Nairobi, Kenya. All rights reserved.'}</div>
+          <div className="ft-copy">© 2026 Smartious E-School Ltd. Nairobi, Kenya. All rights reserved.</div>
           <div className="ft-acs">
             {['Privacy Policy','Terms of Service','Cookie Policy','GDPR'].map(l => <div key={l} className="ft-ac">{l}</div>)}
           </div>
