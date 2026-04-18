@@ -41,6 +41,8 @@ router.post('/login', async (req, res) => {
       grade:      user.grade,
       xp:         user.xp,
       streak:     user.streak,
+      // PHASE 7: Include forcePasswordChange flag for auth guard
+      forcePasswordChange: user.forcePasswordChange || false,
     };
 
     res.json({ success: true, token: sign(user._id), user: safeUser });
@@ -181,6 +183,187 @@ router.post('/mshauri', auth, async (req, res) => {
   } catch (e) {
     console.error('[mshauri]', e.message);
     res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ── Verify email ──────────────────────────────────────
+router.post('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token required'
+      });
+    }
+
+    // Verify JWT
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({
+          success: false,
+          message: 'Verification link expired. Please sign up again.'
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification token'
+      });
+    }
+
+    if (decoded.action !== 'verify_email') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid token type'
+      });
+    }
+
+    // Find user and mark as verified
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already verified'
+      });
+    }
+
+    // Mark as verified
+    user.isEmailVerified = true;
+    user.verificationToken = null;
+    user.verificationTokenExpiry = null;
+    await user.save();
+
+    console.log(`✓ Email verified for user: ${user.email}`);
+
+    res.json({
+      success: true,
+      message: 'Email verified! Please set your password to continue.',
+      userId: user._id
+    });
+  } catch (error) {
+    console.error('[auth/verify-email]', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during verification'
+    });
+  }
+});
+
+// ── Reset password (force or voluntary) ────────────────
+router.post('/reset-password', auth, async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters'
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update password and clear force flag
+    user.password = newPassword;
+    user.forcePasswordChange = false; // PHASE 7: Clear the flag after successful reset
+    await user.save();
+
+    console.log(`✓ Password reset for user: ${user.email}`);
+
+    res.json({
+      success: true,
+      message: 'Password updated successfully. You can now access your dashboard.'
+    });
+  } catch (error) {
+    console.error('[auth/reset-password]', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Server error resetting password'
+    });
+  }
+});
+
+// PHASE 7: Secure password reset endpoint
+// Used when user logs in with temporary credentials and must change password
+router.post('/secure-reset', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password and new password are required'
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 8 characters'
+      });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Verify current password
+    const isPasswordValid = await user.comparePassword(currentPassword);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Check if new password is different from current
+    const isSamePassword = await user.comparePassword(newPassword);
+    if (isSamePassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be different from current password'
+      });
+    }
+
+    // Update password and clear force flag
+    user.password = newPassword;
+    user.forcePasswordChange = false; // PHASE 7: Clear the flag after successful reset
+    await user.save();
+
+    console.log(`✓ Secure password reset for user: ${user.email}`);
+
+    res.json({
+      success: true,
+      message: 'Password updated successfully. You now have full access to your dashboard.',
+      userUpdated: true
+    });
+  } catch (error) {
+    console.error('[auth/secure-reset]', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during secure reset'
+    });
   }
 });
 

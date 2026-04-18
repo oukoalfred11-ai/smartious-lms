@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, ToastProvider, StoreProvider, useAuth } from './context/ctx.jsx'
 import LandingPage   from './pages/LandingPage.jsx'
 import LoginPage     from './pages/LoginPage.jsx'
+import VerifyEmailPage from './pages/VerifyEmailPage.jsx'
+import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 import AdminPortal   from './pages/admin/AdminPortal.jsx'
 import TeacherPortal from './pages/teacher/TeacherPortal.jsx'
 import StudentPortal from './pages/student/StudentPortal.jsx'
@@ -35,6 +37,8 @@ export default function App() {
             <Routes>
               <Route path="/"          element={<LandingPage />} />
               <Route path="/login"     element={<LoginPage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/portal"    element={<RoleRedirect />} />
               <Route path="/admin/*"   element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
               <Route path="/teacher/*" element={<Guard roles={['teacher','admin']}><TeacherPortal /></Guard>} />

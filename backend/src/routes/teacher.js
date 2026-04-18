@@ -183,5 +183,223 @@ router.post('/change-email', auth, requireRole('teacher'), async (req, res) => {
   }
 });
 
-module.exports = router;
+// ── 5. GET teacher's students
+router.get('/students', auth, requireRole('teacher'), async (req, res) => {
+  try {
+    // Get students assigned to this teacher (by subjects)
+    const students = await User.find({ 
+      role: 'student',
+      subjects: { $in: req.user.subjects || [] }
+    }).select('firstName lastName email curriculum grade xp streak createdAt').limit(50);
 
+    res.json({ success: true, students });
+  } catch (e) {
+    console.error('[teacher/students]', e.message);
+    res.status(500).json({ success: false, message: 'Server error fetching students' });
+  }
+});
+
+// ── 6. GET teacher's resources
+router.get('/resources', auth, requireRole('teacher'), async (req, res) => {
+  try {
+    // Mock resources data - in production this would come from a Resources model
+    const resources = [
+      {
+        id: 'res-1',
+        title: 'Pythagoras Theorem Worksheet',
+        type: 'PDF',
+        subject: 'Mathematics',
+        grade: 'Form 3',
+        size: '1.2 MB',
+        downloads: 34,
+        createdAt: new Date()
+      },
+      {
+        id: 'res-2', 
+        title: 'Trigonometry Lecture Slides',
+        type: 'Slides',
+        subject: 'Mathematics',
+        grade: 'Form 3',
+        size: '4.8 MB',
+        downloads: 28,
+        createdAt: new Date()
+      }
+    ];
+
+    res.json({ success: true, resources });
+  } catch (e) {
+    console.error('[teacher/resources]', e.message);
+    res.status(500).json({ success: false, message: 'Server error fetching resources' });
+  }
+});
+
+// ── 7. GET teacher's messages
+router.get('/messages', auth, requireRole('teacher'), async (req, res) => {
+  try {
+    // Mock messages data - in production this would come from a Messages model
+    const messages = [
+      {
+        id: 'msg-1',
+        from: 'Janet Osei',
+        fromRole: 'parent',
+        subject: 'Mathematics Progress Update',
+        body: 'Amara has been making good progress in mathematics...',
+        time: '2 hours ago',
+        unread: true
+      }
+    ];
+
+    res.json({ success: true, messages });
+  } catch (e) {
+    console.error('[teacher/messages]', e.message);
+    res.status(500).json({ success: false, message: 'Server error fetching messages' });
+  }
+});
+
+// ── 8. GET teacher's reports
+router.get('/reports', auth, requireRole('teacher'), async (req, res) => {
+  try {
+    const reports = {
+      classAverage: 73,
+      highestScore: 91,
+      atRiskStudents: 2,
+      attendanceRate: 92,
+      topicMastery: [
+        { topic: 'Number & Algebra', score: 78 },
+        { topic: 'Pythagoras Theorem', score: 73 },
+        { topic: 'Statistics', score: 69 }
+      ]
+    };
+
+    res.json({ success: true, reports });
+  } catch (e) {
+    console.error('[teacher/reports]', e.message);
+    res.status(500).json({ success: false, message: 'Server error fetching reports' });
+  }
+});
+
+// ── 9. GET teacher's blog posts
+router.get('/blog', auth, requireRole('teacher'), async (req, res) => {
+  try {
+    // Mock blog posts - in production this would come from a Blog model
+    const posts = [
+      {
+        id: 'post-1',
+        title: '5 Ways to Make Quadratic Equations Fun for IGCSE Students',
+        reads: 1847,
+        earnings: 5541,
+        date: 'Feb 28',
+        status: 'Published'
+      },
+      {
+        id: 'post-2',
+        title: 'Why Pythagoras Theorem Appears in Every IGCSE Exam',
+        reads: 3204,
+        earnings: 9606,
+        date: 'Feb 14', 
+        status: 'Published'
+      }
+    ];
+
+    res.json({ success: true, posts });
+  } catch (e) {
+    console.error('[teacher/blog]', e.message);
+    res.status(500).json({ success: false, message: 'Server error fetching blog posts' });
+  }
+});
+
+// ── 10. GET teacher's allocations
+router.get('/allocations', auth, requireRole('teacher'), async (req, res) => {
+  try {
+    // Mock allocations data
+    const allocations = [
+      {
+        student: 'Amara Osei',
+        curriculum: 'IGCSE',
+        subject: 'Mathematics',
+        slot: 'Mon/Wed 10:00–11:00 AM',
+        fee: 'KES 1,500/session',
+        status: 'Active'
+      },
+      {
+        student: 'Kofi Mensah',
+        curriculum: 'A-Level', 
+        subject: 'Mathematics',
+        slot: 'Tue/Thu 2:00–3:00 PM',
+        fee: 'KES 1,500/session',
+        status: 'Active'
+      }
+    ];
+
+    res.json({ success: true, allocations });
+  } catch (e) {
+    console.error('[teacher/allocations]', e.message);
+    res.status(500).json({ success: false, message: 'Server error fetching allocations' });
+  }
+});
+
+// ── 11. GET teacher's payslips
+router.get('/payslips', auth, requireRole('teacher'), async (req, res) => {
+  try {
+    // Mock payslips data
+    const payslips = [
+      {
+        month: 'January 2026',
+        attendance: 22,
+        offHours: 8,
+        reads: 142,
+        videos: 3,
+        gross: 'KES 40,126',
+        tax: 'KES 4,013',
+        net: 'KES 36,113',
+        status: 'Paid'
+      },
+      {
+        month: 'December 2025',
+        attendance: 20,
+        offHours: 5,
+        reads: 89,
+        videos: 2,
+        gross: 'KES 34,267',
+        tax: 'KES 3,427',
+        net: 'KES 30,840',
+        status: 'Paid'
+      }
+    ];
+
+    res.json({ success: true, payslips });
+  } catch (e) {
+    console.error('[teacher/payslips]', e.message);
+    res.status(500).json({ success: false, message: 'Server error fetching payslips' });
+  }
+});
+
+// ── 12. GET teacher's marking queue
+router.get('/marking', auth, requireRole('teacher'), async (req, res) => {
+  try {
+    // Mock marking queue data
+    const papers = [
+      {
+        id: 'paper-1',
+        exam: 'Maths Mock — Paper 1',
+        submissions: 24,
+        marks: 100,
+        status: 'Pending'
+      },
+      {
+        id: 'paper-2',
+        exam: 'Chapter 4 Quiz',
+        submissions: 18,
+        marks: 20,
+        status: 'Pending'
+      }
+    ];
+
+    res.json({ success: true, papers });
+  } catch (e) {
+    console.error('[teacher/marking]', e.message);
+    res.status(500).json({ success: false, message: 'Server error fetching marking queue' });
+  }
+});
+
+module.exports = router;

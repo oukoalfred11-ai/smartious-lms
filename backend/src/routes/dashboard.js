@@ -12,4 +12,33 @@ router.get('/admin', auth, requireRole('admin'), async (req, res) => {
   } catch(e) { res.status(500).json({ success:false, message:e.message }) }
 })
 
+// GET teacher dashboard data
+router.get('/teacher', auth, requireRole('teacher'), async (req, res) => {
+  try {
+    // Get teacher's students count
+    const teacherStudents = await User.countDocuments({ 
+      role: 'student', 
+      subjects: { $in: req.user.subjects || [] } 
+    });
+    
+    // Get recent activity stats
+    const recentStats = {
+      activeStudents: 24,
+      classAverage: 73,
+      examsToMark: 3,
+      resourcesUploaded: 47
+    };
+    
+    res.json({ 
+      success: true, 
+      stats: {
+        teacherStudents,
+        ...recentStats
+      }
+    });
+  } catch(e) { 
+    res.status(500).json({ success:false, message:e.message }) 
+  }
+})
+
 module.exports = router

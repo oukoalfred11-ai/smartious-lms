@@ -1,0 +1,42 @@
+const mongoose = require('mongoose');
+
+const subjectSchema = new mongoose.Schema({
+  curriculum: {
+    type: String,
+    enum: ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American'],
+    required: true,
+    trim: true
+  },
+  subjectName: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  category: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  code: {
+    type: String,
+    trim: true
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+}, { timestamps: true });
+
+// Ensure uniqueness per curriculum
+subjectSchema.index({ curriculum: 1, subjectName: 1 }, { unique: true });
+
+module.exports = mongoose.model('Subject', subjectSchema);
+

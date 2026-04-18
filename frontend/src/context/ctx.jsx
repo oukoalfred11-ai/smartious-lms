@@ -35,6 +35,21 @@ export function AuthProvider({ children }) {
   }, [])
   const login = useCallback(async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password })
+    
+    // Handle new verification/reset flows
+    if (data.forceEmailVerification) {
+      localStorage.setItem('sm_verify_token', data.token)
+      window.location.href = '/verify-email'
+      return null
+    }
+    
+    if (data.forcePasswordReset) {
+      localStorage.setItem('sm_token', data.token)
+      localStorage.setItem('sm_user', JSON.stringify(data.user))
+      window.location.href = '/reset-password'
+      return null
+    }
+    
     localStorage.setItem('sm_token', data.token)
     localStorage.setItem('sm_user', JSON.stringify(data.user))
     setUser(data.user)

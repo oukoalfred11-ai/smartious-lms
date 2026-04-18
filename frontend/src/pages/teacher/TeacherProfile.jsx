@@ -496,6 +496,7 @@ export default function TeacherProfile() {
             />
           </div>
         </div>
+      </Modal> { /* <--- You were missing the closing tag for the Change Email Modal! */ }
       </>
       )}
     </div>
