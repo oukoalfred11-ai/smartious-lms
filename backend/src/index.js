@@ -50,31 +50,18 @@ app.use(rateLimit({
   message: { success: false, message: 'Too many requests — please try again later.' },
 }));
 
-// ── Routes ────────────────────────────────────────────────
+// ── Routes (ADMIN PORTAL ONLY) ─────────────────────────────
+// Core Admin Routes
 app.use('/api/auth',          authLimiter, require('./routes/auth'));
 app.use('/api/users',         require('./routes/users'));
-app.use('/api/subjects',      require('./routes/subjects'));
-app.use('/api/teacher',       require('./routes/teacher'));
-app.use('/api/lessons',       require('./routes/lessons'));
-app.use('/api/exams',         require('./routes/exams'));
-app.use('/api/progress',      require('./routes/progress'));
-app.use('/api/messages',      require('./routes/messages'));
-app.use('/api/dashboard',     require('./routes/dashboard'));
-app.use('/api/consultations', require('./routes/consultations'));
-app.use('/api/mastery',       require('./routes/mastery'));
-app.use('/api/adaptive',      require('./routes/adaptive'));
-app.use('/api/resources',     require('./routes/resources'));
-app.use('/api/reports',       require('./routes/reports'));
-app.use('/api/blog',          require('./routes/blog'));
-app.use('/api/allocations',   require('./routes/allocations'));
-app.use('/api/payslips',      require('./routes/payslips'));
-app.use('/api/marking',       require('./routes/marking'));
 app.use('/api/teachers',      require('./routes/teachers'));
-app.use('/api/payroll',       require('./routes/payroll'));
-app.use('/api/programmes',    require('./routes/programmes'));
+app.use('/api/allocations',   require('./routes/allocations'));
+app.use('/api/subjects',      require('./routes/subjects'));
 app.use('/api/curriculum',    require('./routes/curriculum'));
-app.use('/api/groupRooms',    require('./routes/groupRooms'));
-app.use('/api/siteConfig',    require('./routes/siteConfig'));
+app.use('/api/dashboard',     require('./routes/dashboard'));
+
+// Note: Future modules (lessons, exams, messages, etc.) moved to separate repos
+// This keeps admin portal lean and focused on core functionality
 
 // ── Health check ──────────────────────────────────────────
 app.get('/api/health', (_, res) =>
