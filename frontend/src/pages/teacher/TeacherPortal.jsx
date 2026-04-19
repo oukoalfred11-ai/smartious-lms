@@ -4,6 +4,7 @@ import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
 import LiveClassroom from '../../components/ui/LiveClassroom.jsx'
 import TeacherProfile from './TeacherProfile.jsx'
+import TeacherLeaveRequest from './TeacherLeaveRequest.jsx'
 
 // ── SVG icon helper ──────────────────────────────────────
 const Ico = ({ d, w = 18, col = 'currentColor', sw = 2 }) => (
@@ -305,7 +306,7 @@ export default function TeacherPortal() {
     dashboard:'Dashboard', classroom:'Live Classroom', students:'My Students',
     resources:'Resource Library', exambuilder:'Exam Builder', blog:'Blog & Earnings',
     liveclass:'Live Lessons', allocations:'My Allocations', payslips:'Payslips & Earnings',
-    marking:'AI Marking & Integrity', reports:'Reports & Analytics', profile:'My Profile'
+    marking:'AI Marking & Integrity', reports:'Reports & Analytics', profile:'My Profile', leave:'Leave Requests'
   }
 
   const sendChat = () => {
@@ -338,6 +339,7 @@ export default function TeacherPortal() {
     ]},
     { section:'Account', items:[
       {id:'profile',     label:'My Profile',          icon:'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2|circle:12:7:4'},
+      {id:'leave',       label:'Leave Requests',      icon:'M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z', badge:'3', badgeCol:'var(--a600)'},
     ]},
   ]
 
@@ -1310,10 +1312,15 @@ export default function TeacherPortal() {
             </div>
           )}
 
-          {/* ── PROFILE ── */}
-          {page === 'profile' && (
-            <TeacherProfile />
-          )}
+           {/* ── PROFILE ── */}
+           {page === 'profile' && (
+             <TeacherProfile />
+           )}
+
+           {/* ── LEAVE REQUESTS ── */}
+           {page === 'leave' && (
+             <TeacherLeaveRequest />
+           )}
 
         </div>
       </main>

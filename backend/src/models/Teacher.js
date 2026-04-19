@@ -6,11 +6,11 @@ const TeacherSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   phone: { type: String, default: '' },
   bio: { type: String, default: '' },
-  curriculum: {
+  curriculum: [{
     type: String,
     enum: ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American'],
     trim: true
-  },
+  }],
   subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
   qualifications: [String], // e.g., ["Bachelor of Science", "Teaching Diploma"]
   experience: { type: Number, default: 0 }, // Years of experience

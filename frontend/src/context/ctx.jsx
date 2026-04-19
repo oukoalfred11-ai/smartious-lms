@@ -36,14 +36,8 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password })
     
-    // Handle new verification/reset flows
-    if (data.forceEmailVerification) {
-      localStorage.setItem('sm_verify_token', data.token)
-      window.location.href = '/verify-email'
-      return null
-    }
-    
-    if (data.forcePasswordReset) {
+    // PHASE 3-5: Detect requirePasswordChange flag and force redirect to /reset-password
+    if (data.user?.requirePasswordChange) {
       localStorage.setItem('sm_token', data.token)
       localStorage.setItem('sm_user', JSON.stringify(data.user))
       window.location.href = '/reset-password'

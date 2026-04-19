@@ -59,6 +59,8 @@ app.use('/api/allocations',   require('./routes/allocations'));
 app.use('/api/subjects',      require('./routes/subjects'));
 app.use('/api/curriculum',    require('./routes/curriculum'));
 app.use('/api/dashboard',     require('./routes/dashboard'));
+app.use('/api/status',        require('./routes/status-management'));
+app.use('/api/leave-requests', require('./routes/status-management'));
 
 // Note: Future modules (lessons, exams, messages, etc.) moved to separate repos
 // This keeps admin portal lean and focused on core functionality

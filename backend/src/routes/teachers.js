@@ -19,10 +19,13 @@ router.get('/', async (req, res) => {
     const limit = parseInt(req.query.limit) || 100;
     const skip = (page - 1) * limit;
     const curriculum = req.query.curriculum;
-    const status = req.query.status || 'Active';
+    const status = req.query.status; // Only filter if explicitly provided
 
     // Build filter
-    const filter = { status };
+    const filter = {};
+    if (status) {
+      filter.status = status;
+    }
     if (curriculum && curriculum !== 'all') {
       filter.$or = [
         { curriculum: curriculum },

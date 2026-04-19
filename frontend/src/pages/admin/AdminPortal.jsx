@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import PortalLayout from '../../components/layout/PortalLayout.jsx'
 import AdminDashboard from './pages/Dashboard.jsx'
+import { api } from '../../context/ctx.jsx'
 
 const I = (d) => (
   <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -13,11 +14,49 @@ const PAGE_TITLES = {
   allocations:'Student Allocations', payroll:'Payroll Management',
   programmes:'IUFP & Study Abroad', livelessons:'Live Lessons', grouprooms:'Group Class Rooms',
   curriculum:'Curriculum Manager', billing:'Billing & Payments',
-  website:'Website Editor', settings:'System Settings', ai:'AI Console',
+  website:'Website Editor', settings:'System Settings', ai:'AI Console', leave:'Leave Management',
 }
 
 export default function AdminPortal() {
   const [page, setPage] = useState('dashboard')
+  const [userStats, setUserStats] = useState(0)
+  const [pendingAllocations, setPendingAllocations] = useState(0)
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  // Fetch total user count for sidebar badge
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      try {
+        const res = await api.get('/users/stats')
+        setUserStats(res.data.totalUsers || 0)
+      } catch (e) {
+        console.error('Failed to load user stats:', e.message)
+      }
+    }
+    fetchUserStats()
+  }, [refreshKey])
+
+  // Fetch pending allocations count
+  useEffect(() => {
+    const fetchPendingAllocations = async () => {
+      try {
+        const res = await api.get('/allocations/pending-count')
+        setPendingAllocations(res.data.pendingCount || 0)
+      } catch (e) {
+        console.error('Failed to load pending allocations:', e.message)
+      }
+    }
+    // Fetch immediately on mount and when page changes
+    fetchPendingAllocations()
+    
+    // Also refresh every 5 seconds for real-time updates
+    const interval = setInterval(fetchPendingAllocations, 5000)
+    return () => clearInterval(interval)
+  }, [page, refreshKey]) // Also trigger refresh when page or refreshKey changes
+
+  const handleUserSaved = () => {
+    setRefreshKey(prev => prev + 1)
+  }
 
   const mk = (id, label, svg, opts = {}) => ({
     id, label, path:'/admin', active: page === id,
@@ -30,10 +69,11 @@ export default function AdminPortal() {
       mk('analytics','Analytics','<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'),
     ]},
     { label:'Users', items:[
-      mk('users','All Users','<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',{badge:'5'}),
+      mk('users','All Users','<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',{badge:String(userStats)}),
       mk('teachers','Teachers','<path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/>'),
-      mk('allocations','Allocations','<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',{badge:'3',badgeColor:'var(--b700)'}),
+      mk('allocations','Allocations','<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>',{badge: pendingAllocations > 0 ? String(pendingAllocations) : '',badgeColor:pendingAllocations > 0 ? 'var(--r700)' : 'var(--b700)'}),
       mk('payroll','Payroll','<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/><line x1="14" y1="15" x2="18" y2="15"/>'),
+      mk('leave','Leave Requests','<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',{badgeCol:'var(--a600)'}),
       mk('programmes','IUFP & Study Abroad','<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>'),
       mk('livelessons','Live Lessons','<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',{live:true}),
       mk('grouprooms','Group Rooms','<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>'),
@@ -51,7 +91,7 @@ export default function AdminPortal() {
 
   return (
     <PortalLayout title={PAGE_TITLES[page] || 'Admin Panel'} navSections={navSections}>
-      <AdminDashboard page={page} onNav={setPage} />
+      <AdminDashboard page={page} onNav={setPage} onUserSaved={handleUserSaved} userStats={userStats} />
     </PortalLayout>
   )
 }

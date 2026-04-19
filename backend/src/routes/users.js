@@ -38,14 +38,48 @@ function validateRoleFields(user, role) {
   return errors;
 }
 
-// GET all users (admin only) — never return passwords
+// GET /stats — Get total user count for sidebar badge
+router.get('/stats', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    res.json({ success: true, totalUsers });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// GET all users (admin only) with advanced search and filtering
 router.get('/', auth, requireRole('admin'), async (req, res) => {
   try {
-    const users = await User.find()
+    const { search, role, curriculum } = req.query;
+    let query = {};
+
+    // Advanced search: name or email
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Role filter
+    if (role && role !== 'All Roles') {
+      query.role = role.toLowerCase();
+    }
+
+    // Curriculum filter
+    if (curriculum && curriculum !== 'All') {
+      query.curriculum = curriculum;
+    }
+
+    const users = await User.find(query)
       .select('-password')
       .populate('subjects', 'subjectName curriculum')
+      .populate('teachingSpecialties.subjectId', 'subjectName')
       .sort('-createdAt')
       .limit(200);
+    
     res.json({ success: true, users });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
@@ -56,9 +90,9 @@ router.get('/', auth, requireRole('admin'), async (req, res) => {
 router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
   try {
     const students = await User.find({ role: 'student' })
-      .select('_id firstName lastName email curriculum grade')
+      .select('_id firstName lastName email curriculum grade subjects')
       .populate('subjects', 'subjectName curriculum')
-      .sort('firstName')
+      .sort('-createdAt')
       .limit(500);
     res.json({ success: true, students });
   } catch (e) {
@@ -66,10 +100,24 @@ router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
   }
 });
 
-// CREATE user (admin only)
+// GET all teachers (for allocations)
+router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
+  try {
+    // Get teachers from User collection
+    const teachers = await User.find({ role: 'teacher' })
+      .select('_id firstName lastName email phone curriculum subjects createdAt status isOnLeave leaveStartDate leaveEndDate')
+      .populate('subjects', 'subjectName curriculum')
+      .sort('firstName')
+      .limit(500);
+    res.json({ success: true, teachers });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// CREATE user (admin only) with role-specific logic and auto-generated temp password
 router.post('/', auth, requireRole('admin'), async (req, res) => {
   try {
-    // Validate and set role-specific defaults
     validateRoleFields(req.body, req.body.role);
     
     // Ensure subjects is always an array of ObjectIds
@@ -78,8 +126,14 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
     } else if (!req.body.subjects) {
       req.body.subjects = [];
     }
-    
-     const user = await User.create(req.body);
+
+    // PHASE 3-5: Auto-generate temporary password
+    const tempPassword = User.generateTempPassword();
+    req.body.password = tempPassword;
+    req.body.isActive = true; // Users are immediately active
+    req.body.mustChangePassword = true;
+
+    const user = await User.create(req.body);
     
     // Generate verification JWT
     const verificationToken = jwt.sign(
@@ -90,31 +144,25 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
     
     // Update user with verification token
     user.verificationToken = verificationToken;
-    user.forcePasswordReset = true;
     await user.save();
-    
-    // Send verification email
-    const verificationLink = `${process.env.CLIENT_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
-    await sendVerificationEmail({
-      email: user.email,
-      name: user.firstName,
-      verificationLink,
-      expiresIn: '24 hours'
-    });
     
     // Populate subjects before returning
     await user.populate('subjects', 'subjectName curriculum');
+    await user.populate('teachingSpecialties.subjectId', 'subjectName');
     
     const safe = user.toObject();
     delete safe.password;
     
+    // PHASE 3-5: RETURN TEMP PASSWORD IN RESPONSE (for "Copy Credentials" feature)
+    const credentials = {
+      email: user.email,
+      tempPassword: tempPassword
+    };
+
     // If user is a parent, link to selected students
     if (user.role === 'parent' && req.body.linkedStudents && Array.isArray(req.body.linkedStudents)) {
       try {
-        // Add students to parent's linkedStudents
         user.linkedStudents = req.body.linkedStudents;
-        
-        // Add parent to each student's linkedParents
         for (const studentId of req.body.linkedStudents) {
           await User.findByIdAndUpdate(
             studentId,
@@ -126,36 +174,65 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
         console.log(`✓ Parent ${user.firstName} ${user.lastName} linked to ${req.body.linkedStudents.length} students`);
       } catch (linkError) {
         console.error('Failed to link parent to students:', linkError.message);
-        // Don't fail parent creation if linking fails
       }
     }
     
-    // If user role is 'teacher', also create a Teacher record
-    if (user.role === 'teacher') {
-      try {
-        const teacherData = {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phone: user.phone || '',
-          curriculum: user.curriculum || '',
-          subjects: Array.isArray(user.subjects) && user.subjects.length > 0 ? user.subjects : [],
-          status: 'Active',
-        };
-        
-        const teacher = await Teacher.create(teacherData);
-        safe.teacherId = teacher._id; // Include teacher ID in response
-        console.log(`✓ Teacher record created for ${user.firstName} ${user.lastName}`);
-      } catch (teacherError) {
-        console.error('Failed to create Teacher record:', teacherError.message);
-        // Don't fail the user creation if teacher creation fails
-      }
-    }
+     // If user role is 'teacher', build teachingSpecialties from subjects and curriculum
+     if (user.role === 'teacher') {
+       try {
+         // Build teachingSpecialties array from subjects and curriculum
+         const teachingSpecialties = [];
+         const teachingCurricula = Array.isArray(req.body.curriculum) ? req.body.curriculum : (req.body.curriculum ? [req.body.curriculum] : []);
+         const teachingSubjects = Array.isArray(req.body.subjects) ? req.body.subjects : [];
+         
+         // Create a specialty for each combination of subject and curriculum
+         for (const subjectId of teachingSubjects) {
+           for (const curr of teachingCurricula) {
+             teachingSpecialties.push({
+               subjectId: subjectId,
+               curriculum: curr
+             });
+           }
+         }
+         
+         // Update user with teachingSpecialties
+         if (teachingSpecialties.length > 0) {
+           user.teachingSpecialties = teachingSpecialties;
+           await user.save();
+         }
+         
+         console.log(`✓ Teacher ${user.firstName} ${user.lastName} assigned ${teachingSpecialties.length} specialties`);
+       } catch (specialtyError) {
+         console.error('Failed to assign teaching specialties:', specialtyError.message);
+       }
+     }
+     
+     // If user role is 'teacher', also create a Teacher record
+     if (user.role === 'teacher') {
+       try {
+         const teacherData = {
+           firstName: user.firstName,
+           lastName: user.lastName,
+           email: user.email,
+           phone: user.phone || '',
+           curriculum: user.curriculum || [],
+           subjects: Array.isArray(user.subjects) && user.subjects.length > 0 ? user.subjects : [],
+           status: 'Active',
+         };
+         
+         const teacher = await Teacher.create(teacherData);
+         safe.teacherId = teacher._id;
+         console.log(`✓ Teacher record created for ${user.firstName} ${user.lastName}`);
+       } catch (teacherError) {
+         console.error('Failed to create Teacher record:', teacherError.message);
+       }
+     }
     
-    res.json({ 
+    res.status(201).json({ 
       success: true, 
       user: safe,
-      message: 'User created. Verification email sent. Please check your email to verify your account.'
+      credentials, // PHASE 3-5: Return credentials for display
+      message: 'User created successfully. Credentials sent to email.'
     });
   } catch (e) {
     res.status(400).json({ success: false, message: e.message });
@@ -214,42 +291,108 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
       }
     }
 
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true })
-      .select('-password')
-      .populate('subjects', 'subjectName curriculum');
+     const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true })
+       .select('-password')
+       .populate('subjects', 'subjectName curriculum');
+     
+     const safe = user.toObject();
+     
+     // If user is a teacher and subjects or curriculum were updated, rebuild teachingSpecialties
+     if (user.role === 'teacher' && (req.body.subjects !== undefined || req.body.curriculum !== undefined)) {
+       try {
+         // Build teachingSpecialties array from subjects and curriculum
+         const teachingSpecialties = [];
+         const teachingCurricula = Array.isArray(user.curriculum) ? user.curriculum : (user.curriculum ? [user.curriculum] : []);
+         const teachingSubjects = Array.isArray(user.subjects) ? user.subjects : [];
+         
+         // Create a specialty for each combination of subject and curriculum
+         for (const subject of teachingSubjects) {
+           const subjectId = subject._id || subject;
+           for (const curr of teachingCurricula) {
+             teachingSpecialties.push({
+               subjectId: subjectId,
+               curriculum: curr
+             });
+           }
+         }
+         
+         // Update user with new teachingSpecialties
+         user.teachingSpecialties = teachingSpecialties;
+         await user.save();
+         console.log(`✓ Teacher ${user.firstName} ${user.lastName} specialties updated to ${teachingSpecialties.length}`);
+       } catch (specialtyError) {
+         console.error('Failed to update teaching specialties:', specialtyError.message);
+       }
+       
+       try {
+         const teacher = await Teacher.findOne({ email: user.email });
+         if (teacher) {
+           teacher.curriculum = user.curriculum || teacher.curriculum;
+           teacher.subjects = Array.isArray(req.body.subjects) && req.body.subjects.length > 0 
+             ? req.body.subjects 
+             : [];
+           teacher.phone = user.phone || teacher.phone;
+           await teacher.save();
+           console.log(`✓ Teacher record updated for ${user.firstName} ${user.lastName}`);
+         }
+       } catch (teacherError) {
+         console.error('Failed to sync Teacher record:', teacherError.message);
+         // Don't fail the user update if teacher sync fails
+       }
+     }
+     
+      res.json({ success: true, user: safe });
+   } catch (e) {
+     res.status(500).json({ success: false, message: e.message });
+   }
+});
+
+// PATCH /api/users/:id/leave - Set teacher on leave or return from leave (admin only)
+router.patch('/:id/leave', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
     
-    const safe = user.toObject();
-    
-    // If user is a teacher and subjects or curriculum were updated, sync to Teacher record
-    if (user.role === 'teacher' && (req.body.subjects !== undefined || req.body.curriculum !== undefined)) {
-      try {
-        const teacher = await Teacher.findOne({ email: user.email });
-        if (teacher) {
-          teacher.curriculum = user.curriculum || teacher.curriculum;
-          teacher.subjects = Array.isArray(req.body.subjects) && req.body.subjects.length > 0 
-            ? req.body.subjects 
-            : [];
-          teacher.phone = user.phone || teacher.phone;
-          await teacher.save();
-          console.log(`✓ Teacher record updated for ${user.firstName} ${user.lastName}`);
-        }
-      } catch (teacherError) {
-        console.error('Failed to sync Teacher record:', teacherError.message);
-        // Don't fail the user update if teacher sync fails
-      }
+    if (user.role !== 'teacher') {
+      return res.status(400).json({ success: false, message: 'Only teachers can be set on leave' });
     }
-    
-    res.json({ success: true, user: safe });
+
+    const { isOnLeave, leaveStartDate, leaveEndDate } = req.body;
+
+    if (isOnLeave) {
+      user.isOnLeave = true;
+      user.leaveStartDate = leaveStartDate || new Date();
+      user.leaveEndDate = leaveEndDate;
+    } else {
+      user.isOnLeave = false;
+      user.leaveStartDate = null;
+      user.leaveEndDate = null;
+    }
+
+    await user.save();
+    const safe = user.toObject();
+    delete safe.password;
+
+    res.json({ 
+      success: true, 
+      user: safe,
+      message: isOnLeave ? `${user.firstName} ${user.lastName} is now on leave` : `${user.firstName} ${user.lastName} has returned from leave`
+    });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }
 });
 
-// DELETE user (admin only) — demo users cannot be deleted
 router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
     if (!target) return res.status(404).json({ success: false, message: 'User not found' });
+    
+    // PHASE 3-5: Protect main admin from deletion
+    if (target.isMainAdmin) {
+      return res.status(403).json({ success: false, message: 'Main admin account cannot be deleted.' });
+    }
+    
     if (target.isDemo) {
       return res.status(403).json({ success: false, message: 'Demo users cannot be deleted.' });
     }

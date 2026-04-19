@@ -6,7 +6,7 @@ import { api } from '../../context/ctx.jsx'
  * Dynamic curriculum and subject selection component
  * 
  * Props:
- *   - curriculum: string - currently selected curriculum
+ *   - curriculum: string/array - currently selected curriculum (string for student, array for teacher)
  *   - subjects: array - currently selected subject IDs
  *   - onCurriculumChange: function - callback when curriculum changes
  *   - onSubjectsChange: function - callback when subjects change
@@ -26,24 +26,46 @@ export default function CurriculumSubjectSelector({
   const [availableSubjects, setAvailableSubjects] = useState([])
   const [loading, setLoading] = useState(false)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
-  const [quickAddForm, setQuickAddForm] = useState({ subjectName: '', category: '' })
+  const [quickAddForm, setQuickAddForm] = useState({ subjectName: '', category: '', curriculum: '' })
   const [quickAddLoading, setQuickAddLoading] = useState(false)
   const [quickAddError, setQuickAddError] = useState('')
 
   const curricula = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American']
 
+  // Helper function to normalize curriculum to array for teachers
+  const getCurriculumArray = () => {
+    if (role === 'teacher') {
+      return Array.isArray(curriculum) ? curriculum : (curriculum ? [curriculum] : [])
+    }
+    return curriculum ? [curriculum] : []
+  }
+
+  // Track if this is the initial load for auto-selection
+  const [hasAutoSelected, setHasAutoSelected] = useState(false)
+
   // Fetch subjects when curriculum changes
   useEffect(() => {
-    if (!curriculum) {
+    const curriculumList = getCurriculumArray()
+    if (curriculumList.length === 0) {
       setAvailableSubjects([])
+      setHasAutoSelected(false)
       return
     }
 
     const fetchSubjects = async () => {
       setLoading(true)
       try {
-        const res = await api.get(`/subjects/curriculum/${curriculum}`)
-        setAvailableSubjects(res.data.subjects || [])
+        // Fetch subjects for all selected curriculums
+        const allSubjects = []
+        for (const curr of curriculumList) {
+          const res = await api.get(`/subjects/curriculum/${curr}`)
+          const subjectsWithCurr = (res.data.subjects || []).map(s => ({
+            ...s,
+            belongsToCurriculum: curr
+          }))
+          allSubjects.push(...subjectsWithCurr)
+        }
+        setAvailableSubjects(allSubjects)
       } catch (e) {
         console.error('Failed to fetch subjects:', e.message)
         setAvailableSubjects([])
@@ -53,7 +75,7 @@ export default function CurriculumSubjectSelector({
     }
 
     fetchSubjects()
-  }, [curriculum])
+  }, [curriculum, role])
 
   const handleSubjectToggle = (subjectId) => {
     const newSubjects = Array.isArray(subjects) ? [...subjects] : []
@@ -76,25 +98,35 @@ export default function CurriculumSubjectSelector({
       return
     }
 
+    if (role === 'teacher' && !quickAddForm.curriculum) {
+      setQuickAddError('Please select a curriculum for this subject')
+      return
+    }
+
     setQuickAddLoading(true)
     setQuickAddError('')
 
     try {
+      const curriculumForSubject = role === 'teacher' ? quickAddForm.curriculum : curriculum
       const res = await api.post('/subjects', {
-        curriculum,
+        curriculum: curriculumForSubject,
         subjectName: quickAddForm.subjectName.trim(),
         category: quickAddForm.category.trim(),
         code: ''
       })
 
       // Add new subject to available subjects
-      setAvailableSubjects([...availableSubjects, res.data.subject])
+      const newSubject = {
+        ...res.data.subject,
+        belongsToCurriculum: curriculumForSubject
+      }
+      setAvailableSubjects([...availableSubjects, newSubject])
 
       // Auto-select the new subject
       handleSubjectToggle(res.data.subject._id)
 
       // Reset form
-      setQuickAddForm({ subjectName: '', category: '' })
+      setQuickAddForm({ subjectName: '', category: '', curriculum: '' })
       setShowQuickAdd(false)
 
       // Call callback if provided
@@ -108,29 +140,92 @@ export default function CurriculumSubjectSelector({
     }
   }
 
+  const handleCurriculumToggle = (curr) => {
+    const curriculumList = getCurriculumArray()
+    let newCurriculums
+    
+    if (curriculumList.includes(curr)) {
+      newCurriculums = curriculumList.filter(c => c !== curr)
+    } else {
+      newCurriculums = [...curriculumList, curr]
+    }
+    
+    // Clear subjects when curriculums change
+    onSubjectsChange([])
+    onCurriculumChange(role === 'teacher' ? newCurriculums : (newCurriculums.length > 0 ? newCurriculums[0] : ''))
+  }
+
   const selectedCount = Array.isArray(subjects) ? subjects.length : 0
+  const curriculumList = getCurriculumArray()
+  const hasMultipleCurriculums = curriculumList.length > 1
 
   return (
     <>
       {/* Curriculum Selector */}
       <div className="fg">
         <label className="fl">Curriculum {role === 'teacher' ? '*' : ''}</label>
-        <select
-          className="fsel"
-          value={curriculum || ''}
-          onChange={(e) => {
-            onCurriculumChange(e.target.value)
-            // Clear subjects when curriculum changes
-            onSubjectsChange([])
-          }}
-        >
-          <option value="">Select curriculum...</option>
-          {curricula.map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
+        {role === 'teacher' ? (
+          // Multi-select for teachers
+          <div style={{
+            background: '#fff',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--rmd)',
+            padding: 10,
+            maxHeight: 200,
+            overflowY: 'auto'
+          }}>
+            {curricula.map(c => (
+              <div
+                key={c}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '8px 0',
+                  borderBottom: '1px solid var(--border)'
+                }}
+              >
+                <input
+                  type="checkbox"
+                  id={`curriculum-${c}`}
+                  checked={curriculumList.includes(c)}
+                  onChange={() => handleCurriculumToggle(c)}
+                  style={{ width: 16, height: 16, cursor: 'pointer' }}
+                />
+                <label
+                  htmlFor={`curriculum-${c}`}
+                  style={{
+                    flex: 1,
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                    fontSize: 13,
+                    color: 'var(--s900)'
+                  }}
+                >
+                  {c}
+                </label>
+              </div>
+            ))}
+          </div>
+        ) : (
+           // Single select for students
+           <select
+             className="fsel"
+             value={curriculum || ''}
+             onChange={(e) => {
+               onCurriculumChange(e.target.value)
+               // Clear subjects when curriculum changes so user can select new ones
+               onSubjectsChange([])
+             }}
+           >
+             <option value="">Select curriculum...</option>
+             {curricula.map(c => <option key={c} value={c}>{c}</option>)}
+           </select>
+        )}
       </div>
 
       {/* Subject Selector */}
-      {curriculum && (
+      {(role === 'student' ? curriculum : curriculumList.length > 0) && (
         <div className="fg">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <label className="fl">{role === 'teacher' ? 'Teach' : 'Study'} Subjects {role === 'teacher' ? '*' : ''}</label>
@@ -165,6 +260,17 @@ export default function CurriculumSubjectSelector({
               <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--b700)', marginBottom: 8 }}>
                 Quick Add Subject
               </div>
+              {role === 'teacher' && (
+                <select
+                  className="fsel"
+                  value={quickAddForm.curriculum}
+                  onChange={(e) => setQuickAddForm(f => ({ ...f, curriculum: e.target.value }))}
+                  style={{ marginBottom: 8 }}
+                >
+                  <option value="">Select curriculum...</option>
+                  {curriculumList.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              )}
               <input
                 type="text"
                 className="fi"
@@ -241,18 +347,25 @@ export default function CurriculumSubjectSelector({
                     <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--s900)' }}>
                       {subject.subjectName}
                     </span>
-                    {subject.category && (
-                      <span style={{ fontSize: 11, color: 'var(--s400)' }}>
-                        {subject.category}
-                      </span>
-                    )}
+                    <div style={{ display: 'flex', gap: 8, fontSize: 11 }}>
+                      {subject.category && (
+                        <span style={{ color: 'var(--s400)' }}>
+                          {subject.category}
+                        </span>
+                      )}
+                      {hasMultipleCurriculums && (
+                        <span style={{ color: 'var(--b600)', fontWeight: 600 }}>
+                          {subject.belongsToCurriculum}
+                        </span>
+                      )}
+                    </div>
                   </label>
                 </div>
               ))}
             </div>
           ) : (
             <div style={{ fontSize: 13, color: 'var(--s500)', padding: 10 }}>
-              No subjects available for {curriculum}
+              No subjects available for selected curriculum{curriculumList.length > 1 ? 's' : ''}
             </div>
           )}
 

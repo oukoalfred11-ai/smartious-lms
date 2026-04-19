@@ -126,9 +126,9 @@ function PlanBadge({ p }) {
 }
 
 // ─── page component ──────────────────────────────────────
-const DEFAULT_USER_FORM = { firstName: '', lastName: '', email: '', role: 'Student', curriculum: '', plan: 'Basic', _id: null, subjects: [], grade: '', phone: '', bio: '', parentEmail: '', linkedStudents: [] }
+const DEFAULT_USER_FORM = { firstName: '', lastName: '', email: '', role: 'Student', curriculum: '', plan: 'Basic', _id: null, subjects: [], grade: '', phone: '', bio: '', parentEmail: '', linkedStudents: [], teachingSpecialties: [] }
 
-export default function AdminDashboard({ page: pageProp, onNav }) {
+export default function AdminDashboard({ page: pageProp, onNav, onUserSaved, userStats = 0 }) {
    const nav = useNavigate()
    const toast = useToast()
    const [liveSessions, setLiveSessions] = useState(284)
@@ -138,6 +138,7 @@ export default function AdminDashboard({ page: pageProp, onNav }) {
    const [userForm, setUserForm] = useState({ ...DEFAULT_USER_FORM })
    const [page, setPage] = useState(pageProp || 'dashboard')
    const [refreshKey, setRefreshKey] = useState(0)
+   const [credentialsOverlay, setCredentialsOverlay] = useState(null) // PHASE 3-5: Credentials popup
    if (pageProp && pageProp !== page) setPage(pageProp)
    const setActivePage = onNav || setPage
 
@@ -153,21 +154,22 @@ export default function AdminDashboard({ page: pageProp, onNav }) {
      return () => clearInterval(id)
    }, [])
 
-   // Fetch all students for parent selection
-   useEffect(() => {
-     const fetchStudents = async () => {
-       try {
-         const res = await api.get('/users/students/list')
-         setStudents(res.data.students || [])
-       } catch (e) {
-         console.error('Failed to load students:', e.message)
-       }
-     }
-     fetchStudents()
-   }, [])
+    // Fetch all students for parent selection
+    useEffect(() => {
+      const fetchStudents = async () => {
+        try {
+          const res = await api.get('/users/students/list')
+          setStudents(res.data.students || [])
+        } catch (e) {
+          console.error('Failed to load students:', e.message)
+        }
+      }
+      fetchStudents()
+    }, [])
 
    const handleUserSaved = () => {
      setRefreshKey(prev => prev + 1)
+     if (onUserSaved) onUserSaved()
    }
 
    return (
@@ -175,26 +177,27 @@ export default function AdminDashboard({ page: pageProp, onNav }) {
       {/* ── Page tabs (same as admin.html) ── */}
       {/* Using page state to show different sections */}
 
-      {page === 'dashboard' && <DashboardPage
-        liveSessions={liveSessions} liveClasses={liveClasses}
-        onAddUser={() => { setUserForm(resetForm()); setUserModal(true) }}
-        onPending={() => setPendingModal(true)}
-        onNav={setPage}
-        toast={toast}
-      />}
-      {page === 'analytics' && <AnalyticsPage onNav={setPage} />}
-      {page === 'users' && <UsersPage refreshKey={refreshKey} onAddUser={() => { setUserForm(resetForm()); setUserModal(true) }} onPending={() => setPendingModal(true)} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} />}
-      {page === 'teachers' && <TeachersPage refreshKey={refreshKey} onAddUser={() => { setUserForm({...resetForm(), role: 'Teacher', plan: 'Staff'}); setUserModal(true) }} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} />}
-      {page === 'curriculum' && <CurriculumPage toast={toast} />}
-      {page === 'billing' && <BillingPage toast={toast} />}
-      {page === 'website' && <WebsiteEditorPage toast={toast} />}
-      {page === 'settings' && <SettingsPage toast={toast} />}
-      {page === 'ai' && <AIConsolePage toast={toast} />}
-      {page === 'allocations' && <AllocationsPage refreshKey={refreshKey} toast={toast} />}
-      {page === 'payroll' && <PayrollPage toast={toast} />}
-      {page === 'programmes' && <ProgrammesPage toast={toast} />}
-      {page === 'grouprooms' && <GroupRoomsPage toast={toast} />}
-      {page === 'livelessons' && <LiveLessonsPage toast={toast} />}
+       {page === 'dashboard' && <DashboardPage
+         liveSessions={liveSessions} liveClasses={liveClasses}
+         onAddUser={() => { setUserForm(resetForm()); setUserModal(true) }}
+         onPending={() => setPendingModal(true)}
+         onNav={setPage}
+         toast={toast}
+       />}
+       {page === 'analytics' && <AnalyticsPage onNav={setPage} />}
+       {page === 'users' && <UsersPage refreshKey={refreshKey} userStats={userStats} onAddUser={() => { setUserForm(resetForm()); setUserModal(true) }} onPending={() => setPendingModal(true)} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} />}
+       {page === 'teachers' && <TeachersPage refreshKey={refreshKey} toast={toast} />}
+       {page === 'curriculum' && <CurriculumPage toast={toast} />}
+       {page === 'billing' && <BillingPage toast={toast} />}
+       {page === 'website' && <WebsiteEditorPage toast={toast} />}
+       {page === 'settings' && <SettingsPage toast={toast} />}
+       {page === 'ai' && <AIConsolePage toast={toast} />}
+       {page === 'allocations' && <AllocationsPage refreshKey={refreshKey} toast={toast} />}
+       {page === 'payroll' && <PayrollPage toast={toast} />}
+       {page === 'programmes' && <ProgrammesPage toast={toast} />}
+       {page === 'grouprooms' && <GroupRoomsPage toast={toast} />}
+       {page === 'livelessons' && <LiveLessonsPage toast={toast} />}
+       {page === 'leave' && <LeaveManagement />}
 
       {/* Pending Modal */}
       <Modal open={pendingModal} onClose={() => setPendingModal(false)} title="Pending Registrations" size="md"
@@ -221,58 +224,65 @@ export default function AdminDashboard({ page: pageProp, onNav }) {
       </Modal>
 
        {/* Add/Edit User Modal - Role-Specific Fields */}
-       <Modal open={userModal} onClose={() => { setUserModal(false); setUserForm(resetForm()) }} title={userForm._id ? "Edit User" : `Add New ${userForm.role}`} size="lg"
-         footer={<>
-           <button className="btn btn-s" onClick={() => { setUserModal(false); setUserForm(resetForm()) }}>Cancel</button>
-          <button className="btn btn-p" onClick={async () => {
-            if (!userForm.firstName.trim() || !userForm.lastName.trim() || !userForm.email.trim()) {
-              toast.error('First name, last name, and email are required')
-              return
-            }
-            try {
-              const payload = {
-                firstName: userForm.firstName,
-                lastName: userForm.lastName,
-                email: userForm.email,
-                role: userForm.role.toLowerCase(),
-                isActive: true,
-              }
-              // Add role-specific fields
-              if (userForm.role === 'Student') {
-                payload.curriculum = userForm.curriculum
-                payload.grade = userForm.grade
-                payload.plan = userForm.plan
-              } else if (userForm.role === 'Teacher') {
-                payload.subjects = userForm.subjects && userForm.subjects.length > 0 ? userForm.subjects : []
-                payload.phone = userForm.phone
-                payload.plan = 'Staff'
-               } else if (userForm.role === 'Parent') {
-                 payload.phone = userForm.phone
-                 payload.bio = userForm.bio
-                 payload.plan = 'Basic'
-                 payload.linkedStudents = userForm.linkedStudents && userForm.linkedStudents.length > 0 ? userForm.linkedStudents : []
-              } else if (userForm.role === 'Admin') {
-                payload.plan = 'Staff'
-                payload.phone = userForm.phone
-              }
-              if (userForm._id) {
-                // Update existing user
-                await api.patch('/users/' + userForm._id, payload)
-                toast.ok(userForm.firstName + ' updated!')
-              } else {
-                // Create new user
-                payload.password = 'Welcome@2024'
-                await api.post('/users', payload)
-                toast.ok(userForm.firstName + ' created! Temp password: Welcome@2024')
-               }
-               setUserModal(false)
-               setUserForm(resetForm())
-               handleUserSaved()
-             } catch(e) {
-               toast.error(e.response?.data?.message || 'Could not save user')
-            }
-          }}>{userForm._id ? 'Update User' : 'Create User'}</button>
-        </>}>
+        <Modal open={userModal} onClose={() => { setUserModal(false); setUserForm(resetForm()) }} title={userForm._id ? "Edit User" : `Add New ${userForm.role}`} size="lg"
+          footer={<>
+            <button className="btn btn-s" onClick={() => { setUserModal(false); setUserForm(resetForm()) }}>Cancel</button>
+           <button className="btn btn-p" onClick={async () => {
+             if (!userForm.firstName.trim() || !userForm.lastName.trim() || !userForm.email.trim()) {
+               toast.error('First name, last name, and email are required')
+               return
+             }
+             try {
+                const payload = {
+                  firstName: userForm.firstName,
+                  lastName: userForm.lastName,
+                  email: userForm.email,
+                  role: userForm.role.toLowerCase(),
+                  isActive: true,
+                }
+                 // Add role-specific fields
+                 if (userForm.role === 'Student') {
+                   payload.curriculum = userForm.curriculum
+                   payload.grade = userForm.grade
+                   payload.plan = userForm.plan
+                   payload.subjects = userForm.subjects && userForm.subjects.length > 0 ? userForm.subjects : []
+                 } else if (userForm.role === 'Teacher') {
+                  // Handle curriculum as array for teachers
+                  payload.curriculum = Array.isArray(userForm.curriculum) ? userForm.curriculum : (userForm.curriculum ? [userForm.curriculum] : [])
+                  payload.subjects = userForm.subjects && userForm.subjects.length > 0 ? userForm.subjects : []
+                  payload.teachingSpecialties = userForm.teachingSpecialties && userForm.teachingSpecialties.length > 0 ? userForm.teachingSpecialties : []
+                  payload.phone = userForm.phone
+                  payload.plan = 'Staff'
+                 } else if (userForm.role === 'Parent') {
+                   payload.phone = userForm.phone
+                   payload.bio = userForm.bio
+                   payload.plan = 'Basic'
+                   payload.linkedStudents = userForm.linkedStudents && userForm.linkedStudents.length > 0 ? userForm.linkedStudents : []
+                } else if (userForm.role === 'Admin') {
+                  payload.plan = 'Staff'
+                  payload.phone = userForm.phone
+                }
+               if (userForm._id) {
+                 // Update existing user
+                 await api.patch('/users/' + userForm._id, payload)
+                 toast.ok(userForm.firstName + ' updated!')
+               } else {
+                 // Create new user
+                 const response = await api.post('/users', payload)
+                 // PHASE 3-5: Show credentials popup after successful creation
+                 if (response.data.credentials) {
+                   setCredentialsOverlay(response.data.credentials)
+                 }
+                 toast.ok(userForm.firstName + ' created successfully!')
+                }
+                setUserModal(false)
+                setUserForm(resetForm())
+                handleUserSaved()
+              } catch(e) {
+                toast.error(e.response?.data?.message || 'Could not save user')
+             }
+           }}>{userForm._id ? 'Update User' : 'Create User'}</button>
+         </>}>
          {/* Common Fields */}
          <div className="fr2">
            <div className="fg"><label className="fl">First Name *</label><input className="fi" value={userForm.firstName} onChange={e => setUserForm(f => ({...f,firstName:e.target.value}))} placeholder="First name" /></div>
@@ -590,7 +600,7 @@ function AnalyticsPage({ onNav }) {
   )
 }
 
-function UsersPage({ refreshKey, onAddUser, onPending, toast, setUserForm, setUserModal }) {
+function UsersPage({ refreshKey, userStats, onAddUser, onPending, toast, setUserForm, setUserModal, setCredentialsOverlay }) {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -639,95 +649,166 @@ function UsersPage({ refreshKey, onAddUser, onPending, toast, setUserForm, setUs
   if (loading) return <div style={{ textAlign: 'center', padding: 40 }}>Loading users...</div>
   if (error) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--r600)' }}>Error: {error}</div>
 
-  return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
-        <div><div className="sec-tag">Accounts</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>User <em style={{ color: 'var(--b700)' }}>Management</em></h2></div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn btn-s btn-sm" onClick={() => toast.info('Exporting CSV...')}>Export CSV</button>
-          <button className="btn btn-p btn-sm" onClick={onAddUser}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add User
-          </button>
+   return (
+     <>
+       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+         <div><div className="sec-tag">Accounts</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>User <em style={{ color: 'var(--b700)' }}>Management</em></h2></div>
+         <div style={{ display: 'flex', gap: 10 }}>
+           <button className="btn btn-s btn-sm" onClick={() => toast.info('Exporting CSV...')}>Export CSV</button>
+           <button className="btn btn-p btn-sm" onClick={onAddUser}>
+             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+             Add User
+           </button>
+         </div>
+       </div>
+       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
+         <input className="fi" style={{ maxWidth: 280 }} placeholder="Search name, email or ID..." value={search} onChange={e => setSearch(e.target.value)} />
+         <select className="fsel" style={{ maxWidth: 130 }} value={roleFilter} onChange={e => setRoleFilter(e.target.value)}><option>All Roles</option><option>student</option><option>teacher</option><option>parent</option><option>admin</option></select>
+         <select className="fsel" style={{ maxWidth: 130 }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}><option>All Status</option><option>Active</option><option>Suspended</option></select>
+         <select className="fsel" style={{ maxWidth: 130 }} value={planFilter} onChange={e => setPlanFilter(e.target.value)}><option>All Plans</option><option>Basic</option><option>Premium</option><option>IGCSE Pack</option><option>Staff</option></select>
+       </div>
+       {/* PHASE 3-5: User stats badge */}
+       <div style={{ background: 'var(--b50)', border: '1px solid var(--b100)', borderRadius: 'var(--rlg)', padding: '13px 18px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+         <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--b700)' }}>Total Users: {userStats}</span>
         </div>
-      </div>
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
-        <input className="fi" style={{ maxWidth: 280 }} placeholder="Search name, email or ID..." value={search} onChange={e => setSearch(e.target.value)} />
-        <select className="fsel" style={{ maxWidth: 130 }} value={roleFilter} onChange={e => setRoleFilter(e.target.value)}><option>All Roles</option><option>student</option><option>teacher</option><option>parent</option><option>admin</option></select>
-        <select className="fsel" style={{ maxWidth: 130 }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}><option>All Status</option><option>Active</option><option>Suspended</option></select>
-        <select className="fsel" style={{ maxWidth: 130 }} value={planFilter} onChange={e => setPlanFilter(e.target.value)}><option>All Plans</option><option>Basic</option><option>Premium</option><option>IGCSE Pack</option><option>Staff</option></select>
-      </div>
-      <div style={{ background: 'var(--a50)', border: '1px solid var(--a100)', borderRadius: 'var(--rlg)', padding: '13px 18px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
-        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--a600)' }}>5 registrations pending approval</span>
-        <button className="btn btn-ok btn-sm" onClick={() => {
-          toast.ok('5 registrations approved — welcome emails sent')
-        }}>Approve All</button>
-        <button className="btn btn-g btn-sm" onClick={onPending}>Review Individually</button>
-      </div>
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <table className="tbl">
-          <thead><tr><th>User</th><th>Role</th><th>Curriculum</th><th>Plan</th><th>Status</th><th>Last Active</th><th>Actions</th></tr></thead>
-          <tbody>
-            {filtered.map((u, i) => (
-              <tr key={u._id || i}>
-                <td>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <Av init={(u.firstName[0] + u.lastName[0]).toUpperCase()} col={['#3B82F6','#22C55E','#8B5CF6','#F59E0B','#EC4899'][i % 5]} />
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{u.firstName} {u.lastName}</div>
-                      <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>{u.email} · {u._id?.slice(-6) || 'ID'}</div>
+        <div className="card" style={{ padding: 0, overflow: 'auto', maxWidth: '100%' }}>
+          <table className="tbl" style={{ minWidth: '1000px' }}>
+            <thead><tr><th>User</th><th>Role</th><th>Curriculum</th><th>Plan</th><th>Login Status</th><th>Last Active</th><th style={{ width: '120px', textAlign: 'center' }}>Actions</th></tr></thead>
+            <tbody>
+              {filtered.map((u, i) => (
+                <tr key={u._id || i}>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <Av init={(u.firstName[0] + u.lastName[0]).toUpperCase()} col={['#3B82F6','#22C55E','#8B5CF6','#F59E0B','#EC4899'][i % 5]} />
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{u.firstName} {u.lastName}</div>
+                        <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>{u.email} · {u._id?.slice(-6) || 'ID'}</div>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td><span className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>{u.role}</span></td>
-                <td style={{ color: 'var(--s500)' }}>{u.curriculum || 'N/A'}</td>
-                <td><PlanBadge p={u.plan || 'Basic'} /></td>
-                <td><StatusBadge s={u.isActive ? 'Active' : 'Suspended'} /></td>
-                <td style={{ color: 'var(--s400)', fontSize: 13 }}>{u.lastActive || 'Never'}</td>
-                <td>
-                   <div style={{ display: 'flex', gap: 4 }}>
-                      <button className="btn btn-g btn-sm" onClick={() => {
-                        setUserForm({ firstName: u.firstName, lastName: u.lastName, email: u.email, role: u.role, curriculum: u.curriculum || '', plan: u.plan || 'Basic', _id: u._id, subjects: u.subjects || [], grade: u.grade || '', phone: u.phone || '', bio: u.bio || '', parentEmail: u.parentEmail || '', linkedStudents: u.linkedStudents || [] })
-                        setUserModal(true)
-                      }}>Edit</button>
-                     <button className="btn btn-d btn-sm" onClick={async () => {
-                       if (!confirm(`Delete ${u.firstName} ${u.lastName} permanently? This cannot be undone.`)) return
-                       try {
-                         await api.delete('/users/' + u._id)
-                         setUsers(prev => prev.filter(x => x._id !== u._id))
-                         toast.ok(`${u.firstName} deleted`)
-                       } catch(e) { toast.error('Delete failed: ' + (e.response?.data?.message || e.message)) }
-                     }}>Delete</button>
-                   </div>
-                 </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  )
+                  </td>
+                  <td><span className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>{u.role}</span></td>
+                  <td style={{ color: 'var(--s500)', maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                    {Array.isArray(u.curriculum) ? u.curriculum.join(', ') : (u.curriculum || 'N/A')}
+                  </td>
+                  <td><PlanBadge p={u.plan || 'Basic'} /></td>
+                  {/* PHASE 3-5: Show login status instead of generic "Active" */}
+                  <td><span className="badge" style={u.mustChangePassword ? { color: 'var(--a600)', borderColor: 'var(--a100)', background: 'var(--a50)' } : { color: 'var(--g700)', borderColor: 'var(--g100)', background: 'var(--g50)' }}>{u.mustChangePassword ? 'Pending First Login' : 'Active'}</span></td>
+                  <td style={{ color: 'var(--s400)', fontSize: 13 }}>{u.lastActive || 'Never'}</td>
+                  <td style={{ textAlign: 'center', whiteSpace: 'nowrap', minWidth: '120px' }}>
+                     <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                        <button className="btn btn-g btn-sm" onClick={() => {
+                          setUserForm({ firstName: u.firstName, lastName: u.lastName, email: u.email, role: u.role, curriculum: u.curriculum || '', plan: u.plan || 'Basic', _id: u._id, subjects: u.subjects || [], grade: u.grade || '', phone: u.phone || '', bio: u.bio || '', parentEmail: u.parentEmail || '', linkedStudents: u.linkedStudents || [], teachingSpecialties: u.teachingSpecialties || [] })
+                          setUserModal(true)
+                        }}>Edit</button>
+                       <button className="btn btn-d btn-sm" onClick={async () => {
+                         if (!confirm(`Delete ${u.firstName} ${u.lastName} permanently? This cannot be undone.`)) return
+                         try {
+                           await api.delete('/users/' + u._id)
+                           setUsers(prev => prev.filter(x => x._id !== u._id))
+                           toast.ok(`${u.firstName} deleted`)
+                         } catch(e) { toast.error('Delete failed: ' + (e.response?.data?.message || e.message)) }
+                       }}>Delete</button>
+                     </div>
+                   </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+     </>
+   )
 }
 
-function TeachersPage({ refreshKey, onAddUser, toast, setUserForm, setUserModal }) {
+function TeachersPage({ refreshKey, toast }) {
   const [teachers, setTeachers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [selectedTeacher, setSelectedTeacher] = useState(null)
+  const [teacherDetailsLoading, setTeacherDetailsLoading] = useState(false)
 
-  useEffect(() => {
-    const fetchTeachers = async () => {
-      try {
-        const res = await api.get('/teachers')
-        setTeachers(res.data.teachers || [])
-        setLoading(false)
-      } catch (e) {
-        setError(e.response?.data?.message || e.message)
-        setLoading(false)
+    useEffect(() => {
+      const fetchTeachers = async () => {
+        try {
+          const res = await api.get('/users/teachers/list')
+          console.log('Teachers API response:', res.data.teachers)
+          setTeachers(res.data.teachers || [])
+          setLoading(false)
+        } catch (e) {
+          setError(e.response?.data?.message || e.message)
+          setLoading(false)
+        }
       }
+      fetchTeachers()
+    }, [refreshKey])
+
+  const calculateDuration = (createdAt) => {
+    if (!createdAt) return 'N/A'
+    const start = new Date(createdAt)
+    const now = new Date()
+    
+    let years = now.getFullYear() - start.getFullYear()
+    let months = now.getMonth() - start.getMonth()
+    let days = now.getDate() - start.getDate()
+    
+    // Adjust for negative days
+    if (days < 0) {
+      months--
+      const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+      days += prevMonth.getDate()
     }
-    fetchTeachers()
-  }, [refreshKey])
+    
+    // Adjust for negative months
+    if (months < 0) {
+      years--
+      months += 12
+    }
+    
+    // Format output
+    const parts = []
+    if (years > 0) parts.push(`${years}y`)
+    if (months > 0) parts.push(`${months}mo`)
+    if (days > 0) parts.push(`${days}d`)
+    
+    if (parts.length === 0) return 'New'
+    return parts.join(' ')
+  }
+
+  const formatDate = (date) => {
+    if (!date) return 'N/A'
+    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  }
+
+   const handleViewDetails = async (teacher) => {
+     setSelectedTeacher(teacher)
+     setTeacherDetailsLoading(true)
+     // Details will be shown in the modal
+     setTeacherDetailsLoading(false)
+   }
+
+   const handleToggleTeacherLeave = async (teacher) => {
+     try {
+       const newLeaveStatus = !teacher.isOnLeave
+       const res = await api.patch(`/users/${teacher._id}/leave`, {
+         isOnLeave: newLeaveStatus,
+         leaveStartDate: newLeaveStatus ? new Date() : null
+       })
+       
+       // Update teacher in list
+       setTeachers(prev => prev.map(t => 
+         t._id === teacher._id ? {...t, ...res.data.user} : t
+       ))
+       
+       // Update selected teacher modal
+       if (selectedTeacher && selectedTeacher._id === teacher._id) {
+         setSelectedTeacher({...selectedTeacher, ...res.data.user})
+       }
+       
+       toast.ok(res.data.message || 'Leave status updated')
+     } catch (e) {
+       toast.error('Failed to update leave status: ' + (e.response?.data?.message || e.message))
+     }
+   }
 
   if (loading) return <div style={{ textAlign: 'center', padding: 40 }}>Loading teachers...</div>
   if (error) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--r600)' }}>Error: {error}</div>
@@ -736,41 +817,120 @@ function TeachersPage({ refreshKey, onAddUser, toast, setUserForm, setUserModal 
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div><div className="sec-tag">Faculty</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Teacher <em style={{ color: 'var(--b700)' }}>Management</em></h2></div>
-        <button className="btn btn-p btn-sm" onClick={onAddUser}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Teacher
-        </button>
       </div>
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <table className="tbl">
-          <thead><tr><th>Teacher</th><th>Subjects</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody>
-            {teachers.map((t, i) => (
-              <tr key={t._id || i}>
-                <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Av init={(t.firstName[0] + t.lastName[0]).toUpperCase()} col={['#3B82F6','#22C55E','#8B5CF6','#F59E0B','#EC4899'][i % 5]} size={34} /><span style={{ fontWeight: 700, color: 'var(--s900)' }}>{t.firstName} {t.lastName}</span></div></td>
-                <td style={{ color: 'var(--s500)', fontSize: 13 }}>{t.subjects?.join(' · ') || 'N/A'}</td>
-                <td><StatusBadge s={t.status} /></td>
+       <div className="card" style={{ padding: 0, overflow: 'auto', maxWidth: '100%' }}>
+         <table className="tbl" style={{ minWidth: '1400px' }}>
+           <thead><tr><th>Teacher</th><th>Subjects</th><th>Date Joined</th><th>Duration</th><th>Status</th><th>Leave</th><th style={{ width: '100px', textAlign: 'center' }}>Actions</th></tr></thead>
+           <tbody>
+             {teachers.map((t, i) => (
+               <tr key={t._id || i} style={{ background: t.isOnLeave ? 'var(--r50)' : i % 2 === 0 ? '#fff' : 'var(--s50)' }}>
+                 <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Av init={(t.firstName[0] + t.lastName[0]).toUpperCase()} col={['#3B82F6','#22C55E','#8B5CF6','#F59E0B','#EC4899'][i % 5]} size={34} /><span style={{ fontWeight: 700, color: 'var(--s900)' }}>{t.firstName} {t.lastName}</span></div></td>
+                <td style={{ color: 'var(--s500)', fontSize: 13, maxWidth: '200px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                  {t.subjects && t.subjects.length > 0 
+                    ? t.subjects.map(s => typeof s === 'string' ? s : s.subjectName || 'Subject').join(' · ')
+                    : 'N/A'}
+                </td>
+                 <td style={{ color: 'var(--s500)', fontSize: 13 }}>{formatDate(t.createdAt)}</td>
+                 <td style={{ color: 'var(--s500)', fontSize: 13 }}>{calculateDuration(t.createdAt)}</td>
+                 <td><StatusBadge s={t.status} /></td>
                  <td>
-                   <div style={{ display: 'flex', gap: 5 }}>
-                     <button className="btn btn-g btn-sm" onClick={() => {
-                       setUserForm({ firstName: t.firstName, lastName: t.lastName, email: t.email, role: 'Teacher', curriculum: '', plan: 'Staff', _id: t._id, subjects: t.subjects || [], phone: t.phone || '', bio: t.bio || '', grade: '', parentEmail: '' })
-                       setUserModal(true)
-                     }}>Edit</button>
-                     <button className="btn btn-d btn-sm" onClick={async () => {
-                       if (!confirm(`Delete ${t.firstName} ${t.lastName}? This will also delete their User record.`)) return
-                       try {
-                         await api.delete('/teachers/' + t._id)
-                         setTeachers(prev => prev.filter(x => x._id !== t._id))
-                         toast.ok(`${t.firstName} deleted`)
-                       } catch(e) { toast.error('Delete failed: ' + (e.response?.data?.message || e.message)) }
-                     }}>Delete</button>
+                   {t.isOnLeave ? (
+                     <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)' }}>
+                       On Leave
+                     </span>
+                   ) : (
+                     <span style={{ color: 'var(--s400)', fontSize: 12 }}>Active</span>
+                   )}
+                 </td>
+                 <td style={{ textAlign: 'center', whiteSpace: 'nowrap', minWidth: '100px' }}>
+                   <div style={{ display: 'flex', gap: 5, justifyContent: 'center' }}>
+                     <button className="btn btn-b btn-sm" onClick={() => handleViewDetails(t)}>View</button>
                    </div>
                  </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+               </tr>
+             ))}
+           </tbody>
+         </table>
+       </div>
+
+      {/* Teacher Details Modal */}
+      <Modal open={!!selectedTeacher} onClose={() => setSelectedTeacher(null)} title={selectedTeacher ? `${selectedTeacher.firstName} ${selectedTeacher.lastName} - Details` : 'Teacher Details'} size="lg">
+        {selectedTeacher && (
+          <div>
+            <div style={{ background: 'var(--s50)', border: '1px solid var(--s200)', borderRadius: 'var(--rmd)', padding: 14, marginBottom: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase' }}>Email</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedTeacher.email}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase' }}>Phone</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedTeacher.phone || 'N/A'}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase' }}>Date Joined</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{formatDate(selectedTeacher.createdAt)}</div>
+                </div>
+                 <div>
+                   <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase' }}>Duration</div>
+                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{calculateDuration(selectedTeacher.createdAt)}</div>
+                 </div>
+                 <div>
+                   <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase' }}>Leave Status</div>
+                   <div style={{ fontSize: 14, fontWeight: 600, color: selectedTeacher.isOnLeave ? 'var(--r700)' : 'var(--g700)' }}>
+                     {selectedTeacher.isOnLeave ? '🔴 On Leave' : '🟢 Active'}
+                   </div>
+                 </div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 10 }}>Subjects Teaching</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {selectedTeacher.subjects && selectedTeacher.subjects.length > 0 ? (
+                  selectedTeacher.subjects.map((s, idx) => (
+                    <span key={idx} className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>
+                      {typeof s === 'string' ? s : s.subjectName || 'Subject'}
+                    </span>
+                  ))
+                ) : (
+                  <span style={{ fontSize: 13, color: 'var(--s400)' }}>No subjects assigned</span>
+                )}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 10 }}>Teaching Statistics</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div style={{ background: 'var(--b50)', border: '1px solid var(--b100)', borderRadius: 'var(--rmd)', padding: 10 }}>
+                  <div style={{ fontSize: 11, color: 'var(--s500)', fontWeight: 600 }}>Total Students</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--b700)' }}>{selectedTeacher.totalStudents || 0}</div>
+                </div>
+                <div style={{ background: 'var(--g50)', border: '1px solid var(--g100)', borderRadius: 'var(--rmd)', padding: 10 }}>
+                  <div style={{ fontSize: 11, color: 'var(--s500)', fontWeight: 600 }}>Total Sessions</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--g700)' }}>{selectedTeacher.totalSessions || 0}</div>
+                </div>
+              </div>
+            </div>
+
+             {selectedTeacher.bio && (
+               <div>
+                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 8 }}>Bio</div>
+                 <div style={{ fontSize: 13, color: 'var(--s600)', lineHeight: 1.5 }}>{selectedTeacher.bio}</div>
+               </div>
+             )}
+
+             <div style={{ marginTop: 20, borderTop: '1px solid var(--s200)', paddingTop: 16 }}>
+               <button 
+                 className={selectedTeacher.isOnLeave ? 'btn btn-g btn-sm' : 'btn btn-r btn-sm'}
+                 onClick={() => handleToggleTeacherLeave(selectedTeacher)}
+               >
+                 {selectedTeacher.isOnLeave ? '✓ Return from Leave' : '⏸ Set On Leave'}
+               </button>
+             </div>
+          </div>
+        )}
+      </Modal>
     </>
   )
 }
@@ -1118,88 +1278,618 @@ function AIConsolePage({ toast }) {
 }
 
 function AllocationsPage({ refreshKey, toast }) {
-  const [allocations, setAllocations] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+   const [students, setStudents] = useState([])
+   const [allocations, setAllocations] = useState([])
+   const [loading, setLoading] = useState(true)
+   const [error, setError] = useState(null)
+   const [search, setSearch] = useState('')
+   const [selectedStudent, setSelectedStudent] = useState(null)
+   const [allocatingSubject, setAllocatingSubject] = useState(null)
+   const [showAllocateModal, setShowAllocateModal] = useState(false)
+   const [selectedTeacher, setSelectedTeacher] = useState(null)
+   const [availableTeachers, setAvailableTeachers] = useState([])
+   const [loadingTeachers, setLoadingTeachers] = useState(false)
 
-  useEffect(() => {
-    const fetchAllocations = async () => {
+   useEffect(() => {
+     fetchData()
+   }, [refreshKey])
+
+    const fetchData = async () => {
       try {
-        const res = await api.get('/allocations')
-        setAllocations(res.data.allocations || [])
+        const [studentsRes, allocationsRes] = await Promise.all([
+          api.get('/users/students/list'),
+          api.get('/allocations')
+        ])
+        let studentsData = studentsRes.data.students || []
+        const allocationsData = allocationsRes.data.allocations || []
+        
+        // Sort students by latest created (descending)
+        studentsData.sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0).getTime()
+          const dateB = new Date(b.createdAt || 0).getTime()
+          return dateB - dateA
+        })
+        
+        console.log('Students loaded:', studentsData.length, studentsData)
+        console.log('Allocations loaded:', allocationsData.length)
+        
+        setStudents(studentsData)
+        setAllocations(allocationsData)
         setLoading(false)
       } catch (e) {
+        console.error('Fetch error:', e)
         setError(e.response?.data?.message || e.message)
         setLoading(false)
       }
     }
-    fetchAllocations()
-  }, [refreshKey])
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 40 }}>Loading allocations...</div>
-  if (error) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--r600)' }}>Error: {error}</div>
+   // Get student summary data
+   const getStudentSummary = (student) => {
+     const subjectsArray = Array.isArray(student.subjects) ? student.subjects : []
+     let fullyAllocated = 0
+     let pendingAllocation = 0
 
-  return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div><div className="sec-tag">Enrolment System</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student Allocations</h2>
-          <p style={{ color: 'var(--s500)', fontSize: 13.5 }}>Auto-matched students from the website. Review, approve and override teacher assignments.</p></div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-s btn-sm" onClick={() => toast.info('Allocation rules config opening...')}>Allocation Rules</button>
-          <button className="btn btn-p btn-sm" onClick={() => toast.info('Manual allocation wizard...')}>
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Manual Allocate
-          </button>
-        </div>
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 24 }}>
-        {[['Pending Review', allocations.filter(a => a.status === 'Pending').length, 'var(--b700)', 'Awaiting admin confirm'], ['Active Allocations', allocations.filter(a => a.status === 'Active').length, 'var(--g600)', 'Across all programmes'], ['Capacity Used', '89%', 'var(--a600)', '33 free slots remain'], ['Auto-Match Rate', '94%', 'var(--p600)', '6% need manual review']].map(([l, v, c, sub]) => (
-          <div key={l} className="card" style={{ padding: 18, borderLeft: `3px solid ${c}` }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--s400)', marginBottom: 8 }}>{l}</div>
-            <div className="mono" style={{ fontSize: '2rem', fontWeight: 500, color: c }}>{v}</div>
-            <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 4 }}>{sub}</div>
+     subjectsArray.forEach(subject => {
+       const subjectId = subject._id || subject
+       const allocation = allocations.find(a => 
+         a.studentId._id === student._id && 
+         a.subjectId._id === subjectId && 
+         a.status === 'Active'
+       )
+       if (allocation) {
+         fullyAllocated++
+       } else {
+         pendingAllocation++
+       }
+     })
+
+     return {
+       totalSubjects: subjectsArray.length,
+       fullyAllocated,
+       pendingAllocation,
+       subjects: subjectsArray
+     }
+   }
+
+    // Filter students based on search (show ALL students, even without subjects)
+    const filtered = students.filter(student => {
+      const q = search.toLowerCase()
+      const studentName = (student.firstName + ' ' + student.lastName).toLowerCase()
+      const studentEmail = (student.email || '').toLowerCase()
+      return studentName.includes(q) || studentEmail.includes(q)
+    })
+
+    // Open allocate modal and fetch qualified teachers
+    const handleAllocateClick = async (studentId, subjectId, curriculum) => {
+      // Check if there's an existing allocation for this subject
+      const existingAllocation = allocations.find(a =>
+        a.studentId._id === studentId &&
+        a.subjectId._id === subjectId &&
+        a.status === 'Active'
+      )
+      
+      setAllocatingSubject({ 
+        studentId, 
+        subjectId, 
+        curriculum,
+        allocationId: existingAllocation?._id || null
+      })
+      setShowAllocateModal(true)
+      setLoadingTeachers(true)
+      setSelectedTeacher(null)
+
+      try {
+        const res = await api.get(`/allocations/suggest-teachers/${studentId}/${subjectId}`)
+        setAvailableTeachers(res.data.qualifiedTeachers || [])
+      } catch (e) {
+        toast.error('Failed to load qualified teachers: ' + e.message)
+        setAvailableTeachers([])
+      } finally {
+        setLoadingTeachers(false)
+      }
+    }
+
+    // Handle allocate/reassign teacher
+    const handleAllocateTeacher = async () => {
+      if (!selectedTeacher) {
+        toast.error('Please select a teacher')
+        return
+      }
+
+      try {
+        const isReassignment = !!allocatingSubject.allocationId
+
+        if (isReassignment) {
+          // Update existing allocation
+          await api.patch(`/allocations/${allocatingSubject.allocationId}`, {
+            teacherId: selectedTeacher
+          })
+          toast.ok('Teacher reassigned successfully')
+        } else {
+          // Create new allocation
+          await api.post('/allocations', {
+            studentId: allocatingSubject.studentId,
+            subjectId: allocatingSubject.subjectId,
+            teacherId: selectedTeacher,
+            sendEmails: true
+          })
+          toast.ok('Allocation created successfully')
+        }
+
+        // Reset UI state
+        setShowAllocateModal(false)
+        setAllocatingSubject(null)
+        setSelectedTeacher(null)
+        fetchData()
+      } catch (e) {
+        toast.error('Failed to save allocation: ' + (e.response?.data?.message || e.message))
+      }
+    }
+
+    // Handle reassign teacher (kept for backwards compatibility)
+    const handleReassign = async (allocationId) => {
+      if (!selectedTeacher) {
+        toast.error('Please select a teacher')
+        return
+      }
+
+      try {
+        await api.patch(`/allocations/${allocationId}`, {
+          teacherId: selectedTeacher
+        })
+        toast.ok('Teacher reassigned successfully')
+        setShowAllocateModal(false)
+        fetchData()
+      } catch (e) {
+        toast.error('Failed to reassign: ' + (e.response?.data?.message || e.message))
+      }
+    }
+
+    if (loading) return <div style={{ textAlign: 'center', padding: 40 }}>Loading allocations...</div>
+    if (error) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--r600)' }}>Error: {error}</div>
+
+    if (students.length === 0) {
+      return (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+            <div><div className="sec-tag">Enrolment System</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student Allocations</h2>
+              <p style={{ color: 'var(--s500)', fontSize: 13.5 }}>Live matching engine—automatically flagging unallocated subjects.</p></div>
           </div>
-        ))}
-      </div>
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <div style={{ fontWeight: 700, fontSize: 14.5, flex: 1 }}>All Active Allocations</div>
-          <input className="fi" placeholder="Search student or teacher..." style={{ width: 220 }} />
-          <select className="fsel" style={{ width: 160 }}><option>All Programmes</option><option>Homeschool</option><option>IGCSE</option><option>A-Level</option><option>IB Diploma</option></select>
-        </div>
-        <table className="tbl">
-          <thead><tr><th>Student</th><th>Programme</th><th>Teacher</th><th>Session Slot</th><th>Match Type</th><th>Since</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody>
-            {allocations.map((a, i) => (
-              <tr key={a._id || i}>
-                <td style={{ fontWeight: 600 }}>{a.studentId ? `${a.studentId.firstName} ${a.studentId.lastName}` : 'Unknown'}</td>
-                <td><span className="badge badge-blue">{a.programmeId || 'N/A'}</span></td>
-                <td style={{ color: 'var(--s600)' }}>{a.teacherId ? `${a.teacherId.firstName} ${a.teacherId.lastName}` : 'Unknown'}</td>
-                <td style={{ fontSize: 13, color: 'var(--s500)' }}>{a.sessionSlot || 'N/A'}</td>
-                <td><span className={`badge ${a.matchType === 'Auto' ? 'badge-green' : 'badge-amber'}`}>{a.matchType}</span></td>
-                <td style={{ fontSize: 13, color: 'var(--s400)' }}>{new Date(a.createdAt).toLocaleDateString()}</td>
-                <td><StatusBadge s={a.status} /></td>
-                <td>
-                  <div style={{ display: 'flex', gap: 5 }}>
-                    <button className="btn btn-g btn-sm" onClick={() => toast.ok('Reassignment notification sent')}>Reassign</button>
-                    {a.status === 'Pending' && <button className="btn btn-ok btn-sm" onClick={async () => {
-                      if (!confirm(`Approve allocation for ${a.studentId ? a.studentId.firstName : 'Unknown'}?`)) return
-                      try {
-                        await api.post('/allocations/' + a._id + '/approve')
-                        setAllocations(prev => prev.map(x => x._id === a._id ? { ...x, status: 'Active' } : x))
-                        toast.ok('Allocation approved — welcome email sent')
-                      } catch(e) { toast.error('Approve failed: ' + (e.response?.data?.message || e.message)) }
-                    }}>Approve</button>}
+          <div style={{ padding: 40, textAlign: 'center', background: 'var(--s50)', borderRadius: 'var(--rmd)', border: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 14, color: 'var(--s600)' }}>No students found</div>
+            <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 8 }}>Add students to the system first</div>
+          </div>
+        </>
+      )
+    }
+
+   return (
+     <>
+       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+         <div><div className="sec-tag">Enrolment System</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student Allocations</h2>
+           <p style={{ color: 'var(--s500)', fontSize: 13.5 }}>Live matching engine—automatically flagging unallocated subjects.</p></div>
+       </div>
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 14.5 }}>Students Overview</div>
+              <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 4 }}>{filtered.length} students total</div>
+            </div>
+            <input className="fi" placeholder="Search student name or email..." style={{ width: 280 }} value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
+         <table className="tbl">
+           <thead><tr><th>Student</th><th>Curriculum</th><th>Year/Grade</th><th>Fully Allocated</th><th>Pending Allocation</th><th style={{ width: '140px', textAlign: 'center' }}>Action</th></tr></thead>
+           <tbody>
+              {filtered.map((student, i) => {
+                const summary = getStudentSummary(student)
+                // Student has pending if: has unallocated subjects OR has 0 total subjects (needs enrollment)
+                const hasPending = summary.pendingAllocation > 0 || summary.totalSubjects === 0
+                return (
+                  <tr key={student._id} style={{ background: hasPending ? 'var(--a50)' : i % 2 === 0 ? '#fff' : 'var(--s50)' }}>
+                    <td style={{ fontWeight: 600 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <Av init={(student.firstName[0] + student.lastName[0]).toUpperCase()} col={['#3B82F6','#22C55E','#8B5CF6','#F59E0B','#EC4899'][i % 5]} size={32} />
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: 14 }}>{student.firstName} {student.lastName}</div>
+                          <div style={{ fontSize: 11, color: 'var(--s400)' }}>{student.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span className="badge badge-blue">{student.curriculum || 'N/A'}</span></td>
+                    <td style={{ color: 'var(--s600)' }}>{student.grade || 'N/A'}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ fontWeight: 700, color: 'var(--g700)' }}>{summary.fullyAllocated}</span>
+                        <span style={{ color: 'var(--s400)', fontSize: 12 }}>/ {summary.totalSubjects}</span>
+                      </div>
+                    </td>
+                    <td>
+                      {hasPending ? (
+                        <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)' }}>
+                          {summary.totalSubjects === 0 ? 'No subjects' : `${summary.pendingAllocation} pending`}
+                        </span>
+                      ) : (
+                        <span style={{ color: 'var(--g700)', fontWeight: 600 }}>✓ Complete</span>
+                      )}
+                    </td>
+                    <td style={{ textAlign: 'center' }}>
+                      <button 
+                        className={hasPending ? 'btn btn-r btn-sm' : 'btn btn-g btn-sm'}
+                        onClick={() => setSelectedStudent(student)}
+                      >
+                        Manage
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+           </tbody>
+         </table>
+       </div>
+
+       {/* Student Allocation Details Modal */}
+       {selectedStudent && (
+         <Modal 
+           open={!!selectedStudent} 
+           onClose={() => setSelectedStudent(null)} 
+           title={`${selectedStudent.firstName} ${selectedStudent.lastName} - Allocations`}
+           size="lg"
+         >
+           <div style={{ marginBottom: 20, padding: 14, background: 'var(--s50)', borderRadius: 'var(--rmd)' }}>
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+               <div>
+                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase', marginBottom: 4 }}>Curriculum</div>
+                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedStudent.curriculum || 'N/A'}</div>
+               </div>
+               <div>
+                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase', marginBottom: 4 }}>Year / Grade</div>
+                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedStudent.grade || 'N/A'}</div>
+               </div>
+               <div>
+                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase', marginBottom: 4 }}>Email</div>
+                 <div style={{ fontSize: 13, color: 'var(--s700)' }}>{selectedStudent.email}</div>
+               </div>
+               <div>
+                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase', marginBottom: 4 }}>Total Subjects</div>
+                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>
+                   {(() => {
+                     const summary = getStudentSummary(selectedStudent)
+                     return `${summary.fullyAllocated}/${summary.totalSubjects} allocated`
+                   })()}
+                 </div>
+               </div>
+             </div>
+           </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 12 }}>Subject Allocations</div>
+              {(() => {
+                const summary = getStudentSummary(selectedStudent)
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {summary.subjects.map(subject => {
+                      const subjectId = subject._id || subject
+                      const subjectName = typeof subject === 'object' ? subject.subjectName : 'Unknown'
+                      const allocation = allocations.find(a => 
+                        a.studentId._id === selectedStudent._id && 
+                        a.subjectId._id === subjectId && 
+                        a.status === 'Active'
+                      )
+                      const isAllocated = !!allocation
+                      const teacherBeingLoaded = allocatingSubject?.subjectId === subjectId && loadingTeachers
+                      const subjectTeachers = allocatingSubject?.subjectId === subjectId ? availableTeachers : []
+                      const hasNoTeachers = allocatingSubject?.subjectId === subjectId && !loadingTeachers && subjectTeachers.length === 0
+                      
+                      return (
+                        <div 
+                          key={subjectId}
+                          style={{ 
+                            border: '1px solid var(--border)', 
+                            borderRadius: 'var(--rmd)', 
+                            padding: 14,
+                            background: isAllocated ? '#fff' : (allocatingSubject?.subjectId === subjectId ? 'var(--b50)' : 'var(--r50)'),
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, justifyContent: 'space-between', marginBottom: allocatingSubject?.subjectId === subjectId ? 12 : 0 }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--s900)' }}>{subjectName}</div>
+                              {isAllocated && !( allocatingSubject?.subjectId === subjectId) && (
+                                <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 4 }}>
+                                  Assigned to: <span style={{ fontWeight: 600, color: 'var(--g700)' }}>{allocation.teacherId.firstName} {allocation.teacherId.lastName}</span>
+                                </div>
+                              )}
+                              {!isAllocated && !(allocatingSubject?.subjectId === subjectId) && (
+                                <div style={{ fontSize: 12, color: 'var(--r600)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                  <span>⚠️</span> Unassigned
+                                </div>
+                              )}
+                            </div>
+                            {!(allocatingSubject?.subjectId === subjectId) && (
+                              <button
+                                className={isAllocated ? 'btn btn-g btn-sm' : 'btn btn-r btn-sm'}
+                                onClick={() => {
+                                  handleAllocateClick(selectedStudent._id, subjectId, selectedStudent.curriculum)
+                                }}
+                                style={{ whiteSpace: 'nowrap' }}
+                              >
+                                {isAllocated ? '✎ Change' : '➕ Allocate'}
+                              </button>
+                            )}
+                          </div>
+
+                           {allocatingSubject?.subjectId === subjectId && (
+                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+                               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s700)', marginBottom: 8 }}>
+                                 {isAllocated ? 'Reassign Teacher for' : 'Select Teacher for'} {subjectName}
+                               </div>
+                               
+                               {isAllocated && (
+                                 <div style={{
+                                   padding: 8,
+                                   background: 'var(--b50)',
+                                   border: '1px solid var(--b100)',
+                                   borderRadius: 'var(--rmd)',
+                                   fontSize: 11,
+                                   color: 'var(--b700)',
+                                   marginBottom: 12,
+                                   display: 'flex',
+                                   alignItems: 'center',
+                                   gap: 6
+                                 }}>
+                                   <span>ℹ️</span>
+                                   <span>Currently assigned to: <strong>{allocation.teacherId.firstName} {allocation.teacherId.lastName}</strong></span>
+                                 </div>
+                               )}
+                               
+                               {loadingTeachers && (
+                                 <div style={{ padding: 16, textAlign: 'center', color: 'var(--s500)' }}>
+                                   <div style={{ fontSize: 12 }}>🔍 Finding qualified teachers...</div>
+                                 </div>
+                               )}
+
+                               {hasNoTeachers && (
+                                 <div style={{
+                                   padding: 12,
+                                   background: 'var(--r50)',
+                                   border: '1px solid var(--r100)',
+                                   borderRadius: 'var(--rmd)',
+                                   color: 'var(--r700)',
+                                   fontSize: 12,
+                                   textAlign: 'center'
+                                 }}>
+                                   ❌ No qualified teachers available for {subjectName} in {selectedStudent.curriculum}
+                                 </div>
+                               )}
+
+                               {!loadingTeachers && subjectTeachers.length > 0 && (
+                                 <div style={{
+                                   border: '1px solid var(--border)',
+                                   borderRadius: 'var(--rmd)',
+                                   overflow: 'hidden',
+                                   background: '#fff'
+                                 }}>
+                                   <div style={{
+                                     maxHeight: 280,
+                                     overflowY: 'auto',
+                                     overflowX: 'hidden'
+                                   }}>
+                                     {subjectTeachers.map((t, idx) => {
+                                       const isCurrentTeacher = isAllocated && allocation.teacherId._id === t._id;
+                                       return (
+                                         <div
+                                           key={t._id}
+                                           onClick={() => setSelectedTeacher(t._id)}
+                                           style={{
+                                             padding: '12px 14px',
+                                             borderBottom: idx < subjectTeachers.length - 1 ? '1px solid var(--s100)' : 'none',
+                                             cursor: 'pointer',
+                                             background: selectedTeacher === t._id ? 'var(--b50)' : (isCurrentTeacher ? 'var(--s50)' : '#fff'),
+                                             borderLeft: selectedTeacher === t._id ? '3px solid var(--b700)' : (isCurrentTeacher ? '3px solid var(--s400)' : '3px solid transparent'),
+                                             transition: 'all 0.15s ease',
+                                             display: 'flex',
+                                             alignItems: 'center',
+                                             gap: 10
+                                           }}
+                                           onMouseEnter={(e) => {
+                                             if (selectedTeacher !== t._id) {
+                                               e.currentTarget.style.background = 'var(--s50)';
+                                             }
+                                           }}
+                                           onMouseLeave={(e) => {
+                                             if (selectedTeacher !== t._id) {
+                                               e.currentTarget.style.background = isCurrentTeacher ? 'var(--s50)' : '#fff';
+                                             }
+                                           }}
+                                         >
+                                           <div style={{
+                                             width: 32,
+                                             height: 32,
+                                             borderRadius: '50%',
+                                             background: isCurrentTeacher ? 'var(--s300)' : 'var(--b100)',
+                                             color: isCurrentTeacher ? 'var(--s700)' : 'var(--b700)',
+                                             display: 'flex',
+                                             alignItems: 'center',
+                                             justifyContent: 'center',
+                                             fontWeight: 700,
+                                             fontSize: 12,
+                                             flexShrink: 0
+                                           }}>
+                                             {t.firstName.charAt(0)}{t.lastName.charAt(0)}
+                                           </div>
+                                           <div style={{ flex: 1, minWidth: 0 }}>
+                                             <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--s900)' }}>
+                                               {t.firstName} {t.lastName}
+                                               {isCurrentTeacher && <span style={{ fontSize: 11, color: 'var(--s500)', fontWeight: 400, marginLeft: 6 }}>(current)</span>}
+                                             </div>
+                                             <div style={{ fontSize: 11, color: 'var(--s500)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                               {t.email}
+                                             </div>
+                                           </div>
+                                           {selectedTeacher === t._id && (
+                                             <div style={{ color: 'var(--b700)', fontSize: 16 }}>✓</div>
+                                           )}
+                                         </div>
+                                       );
+                                     })}
+                                   </div>
+                                 </div>
+                               )}
+
+                               <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                                 <button
+                                   className="btn btn-p"
+                                   onClick={() => handleAllocateTeacher()}
+                                   disabled={!selectedTeacher || loadingTeachers || hasNoTeachers}
+                                   style={{ flex: 1 }}
+                                 >
+                                   {loadingTeachers ? 'Loading...' : (isAllocated ? 'Update Allocation' : 'Save Allocation')}
+                                 </button>
+                                 <button
+                                   className="btn btn-s"
+                                   onClick={() => {
+                                     setShowAllocateModal(false)
+                                     setAllocatingSubject(null)
+                                     setSelectedTeacher(null)
+                                   }}
+                                 >
+                                   Cancel
+                                 </button>
+                               </div>
+                             </div>
+                           )}
+                        </div>
+                      )
+                    })}
                   </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  )
-}
+                )
+              })()}
+            </div>
+         </Modal>
+       )}
+
+        {/* Allocate/Reassign Modal - Hidden (now using inline dropdowns) */}
+        {false && showAllocateModal && allocatingSubject && (
+         <div style={{
+           position: 'fixed',
+           inset: 0,
+           background: 'rgba(0,0,0,.5)',
+           display: 'flex',
+           alignItems: 'center',
+           justifyContent: 'center',
+           zIndex: 999,
+           padding: 20
+         }}>
+           <div style={{
+             background: '#fff',
+             borderRadius: 'var(--rmd)',
+             boxShadow: '0 20px 25px -5px rgba(0,0,0,.1)',
+             maxWidth: 500,
+             width: '100%'
+           }}>
+             <div style={{
+               padding: '20px',
+               borderBottom: '1px solid var(--border)',
+               display: 'flex',
+               justifyContent: 'space-between',
+               alignItems: 'center'
+             }}>
+               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
+                 Select Teacher
+               </h2>
+               <button
+                 onClick={() => setShowAllocateModal(false)}
+                 style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: 'var(--s500)' }}
+               >
+                 ✕
+               </button>
+             </div>
+
+             <div style={{ padding: '20px' }}>
+               <div style={{ marginBottom: 16, padding: 12, background: 'var(--s50)', borderRadius: 'var(--rmd)' }}>
+                 <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 4 }}>Subject Assignment</div>
+                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>
+                   {(() => {
+                     const subj = selectedStudent?.subjects?.find(s => (s._id || s) === allocatingSubject.subjectId)
+                     return `${typeof subj === 'object' ? subj?.subjectName : 'Subject'} (${allocatingSubject.curriculum})`
+                   })()}
+                 </div>
+               </div>
+
+               <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, color: 'var(--s900)' }}>
+                 Available Teachers
+               </label>
+
+               {loadingTeachers ? (
+                 <div style={{ padding: 20, textAlign: 'center', color: 'var(--s500)' }}>
+                   Finding qualified teachers...
+                 </div>
+               ) : availableTeachers.length > 0 ? (
+                 <div style={{
+                   border: '1px solid var(--border)',
+                   borderRadius: 'var(--rmd)',
+                   maxHeight: 300,
+                   overflowY: 'auto'
+                 }}>
+                   {availableTeachers.map(t => (
+                     <div
+                       key={t._id}
+                       onClick={() => setSelectedTeacher(t._id)}
+                       style={{
+                         padding: '12px',
+                         borderBottom: '1px solid var(--border)',
+                         cursor: 'pointer',
+                         background: selectedTeacher === t._id ? 'var(--b50)' : '#fff',
+                         borderLeft: selectedTeacher === t._id ? '4px solid var(--b700)' : 'none'
+                       }}
+                     >
+                       <div style={{ fontWeight: 600, color: 'var(--s900)' }}>
+                         {t.firstName} {t.lastName}
+                       </div>
+                       <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 2 }}>
+                         {t.email}
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               ) : (
+                 <div style={{
+                   padding: 20,
+                   textAlign: 'center',
+                   color: 'var(--r600)',
+                   background: 'var(--r50)',
+                   borderRadius: 'var(--rmd)',
+                   border: '1px solid var(--r100)'
+                 }}>
+                   No qualified teachers for this subject + curriculum
+                 </div>
+               )}
+             </div>
+
+             <div style={{
+               padding: '20px',
+               borderTop: '1px solid var(--border)',
+               display: 'flex',
+               gap: 10,
+               justifyContent: 'flex-end'
+             }}>
+               <button className="btn btn-s" onClick={() => setShowAllocateModal(false)}>
+                 Cancel
+               </button>
+               <button 
+                 className="btn btn-p" 
+                 onClick={handleAllocateTeacher}
+                 disabled={!selectedTeacher || loadingTeachers}
+               >
+                 Allocate
+               </button>
+             </div>
+           </div>
+         </div>
+       )}
+     </>
+   )
+ }
 
 function PayrollPage({ toast }) {
   const [payrolls, setPayrolls] = useState([])

@@ -378,11 +378,296 @@ async function sendTeacherCredentialsEmail(options) {
       `
     };
 
+
     const info = await transporterInstance.sendMail(mailOptions);
     console.log(`✓ Teacher credentials email sent to ${teacherEmail}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('✗ Failed to send teacher credentials email:', error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send leave request submitted notification to admin
+ */
+async function sendAdminLeaveRequestNotification(options) {
+  try {
+    const {
+      adminEmail,
+      teacherName,
+      teacherEmail,
+      leaveType,
+      leaveStartDate,
+      leaveEndDate,
+      leaveReason,
+      affectedStudents
+    } = options;
+
+    const transporterInstance = transporter || initializeTransporter();
+
+    const startDate = new Date(leaveStartDate).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    const endDate = new Date(leaveEndDate).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    const dayCount = Math.ceil((new Date(leaveEndDate) - new Date(leaveStartDate)) / (1000 * 60 * 60 * 24)) + 1;
+
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      to: adminEmail,
+      subject: `🔔 New Leave Request from ${teacherName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
+            <h1 style="margin: 0; font-size: 24px;">📋 New Leave Request</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 24px; border-radius: 0 0 8px 8px;">
+            <p>Hello Admin,</p>
+            
+            <p><strong>${teacherName}</strong> has submitted a new leave request that requires your approval.</p>
+            
+            <div style="background: white; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0; border-radius: 4px;">
+              <h3 style="margin-top: 0; color: #d97706;">Request Details</h3>
+              <p><strong>Teacher:</strong> ${teacherName}</p>
+              <p><strong>Email:</strong> ${teacherEmail}</p>
+              <p><strong>Leave Type:</strong> ${leaveType}</p>
+              <p><strong>Period:</strong> ${startDate} to ${endDate} (${dayCount} days)</p>
+              <p><strong>Reason:</strong> ${leaveReason}</p>
+              ${affectedStudents ? `<p><strong>Affected Students:</strong> ${affectedStudents} students may need reassignment</p>` : ''}
+            </div>
+
+            <div style="background: #fef3c7; border: 1px solid #fcd34d; padding: 16px; border-radius: 4px; margin: 20px 0;">
+              <p><strong>⚠ Action Required:</strong> Please review this leave request in the admin portal and approve or reject it as soon as possible.</p>
+            </div>
+
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="${process.env.CLIENT_URL || 'https://smartious.ac.ke'}/admin?page=leave" style="background: #d97706; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">Review Leave Request</a>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
+            
+            <p style="font-size: 12px; color: #666;">
+              This is an automated message from Smartious E-School. Please do not reply to this email.
+            </p>
+          </div>
+        </div>
+      `
+    };
+
+    const info = await transporterInstance.sendMail(mailOptions);
+    console.log(`✓ Leave request notification sent to admin (${adminEmail})`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('✗ Failed to send leave request admin notification:', error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send leave request approved notification to teacher
+ */
+async function sendLeaveRequestApprovedEmail(options) {
+  try {
+    const {
+      teacherEmail,
+      teacherName,
+      leaveType,
+      leaveStartDate,
+      leaveEndDate,
+      affectedStudents,
+      approvedBy
+    } = options;
+
+    const transporterInstance = transporter || initializeTransporter();
+
+    const startDate = new Date(leaveStartDate).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    const endDate = new Date(leaveEndDate).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      to: teacherEmail,
+      subject: `✅ Your Leave Request Has Been Approved`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
+            <h1 style="margin: 0; font-size: 24px;">✅ Leave Approved</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 24px; border-radius: 0 0 8px 8px;">
+            <p>Hello <strong>${teacherName}</strong>,</p>
+            
+            <p>Good news! Your leave request has been approved by the admin team.</p>
+            
+            <div style="background: #f0fdf4; border: 1px solid #86efac; padding: 16px; margin: 20px 0; border-radius: 4px;">
+              <h3 style="margin-top: 0; color: #16a34a;">Leave Details</h3>
+              <p><strong>Leave Type:</strong> ${leaveType}</p>
+              <p><strong>Period:</strong> ${startDate} to ${endDate}</p>
+              ${affectedStudents ? `<p><strong>Note:</strong> ${affectedStudents} of your students will be reassigned to other teachers during your absence.</p>` : ''}
+              <p><strong>Approved by:</strong> ${approvedBy || 'Admin'}</p>
+            </div>
+
+            <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin: 20px 0; border-radius: 4px;">
+              <p><strong>🎉 Important:</strong> You are all set for your leave. Your students and parents have been notified about their temporary teacher assignments.</p>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
+            
+            <p style="font-size: 12px; color: #666;">
+              If you have any questions, please contact support@smartious.ac.ke<br>
+              This is an automated message from Smartious E-School.
+            </p>
+          </div>
+        </div>
+      `
+    };
+
+    const info = await transporterInstance.sendMail(mailOptions);
+    console.log(`✓ Leave approved email sent to ${teacherEmail}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('✗ Failed to send leave approved email:', error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send leave request rejected notification to teacher
+ */
+async function sendLeaveRequestRejectedEmail(options) {
+  try {
+    const {
+      teacherEmail,
+      teacherName,
+      leaveType,
+      leaveStartDate,
+      leaveEndDate,
+      rejectionReason
+    } = options;
+
+    const transporterInstance = transporter || initializeTransporter();
+
+    const startDate = new Date(leaveStartDate).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    const endDate = new Date(leaveEndDate).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      to: teacherEmail,
+      subject: `❌ Your Leave Request Has Been Rejected`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
+            <h1 style="margin: 0; font-size: 24px;">❌ Leave Request Rejected</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 24px; border-radius: 0 0 8px 8px;">
+            <p>Hello <strong>${teacherName}</strong>,</p>
+            
+            <p>Unfortunately, your leave request could not be approved at this time.</p>
+            
+            <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 16px; margin: 20px 0; border-radius: 4px;">
+              <h3 style="margin-top: 0; color: #dc2626;">Request Details</h3>
+              <p><strong>Leave Type:</strong> ${leaveType}</p>
+              <p><strong>Requested Period:</strong> ${startDate} to ${endDate}</p>
+            </div>
+
+            <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; margin: 20px 0; border-radius: 4px;">
+              <h3 style="margin-top: 0; color: #dc2626;">Reason for Rejection</h3>
+              <p>${rejectionReason || 'No specific reason provided'}</p>
+            </div>
+
+            <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 16px; margin: 20px 0; border-radius: 4px;">
+              <p><strong>💡 Next Steps:</strong> You may submit a new leave request for different dates or contact the admin team to discuss alternative options.</p>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
+            
+            <p style="font-size: 12px; color: #666;">
+              If you have questions about this decision, please contact support@smartious.ac.ke<br>
+              This is an automated message from Smartious E-School.
+            </p>
+          </div>
+        </div>
+      `
+    };
+
+    const info = await transporterInstance.sendMail(mailOptions);
+    console.log(`✓ Leave rejected email sent to ${teacherEmail}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('✗ Failed to send leave rejected email:', error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send leave request submitted confirmation to teacher
+ */
+async function sendLeaveRequestSubmittedEmail(options) {
+  try {
+    const {
+      teacherEmail,
+      teacherName,
+      leaveType,
+      leaveStartDate,
+      leaveEndDate,
+      leaveReason
+    } = options;
+
+    const transporterInstance = transporter || initializeTransporter();
+
+    const startDate = new Date(leaveStartDate).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    const endDate = new Date(leaveEndDate).toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    const dayCount = Math.ceil((new Date(leaveEndDate) - new Date(leaveStartDate)) / (1000 * 60 * 60 * 24)) + 1;
+
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      to: teacherEmail,
+      subject: `📋 Your Leave Request Has Been Submitted for Review`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
+            <h1 style="margin: 0; font-size: 24px;">📋 Leave Request Submitted</h1>
+          </div>
+          
+          <div style="background: #f8f9fa; padding: 24px; border-radius: 0 0 8px 8px;">
+            <p>Hello <strong>${teacherName}</strong>,</p>
+            
+            <p>Your leave request has been successfully submitted and is pending admin review.</p>
+            
+            <div style="background: white; border-left: 4px solid #3b82f6; padding: 16px; margin: 20px 0; border-radius: 4px;">
+              <h3 style="margin-top: 0; color: #2563eb;">Request Summary</h3>
+              <p><strong>Leave Type:</strong> ${leaveType}</p>
+              <p><strong>Period:</strong> ${startDate} to ${endDate}</p>
+              <p><strong>Duration:</strong> ${dayCount} days</p>
+              <p><strong>Reason:</strong> ${leaveReason}</p>
+              <p><strong>Status:</strong> <span style="color: #f59e0b; font-weight: bold;">⏳ Pending Review</span></p>
+            </div>
+
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 4px; margin: 20px 0;">
+              <p><strong>ℹ️ What Happens Next:</strong></p>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>The admin team will review your request</li>
+                <li>You'll receive an email notification when it's approved or rejected</li>
+                <li>If approved, your students will be temporarily reassigned</li>
+                <li>You can track the status in your teacher dashboard</li>
+              </ul>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
+            
+            <p style="font-size: 12px; color: #666;">
+              This is a confirmation email. Your request reference number is available in your dashboard.<br>
+              This is an automated message from Smartious E-School.
+            </p>
+          </div>
+        </div>
+      `
+    };
+
+    const info = await transporterInstance.sendMail(mailOptions);
+    console.log(`✓ Leave submitted confirmation email sent to ${teacherEmail}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('✗ Failed to send leave submitted email:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -393,6 +678,10 @@ module.exports = {
   sendStudentAllocationNotification,
   sendAdminNotification,
   sendVerificationEmail,
-  sendTeacherCredentialsEmail
+  sendTeacherCredentialsEmail,
+  sendLeaveRequestSubmittedEmail,
+  sendLeaveRequestApprovedEmail,
+  sendLeaveRequestRejectedEmail,
+  sendAdminLeaveRequestNotification
 };
 

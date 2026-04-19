@@ -41,8 +41,8 @@ router.post('/login', async (req, res) => {
       grade:      user.grade,
       xp:         user.xp,
       streak:     user.streak,
-      // PHASE 7: Include forcePasswordChange flag for auth guard
-      forcePasswordChange: user.forcePasswordChange || false,
+      // PHASE 3-5: Include requirePasswordChange flag (renamed from forcePasswordChange)
+      requirePasswordChange: user.mustChangePassword || false,
     };
 
     res.json({ success: true, token: sign(user._id), user: safeUser });
@@ -282,7 +282,7 @@ router.post('/reset-password', auth, async (req, res) => {
 
     // Update password and clear force flag
     user.password = newPassword;
-    user.forcePasswordChange = false; // PHASE 7: Clear the flag after successful reset
+    user.mustChangePassword = false; // PHASE 3-5: Clear flag after successful reset
     await user.save();
 
     console.log(`✓ Password reset for user: ${user.email}`);
@@ -346,9 +346,9 @@ router.post('/secure-reset', auth, async (req, res) => {
       });
     }
 
-    // Update password and clear force flag
+     // Update password and clear force flag
     user.password = newPassword;
-    user.forcePasswordChange = false; // PHASE 7: Clear the flag after successful reset
+    user.mustChangePassword = false; // PHASE 3-5: Clear flag after successful reset
     await user.save();
 
     console.log(`✓ Secure password reset for user: ${user.email}`);
