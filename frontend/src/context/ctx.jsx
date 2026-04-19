@@ -2,9 +2,11 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import axios from 'axios'
 
 // ── API ───────────────────────────────────────────────────
-const BASE = import.meta.env.VITE_API_URL
-  ? `${import.meta.env.VITE_API_URL}/api`
-  : '/api'
+const BASE = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api` 
+  : window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : '/api'
 
 const api = axios.create({ baseURL: BASE })
 api.interceptors.request.use(cfg => {
@@ -33,22 +35,22 @@ export function AuthProvider({ children }) {
     if (t && u) { try { setUser(JSON.parse(u)) } catch {} }
     setLoading(false)
   }, [])
-  const login = useCallback(async (email, password) => {
-    const { data } = await api.post('/auth/login', { email, password })
-    
-    // PHASE 3-5: Detect requirePasswordChange flag and force redirect to /reset-password
-    if (data.user?.requirePasswordChange) {
-      localStorage.setItem('sm_token', data.token)
-      localStorage.setItem('sm_user', JSON.stringify(data.user))
-      window.location.href = '/reset-password'
-      return null
-    }
-    
-    localStorage.setItem('sm_token', data.token)
-    localStorage.setItem('sm_user', JSON.stringify(data.user))
-    setUser(data.user)
-    return data.user
-  }, [])
+   const login = useCallback(async (email, password) => {
+     const { data } = await api.post('/auth/login', { email, password })
+     
+     // PHASE 3-5: Detect requirePasswordChange or mustChangePassword flag and force redirect to /reset-password
+     if (data.user?.mustChangePassword || data.user?.requirePasswordChange) {
+       localStorage.setItem('sm_token', data.token)
+       localStorage.setItem('sm_user', JSON.stringify(data.user))
+       window.location.href = '/reset-password'
+       return null
+     }
+     
+     localStorage.setItem('sm_token', data.token)
+     localStorage.setItem('sm_user', JSON.stringify(data.user))
+     setUser(data.user)
+     return data.user
+   }, [])
   const logout = useCallback(() => {
     localStorage.removeItem('sm_token')
     localStorage.removeItem('sm_user')
@@ -190,29 +192,31 @@ const SEED_GROUP_ROOMS = [
 const StoreCtx = createContext(null)
 
 export function StoreProvider({ children }) {
-  const [siteConfig,    setSiteConfig]    = useState(() => ls('site',          DEFAULT_SITE))
-  const [fees,          setFees]          = useState(() => ls('fees',          DEFAULT_FEES))
-  const [curricula,     setCurricula]     = useState(() => ls('curricula',     DEFAULT_CURRICULA))
-  const [articles,      setArticles]      = useState(() => ls('articles',      SEED_ARTICLES))
-  const [resources,     setResources]     = useState(() => ls('resources',     SEED_RESOURCES))
-  const [lessons,       setLessons]       = useState(() => ls('lessons',       SEED_LESSONS))
-  const [messages,      setMessages]      = useState(() => ls('messages',      SEED_MESSAGES))
-  const [results,       setResults]       = useState(() => ls('results',       SEED_RESULTS))
-  const [announcements, setAnnouncements] = useState(() => ls('announcements', SEED_ANNOUNCEMENTS))
-  const [payments,      setPayments]      = useState(() => ls('payments',      SEED_PAYMENTS))
-  const [groupRooms,    setGroupRooms]    = useState(() => ls('grouprooms',    SEED_GROUP_ROOMS))
+   const [siteConfig,    setSiteConfig]    = useState(() => ls('site',          DEFAULT_SITE))
+   const [fees,          setFees]          = useState(() => ls('fees',          DEFAULT_FEES))
+   const [curricula,     setCurricula]     = useState(() => ls('curricula',     DEFAULT_CURRICULA))
+   const [articles,      setArticles]      = useState(() => ls('articles',      SEED_ARTICLES))
+   const [resources,     setResources]     = useState(() => ls('resources',     SEED_RESOURCES))
+   const [lessons,       setLessons]       = useState(() => ls('lessons',       SEED_LESSONS))
+   const [messages,      setMessages]      = useState(() => ls('messages',      SEED_MESSAGES))
+   const [results,       setResults]       = useState(() => ls('results',       SEED_RESULTS))
+   const [announcements, setAnnouncements] = useState(() => ls('announcements', SEED_ANNOUNCEMENTS))
+   const [payments,      setPayments]      = useState(() => ls('payments',      SEED_PAYMENTS))
+   const [groupRooms,    setGroupRooms]    = useState(() => ls('grouprooms',    SEED_GROUP_ROOMS))
+   const [allocations,   setAllocations]   = useState(() => ls('allocations',   []))
 
-  useEffect(() => { ss('site',          siteConfig)    }, [siteConfig])
-  useEffect(() => { ss('fees',          fees)          }, [fees])
-  useEffect(() => { ss('curricula',     curricula)     }, [curricula])
-  useEffect(() => { ss('articles',      articles)      }, [articles])
-  useEffect(() => { ss('resources',     resources)     }, [resources])
-  useEffect(() => { ss('lessons',       lessons)       }, [lessons])
-  useEffect(() => { ss('messages',      messages)      }, [messages])
-  useEffect(() => { ss('results',       results)       }, [results])
-  useEffect(() => { ss('announcements', announcements) }, [announcements])
-  useEffect(() => { ss('payments',      payments)      }, [payments])
-  useEffect(() => { ss('grouprooms',    groupRooms)    }, [groupRooms])
+   useEffect(() => { ss('site',          siteConfig)    }, [siteConfig])
+   useEffect(() => { ss('fees',          fees)          }, [fees])
+   useEffect(() => { ss('curricula',     curricula)     }, [curricula])
+   useEffect(() => { ss('articles',      articles)      }, [articles])
+   useEffect(() => { ss('resources',     resources)     }, [resources])
+   useEffect(() => { ss('lessons',       lessons)       }, [lessons])
+   useEffect(() => { ss('messages',      messages)      }, [messages])
+   useEffect(() => { ss('results',       results)       }, [results])
+   useEffect(() => { ss('announcements', announcements) }, [announcements])
+   useEffect(() => { ss('payments',      payments)      }, [payments])
+   useEffect(() => { ss('grouprooms',    groupRooms)    }, [groupRooms])
+   useEffect(() => { ss('allocations',   allocations)   }, [allocations])
 
   // Announcements helper — must be defined before functions that call it
   function addAnnouncement(ann) {
@@ -324,49 +328,67 @@ export function StoreProvider({ children }) {
     return pay
   }
 
-  // ── Group rooms ────────────────────────────────────────
-  function addGroupRoom(room) {
-    const r = { id: 'room-' + Date.now(), enrolled: 0, students: [], status: 'Active', capacity: 10, ...room }
-    setGroupRooms(p => [...p, r])
-    return r
-  }
-  function updateGroupRoom(id, changes) { setGroupRooms(p => p.map(r => r.id === id ? { ...r, ...changes } : r)) }
-  function deleteGroupRoom(id) { setGroupRooms(p => p.filter(r => r.id !== id)) }
-  function joinGroupRoom(roomId, studentName) {
-    setGroupRooms(p => p.map(r => {
-      if (r.id !== roomId) return r
-      if (r.enrolled >= r.capacity) return r
-      if (r.students.includes(studentName)) return r
-      return { ...r, enrolled: r.enrolled + 1, students: [...r.students, studentName] }
-    }))
-  }
-  function getRoomsForSubject(subject) { return groupRooms.filter(r => r.subject === subject) }
-  function getAvailableRooms() { return groupRooms.filter(r => r.enrolled < r.capacity) }
+   // ── Group rooms ────────────────────────────────────────
+   function addGroupRoom(room) {
+     const r = { id: 'room-' + Date.now(), enrolled: 0, students: [], status: 'Active', capacity: 10, ...room }
+     setGroupRooms(p => [...p, r])
+     return r
+   }
+   function updateGroupRoom(id, changes) { setGroupRooms(p => p.map(r => r.id === id ? { ...r, ...changes } : r)) }
+   function deleteGroupRoom(id) { setGroupRooms(p => p.filter(r => r.id !== id)) }
+   function joinGroupRoom(roomId, studentName) {
+     setGroupRooms(p => p.map(r => {
+       if (r.id !== roomId) return r
+       if (r.enrolled >= r.capacity) return r
+       if (r.students.includes(studentName)) return r
+       return { ...r, enrolled: r.enrolled + 1, students: [...r.students, studentName] }
+     }))
+   }
+   function getRoomsForSubject(subject) { return groupRooms.filter(r => r.subject === subject) }
+   function getAvailableRooms() { return groupRooms.filter(r => r.enrolled < r.capacity) }
 
-  const value = {
-    // Site
-    siteConfig, updateSiteConfig,
-    // Fees (admin-controlled, read everywhere)
-    fees, updateFees, getFee, fmtFee,
-    // Curricula
-    curricula, addCurriculum, updateCurriculum, deleteCurriculum,
-    // Articles
-    articles, publishArticle, saveDraft, updateArticle, deleteArticle,
-    // Resources
-    resources, addResource, deleteResource, downloadResource,
-    // Lessons
-    lessons, addLesson,
-    // Messages
-    messages, sendMessage, markRead, getThreads, getUnreadCount,
-    // Results
-    results, postResult, getStudentResults,
-    // Announcements
-    announcements, addAnnouncement, getAnnouncements,
-    // Payments
-    payments, addPayment,
-    // Group rooms
-    groupRooms, addGroupRoom, updateGroupRoom, deleteGroupRoom, joinGroupRoom, getRoomsForSubject, getAvailableRooms,
-  }
+   // ── Allocations ────────────────────────────────────────
+   const getAllocations = useCallback(async () => {
+     try {
+       const { data } = await api.get('/allocations')
+       // Sort by enrollment date (newest first)
+       const sorted = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+       setAllocations(sorted)
+       return sorted
+     } catch (err) {
+       console.error('Error fetching allocations:', err)
+       return []
+     }
+   }, [])
+   function updateAllocation(id, changes) { setAllocations(p => p.map(a => a.id === id ? { ...a, ...changes } : a)) }
+   function deleteAllocation(id) { setAllocations(p => p.filter(a => a.id !== id)) }
+
+   const value = {
+     // Site
+     siteConfig, updateSiteConfig,
+     // Fees (admin-controlled, read everywhere)
+     fees, updateFees, getFee, fmtFee,
+     // Curricula
+     curricula, addCurriculum, updateCurriculum, deleteCurriculum,
+     // Articles
+     articles, publishArticle, saveDraft, updateArticle, deleteArticle,
+     // Resources
+     resources, addResource, deleteResource, downloadResource,
+     // Lessons
+     lessons, addLesson,
+     // Messages
+     messages, sendMessage, markRead, getThreads, getUnreadCount,
+     // Results
+     results, postResult, getStudentResults,
+     // Announcements
+     announcements, addAnnouncement, getAnnouncements,
+     // Payments
+     payments, addPayment,
+     // Group rooms
+     groupRooms, addGroupRoom, updateGroupRoom, deleteGroupRoom, joinGroupRoom, getRoomsForSubject, getAvailableRooms,
+     // Allocations
+     allocations, getAllocations, updateAllocation, deleteAllocation,
+   }
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>
 }

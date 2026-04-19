@@ -7,6 +7,14 @@ services:
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
+    
+    # WebSocket support for Socket.io
+    headers:
+      - name: Connection
+        value: upgrade
+      - name: Upgrade
+        value: websocket
+    
     envVars:
       - key: NODE_ENV
         value: production
