@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /teacher/
+Disallow: /student/
+Disallow: /parent/
+Disallow: /portal
+Disallow: /reset-password
+Disallow: /verify-email
+
+Sitemap: https://smartioushomeschool.com/sitemap.xml
