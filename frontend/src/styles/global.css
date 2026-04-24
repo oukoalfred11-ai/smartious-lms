@@ -97,6 +97,137 @@
   --slow: 500ms;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   COMPATIBILITY LAYER — v2 TOKENS → v3 PREMIUM SYSTEM
+   ═══════════════════════════════════════════════════════════
+   
+   This block maps the older variable names used across the JSX
+   components (Dashboard.jsx, AdminPortal.jsx, PortalLayout.jsx,
+   etc.) onto the v3 premium design system defined above.
+   
+   Primary brand: Crimson (Harvard / Yale / MasterClass authority)
+   Accent:        Gold (prestige, warmth, achievement)
+   Cool data:     Sapphire (trust, analytics)
+   
+   Do not remove — JSX files reference these names extensively.
+═══════════════════════════════════════════════════════════ */
+:root {
+  /* ── Brand override — premium crimson + gold ─────── */
+  --crimson0: #FDF2F4;
+  --crimson50:#FBE9EC;
+  --crimson100:#F7CED4;
+  --crimson200:#E8A4AD;
+  --crimson300:#C96773;
+  --crimson500:#A8203A;
+  --crimson600:#8B1A2E;
+  --crimson700:#6F1525;
+  --crimson800:#56101D;
+
+  /* ── Slate / neutral scale (--s*) ─────────────────── */
+  /* Mapped onto v3 ink + parchment so components get warm tones */
+  --s50:   var(--par0);      /* #FDFAF4 — paper */
+  --s100:  var(--par1);      /* #F8F2E6 */
+  --s200:  var(--par2);      /* #F0E8D4 */
+  --s300:  var(--par3);      /* #E4D9C2 */
+  --s400:  var(--par5);      /* #B0A490 — muted text */
+  --s500:  var(--ink7);      /* #526677 — body text subtle */
+  --s600:  var(--ink6);      /* #3D5066 */
+  --s700:  var(--ink5);      /* #2E3D55 — body text strong */
+  --s800:  var(--ink3);      /* #1A2436 */
+  --s900:  var(--ink1);      /* #0D1220 — titles */
+
+  /* ── Primary (--b*) = Crimson for premium authority ── */
+  /* Used across buttons, links, badges, avatars, highlights */
+  --b50:   var(--crimson0);  /* lightest tint for badges */
+  --b100:  var(--crimson50);
+  --b200:  var(--crimson100);
+  --b400:  var(--crimson300);
+  --b500:  var(--crimson500);
+  --b600:  var(--crimson600);
+  --b700:  var(--crimson600); /* primary hue used most */
+  --b800:  var(--crimson700);
+
+  /* ── Success / green (--g*) ──────────────────────── */
+  --g50:   #ECFDF5;
+  --g100:  #D1FAE5;
+  --g200:  #A7F3D0;
+  --g500:  var(--emerald);   /* #1DB954 */
+  --g600:  #14863A;
+  --g700:  #0E6B2D;
+
+  /* ── Error / red (--r*) ──────────────────────────── */
+  --r50:   #FEF2F2;
+  --r100:  #FEE2E2;
+  --r200:  #FECACA;
+  --r500:  var(--ruby);      /* #E63946 */
+  --r600:  #B91C1C;
+  --r700:  #991B1B;
+
+  /* ── Warning / amber (--a*) ──────────────────────── */
+  --a50:   #FFFBEB;
+  --a100:  #FEF3C7;
+  --a200:  #FDE68A;
+  --a500:  var(--amber);     /* #F4A261 */
+  --a600:  #B85C00;
+  --a700:  #92400E;
+
+  /* ── Purple (--p*) — secondary accent ────────────── */
+  --p50:   #F5F3FF;
+  --p100:  #EDE9FE;
+  --p200:  #DDD6FE;
+  --p500:  var(--violet);    /* #7B5EA7 */
+  --p600:  #6D28D9;
+  --p700:  #5B21B6;
+
+  /* ── Teal (--t*) — tertiary ──────────────────────── */
+  --t50:   #F0FDFA;
+  --t100:  #CCFBF1;
+  --t500:  var(--teal);      /* #2EC4B6 */
+  --t600:  #0F766E;
+
+  /* ── Semantic radii aliases (rmd/rlg/rxl) ────────── */
+  /* JSX uses these verbose names; map to numeric v3 scale */
+  --rsm:   var(--r1);   /* 4px  */
+  --rmd:   var(--r3);   /* 12px */
+  --rlg:   var(--r4);   /* 16px */
+  --rxl:   var(--r5);   /* 20px */
+  --r2xl:  var(--r6);   /* 24px */
+
+  /* ── Toast dot colours (used in ctx.jsx) ─────────── */
+  --g500-toast: var(--emerald);
+  --r500-toast: var(--ruby);
+  --b400-toast: var(--crimson500);
+}
+
+/* ── Button colour overrides — make .btn-p crimson, not gold ──
+   The v3 .btn-p defaults to a gold gradient, but for a premium
+   educational brand we want the primary CTA to be crimson.
+   Gold is retained for secondary/prestige accents only. */
+.btn-p, .btn-primary {
+  background: linear-gradient(135deg, var(--crimson600), var(--crimson700));
+  border-color: var(--crimson700);
+  box-shadow: 0 2px 8px rgba(139, 26, 46, 0.25);
+}
+.btn-p:hover, .btn-primary:hover {
+  background: linear-gradient(135deg, var(--crimson500), var(--crimson600));
+  box-shadow: 0 6px 20px rgba(139, 26, 46, 0.35);
+}
+
+/* Legacy JSX badge shorthand — match v3 .badge-* */
+.badge.badge-blue,
+.badge.badge-green,
+.badge.badge-red,
+.badge.badge-amber,
+.badge.badge-slate,
+.badge.badge-purple { letter-spacing: .04em; }
+
+/* Legacy button modifier classes used in older JSX */
+.btn-b    { background: var(--crimson600); color: #fff; border-color: var(--crimson700); }
+.btn-b:hover { background: var(--crimson500); }
+.btn-r    { background: rgba(230,57,70,.08); color: var(--ruby); border-color: rgba(230,57,70,.2); }
+.btn-r:hover { background: var(--ruby); color: #fff; }
+.btn-am   { background: rgba(244,162,97,.1); color: var(--a700); border-color: rgba(244,162,97,.25); }
+.btn-am:hover { background: var(--amber); color: #fff; }
 /* ── RESET ────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
 html, body {
