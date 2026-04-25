@@ -984,106 +984,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               ADAPTIVE PRACTICE — live questions from API
           ════════════════════════════════════════════ */}
-          {page === 'practice' && (
-            <div>
-              {practiceLoading ? (
-                <div className="lc"><div className="spinner"/><div style={{marginTop:12,color:'var(--s500)',fontSize:14}}>Loading personalised questions…</div></div>
-              ) : !practiceData ? (
-                <div className="empty">
-                  <h3>Choose a topic to practise</h3>
-                  <p>Click any subject below to start adaptive practice matched to your mastery level.</p>
-                  <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center',marginTop:16}}>
-                    {subjects.map(s => (
-                      <button key={s.name} className="btn btn-s" onClick={() => loadPractice(s.name)}>
-                        <div style={{width:8,height:8,borderRadius:'50%',background:s.color,flexShrink:0}}/>
-                        {s.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : practiceResult ? (
-                /* ── Results ── */
-                <div style={{maxWidth:540,margin:'0 auto'}}>
-                  <div className="card" style={{textAlign:'center',padding:36}}>
-                    <div className="serif" style={{fontSize:28,color:'var(--s900)',marginBottom:8}}>
-                      {practiceResult.score >= 80 ? 'Excellent work!' : practiceResult.score >= 60 ? 'Good effort!' : 'Keep practising!'}
-                    </div>
-                    <p style={{fontSize:14,color:'var(--s500)',marginBottom:24}}>{practiceData.topic} — {practiceData.subject}</p>
-                    <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:28}}>
-                      {[['Score',`${practiceResult.score}%`,practiceResult.score>=60?'var(--g50)':'var(--r50)',masteryCol(practiceResult.score)],
-                        ['Correct',`${practiceResult.correct}/${practiceResult.total}`,'var(--b50)','var(--b700)'],
-                        ['Difficulty',practiceData.difficulty,'var(--a50)','var(--a600)']].map(([l,v,bg,c]) => (
-                        <div key={l} style={{background:bg,borderRadius:'var(--rmd)',padding:'14px 10px',textAlign:'center'}}>
-                          <div className="mono" style={{fontSize:20,fontWeight:700,color:c}}>{v}</div>
-                          <div style={{fontSize:12,color:'var(--s500)',marginTop:3}}>{l}</div>
-                        </div>
-                      ))}
-                    </div>
-                    {/* Show explanations for wrong answers */}
-                    {practiceData.questions.filter(q => practiceAnswers[q.id] && practiceAnswers[q.id] !== q.correct).map((q,i) => (
-                      <div key={i} style={{textAlign:'left',background:'var(--r50)',border:'1px solid var(--r100)',borderRadius:'var(--rmd)',padding:14,marginBottom:10}}>
-                        <div style={{fontWeight:600,fontSize:13.5,color:'var(--r600)',marginBottom:4}}>Q{q.id}: {q.question}</div>
-                        <div style={{fontSize:13,color:'var(--s700)',marginBottom:4}}>Your answer: <span style={{color:'var(--r600)',fontWeight:600}}>{practiceAnswers[q.id]}</span></div>
-                        <div style={{fontSize:13,color:'var(--g700)',marginBottom:4}}>Correct: <span style={{fontWeight:600}}>{q.correct}</span></div>
-                        {q.explanation && <div style={{fontSize:12.5,color:'var(--s500)',fontStyle:'italic'}}>{q.explanation}</div>}
-                      </div>
-                    ))}
-                    <div style={{display:'flex',gap:10,justifyContent:'center',marginTop:8}}>
-                      <button className="btn btn-p" onClick={() => { setPracticeResult(null); setPracticeAnswers({}); loadPractice(practiceData.subject, practiceData.topic) }}>Try Again</button>
-                      <button className="btn btn-s" onClick={() => goTo('dashboard')}>Back to Dashboard</button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                /* ── Active practice ── */
-                <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16,flexWrap:'wrap',gap:10}}>
-                    <div>
-                      <div className="sec-tag">{practiceData.subject} · {practiceData.difficulty} difficulty · Mastery: {practiceData.currentMastery}%</div>
-                      <h2 className="serif" style={{fontSize:22,color:'var(--s900)'}}>{practiceData.topic}</h2>
-                    </div>
-                    <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                      <div style={{fontSize:13,color:'var(--s500)'}}>{Object.keys(practiceAnswers).length}/{practiceData.questions.length} answered</div>
-                      <button className="btn btn-s btn-sm" onClick={() => { setPracticeData(null); setPracticeAnswers({}) }}>Change Topic</button>
-                    </div>
-                  </div>
-
-                  <div className="prog-bar" style={{marginBottom:20,height:8}}>
-                    <div className="prog-fill" style={{width:`${(Object.keys(practiceAnswers).length/practiceData.questions.length)*100}%`,background:'var(--b600)'}}/>
-                  </div>
-
-                  {practiceData.questions.map((q) => (
-                    <div key={q.id} className="card" style={{marginBottom:14,borderColor:practiceAnswers[q.id]?'var(--b200)':'var(--border)'}}>
-                      <div style={{display:'flex',justifyContent:'space-between',marginBottom:10}}>
-                        <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                          <div style={{width:26,height:26,borderRadius:'50%',background:practiceAnswers[q.id]?'var(--b700)':'var(--s200)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,color:practiceAnswers[q.id]?'#fff':'var(--s500)'}}>{q.id}</div>
-                          <span style={{fontSize:15,color:'var(--s800)',fontWeight:500,lineHeight:1.5}}>{q.question}</span>
-                        </div>
-                        <span style={{fontSize:11,color:'var(--s400)',flexShrink:0,marginLeft:8}}>{q.marks} marks</span>
-                      </div>
-                      {q.options?.map(opt => (
-                        <label key={opt} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 14px',marginBottom:7,borderRadius:'var(--rmd)',cursor:'pointer',border:`1.5px solid ${practiceAnswers[q.id]===opt?'var(--b600)':'var(--border)'}`,background:practiceAnswers[q.id]===opt?'var(--b50)':'var(--bg)',transition:'all .15s'}}>
-                          <input type="radio" name={`q${q.id}`} value={opt} checked={practiceAnswers[q.id]===opt} onChange={() => setPracticeAnswers(a=>({...a,[q.id]:opt}))} style={{accentColor:'var(--b600)'}}/>
-                          <span style={{fontSize:14,color:practiceAnswers[q.id]===opt?'var(--b800)':'var(--s700)',fontWeight:practiceAnswers[q.id]===opt?600:400}}>{opt}</span>
-                        </label>
-                      ))}
-                    </div>
-                  ))}
-
-                  <div style={{position:'sticky',bottom:16,background:'var(--white)',border:'1px solid var(--border)',borderRadius:'var(--rxl)',padding:'14px 24px',display:'flex',justifyContent:'space-between',alignItems:'center',boxShadow:'var(--sh-lg)'}}>
-                    <div style={{fontSize:13.5,color:'var(--s600)'}}>
-                      {Object.keys(practiceAnswers).length < practiceData.questions.length
-                        ? <span style={{color:'var(--a600)'}}>⚠ {practiceData.questions.length - Object.keys(practiceAnswers).length} unanswered</span>
-                        : <span style={{color:'var(--g600)'}}>All questions answered</span>}
-                    </div>
-                    <button className="btn btn-p" onClick={submitPractice} disabled={submitting || Object.keys(practiceAnswers).length === 0}>
-                      {submitting ? 'Submitting…' : 'Submit Answers'}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          {page === 'practice' && <PracticeTab user={user} toast={toast} goTo={goTo} />}
 
           {/* ════════════════════════════════════════════
               EXAMS
@@ -1673,3 +1574,560 @@ export default function StudentPortal() {
     </div>
   )
 }
+// ═══════════════════════════════════════════════════════════
+// QUESTION BANK — IGCSE / Edexcel / CBC
+// ═══════════════════════════════════════════════════════════
+const QUESTION_BANK = {
+  Mathematics: {
+    'Algebra': [
+      { q: 'Solve for x:  3x + 7 = 22', options: ['x = 5', 'x = 7', 'x = 15', 'x = 29/3'], answer: 'x = 5', explanation: 'Subtract 7 from both sides: 3x = 15. Divide by 3: x = 5.' },
+      { q: 'Expand (x + 4)(x − 2)', options: ['x² + 2x − 8', 'x² − 2x − 8', 'x² + 6x − 8', 'x² + 2x + 8'], answer: 'x² + 2x − 8', explanation: 'FOIL: x·x + x·(−2) + 4·x + 4·(−2) = x² − 2x + 4x − 8 = x² + 2x − 8.' },
+      { q: 'Factorise:  x² − 9', options: ['(x − 3)(x − 3)', '(x + 3)(x − 3)', '(x + 9)(x − 1)', 'Cannot be factorised'], answer: '(x + 3)(x − 3)', explanation: 'Difference of two squares: a² − b² = (a + b)(a − b). Here a = x, b = 3.' },
+      { q: 'If 2x − 5 = 11, what is the value of x?', options: ['3', '6', '8', '13'], answer: '8', explanation: 'Add 5: 2x = 16. Divide by 2: x = 8.' },
+      { q: 'Simplify:  4(2x + 3) − 5x', options: ['3x + 12', '13x + 12', '8x + 3', '3x + 3'], answer: '3x + 12', explanation: 'Distribute: 8x + 12 − 5x. Combine like terms: 3x + 12.' },
+    ],
+    'Geometry & Pythagoras': [
+      { q: 'A right-angled triangle has legs 6 cm and 8 cm. What is the hypotenuse?', options: ['10 cm', '14 cm', '12 cm', '7 cm'], answer: '10 cm', explanation: 'Pythagoras: c² = 6² + 8² = 36 + 64 = 100, so c = 10 cm.' },
+      { q: 'Which set is a Pythagorean triple?', options: ['(2, 3, 4)', '(5, 12, 13)', '(4, 5, 6)', '(1, 2, 3)'], answer: '(5, 12, 13)', explanation: '5² + 12² = 25 + 144 = 169 = 13². The others do not satisfy a² + b² = c².' },
+      { q: 'The area of a triangle with base 10 cm and height 6 cm is:', options: ['60 cm²', '30 cm²', '16 cm²', '32 cm²'], answer: '30 cm²', explanation: 'Area = ½ × base × height = ½ × 10 × 6 = 30 cm².' },
+      { q: 'The interior angles of a triangle sum to:', options: ['90°', '180°', '270°', '360°'], answer: '180°', explanation: 'Standard geometry fact: interior angles of any triangle always sum to 180°.' },
+      { q: 'A square has perimeter 24 cm. What is its area?', options: ['36 cm²', '48 cm²', '72 cm²', '144 cm²'], answer: '36 cm²', explanation: 'Side length = 24 ÷ 4 = 6 cm. Area = 6² = 36 cm².' },
+    ],
+    'Number & Percentages': [
+      { q: 'What is 15% of 240?', options: ['24', '32', '36', '40'], answer: '36', explanation: '15% = 0.15. 0.15 × 240 = 36.' },
+      { q: 'A jacket costs $80, then is reduced by 25%. The new price is:', options: ['$55', '$60', '$65', '$75'], answer: '$60', explanation: '25% of 80 = 20. 80 − 20 = $60.' },
+      { q: 'Express 0.75 as a fraction in simplest form.', options: ['3/4', '7/10', '75/100', '4/5'], answer: '3/4', explanation: '0.75 = 75/100 = 3/4 (dividing top and bottom by 25).' },
+      { q: 'What is the value of 2³ × 3²?', options: ['72', '36', '54', '108'], answer: '72', explanation: '2³ = 8 and 3² = 9. So 8 × 9 = 72.' },
+      { q: 'A price increases from $40 to $50. What is the percentage increase?', options: ['10%', '20%', '25%', '50%'], answer: '25%', explanation: 'Increase = $10. Percentage = (10/40) × 100 = 25%.' },
+    ],
+    'Statistics': [
+      { q: 'Find the mean of: 4, 7, 9, 10, 5', options: ['7', '7.5', '6', '8'], answer: '7', explanation: 'Sum = 35. Mean = 35 ÷ 5 = 7.' },
+      { q: 'Find the median of: 3, 8, 1, 5, 9, 2, 7', options: ['5', '6', '7', '4'], answer: '5', explanation: 'Sort: 1, 2, 3, 5, 7, 8, 9. Middle value (4th of 7) = 5.' },
+      { q: 'Find the mode of: 2, 4, 4, 5, 7, 4, 8', options: ['4', '5', '7', '2'], answer: '4', explanation: 'Mode = the value appearing most often. The number 4 appears 3 times.' },
+      { q: 'The range of a data set is:', options: ['Mean of all values', 'Difference between largest and smallest', 'Most common value', 'Sum divided by count'], answer: 'Difference between largest and smallest', explanation: 'Range = max − min. It measures the spread of the data.' },
+      { q: 'A bag has 3 red and 7 blue balls. P(picking red) is:', options: ['3/10', '3/7', '7/10', '1/3'], answer: '3/10', explanation: 'P(red) = favourable / total = 3 / (3 + 7) = 3/10.' },
+    ],
+    'Trigonometry': [
+      { q: 'In a right triangle, sin(θ) is defined as:', options: ['Opposite / Hypotenuse', 'Adjacent / Hypotenuse', 'Opposite / Adjacent', 'Hypotenuse / Opposite'], answer: 'Opposite / Hypotenuse', explanation: 'SOH from SOH-CAH-TOA: sin = Opposite / Hypotenuse.' },
+      { q: 'What is sin(30°)?', options: ['0.5', '0.707', '0.866', '1'], answer: '0.5', explanation: 'sin(30°) = 1/2 = 0.5. This is a standard angle to memorise.' },
+      { q: 'cos(60°) equals:', options: ['√3/2', '1/2', '√2/2', '1'], answer: '1/2', explanation: 'cos(60°) = 0.5. (Note: cos(60°) = sin(30°).)' },
+      { q: 'Which of these statements is true?', options: ['sin²θ + cos²θ = 1', 'sin²θ − cos²θ = 1', 'sin θ + cos θ = 1', 'tan θ = sin θ × cos θ'], answer: 'sin²θ + cos²θ = 1', explanation: 'Pythagorean identity. Always true for any angle θ.' },
+      { q: 'tan(45°) =', options: ['0', '1', '√2', '∞'], answer: '1', explanation: 'tan(45°) = sin(45°)/cos(45°) = (√2/2)/(√2/2) = 1.' },
+    ],
+  },
+ 
+  Physics: {
+    'Forces & Motion': [
+      { q: 'Newton\'s second law is expressed as:', options: ['F = ma', 'F = m/a', 'F = m + a', 'F = m − a'], answer: 'F = ma', explanation: 'Force = mass × acceleration. Standard Newton\'s second law equation.' },
+      { q: 'A car accelerates from rest at 4 m/s². After 5 seconds its velocity is:', options: ['9 m/s', '20 m/s', '25 m/s', '4 m/s'], answer: '20 m/s', explanation: 'v = u + at = 0 + 4 × 5 = 20 m/s.' },
+      { q: 'The SI unit of force is:', options: ['Joule', 'Watt', 'Newton', 'Pascal'], answer: 'Newton', explanation: '1 Newton = 1 kg·m/s². Named after Sir Isaac Newton.' },
+      { q: 'Acceleration due to gravity on Earth is approximately:', options: ['8.8 m/s²', '9.8 m/s²', '10.8 m/s²', '11.8 m/s²'], answer: '9.8 m/s²', explanation: 'g ≈ 9.8 m/s² near Earth\'s surface (often rounded to 10 in IGCSE problems).' },
+      { q: 'Momentum is defined as:', options: ['mass × velocity', 'mass × acceleration', 'force × time', 'force × distance'], answer: 'mass × velocity', explanation: 'p = mv. Momentum is the product of mass and velocity.' },
+    ],
+    'Electricity': [
+      { q: 'Ohm\'s Law states:', options: ['V = IR', 'V = I/R', 'V = I + R', 'V = I − R'], answer: 'V = IR', explanation: 'Voltage = Current × Resistance. Foundation of basic circuit analysis.' },
+      { q: 'The SI unit of electrical resistance is:', options: ['Volt', 'Ampere', 'Ohm', 'Watt'], answer: 'Ohm', explanation: '1 Ohm (Ω) = 1 V/A. Named after Georg Ohm.' },
+      { q: 'In a series circuit, the current:', options: ['Is the same everywhere', 'Splits at each junction', 'Increases with each component', 'Decreases with each component'], answer: 'Is the same everywhere', explanation: 'In series, current has only one path so it\'s identical at every point.' },
+      { q: 'A 12 V battery drives 3 A through a circuit. The resistance is:', options: ['4 Ω', '36 Ω', '15 Ω', '0.25 Ω'], answer: '4 Ω', explanation: 'R = V/I = 12/3 = 4 Ω.' },
+      { q: 'Power dissipated by a resistor is given by:', options: ['P = VI', 'P = V/I', 'P = V + I', 'P = V − I'], answer: 'P = VI', explanation: 'Power = Voltage × Current. Also expressible as I²R or V²/R.' },
+    ],
+    'Waves': [
+      { q: 'Wave speed equation:', options: ['v = fλ', 'v = f/λ', 'v = f + λ', 'v = f − λ'], answer: 'v = fλ', explanation: 'Speed = frequency × wavelength. Fundamental wave equation.' },
+      { q: 'The unit of frequency is:', options: ['Metre', 'Second', 'Hertz', 'Newton'], answer: 'Hertz', explanation: '1 Hz = 1 cycle per second. Named after Heinrich Hertz.' },
+      { q: 'Sound waves are:', options: ['Transverse', 'Longitudinal', 'Electromagnetic', 'Standing only'], answer: 'Longitudinal', explanation: 'Sound waves consist of compressions and rarefactions parallel to the direction of travel.' },
+      { q: 'Light travels in a vacuum at approximately:', options: ['3 × 10⁵ m/s', '3 × 10⁶ m/s', '3 × 10⁸ m/s', '3 × 10¹⁰ m/s'], answer: '3 × 10⁸ m/s', explanation: 'The speed of light in a vacuum is c ≈ 299,792,458 m/s ≈ 3 × 10⁸ m/s.' },
+      { q: 'When light passes from air into glass, it:', options: ['Speeds up', 'Slows down', 'Stays the same speed', 'Stops completely'], answer: 'Slows down', explanation: 'Light slows in denser media. This causes refraction (bending of light).' },
+    ],
+    'Energy': [
+      { q: 'The unit of energy is the:', options: ['Watt', 'Joule', 'Newton', 'Pascal'], answer: 'Joule', explanation: '1 Joule = 1 N·m = energy to apply 1 N over 1 m.' },
+      { q: 'Kinetic energy is calculated as:', options: ['½mv²', 'mv²', 'mgh', 'mv'], answer: '½mv²', explanation: 'KE = ½ × mass × velocity². Note the factor of one-half.' },
+      { q: 'Gravitational potential energy is:', options: ['mgh', '½mv²', 'mv', 'F × d'], answer: 'mgh', explanation: 'GPE = mass × gravity × height. Energy stored due to position above a reference level.' },
+      { q: 'Energy can be:', options: ['Created from nothing', 'Destroyed completely', 'Transformed but not destroyed', 'Multiplied by adding fuel'], answer: 'Transformed but not destroyed', explanation: 'Conservation of Energy: total energy is constant; only the form changes.' },
+      { q: 'Power is defined as:', options: ['Energy × time', 'Energy / time', 'Energy + time', 'Force × time'], answer: 'Energy / time', explanation: 'P = E/t. Measured in Watts (1 W = 1 J/s).' },
+    ],
+  },
+ 
+  Biology: {
+    'Cell Biology': [
+      { q: 'The structure that controls what enters and leaves an animal cell is the:', options: ['Cell wall', 'Cell membrane', 'Nucleus', 'Cytoplasm'], answer: 'Cell membrane', explanation: 'Cell membrane is selectively permeable. (Cell walls are found in plants, fungi, and bacteria — not animal cells.)' },
+      { q: 'Photosynthesis occurs in the:', options: ['Mitochondria', 'Nucleus', 'Chloroplasts', 'Ribosomes'], answer: 'Chloroplasts', explanation: 'Chloroplasts contain chlorophyll and convert light energy into chemical energy.' },
+      { q: 'The "powerhouse" of the cell is the:', options: ['Nucleus', 'Mitochondrion', 'Chloroplast', 'Vacuole'], answer: 'Mitochondrion', explanation: 'Mitochondria produce ATP through respiration — the cell\'s usable energy currency.' },
+      { q: 'Which cell structure contains DNA?', options: ['Cytoplasm', 'Cell membrane', 'Nucleus', 'Ribosome'], answer: 'Nucleus', explanation: 'In eukaryotic cells, DNA is housed in the nucleus.' },
+      { q: 'Plant cells have all of the following EXCEPT:', options: ['Cell wall', 'Chloroplasts', 'Centrioles', 'Large vacuole'], answer: 'Centrioles', explanation: 'Centrioles are typically found in animal cells, not plant cells.' },
+    ],
+    'Human Body Systems': [
+      { q: 'Oxygen and carbon dioxide are exchanged in the:', options: ['Trachea', 'Bronchi', 'Alveoli', 'Diaphragm'], answer: 'Alveoli', explanation: 'Alveoli are tiny air sacs with thin walls — gas exchange happens by diffusion across them.' },
+      { q: 'The chamber of the heart that pumps blood to the body is the:', options: ['Right atrium', 'Right ventricle', 'Left atrium', 'Left ventricle'], answer: 'Left ventricle', explanation: 'The left ventricle is the most muscular chamber, pumping oxygenated blood through the aorta to the body.' },
+      { q: 'Insulin is produced by the:', options: ['Liver', 'Stomach', 'Pancreas', 'Kidney'], answer: 'Pancreas', explanation: 'The pancreas produces insulin (and glucagon) to regulate blood sugar.' },
+      { q: 'The largest organ in the human body is the:', options: ['Brain', 'Liver', 'Skin', 'Lungs'], answer: 'Skin', explanation: 'Skin is the largest organ by surface area and weight.' },
+      { q: 'Red blood cells transport oxygen using a protein called:', options: ['Insulin', 'Haemoglobin', 'Glucose', 'Albumin'], answer: 'Haemoglobin', explanation: 'Haemoglobin contains iron, which binds oxygen reversibly.' },
+    ],
+    'Genetics & Inheritance': [
+      { q: 'DNA stands for:', options: ['Deoxyribonucleic acid', 'Dinitrogen acid', 'Diribonucleic acid', 'Dinucleic acid'], answer: 'Deoxyribonucleic acid', explanation: 'DNA = Deoxyribonucleic Acid. Stores genetic information in all living cells.' },
+      { q: 'A human body cell normally has how many chromosomes?', options: ['23', '46', '92', '12'], answer: '46', explanation: '23 pairs of chromosomes = 46 in total in human somatic cells.' },
+      { q: 'The genotype Tt represents:', options: ['Homozygous dominant', 'Homozygous recessive', 'Heterozygous', 'Mutant'], answer: 'Heterozygous', explanation: 'Heterozygous = one dominant + one recessive allele.' },
+      { q: 'Sex chromosomes in human males are:', options: ['XX', 'XY', 'YY', 'XO'], answer: 'XY', explanation: 'Males have one X and one Y chromosome. Females have XX.' },
+      { q: 'Which scientists are credited with the structure of DNA?', options: ['Darwin & Wallace', 'Watson & Crick', 'Mendel & Morgan', 'Pasteur & Koch'], answer: 'Watson & Crick', explanation: 'James Watson and Francis Crick proposed the double helix structure in 1953 (with key data from Rosalind Franklin).' },
+    ],
+    'Ecology': [
+      { q: 'Producers in an ecosystem are typically:', options: ['Herbivores', 'Carnivores', 'Plants', 'Decomposers'], answer: 'Plants', explanation: 'Plants produce their own food via photosynthesis — they\'re the base of most food chains.' },
+      { q: 'A food chain typically starts with:', options: ['A predator', 'A producer', 'A decomposer', 'A consumer'], answer: 'A producer', explanation: 'Producers (plants) capture solar energy. Energy then flows up to consumers.' },
+      { q: 'The process by which water evaporates and forms clouds is part of the:', options: ['Carbon cycle', 'Nitrogen cycle', 'Water cycle', 'Rock cycle'], answer: 'Water cycle', explanation: 'The water cycle includes evaporation, condensation, precipitation, and collection.' },
+      { q: 'A community of organisms with their physical environment forms a(n):', options: ['Population', 'Species', 'Ecosystem', 'Habitat'], answer: 'Ecosystem', explanation: 'Ecosystem = biotic (living) + abiotic (non-living) factors interacting.' },
+      { q: 'Which gas do plants take in for photosynthesis?', options: ['Oxygen', 'Carbon dioxide', 'Nitrogen', 'Hydrogen'], answer: 'Carbon dioxide', explanation: 'Plants absorb CO₂ and release O₂ during photosynthesis.' },
+    ],
+  },
+ 
+  Chemistry: {
+    'Atomic Structure': [
+      { q: 'The atomic number of an element equals the number of:', options: ['Neutrons', 'Protons', 'Electrons + Neutrons', 'Protons + Neutrons'], answer: 'Protons', explanation: 'Atomic number Z = number of protons. (In a neutral atom, this also equals the number of electrons.)' },
+      { q: 'Which subatomic particle has a negative charge?', options: ['Proton', 'Neutron', 'Electron', 'Nucleus'], answer: 'Electron', explanation: 'Electrons carry a charge of −1. Protons are +1, neutrons are neutral.' },
+      { q: 'The mass number of an atom is:', options: ['Number of protons only', 'Number of electrons only', 'Number of protons + neutrons', 'Number of neutrons only'], answer: 'Number of protons + neutrons', explanation: 'Mass number A = protons + neutrons. Electrons have negligible mass.' },
+      { q: 'Isotopes of an element have:', options: ['Same protons, different neutrons', 'Same neutrons, different protons', 'Same protons and neutrons', 'Different electrons'], answer: 'Same protons, different neutrons', explanation: 'Isotopes have the same atomic number but different mass numbers (e.g. Carbon-12 and Carbon-14).' },
+      { q: 'Where are electrons located?', options: ['In the nucleus', 'In shells around the nucleus', 'Spread evenly through the atom', 'Outside the atom'], answer: 'In shells around the nucleus', explanation: 'Electrons occupy energy levels (shells) at specific distances from the nucleus.' },
+    ],
+    'The Periodic Table': [
+      { q: 'Group 1 elements are also known as:', options: ['Halogens', 'Noble gases', 'Alkali metals', 'Transition metals'], answer: 'Alkali metals', explanation: 'Group 1: Li, Na, K, Rb, Cs, Fr — soft, highly reactive metals.' },
+      { q: 'Group 7 elements are called:', options: ['Halogens', 'Alkali metals', 'Noble gases', 'Lanthanides'], answer: 'Halogens', explanation: 'Group 7 (or 17): F, Cl, Br, I, At — non-metals that form salts.' },
+      { q: 'Group 0 (or 8) elements are:', options: ['Alkali metals', 'Halogens', 'Noble gases', 'Transition metals'], answer: 'Noble gases', explanation: 'Group 0: He, Ne, Ar, Kr, Xe, Rn — full outer shells, very unreactive.' },
+      { q: 'As you go down Group 1, reactivity:', options: ['Decreases', 'Increases', 'Stays the same', 'Becomes zero'], answer: 'Increases', explanation: 'Outer electron is held less tightly going down the group, so it\'s easier to lose, making the element more reactive.' },
+      { q: 'Elements in the same period have the same:', options: ['Number of electron shells', 'Number of outer electrons', 'Atomic mass', 'Reactivity'], answer: 'Number of electron shells', explanation: 'Period number = number of electron shells.' },
+    ],
+    'Chemical Reactions': [
+      { q: 'A chemical reaction that releases heat is called:', options: ['Endothermic', 'Exothermic', 'Catalytic', 'Reversible'], answer: 'Exothermic', explanation: 'Exo = "out". Releases heat to the surroundings.' },
+      { q: 'A catalyst is a substance that:', options: ['Is consumed in the reaction', 'Speeds up a reaction without being used up', 'Slows down all reactions', 'Reacts only with metals'], answer: 'Speeds up a reaction without being used up', explanation: 'Catalysts lower activation energy and are recovered unchanged at the end.' },
+      { q: 'Balance:  H₂ + O₂ → H₂O. Coefficients are:', options: ['1, 1, 1', '2, 1, 2', '1, 2, 2', '2, 2, 1'], answer: '2, 1, 2', explanation: '2H₂ + O₂ → 2H₂O. Now: 4 H atoms each side, 2 O atoms each side. Balanced.' },
+      { q: 'pH 7 is:', options: ['Strongly acidic', 'Strongly basic', 'Neutral', 'Salt'], answer: 'Neutral', explanation: 'Pure water has pH 7. Below 7 = acid, above 7 = base.' },
+      { q: 'Which gas turns limewater milky?', options: ['Oxygen', 'Hydrogen', 'Carbon dioxide', 'Nitrogen'], answer: 'Carbon dioxide', explanation: 'CO₂ reacts with calcium hydroxide (limewater) forming insoluble calcium carbonate, the white cloudiness.' },
+    ],
+    'Acids, Bases & Salts': [
+      { q: 'An acid produces which ion in water?', options: ['OH⁻', 'H⁺', 'Na⁺', 'Cl⁻'], answer: 'H⁺', explanation: 'Acids release H⁺ (hydrogen ions) in aqueous solution.' },
+      { q: 'A base produces which ion in water?', options: ['H⁺', 'OH⁻', 'O²⁻', 'H₃O⁺'], answer: 'OH⁻', explanation: 'Alkalis (soluble bases) release OH⁻ (hydroxide ions) in water.' },
+      { q: 'Acid + Base →', options: ['Salt + Hydrogen', 'Salt + Water', 'Salt + Carbon dioxide', 'No reaction'], answer: 'Salt + Water', explanation: 'Neutralisation: H⁺ + OH⁻ → H₂O. The remaining ions form a salt.' },
+      { q: 'Acid + Metal →', options: ['Salt + Water', 'Salt + Hydrogen', 'Salt + Oxygen', 'No reaction'], answer: 'Salt + Hydrogen', explanation: 'A reactive metal displaces hydrogen from an acid, producing the metal salt and H₂ gas.' },
+      { q: 'Universal indicator turns red in:', options: ['A strong acid', 'A weak base', 'Neutral solution', 'A strong base'], answer: 'A strong acid', explanation: 'Universal indicator: red = strong acid (pH 0–2), green = neutral (pH 7), purple = strong base (pH 13–14).' },
+    ],
+  },
+ 
+  English: {
+    'Reading Comprehension': [
+      { q: 'A "metaphor" is:', options: ['A direct comparison using "like" or "as"', 'An indirect comparison without "like" or "as"', 'An exaggeration', 'A repeated sound'], answer: 'An indirect comparison without "like" or "as"', explanation: 'Metaphor: "Time is a thief." Simile would say "Time is like a thief."' },
+      { q: 'What is the main purpose of a topic sentence?', options: ['Conclude a paragraph', 'State the main idea of a paragraph', 'Provide an example', 'Add an interesting fact'], answer: 'State the main idea of a paragraph', explanation: 'Topic sentence = anchor of the paragraph. Usually placed first.' },
+      { q: 'Which of these is an example of personification?', options: ['The wind whispered through the trees', 'The wind was strong', 'The wind blew at 50 mph', 'The wind was cold'], answer: 'The wind whispered through the trees', explanation: 'Personification gives human qualities ("whispered") to non-human things.' },
+      { q: '"He is as brave as a lion" is an example of:', options: ['Metaphor', 'Simile', 'Hyperbole', 'Alliteration'], answer: 'Simile', explanation: 'Simile uses "like" or "as" for comparison.' },
+      { q: 'The narrator who refers to themselves as "I" is using:', options: ['First person', 'Second person', 'Third person omniscient', 'Third person limited'], answer: 'First person', explanation: 'First person uses I/me/we. Second uses you. Third uses he/she/they.' },
+    ],
+    'Grammar & Punctuation': [
+      { q: 'Choose the correct sentence:', options: ['Their going to the store', 'There going to the store', 'They\'re going to the store', 'Theyre going to the store'], answer: 'They\'re going to the store', explanation: 'They\'re = "they are". Their = possessive. There = location.' },
+      { q: 'A semicolon is used to:', options: ['End a sentence', 'Join two related independent clauses', 'Introduce a list', 'Show possession'], answer: 'Join two related independent clauses', explanation: 'Example: "I love coffee; she prefers tea." Both halves could stand alone, but they\'re closely linked.' },
+      { q: 'Which sentence uses an apostrophe correctly?', options: ['The dog\'s tail wagged', 'The dogs tail wagged', 'The dogs\' tail wagged', 'The dog tail\'s wagged'], answer: 'The dog\'s tail wagged', explanation: 'Singular possession: dog\'s. (Plural would be "dogs\'" — note position of the apostrophe.)' },
+      { q: 'The past tense of "run" is:', options: ['Runned', 'Ran', 'Running', 'Runs'], answer: 'Ran', explanation: '"Run" is irregular: run / ran / run.' },
+      { q: 'Which is a complete sentence?', options: ['Walking down the street', 'The boy walked down the street', 'After the rain stopped', 'Because she was happy'], answer: 'The boy walked down the street', explanation: 'A complete sentence needs a subject ("The boy") and a verb ("walked"). Others are fragments.' },
+    ],
+    'Literature': [
+      { q: 'Shakespeare wrote during which historical period?', options: ['Medieval', 'Renaissance', 'Victorian', 'Romantic'], answer: 'Renaissance', explanation: 'Shakespeare (1564–1616) wrote during the English Renaissance / Elizabethan era.' },
+      { q: '"Romeo and Juliet" is a:', options: ['Comedy', 'Tragedy', 'History', 'Sonnet'], answer: 'Tragedy', explanation: 'A Shakespearean tragedy ending in the deaths of both lovers.' },
+      { q: 'Which is NOT a feature of poetry?', options: ['Rhyme', 'Rhythm', 'Imagery', 'Long paragraphs'], answer: 'Long paragraphs', explanation: 'Poetry uses lines/stanzas, not paragraphs. The other three are common poetic features.' },
+      { q: 'A "sonnet" typically has how many lines?', options: ['10', '12', '14', '16'], answer: '14', explanation: 'Traditional sonnet (Shakespearean or Petrarchan) = 14 lines, often in iambic pentameter.' },
+      { q: 'The protagonist of a story is:', options: ['The villain', 'The main character', 'The narrator', 'The setting'], answer: 'The main character', explanation: 'Protagonist = central character whose journey the story follows.' },
+    ],
+    'Writing Skills': [
+      { q: 'A persuasive essay aims to:', options: ['Tell a story', 'Describe a scene', 'Convince the reader', 'Provide instructions'], answer: 'Convince the reader', explanation: 'Persuasive writing presents arguments to influence the reader\'s opinion.' },
+      { q: 'A good thesis statement is:', options: ['Vague and general', 'Clear and specific', 'A question', 'A description'], answer: 'Clear and specific', explanation: 'Strong thesis = clear claim + specific reasons. Frames the entire essay.' },
+      { q: 'The best place for a topic sentence in an academic paragraph is:', options: ['At the end', 'In the middle', 'At the start', 'Doesn\'t matter'], answer: 'At the start', explanation: 'Topic sentence first → reader knows the paragraph\'s focus immediately.' },
+      { q: 'Which is the most formal opening for a letter?', options: ['Hi there!', 'Dear Sir/Madam,', 'Hey,', 'What\'s up?'], answer: 'Dear Sir/Madam,', explanation: 'Standard formal salutation when you don\'t know the recipient\'s name.' },
+      { q: '"In conclusion" is typically used to:', options: ['Introduce a new topic', 'Add an example', 'Begin a final summary', 'Disagree with a point'], answer: 'Begin a final summary', explanation: 'Conclusion phrases signal the closing summary of an essay or argument.' },
+    ],
+  },
+}
+ 
+// Subject colours — premium palette
+const SUBJECT_COLOURS = {
+  Mathematics: '#8B1A2E',
+  Physics: '#1E3A8A',
+  Chemistry: '#166534',
+  Biology: '#7C2D12',
+  English: '#6B21A8',
+  History: '#92400E',
+  Geography: '#0F766E',
+  'Computer Science': '#1F2937',
+  'Business Studies': '#7E22CE',
+  Economics: '#9F1239',
+}
+const subjectColour = (s) => SUBJECT_COLOURS[s] || '#8B1A2E'
+ 
+// Persisted XP/sessions in localStorage
+const PRACTICE_XP_KEY = 'sm_practice_xp'
+const PRACTICE_HIST_KEY = 'sm_practice_history'
+ 
+const loadXp = () => {
+  try { return parseInt(localStorage.getItem(PRACTICE_XP_KEY) || '0', 10) || 0 }
+  catch { return 0 }
+}
+const saveXp = (xp) => { try { localStorage.setItem(PRACTICE_XP_KEY, String(xp)) } catch {} }
+const loadHist = () => {
+  try { return JSON.parse(localStorage.getItem(PRACTICE_HIST_KEY) || '[]') }
+  catch { return [] }
+}
+const saveHist = (hist) => { try { localStorage.setItem(PRACTICE_HIST_KEY, JSON.stringify(hist.slice(-50))) } catch {} }
+ 
+// Shuffle helper
+const shuffle = (arr) => {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+ 
+function PracticeTab({ user, toast, goTo }) {
+  const [stage, setStage]       = useState('pick')      // 'pick' | 'quiz' | 'result'
+  const [subject, setSubject]   = useState(null)
+  const [topic, setTopic]       = useState(null)
+  const [questions, setQs]      = useState([])
+  const [answers, setAnswers]   = useState({})
+  const [result, setResult]     = useState(null)
+  const [xp, setXp]             = useState(loadXp())
+  const [hist, setHist]         = useState(loadHist())
+ 
+  const allSubjects = Object.keys(QUESTION_BANK)
+ 
+  const startQuiz = (subj, top) => {
+    const bank = QUESTION_BANK[subj]?.[top] || []
+    if (bank.length === 0) {
+      toast?.error?.('No questions for this topic yet.')
+      return
+    }
+    // Pick 5, shuffle, shuffle options too
+    const picked = shuffle(bank).slice(0, 5).map((q, i) => ({
+      ...q,
+      id: i + 1,
+      shuffledOptions: shuffle(q.options),
+      marks: q.marks || 5,
+    }))
+    setSubject(subj)
+    setTopic(top)
+    setQs(picked)
+    setAnswers({})
+    setResult(null)
+    setStage('quiz')
+  }
+ 
+  const submit = () => {
+    let correct = 0
+    questions.forEach(q => {
+      if (answers[q.id] === q.answer) correct++
+    })
+    const score = Math.round((correct / questions.length) * 100)
+    const xpEarned = correct * 20  // 20 XP per correct = max 100/quiz
+    const newXp = xp + xpEarned
+    const session = {
+      subject, topic, score, correct,
+      total: questions.length,
+      xpEarned,
+      date: new Date().toISOString(),
+    }
+    const newHist = [...hist, session]
+    setXp(newXp)
+    setHist(newHist)
+    saveXp(newXp)
+    saveHist(newHist)
+    setResult({ correct, score, xpEarned })
+    setStage('result')
+    if (score >= 80)      toast?.ok?.(`Excellent! +${xpEarned} XP`)
+    else if (score >= 60) toast?.ok?.(`Good work! +${xpEarned} XP`)
+    else                  toast?.info?.(`+${xpEarned} XP. Try again to improve!`)
+  }
+ 
+  const resetToPick = () => {
+    setStage('pick')
+    setSubject(null)
+    setTopic(null)
+    setQuestions([])
+    setAnswers({})
+    setResult(null)
+  }
+ 
+  // ── PICK SCREEN ──────────────────────────────────────────
+  if (stage === 'pick') {
+    return (
+      <div>
+        {/* Hero */}
+        <div className="card" style={{
+          padding: 0, marginBottom: 18, overflow: 'hidden',
+          background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+          color: '#fff',
+        }}>
+          <div style={{ padding: '24px 30px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+              Practice &amp; Master
+            </div>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              Sharpen your skills, one topic at a time
+            </h2>
+            <p style={{ fontSize: 13.5, opacity: .85, marginTop: 8, marginBottom: 0, maxWidth: 540, lineHeight: 1.55 }}>
+              5 questions per session. Instant feedback. Earn XP for every correct answer. Choose a subject below to begin.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+            {[
+              ['Total XP', xp.toLocaleString()],
+              ['Sessions', hist.length],
+              ['Best Score', hist.length ? `${Math.max(...hist.map(h => h.score))}%` : '—'],
+              ['Avg Score', hist.length ? `${Math.round(hist.reduce((s, h) => s + h.score, 0) / hist.length)}%` : '—'],
+            ].map(([l, v]) => (
+              <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
+                  {l}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+ 
+        {/* Subject grid */}
+        <div style={{ marginBottom: 14 }}>
+          <div className="sec-tag">Pick a subject</div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12, marginBottom: 24 }}>
+          {allSubjects.map(s => {
+            const col   = subjectColour(s)
+            const topics = Object.keys(QUESTION_BANK[s])
+            return (
+              <div key={s} className="card" style={{ padding: 0, overflow: 'hidden', borderTop: `4px solid ${col}` }}>
+                <div style={{ padding: '16px 18px 12px' }}>
+                  <div className="serif" style={{ fontSize: 18, color: 'var(--s900)', marginBottom: 4 }}>{s}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600 }}>
+                    {topics.length} topic{topics.length === 1 ? '' : 's'} · IGCSE / Edexcel
+                  </div>
+                </div>
+                <div style={{ borderTop: '1px solid var(--border)', padding: '8px 8px' }}>
+                  {topics.map(t => (
+                    <button
+                      key={t}
+                      onClick={() => startQuiz(s, t)}
+                      style={{
+                        width: '100%', textAlign: 'left',
+                        padding: '8px 10px', borderRadius: 6,
+                        border: 'none', background: 'transparent',
+                        cursor: 'pointer', fontSize: 13, color: 'var(--s700)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        transition: 'background .15s',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = col + '14' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                    >
+                      <span>{t}</span>
+                      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke={col} strokeWidth="2.5" strokeLinecap="round">
+                        <polyline points="9 18 15 12 9 6"/>
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+ 
+        {/* Recent sessions */}
+        {hist.length > 0 && (
+          <div className="card">
+            <div className="ctitle" style={{ marginBottom: 12 }}>Recent Sessions</div>
+            <table className="tbl">
+              <thead>
+                <tr><th>Date</th><th>Subject</th><th>Topic</th><th>Score</th><th>XP</th></tr>
+              </thead>
+              <tbody>
+                {[...hist].reverse().slice(0, 8).map((h, i) => (
+                  <tr key={i}>
+                    <td style={{ fontSize: 12.5, color: 'var(--s500)' }}>
+                      {new Date(h.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                    </td>
+                    <td style={{ fontWeight: 600 }}>{h.subject}</td>
+                    <td style={{ fontSize: 13, color: 'var(--s600)' }}>{h.topic}</td>
+                    <td>
+                      <span className="mono" style={{ fontWeight: 700, color: h.score >= 80 ? 'var(--g600)' : h.score >= 60 ? 'var(--b700)' : 'var(--a600)' }}>
+                        {h.score}%
+                      </span>
+                    </td>
+                    <td>
+                      <span className="mono" style={{ fontWeight: 700, color: 'var(--p600)' }}>+{h.xpEarned}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    )
+  }
+ 
+  // ── QUIZ SCREEN ──────────────────────────────────────────
+  if (stage === 'quiz') {
+    const answered = Object.keys(answers).length
+    const col = subjectColour(subject)
+    return (
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
+          <div>
+            <div className="sec-tag">{subject} · IGCSE Practice</div>
+            <h2 className="serif" style={{ fontSize: 22, color: 'var(--s900)' }}>{topic}</h2>
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ fontSize: 13, color: 'var(--s500)' }}>{answered}/{questions.length} answered</div>
+            <button className="btn btn-s btn-sm" onClick={resetToPick}>Change Topic</button>
+          </div>
+        </div>
+ 
+        <div className="prog-bar" style={{ marginBottom: 20, height: 8 }}>
+          <div className="prog-fill" style={{ width: `${(answered / questions.length) * 100}%`, background: col, transition: 'width .3s' }}/>
+        </div>
+ 
+        {questions.map(q => (
+          <div key={q.id} className="card" style={{ marginBottom: 14, borderColor: answers[q.id] ? col : 'var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', flex: 1 }}>
+                <div style={{
+                  width: 26, height: 26, borderRadius: '50%',
+                  background: answers[q.id] ? col : 'var(--s200)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 700,
+                  color: answers[q.id] ? '#fff' : 'var(--s500)',
+                  flexShrink: 0,
+                }}>{q.id}</div>
+                <span style={{ fontSize: 15, color: 'var(--s800)', fontWeight: 500, lineHeight: 1.5 }}>{q.q}</span>
+              </div>
+              <span style={{ fontSize: 11, color: 'var(--s400)', flexShrink: 0, marginLeft: 8 }}>{q.marks} marks</span>
+            </div>
+            {q.shuffledOptions.map(opt => (
+              <label
+                key={opt}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '10px 14px', marginBottom: 7,
+                  borderRadius: 'var(--rmd)', cursor: 'pointer',
+                  border: `1.5px solid ${answers[q.id] === opt ? col : 'var(--border)'}`,
+                  background: answers[q.id] === opt ? col + '0F' : 'var(--bg)',
+                  transition: 'all .15s',
+                }}
+              >
+                <input
+                  type="radio"
+                  name={`q${q.id}`}
+                  value={opt}
+                  checked={answers[q.id] === opt}
+                  onChange={() => setAnswers(a => ({ ...a, [q.id]: opt }))}
+                  style={{ accentColor: col }}
+                />
+                <span style={{ fontSize: 14, color: answers[q.id] === opt ? col : 'var(--s700)', fontWeight: answers[q.id] === opt ? 600 : 400 }}>
+                  {opt}
+                </span>
+              </label>
+            ))}
+          </div>
+        ))}
+ 
+        <div style={{ position: 'sticky', bottom: 16, background: 'var(--white)', border: '1px solid var(--border)', borderRadius: 'var(--rxl)', padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: 'var(--sh-lg)' }}>
+          <div style={{ fontSize: 13.5, color: 'var(--s600)' }}>
+            {answered < questions.length
+              ? <span style={{ color: 'var(--a600)' }}>{questions.length - answered} unanswered</span>
+              : <span style={{ color: 'var(--g600)' }}>All questions answered</span>
+            }
+          </div>
+          <button
+            className="btn btn-p"
+            onClick={submit}
+            disabled={answered === 0}
+            style={{ background: col, borderColor: col }}
+          >
+            Submit Answers
+          </button>
+        </div>
+      </div>
+    )
+  }
+ 
+  // ── RESULT SCREEN ────────────────────────────────────────
+  if (stage === 'result' && result) {
+    const col = subjectColour(subject)
+    const wrong = questions.filter(q => answers[q.id] && answers[q.id] !== q.answer)
+    return (
+      <div style={{ maxWidth: 640, margin: '0 auto' }}>
+        <div className="card" style={{ textAlign: 'center', padding: 32 }}>
+          <div style={{
+            width: 80, height: 80, borderRadius: '50%',
+            background: result.score >= 80 ? 'var(--g50)' : result.score >= 60 ? 'var(--b50)' : 'var(--a50)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 16px',
+          }}>
+            <span className="mono" style={{
+              fontSize: 28, fontWeight: 700,
+              color: result.score >= 80 ? 'var(--g600)' : result.score >= 60 ? 'var(--b700)' : 'var(--a600)',
+            }}>{result.score}%</span>
+          </div>
+          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', marginBottom: 6 }}>
+            {result.score >= 80 ? 'Excellent work!' : result.score >= 60 ? 'Good effort!' : 'Keep practising!'}
+          </h2>
+          <p style={{ fontSize: 14, color: 'var(--s500)', marginBottom: 20 }}>
+            {topic} — {subject}
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+            {[
+              ['Correct', `${result.correct}/${questions.length}`, 'var(--b50)', 'var(--b700)'],
+              ['XP Earned', `+${result.xpEarned}`, 'var(--p50, var(--a50))', 'var(--p600, var(--a600))'],
+              ['Total XP', xp.toLocaleString(), 'var(--g50)', 'var(--g600)'],
+            ].map(([l, v, bg, c]) => (
+              <div key={l} style={{ background: bg, borderRadius: 'var(--rmd)', padding: '14px 10px' }}>
+                <div className="mono" style={{ fontSize: 18, fontWeight: 700, color: c }}>{v}</div>
+                <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 3 }}>{l}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button className="btn btn-p" onClick={() => startQuiz(subject, topic)} style={{ background: col, borderColor: col }}>
+              Try Again
+            </button>
+            <button className="btn btn-s" onClick={resetToPick}>Pick Another Topic</button>
+            <button className="btn btn-s" onClick={() => goTo?.('dashboard')}>Back to Dashboard</button>
+          </div>
+        </div>
+ 
+        {/* Review wrong answers */}
+        {wrong.length > 0 && (
+          <div style={{ marginTop: 18 }}>
+            <div className="sec-tag" style={{ marginBottom: 8 }}>Review</div>
+            <h3 className="serif" style={{ fontSize: 18, color: 'var(--s900)', marginBottom: 14 }}>
+              Let&apos;s look at what you missed
+            </h3>
+            {wrong.map((q, i) => (
+              <div key={i} className="card" style={{ marginBottom: 10, borderLeft: '4px solid var(--r500)' }}>
+                <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--s900)', marginBottom: 8 }}>
+                  Q{q.id}: {q.q}
+                </div>
+                <div style={{ fontSize: 13, marginBottom: 4 }}>
+                  <span style={{ color: 'var(--s500)' }}>Your answer: </span>
+                  <span style={{ color: 'var(--r600)', fontWeight: 600 }}>{answers[q.id]}</span>
+                </div>
+                <div style={{ fontSize: 13, marginBottom: 8 }}>
+                  <span style={{ color: 'var(--s500)' }}>Correct answer: </span>
+                  <span style={{ color: 'var(--g700)', fontWeight: 600 }}>{q.answer}</span>
+                </div>
+                {q.explanation && (
+                  <div style={{ fontSize: 12.5, color: 'var(--s600)', fontStyle: 'italic', background: 'var(--bg)', padding: '8px 12px', borderRadius: 'var(--rsm)' }}>
+                    {q.explanation}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+ 
+  return null
+}
+ 
