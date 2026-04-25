@@ -1012,52 +1012,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               PERSONALISED STUDY PLAN
           ════════════════════════════════════════════ */}
-          {page === 'studyplan' && (
-            <div>
-              <div style={{marginBottom:20}}>
-                <div className="sec-tag">Generated from your mastery data</div>
-                <h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>My Personalised <em style={{color:'var(--b700)'}}>Study Plan</em></h2>
-                <p style={{fontSize:14,color:'var(--s500)',marginTop:4}}>This plan is built from your actual mastery scores. Weakest topics get more time. Refreshes every time you practise.</p>
-              </div>
-              {planLoading ? <div className="lc"><div className="spinner"/></div> : (
-                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:14}}>
-                  {studyPlan.map((day,i) => (
-                    <div key={i} className="card" style={{borderLeft:`4px solid ${day.color}`,borderTopLeftRadius:0,borderBottomLeftRadius:0}}>
-                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}>
-                        <div>
-                          <div style={{fontWeight:700,fontSize:15,color:'var(--s900)'}}>{day.day}</div>
-                          <div style={{fontSize:12,color:'var(--s500)'}}>{day.mins} minutes</div>
-                        </div>
-                        <span className={`badge ${day.priority==='high'?'badge-red':day.priority==='medium'?'badge-amber':'badge-green'}`}>{day.priority==='high'?'Priority':day.priority==='medium'?'Review':'Maintain'}</span>
-                      </div>
-                      <div style={{background:day.color+'15',borderRadius:'var(--rmd)',padding:'10px 12px',marginBottom:12}}>
-                        <div style={{fontWeight:700,fontSize:14,color:'var(--s900)',marginBottom:1}}>{day.topic}</div>
-                        <div style={{fontSize:12,color:'var(--s500)'}}>{day.subject} · Current mastery: <span className="mono" style={{fontWeight:700,color:masteryCol(day.mastery)}}>{day.mastery}%</span></div>
-                      </div>
-                      <div style={{display:'flex',flexDirection:'column',gap:6}}>
-                        {day.tasks.map((task,ti) => (
-                          <div key={ti} style={{display:'flex',gap:8,fontSize:13,color:'var(--s600)'}}>
-                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke={day.color} strokeWidth="2.5" strokeLinecap="round" style={{flexShrink:0,marginTop:2}}><polyline points="20 6 9 17 4 12"/></svg>
-                            {task}
-                          </div>
-                        ))}
-                      </div>
-                      <button className="btn btn-p btn-sm" style={{marginTop:14,width:'100%',justifyContent:'center'}} onClick={() => { goTo('practice'); loadPractice(day.subject, day.topic) }}>
-                        Start {day.day}'s Session
-                      </button>
-                    </div>
-                  ))}
-                  {studyPlan.length === 0 && (
-                    <div className="empty" style={{gridColumn:'1/-1'}}>
-                      <h3>Building your study plan…</h3>
-                      <p>Complete a practice session first so Mshauri can see your mastery levels and build a personalised plan.</p>
-                      <button className="btn btn-p" onClick={() => { goTo('practice'); loadPractice() }}>Start First Practice</button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+          {page === 'studyplan' && <StudyPlanTab user={user} store={store} setPage={setPage} toast={toast} />}
 
           {/* ════════════════════════════════════════════
               RESOURCES — live from teacher uploads
@@ -4451,6 +4406,801 @@ function TimetableTab({ user, store, setInClassroom, setPage, toast }) {
   )
 }
  
+// ═══════════════════════════════════════════════════════════
+// STUDY PLAN TAB — 7-day rolling plan, real data, mark-as-done
+// ═══════════════════════════════════════════════════════════
+const STUDY_PLAN_KEY = 'sm_study_plan'
+const STUDY_PLAN_DONE_KEY = 'sm_study_plan_done'   // tasks marked complete
+const STUDY_PLAN_GENERATED_KEY = 'sm_study_plan_generated'  // ISO date when last regenerated
+ 
+const loadDoneTasks = () => {
+  try { return JSON.parse(localStorage.getItem(STUDY_PLAN_DONE_KEY) || '{}') }
+  catch { return {} }
+}
+const saveDoneTasks = (d) => {
+  try { localStorage.setItem(STUDY_PLAN_DONE_KEY, JSON.stringify(d)) } catch {}
+}
+ 
+const loadStoredPlan = () => {
+  try { return JSON.parse(localStorage.getItem(STUDY_PLAN_KEY) || 'null') }
+  catch { return null }
+}
+const saveStoredPlan = (p) => {
+  try {
+    localStorage.setItem(STUDY_PLAN_KEY, JSON.stringify(p))
+    localStorage.setItem(STUDY_PLAN_GENERATED_KEY, new Date().toISOString())
+  } catch {}
+}
+ 
+// ── PLAN GENERATOR — uses real Practice + Exam history ─────
+const generateStudyPlan = (user, store) => {
+  // Read student's data
+  let practiceHist = []
+  let examHist = []
+  try { practiceHist = JSON.parse(localStorage.getItem('sm_practice_history') || '[]') } catch {}
+  try { examHist = JSON.parse(localStorage.getItem('sm_exam_history') || '[]') } catch {}
+ 
+  // Subject → array of {topic, score, attempts}
+  const subjectStats = {}
+  practiceHist.forEach(s => {
+    if (!subjectStats[s.subject]) subjectStats[s.subject] = {}
+    if (!subjectStats[s.subject][s.topic]) {
+      subjectStats[s.subject][s.topic] = { scores: [], attempts: 0 }
+    }
+    subjectStats[s.subject][s.topic].scores.push(s.score)
+    subjectStats[s.subject][s.topic].attempts++
+  })
+ 
+  // Compute each topic's avg
+  const topicMastery = []
+  Object.entries(subjectStats).forEach(([subject, topics]) => {
+    Object.entries(topics).forEach(([topic, data]) => {
+      const avg = data.scores.reduce((a, b) => a + b, 0) / data.scores.length
+      topicMastery.push({ subject, topic, mastery: Math.round(avg), attempts: data.attempts })
+    })
+  })
+ 
+  // Subjects from QUESTION_BANK that the student hasn't tried yet
+  const allSubjects = Object.keys(QUESTION_BANK)
+  const triedSubjects = new Set(topicMastery.map(t => t.subject))
+  const untriedSubjects = allSubjects.filter(s => !triedSubjects.has(s))
+ 
+  // Find untried topics within tried subjects
+  const untriedTopics = []
+  Object.keys(QUESTION_BANK).forEach(subject => {
+    Object.keys(QUESTION_BANK[subject]).forEach(topic => {
+      const tried = topicMastery.find(t => t.subject === subject && t.topic === topic)
+      if (!tried) {
+        untriedTopics.push({ subject, topic, mastery: 0, attempts: 0 })
+      }
+    })
+  })
+ 
+  // Find student's enrolled rooms (live classes anchor study around them)
+  const studentFullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+  const myRooms = (store?.groupRooms || []).filter(r =>
+    r.students?.some(s => s === studentFullName || s === user?.firstName || (user?.firstName && s.includes(user.firstName)))
+  )
+ 
+  // Map class days: { 1: ['Mathematics', 'Biology'], 3: [...] }
+  const classesByDay = {}
+  myRooms.forEach(room => {
+    const parsed = parseScheduleString(room.schedule)
+    if (!parsed) return
+    parsed.days.forEach(dow => {
+      if (!classesByDay[dow]) classesByDay[dow] = []
+      classesByDay[dow].push({ subject: room.subject, time: parsed.startMins, teacher: room.teacher })
+    })
+  })
+ 
+  // Build the 7-day plan starting today
+  const plan = []
+  const today = new Date()
+  const dayLongName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+ 
+  // Sort weak topics by mastery (lowest first) for priority
+  const weakTopics = [...topicMastery].filter(t => t.mastery < 70).sort((a, b) => a.mastery - b.mastery)
+  const reviewTopics = [...topicMastery].filter(t => t.mastery >= 70 && t.mastery < 85).sort((a, b) => a.mastery - b.mastery)
+ 
+  // Build a rotation pool that prioritises weak first, then untried in tried subjects, then untried subjects
+  const studyPool = [
+    ...weakTopics.map(t => ({ ...t, priority: 'high' })),
+    ...untriedTopics.slice(0, 5).map(t => ({ ...t, priority: 'medium' })),
+    ...reviewTopics.map(t => ({ ...t, priority: 'low' })),
+    ...untriedTopics.slice(5).map(t => ({ ...t, priority: 'medium' })),
+  ]
+ 
+  // Fallback: if pool is empty (cold start), seed with first 7 topics from QUESTION_BANK
+  if (studyPool.length === 0) {
+    Object.keys(QUESTION_BANK).forEach(subject => {
+      Object.keys(QUESTION_BANK[subject]).slice(0, 2).forEach(topic => {
+        studyPool.push({ subject, topic, mastery: 0, attempts: 0, priority: 'medium' })
+      })
+    })
+  }
+ 
+  // Generate one entry per day
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today.getTime() + i * 86400000)
+    const dow = date.getDay()
+    const isWeekend = dow === 0 || dow === 6
+    const dayClasses = classesByDay[dow] || []
+    const isToday = i === 0
+ 
+    // Pick this day's main topic — rotate through pool
+    const mainTopic = studyPool[i % studyPool.length] || { subject: 'Mathematics', topic: 'Algebra', mastery: 0, priority: 'medium' }
+ 
+    // Build tasks list
+    const tasks = []
+    const minsTarget = isWeekend ? 25 : (mainTopic.priority === 'high' ? 45 : 35)
+ 
+    if (isToday) {
+      tasks.push({
+        id: `${date.toDateString()}-warmup`,
+        type: 'warmup',
+        title: 'Warm-up: 5 minutes review of yesterday',
+        mins: 5,
+        action: 'review',
+      })
+    }
+ 
+    tasks.push({
+      id: `${date.toDateString()}-practice-${mainTopic.topic.replace(/\s/g, '-')}`,
+      type: 'practice',
+      title: `Practice ${mainTopic.topic}`,
+      subject: mainTopic.subject,
+      topic: mainTopic.topic,
+      mins: 20,
+      action: 'practice',
+      mastery: mainTopic.mastery,
+    })
+ 
+    if (mainTopic.mastery > 0 && mainTopic.mastery < 60) {
+      tasks.push({
+        id: `${date.toDateString()}-explain-${mainTopic.topic.replace(/\s/g, '-')}`,
+        type: 'explain',
+        title: `Ask Mshauri to explain ${mainTopic.topic}`,
+        mins: 10,
+        action: 'mshauri',
+        topic: mainTopic.topic,
+      })
+    }
+ 
+    // Anchor live classes
+    dayClasses.forEach(cls => {
+      tasks.push({
+        id: `${date.toDateString()}-class-${cls.subject.replace(/\s/g, '-')}`,
+        type: 'class',
+        title: `Live ${cls.subject} class with ${cls.teacher}`,
+        mins: 60,
+        time: cls.time,
+        action: 'live',
+        subject: cls.subject,
+      })
+    })
+ 
+    // Weekend: lighter, suggest exam practice
+    if (isWeekend && !isToday) {
+      tasks.push({
+        id: `${date.toDateString()}-exam`,
+        type: 'exam',
+        title: `Take a practice exam (10 questions)`,
+        mins: 30,
+        action: 'exam',
+      })
+    }
+ 
+    // Sort tasks by time if any have specific times
+    tasks.sort((a, b) => {
+      if (a.time !== undefined && b.time !== undefined) return a.time - b.time
+      if (a.time !== undefined) return -1
+      if (b.time !== undefined) return 1
+      // Order: warmup → practice → explain → exam
+      const order = { warmup: 1, class: 2, practice: 3, explain: 4, exam: 5 }
+      return (order[a.type] || 99) - (order[b.type] || 99)
+    })
+ 
+    plan.push({
+      date: date.toISOString(),
+      dow,
+      dateStr: date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }),
+      shortDate: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+      dayName: dayLongName[dow],
+      isToday,
+      isWeekend,
+      mainSubject: mainTopic.subject,
+      mainTopic: mainTopic.topic,
+      mainMastery: mainTopic.mastery,
+      priority: mainTopic.priority,
+      minsTarget,
+      tasks,
+    })
+  }
+ 
+  return plan
+}
+ 
+// ── COLOURS ────────────────────────────────────────────────
+const planSubjColours = {
+  'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
+  'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
+  'Geography': '#0F766E',
+}
+const planSubjColour = (s) => planSubjColours[s] || '#8B1A2E'
+ 
+const priorityStyle = {
+  high:   { label: 'Priority',  bg: 'var(--r50)', color: 'var(--r600)', accent: 'var(--r500)' },
+  medium: { label: 'Build',     bg: 'var(--a50)', color: 'var(--a600)', accent: 'var(--a600)' },
+  low:    { label: 'Maintain',  bg: 'var(--g50)', color: 'var(--g600)', accent: 'var(--g600)' },
+}
+ 
+const taskTypeIcon = (type) => {
+  if (type === 'warmup') return '☀'
+  if (type === 'class') return '●'
+  if (type === 'practice') return '◆'
+  if (type === 'explain') return '◇'
+  if (type === 'exam') return '★'
+  return '·'
+}
+ 
+function StudyPlanTab({ user, store, setPage, toast }) {
+  const [plan, setPlan]     = useState(() => loadStoredPlan() || generateStudyPlan(user, store))
+  const [done, setDone]     = useState(() => loadDoneTasks())
+  const [activeDay, setActiveDay] = useState(0)  // index into plan
+ 
+  // Auto-regenerate if plan is older than 24 hours OR data has changed
+  useEffect(() => {
+    const stored = loadStoredPlan()
+    const generatedAt = localStorage.getItem(STUDY_PLAN_GENERATED_KEY)
+    if (!stored || !generatedAt) {
+      const fresh = generateStudyPlan(user, store)
+      setPlan(fresh)
+      saveStoredPlan(fresh)
+      return
+    }
+    const ageHours = (Date.now() - new Date(generatedAt).getTime()) / 3600000
+    if (ageHours > 24) {
+      const fresh = generateStudyPlan(user, store)
+      setPlan(fresh)
+      saveStoredPlan(fresh)
+    }
+  }, [])
+ 
+  const refreshPlan = () => {
+    const fresh = generateStudyPlan(user, store)
+    setPlan(fresh)
+    saveStoredPlan(fresh)
+    toast?.ok?.('Study plan refreshed using your latest data.')
+  }
+ 
+  const toggleDone = (taskId) => {
+    const newDone = { ...done, [taskId]: !done[taskId] }
+    setDone(newDone)
+    saveDoneTasks(newDone)
+  }
+ 
+  const handleAction = (task) => {
+    if (task.action === 'practice')  setPage('practice')
+    else if (task.action === 'live') setPage('live')
+    else if (task.action === 'exam') setPage('exams')
+    else if (task.action === 'mshauri') setPage('tutor')
+    else if (task.action === 'review') {
+      toast?.info?.('Review your last practice session in the Achievements tab.')
+      setPage('achievements')
+    }
+  }
+ 
+  const formatTaskTime = (mins) => {
+    let h = Math.floor(mins / 60)
+    const m = mins % 60
+    const mer = h >= 12 ? 'PM' : 'AM'
+    h = h % 12
+    if (h === 0) h = 12
+    return `${h}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
+  }
+ 
+  // Stats
+  const allTasks = plan.flatMap(d => d.tasks)
+  const doneCount = allTasks.filter(t => done[t.id]).length
+  const totalCount = allTasks.length
+  const completionPct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0
+  const todayPlan = plan[0]
+  const todayTasks = todayPlan?.tasks || []
+  const todayDone = todayTasks.filter(t => done[t.id]).length
+ 
+  return (
+    <div>
+      {/* Hero */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+        color: '#fff',
+      }}>
+        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+              Personalised &amp; Adaptive
+            </div>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              Your Study Plan
+            </h2>
+            <p style={{ fontSize: 13.5, opacity: .85, marginTop: 6, marginBottom: 0, maxWidth: 520, lineHeight: 1.55 }}>
+              Built from your real practice scores, exam history, and live class schedule. Your weakest topics get the most attention.
+            </p>
+          </div>
+          <button
+            onClick={refreshPlan}
+            style={{
+              background: 'rgba(255,255,255,.15)',
+              border: '1px solid rgba(255,255,255,.3)',
+              color: '#fff',
+              padding: '8px 14px',
+              borderRadius: 'var(--rmd)',
+              cursor: 'pointer',
+              fontSize: 12,
+              fontWeight: 600,
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+            Refresh Plan
+          </button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+          {[
+            ['Today',         `${todayDone}/${todayTasks.length}`],
+            ['This Week',     `${doneCount}/${totalCount}`],
+            ['Completion',    `${completionPct}%`],
+            ['Focus',         todayPlan?.mainSubject?.split(' ')[0] || '—'],
+          ].map(([l, v]) => (
+            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
+                {l}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+ 
+      {/* Day picker tabs */}
+      <div style={{
+        display: 'flex',
+        gap: 6,
+        overflowX: 'auto',
+        marginBottom: 18,
+        paddingBottom: 4,
+      }}>
+        {plan.map((day, i) => {
+          const isActive = activeDay === i
+          const dayDoneCount = day.tasks.filter(t => done[t.id]).length
+          const allDone = dayDoneCount === day.tasks.length && day.tasks.length > 0
+          return (
+            <button
+              key={i}
+              onClick={() => setActiveDay(i)}
+              style={{
+                background: isActive ? '#8B1A2E' : 'var(--white)',
+                color: isActive ? '#fff' : 'var(--s700)',
+                border: `1.5px solid ${isActive ? '#8B1A2E' : 'var(--border)'}`,
+                borderRadius: 'var(--rmd)',
+                padding: '10px 14px',
+                cursor: 'pointer',
+                fontSize: 12.5,
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+                position: 'relative',
+                flexShrink: 0,
+                transition: 'all .15s',
+              }}
+            >
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', opacity: isActive ? .85 : .5, marginBottom: 2 }}>
+                {day.isToday ? 'Today' : day.dayName.slice(0, 3)}
+              </div>
+              <div style={{ fontSize: 13 }}>{day.shortDate}</div>
+              {allDone && (
+                <span style={{
+                  position: 'absolute', top: -4, right: -4,
+                  width: 16, height: 16, borderRadius: '50%',
+                  background: 'var(--g500)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="3.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+ 
+      {/* Active day card */}
+      {plan[activeDay] && (() => {
+        const day  = plan[activeDay]
+        const subjCol = planSubjColour(day.mainSubject)
+        const pri  = priorityStyle[day.priority] || priorityStyle.medium
+        return (
+          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            {/* Day header */}
+            <div style={{
+              padding: '20px 24px 18px',
+              borderBottom: '1px solid var(--border)',
+              borderLeft: `4px solid ${subjCol}`,
+              background: 'var(--bg)',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--s400)', marginBottom: 4 }}>
+                    {day.dateStr}
+                  </div>
+                  <h3 className="serif" style={{ fontSize: 22, color: 'var(--s900)', margin: 0, lineHeight: 1.15 }}>
+                    Focus: <span style={{ color: subjCol }}>{day.mainSubject}</span>
+                  </h3>
+                  <div style={{ fontSize: 13, color: 'var(--s500)', marginTop: 4 }}>
+                    Main topic: <strong>{day.mainTopic}</strong>
+                    {day.mainMastery > 0 && (
+                      <> · current mastery <span className="mono" style={{ fontWeight: 700, color: day.mainMastery < 60 ? 'var(--r600)' : day.mainMastery < 80 ? 'var(--a600)' : 'var(--g600)' }}>{day.mainMastery}%</span></>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span style={{
+                    background: pri.bg, color: pri.color,
+                    fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase',
+                    padding: '4px 10px', borderRadius: 99,
+                  }}>{pri.label}</span>
+                  <span style={{
+                    background: 'var(--white)', color: 'var(--s700)',
+                    fontSize: 11.5, fontWeight: 700,
+                    padding: '4px 10px', borderRadius: 99,
+                    border: '1px solid var(--border)',
+                    fontFamily: 'JetBrains Mono, monospace',
+                  }}>{day.minsTarget} min target</span>
+                </div>
+              </div>
+ 
+              {/* Why this? coaching note */}
+              <div style={{
+                fontSize: 12.5, color: 'var(--s500)', fontStyle: 'italic',
+                background: 'var(--white)', borderRadius: 'var(--rsm)',
+                padding: '8px 12px',
+                borderLeft: `2px solid ${subjCol}`,
+              }}>
+                {day.priority === 'high'
+                  ? `Why this: your mastery in ${day.mainTopic} is below 70%. Today's practice will move it forward.`
+                  : day.mainMastery === 0
+                  ? `Why this: you haven't practised ${day.mainTopic} yet. Today's session is your introduction.`
+                  : `Why this: keeping ${day.mainTopic} fresh while you build other topics. Light review.`
+                }
+              </div>
+            </div>
+ 
+            {/* Tasks list */}
+            <div style={{ padding: '14px 0' }}>
+              {day.tasks.length === 0 ? (
+                <div style={{ padding: '20px 24px', textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
+                  No tasks scheduled — enjoy a rest day.
+                </div>
+              ) : day.tasks.map((task) => {
+                const isDone = done[task.id]
+                const hasTime = task.time !== undefined
+                const taskCol = task.subject ? planSubjColour(task.subject) : subjCol
+                return (
+                  <div
+                    key={task.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 14,
+                      padding: '12px 24px',
+                      borderBottom: '1px solid var(--border)',
+                      opacity: isDone ? 0.55 : 1,
+                      transition: 'opacity .2s',
+                    }}
+                  >
+                    {/* Checkbox */}
+                    <button
+                      onClick={() => toggleDone(task.id)}
+                      style={{
+                        width: 22, height: 22, flexShrink: 0,
+                        borderRadius: 6,
+                        border: `2px solid ${isDone ? 'var(--g500)' : 'var(--s300, #CBD5E1)'}`,
+                        background: isDone ? 'var(--g500)' : 'var(--white)',
+                        cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        marginTop: 2,
+                        transition: 'all .15s',
+                      }}
+                    >
+                      {isDone && (
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="3.5" strokeLinecap="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      )}
+                    </button>
+ 
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3, flexWrap: 'wrap' }}>
+                        <span style={{
+                          fontSize: 14, fontWeight: 700,
+                          color: isDone ? 'var(--s500)' : 'var(--s900)',
+                          textDecoration: isDone ? 'line-through' : 'none',
+                        }}>
+                          {task.title}
+                        </span>
+                        {hasTime && (
+                          <span className="mono" style={{
+                            fontSize: 11, fontWeight: 700,
+                            color: taskCol,
+                            background: taskCol + '15',
+                            padding: '2px 7px',
+                            borderRadius: 99,
+                          }}>
+                            {formatTaskTime(task.time)}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: 'var(--s400)', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                        <span style={{ color: taskCol, fontWeight: 700, fontSize: 12 }}>
+                          {taskTypeIcon(task.type)}
+                        </span>
+                        <span style={{ textTransform: 'capitalize' }}>{task.type}</span>
+                        <span>·</span>
+                        <span>{task.mins} min</span>
+                      </div>
+                    </div>
+ 
+                    {!isDone && (
+                      <button
+                        className="btn btn-s btn-sm"
+                        onClick={() => handleAction(task)}
+                        style={{ flexShrink: 0, marginTop: 2 }}
+                      >
+                        Start
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
+    </div>
+  )
+}
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
