@@ -1031,62 +1031,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               MSHAURI AI — mastery-aware
           ════════════════════════════════════════════ */}
-          {page === 'tutor' && (
-            <div>
-              <div style={{marginBottom:16}}>
-                <div className="sec-tag">Personalised AI Tutor</div>
-                <h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Mshauri AI</h2>
-                {mastery && nextRec && (
-                  <div style={{background:'var(--b50)',border:'1px solid var(--b100)',borderRadius:'var(--rmd)',padding:'10px 14px',marginTop:10,fontSize:13,color:'var(--b700)'}}>
-                    Mshauri knows your mastery levels. Your current focus: <strong>{nextRec.topic}</strong> ({nextRec.pct}% mastery). Ask anything — Mshauri will tailor the answer to your level.
-                  </div>
-                )}
-              </div>
-              <div className="card" style={{display:'flex',flexDirection:'column',height:560,padding:0,overflow:'hidden'}}>
-                <div style={{padding:'13px 18px',borderBottom:'1px solid var(--border)',display:'flex',alignItems:'center',gap:10}}>
-                  <div style={{width:36,height:36,borderRadius:'50%',background:'var(--b700)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
-                  </div>
-                  <div>
-                    <div style={{fontWeight:700,fontSize:14}}>Mshauri</div>
-                    <div style={{fontSize:12,color:'var(--g600)',display:'flex',alignItems:'center',gap:4}}><span style={{width:6,height:6,borderRadius:'50%',background:'var(--g500)',display:'inline-block'}}/>Online · Knows your mastery profile</div>
-                  </div>
-                </div>
-                <div style={{flex:1,overflowY:'auto',padding:16,display:'flex',flexDirection:'column',gap:14}}>
-                  {tutorMsgs.map((m,i) => (
-                    <div key={i} style={{display:'flex',gap:9,flexDirection:m.role==='user'?'row-reverse':'row',alignItems:'flex-start'}}>
-                      <div style={{width:30,height:30,borderRadius:'50%',background:m.role==='ai'?'var(--b700)':'var(--s200)',color:m.role==='ai'?'#fff':'var(--s600)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,flexShrink:0}}>
-                        {m.role==='ai'?'M': (user?.firstName?.[0]||'A')}
-                      </div>
-                      <div style={{background:m.role==='user'?'var(--b700)':'var(--white)',color:m.role==='user'?'#fff':'var(--s800)',padding:'10px 14px',borderRadius:m.role==='user'?'14px 14px 4px 14px':'4px 14px 14px 14px',fontSize:13.5,lineHeight:1.65,maxWidth:'78%',border:m.role==='ai'?'1px solid var(--border)':'none'}}>
-                        {m.text}
-                      </div>
-                    </div>
-                  ))}
-                  {aiLoading && <div style={{display:'flex',gap:9,alignItems:'flex-start'}}><div style={{width:30,height:30,borderRadius:'50%',background:'var(--b700)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,color:'#fff'}}>M</div><div style={{background:'var(--bg)',border:'1px solid var(--border)',padding:'10px 14px',borderRadius:'4px 14px 14px 14px',fontSize:13,color:'var(--s400)'}}>Mshauri is thinking…</div></div>}
-                  <div ref={chatEndRef}/>
-                </div>
-                <div style={{padding:'12px 16px',borderTop:'1px solid var(--border)'}}>
-                  <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:8}}>
-                    {[
-                      `What should I study today?`,
-                      nextRec ? `Explain ${nextRec.topic}` : 'How am I doing?',
-                      'Create a practice quiz',
-                      'How is my progress?',
-                    ].map(s => (
-                      <button key={s} className="btn btn-s btn-sm" style={{fontSize:11.5,padding:'4px 10px'}} onClick={() => { setTutorInp(s); setTimeout(() => sendTutor(), 50) }}>{s}</button>
-                    ))}
-                  </div>
-                  <div style={{display:'flex',gap:8}}>
-                    <textarea className="chat-input" value={tutorInp} onChange={e=>setTutorInp(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendTutor()}}} rows={1} placeholder="Ask Mshauri — it knows your exact mastery levels…"/>
-                    <button className="btn btn-p btn-sm" onClick={sendTutor} disabled={aiLoading} style={{padding:'8px 12px'}}>
-                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {page === 'tutor' && <MshauriTab user={user} />}
 
           {/* ════════════════════════════════════════════
               PERSONALISED STUDY PLAN
@@ -3227,7 +3172,761 @@ function LiveClassesTab({ user, store, setInClassroom, toast }) {
   )
 }
  
-
+// ═══════════════════════════════════════════════════════════
+// MSHAURI AI — smart rule-based tutor (no API required)
+// ═══════════════════════════════════════════════════════════
+const MSHAURI_HISTORY_KEY = 'sm_mshauri_history'
+ 
+const loadMshauriHist = () => {
+  try { return JSON.parse(localStorage.getItem(MSHAURI_HISTORY_KEY) || '[]') }
+  catch { return [] }
+}
+const saveMshauriHist = (h) => {
+  try { localStorage.setItem(MSHAURI_HISTORY_KEY, JSON.stringify(h.slice(-30))) } catch {}
+}
+ 
+// ── TOPIC EXPLANATIONS — Mshauri's knowledge base ────────────
+const TOPIC_EXPLANATIONS = {
+  'pythagoras': `**Pythagoras Theorem** is a rule about right-angled triangles.
+ 
+For any right-angled triangle with legs a and b, and hypotenuse c (the longest side, opposite the right angle):
+ 
+**c² = a² + b²**
+ 
+For example, if a triangle has legs of 3 cm and 4 cm:
+c² = 3² + 4² = 9 + 16 = 25
+c = √25 = 5 cm
+ 
+**Common Pythagorean triples to memorise:** (3,4,5), (5,12,13), (8,15,17). These appear often in IGCSE exams.
+ 
+Want me to walk you through a problem?`,
+ 
+  'photosynthesis': `**Photosynthesis** is how plants make their own food using sunlight.
+ 
+The simplified equation:
+**6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂**
+ 
+In plain words: carbon dioxide + water + light energy → glucose (sugar) + oxygen.
+ 
+**Where it happens:** in chloroplasts, which contain the green pigment chlorophyll. Chlorophyll absorbs light energy.
+ 
+**The two stages:**
+1. **Light-dependent reactions** — splits water, releases oxygen, produces ATP and NADPH
+2. **Calvin Cycle (light-independent)** — uses ATP/NADPH to convert CO₂ into glucose
+ 
+**Why it matters:** photosynthesis is the source of nearly all the oxygen in our atmosphere and the base of almost every food chain on Earth.
+ 
+Want to try a quick question on this?`,
+ 
+  'algebra': `**Algebra** is using letters to represent unknown numbers, then finding what those numbers must be.
+ 
+**The basic rule:** whatever you do to one side of an equation, do to the other.
+ 
+**Example:** Solve 3x + 5 = 20
+ 
+Step 1: Subtract 5 from both sides → 3x = 15
+Step 2: Divide both sides by 3 → x = 5
+ 
+**Key skills:**
+- Combine like terms: 3x + 2x = 5x
+- Expand brackets: 2(x + 3) = 2x + 6
+- Factorise: 2x + 6 = 2(x + 3)
+- Solve linear equations
+- Solve quadratics by factorising or formula
+ 
+What kind of algebra problem are you working on?`,
+ 
+  'cell biology': `**Cell biology** studies the building blocks of life.
+ 
+**Two main cell types:**
+- **Animal cells** — have nucleus, cytoplasm, cell membrane, mitochondria, ribosomes
+- **Plant cells** — all of the above PLUS cell wall, chloroplasts, large vacuole
+ 
+**Key parts:**
+- **Nucleus** — contains DNA, controls the cell
+- **Cell membrane** — controls what enters/leaves
+- **Cytoplasm** — jelly-like fluid where reactions happen
+- **Mitochondria** — "powerhouse" — produces energy through respiration
+- **Chloroplasts** (plants only) — site of photosynthesis
+- **Ribosomes** — make proteins
+- **Cell wall** (plants only) — gives shape and support
+ 
+Specialised cells (red blood cells, nerve cells, sperm cells) are adapted for specific jobs.
+ 
+Which part would you like me to explain in more depth?`,
+ 
+  'newton': `**Newton's Three Laws of Motion**
+ 
+**1st Law — Inertia:** An object stays at rest, or moves at constant velocity, unless acted on by a net force. Things don't change their motion by themselves.
+ 
+**2nd Law:** Force = mass × acceleration (F = ma).
+- 1 Newton (N) = the force needed to accelerate 1 kg at 1 m/s²
+- A heavier object needs more force to accelerate at the same rate
+ 
+**3rd Law:** For every action there is an equal and opposite reaction. When you push the ground walking, the ground pushes you back equally.
+ 
+**Useful equations from these laws:**
+- F = ma
+- W = mg (weight = mass × gravity, where g ≈ 9.8 m/s² on Earth)
+- p = mv (momentum)
+ 
+What problem can I help you with?`,
+ 
+  'periodic table': `**The Periodic Table** organises all known elements by their atomic number (number of protons).
+ 
+**Key features:**
+- **Periods** (rows) — elements in the same period have the same number of electron shells
+- **Groups** (columns) — elements in the same group have the same number of outer electrons → similar chemical behaviour
+ 
+**Important groups:**
+- **Group 1: Alkali metals** (Li, Na, K…) — soft, very reactive
+- **Group 2: Alkaline earth metals** (Mg, Ca…) — reactive but less than Group 1
+- **Group 7: Halogens** (F, Cl, Br, I) — non-metals, form salts
+- **Group 0: Noble gases** (He, Ne, Ar) — full outer shell, unreactive
+ 
+**Trends:**
+- Reactivity of metals **increases** down a group
+- Reactivity of non-metals **decreases** down a group
+- Atomic radius increases down a group, decreases across a period
+ 
+What element or trend would you like to explore?`,
+ 
+  'electricity': `**Electricity basics**
+ 
+**Ohm's Law:** V = IR
+- V = Voltage (Volts) — the "push"
+- I = Current (Amperes) — the flow of charge
+- R = Resistance (Ohms) — how much something resists current
+ 
+**Power equations:**
+- P = VI (Power = Voltage × Current)
+- P = I²R = V²/R
+ 
+**Series circuits:**
+- Current is the same everywhere
+- Voltages add up: V_total = V₁ + V₂ + V₃
+- Resistances add: R_total = R₁ + R₂ + R₃
+ 
+**Parallel circuits:**
+- Voltage is the same across each branch
+- Currents add: I_total = I₁ + I₂ + I₃
+- 1/R_total = 1/R₁ + 1/R₂ + 1/R₃
+ 
+**Common units:** 1 kWh = 3,600,000 Joules. Energy bill = Power (kW) × time (hours) × cost per kWh.
+ 
+What circuit problem are you working on?`,
+ 
+  'simile metaphor': `**Simile vs Metaphor** — both are comparisons, but they work differently.
+ 
+**Simile** — uses "like" or "as" to compare:
+- "She runs like the wind"
+- "His smile is as bright as the sun"
+- "The water was as cold as ice"
+ 
+**Metaphor** — says one thing IS another, no "like" or "as":
+- "She is a shining star"
+- "Time is a thief"
+- "His words were daggers"
+ 
+**Why they matter:** they make writing more vivid and emotional. Authors use them to paint pictures in the reader's mind.
+ 
+**Other figures of speech to know for IGCSE English:**
+- **Personification** — giving human traits to non-humans ("the wind whispered")
+- **Hyperbole** — exaggeration ("I've told you a million times")
+- **Alliteration** — repeating initial sounds ("Peter Piper picked")
+ 
+Want to try identifying these in a sentence?`,
+ 
+  'percentage': `**Percentages** mean "out of 100." So 25% = 25/100 = 0.25.
+ 
+**Three common calculations:**
+ 
+**1. Find X% of Y:** Convert percentage to decimal, multiply.
+Example: 15% of 240 = 0.15 × 240 = **36**
+ 
+**2. Find what % one number is of another:** (part / whole) × 100
+Example: What % of 80 is 20? → (20/80) × 100 = **25%**
+ 
+**3. Percentage change:** ((new − old) / old) × 100
+Example: Price went from $40 to $50. Change = ((50−40)/40) × 100 = **25% increase**
+ 
+**Common conversions to remember:**
+- 50% = 1/2 = 0.5
+- 25% = 1/4 = 0.25
+- 75% = 3/4 = 0.75
+- 10% = 1/10 = 0.1
+- 33⅓% = 1/3
+- 12.5% = 1/8
+ 
+What percentage problem can I help with?`,
+ 
+  'trigonometry': `**Trigonometry** — relating angles to sides in right-angled triangles.
+ 
+**The three ratios** (memorise SOH CAH TOA):
+- **sin θ = Opposite / Hypotenuse**
+- **cos θ = Adjacent / Hypotenuse**
+- **tan θ = Opposite / Adjacent**
+ 
+(Opposite is the side opposite the angle θ. Adjacent is the side next to it that isn't the hypotenuse.)
+ 
+**Standard angles to memorise:**
+| Angle | sin | cos | tan |
+|-------|-----|-----|-----|
+| 0° | 0 | 1 | 0 |
+| 30° | 1/2 | √3/2 | 1/√3 |
+| 45° | √2/2 | √2/2 | 1 |
+| 60° | √3/2 | 1/2 | √3 |
+| 90° | 1 | 0 | undefined |
+ 
+**Pythagorean identity:** sin²θ + cos²θ = 1 — always true, useful for simplifying.
+ 
+**To find an unknown angle:** use sin⁻¹, cos⁻¹, tan⁻¹ on your calculator.
+ 
+Show me your problem and I'll walk through it.`,
+}
+ 
+// ── FIND BEST MATCHING TOPIC ─────────────────────────────────
+const findTopicMatch = (text) => {
+  const lower = text.toLowerCase()
+  // Try direct matches first
+  for (const key of Object.keys(TOPIC_EXPLANATIONS)) {
+    if (lower.includes(key)) return key
+  }
+  // Aliases
+  const aliases = [
+    [['hypotenuse', 'right triangle', 'right angled triangle'], 'pythagoras'],
+    [['plant food', 'chlorophyll', 'photosynthes'], 'photosynthesis'],
+    [['solve for x', 'equation', 'unknown', 'variable'], 'algebra'],
+    [['mitochondria', 'nucleus', 'chloroplast', 'organelle'], 'cell biology'],
+    [['force', 'motion', 'acceleration', 'momentum'], 'newton'],
+    [['element', 'group 1', 'halogen', 'noble gas', 'alkali metal'], 'periodic table'],
+    [['voltage', 'current', 'ohm', 'circuit', 'resistance'], 'electricity'],
+    [['figure of speech', 'comparison', 'imagery', 'literary device'], 'simile metaphor'],
+    [['percent', '% of', 'discount', 'increase by'], 'percentage'],
+    [['sin', 'cos', 'tan', 'soh cah toa'], 'trigonometry'],
+  ]
+  for (const [keywords, topic] of aliases) {
+    if (keywords.some(k => lower.includes(k))) return topic
+  }
+  return null
+}
+ 
+// ── MATH SOLVER — handles simple linear equations ────────────
+const trySolveMath = (text) => {
+  const lower = text.toLowerCase().trim()
+ 
+  // Arithmetic: "what is 7 * 8" or "what's 25% of 80"
+  const arithMatch = lower.match(/(?:what\s+(?:is|s)\s+)?(\d+(?:\.\d+)?)\s*([+\-*/x×÷])\s*(\d+(?:\.\d+)?)/i)
+  if (arithMatch) {
+    const a = parseFloat(arithMatch[1])
+    const op = arithMatch[2].toLowerCase().replace('x', '*').replace('×', '*').replace('÷', '/')
+    const b = parseFloat(arithMatch[3])
+    let result
+    if (op === '+') result = a + b
+    else if (op === '-') result = a - b
+    else if (op === '*') result = a * b
+    else if (op === '/') result = b !== 0 ? a / b : null
+    if (result !== null && result !== undefined) {
+      return `${a} ${arithMatch[2]} ${b} = **${Number.isInteger(result) ? result : result.toFixed(4).replace(/\.?0+$/, '')}**`
+    }
+  }
+ 
+  // Percentage: "what is 15% of 240"
+  const pctMatch = lower.match(/(\d+(?:\.\d+)?)\s*%\s+of\s+(\d+(?:\.\d+)?)/i)
+  if (pctMatch) {
+    const pct = parseFloat(pctMatch[1])
+    const num = parseFloat(pctMatch[2])
+    const result = (pct / 100) * num
+    return `${pct}% of ${num} = (${pct}/100) × ${num} = **${Number.isInteger(result) ? result : result.toFixed(2)}**`
+  }
+ 
+  // Linear equation: "solve 3x + 5 = 20" or "3x + 5 = 20"
+  const linMatch = text.match(/(\-?\d*\.?\d*)\s*x\s*([+\-])\s*(\d+(?:\.\d+)?)\s*=\s*(\-?\d+(?:\.\d+)?)/i)
+  if (linMatch) {
+    const a = parseFloat(linMatch[1] || '1') || 1
+    const sign = linMatch[2]
+    const b = parseFloat(linMatch[3])
+    const c = parseFloat(linMatch[4])
+    const constant = sign === '+' ? b : -b
+    const x = (c - constant) / a
+    return `**Solving ${a}x ${sign} ${b} = ${c}**
+ 
+Step 1: ${sign === '+' ? 'Subtract' : 'Add'} ${b} from both sides → ${a}x = ${c - constant}
+Step 2: Divide both sides by ${a} → **x = ${Number.isInteger(x) ? x : x.toFixed(2)}**
+ 
+Check: ${a} × ${Number.isInteger(x) ? x : x.toFixed(2)} ${sign} ${b} = ${(a * x + constant).toFixed(2)} ✓`
+  }
+ 
+  return null
+}
+ 
+// ── BUILD PROGRESS REPORT — reads from localStorage ──────────
+const buildProgressReport = (user) => {
+  let practiceHist = []
+  let examHist = []
+  let xp = 0
+  try { practiceHist = JSON.parse(localStorage.getItem('sm_practice_history') || '[]') } catch {}
+  try { examHist = JSON.parse(localStorage.getItem('sm_exam_history') || '[]') } catch {}
+  try { xp = parseInt(localStorage.getItem('sm_practice_xp') || '0', 10) || 0 } catch {}
+ 
+  if (practiceHist.length === 0 && examHist.length === 0) {
+    return `You haven't started any practice or exams yet, ${user?.firstName || ''}. Try the **Adaptive Practice** tab to begin — pick any subject and topic, complete 5 questions, and I'll know exactly where you stand. Once you've done a few sessions I can give you tailored advice.`
+  }
+ 
+  const subjectStats = {}
+  practiceHist.forEach(s => {
+    if (!subjectStats[s.subject]) subjectStats[s.subject] = []
+    subjectStats[s.subject].push(s.score)
+  })
+ 
+  const subjectLines = Object.entries(subjectStats).map(([subj, scores]) => {
+    const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+    return `- **${subj}:** ${avg}% average (${scores.length} session${scores.length === 1 ? '' : 's'})`
+  }).join('\n')
+ 
+  const weakSubjects = Object.entries(subjectStats)
+    .filter(([_, scores]) => scores.reduce((a, b) => a + b, 0) / scores.length < 60)
+    .map(([s]) => s)
+ 
+  const recentSessions = [...practiceHist].reverse().slice(0, 3)
+ 
+  let report = `**Your progress so far, ${user?.firstName || ''}:**
+ 
+📊 Total XP: **${xp.toLocaleString()}**
+📝 Practice sessions: **${practiceHist.length}**
+🎓 Exams taken: **${examHist.length}**
+ 
+**By subject:**
+${subjectLines}
+ 
+**Recent sessions:**
+${recentSessions.map(s => `- ${s.topic} (${s.subject}): ${s.score}%`).join('\n')}`
+ 
+  if (weakSubjects.length > 0) {
+    report += `\n\n💡 **My recommendation:** Focus on ${weakSubjects.join(' and ')}. These need more attention. Try a few practice sessions in those subjects today.`
+  } else if (practiceHist.length >= 3) {
+    report += `\n\n🌟 You're doing well across all subjects. Keep up the steady work!`
+  }
+ 
+  return report
+}
+ 
+// ── BUILD STUDY RECOMMENDATION ───────────────────────────────
+const buildStudyRecommendation = (user) => {
+  let practiceHist = []
+  try { practiceHist = JSON.parse(localStorage.getItem('sm_practice_history') || '[]') } catch {}
+ 
+  if (practiceHist.length === 0) {
+    return `Since you haven't started yet, I suggest beginning with **Mathematics — Algebra** or **English — Grammar**. These are foundational and appear in every IGCSE paper. Head to the **Adaptive Practice** tab and try 5 questions. Then come back and tell me how it went.`
+  }
+ 
+  // Find the subject with lowest average
+  const subjectAvgs = {}
+  practiceHist.forEach(s => {
+    if (!subjectAvgs[s.subject]) subjectAvgs[s.subject] = []
+    subjectAvgs[s.subject].push(s.score)
+  })
+ 
+  const sorted = Object.entries(subjectAvgs)
+    .map(([s, scores]) => ({ subject: s, avg: scores.reduce((a, b) => a + b, 0) / scores.length }))
+    .sort((a, b) => a.avg - b.avg)
+ 
+  const weakest = sorted[0]
+  const lastSession = practiceHist[practiceHist.length - 1]
+ 
+  if (weakest.avg < 60) {
+    return `Today, focus on **${weakest.subject}** — your average there is ${Math.round(weakest.avg)}%, which means you have room to grow. Pick any topic in ${weakest.subject} from the **Adaptive Practice** tab. After 2 sessions, take a quick break, then try a different subject to keep things fresh. Aim for 30 minutes of focused study.`
+  }
+ 
+  return `You're doing well across the board. Today, I'd suggest:
+1. **15 min review** — practise ${lastSession.topic} again to lock it in
+2. **20 min new ground** — pick a topic you haven't tried yet
+3. **5 min reflection** — look at your Achievements tab and see which badge you're closest to
+ 
+Keep the momentum, ${user?.firstName || 'friend'}!`
+}
+ 
+// ── MAIN RESPONSE ROUTER ─────────────────────────────────────
+const generateMshauriReply = (userMessage, user) => {
+  const text = userMessage.trim()
+  const lower = text.toLowerCase()
+ 
+  // 1. Greetings
+  if (/^(hi|hello|hey|habari|jambo|yo|sup|hola)[\s!.?]*$/i.test(lower)) {
+    return `Habari, ${user?.firstName || 'friend'}! Ready to study? You can ask me to:
+- Explain a topic ("explain pythagoras")
+- Solve a problem ("solve 3x + 5 = 20")
+- Tell you what to study ("what should I study today?")
+- Show your progress ("how am I doing?")
+ 
+What would you like to start with?`
+  }
+ 
+  // 2. Progress questions
+  if (/(how am i doing|my progress|how have i been|my stats|how did i do|my performance|am i improving)/i.test(lower)) {
+    return buildProgressReport(user)
+  }
+ 
+  // 3. Study recommendations
+  if (/(what should i study|what to study|what to learn|recommend|suggest.*topic|study plan|where should i start)/i.test(lower)) {
+    return buildStudyRecommendation(user)
+  }
+ 
+  // 4. Maths solver
+  const mathReply = trySolveMath(text)
+  if (mathReply) return mathReply
+ 
+  // 5. Topic explanation
+  const topic = findTopicMatch(text)
+  if (topic) return TOPIC_EXPLANATIONS[topic]
+ 
+  // 6. Test me requests
+  if (/(test me|quiz me|practice|give me.*question)/i.test(lower)) {
+    return `Great instinct! Head to the **Adaptive Practice** tab — pick any subject and topic, and I'll have 5 questions ready for you. Each session takes about 5 minutes and I'll save your XP to your achievements.
+ 
+After your session, come back and tell me how it went. I'll help you understand anything you got wrong.`
+  }
+ 
+  // 7. Help with homework — redirect appropriately
+  if (/(do my homework|do this for me|just give me the answer|whats the answer)/i.test(lower)) {
+    return `I can help you understand the topic, but I won't do your homework for you — that wouldn't help you actually learn. Tell me which topic the question is on, or share what you've tried so far, and I'll help you work through it.`
+  }
+ 
+  // 8. Generic learning question — guide them
+  if (/(i don't understand|i dont understand|confused|stuck|help me with|how do i)/i.test(lower)) {
+    return `I'd love to help. Tell me specifically which topic you're stuck on — for example:
+- "Help me with **Pythagoras Theorem**"
+- "I don't understand **photosynthesis**"
+- "How do I **solve algebra equations**?"
+ 
+The more specific you are, the better I can help. You can also try the **Adaptive Practice** tab and see what comes up — sometimes doing questions helps reveal exactly what's confusing.`
+  }
+ 
+  // 9. Emotional / motivational
+  if (/(stressed|anxious|worried|overwhelmed|cant focus|hard|too difficult|i give up|tired)/i.test(lower)) {
+    return `That's a normal feeling, ${user?.firstName || 'friend'} — every student goes through it. Here's what helps:
+ 
+1. **Pomodoro:** Study for 25 minutes, then take a 5-minute break. Repeat 3-4 times.
+2. **One topic at a time.** Don't try to do everything at once.
+3. **Practice beats reading.** Active practice (the Practice tab) builds memory faster than re-reading notes.
+4. **Sleep matters.** Your brain consolidates learning during sleep — never sacrifice it.
+ 
+Remember: progress, not perfection. Every practice session you complete makes you a little better than yesterday. What specific subject is feeling hardest right now?`
+  }
+ 
+  // 10. Off-topic
+  if (/(weather|movie|song|football|game|date|girlfriend|boyfriend|tiktok|instagram)/i.test(lower)) {
+    return `Let's keep our focus on your studies — what subject can I help you with today? You can ask about Maths, Physics, Chemistry, Biology, English, or any specific topic.`
+  }
+ 
+  // 11. Default — encourage them to be specific
+  return `That's an interesting question. To give you the best help, could you be more specific?
+ 
+For example:
+- For Maths: "**Solve 2x + 7 = 15**" or "**Explain Pythagoras**"
+- For Sciences: "**Explain photosynthesis**" or "**What are Newton's laws?**"
+- For English: "**What is a metaphor?**" or "**Explain similes**"
+- For Studies: "**What should I study today?**" or "**How am I doing?**"
+ 
+What would you like to learn about?`
+}
+ 
+function MshauriTab({ user }) {
+  const [messages, setMessages] = useState(() => {
+    const saved = loadMshauriHist()
+    if (saved.length > 0) return saved
+    const name = user?.firstName || 'there'
+    return [{
+      role: 'assistant',
+      text: `Habari ${name}! I'm Mshauri, your personal AI tutor. I can help you understand difficult topics, solve problems step-by-step, or check your progress. What would you like to work on today?`,
+      time: new Date().toISOString(),
+    }]
+  })
+  const [input, setInput]     = useState('')
+  const [thinking, setThinking] = useState(false)
+  const chatEndRef            = useRef(null)
+ 
+  useEffect(() => {
+    saveMshauriHist(messages)
+  }, [messages])
+ 
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, thinking])
+ 
+  const send = (text) => {
+    const userMsg = (text || input).trim()
+    if (!userMsg || thinking) return
+ 
+    const newMessages = [...messages, { role: 'user', text: userMsg, time: new Date().toISOString() }]
+    setMessages(newMessages)
+    setInput('')
+    setThinking(true)
+ 
+    // Simulate thinking time for realism (300-800ms based on response length)
+    const reply = generateMshauriReply(userMsg, user)
+    const delay = Math.min(800, 300 + reply.length * 2)
+    setTimeout(() => {
+      setMessages(m => [...m, { role: 'assistant', text: reply, time: new Date().toISOString() }])
+      setThinking(false)
+    }, delay)
+  }
+ 
+  const clearChat = () => {
+    if (window.confirm('Clear our conversation?')) {
+      const name = user?.firstName || 'there'
+      const fresh = [{
+        role: 'assistant',
+        text: `Habari ${name}! Fresh start. What would you like to learn today?`,
+        time: new Date().toISOString(),
+      }]
+      setMessages(fresh)
+    }
+  }
+ 
+  // Suggestions adapt to whether they have practice history
+  const suggestions = (() => {
+    let practiceHist = []
+    try { practiceHist = JSON.parse(localStorage.getItem('sm_practice_history') || '[]') } catch {}
+    if (practiceHist.length === 0) {
+      return ['What should I study today?', 'Explain Pythagoras', 'Solve 2x + 7 = 15', 'How does this work?']
+    }
+    const recent = practiceHist[practiceHist.length - 1]
+    return [
+      'How am I doing?',
+      `Explain ${recent.topic}`,
+      'What should I study today?',
+      'Solve 3x + 5 = 20',
+    ]
+  })()
+ 
+  const initials = user?.firstName?.[0]?.toUpperCase() || 'S'
+ 
+  // Simple markdown-ish formatter for **bold** and line breaks
+  const renderText = (text) => {
+    const parts = text.split(/(\*\*[^*]+\*\*)/g)
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i} style={{ color: 'var(--s900)', fontWeight: 700 }}>{part.slice(2, -2)}</strong>
+      }
+      return part
+    })
+  }
+ 
+  return (
+    <div>
+      {/* Hero */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+        color: '#fff',
+      }}>
+        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%',
+            background: 'rgba(240,204,90,.18)',
+            border: '3px solid #F0CC5A',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+            position: 'relative',
+            boxShadow: '0 4px 16px rgba(0,0,0,.25)',
+          }}>
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round">
+              <rect x="3" y="11" width="18" height="10" rx="2"/>
+              <circle cx="12" cy="5" r="2"/>
+              <path d="M12 7v4"/>
+            </svg>
+            <span style={{
+              position: 'absolute', bottom: 2, right: 2,
+              width: 12, height: 12, borderRadius: '50%',
+              background: '#4ADE80',
+              border: '2px solid #6B0F1E',
+              animation: 'pulse 2s infinite',
+            }}/>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 4 }}>
+              Personalised AI Tutor
+            </div>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              Mshauri
+            </h2>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ADE80', display: 'inline-block' }}/>
+              Online · Knows your progress · Always patient
+            </div>
+          </div>
+          <button
+            onClick={clearChat}
+            style={{
+              background: 'rgba(255,255,255,.1)',
+              border: '1px solid rgba(255,255,255,.25)',
+              color: '#fff',
+              padding: '8px 14px',
+              borderRadius: 'var(--rmd)',
+              cursor: 'pointer',
+              fontSize: 12,
+              fontWeight: 600,
+            }}
+          >
+            New Chat
+          </button>
+        </div>
+      </div>
+ 
+      {/* Chat container */}
+      <div className="card" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 280px)', minHeight: 480, padding: 0, overflow: 'hidden' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {messages.map((m, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              gap: 10,
+              flexDirection: m.role === 'user' ? 'row-reverse' : 'row',
+              alignItems: 'flex-start',
+            }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: m.role === 'assistant' ? '#8B1A2E' : 'var(--s200)',
+                color: m.role === 'assistant' ? '#F0CC5A' : 'var(--s700)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: m.role === 'assistant' ? 'Instrument Serif, serif' : 'JetBrains Mono, monospace',
+                fontSize: m.role === 'assistant' ? 16 : 12,
+                fontWeight: 700,
+                flexShrink: 0,
+              }}>
+                {m.role === 'assistant' ? 'M' : initials}
+              </div>
+              <div style={{
+                background: m.role === 'user' ? '#8B1A2E' : 'var(--bg)',
+                color: m.role === 'user' ? '#fff' : 'var(--s800)',
+                padding: '12px 16px',
+                borderRadius: m.role === 'user' ? '14px 14px 4px 14px' : '4px 14px 14px 14px',
+                fontSize: 14,
+                lineHeight: 1.65,
+                maxWidth: '78%',
+                border: m.role === 'assistant' ? '1px solid var(--border)' : 'none',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}>
+                {m.role === 'assistant' ? renderText(m.text) : m.text}
+              </div>
+            </div>
+          ))}
+          {thinking && (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: '#8B1A2E', color: '#F0CC5A',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'Instrument Serif, serif', fontSize: 16, fontWeight: 700,
+                flexShrink: 0,
+              }}>M</div>
+              <div style={{
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                padding: '12px 16px',
+                borderRadius: '4px 14px 14px 14px',
+                fontSize: 13,
+                color: 'var(--s500)',
+                fontStyle: 'italic',
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <span style={{ display: 'inline-flex', gap: 3 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#8B1A2E', animation: 'mDot 1.2s infinite' }}/>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#8B1A2E', animation: 'mDot 1.2s infinite .2s' }}/>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#8B1A2E', animation: 'mDot 1.2s infinite .4s' }}/>
+                </span>
+                Mshauri is thinking…
+              </div>
+              <style>{`@keyframes mDot { 0%, 100% { opacity: .3 } 50% { opacity: 1 } }`}</style>
+            </div>
+          )}
+          <div ref={chatEndRef}/>
+        </div>
+ 
+        <div style={{ padding: '12px 18px 14px', borderTop: '1px solid var(--border)', background: 'var(--white)' }}>
+          {messages.length <= 2 && !thinking && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+              {suggestions.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => send(s)}
+                  style={{
+                    background: 'var(--bg)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--s700)',
+                    padding: '5px 11px',
+                    borderRadius: 99,
+                    fontSize: 12,
+                    cursor: 'pointer',
+                    fontWeight: 500,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#8B1A2E'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#8B1A2E' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg)'; e.currentTarget.style.color = 'var(--s700)'; e.currentTarget.style.borderColor = 'var(--border)' }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+ 
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+            <textarea
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  send()
+                }
+              }}
+              placeholder="Ask Mshauri anything about your studies…"
+              rows={1}
+              disabled={thinking}
+              style={{
+                flex: 1,
+                background: 'var(--bg)',
+                border: '1.5px solid var(--border)',
+                borderRadius: 'var(--rmd)',
+                padding: '10px 14px',
+                fontSize: 14,
+                fontFamily: 'inherit',
+                resize: 'none',
+                outline: 'none',
+                lineHeight: 1.5,
+                maxHeight: 120,
+              }}
+              onFocus={e => e.target.style.borderColor = '#8B1A2E'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
+            />
+            <button
+              onClick={() => send()}
+              disabled={thinking || !input.trim()}
+              style={{
+                background: input.trim() && !thinking ? '#8B1A2E' : 'var(--s200)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 'var(--rmd)',
+                padding: '10px 16px',
+                cursor: input.trim() && !thinking ? 'pointer' : 'not-allowed',
+                display: 'flex', alignItems: 'center', gap: 6,
+                fontSize: 13, fontWeight: 600,
+                flexShrink: 0,
+              }}
+            >
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+ 
 
 
 
