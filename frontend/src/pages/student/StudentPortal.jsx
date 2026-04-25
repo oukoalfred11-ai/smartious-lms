@@ -1002,31 +1002,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               TIMETABLE
           ════════════════════════════════════════════ */}
-          {page === 'timetable' && (
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Weekly Schedule</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Timetable</h2></div>
-              <div className="card" style={{padding:0,overflow:'hidden'}}>
-                <table className="tbl">
-                  <thead><tr><th>Day</th><th>Subject</th><th>Teacher</th><th>Time</th><th>Status</th><th></th></tr></thead>
-                  <tbody>
-                    {TIMETABLE.map((t,i) => (
-                      <tr key={i}>
-                        <td><span className="mono" style={{fontWeight:700,color:'var(--b700)'}}>{t.day}</span></td>
-                        <td style={{fontWeight:600}}>{t.subj}</td>
-                        <td style={{color:'var(--s500)',fontSize:13}}>{t.teacher}</td>
-                        <td className="mono" style={{fontSize:13}}>{t.time}</td>
-                        <td><span className={`badge ${t.status==='completed'?'badge-green':t.status==='live'?'badge-red':'badge-blue'}`}>{t.status==='live'?'Live Now':t.status==='completed'?'Done':'Upcoming'}</span></td>
-                        <td>
-                          {t.status==='live' && <button className="btn btn-d btn-sm" onClick={() => setInClassroom(true)}>Join</button>}
-                          {t.status==='completed' && <button className="btn btn-g btn-sm" onClick={() => toast.info('Loading recording…')}>Recording</button>}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          {page === 'timetable' && <TimetableTab user={user} store={store} setInClassroom={setInClassroom} setPage={setPage} toast={toast} />}
 
           {/* ════════════════════════════════════════════
               MSHAURI AI — mastery-aware
@@ -3927,7 +3903,554 @@ function MshauriTab({ user }) {
   )
 }
  
-
+// ═══════════════════════════════════════════════════════════
+// TIMETABLE TAB — week grid + list, real student schedule
+// ═══════════════════════════════════════════════════════════
+function TimetableTab({ user, store, setInClassroom, setPage, toast }) {
+  const [view, setView]   = useState('grid')   // 'grid' | 'list'
+  const [tick, setTick]   = useState(0)
+  const [selected, setSelected] = useState(null)  // currently selected slot for action menu
+ 
+  // Re-evaluate live status every 30 seconds
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 30000)
+    return () => clearInterval(id)
+  }, [])
+ 
+  // Find this student's enrolled rooms
+  const studentFullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+  const allRooms = store?.groupRooms || []
+  const myRooms = allRooms.filter(r =>
+    r.students?.some(s =>
+      s === studentFullName ||
+      s === user?.firstName ||
+      (user?.firstName && s.includes(user.firstName))
+    )
+  )
+ 
+  // Build slot data — one slot per (room × day-it-recurs)
+  const slots = []
+  myRooms.forEach(room => {
+    const parsed = parseScheduleString(room.schedule)
+    if (!parsed) return
+    parsed.days.forEach(dow => {
+      slots.push({
+        roomId: room.id,
+        room,
+        dow,
+        startMins: parsed.startMins,
+        endMins: parsed.endMins,
+      })
+    })
+  })
+ 
+  const subjColours = {
+    'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
+    'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
+    'Geography': '#0F766E', 'Computer Science': '#1F2937',
+    'Business Studies': '#7E22CE', 'Economics': '#9F1239',
+  }
+  const colourFor = (s) => subjColours[s] || '#8B1A2E'
+ 
+  const now = new Date()
+  const todayDow = now.getDay()
+  const nowMins = now.getHours() * 60 + now.getMinutes()
+ 
+  const isLiveNow = (slot) =>
+    slot.dow === todayDow && nowMins >= slot.startMins && nowMins < slot.endMins
+  const isPastToday = (slot) =>
+    slot.dow === todayDow && nowMins >= slot.endMins
+  const isUpcomingToday = (slot) =>
+    slot.dow === todayDow && nowMins < slot.startMins
+ 
+  // Determine which days to show (always Mon-Fri; add Sat/Sun if any class falls there)
+  const usedDays = new Set(slots.map(s => s.dow))
+  const showSat = usedDays.has(6)
+  const showSun = usedDays.has(0)
+  const dayList = []
+  if (showSun) dayList.push(0)
+  for (let d = 1; d <= 5; d++) dayList.push(d)
+  if (showSat) dayList.push(6)
+  const dayShortName = (d) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d]
+  const dayLongName  = (d) => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d]
+ 
+  // Time range to display — find earliest start, latest end across all slots
+  let earliestMins = 8 * 60   // default 8 AM
+  let latestMins   = 17 * 60  // default 5 PM
+  if (slots.length > 0) {
+    earliestMins = Math.min(...slots.map(s => s.startMins))
+    latestMins   = Math.max(...slots.map(s => s.endMins))
+    // Snap to nearest hour boundary
+    earliestMins = Math.floor(earliestMins / 60) * 60
+    latestMins   = Math.ceil(latestMins / 60) * 60
+    // Add small buffer
+    earliestMins = Math.max(7 * 60, earliestMins)
+    latestMins   = Math.min(20 * 60, latestMins + 30)
+  }
+  const totalMinsSpan = latestMins - earliestMins
+ 
+  // Hour labels for the row headers
+  const hourLabels = []
+  for (let m = earliestMins; m <= latestMins; m += 60) {
+    let h = Math.floor(m / 60)
+    const mer = h >= 12 ? 'PM' : 'AM'
+    h = h % 12
+    if (h === 0) h = 12
+    hourLabels.push({ mins: m, label: `${h} ${mer}` })
+  }
+ 
+  const formatTime = (mins) => {
+    let h = Math.floor(mins / 60)
+    const m = mins % 60
+    const mer = h >= 12 ? 'PM' : 'AM'
+    h = h % 12
+    if (h === 0) h = 12
+    return `${h}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
+  }
+ 
+  // Stats
+  const liveCount      = slots.filter(isLiveNow).length
+  const todayCount     = slots.filter(s => s.dow === todayDow).length
+  const totalWeekly    = slots.length
+  const subjectCount   = new Set(slots.map(s => s.room.subject)).size
+ 
+  // ── Action menu actions ─────────────────────────────────────
+  const handleAction = (action, slot) => {
+    setSelected(null)
+    if (action === 'join') {
+      setPage('live')
+      setInClassroom(true)
+    } else if (action === 'view-class') {
+      setPage('myroom')
+    } else if (action === 'add-cal') {
+      toast?.info?.(`Reminder set for ${slot.room.subject}`)
+    } else if (action === 'practice') {
+      setPage('practice')
+    }
+  }
+ 
+  // ── EMPTY STATE ─────────────────────────────────────────────
+  if (myRooms.length === 0) {
+    return (
+      <div>
+        <div className="card" style={{
+          padding: 0, marginBottom: 18, overflow: 'hidden',
+          background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+          color: '#fff',
+        }}>
+          <div style={{ padding: '24px 30px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+              Weekly Schedule
+            </div>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0 }}>
+              Your Timetable
+            </h2>
+          </div>
+        </div>
+        <div className="card" style={{ padding: 36, textAlign: 'center' }}>
+          <div style={{ width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%', background: 'var(--s100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="1.5" strokeLinecap="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>Your timetable will appear here</h3>
+          <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto' }}>
+            Once an admin enrols you in classes, your weekly schedule will be built automatically from your class times.
+          </p>
+        </div>
+      </div>
+    )
+  }
+ 
+  return (
+    <div>
+      {/* Hero */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+        color: '#fff',
+      }}>
+        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+              Weekly Schedule
+            </div>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              Your Timetable
+            </h2>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              {dayLongName(todayDow)} · {now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
+            </div>
+          </div>
+          {/* View toggle */}
+          <div style={{
+            display: 'flex',
+            background: 'rgba(0,0,0,.2)',
+            borderRadius: 99,
+            padding: 3,
+            gap: 2,
+          }}>
+            {[['grid', 'Week'], ['list', 'List']].map(([id, label]) => (
+              <button
+                key={id}
+                onClick={() => setView(id)}
+                style={{
+                  background: view === id ? '#fff' : 'transparent',
+                  color: view === id ? '#8B1A2E' : 'rgba(255,255,255,.75)',
+                  border: 'none',
+                  padding: '6px 16px',
+                  borderRadius: 99,
+                  cursor: 'pointer',
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  transition: 'all .15s',
+                }}
+              >{label}</button>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+          {[
+            ['Live Now',     liveCount],
+            ['Today',        todayCount],
+            ['This Week',    totalWeekly],
+            ['Subjects',     subjectCount],
+          ].map(([l, v]) => (
+            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
+                {l}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+ 
+      {/* GRID VIEW */}
+      {view === 'grid' && (
+        <div className="card" style={{ padding: 0, overflow: 'auto' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: `64px repeat(${dayList.length}, minmax(110px, 1fr))`,
+            minWidth: 64 + dayList.length * 110,
+          }}>
+            {/* Header row */}
+            <div style={{ background: 'var(--bg)', borderRight: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}/>
+            {dayList.map(d => {
+              const isToday = d === todayDow
+              return (
+                <div key={d} style={{
+                  background: isToday ? 'rgba(139,26,46,.06)' : 'var(--bg)',
+                  borderRight: '1px solid var(--border)',
+                  borderBottom: '1px solid var(--border)',
+                  padding: '12px 8px',
+                  textAlign: 'center',
+                  position: 'relative',
+                }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: isToday ? '#8B1A2E' : 'var(--s400)' }}>
+                    {dayShortName(d)}
+                  </div>
+                  {isToday && (
+                    <div style={{ fontSize: 9, color: '#8B1A2E', fontWeight: 700, marginTop: 1 }}>Today</div>
+                  )}
+                </div>
+              )
+            })}
+ 
+            {/* Body — one row per hour */}
+            {hourLabels.slice(0, -1).map((hour, hi) => (
+              <div key={hi} style={{ display: 'contents' }}>
+                {/* Time label */}
+                <div style={{
+                  background: 'var(--bg)',
+                  borderRight: '1px solid var(--border)',
+                  borderBottom: '1px solid var(--border)',
+                  padding: '6px 6px 0',
+                  fontSize: 10,
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontWeight: 700,
+                  color: 'var(--s400)',
+                  textAlign: 'right',
+                  height: 60,
+                }}>
+                  {hour.label}
+                </div>
+                {/* Day cells for this hour - empty cells with grid lines */}
+                {dayList.map(d => {
+                  const isToday = d === todayDow
+                  return (
+                    <div key={d} style={{
+                      background: isToday ? 'rgba(139,26,46,.025)' : 'transparent',
+                      borderRight: '1px solid var(--border)',
+                      borderBottom: '1px solid var(--border)',
+                      height: 60,
+                      position: 'relative',
+                    }}/>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+ 
+          {/* Overlay slots positioned absolutely on the grid */}
+          <div style={{ position: 'relative', marginTop: -((hourLabels.length - 1) * 60), pointerEvents: 'none' }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: `64px repeat(${dayList.length}, minmax(110px, 1fr))`,
+              minWidth: 64 + dayList.length * 110,
+            }}>
+              <div/>
+              {dayList.map(d => (
+                <div key={d} style={{ position: 'relative', minHeight: (hourLabels.length - 1) * 60 + 'px' }}>
+                  {slots.filter(s => s.dow === d).map((slot, si) => {
+                    const col = colourFor(slot.room.subject)
+                    const top = ((slot.startMins - earliestMins) / 60) * 60
+                    const height = Math.max(36, ((slot.endMins - slot.startMins) / 60) * 60 - 2)
+                    const live = isLiveNow(slot)
+                    const past = isPastToday(slot)
+                    return (
+                      <div
+                        key={si}
+                        onClick={() => setSelected(slot)}
+                        style={{
+                          position: 'absolute',
+                          top: top + 'px',
+                          left: 4,
+                          right: 4,
+                          height: height + 'px',
+                          background: live ? col : col + 'E0',
+                          color: '#fff',
+                          borderRadius: 'var(--rsm)',
+                          padding: '6px 8px',
+                          fontSize: 11,
+                          cursor: 'pointer',
+                          pointerEvents: 'auto',
+                          boxShadow: live ? `0 0 0 2px #fff, 0 0 0 4px ${col}` : '0 1px 3px rgba(0,0,0,.15)',
+                          opacity: past ? 0.55 : 1,
+                          overflow: 'hidden',
+                          transition: 'all .15s',
+                          zIndex: live ? 5 : 1,
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)' }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
+                        title={`${slot.room.subject} — ${slot.room.teacher}\n${formatTime(slot.startMins)} – ${formatTime(slot.endMins)}`}
+                      >
+                        {live && (
+                          <div style={{
+                            display: 'inline-block',
+                            background: '#fff',
+                            color: col,
+                            fontSize: 8.5,
+                            fontWeight: 800,
+                            letterSpacing: '.08em',
+                            padding: '1px 6px',
+                            borderRadius: 99,
+                            marginBottom: 2,
+                          }}>● LIVE</div>
+                        )}
+                        <div style={{ fontWeight: 700, fontSize: 12, lineHeight: 1.2, marginBottom: 2, textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                          {slot.room.subject}
+                        </div>
+                        <div style={{ fontSize: 10, opacity: .8, lineHeight: 1.2 }}>
+                          {formatTime(slot.startMins)}
+                        </div>
+                        {height > 50 && (
+                          <div style={{ fontSize: 10, opacity: .75, lineHeight: 1.2, marginTop: 1, textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
+                            {slot.room.teacher}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+ 
+      {/* LIST VIEW */}
+      {view === 'list' && (
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Subject</th>
+                <th>Teacher</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...slots].sort((a, b) => {
+                // Sort by day then time, with today first
+                const aDayOrder = a.dow === todayDow ? -1 : a.dow
+                const bDayOrder = b.dow === todayDow ? -1 : b.dow
+                if (aDayOrder !== bDayOrder) return aDayOrder - bDayOrder
+                return a.startMins - b.startMins
+              }).map((slot, i) => {
+                const col = colourFor(slot.room.subject)
+                const live = isLiveNow(slot)
+                const past = isPastToday(slot)
+                const upcomingToday = isUpcomingToday(slot)
+                const isToday = slot.dow === todayDow
+ 
+                let statusBadge
+                if (live) statusBadge = <span className="badge badge-red" style={{ background: '#FEE2E2', color: '#991B1B' }}>● Live Now</span>
+                else if (past) statusBadge = <span className="badge badge-slate" style={{ background: 'var(--s100)', color: 'var(--s500)' }}>Done</span>
+                else if (upcomingToday) statusBadge = <span className="badge badge-amber">Today</span>
+                else statusBadge = <span className="badge badge-blue">Upcoming</span>
+ 
+                return (
+                  <tr key={i} style={{ background: live ? '#FEF2F2' : isToday ? 'rgba(139,26,46,.025)' : 'transparent' }}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 4, height: 24, borderRadius: 2, background: col, flexShrink: 0 }}/>
+                        <span className="mono" style={{ fontWeight: 700, color: isToday ? '#8B1A2E' : 'var(--s700)' }}>
+                          {dayShortName(slot.dow)}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="mono" style={{ fontSize: 13 }}>
+                      {formatTime(slot.startMins)} – {formatTime(slot.endMins)}
+                    </td>
+                    <td style={{ fontWeight: 600 }}>{slot.room.subject}</td>
+                    <td style={{ color: 'var(--s500)', fontSize: 13 }}>{slot.room.teacher}</td>
+                    <td>{statusBadge}</td>
+                    <td>
+                      {live && (
+                        <button className="btn btn-d btn-sm" onClick={() => { setPage('live'); setInClassroom(true) }}>
+                          Join
+                        </button>
+                      )}
+                      {!live && !past && (
+                        <button className="btn btn-s btn-sm" onClick={() => toast?.info?.(`Reminder set for ${slot.room.subject}`)}>
+                          Remind
+                        </button>
+                      )}
+                      {past && (
+                        <button className="btn btn-s btn-sm" onClick={() => setPage('practice')}>
+                          Practice
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+ 
+      {/* Action menu modal */}
+      {selected && (() => {
+        const live = isLiveNow(selected)
+        const past = isPastToday(selected)
+        return (
+          <div
+            onClick={() => setSelected(null)}
+            style={{
+              position: 'fixed', inset: 0,
+              background: 'rgba(15,23,42,.55)',
+              zIndex: 100,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 20,
+            }}
+          >
+            <div
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: 'var(--white)',
+                borderRadius: 'var(--rxl)',
+                width: '100%', maxWidth: 420,
+                overflow: 'hidden',
+                boxShadow: '0 20px 60px rgba(0,0,0,.3)',
+              }}
+            >
+              {/* Header */}
+              <div style={{
+                padding: '20px 24px',
+                background: `linear-gradient(135deg, ${colourFor(selected.room.subject)} 0%, ${colourFor(selected.room.subject)}DD 100%)`,
+                color: '#fff',
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .8, marginBottom: 4 }}>
+                  {dayLongName(selected.dow)} · {formatTime(selected.startMins)} – {formatTime(selected.endMins)}
+                </div>
+                <h3 className="serif" style={{ fontSize: 22, margin: 0 }}>{selected.room.subject}</h3>
+                <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+                  {selected.room.teacher} · {selected.room.curriculum} {selected.room.grade ? '· ' + selected.room.grade : ''}
+                </div>
+                {live && (
+                  <div style={{
+                    display: 'inline-block',
+                    background: '#fff', color: colourFor(selected.room.subject),
+                    fontSize: 10, fontWeight: 800, letterSpacing: '.1em',
+                    padding: '3px 10px', borderRadius: 99,
+                    marginTop: 10,
+                  }}>● LIVE NOW</div>
+                )}
+              </div>
+ 
+              {/* Actions */}
+              <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {live && (
+                  <button
+                    className="btn btn-p"
+                    onClick={() => handleAction('join', selected)}
+                    style={{ background: colourFor(selected.room.subject), borderColor: colourFor(selected.room.subject), justifyContent: 'flex-start' }}
+                  >
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Join Class Now
+                  </button>
+                )}
+                {!live && !past && (
+                  <button
+                    className="btn btn-s"
+                    onClick={() => handleAction('add-cal', selected)}
+                    style={{ justifyContent: 'flex-start' }}
+                  >
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Set Reminder
+                  </button>
+                )}
+                <button
+                  className="btn btn-s"
+                  onClick={() => handleAction('view-class', selected)}
+                  style={{ justifyContent: 'flex-start' }}
+                >
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  View Classmates
+                </button>
+                {past && (
+                  <button
+                    className="btn btn-s"
+                    onClick={() => handleAction('practice', selected)}
+                    style={{ justifyContent: 'flex-start' }}
+                  >
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1.5"/></svg>
+                    Practice This Subject
+                  </button>
+                )}
+                <button
+                  onClick={() => setSelected(null)}
+                  style={{
+                    background: 'transparent', border: 'none',
+                    color: 'var(--s500)', padding: '8px',
+                    fontSize: 13, cursor: 'pointer',
+                    textAlign: 'center', marginTop: 4,
+                  }}
+                >Close</button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+    </div>
+  )
+}
+ 
 
 
 
