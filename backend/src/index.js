@@ -37,7 +37,7 @@ app.use(express.urlencoded({ extended: true }));
 // ── Rate limiting ─────────────────────────────────────────
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,  // Increased from 20 for better user experience
+  max: 100,
   message: { success: false, message: 'Too many login attempts — please wait 15 minutes.' },
 });
 
@@ -50,23 +50,17 @@ app.use(rateLimit({
   message: { success: false, message: 'Too many requests — please try again later.' },
 }));
 
-// ── Routes (ADMIN PORTAL ONLY) ─────────────────────────────
-// Core Admin Routes
-app.use('/api/auth',          authLimiter, require('./routes/auth'));
-app.use('/api/users',         require('./routes/users'));
-app.use('/api/teachers',      require('./routes/teachers'));
-app.use('/api/allocations',   require('./routes/allocations'));
-app.use('/api/subjects',      require('./routes/subjects'));
-app.use('/api/curriculum',    require('./routes/curriculum'));
-console.log('🔍 Mounting students route at', new Date().toISOString());
-app.use('/api/students',      require('./routes/students'));
-console.log('✅ Students route mounted');
-app.use('/api/dashboard',     require('./routes/dashboard'));
-app.use('/api/status',        require('./routes/status-management'));
+// ── Routes ────────────────────────────────────────────────
+app.use('/api/auth',           authLimiter, require('./routes/auth'));
+app.use('/api/users',          require('./routes/users'));
+app.use('/api/teachers',       require('./routes/teachers'));
+app.use('/api/allocations',    require('./routes/allocations'));
+app.use('/api/subjects',       require('./routes/subjects'));
+app.use('/api/curriculum',     require('./routes/curriculum'));
+app.use('/api/students',       require('./routes/students'));
+app.use('/api/dashboard',      require('./routes/dashboard'));
+app.use('/api/status',         require('./routes/status-management'));
 app.use('/api/leave-requests', require('./routes/status-management'));
-
-// Note: Future modules (lessons, exams, messages, etc.) moved to separate repos
-// This keeps admin portal lean and focused on core functionality
 
 // ── Health check ──────────────────────────────────────────
 app.get('/api/health', (_, res) =>
