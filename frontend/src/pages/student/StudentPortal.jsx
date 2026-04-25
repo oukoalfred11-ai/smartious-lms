@@ -40,6 +40,39 @@ const masteryCol = (pct) =>
 const masteryLabel = (pct) =>
   pct >= 80 ? 'Mastered' : pct >= 60 ? 'Progressing' : pct >= 40 ? 'Building' : pct > 0 ? 'Needs Help' : 'Not Started'
 
+// ── YouTube URL normalizer ────────────────────────────────
+// Teachers paste any YouTube URL format. Convert to embed URL
+// so the iframe plays inline instead of opening the YouTube app.
+const toYouTubeEmbed = (url) => {
+  if (!url || typeof url !== 'string') return ''
+  const trimmed = url.trim()
+  if (!trimmed) return ''
+
+  // Already an embed URL
+  if (/^https?:\/\/(www\.)?youtube\.com\/embed\//i.test(trimmed)) return trimmed
+
+  let videoId = ''
+  let m
+
+  // youtu.be/VIDEOID
+  m = trimmed.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/)
+  if (m) videoId = m[1]
+
+  // youtube.com/watch?v=VIDEOID
+  if (!videoId) { m = trimmed.match(/[?&]v=([a-zA-Z0-9_-]{11})/); if (m) videoId = m[1] }
+
+  // youtube.com/shorts/VIDEOID
+  if (!videoId) { m = trimmed.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/); if (m) videoId = m[1] }
+
+  // youtube.com/live/VIDEOID
+  if (!videoId) { m = trimmed.match(/youtube\.com\/live\/([a-zA-Z0-9_-]{11})/); if (m) videoId = m[1] }
+
+  // Raw 11-char video ID
+  if (!videoId && /^[a-zA-Z0-9_-]{11}$/.test(trimmed)) videoId = trimmed
+
+  if (!videoId) return ''
+  return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`
+}
 // ── Badge icon SVGs ───────────────────────────────────────
 const BADGE_ICONS = {
   streak_7:    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#F97316" strokeWidth="2" strokeLinecap="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg>,
@@ -662,10 +695,10 @@ export default function StudentPortal() {
                     ) || store.lessons[0]
                     return (
                       <>
-                        {lesson?.youtubeUrl ? (
+                       {(() => { const embedUrl = toYouTubeEmbed(lesson?.youtubeUrl); return embedUrl ? (
                           <div style={{position:'relative',paddingBottom:'56.25%',height:0,borderRadius:'var(--rlg)',overflow:'hidden',background:'#000'}}>
                             <iframe
-                              src={lesson.youtubeUrl + '?rel=0&modestbranding=1'}
+                              src={embedUrl}
                               title={lesson.title}
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                               allowFullScreen
@@ -681,8 +714,8 @@ export default function StudentPortal() {
                                 <span style={{fontSize:12,color:'rgba(255,255,255,.25)'}}>Teacher can upload a YouTube lesson from their portal</span>
                               </div>
                             </div>
-                          </div>
-                        )}
+                         </div>
+                        ) })()}
                         {lesson && (
                           <div style={{marginTop:12,padding:'12px 16px',background:'var(--bg)',borderRadius:'var(--rmd)',fontSize:13}}>
                             <div style={{fontWeight:700,color:'var(--s800)',marginBottom:2}}>{lesson.title}</div>
