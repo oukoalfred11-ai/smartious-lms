@@ -17,6 +17,11 @@ const router = express.Router();
 const User = require('../models/User');
 const { auth, requireRole } = require('../middleware/auth');
 
+// DEBUG: minimal route with no auth, no DB, no dependencies
+router.get('/ping', (req, res) => {
+  res.json({ success: true, message: 'students router is alive', timestamp: Date.now() });
+});
+
 // Fields the student is allowed to update on their own profile.
 // Anything outside this list is silently ignored.
 const ALLOWED_PROFILE_FIELDS = [
