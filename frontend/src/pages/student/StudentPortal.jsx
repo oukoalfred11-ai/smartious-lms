@@ -989,113 +989,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               EXAMS
           ════════════════════════════════════════════ */}
-          {page === 'exams' && !examActive && !examResult && (
-            <div>
-              <div style={{marginBottom:20}}>
-                <div className="sec-tag">Assessment</div>
-                <h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Exams</h2>
-              </div>
-              {/* Released results from teacher */}
-              {store.getStudentResults('Amara Osei').length > 0 && (
-                <div className="card" style={{marginBottom:20}}>
-                  <div className="ctitle" style={{marginBottom:14}}>Released Results</div>
-                  <table className="tbl">
-                    <thead><tr><th>Exam</th><th>Score</th><th>Grade</th><th>Date</th><th>Feedback</th></tr></thead>
-                    <tbody>
-                      {store.getStudentResults('Amara Osei').map((r,i) => (
-                        <tr key={i}>
-                          <td style={{fontWeight:600}}>{r.exam}</td>
-                          <td><span className="mono" style={{fontWeight:700,color:r.grade==='A'||r.grade==='B'?'var(--g600)':'var(--a600)'}}>{r.score}/{r.total}</span></td>
-                          <td><span className={`badge ${r.grade==='A'||r.grade==='B'?'badge-green':'badge-amber'}`}>{r.grade}</span></td>
-                          <td style={{color:'var(--s500)',fontSize:13}}>{r.date}</td>
-                          <td style={{fontSize:12.5,color:'var(--s500)',maxWidth:200}}>{r.feedback}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              <div className="card">
-                <div className="chdr"><div className="ctitle">Mathematics — Pythagoras Theorem Mock</div><span className="badge badge-red">Due Today</span></div>
-                <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:16}}>
-                  {[['Duration','60 min'],['Questions',`${EXAM_QS.length}`],['Marks',`${EXAM_QS.reduce((s,q)=>s+q.marks,0)}`],['Pass Mark','60%']].map(([l,v]) => (
-                    <div key={l} style={{background:'var(--bg)',borderRadius:'var(--rsm)',padding:'10px 12px',textAlign:'center'}}>
-                      <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:'.05em',color:'var(--s400)',marginBottom:3}}>{l}</div>
-                      <div className="mono" style={{fontSize:14,fontWeight:700,color:'var(--s700)'}}>{v}</div>
-                    </div>
-                  ))}
-                </div>
-                {mastery && (() => { const subj = mastery.subjects.find(s=>s.name==='Mathematics'); const topic = subj?.topics.find(t=>t.name==='Pythagoras & Geometry'); return topic && (
-                  <div style={{background:topic.pct<60?'var(--r50)':'var(--g50)',border:`1px solid ${topic.pct<60?'var(--r100)':'var(--g100)'}`,borderRadius:'var(--rmd)',padding:'10px 14px',marginBottom:14,fontSize:13.5,color:topic.pct<60?'var(--r600)':'var(--g700)'}}>
-                    Your current mastery for this topic: <strong>{topic.pct}%</strong>
-                    {topic.pct < 60 ? ' — Review before starting! Consider practising first.' : ' — You are ready for this exam.'}
-                  </div>
-                )})()}
-                <button className="btn btn-p" onClick={() => {setExamActive(true);setExamTime(3600);setExamAnswers({});setExamResult(null)}}>
-                  Start Exam
-                </button>
-              </div>
-            </div>
-          )}
-          {page === 'exams' && examActive && !examResult && (
-            <div>
-              <div style={{background:'var(--white)',border:'1px solid var(--border)',borderRadius:'var(--rxl)',padding:'14px 24px',marginBottom:20,display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
-                <div><div className="serif" style={{fontSize:18}}>Mathematics — Pythagoras Theorem Mock</div><div style={{fontSize:13,color:'var(--s400)'}}>{EXAM_QS.length} questions · {EXAM_QS.reduce((s,q)=>s+q.marks,0)} marks</div></div>
-                <div style={{display:'flex',gap:14,alignItems:'center'}}>
-                  <div className="mono" style={{fontSize:22,fontWeight:700,color:examTime<300?'var(--r600)':'var(--s800)'}}>{fmtTime(examTime)}</div>
-                  <button className="btn btn-d btn-sm" onClick={() => setExamActive(false)}>Exit</button>
-                </div>
-              </div>
-              {EXAM_QS.map((q,qi) => (
-                <div key={qi} className="card" style={{marginBottom:14,borderColor:examAnswers[q.id]?'var(--b200)':'var(--border)'}}>
-                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:10}}>
-                    <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                      <div style={{width:26,height:26,borderRadius:'50%',background:examAnswers[q.id]?'var(--b700)':'var(--s200)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,color:examAnswers[q.id]?'#fff':'var(--s500)'}}>{qi+1}</div>
-                      <span style={{fontSize:15,fontWeight:500,color:'var(--s800)',lineHeight:1.5}}>{q.q}</span>
-                    </div>
-                    <span style={{fontSize:11,color:'var(--s400)',flexShrink:0,marginLeft:8}}>{q.marks} marks</span>
-                  </div>
-                  {q.opts.map(opt => (
-                    <label key={opt} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 14px',marginBottom:7,borderRadius:'var(--rmd)',cursor:'pointer',border:`1.5px solid ${examAnswers[q.id]===opt?'var(--b600)':'var(--border)'}`,background:examAnswers[q.id]===opt?'var(--b50)':'var(--bg)',transition:'all .15s'}}>
-                      <input type="radio" name={`eq${qi}`} value={opt} checked={examAnswers[q.id]===opt} onChange={() => setExamAnswers(a=>({...a,[q.id]:opt}))} style={{accentColor:'var(--b600)'}}/>
-                      <span style={{fontSize:14,color:examAnswers[q.id]===opt?'var(--b800)':'var(--s700)',fontWeight:examAnswers[q.id]===opt?600:400}}>{opt}</span>
-                    </label>
-                  ))}
-                </div>
-              ))}
-              <div style={{position:'sticky',bottom:16,background:'var(--white)',border:'1px solid var(--border)',borderRadius:'var(--rxl)',padding:'14px 24px',display:'flex',justifyContent:'space-between',alignItems:'center',boxShadow:'var(--sh-lg)'}}>
-                <div style={{fontSize:13.5,color:Object.keys(examAnswers).length<EXAM_QS.length?'var(--a600)':'var(--g600)'}}>
-                  {Object.keys(examAnswers).length}/{EXAM_QS.length} answered
-                </div>
-                <button className="btn btn-p" onClick={submitExam}>Submit Exam</button>
-              </div>
-            </div>
-          )}
-          {page === 'exams' && examResult && (
-            <div style={{maxWidth:520,margin:'0 auto'}}>
-              <div className="card" style={{textAlign:'center',padding:36}}>
-                <div className="serif" style={{fontSize:28,color:'var(--s900)',marginBottom:6}}>
-                  {examResult.pct >= 60 ? 'Well done!' : 'Keep Practising'}
-                </div>
-                <p style={{color:'var(--s500)',marginBottom:24}}>Mathematics — Pythagoras Theorem Mock</p>
-                <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:24}}>
-                  {[['Score',`${examResult.pct}%`,examResult.pct>=60?'var(--g50)':'var(--r50)',masteryCol(examResult.pct)],
-                    ['Correct',`${examResult.correct}/${EXAM_QS.length}`,'var(--b50)','var(--b700)'],
-                    ['Grade',examResult.pct>=80?'A':examResult.pct>=60?'B':'C',examResult.pct>=60?'var(--g50)':'var(--a50)',examResult.pct>=60?'var(--g700)':'var(--a600)']].map(([l,v,bg,c]) => (
-                    <div key={l} style={{background:bg,borderRadius:'var(--rmd)',padding:'16px 10px'}}>
-                      <div className="mono" style={{fontSize:22,fontWeight:700,color:c}}>{v}</div>
-                      <div style={{fontSize:12,color:'var(--s500)',marginTop:3}}>{l}</div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{display:'flex',gap:10,justifyContent:'center'}}>
-                  <button className="btn btn-p" onClick={() => {setExamResult(null);setExamActive(false)}}>Back to Exams</button>
-                  <button className="btn btn-s" onClick={() => { goTo('practice'); loadPractice('Mathematics','Pythagoras & Geometry') }}>Practise Weak Areas</button>
-                </div>
-              </div>
-            </div>
-          )}
+          {page === 'exams' && <ExamsTab user={user} toast={toast} goTo={goTo} store={store} />}
 
           {/* ════════════════════════════════════════════
               LIVE CLASSES
@@ -2427,6 +2321,572 @@ function AchievementsTab({ user }) {
     </div>
   )
 }
+ 
+  return null
+}
+
+ // ═══════════════════════════════════════════════════════════
+// EXAMS TAB — uses QUESTION_BANK from PracticeTab paste
+// ═══════════════════════════════════════════════════════════
+const EXAM_HIST_KEY = 'sm_exam_history'
+const EXAM_DURATION_SECONDS = 60 * 60  // 60 minutes
+const EXAM_QUESTION_COUNT   = 10
+ 
+const loadExamHist = () => {
+  try { return JSON.parse(localStorage.getItem(EXAM_HIST_KEY) || '[]') }
+  catch { return [] }
+}
+const saveExamHist = (h) => {
+  try { localStorage.setItem(EXAM_HIST_KEY, JSON.stringify(h.slice(-30))) } catch {}
+}
+ 
+const fmtExamTime = (s) => {
+  const m = Math.floor(s / 60)
+  const sec = s % 60
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+}
+ 
+const gradeFor = (pct) => {
+  if (pct >= 90) return { grade: 'A*', colour: 'var(--g600)', message: 'Outstanding!' }
+  if (pct >= 80) return { grade: 'A',  colour: 'var(--g600)', message: 'Excellent!' }
+  if (pct >= 70) return { grade: 'B',  colour: 'var(--b700)', message: 'Very good.' }
+  if (pct >= 60) return { grade: 'C',  colour: 'var(--b700)', message: 'Good. Pass.' }
+  if (pct >= 50) return { grade: 'D',  colour: 'var(--a600)', message: 'Borderline pass.' }
+  if (pct >= 40) return { grade: 'E',  colour: 'var(--a600)', message: 'Below pass.' }
+  return         { grade: 'U',         colour: 'var(--r500)', message: 'Ungraded — review and retry.' }
+}
+ 
+const examShuffle = (arr) => {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+ 
+function ExamsTab({ user, toast, goTo, store }) {
+  const [stage,    setStage]    = useState('list')   // 'list' | 'sitting' | 'result'
+  const [subject,  setSubject]  = useState(null)
+  const [examQs,   setExamQs]   = useState([])
+  const [answers,  setAnswers]  = useState({})
+  const [timeLeft, setTimeLeft] = useState(EXAM_DURATION_SECONDS)
+  const [result,   setResult]   = useState(null)
+  const [hist,     setHist]     = useState(loadExamHist())
+ 
+  // Build available exams — one per subject (mixed topics)
+  const availableExams = Object.keys(QUESTION_BANK).map(subj => {
+    const allQs = []
+    Object.entries(QUESTION_BANK[subj]).forEach(([topic, qs]) => {
+      qs.forEach(q => allQs.push({ ...q, topic }))
+    })
+    return {
+      subject: subj,
+      title: `${subj} — Mixed Topics Exam`,
+      questionsAvailable: allQs.length,
+      topics: Object.keys(QUESTION_BANK[subj]).length,
+      colour: subjectColour(subj),
+    }
+  })
+ 
+  // ── Timer effect ─────────────────────────────────────────
+  useEffect(() => {
+    if (stage !== 'sitting') return
+    if (timeLeft <= 0) {
+      submitExam(true)
+      return
+    }
+    const id = setInterval(() => setTimeLeft(t => Math.max(0, t - 1)), 1000)
+    return () => clearInterval(id)
+  }, [stage, timeLeft])
+ 
+  const startExam = (subj) => {
+    const allQs = []
+    Object.entries(QUESTION_BANK[subj]).forEach(([topic, qs]) => {
+      qs.forEach(q => allQs.push({ ...q, topic }))
+    })
+    if (allQs.length < EXAM_QUESTION_COUNT) {
+      toast?.error?.(`Not enough questions for ${subj} exam yet.`)
+      return
+    }
+    const picked = examShuffle(allQs).slice(0, EXAM_QUESTION_COUNT).map((q, i) => ({
+      ...q,
+      id: i + 1,
+      shuffledOptions: examShuffle(q.options),
+      marks: 5,
+    }))
+    setSubject(subj)
+    setExamQs(picked)
+    setAnswers({})
+    setTimeLeft(EXAM_DURATION_SECONDS)
+    setResult(null)
+    setStage('sitting')
+  }
+ 
+  const submitExam = (autoSubmitted = false) => {
+    let correct = 0
+    examQs.forEach(q => {
+      if (answers[q.id] === q.answer) correct++
+    })
+    const score = Math.round((correct / examQs.length) * 100)
+    const session = {
+      subject, score, correct,
+      total: examQs.length,
+      autoSubmitted,
+      timeUsed: EXAM_DURATION_SECONDS - timeLeft,
+      date: new Date().toISOString(),
+    }
+    const newHist = [...hist, session]
+    setHist(newHist)
+    saveExamHist(newHist)
+    setResult({ correct, score, autoSubmitted, timeUsed: session.timeUsed })
+    setStage('result')
+ 
+    if (autoSubmitted) toast?.info?.('Time up — exam submitted automatically.')
+    else if (score >= 60) toast?.ok?.(`Pass! Grade ${gradeFor(score).grade}`)
+    else toast?.info?.(`Below pass mark — keep practising.`)
+  }
+ 
+  const exitExam = () => {
+    if (window.confirm('Leave the exam? Your progress will be lost.')) {
+      setStage('list')
+      setExamQs([])
+      setAnswers({})
+    }
+  }
+ 
+  // Released results — read from the actual logged-in student name
+  const studentFullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+  const releasedResults = (() => {
+    try { return store?.getStudentResults?.(studentFullName) || [] }
+    catch { return [] }
+  })()
+ 
+  // ── LIST SCREEN ──────────────────────────────────────────
+  if (stage === 'list') {
+    const passRate = hist.length > 0
+      ? Math.round((hist.filter(h => h.score >= 60).length / hist.length) * 100)
+      : 0
+    const avgGrade = hist.length > 0
+      ? gradeFor(Math.round(hist.reduce((s, h) => s + h.score, 0) / hist.length)).grade
+      : '—'
+ 
+    return (
+      <div>
+        {/* Hero */}
+        <div className="card" style={{
+          padding: 0, marginBottom: 18, overflow: 'hidden',
+          background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+          color: '#fff',
+        }}>
+          <div style={{ padding: '24px 30px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+              Assessment
+            </div>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              Exam-style assessments under timed conditions
+            </h2>
+            <p style={{ fontSize: 13.5, opacity: .85, marginTop: 8, marginBottom: 0, maxWidth: 540, lineHeight: 1.55 }}>
+              10 questions across mixed topics, 60 minutes, IGCSE-style grading. Your real exam preparation begins here.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+            {[
+              ['Exams Taken',  hist.length],
+              ['Pass Rate',    hist.length ? `${passRate}%` : '—'],
+              ['Avg Grade',    avgGrade],
+              ['Best Grade',   hist.length ? gradeFor(Math.max(...hist.map(h => h.score))).grade : '—'],
+            ].map(([l, v]) => (
+              <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
+                  {l}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+ 
+        {/* Released results from teacher */}
+        {releasedResults.length > 0 && (
+          <div className="card" style={{ marginBottom: 18 }}>
+            <div className="ctitle" style={{ marginBottom: 14 }}>Released Results from Teacher</div>
+            <table className="tbl">
+              <thead>
+                <tr><th>Exam</th><th>Score</th><th>Grade</th><th>Date</th><th>Feedback</th></tr>
+              </thead>
+              <tbody>
+                {releasedResults.map((r, i) => (
+                  <tr key={i}>
+                    <td style={{ fontWeight: 600 }}>{r.exam}</td>
+                    <td>
+                      <span className="mono" style={{ fontWeight: 700, color: r.grade === 'A' || r.grade === 'B' ? 'var(--g600)' : 'var(--a600)' }}>
+                        {r.score}/{r.total}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge ${r.grade === 'A' || r.grade === 'B' ? 'badge-green' : 'badge-amber'}`}>{r.grade}</span>
+                    </td>
+                    <td style={{ color: 'var(--s500)', fontSize: 13 }}>{r.date}</td>
+                    <td style={{ fontSize: 12.5, color: 'var(--s500)', maxWidth: 220 }}>{r.feedback}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+ 
+        {/* Available exams */}
+        <div style={{ marginBottom: 12 }}>
+          <div className="sec-tag">Available Exams</div>
+          <h3 className="serif" style={{ fontSize: 20, color: 'var(--s900)', margin: '4px 0 0' }}>
+            Sit a {EXAM_QUESTION_COUNT}-question mixed-topic exam
+          </h3>
+        </div>
+ 
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14, marginBottom: 24 }}>
+          {availableExams.map(ex => {
+            const lastSession = [...hist].reverse().find(h => h.subject === ex.subject)
+            return (
+              <div key={ex.subject} className="card" style={{
+                padding: 0, overflow: 'hidden',
+                borderTop: `4px solid ${ex.colour}`,
+                display: 'flex', flexDirection: 'column',
+              }}>
+                <div style={{ padding: '18px 20px 14px' }}>
+                  <div className="serif" style={{ fontSize: 18, color: 'var(--s900)', marginBottom: 4 }}>{ex.subject}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 14 }}>
+                    {ex.topics} topics covered · IGCSE / Edexcel
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginBottom: 14 }}>
+                    {[
+                      ['Questions', EXAM_QUESTION_COUNT],
+                      ['Duration',  '60 min'],
+                      ['Marks',     EXAM_QUESTION_COUNT * 5],
+                      ['Pass Mark', '60%'],
+                    ].map(([l, v]) => (
+                      <div key={l} style={{ background: 'var(--bg)', borderRadius: 'var(--rsm)', padding: '8px 10px' }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--s400)', marginBottom: 2 }}>{l}</div>
+                        <div className="mono" style={{ fontSize: 13, fontWeight: 700, color: 'var(--s700)' }}>{v}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {lastSession && (
+                    <div style={{
+                      background: lastSession.score >= 60 ? 'var(--g50)' : 'var(--a50)',
+                      border: `1px solid ${lastSession.score >= 60 ? 'var(--g100)' : 'var(--a100)'}`,
+                      borderRadius: 'var(--rsm)',
+                      padding: '8px 12px',
+                      marginBottom: 0,
+                      fontSize: 12.5,
+                      color: lastSession.score >= 60 ? 'var(--g700)' : 'var(--a600)',
+                    }}>
+                      Last attempt: <strong>{lastSession.score}%</strong> ({gradeFor(lastSession.score).grade}) on {new Date(lastSession.date).toLocaleDateString('en-GB', { day:'numeric', month:'short' })}
+                    </div>
+                  )}
+                </div>
+                <div style={{ marginTop: 'auto', padding: '12px 16px', borderTop: '1px solid var(--border)', background: 'var(--bg)' }}>
+                  <button
+                    className="btn btn-p"
+                    style={{ width: '100%', justifyContent: 'center', background: ex.colour, borderColor: ex.colour }}
+                    onClick={() => startExam(ex.subject)}
+                  >
+                    Start Exam
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+ 
+        {/* Exam history */}
+        {hist.length > 0 && (
+          <div className="card">
+            <div className="ctitle" style={{ marginBottom: 12 }}>My Exam History</div>
+            <table className="tbl">
+              <thead>
+                <tr><th>Date</th><th>Subject</th><th>Score</th><th>Grade</th><th>Time Used</th></tr>
+              </thead>
+              <tbody>
+                {[...hist].reverse().slice(0, 10).map((h, i) => {
+                  const g = gradeFor(h.score)
+                  return (
+                    <tr key={i}>
+                      <td style={{ fontSize: 12.5, color: 'var(--s500)' }}>
+                        {new Date(h.date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{h.subject}</td>
+                      <td>
+                        <span className="mono" style={{ fontWeight: 700, color: h.score >= 60 ? 'var(--g600)' : 'var(--a600)' }}>
+                          {h.score}%
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{
+                          fontFamily: 'JetBrains Mono, monospace',
+                          fontWeight: 700, fontSize: 13,
+                          color: g.colour,
+                          padding: '2px 10px',
+                          borderRadius: 99,
+                          background: g.colour + '14',
+                        }}>{g.grade}</span>
+                      </td>
+                      <td className="mono" style={{ fontSize: 12, color: 'var(--s500)' }}>
+                        {fmtExamTime(h.timeUsed || 0)}{h.autoSubmitted ? ' (auto)' : ''}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    )
+  }
+ 
+  // ── SITTING SCREEN ───────────────────────────────────────
+  if (stage === 'sitting') {
+    const col = subjectColour(subject)
+    const answered = Object.keys(answers).length
+    return (
+      <div>
+        {/* Sticky exam header */}
+        <div style={{
+          background: 'var(--white)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--rxl)',
+          padding: '14px 24px',
+          marginBottom: 20,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: 14,
+        }}>
+          <div>
+            <div className="serif" style={{ fontSize: 18, color: 'var(--s900)' }}>
+              {subject} — Mixed Topics Exam
+            </div>
+            <div style={{ fontSize: 12.5, color: 'var(--s400)' }}>
+              {examQs.length} questions · {examQs.length * 5} marks · Pass mark 60%
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '6px 14px', borderRadius: 99,
+              background: timeLeft < 300 ? 'var(--r50)' : 'var(--bg)',
+              border: `1.5px solid ${timeLeft < 300 ? 'var(--r500)' : 'var(--border)'}`,
+            }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke={timeLeft < 300 ? 'var(--r600)' : 'var(--s700)'} strokeWidth="2" strokeLinecap="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              <span className="mono" style={{ fontSize: 18, fontWeight: 700, color: timeLeft < 300 ? 'var(--r600)' : 'var(--s800)' }}>
+                {fmtExamTime(timeLeft)}
+              </span>
+            </div>
+            <button className="btn btn-d btn-sm" onClick={exitExam}>Exit</button>
+          </div>
+        </div>
+ 
+        <div className="prog-bar" style={{ marginBottom: 20, height: 8 }}>
+          <div className="prog-fill" style={{ width: `${(answered / examQs.length) * 100}%`, background: col, transition: 'width .3s' }}/>
+        </div>
+ 
+        {examQs.map(q => (
+          <div key={q.id} className="card" style={{ marginBottom: 14, borderColor: answers[q.id] ? col : 'var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', flex: 1 }}>
+                <div style={{
+                  width: 26, height: 26, borderRadius: '50%',
+                  background: answers[q.id] ? col : 'var(--s200)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 700,
+                  color: answers[q.id] ? '#fff' : 'var(--s500)',
+                  flexShrink: 0,
+                }}>{q.id}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, color: 'var(--s400)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 4 }}>
+                    {q.topic}
+                  </div>
+                  <span style={{ fontSize: 15, color: 'var(--s800)', fontWeight: 500, lineHeight: 1.5 }}>{q.q}</span>
+                </div>
+              </div>
+              <span style={{ fontSize: 11, color: 'var(--s400)', flexShrink: 0, marginLeft: 8 }}>{q.marks} marks</span>
+            </div>
+            {q.shuffledOptions.map(opt => (
+              <label
+                key={opt}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '10px 14px', marginBottom: 7,
+                  borderRadius: 'var(--rmd)', cursor: 'pointer',
+                  border: `1.5px solid ${answers[q.id] === opt ? col : 'var(--border)'}`,
+                  background: answers[q.id] === opt ? col + '0F' : 'var(--bg)',
+                  transition: 'all .15s',
+                }}
+              >
+                <input
+                  type="radio"
+                  name={`eq${q.id}`}
+                  value={opt}
+                  checked={answers[q.id] === opt}
+                  onChange={() => setAnswers(a => ({ ...a, [q.id]: opt }))}
+                  style={{ accentColor: col }}
+                />
+                <span style={{ fontSize: 14, color: answers[q.id] === opt ? col : 'var(--s700)', fontWeight: answers[q.id] === opt ? 600 : 400 }}>
+                  {opt}
+                </span>
+              </label>
+            ))}
+          </div>
+        ))}
+ 
+        <div style={{
+          position: 'sticky', bottom: 16,
+          background: 'var(--white)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--rxl)',
+          padding: '14px 24px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          boxShadow: 'var(--sh-lg)',
+        }}>
+          <div style={{ fontSize: 13.5, color: 'var(--s600)' }}>
+            {answered < examQs.length
+              ? <span style={{ color: 'var(--a600)' }}>{examQs.length - answered} unanswered</span>
+              : <span style={{ color: 'var(--g600)' }}>All questions answered</span>
+            }
+          </div>
+          <button
+            className="btn btn-p"
+            onClick={() => submitExam(false)}
+            disabled={answered === 0}
+            style={{ background: col, borderColor: col }}
+          >
+            Submit Exam
+          </button>
+        </div>
+      </div>
+    )
+  }
+ 
+  // ── RESULT SCREEN ────────────────────────────────────────
+  if (stage === 'result' && result) {
+    const col   = subjectColour(subject)
+    const grade = gradeFor(result.score)
+    const passed = result.score >= 60
+    const wrong = examQs.filter(q => answers[q.id] && answers[q.id] !== q.answer)
+    const unanswered = examQs.filter(q => !answers[q.id])
+ 
+    return (
+      <div style={{ maxWidth: 720, margin: '0 auto' }}>
+        <div className="card" style={{ textAlign: 'center', padding: 36 }}>
+          <div style={{
+            width: 100, height: 100, margin: '0 auto 16px', borderRadius: '50%',
+            background: passed ? 'var(--g50)' : 'var(--r50)',
+            border: `3px solid ${grade.colour}`,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <div className="mono" style={{ fontSize: 36, fontWeight: 700, color: grade.colour, lineHeight: 1 }}>
+              {grade.grade}
+            </div>
+            <div className="mono" style={{ fontSize: 13, fontWeight: 700, color: grade.colour, marginTop: 2 }}>
+              {result.score}%
+            </div>
+          </div>
+          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', marginBottom: 4 }}>
+            {grade.message}
+          </h2>
+          <p style={{ fontSize: 14, color: 'var(--s500)', marginBottom: 4 }}>
+            {subject} — Mixed Topics Exam
+          </p>
+          {result.autoSubmitted && (
+            <div style={{ fontSize: 12.5, color: 'var(--a600)', fontStyle: 'italic', marginBottom: 14 }}>
+              Time ran out — exam was submitted automatically.
+            </div>
+          )}
+ 
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 22, marginBottom: 24 }}>
+            {[
+              ['Correct',    `${result.correct}/${examQs.length}`, 'var(--b50)',  'var(--b700)'],
+              ['Pass Status', passed ? 'PASSED' : 'FAILED',          passed ? 'var(--g50)' : 'var(--r50)', passed ? 'var(--g600)' : 'var(--r500)'],
+              ['Time Used',   fmtExamTime(result.timeUsed),           'var(--bg)',   'var(--s700)'],
+            ].map(([l, v, bg, c]) => (
+              <div key={l} style={{ background: bg, borderRadius: 'var(--rmd)', padding: '14px 10px' }}>
+                <div className="mono" style={{ fontSize: 16, fontWeight: 700, color: c }}>{v}</div>
+                <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 3 }}>{l}</div>
+              </div>
+            ))}
+          </div>
+ 
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button className="btn btn-p" onClick={() => startExam(subject)} style={{ background: col, borderColor: col }}>
+              Retake Exam
+            </button>
+            <button className="btn btn-s" onClick={() => setStage('list')}>Back to Exams</button>
+            <button className="btn btn-s" onClick={() => goTo?.('practice')}>Practice Weak Areas</button>
+          </div>
+        </div>
+ 
+        {/* Review wrong answers */}
+        {wrong.length > 0 && (
+          <div style={{ marginTop: 18 }}>
+            <div className="sec-tag" style={{ marginBottom: 6 }}>Review</div>
+            <h3 className="serif" style={{ fontSize: 18, color: 'var(--s900)', marginBottom: 14 }}>
+              Questions you missed
+            </h3>
+            {wrong.map((q, i) => (
+              <div key={i} className="card" style={{ marginBottom: 10, borderLeft: '4px solid var(--r500)' }}>
+                <div style={{ fontSize: 11, color: 'var(--s400)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 4 }}>
+                  {q.topic}
+                </div>
+                <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--s900)', marginBottom: 8 }}>
+                  Q{q.id}: {q.q}
+                </div>
+                <div style={{ fontSize: 13, marginBottom: 4 }}>
+                  <span style={{ color: 'var(--s500)' }}>Your answer: </span>
+                  <span style={{ color: 'var(--r600)', fontWeight: 600 }}>{answers[q.id]}</span>
+                </div>
+                <div style={{ fontSize: 13, marginBottom: 8 }}>
+                  <span style={{ color: 'var(--s500)' }}>Correct: </span>
+                  <span style={{ color: 'var(--g700)', fontWeight: 600 }}>{q.answer}</span>
+                </div>
+                {q.explanation && (
+                  <div style={{ fontSize: 12.5, color: 'var(--s600)', fontStyle: 'italic', background: 'var(--bg)', padding: '8px 12px', borderRadius: 'var(--rsm)' }}>
+                    {q.explanation}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+ 
+        {/* Unanswered questions */}
+        {unanswered.length > 0 && (
+          <div style={{ marginTop: 18 }}>
+            <div className="sec-tag" style={{ marginBottom: 6 }}>Unanswered</div>
+            <h3 className="serif" style={{ fontSize: 18, color: 'var(--s900)', marginBottom: 14 }}>
+              Questions you didn&apos;t answer
+            </h3>
+            {unanswered.map((q, i) => (
+              <div key={i} className="card" style={{ marginBottom: 10, borderLeft: '4px solid var(--a500, #F59E0B)' }}>
+                <div style={{ fontSize: 11, color: 'var(--s400)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600, marginBottom: 4 }}>
+                  {q.topic}
+                </div>
+                <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--s900)', marginBottom: 8 }}>
+                  Q{q.id}: {q.q}
+                </div>
+                <div style={{ fontSize: 13 }}>
+                  <span style={{ color: 'var(--s500)' }}>Correct: </span>
+                  <span style={{ color: 'var(--g700)', fontWeight: 600 }}>{q.answer}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
  
   return null
 }
