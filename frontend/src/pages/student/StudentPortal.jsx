@@ -609,61 +609,222 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               CURRICULUM — topic-by-topic mastery grid
           ════════════════════════════════════════════ */}
-          {page === 'curriculum' && (
-            <div>
-              <div style={{marginBottom:20}}>
-                <div className="sec-tag">Your Learning Map</div>
-                <h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>My <em style={{color:'var(--b700)'}}>Curriculum</em></h2>
-                <p style={{fontSize:14,color:'var(--s500)',marginTop:4}}>Click any topic to start adaptive practice. Topics unlock as you master prerequisites.</p>
-              </div>
-              {masteryLoading ? <div className="lc"><div className="spinner"/></div> : (
-                <div style={{display:'flex',flexDirection:'column',gap:20}}>
-                  {subjects.map(subj => (
-                    <div key={subj.name} className="card">
-                      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
-                        <div style={{width:14,height:14,borderRadius:3,background:subj.color,flexShrink:0}}/>
-                        <div className="serif" style={{fontSize:20,color:'var(--s900)',flex:1}}>{subj.name}</div>
-                        <span className="mono" style={{fontWeight:700,fontSize:18,color:masteryCol(subj.overallPct)}}>{subj.overallPct}%</span>
-                        <button className="btn btn-p btn-sm" onClick={() => { goTo('practice'); loadPractice(subj.name) }}>
-                          Practice
-                        </button>
-                      </div>
-                      <div className="prog-bar" style={{height:8,marginBottom:16}}>
-                        <div className="prog-fill" style={{width:subj.overallPct+'%',background:subj.color,transition:'width 1s ease'}}/>
-                      </div>
-                      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:8}}>
-                        {subj.topics.map((topic, ti) => {
-                          const locked = topic.prerequisite &&
-                            subj.topics.find(t => t.name === topic.prerequisite)?.pct < 60
-                          return (
-                            <div key={ti}
-                              style={{background:locked?'var(--s50)':'var(--bg)',border:`1.5px solid ${locked?'var(--s200)':masteryCol(topic.pct)+'40'}`,borderRadius:'var(--rmd)',padding:'10px 12px',cursor:locked?'default':'pointer',opacity:locked?.6:1,transition:'all .2s'}}
-                              onClick={() => !locked && (goTo('practice'), loadPractice(subj.name, topic.name))}>
-                              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
-                                <div style={{fontSize:13,fontWeight:600,color:locked?'var(--s400)':'var(--s800)',lineHeight:1.3}}>{topic.name}</div>
-                                {locked ? (
-                                  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="2.5" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                ) : (
-                                  <span className="mono" style={{fontSize:12,fontWeight:700,color:masteryCol(topic.pct)}}>{topic.pct}%</span>
-                                )}
-                              </div>
-                              {!locked && (
-                                <div style={{height:4,background:'var(--s100)',borderRadius:999,overflow:'hidden'}}>
-                                  <div style={{width:topic.pct+'%',height:'100%',background:masteryCol(topic.pct),borderRadius:999,transition:'width 1s ease'}}/>
-                                </div>
-                              )}
-                              {locked && <div style={{fontSize:11,color:'var(--s400)'}}>Requires: {topic.prerequisite}</div>}
-                              {!locked && <div style={{fontSize:10,color:'var(--s400)',marginTop:4}}>{masteryLabel(topic.pct)} · {topic.attempts||0} sessions</div>}
-                            </div>
-                          )
-                        })}
-                      </div>
+          {page === 'curriculum' && (() => {
+            // Pull real data from store + user object
+            const myCurriculumName = user?.curriculum || 'IGCSE'
+            const curriculumInfo   = store.curricula?.find(c =>
+              c.name === myCurriculumName ||
+              c.name?.toLowerCase() === myCurriculumName?.toLowerCase()
+            )
+            // My class rooms = subjects I'm enrolled in (each room = subject + teacher + schedule)
+            const studentFullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+            const myRooms = (store.groupRooms || []).filter(r =>
+              r.students?.some(s =>
+                s === studentFullName ||
+                s === user?.firstName ||
+                s.includes(user?.firstName)
+              )
+            )
+            // Subject colour palette — stable per subject name
+            const subjectColours = {
+              'Mathematics': '#8B1A2E', 'Physics':'#1E3A8A', 'Chemistry':'#166534',
+              'Biology':'#7C2D12', 'English':'#6B21A8', 'History':'#92400E',
+              'Geography':'#0F766E', 'Computer Science':'#1F2937', 'Business Studies':'#7E22CE',
+              'Economics':'#9F1239', 'Art':'#BE185D', 'Music':'#0E7490',
+            }
+            const colourFor = (name) => subjectColours[name] || '#8B1A2E'
+
+            // Lessons grouped by subject (from the same store the lessons tab uses)
+            const lessonsBySubject = {}
+            ;(store.lessons || []).forEach(l => {
+              const s = l.subject || 'General'
+              if (!lessonsBySubject[s]) lessonsBySubject[s] = []
+              lessonsBySubject[s].push(l)
+            })
+
+            return (
+              <div>
+                {/* Hero card — student's curriculum */}
+                <div className="card" style={{
+                  padding: 0, marginBottom: 18, overflow: 'hidden',
+                  background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+                  color: '#fff',
+                }}>
+                  <div style={{ padding: '28px 32px 20px' }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+                      Your Learning Path
                     </div>
-                  ))}
+                    <h2 style={{ fontFamily: "'Instrument Serif', 'Playfair Display', serif", fontSize: 30, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+                      {curriculumInfo?.name || myCurriculumName}
+                    </h2>
+                    {curriculumInfo?.org && (
+                      <div style={{ fontSize: 13.5, opacity: .8, marginTop: 4 }}>
+                        {curriculumInfo.org}
+                      </div>
+                    )}
+                    {curriculumInfo?.description && (
+                      <p style={{ fontSize: 13.5, opacity: .85, marginTop: 12, marginBottom: 0, maxWidth: 560, lineHeight: 1.55 }}>
+                        {curriculumInfo.description}
+                      </p>
+                    )}
+                  </div>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                    background: 'rgba(0,0,0,.18)',
+                  }}>
+                    {[
+                      ['Grade',       user?.grade || curriculumInfo?.grades || '—'],
+                      ['Subjects',    myRooms.length || curriculumInfo?.subjects || '—'],
+                      ['Plan',        user?.plan || 'Basic'],
+                      ['Status',      'Enrolled'],
+                    ].map(([label, value]) => (
+                      <div key={label} style={{ padding: '14px 20px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 3 }}>
+                          {label}
+                        </div>
+                        <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
+                          {value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
+
+                {/* My Subjects section */}
+                <div style={{ marginBottom: 14, marginTop: 24 }}>
+                  <div className="sec-tag">My Subjects &amp; Teachers</div>
+                  <h3 className="serif" style={{ fontSize: 22, color: 'var(--s900)', margin: '4px 0 0' }}>
+                    {myRooms.length > 0
+                      ? `${myRooms.length} subject${myRooms.length === 1 ? '' : 's'} this term`
+                      : 'No subjects assigned yet'}
+                  </h3>
+                </div>
+
+                {myRooms.length === 0 ? (
+                  <div className="card" style={{ padding: 32, textAlign: 'center' }}>
+                    <div style={{ width: 56, height: 56, margin: '0 auto 14px', borderRadius: '50%', background: 'var(--s100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="1.5" strokeLinecap="round">
+                        <path d="M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13"/><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M8 10h8M8 14h6"/>
+                      </svg>
+                    </div>
+                    <h3 style={{ fontSize: 16, color: 'var(--s800)', marginBottom: 6 }}>Your subjects will appear here</h3>
+                    <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 360, margin: '0 auto' }}>
+                      Once an admin assigns you to subjects, you&apos;ll see your teacher, schedule, and lessons for each one.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
+                    {myRooms.map(room => {
+                      const col = colourFor(room.subject)
+                      const teacherInit = room.teacher
+                        ? room.teacher.replace(/^(Mr\.|Mrs\.|Ms\.|Dr\.)\s*/i, '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+                        : '?'
+                      const subjectLessons = lessonsBySubject[room.subject] || []
+                      return (
+                        <div key={room.id} className="card" style={{
+                          padding: 0, overflow: 'hidden', borderTop: `4px solid ${col}`,
+                          display: 'flex', flexDirection: 'column',
+                        }}>
+                          <div style={{ padding: '18px 20px 14px' }}>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 14 }}>
+                              <div>
+                                <div className="serif" style={{ fontSize: 19, color: 'var(--s900)', lineHeight: 1.2, marginBottom: 3 }}>
+                                  {room.subject}
+                                </div>
+                                <div style={{ fontSize: 11.5, color: 'var(--s400)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600 }}>
+                                  {room.curriculum} {room.grade ? '· ' + room.grade : ''}
+                                </div>
+                              </div>
+                              <span className={`badge ${room.status === 'Active' ? 'badge-green' : 'badge-slate'}`}>
+                                {room.status || 'Active'}
+                              </span>
+                            </div>
+
+                            {/* Teacher */}
+                            {room.teacher && (
+                              <div style={{
+                                display: 'flex', alignItems: 'center', gap: 10,
+                                background: 'var(--bg)', borderRadius: 'var(--rmd)',
+                                padding: '10px 12px', marginBottom: 12,
+                              }}>
+                                <div style={{
+                                  width: 32, height: 32, borderRadius: '50%',
+                                  background: col + '22', color: col,
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700,
+                                  flexShrink: 0,
+                                }}>
+                                  {teacherInit}
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--s800)' }}>
+                                    {room.teacher}
+                                  </div>
+                                  <div style={{ fontSize: 11, color: 'var(--s500)' }}>
+                                    Subject Teacher
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Schedule */}
+                            {room.schedule && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--s600)', marginBottom: 6 }}>
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke={col} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
+                                  <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{room.schedule}</span>
+                              </div>
+                            )}
+
+                            {/* Classmates count */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--s600)' }}>
+                              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke={col} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                              </svg>
+                              <span>{room.enrolled || room.students?.length || 0} classmates</span>
+                            </div>
+
+                            {/* Lessons available */}
+                            {subjectLessons.length > 0 && (
+                              <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                                <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--s400)', marginBottom: 8 }}>
+                                  {subjectLessons.length} lesson{subjectLessons.length === 1 ? '' : 's'} available
+                                </div>
+                                {subjectLessons.slice(0, 2).map((l, li) => (
+                                  <div key={li} style={{ fontSize: 12, color: 'var(--s600)', marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    · {l.title}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          <div style={{ marginTop: 'auto', padding: '10px 14px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8, background: 'var(--bg)' }}>
+                            <button
+                              className="btn btn-p btn-sm"
+                              style={{ flex: 1, justifyContent: 'center' }}
+                              onClick={() => { setSelectedSubj(room.subject); goTo('lessons') }}
+                            >
+                              Open Lessons
+                            </button>
+                            <button
+                              className="btn btn-s btn-sm"
+                              style={{ flex: 1, justifyContent: 'center' }}
+                              onClick={() => goTo('timetable')}
+                            >
+                              Timetable
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          })()}
 
           {/* ════════════════════════════════════════════
               LESSONS — player with adaptive flashcards
