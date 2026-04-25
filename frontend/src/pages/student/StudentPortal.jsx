@@ -1310,43 +1310,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               ACHIEVEMENTS — live badges + XP
           ════════════════════════════════════════════ */}
-          {page === 'achievements' && (
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Your Progress</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Achievements</h2></div>
-              <div className="kpi-grid" style={{marginBottom:24}}>
-                {[{v:mastery?.xp?.toLocaleString()||'0',l:'XP Points',c:'var(--b700)'},{v:`${mastery?.streak||0}`,l:'Day Streak',c:'var(--a600)'},{v:`${mastery?.badges?.length||0}`,l:'Badges Earned',c:'var(--g600)'},{v:subjects.length>0?`${Math.round(subjects.reduce((s,x)=>s+x.overallPct,0)/subjects.length)}%`:'—',l:'Avg Mastery',c:'var(--p600)'}].map((k,i) => (
-                  <div key={i} className="kpi"><div className="kpi-v" style={{color:k.c}}>{k.v}</div><div className="kpi-l">{k.l}</div></div>
-                ))}
-              </div>
-              <div className="card" style={{marginBottom:20}}>
-                <div className="ctitle" style={{marginBottom:14}}>XP Progress to Next Level</div>
-                <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:6}}><span style={{color:'var(--s500)'}}>XP to next level</span><span className="mono" style={{fontWeight:700}}>{mastery?.xp||0} / {Math.ceil(((mastery?.xp||0)+1000)/1000)*1000}</span></div>
-                <div className="prog-bar" style={{height:10}}><div className="prog-fill" style={{width:`${((mastery?.xp||0)%1000)/10}%`,background:'linear-gradient(90deg,var(--b700),var(--p600))',transition:'width .8s ease'}}/></div>
-              </div>
-              <div className="card">
-                <div className="ctitle" style={{marginBottom:14}}>Badges</div>
-                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(130px,1fr))',gap:12}}>
-                  {[
-                    {id:'streak_7',   name:'7-Day Streak',   condition:mastery?.streak>=7},
-                    {id:'streak_30',  name:'30-Day Streak',  condition:mastery?.streak>=30},
-                    {id:'xp_1000',    name:'1,000 XP',       condition:(mastery?.xp||0)>=1000},
-                    {id:'xp_5000',    name:'5,000 XP',       condition:(mastery?.xp||0)>=5000},
-                    {id:'master_subj',name:'Subject Master',  condition:mastery?.subjects?.some(s=>s.overallPct>=80)},
-                    {id:'all_round',  name:'All-Rounder',    condition:mastery?.subjects?.length>=4&&mastery?.subjects?.every(s=>s.overallPct>=50)},
-                  ].map((b,i) => {
-                    const earned = mastery?.badges?.some(x=>x.id===b.id) || b.condition
-                    return (
-                      <div key={i} style={{background:earned?'var(--a50)':'var(--s50)',border:`1.5px solid ${earned?'var(--a200,#FDE68A)':'var(--s200)'}`,borderRadius:'var(--rlg)',padding:16,textAlign:'center',opacity:earned?1:.45,filter:earned?'none':'grayscale(.6)',transition:'all .2s'}}>
-                        <div style={{marginBottom:8,display:'flex',justifyContent:'center'}}>{BADGE_ICONS[b.id]||null}</div>
-                        <div style={{fontSize:12,fontWeight:700,color:'var(--s800)'}}>{b.name}</div>
-                        <div style={{fontSize:11,color:'var(--s500)',marginTop:4}}>{earned?'Earned':'Locked'}</div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
+          {page === 'achievements' && <AchievementsTab user={user} />}
 
           {/* ════════════════════════════════════════════
               GROUP MODE DASHBOARD OVERRIDE
@@ -2127,6 +2091,342 @@ function PracticeTab({ user, toast, goTo }) {
       </div>
     )
   }
+ // ═══════════════════════════════════════════════════════════
+// ACHIEVEMENTS TAB — reads from PracticeTab's localStorage
+// ═══════════════════════════════════════════════════════════
+function AchievementsTab({ user }) {
+  // Read same keys that PracticeTab writes
+  const xp   = (() => { try { return parseInt(localStorage.getItem('sm_practice_xp') || '0', 10) || 0 } catch { return 0 } })()
+  const hist = (() => { try { return JSON.parse(localStorage.getItem('sm_practice_history') || '[]') } catch { return [] } })()
+ 
+  // Calculate streaks from history dates
+  const calcStreak = (sessions) => {
+    if (sessions.length === 0) return 0
+    const days = new Set(sessions.map(s => new Date(s.date).toDateString()))
+    let streak = 0
+    let cursor = new Date()
+    // Look back day by day; allow today + consecutive prior days
+    // First check: did they practice today OR yesterday? (yesterday because they might
+    // not have practiced yet today but the streak isn't broken)
+    const today     = new Date().toDateString()
+    const yesterday = new Date(Date.now() - 86400000).toDateString()
+    if (!days.has(today) && !days.has(yesterday)) return 0
+    if (!days.has(today)) cursor = new Date(Date.now() - 86400000)
+ 
+    while (days.has(cursor.toDateString())) {
+      streak++
+      cursor = new Date(cursor.getTime() - 86400000)
+    }
+    return streak
+  }
+ 
+  const streak           = calcStreak(hist)
+  const sessionCount     = hist.length
+  const subjectsPracticed = [...new Set(hist.map(h => h.subject))]
+  const avgScore         = hist.length ? Math.round(hist.reduce((s, h) => s + h.score, 0) / hist.length) : 0
+  const bestScore        = hist.length ? Math.max(...hist.map(h => h.score)) : 0
+  const bestEver         = hist.find(h => h.score === bestScore)
+ 
+  // Per-subject averages (for Subject Specialist badge)
+  const subjectAverages = {}
+  subjectsPracticed.forEach(subj => {
+    const subjSessions = hist.filter(h => h.subject === subj)
+    subjectAverages[subj] = Math.round(subjSessions.reduce((s, h) => s + h.score, 0) / subjSessions.length)
+  })
+  const hasSpecialty = Object.values(subjectAverages).some(avg => avg >= 80)
+  const specialtySubject = Object.entries(subjectAverages).find(([_, avg]) => avg >= 80)?.[0]
+ 
+  // ── BADGES — earned conditions ───────────────────────────
+  const badges = [
+    { id:'first',       name:'First Steps',       desc:'Complete your first session',   tier:'bronze', earned: sessionCount >= 1 },
+    { id:'quick',       name:'Quick Learner',     desc:'Score 60%+ on a session',         tier:'bronze', earned: bestScore >= 60 },
+    { id:'high',        name:'High Achiever',     desc:'Score 80%+ on a session',         tier:'silver', earned: bestScore >= 80 },
+    { id:'perfect',     name:'Perfectionist',     desc:'Score 100% on a session',         tier:'gold',   earned: bestScore >= 100 },
+    { id:'dedicated',   name:'Dedicated',         desc:'Complete 5 sessions',             tier:'bronze', earned: sessionCount >= 5 },
+    { id:'committed',   name:'Committed',         desc:'Complete 25 sessions',            tier:'silver', earned: sessionCount >= 25 },
+    { id:'scholar',     name:'Scholar',           desc:'Complete 100 sessions',           tier:'gold',   earned: sessionCount >= 100 },
+    { id:'xp100',       name:'Centurion',         desc:'Earn 100 XP',                     tier:'bronze', earned: xp >= 100 },
+    { id:'xp500',       name:'Half Millennium',   desc:'Earn 500 XP',                     tier:'silver', earned: xp >= 500 },
+    { id:'xp1000',      name:'Millennium',        desc:'Earn 1,000 XP',                   tier:'gold',   earned: xp >= 1000 },
+    { id:'xp5000',      name:'Legend',            desc:'Earn 5,000 XP',                   tier:'platinum', earned: xp >= 5000 },
+    { id:'streak3',     name:'3-Day Streak',      desc:'Practice 3 days in a row',        tier:'bronze', earned: streak >= 3 },
+    { id:'streak7',     name:'Week Warrior',      desc:'Practice 7 days in a row',        tier:'silver', earned: streak >= 7 },
+    { id:'streak30',    name:'Monthly Master',    desc:'Practice 30 days in a row',       tier:'platinum', earned: streak >= 30 },
+    { id:'renaissance', name:'Renaissance',       desc:'Practice 3 different subjects',   tier:'silver', earned: subjectsPracticed.length >= 3 },
+    { id:'allrounder',  name:'All Rounder',       desc:'Practice all 5 subjects',         tier:'gold',   earned: subjectsPracticed.length >= 5 },
+    { id:'specialist',  name:'Subject Specialist',desc:'Average 80%+ in any subject',     tier:'gold',   earned: hasSpecialty },
+  ]
+ 
+  const earnedBadges = badges.filter(b => b.earned)
+  const lockedBadges = badges.filter(b => !b.earned)
+ 
+  // Tier styling
+  const tierStyles = {
+    bronze:   { bg:'#CD7F3220', border:'#CD7F32', icon:'#CD7F32' },
+    silver:   { bg:'#C0C0C020', border:'#9CA3AF', icon:'#6B7280' },
+    gold:     { bg:'#F0CC5A20', border:'#F0CC5A', icon:'#C9973A' },
+    platinum: { bg:'#E5E4E220', border:'#94A3B8', icon:'#475569' },
+  }
+ 
+  // Next level XP target — 1,000 XP per level
+  const currentLevel    = Math.floor(xp / 1000) + 1
+  const xpThisLevel     = xp % 1000
+  const xpToNextLevel   = 1000 - xpThisLevel
+  const levelProgressPct = Math.round((xpThisLevel / 1000) * 100)
+ 
+  // Top-3 milestone close to unlocking
+  const closeBadges = lockedBadges
+    .map(b => {
+      let progress = 0, target = 1
+      if (b.id === 'first')       { progress = sessionCount; target = 1 }
+      else if (b.id === 'quick')  { progress = bestScore; target = 60 }
+      else if (b.id === 'high')   { progress = bestScore; target = 80 }
+      else if (b.id === 'perfect'){ progress = bestScore; target = 100 }
+      else if (b.id === 'dedicated'){ progress = sessionCount; target = 5 }
+      else if (b.id === 'committed'){ progress = sessionCount; target = 25 }
+      else if (b.id === 'scholar'){ progress = sessionCount; target = 100 }
+      else if (b.id === 'xp100')  { progress = xp; target = 100 }
+      else if (b.id === 'xp500')  { progress = xp; target = 500 }
+      else if (b.id === 'xp1000') { progress = xp; target = 1000 }
+      else if (b.id === 'xp5000') { progress = xp; target = 5000 }
+      else if (b.id === 'streak3'){ progress = streak; target = 3 }
+      else if (b.id === 'streak7'){ progress = streak; target = 7 }
+      else if (b.id === 'streak30'){ progress = streak; target = 30 }
+      else if (b.id === 'renaissance'){ progress = subjectsPracticed.length; target = 3 }
+      else if (b.id === 'allrounder'){ progress = subjectsPracticed.length; target = 5 }
+      else if (b.id === 'specialist'){
+        const bestAvg = Math.max(0, ...Object.values(subjectAverages))
+        progress = bestAvg; target = 80
+      }
+      return { ...b, progress, target, pct: Math.min(100, Math.round((progress/target)*100)) }
+    })
+    .sort((a,b) => b.pct - a.pct)
+    .slice(0, 3)
+ 
+  return (
+    <div>
+      {/* Hero */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+        color: '#fff',
+      }}>
+        <div style={{ padding: '28px 32px 22px', display: 'flex', alignItems: 'center', gap: 22, flexWrap: 'wrap' }}>
+          {/* Level badge */}
+          <div style={{
+            width: 88, height: 88, borderRadius: '50%',
+            background: 'rgba(240,204,90,.18)',
+            border: '3px solid #F0CC5A',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+            boxShadow: '0 4px 16px rgba(0,0,0,.25)',
+          }}>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A', opacity: .85 }}>
+              Level
+            </div>
+            <div className="mono" style={{ fontSize: 28, fontWeight: 700, color: '#F0CC5A', lineHeight: 1 }}>
+              {currentLevel}
+            </div>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 4 }}>
+              Your Achievements
+            </div>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              {earnedBadges.length === 0
+                ? 'Start practising to earn your first badge'
+                : earnedBadges.length < 5
+                ? "You're on your way"
+                : earnedBadges.length < 10
+                ? 'Strong progress, keep it up'
+                : 'You are an achiever'}
+            </h2>
+            <div style={{ fontSize: 13.5, opacity: .85, marginTop: 6 }}>
+              {earnedBadges.length} of {badges.length} badges earned · {xpToNextLevel.toLocaleString()} XP to Level {currentLevel + 1}
+            </div>
+          </div>
+        </div>
+        {/* XP progress bar inside hero */}
+        <div style={{ background: 'rgba(0,0,0,.2)', padding: '12px 32px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, opacity: .75, marginBottom: 5 }}>
+            <span>{xpThisLevel} / 1,000 XP</span>
+            <span className="mono">{levelProgressPct}%</span>
+          </div>
+          <div style={{ height: 8, background: 'rgba(255,255,255,.1)', borderRadius: 99, overflow: 'hidden' }}>
+            <div style={{
+              width: levelProgressPct + '%',
+              height: '100%',
+              background: 'linear-gradient(90deg, #F0CC5A, #C9973A)',
+              borderRadius: 99,
+              transition: 'width 1s ease',
+            }}/>
+          </div>
+        </div>
+        {/* Stat strip */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
+          {[
+            ['Total XP',      xp.toLocaleString()],
+            ['Day Streak',    streak === 0 ? '0' : `${streak} day${streak === 1 ? '' : 's'}`],
+            ['Sessions',      sessionCount],
+            ['Best Score',    sessionCount ? `${bestScore}%` : '—'],
+            ['Avg Score',     sessionCount ? `${avgScore}%` : '—'],
+          ].map(([label, value]) => (
+            <div key={label} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)', borderTop: '1px solid rgba(255,255,255,.08)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 3 }}>
+                {label}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+ 
+      {/* Empty state if no sessions yet */}
+      {sessionCount === 0 ? (
+        <div className="card" style={{ padding: 36, textAlign: 'center' }}>
+          <div style={{ width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%', background: 'var(--s100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="1.5" strokeLinecap="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>Your achievements will appear here</h3>
+          <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto' }}>
+            Complete your first practice session to start earning XP and unlocking badges.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Almost-there badges */}
+          {closeBadges.length > 0 && (
+            <div className="card" style={{ marginBottom: 18 }}>
+              <div className="ctitle" style={{ marginBottom: 14 }}>Almost there</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {closeBadges.map(b => {
+                  const tier = tierStyles[b.tier]
+                  return (
+                    <div key={b.id} style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                      <div style={{
+                        width: 44, height: 44, borderRadius: '50%',
+                        background: tier.bg, border: `2px solid ${tier.border}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0, opacity: .55, filter: 'grayscale(.4)',
+                      }}>
+                        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke={tier.icon} strokeWidth="2" strokeLinecap="round">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4, flexWrap: 'wrap', gap: 6 }}>
+                          <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s800)' }}>{b.name}</div>
+                          <div className="mono" style={{ fontSize: 12, color: 'var(--s500)' }}>
+                            {b.progress} / {b.target}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 5 }}>{b.desc}</div>
+                        <div style={{ height: 5, background: 'var(--s100)', borderRadius: 99, overflow: 'hidden' }}>
+                          <div style={{ width: b.pct + '%', height: '100%', background: tier.icon, borderRadius: 99, transition: 'width 1s ease' }}/>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+ 
+          {/* Earned badges */}
+          {earnedBadges.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ marginBottom: 12 }}>
+                <div className="sec-tag">Earned · {earnedBadges.length}</div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+                {earnedBadges.map(b => {
+                  const tier = tierStyles[b.tier]
+                  return (
+                    <div key={b.id} style={{
+                      background: '#fff',
+                      border: `2px solid ${tier.border}`,
+                      borderRadius: 'var(--rlg)',
+                      padding: '18px 14px',
+                      textAlign: 'center',
+                      position: 'relative',
+                      transition: 'all .2s',
+                      boxShadow: `0 4px 12px ${tier.bg}`,
+                    }}>
+                      {/* Tier ribbon */}
+                      <div style={{
+                        position: 'absolute', top: 8, right: 8,
+                        background: tier.icon, color: '#fff',
+                        fontSize: 9, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase',
+                        padding: '2px 7px', borderRadius: 99,
+                      }}>
+                        {b.tier}
+                      </div>
+                      <div style={{
+                        width: 56, height: 56, margin: '0 auto 10px', borderRadius: '50%',
+                        background: tier.bg, border: `2px solid ${tier.border}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <svg width="28" height="28" fill={tier.icon} stroke={tier.icon} strokeWidth="1" viewBox="0 0 24 24">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                      </div>
+                      <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--s900)', marginBottom: 3 }}>{b.name}</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>{b.desc}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+ 
+          {/* Locked badges */}
+          {lockedBadges.length > 0 && (
+            <div>
+              <div style={{ marginBottom: 12 }}>
+                <div className="sec-tag">Locked · {lockedBadges.length}</div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+                {lockedBadges.map(b => {
+                  const tier = tierStyles[b.tier]
+                  return (
+                    <div key={b.id} style={{
+                      background: 'var(--bg)',
+                      border: '1.5px solid var(--s200)',
+                      borderRadius: 'var(--rlg)',
+                      padding: '18px 14px',
+                      textAlign: 'center',
+                      opacity: .55,
+                      filter: 'grayscale(.5)',
+                      transition: 'all .2s',
+                    }}>
+                      <div style={{
+                        position: 'absolute', top: 0, right: 0,
+                      }}/>
+                      <div style={{
+                        width: 56, height: 56, margin: '0 auto 10px', borderRadius: '50%',
+                        background: 'var(--s100)', border: '2px solid var(--s200)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="2" strokeLinecap="round">
+                          <rect x="3" y="11" width="18" height="11" rx="2"/>
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                      </div>
+                      <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--s700)', marginBottom: 3 }}>{b.name}</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>{b.desc}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
  
   return null
 }
