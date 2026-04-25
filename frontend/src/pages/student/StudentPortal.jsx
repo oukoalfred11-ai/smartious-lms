@@ -994,42 +994,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               LIVE CLASSES
           ════════════════════════════════════════════ */}
-          {page === 'live' && !inClassroom && (
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Real-Time Learning</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Live Classes</h2></div>
-              <div style={{background:'linear-gradient(135deg,#1E3A8A,var(--b700))',borderRadius:'var(--rxl)',padding:'24px 28px',marginBottom:20,display:'flex',alignItems:'center',gap:20,flexWrap:'wrap'}}>
-                <div style={{width:48,height:48,borderRadius:'50%',background:'rgba(255,255,255,.15)',display:'flex',alignItems:'center',justifyContent:'center',position:'relative'}}>
-                  <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-                  <span style={{position:'absolute',top:-2,right:-2,width:10,height:10,borderRadius:'50%',background:'#4CAF50',border:'2px solid rgba(255,255,255,.3)',animation:'pulse 1.5s infinite'}}/>
-                </div>
-                <div style={{flex:1}}>
-                  <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
-                    <span style={{background:'rgba(255,255,255,.18)',color:'#fff',fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'3px 9px',borderRadius:99,textTransform:'uppercase'}}>LIVE NOW</span>
-                    <span style={{color:'rgba(255,255,255,.6)',fontSize:12.5}}>6 students in class</span>
-                  </div>
-                  <div className="serif" style={{fontSize:'1.15rem',color:'#fff',marginBottom:2}}>IGCSE Mathematics — Pythagoras Theorem</div>
-                  <div style={{fontSize:12.5,color:'rgba(255,255,255,.65)'}}>Mr. James Muthomi · Started 38 minutes ago</div>
-                </div>
-                <button className="btn" style={{background:'#fff',color:'var(--b700)',fontWeight:700,padding:'10px 22px'}} onClick={() => setInClassroom(true)}>
-                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  Join Now
-                </button>
-              </div>
-              <div className="card">
-                <div className="chdr"><div className="ctitle">Upcoming This Week</div></div>
-                {[{subj:'Biology — Cell Division',teacher:'Dr. Ouma',day:'Thu',time:'2:00 PM',dur:'1 hour'},{subj:'Chemistry — Periodic Table',teacher:'Dr. Ouma',day:'Fri',time:'11:00 AM',dur:'1 hour'}].map((c,i) => (
-                  <div key={i} style={{display:'flex',alignItems:'center',gap:14,padding:'11px 0',borderBottom:'1px solid var(--border)'}}>
-                    <div style={{width:44,height:44,background:'var(--s100)',borderRadius:'var(--rmd)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                      <div className="mono" style={{fontSize:9,fontWeight:700,color:'var(--s500)'}}>{c.day.toUpperCase()}</div>
-                      <div className="mono" style={{fontSize:14,fontWeight:700,color:'var(--s800)'}}>{c.time.split(':')[0]}</div>
-                    </div>
-                    <div style={{flex:1}}><div style={{fontWeight:700,fontSize:14}}>{c.subj}</div><div style={{fontSize:12,color:'var(--s500)'}}>{c.teacher} · {c.time} · {c.dur}</div></div>
-                    <button className="btn btn-s btn-sm" onClick={() => toast.info('Adding to calendar…')}>Add to Calendar</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {page === 'live' && !inClassroom && <LiveClassesTab user={user} store={store} setInClassroom={setInClassroom} toast={toast} />}
           {page === 'live' && inClassroom && (
             <LiveClassroom role="student" onLeave={() => setInClassroom(false)}/>
           )}
@@ -2890,4 +2855,605 @@ function ExamsTab({ user, toast, goTo, store }) {
  
   return null
 }
+// ═══════════════════════════════════════════════════════════
+// LIVE CLASSES TAB — schedule-aware, reads real groupRooms
+// ═══════════════════════════════════════════════════════════
  
+// Parse a schedule string like "Mon/Wed 9:00–10:00 AM"
+// Returns { days: [1,3], startMins: 540, endMins: 600 } where days are 0-6 (Sun-Sat)
+// and times are minutes-since-midnight, OR null if unparseable.
+const parseScheduleString = (scheduleStr) => {
+  if (!scheduleStr || typeof scheduleStr !== 'string') return null
+  const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 }
+ 
+  // Split before the first digit so days/time separate cleanly
+  const parts = scheduleStr.trim().split(/\s+(?=\d)/)
+  if (parts.length < 2) return null
+  const daysPart = parts[0]
+  const timePart = parts.slice(1).join(' ')
+ 
+  const dayMatches = daysPart.toLowerCase().match(/sun|mon|tue|wed|thu|fri|sat/g)
+  if (!dayMatches || dayMatches.length === 0) return null
+  const days = []
+  dayMatches.forEach(d => { if (dayMap[d] !== undefined && !days.includes(dayMap[d])) days.push(dayMap[d]) })
+ 
+  // Match "9:00-10:00 AM" or "9:00 AM - 10:00 AM" or "2:00–3:00 PM" (any dash type)
+  const timeMatch = timePart.match(/(\d{1,2}):?(\d{0,2})\s*(am|pm)?\s*[-–—]\s*(\d{1,2}):?(\d{0,2})\s*(am|pm)/i)
+  if (!timeMatch) return null
+ 
+  let startH = parseInt(timeMatch[1], 10)
+  const startM = parseInt(timeMatch[2] || '0', 10)
+  const startMer = (timeMatch[3] || timeMatch[6]).toLowerCase()
+  let endH = parseInt(timeMatch[4], 10)
+  const endM = parseInt(timeMatch[5] || '0', 10)
+  const endMer = timeMatch[6].toLowerCase()
+ 
+  const to24 = (h, mer) => {
+    if (mer === 'pm' && h < 12) return h + 12
+    if (mer === 'am' && h === 12) return 0
+    return h
+  }
+  startH = to24(startH, startMer)
+  endH = to24(endH, endMer)
+ 
+  return {
+    days,
+    startMins: startH * 60 + startM,
+    endMins:   endH * 60 + endM,
+  }
+}
+ 
+// Compute room status RIGHT NOW based on schedule + clock.
+// Returns: 'live' | { startsIn: number-of-mins } | { laterToday: 'HH:MM' } | { tomorrow: 'Day HH:MM' } | { thisWeek: 'Day HH:MM' } | null
+const computeRoomStatus = (scheduleStr, now = new Date()) => {
+  const parsed = parseScheduleString(scheduleStr)
+  if (!parsed) return null
+ 
+  const todayDow = now.getDay()
+  const nowMins  = now.getHours() * 60 + now.getMinutes()
+ 
+  // 1. Live now? (today is in days, and now is between start and end)
+  if (parsed.days.includes(todayDow) && nowMins >= parsed.startMins && nowMins < parsed.endMins) {
+    return { state: 'live', endMins: parsed.endMins, startedMinsAgo: nowMins - parsed.startMins }
+  }
+ 
+  // 2. Starting later today?
+  if (parsed.days.includes(todayDow) && nowMins < parsed.startMins) {
+    return { state: 'today', startMins: parsed.startMins, startsInMins: parsed.startMins - nowMins }
+  }
+ 
+  // 3. Find the next upcoming day in this week or next
+  // Start checking from tomorrow
+  for (let i = 1; i <= 7; i++) {
+    const checkDow = (todayDow + i) % 7
+    if (parsed.days.includes(checkDow)) {
+      return {
+        state: i === 1 ? 'tomorrow' : 'upcoming',
+        dow: checkDow,
+        daysAway: i,
+        startMins: parsed.startMins,
+      }
+    }
+  }
+  return null
+}
+ 
+const formatMins = (mins) => {
+  let h = Math.floor(mins / 60)
+  const m = mins % 60
+  const mer = h >= 12 ? 'PM' : 'AM'
+  h = h % 12
+  if (h === 0) h = 12
+  return `${h}:${String(m).padStart(2, '0')} ${mer}`
+}
+ 
+const dayName = (dow) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow]
+ 
+function LiveClassesTab({ user, store, setInClassroom, toast }) {
+  // Tick state — re-evaluate liveness every 30 seconds
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 30000)
+    return () => clearInterval(id)
+  }, [])
+ 
+  // Find this student's enrolled rooms
+  const studentFullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+  const allRooms = store?.groupRooms || []
+  const myRooms = allRooms.filter(r =>
+    r.students?.some(s =>
+      s === studentFullName ||
+      s === user?.firstName ||
+      (user?.firstName && s.includes(user.firstName))
+    )
+  )
+ 
+  // Compute status for each
+  const now = new Date()
+  const roomsWithStatus = myRooms.map(r => ({
+    ...r,
+    statusInfo: computeRoomStatus(r.schedule, now),
+  }))
+ 
+  const liveRooms     = roomsWithStatus.filter(r => r.statusInfo?.state === 'live')
+  const todayRooms    = roomsWithStatus.filter(r => r.statusInfo?.state === 'today')
+  const tomorrowRooms = roomsWithStatus.filter(r => r.statusInfo?.state === 'tomorrow')
+  const upcomingRooms = roomsWithStatus.filter(r => r.statusInfo?.state === 'upcoming')
+ 
+  // Sort upcoming by daysAway then start time
+  const sortByTime = (a, b) => {
+    const aDays = a.statusInfo.daysAway || 0
+    const bDays = b.statusInfo.daysAway || 0
+    if (aDays !== bDays) return aDays - bDays
+    return (a.statusInfo.startMins || 0) - (b.statusInfo.startMins || 0)
+  }
+  todayRooms.sort((a, b) => a.statusInfo.startsInMins - b.statusInfo.startsInMins)
+  tomorrowRooms.sort(sortByTime)
+  upcomingRooms.sort(sortByTime)
+ 
+  // Stable subject colours (mirror Practice palette)
+  const subjColours = {
+    'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
+    'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
+    'Geography': '#0F766E', 'Computer Science': '#1F2937',
+    'Business Studies': '#7E22CE', 'Economics': '#9F1239',
+  }
+  const colourFor = (s) => subjColours[s] || '#8B1A2E'
+ 
+  return (
+    <div>
+      {/* Hero */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+        color: '#fff',
+      }}>
+        <div style={{ padding: '24px 30px' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+            Real-Time Learning
+          </div>
+          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+            Live Classes
+          </h2>
+          <p style={{ fontSize: 13.5, opacity: .85, marginTop: 6, marginBottom: 0, maxWidth: 540, lineHeight: 1.55 }}>
+            Join your scheduled lessons in our virtual classroom — interactive whiteboard, live chat, and your teacher leading the way.
+          </p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+          {[
+            ['Live Now',        liveRooms.length],
+            ['Today',           todayRooms.length],
+            ['Tomorrow',        tomorrowRooms.length],
+            ['My Classes',      myRooms.length],
+          ].map(([l, v]) => (
+            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
+                {l}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+ 
+      {/* Empty state */}
+      {myRooms.length === 0 && (
+        <div className="card" style={{ padding: 36, textAlign: 'center' }}>
+          <div style={{ width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%', background: 'var(--s100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="1.5" strokeLinecap="round">
+              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+          </div>
+          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>No classes scheduled yet</h3>
+          <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto' }}>
+            Once an admin enrols you in a class room, your live lessons will appear here automatically.
+          </p>
+        </div>
+      )}
+ 
+      {/* LIVE NOW — pulsing crimson card */}
+      {liveRooms.map(room => {
+        const col = colourFor(room.subject)
+        const remaining = room.statusInfo.endMins - (now.getHours() * 60 + now.getMinutes())
+        return (
+          <div key={room.id} style={{
+            background: `linear-gradient(135deg, ${col} 0%, ${col}DD 100%)`,
+            borderRadius: 'var(--rxl)',
+            padding: '24px 28px',
+            marginBottom: 14,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 20,
+            flexWrap: 'wrap',
+            color: '#fff',
+            boxShadow: `0 8px 24px ${col}55`,
+          }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: '50%',
+              background: 'rgba(255,255,255,.18)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              position: 'relative',
+              flexShrink: 0,
+            }}>
+              <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" strokeLinecap="round">
+                <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+              </svg>
+              <span style={{
+                position: 'absolute', top: -2, right: -2,
+                width: 12, height: 12, borderRadius: '50%',
+                background: '#4ADE80',
+                border: '2px solid rgba(255,255,255,.4)',
+                animation: 'pulse 1.5s infinite',
+              }}/>
+            </div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+                <span style={{
+                  background: 'rgba(255,255,255,.2)', color: '#fff',
+                  fontSize: 10, fontWeight: 800, letterSpacing: '.1em',
+                  padding: '4px 10px', borderRadius: 99, textTransform: 'uppercase',
+                }}>● LIVE NOW</span>
+                <span style={{ color: 'rgba(255,255,255,.75)', fontSize: 12.5 }}>
+                  Started {room.statusInfo.startedMinsAgo === 0 ? 'just now' : `${room.statusInfo.startedMinsAgo} min ago`} · {remaining} min left
+                </span>
+              </div>
+              <div className="serif" style={{ fontSize: 20, color: '#fff', marginBottom: 3, lineHeight: 1.2 }}>
+                {room.name} — {room.subject}
+              </div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)' }}>
+                {room.teacher} · {room.curriculum} {room.grade ? '· ' + room.grade : ''} · {room.enrolled || room.students?.length || 0} students
+              </div>
+            </div>
+            <button
+              className="btn"
+              style={{
+                background: '#fff', color: col,
+                fontWeight: 700, padding: '12px 24px',
+                fontSize: 14,
+              }}
+              onClick={() => setInClassroom(true)}
+            >
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ marginRight: 6 }}>
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              Join Now
+            </button>
+          </div>
+        )
+      })}
+ 
+      {/* TODAY (later) */}
+      {todayRooms.length > 0 && (
+        <div className="card" style={{ marginBottom: 14 }}>
+          <div className="chdr">
+            <div className="ctitle">Later Today</div>
+            <span className="badge badge-amber">{todayRooms.length}</span>
+          </div>
+          {todayRooms.map(room => {
+            const col = colourFor(room.subject)
+            const startsIn = room.statusInfo.startsInMins
+            return (
+              <div key={room.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 'var(--rmd)',
+                  background: col + '14', borderLeft: `3px solid ${col}`,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <div className="mono" style={{ fontSize: 9, fontWeight: 700, color: col, textTransform: 'uppercase' }}>
+                    Today
+                  </div>
+                  <div className="mono" style={{ fontSize: 12, fontWeight: 700, color: col }}>
+                    {formatMins(room.statusInfo.startMins).replace(/:00 /, ' ')}
+                  </div>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>
+                    {room.subject} — {room.name}
+                  </div>
+                  <div style={{ fontSize: 12.5, color: 'var(--s500)' }}>
+                    {room.teacher} · Starts in <strong style={{ color: col }}>{startsIn < 60 ? `${startsIn} min` : `${Math.floor(startsIn / 60)}h ${startsIn % 60}m`}</strong>
+                  </div>
+                </div>
+                <button
+                  className="btn btn-s btn-sm"
+                  onClick={() => toast?.info?.(`Reminder set for ${room.subject}`)}
+                  style={{ flexShrink: 0 }}
+                >
+                  Remind Me
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      )}
+ 
+      {/* TOMORROW + UPCOMING */}
+      {(tomorrowRooms.length > 0 || upcomingRooms.length > 0) && (
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">Upcoming This Week</div>
+          </div>
+          {[...tomorrowRooms, ...upcomingRooms].map(room => {
+            const col = colourFor(room.subject)
+            const isTomorrow = room.statusInfo.state === 'tomorrow'
+            return (
+              <div key={room.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 'var(--rmd)',
+                  background: 'var(--bg)',
+                  borderLeft: `3px solid ${col}`,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <div className="mono" style={{ fontSize: 9, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase' }}>
+                    {isTomorrow ? 'Tomorrow' : dayName(room.statusInfo.dow)}
+                  </div>
+                  <div className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--s800)' }}>
+                    {formatMins(room.statusInfo.startMins).replace(/:00 /, ' ')}
+                  </div>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>
+                    {room.subject} — {room.name}
+                  </div>
+                  <div style={{ fontSize: 12.5, color: 'var(--s500)' }}>
+                    {room.teacher} · {room.schedule}
+                  </div>
+                </div>
+                <button
+                  className="btn btn-s btn-sm"
+                  onClick={() => toast?.info?.('Adding to calendar…')}
+                  style={{ flexShrink: 0 }}
+                >
+                  Add to Calendar
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      )}
+ 
+      {/* If they have rooms but nothing today/tomorrow */}
+      {myRooms.length > 0 && liveRooms.length === 0 && todayRooms.length === 0 && tomorrowRooms.length === 0 && upcomingRooms.length === 0 && (
+        <div className="card" style={{ padding: 28, textAlign: 'center' }}>
+          <h3 style={{ fontSize: 16, color: 'var(--s700)', marginBottom: 6 }}>No classes scheduled this week</h3>
+          <p style={{ fontSize: 13, color: 'var(--s500)' }}>
+            Check back later or speak with your teacher about upcoming lessons.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
