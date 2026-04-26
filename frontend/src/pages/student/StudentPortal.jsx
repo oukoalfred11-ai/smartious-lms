@@ -2109,8 +2109,6 @@ function AchievementsTab({ user }) {
     </div>
   )
 }
- 
- return null;
 
  // ═══════════════════════════════════════════════════════════
 // EXAMS TAB — uses QUESTION_BANK from PracticeTab paste
