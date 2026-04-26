@@ -1213,7 +1213,7 @@ export default function StudentPortal() {
          {/* ════════════════════════════════════════════
           SUBSCRIPTION
       ════════════════════════════════════════════ */}
-      {{page === 'profile' && <ProfileTab user={user} toast={toast} />}
+      {page === 'profile' && <ProfileTab user={user} toast={toast} />}
       {page === 'subscription' && (<SubscriptionTab user={user} store={store} toast={toast} />)}
     </div>
   );
