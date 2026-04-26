@@ -1370,7 +1370,7 @@ const QUESTION_BANK = {
       { q: '"In conclusion" is typically used to:', options: ['Introduce a new topic', 'Add an example', 'Begin a final summary', 'Disagree with a point'], answer: 'Begin a final summary', explanation: 'Conclusion phrases signal the closing summary of an essay or argument.' },
     ],
   },
-}
+};
  
 // Subject colours — premium palette
 const SUBJECT_COLOURS = {
