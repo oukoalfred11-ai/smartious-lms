@@ -1197,11 +1197,13 @@ export default function StudentPortal() {
                   <h3>No class rooms yet</h3>
                   <p>The admin will assign you to a class room based on your curriculum and subject choices.</p>
                 </div>
-              )}
-            </div>
-          )}
-          </main>
-      ); 
+            )}
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}  
 
          {/* ════════════════════════════════════════════
           SUBSCRIPTION
