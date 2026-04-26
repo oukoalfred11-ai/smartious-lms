@@ -1205,6 +1205,7 @@ export default function StudentPortal() {
               SUBSCRIPTION
           ════════════════════════════════════════════ */}
           {page === 'subscription' && <SubscriptionTab user={user} store={store} toast={toast} />}
+          
 // ═══════════════════════════════════════════════════════════
 // QUESTION BANK — IGCSE / Edexcel / CBC
 // ═══════════════════════════════════════════════════════════
