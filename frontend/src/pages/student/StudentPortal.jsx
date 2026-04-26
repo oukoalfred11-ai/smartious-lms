@@ -1200,7 +1200,7 @@ export default function StudentPortal() {
               )}
             </div>
           )}
-          </>
+          </main>
       ); 
 
          {/* ════════════════════════════════════════════
