@@ -102,6 +102,7 @@ const NAV_SECTIONS = [
     { id:'resources',    label:'Resources',       svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' },
   ]},
   { label:'Account', items:[
+    { id:'profile',      label:'Profile',          svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
     { id:'achievements', label:'Achievements',    svg:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' },
     { id:'subscription', label:'Subscription',   svg:'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>' },
   ]},
@@ -410,6 +411,7 @@ export default function StudentPortal() {
              page === 'live'      ? 'Live Classes' :
              page === 'timetable' ? 'Timetable' :
              page === 'resources' ? 'Resources' :
+             page === 'profile'   ? 'My Profile' :
              page === 'achievements' ? 'Achievements' :
              page === 'subscription' ? 'Subscription' : 'Portal'}
           </div>
@@ -1211,10 +1213,8 @@ export default function StudentPortal() {
          {/* ════════════════════════════════════════════
           SUBSCRIPTION
       ════════════════════════════════════════════ */}
-      {page === 'subscription' && (
-        <SubscriptionTab user={user} store={store} toast={toast} />
-      )}
-
+      {page === 'profile' && <ProfileTab user={user} toast={toast} />}
+      {page === 'subscription' && (<SubscriptionTab user={user} store={store} toast={toast} />)}
     </div>
   );
 }
@@ -6325,7 +6325,707 @@ function HomeworkTab({ user, toast }) {
 }
  
  
-
+// ═══════════════════════════════════════════════════════════
+// PROFILE TAB — student account & preferences
+// ═══════════════════════════════════════════════════════════
+const PROFILE_PREFS_KEY    = 'sm_profile_prefs'
+const PROFILE_AVATAR_KEY   = 'sm_profile_avatar'
+const PROFILE_BIO_KEY      = 'sm_profile_bio'
+const PROFILE_DISPLAY_KEY  = 'sm_profile_display_name'
+ 
+const loadProfilePrefs = () => {
+  try {
+    return JSON.parse(localStorage.getItem(PROFILE_PREFS_KEY) || 'null') || {
+      notifyEmail: true,
+      notifyDailyDigest: true,
+      notifyHomework: true,
+      notifyExamResults: true,
+      notifyLiveClass: true,
+      shareProgressWithParent: true,
+      preferredContactMethod: 'email',
+      timezone: 'Africa/Nairobi',
+      preferredLanguage: 'en',
+    }
+  } catch {
+    return null
+  }
+}
+const saveProfilePrefs = (p) => {
+  try { localStorage.setItem(PROFILE_PREFS_KEY, JSON.stringify(p)) } catch {}
+}
+ 
+// Generate avatar initials background colour from name (deterministic)
+const initialsColor = (name) => {
+  const colors = ['#8B1A2E', '#1E3A8A', '#166534', '#7C2D12', '#6B21A8', '#92400E', '#0F766E', '#7E22CE']
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
+  return colors[Math.abs(hash) % colors.length]
+}
+ 
+function ProfileTab({ user, toast }) {
+  const initialDisplayName = localStorage.getItem(PROFILE_DISPLAY_KEY) || `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+  const initialBio = localStorage.getItem(PROFILE_BIO_KEY) || ''
+  const initialAvatar = localStorage.getItem(PROFILE_AVATAR_KEY) || null
+ 
+  const [section, setSection] = useState('account')  // 'account' | 'security' | 'notifications' | 'communication'
+  const [displayName, setDisplayName] = useState(initialDisplayName)
+  const [bio, setBio] = useState(initialBio)
+  const [avatar, setAvatar] = useState(initialAvatar)
+  const [prefs, setPrefs] = useState(() => loadProfilePrefs())
+ 
+  // Password change state
+  const [currentPwd, setCurrentPwd] = useState('')
+  const [newPwd, setNewPwd] = useState('')
+  const [confirmPwd, setConfirmPwd] = useState('')
+  const [showPwd, setShowPwd] = useState(false)
+  const [pwdSubmitting, setPwdSubmitting] = useState(false)
+ 
+  const initials = (displayName || 'S').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || 'S'
+  const avatarBg = initialsColor(displayName || 'Student')
+ 
+  // Save handlers
+  const saveAccountInfo = () => {
+    if (!displayName.trim()) {
+      toast?.error?.('Display name cannot be empty.')
+      return
+    }
+    localStorage.setItem(PROFILE_DISPLAY_KEY, displayName.trim())
+    localStorage.setItem(PROFILE_BIO_KEY, bio.trim())
+    if (avatar) localStorage.setItem(PROFILE_AVATAR_KEY, avatar)
+    else localStorage.removeItem(PROFILE_AVATAR_KEY)
+    toast?.ok?.('Profile updated.')
+  }
+ 
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 1024 * 500) {
+      toast?.error?.('Image too large. Max 500KB.')
+      return
+    }
+    if (!file.type.startsWith('image/')) {
+      toast?.error?.('Please upload an image file.')
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = (ev) => setAvatar(ev.target.result)
+    reader.readAsDataURL(file)
+  }
+ 
+  const removeAvatar = () => {
+    setAvatar(null)
+    localStorage.removeItem(PROFILE_AVATAR_KEY)
+  }
+ 
+  // Password change — uses backend if available, otherwise saves intent locally
+  const changePassword = async () => {
+    if (pwdSubmitting) return
+ 
+    // Validation
+    if (!currentPwd) { toast?.error?.('Enter your current password.'); return }
+    if (!newPwd || newPwd.length < 8) { toast?.error?.('New password must be at least 8 characters.'); return }
+    if (newPwd === currentPwd) { toast?.error?.('New password must be different from current.'); return }
+    if (newPwd !== confirmPwd) { toast?.error?.('Passwords do not match.'); return }
+ 
+    // Strength check
+    const hasLower = /[a-z]/.test(newPwd)
+    const hasUpper = /[A-Z]/.test(newPwd)
+    const hasNumber = /\d/.test(newPwd)
+    if (!hasLower || !hasUpper || !hasNumber) {
+      toast?.error?.('Password must contain uppercase, lowercase, and a number.')
+      return
+    }
+ 
+    setPwdSubmitting(true)
+ 
+    try {
+      // Try backend if api is available
+      const apiBase = import.meta?.env?.VITE_API_BASE || ''
+      const token = localStorage.getItem('sm_token') || ''
+ 
+      if (apiBase && token) {
+        const response = await fetch(`${apiBase}/api/auth/change-password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            currentPassword: currentPwd,
+            newPassword: newPwd,
+          }),
+        })
+        if (response.ok) {
+          toast?.ok?.('Password changed successfully.')
+          setCurrentPwd(''); setNewPwd(''); setConfirmPwd('')
+        } else {
+          const errBody = await response.json().catch(() => ({}))
+          toast?.error?.(errBody.message || 'Could not change password. Check current password.')
+        }
+      } else {
+        // Backend not available — show informative message
+        toast?.info?.('Password change requires backend connection. Try again later.')
+      }
+    } catch (e) {
+      console.error('[password]', e)
+      toast?.error?.('Network error. Please try again.')
+    } finally {
+      setPwdSubmitting(false)
+    }
+  }
+ 
+  const updatePref = (key, value) => {
+    const newPrefs = { ...prefs, [key]: value }
+    setPrefs(newPrefs)
+    saveProfilePrefs(newPrefs)
+  }
+ 
+  // Section nav items
+  const sections = [
+    { id: 'account',        label: 'Account Info',     iconPath: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
+    { id: 'security',       label: 'Password & Security', iconPath: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>' },
+    { id: 'notifications',  label: 'Notifications',    iconPath: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>' },
+    { id: 'communication',  label: 'Communication',    iconPath: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
+  ]
+ 
+  return (
+    <div>
+      {/* Hero */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+        color: '#fff',
+      }}>
+        <div style={{ padding: '28px 30px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+          {/* Big avatar */}
+          <div style={{
+            width: 84, height: 84, borderRadius: '50%',
+            background: avatar ? 'transparent' : avatarBg,
+            border: '3px solid #F0CC5A',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontSize: 30, fontWeight: 700,
+            fontFamily: "'Instrument Serif', serif",
+            flexShrink: 0,
+            overflow: 'hidden',
+            boxShadow: '0 4px 16px rgba(0,0,0,.25)',
+          }}>
+            {avatar ? (
+              <img src={avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : initials}
+          </div>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+              Account Settings
+            </div>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              {displayName || 'My Profile'}
+            </h2>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              {user?.email || 'No email set'} · {user?.curriculum || 'IGCSE'} · {user?.grade || 'Year 10'}
+            </div>
+          </div>
+        </div>
+      </div>
+ 
+      {/* Section nav */}
+      <div style={{
+        display: 'flex',
+        background: 'var(--bg)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--rmd)',
+        padding: 4,
+        marginBottom: 18,
+        gap: 2,
+        flexWrap: 'wrap',
+      }}>
+        {sections.map(s => (
+          <button
+            key={s.id}
+            onClick={() => setSection(s.id)}
+            style={{
+              flex: 1, minWidth: 130,
+              background: section === s.id ? 'var(--white)' : 'transparent',
+              color: section === s.id ? '#8B1A2E' : 'var(--s500)',
+              border: 'none',
+              padding: '10px 14px',
+              borderRadius: 'var(--rsm)',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 700,
+              boxShadow: section === s.id ? '0 4px 16px rgba(10,8,6,.10)' : 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              transition: 'all .15s',
+            }}
+          >
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+              dangerouslySetInnerHTML={{ __html: s.iconPath }}/>
+            {s.label}
+          </button>
+        ))}
+      </div>
+ 
+      {/* SECTION: Account Info */}
+      {section === 'account' && (
+        <div className="card">
+          <div className="ctitle" style={{ marginBottom: 18 }}>Personal Information</div>
+ 
+          {/* Avatar uploader */}
+          <div style={{ marginBottom: 24, paddingBottom: 20, borderBottom: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 10 }}>Profile Picture</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+              <div style={{
+                width: 72, height: 72, borderRadius: '50%',
+                background: avatar ? 'transparent' : avatarBg,
+                color: '#fff', fontSize: 26, fontWeight: 700,
+                fontFamily: "'Instrument Serif', serif",
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                overflow: 'hidden',
+                flexShrink: 0,
+                border: '2px solid var(--border)',
+              }}>
+                {avatar ? <img src={avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/> : initials}
+              </div>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <label style={{ display: 'inline-block', marginRight: 8, marginBottom: 4 }}>
+                  <span className="btn btn-s btn-sm" style={{ cursor: 'pointer' }}>
+                    {avatar ? 'Change Picture' : 'Upload Picture'}
+                  </span>
+                  <input type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} />
+                </label>
+                {avatar && (
+                  <button
+                    onClick={removeAvatar}
+                    className="btn btn-d btn-sm"
+                    style={{ marginLeft: 4 }}
+                  >Remove</button>
+                )}
+                <div style={{ fontSize: 11.5, color: 'var(--s400)', marginTop: 6 }}>
+                  PNG or JPG, square crop works best. Max 500KB.
+                </div>
+              </div>
+            </div>
+          </div>
+ 
+          {/* Display name */}
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 6 }}>
+              Display Name
+            </label>
+            <input
+              type="text"
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value)}
+              placeholder="How should we address you?"
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                fontSize: 14,
+                fontFamily: 'inherit',
+                border: '1.5px solid var(--border)',
+                borderRadius: 'var(--rmd)',
+                outline: 'none',
+                background: 'var(--white)',
+              }}
+              onFocus={e => e.target.style.borderColor = '#8B1A2E'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
+            />
+            <div style={{ fontSize: 11.5, color: 'var(--s400)', marginTop: 4 }}>
+              This is shown in chat, leaderboards, and your dashboard.
+            </div>
+          </div>
+ 
+          {/* Email (read-only — managed by admin) */}
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 6 }}>
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={user?.email || 'Not set'}
+              disabled
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                fontSize: 14,
+                fontFamily: 'inherit',
+                border: '1.5px solid var(--border)',
+                borderRadius: 'var(--rmd)',
+                background: 'var(--bg)',
+                color: 'var(--s500)',
+                cursor: 'not-allowed',
+              }}
+            />
+            <div style={{ fontSize: 11.5, color: 'var(--s400)', marginTop: 4 }}>
+              Contact admin to change your email address.
+            </div>
+          </div>
+ 
+          {/* Curriculum & Grade (read-only) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 16 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 6 }}>
+                Curriculum
+              </label>
+              <input
+                type="text"
+                value={user?.curriculum || 'IGCSE'}
+                disabled
+                style={{
+                  width: '100%', padding: '10px 14px', fontSize: 14, fontFamily: 'inherit',
+                  border: '1.5px solid var(--border)', borderRadius: 'var(--rmd)',
+                  background: 'var(--bg)', color: 'var(--s500)', cursor: 'not-allowed',
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 6 }}>
+                Grade / Year
+              </label>
+              <input
+                type="text"
+                value={user?.grade || 'Year 10'}
+                disabled
+                style={{
+                  width: '100%', padding: '10px 14px', fontSize: 14, fontFamily: 'inherit',
+                  border: '1.5px solid var(--border)', borderRadius: 'var(--rmd)',
+                  background: 'var(--bg)', color: 'var(--s500)', cursor: 'not-allowed',
+                }}
+              />
+            </div>
+          </div>
+ 
+          {/* Bio */}
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 6 }}>
+              About Me <span style={{ fontWeight: 400, color: 'var(--s400)' }}>(optional)</span>
+            </label>
+            <textarea
+              value={bio}
+              onChange={e => setBio(e.target.value.slice(0, 300))}
+              placeholder="Share a bit about yourself, your interests, or what you're aiming for..."
+              rows={3}
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                fontSize: 14,
+                fontFamily: 'inherit',
+                border: '1.5px solid var(--border)',
+                borderRadius: 'var(--rmd)',
+                outline: 'none',
+                resize: 'vertical',
+                background: 'var(--white)',
+                lineHeight: 1.6,
+              }}
+              onFocus={e => e.target.style.borderColor = '#8B1A2E'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
+            />
+            <div style={{ fontSize: 11.5, color: 'var(--s400)', marginTop: 4, textAlign: 'right' }}>
+              {bio.length} / 300 characters
+            </div>
+          </div>
+ 
+          <button onClick={saveAccountInfo} className="btn btn-p">
+            Save Changes
+          </button>
+        </div>
+      )}
+ 
+      {/* SECTION: Password & Security */}
+      {section === 'security' && (
+        <div className="card">
+          <div className="ctitle" style={{ marginBottom: 18 }}>Change Password</div>
+ 
+          <div style={{
+            background: 'var(--a50)', border: '1px solid var(--a100)',
+            borderRadius: 'var(--rmd)', padding: 12, marginBottom: 18,
+            fontSize: 12.5, color: 'var(--a700, #92400E)',
+            display: 'flex', gap: 10, alignItems: 'flex-start',
+          }}>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0,marginTop:1}}>
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div>
+              Choose a strong password. Use at least 8 characters with uppercase, lowercase, and a number. Never share your password with anyone - not even teachers or admin staff.
+            </div>
+          </div>
+ 
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 6 }}>
+              Current Password
+            </label>
+            <input
+              type={showPwd ? 'text' : 'password'}
+              value={currentPwd}
+              onChange={e => setCurrentPwd(e.target.value)}
+              placeholder="Enter current password"
+              autoComplete="current-password"
+              style={{
+                width: '100%', padding: '10px 14px', fontSize: 14, fontFamily: 'inherit',
+                border: '1.5px solid var(--border)', borderRadius: 'var(--rmd)',
+                outline: 'none', background: 'var(--white)',
+              }}
+              onFocus={e => e.target.style.borderColor = '#8B1A2E'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
+            />
+          </div>
+ 
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 6 }}>
+              New Password
+            </label>
+            <input
+              type={showPwd ? 'text' : 'password'}
+              value={newPwd}
+              onChange={e => setNewPwd(e.target.value)}
+              placeholder="At least 8 characters"
+              autoComplete="new-password"
+              style={{
+                width: '100%', padding: '10px 14px', fontSize: 14, fontFamily: 'inherit',
+                border: '1.5px solid var(--border)', borderRadius: 'var(--rmd)',
+                outline: 'none', background: 'var(--white)',
+              }}
+              onFocus={e => e.target.style.borderColor = '#8B1A2E'}
+              onBlur={e => e.target.style.borderColor = 'var(--border)'}
+            />
+            {newPwd && (
+              <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap', fontSize: 11 }}>
+                {[
+                  { check: newPwd.length >= 8, label: '8+ characters' },
+                  { check: /[a-z]/.test(newPwd), label: 'lowercase' },
+                  { check: /[A-Z]/.test(newPwd), label: 'UPPERCASE' },
+                  { check: /\d/.test(newPwd), label: 'number' },
+                ].map(req => (
+                  <span key={req.label} style={{
+                    padding: '2px 8px', borderRadius: 99,
+                    background: req.check ? 'var(--g50)' : 'var(--s100)',
+                    color: req.check ? 'var(--g600)' : 'var(--s500)',
+                    fontWeight: 600,
+                  }}>
+                    {req.check ? '[x]' : '[ ]'} {req.label}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+ 
+          <div style={{ marginBottom: 8 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 6 }}>
+              Confirm New Password
+            </label>
+            <input
+              type={showPwd ? 'text' : 'password'}
+              value={confirmPwd}
+              onChange={e => setConfirmPwd(e.target.value)}
+              placeholder="Type new password again"
+              autoComplete="new-password"
+              style={{
+                width: '100%', padding: '10px 14px', fontSize: 14, fontFamily: 'inherit',
+                border: `1.5px solid ${confirmPwd && newPwd !== confirmPwd ? 'var(--r500)' : 'var(--border)'}`,
+                borderRadius: 'var(--rmd)', outline: 'none', background: 'var(--white)',
+              }}
+              onFocus={e => { if (newPwd === confirmPwd) e.target.style.borderColor = '#8B1A2E' }}
+              onBlur={e => { if (!confirmPwd || newPwd === confirmPwd) e.target.style.borderColor = 'var(--border)' }}
+            />
+            {confirmPwd && newPwd !== confirmPwd && (
+              <div style={{ fontSize: 11, color: 'var(--r500)', marginTop: 4, fontWeight: 600 }}>
+                Passwords don't match
+              </div>
+            )}
+          </div>
+ 
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18, fontSize: 13, color: 'var(--s600)', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={showPwd}
+              onChange={e => setShowPwd(e.target.checked)}
+              style={{ accentColor: '#8B1A2E' }}
+            />
+            Show passwords
+          </label>
+ 
+          <button
+            onClick={changePassword}
+            disabled={pwdSubmitting}
+            className="btn btn-p"
+            style={{ opacity: pwdSubmitting ? .7 : 1 }}
+          >
+            {pwdSubmitting ? 'Changing...' : 'Change Password'}
+          </button>
+        </div>
+      )}
+ 
+      {/* SECTION: Notifications */}
+      {section === 'notifications' && (
+        <div className="card">
+          <div className="ctitle" style={{ marginBottom: 18 }}>Notification Preferences</div>
+ 
+          {[
+            { key: 'notifyEmail',          label: 'Email notifications',           desc: 'Receive important account emails.' },
+            { key: 'notifyDailyDigest',    label: 'Daily study digest',            desc: 'Morning summary of your day\'s plan and what\'s due.' },
+            { key: 'notifyHomework',       label: 'Homework reminders',            desc: 'Alert me 24 hours before any homework is due.' },
+            { key: 'notifyExamResults',    label: 'Exam results',                  desc: 'Notify me when teachers release exam grades.' },
+            { key: 'notifyLiveClass',      label: 'Live class reminders',          desc: '15 minutes before every scheduled live class.' },
+          ].map(item => (
+            <div key={item.key} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+              padding: '14px 0', borderBottom: '1px solid var(--border)', gap: 14, flexWrap: 'wrap',
+            }}>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{item.label}</div>
+                <div style={{ fontSize: 12.5, color: 'var(--s500)', marginTop: 2 }}>{item.desc}</div>
+              </div>
+              {/* Toggle */}
+              <button
+                onClick={() => updatePref(item.key, !prefs[item.key])}
+                style={{
+                  width: 44, height: 24, padding: 2,
+                  borderRadius: 99,
+                  border: 'none',
+                  background: prefs[item.key] ? '#8B1A2E' : 'var(--s300, #CBD5E1)',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'background .2s',
+                  flexShrink: 0,
+                }}
+              >
+                <div style={{
+                  position: 'absolute', top: 2,
+                  left: prefs[item.key] ? 22 : 2,
+                  width: 20, height: 20,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  transition: 'left .2s',
+                  boxShadow: '0 2px 4px rgba(0,0,0,.2)',
+                }}/>
+              </button>
+            </div>
+          ))}
+ 
+          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 16, fontStyle: 'italic' }}>
+            Changes save automatically.
+          </div>
+        </div>
+      )}
+ 
+      {/* SECTION: Communication */}
+      {section === 'communication' && (
+        <div className="card">
+          <div className="ctitle" style={{ marginBottom: 18 }}>Communication & Privacy</div>
+ 
+          {/* Share progress with parent */}
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+            padding: '14px 0', borderBottom: '1px solid var(--border)', gap: 14, flexWrap: 'wrap',
+          }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>Share progress with parent</div>
+              <div style={{ fontSize: 12.5, color: 'var(--s500)', marginTop: 2 }}>
+                Allow your parent or guardian to see your dashboard, mastery scores, and exam results.
+              </div>
+            </div>
+            <button
+              onClick={() => updatePref('shareProgressWithParent', !prefs.shareProgressWithParent)}
+              style={{
+                width: 44, height: 24, padding: 2, borderRadius: 99, border: 'none',
+                background: prefs.shareProgressWithParent ? '#8B1A2E' : 'var(--s300, #CBD5E1)',
+                cursor: 'pointer', position: 'relative', transition: 'background .2s', flexShrink: 0,
+              }}
+            >
+              <div style={{
+                position: 'absolute', top: 2,
+                left: prefs.shareProgressWithParent ? 22 : 2,
+                width: 20, height: 20, borderRadius: '50%',
+                background: '#fff', transition: 'left .2s',
+                boxShadow: '0 2px 4px rgba(0,0,0,.2)',
+              }}/>
+            </button>
+          </div>
+ 
+          {/* Preferred contact method */}
+          <div style={{ padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)', marginBottom: 4 }}>
+              Preferred contact method
+            </div>
+            <div style={{ fontSize: 12.5, color: 'var(--s500)', marginBottom: 10 }}>
+              How should teachers and admin reach you for important updates?
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {[
+                { id: 'email',    label: 'Email' },
+                { id: 'message',  label: 'In-app messaging' },
+                { id: 'both',     label: 'Both' },
+              ].map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => updatePref('preferredContactMethod', opt.id)}
+                  className={prefs.preferredContactMethod === opt.id ? 'btn btn-p btn-sm' : 'btn btn-s btn-sm'}
+                  style={{ background: prefs.preferredContactMethod === opt.id ? '#8B1A2E' : 'transparent' }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+ 
+          {/* Timezone */}
+          <div style={{ padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
+            <label style={{ display: 'block', fontWeight: 700, fontSize: 14, color: 'var(--s900)', marginBottom: 4 }}>
+              Timezone
+            </label>
+            <div style={{ fontSize: 12.5, color: 'var(--s500)', marginBottom: 10 }}>
+              Class times and reminders are shown in this timezone.
+            </div>
+            <select
+              value={prefs.timezone}
+              onChange={e => updatePref('timezone', e.target.value)}
+              style={{
+                padding: '8px 12px', fontSize: 14, fontFamily: 'inherit',
+                border: '1.5px solid var(--border)', borderRadius: 'var(--rmd)',
+                background: 'var(--white)', color: 'var(--s700)', cursor: 'pointer',
+                minWidth: 200,
+              }}
+            >
+              <option value="Africa/Nairobi">Nairobi (EAT, UTC+3)</option>
+              <option value="Asia/Dubai">Dubai (GST, UTC+4)</option>
+              <option value="Europe/London">London (GMT/BST)</option>
+              <option value="America/New_York">New York (EST/EDT)</option>
+              <option value="America/Los_Angeles">Los Angeles (PST/PDT)</option>
+              <option value="Africa/Lagos">Lagos (WAT, UTC+1)</option>
+              <option value="Africa/Johannesburg">Johannesburg (SAST, UTC+2)</option>
+            </select>
+          </div>
+ 
+          {/* Language */}
+          <div style={{ padding: '14px 0' }}>
+            <label style={{ display: 'block', fontWeight: 700, fontSize: 14, color: 'var(--s900)', marginBottom: 4 }}>
+              Preferred language
+            </label>
+            <div style={{ fontSize: 12.5, color: 'var(--s500)', marginBottom: 10 }}>
+              For emails and notifications. Class language is set by your teacher.
+            </div>
+            <select
+              value={prefs.preferredLanguage}
+              onChange={e => updatePref('preferredLanguage', e.target.value)}
+              style={{
+                padding: '8px 12px', fontSize: 14, fontFamily: 'inherit',
+                border: '1.5px solid var(--border)', borderRadius: 'var(--rmd)',
+                background: 'var(--white)', color: 'var(--s700)', cursor: 'pointer',
+                minWidth: 200,
+              }}
+            >
+              <option value="en">English</option>
+              <option value="sw">Kiswahili</option>
+              <option value="fr">Francais</option>
+              <option value="ar">Arabic</option>
+              <option value="es">Espanol</option>
+            </select>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+ 
 
 
 
