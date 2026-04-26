@@ -1201,10 +1201,16 @@ export default function StudentPortal() {
             </div>
           )}
 
-          {/* ════════════════════════════════════════════
-              SUBSCRIPTION
-          ════════════════════════════════════════════ */}
-          {page === 'subscription' && <SubscriptionTab user={user} store={store} toast={toast} />}
+         {/* ════════════════════════════════════════════
+          SUBSCRIPTION
+      ════════════════════════════════════════════ */}
+      {page === 'subscription' && (
+        <SubscriptionTab user={user} store={store} toast={toast} />
+      )}
+
+    </div>
+  );
+}
           
 // ═══════════════════════════════════════════════════════════
 // QUESTION BANK — IGCSE / Edexcel / CBC
