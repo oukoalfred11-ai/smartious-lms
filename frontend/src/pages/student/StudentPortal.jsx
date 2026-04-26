@@ -4916,278 +4916,229 @@ function StudyPlanTab({ user, store, setPage, toast }) {
 }
  
 // ═══════════════════════════════════════════════════════════
-// SUBSCRIPTION TAB — exact landing page pricing + live Paystack
+// SUBSCRIPTION TAB — KES, enrolled-only, 3-day grace
 // ═══════════════════════════════════════════════════════════
  
-// Paystack live key (from your Paystack dashboard)
+// Paystack live key (your dashboard)
 const PAYSTACK_PUBLIC_KEY = 'pk_live_a1608f5c5f71946ca1357afa673cd53ce4057af8'
  
 const SUBSCRIPTION_PAYMENTS_KEY = 'sm_subscription_payments'
-const SUBSCRIPTION_TIER_KEY     = 'sm_subscription_tier'   // active plan id
-const SUBSCRIPTION_MODE_KEY     = 'sm_subscription_mode'   // active tab id
+const SUBSCRIPTION_TIER_KEY     = 'sm_subscription_tier'
+const SUBSCRIPTION_MODE_KEY     = 'sm_subscription_mode'
+const SUBSCRIPTION_ENROLLED_KEY = 'sm_subscription_enrolled'  // the plan student has paid for
  
-// Approximate USD → KES rate for display (Paystack handles the actual conversion)
+// Conversion rate USD → KES. Update if your landing rate changes.
+// (Landing shows "~ KES 52,000" for $400/month → ratio of 130 KES per USD)
 const KES_PER_USD = 130
  
-// PRICING — mirrors landing page exactly. Update here when landing changes.
+// Grace period in days after due date before lockout
+const GRACE_PERIOD_DAYS = 3
+ 
+// PRICING — mirrors landing page exactly
 const PRICING_TABS = [
   {
     id: 'homeschool',
     label: 'Homeschool · In-Person',
     plans: [
-      {
-        id: 'hs-primary',
-        name: 'Primary',
-        subtitle: 'CBC · British · American',
-        eyebrow: 'HOMESCHOOL · AT HOME',
-        gradeRange: 'Grades 1-6',
-        monthly: 400,  termly: 1140, annually: 4224,
-        termSave: 60, annualSave: 576,
-        features: [
-          'Full CBC, British or American curriculum',
-          'Dedicated class teacher (home or video)',
-          'All teaching materials, textbooks & workbooks',
-          'Quarterly progress reports',
-          'Parent dashboard',
-        ],
-      },
-      {
-        id: 'hs-highschool',
-        name: 'High School',
-        subtitle: 'IGCSE · Edexcel',
-        eyebrow: 'HOMESCHOOL · AT HOME',
-        gradeRange: 'Year 7-11',
-        badge: 'Most Popular',
-        featured: true,
-        monthly: 423,  termly: 1206, annually: 4467,
-        termSave: 63, annualSave: 609,
-        features: [
-          'IGCSE, Edexcel, British or American pathway',
-          'Subject specialist tutors per subject',
-          'All Cambridge & Edexcel past papers',
-          'Mock exams & marking schemes',
-          'University counselling',
-        ],
-      },
-      {
-        id: 'hs-alevel',
-        name: 'A-Level / IB Diploma',
-        subtitle: '',
-        eyebrow: 'HOMESCHOOL · AT HOME',
-        gradeRange: 'Year 12-13',
-        monthly: 515,  termly: 1468, annually: 5438,
-        termSave: 77, annualSave: 742,
-        features: [
-          'Cambridge A-Level or IB Diploma',
-          'University counselling included',
-          'UCAS / Common App application support',
-          'Unlimited Mshauri AI + live Zoom sessions',
-          'Personal statement coaching',
-        ],
-      },
+      { id: 'hs-primary',    name: 'Primary',              subtitle: 'CBC · British · American', eyebrow: 'HOMESCHOOL · AT HOME', gradeRange: 'Grades 1-6',  monthly: 400, termly: 1140, annually: 4224, termSave: 60, annualSave: 576, features: ['Full CBC, British or American curriculum','Dedicated class teacher (home or video)','All teaching materials, textbooks & workbooks','Quarterly progress reports','Parent dashboard'] },
+      { id: 'hs-highschool', name: 'High School',          subtitle: 'IGCSE · Edexcel',         eyebrow: 'HOMESCHOOL · AT HOME', gradeRange: 'Year 7-11',   monthly: 423, termly: 1206, annually: 4467, termSave: 63, annualSave: 609, badge: 'Most Popular', featured: true, features: ['IGCSE, Edexcel, British or American pathway','Subject specialist tutors per subject','All Cambridge & Edexcel past papers','Mock exams & marking schemes','University counselling'] },
+      { id: 'hs-alevel',     name: 'A-Level / IB Diploma', subtitle: '',                          eyebrow: 'HOMESCHOOL · AT HOME', gradeRange: 'Year 12-13',  monthly: 515, termly: 1468, annually: 5438, termSave: 77, annualSave: 742, features: ['Cambridge A-Level or IB Diploma','University counselling included','UCAS / Common App application support','Unlimited Mshauri AI + live Zoom sessions','Personal statement coaching'] },
     ],
   },
   {
     id: 'virtual',
     label: 'Online / Virtual School',
     plans: [
-      {
-        id: 'v-basic',
-        name: 'Basic Online',
-        subtitle: '',
-        eyebrow: 'ONLINE / VIRTUAL SCHOOL',
-        gradeRange: 'All ages',
-        monthly: 180,  termly: 513,  annually: 1901,
-        termSave: 27, annualSave: 259,
-        features: [
-          'Full recorded video lesson library',
-          'Interactive practice quizzes & worksheets',
-          'Mshauri AI homework helper',
-          'Self-paced learning',
-          'Discussion forums',
-        ],
-      },
-      {
-        id: 'v-premium',
-        name: 'Premium Online',
-        subtitle: '',
-        eyebrow: 'ONLINE / VIRTUAL SCHOOL',
-        gradeRange: 'All ages',
-        badge: 'Best Value',
-        featured: true,
-        monthly: 260,  termly: 741,  annually: 2746,
-        termSave: 39, annualSave: 374,
-        features: [
-          'Everything in Basic, plus:',
-          'Live small-group Zoom classes',
-          'Direct teacher messaging',
-          'Personalised learning paths',
-          'Monthly 1-on-1 reviews',
-        ],
-      },
-      {
-        id: 'v-igcse',
-        name: 'IGCSE Full Pack',
-        subtitle: '',
-        eyebrow: 'ONLINE / VIRTUAL SCHOOL',
-        gradeRange: 'Year 9-11',
-        monthly: 360,  termly: 1026, annually: 3802,
-        termSave: 54, annualSave: 518,
-        features: [
-          'Complete IGCSE curriculum across all subjects',
-          'All Cambridge past papers 2015-2025',
-          'Mock exams with marking schemes',
-          'Subject specialist tutors',
-          'University guidance',
-        ],
-      },
+      { id: 'v-basic',   name: 'Basic Online',     subtitle: '', eyebrow: 'ONLINE / VIRTUAL SCHOOL', gradeRange: 'All ages', monthly: 180, termly: 513,  annually: 1901, termSave: 27, annualSave: 259, features: ['Full recorded video lesson library','Interactive practice quizzes & worksheets','Mshauri AI homework helper','Self-paced learning','Discussion forums'] },
+      { id: 'v-premium', name: 'Premium Online',   subtitle: '', eyebrow: 'ONLINE / VIRTUAL SCHOOL', gradeRange: 'All ages', monthly: 260, termly: 741,  annually: 2746, termSave: 39, annualSave: 374, badge: 'Best Value', featured: true, features: ['Everything in Basic, plus:','Live small-group Zoom classes','Direct teacher messaging','Personalised learning paths','Monthly 1-on-1 reviews'] },
+      { id: 'v-igcse',   name: 'IGCSE Full Pack',  subtitle: '', eyebrow: 'ONLINE / VIRTUAL SCHOOL', gradeRange: 'Year 9-11', monthly: 360, termly: 1026, annually: 3802, termSave: 54, annualSave: 518, features: ['Complete IGCSE curriculum across all subjects','All Cambridge past papers 2015-2025','Mock exams with marking schemes','Subject specialist tutors','University guidance'] },
     ],
   },
   {
     id: 'tuition',
     label: 'Private Tuition',
     plans: [
-      {
-        id: 't-online',
-        name: 'Online Session',
-        subtitle: '',
-        eyebrow: 'PRIVATE TUITION · ONLINE',
-        gradeRange: 'Any subject',
-        unit: 'per hour',
-        hourly: 8,
-        monthly: 8, termly: 8, annually: 8,
-        features: [
-          'Video session with subject specialist',
-          'Interactive shared digital whiteboard',
-          'Recorded for review',
-          '1-hour minimum booking',
-          'Pay per session',
-        ],
-      },
-      {
-        id: 't-home',
-        name: 'Home Visit',
-        subtitle: 'Nairobi area',
-        eyebrow: 'PRIVATE TUITION · NAIROBI',
-        gradeRange: 'Any subject',
-        unit: 'per hour',
-        badge: 'Popular',
-        featured: true,
-        hourly: 12,
-        monthly: 12, termly: 12, annually: 12,
-        features: [
-          'Tutor comes to your home in Nairobi',
-          'Subject specialist matched to need',
-          'Flexible scheduling',
-          '1-hour minimum',
-          'Materials provided',
-        ],
-      },
-      {
-        id: 't-bundle',
-        name: 'Monthly Bundle',
-        subtitle: '20 hours per month',
-        eyebrow: 'PRIVATE TUITION · BUNDLE',
-        gradeRange: 'All subjects',
-        monthly: 235, termly: 235*3, annually: 235*12,
-        features: [
-          '20 hours — online or home visit',
-          'Same dedicated tutor each week',
-          'Mix any subjects',
-          'Save vs hourly rate',
-          'Monthly subscription',
-        ],
-      },
+      { id: 't-online', name: 'Online Session', subtitle: '',              eyebrow: 'PRIVATE TUITION · ONLINE',  gradeRange: 'Any subject',     unit: 'per hour', hourly: 8,  monthly: 8,  termly: 8,  annually: 8,    features: ['Video session with subject specialist','Interactive shared digital whiteboard','Recorded for review','1-hour minimum booking','Pay per session'] },
+      { id: 't-home',   name: 'Home Visit',     subtitle: 'Nairobi area', eyebrow: 'PRIVATE TUITION · NAIROBI', gradeRange: 'Any subject',     unit: 'per hour', hourly: 12, monthly: 12, termly: 12, annually: 12,   badge: 'Popular', featured: true, features: ['Tutor comes to your home in Nairobi','Subject specialist matched to need','Flexible scheduling','1-hour minimum','Materials provided'] },
+      { id: 't-bundle', name: 'Monthly Bundle', subtitle: '20 hours per month', eyebrow: 'PRIVATE TUITION · BUNDLE', gradeRange: 'All subjects',                       monthly: 235, termly: 705, annually: 2820, features: ['20 hours - online or home visit','Same dedicated tutor each week','Mix any subjects','Save vs hourly rate','Monthly subscription'] },
     ],
   },
 ]
  
-// Find a plan and tab by plan id
 const findPlanById = (planId) => {
   for (const tab of PRICING_TABS) {
     const plan = tab.plans.find(p => p.id === planId)
     if (plan) return { tab, plan }
   }
-  return { tab: PRICING_TABS[0], plan: PRICING_TABS[0].plans[1] }
+  return null
 }
  
-// Lazy-load Paystack inline.js once
+const findPlanTabId = (planId) => {
+  for (const tab of PRICING_TABS) {
+    if (tab.plans.find(p => p.id === planId)) return tab.id
+  }
+  return 'homeschool'
+}
+ 
+// Lazy-load Paystack inline.js
 let paystackPromise = null
 const ensurePaystack = () => {
   if (paystackPromise) return paystackPromise
   paystackPromise = new Promise((resolve, reject) => {
-    if (typeof window !== 'undefined' && window.PaystackPop) {
-      resolve(window.PaystackPop)
-      return
-    }
+    if (typeof window !== 'undefined' && window.PaystackPop) { resolve(window.PaystackPop); return }
     const script = document.createElement('script')
     script.src = 'https://js.paystack.co/v2/inline.js'
     script.async = true
-    script.onload = () => {
-      if (window.PaystackPop) resolve(window.PaystackPop)
-      else reject(new Error('Paystack script loaded but PaystackPop is undefined'))
-    }
+    script.onload = () => window.PaystackPop ? resolve(window.PaystackPop) : reject(new Error('Paystack loaded but PaystackPop undefined'))
     script.onerror = () => reject(new Error('Failed to load Paystack script'))
     document.head.appendChild(script)
   })
   return paystackPromise
 }
  
-const loadStudentPayments = () => {
-  try { return JSON.parse(localStorage.getItem(SUBSCRIPTION_PAYMENTS_KEY) || '[]') }
-  catch { return [] }
-}
-const saveStudentPayments = (p) => {
-  try { localStorage.setItem(SUBSCRIPTION_PAYMENTS_KEY, JSON.stringify(p.slice(-50))) } catch {}
-}
+const loadStudentPayments = () => { try { return JSON.parse(localStorage.getItem(SUBSCRIPTION_PAYMENTS_KEY) || '[]') } catch { return [] } }
+const saveStudentPayments = (p) => { try { localStorage.setItem(SUBSCRIPTION_PAYMENTS_KEY, JSON.stringify(p.slice(-50))) } catch {} }
+const loadEnrolledPlan = () => { try { return localStorage.getItem(SUBSCRIPTION_ENROLLED_KEY) || null } catch { return null } }
+const saveEnrolledPlan = (planId) => { try { localStorage.setItem(SUBSCRIPTION_ENROLLED_KEY, planId) } catch {} }
  
 const buildReferralCode = (user) => {
   const last = (user?.lastName || 'STUDENT').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5)
   return `${last}-${new Date().getFullYear()}`
 }
  
+// ═══════════════════════════════════════════════════════════
+// SUBSCRIPTION STATUS — for grace period lockout
+// ═══════════════════════════════════════════════════════════
+// Place this at module level so the main StudentPortal can call it.
+// Returns: { active, daysOverdue, locked, nextDueDate, lastPayment }
+const computeSubscriptionStatus = (user) => {
+  const payments = loadStudentPayments()
+  const lastPayment = payments[0]
+  const enrolledPlanId = loadEnrolledPlan() || user?.enrolledPlanId
+ 
+  // Never paid + never enrolled = grace state, not locked (lets new students browse)
+  if (!lastPayment) {
+    return {
+      active: false,
+      daysOverdue: 0,
+      locked: false,
+      nextDueDate: null,
+      lastPayment: null,
+      enrolledPlanId,
+      neverPaid: true,
+    }
+  }
+ 
+  // Compute due date based on payment cycle
+  const paidOn = new Date(lastPayment.date)
+  const dueDate = new Date(paidOn)
+  if (lastPayment.cycle === 'annually') dueDate.setFullYear(dueDate.getFullYear() + 1)
+  else if (lastPayment.cycle === 'termly') dueDate.setMonth(dueDate.getMonth() + 3)
+  else dueDate.setMonth(dueDate.getMonth() + 1)
+ 
+  const now = new Date()
+  const daysOverdue = Math.floor((now - dueDate) / (1000 * 60 * 60 * 24))
+ 
+  return {
+    active: daysOverdue <= 0,
+    daysOverdue: Math.max(0, daysOverdue),
+    locked: daysOverdue > GRACE_PERIOD_DAYS,
+    nextDueDate: dueDate,
+    lastPayment,
+    enrolledPlanId,
+    neverPaid: false,
+  }
+}
+ 
+// ═══════════════════════════════════════════════════════════
+// LOCKOUT BANNER — paste this if you want it visible across tabs
+// (it's not strictly required, the SubscriptionTab handles its own
+// renewal flow, but a top banner makes overdue status visible)
+// ═══════════════════════════════════════════════════════════
+function SubscriptionStatusBanner({ user, onRenew }) {
+  const status = computeSubscriptionStatus(user)
+  if (status.active || status.neverPaid) return null
+ 
+  const isLocked = status.locked
+  const daysOverdue = status.daysOverdue
+ 
+  return (
+    <div style={{
+      background: isLocked ? '#7F1D1D' : '#92400E',
+      color: '#fff',
+      padding: '10px 18px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      fontSize: 13,
+      flexWrap: 'wrap',
+    }}>
+      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0}}>
+        {isLocked
+          ? <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></>
+          : <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>
+        }
+      </svg>
+      <div style={{ flex: 1, minWidth: 200 }}>
+        <strong>{isLocked ? 'Account Locked: ' : 'Payment Overdue: '}</strong>
+        {isLocked
+          ? `Your subscription has been overdue for ${daysOverdue} days. Please renew to restore access.`
+          : `Your subscription is ${daysOverdue} day${daysOverdue === 1 ? '' : 's'} overdue. ${GRACE_PERIOD_DAYS - daysOverdue} day${GRACE_PERIOD_DAYS - daysOverdue === 1 ? '' : 's'} until lockout.`
+        }
+      </div>
+      <button
+        onClick={onRenew}
+        style={{
+          background: '#fff',
+          color: isLocked ? '#7F1D1D' : '#92400E',
+          border: 'none',
+          padding: '6px 14px',
+          borderRadius: 6,
+          fontWeight: 700,
+          fontSize: 12,
+          cursor: 'pointer',
+        }}
+      >Renew Now</button>
+    </div>
+  )
+}
+ 
+// ═══════════════════════════════════════════════════════════
+// MAIN SUBSCRIPTION TAB
+// ═══════════════════════════════════════════════════════════
 function SubscriptionTab({ user, store, toast }) {
-  const [activeTabId, setActiveTabId] = useState(
-    () => localStorage.getItem(SUBSCRIPTION_MODE_KEY) || 'homeschool'
-  )
-  const [billingCycle, setBillingCycle] = useState('monthly')  // monthly | termly | annually
-  const [selectedPlanId, setSelectedPlanId] = useState(
-    () => localStorage.getItem(SUBSCRIPTION_TIER_KEY) || 'hs-highschool'
-  )
+  const status = computeSubscriptionStatus(user)
+  const enrolledPlanId = status.enrolledPlanId
+ 
+  // View mode: 'enrolled' (show only their plan) or 'change' (full catalog)
+  const [viewMode, setViewMode] = useState(enrolledPlanId ? 'enrolled' : 'change')
+ 
+  // Default to their enrolled plan, or featured high school plan if no enrollment
+  const defaultPlanId = enrolledPlanId || 'hs-highschool'
+  const [activeTabId,   setActiveTabId]   = useState(() => findPlanTabId(defaultPlanId))
+  const [billingCycle,  setBillingCycle]  = useState('monthly')
+  const [selectedPlanId, setSelectedPlanId] = useState(defaultPlanId)
   const [payments, setPayments] = useState(() => loadStudentPayments())
   const [processing, setProcessing] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(null)
  
   const activeTab = PRICING_TABS.find(t => t.id === activeTabId) || PRICING_TABS[0]
-  const { plan: currentPlan } = findPlanById(selectedPlanId)
+  const planLookup = findPlanById(selectedPlanId)
+  const currentPlan = planLookup ? planLookup.plan : PRICING_TABS[0].plans[1]
  
-  // Get the price + label for current billing cycle on the selected plan
   const getPriceForCycle = (plan, cycle) => {
     if (plan.unit === 'per hour') return { price: plan.hourly, label: plan.unit, savings: 0 }
-    if (cycle === 'monthly')  return { price: plan.monthly,  label: 'per month',    savings: 0 }
-    if (cycle === 'termly')   return { price: plan.termly,   label: 'per term',    savings: plan.termSave }
-    if (cycle === 'annually') return { price: plan.annually, label: 'per year',    savings: plan.annualSave }
+    if (cycle === 'monthly')  return { price: plan.monthly,  label: 'per month', savings: 0 }
+    if (cycle === 'termly')   return { price: plan.termly,   label: 'per term',  savings: plan.termSave || 0 }
+    if (cycle === 'annually') return { price: plan.annually, label: 'per year',  savings: plan.annualSave || 0 }
     return { price: plan.monthly, label: 'per month', savings: 0 }
   }
  
   const referralCode = buildReferralCode(user)
  
-  // Active subscription details
-  const lastPayment = payments[0]
-  const hasActiveSubscription = lastPayment && lastPayment.status === 'success'
-  const nextPaymentDate = (() => {
-    if (!lastPayment) return null
-    const d = new Date(lastPayment.date)
-    if (lastPayment.cycle === 'annually') d.setFullYear(d.getFullYear() + 1)
-    else if (lastPayment.cycle === 'termly') d.setMonth(d.getMonth() + 3)
-    else d.setMonth(d.getMonth() + 1)
-    return d
-  })()
- 
   const switchTab = (tabId) => {
     setActiveTabId(tabId)
     localStorage.setItem(SUBSCRIPTION_MODE_KEY, tabId)
-    // Pick the featured plan in the new tab
     const newTab = PRICING_TABS.find(t => t.id === tabId)
     const featured = newTab?.plans.find(p => p.featured) || newTab?.plans[0]
     if (featured) {
@@ -5201,28 +5152,21 @@ function SubscriptionTab({ user, store, toast }) {
     localStorage.setItem(SUBSCRIPTION_TIER_KEY, planId)
   }
  
-  // ── PAYSTACK PAYMENT ──────────────────────────────────────
+  // ── PAYSTACK PAYMENT (KES) ──────────────────────────────
   const handlePay = async () => {
     if (processing) return
-    if (!user?.email) {
-      toast?.error?.('Please add an email address before paying.')
-      return
-    }
+    if (!user?.email) { toast?.error?.('Please add an email address before paying.'); return }
  
-    const { price, label } = getPriceForCycle(currentPlan, billingCycle)
-    const usdAmount = price
-    // Paystack USD requires amount in cents (smallest unit)
-    const paystackAmount = Math.round(usdAmount * 100)
+    const { price: usdPrice } = getPriceForCycle(currentPlan, billingCycle)
+    const kesPrice = Math.round(usdPrice * KES_PER_USD)
+    // Paystack expects KES amount in kobo (minor unit) — multiply by 100
+    const paystackAmount = kesPrice * 100
  
     setProcessing(true)
  
     try {
       const PaystackPop = await ensurePaystack()
-      if (!PaystackPop) {
-        toast?.error?.('Could not load payment processor. Check your internet.')
-        setProcessing(false)
-        return
-      }
+      if (!PaystackPop) { toast?.error?.('Could not load Paystack. Check internet.'); setProcessing(false); return }
  
       const reference = 'SM-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8).toUpperCase()
       const paystack = new PaystackPop()
@@ -5231,7 +5175,7 @@ function SubscriptionTab({ user, store, toast }) {
         key: PAYSTACK_PUBLIC_KEY,
         email: user.email,
         amount: paystackAmount,
-        currency: 'USD',
+        currency: 'KES',  // ← KES (was USD — Paystack KE accounts don't support USD)
         ref: reference,
         metadata: {
           student_name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
@@ -5239,10 +5183,12 @@ function SubscriptionTab({ user, store, toast }) {
           plan_name: currentPlan.name,
           tab: activeTabId,
           billing_cycle: billingCycle,
+          usd_equivalent: usdPrice,
           custom_fields: [
-            { display_name: 'Plan',           variable_name: 'plan',           value: `${currentPlan.name} — ${currentPlan.subtitle || ''}`.trim() },
-            { display_name: 'Billing Cycle',  variable_name: 'billing_cycle',  value: billingCycle },
-            { display_name: 'Student',        variable_name: 'student',        value: `${user.firstName} ${user.lastName}` },
+            { display_name: 'Plan',          variable_name: 'plan',          value: `${currentPlan.name}${currentPlan.subtitle ? ' - ' + currentPlan.subtitle : ''}` },
+            { display_name: 'Billing Cycle', variable_name: 'billing_cycle', value: billingCycle },
+            { display_name: 'Student',       variable_name: 'student',       value: `${user.firstName} ${user.lastName}` },
+            { display_name: 'USD Price',     variable_name: 'usd_price',     value: '$' + usdPrice },
           ],
         },
         onSuccess: (transaction) => {
@@ -5252,8 +5198,9 @@ function SubscriptionTab({ user, store, toast }) {
             planName: currentPlan.name,
             tab: activeTabId,
             cycle: billingCycle,
-            amount: usdAmount,
-            currency: 'USD',
+            amountKES: kesPrice,
+            amountUSD: usdPrice,
+            currency: 'KES',
             method: 'Paystack',
             reference: transaction.reference,
             date: new Date().toISOString(),
@@ -5262,60 +5209,85 @@ function SubscriptionTab({ user, store, toast }) {
           const newPayments = [newPayment, ...payments]
           setPayments(newPayments)
           saveStudentPayments(newPayments)
+          // Mark this plan as the student's enrolled plan
+          saveEnrolledPlan(currentPlan.id)
           if (store?.addPayment) {
             try {
               store.addPayment({
                 student: `${user.firstName} ${user.lastName}`,
-                amount: usdAmount,
+                amount: kesPrice,
                 method: 'Paystack',
                 reference: transaction.reference,
               })
             } catch {}
           }
           setPaymentSuccess(newPayment)
-          toast?.ok?.('Payment successful! Your subscription is active.')
+          setViewMode('enrolled')  // switch back to enrolled view
+          toast?.ok?.('Payment successful! Subscription is active.')
           setProcessing(false)
         },
         onCancel: () => {
-          toast?.info?.('Payment cancelled. You can try again anytime.')
+          toast?.info?.('Payment cancelled. Try again anytime.')
           setProcessing(false)
         },
       })
     } catch (e) {
       console.error('[paystack]', e)
-      toast?.error?.('Payment processor error: ' + (e?.message || 'Unknown'))
+      toast?.error?.('Payment error: ' + (e?.message || 'Unknown'))
       setProcessing(false)
     }
   }
  
-  const formatUSD = (amount) => `$${amount.toLocaleString()}`
-  const formatKES = (usd) => `~ KES ${(usd * KES_PER_USD).toLocaleString()}`
+  const formatUSD = (a) => `$${a.toLocaleString()}`
+  const formatKES = (usd) => `KES ${Math.round(usd * KES_PER_USD).toLocaleString()}`
+ 
   const { price: currentPrice, label: currentLabel, savings: currentSavings } = getPriceForCycle(currentPlan, billingCycle)
  
-  return (
-    <div>
-      {/* HERO — current subscription status */}
-      <div className="card" style={{
-        padding: 0, marginBottom: 18, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
-        color: '#fff',
-      }}>
-        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
-              {hasActiveSubscription ? 'Active Subscription' : 'Choose Your Plan'}
+  // ── ENROLLED-ONLY VIEW (the default for paid students) ──
+  if (viewMode === 'enrolled' && enrolledPlanId) {
+    const enrolledLookup = findPlanById(enrolledPlanId)
+    const enrolledPlan = enrolledLookup ? enrolledLookup.plan : null
+    const lastPayment = status.lastPayment
+ 
+    if (!enrolledPlan) {
+      // Plan not in catalog (legacy plan or removed)
+      return (
+        <div className="card" style={{ padding: 36, textAlign: 'center' }}>
+          <h3>Your enrolled plan is not in the current catalog.</h3>
+          <button className="btn btn-p" onClick={() => setViewMode('change')}>Choose a Plan</button>
+        </div>
+      )
+    }
+ 
+    return (
+      <div>
+        {/* HERO — current subscription with renewal status */}
+        <div className="card" style={{
+          padding: 0, marginBottom: 18, overflow: 'hidden',
+          background: status.locked
+            ? 'linear-gradient(135deg, #7F1D1D 0%, #991B1B 100%)'
+            : status.daysOverdue > 0
+            ? 'linear-gradient(135deg, #B45309 0%, #92400E 100%)'
+            : 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+          color: '#fff',
+        }}>
+          <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 240 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+                {status.locked ? 'Account Locked' : status.daysOverdue > 0 ? 'Payment Overdue' : 'Active Subscription'}
+              </div>
+              <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+                {enrolledPlan.name}{enrolledPlan.subtitle ? ` (${enrolledPlan.subtitle})` : ''}
+              </h2>
+              <div style={{ fontSize: 13.5, opacity: .9, marginTop: 6 }}>
+                {status.locked
+                  ? <>Locked since {new Date(status.nextDueDate.getTime() + GRACE_PERIOD_DAYS * 86400000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} · <strong>Renew to restore access</strong></>
+                  : status.daysOverdue > 0
+                  ? <>Was due {status.nextDueDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · <strong>{GRACE_PERIOD_DAYS - status.daysOverdue} day{GRACE_PERIOD_DAYS - status.daysOverdue === 1 ? '' : 's'} until lockout</strong></>
+                  : <>Next payment: <strong>{status.nextDueDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</strong></>
+                }
+              </div>
             </div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
-              {hasActiveSubscription ? lastPayment.planName : currentPlan.name}
-            </h2>
-            <div style={{ fontSize: 13.5, opacity: .85, marginTop: 6 }}>
-              {hasActiveSubscription && nextPaymentDate
-                ? <>Next payment: <strong>{nextPaymentDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</strong></>
-                : <>{formatUSD(currentPrice)} {currentLabel} · select your plan below</>
-              }
-            </div>
-          </div>
-          {!hasActiveSubscription && (
             <button
               onClick={handlePay}
               disabled={processing}
@@ -5336,106 +5308,207 @@ function SubscriptionTab({ user, store, toast }) {
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
               </svg>
-              {processing ? 'Processing…' : `Pay ${formatUSD(currentPrice)}`}
+              {processing ? 'Processing…' : status.daysOverdue > 0 ? `Renew · ${formatKES(currentPrice)}` : `Pay ${formatKES(currentPrice)}`}
             </button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+            {[
+              ['Plan',     enrolledPlan.name],
+              ['Cycle',    billingCycle.charAt(0).toUpperCase() + billingCycle.slice(1)],
+              ['USD',      formatUSD(currentPrice)],
+              ['KES',      Math.round(currentPrice * KES_PER_USD).toLocaleString()],
+            ].map(([l, v]) => (
+              <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>{l}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+ 
+        {/* Plan details card */}
+        <div className="card" style={{ marginBottom: 18 }}>
+          <div className="chdr">
+            <div className="ctitle">My Plan Details</div>
+            <button
+              onClick={() => setViewMode('change')}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#8B1A2E',
+                fontSize: 12.5,
+                fontWeight: 700,
+                cursor: 'pointer',
+                textDecoration: 'underline',
+              }}
+            >Change Plan</button>
+          </div>
+          <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1, minWidth: 240 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--s400)', marginBottom: 4 }}>
+                {enrolledPlan.eyebrow}
+              </div>
+              <h3 className="serif" style={{ fontSize: 20, color: 'var(--s900)', margin: '0 0 8px' }}>
+                {enrolledPlan.name}
+              </h3>
+              {enrolledPlan.gradeRange && (
+                <div style={{ fontSize: 12.5, color: 'var(--s500)', marginBottom: 14 }}>
+                  {enrolledPlan.gradeRange}
+                </div>
+              )}
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {enrolledPlan.features.map((f, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13.5, color: 'var(--s700)' }}>
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#8B1A2E" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 3 }}>
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div style={{ background: 'var(--bg)', padding: 16, borderRadius: 'var(--rmd)', minWidth: 200 }}>
+              <div style={{ fontSize: 11, color: 'var(--s400)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '.06em', marginBottom: 8 }}>Pricing</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
+                <span style={{ fontSize: 14, color: '#8B1A2E', fontWeight: 700 }}>$</span>
+                <span style={{ fontSize: 28, color: '#8B1A2E', fontWeight: 700, lineHeight: 1, fontFamily: "'Playfair Display', serif" }}>
+                  {currentPrice.toLocaleString()}
+                </span>
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--s500)', marginBottom: 4 }}>
+                {currentLabel}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--s400)' }}>
+                = {formatKES(currentPrice)} KES
+              </div>
+            </div>
+          </div>
+        </div>
+ 
+        {/* Payment History */}
+        <div className="card" style={{ marginBottom: 18 }}>
+          <div className="ctitle" style={{ marginBottom: 14 }}>Payment History</div>
+          {payments.length === 0 ? (
+            <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
+              No payments yet
+            </div>
+          ) : (
+            <table className="tbl">
+              <thead><tr><th>Date</th><th>Plan</th><th>Cycle</th><th>Amount</th><th>Reference</th><th>Status</th></tr></thead>
+              <tbody>
+                {payments.slice(0, 10).map(p => (
+                  <tr key={p.id}>
+                    <td style={{ fontSize: 12.5, color: 'var(--s500)' }}>{new Date(p.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                    <td style={{ fontWeight: 600 }}>{p.planName}</td>
+                    <td style={{ fontSize: 12.5, color: 'var(--s600)', textTransform: 'capitalize' }}>{p.cycle || 'monthly'}</td>
+                    <td><span className="mono" style={{ fontWeight: 700 }}>KES {(p.amountKES || (p.amount * KES_PER_USD) || p.amount).toLocaleString()}</span></td>
+                    <td className="mono" style={{ fontSize: 11, color: 'var(--s500)' }}>{p.reference?.slice(0, 16)}{p.reference?.length > 16 ? '…' : ''}</td>
+                    <td><span className="badge badge-green">Paid</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
-          {[
-            ['Plan',      currentPlan.name],
-            ['Billing',   currentLabel.replace('per ', '').charAt(0).toUpperCase() + currentLabel.replace('per ', '').slice(1)],
-            ['USD',       formatUSD(currentPrice)],
-            ['KES',       (currentPrice * KES_PER_USD).toLocaleString()],
-          ].map(([l, v]) => (
-            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
-                {l}
-              </div>
-              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
+ 
+        {/* Referral */}
+        <div className="card" style={{
+          background: 'linear-gradient(135deg, rgba(240,204,90,.08), rgba(184,150,12,.06))',
+          border: '1px solid rgba(240,204,90,.4)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#F0CC5A', color: '#6B0F1E', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3-3m0 0l-3 3m3-3v8"/></svg>
             </div>
-          ))}
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)', marginBottom: 2 }}>Refer a friend, get one month free</div>
+              <div style={{ fontSize: 12.5, color: 'var(--s600)' }}>Code: <span className="mono" style={{ fontWeight: 700, color: '#8B1A2E', background: '#fff', padding: '2px 8px', borderRadius: 4 }}>{referralCode}</span></div>
+            </div>
+            <button className="btn btn-s btn-sm" onClick={() => { if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(referralCode); toast?.ok?.('Copied.') } }}>Copy</button>
+          </div>
+        </div>
+ 
+        {/* Success modal */}
+        {paymentSuccess && (
+          <div onClick={() => setPaymentSuccess(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: 'var(--white)', borderRadius: 20, maxWidth: 480, width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
+              <div style={{ background: 'linear-gradient(135deg, #14532D, #166534)', padding: '28px 30px', color: '#fff', textAlign: 'center' }}>
+                <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                  <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <h3 className="serif" style={{ fontSize: 22, marginBottom: 4 }}>Payment Successful</h3>
+                <p style={{ fontSize: 13.5, opacity: .85, margin: 0 }}>Your subscription is now active!</p>
+              </div>
+              <div style={{ padding: '20px 26px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+                  {[
+                    ['Plan', paymentSuccess.planName],
+                    ['Amount', `KES ${paymentSuccess.amountKES?.toLocaleString() || (paymentSuccess.amount * KES_PER_USD).toLocaleString()}`],
+                    ['Reference', paymentSuccess.reference],
+                    ['Date', new Date(paymentSuccess.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })],
+                  ].map(([l, v]) => (
+                    <div key={l} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                      <span style={{ color: 'var(--s500)' }}>{l}</span>
+                      <span className="mono" style={{ fontWeight: 700, color: 'var(--s900)' }}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={() => setPaymentSuccess(null)} style={{ width: '100%', background: '#8B1A2E', color: '#fff', border: 'none', padding: '12px', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Continue Learning</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+ 
+  // ── CHANGE PLAN VIEW (full catalog) ─────────────────────
+  return (
+    <div>
+      {/* Hero */}
+      <div className="card" style={{ padding: 0, marginBottom: 18, overflow: 'hidden', background: 'linear-gradient(135deg, #8B1A2E, #6B0F1E)', color: '#fff' }}>
+        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+              {enrolledPlanId ? 'Change Plan' : 'Choose Your Plan'}
+            </div>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              {currentPlan.name}{currentPlan.subtitle ? ` (${currentPlan.subtitle})` : ''}
+            </h2>
+            <div style={{ fontSize: 13.5, opacity: .85, marginTop: 6 }}>
+              {formatUSD(currentPrice)} {currentLabel} = <strong>{formatKES(currentPrice)}</strong>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {enrolledPlanId && (
+              <button onClick={() => setViewMode('enrolled')} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,.4)', color: '#fff', padding: '12px 20px', borderRadius: 'var(--rmd)', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+                ← Back to My Plan
+              </button>
+            )}
+            <button onClick={handlePay} disabled={processing} style={{ background: '#F0CC5A', color: '#6B0F1E', border: 'none', padding: '12px 24px', borderRadius: 'var(--rmd)', cursor: processing ? 'wait' : 'pointer', fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 14px rgba(240,204,90,.35)', opacity: processing ? .7 : 1 }}>
+              {processing ? 'Processing…' : `Pay ${formatKES(currentPrice)}`}
+            </button>
+          </div>
         </div>
       </div>
  
-      {/* TAB SWITCHER */}
-      <div style={{
-        display: 'flex',
-        background: 'var(--bg)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--rmd)',
-        padding: 4,
-        marginBottom: 18,
-        gap: 2,
-        flexWrap: 'wrap',
-      }}>
+      {/* Tab switcher */}
+      <div style={{ display: 'flex', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--rmd)', padding: 4, marginBottom: 18, gap: 2, flexWrap: 'wrap' }}>
         {PRICING_TABS.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => switchTab(tab.id)}
-            style={{
-              flex: 1,
-              minWidth: 130,
-              background: activeTabId === tab.id ? 'var(--white)' : 'transparent',
-              color: activeTabId === tab.id ? '#8B1A2E' : 'var(--s500)',
-              border: 'none',
-              padding: '10px 16px',
-              borderRadius: 'var(--rsm)',
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 700,
-              boxShadow: activeTabId === tab.id ? '0 4px 16px rgba(10,8,6,.10)' : 'none',
-              transition: 'all .15s',
-            }}
-          >{tab.label}</button>
+          <button key={tab.id} onClick={() => switchTab(tab.id)} style={{ flex: 1, minWidth: 130, background: activeTabId === tab.id ? 'var(--white)' : 'transparent', color: activeTabId === tab.id ? '#8B1A2E' : 'var(--s500)', border: 'none', padding: '10px 16px', borderRadius: 'var(--rsm)', cursor: 'pointer', fontSize: 13, fontWeight: 700, boxShadow: activeTabId === tab.id ? '0 4px 16px rgba(10,8,6,.10)' : 'none' }}>
+            {tab.label}
+          </button>
         ))}
       </div>
  
-      {/* BILLING CYCLE SWITCHER (hide for Private Tuition since pricing is hourly) */}
+      {/* Billing cycle */}
       {activeTabId !== 'tuition' && (
         <>
-          <div style={{
-            display: 'flex',
-            background: 'var(--bg)',
-            border: '1px solid var(--border)',
-            borderRadius: 99,
-            padding: 4,
-            margin: '0 auto 8px',
-            width: 'fit-content',
-            gap: 2,
-            flexWrap: 'wrap',
-          }}>
-            {[
-              { id: 'monthly',  label: 'Monthly' },
-              { id: 'termly',   label: 'Termly',   save: '5%' },
-              { id: 'annually', label: 'Annually', save: '12%' },
-            ].map(c => (
-              <button
-                key={c.id}
-                onClick={() => setBillingCycle(c.id)}
-                style={{
-                  background: billingCycle === c.id ? '#8B1A2E' : 'transparent',
-                  color: billingCycle === c.id ? '#fff' : 'var(--s700)',
-                  border: 'none',
-                  padding: '8px 18px',
-                  borderRadius: 99,
-                  cursor: 'pointer',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  transition: 'all .15s',
-                }}
-              >
+          <div style={{ display: 'flex', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 99, padding: 4, margin: '0 auto 8px', width: 'fit-content', gap: 2, flexWrap: 'wrap' }}>
+            {[{ id: 'monthly', label: 'Monthly' }, { id: 'termly', label: 'Termly', save: '5%' }, { id: 'annually', label: 'Annually', save: '12%' }].map(c => (
+              <button key={c.id} onClick={() => setBillingCycle(c.id)} style={{ background: billingCycle === c.id ? '#8B1A2E' : 'transparent', color: billingCycle === c.id ? '#fff' : 'var(--s700)', border: 'none', padding: '8px 18px', borderRadius: 99, cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
                 {c.label}
-                {c.save && (
-                  <span style={{
-                    fontSize: 10, fontWeight: 800,
-                    background: billingCycle === c.id ? '#F0CC5A' : 'rgba(139,26,46,.12)',
-                    color: billingCycle === c.id ? '#6B0F1E' : '#8B1A2E',
-                    padding: '2px 7px',
-                    borderRadius: 99,
-                    letterSpacing: '.04em',
-                  }}>Save {c.save}</span>
-                )}
+                {c.save && <span style={{ fontSize: 10, fontWeight: 800, background: billingCycle === c.id ? '#F0CC5A' : 'rgba(139,26,46,.12)', color: billingCycle === c.id ? '#6B0F1E' : '#8B1A2E', padding: '2px 7px', borderRadius: 99 }}>Save {c.save}</span>}
               </button>
             ))}
           </div>
@@ -5447,309 +5520,76 @@ function SubscriptionTab({ user, store, toast }) {
         </>
       )}
  
-      {activeTabId === 'tuition' && (
-        <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--s400)', fontStyle: 'italic', marginBottom: 16 }}>
-          Pay per session or subscribe to a monthly bundle
-        </div>
-      )}
- 
-      {/* PLAN CARDS */}
+      {/* Plan cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14, marginBottom: 24 }}>
         {activeTab.plans.map(plan => {
           const { price, label, savings } = getPriceForCycle(plan, billingCycle)
           const isSelected = selectedPlanId === plan.id
           const isFeatured = plan.featured
           return (
-            <div
-              key={plan.id}
-              onClick={() => selectPlan(plan.id)}
-              style={{
-                position: 'relative',
-                background: isFeatured ? '#0A0806' : '#FEFDFB',
-                color: isFeatured ? '#fff' : 'var(--s900)',
-                border: `2px solid ${isSelected ? '#F0CC5A' : isFeatured ? '#0A0806' : 'var(--border)'}`,
-                borderRadius: 20,
-                padding: 28,
-                cursor: 'pointer',
-                transition: 'all .2s',
-                outline: isSelected ? '3px solid rgba(240,204,90,.3)' : 'none',
-                outlineOffset: -2,
-              }}
-              onMouseEnter={e => { if (!isSelected) e.currentTarget.style.transform = 'translateY(-3px)' }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
-            >
-              {/* Badge */}
+            <div key={plan.id} onClick={() => selectPlan(plan.id)} style={{
+              position: 'relative',
+              background: isFeatured ? '#0A0806' : '#FEFDFB',
+              color: isFeatured ? '#fff' : 'var(--s900)',
+              border: `2px solid ${isSelected ? '#F0CC5A' : isFeatured ? '#0A0806' : 'var(--border)'}`,
+              borderRadius: 20, padding: 28, cursor: 'pointer',
+              outline: isSelected ? '3px solid rgba(240,204,90,.3)' : 'none', outlineOffset: -2,
+              transition: 'all .2s',
+            }}>
               {plan.badge && (
-                <div style={{
-                  display: 'inline-block',
-                  background: 'linear-gradient(90deg, #B8960C, #D4AF37)',
-                  color: '#0A0806',
-                  fontSize: 10, fontWeight: 800, letterSpacing: '.08em',
-                  padding: '4px 12px',
-                  borderRadius: 99,
-                  marginBottom: 14,
-                  textTransform: 'uppercase',
-                }}>
-                  {plan.badge}
-                </div>
+                <div style={{ display: 'inline-block', background: 'linear-gradient(90deg, #B8960C, #D4AF37)', color: '#0A0806', fontSize: 10, fontWeight: 800, letterSpacing: '.08em', padding: '4px 12px', borderRadius: 99, marginBottom: 14, textTransform: 'uppercase' }}>{plan.badge}</div>
               )}
- 
-              {/* Eyebrow */}
-              <div style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: '.1em',
-                textTransform: 'uppercase',
-                color: isFeatured ? 'rgba(247,243,237,.35)' : 'var(--s400)',
-                marginBottom: 8,
-              }}>
-                {plan.eyebrow}
-              </div>
- 
-              {/* Name */}
-              <h3 style={{
-                fontFamily: "'Instrument Serif', 'Playfair Display', serif",
-                fontSize: 22, fontWeight: 700,
-                color: isFeatured ? '#fff' : 'var(--s900)',
-                margin: '0 0 6px',
-                lineHeight: 1.2,
-              }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: isFeatured ? 'rgba(247,243,237,.35)' : 'var(--s400)', marginBottom: 8 }}>{plan.eyebrow}</div>
+              <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, fontWeight: 700, color: isFeatured ? '#fff' : 'var(--s900)', margin: '0 0 6px', lineHeight: 1.2 }}>
                 {plan.name}{plan.subtitle ? ` (${plan.subtitle})` : ''}
               </h3>
- 
-              {/* Price */}
               <div style={{ marginBottom: 4, display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{
-                  fontSize: 18, fontWeight: 700,
-                  color: isFeatured ? '#F0CC5A' : '#8B1A2E',
-                  fontFamily: "'Playfair Display', serif",
-                  marginTop: -8,
-                }}>$</span>
-                <span style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontSize: 48, fontWeight: 700,
-                  color: isFeatured ? '#F0CC5A' : '#8B1A2E',
-                  lineHeight: 1,
-                }}>
-                  {price.toLocaleString()}
-                </span>
+                <span style={{ fontSize: 18, fontWeight: 700, color: isFeatured ? '#F0CC5A' : '#8B1A2E', fontFamily: "'Playfair Display', serif", marginTop: -8 }}>$</span>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 48, fontWeight: 700, color: isFeatured ? '#F0CC5A' : '#8B1A2E', lineHeight: 1 }}>{price.toLocaleString()}</span>
               </div>
-              <div style={{
-                fontSize: 12.5,
-                color: isFeatured ? 'rgba(247,243,237,.45)' : 'var(--s500)',
-                marginBottom: 4,
-              }}>
+              <div style={{ fontSize: 12.5, color: isFeatured ? 'rgba(247,243,237,.45)' : 'var(--s500)', marginBottom: 4 }}>
                 {label}{plan.gradeRange ? ` · ${plan.gradeRange}` : ''}
               </div>
-              {/* KES equivalent */}
               {price > 50 && (
-                <div style={{
-                  fontSize: 11.5,
-                  color: isFeatured ? 'rgba(247,243,237,.35)' : 'var(--s400)',
-                  marginBottom: 14,
-                }}>
-                  ~ KES {(price * KES_PER_USD).toLocaleString()}{label !== 'per hour' && billingCycle === 'monthly' ? ' per month' : ''}
+                <div style={{ fontSize: 11.5, color: isFeatured ? 'rgba(247,243,237,.35)' : 'var(--s400)', marginBottom: 14 }}>
+                  ~ KES {Math.round(price * KES_PER_USD).toLocaleString()}{label !== 'per hour' && billingCycle === 'monthly' ? ' per month' : ''}
                 </div>
               )}
- 
-              {/* Savings badge */}
               {savings > 0 && (
-                <div style={{
-                  display: 'inline-block',
-                  background: isFeatured ? 'rgba(240,204,90,.18)' : 'rgba(139,26,46,.08)',
-                  color: isFeatured ? '#F0CC5A' : '#8B1A2E',
-                  fontSize: 11, fontWeight: 700,
-                  padding: '3px 10px',
-                  borderRadius: 99,
-                  marginBottom: 14,
-                }}>
-                  You save ${savings}
-                </div>
+                <div style={{ display: 'inline-block', background: isFeatured ? 'rgba(240,204,90,.18)' : 'rgba(139,26,46,.08)', color: isFeatured ? '#F0CC5A' : '#8B1A2E', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 99, marginBottom: 14 }}>You save ${savings}</div>
               )}
- 
-              {/* Features */}
-              <ul style={{
-                listStyle: 'none', padding: 0, margin: '0 0 22px',
-                display: 'flex', flexDirection: 'column', gap: 8,
-              }}>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 22px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {plan.features.map((f, i) => (
-                  <li key={i} style={{
-                    display: 'flex', alignItems: 'flex-start', gap: 10,
-                    fontSize: 13.5,
-                    color: isFeatured ? 'rgba(247,243,237,.7)' : 'var(--s600)',
-                  }}>
-                    <div style={{
-                      width: 18, height: 18, borderRadius: '50%',
-                      background: isFeatured ? 'rgba(240,204,90,.18)' : 'rgba(139,26,46,.08)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      flexShrink: 0, marginTop: 1,
-                    }}>
-                      <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke={isFeatured ? '#F0CC5A' : '#8B1A2E'} strokeWidth="3" strokeLinecap="round">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
+                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13.5, color: isFeatured ? 'rgba(247,243,237,.7)' : 'var(--s600)' }}>
+                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: isFeatured ? 'rgba(240,204,90,.18)' : 'rgba(139,26,46,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                      <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke={isFeatured ? '#F0CC5A' : '#8B1A2E'} strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     <span>{f}</span>
                   </li>
                 ))}
               </ul>
- 
-              {/* Select / Pay button */}
-              <button
-                onClick={(e) => { e.stopPropagation(); selectPlan(plan.id); if (isSelected) handlePay() }}
-                disabled={processing && isSelected}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: 6,
-                  fontWeight: 700,
-                  fontSize: 13.5,
-                  cursor: processing && isSelected ? 'wait' : 'pointer',
-                  border: 'none',
-                  textAlign: 'center',
-                  background: isSelected
-                    ? 'linear-gradient(90deg, #B8960C, #D4AF37)'
-                    : isFeatured ? 'transparent' : 'transparent',
-                  color: isSelected
-                    ? '#0A0806'
-                    : isFeatured ? '#F0CC5A' : '#8B1A2E',
-                  boxShadow: isSelected ? '0 4px 14px rgba(184,150,12,.3)' : 'none',
-                  borderWidth: isSelected ? 0 : 1.5,
-                  borderStyle: 'solid',
-                  borderColor: isSelected ? 'transparent' : isFeatured ? '#F0CC5A' : '#8B1A2E',
-                  transition: 'all .15s',
-                }}
-              >
-                {isSelected
-                  ? processing ? 'Processing…' : `Pay $${price} Now`
-                  : 'Select Plan'
-                }
+              <button onClick={(e) => { e.stopPropagation(); selectPlan(plan.id); if (isSelected) handlePay() }} disabled={processing && isSelected} style={{
+                display: 'block', width: '100%', padding: '12px', borderRadius: 6, fontWeight: 700, fontSize: 13.5,
+                cursor: processing && isSelected ? 'wait' : 'pointer', border: 'none', textAlign: 'center',
+                background: isSelected ? 'linear-gradient(90deg, #B8960C, #D4AF37)' : 'transparent',
+                color: isSelected ? '#0A0806' : isFeatured ? '#F0CC5A' : '#8B1A2E',
+                boxShadow: isSelected ? '0 4px 14px rgba(184,150,12,.3)' : 'none',
+                borderWidth: isSelected ? 0 : 1.5, borderStyle: 'solid',
+                borderColor: isSelected ? 'transparent' : isFeatured ? '#F0CC5A' : '#8B1A2E',
+              }}>
+                {isSelected ? processing ? 'Processing…' : `Pay ${formatKES(price)}` : 'Select Plan'}
               </button>
             </div>
           )
         })}
       </div>
  
-      {/* REFERRAL CARD */}
-      <div className="card" style={{
-        marginBottom: 18,
-        background: 'linear-gradient(135deg, rgba(240,204,90,.08) 0%, rgba(184,150,12,.06) 100%)',
-        border: '1px solid rgba(240,204,90,.4)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-          <div style={{
-            width: 44, height: 44, borderRadius: '50%',
-            background: '#F0CC5A',
-            color: '#6B0F1E',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3-3m0 0l-3 3m3-3v8"/>
-            </svg>
-          </div>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)', marginBottom: 2 }}>
-              Refer a friend, get one month free
-            </div>
-            <div style={{ fontSize: 12.5, color: 'var(--s600)' }}>
-              Your code: <span className="mono" style={{ fontWeight: 700, color: '#8B1A2E', background: '#fff', padding: '2px 8px', borderRadius: 4 }}>{referralCode}</span>
-            </div>
-          </div>
-          <button
-            className="btn btn-s btn-sm"
-            onClick={() => {
-              if (navigator.clipboard?.writeText) {
-                navigator.clipboard.writeText(referralCode)
-                toast?.ok?.('Referral code copied.')
-              }
-            }}
-          >
-            Copy
-          </button>
-        </div>
-      </div>
- 
-      {/* PAYMENT HISTORY */}
-      <div className="card">
-        <div className="ctitle" style={{ marginBottom: 14 }}>Payment History</div>
-        {payments.length === 0 ? (
-          <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--s400)' }}>
-            <div style={{ fontSize: 14, marginBottom: 4 }}>No payments yet</div>
-            <div style={{ fontSize: 12.5 }}>Your subscriptions will appear here.</div>
-          </div>
-        ) : (
-          <table className="tbl">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Plan</th>
-                <th>Cycle</th>
-                <th>Amount</th>
-                <th>Reference</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments.slice(0, 10).map(p => (
-                <tr key={p.id}>
-                  <td style={{ fontSize: 12.5, color: 'var(--s500)' }}>
-                    {new Date(p.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </td>
-                  <td style={{ fontWeight: 600 }}>{p.planName}</td>
-                  <td style={{ fontSize: 12.5, color: 'var(--s600)', textTransform: 'capitalize' }}>{p.cycle}</td>
-                  <td>
-                    <span className="mono" style={{ fontWeight: 700 }}>${p.amount.toLocaleString()}</span>
-                  </td>
-                  <td className="mono" style={{ fontSize: 11, color: 'var(--s500)' }}>
-                    {p.reference.slice(0, 16)}{p.reference.length > 16 ? '…' : ''}
-                  </td>
-                  <td>
-                    <span className="badge badge-green">Paid</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
- 
-      {/* SUCCESS MODAL */}
       {paymentSuccess && (
-        <div
-          onClick={() => setPaymentSuccess(null)}
-          style={{
-            position: 'fixed', inset: 0,
-            background: 'rgba(15,23,42,.7)',
-            zIndex: 200,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: 20,
-          }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              background: 'var(--white)',
-              borderRadius: 20,
-              maxWidth: 480,
-              width: '100%',
-              overflow: 'hidden',
-              boxShadow: '0 20px 60px rgba(0,0,0,.3)',
-            }}
-          >
-            <div style={{
-              background: 'linear-gradient(135deg, #14532D 0%, #166534 100%)',
-              padding: '28px 30px',
-              color: '#fff',
-              textAlign: 'center',
-            }}>
-              <div style={{
-                width: 64, height: 64, borderRadius: '50%',
-                background: 'rgba(255,255,255,.18)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 14px',
-              }}>
-                <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="3" strokeLinecap="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
+        <div onClick={() => setPaymentSuccess(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--white)', borderRadius: 20, maxWidth: 480, width: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
+            <div style={{ background: 'linear-gradient(135deg, #14532D, #166534)', padding: '28px 30px', color: '#fff', textAlign: 'center' }}>
+              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
               <h3 className="serif" style={{ fontSize: 22, marginBottom: 4 }}>Payment Successful</h3>
               <p style={{ fontSize: 13.5, opacity: .85, margin: 0 }}>Welcome to {paymentSuccess.planName}!</p>
@@ -5757,10 +5597,10 @@ function SubscriptionTab({ user, store, toast }) {
             <div style={{ padding: '20px 26px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
                 {[
-                  ['Plan',      paymentSuccess.planName],
-                  ['Amount',    `$${paymentSuccess.amount.toLocaleString()}`],
+                  ['Plan', paymentSuccess.planName],
+                  ['Amount', `KES ${paymentSuccess.amountKES?.toLocaleString()}`],
                   ['Reference', paymentSuccess.reference],
-                  ['Date',      new Date(paymentSuccess.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })],
+                  ['Date', new Date(paymentSuccess.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })],
                 ].map(([l, v]) => (
                   <div key={l} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                     <span style={{ color: 'var(--s500)' }}>{l}</span>
@@ -5768,22 +5608,7 @@ function SubscriptionTab({ user, store, toast }) {
                   </div>
                 ))}
               </div>
-              <button
-                onClick={() => setPaymentSuccess(null)}
-                style={{
-                  width: '100%',
-                  background: '#8B1A2E',
-                  color: '#fff',
-                  border: 'none',
-                  padding: '12px',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                }}
-              >
-                Continue Learning
-              </button>
+              <button onClick={() => setPaymentSuccess(null)} style={{ width: '100%', background: '#8B1A2E', color: '#fff', border: 'none', padding: '12px', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Continue Learning</button>
             </div>
           </div>
         </div>
