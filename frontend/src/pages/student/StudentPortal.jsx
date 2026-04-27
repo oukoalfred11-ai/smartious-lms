@@ -7149,7 +7149,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
   })()
 
   const greeting = greetingFor()
-  const affirmation = getTodayAffirmation()
+  const affirmation = "Welcome back! Ready to learn today?"
   const isGroupMode = learningMode === 'group'
 
   return (
