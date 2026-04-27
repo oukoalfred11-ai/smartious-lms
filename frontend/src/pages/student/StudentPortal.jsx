@@ -434,181 +434,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               DASHBOARD — live mastery data
           ════════════════════════════════════════════ */}
-          {page === 'dashboard' && learningMode === 'individual' && (
-            <div>
-              {masteryLoading ? (
-                <div className="lc"><div className="spinner"/></div>
-              ) : (
-                <>
-                {/* Announcements from store */}
-                {store.getAnnouncements('student').slice(0,2).map((a,i) => (
-                  <div key={i} style={{background:a.type==='article'?'var(--b50)':a.type==='resource'?'var(--g50)':'var(--a50)',border:`1px solid ${a.type==='article'?'var(--b100)':a.type==='resource'?'var(--g100)':'var(--a100)'}`,borderRadius:'var(--rlg)',padding:'12px 16px',display:'flex',alignItems:'center',gap:12,marginBottom:12,flexWrap:'wrap'}}>
-                    <div style={{flex:1}}><div style={{fontWeight:700,fontSize:13.5,color:a.type==='article'?'var(--b700)':a.type==='resource'?'var(--g700)':'var(--a600)',marginBottom:2}}>{a.title}</div><div style={{fontSize:12.5,color:'var(--s500)'}}>{a.body}</div></div>
-                    <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                      <span style={{fontSize:11,color:'var(--s400)'}}>{a.date}</span>
-                      {a.type==='resource' && <button className="btn btn-s btn-sm" onClick={()=>goTo('resources')}>View</button>}
-                    </div>
-                  </div>
-                ))}
-                  {/* KPI row */}
-                  <div className="kpi-grid" style={{marginBottom:24}}>
-                    {[
-                      {v: mastery?.xp?.toLocaleString() || '0',    l:'Total XP',       d:`Streak: ${mastery?.streak||0} days`,  dc:'var(--b700)'},
-                      {v: subjects.length > 0 ? `${Math.round(subjects.reduce((s,x)=>s+x.overallPct,0)/subjects.length)}%` : '—', l:'Avg Mastery', d:'Across all subjects', dc:'var(--g600)'},
-                      {v: nextRec ? nextRec.subject : '—',          l:'Priority Subject', d:nextRec ? `${nextRec.topic}` : 'All on track', dc:'var(--a600)'},
-                      {v: `${mastery?.studyTimeToday||0}/${mastery?.dailyGoalMins||30}`, l:'Study Today (min)', d: (mastery?.studyTimeToday||0) >= (mastery?.dailyGoalMins||30) ? 'Goal reached!' : 'Keep going', dc: (mastery?.studyTimeToday||0) >= (mastery?.dailyGoalMins||30) ? 'var(--g600)' : 'var(--a600)'},
-                    ].map((k,i) => (
-                      <div key={i} className="kpi">
-                        <div className="kpi-v" style={{fontSize:i===2?16:undefined}}>{k.v}</div>
-                        <div className="kpi-l">{k.l}</div>
-                        <div className="kpi-d" style={{color:k.dc}}>{k.d}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:20}}>
-                    <div style={{display:'flex',flexDirection:'column',gap:20}}>
-
-                      {/* Personalised recommendation banner */}
-                      {nextRec && (
-                        <div style={{background:'linear-gradient(135deg,var(--b900,#1E3A8A),var(--b700))',borderRadius:'var(--rxl)',padding:'20px 24px',color:'#fff',display:'flex',alignItems:'center',gap:16,flexWrap:'wrap'}}>
-                          <div style={{width:44,height:44,borderRadius:'50%',background:'rgba(255,255,255,.15)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                          </div>
-                          <div style={{flex:1}}>
-                            <div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,.5)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:3}}>Mshauri recommends right now</div>
-                            <div style={{fontFamily:'Instrument Serif,serif',fontSize:18,color:'#fff',marginBottom:2}}>{nextRec.topic} — {nextRec.subject}</div>
-                            <div style={{fontSize:13,color:'rgba(255,255,255,.6)'}}>Current mastery: <span className="mono" style={{fontWeight:700,color:nextRec.pct<60?'#FCA5A5':'#6EE7B7'}}>{nextRec.pct}%</span> — this is your weakest active topic</div>
-                          </div>
-                          <div style={{display:'flex',gap:8}}>
-                            <button className="btn" style={{background:'rgba(255,255,255,.15)',color:'#fff',borderColor:'rgba(255,255,255,.25)'}}
-                              onClick={() => { goTo('practice'); loadPractice(nextRec.subject, nextRec.topic) }}>
-                              Practice it
-                            </button>
-                            <button className="btn" style={{background:'#fff',color:'var(--b700)',fontWeight:700,borderColor:'transparent'}}
-                              onClick={() => { setTutorInp('Explain ' + (nextRec.topic || '') + ' to me'); goTo('tutor'); }}>
-                              Ask Mshauri
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Subject mastery bars — live data */}
-                      <div className="card">
-                        <div className="chdr">
-                          <div className="ctitle">Subject Mastery</div>
-                          <button className="btn btn-g btn-sm" onClick={() => goTo('curriculum')}>View All Topics</button>
-                        </div>
-                        {subjects.length === 0 ? (
-                          <div className="empty"><p>Loading your mastery data…</p></div>
-                        ) : subjects.map(s => (
-                          <div key={s.name} style={{marginBottom:12}}>
-                            <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:5}}>
-                              <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                                <div style={{width:10,height:10,borderRadius:2,background:s.color,flexShrink:0}}/>
-                                <span style={{fontWeight:600}}>{s.name}</span>
-                                {s.velocity !== 0 && (
-                                  <span style={{fontSize:11,color:s.velocity>0?'var(--g600)':'var(--r500)',fontWeight:700}}>
-                                    {s.velocity > 0 ? '↑' : '↓'} {Math.abs(s.velocity)}%
-                                  </span>
-                                )}
-                              </div>
-                              <div style={{display:'flex',alignItems:'center',gap:8}}>
-                                <span style={{fontSize:11,color:masteryCol(s.overallPct),fontWeight:700}}>{masteryLabel(s.overallPct)}</span>
-                                <span className="mono" style={{fontWeight:700,color:masteryCol(s.overallPct)}}>{s.overallPct}%</span>
-                              </div>
-                            </div>
-                            <div className="prog-bar">
-                              <div className="prog-fill" style={{width:s.overallPct+'%',background:s.color,transition:'width 1s ease'}}/>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Recent activity + next sessions */}
-                      <div className="card">
-                        <div className="chdr"><div className="ctitle">Quick Actions</div></div>
-                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-                          {[
-                            {label:'Start Adaptive Practice', icon:'<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1.5"/>', action:() => { goTo('practice'); loadPractice() }},
-                            {label:'View My Study Plan',      icon:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>',               action:() => goTo('studyplan')},
-                            {label:'Ask Mshauri AI',          icon:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',                           action:() => goTo('tutor')},
-                            {label:'All My Topics',           icon:'<path d="M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13"/><path d="M4 19a2 2 0 0 0 2 2h14"/>',             action:() => goTo('curriculum')},
-                          ].map((a,i) => (
-                            <button key={i} className="btn btn-s" style={{justifyContent:'flex-start',gap:8,padding:'12px 14px'}} onClick={a.action}>
-                              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:a.icon}}/>
-                              <span style={{fontSize:13}}>{a.label}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right column */}
-                    <div style={{display:'flex',flexDirection:'column',gap:16}}>
-
-                      {/* Daily goal ring */}
-                      <div className="card" style={{textAlign:'center',padding:20}}>
-                        <div style={{fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:'var(--s400)',marginBottom:12}}>Daily Study Goal</div>
-                        <div style={{position:'relative',width:96,height:96,margin:'0 auto 12px'}}>
-                          <svg viewBox="0 0 36 36" style={{width:96,height:96,transform:'rotate(-90deg)'}}>
-                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--s100)" strokeWidth="3"/>
-                            <circle cx="18" cy="18" r="15.9" fill="none"
-                              stroke={mastery && mastery.studyTimeToday >= mastery.dailyGoalMins ? 'var(--g500)' : 'var(--b600)'}
-                              strokeWidth="3"
-                              strokeDasharray={`${Math.min(100, Math.round(((mastery?.studyTimeToday||0)/(mastery?.dailyGoalMins||30))*100))} 100`}
-                              strokeLinecap="round"/>
-                          </svg>
-                          <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
-                            <span className="mono" style={{fontSize:18,fontWeight:700,color:'var(--s900)'}}>{mastery?.studyTimeToday||0}</span>
-                            <span style={{fontSize:10,color:'var(--s400)'}}>/ {mastery?.dailyGoalMins||30} min</span>
-                          </div>
-                        </div>
-                        {mastery && mastery.studyTimeToday >= mastery.dailyGoalMins
-                          ? <div style={{fontSize:13,color:'var(--g600)',fontWeight:700}}>Daily goal reached!</div>
-                          : <div style={{fontSize:12,color:'var(--s500)'}}>Complete a practice set to add study time</div>
-                        }
-                      </div>
-
-                      {/* Badges */}
-                      {mastery?.badges?.length > 0 && (
-                        <div className="card">
-                          <div className="ctitle" style={{marginBottom:12}}>Recent Badges</div>
-                          <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-                            {mastery.badges.slice(-4).map((b,i) => (
-                              <div key={i} style={{display:'flex',alignItems:'center',gap:6,background:'var(--a50)',border:'1px solid var(--a100)',borderRadius:99,padding:'5px 10px',fontSize:12,fontWeight:600,color:'var(--a600)'}}>
-                                {BADGE_ICONS[b.id] || null}
-                                {b.name}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Topics needing help */}
-                      <div className="card">
-                        <div className="ctitle" style={{marginBottom:12}}>Topics Needing Help</div>
-                        {subjects.flatMap(s => s.topics.filter(t => t.pct > 0 && t.pct < 60).map(t => ({...t, subject:s.name, color:s.color}))).sort((a,b)=>a.pct-b.pct).slice(0,4).map((t,i) => (
-                          <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'8px 0',borderBottom:'1px solid var(--border)',cursor:'pointer'}}
-                            onClick={() => { goTo('practice'); loadPractice(t.subject, t.name) }}>
-                            <div style={{width:8,height:8,borderRadius:'50%',background:t.color,flexShrink:0}}/>
-                            <div style={{flex:1}}>
-                              <div style={{fontSize:13,fontWeight:600,color:'var(--s800)'}}>{t.name}</div>
-                              <div style={{fontSize:11,color:'var(--s400)'}}>{t.subject}</div>
-                            </div>
-                            <span className="mono" style={{fontSize:13,fontWeight:700,color:masteryCol(t.pct)}}>{t.pct}%</span>
-                          </div>
-                        ))}
-                        {subjects.flatMap(s => s.topics.filter(t => t.pct < 60)).length === 0 && (
-                          <div style={{fontSize:13,color:'var(--g600)',textAlign:'center',padding:12}}>All topics above 60%!</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
+          {page === 'dashboard' && <DashboardTab user={user} store={store} setPage={setPage} setInClassroom={setInClassroom} setLearningMode={setLearningMode} learningMode={learningMode} toast={toast} />}
 
           {/* ════════════════════════════════════════════
               CURRICULUM — topic-by-topic mastery grid
@@ -7027,7 +6853,720 @@ function ProfileTab({ user, toast }) {
 }
  
 
-
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD TAB — unified for individual & group, real data
+// ═══════════════════════════════════════════════════════════
+ 
+const dashSubjColours = {
+  'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
+  'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
+  'Geography': '#0F766E', 'Computer Science': '#1F2937',
+  'Business Studies': '#7E22CE', 'Economics': '#9F1239',
+}
+const dashSubjColour = (s) => dashSubjColours[s] || '#8B1A2E'
+ 
+// Daily affirmations — rotates by day-of-year, same quote for the whole day.
+// Mix of African voices, classic wisdom, education-focused, and Smartious originals.
+const DAILY_AFFIRMATIONS = [
+  { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela" },
+  { text: "You are never too small to make a difference.", author: "Wangari Maathai" },
+  { text: "I have learned that to be with those I like is enough.", author: "Walt Whitman" },
+  { text: "Small daily steps compound into mastery.", author: null },
+  { text: "Once you stop learning, you start dying.", author: "Albert Einstein" },
+  { text: "The best way out is always through.", author: "Robert Frost" },
+  { text: "He who learns, teaches.", author: "Ethiopian proverb" },
+  { text: "Knowledge is like a garden; if it is not cultivated, it cannot be harvested.", author: "Guinean proverb" },
+  { text: "Mistakes are proof that you are trying.", author: null },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "A river cuts through rock not because of its power, but its persistence.", author: null },
+  { text: "When the deepest part of you becomes engaged in what you are doing, you have come home.", author: "Sarah Ban Breathnach" },
+  { text: "If you want to go fast, go alone. If you want to go far, go together.", author: "African proverb" },
+  { text: "Try to be a rainbow in someone's cloud.", author: "Maya Angelou" },
+  { text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Aristotle" },
+  { text: "The expert in anything was once a beginner.", author: null },
+  { text: "Wisdom is like a baobab tree; no one individual can embrace it.", author: "Akan proverb" },
+  { text: "Do not wait for the light to appear at the end of the tunnel; stride down there and light it yourself.", author: "Sara Henderson" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "There is no shame in not knowing; the shame lies in not finding out.", author: "Russian proverb" },
+  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+  { text: "The only way to learn mathematics is to do mathematics.", author: "Paul Halmos" },
+  { text: "I have not failed. I've just found 10,000 ways that won't work.", author: "Thomas Edison" },
+  { text: "If I have seen further it is by standing on the shoulders of giants.", author: "Isaac Newton" },
+  { text: "A goal without a plan is just a wish.", author: "Antoine de Saint-Exupery" },
+  { text: "Success is the sum of small efforts repeated day in and day out.", author: "Robert Collier" },
+  { text: "The mind is not a vessel to be filled, but a fire to be kindled.", author: "Plutarch" },
+  { text: "However difficult life may seem, there is always something you can do and succeed at.", author: "Stephen Hawking" },
+  { text: "Knowing yourself is the beginning of all wisdom.", author: "Aristotle" },
+  { text: "The roots of education are bitter, but the fruit is sweet.", author: "Aristotle" },
+]
+ 
+// Pick the affirmation for today — same for everyone on the same day, rotates daily
+const todaysAffirmation = () => {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), 0, 0)
+  const diff = now - start
+  const dayOfYear = Math.floor(diff / 86400000)
+  return DAILY_AFFIRMATIONS[dayOfYear % DAILY_AFFIRMATIONS.length]
+}
+ 
+const greetingFor = () => {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 17) return 'Good afternoon'
+  if (h < 21) return 'Good evening'
+  return 'Working late'
+}
+ 
+ 
+// Simple format for "X hours ago" / "yesterday"
+const timeAgo = (iso) => {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  if (hours < 24) return `${hours}h ago`
+  if (days === 1) return 'yesterday'
+  if (days < 7) return `${days}d ago`
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+ 
+function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, learningMode, toast }) {
+  // Tick to refresh live status every 30s
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 30000)
+    return () => clearInterval(id)
+  }, [])
+ 
+  const studentFullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+  const firstName = user?.firstName || 'Student'
+  const initials = (studentFullName || firstName).split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || 'S'
+ 
+  // Read avatar from profile if set
+  const avatar = (() => {
+    try { return localStorage.getItem('sm_profile_avatar') } catch { return null }
+  })()
+ 
+  // ── DATA AGGREGATION ────────────────────────────────
+  // All data comes from localStorage written by the other tabs.
+ 
+  let practiceHist = [], examHist = [], homework = [], xp = 0
+  try { practiceHist = JSON.parse(localStorage.getItem('sm_practice_history') || '[]') } catch {}
+  try { examHist = JSON.parse(localStorage.getItem('sm_exam_history') || '[]') } catch {}
+  try { homework = JSON.parse(localStorage.getItem('sm_homework_assigned') || '[]') } catch {}
+  try { xp = parseInt(localStorage.getItem('sm_practice_xp') || '0', 10) || 0 } catch {}
+ 
+  // Filter homework to this student
+  const myHomework = homework.filter(hw =>
+    !hw.assignedTo || hw.assignedTo === studentFullName ||
+    hw.assignedTo === firstName || hw.assignedTo === '*'
+  )
+ 
+  // Compute per-subject mastery
+  const subjectStats = {}
+  practiceHist.forEach(s => {
+    if (!subjectStats[s.subject]) subjectStats[s.subject] = []
+    subjectStats[s.subject].push(s.score)
+  })
+  const subjectMastery = Object.entries(subjectStats).map(([subj, scores]) => ({
+    subject: subj,
+    mastery: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
+    sessions: scores.length,
+  })).sort((a, b) => b.mastery - a.mastery)
+ 
+  // Compute streak (consecutive days with practice activity)
+  const streak = (() => {
+    if (practiceHist.length === 0) return 0
+    const days = new Set(practiceHist.map(s => new Date(s.date).toDateString()))
+    let count = 0
+    let cursor = new Date()
+    while (days.has(cursor.toDateString())) {
+      count++
+      cursor.setDate(cursor.getDate() - 1)
+    }
+    return count
+  })()
+ 
+  // Pass rate from exams
+  const passRate = examHist.length > 0
+    ? Math.round((examHist.filter(e => e.score >= 60).length / examHist.length) * 100)
+    : null
+ 
+  // Today's classes (using parseScheduleString from LiveClasses paste)
+  const myRooms = (store?.groupRooms || []).filter(r =>
+    r.students?.some(s => s === studentFullName || s === firstName || (firstName && s.includes(firstName)))
+  )
+  const now = new Date()
+  const todayDow = now.getDay()
+  const nowMins = now.getHours() * 60 + now.getMinutes()
+ 
+  const todayClasses = []
+  myRooms.forEach(room => {
+    const parsed = parseScheduleString(room.schedule)
+    if (!parsed || !parsed.days.includes(todayDow)) return
+    let status = 'upcoming'
+    if (nowMins >= parsed.endMins) status = 'done'
+    else if (nowMins >= parsed.startMins) status = 'live'
+    todayClasses.push({
+      ...room,
+      startMins: parsed.startMins,
+      endMins: parsed.endMins,
+      status,
+    })
+  })
+  todayClasses.sort((a, b) => a.startMins - b.startMins)
+ 
+  // Today's homework due (and overdue)
+  const homeworkPending = myHomework.filter(h => h.status !== 'submitted' && h.status !== 'graded')
+  const overdueHomework = homeworkPending.filter(h => new Date(h.dueDate) < now)
+  const dueTodayHomework = homeworkPending.filter(h => {
+    const d = new Date(h.dueDate)
+    return d.toDateString() === now.toDateString() && d >= now
+  })
+  const dueThisWeekHomework = homeworkPending.filter(h => {
+    const d = new Date(h.dueDate)
+    const days = (d - now) / 86400000
+    return days > 0 && days <= 7
+  })
+ 
+  // Recent activity timeline (last 5 events from any source)
+  const activity = []
+  practiceHist.slice(-10).forEach(s => activity.push({
+    type: 'practice', date: s.date,
+    label: `Practiced ${s.topic} (${s.subject})`, score: s.score,
+    icon: 'practice', color: dashSubjColour(s.subject),
+  }))
+  examHist.slice(-5).forEach(e => activity.push({
+    type: 'exam', date: e.date,
+    label: `${e.subject} exam`, score: e.score,
+    icon: 'exam', color: dashSubjColour(e.subject),
+  }))
+  myHomework.filter(h => h.submittedAt).slice(-5).forEach(h => activity.push({
+    type: 'homework', date: h.submittedAt,
+    label: `Submitted: ${h.title}`,
+    icon: 'homework', color: dashSubjColour(h.subject),
+  }))
+  activity.sort((a, b) => new Date(b.date) - new Date(a.date))
+  const recentActivity = activity.slice(0, 5)
+ 
+  // ── RECOMMENDED NEXT ACTION ─────────────────────────
+  const nextAction = (() => {
+    // Live class right now
+    const liveNow = todayClasses.find(c => c.status === 'live')
+    if (liveNow) return {
+      title: 'You have a live class right now',
+      subtitle: `${liveNow.subject} with ${liveNow.teacher} - ends at ${formatMinsTime(liveNow.endMins)}`,
+      cta: 'Join Class Now',
+      colour: '#22C55E',
+      action: () => { setPage('live'); setInClassroom(true) },
+    }
+ 
+    // Class within 30 min
+    const upcomingClass = todayClasses.find(c => c.status === 'upcoming' && (c.startMins - nowMins) <= 30)
+    if (upcomingClass) return {
+      title: `Class starting in ${upcomingClass.startMins - nowMins} min`,
+      subtitle: `${upcomingClass.subject} with ${upcomingClass.teacher}`,
+      cta: 'View Live Classes',
+      colour: '#1E3A8A',
+      action: () => setPage('live'),
+    }
+ 
+    // Overdue homework
+    if (overdueHomework.length > 0) {
+      const hw = overdueHomework[0]
+      return {
+        title: `${overdueHomework.length} overdue homework`,
+        subtitle: `Start with: ${hw.title} (${hw.subject})`,
+        cta: 'Open Homework',
+        colour: '#DC2626',
+        action: () => setPage('homework'),
+      }
+    }
+ 
+    // Homework due today
+    if (dueTodayHomework.length > 0) {
+      const hw = dueTodayHomework[0]
+      return {
+        title: 'Homework due today',
+        subtitle: `${hw.title} (${hw.subject}) due in a few hours`,
+        cta: 'Submit Now',
+        colour: '#F59E0B',
+        action: () => setPage('homework'),
+      }
+    }
+ 
+    // Weak topic to practice
+    const weakest = subjectMastery.find(s => s.mastery < 60)
+    if (weakest) {
+      return {
+        title: `Strengthen ${weakest.subject}`,
+        subtitle: `Current mastery: ${weakest.mastery}% - 5 minutes can move this forward`,
+        cta: 'Start Practice',
+        colour: '#8B1A2E',
+        action: () => setPage('practice'),
+      }
+    }
+ 
+    // Default — daily practice nudge
+    return {
+      title: streak > 0 ? `Keep your ${streak}-day streak going` : 'Start a 5-minute practice',
+      subtitle: practiceHist.length === 0
+        ? 'Pick any subject to begin'
+        : 'Just one quick session keeps your momentum',
+      cta: 'Open Practice',
+      colour: '#8B1A2E',
+      action: () => setPage('practice'),
+    }
+  })()
+ 
+  const greeting = greetingFor()
+  const affirmation = getTodayAffirmation()
+  const isGroupMode = learningMode === 'group'
+ 
+  return (
+    <div>
+      {/* ─── WELCOME HERO ─── */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+        color: '#fff',
+      }}>
+        <div style={{ padding: '28px 30px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+          {/* Avatar */}
+          <div style={{
+            width: 72, height: 72, borderRadius: '50%',
+            background: avatar ? 'transparent' : 'rgba(240,204,90,.18)',
+            border: '3px solid #F0CC5A',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#F0CC5A',
+            fontSize: 26, fontWeight: 700,
+            fontFamily: "'Instrument Serif', serif",
+            flexShrink: 0,
+            overflow: 'hidden',
+          }}>
+            {avatar ? <img src={avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/> : initials}
+          </div>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+              <div style={{
+                background: isGroupMode ? 'rgba(34,197,94,.2)' : 'rgba(59,130,246,.2)',
+                border: `1px solid ${isGroupMode ? 'rgba(34,197,94,.4)' : 'rgba(59,130,246,.4)'}`,
+                borderRadius: 99, padding: '3px 10px',
+                fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase',
+                color: isGroupMode ? '#86EFAC' : '#93C5FD',
+              }}>{isGroupMode ? 'Group Class' : 'Individual'}</div>
+              <button
+                onClick={() => {
+                  const newMode = isGroupMode ? 'individual' : 'group'
+                  setLearningMode(newMode)
+                  localStorage.setItem('sm_learning_mode', newMode)
+                  toast?.ok?.(`Switched to ${newMode === 'group' ? 'Group' : 'Individual'} mode`)
+                }}
+                style={{
+                  background: 'transparent', border: 'none',
+                  color: 'rgba(255,255,255,.6)', fontSize: 11.5,
+                  cursor: 'pointer', textDecoration: 'underline',
+                }}
+              >Switch to {isGroupMode ? 'Individual' : 'Group'}</button>
+            </div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
+              {greeting}, <em style={{ color: '#F0CC5A', fontStyle: 'italic' }}>{firstName}</em>
+            </h1>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              {user?.curriculum || 'IGCSE'} · {user?.grade || 'Year 10'} · {now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </div>
+          </div>
+        </div>
+        {/* Quick stats strip */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.2)' }}>
+          {[
+            { label: 'XP',         value: xp.toLocaleString(),                     onClick: () => setPage('achievements'), color: '#F0CC5A' },
+            { label: 'Streak',     value: streak > 0 ? `${streak} day${streak === 1 ? '' : 's'}` : '0',  onClick: () => setPage('practice'),   color: streak >= 3 ? '#4ADE80' : '#fff' },
+            { label: 'Pass Rate',  value: passRate !== null ? `${passRate}%` : '-', onClick: () => setPage('exams'),     color: passRate >= 60 ? '#4ADE80' : (passRate !== null ? '#F59E0B' : '#fff') },
+            { label: 'Practice',   value: practiceHist.length,                     onClick: () => setPage('practice'),   color: '#fff' },
+          ].map(stat => (
+            <button
+              key={stat.label}
+              onClick={stat.onClick}
+              style={{
+                padding: '14px 18px',
+                borderRight: '1px solid rgba(255,255,255,.08)',
+                background: 'transparent',
+                border: 'none', borderBottom: 'none', borderTop: 'none', borderLeft: 'none',
+                color: '#fff',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'background .15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,.05)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
+                {stat.label}
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: stat.color }}>
+                {stat.value}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+ 
+      {/* ─── DAILY AFFIRMATION ─── */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(240,204,90,.08) 0%, rgba(184,150,12,.04) 100%)',
+        border: '1px solid rgba(240,204,90,.3)',
+        borderRadius: 'var(--rxl)',
+        padding: '16px 22px',
+        marginBottom: 18,
+        display: 'flex',
+        gap: 14,
+        alignItems: 'center',
+        flexWrap: 'wrap',
+      }}>
+        <div style={{
+          width: 36, height: 36, borderRadius: '50%',
+          background: 'rgba(240,204,90,.2)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#B8960C" strokeWidth="2" strokeLinecap="round">
+            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+          </svg>
+        </div>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{
+            fontFamily: "'Instrument Serif', serif",
+            fontSize: 16, fontStyle: 'italic',
+            color: 'var(--s700)',
+            lineHeight: 1.45,
+            marginBottom: 2,
+          }}>
+            {affirmation.text}
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--s400)', fontWeight: 600 }}>
+            {'\u2014'} {affirmation.attribution}
+          </div>
+        </div>
+      </div>
+ 
+      {/* ─── RECOMMENDED NEXT ACTION ─── */}
+      <div
+        onClick={nextAction.action}
+        style={{
+          background: `linear-gradient(135deg, ${nextAction.colour} 0%, ${nextAction.colour}DD 100%)`,
+          borderRadius: 'var(--rxl)',
+          padding: '20px 26px',
+          marginBottom: 18,
+          color: '#fff',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap',
+          transition: 'transform .15s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+        onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+      >
+        <div style={{
+          width: 48, height: 48, borderRadius: '50%',
+          background: 'rgba(255,255,255,.18)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        </div>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .8, marginBottom: 2 }}>
+            Recommended Now
+          </div>
+          <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, marginBottom: 2 }}>
+            {nextAction.title}
+          </div>
+          <div style={{ fontSize: 13, opacity: .85 }}>
+            {nextAction.subtitle}
+          </div>
+        </div>
+        <button
+          style={{
+            background: '#fff',
+            color: nextAction.colour,
+            border: 'none',
+            padding: '10px 20px',
+            borderRadius: 'var(--rmd)',
+            fontWeight: 700, fontSize: 13.5,
+            cursor: 'pointer', flexShrink: 0,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}
+        >
+          {nextAction.cta}
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+ 
+      {/* ─── TODAY'S AGENDA: 2-COLUMN ─── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14, marginBottom: 18 }}>
+        {/* Today's Classes */}
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">Today's Classes</div>
+            <button onClick={() => setPage('live')} style={{ background: 'transparent', border: 'none', color: '#8B1A2E', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+              View all -&gt;
+            </button>
+          </div>
+          {todayClasses.length === 0 ? (
+            <div style={{ padding: '20px 0', textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
+              No classes scheduled today
+            </div>
+          ) : todayClasses.map((cls, i) => (
+            <div key={i}
+              onClick={() => { if (cls.status === 'live') { setPage('live'); setInClassroom(true) } else { setPage('live') } }}
+              style={{
+                display: 'flex', gap: 12, padding: '12px 0',
+                borderBottom: i < todayClasses.length - 1 ? '1px solid var(--border)' : 'none',
+                cursor: 'pointer', alignItems: 'center',
+              }}>
+              <div style={{
+                width: 4, height: 40, borderRadius: 2,
+                background: dashSubjColour(cls.subject), flexShrink: 0,
+              }}/>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{cls.subject}</div>
+                <div style={{ fontSize: 12, color: 'var(--s500)' }}>
+                  {cls.teacher} · {formatMinsTime(cls.startMins)} - {formatMinsTime(cls.endMins)}
+                </div>
+              </div>
+              {cls.status === 'live' && (
+                <span style={{
+                  background: '#FEE2E2', color: '#991B1B',
+                  fontSize: 10, fontWeight: 800, letterSpacing: '.06em',
+                  padding: '3px 8px', borderRadius: 99, textTransform: 'uppercase',
+                }}>LIVE</span>
+              )}
+              {cls.status === 'done' && (
+                <span style={{ fontSize: 11, color: 'var(--s400)' }}>Done</span>
+              )}
+              {cls.status === 'upcoming' && (
+                <span style={{
+                  background: 'var(--a50)', color: 'var(--a600)',
+                  fontSize: 10, fontWeight: 800, letterSpacing: '.06em',
+                  padding: '3px 8px', borderRadius: 99,
+                }}>UPCOMING</span>
+              )}
+            </div>
+          ))}
+        </div>
+ 
+        {/* Today's Homework */}
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">
+              Homework
+              {overdueHomework.length > 0 && (
+                <span style={{
+                  marginLeft: 8,
+                  background: 'var(--r50)', color: 'var(--r600)',
+                  fontSize: 10, fontWeight: 800,
+                  padding: '2px 7px', borderRadius: 99,
+                }}>{overdueHomework.length} overdue</span>
+              )}
+            </div>
+            <button onClick={() => setPage('homework')} style={{ background: 'transparent', border: 'none', color: '#8B1A2E', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+              View all -&gt;
+            </button>
+          </div>
+          {[...overdueHomework, ...dueTodayHomework, ...dueThisWeekHomework].slice(0, 4).length === 0 ? (
+            <div style={{ padding: '20px 0', textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
+              All caught up - no pending homework
+            </div>
+          ) : (
+            [...overdueHomework, ...dueTodayHomework, ...dueThisWeekHomework].slice(0, 4).map((hw, i) => {
+              const isOverdue = new Date(hw.dueDate) < now
+              return (
+                <div key={hw.id}
+                  onClick={() => setPage('homework')}
+                  style={{
+                    display: 'flex', gap: 12, padding: '12px 0',
+                    borderBottom: i < Math.min(3, [...overdueHomework, ...dueTodayHomework, ...dueThisWeekHomework].length - 1) ? '1px solid var(--border)' : 'none',
+                    cursor: 'pointer', alignItems: 'center',
+                  }}>
+                  <div style={{
+                    width: 4, height: 40, borderRadius: 2,
+                    background: dashSubjColour(hw.subject), flexShrink: 0,
+                  }}/>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{hw.title}</div>
+                    <div style={{ fontSize: 12, color: 'var(--s500)' }}>
+                      {hw.subject} · {hw.teacher}
+                    </div>
+                  </div>
+                  <span style={{
+                    background: isOverdue ? 'var(--r50)' : 'var(--a50)',
+                    color: isOverdue ? 'var(--r600)' : 'var(--a600)',
+                    fontSize: 10, fontWeight: 800,
+                    padding: '3px 8px', borderRadius: 99,
+                    textTransform: 'uppercase', whiteSpace: 'nowrap',
+                  }}>
+                    {isOverdue ? 'Overdue' : 'Due Soon'}
+                  </span>
+                </div>
+              )
+            })
+          )}
+        </div>
+      </div>
+ 
+      {/* ─── MASTERY SNAPSHOT ─── */}
+      {subjectMastery.length > 0 && (
+        <div className="card" style={{ marginBottom: 18 }}>
+          <div className="chdr">
+            <div className="ctitle">Mastery Snapshot</div>
+            <button onClick={() => setPage('practice')} style={{ background: 'transparent', border: 'none', color: '#8B1A2E', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+              Practice -&gt;
+            </button>
+          </div>
+          {subjectMastery.slice(0, 6).map(s => {
+            const col = dashSubjColour(s.subject)
+            return (
+              <div key={s.subject}
+                onClick={() => setPage('practice')}
+                style={{ marginBottom: 10, cursor: 'pointer' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--s700)' }}>{s.subject}</span>
+                  <span className="mono" style={{ fontSize: 13, fontWeight: 700, color: col }}>
+                    {s.mastery}% <span style={{ fontWeight: 400, color: 'var(--s400)', fontSize: 11 }}>({s.sessions} sessions)</span>
+                  </span>
+                </div>
+                <div style={{
+                  height: 8, borderRadius: 4,
+                  background: 'var(--bg)', overflow: 'hidden',
+                }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${s.mastery}%`,
+                    background: col,
+                    borderRadius: 4,
+                    transition: 'width .4s ease',
+                  }}/>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+ 
+      {/* ─── BOTTOM ROW: 2 columns ─── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
+        {/* Recent Activity */}
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">Recent Activity</div>
+          </div>
+          {recentActivity.length === 0 ? (
+            <div style={{ padding: '20px 0', textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
+              No activity yet - start a practice session
+            </div>
+          ) : recentActivity.map((a, i) => (
+            <div key={i}
+              onClick={() => {
+                if (a.type === 'practice') setPage('practice')
+                else if (a.type === 'exam') setPage('exams')
+                else if (a.type === 'homework') setPage('homework')
+              }}
+              style={{
+                display: 'flex', gap: 10, padding: '10px 0',
+                borderBottom: i < recentActivity.length - 1 ? '1px solid var(--border)' : 'none',
+                cursor: 'pointer', alignItems: 'center',
+              }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: a.color + '15',
+                color: a.color,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+                fontSize: 11, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
+              }}>
+                {a.type === 'practice' ? 'P' : a.type === 'exam' ? 'E' : 'H'}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, color: 'var(--s700)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.label}</div>
+                <div style={{ fontSize: 11, color: 'var(--s400)' }}>{timeAgo(a.date)}</div>
+              </div>
+              {a.score !== undefined && (
+                <span className="mono" style={{
+                  fontSize: 12, fontWeight: 700,
+                  color: a.score >= 80 ? 'var(--g600)' : a.score >= 60 ? 'var(--a600)' : 'var(--r500)',
+                  flexShrink: 0,
+                }}>{a.score}%</span>
+              )}
+            </div>
+          ))}
+        </div>
+ 
+        {/* My Subjects (quick jump) */}
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">My Subjects</div>
+            <button onClick={() => setPage('curriculum')} style={{ background: 'transparent', border: 'none', color: '#8B1A2E', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+              View all -&gt;
+            </button>
+          </div>
+          {myRooms.length === 0 ? (
+            <div style={{ padding: '20px 0', textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
+              No subjects enrolled yet
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {[...new Set(myRooms.map(r => r.subject))].map(subj => {
+                const mast = subjectMastery.find(s => s.subject === subj)
+                const col = dashSubjColour(subj)
+                return (
+                  <button
+                    key={subj}
+                    onClick={() => setPage('practice')}
+                    style={{
+                      background: col + '0F',
+                      border: `1.5px solid ${col}30`,
+                      borderRadius: 'var(--rsm)',
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      transition: 'all .15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = col + '20' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = col + '0F' }}
+                  >
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: col }}/>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--s700)' }}>{subj}</span>
+                    {mast && (
+                      <span className="mono" style={{ fontSize: 11, fontWeight: 700, color: col }}>{mast.mastery}%</span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+ 
+// Helper at module level — minutes since midnight to "9:00 AM"
+function formatMinsTime(mins) {
+  let h = Math.floor(mins / 60)
+  const m = mins % 60
+  const mer = h >= 12 ? 'PM' : 'AM'
+  h = h % 12
+  if (h === 0) h = 12
+  return `${h}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
+}
+ 
 
 
 
