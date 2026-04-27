@@ -430,11 +430,7 @@ export default function StudentPortal() {
         </div>
 
         <div className="content" style={{animation:'fadeIn .25s ease'}}>
-
-          {/* ════════════════════════════════════════════
-              DASHBOARD — live mastery data
-          ════════════════════════════════════════════ */}
-          {page === 'dashboard' && <DashboardTab user={user} store={store} setPage={setPage} setInClassroom={setInClassroom} setLearningMode={setLearningMode} learningMode={learningMode} toast={toast} />}
+          
 
           {/* ════════════════════════════════════════════
               CURRICULUM — topic-by-topic mastery grid
@@ -6854,9 +6850,39 @@ function ProfileTab({ user, toast }) {
  
 
 // ═══════════════════════════════════════════════════════════
+// DASHBOARD — Unified Student Dashboard
+// ═══════════════════════════════════════════════════════════
+//
+// REPLACES the TWO existing dashboard blocks (lines 400-1408).
+// One unified component that adapts to learning mode.
+//
+// HOW TO APPLY:
+//
+// STEP 1: Find and select the entire individual+group dashboard block
+//
+//   START: line ~397 — the comment that says:
+//     {/* ════════════════════════════════════════════
+//         DASHBOARD — live mastery data
+//
+//   END: line ~1408 — the closing `)}` after the group dashboard
+//   (right before the SUBSCRIPTION comment block)
+//
+//   That's about 1008 lines of code. Select all of it.
+//
+// STEP 2: Delete the selection
+//
+// STEP 3: Paste this single line in its place:
+//
+//          {page === 'dashboard' && <DashboardTab user={user} store={store} setPage={setPage} setInClassroom={setInClassroom} setLearningMode={setLearningMode} learningMode={learningMode} toast={toast} />}
+//
+// STEP 4: Add the DashboardTab component at the bottom of the file
+//   at COLUMN 1 — paste everything below this line:
+
+
+// ═══════════════════════════════════════════════════════════
 // DASHBOARD TAB — unified for individual & group, real data
 // ═══════════════════════════════════════════════════════════
- 
+
 const dashSubjColours = {
   'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
   'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
@@ -6864,7 +6890,7 @@ const dashSubjColours = {
   'Business Studies': '#7E22CE', 'Economics': '#9F1239',
 }
 const dashSubjColour = (s) => dashSubjColours[s] || '#8B1A2E'
- 
+
 // Daily affirmations — rotates by day-of-year, same quote for the whole day.
 // Mix of African voices, classic wisdom, education-focused, and Smartious originals.
 const DAILY_AFFIRMATIONS = [
@@ -6899,7 +6925,7 @@ const DAILY_AFFIRMATIONS = [
   { text: "Knowing yourself is the beginning of all wisdom.", author: "Aristotle" },
   { text: "The roots of education are bitter, but the fruit is sweet.", author: "Aristotle" },
 ]
- 
+
 // Pick the affirmation for today — same for everyone on the same day, rotates daily
 const todaysAffirmation = () => {
   const now = new Date()
@@ -6908,7 +6934,7 @@ const todaysAffirmation = () => {
   const dayOfYear = Math.floor(diff / 86400000)
   return DAILY_AFFIRMATIONS[dayOfYear % DAILY_AFFIRMATIONS.length]
 }
- 
+
 const greetingFor = () => {
   const h = new Date().getHours()
   if (h < 12) return 'Good morning'
@@ -6916,8 +6942,8 @@ const greetingFor = () => {
   if (h < 21) return 'Good evening'
   return 'Working late'
 }
- 
- 
+
+
 // Simple format for "X hours ago" / "yesterday"
 const timeAgo = (iso) => {
   const diff = Date.now() - new Date(iso).getTime()
@@ -6931,7 +6957,7 @@ const timeAgo = (iso) => {
   if (days < 7) return `${days}d ago`
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
- 
+
 function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, learningMode, toast }) {
   // Tick to refresh live status every 30s
   const [tick, setTick] = useState(0)
@@ -6939,31 +6965,31 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
     const id = setInterval(() => setTick(t => t + 1), 30000)
     return () => clearInterval(id)
   }, [])
- 
+
   const studentFullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
   const firstName = user?.firstName || 'Student'
   const initials = (studentFullName || firstName).split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || 'S'
- 
+
   // Read avatar from profile if set
   const avatar = (() => {
     try { return localStorage.getItem('sm_profile_avatar') } catch { return null }
   })()
- 
+
   // ── DATA AGGREGATION ────────────────────────────────
   // All data comes from localStorage written by the other tabs.
- 
+
   let practiceHist = [], examHist = [], homework = [], xp = 0
   try { practiceHist = JSON.parse(localStorage.getItem('sm_practice_history') || '[]') } catch {}
   try { examHist = JSON.parse(localStorage.getItem('sm_exam_history') || '[]') } catch {}
   try { homework = JSON.parse(localStorage.getItem('sm_homework_assigned') || '[]') } catch {}
   try { xp = parseInt(localStorage.getItem('sm_practice_xp') || '0', 10) || 0 } catch {}
- 
+
   // Filter homework to this student
   const myHomework = homework.filter(hw =>
     !hw.assignedTo || hw.assignedTo === studentFullName ||
     hw.assignedTo === firstName || hw.assignedTo === '*'
   )
- 
+
   // Compute per-subject mastery
   const subjectStats = {}
   practiceHist.forEach(s => {
@@ -6975,7 +7001,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
     mastery: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
     sessions: scores.length,
   })).sort((a, b) => b.mastery - a.mastery)
- 
+
   // Compute streak (consecutive days with practice activity)
   const streak = (() => {
     if (practiceHist.length === 0) return 0
@@ -6988,12 +7014,12 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
     }
     return count
   })()
- 
+
   // Pass rate from exams
   const passRate = examHist.length > 0
     ? Math.round((examHist.filter(e => e.score >= 60).length / examHist.length) * 100)
     : null
- 
+
   // Today's classes (using parseScheduleString from LiveClasses paste)
   const myRooms = (store?.groupRooms || []).filter(r =>
     r.students?.some(s => s === studentFullName || s === firstName || (firstName && s.includes(firstName)))
@@ -7001,7 +7027,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
   const now = new Date()
   const todayDow = now.getDay()
   const nowMins = now.getHours() * 60 + now.getMinutes()
- 
+
   const todayClasses = []
   myRooms.forEach(room => {
     const parsed = parseScheduleString(room.schedule)
@@ -7017,7 +7043,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
     })
   })
   todayClasses.sort((a, b) => a.startMins - b.startMins)
- 
+
   // Today's homework due (and overdue)
   const homeworkPending = myHomework.filter(h => h.status !== 'submitted' && h.status !== 'graded')
   const overdueHomework = homeworkPending.filter(h => new Date(h.dueDate) < now)
@@ -7030,7 +7056,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
     const days = (d - now) / 86400000
     return days > 0 && days <= 7
   })
- 
+
   // Recent activity timeline (last 5 events from any source)
   const activity = []
   practiceHist.slice(-10).forEach(s => activity.push({
@@ -7050,7 +7076,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
   }))
   activity.sort((a, b) => new Date(b.date) - new Date(a.date))
   const recentActivity = activity.slice(0, 5)
- 
+
   // ── RECOMMENDED NEXT ACTION ─────────────────────────
   const nextAction = (() => {
     // Live class right now
@@ -7062,7 +7088,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
       colour: '#22C55E',
       action: () => { setPage('live'); setInClassroom(true) },
     }
- 
+
     // Class within 30 min
     const upcomingClass = todayClasses.find(c => c.status === 'upcoming' && (c.startMins - nowMins) <= 30)
     if (upcomingClass) return {
@@ -7072,7 +7098,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
       colour: '#1E3A8A',
       action: () => setPage('live'),
     }
- 
+
     // Overdue homework
     if (overdueHomework.length > 0) {
       const hw = overdueHomework[0]
@@ -7084,7 +7110,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
         action: () => setPage('homework'),
       }
     }
- 
+
     // Homework due today
     if (dueTodayHomework.length > 0) {
       const hw = dueTodayHomework[0]
@@ -7096,7 +7122,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
         action: () => setPage('homework'),
       }
     }
- 
+
     // Weak topic to practice
     const weakest = subjectMastery.find(s => s.mastery < 60)
     if (weakest) {
@@ -7108,7 +7134,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
         action: () => setPage('practice'),
       }
     }
- 
+
     // Default — daily practice nudge
     return {
       title: streak > 0 ? `Keep your ${streak}-day streak going` : 'Start a 5-minute practice',
@@ -7120,11 +7146,11 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
       action: () => setPage('practice'),
     }
   })()
- 
+
   const greeting = greetingFor()
   const affirmation = getTodayAffirmation()
   const isGroupMode = learningMode === 'group'
- 
+
   return (
     <div>
       {/* ─── WELCOME HERO ─── */}
@@ -7213,7 +7239,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
           ))}
         </div>
       </div>
- 
+
       {/* ─── DAILY AFFIRMATION ─── */}
       <div style={{
         background: 'linear-gradient(135deg, rgba(240,204,90,.08) 0%, rgba(184,150,12,.04) 100%)',
@@ -7252,7 +7278,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
           </div>
         </div>
       </div>
- 
+
       {/* ─── RECOMMENDED NEXT ACTION ─── */}
       <div
         onClick={nextAction.action}
@@ -7308,7 +7334,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
           </svg>
         </button>
       </div>
- 
+
       {/* ─── TODAY'S AGENDA: 2-COLUMN ─── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14, marginBottom: 18 }}>
         {/* Today's Classes */}
@@ -7361,7 +7387,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
             </div>
           ))}
         </div>
- 
+
         {/* Today's Homework */}
         <div className="card">
           <div className="chdr">
@@ -7420,7 +7446,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
           )}
         </div>
       </div>
- 
+
       {/* ─── MASTERY SNAPSHOT ─── */}
       {subjectMastery.length > 0 && (
         <div className="card" style={{ marginBottom: 18 }}>
@@ -7459,7 +7485,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
           })}
         </div>
       )}
- 
+
       {/* ─── BOTTOM ROW: 2 columns ─── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
         {/* Recent Activity */}
@@ -7507,7 +7533,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
             </div>
           ))}
         </div>
- 
+
         {/* My Subjects (quick jump) */}
         <div className="card">
           <div className="chdr">
@@ -7556,7 +7582,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
     </div>
   )
 }
- 
+
 // Helper at module level — minutes since midnight to "9:00 AM"
 function formatMinsTime(mins) {
   let h = Math.floor(mins / 60)
@@ -7566,7 +7592,6 @@ function formatMinsTime(mins) {
   if (h === 0) h = 12
   return `${h}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
 }
- 
 
 
 
