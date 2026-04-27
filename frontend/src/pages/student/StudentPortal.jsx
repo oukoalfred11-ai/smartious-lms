@@ -810,6 +810,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               ADAPTIVE PRACTICE — live questions from API
           ════════════════════════════════════════════ */}
+          {page === 'dashboard' && <DashboardTab user={user} store={store} setPage={setPage} setInClassroom={setInClassroom} setLearningMode={setLearningMode} learningMode={learningMode} toast={toast} />}
           {page === 'practice' && <PracticeTab user={user} toast={toast} goTo={goTo} />}
           {page === 'homework' && <HomeworkTab user={user} toast={toast} />}
 
