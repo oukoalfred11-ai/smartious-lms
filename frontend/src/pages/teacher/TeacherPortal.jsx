@@ -418,142 +418,7 @@ export default function TeacherPortal() {
         <div className="content" style={{animation:'fadeIn .25s ease'}}>
 
           {/* ── DASHBOARD ── */}
-          {page === 'dashboard' && (
-            <div>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:24,flexWrap:'wrap',gap:12}}>
-                <div>
-                  <div className="sec-tag">Good afternoon</div>
-                  <h1 className="serif" style={{fontSize:28,color:'var(--s900)',marginBottom:4}}>Welcome back, <em style={{color:'var(--b700)'}}>Mr. Muthomi</em></h1>
-                  <p style={{fontSize:14,color:'var(--s500)'}}>Mathematics · IGCSE · Form 3 · Smartious E-School Nairobi</p>
-                </div>
-                <div style={{display:'flex',gap:10}}>
-                  <button className="btn btn-s btn-sm" onClick={() => setPage('exambuilder')}>
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    New Exam
-                  </button>
-                  <button className="btn btn-p btn-sm" onClick={() => setPage('classroom')}>
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Enter Live Class
-                  </button>
-                </div>
-              </div>
-
-              <div className="kpi-grid">
-                {[
-                  {bg:'var(--b50)',ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>,v:'24',l:'Active Students',d:'↑ +2 this term',dc:'var(--g600)'},
-                  {bg:'var(--g50)',ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>,v:'73%',l:'Class Avg. Score',d:'↑ +4% vs last term',dc:'var(--g600)'},
-                  {bg:'var(--a50)',ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,v:'3',l:'Exams to Mark',d:'Due this week',dc:'var(--a600)'},
-                  {bg:'var(--p50)',ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/></svg>,v:'47',l:'Resources Uploaded',d:'↑ +6 this month',dc:'var(--g600)'},
-                ].map((k,i) => (
-                  <div key={i} className="kpi">
-                    <div className="kpi-ic" style={{background:k.bg}}>{k.ic}</div>
-                    <div className="kpi-v">{k.v}</div>
-                    <div className="kpi-l">{k.l}</div>
-                    <div className="kpi-d" style={{color:k.dc}}>{k.d}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:20}}>
-                <div style={{display:'flex',flexDirection:'column',gap:20}}>
-                  {/* Class performance */}
-                  <div className="card">
-                    <div className="chdr"><div className="ctitle">Class Performance Overview</div><button className="btn btn-g btn-sm" onClick={() => setPage('reports')}>Full Report</button></div>
-                    {STUDENTS.slice(0,6).map((s,i) => {
-                      const col = s.score>=75?'var(--g600)':s.score>=60?'var(--a600)':'var(--r500)'
-                      return (
-                        <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 0',borderBottom:i<5?'1px solid var(--border)':'none'}}>
-                          <Av init={s.init} col={s.col} size={34}/>
-                          <div style={{flex:1,minWidth:0}}>
-                            <div style={{fontSize:14,fontWeight:600,color:'var(--s800)',marginBottom:5}}>{s.name}</div>
-                            <div className="prog-bar"><div className="prog-fill" style={{width:s.score+'%',background:col}}/></div>
-                          </div>
-                          <span className="mono" style={{fontSize:14,fontWeight:700,color:col,flexShrink:0}}>{s.score}%</span>
-                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke={s.trend==='up'?'var(--g600)':'var(--r500)'} strokeWidth="2.5" strokeLinecap="round" style={{flexShrink:0,transform:s.trend==='up'?'rotate(-90deg)':'rotate(90deg)'}}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        </div>
-                      )
-                    })}
-                  </div>
-
-                  {/* Schedule */}
-                  <div className="card">
-                    <div className="chdr"><div className="ctitle">This Week's Schedule</div></div>
-                    <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                      <div style={{display:'flex',gap:14,alignItems:'center',padding:12,background:'var(--r50)',border:'1px solid var(--r100)',borderRadius:'var(--rmd)'}}>
-                        <div style={{width:44,height:44,background:'var(--r500)',borderRadius:'var(--rmd)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                          <div className="mono" style={{fontSize:11,color:'#fff',fontWeight:700}}>NOW</div>
-                        </div>
-                        <div style={{flex:1}}>
-                          <div style={{fontWeight:700,fontSize:14}}>Mathematics — Pythagoras Theorem</div>
-                          <div style={{fontSize:12,color:'var(--s500)'}}>IGCSE Form 3 · 6 students attending · 38 min remaining</div>
-                        </div>
-                        <button className="btn btn-d btn-sm" onClick={() => setPage('classroom')}>Join</button>
-                      </div>
-                      {[{day:'TUE',num:11,title:'Mathematics — Trigonometry Intro',time:'10:00 AM – 11:00 AM'},{day:'THU',num:13,title:'Mock Exam — Paper 2 Review',time:'2:00 PM – 3:30 PM'}].map((c,i) => (
-                        <div key={i} style={{display:'flex',gap:14,alignItems:'center',padding:12,background:'var(--bg)',border:'1px solid var(--border)',borderRadius:'var(--rmd)'}}>
-                          <div style={{width:44,height:44,background:'var(--s200)',borderRadius:'var(--rmd)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',flexShrink:0,textAlign:'center'}}>
-                            <div className="mono" style={{fontSize:9,color:'var(--s600)',fontWeight:700}}>{c.day}</div>
-                            <div className="mono" style={{fontSize:15,color:'var(--s800)',fontWeight:700}}>{c.num}</div>
-                          </div>
-                          <div style={{flex:1}}><div style={{fontWeight:700,fontSize:14}}>{c.title}</div><div style={{fontSize:12,color:'var(--s500)'}}>{c.time}</div></div>
-                          <button className="btn btn-s btn-sm">Prepare</button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{display:'flex',flexDirection:'column',gap:20}}>
-                  {/* Pending marking */}
-                  <div className="card">
-                    <div className="chdr" style={{marginBottom:14}}><div className="ctitle">Pending Marking</div></div>
-                    <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                      {[{title:'Maths Mock — Paper 1',subs:24,marks:100},{title:'Chapter 4 Quiz',subs:18,marks:20}].map((e,i) => (
-                        <div key={i} style={{background:i===0?'var(--a50)':'var(--bg)',border:`1px solid ${i===0?'var(--a100)':'var(--border)'}`,borderRadius:'var(--rmd)',padding:12,cursor:'pointer'}} onClick={() => setPage('marking')}>
-                          <div style={{fontWeight:700,fontSize:13.5,marginBottom:3}}>{e.title}</div>
-                          <div style={{fontSize:12,color:'var(--s500)',marginBottom:8}}>{e.subs} submissions · {e.marks} marks</div>
-                          <button className="btn btn-am btn-sm" style={{width:'100%',justifyContent:'center'}}>
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                            Mark with AI
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Quick actions */}
-                  <div className="card">
-                    <div className="ctitle" style={{marginBottom:14}}>Quick Actions</div>
-                    <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                      <button className="btn btn-s" style={{justifyContent:'flex-start'}} onClick={() => setUploadModal(true)}>
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                        Upload Resource
-                      </button>
-                      <button className="btn btn-s" style={{justifyContent:'flex-start'}} onClick={() => setPage('exambuilder')}>
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Create New Exam
-                      </button>
-                      <button className="btn btn-s" style={{justifyContent:'flex-start'}} onClick={() => setPage('reports')}>
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        View Student Reports
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Class health */}
-                  <div className="card">
-                    <div className="ctitle" style={{marginBottom:14}}>Class Health</div>
-                    {[['Attendance (this week)','92%','var(--g600)'],['Assignment completion','87%','var(--b700)'],['At-risk students','2','var(--r500)'],['Top performer','Faith Wanjiru','var(--s800)']].map(([l,v,c]) => (
-                      <div key={l} style={{display:'flex',justifyContent:'space-between',fontSize:13.5,marginBottom:10}}>
-                        <span style={{color:'var(--s500)'}}>{l}</span>
-                        <span className="mono" style={{fontWeight:700,color:c}}>{v}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {page === 'dashboard' && <TeacherDashboardTab user={user} store={store} setPage={setPage} setUploadModal={setUploadModal} toast={toast} />}
 
           {/* ── LIVE CLASSROOM ── */}
           {page === 'classroom' && (
@@ -1491,6 +1356,584 @@ export default function TeacherPortal() {
           </div>
         )}
       </Modal>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// TEACHER DASHBOARD TAB — student-centric command center
+// ═══════════════════════════════════════════════════════════
+ 
+const teacherSubjColours = {
+  'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
+  'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
+  'Geography': '#0F766E', 'Computer Science': '#1F2937',
+}
+const teacherSubjColour = (s) => teacherSubjColours[s] || '#8B1A2E'
+ 
+const teacherGreeting = () => {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 17) return 'Good afternoon'
+  if (h < 21) return 'Good evening'
+  return 'Working late'
+}
+ 
+const teacherTimeAgo = (iso) => {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  if (hours < 24) return `${hours}h ago`
+  if (days === 1) return 'yesterday'
+  if (days < 7) return `${days}d ago`
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+ 
+// Seed sample student state on first load so the dashboard looks alive even
+// before the backend is wired. Each student gets fake mastery, last-active,
+// homework status. Real data will replace this once the backend exists.
+const TEACHER_DASH_SEED_KEY = 'sm_teacher_dashboard_seeded'
+const seedTeacherSampleData = () => {
+  if (localStorage.getItem(TEACHER_DASH_SEED_KEY)) return
+ 
+  // Seed a "students enrolled with this teacher" list with realistic data
+  const seedStudents = [
+    { id: 's1', name: 'Amara Osei',    initials: 'AO', curriculum: 'IGCSE',  year: 'Year 10', mastery: 72, lastActive: 1,   hwSubmitted: 3, hwTotal: 4, status: 'on-track',     attendance: 88 },
+    { id: 's2', name: 'Kofi Mensah',   initials: 'KM', curriculum: 'IGCSE',  year: 'Year 10', mastery: 88, lastActive: 0.5, hwSubmitted: 4, hwTotal: 4, status: 'excellent',    attendance: 96 },
+    { id: 's3', name: 'Zara Kamau',    initials: 'ZK', curriculum: 'IGCSE',  year: 'Year 10', mastery: 65, lastActive: 4,   hwSubmitted: 2, hwTotal: 4, status: 'on-track',     attendance: 82 },
+    { id: 's4', name: 'Brian Otieno',  initials: 'BO', curriculum: 'IGCSE',  year: 'Year 11', mastery: 79, lastActive: 1,   hwSubmitted: 3, hwTotal: 4, status: 'on-track',     attendance: 90 },
+    { id: 's5', name: 'Faith Wanjiru', initials: 'FW', curriculum: 'IGCSE',  year: 'Year 10', mastery: 91, lastActive: 0.2, hwSubmitted: 4, hwTotal: 4, status: 'excellent',    attendance: 98 },
+    { id: 's6', name: 'David Mwangi',  initials: 'DM', curriculum: 'IGCSE',  year: 'Year 10', mastery: 58, lastActive: 7,   hwSubmitted: 1, hwTotal: 4, status: 'at-risk',      attendance: 74 },
+    { id: 's7', name: 'Lydia Achieng', initials: 'LA', curriculum: 'IGCSE',  year: 'Year 11', mastery: 76, lastActive: 2,   hwSubmitted: 3, hwTotal: 4, status: 'on-track',     attendance: 85 },
+    { id: 's8', name: 'Peter Kamau',   initials: 'PK', curriculum: 'IGCSE',  year: 'Year 11', mastery: 62, lastActive: 5,   hwSubmitted: 2, hwTotal: 4, status: 'needs-help',    attendance: 78 },
+  ]
+  localStorage.setItem('sm_teacher_students', JSON.stringify(seedStudents))
+ 
+  // Seed pending grading queue
+  const pendingGrading = [
+    { id: 'g1', studentName: 'Brian Otieno',  studentInitials: 'BO', homework: 'Quadratic Equations Practice', subject: 'Mathematics', submittedAt: new Date(Date.now() - 2 * 3600000).toISOString(), maxMarks: 50, type: 'mixed' },
+    { id: 'g2', studentName: 'Lydia Achieng', studentInitials: 'LA', homework: 'Quadratic Equations Practice', subject: 'Mathematics', submittedAt: new Date(Date.now() - 4 * 3600000).toISOString(), maxMarks: 50, type: 'mixed' },
+    { id: 'g3', studentName: 'Zara Kamau',    studentInitials: 'ZK', homework: 'Persuasive Essay',             subject: 'English',     submittedAt: new Date(Date.now() - 24 * 3600000).toISOString(), maxMarks: 30, type: 'text' },
+    { id: 'g4', studentName: 'Amara Osei',    studentInitials: 'AO', homework: 'Photosynthesis Quiz',          subject: 'Biology',     submittedAt: new Date(Date.now() - 8 * 3600000).toISOString(), maxMarks: 5,  type: 'quiz' },
+    { id: 'g5', studentName: 'Kofi Mensah',   studentInitials: 'KM', homework: 'Newton Laws Essay',            subject: 'Physics',     submittedAt: new Date(Date.now() - 36 * 3600000).toISOString(),maxMarks: 30, type: 'text' },
+  ]
+  localStorage.setItem('sm_teacher_pending_grading', JSON.stringify(pendingGrading))
+ 
+  // Seed recent student activity feed
+  const recentActivity = [
+    { id: 'a1', student: 'Faith Wanjiru', initials: 'FW', action: 'Completed Pythagoras practice', score: 95, when: new Date(Date.now() - 12 * 60000).toISOString(),  type: 'practice', subject: 'Mathematics' },
+    { id: 'a2', student: 'Kofi Mensah',   initials: 'KM', action: 'Submitted homework: Newton Laws', when: new Date(Date.now() - 36 * 3600000).toISOString(),         type: 'homework', subject: 'Physics' },
+    { id: 'a3', student: 'Brian Otieno',  initials: 'BO', action: 'Took Mathematics exam',         score: 78, when: new Date(Date.now() - 2 * 3600000).toISOString(),  type: 'exam',     subject: 'Mathematics' },
+    { id: 'a4', student: 'Amara Osei',    initials: 'AO', action: 'Practiced Algebra',             score: 72, when: new Date(Date.now() - 4 * 3600000).toISOString(),  type: 'practice', subject: 'Mathematics' },
+    { id: 'a5', student: 'David Mwangi',  initials: 'DM', action: 'Missed live class',                       when: new Date(Date.now() - 26 * 3600000).toISOString(), type: 'attendance', subject: 'Mathematics' },
+    { id: 'a6', student: 'Zara Kamau',    initials: 'ZK', action: 'Asked Mshauri for help',                  when: new Date(Date.now() - 6 * 3600000).toISOString(),  type: 'mshauri',  subject: 'Mathematics' },
+  ]
+  localStorage.setItem('sm_teacher_recent_activity', JSON.stringify(recentActivity))
+ 
+  localStorage.setItem(TEACHER_DASH_SEED_KEY, '1')
+}
+ 
+const loadTeacherStudents = () => {
+  try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
+}
+const loadPendingGrading = () => {
+  try { return JSON.parse(localStorage.getItem('sm_teacher_pending_grading') || '[]') } catch { return [] }
+}
+const loadTeacherActivity = () => {
+  try { return JSON.parse(localStorage.getItem('sm_teacher_recent_activity') || '[]') } catch { return [] }
+}
+ 
+function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
+  // Seed sample data on first load
+  useEffect(() => { seedTeacherSampleData() }, [])
+ 
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 30000)
+    return () => clearInterval(id)
+  }, [])
+ 
+  const teacherFirstName = user?.firstName || 'Teacher'
+  const teacherLastName = user?.lastName || ''
+  const teacherFullName = `${teacherFirstName} ${teacherLastName}`.trim()
+  const teacherSubject = user?.subject || 'Mathematics'
+  const teacherInitials = (teacherFullName || 'T').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || 'T'
+ 
+  // Read teacher data
+  const myStudents = loadTeacherStudents()
+  const pendingGrading = loadPendingGrading()
+  const recentActivity = loadTeacherActivity()
+ 
+  // Filter the store's groupRooms to this teacher's rooms
+  const allRooms = store?.groupRooms || []
+  const myRooms = allRooms.filter(r =>
+    r.teacher === teacherFullName ||
+    r.teacher === `Mr. ${teacherLastName}` ||
+    r.teacher === `Ms. ${teacherLastName}` ||
+    r.teacher === `Mrs. ${teacherLastName}` ||
+    r.teacher?.includes(teacherLastName)
+  )
+ 
+  // Compute today's classes for this teacher
+  const now = new Date()
+  const todayDow = now.getDay()
+  const nowMins = now.getHours() * 60 + now.getMinutes()
+  const todayClasses = []
+  myRooms.forEach(room => {
+    // parseScheduleString must exist already from student portal
+    let parsed = null
+    if (typeof parseScheduleString === 'function') {
+      parsed = parseScheduleString(room.schedule)
+    }
+    if (!parsed || !parsed.days?.includes(todayDow)) return
+    let status = 'upcoming'
+    if (nowMins >= parsed.endMins) status = 'done'
+    else if (nowMins >= parsed.startMins) status = 'live'
+    todayClasses.push({ ...room, ...parsed, status })
+  })
+  todayClasses.sort((a, b) => a.startMins - b.startMins)
+ 
+  // Stats
+  const totalStudents = myStudents.length
+  const onTrackCount = myStudents.filter(s => s.status === 'excellent' || s.status === 'on-track').length
+  const atRiskCount = myStudents.filter(s => s.status === 'at-risk' || s.status === 'needs-help').length
+  const classAvgMastery = myStudents.length > 0
+    ? Math.round(myStudents.reduce((sum, s) => sum + s.mastery, 0) / myStudents.length)
+    : 0
+  const pendingCount = pendingGrading.length
+  const totalHwAssigned = myStudents.reduce((sum, s) => sum + s.hwTotal, 0)
+  const totalHwSubmitted = myStudents.reduce((sum, s) => sum + s.hwSubmitted, 0)
+  const submissionRate = totalHwAssigned > 0 ? Math.round((totalHwSubmitted / totalHwAssigned) * 100) : 0
+ 
+  // Compute alerts (only show alert strip if any are urgent)
+  const alerts = []
+  if (pendingCount >= 3) alerts.push({ type: 'grading', label: `${pendingCount} homework submissions awaiting your grade`, action: () => setPage('marking'), color: 'var(--a600)' })
+  if (atRiskCount > 0) alerts.push({ type: 'risk', label: `${atRiskCount} student${atRiskCount === 1 ? '' : 's'} at risk - needs your attention`, action: () => setPage('students'), color: 'var(--r500)' })
+  const liveClass = todayClasses.find(c => c.status === 'live')
+  if (liveClass) alerts.push({ type: 'live', label: `Live class right now: ${liveClass.subject}`, action: () => setPage('classroom'), color: 'var(--g600)' })
+  const upcomingClass = todayClasses.find(c => c.status === 'upcoming' && (c.startMins - nowMins) <= 30)
+  if (upcomingClass) alerts.push({ type: 'upcoming', label: `Class in ${upcomingClass.startMins - nowMins} min: ${upcomingClass.subject}`, action: () => setPage('classroom'), color: 'var(--b700)' })
+ 
+  // Sort student grid: at-risk first, then by mastery desc
+  const sortedStudents = [...myStudents].sort((a, b) => {
+    const order = { 'at-risk': 0, 'needs-help': 1, 'on-track': 2, 'excellent': 3 }
+    if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status]
+    return a.mastery - b.mastery
+  })
+ 
+  // Status colour helper
+  const statusStyle = (status) => {
+    switch (status) {
+      case 'excellent':  return { color: 'var(--g600)', bg: 'var(--g50)',  label: 'Excellent' }
+      case 'on-track':   return { color: 'var(--b700)', bg: 'var(--b50)',  label: 'On track' }
+      case 'needs-help': return { color: 'var(--a600)', bg: 'var(--a50)',  label: 'Needs help' }
+      case 'at-risk':    return { color: 'var(--r500)', bg: 'var(--r50)',  label: 'At risk' }
+      default:           return { color: 'var(--s500)', bg: 'var(--bg)',   label: status }
+    }
+  }
+ 
+  // Avatar colour from name
+  const avatarColor = (name) => {
+    const colors = ['#3B82F6', '#22C55E', '#8B5CF6', '#F59E0B', '#EC4899', '#14B8A6', '#F97316', '#06B6D4']
+    let hash = 0
+    for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
+    return colors[Math.abs(hash) % colors.length]
+  }
+ 
+  return (
+    <div>
+      {/* ─── WELCOME HERO ─── */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%)',
+        color: '#fff',
+      }}>
+        <div style={{ padding: '28px 30px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+          <div style={{
+            width: 72, height: 72, borderRadius: '50%',
+            background: 'rgba(240,204,90,.18)',
+            border: '3px solid #F0CC5A',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#F0CC5A',
+            fontSize: 26, fontWeight: 700,
+            fontFamily: "'Instrument Serif', serif",
+            flexShrink: 0,
+          }}>
+            {teacherInitials}
+          </div>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 4 }}>
+              Teacher Dashboard
+            </div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
+              {teacherGreeting()}, <em style={{ color: '#F0CC5A', fontStyle: 'italic' }}>{teacherFirstName}</em>
+            </h1>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              {teacherSubject} · {now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setPage('exambuilder')}
+              style={{
+                background: 'rgba(255,255,255,.1)',
+                border: '1px solid rgba(255,255,255,.3)',
+                color: '#fff',
+                padding: '10px 16px',
+                borderRadius: 'var(--rmd)',
+                cursor: 'pointer',
+                fontSize: 13,
+                fontWeight: 600,
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}
+            >
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              New Exam
+            </button>
+            <button
+              onClick={() => setPage('classroom')}
+              style={{
+                background: '#F0CC5A',
+                color: '#1E3A8A',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: 'var(--rmd)',
+                cursor: 'pointer',
+                fontSize: 13,
+                fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 6,
+                boxShadow: '0 4px 14px rgba(240,204,90,.3)',
+              }}
+            >
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              Enter Live Class
+            </button>
+          </div>
+        </div>
+        {/* Stats strip */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', background: 'rgba(0,0,0,.2)' }}>
+          {[
+            { l: 'My Students',    v: totalStudents,                                 c: '#fff' },
+            { l: 'Class Average',  v: `${classAvgMastery}%`,                         c: classAvgMastery >= 75 ? '#4ADE80' : classAvgMastery >= 60 ? '#F0CC5A' : '#FCA5A5' },
+            { l: 'Submissions',    v: `${submissionRate}%`,                          c: submissionRate >= 80 ? '#4ADE80' : '#fff' },
+            { l: 'To Mark',        v: pendingCount,                                  c: pendingCount > 0 ? '#FCA5A5' : '#fff' },
+            { l: 'At Risk',        v: atRiskCount,                                   c: atRiskCount > 0 ? '#FCA5A5' : '#fff' },
+          ].map(stat => (
+            <div key={stat.l} style={{
+              padding: '14px 18px',
+              borderRight: '1px solid rgba(255,255,255,.08)',
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
+                {stat.l}
+              </div>
+              <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: stat.c }}>
+                {stat.v}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+ 
+      {/* ─── ACTION REQUIRED ALERTS (only if any) ─── */}
+      {alerts.length > 0 && (
+        <div className="card" style={{ marginBottom: 18, background: 'var(--a50)', border: '1px solid var(--a100)' }}>
+          <div className="ctitle" style={{ marginBottom: 10, color: 'var(--a700, #92400E)' }}>
+            Action Required
+          </div>
+          {alerts.map((a, i) => (
+            <div key={i}
+              onClick={a.action}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '10px 0',
+                borderTop: i > 0 ? '1px solid rgba(245,158,11,.2)' : 'none',
+                cursor: 'pointer',
+              }}>
+              <div style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: a.color, flexShrink: 0,
+              }}/>
+              <div style={{ flex: 1, fontSize: 13.5, fontWeight: 600, color: 'var(--s800)' }}>
+                {a.label}
+              </div>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="2.5" strokeLinecap="round" style={{flexShrink:0}}>
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </div>
+          ))}
+        </div>
+      )}
+ 
+      {/* ─── TODAY'S CLASSES ─── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14, marginBottom: 18 }}>
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">Today's Classes</div>
+            <button onClick={() => setPage('classroom')} style={{ background: 'transparent', border: 'none', color: 'var(--b700)', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+              Enter Classroom -&gt;
+            </button>
+          </div>
+          {todayClasses.length === 0 ? (
+            <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
+              No classes scheduled today
+            </div>
+          ) : todayClasses.map((cls, i) => (
+            <div key={i}
+              onClick={() => setPage('classroom')}
+              style={{
+                display: 'flex', gap: 12, padding: '12px 0',
+                borderBottom: i < todayClasses.length - 1 ? '1px solid var(--border)' : 'none',
+                cursor: 'pointer', alignItems: 'center',
+              }}>
+              <div style={{
+                width: 4, height: 40, borderRadius: 2,
+                background: teacherSubjColour(cls.subject), flexShrink: 0,
+              }}/>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{cls.subject} - {cls.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--s500)' }}>
+                  {(cls.students?.length || cls.enrolled || 0)} students enrolled
+                </div>
+              </div>
+              {cls.status === 'live' && (
+                <span style={{
+                  background: '#FEE2E2', color: '#991B1B',
+                  fontSize: 10, fontWeight: 800, letterSpacing: '.06em',
+                  padding: '3px 8px', borderRadius: 99,
+                }}>LIVE NOW</span>
+              )}
+              {cls.status === 'upcoming' && (
+                <span style={{ fontSize: 11, color: 'var(--s500)' }}>Upcoming</span>
+              )}
+              {cls.status === 'done' && (
+                <span style={{ fontSize: 11, color: 'var(--s400)' }}>Done</span>
+              )}
+            </div>
+          ))}
+        </div>
+ 
+        {/* Pending Grading */}
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">
+              Pending Grading
+              {pendingCount > 0 && (
+                <span style={{
+                  marginLeft: 8,
+                  background: 'var(--a50)', color: 'var(--a600)',
+                  fontSize: 10, fontWeight: 800,
+                  padding: '2px 7px', borderRadius: 99,
+                }}>{pendingCount}</span>
+              )}
+            </div>
+            <button onClick={() => setPage('marking')} style={{ background: 'transparent', border: 'none', color: 'var(--b700)', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+              Open Marking -&gt;
+            </button>
+          </div>
+          {pendingGrading.length === 0 ? (
+            <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
+              All caught up - nothing to grade
+            </div>
+          ) : pendingGrading.slice(0, 4).map((item, i) => (
+            <div key={item.id}
+              onClick={() => setPage('marking')}
+              style={{
+                display: 'flex', gap: 10, padding: '10px 0',
+                borderBottom: i < Math.min(3, pendingGrading.length - 1) ? '1px solid var(--border)' : 'none',
+                cursor: 'pointer', alignItems: 'center',
+              }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: avatarColor(item.studentName), color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11, fontWeight: 700, flexShrink: 0,
+              }}>{item.studentInitials}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s900)' }}>{item.studentName}</div>
+                <div style={{ fontSize: 11.5, color: 'var(--s500)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item.homework} · {teacherTimeAgo(item.submittedAt)}
+                </div>
+              </div>
+              <span style={{
+                background: teacherSubjColour(item.subject) + '15',
+                color: teacherSubjColour(item.subject),
+                fontSize: 10, fontWeight: 700,
+                padding: '2px 8px', borderRadius: 99, flexShrink: 0,
+              }}>
+                {item.maxMarks} marks
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+ 
+      {/* ─── MY STUDENTS GRID ─── */}
+      <div className="card" style={{ marginBottom: 18 }}>
+        <div className="chdr" style={{ marginBottom: 14 }}>
+          <div className="ctitle">My Students <span style={{ color: 'var(--s400)', fontWeight: 400 }}>({totalStudents})</span></div>
+          <button onClick={() => setPage('students')} style={{ background: 'transparent', border: 'none', color: 'var(--b700)', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+            View All -&gt;
+          </button>
+        </div>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: 12,
+        }}>
+          {sortedStudents.slice(0, 8).map(s => {
+            const sty = statusStyle(s.status)
+            return (
+              <div key={s.id}
+                onClick={() => setPage('students')}
+                style={{
+                  border: '1.5px solid var(--border)',
+                  borderRadius: 'var(--rmd)',
+                  padding: 14,
+                  cursor: 'pointer',
+                  background: 'var(--white)',
+                  transition: 'all .15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = sty.color; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%',
+                    background: avatarColor(s.name), color: '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 700, fontSize: 13, flexShrink: 0,
+                  }}>{s.initials}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s900)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--s500)' }}>{s.year}</div>
+                  </div>
+                  <span style={{
+                    background: sty.bg, color: sty.color,
+                    fontSize: 10, fontWeight: 700, letterSpacing: '.04em',
+                    padding: '3px 7px', borderRadius: 99, flexShrink: 0,
+                  }}>{sty.label}</span>
+                </div>
+ 
+                {/* Mastery bar */}
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <span style={{ fontSize: 11, color: 'var(--s500)' }}>Mastery</span>
+                    <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: sty.color }}>{s.mastery}%</span>
+                  </div>
+                  <div style={{ height: 5, borderRadius: 3, background: 'var(--bg)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${s.mastery}%`, background: sty.color, borderRadius: 3 }}/>
+                  </div>
+                </div>
+ 
+                {/* Bottom row: HW + Last active */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--s500)' }}>
+                  <span>HW: <strong style={{ color: s.hwSubmitted < s.hwTotal ? 'var(--a600)' : 'var(--g600)' }}>{s.hwSubmitted}/{s.hwTotal}</strong></span>
+                  <span>Att: <strong style={{ color: s.attendance >= 85 ? 'var(--g600)' : 'var(--a600)' }}>{s.attendance}%</strong></span>
+                  <span>Active: {s.lastActive < 1 ? `${Math.round(s.lastActive * 24)}h` : `${Math.round(s.lastActive)}d`}</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        {totalStudents > 8 && (
+          <div style={{ textAlign: 'center', marginTop: 14 }}>
+            <button onClick={() => setPage('students')} className="btn btn-s btn-sm">
+              See all {totalStudents} students
+            </button>
+          </div>
+        )}
+      </div>
+ 
+      {/* ─── BOTTOM ROW: Quick Actions + Recent Activity ─── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
+        {/* Quick Actions */}
+        <div className="card">
+          <div className="ctitle" style={{ marginBottom: 14 }}>Quick Actions</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <button className="btn btn-s" style={{ justifyContent: 'flex-start' }} onClick={() => setPage('exambuilder')}>
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Create New Exam or Homework
+            </button>
+            <button className="btn btn-s" style={{ justifyContent: 'flex-start' }} onClick={() => setPage('marking')}>
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
+              Grade Submissions{pendingCount > 0 && ` (${pendingCount})`}
+            </button>
+            <button className="btn btn-s" style={{ justifyContent: 'flex-start' }} onClick={() => setUploadModal && setUploadModal(true)}>
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Upload Resource
+            </button>
+            <button className="btn btn-s" style={{ justifyContent: 'flex-start' }} onClick={() => setPage('reports')}>
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              View Student Reports
+            </button>
+            <button className="btn btn-s" style={{ justifyContent: 'flex-start' }} onClick={() => setPage('students')}>
+              <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              </svg>
+              Manage Students
+            </button>
+          </div>
+        </div>
+ 
+        {/* Recent Student Activity Feed */}
+        <div className="card">
+          <div className="ctitle" style={{ marginBottom: 14 }}>Recent Student Activity</div>
+          {recentActivity.length === 0 ? (
+            <div style={{ padding: '20px 0', textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
+              No recent activity
+            </div>
+          ) : recentActivity.slice(0, 6).map((a, i) => {
+            const iconBg = teacherSubjColour(a.subject) + '15'
+            const iconColor = teacherSubjColour(a.subject)
+            const letter = a.type === 'practice' ? 'P' : a.type === 'exam' ? 'E' : a.type === 'homework' ? 'H' : a.type === 'attendance' ? 'A' : 'M'
+            return (
+              <div key={a.id}
+                onClick={() => setPage('students')}
+                style={{
+                  display: 'flex', gap: 10, padding: '10px 0',
+                  borderBottom: i < recentActivity.length - 1 ? '1px solid var(--border)' : 'none',
+                  cursor: 'pointer', alignItems: 'center',
+                }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: iconBg, color: iconColor,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
+                  flexShrink: 0,
+                }}>{letter}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, color: 'var(--s700)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <strong style={{ color: 'var(--s900)' }}>{a.student}</strong> {a.action}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--s400)' }}>{teacherTimeAgo(a.when)}</div>
+                </div>
+                {a.score !== undefined && (
+                  <span className="mono" style={{
+                    fontSize: 12, fontWeight: 700,
+                    color: a.score >= 80 ? 'var(--g600)' : a.score >= 60 ? 'var(--a600)' : 'var(--r500)',
+                    flexShrink: 0,
+                  }}>{a.score}%</span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }
