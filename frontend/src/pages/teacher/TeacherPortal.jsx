@@ -565,127 +565,8 @@ export default function TeacherPortal() {
           )}
 
           {/* ── MY STUDENTS ── */}
-          {page === 'students' && (
-            <div>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:20,flexWrap:'wrap',gap:12}}>
-                <div><div className="sec-tag">IGCSE Form 3 · Mathematics</div><h2 className="serif" style={{fontSize:24,color:'var(--s900)'}}>My <em style={{color:'var(--b700)'}}>Students</em></h2></div>
-                <div style={{display:'flex',gap:10}}>
-                  <input className="fi" style={{maxWidth:240}} placeholder="Search students…"/>
-                  <button className="btn btn-p btn-sm" onClick={() => toast.ok('Exporting class report…')}>
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Export Report
-                  </button>
-                </div>
-              </div>
-              <div className="card" style={{padding:0,overflow:'hidden'}}>
-                <table className="tbl">
-                  <thead><tr><th>Student</th><th>Latest Score</th><th>Trend</th><th>Attendance</th><th>Status</th><th></th></tr></thead>
-                  <tbody>
-                    {STUDENTS.map((s,i) => {
-                      const sc = s.score>=75?'var(--g600)':s.score>=60?'var(--a600)':'var(--r500)'
-                      const stCol = s.status==='Excellent'?{color:'var(--g700)',borderColor:'#BBF7D0',background:'var(--g50)'}:s.status==='At Risk'?{color:'var(--r600)',borderColor:'var(--r100)',background:'var(--r50)'}:{color:'var(--b700)',borderColor:'var(--b200)',background:'var(--b50)'}
-                      return (
-                        <tr key={i}>
-                          <td><div style={{display:'flex',alignItems:'center',gap:10}}><Av init={s.init} col={s.col} size={34}/><div style={{fontWeight:600,fontSize:14}}>{s.name}</div></div></td>
-                          <td><span className="mono" style={{fontWeight:700,color:sc}}>{s.score}%</span></td>
-                          <td>
-                            <div style={{display:'flex',alignItems:'center',gap:4,fontSize:13,fontWeight:600,color:s.trend==='up'?'var(--g600)':'var(--r500)'}}>
-                              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{transform:s.trend==='up'?'rotate(-90deg)':'rotate(90deg)'}}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                              {s.trend==='up'?'Improving':'Declining'}
-                            </div>
-                          </td>
-                          <td><span className="mono" style={{fontWeight:600,fontSize:13,color:s.att>=90?'var(--g600)':s.att>=80?'var(--a600)':'var(--r500)'}}>{s.att}%</span></td>
-                          <td><span className="badge" style={stCol}>{s.status}</span></td>
-                          <td style={{display:'flex',gap:6}}>
-                            <button className="btn btn-g btn-sm" onClick={() => toast.info(`Opening profile: ${s.name}`)}>Profile</button>
-                            <button className="btn btn-s btn-sm" onClick={() => loadHeatmap(s.id||`demo-${i}`, s.name)}>
-                              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-                              Mastery
-                            </button>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
+          {page === 'students' && <MyStudentsTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} setMsgTo={setMsgTo} setMsgSubject={setMsgSubject} setMsgBody={setMsgBody} setMsgModal={setMsgModal} />}
 
-            {/* ── MASTERY HEATMAP PANEL ── */}
-            {(heatmapStudent || heatmapLoading) && (
-              <div className="card" style={{marginTop:20,animation:'fadeUp .3s ease'}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                  <div>
-                    <div className="sec-tag">Per-Topic Mastery</div>
-                    <h3 className="serif" style={{fontSize:20,color:'var(--s900)'}}>
-                      {heatmapStudent} — Mastery Heatmap
-                    </h3>
-                  </div>
-                  <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                    <div style={{display:'flex',gap:6,alignItems:'center',fontSize:12,color:'var(--s500)'}}>
-                      {[['var(--g500)','Mastered (80%+)'],['var(--b600)','Progressing (60%)'],['var(--a600)','Building (40%)'],['var(--r500)','Needs Help']].map(([c,l]) => (
-                        <div key={l} style={{display:'flex',alignItems:'center',gap:4}}><div style={{width:10,height:10,borderRadius:2,background:c}}/><span>{l}</span></div>
-                      ))}
-                    </div>
-                    <button className="btn btn-g btn-sm" onClick={() => {setHeatmapStudent(null);setHeatmapData(null)}}>
-                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
-                  </div>
-                </div>
-
-                {heatmapLoading ? (
-                  <div className="lc"><div className="spinner"/></div>
-                ) : heatmapData ? (
-                  <div style={{display:'flex',flexDirection:'column',gap:16}}>
-                    {heatmapData.map((subj, si) => (
-                      <div key={si}>
-                        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
-                          <span style={{fontWeight:700,fontSize:14,color:'var(--s800)',minWidth:160}}>{subj.subject}</span>
-                          <div style={{flex:1,height:8,background:'var(--s100)',borderRadius:999,overflow:'hidden'}}>
-                            <div style={{width:subj.overall+'%',height:'100%',background:mCol(subj.overall),borderRadius:999,transition:'width 1s ease'}}/>
-                          </div>
-                          <span className="mono" style={{fontSize:13,fontWeight:700,color:mCol(subj.overall),minWidth:36}}>{subj.overall}%</span>
-                          {subj.velocity !== 0 && (
-                            <span style={{fontSize:11,fontWeight:700,color:subj.velocity>0?'var(--g600)':'var(--r500)'}}>
-                              {subj.velocity > 0 ? '↑' : '↓'}{Math.abs(subj.velocity)}%
-                            </span>
-                          )}
-                        </div>
-                        <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-                          {subj.topics.map((t, ti) => (
-                            <div key={ti} title={`${t.name}: ${t.pct}% — ${mLabel(t.pct)} — ${t.attempts} sessions`}
-                              style={{
-                                padding:'5px 10px',
-                                borderRadius:'var(--rsm)',
-                                fontSize:12,
-                                fontWeight:600,
-                                background: t.pct >= 80 ? 'var(--g50)' : t.pct >= 60 ? 'var(--b50)' : t.pct >= 40 ? 'var(--a50)' : t.pct > 0 ? 'var(--r50)' : 'var(--s50)',
-                                color: mCol(t.pct),
-                                border: `1.5px solid ${t.pct >= 80 ? '#BBF7D0' : t.pct >= 60 ? 'var(--b200)' : t.pct >= 40 ? '#FDE68A' : t.pct > 0 ? '#FECACA' : 'var(--s200)'}`,
-                                cursor:'pointer',
-                              }}
-                              onClick={() => toast.info(`${t.name}: ${t.pct}% mastery · ${mLabel(t.pct)} · ${t.attempts} sessions`)}>
-                              {t.name}
-                              <span className="mono" style={{marginLeft:6,fontSize:11}}>{t.pct}%</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                    <div style={{background:'var(--bg)',borderRadius:'var(--rmd)',padding:14,display:'flex',gap:20,flexWrap:'wrap',fontSize:13,color:'var(--s500)'}}>
-                      <div>Topics needing intervention: <strong style={{color:'var(--r600)'}}>{heatmapData.flatMap(s=>s.topics).filter(t=>t.pct>0&&t.pct<50).length}</strong></div>
-                      <div>Topics mastered: <strong style={{color:'var(--g600)'}}>{heatmapData.flatMap(s=>s.topics).filter(t=>t.pct>=80).length}</strong></div>
-                      <div>Not yet started: <strong style={{color:'var(--s400)'}}>{heatmapData.flatMap(s=>s.topics).filter(t=>t.pct===0).length}</strong></div>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{textAlign:'center',padding:24,color:'var(--s400)',fontSize:14}}>
-                    No mastery data yet for this student. They need to complete at least one practice session.
-                  </div>
-                )}
-              </div>
-            )}
-            </div>
-          )}
 
           {/* ── QUESTION BANK ── */}
           {page === 'questionbank' && <QuestionBankTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
@@ -2294,6 +2175,875 @@ function QuestionBankTab({ user, store, setPage, toast }) {
               </div>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// MY STUDENTS — deep drilldown for individual student management
+// ═══════════════════════════════════════════════════════════
+// Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
+
+const MS_NOTES_PREFIX = 'sm_teacher_notes_'
+const MS_FLAGS_KEY    = 'sm_student_flags'
+
+const msSubjColours = {
+  'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
+  'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
+  'Geography': '#0F766E', 'Computer Science': '#1F2937',
+}
+const msSubjColour = (s) => msSubjColours[s] || '#7D1025'
+
+const msTimeAgo = (iso) => {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return mins + 'm ago'
+  if (hours < 24) return hours + 'h ago'
+  if (days === 1) return 'yesterday'
+  if (days < 7) return days + 'd ago'
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+const msAvatarColor = (name) => {
+  const colors = ['#7D1025', '#8B1A2E', '#C9A030', '#1E3A8A', '#166534', '#7C2D12', '#6B21A8', '#92400E']
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
+  return colors[Math.abs(hash) % colors.length]
+}
+
+const msStatusStyle = (status) => {
+  switch (status) {
+    case 'excellent':  return { color: '#15803D', bg: '#DCFCE7', label: 'Excellent', borderColor: '#86EFAC' }
+    case 'on-track':   return { color: '#7D1025', bg: '#FBE8E8', label: 'On track',  borderColor: '#F4C5C5' }
+    case 'needs-help': return { color: '#B45309', bg: '#FEF3C7', label: 'Needs help', borderColor: '#FCD34D' }
+    case 'at-risk':    return { color: '#B91C1C', bg: '#FEE2E2', label: 'At risk',    borderColor: '#FCA5A5' }
+    default:           return { color: '#64748B', bg: '#F1F5F9', label: status,        borderColor: '#CBD5E1' }
+  }
+}
+
+// Load functions
+const msLoadStudents = () => {
+  try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
+}
+const msSaveStudents = (students) => {
+  try { localStorage.setItem('sm_teacher_students', JSON.stringify(students)) } catch {}
+}
+const msLoadNotes = (studentId) => {
+  try { return JSON.parse(localStorage.getItem(MS_NOTES_PREFIX + studentId) || '[]') } catch { return [] }
+}
+const msSaveNotes = (studentId, notes) => {
+  try { localStorage.setItem(MS_NOTES_PREFIX + studentId, JSON.stringify(notes.slice(-50))) } catch {}
+}
+const msLoadActivity = () => {
+  try { return JSON.parse(localStorage.getItem('sm_teacher_recent_activity') || '[]') } catch { return [] }
+}
+const msLoadHomework = () => {
+  try { return JSON.parse(localStorage.getItem('sm_teacher_pending_grading') || '[]') } catch { return [] }
+}
+const msLoadClassHistory = () => {
+  try { return JSON.parse(localStorage.getItem('sm_teacher_class_history') || '[]') } catch { return [] }
+}
+
+// Seed if dashboard hasn't been visited yet
+const msSeedIfEmpty = () => {
+  const existing = msLoadStudents()
+  if (existing.length > 0) return existing
+  const seeded = [
+    { id: 's1', name: 'Amara Osei',    initials: 'AO', curriculum: 'IGCSE',  year: 'Year 10', mastery: 72, lastActive: 1,   hwSubmitted: 3, hwTotal: 4, status: 'on-track',     attendance: 88, parentName: 'Janet Osei',     parentEmail: 'janet.osei@example.com',     phone: '+254 712 000 001' },
+    { id: 's2', name: 'Kofi Mensah',   initials: 'KM', curriculum: 'IGCSE',  year: 'Year 10', mastery: 88, lastActive: 0.5, hwSubmitted: 4, hwTotal: 4, status: 'excellent',    attendance: 96, parentName: 'Akua Mensah',    parentEmail: 'akua.mensah@example.com',    phone: '+254 712 000 002' },
+    { id: 's3', name: 'Zara Kamau',    initials: 'ZK', curriculum: 'IGCSE',  year: 'Year 10', mastery: 65, lastActive: 4,   hwSubmitted: 2, hwTotal: 4, status: 'on-track',     attendance: 82, parentName: 'Susan Kamau',    parentEmail: 'susan.kamau@example.com',    phone: '+254 712 000 003' },
+    { id: 's4', name: 'Brian Otieno',  initials: 'BO', curriculum: 'IGCSE',  year: 'Year 11', mastery: 79, lastActive: 1,   hwSubmitted: 3, hwTotal: 4, status: 'on-track',     attendance: 90, parentName: 'Peter Otieno',   parentEmail: 'peter.otieno@example.com',   phone: '+254 712 000 004' },
+    { id: 's5', name: 'Faith Wanjiru', initials: 'FW', curriculum: 'IGCSE',  year: 'Year 10', mastery: 91, lastActive: 0.2, hwSubmitted: 4, hwTotal: 4, status: 'excellent',    attendance: 98, parentName: 'Mary Wanjiru',   parentEmail: 'mary.wanjiru@example.com',   phone: '+254 712 000 005' },
+    { id: 's6', name: 'David Mwangi',  initials: 'DM', curriculum: 'IGCSE',  year: 'Year 10', mastery: 58, lastActive: 7,   hwSubmitted: 1, hwTotal: 4, status: 'at-risk',      attendance: 74, parentName: 'James Mwangi',   parentEmail: 'james.mwangi@example.com',   phone: '+254 712 000 006' },
+    { id: 's7', name: 'Lydia Achieng', initials: 'LA', curriculum: 'IGCSE',  year: 'Year 11', mastery: 76, lastActive: 2,   hwSubmitted: 3, hwTotal: 4, status: 'on-track',     attendance: 85, parentName: 'Grace Achieng',  parentEmail: 'grace.achieng@example.com',  phone: '+254 712 000 007' },
+    { id: 's8', name: 'Peter Kamau',   initials: 'PK', curriculum: 'IGCSE',  year: 'Year 11', mastery: 62, lastActive: 5,   hwSubmitted: 2, hwTotal: 4, status: 'needs-help',    attendance: 78, parentName: 'Eunice Kamau',   parentEmail: 'eunice.kamau@example.com',   phone: '+254 712 000 008' },
+  ]
+  msSaveStudents(seeded)
+  return seeded
+}
+
+function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, setMsgBody, setMsgModal }) {
+  const [students, setStudents] = useState(() => msSeedIfEmpty())
+  const [view, setView] = useState('roster')  // 'roster' | 'detail'
+  const [selectedStudent, setSelectedStudent] = useState(null)
+  const [detailTab, setDetailTab] = useState('overview')
+
+  const [searchQ, setSearchQ] = useState('')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [filterYear, setFilterYear] = useState('all')
+  const [sortBy, setSortBy] = useState('priority')
+
+  // For drilldown
+  const [studentNotes, setStudentNotes] = useState([])
+  const [newNoteText, setNewNoteText] = useState('')
+  const [noteCategory, setNoteCategory] = useState('observation')
+
+  // Load notes when student selected
+  useEffect(() => {
+    if (selectedStudent) {
+      setStudentNotes(msLoadNotes(selectedStudent.id))
+    }
+  }, [selectedStudent])
+
+  const openDetail = (student) => {
+    setSelectedStudent(student)
+    setView('detail')
+    setDetailTab('overview')
+  }
+
+  const backToRoster = () => {
+    setView('roster')
+    setSelectedStudent(null)
+  }
+
+  const updateStudentStatus = (newStatus) => {
+    if (!selectedStudent) return
+    const updated = students.map(s => s.id === selectedStudent.id ? { ...s, status: newStatus } : s)
+    setStudents(updated)
+    msSaveStudents(updated)
+    setSelectedStudent({ ...selectedStudent, status: newStatus })
+    toast?.ok?.('Student status updated to ' + msStatusStyle(newStatus).label)
+  }
+
+  const addNote = () => {
+    if (!newNoteText.trim() || !selectedStudent) return
+    const note = {
+      id: 'note-' + Date.now(),
+      text: newNoteText.trim(),
+      category: noteCategory,
+      createdAt: new Date().toISOString(),
+      author: 'Mr. James Muthomi',
+    }
+    const updated = [note, ...studentNotes]
+    setStudentNotes(updated)
+    msSaveNotes(selectedStudent.id, updated)
+    setNewNoteText('')
+    toast?.ok?.('Note saved.')
+  }
+
+  const deleteNote = (noteId) => {
+    const updated = studentNotes.filter(n => n.id !== noteId)
+    setStudentNotes(updated)
+    if (selectedStudent) msSaveNotes(selectedStudent.id, updated)
+  }
+
+  const messageStudent = (student) => {
+    if (setMsgTo && setMsgSubject && setMsgBody && setMsgModal) {
+      setMsgTo(student.parentName || student.name)
+      setMsgSubject('About ' + student.name)
+      setMsgBody('')
+      setMsgModal(true)
+    } else {
+      toast?.info?.('Messaging will open the message composer.')
+    }
+  }
+
+  // Filter + sort students for roster
+  const filteredStudents = students.filter(s => {
+    if (filterStatus !== 'all' && s.status !== filterStatus) return false
+    if (filterYear !== 'all' && s.year !== filterYear) return false
+    if (searchQ.trim()) {
+      const search = searchQ.toLowerCase()
+      if (!s.name.toLowerCase().includes(search) && !(s.parentName || '').toLowerCase().includes(search)) return false
+    }
+    return true
+  })
+
+  const sortedStudents = [...filteredStudents].sort((a, b) => {
+    if (sortBy === 'priority') {
+      const order = { 'at-risk': 0, 'needs-help': 1, 'on-track': 2, 'excellent': 3 }
+      if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status]
+      return a.mastery - b.mastery
+    }
+    if (sortBy === 'name') return a.name.localeCompare(b.name)
+    if (sortBy === 'mastery-high') return b.mastery - a.mastery
+    if (sortBy === 'mastery-low') return a.mastery - b.mastery
+    if (sortBy === 'attendance-low') return a.attendance - b.attendance
+    return 0
+  })
+
+  // Stats for roster header
+  const rosterStats = {
+    total: students.length,
+    excellent: students.filter(s => s.status === 'excellent').length,
+    onTrack: students.filter(s => s.status === 'on-track').length,
+    needsHelp: students.filter(s => s.status === 'needs-help').length,
+    atRisk: students.filter(s => s.status === 'at-risk').length,
+    avgMastery: students.length > 0 ? Math.round(students.reduce((sum, s) => sum + s.mastery, 0) / students.length) : 0,
+    avgAttendance: students.length > 0 ? Math.round(students.reduce((sum, s) => sum + s.attendance, 0) / students.length) : 0,
+  }
+
+  const allYears = [...new Set(students.map(s => s.year))]
+
+  // ── DETAIL VIEW ─────────────────────────────────────
+  if (view === 'detail' && selectedStudent) {
+    const sty = msStatusStyle(selectedStudent.status)
+    const studentRecentActivity = msLoadActivity().filter(a => a.student === selectedStudent.name)
+    const studentHomework = msLoadHomework().filter(h => h.studentName === selectedStudent.name)
+    const classHistory = msLoadClassHistory()
+
+    return (
+      <div>
+        {/* Back navigation */}
+        <button onClick={backToRoster}
+          style={{
+            background: 'transparent', border: 'none',
+            color: '#7D1025', fontSize: 13, fontWeight: 700,
+            cursor: 'pointer', padding: '6px 0', marginBottom: 14,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          Back to All Students
+        </button>
+
+        {/* Hero card with student info — CRIMSON theme */}
+        <div className="card" style={{
+          padding: 0, marginBottom: 18, overflow: 'hidden',
+          background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+          color: '#FBFAF5',
+        }}>
+          <div style={{ padding: '28px 30px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%',
+              background: '#C9A030',
+              border: '3px solid #F0CC5A',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#7D1025',
+              fontSize: 28, fontWeight: 700,
+              fontFamily: "'Instrument Serif', serif",
+              flexShrink: 0,
+            }}>
+              {selectedStudent.initials}
+            </div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
+                Student Profile
+              </div>
+              <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 30, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+                {selectedStudent.name}
+              </h1>
+              <div style={{ fontSize: 13, opacity: .9, marginTop: 6, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                <span>{selectedStudent.curriculum} {selectedStudent.year}</span>
+                <span>Active {selectedStudent.lastActive < 1 ? Math.round(selectedStudent.lastActive * 24) + 'h ago' : Math.round(selectedStudent.lastActive) + 'd ago'}</span>
+                {selectedStudent.parentName && <span>Parent: {selectedStudent.parentName}</span>}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button onClick={() => messageStudent(selectedStudent)}
+                style={{
+                  background: 'rgba(251,250,245,.15)',
+                  border: '1px solid rgba(251,250,245,.35)',
+                  color: '#FBFAF5',
+                  padding: '10px 16px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                Message
+              </button>
+              <button onClick={() => setPage('exambuilder')}
+                style={{
+                  background: '#C9A030', color: '#7D1025', border: 'none',
+                  padding: '10px 16px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  boxShadow: '0 4px 14px rgba(201,160,48,.35)',
+                }}>
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Assign Work
+              </button>
+            </div>
+          </div>
+          {/* Stats strip */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+            {[
+              { l: 'Status',     v: sty.label,                                                                   c: '#F0CC5A' },
+              { l: 'Mastery',    v: selectedStudent.mastery + '%',                                              c: selectedStudent.mastery >= 75 ? '#86EFAC' : selectedStudent.mastery >= 60 ? '#F0CC5A' : '#FCA5A5' },
+              { l: 'Attendance', v: selectedStudent.attendance + '%',                                            c: selectedStudent.attendance >= 85 ? '#86EFAC' : '#F0CC5A' },
+              { l: 'Homework',   v: selectedStudent.hwSubmitted + '/' + selectedStudent.hwTotal,                 c: selectedStudent.hwSubmitted === selectedStudent.hwTotal ? '#86EFAC' : '#F0CC5A' },
+              { l: 'Last Active',v: selectedStudent.lastActive < 1 ? Math.round(selectedStudent.lastActive*24) + 'h' : Math.round(selectedStudent.lastActive) + 'd', c: selectedStudent.lastActive < 2 ? '#86EFAC' : '#F0CC5A' },
+            ].map(stat => (
+              <div key={stat.l} style={{ padding: '14px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .7, marginBottom: 2, color: '#F0CC5A' }}>
+                  {stat.l}
+                </div>
+                <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: stat.c }}>
+                  {stat.v}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div style={{
+          display: 'flex',
+          background: '#FBFAF5',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--rmd)',
+          padding: 4, marginBottom: 18, gap: 2, flexWrap: 'wrap',
+        }}>
+          {[
+            { id: 'overview',      label: 'Overview' },
+            { id: 'mastery',       label: 'Mastery' },
+            { id: 'homework',      label: 'Homework' },
+            { id: 'exams',         label: 'Exams' },
+            { id: 'attendance',    label: 'Attendance' },
+            { id: 'communication', label: 'Notes & Comms' },
+          ].map(t => (
+            <button key={t.id} onClick={() => setDetailTab(t.id)}
+              style={{
+                flex: 1, minWidth: 100,
+                background: detailTab === t.id ? '#7D1025' : 'transparent',
+                color: detailTab === t.id ? '#FBFAF5' : '#64748B',
+                border: 'none', padding: '10px 14px',
+                borderRadius: 'var(--rsm)', cursor: 'pointer',
+                fontSize: 13, fontWeight: 700,
+                boxShadow: detailTab === t.id ? '0 4px 16px rgba(125,16,37,.15)' : 'none',
+              }}>{t.label}</button>
+          ))}
+        </div>
+
+        {/* OVERVIEW TAB */}
+        {detailTab === 'overview' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
+            {/* Quick Actions */}
+            <div className="card">
+              <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Quick Actions</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button className="btn btn-s" style={{ justifyContent: 'flex-start' }} onClick={() => messageStudent(selectedStudent)}>
+                  Send Message to {selectedStudent.parentName ? 'Parent' : 'Student'}
+                </button>
+                <button className="btn btn-s" style={{ justifyContent: 'flex-start' }} onClick={() => setPage('exambuilder')}>
+                  Assign Homework
+                </button>
+                <button className="btn btn-s" style={{ justifyContent: 'flex-start' }} onClick={() => setPage('exambuilder')}>
+                  Schedule Exam
+                </button>
+                <button className="btn btn-s" style={{ justifyContent: 'flex-start' }} onClick={() => toast?.info?.('Generating progress report...')}>
+                  Generate Progress Report
+                </button>
+              </div>
+            </div>
+
+            {/* Update status */}
+            <div className="card">
+              <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Update Status</div>
+              <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 10 }}>
+                Currently: <strong style={{ color: sty.color }}>{sty.label}</strong>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 6 }}>
+                {['excellent', 'on-track', 'needs-help', 'at-risk'].map(s => {
+                  const st = msStatusStyle(s)
+                  const isActive = selectedStudent.status === s
+                  return (
+                    <button key={s} onClick={() => updateStudentStatus(s)}
+                      style={{
+                        background: isActive ? st.color : st.bg,
+                        color: isActive ? '#fff' : st.color,
+                        border: '1.5px solid ' + (isActive ? st.color : st.borderColor),
+                        padding: '8px 10px', borderRadius: 'var(--rsm)',
+                        cursor: 'pointer', fontSize: 11.5, fontWeight: 700,
+                      }}>{st.label}</button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Recent activity */}
+            <div className="card" style={{ gridColumn: 'span 2' }}>
+              <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Recent Activity</div>
+              {studentRecentActivity.length === 0 ? (
+                <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
+                  No recent activity recorded for this student.
+                </div>
+              ) : (
+                studentRecentActivity.slice(0, 8).map((a, i) => (
+                  <div key={a.id || i} style={{
+                    display: 'flex', gap: 10, padding: '10px 0',
+                    borderBottom: i < studentRecentActivity.length - 1 ? '1px solid var(--border)' : 'none',
+                    alignItems: 'center',
+                  }}>
+                    <div style={{
+                      width: 30, height: 30, borderRadius: '50%',
+                      background: msSubjColour(a.subject) + '15', color: msSubjColour(a.subject),
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, fontWeight: 700, flexShrink: 0,
+                      fontFamily: 'JetBrains Mono, monospace',
+                    }}>{(a.type || 'A')[0].toUpperCase()}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, color: 'var(--s700)' }}>{a.action}</div>
+                      <div style={{ fontSize: 11, color: 'var(--s400)' }}>{msTimeAgo(a.when)}</div>
+                    </div>
+                    {a.score !== undefined && (
+                      <span className="mono" style={{
+                        fontSize: 12, fontWeight: 700,
+                        color: a.score >= 80 ? '#15803D' : a.score >= 60 ? '#B45309' : '#B91C1C',
+                      }}>{a.score}%</span>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Latest note */}
+            <div className="card" style={{ gridColumn: 'span 2' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <div className="ctitle" style={{ color: '#7D1025' }}>Latest Notes</div>
+                <button onClick={() => setDetailTab('communication')}
+                  style={{ background: 'transparent', border: 'none', color: '#7D1025', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                  View All -&gt;
+                </button>
+              </div>
+              {studentNotes.length === 0 ? (
+                <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
+                  No notes yet. Add your first observation in the Notes tab.
+                </div>
+              ) : (
+                studentNotes.slice(0, 3).map(note => (
+                  <div key={note.id} style={{
+                    background: '#FBFAF5', borderLeft: '3px solid #C9A030',
+                    padding: '10px 14px', borderRadius: 'var(--rsm)',
+                    marginBottom: 8, fontSize: 13, color: 'var(--s700)',
+                    lineHeight: 1.6,
+                  }}>
+                    <div style={{ marginBottom: 4 }}>{note.text}</div>
+                    <div style={{ fontSize: 10.5, color: 'var(--s400)' }}>
+                      {note.category} | {msTimeAgo(note.createdAt)}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* MASTERY TAB */}
+        {detailTab === 'mastery' && (
+          <div className="card">
+            <div className="ctitle" style={{ marginBottom: 14, color: '#7D1025' }}>Subject Mastery</div>
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontWeight: 700, fontSize: 14 }}>Overall Mastery</span>
+                <span className="mono" style={{ fontWeight: 700, color: '#7D1025' }}>{selectedStudent.mastery}%</span>
+              </div>
+              <div style={{ height: 12, background: '#FBFAF5', borderRadius: 6, overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%',
+                  width: selectedStudent.mastery + '%',
+                  background: 'linear-gradient(90deg, #7D1025, #C9A030)',
+                  borderRadius: 6,
+                }}/>
+              </div>
+            </div>
+
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#7D1025', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>
+              Per-Topic Breakdown (Sample)
+            </div>
+            {[
+              { topic: 'Algebra',           mastery: 82, attempts: 14 },
+              { topic: 'Pythagoras Theorem', mastery: 76, attempts: 9 },
+              { topic: 'Trigonometry',      mastery: 64, attempts: 7 },
+              { topic: 'Statistics',        mastery: 58, attempts: 5 },
+              { topic: 'Geometry',          mastery: 71, attempts: 11 },
+              { topic: 'Functions & Graphs', mastery: 49, attempts: 3 },
+            ].map(t => {
+              const tColor = t.mastery >= 80 ? '#15803D' : t.mastery >= 60 ? '#7D1025' : t.mastery >= 40 ? '#B45309' : '#B91C1C'
+              return (
+                <div key={t.topic} style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 13 }}>
+                    <span style={{ fontWeight: 600, color: 'var(--s700)' }}>{t.topic}</span>
+                    <span style={{ fontSize: 11, color: 'var(--s400)' }}>{t.attempts} sessions | <span className="mono" style={{ fontWeight: 700, color: tColor }}>{t.mastery}%</span></span>
+                  </div>
+                  <div style={{ height: 6, background: '#FBFAF5', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: t.mastery + '%', background: tColor, borderRadius: 3 }}/>
+                  </div>
+                </div>
+              )
+            })}
+            <div style={{
+              background: '#FBFAF5', borderLeft: '3px solid #C9A030',
+              padding: '10px 14px', borderRadius: 'var(--rsm)',
+              fontSize: 12, color: 'var(--s600)', marginTop: 14, fontStyle: 'italic',
+            }}>
+              Mastery data updates as students complete practice and exams. Real-time data will populate once the backend is connected.
+            </div>
+          </div>
+        )}
+
+        {/* HOMEWORK TAB */}
+        {detailTab === 'homework' && (
+          <div className="card">
+            <div className="ctitle" style={{ marginBottom: 14, color: '#7D1025' }}>Homework Assignments</div>
+            {studentHomework.length === 0 ? (
+              <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 36 }}>
+                No homework assignments yet for this student.
+              </div>
+            ) : (
+              studentHomework.map(h => (
+                <div key={h.id} style={{
+                  display: 'flex', gap: 12, padding: '12px 0',
+                  borderBottom: '1px solid var(--border)',
+                  alignItems: 'center',
+                }}>
+                  <div style={{
+                    width: 4, height: 36, borderRadius: 2,
+                    background: msSubjColour(h.subject), flexShrink: 0,
+                  }}/>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{h.homework}</div>
+                    <div style={{ fontSize: 12, color: 'var(--s500)' }}>
+                      {h.subject} | Submitted {msTimeAgo(h.submittedAt)} | {h.maxMarks} marks
+                    </div>
+                  </div>
+                  <button onClick={() => setPage('marking')} className="btn btn-s btn-sm">Grade</button>
+                </div>
+              ))
+            )}
+            <div style={{ textAlign: 'center', marginTop: 14 }}>
+              <button onClick={() => setPage('exambuilder')}
+                style={{
+                  background: '#7D1025', color: '#FBFAF5', border: 'none',
+                  padding: '10px 18px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                }}>Assign New Homework</button>
+            </div>
+          </div>
+        )}
+
+        {/* EXAMS TAB */}
+        {detailTab === 'exams' && (
+          <div className="card">
+            <div className="ctitle" style={{ marginBottom: 14, color: '#7D1025' }}>Exam History</div>
+            <div style={{
+              background: '#FBFAF5', borderLeft: '3px solid #C9A030',
+              padding: '10px 14px', borderRadius: 'var(--rsm)',
+              fontSize: 13, color: 'var(--s600)', marginBottom: 14, fontStyle: 'italic',
+            }}>
+              Exam history will populate once exams are scheduled. Use the Exam Builder to create scheduled exams with locked start times.
+            </div>
+            <div style={{ textAlign: 'center', padding: 24 }}>
+              <button onClick={() => setPage('exambuilder')}
+                style={{
+                  background: '#7D1025', color: '#FBFAF5', border: 'none',
+                  padding: '10px 18px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                }}>Schedule Exam for {selectedStudent.name}</button>
+            </div>
+          </div>
+        )}
+
+        {/* ATTENDANCE TAB */}
+        {detailTab === 'attendance' && (
+          <div className="card">
+            <div className="ctitle" style={{ marginBottom: 14, color: '#7D1025' }}>Class Attendance</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, marginBottom: 18 }}>
+              {[
+                ['Overall',        selectedStudent.attendance + '%',                                  '#7D1025'],
+                ['Classes Held',    classHistory.length,                                              '#7D1025'],
+                ['Attended',        classHistory.filter(c => c.attended.includes(selectedStudent.name)).length, '#15803D'],
+                ['Missed',          classHistory.filter(c => c.missed?.includes(selectedStudent.name)).length,  '#B91C1C'],
+              ].map(([l, v, c]) => (
+                <div key={l} style={{ background: '#FBFAF5', padding: '12px 14px', borderRadius: 'var(--rsm)' }}>
+                  <div style={{ fontSize: 10, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, marginBottom: 2 }}>{l}</div>
+                  <div className="mono" style={{ fontSize: 18, fontWeight: 700, color: c }}>{v}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#7D1025', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>
+              Class-by-Class Log
+            </div>
+            {classHistory.length === 0 ? (
+              <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
+                No class history yet.
+              </div>
+            ) : (
+              classHistory.map(cls => {
+                const wasPresent = cls.attended.includes(selectedStudent.name)
+                const wasLate = cls.late?.includes(selectedStudent.name)
+                return (
+                  <div key={cls.id} style={{
+                    display: 'flex', gap: 12, padding: '10px 0',
+                    borderBottom: '1px solid var(--border)',
+                    alignItems: 'center',
+                  }}>
+                    <div style={{
+                      width: 4, height: 32, borderRadius: 2,
+                      background: msSubjColour(cls.subject), flexShrink: 0,
+                    }}/>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13.5 }}>{cls.topic}</div>
+                      <div style={{ fontSize: 11, color: 'var(--s500)' }}>{cls.subject} | {msTimeAgo(cls.date)}</div>
+                    </div>
+                    <span style={{
+                      background: wasPresent ? '#DCFCE7' : '#FEE2E2',
+                      color: wasPresent ? '#15803D' : '#B91C1C',
+                      fontSize: 10, fontWeight: 700, letterSpacing: '.06em',
+                      padding: '3px 10px', borderRadius: 99, textTransform: 'uppercase',
+                    }}>
+                      {wasPresent ? (wasLate ? 'Late' : 'Present') : 'Absent'}
+                    </span>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        )}
+
+        {/* COMMUNICATION / NOTES TAB */}
+        {detailTab === 'communication' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
+            {/* Add note */}
+            <div className="card">
+              <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Add Note</div>
+              <div className="fg">
+                <label className="fl">Category</label>
+                <select className="fsel" value={noteCategory} onChange={e => setNoteCategory(e.target.value)}>
+                  <option value="observation">Observation</option>
+                  <option value="behavior">Behavior</option>
+                  <option value="parent-comm">Parent Communication</option>
+                  <option value="intervention">Intervention</option>
+                  <option value="achievement">Achievement</option>
+                </select>
+              </div>
+              <div className="fg" style={{ marginBottom: 12 }}>
+                <label className="fl">Note</label>
+                <textarea className="fi" rows={4} value={newNoteText} onChange={e => setNewNoteText(e.target.value)}
+                  placeholder="Write your observation or note about this student..."
+                  style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
+              </div>
+              <button onClick={addNote}
+                style={{
+                  background: '#7D1025', color: '#FBFAF5', border: 'none',
+                  padding: '10px 18px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 13, fontWeight: 700, width: '100%',
+                }}>Save Note</button>
+              <div style={{
+                background: '#FBFAF5', borderLeft: '3px solid #C9A030',
+                padding: '8px 12px', borderRadius: 'var(--rsm)',
+                fontSize: 11.5, color: 'var(--s500)', marginTop: 12, fontStyle: 'italic',
+              }}>
+                Notes are private to teaching staff. They help track patterns over time.
+              </div>
+            </div>
+
+            {/* All notes */}
+            <div className="card">
+              <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>
+                All Notes <span style={{ fontWeight: 400, color: 'var(--s400)' }}>({studentNotes.length})</span>
+              </div>
+              {studentNotes.length === 0 ? (
+                <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
+                  No notes yet. Add your first observation.
+                </div>
+              ) : (
+                studentNotes.map(note => (
+                  <div key={note.id} style={{
+                    background: '#FBFAF5', borderLeft: '3px solid #C9A030',
+                    padding: '12px 14px', borderRadius: 'var(--rsm)',
+                    marginBottom: 8,
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
+                      <span style={{
+                        background: '#7D1025', color: '#FBFAF5',
+                        fontSize: 9.5, fontWeight: 700, letterSpacing: '.06em',
+                        padding: '2px 7px', borderRadius: 99, textTransform: 'uppercase',
+                      }}>{note.category}</span>
+                      <button onClick={() => deleteNote(note.id)}
+                        style={{
+                          background: 'transparent', border: 'none', color: 'var(--s400)',
+                          fontSize: 11, cursor: 'pointer',
+                        }}>Delete</button>
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--s700)', lineHeight: 1.6, marginBottom: 4 }}>
+                      {note.text}
+                    </div>
+                    <div style={{ fontSize: 10.5, color: 'var(--s400)' }}>
+                      {note.author} | {msTimeAgo(note.createdAt)}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ── ROSTER VIEW ─────────────────────────────────────
+  return (
+    <div>
+      {/* Hero — CRIMSON theme */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+        color: '#FBFAF5',
+      }}>
+        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>
+              My Students
+            </div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              Your Roster
+            </h1>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              {rosterStats.total} students | Class average mastery {rosterStats.avgMastery}% | Attendance {rosterStats.avgAttendance}%
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+          {[
+            ['Total',      rosterStats.total,      '#FBFAF5'],
+            ['Excellent',  rosterStats.excellent,  '#86EFAC'],
+            ['On Track',   rosterStats.onTrack,    '#F0CC5A'],
+            ['Needs Help', rosterStats.needsHelp,  '#FCD34D'],
+            ['At Risk',    rosterStats.atRisk,     '#FCA5A5'],
+          ].map(([l, v, c]) => (
+            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .7, marginBottom: 2, color: '#F0CC5A' }}>{l}</div>
+              <div style={{ fontSize: 16, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: c }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="card" style={{ marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Search</label>
+            <input className="fi" placeholder="Search by student or parent name..."
+              value={searchQ} onChange={e => setSearchQ(e.target.value)} style={{ width: '100%' }}/>
+          </div>
+          <div style={{ minWidth: 130 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Status</label>
+            <select className="fsel" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ width: '100%' }}>
+              <option value="all">All</option>
+              <option value="excellent">Excellent</option>
+              <option value="on-track">On Track</option>
+              <option value="needs-help">Needs Help</option>
+              <option value="at-risk">At Risk</option>
+            </select>
+          </div>
+          <div style={{ minWidth: 130 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Year</label>
+            <select className="fsel" value={filterYear} onChange={e => setFilterYear(e.target.value)} style={{ width: '100%' }}>
+              <option value="all">All</option>
+              {allYears.map(y => <option key={y}>{y}</option>)}
+            </select>
+          </div>
+          <div style={{ minWidth: 160 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Sort By</label>
+            <select className="fsel" value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ width: '100%' }}>
+              <option value="priority">Priority (At-risk first)</option>
+              <option value="name">Name (A-Z)</option>
+              <option value="mastery-high">Mastery (High to Low)</option>
+              <option value="mastery-low">Mastery (Low to High)</option>
+              <option value="attendance-low">Attendance (Low first)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Results count */}
+      <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 10 }}>
+        Showing <strong style={{ color: '#7D1025' }}>{sortedStudents.length}</strong> of {rosterStats.total} students
+      </div>
+
+      {/* Student grid */}
+      {sortedStudents.length === 0 ? (
+        <div className="card" style={{ padding: 36, textAlign: 'center' }}>
+          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>No students match these filters</h3>
+          <p style={{ fontSize: 13.5, color: 'var(--s500)' }}>Try clearing some filters.</p>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+          {sortedStudents.map(s => {
+            const sty = msStatusStyle(s.status)
+            return (
+              <div key={s.id} onClick={() => openDetail(s)}
+                style={{
+                  border: '1.5px solid var(--border)',
+                  borderRadius: 'var(--rmd)',
+                  padding: 14,
+                  cursor: 'pointer',
+                  background: '#FBFAF5',
+                  transition: 'all .15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#7D1025'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(125,16,37,.15)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: '50%',
+                    background: msAvatarColor(s.name), color: '#FBFAF5',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 700, fontSize: 14, flexShrink: 0,
+                    fontFamily: "'Instrument Serif', serif",
+                  }}>{s.initials}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--s500)' }}>{s.curriculum} {s.year}</div>
+                  </div>
+                  <span style={{
+                    background: sty.bg, color: sty.color,
+                    border: '1px solid ' + sty.borderColor,
+                    fontSize: 10, fontWeight: 700, letterSpacing: '.04em',
+                    padding: '3px 8px', borderRadius: 99, flexShrink: 0,
+                  }}>{sty.label}</span>
+                </div>
+
+                {/* Mastery bar */}
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span style={{ fontSize: 11, color: 'var(--s500)', fontWeight: 600 }}>Mastery</span>
+                    <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: sty.color }}>{s.mastery}%</span>
+                  </div>
+                  <div style={{ height: 6, borderRadius: 3, background: '#FFF', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: s.mastery + '%', background: sty.color, borderRadius: 3 }}/>
+                  </div>
+                </div>
+
+                {/* Bottom stats */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--s500)', marginBottom: 10 }}>
+                  <span>HW: <strong style={{ color: s.hwSubmitted < s.hwTotal ? '#B45309' : '#15803D' }}>{s.hwSubmitted}/{s.hwTotal}</strong></span>
+                  <span>Att: <strong style={{ color: s.attendance >= 85 ? '#15803D' : '#B45309' }}>{s.attendance}%</strong></span>
+                  <span>Active: {s.lastActive < 1 ? Math.round(s.lastActive * 24) + 'h' : Math.round(s.lastActive) + 'd'}</span>
+                </div>
+
+                {/* Quick action */}
+                <div style={{ display: 'flex', gap: 6, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+                  <button onClick={e => { e.stopPropagation(); messageStudent(s) }}
+                    style={{
+                      flex: 1, background: '#FBFAF5', color: '#7D1025',
+                      border: '1px solid #F4C5C5',
+                      padding: '6px 10px', borderRadius: 'var(--rsm)',
+                      cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                    }}>Message</button>
+                  <button onClick={e => { e.stopPropagation(); openDetail(s) }}
+                    style={{
+                      flex: 1, background: '#7D1025', color: '#FBFAF5',
+                      border: 'none',
+                      padding: '6px 10px', borderRadius: 'var(--rsm)',
+                      cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                    }}>View Profile</button>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
