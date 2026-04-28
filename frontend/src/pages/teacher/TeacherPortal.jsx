@@ -418,14 +418,8 @@ export default function TeacherPortal() {
         <div className="content" style={{animation:'fadeIn .25s ease'}}>
 
           {/* ── DASHBOARD ── */}
-          
-          {/* ── LIVE CLASSROOM ── */}
-          {page === 'classroom' && (
-            <LiveClassroom
-              role="teacher"
-              onLeave={() => { setPage('dashboard'); toast.ok('Session ended. Recording saved.') }}
-            />
-          )}
+          {page === 'dashboard' && <TeacherDashboardTab user={user} store={store} setPage={setPage} setUploadModal={setUploadModal} toast={toast} />}
+          {page === 'classroom' && <TeacherLiveLessonsTab user={user} store={store} setPage={setPage} toast={toast} />}
 
           {/* ── MY STUDENTS ── */}
           {page === 'students' && (
@@ -1979,3 +1973,693 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
     </div>
   )
 }
+
+// ═══════════════════════════════════════════════════════════
+// TEACHER LIVE LESSONS TAB — pre-class, in-class, post-class
+// ═══════════════════════════════════════════════════════════
+ 
+const LIVE_CLASS_ACTIVE_KEY    = 'sm_live_class_active'
+const LIVE_CLASS_ATTENDEES_KEY = 'sm_live_class_attendees'
+const ATTENDANCE_RECORDS_KEY   = 'sm_attendance_records'
+const CLASS_HISTORY_KEY        = 'sm_teacher_class_history'
+const CLASS_NOTES_KEY          = 'sm_teacher_class_notes'
+ 
+const liveLessonSubjColours = {
+  'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
+  'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
+  'Geography': '#0F766E', 'Computer Science': '#1F2937',
+}
+const liveLessonSubjColour = (s) => liveLessonSubjColours[s] || '#8B1A2E'
+ 
+const liveLessonTimeAgo = (iso) => {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  if (hours < 24) return `${hours}h ago`
+  if (days === 1) return 'yesterday'
+  if (days < 7) return `${days}d ago`
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+ 
+const liveLessonFormatTime = (mins) => {
+  let h = Math.floor(mins / 60)
+  const m = mins % 60
+  const mer = h >= 12 ? 'PM' : 'AM'
+  h = h % 12
+  if (h === 0) h = 12
+  return `${h}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
+}
+ 
+// Seed sample class history so the History tab has something to show
+const LIVE_LESSONS_SEEDED_KEY = 'sm_live_lessons_seeded'
+const seedLiveLessonsData = () => {
+  if (localStorage.getItem(LIVE_LESSONS_SEEDED_KEY)) return
+  const sampleHistory = [
+    {
+      id: 'cls-001',
+      subject: 'Mathematics',
+      topic: 'Pythagoras Theorem',
+      date: new Date(Date.now() - 1 * 86400000).toISOString(),
+      durationMins: 58,
+      enrolled: ['Amara Osei', 'Kofi Mensah', 'Zara Kamau', 'Brian Otieno', 'Faith Wanjiru', 'David Mwangi', 'Lydia Achieng', 'Peter Kamau'],
+      attended: ['Amara Osei', 'Kofi Mensah', 'Zara Kamau', 'Brian Otieno', 'Faith Wanjiru', 'Lydia Achieng', 'Peter Kamau'],
+      missed: ['David Mwangi'],
+      late: ['Peter Kamau'],
+      notes: 'Covered Pythagorean triples and word problems. Most students grasped the concept well. David missed - send catch-up.',
+    },
+    {
+      id: 'cls-002',
+      subject: 'Mathematics',
+      topic: 'Algebraic Expressions',
+      date: new Date(Date.now() - 3 * 86400000).toISOString(),
+      durationMins: 60,
+      enrolled: ['Amara Osei', 'Kofi Mensah', 'Zara Kamau', 'Brian Otieno', 'Faith Wanjiru', 'David Mwangi', 'Lydia Achieng', 'Peter Kamau'],
+      attended: ['Amara Osei', 'Kofi Mensah', 'Zara Kamau', 'Faith Wanjiru', 'David Mwangi', 'Lydia Achieng', 'Peter Kamau'],
+      missed: ['Brian Otieno'],
+      late: [],
+      notes: 'Introduction to factorisation. Faith asked excellent questions. Plan to assign 5 practice problems.',
+    },
+    {
+      id: 'cls-003',
+      subject: 'Mathematics',
+      topic: 'Linear Equations Review',
+      date: new Date(Date.now() - 5 * 86400000).toISOString(),
+      durationMins: 45,
+      enrolled: ['Amara Osei', 'Kofi Mensah', 'Zara Kamau', 'Brian Otieno', 'Faith Wanjiru', 'David Mwangi', 'Lydia Achieng', 'Peter Kamau'],
+      attended: ['Amara Osei', 'Kofi Mensah', 'Brian Otieno', 'Faith Wanjiru', 'Lydia Achieng', 'Peter Kamau'],
+      missed: ['Zara Kamau', 'David Mwangi'],
+      late: ['Brian Otieno'],
+      notes: 'Quick review session. Students requested more practice on word problems.',
+    },
+  ]
+  localStorage.setItem(CLASS_HISTORY_KEY, JSON.stringify(sampleHistory))
+  localStorage.setItem(LIVE_LESSONS_SEEDED_KEY, '1')
+}
+ 
+const loadClassHistory = () => {
+  try { return JSON.parse(localStorage.getItem(CLASS_HISTORY_KEY) || '[]') } catch { return [] }
+}
+const saveClassHistory = (h) => {
+  try { localStorage.setItem(CLASS_HISTORY_KEY, JSON.stringify(h.slice(-50))) } catch {}
+}
+ 
+const loadLiveAttendees = () => {
+  try { return JSON.parse(localStorage.getItem(LIVE_CLASS_ATTENDEES_KEY) || '[]') } catch { return [] }
+}
+ 
+const setLiveClassActive = (roomData) => {
+  if (roomData) {
+    try { localStorage.setItem(LIVE_CLASS_ACTIVE_KEY, JSON.stringify(roomData)) } catch {}
+  } else {
+    try { localStorage.removeItem(LIVE_CLASS_ACTIVE_KEY) } catch {}
+    try { localStorage.removeItem(LIVE_CLASS_ATTENDEES_KEY) } catch {}
+  }
+}
+ 
+function TeacherLiveLessonsTab({ user, store, setPage, toast }) {
+  // Seed data on first load
+  useEffect(() => { seedLiveLessonsData() }, [])
+ 
+  // View state: 'hub' (manage) | 'live' (in whiteboard)
+  const [view, setView] = useState('hub')
+  const [activeRoom, setActiveRoom] = useState(null)
+  const [hubTab, setHubTab] = useState('today')  // 'today' | 'week' | 'history'
+  const [historyDetail, setHistoryDetail] = useState(null)
+  const [tick, setTick] = useState(0)
+ 
+  // Refresh every 30s for live status
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 30000)
+    return () => clearInterval(id)
+  }, [])
+ 
+  const teacherFirstName = user?.firstName || 'Teacher'
+  const teacherLastName = user?.lastName || ''
+  const teacherFullName = `${teacherFirstName} ${teacherLastName}`.trim()
+ 
+  // Filter rooms to this teacher
+  const allRooms = store?.groupRooms || []
+  const myRooms = allRooms.filter(r =>
+    r.teacher === teacherFullName ||
+    r.teacher === `Mr. ${teacherLastName}` ||
+    r.teacher === `Ms. ${teacherLastName}` ||
+    r.teacher === `Mrs. ${teacherLastName}` ||
+    r.teacher === `Dr. ${teacherLastName}` ||
+    r.teacher?.includes(teacherLastName)
+  )
+ 
+  // Compute class status for each room based on schedule
+  const now = new Date()
+  const todayDow = now.getDay()
+  const nowMins = now.getHours() * 60 + now.getMinutes()
+ 
+  const enrichedRooms = myRooms.map(room => {
+    let parsed = null
+    if (typeof parseScheduleString === 'function') {
+      parsed = parseScheduleString(room.schedule)
+    }
+    if (!parsed) return { ...room, schedule_parsed: null, today: false, status: 'unscheduled' }
+ 
+    const isToday = parsed.days?.includes(todayDow)
+    let status = 'upcoming-week'
+    if (isToday) {
+      if (nowMins >= parsed.endMins) status = 'done-today'
+      else if (nowMins >= parsed.startMins) status = 'live-eligible'
+      else if (parsed.startMins - nowMins <= 30) status = 'starting-soon'
+      else status = 'upcoming-today'
+    }
+    return { ...room, schedule_parsed: parsed, today: isToday, status }
+  })
+ 
+  const todayRooms = enrichedRooms.filter(r => r.today).sort((a, b) => (a.schedule_parsed?.startMins || 0) - (b.schedule_parsed?.startMins || 0))
+  const weekRooms = enrichedRooms.sort((a, b) => {
+    const aMins = (a.schedule_parsed?.days?.[0] || 7) * 1440 + (a.schedule_parsed?.startMins || 0)
+    const bMins = (b.schedule_parsed?.days?.[0] || 7) * 1440 + (b.schedule_parsed?.startMins || 0)
+    return aMins - bMins
+  })
+ 
+  const classHistory = loadClassHistory()
+ 
+  // ── ACTIONS ─────────────────────────────────────────
+  const startClass = (room) => {
+    setActiveRoom(room)
+    setView('live')
+    // Signal class is live (students reading this key see "Live Now")
+    setLiveClassActive({
+      roomId: room.id,
+      roomName: room.name,
+      subject: room.subject,
+      teacher: teacherFullName,
+      startedAt: new Date().toISOString(),
+    })
+    toast?.ok?.(`Started ${room.subject} class. ${room.students?.length || 0} students notified.`)
+  }
+ 
+  const endClass = () => {
+    // Save attendance to history
+    if (activeRoom) {
+      const attendees = loadLiveAttendees()
+      const enrolled = activeRoom.students || []
+      const attendedNames = attendees.map(a => a.studentName)
+      const missed = enrolled.filter(name => !attendedNames.includes(name))
+ 
+      const newSession = {
+        id: 'cls-' + Date.now(),
+        subject: activeRoom.subject,
+        topic: activeRoom.name || activeRoom.subject + ' Class',
+        date: new Date().toISOString(),
+        durationMins: 60,  // Could compute from startedAt
+        enrolled,
+        attended: attendedNames,
+        missed,
+        late: attendees.filter(a => a.late).map(a => a.studentName),
+        notes: '',
+      }
+      const newHistory = [newSession, ...classHistory]
+      saveClassHistory(newHistory)
+    }
+ 
+    setLiveClassActive(null)
+    setActiveRoom(null)
+    setView('hub')
+    toast?.ok?.('Session ended. Attendance recorded.')
+  }
+ 
+  // ── RENDER: LIVE WHITEBOARD ─────────────────────────
+  if (view === 'live' && activeRoom) {
+    return (
+      <div>
+        {/* Active class banner */}
+        <div style={{
+          background: 'linear-gradient(135deg, #DC2626, #991B1B)',
+          color: '#fff',
+          padding: '12px 22px',
+          borderRadius: 'var(--rmd)',
+          marginBottom: 14,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+          flexWrap: 'wrap',
+        }}>
+          <div style={{
+            width: 12, height: 12, borderRadius: '50%',
+            background: '#FCA5A5', flexShrink: 0,
+            animation: 'pulse 1.5s infinite',
+          }}/>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>
+              LIVE: {activeRoom.subject} - {activeRoom.name}
+            </div>
+            <div style={{ fontSize: 12, opacity: .85 }}>
+              {(activeRoom.students?.length || 0)} students enrolled - attendance is being tracked
+            </div>
+          </div>
+          <button
+            onClick={endClass}
+            style={{
+              background: 'rgba(255,255,255,.15)',
+              border: '1px solid rgba(255,255,255,.4)',
+              color: '#fff',
+              padding: '8px 16px',
+              borderRadius: 'var(--rmd)',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 700,
+            }}
+          >
+            End Class
+          </button>
+        </div>
+ 
+        {/* Render the whiteboard */}
+        <LiveClassroom
+          role="teacher"
+          onLeave={endClass}
+        />
+      </div>
+    )
+  }
+ 
+  // ── RENDER: HUB ─────────────────────────────────────
+  return (
+    <div>
+      {/* Hero */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%)',
+        color: '#fff',
+      }}>
+        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+              Live Lessons
+            </div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              Your Classes
+            </h1>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              {todayRooms.length} class{todayRooms.length === 1 ? '' : 'es'} today
+              {todayRooms.filter(r => r.status === 'live-eligible').length > 0 && (
+                <> · <span style={{ color: '#FCA5A5', fontWeight: 700 }}>1 LIVE</span></>
+              )}
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.2)' }}>
+          {[
+            ['Today',     todayRooms.length],
+            ['This Week', myRooms.length],
+            ['Total Hours', myRooms.length * 2 + 'h'],
+            ['History',   classHistory.length],
+          ].map(([l, v]) => (
+            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
+                {l}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+ 
+      {/* Tab switcher */}
+      <div style={{
+        display: 'flex',
+        background: 'var(--bg)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--rmd)',
+        padding: 4,
+        marginBottom: 18,
+        gap: 2,
+        flexWrap: 'wrap',
+      }}>
+        {[
+          { id: 'today',   label: 'Today' },
+          { id: 'week',    label: 'This Week' },
+          { id: 'history', label: 'History' },
+        ].map(t => (
+          <button
+            key={t.id}
+            onClick={() => setHubTab(t.id)}
+            style={{
+              flex: 1, minWidth: 100,
+              background: hubTab === t.id ? 'var(--white)' : 'transparent',
+              color: hubTab === t.id ? 'var(--b700)' : 'var(--s500)',
+              border: 'none',
+              padding: '10px 16px',
+              borderRadius: 'var(--rsm)',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 700,
+              boxShadow: hubTab === t.id ? '0 4px 16px rgba(10,8,6,.10)' : 'none',
+            }}
+          >{t.label}</button>
+        ))}
+      </div>
+ 
+      {/* TODAY TAB */}
+      {hubTab === 'today' && (
+        <>
+          {todayRooms.length === 0 ? (
+            <div className="card" style={{ padding: 36, textAlign: 'center' }}>
+              <div style={{ width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%', background: 'var(--s100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="1.5" strokeLinecap="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </div>
+              <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>No classes scheduled today</h3>
+              <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto' }}>
+                Enjoy your day, or use this time to prepare materials and grade pending submissions.
+              </p>
+            </div>
+          ) : todayRooms.map(room => {
+            const col = liveLessonSubjColour(room.subject)
+            const enrolledCount = room.students?.length || 0
+            const isLive = room.status === 'live-eligible'
+            const isStartingSoon = room.status === 'starting-soon'
+            const isDone = room.status === 'done-today'
+            const isUpcoming = room.status === 'upcoming-today'
+            return (
+              <div key={room.id} className="card" style={{
+                marginBottom: 12, padding: 0, overflow: 'hidden',
+                borderLeft: `4px solid ${col}`,
+              }}>
+                <div style={{ padding: '18px 22px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 14, flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: 200 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: col }}>
+                          {room.subject}
+                        </div>
+                        {isLive && (
+                          <span style={{
+                            background: '#FEE2E2', color: '#991B1B',
+                            fontSize: 10, fontWeight: 800, letterSpacing: '.06em',
+                            padding: '3px 8px', borderRadius: 99,
+                          }}>LIVE NOW</span>
+                        )}
+                        {isStartingSoon && (
+                          <span style={{
+                            background: 'var(--a50)', color: 'var(--a600)',
+                            fontSize: 10, fontWeight: 800, letterSpacing: '.06em',
+                            padding: '3px 8px', borderRadius: 99,
+                          }}>STARTING SOON</span>
+                        )}
+                        {isDone && (
+                          <span style={{
+                            background: 'var(--s100)', color: 'var(--s500)',
+                            fontSize: 10, fontWeight: 800, letterSpacing: '.06em',
+                            padding: '3px 8px', borderRadius: 99,
+                          }}>DONE</span>
+                        )}
+                      </div>
+                      <h3 className="serif" style={{ fontSize: 20, color: 'var(--s900)', margin: '0 0 4px' }}>
+                        {room.name}
+                      </h3>
+                      <div style={{ fontSize: 13, color: 'var(--s500)' }}>
+                        {liveLessonFormatTime(room.schedule_parsed?.startMins || 0)} - {liveLessonFormatTime(room.schedule_parsed?.endMins || 0)}
+                        {' · '}{enrolledCount} student{enrolledCount === 1 ? '' : 's'} enrolled
+                        {' · '}{room.curriculum || 'IGCSE'} {room.grade || ''}
+                      </div>
+                    </div>
+                    {/* Actions */}
+                    <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                      {(isLive || isStartingSoon) && (
+                        <button
+                          onClick={() => startClass(room)}
+                          style={{
+                            background: isLive ? '#DC2626' : col,
+                            color: '#fff', border: 'none',
+                            padding: '10px 20px', borderRadius: 'var(--rmd)',
+                            cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                            display: 'flex', alignItems: 'center', gap: 6,
+                            boxShadow: '0 4px 12px ' + (isLive ? 'rgba(220,38,38,.3)' : col + '40'),
+                          }}
+                        >
+                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                          </svg>
+                          {isLive ? 'Join Live Class' : 'Start Class'}
+                        </button>
+                      )}
+                      {isUpcoming && (
+                        <button
+                          onClick={() => startClass(room)}
+                          style={{
+                            background: 'transparent',
+                            color: col, border: `1.5px solid ${col}`,
+                            padding: '10px 20px', borderRadius: 'var(--rmd)',
+                            cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                          }}
+                        >
+                          Start Early
+                        </button>
+                      )}
+                      {isDone && (
+                        <button
+                          className="btn btn-s btn-sm"
+                          onClick={() => toast?.info?.('Recording will be available within 1 hour.')}
+                        >
+                          View Recording
+                        </button>
+                      )}
+                    </div>
+                  </div>
+ 
+                  {/* Enrolled students preview */}
+                  {enrolledCount > 0 && (
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 8 }}>
+                        Enrolled students
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {(room.students || []).slice(0, 10).map((studentName, i) => (
+                          <span key={i} style={{
+                            background: col + '0F',
+                            color: col,
+                            border: `1px solid ${col}30`,
+                            fontSize: 11, fontWeight: 600,
+                            padding: '4px 10px',
+                            borderRadius: 99,
+                          }}>{studentName}</span>
+                        ))}
+                        {enrolledCount > 10 && (
+                          <span style={{
+                            background: 'var(--bg)',
+                            color: 'var(--s500)',
+                            fontSize: 11, fontWeight: 600,
+                            padding: '4px 10px',
+                            borderRadius: 99,
+                          }}>+{enrolledCount - 10} more</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </>
+      )}
+ 
+      {/* WEEK TAB */}
+      {hubTab === 'week' && (
+        <>
+          {weekRooms.length === 0 ? (
+            <div className="card" style={{ padding: 36, textAlign: 'center', color: 'var(--s500)' }}>
+              No classes assigned yet
+            </div>
+          ) : weekRooms.map(room => {
+            const col = liveLessonSubjColour(room.subject)
+            const enrolledCount = room.students?.length || 0
+            return (
+              <div key={room.id} className="card" style={{
+                marginBottom: 10, padding: 14,
+                borderLeft: `4px solid ${col}`,
+                display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+              }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: col, marginBottom: 2 }}>
+                    {room.subject}
+                  </div>
+                  <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)' }}>{room.name}</div>
+                  <div style={{ fontSize: 12.5, color: 'var(--s500)', marginTop: 2 }}>
+                    {room.schedule} · {enrolledCount} students
+                  </div>
+                </div>
+                <button className="btn btn-s btn-sm" onClick={() => toast?.info?.('Material preparation coming soon.')}>
+                  Prepare Materials
+                </button>
+              </div>
+            )
+          })}
+        </>
+      )}
+ 
+      {/* HISTORY TAB */}
+      {hubTab === 'history' && (
+        <>
+          {classHistory.length === 0 ? (
+            <div className="card" style={{ padding: 36, textAlign: 'center', color: 'var(--s500)' }}>
+              No past classes yet
+            </div>
+          ) : classHistory.map(session => {
+            const col = liveLessonSubjColour(session.subject)
+            const attendanceRate = session.enrolled.length > 0
+              ? Math.round((session.attended.length / session.enrolled.length) * 100)
+              : 0
+            return (
+              <div key={session.id} className="card" style={{
+                marginBottom: 10, padding: 14,
+                borderLeft: `4px solid ${col}`,
+                cursor: 'pointer',
+              }}
+              onClick={() => setHistoryDetail(session)}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, flexWrap: 'wrap' }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: col }}>
+                        {session.subject}
+                      </div>
+                      <span style={{ fontSize: 11, color: 'var(--s500)' }}>
+                        {liveLessonTimeAgo(session.date)} - {session.durationMins} min
+                      </span>
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)' }}>{session.topic}</div>
+                  </div>
+                  <div style={{ textAlign: 'center', minWidth: 80 }}>
+                    <div className="mono" style={{
+                      fontSize: 18, fontWeight: 700,
+                      color: attendanceRate >= 80 ? 'var(--g600)' : attendanceRate >= 60 ? 'var(--a600)' : 'var(--r500)',
+                    }}>
+                      {attendanceRate}%
+                    </div>
+                    <div style={{ fontSize: 10, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                      Attendance
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'center', minWidth: 70 }}>
+                    <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--s700)' }}>
+                      {session.attended.length}/{session.enrolled.length}
+                    </div>
+                    <div style={{ fontSize: 10, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                      Present
+                    </div>
+                  </div>
+                  {session.missed.length > 0 && (
+                    <div style={{ textAlign: 'center', minWidth: 70 }}>
+                      <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--r500)' }}>
+                        {session.missed.length}
+                      </div>
+                      <div style={{ fontSize: 10, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                        Missed
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </>
+      )}
+ 
+      {/* HISTORY DETAIL MODAL */}
+      {historyDetail && (
+        <div onClick={() => setHistoryDetail(null)} style={{
+          position: 'fixed', inset: 0, background: 'rgba(15,23,42,.65)', zIndex: 200,
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 20, overflowY: 'auto',
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: 'var(--white)', borderRadius: 'var(--rxl)',
+            maxWidth: 720, width: '100%', overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,.3)', marginTop: 40, marginBottom: 40,
+          }}>
+            <div style={{
+              padding: '22px 28px',
+              background: `linear-gradient(135deg, ${liveLessonSubjColour(historyDetail.subject)}, ${liveLessonSubjColour(historyDetail.subject)}DD)`,
+              color: '#fff',
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .8, marginBottom: 4 }}>
+                {historyDetail.subject} · {liveLessonTimeAgo(historyDetail.date)}
+              </div>
+              <h3 className="serif" style={{ fontSize: 22, margin: 0 }}>{historyDetail.topic}</h3>
+              <div style={{ fontSize: 13, opacity: .9, marginTop: 4 }}>
+                {historyDetail.durationMins} minutes - {historyDetail.attended.length}/{historyDetail.enrolled.length} attended
+              </div>
+            </div>
+ 
+            <div style={{ padding: '20px 28px', maxHeight: '60vh', overflowY: 'auto' }}>
+              {/* Attended */}
+              <div style={{ marginBottom: 20 }}>
+                <div className="sec-tag" style={{ marginBottom: 8 }}>Attended ({historyDetail.attended.length})</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {historyDetail.attended.map((name, i) => (
+                    <span key={i} style={{
+                      background: 'var(--g50)', color: 'var(--g700)',
+                      border: '1px solid var(--g100)',
+                      fontSize: 12, fontWeight: 600,
+                      padding: '4px 10px', borderRadius: 99,
+                    }}>{name}{historyDetail.late?.includes(name) ? ' (late)' : ''}</span>
+                  ))}
+                </div>
+              </div>
+ 
+              {/* Missed */}
+              {historyDetail.missed.length > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                  <div className="sec-tag" style={{ marginBottom: 8, color: 'var(--r600)' }}>Missed ({historyDetail.missed.length})</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                    {historyDetail.missed.map((name, i) => (
+                      <span key={i} style={{
+                        background: 'var(--r50)', color: 'var(--r600)',
+                        border: '1px solid var(--r100)',
+                        fontSize: 12, fontWeight: 600,
+                        padding: '4px 10px', borderRadius: 99,
+                      }}>{name}</span>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <button
+                      className="btn btn-s btn-sm"
+                      onClick={() => { setHistoryDetail(null); toast?.info?.(`Send catch-up message to ${historyDetail.missed.length} students - opens messaging soon.`) }}
+                    >
+                      Send Catch-Up Message
+                    </button>
+                    <button
+                      className="btn btn-s btn-sm"
+                      onClick={() => { setHistoryDetail(null); setPage('exambuilder') }}
+                    >
+                      Assign Catch-Up Homework
+                    </button>
+                  </div>
+                </div>
+              )}
+ 
+              {/* Notes */}
+              {historyDetail.notes && (
+                <div>
+                  <div className="sec-tag" style={{ marginBottom: 8 }}>My Notes</div>
+                  <div style={{
+                    background: 'var(--bg)', borderLeft: '3px solid var(--b500, #3B82F6)',
+                    padding: '10px 14px', borderRadius: 'var(--rsm)',
+                    fontSize: 13.5, color: 'var(--s700)', fontStyle: 'italic', lineHeight: 1.6,
+                  }}>
+                    {historyDetail.notes}
+                  </div>
+                </div>
+              )}
+            </div>
+ 
+            <div style={{ padding: '14px 28px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button onClick={() => setHistoryDetail(null)} className="btn btn-s">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
