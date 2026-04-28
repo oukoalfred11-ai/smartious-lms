@@ -303,11 +303,14 @@ export default function TeacherPortal() {
   const drawingRef = useRef(false)
 
   const pageTitles = {
-    dashboard:'Dashboard', classroom:'Live Classroom', students:'My Students',
-    resources:'Resource Library', exambuilder:'Exams', questionbank:'Question Bank', blog:'Blog & Earnings',
-    liveclass:'Live Lessons', allocations:'My Allocations', payslips:'Payslips & Earnings',
-    marking:'Homework', reports:'Reports & Analytics', profile:'My Profile', leave:'Leave Requests',
-    communication:'Messages'
+    dashboard: 'Dashboard',
+    students: 'My Students',
+    classroom: 'Live Classes',
+    questionbank: 'Question Bank',
+    exambuilder: 'Exams',
+    marking: 'Homework',
+    communication: 'Messages',
+    profile: 'My Profile',
   }
 
   const sendChat = () => {
@@ -321,30 +324,21 @@ export default function TeacherPortal() {
   }
 
   const nav = [
-    { section:'Classroom', items:[
-      {id:'dashboard',  label:'Dashboard',       icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
-      {id:'classroom',  label:'Live Classroom',  icon:'rect:2:3:20:14:2|M8 21h8M12 17v4', live:true},
-      {id:'students',   label:'My Students',     icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75', badge:'24'},
-    ]},
-    { section:'Content', items:[
-      {id:'questionbank',label:'Question Bank',    icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6|circle:18:18:3'},
-      {id:'resources',   label:'Resource Library', icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6'},
-      {id:'exambuilder', label:'Exams',           icon:'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2|rect:9:3:6:4:1.5|line:9:12:15:12|line:9:16:12:16'},
-      {id:'blog',        label:'Blog & Earnings',  icon:'M12 19l7-7 3 3-7 7-3-3z|M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z|M2 2l7.586 7.586|circle:11:11:2', badge:'3', badgeCol:'var(--g600)'},
+    { section:'Teaching', items:[
+      {id:'dashboard',     label:'Dashboard',        icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
+      {id:'students',      label:'My Students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
+      {id:'classroom',     label:'Live Classes',     icon:'rect:2:3:20:14:2|M8 21h8M12 17v4', live:true},
     ]},
     { section:'Assessment', items:[
-      {id:'liveclass',   label:'Live Lessons',        icon:'poly:23 7 16 12 23 17 23 7|rect:1:5:15:14:2', live:true},
-      {id:'allocations', label:'My Allocations',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|line:19:8:19:14|line:22:11:16:11', badge:'3', badgeCol:'var(--b700)'},
-      {id:'payslips',    label:'Payslips',            icon:'rect:2:5:20:14:2|line:2:10:22:10|line:6:15:10:15|line:14:15:18:15'},
-      {id:'marking',     label:'Homework',            icon:'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'},
-      {id:'reports',     label:'Reports & Analytics', icon:'pline:22 12 18 12 15 21 9 3 6 12 2 12'},
+      {id:'questionbank',  label:'Question Bank',    icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6|circle:18:18:3'},
+      {id:'exambuilder',   label:'Exams',            icon:'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2|rect:9:3:6:4:1.5|line:9:12:15:12|line:9:16:12:16'},
+      {id:'marking',       label:'Homework',         icon:'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'},
     ]},
     { section:'Communication', items:[
       {id:'communication', label:'Messages',         icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'},
     ]},
     { section:'Account', items:[
-      {id:'profile',     label:'My Profile',          icon:'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2|circle:12:7:4'},
-      {id:'leave',       label:'Leave Requests',      icon:'M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z', badge:'3', badgeCol:'var(--a600)'},
+      {id:'profile',       label:'My Profile',       icon:'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2|circle:12:7:4'},
     ]},
   ]
 
@@ -463,7 +457,7 @@ export default function TeacherPortal() {
                 <div style={{display:'flex',flexDirection:'column',gap:20}}>
                   {/* Class performance */}
                   <div className="card">
-                    <div className="chdr"><div className="ctitle">Class Performance Overview</div><button className="btn btn-g btn-sm" onClick={() => setPage('reports')}>Full Report</button></div>
+                    <div className="chdr"><div className="ctitle">Class Performance Overview</div><button className="btn btn-g btn-sm" onClick={() => setPage('students')}>View All Students</button></div>
                     {STUDENTS.slice(0,6).map((s,i) => {
                       const col = s.score>=75?'var(--g600)':s.score>=60?'var(--a600)':'var(--r500)'
                       return (
@@ -530,17 +524,25 @@ export default function TeacherPortal() {
                   <div className="card">
                     <div className="ctitle" style={{marginBottom:14}}>Quick Actions</div>
                     <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                      <button className="btn btn-s" style={{justifyContent:'flex-start'}} onClick={() => setUploadModal(true)}>
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                        Upload Resource
+                      <button className="btn btn-s" style={{justifyContent:'flex-start'}} onClick={() => setPage('questionbank')}>
+                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13"/><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M8 10h8M8 14h6"/></svg>
+                        Question Bank
+                      </button>
+                      <button className="btn btn-s" style={{justifyContent:'flex-start'}} onClick={() => setPage('marking')}>
+                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        Grade Homework
                       </button>
                       <button className="btn btn-s" style={{justifyContent:'flex-start'}} onClick={() => setPage('exambuilder')}>
                         <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Create New Exam
+                        Schedule Exam
                       </button>
-                      <button className="btn btn-s" style={{justifyContent:'flex-start'}} onClick={() => setPage('reports')}>
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        View Student Reports
+                      <button className="btn btn-s" style={{justifyContent:'flex-start'}} onClick={() => setPage('students')}>
+                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        View My Students
+                      </button>
+                      <button className="btn btn-s" style={{justifyContent:'flex-start'}} onClick={() => setPage('communication')}>
+                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Messages
                       </button>
                     </div>
                   </div>
@@ -575,48 +577,6 @@ export default function TeacherPortal() {
           {/* ── QUESTION BANK ── */}
           {page === 'questionbank' && <QuestionBankTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
 
-          {/* ── RESOURCE LIBRARY ── */}
-          {page === 'resources' && (
-            <div>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:20,flexWrap:'wrap',gap:12}}>
-                <div><div className="sec-tag">Content Management</div><h2 className="serif" style={{fontSize:24,color:'var(--s900)'}}>Resource <em style={{color:'var(--b700)'}}>Library</em></h2></div>
-                <button className="btn btn-p" onClick={() => { setUploadModal(true); setUploadStep(1) }}>
-                  <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  Upload Resource
-                </button>
-              </div>
-              <div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:20}}>
-                <input className="fi" style={{maxWidth:260}} placeholder="Search resources…"/>
-                <select className="fsel" style={{maxWidth:160}}><option>All Types</option><option>PDF</option><option>Video</option><option>Slides</option><option>Link</option></select>
-                <select className="fsel" style={{maxWidth:160}}><option>All Subjects</option><option>Mathematics</option><option>Biology</option></select>
-                <select className="fsel" style={{maxWidth:160}}><option>All Classes</option><option>Form 1</option><option>Form 2</option><option>Form 3</option><option>Form 4</option></select>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:14}}>
-                {RESOURCES.map((r,i) => (
-                  <div key={i} className="res-card">
-                    <div className="res-icon" style={{background:r.colBg}}>
-                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={r.colSt} strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    </div>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontWeight:700,fontSize:14,color:'var(--s800)',marginBottom:3}}>{r.t}</div>
-                      <div style={{fontSize:11.5,color:'var(--s400)',marginBottom:8}}>{r.type} · {r.sub} · {r.cls} · {r.size}</div>
-                      <div style={{fontSize:12,color:'var(--s500)',background:'var(--bg)',borderRadius:'var(--rsm)',padding:8,marginBottom:10,lineHeight:1.5}}>
-                        <span style={{fontWeight:700,color:'var(--b700)'}}>AI Summary: </span>{r.ai}
-                      </div>
-                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                        <span style={{fontSize:11.5,color:'var(--s400)'}}>{r.dl} downloads</span>
-                        <div style={{display:'flex',gap:6}}>
-                          <button className="btn btn-s btn-sm" onClick={() => toast.info(`Sharing: ${r.t}`)}>Share</button>
-                          <button className="btn btn-g btn-sm" style={{color:'var(--r500)'}} onClick={() => toast.error('Deleting resource…')}>Delete</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* ── EXAMS ── */}
           {page === 'exambuilder' && <ExamsTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
 
@@ -625,314 +585,6 @@ export default function TeacherPortal() {
           {/* ── HOMEWORK ── */}
           {page === 'marking' && <HomeworkTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
 
-
-          {/* ── REPORTS ── */}
-          {page === 'reports' && (
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Analytics</div><h2 className="serif" style={{fontSize:24,color:'var(--s900)'}}>Reports &amp; <em style={{color:'var(--b700)'}}>Analytics</em></h2></div>
-              <div className="kpi-grid" style={{marginBottom:20}}>
-                {[
-                  {bg:'var(--b50)',ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,v:'73%',l:'Class Average',d:'↑ +4% vs last term',dc:'var(--g600)'},
-                  {bg:'var(--g50)',ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M9 11l3 3L22 4"/></svg>,v:'91%',l:'Highest Score',d:'Faith Wanjiru',dc:'var(--s500)'},
-                  {bg:'var(--r50)',ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--r500)" strokeWidth="2" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>,v:'2',l:'At-Risk Students',d:'Needs attention',dc:'var(--r500)'},
-                  {bg:'var(--a50)',ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,v:'92%',l:'Attendance Rate',d:'Above school avg',dc:'var(--g600)'},
-                ].map((k,i)=>(
-                  <div key={i} className="kpi"><div className="kpi-ic" style={{background:k.bg}}>{k.ic}</div><div className="kpi-v">{k.v}</div><div className="kpi-l">{k.l}</div><div className="kpi-d" style={{color:k.dc}}>{k.d}</div></div>
-                ))}
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
-                <div className="card">
-                  <div className="chdr"><div className="ctitle">Topic Mastery Breakdown</div></div>
-                  {[['Number & Algebra',78,'#3B82F6'],['Pythagoras Theorem',73,'#22C55E'],['Statistics',69,'#F59E0B'],['Coordinate Geometry',61,'#8B5CF6'],['Functions & Graphs',55,'#EC4899']].map(([n,pct,c]) => (
-                    <div key={n} style={{marginBottom:12}}>
-                      <div style={{display:'flex',justifyContent:'space-between',fontSize:13.5,marginBottom:5}}>
-                        <span style={{fontWeight:600,color:'var(--s700)'}}>{n}</span>
-                        <span className="mono" style={{fontWeight:700,color:c}}>{pct}%</span>
-                      </div>
-                      <div className="prog-bar"><div className="prog-fill" style={{width:pct+'%',background:c}}/></div>
-                    </div>
-                  ))}
-                </div>
-                <div className="card">
-                  <div className="chdr"><div className="ctitle">At-Risk Student Action Plan</div></div>
-                  {[{name:'David Mwangi',score:58,note:'Declining in 3 consecutive assessments. Low attendance (74%). Integrity concerns in last exam.',col:'r'},{name:'Peter Kamau',score:62,note:'Borderline pass. Weak in Geometry and Functions. Attendance 78%.',col:'a'}].map(s => (
-                    <div key={s.name} style={{background:s.col==='r'?'var(--r50)':'var(--a50)',border:`1px solid var(--${s.col}100)`,borderRadius:'var(--rmd)',padding:14,marginBottom:12}}>
-                      <div style={{fontWeight:700,fontSize:14,color:s.col==='r'?'#B91C1C':'#B45309',marginBottom:6}}>{s.name} — {s.score}%</div>
-                      <div style={{fontSize:12.5,color:'var(--s600)',lineHeight:1.65,marginBottom:10}}>{s.note}</div>
-                      <div style={{display:'flex',gap:8}}>
-                        <button className={`btn btn-${s.col==='r'?'d':'am'} btn-sm`} onClick={() => toast.info(`Scheduling session with ${s.name}…`)}>Schedule Session</button>
-                        <button className="btn btn-s btn-sm" onClick={() => { setMsgTo('Janet Osei'); setMsgSubject('Student Progress Update'); setMsgBody(''); setMsgModal(true) }}>Message Parent</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── MESSAGES ── */}
-          {page === 'reports' && (
-            <div>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:20,flexWrap:'wrap',gap:12}}>
-                <div><div className="sec-tag">Communication</div><h2 className="serif" style={{fontSize:24,color:'var(--s900)'}}>Messages</h2></div>
-                <button className="btn btn-p btn-sm" onClick={() => { setMsgSubject(''); setMsgBody(''); setMsgModal(true) }}>
-                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  New Message
-                </button>
-              </div>
-              {myThreads.length === 0 ? (
-                <div className="empty"><h3>No messages yet</h3><p>Send a message to a parent or student.</p></div>
-              ) : (
-                <div style={{display:'grid',gridTemplateColumns:'260px 1fr',gap:20,height:560}}>
-                  <div className="card" style={{padding:0,overflow:'hidden'}}>
-                    <div style={{padding:'12px 14px',borderBottom:'1px solid var(--border)',fontWeight:700,fontSize:13.5}}>Conversations</div>
-                    {myThreads.map((thread, ti) => {
-                      const last = thread.messages[thread.messages.length - 1]
-                      const other = last.from === 'Mr. James Muthomi' ? last.to : last.from
-                      const isActive = activeThread?.id === thread.id
-                      return (
-                        <div key={ti} onClick={() => { setActiveThread(thread); thread.messages.forEach(m => store.markRead(m.id)) }}
-                          style={{padding:'12px 14px',borderBottom:'1px solid var(--border)',cursor:'pointer',background:isActive?'var(--b50)':'transparent',borderLeft:isActive?'3px solid var(--b600)':'3px solid transparent'}}>
-                          <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                            <div style={{width:32,height:32,borderRadius:'50%',background:'#3B82F620',color:'#3B82F6',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'JetBrains Mono,monospace',fontSize:11,fontWeight:700,flexShrink:0}}>
-                              {other.split(' ').map(w=>w[0]).join('').slice(0,2)}
-                            </div>
-                            <div style={{flex:1,minWidth:0}}>
-                              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                                <span style={{fontWeight:700,fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{other}</span>
-                                {thread.unread > 0 && <span className="sb-badge">{thread.unread}</span>}
-                              </div>
-                              <div style={{fontSize:11.5,color:'var(--s400)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{last.subject}</div>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                  <div className="card" style={{padding:0,display:'flex',flexDirection:'column'}}>
-                    {activeThread ? (
-                      <>
-                        <div style={{padding:'13px 18px',borderBottom:'1px solid var(--border)',fontWeight:700,fontSize:14}}>
-                          {activeThread.messages[activeThread.messages.length-1].subject}
-                        </div>
-                        <div style={{flex:1,overflowY:'auto',padding:16,display:'flex',flexDirection:'column',gap:12}}>
-                          {[...activeThread.messages].reverse().map((m, mi) => (
-                            <div key={mi} style={{display:'flex',gap:9,flexDirection:m.from==='Mr. James Muthomi'?'row-reverse':'row',alignItems:'flex-end'}}>
-                              <div style={{width:28,height:28,borderRadius:'50%',background:m.avatarCol+'20',color:m.avatarCol,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,flexShrink:0}}>{m.avatar}</div>
-                              <div style={{background:m.from==='Mr. James Muthomi'?'var(--b700)':'var(--white)',color:m.from==='Mr. James Muthomi'?'#fff':'var(--s800)',border:m.from!=='Mr. James Muthomi'?'1px solid var(--border)':'none',borderRadius:m.from==='Mr. James Muthomi'?'14px 14px 4px 14px':'4px 14px 14px 14px',padding:'9px 13px',maxWidth:'72%',fontSize:13.5,lineHeight:1.65}}>
-                                {m.body}
-                                <div style={{fontSize:10,marginTop:4,opacity:.5,textAlign:m.from==='Mr. James Muthomi'?'right':'left'}}>{m.time}</div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div style={{padding:'10px 14px',borderTop:'1px solid var(--border)',display:'flex',gap:8}}>
-                          <textarea className="chat-input" value={replyText} onChange={e=>setReplyText(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleReply(activeThread)}}} rows={1} placeholder="Type a reply…" style={{flex:1}}/>
-                          <button className="btn btn-p btn-sm" onClick={() => handleReply(activeThread)} style={{padding:'7px 10px'}}>
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:'var(--s400)',fontSize:14}}>Select a conversation</div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── ALLOCATIONS ── */}
-          {page === 'allocations' && (
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">My Assignments</div><h2 className="serif" style={{fontSize:24,color:'var(--s900)'}}>My <em style={{color:'var(--b700)'}}>Allocations</em></h2></div>
-              <div className="card" style={{padding:0,overflow:'hidden'}}>
-                <table className="tbl">
-                  <thead><tr><th>Student</th><th>Curriculum</th><th>Subject</th><th>Session Slot</th><th>Fee</th><th>Status</th></tr></thead>
-                  <tbody>
-                    {ALLOCS.map((a,i) => (
-                      <tr key={i}>
-                        <td style={{fontWeight:700}}>{a.student}</td>
-                        <td><span className="badge badge-blue">{a.curriculum}</span></td>
-                        <td style={{color:'var(--s600)'}}>{a.subject}</td>
-                        <td style={{fontSize:13,color:'var(--s500)'}}>{a.slot}</td>
-                        <td className="mono" style={{fontWeight:600,fontSize:13}}>{a.fee}</td>
-                        <td><span className={`badge ${a.status==='Active'?'badge-green':'badge-amber'}`}>{a.status}</span></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* ── PAYSLIPS ── */}
-          {page === 'payslips' && (
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Earnings</div><h2 className="serif" style={{fontSize:24,color:'var(--s900)'}}>Payslips &amp; <em style={{color:'var(--b700)'}}>Earnings</em></h2></div>
-              <div className="rate-card" style={{marginBottom:20}}>
-                <div className="serif" style={{fontSize:'1rem',color:'#fff',flexShrink:0}}>Pay Rates</div>
-                {[['Daily Attendance','KES 1,500','#34D399'],['Off-Hours Session','KES 300','#FCD34D'],['Article Read','KES 3','#93C5FD'],['Video Upload','KES 100','#D8B4FE']].map(([l,v,c]) => (
-                  <div key={l} className="rate-item"><div className="rate-lbl">{l}</div><div className="mono" style={{fontSize:'1.4rem',color:c,fontWeight:500}}>{v}</div></div>
-                ))}
-              </div>
-              <div className="card" style={{padding:0,overflow:'hidden'}}>
-                <table className="tbl">
-                  <thead><tr><th>Month</th><th>Attendance</th><th>Off-Hours</th><th>Article Reads</th><th>Videos</th><th>Gross</th><th>Tax</th><th>Net Pay</th><th>Status</th><th></th></tr></thead>
-                  <tbody>
-                    {PAYSLIPS.map((p,i) => (
-                      <tr key={i}>
-                        <td style={{fontWeight:700}}>{p.month}</td>
-                        <td className="mono">{p.att}</td>
-                        <td className="mono">{p.offhrs}</td>
-                        <td className="mono">{p.reads.toLocaleString()}</td>
-                        <td className="mono">{p.videos}</td>
-                        <td className="mono" style={{fontWeight:700}}>{p.gross}</td>
-                        <td className="mono" style={{color:'var(--r600)'}}>{p.tax}</td>
-                        <td className="mono" style={{fontWeight:700,color:'var(--g600)'}}>{p.net}</td>
-                        <td><span className="sp-paid">{p.status}</span></td>
-                        <td><button className="btn btn-g btn-sm" onClick={() => toast.info(`Downloading ${p.month} payslip…`)}>Download</button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* ── BLOG ── */}
-          {page === 'blog' && !blogEditor && (
-            <div>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:20,flexWrap:'wrap',gap:12}}>
-                <div>
-                  <div className="sec-tag">Blog & Earnings</div>
-                  <h2 className="serif" style={{fontSize:24,color:'var(--s900)'}}>Blog &amp; <em style={{color:'var(--b700)'}}>Earnings</em></h2>
-                  <p style={{fontSize:13.5,color:'var(--s500)',marginTop:4}}>You earn KES 3 per article read. Articles appear on the website and in the Parent portal.</p>
-                </div>
-                <button className="btn btn-p" onClick={() => { setEditingArticle(null); setBlogTitle(''); setBlogBody(''); setBlogEditor(true) }}>
-                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  Write New Post
-                </button>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14,marginBottom:20}}>
-                {[
-                  ['Total Reads', totalReads.toLocaleString(), 'var(--b700)'],
-                  ['Total Earnings', 'KES ' + totalEarnings.toLocaleString(), 'var(--g600)'],
-                  ['Published Posts', myArticles.filter(a=>a.status==='Published').length.toString(), 'var(--p600)'],
-                ].map(([l,v,c]) => (
-                  <div key={l} className="kpi"><div className="kpi-v" style={{color:c,fontSize:v.length>8?16:undefined}}>{v}</div><div className="kpi-l">{l}</div></div>
-                ))}
-              </div>
-              {myArticles.length === 0 ? (
-                <div className="empty">
-                  <h3>No articles yet</h3>
-                  <p>Write your first article — it will appear on the Smartious website and in parent dashboards.</p>
-                  <button className="btn btn-p" onClick={() => setBlogEditor(true)}>Write First Article</button>
-                </div>
-              ) : (
-                <div style={{display:'flex',flexDirection:'column',gap:12}}>
-                  {myArticles.map((p) => (
-                    <div key={p.id} className="card" style={{display:'flex',alignItems:'center',gap:16,flexWrap:'wrap'}}>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontWeight:700,fontSize:14.5,marginBottom:4}}>{p.title}</div>
-                        <div style={{display:'flex',gap:12,fontSize:12.5,color:'var(--s400)',flexWrap:'wrap'}}>
-                          <span>{p.date}</span>
-                          {p.reads > 0 && <span className="mono" style={{fontWeight:600,color:'var(--s700)'}}>{p.reads.toLocaleString()} reads</span>}
-                          {p.earnings > 0 && <span style={{color:'var(--g600)',fontWeight:700}}>KES {p.earnings.toLocaleString()}</span>}
-                          {p.status === 'Published' && p.url && (
-                            <span style={{color:'var(--b600)',fontSize:11}}>smartioushomeschool.com{p.url}</span>
-                          )}
-                        </div>
-                      </div>
-                      <span className={`badge ${p.status==='Published'?'badge-green':'badge-slate'}`}>{p.status}</span>
-                      <div style={{display:'flex',gap:8}}>
-                        <button className="btn btn-s btn-sm" onClick={() => openEditor(p)}>Edit</button>
-                        {p.status === 'Draft' && (
-                          <button className="btn btn-ok btn-sm" onClick={() => {
-                            const slug = p.title.toLowerCase().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-')
-                            store.updateArticle(p.id, { status:'Published', url:'/blog/'+slug, date: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) })
-                            toast.ok('Published! Now live on website.')
-                          }}>Publish</button>
-                        )}
-                        <button className="btn btn-d btn-sm" onClick={() => { store.deleteArticle(p.id); toast.ok('Article deleted') }}>Delete</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── BLOG EDITOR ── */}
-          {page === 'blog' && blogEditor && (
-            <div>
-              <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:20}}>
-                <button className="btn btn-g btn-sm" onClick={() => { setBlogEditor(false); setEditingArticle(null) }}>
-                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-                  Back
-                </button>
-                <div>
-                  <div className="sec-tag">Blog Editor</div>
-                  <h2 className="serif" style={{fontSize:22,color:'var(--s900)'}}>{editingArticle ? 'Edit Article' : 'Write New Article'}</h2>
-                </div>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 300px',gap:20,alignItems:'start'}}>
-                <div style={{display:'flex',flexDirection:'column',gap:14}}>
-                  <div className="fg">
-                    <label className="fl">Article Title *</label>
-                    <input className="fi" value={blogTitle} onChange={e=>setBlogTitle(e.target.value)} placeholder="e.g. 5 Ways to Make Quadratic Equations Fun"/>
-                    {blogTitle && <div style={{fontSize:11.5,color:'var(--s400)',marginTop:4}}>URL: smartioushomeschool.com/blog/{blogTitle.toLowerCase().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-') || '…'}</div>}
-                  </div>
-                  <div className="fg">
-                    <label className="fl">Article Body *</label>
-                    <textarea className="fi" rows={16} value={blogBody} onChange={e=>setBlogBody(e.target.value)}
-                      placeholder="Write your full article here. This will be visible to all students and parents on the Smartious website."
-                      style={{resize:'vertical',lineHeight:1.7,fontFamily:'inherit'}}/>
-                    <div style={{fontSize:12,color:'var(--s400)',marginTop:4}}>{blogBody.split(/\s+/).filter(Boolean).length} words</div>
-                  </div>
-                </div>
-                <div style={{display:'flex',flexDirection:'column',gap:14}}>
-                  <div className="card">
-                    <div className="ctitle" style={{marginBottom:12}}>Settings</div>
-                    <div className="fg">
-                      <label className="fl">Subject</label>
-                      <select className="fsel" value={blogSubject} onChange={e=>setBlogSubject(e.target.value)}>
-                        <option>Mathematics</option><option>Biology</option><option>Chemistry</option><option>Physics</option><option>English Language</option>
-                      </select>
-                    </div>
-                    <div className="fg">
-                      <label className="fl">Category</label>
-                      <select className="fsel" value={blogCat} onChange={e=>setBlogCat(e.target.value)}>
-                        <option value="igcse">IGCSE</option><option value="homeschool">Homeschool</option><option value="ai">AI & EdTech</option><option value="ib">IB</option><option value="university">University</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="card">
-                    <div className="ctitle" style={{marginBottom:12}}>Publish</div>
-                    <p style={{fontSize:13,color:'var(--s500)',marginBottom:14,lineHeight:1.6}}>Publishing will make this article live on the website and notify parents. You earn KES 3 per read.</p>
-                    <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                      <button className="btn btn-ok" style={{justifyContent:'center'}} onClick={() => handlePublish(false)}>
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                        Publish to Website
-                      </button>
-                      <button className="btn btn-s" style={{justifyContent:'center'}} onClick={() => handlePublish(true)}>Save as Draft</button>
-                    </div>
-                  </div>
-                  <div className="card" style={{background:'var(--b50)',borderColor:'var(--b100)'}}>
-                    <div style={{fontSize:12.5,color:'var(--b700)',lineHeight:1.6}}>
-                      <strong>After publishing:</strong>
-                      <ul style={{marginTop:6,paddingLeft:16,display:'flex',flexDirection:'column',gap:4}}>
-                        <li>Appears on website Blog page</li>
-                        <li>Appears in Parent portal</li>
-                        <li>Parents receive notification</li>
-                        <li>Auto-generates shareable URL</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* ── LIVE LESSONS ── */}
           {page==='liveclass'&&(
@@ -958,11 +610,6 @@ export default function TeacherPortal() {
            {/* ── PROFILE ── */}
            {page === 'profile' && (
              <TeacherProfile />
-           )}
-
-           {/* ── LEAVE REQUESTS ── */}
-           {page === 'leave' && (
-             <TeacherLeaveRequest />
            )}
 
         </div>
