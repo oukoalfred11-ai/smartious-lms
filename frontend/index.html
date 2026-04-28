@@ -6,6 +6,14 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <!-- ═══════════════════════════════════════════════════
+       Permissions Policy — explicitly ALLOW camera, microphone,
+       and display-capture (screen-share) for our own origin.
+       This is required for Live Classes to work.
+       ═══════════════════════════════════════════════════ -->
+  <meta http-equiv="Permissions-Policy" content="camera=(self), microphone=(self), display-capture=(self), autoplay=(self)"/>
+  <meta http-equiv="Feature-Policy" content="camera 'self'; microphone 'self'; display-capture 'self'"/>
+
+  <!-- ═══════════════════════════════════════════════════
        Primary page title & description (used by search engines)
        ═══════════════════════════════════════════════════ -->
   <title>Smartious Homeschool — International Online School · IGCSE, A-Level, IB, CBC</title>
