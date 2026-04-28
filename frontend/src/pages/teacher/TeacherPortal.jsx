@@ -306,7 +306,8 @@ export default function TeacherPortal() {
     dashboard:'Dashboard', classroom:'Live Classroom', students:'My Students',
     resources:'Resource Library', exambuilder:'Exams', questionbank:'Question Bank', blog:'Blog & Earnings',
     liveclass:'Live Lessons', allocations:'My Allocations', payslips:'Payslips & Earnings',
-    marking:'Homework', reports:'Reports & Analytics', profile:'My Profile', leave:'Leave Requests'
+    marking:'Homework', reports:'Reports & Analytics', profile:'My Profile', leave:'Leave Requests',
+    communication:'Messages'
   }
 
   const sendChat = () => {
@@ -337,6 +338,9 @@ export default function TeacherPortal() {
       {id:'payslips',    label:'Payslips',            icon:'rect:2:5:20:14:2|line:2:10:22:10|line:6:15:10:15|line:14:15:18:15'},
       {id:'marking',     label:'Homework',            icon:'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'},
       {id:'reports',     label:'Reports & Analytics', icon:'pline:22 12 18 12 15 21 9 3 6 12 2 12'},
+    ]},
+    { section:'Communication', items:[
+      {id:'communication', label:'Messages',         icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'},
     ]},
     { section:'Account', items:[
       {id:'profile',     label:'My Profile',          icon:'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2|circle:12:7:4'},
@@ -947,6 +951,9 @@ export default function TeacherPortal() {
               ))}
             </div>
           )}
+
+           {/* ── COMMUNICATION ── */}
+           {page === 'communication' && <CommunicationTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
 
            {/* ── PROFILE ── */}
            {page === 'profile' && (
@@ -5009,6 +5016,952 @@ function HomeworkTab({ user, store, setPage, toast }) {
               </div>
             )
           })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// COMMUNICATION — Safety-filtered messaging with admin oversight
+// ═══════════════════════════════════════════════════════════
+// Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
+//
+// CHILD SAFETY DESIGN:
+// - All teacher-student messages auto-logged to admin audit (sm_messages_audit)
+// - Anti-grooming filter on outgoing messages (warns + flags suspicious phrases)
+// - Cannot edit or delete sent messages (immutable conversation log)
+// - "Visible to admin" indicator always shown on student channels
+// - Auto-flags suspicious patterns to sm_safety_flags
+
+const CM_MESSAGES_KEY      = 'sm_messages'
+const CM_AUDIT_KEY         = 'sm_messages_audit'
+const CM_FLAGS_KEY         = 'sm_safety_flags'
+const CM_SEEDED_KEY        = 'sm_messages_seeded'
+
+// Phrases that trigger child-safety warning when teacher messages a STUDENT
+// (these patterns are inappropriate for adult-to-minor communication on an education platform)
+const CM_RISKY_PATTERNS = [
+  { pattern: /\b(don'?t tell|keep this between|just between us|our secret|private chat|don'?t mention)\b/i, label: 'secrecy language', severity: 'high' },
+  { pattern: /\b(meet me|come to my|my house|my place|alone)\b/i, label: 'in-person meeting', severity: 'high' },
+  { pattern: /\b(text me|whatsapp me|call me|my phone|my number)\b/i, label: 'off-platform contact', severity: 'high' },
+  { pattern: /\b\d{3}[\s\-]?\d{3}[\s\-]?\d{4}\b|\b\+?\d{10,}\b/, label: 'phone number', severity: 'medium' },
+  { pattern: /\b(facebook|instagram|tiktok|snapchat|telegram|signal|discord)\b/i, label: 'social media platform', severity: 'medium' },
+  { pattern: /\b(gift|present|surprise|give you something)\b/i, label: 'gift offer', severity: 'medium' },
+  { pattern: /\b(beautiful|pretty|cute|attractive|handsome)\b/i, label: 'personal compliment', severity: 'medium' },
+  { pattern: /\b(home address|where do you live|your address)\b/i, label: 'address request', severity: 'high' },
+]
+
+const cmCheckMessage = (text) => {
+  const flags = []
+  for (const p of CM_RISKY_PATTERNS) {
+    if (p.pattern.test(text)) flags.push({ label: p.label, severity: p.severity })
+  }
+  return flags
+}
+
+const cmTimeAgo = (iso) => {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return mins + 'm ago'
+  if (hours < 24) return hours + 'h ago'
+  if (days === 1) return 'yesterday'
+  if (days < 7) return days + 'd ago'
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+const cmFormatTime = (iso) => {
+  const d = new Date(iso)
+  const today = new Date()
+  if (d.toDateString() === today.toDateString()) {
+    return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
+  }
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' +
+    d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
+}
+
+const cmAvatarColor = (name) => {
+  const colors = ['#7D1025', '#8B1A2E', '#C9A030', '#1E3A8A', '#166534', '#7C2D12', '#6B21A8', '#92400E']
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
+  return colors[Math.abs(hash) % colors.length]
+}
+
+const cmInitials = (name) => {
+  return (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || '?'
+}
+
+// Load/save
+const cmLoadMessages = () => {
+  try { return JSON.parse(localStorage.getItem(CM_MESSAGES_KEY) || '[]') } catch { return [] }
+}
+const cmSaveMessages = (msgs) => {
+  try { localStorage.setItem(CM_MESSAGES_KEY, JSON.stringify(msgs.slice(-500))) } catch {}
+}
+const cmLoadAudit = () => {
+  try { return JSON.parse(localStorage.getItem(CM_AUDIT_KEY) || '[]') } catch { return [] }
+}
+const cmAppendAudit = (entry) => {
+  try {
+    const existing = cmLoadAudit()
+    existing.push(entry)
+    localStorage.setItem(CM_AUDIT_KEY, JSON.stringify(existing.slice(-500)))
+  } catch {}
+}
+const cmAppendFlag = (entry) => {
+  try {
+    const existing = JSON.parse(localStorage.getItem(CM_FLAGS_KEY) || '[]')
+    existing.push(entry)
+    localStorage.setItem(CM_FLAGS_KEY, JSON.stringify(existing.slice(-200)))
+  } catch {}
+}
+const cmLoadStudents = () => {
+  try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
+}
+const cmGenerateId = () => 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)
+
+// Seed sample messages
+const cmSeedSample = (teacherName) => {
+  if (localStorage.getItem(CM_SEEDED_KEY)) return
+  const now = Date.now()
+  const samples = [
+    // Parent thread: Janet Osei (Amara's parent)
+    {
+      id: cmGenerateId(), threadId: 'th-parent-amara',
+      from: 'Janet Osei', fromRole: 'parent',
+      to: teacherName, toRole: 'teacher',
+      channel: 'parent',
+      subject: "Amara's progress in Algebra",
+      body: 'Hello, I noticed Amara has been struggling with quadratic equations at home. Could you give us a few extra practice resources for the weekend?',
+      sentAt: new Date(now - 2 * 86400000).toISOString(),
+      read: true, flags: [],
+    },
+    {
+      id: cmGenerateId(), threadId: 'th-parent-amara',
+      from: teacherName, fromRole: 'teacher',
+      to: 'Janet Osei', toRole: 'parent',
+      channel: 'parent',
+      subject: "Re: Amara's progress in Algebra",
+      body: "Thanks for letting me know. I'll send Amara a custom worksheet on Monday with worked examples. She should complete it by Friday.",
+      sentAt: new Date(now - 86400000).toISOString(),
+      read: true, flags: [],
+    },
+    {
+      id: cmGenerateId(), threadId: 'th-parent-amara',
+      from: 'Janet Osei', fromRole: 'parent',
+      to: teacherName, toRole: 'teacher',
+      channel: 'parent',
+      subject: "Re: Amara's progress in Algebra",
+      body: "Thank you so much. We'll make sure she completes it.",
+      sentAt: new Date(now - 3600000).toISOString(),
+      read: false, flags: [],
+    },
+    // Parent thread: David's parent (at-risk)
+    {
+      id: cmGenerateId(), threadId: 'th-parent-david',
+      from: teacherName, fromRole: 'teacher',
+      to: 'James Mwangi', toRole: 'parent',
+      channel: 'parent',
+      subject: "David's recent attendance",
+      body: "Mr. Mwangi, I wanted to reach out about David's attendance. He missed last week's class on Pythagoras. Could we set up a brief call to discuss?",
+      sentAt: new Date(now - 4 * 86400000).toISOString(),
+      read: true, flags: [],
+    },
+    {
+      id: cmGenerateId(), threadId: 'th-parent-david',
+      from: 'James Mwangi', fromRole: 'parent',
+      to: teacherName, toRole: 'teacher',
+      channel: 'parent',
+      subject: "Re: David's recent attendance",
+      body: "Thank you for noticing. He's been unwell. Can we connect next week?",
+      sentAt: new Date(now - 3 * 86400000).toISOString(),
+      read: true, flags: [],
+    },
+    // Student thread: Kofi (high performer asking for extension work)
+    {
+      id: cmGenerateId(), threadId: 'th-student-kofi',
+      from: 'Kofi Mensah', fromRole: 'student',
+      to: teacherName, toRole: 'teacher',
+      channel: 'student',
+      subject: 'Extension work request',
+      body: 'Hello sir, I finished the homework already. Can I get extra problems to work on this weekend?',
+      sentAt: new Date(now - 6 * 3600000).toISOString(),
+      read: false, flags: [], adminVisible: true,
+    },
+    // Admin thread
+    {
+      id: cmGenerateId(), threadId: 'th-admin-1',
+      from: 'School Admin', fromRole: 'admin',
+      to: teacherName, toRole: 'teacher',
+      channel: 'admin',
+      subject: 'Term 2 schedule confirmation',
+      body: 'Please confirm your availability for the Term 2 schedule. Live class slots are unchanged from Term 1.',
+      sentAt: new Date(now - 5 * 86400000).toISOString(),
+      read: true, flags: [],
+    },
+  ]
+  cmSaveMessages(samples)
+  localStorage.setItem(CM_SEEDED_KEY, '1')
+}
+
+function CommunicationTab({ user, store, setPage, toast }) {
+  const teacherFullName = 'Mr. James Muthomi'
+
+  useEffect(() => { cmSeedSample(teacherFullName) }, [])
+
+  const [messages, setMessages] = useState(() => cmLoadMessages())
+  const [activeChannel, setActiveChannel] = useState('parent')  // 'parent' | 'student' | 'admin'
+  const [activeThreadId, setActiveThreadId] = useState(null)
+  const [showCompose, setShowCompose] = useState(false)
+  const [searchQ, setSearchQ] = useState('')
+
+  // Compose form
+  const [composeTo, setComposeTo] = useState('')
+  const [composeChannel, setComposeChannel] = useState('parent')
+  const [composeSubject, setComposeSubject] = useState('')
+  const [composeBody, setComposeBody] = useState('')
+  const [composeFlags, setComposeFlags] = useState([])
+  const [composeAcknowledged, setComposeAcknowledged] = useState(false)
+
+  // Reply state
+  const [replyText, setReplyText] = useState('')
+  const [replyFlags, setReplyFlags] = useState([])
+  const [replyAcknowledged, setReplyAcknowledged] = useState(false)
+
+  const allStudents = cmLoadStudents()
+
+  // Group messages into threads
+  const allThreads = (() => {
+    const map = new Map()
+    messages.forEach(m => {
+      const tid = m.threadId
+      if (!map.has(tid)) map.set(tid, [])
+      map.get(tid).push(m)
+    })
+    return Array.from(map.entries()).map(([threadId, msgs]) => {
+      msgs.sort((a, b) => new Date(a.sentAt) - new Date(b.sentAt))
+      const last = msgs[msgs.length - 1]
+      const otherParty = last.from === teacherFullName ? last.to : last.from
+      const otherRole = last.from === teacherFullName ? last.toRole : last.fromRole
+      const channel = last.channel
+      const unread = msgs.filter(m => !m.read && m.from !== teacherFullName).length
+      const hasFlags = msgs.some(m => m.flags && m.flags.length > 0)
+      return {
+        threadId, messages: msgs, last,
+        otherParty, otherRole, channel,
+        unread, hasFlags,
+        subject: msgs[0].subject.replace(/^Re: /, ''),
+      }
+    }).sort((a, b) => new Date(b.last.sentAt) - new Date(a.last.sentAt))
+  })()
+
+  const channelThreads = allThreads.filter(t => t.channel === activeChannel)
+  const filteredThreads = channelThreads.filter(t => {
+    if (!searchQ.trim()) return true
+    const search = searchQ.toLowerCase()
+    return t.otherParty.toLowerCase().includes(search) ||
+           t.subject.toLowerCase().includes(search) ||
+           t.messages.some(m => m.body.toLowerCase().includes(search))
+  })
+
+  const channelCounts = {
+    parent:  allThreads.filter(t => t.channel === 'parent').length,
+    student: allThreads.filter(t => t.channel === 'student').length,
+    admin:   allThreads.filter(t => t.channel === 'admin').length,
+  }
+  const unreadCounts = {
+    parent:  allThreads.filter(t => t.channel === 'parent' && t.unread > 0).length,
+    student: allThreads.filter(t => t.channel === 'student' && t.unread > 0).length,
+    admin:   allThreads.filter(t => t.channel === 'admin' && t.unread > 0).length,
+  }
+
+  const activeThread = activeThreadId ? allThreads.find(t => t.threadId === activeThreadId) : null
+
+  // Mark thread as read when opened
+  useEffect(() => {
+    if (activeThread) {
+      const updated = messages.map(m => {
+        if (m.threadId === activeThread.threadId && m.from !== teacherFullName && !m.read) {
+          return { ...m, read: true }
+        }
+        return m
+      })
+      if (JSON.stringify(updated) !== JSON.stringify(messages)) {
+        setMessages(updated)
+        cmSaveMessages(updated)
+      }
+    }
+  }, [activeThreadId])
+
+  // Recompute compose flags as user types
+  useEffect(() => {
+    if (composeChannel === 'student' && composeBody.trim()) {
+      setComposeFlags(cmCheckMessage(composeBody))
+    } else {
+      setComposeFlags([])
+    }
+    setComposeAcknowledged(false)
+  }, [composeBody, composeChannel])
+
+  useEffect(() => {
+    if (activeThread && activeThread.channel === 'student' && replyText.trim()) {
+      setReplyFlags(cmCheckMessage(replyText))
+    } else {
+      setReplyFlags([])
+    }
+    setReplyAcknowledged(false)
+  }, [replyText, activeThread])
+
+  // ── ACTIONS ─────────────────────────────────────────
+  const sendNewMessage = () => {
+    if (!composeTo.trim()) { toast?.error?.('Recipient is required.'); return }
+    if (!composeSubject.trim()) { toast?.error?.('Subject is required.'); return }
+    if (!composeBody.trim()) { toast?.error?.('Message body is required.'); return }
+
+    const flags = composeFlags
+    const hasHighSeverity = flags.some(f => f.severity === 'high')
+
+    if (flags.length > 0 && !composeAcknowledged) {
+      toast?.error?.('Please review and acknowledge the safety warning before sending.')
+      return
+    }
+
+    const role = composeChannel === 'parent' ? 'parent' : composeChannel === 'student' ? 'student' : 'admin'
+    const newMsg = {
+      id: cmGenerateId(),
+      threadId: 'th-' + composeChannel + '-' + Date.now(),
+      from: teacherFullName, fromRole: 'teacher',
+      to: composeTo, toRole: role,
+      channel: composeChannel,
+      subject: composeSubject.trim(),
+      body: composeBody.trim(),
+      sentAt: new Date().toISOString(),
+      read: true,
+      flags: flags,
+      adminVisible: composeChannel === 'student',
+    }
+
+    const updated = [...messages, newMsg]
+    setMessages(updated)
+    cmSaveMessages(updated)
+
+    // Audit log for student channel
+    if (composeChannel === 'student') {
+      cmAppendAudit({
+        id: 'audit-' + Date.now(),
+        messageId: newMsg.id,
+        teacher: teacherFullName,
+        student: composeTo,
+        subject: composeSubject,
+        body: composeBody,
+        sentAt: newMsg.sentAt,
+        flags: flags,
+      })
+    }
+
+    // Flag if any safety patterns triggered
+    if (flags.length > 0) {
+      cmAppendFlag({
+        id: 'flag-' + Date.now(),
+        messageId: newMsg.id,
+        teacher: teacherFullName,
+        student: composeChannel === 'student' ? composeTo : null,
+        flags: flags,
+        severity: hasHighSeverity ? 'high' : 'medium',
+        sentAt: newMsg.sentAt,
+        body: composeBody,
+      })
+      toast?.info?.('Message sent. Safety flag logged to admin.')
+    } else {
+      toast?.ok?.('Message sent.')
+    }
+
+    setShowCompose(false)
+    setComposeTo(''); setComposeChannel('parent'); setComposeSubject(''); setComposeBody(''); setComposeFlags([]); setComposeAcknowledged(false)
+  }
+
+  const sendReply = () => {
+    if (!activeThread || !replyText.trim()) return
+
+    const flags = replyFlags
+    const hasHighSeverity = flags.some(f => f.severity === 'high')
+
+    if (flags.length > 0 && !replyAcknowledged) {
+      toast?.error?.('Please review and acknowledge the safety warning before sending.')
+      return
+    }
+
+    const newMsg = {
+      id: cmGenerateId(),
+      threadId: activeThread.threadId,
+      from: teacherFullName, fromRole: 'teacher',
+      to: activeThread.otherParty, toRole: activeThread.otherRole,
+      channel: activeThread.channel,
+      subject: 'Re: ' + activeThread.subject,
+      body: replyText.trim(),
+      sentAt: new Date().toISOString(),
+      read: true,
+      flags: flags,
+      adminVisible: activeThread.channel === 'student',
+    }
+
+    const updated = [...messages, newMsg]
+    setMessages(updated)
+    cmSaveMessages(updated)
+
+    if (activeThread.channel === 'student') {
+      cmAppendAudit({
+        id: 'audit-' + Date.now(), messageId: newMsg.id,
+        teacher: teacherFullName, student: activeThread.otherParty,
+        subject: newMsg.subject, body: newMsg.body, sentAt: newMsg.sentAt, flags: flags,
+      })
+    }
+
+    if (flags.length > 0) {
+      cmAppendFlag({
+        id: 'flag-' + Date.now(), messageId: newMsg.id,
+        teacher: teacherFullName, student: activeThread.channel === 'student' ? activeThread.otherParty : null,
+        flags: flags, severity: hasHighSeverity ? 'high' : 'medium',
+        sentAt: newMsg.sentAt, body: replyText,
+      })
+      toast?.info?.('Reply sent. Safety flag logged to admin.')
+    } else {
+      toast?.ok?.('Reply sent.')
+    }
+
+    setReplyText(''); setReplyFlags([]); setReplyAcknowledged(false)
+  }
+
+  const reportConversation = () => {
+    if (!activeThread) return
+    if (!confirm('Report this conversation to admin for review? This action cannot be undone.')) return
+    cmAppendFlag({
+      id: 'flag-' + Date.now(),
+      threadId: activeThread.threadId,
+      teacher: teacherFullName,
+      otherParty: activeThread.otherParty,
+      reason: 'Manually reported by teacher',
+      severity: 'high',
+      sentAt: new Date().toISOString(),
+    })
+    toast?.ok?.('Conversation reported to admin.')
+  }
+
+  const channelColors = {
+    parent: '#7D1025',
+    student: '#1E3A8A',
+    admin: '#7E22CE',
+  }
+  const channelLabels = {
+    parent: 'Parents',
+    student: 'Students',
+    admin: 'Admin',
+  }
+  const channelDescriptions = {
+    parent: 'Communication with parents and guardians',
+    student: 'Direct messages with students. ALL messages visible to admin for child safety.',
+    admin: 'Operational communication with school administration',
+  }
+
+  return (
+    <div>
+      {/* Hero */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+        color: '#FBFAF5',
+      }}>
+        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>
+              Communication
+            </div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              Messages
+            </h1>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              Parents, students, and admin in one place. All student conversations are admin-visible for child safety.
+            </div>
+          </div>
+          <button onClick={() => { setShowCompose(true); setComposeChannel(activeChannel) }}
+            style={{
+              background: '#C9A030', color: '#7D1025', border: 'none',
+              padding: '12px 22px', borderRadius: 'var(--rmd)',
+              cursor: 'pointer', fontSize: 14, fontWeight: 700,
+              display: 'flex', alignItems: 'center', gap: 8,
+              boxShadow: '0 4px 14px rgba(201,160,48,.35)',
+            }}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            New Message
+          </button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', background: 'rgba(0,0,0,.18)' }}>
+          {[
+            ['Parents',  channelCounts.parent,  unreadCounts.parent],
+            ['Students', channelCounts.student, unreadCounts.student],
+            ['Admin',    channelCounts.admin,   unreadCounts.admin],
+          ].map(([l, count, unread]) => (
+            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .7, marginBottom: 2, color: '#F0CC5A' }}>{l}</div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+                <span style={{ fontSize: 16, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: '#FBFAF5' }}>{count}</span>
+                {unread > 0 && (
+                  <span style={{
+                    background: '#FCA5A5', color: '#7D1025',
+                    fontSize: 10, fontWeight: 800,
+                    padding: '2px 7px', borderRadius: 99,
+                  }}>{unread} unread</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Channel tabs */}
+      <div style={{
+        display: 'flex',
+        background: '#FBFAF5',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--rmd)',
+        padding: 4, marginBottom: 18, gap: 2, flexWrap: 'wrap',
+      }}>
+        {['parent', 'student', 'admin'].map(ch => {
+          const isActive = activeChannel === ch
+          const count = channelCounts[ch]
+          const unread = unreadCounts[ch]
+          return (
+            <button key={ch} onClick={() => { setActiveChannel(ch); setActiveThreadId(null) }}
+              style={{
+                flex: 1, minWidth: 120,
+                background: isActive ? channelColors[ch] : 'transparent',
+                color: isActive ? '#FBFAF5' : 'var(--s500)',
+                border: 'none', padding: '10px 14px',
+                borderRadius: 'var(--rsm)', cursor: 'pointer',
+                fontSize: 13, fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                boxShadow: isActive ? '0 4px 16px rgba(125,16,37,.15)' : 'none',
+              }}>
+              {channelLabels[ch]}
+              <span style={{
+                background: isActive ? 'rgba(251,250,245,.25)' : 'var(--bg)',
+                color: isActive ? '#FBFAF5' : 'var(--s500)',
+                fontSize: 11, fontWeight: 700,
+                padding: '2px 7px', borderRadius: 99,
+              }}>{count}</span>
+              {unread > 0 && (
+                <span style={{
+                  background: '#FCA5A5', color: '#7D1025',
+                  fontSize: 10, fontWeight: 800,
+                  padding: '1px 6px', borderRadius: 99,
+                }}>{unread}</span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Channel info banner */}
+      <div style={{
+        background: activeChannel === 'student' ? '#FEF3C7' : '#FBFAF5',
+        border: '1px solid ' + (activeChannel === 'student' ? '#FCD34D' : 'var(--border)'),
+        borderLeft: '3px solid ' + (activeChannel === 'student' ? '#B45309' : '#C9A030'),
+        padding: '10px 14px', borderRadius: 'var(--rsm)',
+        fontSize: 12.5, color: 'var(--s700)', marginBottom: 14,
+        display: 'flex', alignItems: 'center', gap: 10,
+      }}>
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke={activeChannel === 'student' ? '#B45309' : '#C9A030'} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <div>
+          <strong>{activeChannel === 'student' ? 'Child Safety: ' : 'Note: '}</strong>
+          {channelDescriptions[activeChannel]}
+        </div>
+      </div>
+
+      {/* Two-column: thread list + active conversation */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 320px) 1fr', gap: 14 }}>
+        {/* Thread list */}
+        <div className="card" style={{ padding: 0, overflow: 'hidden', alignSelf: 'start', maxHeight: 700, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', background: '#FBFAF5' }}>
+            <input className="fi" placeholder="Search conversations..."
+              value={searchQ} onChange={e => setSearchQ(e.target.value)}
+              style={{ width: '100%', fontSize: 13 }}/>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            {filteredThreads.length === 0 ? (
+              <div style={{ padding: 30, textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
+                No conversations yet
+              </div>
+            ) : (
+              filteredThreads.map(thread => {
+                const isActive = activeThreadId === thread.threadId
+                return (
+                  <div key={thread.threadId} onClick={() => setActiveThreadId(thread.threadId)}
+                    style={{
+                      padding: '14px 14px',
+                      borderBottom: '1px solid var(--border)',
+                      cursor: 'pointer',
+                      background: isActive ? '#FBE8E8' : '#FFF',
+                      borderLeft: '3px solid ' + (isActive ? channelColors[thread.channel] : 'transparent'),
+                    }}>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                      <div style={{
+                        width: 36, height: 36, borderRadius: '50%',
+                        background: cmAvatarColor(thread.otherParty), color: '#FBFAF5',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 12, fontWeight: 700, flexShrink: 0,
+                      }}>{cmInitials(thread.otherParty)}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                          <span style={{
+                            fontWeight: 700, fontSize: 13.5, color: 'var(--s900)',
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                          }}>{thread.otherParty}</span>
+                          {thread.unread > 0 && (
+                            <span style={{
+                              background: '#7D1025', color: '#FBFAF5',
+                              fontSize: 10, fontWeight: 800,
+                              padding: '1px 7px', borderRadius: 99, flexShrink: 0,
+                            }}>{thread.unread}</span>
+                          )}
+                        </div>
+                        <div style={{
+                          fontSize: 11.5, color: 'var(--s500)', marginBottom: 3,
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}>{thread.subject}</div>
+                        <div style={{
+                          fontSize: 11, color: 'var(--s400)',
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}>{thread.last.body}</div>
+                        <div style={{ fontSize: 10, color: 'var(--s400)', marginTop: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>{cmTimeAgo(thread.last.sentAt)}</span>
+                          {thread.hasFlags && (
+                            <span style={{
+                              background: '#FEE2E2', color: '#B91C1C',
+                              fontSize: 9, fontWeight: 700, letterSpacing: '.06em',
+                              padding: '1px 6px', borderRadius: 99,
+                            }}>FLAGGED</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Active conversation */}
+        <div className="card" style={{ padding: 0, display: 'flex', flexDirection: 'column', minHeight: 500 }}>
+          {!activeThread ? (
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--s400)', padding: 40, textAlign: 'center' }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Select a conversation</div>
+                <div style={{ fontSize: 13 }}>Or start a new message using the button above</div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Header */}
+              <div style={{
+                padding: '14px 18px', borderBottom: '1px solid var(--border)',
+                display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+              }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: '50%',
+                  background: cmAvatarColor(activeThread.otherParty), color: '#FBFAF5',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, fontWeight: 700, flexShrink: 0,
+                }}>{cmInitials(activeThread.otherParty)}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{activeThread.otherParty}</span>
+                    <span style={{
+                      background: channelColors[activeThread.channel] + '15',
+                      color: channelColors[activeThread.channel],
+                      fontSize: 9.5, fontWeight: 700, letterSpacing: '.06em',
+                      padding: '2px 7px', borderRadius: 99, textTransform: 'uppercase',
+                    }}>{activeThread.otherRole}</span>
+                    {activeThread.channel === 'student' && (
+                      <span style={{
+                        background: '#FEF3C7', color: '#B45309',
+                        fontSize: 9.5, fontWeight: 700, letterSpacing: '.06em',
+                        padding: '2px 7px', borderRadius: 99,
+                      }}>VISIBLE TO ADMIN</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 2 }}>{activeThread.subject}</div>
+                </div>
+                <button onClick={reportConversation}
+                  style={{
+                    background: 'transparent', border: '1px solid #FCA5A5',
+                    color: '#B91C1C',
+                    padding: '6px 12px', borderRadius: 'var(--rsm)',
+                    cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                  }}>Report</button>
+              </div>
+
+              {/* Messages */}
+              <div style={{
+                flex: 1, padding: 18, overflowY: 'auto',
+                background: '#FBFAF5',
+                display: 'flex', flexDirection: 'column', gap: 12,
+              }}>
+                {activeThread.messages.map(m => {
+                  const isMine = m.from === teacherFullName
+                  return (
+                    <div key={m.id} style={{
+                      display: 'flex', gap: 9, flexDirection: isMine ? 'row-reverse' : 'row',
+                      alignItems: 'flex-end',
+                    }}>
+                      <div style={{
+                        width: 30, height: 30, borderRadius: '50%',
+                        background: cmAvatarColor(m.from), color: '#FBFAF5',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 10, fontWeight: 700, flexShrink: 0,
+                      }}>{cmInitials(m.from)}</div>
+                      <div style={{
+                        background: isMine ? '#7D1025' : '#FFF',
+                        color: isMine ? '#FBFAF5' : 'var(--s800)',
+                        border: isMine ? 'none' : '1px solid var(--border)',
+                        borderRadius: isMine ? '14px 14px 4px 14px' : '4px 14px 14px 14px',
+                        padding: '10px 14px',
+                        maxWidth: '75%',
+                        fontSize: 13.5, lineHeight: 1.6,
+                      }}>
+                        <div style={{ whiteSpace: 'pre-wrap' }}>{m.body}</div>
+                        {m.flags && m.flags.length > 0 && (
+                          <div style={{
+                            marginTop: 8, padding: '6px 10px',
+                            background: isMine ? 'rgba(251,250,245,.15)' : '#FEE2E2',
+                            color: isMine ? '#FCA5A5' : '#B91C1C',
+                            borderRadius: 6, fontSize: 10.5, fontWeight: 700,
+                            display: 'flex', alignItems: 'center', gap: 6,
+                          }}>
+                            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                              <line x1="12" y1="9" x2="12" y2="13"/>
+                              <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                            Safety flag: {m.flags.map(f => f.label).join(', ')}
+                          </div>
+                        )}
+                        <div style={{
+                          fontSize: 10, marginTop: 6, opacity: .6,
+                          textAlign: isMine ? 'right' : 'left',
+                        }}>{cmFormatTime(m.sentAt)}</div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Reply box */}
+              <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', background: '#FFF' }}>
+                {/* Safety warning for student channel */}
+                {replyFlags.length > 0 && (
+                  <div style={{
+                    background: '#FEE2E2', border: '1px solid #FCA5A5',
+                    borderRadius: 'var(--rsm)', padding: '10px 12px',
+                    marginBottom: 10, fontSize: 12, color: '#B91C1C',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, fontWeight: 700 }}>
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                      </svg>
+                      Child Safety Warning
+                    </div>
+                    <div style={{ marginBottom: 6 }}>
+                      Your message contains: <strong>{replyFlags.map(f => f.label).join(', ')}</strong>.
+                      This may not be appropriate for adult-to-minor communication on this platform.
+                    </div>
+                    <label style={{ display: 'flex', gap: 6, alignItems: 'center', cursor: 'pointer', fontSize: 11.5 }}>
+                      <input type="checkbox" checked={replyAcknowledged}
+                        onChange={e => setReplyAcknowledged(e.target.checked)}
+                        style={{ accentColor: '#B91C1C' }}/>
+                      I have reviewed and confirm this message is appropriate. (Will be flagged to admin.)
+                    </label>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+                  <textarea value={replyText} onChange={e => setReplyText(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply() } }}
+                    rows={2} placeholder="Type your reply..."
+                    style={{
+                      flex: 1, padding: '10px 12px',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--rsm)',
+                      fontSize: 13, fontFamily: 'inherit',
+                      resize: 'vertical',
+                    }}/>
+                  <button onClick={sendReply}
+                    disabled={!replyText.trim() || (replyFlags.length > 0 && !replyAcknowledged)}
+                    style={{
+                      background: replyText.trim() && (replyFlags.length === 0 || replyAcknowledged) ? '#7D1025' : 'var(--bg)',
+                      color: replyText.trim() && (replyFlags.length === 0 || replyAcknowledged) ? '#FBFAF5' : 'var(--s400)',
+                      border: 'none',
+                      padding: '10px 16px', borderRadius: 'var(--rsm)',
+                      cursor: replyText.trim() && (replyFlags.length === 0 || replyAcknowledged) ? 'pointer' : 'not-allowed',
+                      fontSize: 13, fontWeight: 700,
+                      display: 'flex', alignItems: 'center', gap: 6,
+                    }}>
+                    Send
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <line x1="22" y1="2" x2="11" y2="13"/>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Compose modal */}
+      {showCompose && (
+        <div onClick={() => setShowCompose(false)} style={{
+          position: 'fixed', inset: 0, background: 'rgba(15,23,42,.65)', zIndex: 200,
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 20, overflowY: 'auto',
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: '#FBFAF5', borderRadius: 'var(--rxl)',
+            maxWidth: 640, width: '100%', overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,.3)', marginTop: 40, marginBottom: 40,
+          }}>
+            <div style={{
+              padding: '20px 28px',
+              background: 'linear-gradient(135deg, #7D1025, #8B1A2E)',
+              color: '#FBFAF5',
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
+                New Message
+              </div>
+              <h3 className="serif" style={{ fontSize: 22, margin: 0 }}>Compose</h3>
+            </div>
+
+            <div style={{ padding: '20px 28px' }}>
+              {/* Channel */}
+              <div className="fg">
+                <label className="fl">Send to</label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {['parent', 'student', 'admin'].map(ch => (
+                    <button key={ch} onClick={() => setComposeChannel(ch)}
+                      style={{
+                        flex: 1,
+                        background: composeChannel === ch ? channelColors[ch] : '#FFF',
+                        color: composeChannel === ch ? '#FBFAF5' : 'var(--s700)',
+                        border: '1.5px solid ' + (composeChannel === ch ? channelColors[ch] : 'var(--border)'),
+                        padding: '8px 12px', borderRadius: 'var(--rsm)',
+                        cursor: 'pointer', fontSize: 12.5, fontWeight: 700,
+                      }}>{channelLabels[ch]}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recipient */}
+              <div className="fg">
+                <label className="fl">Recipient *</label>
+                {composeChannel === 'student' ? (
+                  <select className="fsel" value={composeTo} onChange={e => setComposeTo(e.target.value)}>
+                    <option value="">Select student...</option>
+                    {allStudents.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                  </select>
+                ) : composeChannel === 'parent' ? (
+                  <select className="fsel" value={composeTo} onChange={e => setComposeTo(e.target.value)}>
+                    <option value="">Select parent...</option>
+                    {allStudents.filter(s => s.parentName).map(s => (
+                      <option key={s.id} value={s.parentName}>{s.parentName} (parent of {s.name})</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input className="fi" value={composeTo} onChange={e => setComposeTo(e.target.value)}
+                    placeholder="School Admin"/>
+                )}
+              </div>
+
+              {/* Subject */}
+              <div className="fg">
+                <label className="fl">Subject *</label>
+                <input className="fi" value={composeSubject} onChange={e => setComposeSubject(e.target.value)}
+                  placeholder="Brief subject line"/>
+              </div>
+
+              {/* Body */}
+              <div className="fg">
+                <label className="fl">Message *</label>
+                <textarea className="fi" rows={6} value={composeBody}
+                  onChange={e => setComposeBody(e.target.value)}
+                  placeholder="Type your message..."
+                  style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
+              </div>
+
+              {/* Safety warning */}
+              {composeFlags.length > 0 && (
+                <div style={{
+                  background: '#FEE2E2', border: '1px solid #FCA5A5',
+                  borderRadius: 'var(--rsm)', padding: '12px 14px',
+                  marginBottom: 14, fontSize: 12.5, color: '#B91C1C',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, fontWeight: 700 }}>
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Child Safety Warning
+                  </div>
+                  <div style={{ marginBottom: 8, lineHeight: 1.6 }}>
+                    Your message contains: <strong>{composeFlags.map(f => f.label).join(', ')}</strong>.
+                    These patterns are not typically appropriate for adult-to-minor communication on an education platform.
+                  </div>
+                  <label style={{ display: 'flex', gap: 6, alignItems: 'center', cursor: 'pointer', fontSize: 11.5 }}>
+                    <input type="checkbox" checked={composeAcknowledged}
+                      onChange={e => setComposeAcknowledged(e.target.checked)}
+                      style={{ accentColor: '#B91C1C' }}/>
+                    I have reviewed and confirm this message is appropriate. (Will be flagged to admin.)
+                  </label>
+                </div>
+              )}
+
+              {/* Admin visibility note for student channel */}
+              {composeChannel === 'student' && composeFlags.length === 0 && (
+                <div style={{
+                  background: '#FEF3C7', borderLeft: '3px solid #B45309',
+                  padding: '10px 12px', borderRadius: 'var(--rsm)',
+                  fontSize: 12, color: '#B45309', marginBottom: 14,
+                  fontStyle: 'italic',
+                }}>
+                  This message will be visible to school admin for child safety oversight.
+                </div>
+              )}
+            </div>
+
+            <div style={{
+              padding: '14px 24px', borderTop: '1px solid var(--border)',
+              background: '#FFF', display: 'flex', justifyContent: 'flex-end', gap: 8,
+            }}>
+              <button onClick={() => setShowCompose(false)} className="btn btn-s">Cancel</button>
+              <button onClick={sendNewMessage}
+                disabled={composeFlags.length > 0 && !composeAcknowledged}
+                style={{
+                  background: composeFlags.length === 0 || composeAcknowledged ? '#7D1025' : 'var(--bg)',
+                  color: composeFlags.length === 0 || composeAcknowledged ? '#FBFAF5' : 'var(--s400)',
+                  border: 'none',
+                  padding: '10px 18px', borderRadius: 'var(--rmd)',
+                  cursor: composeFlags.length === 0 || composeAcknowledged ? 'pointer' : 'not-allowed',
+                  fontSize: 13, fontWeight: 700,
+                }}>Send Message</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
