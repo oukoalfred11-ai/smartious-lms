@@ -418,8 +418,7 @@ export default function TeacherPortal() {
         <div className="content" style={{animation:'fadeIn .25s ease'}}>
 
           {/* ── DASHBOARD ── */}
-          {page === 'dashboard' && <TeacherDashboardTab user={user} store={store} setPage={setPage} setUploadModal={setUploadModal} toast={toast} />}
-
+          
           {/* ── LIVE CLASSROOM ── */}
           {page === 'classroom' && (
             <LiveClassroom
@@ -1361,16 +1360,59 @@ export default function TeacherPortal() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// TEACHER DASHBOARD — Student-Centric Command Center
+// ═══════════════════════════════════════════════════════════
+//
+// ONE BIG REPLACEMENT in TeacherPortal.jsx
+//
+// The existing dashboard block is at lines 421-557 (137 lines).
+// We replace it with a single line that calls the new component,
+// and add the component at the bottom of the file.
+//
+// HOW TO APPLY — TWO STEPS
+//
+// STEP 1: Find and replace the dashboard block
+//
+//   On GitHub, open TeacherPortal.jsx in edit mode.
+//   Press Ctrl+F and search for: page === 'dashboard' && (
+//
+//   You'll land on line ~421:
+//     {page === 'dashboard' && (
+//
+//   Click at the START of that line, then scroll down to find the
+//   matching closing `)}` at line ~556 (right before the
+//   "/* ── LIVE CLASSROOM ── */" comment).
+//
+//   Select everything between (about 137 lines).
+//   Delete.
+//
+//   Paste this single line in its place:
+//
+//          {page === 'dashboard' && <TeacherDashboardTab user={user} store={store} setPage={setPage} setUploadModal={setUploadModal} toast={toast} />}
+//
+//
+// STEP 2: Add the component at the bottom of the file
+//
+//   Press Ctrl+End to jump to the bottom of TeacherPortal.jsx.
+//   The last line should be `}` (closing the TeacherPortal function).
+//
+//   Click at the END of that final `}`.
+//   Press Enter twice.
+//
+//   Paste everything below this divider line at COLUMN 1 (no indent):
+
+
+// ═══════════════════════════════════════════════════════════
 // TEACHER DASHBOARD TAB — student-centric command center
 // ═══════════════════════════════════════════════════════════
- 
+
 const teacherSubjColours = {
   'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
   'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
   'Geography': '#0F766E', 'Computer Science': '#1F2937',
 }
 const teacherSubjColour = (s) => teacherSubjColours[s] || '#8B1A2E'
- 
+
 const teacherGreeting = () => {
   const h = new Date().getHours()
   if (h < 12) return 'Good morning'
@@ -1378,7 +1420,7 @@ const teacherGreeting = () => {
   if (h < 21) return 'Good evening'
   return 'Working late'
 }
- 
+
 const teacherTimeAgo = (iso) => {
   const diff = Date.now() - new Date(iso).getTime()
   const mins = Math.floor(diff / 60000)
@@ -1391,14 +1433,14 @@ const teacherTimeAgo = (iso) => {
   if (days < 7) return `${days}d ago`
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
- 
+
 // Seed sample student state on first load so the dashboard looks alive even
 // before the backend is wired. Each student gets fake mastery, last-active,
 // homework status. Real data will replace this once the backend exists.
 const TEACHER_DASH_SEED_KEY = 'sm_teacher_dashboard_seeded'
 const seedTeacherSampleData = () => {
   if (localStorage.getItem(TEACHER_DASH_SEED_KEY)) return
- 
+
   // Seed a "students enrolled with this teacher" list with realistic data
   const seedStudents = [
     { id: 's1', name: 'Amara Osei',    initials: 'AO', curriculum: 'IGCSE',  year: 'Year 10', mastery: 72, lastActive: 1,   hwSubmitted: 3, hwTotal: 4, status: 'on-track',     attendance: 88 },
@@ -1411,7 +1453,7 @@ const seedTeacherSampleData = () => {
     { id: 's8', name: 'Peter Kamau',   initials: 'PK', curriculum: 'IGCSE',  year: 'Year 11', mastery: 62, lastActive: 5,   hwSubmitted: 2, hwTotal: 4, status: 'needs-help',    attendance: 78 },
   ]
   localStorage.setItem('sm_teacher_students', JSON.stringify(seedStudents))
- 
+
   // Seed pending grading queue
   const pendingGrading = [
     { id: 'g1', studentName: 'Brian Otieno',  studentInitials: 'BO', homework: 'Quadratic Equations Practice', subject: 'Mathematics', submittedAt: new Date(Date.now() - 2 * 3600000).toISOString(), maxMarks: 50, type: 'mixed' },
@@ -1421,7 +1463,7 @@ const seedTeacherSampleData = () => {
     { id: 'g5', studentName: 'Kofi Mensah',   studentInitials: 'KM', homework: 'Newton Laws Essay',            subject: 'Physics',     submittedAt: new Date(Date.now() - 36 * 3600000).toISOString(),maxMarks: 30, type: 'text' },
   ]
   localStorage.setItem('sm_teacher_pending_grading', JSON.stringify(pendingGrading))
- 
+
   // Seed recent student activity feed
   const recentActivity = [
     { id: 'a1', student: 'Faith Wanjiru', initials: 'FW', action: 'Completed Pythagoras practice', score: 95, when: new Date(Date.now() - 12 * 60000).toISOString(),  type: 'practice', subject: 'Mathematics' },
@@ -1432,10 +1474,10 @@ const seedTeacherSampleData = () => {
     { id: 'a6', student: 'Zara Kamau',    initials: 'ZK', action: 'Asked Mshauri for help',                  when: new Date(Date.now() - 6 * 3600000).toISOString(),  type: 'mshauri',  subject: 'Mathematics' },
   ]
   localStorage.setItem('sm_teacher_recent_activity', JSON.stringify(recentActivity))
- 
+
   localStorage.setItem(TEACHER_DASH_SEED_KEY, '1')
 }
- 
+
 const loadTeacherStudents = () => {
   try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
 }
@@ -1445,28 +1487,28 @@ const loadPendingGrading = () => {
 const loadTeacherActivity = () => {
   try { return JSON.parse(localStorage.getItem('sm_teacher_recent_activity') || '[]') } catch { return [] }
 }
- 
+
 function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
   // Seed sample data on first load
   useEffect(() => { seedTeacherSampleData() }, [])
- 
+
   const [tick, setTick] = useState(0)
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 30000)
     return () => clearInterval(id)
   }, [])
- 
+
   const teacherFirstName = user?.firstName || 'Teacher'
   const teacherLastName = user?.lastName || ''
   const teacherFullName = `${teacherFirstName} ${teacherLastName}`.trim()
   const teacherSubject = user?.subject || 'Mathematics'
   const teacherInitials = (teacherFullName || 'T').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || 'T'
- 
+
   // Read teacher data
   const myStudents = loadTeacherStudents()
   const pendingGrading = loadPendingGrading()
   const recentActivity = loadTeacherActivity()
- 
+
   // Filter the store's groupRooms to this teacher's rooms
   const allRooms = store?.groupRooms || []
   const myRooms = allRooms.filter(r =>
@@ -1476,7 +1518,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
     r.teacher === `Mrs. ${teacherLastName}` ||
     r.teacher?.includes(teacherLastName)
   )
- 
+
   // Compute today's classes for this teacher
   const now = new Date()
   const todayDow = now.getDay()
@@ -1495,7 +1537,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
     todayClasses.push({ ...room, ...parsed, status })
   })
   todayClasses.sort((a, b) => a.startMins - b.startMins)
- 
+
   // Stats
   const totalStudents = myStudents.length
   const onTrackCount = myStudents.filter(s => s.status === 'excellent' || s.status === 'on-track').length
@@ -1507,7 +1549,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
   const totalHwAssigned = myStudents.reduce((sum, s) => sum + s.hwTotal, 0)
   const totalHwSubmitted = myStudents.reduce((sum, s) => sum + s.hwSubmitted, 0)
   const submissionRate = totalHwAssigned > 0 ? Math.round((totalHwSubmitted / totalHwAssigned) * 100) : 0
- 
+
   // Compute alerts (only show alert strip if any are urgent)
   const alerts = []
   if (pendingCount >= 3) alerts.push({ type: 'grading', label: `${pendingCount} homework submissions awaiting your grade`, action: () => setPage('marking'), color: 'var(--a600)' })
@@ -1516,14 +1558,14 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
   if (liveClass) alerts.push({ type: 'live', label: `Live class right now: ${liveClass.subject}`, action: () => setPage('classroom'), color: 'var(--g600)' })
   const upcomingClass = todayClasses.find(c => c.status === 'upcoming' && (c.startMins - nowMins) <= 30)
   if (upcomingClass) alerts.push({ type: 'upcoming', label: `Class in ${upcomingClass.startMins - nowMins} min: ${upcomingClass.subject}`, action: () => setPage('classroom'), color: 'var(--b700)' })
- 
+
   // Sort student grid: at-risk first, then by mastery desc
   const sortedStudents = [...myStudents].sort((a, b) => {
     const order = { 'at-risk': 0, 'needs-help': 1, 'on-track': 2, 'excellent': 3 }
     if (order[a.status] !== order[b.status]) return order[a.status] - order[b.status]
     return a.mastery - b.mastery
   })
- 
+
   // Status colour helper
   const statusStyle = (status) => {
     switch (status) {
@@ -1534,7 +1576,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
       default:           return { color: 'var(--s500)', bg: 'var(--bg)',   label: status }
     }
   }
- 
+
   // Avatar colour from name
   const avatarColor = (name) => {
     const colors = ['#3B82F6', '#22C55E', '#8B5CF6', '#F59E0B', '#EC4899', '#14B8A6', '#F97316', '#06B6D4']
@@ -1542,7 +1584,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
     for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
     return colors[Math.abs(hash) % colors.length]
   }
- 
+
   return (
     <div>
       {/* ─── WELCOME HERO ─── */}
@@ -1640,7 +1682,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
           ))}
         </div>
       </div>
- 
+
       {/* ─── ACTION REQUIRED ALERTS (only if any) ─── */}
       {alerts.length > 0 && (
         <div className="card" style={{ marginBottom: 18, background: 'var(--a50)', border: '1px solid var(--a100)' }}>
@@ -1670,7 +1712,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
           ))}
         </div>
       )}
- 
+
       {/* ─── TODAY'S CLASSES ─── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14, marginBottom: 18 }}>
         <div className="card">
@@ -1718,7 +1760,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
             </div>
           ))}
         </div>
- 
+
         {/* Pending Grading */}
         <div className="card">
           <div className="chdr">
@@ -1773,7 +1815,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
           ))}
         </div>
       </div>
- 
+
       {/* ─── MY STUDENTS GRID ─── */}
       <div className="card" style={{ marginBottom: 18 }}>
         <div className="chdr" style={{ marginBottom: 14 }}>
@@ -1820,7 +1862,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
                     padding: '3px 7px', borderRadius: 99, flexShrink: 0,
                   }}>{sty.label}</span>
                 </div>
- 
+
                 {/* Mastery bar */}
                 <div style={{ marginBottom: 8 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
@@ -1831,7 +1873,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
                     <div style={{ height: '100%', width: `${s.mastery}%`, background: sty.color, borderRadius: 3 }}/>
                   </div>
                 </div>
- 
+
                 {/* Bottom row: HW + Last active */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--s500)' }}>
                   <span>HW: <strong style={{ color: s.hwSubmitted < s.hwTotal ? 'var(--a600)' : 'var(--g600)' }}>{s.hwSubmitted}/{s.hwTotal}</strong></span>
@@ -1850,7 +1892,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
           </div>
         )}
       </div>
- 
+
       {/* ─── BOTTOM ROW: Quick Actions + Recent Activity ─── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
         {/* Quick Actions */}
@@ -1889,7 +1931,7 @@ function TeacherDashboardTab({ user, store, setPage, setUploadModal, toast }) {
             </button>
           </div>
         </div>
- 
+
         {/* Recent Student Activity Feed */}
         <div className="card">
           <div className="ctitle" style={{ marginBottom: 14 }}>Recent Student Activity</div>
