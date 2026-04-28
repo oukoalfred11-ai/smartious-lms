@@ -306,7 +306,7 @@ export default function TeacherPortal() {
     dashboard:'Dashboard', classroom:'Live Classroom', students:'My Students',
     resources:'Resource Library', exambuilder:'Exams', questionbank:'Question Bank', blog:'Blog & Earnings',
     liveclass:'Live Lessons', allocations:'My Allocations', payslips:'Payslips & Earnings',
-    marking:'AI Marking & Integrity', reports:'Reports & Analytics', profile:'My Profile', leave:'Leave Requests'
+    marking:'Homework', reports:'Reports & Analytics', profile:'My Profile', leave:'Leave Requests'
   }
 
   const sendChat = () => {
@@ -335,7 +335,7 @@ export default function TeacherPortal() {
       {id:'liveclass',   label:'Live Lessons',        icon:'poly:23 7 16 12 23 17 23 7|rect:1:5:15:14:2', live:true},
       {id:'allocations', label:'My Allocations',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|line:19:8:19:14|line:22:11:16:11', badge:'3', badgeCol:'var(--b700)'},
       {id:'payslips',    label:'Payslips',            icon:'rect:2:5:20:14:2|line:2:10:22:10|line:6:15:10:15|line:14:15:18:15'},
-      {id:'marking',     label:'AI Marking',          icon:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'},
+      {id:'marking',     label:'Homework',            icon:'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'},
       {id:'reports',     label:'Reports & Analytics', icon:'pline:22 12 18 12 15 21 9 3 6 12 2 12'},
     ]},
     { section:'Account', items:[
@@ -618,104 +618,9 @@ export default function TeacherPortal() {
 
 
           {/* ── AI MARKING ── */}
-          {page === 'marking' && (
-            <div style={{display:'grid',gridTemplateColumns:'1fr 300px',gap:20,alignItems:'start'}}>
-              <div>
-                <div style={{marginBottom:18}}>
-                  <div className="sec-tag">AI Marking & Integrity</div>
-                  <h2 className="serif" style={{fontSize:24,color:'var(--s900)'}}>Mathematics Mock — <em style={{color:'var(--b700)'}}>Paper 1</em></h2>
-                  <p style={{fontSize:14,color:'var(--s500)',marginTop:4}}>24 submissions · AI-marked · 5 questions · 100 marks</p>
-                </div>
-                <div className="card" style={{marginBottom:20}}>
-                  <div className="chdr">
-                    <div className="ctitle">Class Score Overview</div>
-                    <div style={{display:'flex',gap:8}}>
-                      <button className="btn btn-s btn-sm" onClick={() => toast.ok('Exporting results to CSV…')}>Export CSV</button>
-                      <button className="btn btn-p btn-sm" onClick={() => toast.ok('Sending results to all students…')}>Publish Results</button>
-                    </div>
-                  </div>
-                  {MARK_STU.map((s,i) => {
-                    const total = s.scores.reduce((a,b)=>a+b,0)
-                    const col = total>=75?'var(--g600)':total>=60?'var(--a600)':'var(--r500)'
-                    return (
-                      <div key={i} className="mark-row">
-                        <Av init={s.init} col={s.col} size={36}/>
-                        <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontSize:14,fontWeight:600,color:'var(--s800)',marginBottom:4}}>
-                            {s.name}
-                            {s.flagged&&<span style={{marginLeft:8,fontSize:11,fontWeight:700,color:'var(--r600)',background:'var(--r50)',border:'1px solid var(--r100)',borderRadius:999,padding:'1px 8px'}}>⚠ Flagged</span>}
-                          </div>
-                          <div style={{display:'flex',gap:12,fontSize:12,color:'var(--s400)'}}>
-                            {s.scores.map((sc,qi) => <span key={qi}>Q{qi+1}: <span className="mono" style={{fontWeight:700,color:'var(--s700)'}}>{sc}</span></span>)}
-                          </div>
-                        </div>
-                        <span className="mono" style={{fontSize:18,fontWeight:700,color:col,flexShrink:0}}>{total}%</span>
-                        <button className="btn btn-g btn-sm" onClick={() => setMarkDetail(s)} style={{flexShrink:0}}>Review</button>
-                      </div>
-                    )
-                  })}
-                </div>
-                <div className="card">
-                  <div className="chdr"><div className="ctitle">Score Distribution</div><span style={{fontSize:13,color:'var(--s500)'}}>Class average: <span className="mono" style={{fontWeight:700,color:'var(--b700)'}}>73%</span></span></div>
-                  <div style={{display:'flex',gap:6,alignItems:'flex-end',height:80}}>
-                    {[{r:'0–39',n:1,c:'var(--r500)'},{r:'40–59',n:2,c:'var(--a500)'},{r:'60–69',n:4,c:'var(--a500)'},{r:'70–79',n:8,c:'var(--b500)'},{r:'80–89',n:6,c:'var(--g500)'},{r:'90–100',n:3,c:'var(--g600)'}].map((d,i) => (
-                      <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
-                        <div className="mono" style={{fontSize:10,color:'var(--s500)'}}>{d.n}</div>
-                        <div style={{width:'100%',background:d.c,borderRadius:'4px 4px 0 0',height:Math.round(d.n/8*100)+'%',minHeight:6,opacity:.85}}/>
-                        <div style={{fontSize:9.5,color:'var(--s400)',textAlign:'center'}}>{d.r}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+          {/* ── HOMEWORK ── */}
+          {page === 'marking' && <HomeworkTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
 
-              {/* Integrity sidebar */}
-              <div style={{display:'flex',flexDirection:'column',gap:16}}>
-                <div className="card">
-                  <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:16}}>
-                    <div style={{width:32,height:32,background:'var(--a50)',borderRadius:'var(--rmd)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    </div>
-                    <div className="ctitle" style={{fontSize:15}}>Integrity Scanner</div>
-                  </div>
-                  {[['AI-Generated Answers','David · 15%','var(--a600)',15,'1 student flagged'],['Plagiarism Detected','David · 22%','var(--r600)',22,'1 student flagged'],['Unusual Copy-Paste','David · 38%','var(--r600)',38,'1 student flagged']].map(([l,v,c,pct,sub]) => (
-                    <div key={l} style={{marginBottom:14}}>
-                      <div style={{display:'flex',justifyContent:'space-between',fontSize:12.5,marginBottom:6}}>
-                        <span style={{color:'var(--s500)'}}>{l}</span>
-                        <span className="mono" style={{fontWeight:700,color:c}}>{v}</span>
-                      </div>
-                      <div className="prog-bar"><div className="prog-fill" style={{width:pct+'%',background:c}}/></div>
-                      <div style={{fontSize:11,color:'var(--s400)',marginTop:4}}>{sub}</div>
-                    </div>
-                  ))}
-                  <div style={{background:'var(--r50)',border:'1px solid var(--r100)',borderRadius:'var(--rmd)',padding:12}}>
-                    <div style={{fontWeight:700,fontSize:13,color:'var(--r600)',marginBottom:4}}>⚠ Integrity Alert</div>
-                    <div style={{fontSize:12,color:'var(--s600)',lineHeight:1.6}}>David Mwangi's submission shows 22% plagiarism and unusual copy-paste patterns. Review recommended before releasing marks.</div>
-                    <button className="btn btn-d btn-sm" style={{marginTop:10,width:'100%',justifyContent:'center'}} onClick={() => setMarkDetail(MARK_STU[4])}>Review Submission</button>
-                  </div>
-                </div>
-
-                {/* Chat */}
-                <div className="card">
-                  <div className="ctitle" style={{fontSize:15,marginBottom:12}}>Marking Assistant</div>
-                  <div className="chat-area" style={{height:180,background:'var(--bg)',borderRadius:'var(--rmd)',padding:10}}>
-                    {chatMsgs.map((m,i) => (
-                      <div key={i} className={`chat-msg${m.role==='user'?' user':''}`}>
-                        <div className="chat-av" style={{background:m.role==='ai'?'var(--b700)':'var(--s600)'}}>{m.role==='ai'?'M':'J'}</div>
-                        <div className="chat-bubble" style={{fontSize:12.5}}>{m.text}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{display:'flex',gap:8,marginTop:10}}>
-                    <textarea className="chat-input" value={chatInp} onChange={e=>setChatInp(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}}} rows={1} placeholder="Ask about marking…" style={{fontSize:13}}/>
-                    <button className="btn btn-p btn-sm" onClick={sendChat} style={{padding:'8px 12px'}}>
-                      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* ── REPORTS ── */}
           {page === 'reports' && (
@@ -3809,6 +3714,1296 @@ function ExamsTab({ user, store, setPage, toast }) {
                       {exam.assignedStudents.length}
                     </div>
                     <div style={{ fontSize: 10, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Students</div>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// HOMEWORK — Assign and grade workflow
+// ═══════════════════════════════════════════════════════════
+// Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
+
+const HW_ASSIGNED_KEY = 'sm_homework_assigned'
+const HW_DRAFTS_KEY   = 'sm_homework_drafts'
+
+const hwSubjColours = {
+  'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
+  'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
+  'Geography': '#0F766E', 'Computer Science': '#1F2937',
+  'Business Studies': '#7E22CE', 'Economics': '#9F1239',
+}
+const hwSubjColour = (s) => hwSubjColours[s] || '#7D1025'
+
+const hwTimeAgo = (iso) => {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return mins + 'm ago'
+  if (hours < 24) return hours + 'h ago'
+  if (days === 1) return 'yesterday'
+  if (days < 7) return days + 'd ago'
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+const hwTimeUntilDue = (iso) => {
+  const diff = new Date(iso).getTime() - Date.now()
+  if (diff < 0) {
+    const overdueDays = Math.floor(-diff / 86400000)
+    if (overdueDays === 0) return 'overdue today'
+    return overdueDays + 'd overdue'
+  }
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 60) return 'due in ' + mins + 'm'
+  if (hours < 24) return 'due in ' + hours + 'h'
+  if (days === 1) return 'due tomorrow'
+  if (days < 7) return 'due in ' + days + 'd'
+  return 'due ' + new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+const hwFormatDate = (iso) => {
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
+const hwLoadAssignments = () => {
+  try { return JSON.parse(localStorage.getItem(HW_ASSIGNED_KEY) || '[]') } catch { return [] }
+}
+const hwSaveAssignments = (items) => {
+  try { localStorage.setItem(HW_ASSIGNED_KEY, JSON.stringify(items.slice(-200))) } catch {}
+}
+const hwLoadStudents = () => {
+  try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
+}
+const hwLoadQuestionBank = () => {
+  try { return JSON.parse(localStorage.getItem('sm_question_bank_custom') || '[]') } catch { return [] }
+}
+
+const hwGenerateId = () => 'hw-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)
+
+const hwDefaultDueDate = () => {
+  const d = new Date()
+  d.setDate(d.getDate() + 7)
+  d.setHours(23, 59, 0, 0)
+  const pad = (n) => String(n).padStart(2, '0')
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes())
+}
+
+// Seed sample homework on first load
+const HW_SEEDED_KEY = 'sm_homework_seeded'
+const hwSeedSample = () => {
+  if (localStorage.getItem(HW_SEEDED_KEY)) return
+  const allStudents = hwLoadStudents()
+  if (allStudents.length === 0) return  // Wait until students exist
+  const studentIds = allStudents.map(s => s.id)
+  const now = Date.now()
+  const samples = [
+    {
+      id: 'hw-sample-1',
+      title: 'Quadratic Equations Practice',
+      subject: 'Mathematics',
+      curriculum: 'IGCSE',
+      year: 'Year 10',
+      questionIds: [],  // Could reference QB if seeded
+      customInstructions: 'Solve all 5 questions on the worksheet. Show all working. Submit photo of your work.',
+      dueDate: new Date(now + 3 * 86400000).toISOString(),
+      assignedStudents: studentIds,
+      totalMarks: 50,
+      status: 'active',
+      teacher: 'Mr. James Muthomi',
+      assignedAt: new Date(now - 1 * 86400000).toISOString(),
+      submissions: [
+        { studentId: 's4', studentName: 'Brian Otieno', submittedAt: new Date(now - 2 * 3600000).toISOString(), responses: { custom: 'See attached photo' }, grade: null, feedback: null },
+        { studentId: 'lydia-id', studentName: 'Lydia Achieng', submittedAt: new Date(now - 4 * 3600000).toISOString(), responses: { custom: 'Worked solutions attached' }, grade: null, feedback: null },
+      ],
+    },
+    {
+      id: 'hw-sample-2',
+      title: 'Photosynthesis Quiz',
+      subject: 'Biology',
+      curriculum: 'IGCSE',
+      year: 'Year 10',
+      questionIds: [],
+      customInstructions: '5 short answer questions on photosynthesis. Define each term clearly.',
+      dueDate: new Date(now + 1 * 86400000).toISOString(),
+      assignedStudents: studentIds,
+      totalMarks: 25,
+      status: 'active',
+      teacher: 'Mr. James Muthomi',
+      assignedAt: new Date(now - 2 * 86400000).toISOString(),
+      submissions: [
+        { studentId: 's1', studentName: 'Amara Osei', submittedAt: new Date(now - 8 * 3600000).toISOString(), responses: { custom: 'Photosynthesis converts light energy into chemical energy in chloroplasts. The process requires CO2, water, and chlorophyll.' }, grade: null, feedback: null },
+      ],
+    },
+    {
+      id: 'hw-sample-3',
+      title: 'Persuasive Essay: My Future Career',
+      subject: 'English',
+      curriculum: 'IGCSE',
+      year: 'Year 10',
+      questionIds: [],
+      customInstructions: 'Write a 500-word persuasive essay on why your chosen career is the best fit for you. Submit as text.',
+      dueDate: new Date(now - 1 * 86400000).toISOString(),
+      assignedStudents: studentIds,
+      totalMarks: 30,
+      status: 'active',
+      teacher: 'Mr. James Muthomi',
+      assignedAt: new Date(now - 7 * 86400000).toISOString(),
+      submissions: [
+        { studentId: 's3', studentName: 'Zara Kamau', submittedAt: new Date(now - 24 * 3600000).toISOString(),
+          responses: { custom: 'I want to be a doctor because I have always been fascinated by how the human body works...' },
+          grade: null, feedback: null },
+      ],
+    },
+  ]
+  hwSaveAssignments(samples)
+  localStorage.setItem(HW_SEEDED_KEY, '1')
+}
+
+function HomeworkTab({ user, store, setPage, toast }) {
+  const [assignments, setAssignments] = useState(() => { hwSeedSample(); return hwLoadAssignments() })
+  const [view, setView] = useState('list')  // 'list' | 'create' | 'detail' | 'grade'
+  const [selectedHw, setSelectedHw] = useState(null)
+  const [selectedSubmission, setSelectedSubmission] = useState(null)
+  const [activeTab, setActiveTab] = useState('pending')  // 'pending' | 'active' | 'graded' | 'all'
+  const [createStep, setCreateStep] = useState(1)
+
+  // Filters
+  const [filterSubject, setFilterSubject] = useState('all')
+  const [searchQ, setSearchQ] = useState('')
+
+  // Create form state
+  const [formTitle, setFormTitle] = useState('')
+  const [formSubject, setFormSubject] = useState('Mathematics')
+  const [formCurriculum, setFormCurriculum] = useState('IGCSE')
+  const [formYear, setFormYear] = useState('Year 10')
+  const [formDueDate, setFormDueDate] = useState(hwDefaultDueDate())
+  const [formInstructions, setFormInstructions] = useState('')
+  const [formSelectedQuestions, setFormSelectedQuestions] = useState([])
+  const [formSelectedStudents, setFormSelectedStudents] = useState([])
+  const [bankFilter, setBankFilter] = useState({ subject: 'Mathematics', difficulty: 'all', search: '' })
+
+  // Grade form state
+  const [gradeMark, setGradeMark] = useState('')
+  const [gradeFeedback, setGradeFeedback] = useState('')
+  const [gradePerQuestion, setGradePerQuestion] = useState({})
+
+  const allStudents = hwLoadStudents()
+  const questionBank = hwLoadQuestionBank()
+
+  // Derived
+  const enrichedAssignments = assignments.map(hw => {
+    const submissionsCount = (hw.submissions || []).length
+    const gradedCount = (hw.submissions || []).filter(s => s.grade !== null && s.grade !== undefined).length
+    const ungradedCount = submissionsCount - gradedCount
+    const expectedCount = hw.assignedStudents?.length || 0
+    return { ...hw, _submissionsCount: submissionsCount, _gradedCount: gradedCount, _ungradedCount: ungradedCount, _expectedCount: expectedCount }
+  })
+
+  // Tab counts
+  const counts = {
+    all: enrichedAssignments.length,
+    active: enrichedAssignments.filter(hw => hw.status === 'active' && hw._ungradedCount === 0 && hw._gradedCount < hw._expectedCount).length,
+    pending: enrichedAssignments.filter(hw => hw._ungradedCount > 0).length,
+    graded: enrichedAssignments.filter(hw => hw._gradedCount > 0 && hw._gradedCount === hw._submissionsCount).length,
+  }
+
+  // Filter for active tab
+  const tabFiltered = enrichedAssignments.filter(hw => {
+    if (activeTab === 'pending') return hw._ungradedCount > 0
+    if (activeTab === 'active') return hw.status === 'active'
+    if (activeTab === 'graded') return hw._gradedCount > 0
+    return true
+  })
+
+  const filtered = tabFiltered.filter(hw => {
+    if (filterSubject !== 'all' && hw.subject !== filterSubject) return false
+    if (searchQ.trim()) {
+      const s = searchQ.toLowerCase()
+      if (!hw.title.toLowerCase().includes(s) && !hw.subject.toLowerCase().includes(s)) return false
+    }
+    return true
+  }).sort((a, b) => new Date(b.assignedAt) - new Date(a.assignedAt))
+
+  // Stats for hero
+  const stats = {
+    total: assignments.length,
+    pendingGrading: enrichedAssignments.reduce((sum, hw) => sum + hw._ungradedCount, 0),
+    submissions: enrichedAssignments.reduce((sum, hw) => sum + hw._submissionsCount, 0),
+    students: allStudents.length,
+  }
+
+  // Filter question bank for picker
+  const filteredBank = questionBank.filter(q => {
+    if (q.status !== 'published') return false
+    if (bankFilter.subject !== 'all' && q.subject !== bankFilter.subject) return false
+    if (bankFilter.difficulty !== 'all' && q.difficulty !== bankFilter.difficulty) return false
+    if (bankFilter.search.trim()) {
+      const s = bankFilter.search.toLowerCase()
+      if (!q.question.toLowerCase().includes(s) && !q.topic.toLowerCase().includes(s)) return false
+    }
+    return true
+  })
+
+  const formTotalMarks = formSelectedQuestions.reduce((sum, qid) => {
+    const q = questionBank.find(qq => qq.id === qid)
+    return sum + (q?.marks || 0)
+  }, 0)
+
+  // ── ACTIONS ─────────────────────────────────────────
+  const resetForm = () => {
+    setFormTitle('')
+    setFormSubject('Mathematics')
+    setFormCurriculum('IGCSE')
+    setFormYear('Year 10')
+    setFormDueDate(hwDefaultDueDate())
+    setFormInstructions('')
+    setFormSelectedQuestions([])
+    setFormSelectedStudents([])
+    setCreateStep(1)
+  }
+
+  const openCreate = () => {
+    resetForm()
+    setView('create')
+  }
+
+  const toggleQuestion = (qid) => {
+    if (formSelectedQuestions.includes(qid)) {
+      setFormSelectedQuestions(formSelectedQuestions.filter(id => id !== qid))
+    } else {
+      setFormSelectedQuestions([...formSelectedQuestions, qid])
+    }
+  }
+
+  const toggleStudent = (sid) => {
+    if (formSelectedStudents.includes(sid)) {
+      setFormSelectedStudents(formSelectedStudents.filter(id => id !== sid))
+    } else {
+      setFormSelectedStudents([...formSelectedStudents, sid])
+    }
+  }
+
+  const validateCreateStep = (step) => {
+    if (step === 1) {
+      if (!formTitle.trim()) { toast?.error?.('Title is required.'); return false }
+      if (!formDueDate) { toast?.error?.('Due date is required.'); return false }
+      return true
+    }
+    if (step === 2) {
+      if (formSelectedQuestions.length === 0 && !formInstructions.trim()) {
+        toast?.error?.('Add at least one question OR write custom instructions.')
+        return false
+      }
+      return true
+    }
+    if (step === 3) {
+      if (formSelectedStudents.length === 0) { toast?.error?.('Assign to at least one student.'); return false }
+      return true
+    }
+    return true
+  }
+
+  const assignHomework = () => {
+    if (!validateCreateStep(1) || !validateCreateStep(2) || !validateCreateStep(3)) return
+    const newHw = {
+      id: hwGenerateId(),
+      title: formTitle.trim(),
+      subject: formSubject,
+      curriculum: formCurriculum,
+      year: formYear,
+      questionIds: formSelectedQuestions,
+      customInstructions: formInstructions.trim(),
+      dueDate: new Date(formDueDate).toISOString(),
+      assignedStudents: formSelectedStudents,
+      totalMarks: formTotalMarks || 100,
+      status: 'active',
+      teacher: 'Mr. James Muthomi',
+      assignedAt: new Date().toISOString(),
+      submissions: [],
+    }
+    const updated = [newHw, ...assignments]
+    setAssignments(updated)
+    hwSaveAssignments(updated)
+    toast?.ok?.('Homework assigned to ' + formSelectedStudents.length + ' students.')
+    setView('list')
+    resetForm()
+  }
+
+  const deleteHomework = (id) => {
+    const updated = assignments.filter(hw => hw.id !== id)
+    setAssignments(updated)
+    hwSaveAssignments(updated)
+    toast?.ok?.('Homework deleted.')
+    setView('list')
+    setSelectedHw(null)
+  }
+
+  const openDetail = (hw) => {
+    setSelectedHw(hw)
+    setView('detail')
+  }
+
+  const openGrade = (hw, submission) => {
+    setSelectedHw(hw)
+    setSelectedSubmission(submission)
+    setGradeMark(submission.grade !== null && submission.grade !== undefined ? String(submission.grade) : '')
+    setGradeFeedback(submission.feedback || '')
+    setGradePerQuestion(submission.perQuestionGrades || {})
+    setView('grade')
+  }
+
+  const saveGrade = () => {
+    if (!gradeMark || isNaN(parseFloat(gradeMark))) {
+      toast?.error?.('Please enter a valid mark.')
+      return
+    }
+    const mark = parseFloat(gradeMark)
+    if (mark < 0 || mark > selectedHw.totalMarks) {
+      toast?.error?.('Mark must be between 0 and ' + selectedHw.totalMarks + '.')
+      return
+    }
+
+    const updated = assignments.map(hw => {
+      if (hw.id !== selectedHw.id) return hw
+      return {
+        ...hw,
+        submissions: (hw.submissions || []).map(sub => {
+          if (sub.studentId !== selectedSubmission.studentId) return sub
+          return {
+            ...sub,
+            grade: mark,
+            feedback: gradeFeedback.trim(),
+            perQuestionGrades: gradePerQuestion,
+            gradedAt: new Date().toISOString(),
+          }
+        }),
+      }
+    })
+    setAssignments(updated)
+    hwSaveAssignments(updated)
+    toast?.ok?.('Grade saved. Student will see ' + mark + '/' + selectedHw.totalMarks + ' (' + Math.round(mark / selectedHw.totalMarks * 100) + '%)')
+    setView('detail')
+    setSelectedSubmission(null)
+  }
+
+  // ── RENDER: GRADE VIEW ──────────────────────────────
+  if (view === 'grade' && selectedHw && selectedSubmission) {
+    const subjCol = hwSubjColour(selectedHw.subject)
+    const hwQuestions = (selectedHw.questionIds || []).map(qid => questionBank.find(q => q.id === qid)).filter(Boolean)
+    const studentRecord = allStudents.find(s => s.id === selectedSubmission.studentId)
+    const previewPercent = gradeMark ? Math.round(parseFloat(gradeMark) / selectedHw.totalMarks * 100) : null
+
+    return (
+      <div>
+        <button onClick={() => { setView('detail'); setSelectedSubmission(null) }}
+          style={{
+            background: 'transparent', border: 'none', color: '#7D1025',
+            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+            padding: '6px 0', marginBottom: 14,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          Back to Submissions
+        </button>
+
+        {/* Hero */}
+        <div className="card" style={{
+          padding: 0, marginBottom: 18, overflow: 'hidden',
+          background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+          color: '#FBFAF5',
+        }}>
+          <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: '50%',
+              background: '#C9A030',
+              border: '3px solid #F0CC5A',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#7D1025',
+              fontSize: 22, fontWeight: 700,
+              fontFamily: "'Instrument Serif', serif",
+              flexShrink: 0,
+            }}>{studentRecord?.initials || selectedSubmission.studentName.split(' ').map(w => w[0]).join('').slice(0, 2)}</div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
+                Grading Submission
+              </div>
+              <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 24, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
+                {selectedSubmission.studentName}
+              </h1>
+              <div style={{ fontSize: 13, opacity: .9, marginTop: 4 }}>
+                {selectedHw.title} | Submitted {hwTimeAgo(selectedSubmission.submittedAt)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 14 }}>
+          {/* LEFT: Student's submission */}
+          <div>
+            <div className="card" style={{ marginBottom: 14 }}>
+              <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Student's Submission</div>
+
+              {selectedSubmission.responses?.custom && (
+                <div style={{
+                  background: '#FBFAF5', borderLeft: '3px solid #C9A030',
+                  padding: '14px 16px', borderRadius: 'var(--rsm)',
+                  fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.7,
+                  whiteSpace: 'pre-wrap', marginBottom: 14,
+                }}>{selectedSubmission.responses.custom}</div>
+              )}
+
+              {hwQuestions.length > 0 && hwQuestions.map((q, i) => {
+                const studentAnswer = selectedSubmission.responses?.[q.id]
+                return (
+                  <div key={q.id} style={{
+                    padding: 14, marginBottom: 10,
+                    background: '#FBFAF5',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--rmd)',
+                  }}>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 8 }}>
+                      <span className="mono" style={{
+                        fontSize: 11, fontWeight: 700, color: '#7D1025',
+                        background: '#FBE8E8', padding: '2px 8px', borderRadius: 'var(--rsm)',
+                        flexShrink: 0,
+                      }}>Q{i + 1}</span>
+                      <div style={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'var(--s900)' }}>{q.question}</div>
+                    </div>
+
+                    <div style={{ marginBottom: 10 }}>
+                      <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Student's Answer</div>
+                      <div style={{
+                        background: '#FFF',
+                        border: '1px solid var(--border)',
+                        padding: '8px 12px', borderRadius: 'var(--rsm)',
+                        fontSize: 13, color: 'var(--s800)',
+                        whiteSpace: 'pre-wrap', lineHeight: 1.6,
+                      }}>{studentAnswer || <span style={{ color: 'var(--s400)', fontStyle: 'italic' }}>No answer provided</span>}</div>
+                    </div>
+
+                    <div>
+                      <div style={{ fontSize: 10.5, fontWeight: 700, color: '#15803D', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Expected Answer</div>
+                      <div style={{
+                        background: '#DCFCE7',
+                        border: '1px solid #86EFAC',
+                        padding: '8px 12px', borderRadius: 'var(--rsm)',
+                        fontSize: 13, color: '#15803D', fontWeight: 600,
+                      }}>{q.answer || '—'}</div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
+                      <span style={{ fontSize: 11, color: 'var(--s500)' }}>Mark for this question:</span>
+                      <input type="number" min="0" max={q.marks}
+                        value={gradePerQuestion[q.id] || ''}
+                        onChange={e => setGradePerQuestion({ ...gradePerQuestion, [q.id]: e.target.value })}
+                        style={{
+                          width: 70, padding: '6px 10px',
+                          border: '1.5px solid var(--border)',
+                          borderRadius: 'var(--rsm)',
+                          fontSize: 13, fontFamily: 'JetBrains Mono, monospace',
+                        }}/>
+                      <span style={{ fontSize: 12, color: 'var(--s500)', fontFamily: 'JetBrains Mono, monospace' }}>/ {q.marks}</span>
+                    </div>
+                  </div>
+                )
+              })}
+
+              {hwQuestions.length === 0 && !selectedSubmission.responses?.custom && (
+                <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
+                  No submission content available.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* RIGHT: Grading panel */}
+          <div>
+            <div className="card" style={{ position: 'sticky', top: 20, background: '#FBFAF5', border: '2px solid #C9A030' }}>
+              <div className="ctitle" style={{ marginBottom: 14, color: '#7D1025' }}>Grade & Feedback</div>
+
+              <div className="fg">
+                <label className="fl">Total Mark *</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input className="fi" type="number" min="0" max={selectedHw.totalMarks}
+                    value={gradeMark} onChange={e => setGradeMark(e.target.value)}
+                    placeholder="0"
+                    style={{ width: 100, fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 700, color: '#7D1025' }}/>
+                  <span style={{ fontSize: 14, color: 'var(--s500)', fontFamily: 'JetBrains Mono, monospace' }}>/ {selectedHw.totalMarks}</span>
+                </div>
+                {previewPercent !== null && (
+                  <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 6 }}>
+                    Percentage: <strong style={{ color: previewPercent >= 75 ? '#15803D' : previewPercent >= 60 ? '#B45309' : '#B91C1C' }}>{previewPercent}%</strong>
+                    {' '}|{' '}Grade: <strong>{previewPercent >= 80 ? 'A' : previewPercent >= 70 ? 'B' : previewPercent >= 60 ? 'C' : previewPercent >= 50 ? 'D' : 'F'}</strong>
+                  </div>
+                )}
+              </div>
+
+              <div className="fg" style={{ marginBottom: 14 }}>
+                <label className="fl">Feedback to Student</label>
+                <textarea className="fi" rows={6} value={gradeFeedback}
+                  onChange={e => setGradeFeedback(e.target.value)}
+                  placeholder="What did they do well? What should they work on next?"
+                  style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
+              </div>
+
+              <button onClick={saveGrade}
+                style={{
+                  background: '#7D1025', color: '#FBFAF5', border: 'none',
+                  padding: '12px 20px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 14, fontWeight: 700,
+                  width: '100%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  boxShadow: '0 4px 14px rgba(125,16,37,.25)',
+                }}>
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Save Grade and Release to Student
+              </button>
+
+              <div style={{
+                background: '#FFF', borderLeft: '3px solid #7D1025',
+                padding: '10px 12px', borderRadius: 'var(--rsm)',
+                fontSize: 11.5, color: 'var(--s700)', marginTop: 12,
+                lineHeight: 1.6,
+              }}>
+                <strong style={{ color: '#7D1025' }}>What happens:</strong> Student will see this grade and feedback in their Homework tab. The grade contributes to their mastery and overall stats.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── RENDER: DETAIL VIEW ─────────────────────────────
+  if (view === 'detail' && selectedHw) {
+    const subjCol = hwSubjColour(selectedHw.subject)
+    const submissions = selectedHw.submissions || []
+    const expectedStudents = (selectedHw.assignedStudents || []).map(sid => allStudents.find(s => s.id === sid)).filter(Boolean)
+    const submittedStudentIds = submissions.map(s => s.studentId)
+    const notSubmittedStudents = expectedStudents.filter(s => !submittedStudentIds.includes(s.id))
+
+    const ungraded = submissions.filter(s => s.grade === null || s.grade === undefined)
+    const graded = submissions.filter(s => s.grade !== null && s.grade !== undefined)
+
+    return (
+      <div>
+        <button onClick={() => { setView('list'); setSelectedHw(null) }}
+          style={{
+            background: 'transparent', border: 'none', color: '#7D1025',
+            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+            padding: '6px 0', marginBottom: 14,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          Back to Homework List
+        </button>
+
+        {/* Hero */}
+        <div className="card" style={{
+          padding: 0, marginBottom: 18, overflow: 'hidden',
+          background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+          color: '#FBFAF5',
+        }}>
+          <div style={{ padding: '28px 30px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
+              {selectedHw.subject} | {selectedHw.curriculum} {selectedHw.year}
+            </div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
+              {selectedHw.title}
+            </h1>
+            <div style={{ fontSize: 13, opacity: .9, marginTop: 6 }}>
+              Assigned {hwTimeAgo(selectedHw.assignedAt)} | <strong style={{ color: '#F0CC5A' }}>{hwTimeUntilDue(selectedHw.dueDate)}</strong>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+            {[
+              ['Assigned',     expectedStudents.length, '#FBFAF5'],
+              ['Submitted',    submissions.length,      submissions.length > 0 ? '#F0CC5A' : '#FBFAF5'],
+              ['To Grade',     ungraded.length,         ungraded.length > 0 ? '#FCA5A5' : '#FBFAF5'],
+              ['Graded',       graded.length,           '#86EFAC'],
+              ['Total Marks',  selectedHw.totalMarks,   '#F0CC5A'],
+            ].map(([l, v, c]) => (
+              <div key={l} style={{ padding: '14px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .7, marginBottom: 2, color: '#F0CC5A' }}>{l}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: c }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Instructions */}
+        {selectedHw.customInstructions && (
+          <div className="card" style={{ marginBottom: 14 }}>
+            <div className="ctitle" style={{ marginBottom: 8, color: '#7D1025' }}>Instructions</div>
+            <div style={{
+              background: '#FBFAF5', borderLeft: '3px solid #C9A030',
+              padding: '12px 16px', borderRadius: 'var(--rsm)',
+              fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.7,
+              whiteSpace: 'pre-wrap',
+            }}>{selectedHw.customInstructions}</div>
+          </div>
+        )}
+
+        {/* Submissions to grade */}
+        {ungraded.length > 0 && (
+          <div className="card" style={{ marginBottom: 14, border: '2px solid #C9A030' }}>
+            <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>
+              Awaiting Your Grade ({ungraded.length})
+            </div>
+            {ungraded.map((sub, i) => (
+              <div key={sub.studentId + i} style={{
+                display: 'flex', gap: 12, padding: '12px 0',
+                borderBottom: i < ungraded.length - 1 ? '1px solid var(--border)' : 'none',
+                alignItems: 'center', cursor: 'pointer',
+              }} onClick={() => openGrade(selectedHw, sub)}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: '50%',
+                  background: msAvatarColor(sub.studentName), color: '#FBFAF5',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 700, fontSize: 12, flexShrink: 0,
+                }}>{sub.studentName.split(' ').map(w => w[0]).join('').slice(0, 2)}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>{sub.studentName}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>Submitted {hwTimeAgo(sub.submittedAt)}</div>
+                </div>
+                <button onClick={(e) => { e.stopPropagation(); openGrade(selectedHw, sub) }}
+                  style={{
+                    background: '#7D1025', color: '#FBFAF5', border: 'none',
+                    padding: '8px 16px', borderRadius: 'var(--rsm)',
+                    cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                  }}>Grade Now</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Graded submissions */}
+        {graded.length > 0 && (
+          <div className="card" style={{ marginBottom: 14 }}>
+            <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>
+              Graded ({graded.length})
+            </div>
+            {graded.map((sub, i) => {
+              const pct = Math.round(sub.grade / selectedHw.totalMarks * 100)
+              const gradeCol = pct >= 80 ? '#15803D' : pct >= 60 ? '#B45309' : '#B91C1C'
+              return (
+                <div key={sub.studentId + i} style={{
+                  display: 'flex', gap: 12, padding: '12px 0',
+                  borderBottom: i < graded.length - 1 ? '1px solid var(--border)' : 'none',
+                  alignItems: 'center', cursor: 'pointer',
+                }} onClick={() => openGrade(selectedHw, sub)}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: '50%',
+                    background: msAvatarColor(sub.studentName), color: '#FBFAF5',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 700, fontSize: 12, flexShrink: 0,
+                  }}>{sub.studentName.split(' ').map(w => w[0]).join('').slice(0, 2)}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14 }}>{sub.studentName}</div>
+                    <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>Graded {hwTimeAgo(sub.gradedAt || sub.submittedAt)}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div className="mono" style={{ fontSize: 16, fontWeight: 700, color: gradeCol }}>{sub.grade}/{selectedHw.totalMarks}</div>
+                    <div className="mono" style={{ fontSize: 11, color: gradeCol, fontWeight: 700 }}>{pct}%</div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Not yet submitted */}
+        {notSubmittedStudents.length > 0 && (
+          <div className="card" style={{ marginBottom: 14 }}>
+            <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>
+              Not Yet Submitted ({notSubmittedStudents.length})
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {notSubmittedStudents.map(s => (
+                <span key={s.id} style={{
+                  background: '#FBFAF5', color: 'var(--s500)',
+                  border: '1px solid var(--border)',
+                  fontSize: 12, fontWeight: 600,
+                  padding: '5px 12px', borderRadius: 99,
+                }}>{s.name}</span>
+              ))}
+            </div>
+            <button
+              onClick={() => toast?.info?.('Reminder will be sent (Communication module pending).')}
+              style={{
+                background: 'transparent', color: '#7D1025',
+                border: '1.5px solid #7D1025',
+                padding: '8px 14px', borderRadius: 'var(--rmd)',
+                cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                marginTop: 14,
+              }}>Send Reminder to All</button>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 18, flexWrap: 'wrap' }}>
+          <button onClick={() => { if (confirm('Delete this homework? All submissions will be lost.')) deleteHomework(selectedHw.id) }}
+            style={{
+              background: '#FEE2E2', color: '#B91C1C',
+              border: '1px solid #FCA5A5',
+              padding: '10px 18px', borderRadius: 'var(--rmd)',
+              cursor: 'pointer', fontSize: 13, fontWeight: 700,
+            }}>Delete Homework</button>
+          <button onClick={() => { setView('list'); setSelectedHw(null) }} className="btn btn-s">Close</button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── RENDER: CREATE FORM ─────────────────────────────
+  if (view === 'create') {
+    return (
+      <div>
+        <button onClick={() => { setView('list'); resetForm() }}
+          style={{
+            background: 'transparent', border: 'none', color: '#7D1025',
+            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+            padding: '6px 0', marginBottom: 14,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          Back to Homework List
+        </button>
+
+        <div style={{ marginBottom: 18 }}>
+          <div className="sec-tag" style={{ color: '#7D1025' }}>Assign New Homework</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>
+            Create <em style={{ color: '#7D1025' }}>Homework</em>
+          </h2>
+        </div>
+
+        {/* Step indicators */}
+        <div style={{
+          background: '#FBFAF5', borderRadius: 'var(--rmd)',
+          padding: 14, marginBottom: 18,
+          display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+        }}>
+          {[
+            { n: 1, label: 'Details' },
+            { n: 2, label: 'Content' },
+            { n: 3, label: 'Assign' },
+          ].map((step, i) => {
+            const isActive = createStep === step.n
+            const isDone = createStep > step.n
+            return (
+              <div key={step.n} style={{ display: 'flex', alignItems: 'center', flex: i < 2 ? 1 : 'auto', gap: 8 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: isActive ? '#7D1025' : isDone ? '#C9A030' : '#FFF',
+                  color: isActive || isDone ? '#FBFAF5' : 'var(--s500)',
+                  border: '2px solid ' + (isActive ? '#7D1025' : isDone ? '#C9A030' : 'var(--border)'),
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
+                  flexShrink: 0,
+                }}>{isDone ? (
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                ) : step.n}</div>
+                <span style={{
+                  fontSize: 13, fontWeight: 700,
+                  color: isActive ? '#7D1025' : isDone ? '#C9A030' : 'var(--s400)',
+                }}>{step.label}</span>
+                {i < 2 && <div style={{ flex: 1, height: 2, background: isDone ? '#C9A030' : 'var(--border)', margin: '0 8px' }}/>}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* STEP 1: DETAILS */}
+        {createStep === 1 && (
+          <div className="card">
+            <div className="ctitle" style={{ marginBottom: 16, color: '#7D1025' }}>Homework Details</div>
+            <div className="fg">
+              <label className="fl">Title *</label>
+              <input className="fi" value={formTitle} onChange={e => setFormTitle(e.target.value)}
+                placeholder="e.g. Chapter 5 Practice: Quadratic Equations"/>
+            </div>
+            <div className="fr2">
+              <div className="fg" style={{ marginBottom: 0 }}>
+                <label className="fl">Subject</label>
+                <select className="fsel" value={formSubject} onChange={e => setFormSubject(e.target.value)}>
+                  {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="fg" style={{ marginBottom: 0 }}>
+                <label className="fl">Curriculum</label>
+                <select className="fsel" value={formCurriculum} onChange={e => setFormCurriculum(e.target.value)}>
+                  {Object.entries(QB_CURRICULA).map(([id, info]) => <option key={id} value={id}>{info.label}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="fg" style={{ marginTop: 14 }}>
+              <label className="fl">Year / Grade</label>
+              <select className="fsel" value={formYear} onChange={e => setFormYear(e.target.value)}>
+                {(QB_CURRICULA[formCurriculum]?.years || []).map(y => <option key={y}>{y}</option>)}
+              </select>
+            </div>
+            <div className="fg" style={{ marginTop: 14, marginBottom: 0 }}>
+              <label className="fl">Due Date *</label>
+              <input className="fi" type="datetime-local" value={formDueDate}
+                onChange={e => setFormDueDate(e.target.value)}/>
+              <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                Students can submit anytime before this. Late submissions still allowed but flagged.
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
+              <button onClick={() => { if (validateCreateStep(1)) setCreateStep(2) }}
+                style={{
+                  background: '#7D1025', color: '#FBFAF5', border: 'none',
+                  padding: '10px 20px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 14, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                Continue to Content
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: CONTENT */}
+        {createStep === 2 && (
+          <div>
+            <div className="card" style={{ marginBottom: 14 }}>
+              <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Custom Instructions</div>
+              <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 8 }}>
+                Free-form instructions for students. Use this for essay prompts, worksheets, or open-ended assignments.
+              </div>
+              <textarea className="fi" rows={5} value={formInstructions}
+                onChange={e => setFormInstructions(e.target.value)}
+                placeholder="e.g. Read pages 45-58. Write a 300-word reflection on the main themes. Submit as text by Friday."
+                style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
+            </div>
+
+            <div className="card" style={{ marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+                <div className="ctitle" style={{ color: '#7D1025' }}>
+                  Pick from Question Bank
+                  {formSelectedQuestions.length > 0 && (
+                    <span style={{
+                      marginLeft: 10,
+                      background: '#C9A030', color: '#7D1025',
+                      fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
+                      padding: '3px 10px', borderRadius: 99,
+                    }}>{formSelectedQuestions.length} selected | {formTotalMarks} marks</span>
+                  )}
+                </div>
+                <button onClick={() => setPage('questionbank')}
+                  style={{
+                    background: 'transparent', border: '1px solid #7D1025',
+                    color: '#7D1025', padding: '6px 12px',
+                    borderRadius: 'var(--rsm)', cursor: 'pointer',
+                    fontSize: 12, fontWeight: 700,
+                  }}>+ Add to Question Bank</button>
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 14 }}>
+                Optional: pair instructions with structured questions from your bank. Students answer each one.
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+                <input className="fi" placeholder="Search questions..."
+                  value={bankFilter.search}
+                  onChange={e => setBankFilter({ ...bankFilter, search: e.target.value })}
+                  style={{ flex: 1, minWidth: 180 }}/>
+                <select className="fsel" value={bankFilter.subject}
+                  onChange={e => setBankFilter({ ...bankFilter, subject: e.target.value })}
+                  style={{ minWidth: 140 }}>
+                  <option value="all">All Subjects</option>
+                  {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                </select>
+                <select className="fsel" value={bankFilter.difficulty}
+                  onChange={e => setBankFilter({ ...bankFilter, difficulty: e.target.value })}
+                  style={{ minWidth: 130 }}>
+                  <option value="all">All Difficulty</option>
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+              {filteredBank.length === 0 ? (
+                <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
+                  No questions found. Add to Question Bank, or skip and use just instructions.
+                </div>
+              ) : (
+                <div style={{ maxHeight: 380, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {filteredBank.map(q => {
+                    const isSelected = formSelectedQuestions.includes(q.id)
+                    const subjCol = hwSubjColour(q.subject)
+                    return (
+                      <div key={q.id} onClick={() => toggleQuestion(q.id)}
+                        style={{
+                          padding: 10,
+                          border: '1.5px solid ' + (isSelected ? '#7D1025' : 'var(--border)'),
+                          borderRadius: 'var(--rmd)',
+                          background: isSelected ? '#FBE8E8' : '#FBFAF5',
+                          cursor: 'pointer',
+                          display: 'flex', gap: 10, alignItems: 'flex-start',
+                        }}>
+                        <div style={{
+                          width: 20, height: 20, borderRadius: 4,
+                          background: isSelected ? '#7D1025' : '#FFF',
+                          border: '2px solid ' + (isSelected ? '#7D1025' : 'var(--border)'),
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0, marginTop: 2,
+                        }}>
+                          {isSelected && (
+                            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#FBFAF5" strokeWidth="3" strokeLinecap="round">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          )}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
+                            <span style={{
+                              background: subjCol + '15', color: subjCol,
+                              fontSize: 9, fontWeight: 700, letterSpacing: '.06em',
+                              padding: '2px 6px', borderRadius: 99, textTransform: 'uppercase',
+                            }}>{q.subject}</span>
+                            <span style={{ fontSize: 10, color: 'var(--s500)' }}>{q.topic} | {q.difficulty}</span>
+                          </div>
+                          <div style={{ fontSize: 12.5, color: 'var(--s900)', fontWeight: 600 }}>{q.question}</div>
+                        </div>
+                        <span style={{
+                          background: 'var(--bg)', color: 'var(--s700)',
+                          padding: '3px 7px', borderRadius: 'var(--rsm)',
+                          fontSize: 10.5, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
+                          flexShrink: 0,
+                        }}>{q.marks}m</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18, gap: 8, flexWrap: 'wrap' }}>
+              <button onClick={() => setCreateStep(1)} className="btn btn-s">Back</button>
+              <button onClick={() => { if (validateCreateStep(2)) setCreateStep(3) }}
+                style={{
+                  background: '#7D1025', color: '#FBFAF5', border: 'none',
+                  padding: '10px 20px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 14, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                Continue to Assign
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: ASSIGN */}
+        {createStep === 3 && (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
+              <div className="card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 6 }}>
+                  <div className="ctitle" style={{ color: '#7D1025' }}>
+                    Students ({formSelectedStudents.length}/{allStudents.length})
+                  </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button onClick={() => setFormSelectedStudents(allStudents.map(s => s.id))}
+                      style={{
+                        background: '#FBFAF5', color: '#7D1025',
+                        border: '1px solid #F4C5C5',
+                        padding: '4px 10px', borderRadius: 'var(--rsm)',
+                        cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                      }}>Select All</button>
+                    <button onClick={() => setFormSelectedStudents([])}
+                      style={{
+                        background: 'transparent', color: 'var(--s500)',
+                        border: '1px solid var(--border)',
+                        padding: '4px 10px', borderRadius: 'var(--rsm)',
+                        cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                      }}>Clear</button>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 340, overflowY: 'auto' }}>
+                  {allStudents.map(s => {
+                    const isSelected = formSelectedStudents.includes(s.id)
+                    return (
+                      <label key={s.id}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '8px 10px',
+                          border: '1.5px solid ' + (isSelected ? '#7D1025' : 'var(--border)'),
+                          borderRadius: 'var(--rmd)',
+                          background: isSelected ? '#FBE8E8' : '#FBFAF5',
+                          cursor: 'pointer',
+                        }}>
+                        <input type="checkbox" checked={isSelected}
+                          onChange={() => toggleStudent(s.id)}
+                          style={{ accentColor: '#7D1025' }}/>
+                        <div style={{
+                          width: 30, height: 30, borderRadius: '50%',
+                          background: msAvatarColor(s.name), color: '#FBFAF5',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: 700, fontSize: 11, flexShrink: 0,
+                        }}>{s.initials}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 600 }}>{s.name}</div>
+                          <div style={{ fontSize: 11, color: 'var(--s500)' }}>{s.year} | Mastery {s.mastery}%</div>
+                        </div>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="card" style={{ background: '#FBFAF5', border: '2px solid #C9A030' }}>
+                <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Homework Summary</div>
+                {[
+                  ['Title',          formTitle || '—'],
+                  ['Subject',        formSubject + ' | ' + formCurriculum + ' | ' + formYear],
+                  ['Due',            formDueDate ? hwFormatDate(new Date(formDueDate).toISOString()) : '—'],
+                  ['Questions',      formSelectedQuestions.length || '—'],
+                  ['Total Marks',    formTotalMarks || (formInstructions ? '100 (default)' : 0)],
+                  ['Students',       formSelectedStudents.length],
+                ].map(([l, v]) => (
+                  <div key={l} style={{
+                    display: 'flex', justifyContent: 'space-between',
+                    padding: '8px 0', borderBottom: '1px solid #F4C5C5',
+                    fontSize: 13,
+                  }}>
+                    <span style={{ color: 'var(--s500)' }}>{l}</span>
+                    <span style={{ fontWeight: 700, color: '#7D1025', textAlign: 'right', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</span>
+                  </div>
+                ))}
+                <div style={{
+                  background: '#FFF', borderLeft: '3px solid #7D1025',
+                  padding: '12px 14px', borderRadius: 'var(--rsm)',
+                  fontSize: 12.5, color: 'var(--s700)', marginTop: 14,
+                  lineHeight: 1.6,
+                }}>
+                  <strong style={{ color: '#7D1025' }}>What happens next:</strong>
+                  <br/>Students see this in their Homework tab immediately. They submit by the due date. You grade via the Pending tab.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18, gap: 8, flexWrap: 'wrap' }}>
+              <button onClick={() => setCreateStep(2)} className="btn btn-s">Back</button>
+              <button onClick={assignHomework}
+                style={{
+                  background: '#C9A030', color: '#7D1025', border: 'none',
+                  padding: '12px 24px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 14, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  boxShadow: '0 4px 14px rgba(201,160,48,.35)',
+                }}>
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+                Assign to Students
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ── RENDER: LIST VIEW ───────────────────────────────
+  return (
+    <div>
+      {/* Hero */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+        color: '#FBFAF5',
+      }}>
+        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>
+              Homework
+            </div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              Assign and Grade
+            </h1>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              Build assignments from Question Bank or write custom prompts. Grade per submission with feedback.
+            </div>
+          </div>
+          <button onClick={openCreate}
+            style={{
+              background: '#C9A030', color: '#7D1025', border: 'none',
+              padding: '12px 22px', borderRadius: 'var(--rmd)',
+              cursor: 'pointer', fontSize: 14, fontWeight: 700,
+              display: 'flex', alignItems: 'center', gap: 8,
+              boxShadow: '0 4px 14px rgba(201,160,48,.35)',
+            }}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Assign Homework
+          </button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+          {[
+            ['Total',        stats.total,          '#FBFAF5'],
+            ['To Grade',     stats.pendingGrading, stats.pendingGrading > 0 ? '#FCA5A5' : '#FBFAF5'],
+            ['Submissions',  stats.submissions,    '#F0CC5A'],
+            ['Students',     stats.students,       '#FBFAF5'],
+          ].map(([l, v, c]) => (
+            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .7, marginBottom: 2, color: '#F0CC5A' }}>{l}</div>
+              <div style={{ fontSize: 16, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: c }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab switcher */}
+      <div style={{
+        display: 'flex',
+        background: '#FBFAF5',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--rmd)',
+        padding: 4, marginBottom: 14, gap: 2, flexWrap: 'wrap',
+      }}>
+        {[
+          { id: 'pending', label: 'Pending Grading', count: counts.pending, hot: true },
+          { id: 'active',  label: 'Active',          count: counts.active },
+          { id: 'graded',  label: 'Graded',          count: counts.graded },
+          { id: 'all',     label: 'All',             count: counts.all },
+        ].map(t => (
+          <button key={t.id} onClick={() => setActiveTab(t.id)}
+            style={{
+              flex: 1, minWidth: 100,
+              background: activeTab === t.id ? '#7D1025' : 'transparent',
+              color: activeTab === t.id ? '#FBFAF5' : 'var(--s500)',
+              border: 'none', padding: '10px 14px',
+              borderRadius: 'var(--rsm)', cursor: 'pointer',
+              fontSize: 13, fontWeight: 700,
+              boxShadow: activeTab === t.id ? '0 4px 16px rgba(125,16,37,.15)' : 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            }}>
+            {t.label}
+            {t.count > 0 && (
+              <span style={{
+                background: activeTab === t.id ? 'rgba(251,250,245,.2)' : (t.hot ? '#FEE2E2' : 'var(--bg)'),
+                color: activeTab === t.id ? '#FBFAF5' : (t.hot ? '#B91C1C' : 'var(--s500)'),
+                fontSize: 10, fontWeight: 800,
+                padding: '2px 7px', borderRadius: 99,
+              }}>{t.count}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div className="card" style={{ marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Search</label>
+            <input className="fi" placeholder="Search by title or subject..."
+              value={searchQ} onChange={e => setSearchQ(e.target.value)} style={{ width: '100%' }}/>
+          </div>
+          <div style={{ minWidth: 140 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Subject</label>
+            <select className="fsel" value={filterSubject} onChange={e => setFilterSubject(e.target.value)} style={{ width: '100%' }}>
+              <option value="all">All</option>
+              {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 10 }}>
+        Showing <strong style={{ color: '#7D1025' }}>{filtered.length}</strong> assignments
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>
+            {stats.total === 0 ? 'No homework yet' : 'Nothing in this tab'}
+          </h3>
+          <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto 14px' }}>
+            {stats.total === 0
+              ? 'Assign your first homework. Pick from Question Bank, write custom instructions, set a due date.'
+              : 'Try a different tab or clear filters.'}
+          </p>
+          {stats.total === 0 && (
+            <button onClick={openCreate}
+              style={{
+                background: '#7D1025', color: '#FBFAF5', border: 'none',
+                padding: '10px 20px', borderRadius: 'var(--rmd)',
+                cursor: 'pointer', fontSize: 14, fontWeight: 700,
+              }}>Assign Your First Homework</button>
+          )}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filtered.map(hw => {
+            const subjCol = hwSubjColour(hw.subject)
+            const dueText = hwTimeUntilDue(hw.dueDate)
+            const isOverdue = new Date(hw.dueDate).getTime() < Date.now()
+            return (
+              <div key={hw.id} className="card" style={{
+                padding: 14, borderLeft: '4px solid ' + subjCol, cursor: 'pointer',
+              }} onClick={() => openDetail(hw)}>
+                <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: subjCol, letterSpacing: '.06em', textTransform: 'uppercase' }}>{hw.subject}</span>
+                      <span style={{ fontSize: 11, color: 'var(--s500)' }}>{hw.curriculum} {hw.year}</span>
+                      {hw._ungradedCount > 0 && (
+                        <span style={{
+                          background: '#FEE2E2', color: '#B91C1C',
+                          fontSize: 9.5, fontWeight: 800, letterSpacing: '.06em',
+                          padding: '2px 8px', borderRadius: 99,
+                        }}>{hw._ungradedCount} TO GRADE</span>
+                      )}
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)', marginBottom: 4 }}>{hw.title}</div>
+                    <div style={{ fontSize: 12, color: 'var(--s500)' }}>
+                      Assigned {hwTimeAgo(hw.assignedAt)} | <strong style={{ color: isOverdue ? '#B91C1C' : '#7D1025' }}>{dueText}</strong> | {hw.assignedStudents.length} students
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                    <div style={{ textAlign: 'center', minWidth: 80 }}>
+                      <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--s700)' }}>
+                        {hw._submissionsCount}/{hw._expectedCount}
+                      </div>
+                      <div style={{ fontSize: 9.5, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Submitted</div>
+                    </div>
+                    <div style={{ textAlign: 'center', minWidth: 70 }}>
+                      <div className="mono" style={{
+                        fontSize: 14, fontWeight: 700,
+                        color: hw._gradedCount === hw._submissionsCount && hw._submissionsCount > 0 ? '#15803D' : '#B45309',
+                      }}>{hw._gradedCount}</div>
+                      <div style={{ fontSize: 9.5, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Graded</div>
+                    </div>
                   </div>
                 </div>
               </div>
