@@ -304,7 +304,7 @@ export default function TeacherPortal() {
 
   const pageTitles = {
     dashboard:'Dashboard', classroom:'Live Classroom', students:'My Students',
-    resources:'Resource Library', exambuilder:'Exam Builder', questionbank:'Question Bank', blog:'Blog & Earnings',
+    resources:'Resource Library', exambuilder:'Exams', questionbank:'Question Bank', blog:'Blog & Earnings',
     liveclass:'Live Lessons', allocations:'My Allocations', payslips:'Payslips & Earnings',
     marking:'AI Marking & Integrity', reports:'Reports & Analytics', profile:'My Profile', leave:'Leave Requests'
   }
@@ -328,7 +328,7 @@ export default function TeacherPortal() {
     { section:'Content', items:[
       {id:'questionbank',label:'Question Bank',    icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6|circle:18:18:3'},
       {id:'resources',   label:'Resource Library', icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6'},
-      {id:'exambuilder', label:'Exam Builder',     icon:'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2|rect:9:3:6:4:1.5|line:9:12:15:12|line:9:16:12:16'},
+      {id:'exambuilder', label:'Exams',           icon:'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2|rect:9:3:6:4:1.5|line:9:12:15:12|line:9:16:12:16'},
       {id:'blog',        label:'Blog & Earnings',  icon:'M12 19l7-7 3 3-7 7-3-3z|M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z|M2 2l7.586 7.586|circle:11:11:2', badge:'3', badgeCol:'var(--g600)'},
     ]},
     { section:'Assessment', items:[
@@ -613,163 +613,9 @@ export default function TeacherPortal() {
             </div>
           )}
 
-          {/* ── EXAM BUILDER ── */}
-          {page === 'exambuilder' && (
-            <div style={{display:'grid',gridTemplateColumns:'1fr 300px',gap:20,alignItems:'start'}}>
-              <div>
-                <div style={{marginBottom:18}}>
-                  <div className="sec-tag">Exam Builder</div>
-                  <h2 className="serif" style={{fontSize:24,color:'var(--s900)'}}>Create <em style={{color:'var(--b700)'}}>New Exam</em></h2>
-                </div>
-                {/* Step indicators */}
-                <div style={{display:'flex',alignItems:'center',marginBottom:28}}>
-                  {[1,2,3].map((n,i) => (
-                    <div key={n} style={{display:'flex',alignItems:'center',flex:i<2?1:'auto'}}>
-                      <div style={{display:'flex',alignItems:'center',gap:8}}>
-                        <div style={{width:28,height:28,borderRadius:'50%',background:ebStep>=n?'var(--b700)':'var(--s200)',color:ebStep>=n?'#fff':'var(--s500)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,fontFamily:'JetBrains Mono,monospace'}}>{n}</div>
-                        <span style={{fontSize:12.5,fontWeight:700,color:ebStep>=n?'var(--b700)':'var(--s400)'}}>{['Details','Questions','Security'][i]}</span>
-                      </div>
-                      {i<2&&<div style={{flex:1,height:1,background:'var(--border)',margin:'0 10px'}}/>}
-                    </div>
-                  ))}
-                </div>
+          {/* ── EXAMS ── */}
+          {page === 'exambuilder' && <ExamsTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
 
-                {ebStep===1&&(
-                  <div>
-                    <div className="card" style={{marginBottom:16}}>
-                      <div className="ctitle" style={{marginBottom:18}}>Exam Details</div>
-                      <div className="fg"><label className="fl">Exam Title</label><input className="fi" defaultValue="Mathematics — Pythagoras Theorem Mock" placeholder="e.g. Mathematics Mock Paper 1"/></div>
-                      <div className="fr2">
-                        <div className="fg" style={{marginBottom:0}}><label className="fl">Subject</label><select className="fsel"><option>Mathematics</option><option>Biology</option><option>Chemistry</option><option>Physics</option></select></div>
-                        <div className="fg" style={{marginBottom:0}}><label className="fl">Class</label><select className="fsel"><option>IGCSE Form 3</option><option>IGCSE Form 2</option><option>IGCSE Form 4</option></select></div>
-                      </div>
-                      <div className="fr2" style={{marginTop:14}}>
-                        <div className="fg" style={{marginBottom:0}}><label className="fl">Duration (minutes)</label><input className="fi" defaultValue="60" type="number"/></div>
-                        <div className="fg" style={{marginBottom:0}}><label className="fl">Total Marks</label><input className="fi" defaultValue="100" type="number"/></div>
-                      </div>
-                      <div className="fr2" style={{marginTop:14}}>
-                        <div className="fg" style={{marginBottom:0}}><label className="fl">Available From</label><input className="fi" type="datetime-local" defaultValue="2026-03-10T09:00"/></div>
-                        <div className="fg" style={{marginBottom:0}}><label className="fl">Deadline</label><input className="fi" type="datetime-local" defaultValue="2026-03-10T11:00"/></div>
-                      </div>
-                      <div className="fg" style={{marginTop:14,marginBottom:0}}><label className="fl">Instructions</label><textarea className="fta" rows={3} defaultValue="Answer ALL questions. Show full working for all calculations. Calculator NOT permitted."/></div>
-                    </div>
-                    <div style={{display:'flex',justifyContent:'flex-end'}}>
-                      <button className="btn btn-p" onClick={() => setEbStep(2)}>Continue to Questions <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                    </div>
-                  </div>
-                )}
-
-                {ebStep===2&&(
-                  <div>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14,flexWrap:'wrap',gap:10}}>
-                      <div className="ctitle">Questions <span className="mono" style={{fontSize:14,color:'var(--s500)'}}>({EXAM_QS.length} added)</span></div>
-                      <div style={{display:'flex',gap:8}}>
-                        <button className="btn btn-s btn-sm" onClick={() => toast.info('Adding question...')}>
-                          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                          Add Question
-                        </button>
-                        <button className="btn btn-am btn-sm" onClick={() => toast.info('AI generating questions…')}>
-                          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                          AI Generate All
-                        </button>
-                      </div>
-                    </div>
-                    {EXAM_QS.map((q,i) => {
-                      const tCol = q.type==='MCQ'?{color:'var(--b700)',borderColor:'var(--b200)',background:'var(--b50)'}:q.type==='Short Answer'?{color:'var(--g700)',borderColor:'var(--g100)',background:'var(--g50)'}:{color:'var(--p600)',borderColor:'#EDE9FE',background:'var(--p50)'}
-                      return (
-                        <div key={i} className="q-card">
-                          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:10}}>
-                            <div style={{display:'flex',alignItems:'center',gap:10,flex:1,minWidth:0}}>
-                              <div className="mono" style={{fontSize:13,fontWeight:700,color:'var(--s400)',flexShrink:0}}>Q{i+1}</div>
-                              <div style={{flex:1,minWidth:0}}>
-                                <div style={{fontSize:14,fontWeight:600,color:'var(--s800)',marginBottom:6}}>{q.text}</div>
-                                <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                                  <span className="badge" style={tCol}>{q.type}</span>
-                                  <span style={{fontSize:12,color:'var(--s400)'}}>{q.marks} marks</span>
-                                </div>
-                              </div>
-                            </div>
-                            <div style={{display:'flex',gap:6,flexShrink:0}}>
-                              <button className="btn btn-g btn-sm" onClick={() => toast.info(`Editing Q${i+1}`)}>
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-                              </button>
-                              <button className="btn btn-g btn-sm" style={{color:'var(--r500)'}} onClick={() => toast.error('Question removed')}>
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                    <div style={{display:'flex',justifyContent:'space-between',marginTop:8}}>
-                      <button className="btn btn-s" onClick={() => setEbStep(1)}>Back</button>
-                      <button className="btn btn-p" onClick={() => setEbStep(3)}>Continue to Security <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                    </div>
-                  </div>
-                )}
-
-                {ebStep===3&&(
-                  <div>
-                    <div className="card" style={{marginBottom:16}}>
-                      <div className="ctitle" style={{marginBottom:18}}>Security & Proctoring Settings</div>
-                      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-                        {[{l:'Tab-switch detection',d:'Log and flag when student leaves exam tab',on:true},{l:'Copy-paste disabled',d:'Prevent clipboard use during exam',on:true},{l:'Time limit enforced',d:'Auto-submit on deadline',on:true},{l:'Question randomisation',d:'Shuffle question order per student',on:true},{l:'Answer randomisation',d:'Shuffle MCQ options per student',on:true},{l:'Full-screen mode',d:'Force student into full-screen',on:false},{l:'IP logging',d:'Record student IP on each action',on:false},{l:'Right-click disabled',d:'Block context menu',on:true}].map((o,i) => (
-                          <div key={i} style={{background:'var(--bg)',border:'1px solid var(--border)',borderRadius:'var(--rmd)',padding:12,display:'flex',gap:10,alignItems:'flex-start'}}>
-                            <div style={{width:36,height:20,borderRadius:999,background:o.on?'var(--b700)':'var(--s300)',cursor:'pointer',position:'relative',transition:'background .2s',flexShrink:0,marginTop:2}} onClick={() => toast.info(`${o.l} ${o.on?'disabled':'enabled'}`)}>
-                              <div style={{position:'absolute',top:2,left:o.on?20:2,width:16,height:16,background:'#fff',borderRadius:'50%',transition:'left .2s'}}/>
-                            </div>
-                            <div>
-                              <div style={{fontSize:13,fontWeight:700,color:'var(--s800)'}}>{o.l}</div>
-                              <div style={{fontSize:11.5,color:'var(--s500)',marginTop:1}}>{o.d}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div style={{display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:10}}>
-                      <button className="btn btn-s" onClick={() => setEbStep(2)}>Back</button>
-                      <div style={{display:'flex',gap:10}}>
-                        <button className="btn btn-s" onClick={() => toast.info('Exam saved as draft')}>Save Draft</button>
-                        <button className="btn btn-ok" onClick={() => { toast.ok('Exam published to students!'); setEbStep(1) }}>
-                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                          Publish Exam
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Sidebar */}
-              <div style={{display:'flex',flexDirection:'column',gap:16}}>
-                <div className="card">
-                  <div className="card-label" style={{marginBottom:12}}>Exam Summary</div>
-                  {[['Title','Pythagoras Mock'],['Questions',EXAM_QS.length],['Total marks',EXAM_QS.reduce((s,q)=>s+q.marks,0)],['Duration','60 min'],['Assigned to','24 students']].map(([l,v]) => (
-                    <div key={l} style={{display:'flex',justifyContent:'space-between',fontSize:13.5,marginBottom:9}}>
-                      <span style={{color:'var(--s500)'}}>{l}</span>
-                      <span className="mono" style={{fontWeight:700,color:'var(--s800)',fontSize:12,textAlign:'right',maxWidth:160}}>{v}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="card">
-                  <div className="card-label" style={{marginBottom:12}}>Add Question Type</div>
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-                    {[
-                      {l:'MCQ',bg:'var(--b50)',ic:<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>},
-                      {l:'Short Answer',bg:'var(--g50)',ic:<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M8 6h13M8 12h13M8 18h5"/></svg>},
-                      {l:'Essay',bg:'var(--p50)',ic:<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>},
-                      {l:'Photo Answer',bg:'var(--a50)',ic:<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>},
-                    ].map(q => (
-                      <div key={q.l} className="q-type-btn" onClick={() => toast.info(`Adding ${q.l} question`)}>
-                        <div className="q-type-icon" style={{background:q.bg}}>{q.ic}</div>
-                        <div style={{fontSize:11.5,fontWeight:700,color:'var(--s700)'}}>{q.l}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* ── AI MARKING ── */}
           {page === 'marking' && (
@@ -3040,6 +2886,930 @@ function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, s
                       padding: '6px 10px', borderRadius: 'var(--rsm)',
                       cursor: 'pointer', fontSize: 11, fontWeight: 700,
                     }}>View Profile</button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// EXAMS — Schedule, lock until start time, deploy to students
+// ═══════════════════════════════════════════════════════════
+// Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
+
+const EX_ASSIGNMENTS_KEY = 'sm_exam_assignments'
+const EX_SUBMISSIONS_KEY = 'sm_exam_submissions'
+
+const exSubjColours = {
+  'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
+  'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
+  'Geography': '#0F766E', 'Computer Science': '#1F2937',
+  'Business Studies': '#7E22CE', 'Economics': '#9F1239',
+}
+const exSubjColour = (s) => exSubjColours[s] || '#7D1025'
+
+const exTimeAgo = (iso) => {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return mins + 'm ago'
+  if (hours < 24) return hours + 'h ago'
+  if (days === 1) return 'yesterday'
+  if (days < 7) return days + 'd ago'
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+const exTimeUntil = (iso) => {
+  const diff = new Date(iso).getTime() - Date.now()
+  if (diff < 0) return null
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'starting now'
+  if (mins < 60) return 'in ' + mins + 'm'
+  if (hours < 24) return 'in ' + hours + 'h ' + (mins % 60) + 'm'
+  if (days === 1) return 'tomorrow'
+  return 'in ' + days + ' days'
+}
+
+const exFormatDateTime = (iso) => {
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ' at ' +
+    d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
+}
+
+// Compute exam status from start time and duration
+const exComputeStatus = (exam) => {
+  const now = Date.now()
+  const start = new Date(exam.startAt).getTime()
+  const end = start + (exam.durationMins * 60000)
+  if (now < start) return 'scheduled'
+  if (now < end) return 'active'
+  return 'ended'
+}
+
+const exLoadExams = () => {
+  try { return JSON.parse(localStorage.getItem(EX_ASSIGNMENTS_KEY) || '[]') } catch { return [] }
+}
+const exSaveExams = (exams) => {
+  try { localStorage.setItem(EX_ASSIGNMENTS_KEY, JSON.stringify(exams.slice(-200))) } catch {}
+}
+const exLoadStudents = () => {
+  try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
+}
+const exLoadQuestionBank = () => {
+  try { return JSON.parse(localStorage.getItem('sm_question_bank_custom') || '[]') } catch { return [] }
+}
+const exGenerateId = () => 'exam-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)
+
+// Default datetime-local 1 day from now at 09:00
+const exDefaultStartAt = () => {
+  const d = new Date()
+  d.setDate(d.getDate() + 1)
+  d.setHours(9, 0, 0, 0)
+  // Format as YYYY-MM-DDTHH:MM (datetime-local format)
+  const pad = (n) => String(n).padStart(2, '0')
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes())
+}
+
+function ExamsTab({ user, store, setPage, toast }) {
+  const [exams, setExams] = useState(() => exLoadExams())
+  const [view, setView] = useState('list')  // 'list' | 'create' | 'detail'
+  const [selectedExam, setSelectedExam] = useState(null)
+  const [createStep, setCreateStep] = useState(1)
+
+  // Filters
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [searchQ, setSearchQ] = useState('')
+
+  // Create form state
+  const [formTitle, setFormTitle] = useState('')
+  const [formSubject, setFormSubject] = useState('Mathematics')
+  const [formCurriculum, setFormCurriculum] = useState('IGCSE')
+  const [formYear, setFormYear] = useState('Year 10')
+  const [formStartAt, setFormStartAt] = useState(exDefaultStartAt())
+  const [formDuration, setFormDuration] = useState(60)
+  const [formInstructions, setFormInstructions] = useState('Answer ALL questions. Show full working. Calculator NOT permitted.')
+  const [formSelectedQuestions, setFormSelectedQuestions] = useState([])
+  const [formSelectedStudents, setFormSelectedStudents] = useState([])
+  const [bankFilter, setBankFilter] = useState({ subject: 'Mathematics', difficulty: 'all', search: '' })
+
+  const allStudents = exLoadStudents()
+  const questionBank = exLoadQuestionBank()
+
+  // Derived
+  const examsWithStatus = exams.map(e => ({ ...e, _status: exComputeStatus(e) }))
+  const filteredExams = examsWithStatus.filter(e => {
+    if (filterStatus !== 'all' && e._status !== filterStatus) return false
+    if (searchQ.trim()) {
+      const search = searchQ.toLowerCase()
+      if (!e.title.toLowerCase().includes(search) && !e.subject.toLowerCase().includes(search)) return false
+    }
+    return true
+  }).sort((a, b) => new Date(b.startAt) - new Date(a.startAt))
+
+  // Filter question bank for picker
+  const filteredBankQuestions = questionBank.filter(q => {
+    if (q.status !== 'published') return false
+    if (bankFilter.subject !== 'all' && q.subject !== bankFilter.subject) return false
+    if (bankFilter.difficulty !== 'all' && q.difficulty !== bankFilter.difficulty) return false
+    if (bankFilter.search.trim()) {
+      const s = bankFilter.search.toLowerCase()
+      if (!q.question.toLowerCase().includes(s) && !q.topic.toLowerCase().includes(s)) return false
+    }
+    return true
+  })
+
+  const totalMarks = formSelectedQuestions.reduce((sum, qid) => {
+    const q = questionBank.find(qq => qq.id === qid)
+    return sum + (q?.marks || 0)
+  }, 0)
+
+  // Stats
+  const stats = {
+    total: exams.length,
+    scheduled: examsWithStatus.filter(e => e._status === 'scheduled').length,
+    active: examsWithStatus.filter(e => e._status === 'active').length,
+    ended: examsWithStatus.filter(e => e._status === 'ended').length,
+  }
+
+  // ── ACTIONS ─────────────────────────────────────────
+  const resetForm = () => {
+    setFormTitle('')
+    setFormSubject('Mathematics')
+    setFormCurriculum('IGCSE')
+    setFormYear('Year 10')
+    setFormStartAt(exDefaultStartAt())
+    setFormDuration(60)
+    setFormInstructions('Answer ALL questions. Show full working. Calculator NOT permitted.')
+    setFormSelectedQuestions([])
+    setFormSelectedStudents([])
+    setCreateStep(1)
+  }
+
+  const openCreate = () => {
+    resetForm()
+    setView('create')
+  }
+
+  const toggleQuestion = (qid) => {
+    if (formSelectedQuestions.includes(qid)) {
+      setFormSelectedQuestions(formSelectedQuestions.filter(id => id !== qid))
+    } else {
+      setFormSelectedQuestions([...formSelectedQuestions, qid])
+    }
+  }
+
+  const toggleStudent = (sid) => {
+    if (formSelectedStudents.includes(sid)) {
+      setFormSelectedStudents(formSelectedStudents.filter(id => id !== sid))
+    } else {
+      setFormSelectedStudents([...formSelectedStudents, sid])
+    }
+  }
+
+  const selectAllStudents = () => {
+    setFormSelectedStudents(allStudents.map(s => s.id))
+  }
+
+  const clearAllStudents = () => {
+    setFormSelectedStudents([])
+  }
+
+  const validateStep = (step) => {
+    if (step === 1) {
+      if (!formTitle.trim()) { toast?.error?.('Exam title is required.'); return false }
+      if (!formStartAt) { toast?.error?.('Start time is required.'); return false }
+      const startTime = new Date(formStartAt).getTime()
+      if (startTime < Date.now() - 60000) { toast?.error?.('Start time must be in the future.'); return false }
+      if (!formDuration || formDuration < 5) { toast?.error?.('Duration must be at least 5 minutes.'); return false }
+      return true
+    }
+    if (step === 2) {
+      if (formSelectedQuestions.length === 0) { toast?.error?.('Select at least one question.'); return false }
+      return true
+    }
+    if (step === 3) {
+      if (formSelectedStudents.length === 0) { toast?.error?.('Assign to at least one student.'); return false }
+      return true
+    }
+    return true
+  }
+
+  const scheduleExam = () => {
+    if (!validateStep(1) || !validateStep(2) || !validateStep(3)) return
+
+    const newExam = {
+      id: exGenerateId(),
+      title: formTitle.trim(),
+      subject: formSubject,
+      curriculum: formCurriculum,
+      year: formYear,
+      startAt: new Date(formStartAt).toISOString(),
+      durationMins: parseInt(formDuration) || 60,
+      instructions: formInstructions.trim(),
+      questionIds: formSelectedQuestions,
+      assignedStudents: formSelectedStudents,
+      totalMarks: totalMarks,
+      status: 'scheduled',
+      teacher: 'Mr. James Muthomi',
+      createdAt: new Date().toISOString(),
+    }
+
+    const updated = [newExam, ...exams]
+    setExams(updated)
+    exSaveExams(updated)
+    toast?.ok?.('Exam scheduled and locked. ' + formSelectedStudents.length + ' students will be notified.')
+    setView('list')
+    resetForm()
+  }
+
+  const deleteExam = (id) => {
+    const updated = exams.filter(e => e.id !== id)
+    setExams(updated)
+    exSaveExams(updated)
+    toast?.ok?.('Exam deleted.')
+    setSelectedExam(null)
+    setView('list')
+  }
+
+  const openDetail = (exam) => {
+    setSelectedExam(exam)
+    setView('detail')
+  }
+
+  // ── RENDER: DETAIL VIEW ─────────────────────────────
+  if (view === 'detail' && selectedExam) {
+    const status = exComputeStatus(selectedExam)
+    const subjCol = exSubjColour(selectedExam.subject)
+    const examQuestions = selectedExam.questionIds.map(qid => questionBank.find(q => q.id === qid)).filter(Boolean)
+    const examStudents = selectedExam.assignedStudents.map(sid => allStudents.find(s => s.id === sid)).filter(Boolean)
+    const timeUntil = exTimeUntil(selectedExam.startAt)
+    const endTime = new Date(new Date(selectedExam.startAt).getTime() + selectedExam.durationMins * 60000)
+
+    const statusBadge = status === 'scheduled'
+      ? { bg: '#FEF3C7', color: '#B45309', label: 'SCHEDULED' }
+      : status === 'active'
+      ? { bg: '#FEE2E2', color: '#B91C1C', label: 'LIVE NOW' }
+      : { bg: '#F1F5F9', color: '#64748B', label: 'ENDED' }
+
+    return (
+      <div>
+        <button onClick={() => { setView('list'); setSelectedExam(null) }}
+          style={{
+            background: 'transparent', border: 'none',
+            color: '#7D1025', fontSize: 13, fontWeight: 700,
+            cursor: 'pointer', padding: '6px 0', marginBottom: 14,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          Back to Exams
+        </button>
+
+        {/* Hero */}
+        <div className="card" style={{
+          padding: 0, marginBottom: 18, overflow: 'hidden',
+          background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+          color: '#FBFAF5',
+        }}>
+          <div style={{ padding: '28px 30px' }}>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{
+                background: statusBadge.bg, color: statusBadge.color,
+                fontSize: 10, fontWeight: 800, letterSpacing: '.08em',
+                padding: '4px 10px', borderRadius: 99,
+              }}>{statusBadge.label}</span>
+              <span style={{ fontSize: 11, opacity: .75, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#F0CC5A' }}>
+                {selectedExam.subject} | {selectedExam.curriculum} {selectedExam.year}
+              </span>
+            </div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 30, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              {selectedExam.title}
+            </h1>
+            <div style={{ fontSize: 13, opacity: .9, marginTop: 8 }}>
+              {exFormatDateTime(selectedExam.startAt)} | {selectedExam.durationMins} min duration
+              {timeUntil && status === 'scheduled' && <> | <strong style={{ color: '#F0CC5A' }}>Starts {timeUntil}</strong></>}
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+            {[
+              ['Questions', selectedExam.questionIds.length,                                 '#FBFAF5'],
+              ['Total Marks', selectedExam.totalMarks,                                       '#F0CC5A'],
+              ['Duration', selectedExam.durationMins + ' min',                              '#FBFAF5'],
+              ['Students', selectedExam.assignedStudents.length,                            '#FBFAF5'],
+              ['Ends', endTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }), '#F0CC5A'],
+            ].map(([l, v, c]) => (
+              <div key={l} style={{ padding: '14px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .7, marginBottom: 2, color: '#F0CC5A' }}>{l}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: c }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
+          {/* Questions */}
+          <div className="card">
+            <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Questions ({examQuestions.length})</div>
+            {examQuestions.length === 0 ? (
+              <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
+                No questions found in bank.
+              </div>
+            ) : (
+              examQuestions.map((q, i) => (
+                <div key={q.id} style={{
+                  display: 'flex', gap: 10, padding: '10px 0',
+                  borderBottom: i < examQuestions.length - 1 ? '1px solid var(--border)' : 'none',
+                }}>
+                  <div className="mono" style={{ width: 28, fontSize: 12, fontWeight: 700, color: 'var(--s400)', flexShrink: 0 }}>Q{i + 1}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontSize: 13, color: 'var(--s900)', fontWeight: 600,
+                      marginBottom: 4, lineHeight: 1.5,
+                    }}>{q.question}</div>
+                    <div style={{ fontSize: 10.5, color: 'var(--s400)' }}>
+                      {q.topic} | {q.difficulty} | {q.marks} marks
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Students assigned */}
+          <div className="card">
+            <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Assigned Students ({examStudents.length})</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {examStudents.map(s => (
+                <span key={s.id} style={{
+                  background: '#FBFAF5', color: '#7D1025',
+                  border: '1px solid #F4C5C5',
+                  fontSize: 12, fontWeight: 600,
+                  padding: '5px 12px', borderRadius: 99,
+                }}>{s.name}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Instructions */}
+          {selectedExam.instructions && (
+            <div className="card" style={{ gridColumn: 'span 2' }}>
+              <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Instructions</div>
+              <div style={{
+                background: '#FBFAF5', borderLeft: '3px solid #C9A030',
+                padding: '12px 16px', borderRadius: 'var(--rsm)',
+                fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.7,
+                whiteSpace: 'pre-wrap',
+              }}>{selectedExam.instructions}</div>
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 18, flexWrap: 'wrap' }}>
+          {status === 'scheduled' && (
+            <button onClick={() => { if (confirm('Delete this scheduled exam? Students will be unassigned.')) deleteExam(selectedExam.id) }}
+              style={{
+                background: '#FEE2E2', color: '#B91C1C',
+                border: '1px solid #FCA5A5',
+                padding: '10px 18px', borderRadius: 'var(--rmd)',
+                cursor: 'pointer', fontSize: 13, fontWeight: 700,
+              }}>Cancel Exam</button>
+          )}
+          <button onClick={() => { setView('list'); setSelectedExam(null) }} className="btn btn-s">Close</button>
+        </div>
+      </div>
+    )
+  }
+
+  // ── RENDER: CREATE FORM ─────────────────────────────
+  if (view === 'create') {
+    return (
+      <div>
+        <button onClick={() => { setView('list'); resetForm() }}
+          style={{
+            background: 'transparent', border: 'none',
+            color: '#7D1025', fontSize: 13, fontWeight: 700,
+            cursor: 'pointer', padding: '6px 0', marginBottom: 14,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          Back to Exams
+        </button>
+
+        <div style={{ marginBottom: 18 }}>
+          <div className="sec-tag" style={{ color: '#7D1025' }}>Schedule New Exam</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>
+            Create <em style={{ color: '#7D1025' }}>Exam</em>
+          </h2>
+        </div>
+
+        {/* Step indicators */}
+        <div style={{
+          background: '#FBFAF5',
+          borderRadius: 'var(--rmd)',
+          padding: 14, marginBottom: 18,
+          display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+        }}>
+          {[
+            { n: 1, label: 'Details' },
+            { n: 2, label: 'Questions' },
+            { n: 3, label: 'Assign & Lock' },
+          ].map((step, i) => {
+            const isActive = createStep === step.n
+            const isDone = createStep > step.n
+            return (
+              <div key={step.n} style={{ display: 'flex', alignItems: 'center', flex: i < 2 ? 1 : 'auto', gap: 8 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: isActive ? '#7D1025' : isDone ? '#C9A030' : '#FFF',
+                  color: isActive || isDone ? '#FBFAF5' : 'var(--s500)',
+                  border: '2px solid ' + (isActive ? '#7D1025' : isDone ? '#C9A030' : 'var(--border)'),
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
+                  flexShrink: 0,
+                }}>{isDone ? (
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                ) : step.n}</div>
+                <span style={{
+                  fontSize: 13, fontWeight: 700,
+                  color: isActive ? '#7D1025' : isDone ? '#C9A030' : 'var(--s400)',
+                }}>{step.label}</span>
+                {i < 2 && <div style={{ flex: 1, height: 2, background: isDone ? '#C9A030' : 'var(--border)', margin: '0 8px' }}/>}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* STEP 1: DETAILS */}
+        {createStep === 1 && (
+          <div className="card">
+            <div className="ctitle" style={{ marginBottom: 16, color: '#7D1025' }}>Exam Details</div>
+
+            <div className="fg">
+              <label className="fl">Exam Title *</label>
+              <input className="fi" value={formTitle} onChange={e => setFormTitle(e.target.value)}
+                placeholder="e.g. Mid-Term Mathematics Mock Paper 1"/>
+            </div>
+
+            <div className="fr2">
+              <div className="fg" style={{ marginBottom: 0 }}>
+                <label className="fl">Subject</label>
+                <select className="fsel" value={formSubject} onChange={e => setFormSubject(e.target.value)}>
+                  {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="fg" style={{ marginBottom: 0 }}>
+                <label className="fl">Curriculum</label>
+                <select className="fsel" value={formCurriculum} onChange={e => setFormCurriculum(e.target.value)}>
+                  {Object.entries(QB_CURRICULA).map(([id, info]) => <option key={id} value={id}>{info.label}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="fg" style={{ marginTop: 14 }}>
+              <label className="fl">Year / Grade</label>
+              <select className="fsel" value={formYear} onChange={e => setFormYear(e.target.value)}>
+                {(QB_CURRICULA[formCurriculum]?.years || []).map(y => <option key={y}>{y}</option>)}
+              </select>
+            </div>
+
+            <div className="fr2" style={{ marginTop: 14 }}>
+              <div className="fg" style={{ marginBottom: 0 }}>
+                <label className="fl">Start Time *</label>
+                <input className="fi" type="datetime-local" value={formStartAt}
+                  onChange={e => setFormStartAt(e.target.value)}/>
+                <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                  Exam will be locked until this time
+                </div>
+              </div>
+              <div className="fg" style={{ marginBottom: 0 }}>
+                <label className="fl">Duration (minutes) *</label>
+                <input className="fi" type="number" min="5" max="300"
+                  value={formDuration} onChange={e => setFormDuration(e.target.value)}/>
+                <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                  Auto-submits at {formStartAt && formDuration ? new Date(new Date(formStartAt).getTime() + parseInt(formDuration) * 60000).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—'}
+                </div>
+              </div>
+            </div>
+
+            <div className="fg" style={{ marginTop: 14, marginBottom: 0 }}>
+              <label className="fl">Instructions</label>
+              <textarea className="fi" rows={4} value={formInstructions}
+                onChange={e => setFormInstructions(e.target.value)}
+                placeholder="What students will see before starting the exam"
+                style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
+              <button onClick={() => { if (validateStep(1)) setCreateStep(2) }}
+                style={{
+                  background: '#7D1025', color: '#FBFAF5', border: 'none',
+                  padding: '10px 20px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 14, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                Continue to Questions
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: QUESTIONS */}
+        {createStep === 2 && (
+          <div>
+            <div className="card" style={{ marginBottom: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+                <div className="ctitle" style={{ color: '#7D1025' }}>
+                  Pick Questions from Bank
+                  {formSelectedQuestions.length > 0 && (
+                    <span style={{
+                      marginLeft: 10,
+                      background: '#C9A030', color: '#7D1025',
+                      fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
+                      padding: '3px 10px', borderRadius: 99,
+                    }}>{formSelectedQuestions.length} selected | {totalMarks} marks</span>
+                  )}
+                </div>
+                <button onClick={() => setPage('questionbank')}
+                  style={{
+                    background: 'transparent', border: '1px solid #7D1025',
+                    color: '#7D1025', padding: '6px 12px',
+                    borderRadius: 'var(--rsm)', cursor: 'pointer',
+                    fontSize: 12, fontWeight: 700,
+                  }}>+ Add to Question Bank</button>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+                <input className="fi" placeholder="Search questions..."
+                  value={bankFilter.search}
+                  onChange={e => setBankFilter({ ...bankFilter, search: e.target.value })}
+                  style={{ flex: 1, minWidth: 180 }}/>
+                <select className="fsel" value={bankFilter.subject}
+                  onChange={e => setBankFilter({ ...bankFilter, subject: e.target.value })}
+                  style={{ minWidth: 140 }}>
+                  <option value="all">All Subjects</option>
+                  {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                </select>
+                <select className="fsel" value={bankFilter.difficulty}
+                  onChange={e => setBankFilter({ ...bankFilter, difficulty: e.target.value })}
+                  style={{ minWidth: 130 }}>
+                  <option value="all">All Difficulty</option>
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+
+              {filteredBankQuestions.length === 0 ? (
+                <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
+                  No questions found. Add questions in the Question Bank first.
+                </div>
+              ) : (
+                <div style={{ maxHeight: 480, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {filteredBankQuestions.map(q => {
+                    const isSelected = formSelectedQuestions.includes(q.id)
+                    const subjCol = exSubjColour(q.subject)
+                    return (
+                      <div key={q.id} onClick={() => toggleQuestion(q.id)}
+                        style={{
+                          padding: 12,
+                          border: '1.5px solid ' + (isSelected ? '#7D1025' : 'var(--border)'),
+                          borderRadius: 'var(--rmd)',
+                          background: isSelected ? '#FBE8E8' : '#FBFAF5',
+                          cursor: 'pointer',
+                          display: 'flex', gap: 12, alignItems: 'flex-start',
+                        }}>
+                        <div style={{
+                          width: 22, height: 22, borderRadius: 4,
+                          background: isSelected ? '#7D1025' : '#FFF',
+                          border: '2px solid ' + (isSelected ? '#7D1025' : 'var(--border)'),
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0, marginTop: 2,
+                        }}>
+                          {isSelected && (
+                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#FBFAF5" strokeWidth="3" strokeLinecap="round">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          )}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
+                            <span style={{
+                              background: subjCol + '15', color: subjCol,
+                              fontSize: 9.5, fontWeight: 700, letterSpacing: '.06em',
+                              padding: '2px 7px', borderRadius: 99, textTransform: 'uppercase',
+                            }}>{q.subject}</span>
+                            <span style={{ fontSize: 10.5, color: 'var(--s500)' }}>{q.topic} | {q.difficulty}</span>
+                          </div>
+                          <div style={{ fontSize: 13, color: 'var(--s900)', fontWeight: 600 }}>{q.question}</div>
+                        </div>
+                        <span style={{
+                          background: 'var(--bg)', color: 'var(--s700)',
+                          padding: '4px 8px', borderRadius: 'var(--rsm)',
+                          fontSize: 11, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
+                          flexShrink: 0,
+                        }}>{q.marks}m</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18, gap: 8, flexWrap: 'wrap' }}>
+              <button onClick={() => setCreateStep(1)} className="btn btn-s">Back</button>
+              <button onClick={() => { if (validateStep(2)) setCreateStep(3) }}
+                style={{
+                  background: '#7D1025', color: '#FBFAF5', border: 'none',
+                  padding: '10px 20px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 14, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                Continue to Assign
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: ASSIGN & LOCK */}
+        {createStep === 3 && (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
+              {/* Students */}
+              <div className="card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 6 }}>
+                  <div className="ctitle" style={{ color: '#7D1025' }}>
+                    Assign to Students ({formSelectedStudents.length}/{allStudents.length})
+                  </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button onClick={selectAllStudents}
+                      style={{
+                        background: '#FBFAF5', color: '#7D1025',
+                        border: '1px solid #F4C5C5',
+                        padding: '4px 10px', borderRadius: 'var(--rsm)',
+                        cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                      }}>Select All</button>
+                    <button onClick={clearAllStudents}
+                      style={{
+                        background: 'transparent', color: 'var(--s500)',
+                        border: '1px solid var(--border)',
+                        padding: '4px 10px', borderRadius: 'var(--rsm)',
+                        cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                      }}>Clear</button>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 340, overflowY: 'auto' }}>
+                  {allStudents.map(s => {
+                    const isSelected = formSelectedStudents.includes(s.id)
+                    return (
+                      <label key={s.id}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '8px 10px',
+                          border: '1.5px solid ' + (isSelected ? '#7D1025' : 'var(--border)'),
+                          borderRadius: 'var(--rmd)',
+                          background: isSelected ? '#FBE8E8' : '#FBFAF5',
+                          cursor: 'pointer',
+                        }}>
+                        <input type="checkbox" checked={isSelected}
+                          onChange={() => toggleStudent(s.id)}
+                          style={{ accentColor: '#7D1025' }}/>
+                        <div style={{
+                          width: 30, height: 30, borderRadius: '50%',
+                          background: msAvatarColor(s.name), color: '#FBFAF5',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: 700, fontSize: 11, flexShrink: 0,
+                        }}>{s.initials}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 600 }}>{s.name}</div>
+                          <div style={{ fontSize: 11, color: 'var(--s500)' }}>{s.year} | Mastery {s.mastery}%</div>
+                        </div>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Summary */}
+              <div className="card" style={{ background: '#FBFAF5', border: '2px solid #C9A030' }}>
+                <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Exam Summary</div>
+                {[
+                  ['Title',         formTitle || '—'],
+                  ['Subject',       formSubject + ' | ' + formCurriculum + ' | ' + formYear],
+                  ['Start Time',    formStartAt ? exFormatDateTime(new Date(formStartAt).toISOString()) : '—'],
+                  ['Duration',      formDuration + ' min'],
+                  ['Questions',     formSelectedQuestions.length],
+                  ['Total Marks',   totalMarks],
+                  ['Students',      formSelectedStudents.length],
+                ].map(([l, v]) => (
+                  <div key={l} style={{
+                    display: 'flex', justifyContent: 'space-between',
+                    padding: '8px 0', borderBottom: '1px solid #F4C5C5',
+                    fontSize: 13,
+                  }}>
+                    <span style={{ color: 'var(--s500)' }}>{l}</span>
+                    <span style={{ fontWeight: 700, color: '#7D1025', textAlign: 'right', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</span>
+                  </div>
+                ))}
+                <div style={{
+                  background: '#FFF', borderLeft: '3px solid #7D1025',
+                  padding: '12px 14px', borderRadius: 'var(--rsm)',
+                  fontSize: 12.5, color: 'var(--s700)', marginTop: 14,
+                  lineHeight: 1.6,
+                }}>
+                  <strong style={{ color: '#7D1025' }}>What happens next:</strong>
+                  <br/>This exam will be LOCKED for all assigned students. They will see a countdown until the start time. At start time, they can begin the exam. Auto-submits at end of duration.
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18, gap: 8, flexWrap: 'wrap' }}>
+              <button onClick={() => setCreateStep(2)} className="btn btn-s">Back</button>
+              <button onClick={scheduleExam}
+                style={{
+                  background: '#C9A030', color: '#7D1025', border: 'none',
+                  padding: '12px 24px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 14, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  boxShadow: '0 4px 14px rgba(201,160,48,.35)',
+                }}>
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                Schedule and Lock Exam
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ── RENDER: LIST VIEW ───────────────────────────────
+  return (
+    <div>
+      {/* Hero */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+        color: '#FBFAF5',
+      }}>
+        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>
+              Exams
+            </div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              Schedule and Deploy Tests
+            </h1>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              Build exams from your Question Bank. Lock until start time. Auto-submits at end.
+            </div>
+          </div>
+          <button onClick={openCreate}
+            style={{
+              background: '#C9A030', color: '#7D1025', border: 'none',
+              padding: '12px 22px', borderRadius: 'var(--rmd)',
+              cursor: 'pointer', fontSize: 14, fontWeight: 700,
+              display: 'flex', alignItems: 'center', gap: 8,
+              boxShadow: '0 4px 14px rgba(201,160,48,.35)',
+            }}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Schedule New Exam
+          </button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+          {[
+            ['Total',     stats.total,     '#FBFAF5'],
+            ['Scheduled', stats.scheduled, '#F0CC5A'],
+            ['Live Now',  stats.active,    '#FCA5A5'],
+            ['Ended',     stats.ended,     '#FBFAF5'],
+          ].map(([l, v, c]) => (
+            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .7, marginBottom: 2, color: '#F0CC5A' }}>{l}</div>
+              <div style={{ fontSize: 16, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: c }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="card" style={{ marginBottom: 14 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Search</label>
+            <input className="fi" placeholder="Search by exam title or subject..."
+              value={searchQ} onChange={e => setSearchQ(e.target.value)} style={{ width: '100%' }}/>
+          </div>
+          <div style={{ minWidth: 140 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Status</label>
+            <select className="fsel" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ width: '100%' }}>
+              <option value="all">All</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="active">Live Now</option>
+              <option value="ended">Ended</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 10 }}>
+        Showing <strong style={{ color: '#7D1025' }}>{filteredExams.length}</strong> of {stats.total} exams
+      </div>
+
+      {filteredExams.length === 0 ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{
+            width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%',
+            background: '#FBFAF5', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="#C9A030" strokeWidth="1.5" strokeLinecap="round">
+              <rect x="9" y="3" width="6" height="4" rx="1.5"/>
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+            </svg>
+          </div>
+          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>
+            {stats.total === 0 ? 'No exams scheduled yet' : 'No exams match these filters'}
+          </h3>
+          <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto 14px' }}>
+            {stats.total === 0
+              ? 'Schedule your first exam. Pick questions from your bank, set a start time, and assign students.'
+              : 'Try clearing some filters.'}
+          </p>
+          {stats.total === 0 && (
+            <button onClick={openCreate}
+              style={{
+                background: '#7D1025', color: '#FBFAF5', border: 'none',
+                padding: '10px 20px', borderRadius: 'var(--rmd)',
+                cursor: 'pointer', fontSize: 14, fontWeight: 700,
+              }}>Schedule Your First Exam</button>
+          )}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filteredExams.map(exam => {
+            const status = exam._status
+            const subjCol = exSubjColour(exam.subject)
+            const timeUntil = exTimeUntil(exam.startAt)
+            const statusBadge = status === 'scheduled'
+              ? { bg: '#FEF3C7', color: '#B45309', label: 'SCHEDULED' }
+              : status === 'active'
+              ? { bg: '#FEE2E2', color: '#B91C1C', label: 'LIVE NOW' }
+              : { bg: '#F1F5F9', color: '#64748B', label: 'ENDED' }
+
+            return (
+              <div key={exam.id} className="card" style={{
+                padding: 14, borderLeft: '4px solid ' + subjCol, cursor: 'pointer',
+              }} onClick={() => openDetail(exam)}>
+                <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span style={{
+                        background: statusBadge.bg, color: statusBadge.color,
+                        fontSize: 9.5, fontWeight: 800, letterSpacing: '.08em',
+                        padding: '2px 8px', borderRadius: 99,
+                      }}>{statusBadge.label}</span>
+                      {status === 'active' && (
+                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#B91C1C', animation: 'pulse 1.5s infinite' }}/>
+                      )}
+                      <span style={{ fontSize: 11, fontWeight: 700, color: subjCol, letterSpacing: '.06em', textTransform: 'uppercase' }}>{exam.subject}</span>
+                      <span style={{ fontSize: 11, color: 'var(--s500)' }}>{exam.curriculum} {exam.year}</span>
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)', marginBottom: 4 }}>{exam.title}</div>
+                    <div style={{ fontSize: 12, color: 'var(--s500)' }}>
+                      {exFormatDateTime(exam.startAt)} | {exam.durationMins} min | {exam.questionIds.length} questions | {exam.totalMarks} marks
+                      {timeUntil && status === 'scheduled' && <> | <strong style={{ color: '#C9A030' }}>{timeUntil}</strong></>}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'center', minWidth: 80 }}>
+                    <div className="mono" style={{ fontSize: 18, fontWeight: 700, color: '#7D1025' }}>
+                      {exam.assignedStudents.length}
+                    </div>
+                    <div style={{ fontSize: 10, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Students</div>
+                  </div>
                 </div>
               </div>
             )
