@@ -7002,12 +7002,17 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
   const previewVideoRef = useRef(null)
   const canvasRef = useRef(null)
   const drawingRef = useRef(false)
-  const lastPointRef = useRef(null)
   const streamRef = useRef(null)
   const audioContextRef = useRef(null)
   const audioAnalyserRef = useRef(null)
   const audioLevelRafRef = useRef(null)
   const drawingHistoryRef = useRef([])
+  // Performance refs:
+  const canvasSnapshotRef = useRef(null)        // ImageBitmap of all completed strokes
+  const currentStrokeRef = useRef(null)         // The stroke currently being drawn
+  const pendingPointRef = useRef(null)          // Latest pointer position queued for next frame
+  const drawRafRef = useRef(null)               // requestAnimationFrame handle
+  const ctxRef = useRef(null)                   // Cached 2d context
 
   const COLOR_PALETTE = [
     { hex: '#7D1025', label: 'Crimson' },
@@ -7180,16 +7185,51 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
   }, [phase])
 
   // ── CANVAS ────────────────────────────────────────
-  const setupCanvas = () => {
+  // Performance architecture:
+  // - During a stroke: draw to canvas via requestAnimationFrame (60fps cap, no lag)
+  // - On stroke end: commit to history + cache canvas as ImageBitmap snapshot
+  // - On resize: just paint the snapshot once (no replay of every stroke)
+
+  const initCanvas = () => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const dpr = window.devicePixelRatio || 1
     const rect = canvas.getBoundingClientRect()
-    canvas.width = rect.width * window.devicePixelRatio
-    canvas.height = rect.height * window.devicePixelRatio
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
+    const targetW = Math.floor(rect.width * dpr)
+    const targetH = Math.floor(rect.height * dpr)
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW
+      canvas.height = targetH
+    }
+    const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true })
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.scale(dpr, dpr)
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
+    ctxRef.current = ctx
+    return ctx
+  }
+
+  const repaintFromSnapshot = () => {
+    const canvas = canvasRef.current
+    const ctx = ctxRef.current
+    if (!canvas || !ctx) return
+    const rect = canvas.getBoundingClientRect()
+    ctx.clearRect(0, 0, rect.width, rect.height)
+    if (canvasSnapshotRef.current) {
+      try {
+        ctx.drawImage(canvasSnapshotRef.current, 0, 0, rect.width, rect.height)
+      } catch (e) { /* snapshot may be invalid after resize, ignore */ }
+    }
+  }
+
+  // Build snapshot from history (used on first load + after undo/clear)
+  const rebuildSnapshot = async () => {
+    const canvas = canvasRef.current
+    const ctx = ctxRef.current
+    if (!canvas || !ctx) return
+    const rect = canvas.getBoundingClientRect()
+    ctx.clearRect(0, 0, rect.width, rect.height)
     drawingHistoryRef.current.forEach(stroke => {
       ctx.strokeStyle = stroke.color
       ctx.lineWidth = stroke.width
@@ -7201,14 +7241,34 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
       })
       ctx.stroke()
     })
+    // Cache snapshot for fast resize/repaint
+    try {
+      if (window.createImageBitmap) {
+        canvasSnapshotRef.current = await createImageBitmap(canvas)
+      }
+    } catch (e) { /* not all browsers support, fallback fine */ }
   }
 
+  // Set up canvas on enter live mode + resize
   useEffect(() => {
     if (phase !== 'live') return
-    setupCanvas()
-    const handleResize = () => setupCanvas()
+    initCanvas()
+    rebuildSnapshot()
+    let resizeTimeout = null
+    const handleResize = () => {
+      // Debounce resize to avoid thrashing
+      if (resizeTimeout) clearTimeout(resizeTimeout)
+      resizeTimeout = setTimeout(() => {
+        initCanvas()
+        rebuildSnapshot()
+      }, 100)
+    }
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (resizeTimeout) clearTimeout(resizeTimeout)
+      if (drawRafRef.current) cancelAnimationFrame(drawRafRef.current)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, layoutMode])
 
@@ -7216,53 +7276,109 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
     const canvas = canvasRef.current
     if (!canvas) return null
     const rect = canvas.getBoundingClientRect()
-    const x = (e.touches?.[0]?.clientX ?? e.clientX) - rect.left
-    const y = (e.touches?.[0]?.clientY ?? e.clientY) - rect.top
-    return { x, y }
+    // Pointer events have clientX/Y. Touch events nest in .touches[0].
+    const clientX = e.clientX !== undefined ? e.clientX : e.touches?.[0]?.clientX
+    const clientY = e.clientY !== undefined ? e.clientY : e.touches?.[0]?.clientY
+    if (clientX === undefined || clientY === undefined) return null
+    return { x: clientX - rect.left, y: clientY - rect.top }
+  }
+
+  const drawFrame = () => {
+    drawRafRef.current = null
+    if (!drawingRef.current) return
+    const ctx = ctxRef.current
+    const cur = currentStrokeRef.current
+    const pt = pendingPointRef.current
+    if (!ctx || !cur || !pt) return
+    // Draw line from last committed point to current pending point
+    const lastIdx = cur.points.length - 1
+    const last = cur.points[lastIdx]
+    if (!last) return
+    ctx.strokeStyle = cur.color
+    ctx.lineWidth = cur.width
+    ctx.globalCompositeOperation = cur.tool === 'eraser' ? 'destination-out' : 'source-over'
+    ctx.beginPath()
+    ctx.moveTo(last.x, last.y)
+    ctx.lineTo(pt.x, pt.y)
+    ctx.stroke()
+    cur.points.push(pt)
+    pendingPointRef.current = null
   }
 
   const startDrawing = (e) => {
     e.preventDefault()
+    const point = getCanvasPoint(e)
+    if (!point) return
+    const ctx = ctxRef.current || initCanvas()
+    if (!ctx) return
     drawingRef.current = true
-    const point = getCanvasPoint(e); if (!point) return
-    lastPointRef.current = point
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    ctx.strokeStyle = penColor
-    ctx.lineWidth = tool === 'eraser' ? strokeWidth * 4 : strokeWidth
-    ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over'
-    ctx.beginPath()
-    ctx.moveTo(point.x, point.y)
-    drawingHistoryRef.current.push({ tool, color: penColor, width: ctx.lineWidth, points: [point] })
+    currentStrokeRef.current = {
+      tool, color: penColor,
+      width: tool === 'eraser' ? strokeWidth * 4 : strokeWidth,
+      points: [point],
+    }
+    // Capture pointer for smooth drawing even when leaving canvas briefly
+    if (e.pointerId !== undefined && canvasRef.current?.setPointerCapture) {
+      try { canvasRef.current.setPointerCapture(e.pointerId) } catch {}
+    }
   }
 
-  const draw = (e) => {
+  const continueDrawing = (e) => {
     if (!drawingRef.current) return
     e.preventDefault()
-    const point = getCanvasPoint(e); if (!point) return
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    ctx.lineTo(point.x, point.y); ctx.stroke()
-    lastPointRef.current = point
-    const cur = drawingHistoryRef.current[drawingHistoryRef.current.length - 1]
-    if (cur) cur.points.push(point)
+    const point = getCanvasPoint(e)
+    if (!point) return
+    pendingPointRef.current = point
+    // Schedule a draw on next animation frame if not already scheduled
+    if (drawRafRef.current === null) {
+      drawRafRef.current = requestAnimationFrame(drawFrame)
+    }
   }
 
-  const stopDrawing = () => { drawingRef.current = false; lastPointRef.current = null }
+  const stopDrawing = (e) => {
+    if (!drawingRef.current) return
+    e?.preventDefault?.()
+    drawingRef.current = false
+    // Flush any pending point
+    if (pendingPointRef.current && drawRafRef.current !== null) {
+      cancelAnimationFrame(drawRafRef.current)
+      drawRafRef.current = null
+      drawFrame()
+    }
+    // Commit stroke to history
+    if (currentStrokeRef.current && currentStrokeRef.current.points.length > 0) {
+      drawingHistoryRef.current.push(currentStrokeRef.current)
+      // Update snapshot to include this stroke
+      const canvas = canvasRef.current
+      if (canvas && window.createImageBitmap) {
+        createImageBitmap(canvas).then(bmp => {
+          canvasSnapshotRef.current = bmp
+        }).catch(() => {})
+      }
+    }
+    currentStrokeRef.current = null
+    pendingPointRef.current = null
+    // Release pointer capture
+    if (e?.pointerId !== undefined && canvasRef.current?.releasePointerCapture) {
+      try { canvasRef.current.releasePointerCapture(e.pointerId) } catch {}
+    }
+  }
 
   const clearCanvas = () => {
     if (!confirm('Clear the entire whiteboard? This cannot be undone.')) return
-    const canvas = canvasRef.current; if (!canvas) return
-    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+    const canvas = canvasRef.current
+    const ctx = ctxRef.current
+    if (!canvas || !ctx) return
+    const rect = canvas.getBoundingClientRect()
+    ctx.clearRect(0, 0, rect.width, rect.height)
     drawingHistoryRef.current = []
+    canvasSnapshotRef.current = null
   }
 
   const undoLast = () => {
     if (drawingHistoryRef.current.length === 0) return
     drawingHistoryRef.current.pop()
-    const canvas = canvasRef.current; if (!canvas) return
-    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-    setupCanvas()
+    rebuildSnapshot()
   }
 
   // ── LEAVE ─────────────────────────────────────────
@@ -7610,9 +7726,11 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
           <>
             <div style={{ flex: 1, position: 'relative', background: '#FBFAF5' }}>
               <canvas ref={canvasRef}
-                onMouseDown={startDrawing} onMouseMove={draw}
-                onMouseUp={stopDrawing} onMouseLeave={stopDrawing}
-                onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing}
+                onPointerDown={startDrawing}
+                onPointerMove={continueDrawing}
+                onPointerUp={stopDrawing}
+                onPointerCancel={stopDrawing}
+                onPointerLeave={stopDrawing}
                 style={{
                   width: '100%', height: '100%',
                   cursor: tool === 'eraser' ? 'cell' : 'crosshair',
@@ -7743,9 +7861,11 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
           <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 360px', gap: 8, padding: 8 }}>
             <div style={{ position: 'relative', background: '#FBFAF5', borderRadius: 12, overflow: 'hidden' }}>
               <canvas ref={canvasRef}
-                onMouseDown={startDrawing} onMouseMove={draw}
-                onMouseUp={stopDrawing} onMouseLeave={stopDrawing}
-                onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing}
+                onPointerDown={startDrawing}
+                onPointerMove={continueDrawing}
+                onPointerUp={stopDrawing}
+                onPointerCancel={stopDrawing}
+                onPointerLeave={stopDrawing}
                 style={{
                   width: '100%', height: '100%',
                   cursor: tool === 'eraser' ? 'cell' : 'crosshair',
