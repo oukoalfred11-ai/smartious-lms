@@ -308,6 +308,7 @@ export default function TeacherPortal() {
     exambuilder: 'Exams',
     marking: 'Homework',
     communication: 'Messages',
+    mshauri: 'Mshauri AI',
     profile: 'My Profile',
   }
 
@@ -334,6 +335,9 @@ export default function TeacherPortal() {
     ]},
     { section:'Communication', items:[
       {id:'communication', label:'Messages',         icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'},
+    ]},
+    { section:'Assistant', items:[
+      {id:'mshauri',       label:'Mshauri AI',       icon:'M12 2L2 7l10 5 10-5-10-5z|M2 17l10 5 10-5|M2 12l10 5 10-5'},
     ]},
     { section:'Account', items:[
       {id:'profile',       label:'My Profile',       icon:'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2|circle:12:7:4'},
@@ -464,12 +468,18 @@ export default function TeacherPortal() {
            {/* ── COMMUNICATION ── */}
            {page === 'communication' && <CommunicationTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
 
+           {/* ── MSHAURI AI ── */}
+           {page === 'mshauri' && <MshauriAITab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
+
            {/* ── PROFILE ── */}
            {page === 'profile' && <TeacherProfileTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
 
 
         </div>
       </main>
+
+      {/* ── Mshauri Floating Button & Panel ── */}
+      <MshauriFloatingButton user={store?.currentUser} setPage={setPage} toast={toast} currentPage={page}/>
 
       {/* ── Send Message Modal ── */}
       <Modal open={msgModal} onClose={() => setMsgModal(false)} title="Send Message" size="md"
@@ -8063,5 +8073,1336 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
         </div>
       )}
     </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// MSHAURI AI — Teaching assistant powered by Claude
+// ═══════════════════════════════════════════════════════════
+// Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
+//
+// PHILOSOPHY:
+// - Action-oriented entry points (skills) instead of empty chat box
+// - Mock mode works WITHOUT API key (for demos)
+// - Real mode wires to backend POST /api/mshauri/chat (next turn)
+// - Outputs flow into other modules (Question Bank, Communication, Drafts)
+// - Two access modes: dedicated tab + floating button
+
+const MA_CHATS_KEY = 'sm_mshauri_chats'
+const MA_CONFIG_KEY = 'sm_mshauri_config'
+
+const maGenerateId = () => 'chat-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)
+
+const maLoadChats = () => {
+  try { return JSON.parse(localStorage.getItem(MA_CHATS_KEY) || '[]') } catch { return [] }
+}
+const maSaveChats = (chats) => {
+  try { localStorage.setItem(MA_CHATS_KEY, JSON.stringify(chats.slice(-50))) } catch {}
+}
+const maLoadConfig = () => {
+  try {
+    return { apiConnected: false, model: 'sonnet', dailyUsage: 0, ...JSON.parse(localStorage.getItem(MA_CONFIG_KEY) || '{}') }
+  } catch { return { apiConnected: false, model: 'sonnet', dailyUsage: 0 } }
+}
+const maSaveConfig = (config) => {
+  try { localStorage.setItem(MA_CONFIG_KEY, JSON.stringify(config)) } catch {}
+}
+
+const maTimeAgo = (iso) => {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return mins + 'm ago'
+  if (hours < 24) return hours + 'h ago'
+  if (days === 1) return 'yesterday'
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+// ──────────────────────────────────────────────────────
+// SKILLS — structured prompt builders
+// ──────────────────────────────────────────────────────
+
+const MA_SKILLS = [
+  {
+    id: 'generate-questions',
+    label: 'Generate Questions',
+    icon: 'M9.5 2A2.5 2.5 0 0 0 7 4.5v15A2.5 2.5 0 0 0 9.5 22h11V2h-11z|M14 7h2|M14 11h2|M14 15h2',
+    color: '#7D1025',
+    description: 'Create exam or practice questions from any topic',
+    formFields: [
+      { id: 'subject', label: 'Subject', type: 'select', options: ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'History', 'Geography', 'Business Studies'], default: 'Mathematics' },
+      { id: 'curriculum', label: 'Curriculum', type: 'select', options: ['IGCSE', 'Cambridge A-Level', 'Edexcel', 'IB', 'Kenya CBC', 'American'], default: 'IGCSE' },
+      { id: 'year', label: 'Year / Grade', type: 'text', default: 'Year 10' },
+      { id: 'topic', label: 'Topic', type: 'text', default: 'Quadratic equations', placeholder: 'e.g. Trigonometry, Photosynthesis, Algebra' },
+      { id: 'difficulty', label: 'Difficulty', type: 'select', options: ['Easy', 'Medium', 'Hard', 'Mixed'], default: 'Medium' },
+      { id: 'count', label: 'Number of questions', type: 'number', default: 5, min: 1, max: 20 },
+      { id: 'type', label: 'Question type', type: 'select', options: ['Mixed', 'Multiple choice', 'Short answer', 'Essay', 'True/False'], default: 'Mixed' },
+    ],
+    saveAction: 'questionbank',
+    saveLabel: 'Save to Question Bank',
+  },
+  {
+    id: 'mark-answer',
+    label: 'Mark Student Work',
+    icon: 'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11',
+    color: '#7D1025',
+    description: 'Get suggested marks and feedback for student answers',
+    formFields: [
+      { id: 'question', label: 'The question', type: 'textarea', placeholder: 'Paste the question or task...', rows: 3 },
+      { id: 'studentAnswer', label: 'Student answer', type: 'textarea', placeholder: 'Paste student response...', rows: 6 },
+      { id: 'maxMarks', label: 'Maximum marks', type: 'number', default: 10, min: 1, max: 100 },
+      { id: 'level', label: 'Education level', type: 'select', options: ['IGCSE Year 9', 'IGCSE Year 10', 'IGCSE Year 11', 'A-Level', 'IB', 'CBC'], default: 'IGCSE Year 10' },
+      { id: 'feedbackTone', label: 'Feedback tone', type: 'select', options: ['Encouraging', 'Direct', 'Analytical', 'Supportive'], default: 'Encouraging' },
+    ],
+    saveAction: 'copy',
+    saveLabel: 'Copy Feedback',
+  },
+  {
+    id: 'parent-message',
+    label: 'Parent Message',
+    icon: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+    color: '#7D1025',
+    description: 'Draft professional messages to parents',
+    formFields: [
+      { id: 'studentName', label: 'Student name', type: 'student-select' },
+      { id: 'topic', label: 'What is this message about?', type: 'select', options: ['Progress update (positive)', 'Concern about progress', 'Behavior concern', 'Attendance issue', 'Achievement / praise', 'Upcoming exam', 'Schedule change', 'Other (specify below)'], default: 'Progress update (positive)' },
+      { id: 'specifics', label: 'Specifics', type: 'textarea', placeholder: 'Brief facts: scores, observations, dates, what you want to discuss...', rows: 4 },
+      { id: 'tone', label: 'Tone', type: 'select', options: ['Warm and personal', 'Professional', 'Direct but kind', 'Celebratory'], default: 'Warm and personal' },
+      { id: 'length', label: 'Length', type: 'select', options: ['Short (3-4 sentences)', 'Medium (1 paragraph)', 'Long (2-3 paragraphs)'], default: 'Medium (1 paragraph)' },
+    ],
+    saveAction: 'communication',
+    saveLabel: 'Save as Draft',
+  },
+  {
+    id: 'lesson-plan',
+    label: 'Lesson Plan',
+    icon: 'rect:3:3:18:18:2|line:9:9:15:9|line:9:13:15:13|line:9:17:15:17',
+    color: '#7D1025',
+    description: 'Build a complete lesson plan with timings and activities',
+    formFields: [
+      { id: 'subject', label: 'Subject', type: 'select', options: ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'History', 'Geography'], default: 'Mathematics' },
+      { id: 'curriculum', label: 'Curriculum', type: 'select', options: ['IGCSE', 'A-Level', 'Edexcel', 'IB', 'Kenya CBC'], default: 'IGCSE' },
+      { id: 'year', label: 'Year / Grade', type: 'text', default: 'Year 10' },
+      { id: 'topic', label: 'Topic', type: 'text', default: 'Pythagoras Theorem', placeholder: 'e.g. Trigonometry, French Revolution' },
+      { id: 'duration', label: 'Lesson duration (minutes)', type: 'number', default: 60, min: 15, max: 180 },
+      { id: 'studentCount', label: 'Number of students', type: 'number', default: 8, min: 1, max: 50 },
+      { id: 'objectives', label: 'Learning objectives (optional)', type: 'textarea', placeholder: 'What should students be able to do by the end?', rows: 3 },
+    ],
+    saveAction: 'copy',
+    saveLabel: 'Copy Plan',
+  },
+  {
+    id: 'student-insights',
+    label: 'Student Insights',
+    icon: 'M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:8.5:7:4|line:20:8:20:14|line:23:11:17:11',
+    color: '#7D1025',
+    description: 'Analyze a student and suggest interventions',
+    formFields: [
+      { id: 'studentName', label: 'Student', type: 'student-select' },
+      { id: 'concern', label: 'Specific concern (optional)', type: 'textarea', placeholder: 'e.g. Falling behind in algebra. Was excellent in Term 1.', rows: 3 },
+      { id: 'lookback', label: 'How far back to consider', type: 'select', options: ['Last 2 weeks', 'Last month', 'This term', 'All time'], default: 'Last month' },
+    ],
+    saveAction: 'copy',
+    saveLabel: 'Copy Insights',
+  },
+  {
+    id: 'free-chat',
+    label: 'Free Chat',
+    icon: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+    color: '#C9A030',
+    description: 'Ask anything — translation, explanation, brainstorming',
+    formFields: [
+      { id: 'message', label: 'Your message', type: 'textarea', placeholder: 'Ask Mshauri anything...', rows: 5 },
+    ],
+    saveAction: 'copy',
+    saveLabel: 'Copy Response',
+  },
+]
+
+// ──────────────────────────────────────────────────────
+// PROMPT BUILDER — converts skill + form data to API messages
+// ──────────────────────────────────────────────────────
+const maBuildSystemPrompt = (teacherName, skill) => {
+  return `You are Mshauri, an AI teaching assistant for Smartious Homeschool, a Kenya-based international online school. You help ${teacherName || 'a teacher'} with daily teaching tasks.
+
+CONTEXT:
+- Smartious teaches Cambridge IGCSE, A-Level, Edexcel, IB, Kenya CBC, and American curricula
+- Students are aged 5-18, mostly remote learners across Kenya, UK, UAE, USA, Canada
+- Brand voice: warm, professional, encouraging, culturally aware (Kenya context)
+- You should be aware of local context (KCSE, CBC competencies, KSh currency, etc.) when relevant
+
+TONE GUIDELINES:
+- Concise and useful — teachers are busy
+- Confident but humble (you make mistakes too)
+- Constructive when giving feedback (build up, don't tear down)
+- Format outputs with clear structure (markdown lists, headings)
+- Avoid filler ("Certainly!", "Great question!") — get to the answer
+
+CURRENT TASK: ${skill.label} — ${skill.description}`
+}
+
+const maBuildUserPrompt = (skill, formData) => {
+  switch (skill.id) {
+    case 'generate-questions':
+      return `Generate ${formData.count} ${formData.difficulty.toLowerCase()} ${formData.type === 'Mixed' ? '' : formData.type.toLowerCase() + ' '}questions for ${formData.subject} at ${formData.curriculum} ${formData.year} level.
+
+Topic: ${formData.topic}
+
+For each question, provide:
+1. The question itself (clearly numbered)
+2. The answer
+3. A brief mark scheme (3-5 bullet points) showing what earns marks
+4. Estimated time to complete
+
+Format as a clean list ready to be added to a question bank.`
+
+    case 'mark-answer':
+      return `Mark this student answer at ${formData.level} level.
+
+QUESTION:
+${formData.question}
+
+STUDENT ANSWER:
+${formData.studentAnswer}
+
+MAXIMUM MARKS: ${formData.maxMarks}
+
+Provide:
+1. Suggested mark out of ${formData.maxMarks}
+2. ${formData.feedbackTone.toLowerCase()} feedback (3-4 sentences)
+3. What the student got right (specific observations)
+4. What was missing or could be improved
+5. One concrete next-step suggestion
+
+Format clearly so the teacher can copy any section.`
+
+    case 'parent-message':
+      return `Write a ${formData.length.toLowerCase()} message to the parent of ${formData.studentName || 'this student'}.
+
+Topic: ${formData.topic}
+Specifics: ${formData.specifics || 'No additional notes provided'}
+Tone: ${formData.tone}
+
+Write the message ready to send. No subject line needed unless this is a formal email situation. End with a warm sign-off appropriate to a teacher.`
+
+    case 'lesson-plan':
+      return `Create a ${formData.duration}-minute lesson plan for ${formData.studentCount} students.
+
+Subject: ${formData.subject}
+Curriculum: ${formData.curriculum}
+Year: ${formData.year}
+Topic: ${formData.topic}
+${formData.objectives ? 'Learning objectives: ' + formData.objectives : ''}
+
+Structure the plan with:
+1. Learning objectives (3-4)
+2. Materials needed
+3. Lesson timeline with timings (e.g. "0-5 min: Hook activity", "5-15 min: Direct instruction"...)
+4. Differentiation suggestions for stronger and weaker students
+5. Quick check for understanding (formative assessment)
+6. Homework suggestion (if applicable)
+
+Keep activities engaging and age-appropriate.`
+
+    case 'student-insights':
+      return `Analyze ${formData.studentName || 'this student'} and provide actionable insights.
+
+Lookback period: ${formData.lookback}
+${formData.concern ? 'Specific concern raised: ' + formData.concern : 'No specific concern noted'}
+
+Provide:
+1. Likely root causes (3 hypotheses, ranked by probability)
+2. Concrete intervention suggestions (3-5, ordered by impact)
+3. Conversation starters for the next class (2-3 questions to ask the student)
+4. What to communicate to the parent (1 sentence)
+5. Red flags to watch for in the next 2 weeks
+
+Be honest. If you don't have enough data, say so and ask what to look at.`
+
+    case 'free-chat':
+      return formData.message
+
+    default:
+      return ''
+  }
+}
+
+// ──────────────────────────────────────────────────────
+// MOCK RESPONSES — for when API is not connected
+// ──────────────────────────────────────────────────────
+const maMockResponse = (skill, formData) => {
+  switch (skill.id) {
+    case 'generate-questions':
+      return `Here are ${formData.count} ${formData.difficulty.toLowerCase()} ${formData.subject} questions on **${formData.topic}** for ${formData.curriculum} ${formData.year}:
+
+**Question 1**
+Solve the equation x² + 5x + 6 = 0 using factorization.
+*Answer:* x = -2 or x = -3
+*Mark scheme:* 1 mark for setting up factorization, 1 for correct factors (x+2)(x+3), 1 for both solutions
+*Time:* 3 minutes
+
+**Question 2**
+Find the roots of 2x² - 7x + 3 = 0 using the quadratic formula.
+*Answer:* x = 3 or x = 0.5
+*Mark scheme:* 1 for correct formula recall, 1 for substitution, 1 for both roots
+*Time:* 4 minutes
+
+**Question 3**
+The product of two consecutive integers is 110. Find the integers.
+*Answer:* 10 and 11 (or -10 and -11)
+*Mark scheme:* 1 for setting up x(x+1) = 110, 1 for solving, 1 for both pairs
+*Time:* 5 minutes
+
+*[This is a mock response. Connect your Anthropic API key to get real Mshauri intelligence.]*`
+
+    case 'mark-answer':
+      return `**Suggested mark: ${Math.floor(formData.maxMarks * 0.7)}/${formData.maxMarks}**
+
+**Feedback (${formData.feedbackTone.toLowerCase()}):**
+This is a solid attempt that shows you understand the core concept. Your working is mostly clear and you've reached a reasonable conclusion, but there are a few places where more care would have earned full marks.
+
+**What you got right:**
+- Correctly identified the problem type
+- Showed clear working at each step
+- Final answer is in the correct form
+
+**What could be improved:**
+- Step 3 has a sign error that propagated through to the answer
+- The unit/notation in your final answer is missing
+- Consider checking your answer by substituting back into the original equation
+
+**Next step:**
+Try this same problem again but pause after each step to check whether the result makes sense. A quick estimation can catch sign errors early.
+
+*[This is a mock response. Connect your Anthropic API key to get real Mshauri intelligence.]*`
+
+    case 'parent-message':
+      return `Hello,
+
+I wanted to reach out about ${formData.studentName || 'your child'}'s progress this term. ${formData.topic.includes('positive') ? 'They have been making excellent progress, particularly in their problem-solving abilities — I noticed how confidently they tackled this week\'s challenges.' : 'There are a few areas where some additional support at home would really help us move forward together.'}
+
+${formData.specifics ? formData.specifics + '\n\n' : ''}I would love to discuss this in more detail. Please let me know if you have time for a brief call this week, or feel free to reply with any questions.
+
+Warm regards,
+Mr. James Muthomi
+Mathematics Teacher · Smartious Homeschool
+
+*[This is a mock response. Connect your Anthropic API key to get real Mshauri intelligence.]*`
+
+    case 'lesson-plan':
+      return `# ${formData.topic} — ${formData.duration}-minute lesson plan
+
+**Subject:** ${formData.subject} · **Curriculum:** ${formData.curriculum} · **Year:** ${formData.year} · **Class size:** ${formData.studentCount}
+
+## Learning objectives
+By the end of this lesson, students will be able to:
+1. Apply the ${formData.topic} concept to solve standard problems
+2. Explain the underlying principle in their own words
+3. Identify when this technique is appropriate to use
+
+## Materials needed
+- Whiteboard with stylus
+- Worksheet with 8 progressive problems
+- Calculator (optional)
+
+## Timeline
+
+**0-5 min · Hook activity**
+Open with a real-world puzzle that requires the technique. Don't reveal the connection yet.
+
+**5-20 min · Direct instruction**
+Introduce the concept using the visual whiteboard. Show 2 worked examples, narrating your thinking.
+
+**20-40 min · Guided practice**
+Students work problems 1-4 individually. Roam the room. Pull aside any student who is stuck for a 1-minute reset.
+
+**40-50 min · Independent challenge**
+Problems 5-8 are graduated harder. Stronger students should reach problem 8.
+
+**50-${formData.duration - 5} min · Group share**
+Two students explain their approach to problem 5 at the whiteboard.
+
+**${formData.duration - 5}-${formData.duration} min · Exit ticket**
+"In your own words, when would you use this technique?"
+
+## Differentiation
+- **For stronger students:** Bonus problem with a twist (changes one variable)
+- **For students who need support:** Pair with a peer-tutor for problems 1-4
+
+## Homework
+Worksheet problems 9-12 (similar difficulty to in-class).
+
+*[This is a mock response. Connect your Anthropic API key to get real Mshauri intelligence.]*`
+
+    case 'student-insights':
+      return `# Insights for ${formData.studentName || 'this student'}
+
+## Likely root causes (most to least probable)
+
+**1. Foundation gap (most likely)**
+Recent struggle with ${formData.subject || 'this subject'} often traces to a missed concept 2-3 topics back. Worth a 10-minute one-on-one diagnostic to test foundation skills before introducing new material.
+
+**2. External factors**
+Sudden drop in performance often correlates with non-academic events. Check attendance pattern and any recent home situation. A brief, kind check-in conversation often surfaces the cause.
+
+**3. Engagement style mismatch**
+Some students need more visual/concrete examples than abstract explanations. Try a different approach to the same concept and see if the lights come on.
+
+## Recommended interventions
+
+1. **Diagnostic conversation (5 min, this week)** — "Walk me through what you tried on the last quiz." Listen for misconceptions.
+2. **Targeted practice set** — 5 problems specifically on the foundation skill, not the new topic.
+3. **Buddy pairing** — Partner with a stronger peer for the next 2 sessions.
+4. **Parent loop-in** — Brief, warm message to parent describing the plan, not the problem.
+
+## Conversation starters
+- "What part of this topic clicks for you?" (find the foothold)
+- "If you had to teach this to a younger student, where would you start?"
+- "What would help you most right now: more examples, more practice, or someone to talk it through with?"
+
+## What to tell the parent (1 sentence)
+"I've noticed [child] has hit a tricky patch with [topic] — I'm planning some focused support and would love their continued encouragement at home."
+
+## Red flags to watch (next 2 weeks)
+- Continued attendance drop
+- Defensive reactions to feedback
+- Withdrawal from group work
+- Significant homework completion drop
+
+*[This is a mock response. Connect your Anthropic API key to get real Mshauri intelligence.]*`
+
+    case 'free-chat':
+      return `I'm currently running in mock mode — your Anthropic API key isn't connected yet, so I can't give a real response to "${formData.message}".
+
+Once you connect your API key (instructions in the Mshauri settings panel), I'll be able to:
+- Answer any teaching question
+- Translate between English, Kiswahili, French, and other languages
+- Brainstorm ideas, lesson hooks, or analogies
+- Explain concepts at any age level
+- Help draft any kind of message or document
+
+For now, you can still use the structured skills (Generate Questions, Mark Work, etc.) — they show realistic mock outputs so you can demo Mshauri to others.
+
+*[Mock response — connect API for real intelligence.]*`
+
+    default:
+      return 'Mock response. Connect your API key for real intelligence.'
+  }
+}
+
+// ──────────────────────────────────────────────────────
+// MAIN MSHAURI TAB
+// ──────────────────────────────────────────────────────
+function MshauriAITab({ user, store, setPage, toast }) {
+  const teacherName = (user?.firstName || 'James') + ' ' + (user?.lastName || 'Muthomi')
+
+  const [chats, setChats] = useState(() => maLoadChats())
+  const [config, setConfig] = useState(() => maLoadConfig())
+  const [activeChatId, setActiveChatId] = useState(null)
+  const [showSkillPicker, setShowSkillPicker] = useState(true)
+  const [activeSkill, setActiveSkill] = useState(null)
+  const [formData, setFormData] = useState({})
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [streamedText, setStreamedText] = useState('')
+  const [showSettings, setShowSettings] = useState(false)
+
+  const allStudents = (() => {
+    try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
+  })()
+
+  const activeChat = activeChatId ? chats.find(c => c.id === activeChatId) : null
+
+  const startNewChat = (skill) => {
+    setActiveSkill(skill)
+    setShowSkillPicker(false)
+    // Initialize form data with defaults
+    const defaults = {}
+    skill.formFields.forEach(f => {
+      if (f.default !== undefined) defaults[f.id] = f.default
+      else if (f.type === 'number') defaults[f.id] = 1
+      else defaults[f.id] = ''
+    })
+    setFormData(defaults)
+    setActiveChatId(null)
+    setStreamedText('')
+  }
+
+  const generateResponse = async () => {
+    if (!activeSkill) return
+
+    // Validate required text fields
+    for (const f of activeSkill.formFields) {
+      if (f.type === 'textarea' && !formData[f.id]?.trim() && f.id !== 'objectives' && f.id !== 'concern' && f.id !== 'specifics') {
+        toast?.error?.('Please fill in: ' + f.label)
+        return
+      }
+    }
+
+    setIsStreaming(true)
+    setStreamedText('')
+
+    const systemPrompt = maBuildSystemPrompt(teacherName, activeSkill)
+    const userPrompt = maBuildUserPrompt(activeSkill, formData)
+
+    let response = ''
+
+    if (config.apiConnected) {
+      // REAL API CALL — to be wired in next turn
+      try {
+        const res = await fetch('/api/mshauri/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userPrompt }],
+            model: config.model === 'sonnet' ? 'claude-sonnet-4-20250514' : 'claude-haiku-4-5-20251001',
+            maxTokens: 2000,
+          }),
+        })
+        if (!res.ok) throw new Error('API request failed')
+        const data = await res.json()
+        response = data.content || data.message || 'No response received.'
+      } catch (err) {
+        toast?.error?.('Could not reach Mshauri AI. Using mock response.')
+        response = maMockResponse(activeSkill, formData)
+      }
+    } else {
+      // MOCK MODE
+      response = maMockResponse(activeSkill, formData)
+    }
+
+    // Streaming animation: type out the response character by character
+    const chunks = response.split(/(\s+)/)
+    for (let i = 0; i < chunks.length; i++) {
+      setStreamedText(t => t + chunks[i])
+      // Adaptive speed: faster for whitespace, slower for words
+      await new Promise(r => setTimeout(r, chunks[i].match(/^\s+$/) ? 5 : 25))
+    }
+
+    // Save to chats
+    const newChat = {
+      id: maGenerateId(),
+      skillId: activeSkill.id,
+      skillLabel: activeSkill.label,
+      title: getChatTitle(activeSkill, formData),
+      formData,
+      response,
+      createdAt: new Date().toISOString(),
+    }
+    const updated = [newChat, ...chats]
+    setChats(updated)
+    maSaveChats(updated)
+    setActiveChatId(newChat.id)
+    setIsStreaming(false)
+
+    // Track usage
+    const newConfig = { ...config, dailyUsage: (config.dailyUsage || 0) + 1 }
+    setConfig(newConfig)
+    maSaveConfig(newConfig)
+  }
+
+  const regenerate = () => {
+    if (!activeChat) return
+    setActiveSkill(MA_SKILLS.find(s => s.id === activeChat.skillId))
+    setFormData(activeChat.formData)
+    setActiveChatId(null)
+    setShowSkillPicker(false)
+    // After form re-loads, user can hit generate again
+  }
+
+  const copyResponse = () => {
+    const text = activeChat?.response || streamedText
+    if (!text) return
+    navigator.clipboard?.writeText(text).then(() => {
+      toast?.ok?.('Copied to clipboard')
+    }).catch(() => {
+      toast?.error?.('Could not copy. Select text and use Ctrl+C.')
+    })
+  }
+
+  const saveToBank = () => {
+    if (!activeChat) return
+    if (activeChat.skillId === 'generate-questions') {
+      // Parse mock/real response and save to question bank
+      // For now, save raw to localStorage with marker
+      try {
+        const existing = JSON.parse(localStorage.getItem('sm_question_bank_drafts') || '[]')
+        existing.push({
+          id: 'mshauri-' + Date.now(),
+          source: 'mshauri',
+          subject: activeChat.formData.subject,
+          curriculum: activeChat.formData.curriculum,
+          year: activeChat.formData.year,
+          topic: activeChat.formData.topic,
+          rawContent: activeChat.response,
+          createdAt: new Date().toISOString(),
+        })
+        localStorage.setItem('sm_question_bank_drafts', JSON.stringify(existing))
+        toast?.ok?.('Saved as draft. Open Question Bank to review and publish.')
+      } catch { toast?.error?.('Could not save draft.') }
+    }
+  }
+
+  const saveAsDraftMessage = () => {
+    if (!activeChat) return
+    try {
+      const existing = JSON.parse(localStorage.getItem('sm_message_drafts') || '[]')
+      existing.push({
+        id: 'mshauri-' + Date.now(),
+        source: 'mshauri',
+        recipient: activeChat.formData.studentName ? 'Parent of ' + activeChat.formData.studentName : '',
+        body: activeChat.response.replace(/\*\[.*?\]\*/, '').trim(),
+        createdAt: new Date().toISOString(),
+      })
+      localStorage.setItem('sm_message_drafts', JSON.stringify(existing))
+      toast?.ok?.('Draft saved. Open Messages to review and send.')
+    } catch { toast?.error?.('Could not save draft.') }
+  }
+
+  const deleteChat = (chatId) => {
+    if (!confirm('Delete this conversation?')) return
+    const updated = chats.filter(c => c.id !== chatId)
+    setChats(updated)
+    maSaveChats(updated)
+    if (activeChatId === chatId) {
+      setActiveChatId(null)
+      setShowSkillPicker(true)
+    }
+  }
+
+  const updateField = (id, value) => {
+    setFormData(f => ({ ...f, [id]: value }))
+  }
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 280px) 1fr', gap: 14, minHeight: 600 }}>
+      {/* ── LEFT: HISTORY SIDEBAR ── */}
+      <div style={{
+        background: '#FFF',
+        border: '1.5px solid var(--border)',
+        borderRadius: 'var(--rxl)',
+        padding: 14,
+        display: 'flex', flexDirection: 'column',
+        maxHeight: 'calc(100vh - 200px)',
+      }}>
+        <button onClick={() => { setShowSkillPicker(true); setActiveChatId(null); setActiveSkill(null) }}
+          style={{
+            background: 'linear-gradient(135deg, #7D1025, #8B1A2E)',
+            color: '#FBFAF5',
+            border: 'none',
+            padding: '12px 16px',
+            borderRadius: 'var(--rmd)',
+            cursor: 'pointer',
+            fontSize: 13.5, fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            marginBottom: 12,
+            boxShadow: '0 4px 14px rgba(125,16,37,.25)',
+          }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          New Conversation
+        </button>
+
+        <div style={{
+          fontSize: 10.5, fontWeight: 700,
+          letterSpacing: '.1em', textTransform: 'uppercase',
+          color: 'var(--s500)', marginBottom: 8, paddingLeft: 4,
+        }}>History</div>
+
+        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {chats.length === 0 ? (
+            <div style={{ fontSize: 12, color: 'var(--s400)', padding: 16, textAlign: 'center', fontStyle: 'italic' }}>
+              No conversations yet. Click "New Conversation" to start.
+            </div>
+          ) : (
+            chats.map(c => {
+              const isActive = activeChatId === c.id
+              return (
+                <div key={c.id} onClick={() => { setActiveChatId(c.id); setShowSkillPicker(false); setActiveSkill(null) }}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: 'var(--rsm)',
+                    cursor: 'pointer',
+                    background: isActive ? '#FBE8E8' : 'transparent',
+                    borderLeft: '3px solid ' + (isActive ? '#7D1025' : 'transparent'),
+                  }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#FBFAF5' }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}>
+                  <div style={{
+                    fontSize: 12.5, fontWeight: 700,
+                    color: 'var(--s900)',
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    marginBottom: 2,
+                  }}>{c.title}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 10, color: 'var(--s500)' }}>{c.skillLabel}</span>
+                    <span style={{ fontSize: 10, color: 'var(--s400)' }}>{maTimeAgo(c.createdAt)}</span>
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
+
+        {/* Footer: Settings + API status */}
+        <div style={{
+          borderTop: '1px solid var(--border)',
+          paddingTop: 12, marginTop: 12,
+        }}>
+          <div onClick={() => setShowSettings(true)}
+            style={{
+              padding: '8px 10px',
+              borderRadius: 'var(--rsm)',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              fontSize: 11.5,
+              color: 'var(--s600)',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#FBFAF5'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: config.apiConnected ? '#15803D' : '#B45309',
+              }}/>
+              {config.apiConnected ? 'API Connected' : 'Mock Mode'}
+            </span>
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* ── RIGHT: MAIN CONVERSATION AREA ── */}
+      <div style={{
+        background: '#FFF',
+        border: '1.5px solid var(--border)',
+        borderRadius: 'var(--rxl)',
+        padding: 0,
+        overflow: 'hidden',
+        display: 'flex', flexDirection: 'column',
+      }}>
+        {/* Skill Picker */}
+        {showSkillPicker && (
+          <div style={{ padding: 32, overflowY: 'auto' }}>
+            {/* Hero */}
+            <div style={{
+              background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+              borderRadius: 'var(--rxl)',
+              padding: '28px 32px',
+              color: '#FBFAF5',
+              marginBottom: 24,
+              boxShadow: '0 12px 32px rgba(125,16,37,.18)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                <div style={{
+                  width: 64, height: 64, borderRadius: '50%',
+                  background: '#C9A030',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                  border: '3px solid #F0CC5A',
+                }}>
+                  <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#7D1025" strokeWidth="2" strokeLinecap="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
+                    Mshauri AI
+                  </div>
+                  <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+                    Your teaching assistant
+                  </h1>
+                  <div style={{ fontSize: 13, opacity: .9, marginTop: 4 }}>
+                    Generate questions, mark work, draft messages, plan lessons. Powered by Claude.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Skills grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: 14,
+            }}>
+              {MA_SKILLS.map(skill => (
+                <div key={skill.id} onClick={() => startNewChat(skill)}
+                  style={{
+                    background: '#FFF',
+                    border: '1.5px solid var(--border)',
+                    borderRadius: 'var(--rxl)',
+                    padding: 20,
+                    cursor: 'pointer',
+                    transition: 'all .15s',
+                    display: 'flex', gap: 14,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = skill.color; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(125,16,37,.1)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 12,
+                    background: skill.color + '12',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    <Ico d={skill.icon} w={20} col={skill.color} sw={2}/>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)', marginBottom: 4 }}>{skill.label}</div>
+                    <div style={{ fontSize: 12.5, color: 'var(--s500)', lineHeight: 1.5 }}>{skill.description}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* API status banner */}
+            {!config.apiConnected && (
+              <div style={{
+                background: '#FEF3C7', borderLeft: '3px solid #B45309',
+                padding: '12px 16px',
+                borderRadius: 'var(--rsm)',
+                fontSize: 13, color: '#92400E',
+                marginTop: 18,
+                display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+              }}>
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#B45309" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <div style={{ flex: 1, minWidth: 200, lineHeight: 1.5 }}>
+                  <strong>Mshauri is in mock mode.</strong> All skills work with realistic placeholder responses, perfect for demos. Connect your Anthropic API for real intelligence.
+                </div>
+                <button onClick={() => setShowSettings(true)}
+                  style={{
+                    background: '#B45309', color: '#FBFAF5', border: 'none',
+                    padding: '8px 16px', borderRadius: 'var(--rsm)',
+                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  }}>Connect API</button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Active skill form */}
+        {activeSkill && !activeChatId && (
+          <div style={{ padding: 32, overflowY: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              <button onClick={() => { setActiveSkill(null); setShowSkillPicker(true) }}
+                style={{
+                  background: 'transparent', border: 'none',
+                  color: '#7D1025', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M19 12H5M12 5l-7 7 7 7"/>
+                </svg>
+                Back
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: 12,
+                background: activeSkill.color + '15',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Ico d={activeSkill.icon} w={22} col={activeSkill.color} sw={2}/>
+              </div>
+              <div>
+                <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 24, color: 'var(--s900)', margin: 0 }}>
+                  {activeSkill.label}
+                </h2>
+                <div style={{ fontSize: 13, color: 'var(--s500)' }}>{activeSkill.description}</div>
+              </div>
+            </div>
+
+            {/* Form */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14, marginBottom: 20 }}>
+              {activeSkill.formFields.map(field => (
+                <div key={field.id} className="fg" style={{
+                  marginBottom: 0,
+                  gridColumn: (field.type === 'textarea' || field.id === 'topic') ? 'span 2' : 'auto',
+                }}>
+                  <label className="fl">{field.label}</label>
+                  {field.type === 'select' && (
+                    <select className="fsel" value={formData[field.id] || ''} onChange={e => updateField(field.id, e.target.value)}>
+                      {field.options.map(o => <option key={o}>{o}</option>)}
+                    </select>
+                  )}
+                  {field.type === 'text' && (
+                    <input className="fi" value={formData[field.id] || ''}
+                      onChange={e => updateField(field.id, e.target.value)}
+                      placeholder={field.placeholder}/>
+                  )}
+                  {field.type === 'number' && (
+                    <input className="fi" type="number"
+                      min={field.min} max={field.max}
+                      value={formData[field.id] || ''}
+                      onChange={e => updateField(field.id, parseInt(e.target.value) || 0)}/>
+                  )}
+                  {field.type === 'textarea' && (
+                    <textarea className="fi" rows={field.rows || 4}
+                      value={formData[field.id] || ''}
+                      onChange={e => updateField(field.id, e.target.value)}
+                      placeholder={field.placeholder}
+                      style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
+                  )}
+                  {field.type === 'student-select' && (
+                    <select className="fsel" value={formData[field.id] || ''} onChange={e => updateField(field.id, e.target.value)}>
+                      <option value="">Select student...</option>
+                      {allStudents.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                    </select>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <button onClick={generateResponse}
+              disabled={isStreaming}
+              style={{
+                background: isStreaming ? 'var(--bg)' : '#7D1025',
+                color: isStreaming ? 'var(--s400)' : '#FBFAF5',
+                border: 'none',
+                padding: '14px 28px', borderRadius: 'var(--rmd)',
+                cursor: isStreaming ? 'wait' : 'pointer',
+                fontSize: 14, fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 8,
+                boxShadow: isStreaming ? 'none' : '0 4px 14px rgba(125,16,37,.25)',
+              }}>
+              {isStreaming ? (
+                <>
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 1s linear infinite' }}>
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                  </svg>
+                  Mshauri is thinking...
+                </>
+              ) : (
+                <>
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                  Generate Response
+                </>
+              )}
+            </button>
+
+            {/* Live streaming output (while generating) */}
+            {isStreaming && streamedText && (
+              <div style={{
+                marginTop: 20,
+                padding: 20,
+                background: '#FBFAF5',
+                borderRadius: 'var(--rmd)',
+                borderLeft: '3px solid #C9A030',
+                fontSize: 14, lineHeight: 1.7,
+                color: 'var(--s700)',
+                whiteSpace: 'pre-wrap',
+              }}>
+                {streamedText}
+                <span style={{ display: 'inline-block', width: 8, height: 16, background: '#7D1025', marginLeft: 2, animation: 'pulse 1s infinite' }}/>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Active chat (completed response) */}
+        {activeChat && (
+          <div style={{ padding: 32, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
+                <span style={{
+                  background: '#7D1025', color: '#FBFAF5',
+                  fontSize: 10, fontWeight: 800, letterSpacing: '.08em',
+                  padding: '3px 10px', borderRadius: 99, textTransform: 'uppercase',
+                }}>{activeChat.skillLabel}</span>
+                <span style={{ fontSize: 12, color: 'var(--s500)' }}>{maTimeAgo(activeChat.createdAt)}</span>
+                <button onClick={() => deleteChat(activeChat.id)}
+                  style={{
+                    background: 'transparent', border: 'none', color: 'var(--s400)',
+                    fontSize: 11, cursor: 'pointer', marginLeft: 'auto',
+                  }}>Delete</button>
+              </div>
+              <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', margin: 0 }}>
+                {activeChat.title}
+              </h2>
+            </div>
+
+            <div style={{
+              background: '#FBFAF5',
+              borderLeft: '3px solid #C9A030',
+              borderRadius: 'var(--rmd)',
+              padding: 22,
+              fontSize: 14, lineHeight: 1.75,
+              color: 'var(--s800)',
+              whiteSpace: 'pre-wrap',
+              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+              marginBottom: 18,
+            }}>{activeChat.response}</div>
+
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button onClick={copyResponse}
+                style={{
+                  background: '#FBFAF5', color: '#7D1025',
+                  border: '1.5px solid #F4C5C5',
+                  padding: '10px 18px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                Copy
+              </button>
+              <button onClick={regenerate}
+                style={{
+                  background: '#FBFAF5', color: '#7D1025',
+                  border: '1.5px solid #F4C5C5',
+                  padding: '10px 18px', borderRadius: 'var(--rmd)',
+                  cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M3 7v6h6"/>
+                  <path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>
+                </svg>
+                Regenerate
+              </button>
+              {activeChat.skillId === 'generate-questions' && (
+                <button onClick={saveToBank}
+                  style={{
+                    background: '#7D1025', color: '#FBFAF5', border: 'none',
+                    padding: '10px 18px', borderRadius: 'var(--rmd)',
+                    cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}>
+                  Save to Question Bank
+                </button>
+              )}
+              {activeChat.skillId === 'parent-message' && (
+                <button onClick={saveAsDraftMessage}
+                  style={{
+                    background: '#7D1025', color: '#FBFAF5', border: 'none',
+                    padding: '10px 18px', borderRadius: 'var(--rmd)',
+                    cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}>
+                  Save as Draft
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* SETTINGS MODAL */}
+      {showSettings && (
+        <MshauriSettingsModal
+          config={config}
+          setConfig={(newConfig) => { setConfig(newConfig); maSaveConfig(newConfig) }}
+          onClose={() => setShowSettings(false)}
+          toast={toast}
+        />
+      )}
+    </div>
+  )
+}
+
+const getChatTitle = (skill, formData) => {
+  switch (skill.id) {
+    case 'generate-questions': return formData.subject + ' · ' + (formData.topic || 'Topic')
+    case 'mark-answer': return 'Marked answer (' + (formData.maxMarks || 10) + ' marks)'
+    case 'parent-message': return (formData.studentName || 'Parent') + ' · ' + (formData.topic || '').split(' ')[0]
+    case 'lesson-plan': return (formData.topic || 'Lesson') + ' · ' + (formData.duration || 60) + 'min'
+    case 'student-insights': return 'Insights · ' + (formData.studentName || 'Student')
+    case 'free-chat': return (formData.message || '').slice(0, 40) + ((formData.message || '').length > 40 ? '...' : '')
+    default: return 'Conversation'
+  }
+}
+
+// ──────────────────────────────────────────────────────
+// SETTINGS MODAL
+// ──────────────────────────────────────────────────────
+function MshauriSettingsModal({ config, setConfig, onClose, toast }) {
+  const [model, setModel] = useState(config.model || 'sonnet')
+
+  return (
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, background: 'rgba(15,23,42,.65)', zIndex: 200,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: '#FFF', borderRadius: 'var(--rxl)',
+        maxWidth: 520, width: '100%',
+        boxShadow: '0 20px 60px rgba(0,0,0,.3)', overflow: 'hidden',
+      }}>
+        <div style={{
+          padding: '20px 28px',
+          background: 'linear-gradient(135deg, #7D1025, #8B1A2E)',
+          color: '#FBFAF5',
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
+            Mshauri Settings
+          </div>
+          <h3 className="serif" style={{ fontSize: 22, margin: 0 }}>API & Preferences</h3>
+        </div>
+
+        <div style={{ padding: '24px 28px' }}>
+          {/* API Status */}
+          <div style={{
+            background: config.apiConnected ? '#DCFCE7' : '#FEF3C7',
+            borderLeft: '3px solid ' + (config.apiConnected ? '#15803D' : '#B45309'),
+            padding: '12px 14px', borderRadius: 'var(--rsm)',
+            fontSize: 13, color: config.apiConnected ? '#15803D' : '#92400E',
+            marginBottom: 20, lineHeight: 1.6,
+          }}>
+            <strong>Status: {config.apiConnected ? 'Connected' : 'Mock Mode'}</strong>
+            <br/>
+            {config.apiConnected
+              ? 'Mshauri is using your Anthropic API for real intelligence.'
+              : 'All skills work in mock mode. Real responses require backend setup.'}
+          </div>
+
+          {/* Setup Instructions */}
+          {!config.apiConnected && (
+            <div style={{ marginBottom: 20 }}>
+              <div className="ctitle" style={{ marginBottom: 10, color: '#7D1025' }}>Connect to Anthropic API</div>
+              <div style={{ fontSize: 13, color: 'var(--s700)', lineHeight: 1.7, marginBottom: 12 }}>
+                To enable real AI responses, your developer needs to:
+              </div>
+              <ol style={{ fontSize: 13, color: 'var(--s700)', lineHeight: 1.8, paddingLeft: 20, marginBottom: 12 }}>
+                <li>Add <code style={{ background: '#FBFAF5', padding: '1px 6px', borderRadius: 3, fontSize: 12 }}>ANTHROPIC_API_KEY</code> environment variable on Render backend</li>
+                <li>Add a <code style={{ background: '#FBFAF5', padding: '1px 6px', borderRadius: 3, fontSize: 12 }}>POST /api/mshauri/chat</code> endpoint</li>
+                <li>Toggle "API Connected" below once endpoint is live</li>
+              </ol>
+              <div style={{
+                background: '#FBFAF5', borderLeft: '3px solid #C9A030',
+                padding: '10px 14px', borderRadius: 'var(--rsm)',
+                fontSize: 12, color: 'var(--s600)', fontStyle: 'italic',
+              }}>
+                Backend code will be provided separately. For now, mock mode lets you demo and test the UI.
+              </div>
+            </div>
+          )}
+
+          {/* Toggle (manual switch when backend ready) */}
+          <label style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '10px 0', borderBottom: '1px solid var(--border)',
+            cursor: 'pointer',
+          }}>
+            <div>
+              <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--s900)' }}>API Connected</div>
+              <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>Toggle ON only after backend endpoint is deployed</div>
+            </div>
+            <input type="checkbox" checked={config.apiConnected}
+              onChange={e => setConfig({ ...config, apiConnected: e.target.checked })}
+              style={{ accentColor: '#7D1025', width: 18, height: 18 }}/>
+          </label>
+
+          {/* Model selection */}
+          <div className="fg" style={{ marginTop: 18, marginBottom: 0 }}>
+            <label className="fl">Model</label>
+            <select className="fsel" value={model}
+              onChange={e => { setModel(e.target.value); setConfig({ ...config, model: e.target.value }) }}>
+              <option value="sonnet">Claude Sonnet 4 (recommended for quality)</option>
+              <option value="haiku">Claude Haiku 4.5 (cheaper, faster, simpler tasks)</option>
+            </select>
+            <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 4 }}>
+              Sonnet costs ~5x more than Haiku per message but produces much better questions, marking, and lesson plans.
+            </div>
+          </div>
+
+          {/* Usage */}
+          <div style={{
+            background: '#FBFAF5',
+            padding: '12px 14px', borderRadius: 'var(--rsm)',
+            marginTop: 18,
+            fontSize: 12.5, color: 'var(--s600)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          }}>
+            <span>Conversations today: <strong style={{ color: '#7D1025' }}>{config.dailyUsage || 0}</strong></span>
+            <button onClick={() => { setConfig({ ...config, dailyUsage: 0 }); toast?.ok?.('Usage counter reset') }}
+              style={{
+                background: 'transparent', border: 'none', color: 'var(--s500)',
+                fontSize: 11, cursor: 'pointer',
+              }}>Reset</button>
+          </div>
+        </div>
+
+        <div style={{
+          padding: '14px 24px', borderTop: '1px solid var(--border)',
+          background: '#FBFAF5', display: 'flex', justifyContent: 'flex-end',
+        }}>
+          <button onClick={onClose}
+            style={{
+              background: '#7D1025', color: '#FBFAF5', border: 'none',
+              padding: '10px 24px', borderRadius: 'var(--rmd)',
+              fontSize: 13, fontWeight: 700, cursor: 'pointer',
+            }}>Done</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ──────────────────────────────────────────────────────
+// FLOATING BUTTON — appears on every page
+// ──────────────────────────────────────────────────────
+function MshauriFloatingButton({ user, setPage, toast, currentPage }) {
+  const [open, setOpen] = useState(false)
+
+  // Don't show on Mshauri tab itself or in classroom
+  if (currentPage === 'mshauri' || currentPage === 'classroom') return null
+
+  return (
+    <>
+      {/* Floating button */}
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="Open Mshauri AI"
+          title="Mshauri AI — your teaching assistant"
+          style={{
+            position: 'fixed',
+            bottom: 24, right: 24,
+            width: 60, height: 60,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #7D1025, #8B1A2E)',
+            color: '#FBFAF5',
+            border: '3px solid #C9A030',
+            cursor: 'pointer',
+            boxShadow: '0 8px 24px rgba(125,16,37,.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 90,
+            transition: 'transform .15s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </button>
+      )}
+
+      {/* Slide-in panel */}
+      {open && (
+        <div style={{
+          position: 'fixed',
+          bottom: 24, right: 24,
+          width: 380,
+          maxWidth: 'calc(100vw - 48px)',
+          maxHeight: 'calc(100vh - 48px)',
+          background: '#FFF',
+          borderRadius: 'var(--rxl)',
+          boxShadow: '0 24px 60px rgba(0,0,0,.25)',
+          border: '1.5px solid var(--border)',
+          zIndex: 90,
+          display: 'flex', flexDirection: 'column',
+          overflow: 'hidden',
+        }}>
+          {/* Header */}
+          <div style={{
+            background: 'linear-gradient(135deg, #7D1025, #8B1A2E)',
+            color: '#FBFAF5',
+            padding: '14px 18px',
+            display: 'flex', alignItems: 'center', gap: 12,
+          }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: '50%',
+              background: '#C9A030',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#7D1025" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>Mshauri AI</div>
+              <div style={{ fontSize: 11, opacity: .85 }}>Your teaching assistant</div>
+            </div>
+            <button onClick={() => setOpen(false)}
+              aria-label="Close"
+              style={{
+                background: 'rgba(251,250,245,.15)',
+                color: '#FBFAF5', border: 'none',
+                width: 30, height: 30, borderRadius: '50%',
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Body */}
+          <div style={{ padding: 18, overflowY: 'auto' }}>
+            <div style={{ fontSize: 13, color: 'var(--s600)', marginBottom: 14, lineHeight: 1.6 }}>
+              Quick start a Mshauri task:
+            </div>
+            {MA_SKILLS.slice(0, 5).map(skill => (
+              <button key={skill.id}
+                onClick={() => { setPage('mshauri'); setOpen(false) }}
+                style={{
+                  width: '100%',
+                  background: '#FBFAF5',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--rmd)',
+                  padding: '12px 14px',
+                  cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  marginBottom: 8,
+                  textAlign: 'left',
+                  transition: 'all .15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#7D1025'; e.currentTarget.style.background = '#FBE8E8' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = '#FBFAF5' }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: '#7D1025' + '12',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <Ico d={skill.icon} w={16} col="#7D1025" sw={2}/>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)' }}>{skill.label}</div>
+                  <div style={{ fontSize: 11, color: 'var(--s500)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{skill.description}</div>
+                </div>
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="2" strokeLinecap="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            ))}
+
+            <button onClick={() => { setPage('mshauri'); setOpen(false) }}
+              style={{
+                width: '100%',
+                background: '#7D1025', color: '#FBFAF5', border: 'none',
+                padding: '12px', borderRadius: 'var(--rmd)',
+                cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                marginTop: 10,
+              }}>
+              Open Full Mshauri
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
