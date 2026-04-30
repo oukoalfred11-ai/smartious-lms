@@ -5472,1222 +5472,6 @@ function CommunicationTab({ user, store, setPage, toast }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// TEACHER LIVE STUDIO — Professional teaching experience
-// ═══════════════════════════════════════════════════════════
-// Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
-//
-// FEATURES:
-// - Pre-flight device check (camera + mic preview)
-// - Camera LOCKED ON during class (no toggle button)
-// - Three layout modes: Whiteboard / Mixed / Gallery
-// - Full-screen whiteboard with floating teacher cam (Microsoft Whiteboard style)
-// - Real getUserMedia for live camera + mic
-// - Drawing: pen, eraser, colors, stroke widths, clear, undo
-// - Mic mute/unmute (allowed - teachers need this for coughs/listening)
-// - Keyboard shortcuts: P=pen, E=eraser, 1-4=colors, F=fullscreen, M=mute mic
-
-function TeacherLiveStudio({ user, onLeave, toast }) {
-  const teacherFirstName = user?.firstName || 'Teacher'
-  const teacherLastName = user?.lastName || ''
-  const teacherFullName = (teacherFirstName + ' ' + teacherLastName).trim() || 'Mr. James Muthomi'
-  const teacherInitials = teacherFullName.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('')
-
-  // ── STATE ──────────────────────────────────────────
-  const [phase, setPhase] = useState('preflight')   // 'preflight' | 'live'
-  const [layoutMode, setLayoutMode] = useState('whiteboard')  // 'whiteboard' | 'mixed' | 'gallery'
-  const [tool, setTool] = useState('pen')           // 'pen' | 'eraser'
-  const [penColor, setPenColor] = useState('#7D1025')
-  const [strokeWidth, setStrokeWidth] = useState(3)
-  const [micEnabled, setMicEnabled] = useState(true)
-  const [audioLevel, setAudioLevel] = useState(0)
-  const [cameraError, setCameraError] = useState(null)
-  const [micError, setMicError] = useState(null)
-  const [classDuration, setClassDuration] = useState(0)
-  const [classStartedAt, setClassStartedAt] = useState(null)
-  const [availableCameras, setAvailableCameras] = useState([])
-  const [availableMics, setAvailableMics] = useState([])
-  const [selectedCamera, setSelectedCamera] = useState('')
-  const [selectedMic, setSelectedMic] = useState('')
-  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
-  const [studentsJoined, setStudentsJoined] = useState([])
-
-  // ── REFS ───────────────────────────────────────────
-  const localVideoRef = useRef(null)
-  const previewVideoRef = useRef(null)
-  const canvasRef = useRef(null)
-  const drawingRef = useRef(false)
-  const lastPointRef = useRef(null)
-  const streamRef = useRef(null)
-  const audioContextRef = useRef(null)
-  const audioAnalyserRef = useRef(null)
-  const audioLevelRafRef = useRef(null)
-  const drawingHistoryRef = useRef([])
-
-  // Color palette
-  const COLOR_PALETTE = [
-    { hex: '#7D1025', label: 'Crimson' },
-    { hex: '#1E3A8A', label: 'Navy' },
-    { hex: '#166534', label: 'Green' },
-    { hex: '#C9A030', label: 'Gold' },
-    { hex: '#0F172A', label: 'Black' },
-    { hex: '#DC2626', label: 'Red' },
-  ]
-
-  // ── LIST DEVICES ──────────────────────────────────
-  const listDevices = async () => {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices()
-      const cams = devices.filter(d => d.kind === 'videoinput')
-      const mics = devices.filter(d => d.kind === 'audioinput')
-      setAvailableCameras(cams)
-      setAvailableMics(mics)
-      if (cams.length > 0 && !selectedCamera) setSelectedCamera(cams[0].deviceId)
-      if (mics.length > 0 && !selectedMic) setSelectedMic(mics[0].deviceId)
-    } catch (err) {
-      // permissions might not be granted yet, listing will be empty
-    }
-  }
-
-  // ── START CAMERA + MIC ────────────────────────────
-  const startMedia = async (videoDeviceId, audioDeviceId) => {
-    setCameraError(null)
-    setMicError(null)
-    try {
-      // Stop any existing stream
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(t => t.stop())
-      }
-      const constraints = {
-        video: videoDeviceId ? { deviceId: { exact: videoDeviceId }, width: { ideal: 640 }, height: { ideal: 480 } } : { width: { ideal: 640 }, height: { ideal: 480 } },
-        audio: audioDeviceId ? { deviceId: { exact: audioDeviceId }, echoCancellation: true, noiseSuppression: true } : { echoCancellation: true, noiseSuppression: true },
-      }
-      const stream = await navigator.mediaDevices.getUserMedia(constraints)
-      streamRef.current = stream
-
-      // Attach to preview video
-      if (previewVideoRef.current) {
-        previewVideoRef.current.srcObject = stream
-      }
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = stream
-      }
-
-      // Setup audio analyser for level meter
-      try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext
-        if (audioContextRef.current) {
-          audioContextRef.current.close().catch(() => {})
-        }
-        audioContextRef.current = new AudioContext()
-        const source = audioContextRef.current.createMediaStreamSource(stream)
-        const analyser = audioContextRef.current.createAnalyser()
-        analyser.fftSize = 256
-        source.connect(analyser)
-        audioAnalyserRef.current = analyser
-
-        const dataArray = new Uint8Array(analyser.frequencyBinCount)
-        const updateLevel = () => {
-          if (!audioAnalyserRef.current) return
-          analyser.getByteFrequencyData(dataArray)
-          const avg = dataArray.reduce((sum, v) => sum + v, 0) / dataArray.length
-          setAudioLevel(avg)
-          audioLevelRafRef.current = requestAnimationFrame(updateLevel)
-        }
-        updateLevel()
-      } catch (e) {
-        // Audio analyser is non-critical
-      }
-
-      // List devices now that we have permission
-      await listDevices()
-      return true
-    } catch (err) {
-      const msg = err.name === 'NotAllowedError' ? 'Permission denied. Please allow camera and microphone access.'
-        : err.name === 'NotFoundError' ? 'No camera or microphone found. Please connect one and reload.'
-        : err.name === 'NotReadableError' ? 'Camera or microphone is being used by another app.'
-        : 'Could not access camera or microphone: ' + err.message
-      setCameraError(msg)
-      return false
-    }
-  }
-
-  // ── INITIALIZE on mount ───────────────────────────
-  useEffect(() => {
-    let mounted = true
-    const init = async () => {
-      // Try to get permissions and list devices
-      const ok = await startMedia(null, null)
-      if (mounted && !ok) {
-        // already set error
-      }
-    }
-    init()
-    return () => {
-      mounted = false
-      // Cleanup
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(t => t.stop())
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close().catch(() => {})
-      }
-      if (audioLevelRafRef.current) {
-        cancelAnimationFrame(audioLevelRafRef.current)
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // ── REACT TO MIC TOGGLE ───────────────────────────
-  useEffect(() => {
-    if (streamRef.current) {
-      streamRef.current.getAudioTracks().forEach(t => {
-        t.enabled = micEnabled
-      })
-    }
-  }, [micEnabled])
-
-  // ── HANDLE DEVICE CHANGE ──────────────────────────
-  const switchCamera = async (deviceId) => {
-    setSelectedCamera(deviceId)
-    await startMedia(deviceId, selectedMic)
-  }
-  const switchMic = async (deviceId) => {
-    setSelectedMic(deviceId)
-    await startMedia(selectedCamera, deviceId)
-  }
-
-  // ── JOIN CLASS ────────────────────────────────────
-  const joinClass = () => {
-    if (cameraError) {
-      toast?.error?.('Cannot join: camera/mic not working')
-      return
-    }
-    setPhase('live')
-    setClassStartedAt(Date.now())
-    // Signal class is live (cross-portal)
-    try {
-      localStorage.setItem('sm_live_class_active', JSON.stringify({
-        teacher: teacherFullName,
-        startedAt: new Date().toISOString(),
-      }))
-    } catch {}
-
-    // Attach video to live element after render
-    setTimeout(() => {
-      if (localVideoRef.current && streamRef.current) {
-        localVideoRef.current.srcObject = streamRef.current
-      }
-    }, 100)
-  }
-
-  // ── DURATION TIMER ────────────────────────────────
-  useEffect(() => {
-    if (phase !== 'live' || !classStartedAt) return
-    const interval = setInterval(() => {
-      setClassDuration(Math.floor((Date.now() - classStartedAt) / 1000))
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [phase, classStartedAt])
-
-  // ── KEYBOARD SHORTCUTS ────────────────────────────
-  useEffect(() => {
-    if (phase !== 'live') return
-    const handler = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
-      if (e.key === 'p' || e.key === 'P') setTool('pen')
-      else if (e.key === 'e' || e.key === 'E') setTool('eraser')
-      else if (e.key === '1') setPenColor(COLOR_PALETTE[0].hex)
-      else if (e.key === '2') setPenColor(COLOR_PALETTE[1].hex)
-      else if (e.key === '3') setPenColor(COLOR_PALETTE[2].hex)
-      else if (e.key === '4') setPenColor(COLOR_PALETTE[3].hex)
-      else if (e.key === 'f' || e.key === 'F') setLayoutMode('whiteboard')
-      else if (e.key === 'g' || e.key === 'G') setLayoutMode('gallery')
-      else if (e.key === 'm' || e.key === 'M') setMicEnabled(m => !m)
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase])
-
-  // ── CANVAS / DRAWING ──────────────────────────────
-  const setupCanvas = () => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    const rect = canvas.getBoundingClientRect()
-    canvas.width = rect.width * window.devicePixelRatio
-    canvas.height = rect.height * window.devicePixelRatio
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-    // Restore drawings
-    drawingHistoryRef.current.forEach(stroke => {
-      ctx.strokeStyle = stroke.color
-      ctx.lineWidth = stroke.width
-      ctx.globalCompositeOperation = stroke.tool === 'eraser' ? 'destination-out' : 'source-over'
-      ctx.beginPath()
-      stroke.points.forEach((pt, i) => {
-        if (i === 0) ctx.moveTo(pt.x, pt.y)
-        else ctx.lineTo(pt.x, pt.y)
-      })
-      ctx.stroke()
-    })
-  }
-
-  useEffect(() => {
-    if (phase !== 'live') return
-    setupCanvas()
-    const handleResize = () => setupCanvas()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, layoutMode])
-
-  const getCanvasPoint = (e) => {
-    const canvas = canvasRef.current
-    if (!canvas) return null
-    const rect = canvas.getBoundingClientRect()
-    const x = (e.touches?.[0]?.clientX ?? e.clientX) - rect.left
-    const y = (e.touches?.[0]?.clientY ?? e.clientY) - rect.top
-    return { x, y }
-  }
-
-  const startDrawing = (e) => {
-    e.preventDefault()
-    drawingRef.current = true
-    const point = getCanvasPoint(e)
-    if (!point) return
-    lastPointRef.current = point
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    ctx.strokeStyle = penColor
-    ctx.lineWidth = tool === 'eraser' ? strokeWidth * 4 : strokeWidth
-    ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over'
-    ctx.beginPath()
-    ctx.moveTo(point.x, point.y)
-    // Start new stroke in history
-    drawingHistoryRef.current.push({
-      tool, color: penColor, width: ctx.lineWidth, points: [point],
-    })
-  }
-
-  const draw = (e) => {
-    if (!drawingRef.current) return
-    e.preventDefault()
-    const point = getCanvasPoint(e)
-    if (!point) return
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    ctx.lineTo(point.x, point.y)
-    ctx.stroke()
-    lastPointRef.current = point
-    // Add to current stroke
-    const currentStroke = drawingHistoryRef.current[drawingHistoryRef.current.length - 1]
-    if (currentStroke) currentStroke.points.push(point)
-  }
-
-  const stopDrawing = () => {
-    drawingRef.current = false
-    lastPointRef.current = null
-  }
-
-  const clearCanvas = () => {
-    if (!confirm('Clear the entire whiteboard? This cannot be undone.')) return
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    drawingHistoryRef.current = []
-  }
-
-  const undoLast = () => {
-    if (drawingHistoryRef.current.length === 0) return
-    drawingHistoryRef.current.pop()
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    setupCanvas()
-  }
-
-  // ── LEAVE CLASS ───────────────────────────────────
-  const confirmLeave = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop())
-    }
-    if (audioContextRef.current) {
-      audioContextRef.current.close().catch(() => {})
-    }
-    try { localStorage.removeItem('sm_live_class_active') } catch {}
-    if (onLeave) onLeave()
-  }
-
-  const formatDuration = (sec) => {
-    const h = Math.floor(sec / 3600)
-    const m = Math.floor((sec % 3600) / 60)
-    const s = sec % 60
-    if (h > 0) return h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')
-    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')
-  }
-
-  // ═══════════════════════════════════════════════════
-  // RENDER: PRE-FLIGHT DEVICE CHECK
-  // ═══════════════════════════════════════════════════
-  if (phase === 'preflight') {
-    const hasCamera = streamRef.current && streamRef.current.getVideoTracks().length > 0 && streamRef.current.getVideoTracks()[0].enabled
-    const hasMic = streamRef.current && streamRef.current.getAudioTracks().length > 0
-    const ready = hasCamera && hasMic && !cameraError
-
-    return (
-      <div style={{
-        minHeight: 'calc(100vh - 100px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 20,
-      }}>
-        <div style={{
-          background: '#FFF',
-          borderRadius: 'var(--rxl)',
-          boxShadow: '0 20px 60px rgba(125,16,37,.15)',
-          maxWidth: 900,
-          width: '100%',
-          overflow: 'hidden',
-        }}>
-          {/* Header */}
-          <div style={{
-            padding: '24px 32px',
-            background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
-            color: '#FBFAF5',
-          }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
-              Pre-flight Check
-            </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0 }}>
-              Ready to teach?
-            </h1>
-            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
-              Confirm your camera and microphone are working before joining the class.
-            </div>
-          </div>
-
-          <div style={{ padding: '28px 32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
-            {/* Camera preview */}
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#7D1025', marginBottom: 8 }}>
-                Camera Preview
-              </div>
-              <div style={{
-                aspectRatio: '4 / 3',
-                background: '#0F172A',
-                borderRadius: 'var(--rmd)',
-                overflow: 'hidden',
-                position: 'relative',
-                border: cameraError ? '2px solid #DC2626' : (hasCamera ? '2px solid #15803D' : '2px solid var(--border)'),
-              }}>
-                {cameraError ? (
-                  <div style={{
-                    position: 'absolute', inset: 0,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexDirection: 'column', gap: 8,
-                    color: '#FCA5A5', padding: 20, textAlign: 'center',
-                  }}>
-                    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <path d="M16 16h5v5"/><path d="M8 8H3V3"/>
-                      <path d="M21 12c0 4.971-4.029 9-9 9-2.65 0-5.022-1.143-6.667-2.964M3 12c0-4.971 4.029-9 9-9 2.65 0 5.022 1.143 6.667 2.964"/>
-                    </svg>
-                    <div style={{ fontSize: 13, lineHeight: 1.5 }}>{cameraError}</div>
-                    <button onClick={() => startMedia(selectedCamera, selectedMic)}
-                      style={{
-                        background: '#FCA5A5', color: '#7D1025', border: 'none',
-                        padding: '8px 16px', borderRadius: 'var(--rsm)',
-                        fontSize: 12, fontWeight: 700, cursor: 'pointer', marginTop: 8,
-                      }}>Retry</button>
-                  </div>
-                ) : (
-                  <video
-                    ref={previewVideoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
-                  />
-                )}
-                {hasCamera && !cameraError && (
-                  <div style={{
-                    position: 'absolute', top: 12, right: 12,
-                    background: 'rgba(21,128,61,.9)', color: '#FFF',
-                    fontSize: 10, fontWeight: 700, letterSpacing: '.08em',
-                    padding: '4px 10px', borderRadius: 99,
-                    display: 'flex', alignItems: 'center', gap: 6,
-                  }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#86EFAC' }}/>
-                    LIVE
-                  </div>
-                )}
-              </div>
-
-              {/* Camera selector */}
-              {availableCameras.length > 1 && (
-                <select
-                  value={selectedCamera}
-                  onChange={e => switchCamera(e.target.value)}
-                  className="fsel"
-                  style={{ width: '100%', marginTop: 10, fontSize: 12 }}
-                >
-                  {availableCameras.map(d => (
-                    <option key={d.deviceId} value={d.deviceId}>{d.label || 'Camera ' + d.deviceId.slice(0, 4)}</option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            {/* Mic test */}
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#7D1025', marginBottom: 8 }}>
-                Microphone Test
-              </div>
-              <div style={{
-                background: '#FBFAF5',
-                borderRadius: 'var(--rmd)',
-                padding: 24,
-                border: hasMic ? '2px solid #15803D' : '2px solid var(--border)',
-              }}>
-                <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 12 }}>
-                  Speak normally. The bar below should react to your voice.
-                </div>
-
-                {/* Audio level meter */}
-                <div style={{ height: 12, background: '#FFF', borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }}>
-                  <div style={{
-                    height: '100%',
-                    width: Math.min(100, (audioLevel / 80) * 100) + '%',
-                    background: audioLevel > 30 ? 'linear-gradient(90deg, #15803D, #C9A030)' : '#15803D',
-                    transition: 'width .05s linear',
-                  }}/>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--s400)', marginTop: 4, fontFamily: 'JetBrains Mono, monospace' }}>
-                  <span>Quiet</span>
-                  <span>Normal</span>
-                  <span>Loud</span>
-                </div>
-
-                {audioLevel > 5 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, color: '#15803D', fontSize: 12, fontWeight: 700 }}>
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    Mic working
-                  </div>
-                )}
-
-                {/* Mic selector */}
-                {availableMics.length > 1 && (
-                  <select
-                    value={selectedMic}
-                    onChange={e => switchMic(e.target.value)}
-                    className="fsel"
-                    style={{ width: '100%', marginTop: 12, fontSize: 12 }}
-                  >
-                    {availableMics.map(d => (
-                      <option key={d.deviceId} value={d.deviceId}>{d.label || 'Microphone ' + d.deviceId.slice(0, 4)}</option>
-                    ))}
-                  </select>
-                )}
-              </div>
-
-              {/* Important notice */}
-              <div style={{
-                background: '#FEF3C7', borderLeft: '3px solid #B45309',
-                padding: '10px 14px', borderRadius: 'var(--rsm)',
-                fontSize: 12, color: '#B45309', marginTop: 12, lineHeight: 1.6,
-              }}>
-                <strong>Note:</strong> Your camera will stay on for the entire class for child-safety oversight. You can mute your microphone if needed.
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div style={{
-            padding: '20px 32px',
-            background: '#FBFAF5',
-            borderTop: '1px solid var(--border)',
-            display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap',
-          }}>
-            <button onClick={() => onLeave && onLeave()}
-              style={{
-                background: 'transparent', border: '1px solid var(--border)',
-                color: 'var(--s700)',
-                padding: '10px 20px', borderRadius: 'var(--rmd)',
-                fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              }}>Cancel</button>
-
-            <button
-              onClick={joinClass}
-              disabled={!ready}
-              style={{
-                background: ready ? '#C9A030' : '#FBFAF5',
-                color: ready ? '#7D1025' : 'var(--s400)',
-                border: ready ? 'none' : '1px solid var(--border)',
-                padding: '12px 28px', borderRadius: 'var(--rmd)',
-                fontSize: 14, fontWeight: 700,
-                cursor: ready ? 'pointer' : 'not-allowed',
-                display: 'flex', alignItems: 'center', gap: 8,
-                boxShadow: ready ? '0 4px 14px rgba(201,160,48,.35)' : 'none',
-              }}>
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              {ready ? 'Join Class Now' : 'Waiting for camera and mic...'}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // ═══════════════════════════════════════════════════
-  // RENDER: LIVE TEACHING STUDIO
-  // ═══════════════════════════════════════════════════
-
-  const isWhiteboardMode = layoutMode === 'whiteboard'
-  const isGalleryMode = layoutMode === 'gallery'
-  const isMixedMode = layoutMode === 'mixed'
-
-  // Camera lost during class warning
-  if (phase === 'live' && cameraError) {
-    return (
-      <div style={{
-        minHeight: 'calc(100vh - 100px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-      }}>
-        <div style={{
-          background: '#FFF', borderRadius: 'var(--rxl)',
-          padding: 36, maxWidth: 480, textAlign: 'center',
-          border: '2px solid #DC2626',
-        }}>
-          <div style={{
-            width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%',
-            background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="#DC2626" strokeWidth="2" strokeLinecap="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-          </div>
-          <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: '#7D1025', marginBottom: 8 }}>Camera disconnected</h3>
-          <p style={{ fontSize: 14, color: 'var(--s600)', lineHeight: 1.6, marginBottom: 20 }}>
-            Your camera has stopped. Camera must remain on during live classes for child-safety oversight.
-          </p>
-          <button onClick={confirmLeave}
-            style={{
-              background: '#7D1025', color: '#FBFAF5', border: 'none',
-              padding: '12px 24px', borderRadius: 'var(--rmd)',
-              fontSize: 14, fontWeight: 700, cursor: 'pointer',
-            }}>End Class</button>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      background: '#0F172A',
-      zIndex: 100,
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
-      {/* ─── TOP BAR ─── */}
-      <div style={{
-        background: '#1F2937',
-        color: '#FBFAF5',
-        padding: '10px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        flexWrap: 'wrap',
-        borderBottom: '1px solid #374151',
-        flexShrink: 0,
-      }}>
-        {/* Live indicator */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{
-            width: 10, height: 10, borderRadius: '50%',
-            background: '#DC2626',
-            boxShadow: '0 0 8px rgba(220,38,38,.6)',
-            animation: 'pulse 1.5s infinite',
-          }}/>
-          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', color: '#FCA5A5' }}>LIVE</span>
-        </div>
-
-        <span className="mono" style={{ fontSize: 13, fontWeight: 700, color: '#F0CC5A', minWidth: 70 }}>
-          {formatDuration(classDuration)}
-        </span>
-
-        <div style={{ width: 1, height: 20, background: '#374151' }}/>
-
-        <div style={{ flex: 1, minWidth: 140 }}>
-          <div style={{ fontSize: 11, opacity: .7 }}>Live Class</div>
-          <div style={{ fontSize: 14, fontWeight: 700 }}>{teacherFullName}</div>
-        </div>
-
-        {/* Layout mode switcher */}
-        <div style={{
-          display: 'flex',
-          background: '#0F172A',
-          borderRadius: 'var(--rsm)',
-          padding: 3,
-          gap: 2,
-        }}>
-          {[
-            { id: 'whiteboard', label: 'Whiteboard', icon: 'rect' },
-            { id: 'mixed',      label: 'Mixed',      icon: 'split' },
-            { id: 'gallery',    label: 'Gallery',    icon: 'grid' },
-          ].map(m => (
-            <button key={m.id} onClick={() => setLayoutMode(m.id)}
-              title={m.label + ' mode'}
-              style={{
-                background: layoutMode === m.id ? '#C9A030' : 'transparent',
-                color: layoutMode === m.id ? '#0F172A' : '#9CA3AF',
-                border: 'none',
-                padding: '6px 12px',
-                borderRadius: 4,
-                fontSize: 11.5,
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 5,
-              }}>
-              {m.icon === 'rect' && (
-                <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <rect x="3" y="3" width="18" height="14" rx="2"/>
-                </svg>
-              )}
-              {m.icon === 'split' && (
-                <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/>
-                </svg>
-              )}
-              {m.icon === 'grid' && (
-                <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                  <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                </svg>
-              )}
-              {m.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Mic toggle (allowed) */}
-        <button onClick={() => setMicEnabled(!micEnabled)}
-          title={micEnabled ? 'Mute microphone (M)' : 'Unmute microphone (M)'}
-          style={{
-            background: micEnabled ? '#374151' : '#DC2626',
-            color: '#FBFAF5',
-            border: 'none',
-            width: 40, height: 40,
-            borderRadius: '50%',
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-          {micEnabled ? (
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-              <line x1="12" y1="19" x2="12" y2="23"/>
-              <line x1="8" y1="23" x2="16" y2="23"/>
-            </svg>
-          ) : (
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="1" y1="1" x2="23" y2="23"/>
-              <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/>
-              <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/>
-              <line x1="12" y1="19" x2="12" y2="23"/>
-              <line x1="8" y1="23" x2="16" y2="23"/>
-            </svg>
-          )}
-        </button>
-
-        {/* Camera (locked-on indicator, no toggle) */}
-        <div title="Camera is locked ON for child-safety oversight"
-          style={{
-            background: '#15803D',
-            color: '#FBFAF5',
-            width: 40, height: 40,
-            borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            position: 'relative',
-          }}>
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <polygon points="23 7 16 12 23 17 23 7"/>
-            <rect x="1" y="5" width="15" height="14" rx="2"/>
-          </svg>
-          <span style={{
-            position: 'absolute', top: -2, right: -2,
-            background: '#C9A030', color: '#0F172A',
-            width: 14, height: 14, borderRadius: '50%',
-            fontSize: 9, fontWeight: 800,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: '2px solid #1F2937',
-          }}>
-            <svg width="7" height="7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-              <rect x="3" y="11" width="18" height="11" rx="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-          </span>
-        </div>
-
-        {/* Leave class */}
-        <button onClick={() => setShowLeaveConfirm(true)}
-          style={{
-            background: '#DC2626',
-            color: '#FBFAF5',
-            border: 'none',
-            padding: '8px 16px',
-            borderRadius: 'var(--rsm)',
-            fontSize: 12.5,
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-          End Class
-        </button>
-      </div>
-
-      {/* ─── MAIN STAGE ─── */}
-      <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
-        {/* WHITEBOARD MODE: full-screen canvas with floating teacher cam */}
-        {isWhiteboardMode && (
-          <>
-            <div style={{ flex: 1, position: 'relative', background: '#FBFAF5' }}>
-              <canvas
-                ref={canvasRef}
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={stopDrawing}
-                onMouseLeave={stopDrawing}
-                onTouchStart={startDrawing}
-                onTouchMove={draw}
-                onTouchEnd={stopDrawing}
-                style={{
-                  width: '100%', height: '100%',
-                  cursor: tool === 'eraser' ? 'cell' : 'crosshair',
-                  touchAction: 'none',
-                }}
-              />
-
-              {/* Floating teacher cam (Microsoft Whiteboard style) */}
-              <div style={{
-                position: 'absolute',
-                bottom: 24, right: 24,
-                width: 200, height: 150,
-                background: '#0F172A',
-                borderRadius: 12,
-                overflow: 'hidden',
-                boxShadow: '0 12px 32px rgba(0,0,0,.4)',
-                border: '3px solid #C9A030',
-              }}>
-                <video
-                  ref={localVideoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
-                />
-                <div style={{
-                  position: 'absolute', bottom: 6, left: 6, right: 6,
-                  background: 'rgba(0,0,0,.6)',
-                  color: '#FBFAF5',
-                  padding: '4px 8px',
-                  borderRadius: 4,
-                  fontSize: 10,
-                  fontWeight: 700,
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6,
-                }}>
-                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{teacherFirstName}</span>
-                  {!micEnabled && (
-                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#FCA5A5" strokeWidth="2.5" strokeLinecap="round">
-                      <line x1="1" y1="1" x2="23" y2="23"/>
-                      <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/>
-                    </svg>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Whiteboard tools panel */}
-            <div style={{
-              width: 60,
-              background: '#1F2937',
-              borderLeft: '1px solid #374151',
-              padding: '12px 8px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-              alignItems: 'center',
-            }}>
-              {/* Pen tool */}
-              <button onClick={() => setTool('pen')}
-                title="Pen (P)"
-                style={{
-                  background: tool === 'pen' ? '#C9A030' : '#374151',
-                  color: tool === 'pen' ? '#0F172A' : '#FBFAF5',
-                  border: 'none',
-                  width: 44, height: 44,
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
-                </svg>
-              </button>
-
-              {/* Eraser tool */}
-              <button onClick={() => setTool('eraser')}
-                title="Eraser (E)"
-                style={{
-                  background: tool === 'eraser' ? '#C9A030' : '#374151',
-                  color: tool === 'eraser' ? '#0F172A' : '#FBFAF5',
-                  border: 'none',
-                  width: 44, height: 44,
-                  borderRadius: 8,
-                  cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M20 20H7L3 16c-1-1-1-3 0-4l8-8 10 10-2 2"/>
-                  <path d="M14 7l4 4"/>
-                </svg>
-              </button>
-
-              <div style={{ width: 32, height: 1, background: '#374151', margin: '4px 0' }}/>
-
-              {/* Color palette */}
-              {COLOR_PALETTE.slice(0, 6).map((c, i) => (
-                <button key={c.hex} onClick={() => { setPenColor(c.hex); setTool('pen') }}
-                  title={c.label + (i < 4 ? ' (' + (i + 1) + ')' : '')}
-                  style={{
-                    background: c.hex,
-                    border: penColor === c.hex && tool === 'pen' ? '3px solid #FBFAF5' : '2px solid #374151',
-                    width: 32, height: 32,
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    boxShadow: penColor === c.hex && tool === 'pen' ? '0 0 0 2px ' + c.hex : 'none',
-                  }}/>
-              ))}
-
-              <div style={{ width: 32, height: 1, background: '#374151', margin: '4px 0' }}/>
-
-              {/* Stroke widths */}
-              {[2, 4, 8].map(w => (
-                <button key={w} onClick={() => setStrokeWidth(w)}
-                  title={'Stroke ' + w + 'px'}
-                  style={{
-                    background: strokeWidth === w ? '#C9A030' : 'transparent',
-                    border: '2px solid ' + (strokeWidth === w ? '#C9A030' : '#374151'),
-                    width: 36, height: 36,
-                    borderRadius: 8,
-                    cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                  <span style={{
-                    width: w, height: w,
-                    borderRadius: '50%',
-                    background: strokeWidth === w ? '#0F172A' : '#FBFAF5',
-                  }}/>
-                </button>
-              ))}
-
-              <div style={{ width: 32, height: 1, background: '#374151', margin: '4px 0' }}/>
-
-              {/* Undo */}
-              <button onClick={undoLast}
-                title="Undo last stroke"
-                style={{
-                  background: '#374151', color: '#FBFAF5',
-                  border: 'none',
-                  width: 44, height: 44, borderRadius: 8,
-                  cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>
-                </svg>
-              </button>
-
-              {/* Clear */}
-              <button onClick={clearCanvas}
-                title="Clear whiteboard"
-                style={{
-                  background: '#7F1D1D', color: '#FCA5A5',
-                  border: 'none',
-                  width: 44, height: 44, borderRadius: 8,
-                  cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6l-1 14H6L5 6"/>
-                </svg>
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* MIXED MODE: half whiteboard + half teacher cam */}
-        {isMixedMode && (
-          <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 360px', gap: 8, padding: 8 }}>
-            <div style={{ position: 'relative', background: '#FBFAF5', borderRadius: 12, overflow: 'hidden' }}>
-              <canvas
-                ref={canvasRef}
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={stopDrawing}
-                onMouseLeave={stopDrawing}
-                onTouchStart={startDrawing}
-                onTouchMove={draw}
-                onTouchEnd={stopDrawing}
-                style={{
-                  width: '100%', height: '100%',
-                  cursor: tool === 'eraser' ? 'cell' : 'crosshair',
-                  touchAction: 'none',
-                }}
-              />
-              {/* Mini tool palette overlay */}
-              <div style={{
-                position: 'absolute', top: 16, left: 16,
-                background: 'rgba(31,41,55,.95)',
-                borderRadius: 8,
-                padding: 6,
-                display: 'flex', gap: 4,
-                boxShadow: '0 4px 12px rgba(0,0,0,.3)',
-              }}>
-                <button onClick={() => setTool('pen')}
-                  style={{
-                    background: tool === 'pen' ? '#C9A030' : 'transparent',
-                    color: tool === 'pen' ? '#0F172A' : '#FBFAF5',
-                    border: 'none', width: 32, height: 32, borderRadius: 4, cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
-                  </svg>
-                </button>
-                <button onClick={() => setTool('eraser')}
-                  style={{
-                    background: tool === 'eraser' ? '#C9A030' : 'transparent',
-                    color: tool === 'eraser' ? '#0F172A' : '#FBFAF5',
-                    border: 'none', width: 32, height: 32, borderRadius: 4, cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M20 20H7L3 16c-1-1-1-3 0-4l8-8 10 10-2 2"/>
-                  </svg>
-                </button>
-                <div style={{ width: 1, background: '#374151', margin: '0 4px' }}/>
-                {COLOR_PALETTE.slice(0, 4).map(c => (
-                  <button key={c.hex} onClick={() => { setPenColor(c.hex); setTool('pen') }}
-                    style={{
-                      background: c.hex,
-                      border: penColor === c.hex ? '2px solid #FBFAF5' : '1px solid transparent',
-                      width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
-                    }}/>
-                ))}
-                <div style={{ width: 1, background: '#374151', margin: '0 4px' }}/>
-                <button onClick={undoLast}
-                  style={{
-                    background: 'transparent', color: '#FBFAF5',
-                    border: 'none', width: 32, height: 32, borderRadius: 4, cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Teacher cam panel */}
-            <div style={{
-              background: '#0F172A',
-              borderRadius: 12,
-              overflow: 'hidden',
-              position: 'relative',
-              display: 'flex', flexDirection: 'column',
-            }}>
-              <div style={{ flex: 1, position: 'relative' }}>
-                <video
-                  ref={localVideoRef}
-                  autoPlay playsInline muted
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
-                />
-              </div>
-              <div style={{
-                background: '#1F2937', color: '#FBFAF5',
-                padding: '10px 14px',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 700 }}>{teacherFullName}</div>
-                  <div style={{ fontSize: 11, opacity: .7 }}>Teacher</div>
-                </div>
-                {!micEnabled && (
-                  <span style={{
-                    background: '#DC2626', color: '#FBFAF5',
-                    fontSize: 10, fontWeight: 700, letterSpacing: '.06em',
-                    padding: '3px 8px', borderRadius: 99,
-                  }}>MUTED</span>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* GALLERY MODE: teacher + students placeholders */}
-        {isGalleryMode && (
-          <div style={{
-            flex: 1, padding: 16,
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gridAutoRows: '1fr',
-            gap: 10,
-            alignContent: 'start',
-          }}>
-            {/* Teacher tile */}
-            <div style={{
-              background: '#0F172A',
-              borderRadius: 12,
-              overflow: 'hidden',
-              position: 'relative',
-              border: '2px solid #C9A030',
-              aspectRatio: '4 / 3',
-            }}>
-              <video
-                ref={localVideoRef}
-                autoPlay playsInline muted
-                style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
-              />
-              <div style={{
-                position: 'absolute', bottom: 8, left: 8, right: 8,
-                background: 'rgba(0,0,0,.7)',
-                color: '#FBFAF5',
-                padding: '5px 10px',
-                borderRadius: 6,
-                fontSize: 11,
-                fontWeight: 700,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              }}>
-                <span>{teacherFullName}</span>
-                <span style={{
-                  background: '#C9A030', color: '#0F172A',
-                  fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 99,
-                }}>TEACHER</span>
-              </div>
-            </div>
-
-            {/* Student placeholders */}
-            {['Amara Osei', 'Kofi Mensah', 'Faith Wanjiru', 'Brian Otieno', 'Lydia Achieng', 'Zara Kamau'].map((name, i) => (
-              <div key={i} style={{
-                background: '#1F2937',
-                borderRadius: 12,
-                position: 'relative',
-                border: '1px solid #374151',
-                aspectRatio: '4 / 3',
-                display: 'flex',
-                alignItems: 'center', justifyContent: 'center',
-              }}>
-                <div style={{
-                  width: 70, height: 70, borderRadius: '50%',
-                  background: ['#7D1025', '#1E3A8A', '#166534', '#7C2D12', '#6B21A8', '#92400E'][i % 6],
-                  color: '#FBFAF5',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 22, fontWeight: 700,
-                  fontFamily: "'Instrument Serif', serif",
-                }}>{name.split(' ').map(w => w[0]).join('')}</div>
-                <div style={{
-                  position: 'absolute', bottom: 8, left: 8, right: 8,
-                  background: 'rgba(0,0,0,.7)',
-                  color: '#FBFAF5',
-                  padding: '5px 10px',
-                  borderRadius: 6,
-                  fontSize: 11,
-                  fontWeight: 700,
-                }}>{name}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ─── BOTTOM HINT BAR ─── */}
-      <div style={{
-        background: '#1F2937',
-        borderTop: '1px solid #374151',
-        padding: '6px 20px',
-        color: '#9CA3AF',
-        fontSize: 11,
-        fontWeight: 600,
-        display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14,
-        flexShrink: 0,
-      }}>
-        <div>
-          {isWhiteboardMode && (
-            <span>Shortcuts: <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>P</kbd> Pen | <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>E</kbd> Eraser | <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>1-4</kbd> Colors | <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>M</kbd> Toggle Mic</span>
-          )}
-          {!isWhiteboardMode && (
-            <span>Shortcuts: <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>F</kbd> Whiteboard mode | <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>G</kbd> Gallery mode | <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>M</kbd> Toggle Mic</span>
-          )}
-        </div>
-        <div>
-          <span style={{ color: '#86EFAC' }}>Camera locked ON</span> for child safety
-        </div>
-      </div>
-
-      {/* Leave confirmation modal */}
-      {showLeaveConfirm && (
-        <div onClick={() => setShowLeaveConfirm(false)} style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)',
-          zIndex: 200,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 20,
-        }}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: '#FFF', borderRadius: 'var(--rxl)',
-            padding: 32, maxWidth: 420,
-            boxShadow: '0 20px 60px rgba(0,0,0,.3)',
-          }}>
-            <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: '#7D1025', marginBottom: 8 }}>End class?</h3>
-            <p style={{ fontSize: 14, color: 'var(--s600)', lineHeight: 1.6, marginBottom: 20 }}>
-              This will end the live session for all students. Recording will be saved automatically.
-            </p>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowLeaveConfirm(false)}
-                style={{
-                  background: 'transparent', color: 'var(--s700)',
-                  border: '1px solid var(--border)',
-                  padding: '10px 20px', borderRadius: 'var(--rmd)',
-                  fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                }}>Continue Teaching</button>
-              <button onClick={confirmLeave}
-                style={{
-                  background: '#DC2626', color: '#FBFAF5', border: 'none',
-                  padding: '10px 20px', borderRadius: 'var(--rmd)',
-                  fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                }}>End Class</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════
 // TEACHER DASHBOARD — Premium daily home screen
 // ═══════════════════════════════════════════════════════════
 // Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
@@ -8170,6 +6954,990 @@ function TeacherProfileTab({ user, store, setPage, toast }) {
                   padding: '10px 18px', borderRadius: 'var(--rmd)',
                   cursor: 'pointer', fontSize: 13, fontWeight: 700,
                 }}>Use This Photo</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// TEACHER LIVE STUDIO — Flexible teaching experience
+// ═══════════════════════════════════════════════════════════
+// Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
+//
+// PHILOSOPHY:
+// - Camera and mic are OPTIONAL. Teacher can join without them.
+// - Pre-flight check tries devices but never blocks joining.
+// - If camera works -> use it. If not -> show initials avatar.
+// - Three layout modes: Whiteboard / Mixed / Gallery
+// - All teaching tools work even without camera/mic.
+
+function TeacherLiveStudio({ user, onLeave, toast }) {
+  const teacherFirstName = user?.firstName || 'James'
+  const teacherLastName = user?.lastName || 'Muthomi'
+  const teacherFullName = ('Mr. ' + teacherFirstName + ' ' + teacherLastName).trim()
+  const teacherInitials = (teacherFirstName[0] || 'T') + (teacherLastName[0] || '')
+
+  // ── STATE ──────────────────────────────────────────
+  const [phase, setPhase] = useState('preflight')   // 'preflight' | 'live'
+  const [layoutMode, setLayoutMode] = useState('whiteboard')
+  const [tool, setTool] = useState('pen')
+  const [penColor, setPenColor] = useState('#7D1025')
+  const [strokeWidth, setStrokeWidth] = useState(3)
+  const [micEnabled, setMicEnabled] = useState(true)
+  const [cameraEnabled, setCameraEnabled] = useState(true)
+  const [audioLevel, setAudioLevel] = useState(0)
+  const [hasCamera, setHasCamera] = useState(false)
+  const [hasMic, setHasMic] = useState(false)
+  const [deviceMessage, setDeviceMessage] = useState('')   // friendly status, not blocking
+  const [classDuration, setClassDuration] = useState(0)
+  const [classStartedAt, setClassStartedAt] = useState(null)
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
+  const [tryingMedia, setTryingMedia] = useState(true)
+
+  // ── REFS ───────────────────────────────────────────
+  const localVideoRef = useRef(null)
+  const previewVideoRef = useRef(null)
+  const canvasRef = useRef(null)
+  const drawingRef = useRef(false)
+  const lastPointRef = useRef(null)
+  const streamRef = useRef(null)
+  const audioContextRef = useRef(null)
+  const audioAnalyserRef = useRef(null)
+  const audioLevelRafRef = useRef(null)
+  const drawingHistoryRef = useRef([])
+
+  const COLOR_PALETTE = [
+    { hex: '#7D1025', label: 'Crimson' },
+    { hex: '#1E3A8A', label: 'Navy' },
+    { hex: '#166534', label: 'Green' },
+    { hex: '#C9A030', label: 'Gold' },
+    { hex: '#0F172A', label: 'Black' },
+    { hex: '#DC2626', label: 'Red' },
+  ]
+
+  // ── TRY MEDIA (non-blocking) ──────────────────────
+  const tryStartMedia = async () => {
+    setTryingMedia(true)
+    setDeviceMessage('')
+    try {
+      // Stop existing stream
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop())
+      }
+
+      // Try video + audio first, then fall back gracefully
+      let stream = null
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 640 }, height: { ideal: 480 } },
+          audio: { echoCancellation: true, noiseSuppression: true },
+        })
+        setHasCamera(true)
+        setHasMic(true)
+      } catch (err1) {
+        // Try audio only
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: false,
+            audio: { echoCancellation: true, noiseSuppression: true },
+          })
+          setHasCamera(false)
+          setHasMic(true)
+          setDeviceMessage('Audio only — camera not available')
+        } catch (err2) {
+          // Try video only
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { width: { ideal: 640 }, height: { ideal: 480 } },
+              audio: false,
+            })
+            setHasCamera(true)
+            setHasMic(false)
+            setDeviceMessage('Video only — microphone not available')
+          } catch (err3) {
+            // Nothing works — that's okay, we'll join without media
+            setHasCamera(false)
+            setHasMic(false)
+            const reason = err3.name === 'NotAllowedError' ? 'Permission denied'
+              : err3.name === 'NotFoundError' ? 'No devices found'
+              : err3.name === 'NotReadableError' ? 'Devices in use by another app'
+              : 'Devices not available'
+            setDeviceMessage(reason + ' — you can still join the class')
+          }
+        }
+      }
+
+      if (stream) {
+        streamRef.current = stream
+        if (previewVideoRef.current) previewVideoRef.current.srcObject = stream
+        if (localVideoRef.current) localVideoRef.current.srcObject = stream
+
+        // Audio level meter
+        if (stream.getAudioTracks().length > 0) {
+          try {
+            const AC = window.AudioContext || window.webkitAudioContext
+            if (audioContextRef.current) audioContextRef.current.close().catch(() => {})
+            audioContextRef.current = new AC()
+            const source = audioContextRef.current.createMediaStreamSource(stream)
+            const analyser = audioContextRef.current.createAnalyser()
+            analyser.fftSize = 256
+            source.connect(analyser)
+            audioAnalyserRef.current = analyser
+            const dataArray = new Uint8Array(analyser.frequencyBinCount)
+            const updateLevel = () => {
+              if (!audioAnalyserRef.current) return
+              analyser.getByteFrequencyData(dataArray)
+              const avg = dataArray.reduce((s, v) => s + v, 0) / dataArray.length
+              setAudioLevel(avg)
+              audioLevelRafRef.current = requestAnimationFrame(updateLevel)
+            }
+            updateLevel()
+          } catch (e) { /* non-critical */ }
+        }
+      }
+    } catch (err) {
+      setHasCamera(false)
+      setHasMic(false)
+      setDeviceMessage('Could not access devices — you can still join')
+    } finally {
+      setTryingMedia(false)
+    }
+  }
+
+  // ── INIT on mount ─────────────────────────────────
+  useEffect(() => {
+    tryStartMedia()
+    return () => {
+      if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop())
+      if (audioContextRef.current) audioContextRef.current.close().catch(() => {})
+      if (audioLevelRafRef.current) cancelAnimationFrame(audioLevelRafRef.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // ── MIC TOGGLE ────────────────────────────────────
+  useEffect(() => {
+    if (streamRef.current) {
+      streamRef.current.getAudioTracks().forEach(t => { t.enabled = micEnabled })
+    }
+  }, [micEnabled])
+
+  // ── CAMERA TOGGLE (now allowed) ───────────────────
+  useEffect(() => {
+    if (streamRef.current) {
+      streamRef.current.getVideoTracks().forEach(t => { t.enabled = cameraEnabled })
+    }
+  }, [cameraEnabled])
+
+  // ── JOIN ──────────────────────────────────────────
+  const joinClass = () => {
+    setPhase('live')
+    setClassStartedAt(Date.now())
+    try {
+      localStorage.setItem('sm_live_class_active', JSON.stringify({
+        teacher: teacherFullName,
+        startedAt: new Date().toISOString(),
+      }))
+    } catch {}
+    setTimeout(() => {
+      if (localVideoRef.current && streamRef.current) {
+        localVideoRef.current.srcObject = streamRef.current
+      }
+    }, 100)
+  }
+
+  // ── DURATION ──────────────────────────────────────
+  useEffect(() => {
+    if (phase !== 'live' || !classStartedAt) return
+    const interval = setInterval(() => {
+      setClassDuration(Math.floor((Date.now() - classStartedAt) / 1000))
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [phase, classStartedAt])
+
+  // ── KEYBOARD ──────────────────────────────────────
+  useEffect(() => {
+    if (phase !== 'live') return
+    const handler = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.key === 'p' || e.key === 'P') setTool('pen')
+      else if (e.key === 'e' || e.key === 'E') setTool('eraser')
+      else if (e.key === '1') setPenColor(COLOR_PALETTE[0].hex)
+      else if (e.key === '2') setPenColor(COLOR_PALETTE[1].hex)
+      else if (e.key === '3') setPenColor(COLOR_PALETTE[2].hex)
+      else if (e.key === '4') setPenColor(COLOR_PALETTE[3].hex)
+      else if (e.key === 'f' || e.key === 'F') setLayoutMode('whiteboard')
+      else if (e.key === 'g' || e.key === 'G') setLayoutMode('gallery')
+      else if (e.key === 'm' || e.key === 'M') setMicEnabled(m => !m)
+      else if (e.key === 'v' || e.key === 'V') setCameraEnabled(c => !c)
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase])
+
+  // ── CANVAS ────────────────────────────────────────
+  const setupCanvas = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const rect = canvas.getBoundingClientRect()
+    canvas.width = rect.width * window.devicePixelRatio
+    canvas.height = rect.height * window.devicePixelRatio
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    drawingHistoryRef.current.forEach(stroke => {
+      ctx.strokeStyle = stroke.color
+      ctx.lineWidth = stroke.width
+      ctx.globalCompositeOperation = stroke.tool === 'eraser' ? 'destination-out' : 'source-over'
+      ctx.beginPath()
+      stroke.points.forEach((pt, i) => {
+        if (i === 0) ctx.moveTo(pt.x, pt.y)
+        else ctx.lineTo(pt.x, pt.y)
+      })
+      ctx.stroke()
+    })
+  }
+
+  useEffect(() => {
+    if (phase !== 'live') return
+    setupCanvas()
+    const handleResize = () => setupCanvas()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, layoutMode])
+
+  const getCanvasPoint = (e) => {
+    const canvas = canvasRef.current
+    if (!canvas) return null
+    const rect = canvas.getBoundingClientRect()
+    const x = (e.touches?.[0]?.clientX ?? e.clientX) - rect.left
+    const y = (e.touches?.[0]?.clientY ?? e.clientY) - rect.top
+    return { x, y }
+  }
+
+  const startDrawing = (e) => {
+    e.preventDefault()
+    drawingRef.current = true
+    const point = getCanvasPoint(e); if (!point) return
+    lastPointRef.current = point
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    ctx.strokeStyle = penColor
+    ctx.lineWidth = tool === 'eraser' ? strokeWidth * 4 : strokeWidth
+    ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over'
+    ctx.beginPath()
+    ctx.moveTo(point.x, point.y)
+    drawingHistoryRef.current.push({ tool, color: penColor, width: ctx.lineWidth, points: [point] })
+  }
+
+  const draw = (e) => {
+    if (!drawingRef.current) return
+    e.preventDefault()
+    const point = getCanvasPoint(e); if (!point) return
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    ctx.lineTo(point.x, point.y); ctx.stroke()
+    lastPointRef.current = point
+    const cur = drawingHistoryRef.current[drawingHistoryRef.current.length - 1]
+    if (cur) cur.points.push(point)
+  }
+
+  const stopDrawing = () => { drawingRef.current = false; lastPointRef.current = null }
+
+  const clearCanvas = () => {
+    if (!confirm('Clear the entire whiteboard? This cannot be undone.')) return
+    const canvas = canvasRef.current; if (!canvas) return
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+    drawingHistoryRef.current = []
+  }
+
+  const undoLast = () => {
+    if (drawingHistoryRef.current.length === 0) return
+    drawingHistoryRef.current.pop()
+    const canvas = canvasRef.current; if (!canvas) return
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+    setupCanvas()
+  }
+
+  // ── LEAVE ─────────────────────────────────────────
+  const confirmLeave = () => {
+    if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop())
+    if (audioContextRef.current) audioContextRef.current.close().catch(() => {})
+    try { localStorage.removeItem('sm_live_class_active') } catch {}
+    if (onLeave) onLeave()
+  }
+
+  const formatDuration = (sec) => {
+    const h = Math.floor(sec / 3600)
+    const m = Math.floor((sec % 3600) / 60)
+    const s = sec % 60
+    if (h > 0) return h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')
+    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')
+  }
+
+  // ═══════════════════════════════════════════════════
+  // PRE-FLIGHT (now optional, always lets you join)
+  // ═══════════════════════════════════════════════════
+  if (phase === 'preflight') {
+    return (
+      <div style={{ minHeight: 'calc(100vh - 100px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <div style={{
+          background: '#FFF', borderRadius: 'var(--rxl)',
+          boxShadow: '0 20px 60px rgba(125,16,37,.15)',
+          maxWidth: 900, width: '100%', overflow: 'hidden',
+        }}>
+          <div style={{
+            padding: '24px 32px',
+            background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+            color: '#FBFAF5',
+          }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
+              Live Class · Pre-flight
+            </div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0 }}>
+              Ready to teach?
+            </h1>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              Camera and microphone are optional. You can join the class either way.
+            </div>
+          </div>
+
+          <div style={{ padding: '28px 32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
+            {/* Camera preview */}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#7D1025', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                Camera
+                {hasCamera && <span style={{ background: '#15803D', color: '#FBFAF5', fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 99, letterSpacing: '.08em' }}>WORKING</span>}
+                {!hasCamera && !tryingMedia && <span style={{ background: '#FBFAF5', color: 'var(--s500)', fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 99, letterSpacing: '.08em', border: '1px solid var(--border)' }}>OPTIONAL</span>}
+              </div>
+              <div style={{
+                aspectRatio: '4 / 3',
+                background: '#0F172A',
+                borderRadius: 'var(--rmd)',
+                overflow: 'hidden',
+                position: 'relative',
+                border: '2px solid ' + (hasCamera ? '#15803D' : 'var(--border)'),
+              }}>
+                {tryingMedia ? (
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#9CA3AF', fontSize: 13,
+                  }}>
+                    Checking devices...
+                  </div>
+                ) : hasCamera ? (
+                  <video ref={previewVideoRef} autoPlay playsInline muted
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}/>
+                ) : (
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexDirection: 'column', gap: 12,
+                    color: '#9CA3AF', padding: 20, textAlign: 'center',
+                  }}>
+                    <div style={{
+                      width: 80, height: 80, borderRadius: '50%',
+                      background: '#C9A030',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#7D1025',
+                      fontSize: 30, fontWeight: 400,
+                      fontFamily: "'Instrument Serif', serif",
+                    }}>{teacherInitials.toUpperCase()}</div>
+                    <div style={{ fontSize: 13, lineHeight: 1.5, maxWidth: 240 }}>
+                      No camera detected. Students will see your initials avatar.
+                    </div>
+                  </div>
+                )}
+              </div>
+              {!hasCamera && !tryingMedia && (
+                <button onClick={tryStartMedia}
+                  style={{
+                    background: 'transparent', border: '1px solid #7D1025',
+                    color: '#7D1025', padding: '6px 14px',
+                    borderRadius: 'var(--rsm)', cursor: 'pointer',
+                    fontSize: 12, fontWeight: 700, marginTop: 10,
+                  }}>Try again</button>
+              )}
+            </div>
+
+            {/* Microphone */}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#7D1025', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                Microphone
+                {hasMic && <span style={{ background: '#15803D', color: '#FBFAF5', fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 99, letterSpacing: '.08em' }}>WORKING</span>}
+                {!hasMic && !tryingMedia && <span style={{ background: '#FBFAF5', color: 'var(--s500)', fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 99, letterSpacing: '.08em', border: '1px solid var(--border)' }}>OPTIONAL</span>}
+              </div>
+              <div style={{
+                background: '#FBFAF5',
+                borderRadius: 'var(--rmd)',
+                padding: 24,
+                border: '2px solid ' + (hasMic ? '#15803D' : 'var(--border)'),
+              }}>
+                {tryingMedia ? (
+                  <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>Checking microphone...</div>
+                ) : hasMic ? (
+                  <>
+                    <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 12 }}>
+                      Speak normally. The bar should react to your voice.
+                    </div>
+                    <div style={{ height: 12, background: '#FFF', borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                      <div style={{
+                        height: '100%',
+                        width: Math.min(100, (audioLevel / 80) * 100) + '%',
+                        background: audioLevel > 30 ? 'linear-gradient(90deg, #15803D, #C9A030)' : '#15803D',
+                        transition: 'width .05s linear',
+                      }}/>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--s400)', marginTop: 4, fontFamily: 'JetBrains Mono, monospace' }}>
+                      <span>Quiet</span><span>Normal</span><span>Loud</span>
+                    </div>
+                    {audioLevel > 5 && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, color: '#15803D', fontSize: 12, fontWeight: 700 }}>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Mic working
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div style={{ fontSize: 13, color: 'var(--s500)', textAlign: 'center', padding: '8px 0', lineHeight: 1.6 }}>
+                    No microphone detected.<br/>You can teach using just the whiteboard and chat.
+                  </div>
+                )}
+              </div>
+
+              {deviceMessage && (
+                <div style={{
+                  background: '#FEF3C7', borderLeft: '3px solid #B45309',
+                  padding: '10px 14px', borderRadius: 'var(--rsm)',
+                  fontSize: 12, color: '#B45309', marginTop: 12, lineHeight: 1.6,
+                }}>{deviceMessage}</div>
+              )}
+            </div>
+          </div>
+
+          {/* Info banner */}
+          <div style={{ padding: '0 32px 16px' }}>
+            <div style={{
+              background: '#FBFAF5', borderLeft: '3px solid #C9A030',
+              padding: '10px 14px', borderRadius: 'var(--rsm)',
+              fontSize: 12, color: 'var(--s600)', lineHeight: 1.6,
+            }}>
+              <strong>Tip:</strong> The whiteboard works without camera or mic. You can join now and fix devices later from the toolbar inside the class.
+            </div>
+          </div>
+
+          {/* Footer actions */}
+          <div style={{
+            padding: '20px 32px',
+            background: '#FBFAF5',
+            borderTop: '1px solid var(--border)',
+            display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap',
+          }}>
+            <button onClick={() => onLeave && onLeave()}
+              style={{
+                background: 'transparent', border: '1px solid var(--border)',
+                color: 'var(--s700)',
+                padding: '10px 20px', borderRadius: 'var(--rmd)',
+                fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              }}>Cancel</button>
+
+            <button onClick={joinClass}
+              style={{
+                background: '#C9A030',
+                color: '#7D1025',
+                border: 'none',
+                padding: '12px 28px', borderRadius: 'var(--rmd)',
+                fontSize: 14, fontWeight: 800, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 8,
+                boxShadow: '0 4px 14px rgba(201,160,48,.35)',
+              }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              {hasCamera && hasMic ? 'Join with Camera & Mic'
+                : hasCamera ? 'Join with Camera'
+                : hasMic ? 'Join with Mic'
+                : 'Join Class'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ═══════════════════════════════════════════════════
+  // LIVE STUDIO
+  // ═══════════════════════════════════════════════════
+  const isWhiteboardMode = layoutMode === 'whiteboard'
+  const isGalleryMode = layoutMode === 'gallery'
+  const isMixedMode = layoutMode === 'mixed'
+
+  // Avatar fallback when no camera
+  const TeacherAvatar = ({ size = 80 }) => (
+    <div style={{
+      width: size, height: size, borderRadius: '50%',
+      background: '#C9A030',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: '#7D1025',
+      fontSize: size * 0.4,
+      fontWeight: 400,
+      fontFamily: "'Instrument Serif', serif",
+      border: '3px solid #F0CC5A',
+    }}>{teacherInitials.toUpperCase()}</div>
+  )
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: '#0F172A', zIndex: 100,
+      display: 'flex', flexDirection: 'column',
+    }}>
+      {/* TOP BAR */}
+      <div style={{
+        background: '#1F2937', color: '#FBFAF5',
+        padding: '10px 20px',
+        display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+        borderBottom: '1px solid #374151', flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{
+            width: 10, height: 10, borderRadius: '50%',
+            background: '#DC2626',
+            boxShadow: '0 0 8px rgba(220,38,38,.6)',
+            animation: 'pulse 1.5s infinite',
+          }}/>
+          <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.1em', color: '#FCA5A5' }}>LIVE</span>
+        </div>
+        <span className="mono" style={{ fontSize: 13, fontWeight: 700, color: '#F0CC5A', minWidth: 70 }}>
+          {formatDuration(classDuration)}
+        </span>
+        <div style={{ width: 1, height: 20, background: '#374151' }}/>
+        <div style={{ flex: 1, minWidth: 140 }}>
+          <div style={{ fontSize: 11, opacity: .7 }}>Live Class</div>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>{teacherFullName}</div>
+        </div>
+
+        {/* Layout switcher */}
+        <div style={{ display: 'flex', background: '#0F172A', borderRadius: 'var(--rsm)', padding: 3, gap: 2 }}>
+          {[
+            { id: 'whiteboard', label: 'Whiteboard' },
+            { id: 'mixed',      label: 'Mixed' },
+            { id: 'gallery',    label: 'Gallery' },
+          ].map(m => (
+            <button key={m.id} onClick={() => setLayoutMode(m.id)}
+              style={{
+                background: layoutMode === m.id ? '#C9A030' : 'transparent',
+                color: layoutMode === m.id ? '#0F172A' : '#9CA3AF',
+                border: 'none', padding: '6px 12px',
+                borderRadius: 4, fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+              }}>{m.label}</button>
+          ))}
+        </div>
+
+        {/* Mic toggle */}
+        <button onClick={() => setMicEnabled(!micEnabled)}
+          disabled={!hasMic}
+          title={hasMic ? (micEnabled ? 'Mute (M)' : 'Unmute (M)') : 'No microphone'}
+          style={{
+            background: !hasMic ? '#4B5563' : micEnabled ? '#374151' : '#DC2626',
+            color: !hasMic ? '#9CA3AF' : '#FBFAF5',
+            border: 'none', width: 40, height: 40, borderRadius: '50%',
+            cursor: hasMic ? 'pointer' : 'not-allowed',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            opacity: hasMic ? 1 : 0.6,
+          }}>
+          {micEnabled && hasMic ? (
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          ) : (
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="1" y1="1" x2="23" y2="23"/>
+              <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/>
+              <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/>
+              <line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          )}
+        </button>
+
+        {/* Camera toggle */}
+        <button onClick={() => setCameraEnabled(!cameraEnabled)}
+          disabled={!hasCamera}
+          title={hasCamera ? (cameraEnabled ? 'Turn off camera (V)' : 'Turn on camera (V)') : 'No camera'}
+          style={{
+            background: !hasCamera ? '#4B5563' : cameraEnabled ? '#374151' : '#DC2626',
+            color: !hasCamera ? '#9CA3AF' : '#FBFAF5',
+            border: 'none', width: 40, height: 40, borderRadius: '50%',
+            cursor: hasCamera ? 'pointer' : 'not-allowed',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            opacity: hasCamera ? 1 : 0.6,
+          }}>
+          {cameraEnabled && hasCamera ? (
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <polygon points="23 7 16 12 23 17 23 7"/>
+              <rect x="1" y="5" width="15" height="14" rx="2"/>
+            </svg>
+          ) : (
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M16 16h5v5"/><path d="M8 8H3V3"/>
+              <path d="M21 12c0 4.971-4.029 9-9 9-2.65 0-5.022-1.143-6.667-2.964M3 12c0-4.971 4.029-9 9-9 2.65 0 5.022 1.143 6.667 2.964"/>
+            </svg>
+          )}
+        </button>
+
+        <button onClick={() => setShowLeaveConfirm(true)}
+          style={{
+            background: '#DC2626', color: '#FBFAF5', border: 'none',
+            padding: '8px 16px', borderRadius: 'var(--rsm)',
+            fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+          }}>End Class</button>
+      </div>
+
+      {/* MAIN STAGE */}
+      <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
+        {/* WHITEBOARD MODE */}
+        {isWhiteboardMode && (
+          <>
+            <div style={{ flex: 1, position: 'relative', background: '#FBFAF5' }}>
+              <canvas ref={canvasRef}
+                onMouseDown={startDrawing} onMouseMove={draw}
+                onMouseUp={stopDrawing} onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing}
+                style={{
+                  width: '100%', height: '100%',
+                  cursor: tool === 'eraser' ? 'cell' : 'crosshair',
+                  touchAction: 'none',
+                }}/>
+
+              {/* Floating teacher cam (or avatar fallback) */}
+              <div style={{
+                position: 'absolute', bottom: 24, right: 24,
+                width: 200, height: 150,
+                background: '#0F172A',
+                borderRadius: 12, overflow: 'hidden',
+                boxShadow: '0 12px 32px rgba(0,0,0,.4)',
+                border: '3px solid #C9A030',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {hasCamera && cameraEnabled ? (
+                  <video ref={localVideoRef} autoPlay playsInline muted
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}/>
+                ) : (
+                  <TeacherAvatar size={80}/>
+                )}
+                <div style={{
+                  position: 'absolute', bottom: 6, left: 6, right: 6,
+                  background: 'rgba(0,0,0,.6)',
+                  color: '#FBFAF5',
+                  padding: '4px 8px', borderRadius: 4,
+                  fontSize: 10, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6,
+                }}>
+                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{teacherFirstName}</span>
+                  {!micEnabled && (
+                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#FCA5A5" strokeWidth="2.5" strokeLinecap="round">
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                      <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/>
+                    </svg>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Tool panel */}
+            <div style={{
+              width: 60, background: '#1F2937',
+              borderLeft: '1px solid #374151',
+              padding: '12px 8px',
+              display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center',
+            }}>
+              <button onClick={() => setTool('pen')} title="Pen (P)"
+                style={{
+                  background: tool === 'pen' ? '#C9A030' : '#374151',
+                  color: tool === 'pen' ? '#0F172A' : '#FBFAF5',
+                  border: 'none', width: 44, height: 44, borderRadius: 8,
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                </svg>
+              </button>
+              <button onClick={() => setTool('eraser')} title="Eraser (E)"
+                style={{
+                  background: tool === 'eraser' ? '#C9A030' : '#374151',
+                  color: tool === 'eraser' ? '#0F172A' : '#FBFAF5',
+                  border: 'none', width: 44, height: 44, borderRadius: 8,
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M20 20H7L3 16c-1-1-1-3 0-4l8-8 10 10-2 2"/>
+                  <path d="M14 7l4 4"/>
+                </svg>
+              </button>
+              <div style={{ width: 32, height: 1, background: '#374151', margin: '4px 0' }}/>
+              {COLOR_PALETTE.slice(0, 6).map((c, i) => (
+                <button key={c.hex} onClick={() => { setPenColor(c.hex); setTool('pen') }}
+                  title={c.label + (i < 4 ? ' (' + (i + 1) + ')' : '')}
+                  style={{
+                    background: c.hex,
+                    border: penColor === c.hex && tool === 'pen' ? '3px solid #FBFAF5' : '2px solid #374151',
+                    width: 32, height: 32, borderRadius: '50%',
+                    cursor: 'pointer',
+                    boxShadow: penColor === c.hex && tool === 'pen' ? '0 0 0 2px ' + c.hex : 'none',
+                  }}/>
+              ))}
+              <div style={{ width: 32, height: 1, background: '#374151', margin: '4px 0' }}/>
+              {[2, 4, 8].map(w => (
+                <button key={w} onClick={() => setStrokeWidth(w)} title={'Stroke ' + w + 'px'}
+                  style={{
+                    background: strokeWidth === w ? '#C9A030' : 'transparent',
+                    border: '2px solid ' + (strokeWidth === w ? '#C9A030' : '#374151'),
+                    width: 36, height: 36, borderRadius: 8,
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                  <span style={{
+                    width: w, height: w, borderRadius: '50%',
+                    background: strokeWidth === w ? '#0F172A' : '#FBFAF5',
+                  }}/>
+                </button>
+              ))}
+              <div style={{ width: 32, height: 1, background: '#374151', margin: '4px 0' }}/>
+              <button onClick={undoLast} title="Undo"
+                style={{
+                  background: '#374151', color: '#FBFAF5', border: 'none',
+                  width: 44, height: 44, borderRadius: 8, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>
+                </svg>
+              </button>
+              <button onClick={clearCanvas} title="Clear"
+                style={{
+                  background: '#7F1D1D', color: '#FCA5A5', border: 'none',
+                  width: 44, height: 44, borderRadius: 8, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14H6L5 6"/>
+                </svg>
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* MIXED MODE */}
+        {isMixedMode && (
+          <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 360px', gap: 8, padding: 8 }}>
+            <div style={{ position: 'relative', background: '#FBFAF5', borderRadius: 12, overflow: 'hidden' }}>
+              <canvas ref={canvasRef}
+                onMouseDown={startDrawing} onMouseMove={draw}
+                onMouseUp={stopDrawing} onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing}
+                style={{
+                  width: '100%', height: '100%',
+                  cursor: tool === 'eraser' ? 'cell' : 'crosshair',
+                  touchAction: 'none',
+                }}/>
+              <div style={{
+                position: 'absolute', top: 16, left: 16,
+                background: 'rgba(31,41,55,.95)', borderRadius: 8, padding: 6,
+                display: 'flex', gap: 4, boxShadow: '0 4px 12px rgba(0,0,0,.3)',
+              }}>
+                <button onClick={() => setTool('pen')}
+                  style={{
+                    background: tool === 'pen' ? '#C9A030' : 'transparent',
+                    color: tool === 'pen' ? '#0F172A' : '#FBFAF5',
+                    border: 'none', width: 32, height: 32, borderRadius: 4, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                  </svg>
+                </button>
+                <button onClick={() => setTool('eraser')}
+                  style={{
+                    background: tool === 'eraser' ? '#C9A030' : 'transparent',
+                    color: tool === 'eraser' ? '#0F172A' : '#FBFAF5',
+                    border: 'none', width: 32, height: 32, borderRadius: 4, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M20 20H7L3 16c-1-1-1-3 0-4l8-8 10 10-2 2"/>
+                  </svg>
+                </button>
+                <div style={{ width: 1, background: '#374151', margin: '0 4px' }}/>
+                {COLOR_PALETTE.slice(0, 4).map(c => (
+                  <button key={c.hex} onClick={() => { setPenColor(c.hex); setTool('pen') }}
+                    style={{
+                      background: c.hex,
+                      border: penColor === c.hex ? '2px solid #FBFAF5' : '1px solid transparent',
+                      width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
+                    }}/>
+                ))}
+                <div style={{ width: 1, background: '#374151', margin: '0 4px' }}/>
+                <button onClick={undoLast}
+                  style={{
+                    background: 'transparent', color: '#FBFAF5',
+                    border: 'none', width: 32, height: 32, borderRadius: 4, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div style={{
+              background: '#0F172A', borderRadius: 12, overflow: 'hidden',
+              position: 'relative', display: 'flex', flexDirection: 'column',
+            }}>
+              <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {hasCamera && cameraEnabled ? (
+                  <video ref={localVideoRef} autoPlay playsInline muted
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}/>
+                ) : (
+                  <TeacherAvatar size={120}/>
+                )}
+              </div>
+              <div style={{
+                background: '#1F2937', color: '#FBFAF5',
+                padding: '10px 14px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>{teacherFullName}</div>
+                  <div style={{ fontSize: 11, opacity: .7 }}>Teacher</div>
+                </div>
+                {!micEnabled && (
+                  <span style={{ background: '#DC2626', color: '#FBFAF5', fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 99 }}>MUTED</span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* GALLERY MODE */}
+        {isGalleryMode && (
+          <div style={{
+            flex: 1, padding: 16,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gridAutoRows: '1fr', gap: 10, alignContent: 'start',
+          }}>
+            <div style={{
+              background: '#0F172A', borderRadius: 12,
+              overflow: 'hidden', position: 'relative',
+              border: '2px solid #C9A030', aspectRatio: '4 / 3',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {hasCamera && cameraEnabled ? (
+                <video ref={localVideoRef} autoPlay playsInline muted
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}/>
+              ) : (
+                <TeacherAvatar size={100}/>
+              )}
+              <div style={{
+                position: 'absolute', bottom: 8, left: 8, right: 8,
+                background: 'rgba(0,0,0,.7)', color: '#FBFAF5',
+                padding: '5px 10px', borderRadius: 6,
+                fontSize: 11, fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <span>{teacherFullName}</span>
+                <span style={{ background: '#C9A030', color: '#0F172A', fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 99 }}>TEACHER</span>
+              </div>
+            </div>
+
+            {['Amara Osei', 'Kofi Mensah', 'Faith Wanjiru', 'Brian Otieno', 'Lydia Achieng', 'Zara Kamau'].map((name, i) => (
+              <div key={i} style={{
+                background: '#1F2937', borderRadius: 12,
+                position: 'relative', border: '1px solid #374151', aspectRatio: '4 / 3',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <div style={{
+                  width: 70, height: 70, borderRadius: '50%',
+                  background: ['#7D1025', '#1E3A8A', '#166534', '#7C2D12', '#6B21A8', '#92400E'][i % 6],
+                  color: '#FBFAF5',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 22, fontWeight: 700,
+                  fontFamily: "'Instrument Serif', serif",
+                }}>{name.split(' ').map(w => w[0]).join('')}</div>
+                <div style={{
+                  position: 'absolute', bottom: 8, left: 8, right: 8,
+                  background: 'rgba(0,0,0,.7)', color: '#FBFAF5',
+                  padding: '5px 10px', borderRadius: 6,
+                  fontSize: 11, fontWeight: 700,
+                }}>{name}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* BOTTOM HINT BAR */}
+      <div style={{
+        background: '#1F2937', borderTop: '1px solid #374151',
+        padding: '6px 20px', color: '#9CA3AF',
+        fontSize: 11, fontWeight: 600,
+        display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14,
+        flexShrink: 0,
+      }}>
+        <div>
+          {isWhiteboardMode && (
+            <span><kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>P</kbd> Pen · <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>E</kbd> Eraser · <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>1-4</kbd> Colors · <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>M</kbd> Mic · <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>V</kbd> Cam</span>
+          )}
+          {!isWhiteboardMode && (
+            <span><kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>F</kbd> Whiteboard · <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>G</kbd> Gallery · <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>M</kbd> Mic · <kbd style={{ background: '#374151', padding: '1px 5px', borderRadius: 3, color: '#FBFAF5' }}>V</kbd> Cam</span>
+          )}
+        </div>
+        <div>
+          {hasCamera || hasMic ? <span>Devices: {hasCamera && 'Camera'}{hasCamera && hasMic && ' + '}{hasMic && 'Microphone'}</span> : <span style={{ color: '#FCD34D' }}>No camera or mic</span>}
+        </div>
+      </div>
+
+      {/* Leave confirm modal */}
+      {showLeaveConfirm && (
+        <div onClick={() => setShowLeaveConfirm(false)} style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)',
+          zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: '#FFF', borderRadius: 'var(--rxl)',
+            padding: 32, maxWidth: 420,
+            boxShadow: '0 20px 60px rgba(0,0,0,.3)',
+          }}>
+            <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: '#7D1025', marginBottom: 8 }}>End class?</h3>
+            <p style={{ fontSize: 14, color: 'var(--s600)', lineHeight: 1.6, marginBottom: 20 }}>
+              This will end the live session. Whiteboard contents will be saved.
+            </p>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowLeaveConfirm(false)}
+                style={{
+                  background: 'transparent', color: 'var(--s700)',
+                  border: '1px solid var(--border)',
+                  padding: '10px 20px', borderRadius: 'var(--rmd)',
+                  fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                }}>Continue Teaching</button>
+              <button onClick={confirmLeave}
+                style={{
+                  background: '#DC2626', color: '#FBFAF5', border: 'none',
+                  padding: '10px 20px', borderRadius: 'var(--rmd)',
+                  fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                }}>End Class</button>
             </div>
           </div>
         </div>
