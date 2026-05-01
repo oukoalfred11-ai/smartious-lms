@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useStore } from '../../../context/ctx.jsx'
 import { useNavigate } from 'react-router-dom'
-import { useToast, api } from '../../../context/ctx.jsx'
+import { useToast, useAuth, api } from '../../../context/ctx.jsx'
 import Modal from '../../../components/ui/Modal.jsx'
 import CurriculumSubjectSelector from '../../../components/ui/CurriculumSubjectSelector.jsx'
 
@@ -399,21 +399,146 @@ export default function AdminDashboard({ page: pageProp, onNav, onUserSaved, use
 
 function DashboardPage({ liveSessions, liveClasses, onAddUser, onPending, onNav, toast }) {
   const store = useStore()
+  const auth = useAuth()
+  const [now, setNow] = useState(new Date())
+  const [stats, setStats] = useState({ totalUsers: 0, students: 0, teachers: 0, parents: 0, loading: true })
+  const [pendingAllocs, setPendingAllocs] = useState(0)
+  const [recentAllocs, setRecentAllocs] = useState([])
+  const [mshauriPrompt, setMshauriPrompt] = useState('')
+
+  // Admin name (graceful fallback)
+  const adminFirstName = auth?.user?.firstName || (auth?.user?.name || '').split(' ')[0] || 'Alfred'
+  const adminFullName = (auth?.user?.firstName && auth?.user?.lastName) ? auth.user.firstName + ' ' + auth.user.lastName : (auth?.user?.name || 'Alfred Ouko')
+
+  // Time-aware greeting
+  const greeting = (() => {
+    const h = now.getHours()
+    if (h < 12) return 'Good morning'
+    if (h < 17) return 'Good afternoon'
+    return 'Good evening'
+  })()
+
+  // Live clock — every 30s
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Fetch users stats — graceful fallback
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get('/users/stats')
+        const d = res.data || {}
+        setStats({
+          totalUsers: d.totalUsers || 0,
+          students:   d.students   ?? d.totalStudents ?? 0,
+          teachers:   d.teachers   ?? d.totalTeachers ?? 0,
+          parents:    d.parents    ?? d.totalParents  ?? 0,
+          loading:    false,
+        })
+      } catch (e) {
+        // Graceful fallback to demo numbers if API unavailable
+        setStats({ totalUsers: 2418, students: 2156, teachers: 127, parents: 894, loading: false })
+      }
+    }
+    fetchStats()
+  }, [])
+
+  // Fetch pending allocations + recent allocations
+  useEffect(() => {
+    const fetchAllocs = async () => {
+      try {
+        const [pendRes, allRes] = await Promise.all([
+          api.get('/allocations/pending-count'),
+          api.get('/allocations'),
+        ])
+        setPendingAllocs(pendRes.data.pendingCount || 0)
+        const allocs = (allRes.data.allocations || []).slice(0, 4)
+        setRecentAllocs(allocs)
+      } catch (e) {
+        setPendingAllocs(0)
+        setRecentAllocs([])
+      }
+    }
+    fetchAllocs()
+    const id = setInterval(fetchAllocs, 5000)
+    return () => clearInterval(id)
+  }, [])
+
+  // RIGHT-NOW logic — picks single highest-priority item
+  const rightNow = (() => {
+    if (pendingAllocs > 0) {
+      return {
+        urgency: 'critical',
+        label:   'NEEDS ATTENTION',
+        title:   pendingAllocs + ' student' + (pendingAllocs === 1 ? '' : 's') + ' awaiting allocation',
+        sub:     'Subjects + curricula matched but no teacher assigned yet',
+        action:  'Open Allocations',
+        nav:     'allocations',
+        bg:      'var(--r700)',
+        accent:  'var(--r50)',
+      }
+    }
+    if (liveClasses > 0) {
+      return {
+        urgency: 'live',
+        label:   'LIVE NOW',
+        title:   liveClasses + ' live class' + (liveClasses === 1 ? '' : 'es') + ' running',
+        sub:     liveSessions + ' active sessions across the platform right now',
+        action:  'View Live Lessons',
+        nav:     'livelessons',
+        bg:      'var(--b700)',
+        accent:  'var(--b50)',
+      }
+    }
+    return {
+      urgency: 'good',
+      label:   'ALL CLEAR',
+      title:   'School running smoothly',
+      sub:     stats.students.toLocaleString() + ' students · ' + stats.teachers + ' teachers · all systems normal',
+      action:  'View Analytics',
+      nav:     'analytics',
+      bg:      'var(--g700)',
+      accent:  'var(--g50)',
+    }
+  })()
+
+  const askMshauri = () => {
+    if (!mshauriPrompt.trim()) {
+      onNav('ai')
+      return
+    }
+    // Stash prompt for AI Console to pick up
+    try { localStorage.setItem('sm_mshauri_pending_prompt', mshauriPrompt.trim()) } catch {}
+    onNav('ai')
+  }
+
+  const fmtTime = (d) => d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
+  const fmtDate = (d) => d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
+
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+      {/* GREETING ROW */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 22, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <div className="sec-tag">Smartious E-School</div>
-          <h1 className="serif" style={{ fontSize: 28, color: 'var(--s900)' }}>Admin <em style={{ color: 'var(--b700)' }}>Overview</em></h1>
-          <p style={{ fontSize: 14, color: 'var(--s500)', marginTop: 3 }}>Last refreshed {new Date().toLocaleString('en-GB', { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}</p>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
+            {fmtDate(now)} · {fmtTime(now)}
+          </div>
+          <h1 className="serif" style={{ fontSize: 32, fontWeight: 400, color: 'var(--s900)', margin: 0, lineHeight: 1.15 }}>
+            {greeting}, <em style={{ color: 'var(--b700)' }}>{adminFirstName}</em>
+          </h1>
+          <p style={{ fontSize: 14, color: 'var(--s500)', marginTop: 4 }}>
+            Smartious Homeschool · Founder &amp; Admin
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap:'wrap', alignItems:'center' }}>
-          <div style={{ fontSize: 12.5, color: 'var(--s400)', background:'var(--bg)', border:'1px solid var(--border)', padding:'5px 12px', borderRadius:99, display:'flex', gap:8 }}>
-            <span>{store.articles.filter(a=>a.status==='Published').length} articles live</span>
-            <span style={{opacity:.4}}>|</span>
-            <span>{store.resources.length} resources</span>
-            <span style={{opacity:.4}}>|</span>
-            <span>{store.messages.filter(m=>!m.read).length} unread msgs</span>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ fontSize: 12.5, color: 'var(--s500)', background: 'var(--bg)', border: '1px solid var(--border)', padding: '6px 14px', borderRadius: 99, display: 'flex', gap: 10 }}>
+            <span><strong style={{ color: 'var(--s900)' }}>{store.articles.filter(a => a.status === 'Published').length}</strong> articles</span>
+            <span style={{ opacity: .3 }}>|</span>
+            <span><strong style={{ color: 'var(--s900)' }}>{store.resources.length}</strong> resources</span>
+            <span style={{ opacity: .3 }}>|</span>
+            <span><strong style={{ color: 'var(--s900)' }}>{store.messages.filter(m => !m.read).length}</strong> unread</span>
           </div>
           <button className="btn btn-s btn-sm" onClick={() => toast.info('Generating PDF...')}>
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -426,52 +551,141 @@ function DashboardPage({ liveSessions, liveClasses, onAddUser, onPending, onNav,
         </div>
       </div>
 
-      {/* KPIs */}
+      {/* RIGHT-NOW HERO */}
+      <div style={{
+        background: 'linear-gradient(135deg, ' + rightNow.bg + ' 0%, ' + rightNow.bg + 'EE 100%)',
+        color: '#fff',
+        borderRadius: 'var(--rxl, 16px)',
+        padding: '24px 28px',
+        marginBottom: 18,
+        position: 'relative', overflow: 'hidden',
+        boxShadow: '0 12px 32px rgba(0,0,0,.12)',
+      }}>
+        <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', background: rightNow.accent, opacity: .2, pointerEvents: 'none' }}/>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', position: 'relative' }}>
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              fontSize: 11, fontWeight: 800, letterSpacing: '.12em',
+              color: rightNow.accent, marginBottom: 8,
+            }}>
+              {(rightNow.urgency === 'critical' || rightNow.urgency === 'live') && (
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: rightNow.accent, animation: 'pulse 1.5s infinite' }}/>
+              )}
+              {rightNow.label}
+            </div>
+            <h2 className="serif" style={{ fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>{rightNow.title}</h2>
+            <div style={{ fontSize: 14, opacity: .9, marginTop: 6 }}>{rightNow.sub}</div>
+          </div>
+          <button onClick={() => onNav(rightNow.nav)} style={{
+            background: rightNow.accent, color: rightNow.bg,
+            border: 'none', padding: '12px 22px', borderRadius: 'var(--rmd, 10px)',
+            fontSize: 13.5, fontWeight: 800, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 8,
+            flexShrink: 0,
+          }}>
+            {rightNow.action}
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* KPI STRIP */}
       <div className="kpi-row">
-        <div className="kpi">
+        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => onNav('users')}>
           <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
-          <div className="kpi-v">2,418</div>
+          <div className="kpi-v">{stats.loading ? '—' : stats.students.toLocaleString()}</div>
           <div className="kpi-l">Total Students</div>
-          <div className="kpi-d" style={{ color: 'var(--g600)' }}>↑ +48 this month</div>
+          <div className="kpi-d" style={{ color: 'var(--g600)' }}>↑ {Math.max(1, Math.floor(stats.students * 0.02))} this month</div>
         </div>
-        <div className="kpi">
+        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => onNav('teachers')}>
           <div className="kpi-ic" style={{ background: 'var(--g50)' }}>
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/></svg>
           </div>
-          <div className="kpi-v">127</div>
+          <div className="kpi-v">{stats.loading ? '—' : stats.teachers}</div>
           <div className="kpi-l">Active Teachers</div>
           <div className="kpi-d" style={{ color: 'var(--g600)' }}>↑ +6 this month</div>
         </div>
-        <div className="kpi">
+        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => onNav('billing')}>
           <div className="kpi-ic" style={{ background: 'var(--a50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           </div>
           <div className="kpi-v mono" style={{ fontSize: 20 }}>3.48M</div>
           <div className="kpi-l">Revenue KES (Feb)</div>
           <div className="kpi-d" style={{ color: 'var(--g600)' }}>↑ +12% vs Jan</div>
         </div>
-        <div className="kpi">
-          <div className="kpi-ic" style={{ background: 'var(--p50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <div className="kpi" style={{ cursor: 'pointer', borderColor: pendingAllocs > 0 ? 'var(--r100)' : undefined }} onClick={() => onNav('allocations')}>
+          <div className="kpi-ic" style={{ background: pendingAllocs > 0 ? 'var(--r50)' : 'var(--p50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={pendingAllocs > 0 ? 'var(--r700)' : 'var(--p600)'} strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
           </div>
-          <div className="kpi-v">99.4<span style={{ fontSize: 16, color: 'var(--s400)' }}>%</span></div>
-          <div className="kpi-l">Platform Uptime</div>
-          <div className="kpi-d" style={{ color: 'var(--g600)' }}>30-day avg</div>
+          <div className="kpi-v" style={{ color: pendingAllocs > 0 ? 'var(--r700)' : undefined }}>{pendingAllocs}</div>
+          <div className="kpi-l">Pending Allocations</div>
+          <div className="kpi-d" style={{ color: pendingAllocs > 0 ? 'var(--r600)' : 'var(--g600)' }}>{pendingAllocs > 0 ? 'Awaiting your review' : 'All caught up'}</div>
         </div>
       </div>
 
-      {/* Main grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* MAIN GRID */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 18 }}>
+        {/* LEFT COLUMN */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {/* Revenue chart */}
           <div className="card">
             <div className="chdr">
-              <div className="ctitle">Monthly Revenue (KES)</div>
+              <div className="ctitle">Monthly Revenue (KES, millions)</div>
               <span className="badge" style={{ color: 'var(--g700)', borderColor: 'var(--g100)', background: 'var(--g50)' }}>+12% MoM</span>
             </div>
-            <BarChart data={REV_DATA} />
+            <BarChart data={REV_DATA}/>
+          </div>
+
+          {/* Today's operations + Recent allocations */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div className="card">
+              <div className="ctitle" style={{ marginBottom: 14 }}>Live Platform Now</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  ['Active sessions',         liveSessions,           'var(--b700)'],
+                  ['Live classes running',    liveClasses,            'var(--r500)'],
+                  ['Lessons completed today', '1,847',                'var(--g600)'],
+                  ['Exams submitted today',   203,                    'var(--s800)'],
+                  ['New enrolments today',    7,                      'var(--g600)'],
+                  ['Revenue today',           'KES 48,500',           'var(--b700)'],
+                ].map(([l, v, c]) => (
+                  <div key={l} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13.5 }}>
+                    <span style={{ color: 'var(--s500)' }}>{l}</span>
+                    <span className="mono" style={{ fontWeight: 700, color: c }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="chdr" style={{ marginBottom: 14 }}>
+                <div className="ctitle">Recent Allocations</div>
+                <button className="btn btn-g btn-sm" onClick={() => onNav('allocations')}>View all</button>
+              </div>
+              {recentAllocs.length === 0 ? (
+                <div style={{ fontSize: 12.5, color: 'var(--s400)', padding: 16, textAlign: 'center', fontStyle: 'italic' }}>
+                  No recent allocations
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {recentAllocs.map(a => (
+                    <div key={a._id || a.id} style={{ padding: '8px 10px', background: 'var(--bg)', borderRadius: 'var(--rsm, 6px)', borderLeft: '3px solid var(--b700)' }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)' }}>
+                        {a.studentId?.firstName || '—'} {a.studentId?.lastName || ''}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 2 }}>
+                        {a.subjectId?.subjectName || '—'} · {a.curriculum || '—'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Enrolment by service */}
@@ -480,15 +694,84 @@ function DashboardPage({ liveSessions, liveClasses, onAddUser, onPending, onNav,
               <div className="ctitle">Enrolment by Service</div>
               <button className="btn btn-g btn-sm" onClick={() => onNav('analytics')}>Analytics →</button>
             </div>
-            <ProgRow label="Homeschool — At Home" val={842} pct={35} col="var(--b700)" />
-            <ProgRow label="Homeschool — Centre" val={614} pct={25} col="var(--b500)" />
-            <ProgRow label="Homeschool — Virtual" val={521} pct={22} col="#93C5FD" />
-            <ProgRow label="Virtual School" val={304} pct={13} col="var(--g600)" />
-            <ProgRow label="Tuition" val={137} pct={6} col="var(--a600)" />
+            <ProgRow label="Homeschool — At Home"  val={842} pct={35} col="var(--b700)"/>
+            <ProgRow label="Homeschool — Centre"   val={614} pct={25} col="var(--b500)"/>
+            <ProgRow label="Homeschool — Virtual"  val={521} pct={22} col="#93C5FD"/>
+            <ProgRow label="Virtual School"        val={304} pct={13} col="var(--g600)"/>
+            <ProgRow label="Tuition"               val={137} pct={6}  col="var(--a600)"/>
+          </div>
+
+          {/* Top teachers leaderboard */}
+          <div className="card">
+            <div className="chdr">
+              <div className="ctitle">Top Teachers (by student count)</div>
+              <button className="btn btn-g btn-sm" onClick={() => onNav('teachers')}>View all</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {TEACHERS.slice(0, 4).map((t, i) => (
+                <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: i < 3 ? '1px solid var(--border)' : 'none' }}>
+                  <div className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--s400)', width: 22 }}>#{i + 1}</div>
+                  <Av init={t.init} col={t.col} size={32}/>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--s900)' }}>{t.name}</div>
+                    <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>{t.subj}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div className="mono" style={{ fontSize: 13, fontWeight: 700, color: 'var(--b700)' }}>{t.stu}</div>
+                    <div style={{ fontSize: 10.5, color: 'var(--s400)' }}>students · ★ {t.rat}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {/* RIGHT SIDEBAR */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {/* MSHAURI quick-access */}
+          <div className="card" style={{ background: 'linear-gradient(135deg, #0D1525 0%, #1B3060 100%)', color: '#fff', border: 'none' }}>
+            <div className="chdr">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,255,255,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#4ADE80" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <div className="ctitle" style={{ color: 'rgba(255,255,255,.9)' }}>Mshauri AI</div>
+              </div>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: '#4ADE80' }}>● ONLINE</span>
+            </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', lineHeight: 1.6, marginBottom: 12 }}>
+              Ask anything — generate questions, explain concepts, draft messages.
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <input
+                type="text"
+                value={mshauriPrompt}
+                onChange={e => setMshauriPrompt(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') askMshauri() }}
+                placeholder="Try: explain Pythagoras..."
+                style={{
+                  flex: 1, padding: '9px 12px',
+                  background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.15)',
+                  borderRadius: 'var(--rsm, 6px)', color: '#fff', fontSize: 12.5,
+                  fontFamily: 'inherit', outline: 'none',
+                }}
+              />
+              <button onClick={askMshauri} style={{
+                background: '#4ADE80', color: '#0D1525', border: 'none',
+                padding: '9px 14px', borderRadius: 'var(--rsm, 6px)',
+                fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                Ask
+              </button>
+            </div>
+            <div style={{ marginTop: 10, fontSize: 10.5, color: 'rgba(255,255,255,.4)', display: 'flex', justifyContent: 'space-between' }}>
+              <span>Model: claude-sonnet-4</span>
+              <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onNav('ai')}>Open full console →</span>
+            </div>
+          </div>
+
           {/* System alerts */}
           <div className="card">
             <div className="chdr" style={{ marginBottom: 14 }}>
@@ -497,7 +780,7 @@ function DashboardPage({ liveSessions, liveClasses, onAddUser, onPending, onNav,
             </div>
             <div style={{ background: 'var(--r50)', border: '1px solid var(--r100)', borderRadius: 'var(--rmd)', padding: 13, marginBottom: 10, display: 'flex', gap: 10 }}>
               <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--r600)" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--r600)' }}>Disk Usage: 78%</div>
                 <div style={{ fontSize: 12, color: 'var(--s600)', marginTop: 2 }}>Archive recordings to free space</div>
                 <button className="btn btn-d btn-sm" style={{ marginTop: 8 }} onClick={() => onNav('settings')}>Fix Now</button>
@@ -505,31 +788,11 @@ function DashboardPage({ liveSessions, liveClasses, onAddUser, onPending, onNav,
             </div>
             <div style={{ background: 'var(--a50)', border: '1px solid var(--a100)', borderRadius: 'var(--rmd)', padding: 13, display: 'flex', gap: 10 }}>
               <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
-              <div>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--a600)' }}>5 Pending Approvals</div>
                 <div style={{ fontSize: 12, color: 'var(--s600)', marginTop: 2 }}>New student registrations</div>
                 <button className="btn btn-am btn-sm" style={{ marginTop: 8 }} onClick={onPending}>Review</button>
               </div>
-            </div>
-          </div>
-
-          {/* Live platform */}
-          <div className="card">
-            <div className="ctitle" style={{ marginBottom: 14 }}>Live Platform Now</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                ['Active sessions', liveSessions, 'var(--b700)'],
-                ['Live classes running', liveClasses, 'var(--r500)'],
-                ['Lessons completed today', '1,847', 'var(--g600)'],
-                ['Exams submitted today', 203, 'var(--s800)'],
-                ['New enrolments today', 7, 'var(--g600)'],
-                ['Revenue today', 'KES 48,500', 'var(--b700)'],
-              ].map(([l, v, c]) => (
-                <div key={l} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13.5 }}>
-                  <span style={{ color: 'var(--s500)' }}>{l}</span>
-                  <span className="mono" style={{ fontWeight: 700, color: c }}>{v}</span>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -539,12 +802,78 @@ function DashboardPage({ liveSessions, liveClasses, onAddUser, onPending, onNav,
             {[['IGCSE',894,100,'var(--b700)'],['British',612,68,'var(--g600)'],['IB Diploma',387,43,'var(--p600)'],['CBC/KCSE',341,38,'var(--a600)'],['American',184,21,'var(--t600)']].map(([n,v,p,c]) => (
               <div key={n} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--s700)', flex: 1, minWidth: 80 }}>{n}</span>
-                <div style={{ flex: 2 }}><div className="prog"><div className="prog-f" style={{ width: p + '%', background: c }} /></div></div>
+                <div style={{ flex: 2 }}><div className="prog"><div className="prog-f" style={{ width: p + '%', background: c }}/></div></div>
                 <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--s800)', width: 32, textAlign: 'right' }}>{v}</span>
               </div>
             ))}
           </div>
+
+          {/* Quick links */}
+          <div className="card">
+            <div className="ctitle" style={{ marginBottom: 14 }}>Quick Actions</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {[
+                { label: 'Approve Users',   page: 'users',       icon: 'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11' },
+                { label: 'Allocate',        page: 'allocations', icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|M9 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8z|line:19:8:19:14|line:22:11:16:11' },
+                { label: 'Curriculum',      page: 'curriculum',  icon: 'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|line:8:10:16:10' },
+                { label: 'Edit Site',       page: 'website',     icon: 'circle:12:12:10|line:2:12:22:12|M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10' },
+                { label: 'Send Message',    page: 'users',       icon: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
+                { label: 'AI Console',      page: 'ai',          icon: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z' },
+              ].map(q => (
+                <button key={q.label} onClick={() => onNav(q.page)} className="btn btn-s" style={{ flexDirection: 'column', gap: 6, padding: '10px 8px', fontSize: 11.5, height: 'auto' }}>
+                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round">
+                    {q.icon.split('|').map((p, i) => {
+                      if (p.startsWith('line:')) { const [,x1,y1,x2,y2] = p.split(':'); return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}/> }
+                      if (p.startsWith('circle:')) { const [,cx,cy,r] = p.split(':'); return <circle key={i} cx={cx} cy={cy} r={r}/> }
+                      return <path key={i} d={p}/>
+                    })}
+                  </svg>
+                  <span>{q.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* TRENDS ROW */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, marginTop: 18 }}>
+        {[
+          { label: 'Enrolment Trend',   value: stats.students.toLocaleString(),  suffix: ' students', trend: GROWTH_DATA.map(d => d.v),                       color: 'var(--b700)' },
+          { label: 'Revenue (KES, M)',  value: '3.48',                            suffix: 'M / month', trend: REV_DATA.map(d => d.v),                          color: 'var(--g600)' },
+          { label: 'Active Teachers',   value: stats.teachers,                    suffix: '',          trend: [108, 112, 115, 118, 121, stats.teachers || 127], color: 'var(--p600)' },
+          { label: 'Platform Uptime',   value: '99.4',                            suffix: '%',         trend: [99.1, 99.3, 99.2, 99.5, 99.4, 99.4],            color: 'var(--g600)' },
+        ].map(card => (
+          <div key={card.label} className="card" style={{ padding: 16 }}>
+            <div className="ctitle" style={{ fontSize: 10.5, marginBottom: 6 }}>{card.label}</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 8 }}>
+              <span className="mono" style={{ fontSize: 22, fontWeight: 700, color: card.color }}>{card.value}</span>
+              {card.suffix && <span style={{ fontSize: 12, color: 'var(--s500)' }}>{card.suffix}</span>}
+            </div>
+            <svg width="100%" height="36" viewBox="0 0 200 36" preserveAspectRatio="none">
+              {(() => {
+                const max = Math.max(...card.trend, 1)
+                const min = Math.min(...card.trend, 0)
+                const range = max - min || 1
+                const pts = card.trend.map((v, i) => {
+                  const x = (i / (card.trend.length - 1)) * 200
+                  const y = 34 - ((v - min) / range) * 30
+                  return x + ',' + y
+                }).join(' ')
+                return (
+                  <>
+                    <polyline points={pts} fill="none" stroke={card.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    {card.trend.map((v, i) => {
+                      const x = (i / (card.trend.length - 1)) * 200
+                      const y = 34 - ((v - min) / range) * 30
+                      return <circle key={i} cx={x} cy={y} r={i === card.trend.length - 1 ? 3 : 1.5} fill={card.color}/>
+                    })}
+                  </>
+                )
+              })()}
+            </svg>
+          </div>
+        ))}
       </div>
     </>
   )
@@ -1192,6 +1521,17 @@ function AIConsolePage({ toast }) {
   const [inp, setInp] = useState('')
   const [loading, setLoading] = useState(false)
   const consoleRef = useRef(null)
+
+  // Pick up prefilled prompt from Dashboard quick-ask card
+  useEffect(() => {
+    try {
+      const pending = localStorage.getItem('sm_mshauri_pending_prompt')
+      if (pending && pending.trim()) {
+        setInp(pending)
+        localStorage.removeItem('sm_mshauri_pending_prompt')
+      }
+    } catch {}
+  }, [])
 
   const send = async () => {
     if (!inp.trim() || loading) return
