@@ -1618,618 +1618,947 @@ function AIConsolePage({ toast }) {
 }
 
 function AllocationsPage({ refreshKey, toast }) {
-   const [students, setStudents] = useState([])
-   const [allocations, setAllocations] = useState([])
-   const [loading, setLoading] = useState(true)
-   const [error, setError] = useState(null)
-   const [search, setSearch] = useState('')
-   const [selectedStudent, setSelectedStudent] = useState(null)
-   const [allocatingSubject, setAllocatingSubject] = useState(null)
-   const [showAllocateModal, setShowAllocateModal] = useState(false)
-   const [selectedTeacher, setSelectedTeacher] = useState(null)
-   const [availableTeachers, setAvailableTeachers] = useState([])
-   const [loadingTeachers, setLoadingTeachers] = useState(false)
+  // ── DATA STATE ────────────────────────────────────
+  const [students, setStudents] = useState([])
+  const [allocations, setAllocations] = useState([])
+  const [allTeachers, setAllTeachers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-   useEffect(() => {
-     fetchData()
-   }, [refreshKey])
+  // ── UI STATE ──────────────────────────────────────
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')        // all | pending | complete | nosubjects
+  const [curriculumFilter, setCurriculumFilter] = useState('all')
+  const [yearFilter, setYearFilter] = useState('all')
+  const [viewMode, setViewMode] = useState('all')                // all | pending-queue
+  const [selectedStudent, setSelectedStudent] = useState(null)
 
-    const fetchData = async () => {
-      try {
-        const [studentsRes, allocationsRes] = await Promise.all([
-          api.get('/users/students/list'),
-          api.get('/allocations')
-        ])
-        let studentsData = studentsRes.data.students || []
-        const allocationsData = allocationsRes.data.allocations || []
-        
-        // Sort students by latest created (descending)
-        studentsData.sort((a, b) => {
-          const dateA = new Date(a.createdAt || 0).getTime()
-          const dateB = new Date(b.createdAt || 0).getTime()
-          return dateB - dateA
-        })
-        
-        console.log('Students loaded:', studentsData.length, studentsData)
-        console.log('Allocations loaded:', allocationsData.length)
-        
-        setStudents(studentsData)
-        setAllocations(allocationsData)
-        setLoading(false)
-      } catch (e) {
-        console.error('Fetch error:', e)
-        setError(e.response?.data?.message || e.message)
-        setLoading(false)
-      }
+  // ── ALLOCATION MODAL STATE ────────────────────────
+  const [allocatingSubject, setAllocatingSubject] = useState(null)
+  const [showAllocateModal, setShowAllocateModal] = useState(false)
+  const [selectedTeacher, setSelectedTeacher] = useState(null)
+  const [availableTeachers, setAvailableTeachers] = useState([])
+  const [loadingTeachers, setLoadingTeachers] = useState(false)
+
+  // ── BULK ALLOCATION STATE ─────────────────────────
+  const [showBulkModal, setShowBulkModal] = useState(false)
+  const [bulkLoading, setBulkLoading] = useState(false)
+  const [bulkPreview, setBulkPreview] = useState([])             // [{ studentId, studentName, subjectId, subjectName, curriculum, suggestedTeachers, selectedTeacherId, included }]
+  const [bulkSendEmails, setBulkSendEmails] = useState(false)    // SAFETY: default OFF
+  const [bulkExecuting, setBulkExecuting] = useState(false)
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0, failed: [] })
+
+  // ── INITIAL FETCH ─────────────────────────────────
+  useEffect(() => {
+    fetchData()
+  }, [refreshKey])
+
+  const fetchData = async () => {
+    try {
+      const [studentsRes, allocationsRes, teachersRes] = await Promise.all([
+        api.get('/users/students/list'),
+        api.get('/allocations'),
+        api.get('/users/teachers/list').catch(() => ({ data: { teachers: [] } })),
+      ])
+      let studentsData = studentsRes.data.students || []
+      const allocationsData = allocationsRes.data.allocations || []
+
+      // Sort students by latest created (descending)
+      studentsData.sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0).getTime()
+        const dateB = new Date(b.createdAt || 0).getTime()
+        return dateB - dateA
+      })
+
+      setStudents(studentsData)
+      setAllocations(allocationsData)
+      setAllTeachers(teachersRes.data.teachers || [])
+      setLoading(false)
+    } catch (e) {
+      setError(e.response?.data?.message || e.message)
+      setLoading(false)
     }
+  }
 
-   // Get student summary data
-   const getStudentSummary = (student) => {
-     const subjectsArray = Array.isArray(student.subjects) ? student.subjects : []
-     let fullyAllocated = 0
-     let pendingAllocation = 0
+  // ── HELPERS ────────────────────────────────────────
+  const getStudentSummary = (student) => {
+    const subjectsArray = Array.isArray(student.subjects) ? student.subjects : []
+    let fullyAllocated = 0
+    let pendingAllocation = 0
 
-     subjectsArray.forEach(subject => {
-       const subjectId = subject._id || subject
-       const allocation = allocations.find(a => 
-         a.studentId._id === student._id && 
-         a.subjectId._id === subjectId && 
-         a.status === 'Active'
-       )
-       if (allocation) {
-         fullyAllocated++
-       } else {
-         pendingAllocation++
-       }
-     })
-
-     return {
-       totalSubjects: subjectsArray.length,
-       fullyAllocated,
-       pendingAllocation,
-       subjects: subjectsArray
-     }
-   }
-
-    // Filter students based on search (show ALL students, even without subjects)
-    const filtered = students.filter(student => {
-      const q = search.toLowerCase()
-      const studentName = (student.firstName + ' ' + student.lastName).toLowerCase()
-      const studentEmail = (student.email || '').toLowerCase()
-      return studentName.includes(q) || studentEmail.includes(q)
-    })
-
-    // Open allocate modal and fetch qualified teachers
-    const handleAllocateClick = async (studentId, subjectId, curriculum) => {
-      // Check if there's an existing allocation for this subject
-      const existingAllocation = allocations.find(a =>
-        a.studentId._id === studentId &&
+    subjectsArray.forEach(subject => {
+      const subjectId = subject._id || subject
+      const allocation = allocations.find(a =>
+        a.studentId._id === student._id &&
         a.subjectId._id === subjectId &&
         a.status === 'Active'
       )
-      
-      setAllocatingSubject({ 
-        studentId, 
-        subjectId, 
-        curriculum,
-        allocationId: existingAllocation?._id || null
-      })
-      setShowAllocateModal(true)
-      setLoadingTeachers(true)
-      setSelectedTeacher(null)
+      if (allocation) fullyAllocated++
+      else pendingAllocation++
+    })
 
-      try {
-        const res = await api.get(`/allocations/suggest-teachers/${studentId}/${subjectId}`)
-        setAvailableTeachers(res.data.qualifiedTeachers || [])
-      } catch (e) {
-        toast.error('Failed to load qualified teachers: ' + e.message)
-        setAvailableTeachers([])
-      } finally {
-        setLoadingTeachers(false)
-      }
+    return {
+      totalSubjects: subjectsArray.length,
+      fullyAllocated,
+      pendingAllocation,
+      subjects: subjectsArray,
+    }
+  }
+
+  // Avatar color from name (deterministic, uses tokens)
+  const avColor = (name) => {
+    const tokens = ['var(--b700)', 'var(--g600)', 'var(--p600)', 'var(--a600)', 'var(--t600)', 'var(--r600)']
+    let hash = 0
+    for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
+    return tokens[Math.abs(hash) % tokens.length]
+  }
+
+  // ── KPI COMPUTATIONS ──────────────────────────────
+  const kpiTotalStudents = students.length
+  const kpiAllocatedSubjects = students.reduce((sum, s) => sum + getStudentSummary(s).fullyAllocated, 0)
+  const kpiTotalSubjects = students.reduce((sum, s) => sum + getStudentSummary(s).totalSubjects, 0)
+  const kpiPendingSubjects = students.reduce((sum, s) => sum + getStudentSummary(s).pendingAllocation, 0)
+  const kpiPendingStudents = students.filter(s => getStudentSummary(s).pendingAllocation > 0).length
+  const kpiAvailableTeachers = allTeachers.length
+
+  // ── FILTER OPTIONS ─────────────────────────────────
+  const allCurricula = [...new Set(students.map(s => s.curriculum).filter(Boolean))].sort()
+  const allYears = [...new Set(students.map(s => s.grade).filter(Boolean))].sort()
+
+  // ── FILTERED STUDENTS ─────────────────────────────
+  const filtered = students.filter(student => {
+    const q = search.toLowerCase()
+    const studentName = (student.firstName + ' ' + student.lastName).toLowerCase()
+    const studentEmail = (student.email || '').toLowerCase()
+    if (q && !studentName.includes(q) && !studentEmail.includes(q)) return false
+
+    if (curriculumFilter !== 'all' && student.curriculum !== curriculumFilter) return false
+    if (yearFilter !== 'all' && student.grade !== yearFilter) return false
+
+    if (statusFilter !== 'all') {
+      const summary = getStudentSummary(student)
+      if (statusFilter === 'pending' && summary.pendingAllocation === 0) return false
+      if (statusFilter === 'complete' && (summary.totalSubjects === 0 || summary.pendingAllocation > 0)) return false
+      if (statusFilter === 'nosubjects' && summary.totalSubjects > 0) return false
     }
 
-    // Handle allocate/reassign teacher
-    const handleAllocateTeacher = async () => {
-      if (!selectedTeacher) {
-        toast.error('Please select a teacher')
-        return
-      }
-
-      try {
-        const isReassignment = !!allocatingSubject.allocationId
-
-        if (isReassignment) {
-          // Update existing allocation
-          await api.patch(`/allocations/${allocatingSubject.allocationId}`, {
-            teacherId: selectedTeacher
-          })
-          toast.ok('Teacher reassigned successfully')
-        } else {
-          // Create new allocation
-          await api.post('/allocations', {
-            studentId: allocatingSubject.studentId,
-            subjectId: allocatingSubject.subjectId,
-            teacherId: selectedTeacher,
-            sendEmails: true
-          })
-          toast.ok('Allocation created successfully')
-        }
-
-        // Reset UI state
-        setShowAllocateModal(false)
-        setAllocatingSubject(null)
-        setSelectedTeacher(null)
-        fetchData()
-      } catch (e) {
-        toast.error('Failed to save allocation: ' + (e.response?.data?.message || e.message))
-      }
+    if (viewMode === 'pending-queue') {
+      const summary = getStudentSummary(student)
+      if (summary.pendingAllocation === 0) return false
     }
 
-    // Handle reassign teacher (kept for backwards compatibility)
-    const handleReassign = async (allocationId) => {
-      if (!selectedTeacher) {
-        toast.error('Please select a teacher')
-        return
-      }
+    return true
+  })
 
-      try {
-        await api.patch(`/allocations/${allocationId}`, {
-          teacherId: selectedTeacher
+  // ── ALLOCATE FLOW ─────────────────────────────────
+  const handleAllocateClick = async (studentId, subjectId, curriculum) => {
+    const existingAllocation = allocations.find(a =>
+      a.studentId._id === studentId &&
+      a.subjectId._id === subjectId &&
+      a.status === 'Active'
+    )
+
+    setAllocatingSubject({
+      studentId,
+      subjectId,
+      curriculum,
+      allocationId: existingAllocation?._id || null,
+    })
+    setShowAllocateModal(true)
+    setLoadingTeachers(true)
+    setSelectedTeacher(null)
+
+    try {
+      const res = await api.get(`/allocations/suggest-teachers/${studentId}/${subjectId}`)
+      const teachers = res.data.qualifiedTeachers || []
+      setAvailableTeachers(teachers)
+      // Auto-select the first (best match) teacher for one-click flow
+      if (teachers.length > 0 && !existingAllocation) {
+        setSelectedTeacher(teachers[0]._id)
+      }
+    } catch (e) {
+      toast.error('Failed to load qualified teachers: ' + e.message)
+      setAvailableTeachers([])
+    } finally {
+      setLoadingTeachers(false)
+    }
+  }
+
+  const handleAllocateTeacher = async () => {
+    if (!selectedTeacher) {
+      toast.error('Please select a teacher')
+      return
+    }
+
+    try {
+      const isReassignment = !!allocatingSubject.allocationId
+
+      if (isReassignment) {
+        await api.patch(`/allocations/${allocatingSubject.allocationId}`, {
+          teacherId: selectedTeacher,
         })
         toast.ok('Teacher reassigned successfully')
-        setShowAllocateModal(false)
-        fetchData()
+      } else {
+        await api.post('/allocations', {
+          studentId: allocatingSubject.studentId,
+          subjectId: allocatingSubject.subjectId,
+          teacherId: selectedTeacher,
+          sendEmails: true,
+        })
+        toast.ok('Allocation created · emails sent')
+      }
+
+      setShowAllocateModal(false)
+      setAllocatingSubject(null)
+      setSelectedTeacher(null)
+      fetchData()
+    } catch (e) {
+      toast.error('Failed to save allocation: ' + (e.response?.data?.message || e.message))
+    }
+  }
+
+  // ── BULK ALLOCATE FLOW ────────────────────────────
+  const startBulkAllocate = async () => {
+    setBulkLoading(true)
+    setShowBulkModal(true)
+    setBulkSendEmails(false)
+    setBulkProgress({ done: 0, total: 0, failed: [] })
+
+    // Build list of all pending (student, subject) pairs
+    const pendingPairs = []
+    students.forEach(student => {
+      // Apply curriculum filter to bulk preview if set
+      if (curriculumFilter !== 'all' && student.curriculum !== curriculumFilter) return
+
+      const summary = getStudentSummary(student)
+      summary.subjects.forEach(subject => {
+        const subjectId = subject._id || subject
+        const subjectName = typeof subject === 'object' ? subject.subjectName : 'Unknown'
+        const isAllocated = allocations.some(a =>
+          a.studentId._id === student._id &&
+          a.subjectId._id === subjectId &&
+          a.status === 'Active'
+        )
+        if (!isAllocated) {
+          pendingPairs.push({
+            studentId: student._id,
+            studentName: student.firstName + ' ' + student.lastName,
+            studentEmail: student.email,
+            subjectId,
+            subjectName,
+            curriculum: student.curriculum,
+            year: student.grade,
+          })
+        }
+      })
+    })
+
+    if (pendingPairs.length === 0) {
+      toast.info('No pending allocations to process')
+      setShowBulkModal(false)
+      setBulkLoading(false)
+      return
+    }
+
+    // Cap at 50 to prevent overwhelming the backend
+    const capped = pendingPairs.slice(0, 50)
+
+    // Fetch suggestions for each in sequence (parallel would flood the API)
+    const preview = []
+    for (let i = 0; i < capped.length; i++) {
+      const pair = capped[i]
+      try {
+        const res = await api.get(`/allocations/suggest-teachers/${pair.studentId}/${pair.subjectId}`)
+        const suggestedTeachers = res.data.qualifiedTeachers || []
+        preview.push({
+          ...pair,
+          suggestedTeachers,
+          selectedTeacherId: suggestedTeachers[0]?._id || null,
+          included: suggestedTeachers.length > 0,
+        })
       } catch (e) {
-        toast.error('Failed to reassign: ' + (e.response?.data?.message || e.message))
+        preview.push({
+          ...pair,
+          suggestedTeachers: [],
+          selectedTeacherId: null,
+          included: false,
+          error: e.message,
+        })
+      }
+      // Update preview as we go for live feedback
+      setBulkPreview([...preview])
+    }
+
+    setBulkLoading(false)
+    if (pendingPairs.length > 50) {
+      toast.info(`Showing first 50 of ${pendingPairs.length} pending. Process these and run again.`)
+    }
+  }
+
+  const updateBulkPreviewRow = (index, changes) => {
+    setBulkPreview(prev => prev.map((row, i) => i === index ? { ...row, ...changes } : row))
+  }
+
+  const executeBulkAllocate = async () => {
+    const toExecute = bulkPreview.filter(r => r.included && r.selectedTeacherId)
+    if (toExecute.length === 0) {
+      toast.error('No rows selected for allocation')
+      return
+    }
+
+    if (!confirm(`Create ${toExecute.length} allocation${toExecute.length === 1 ? '' : 's'}?` + (bulkSendEmails ? '\n\nEmails WILL be sent to parents.' : '\n\nEmails will NOT be sent.'))) return
+
+    setBulkExecuting(true)
+    setBulkProgress({ done: 0, total: toExecute.length, failed: [] })
+
+    const failed = []
+
+    // Execute one at a time (sequential, not parallel — protects backend)
+    for (let i = 0; i < toExecute.length; i++) {
+      const row = toExecute[i]
+      try {
+        await api.post('/allocations', {
+          studentId: row.studentId,
+          subjectId: row.subjectId,
+          teacherId: row.selectedTeacherId,
+          sendEmails: bulkSendEmails,
+        })
+        setBulkProgress(p => ({ ...p, done: i + 1, failed: [...failed] }))
+      } catch (e) {
+        failed.push({
+          row,
+          error: e.response?.data?.message || e.message,
+        })
+        setBulkProgress(p => ({ ...p, done: i + 1, failed: [...failed] }))
       }
     }
 
-    if (loading) return <div style={{ textAlign: 'center', padding: 40 }}>Loading allocations...</div>
-    if (error) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--r600)' }}>Error: {error}</div>
+    setBulkExecuting(false)
 
-    if (students.length === 0) {
-      return (
-        <>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-            <div><div className="sec-tag">Enrolment System</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student Allocations</h2>
-              <p style={{ color: 'var(--s500)', fontSize: 13.5 }}>Live matching engine—automatically flagging unallocated subjects.</p></div>
-          </div>
-          <div style={{ padding: 40, textAlign: 'center', background: 'var(--s50)', borderRadius: 'var(--rmd)', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 14, color: 'var(--s600)' }}>No students found</div>
-            <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 8 }}>Add students to the system first</div>
-          </div>
-        </>
-      )
+    const succeeded = toExecute.length - failed.length
+    if (failed.length === 0) {
+      toast.ok(`All ${succeeded} allocations created successfully`)
+    } else {
+      toast.error(`${succeeded} succeeded · ${failed.length} failed (see details)`)
     }
 
-   return (
-     <>
-       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-         <div><div className="sec-tag">Enrolment System</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student Allocations</h2>
-           <p style={{ color: 'var(--s500)', fontSize: 13.5 }}>Live matching engine—automatically flagging unallocated subjects.</p></div>
-       </div>
+    fetchData()
+  }
+
+  const closeBulkModal = () => {
+    if (bulkExecuting) {
+      toast.error('Cannot close while bulk allocation is running')
+      return
+    }
+    setShowBulkModal(false)
+    setBulkPreview([])
+    setBulkProgress({ done: 0, total: 0, failed: [] })
+  }
+
+  // ── RENDER STATES ──────────────────────────────────
+  if (loading) {
+    return (
+      <>
+        <div style={{ marginBottom: 20 }}>
+          <div className="sec-tag">Enrolment System</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student <em style={{ color: 'var(--b700)' }}>Allocations</em></h2>
+        </div>
+        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)', fontSize: 14 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>Loading</div>
+          Fetching students, allocations, and teachers...
+        </div>
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <div style={{ marginBottom: 20 }}>
+          <div className="sec-tag">Enrolment System</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student <em style={{ color: 'var(--b700)' }}>Allocations</em></h2>
+        </div>
+        <div className="card" style={{ padding: 24, background: 'var(--r50)', borderColor: 'var(--r100)' }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--r700)', marginBottom: 6 }}>Failed to load allocations</div>
+          <div style={{ fontSize: 12, color: 'var(--r600)', marginBottom: 12 }}>{error}</div>
+          <button className="btn btn-r btn-sm" onClick={fetchData}>Retry</button>
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      {/* HEADER ROW */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div className="sec-tag">Enrolment System</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student <em style={{ color: 'var(--b700)' }}>Allocations</em></h2>
+          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Match students to qualified teachers · 3-point check (subject + curriculum + specialty)</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {kpiPendingSubjects > 0 && (
+            <button className="btn btn-p btn-sm" onClick={startBulkAllocate}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              Bulk Allocate ({kpiPendingSubjects})
+            </button>
+          )}
+          <button className="btn btn-s btn-sm" onClick={fetchData}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {/* KPI STRIP */}
+      <div className="kpi-row">
+        <div className="kpi">
+          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div className="kpi-v">{kpiTotalStudents}</div>
+          <div className="kpi-l">Total Students</div>
+          <div className="kpi-d" style={{ color: 'var(--s500)' }}>{kpiTotalSubjects} subject enrolments</div>
+        </div>
+        <div className="kpi">
+          <div className="kpi-ic" style={{ background: 'var(--g50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div className="kpi-v"><span style={{ color: 'var(--g600)' }}>{kpiAllocatedSubjects}</span><span style={{ fontSize: 16, color: 'var(--s400)' }}>/{kpiTotalSubjects}</span></div>
+          <div className="kpi-l">Fully Allocated</div>
+          <div className="kpi-d" style={{ color: 'var(--g600)' }}>{kpiTotalSubjects > 0 ? Math.round(kpiAllocatedSubjects / kpiTotalSubjects * 100) : 0}% complete</div>
+        </div>
+        <div className="kpi" style={{ borderColor: kpiPendingSubjects > 0 ? 'var(--r100)' : undefined, cursor: kpiPendingSubjects > 0 ? 'pointer' : 'default' }} onClick={() => kpiPendingSubjects > 0 && setStatusFilter('pending')}>
+          <div className="kpi-ic" style={{ background: kpiPendingSubjects > 0 ? 'var(--r50)' : 'var(--s100)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={kpiPendingSubjects > 0 ? 'var(--r700)' : 'var(--s500)'} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div className="kpi-v" style={{ color: kpiPendingSubjects > 0 ? 'var(--r700)' : undefined }}>{kpiPendingSubjects}</div>
+          <div className="kpi-l">Pending Allocations</div>
+          <div className="kpi-d" style={{ color: kpiPendingSubjects > 0 ? 'var(--r600)' : 'var(--g600)' }}>
+            {kpiPendingSubjects > 0 ? `Across ${kpiPendingStudents} student${kpiPendingStudents === 1 ? '' : 's'}` : 'All caught up'}
+          </div>
+        </div>
+        <div className="kpi" style={{ cursor: 'default' }}>
+          <div className="kpi-ic" style={{ background: 'var(--p50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/></svg>
+          </div>
+          <div className="kpi-v">{kpiAvailableTeachers}</div>
+          <div className="kpi-l">Active Teachers</div>
+          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Available for allocation</div>
+        </div>
+      </div>
+
+      {/* FILTER BAR */}
+      <div className="card" style={{ padding: '14px 16px', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <span className="ctitle" style={{ marginRight: 4 }}>Filter:</span>
+          {[
+            { id: 'all',         label: 'All',          count: students.length },
+            { id: 'pending',     label: 'Pending',      count: kpiPendingStudents, urgent: kpiPendingStudents > 0 },
+            { id: 'complete',    label: 'Complete',     count: students.filter(s => { const x = getStudentSummary(s); return x.totalSubjects > 0 && x.pendingAllocation === 0 }).length },
+            { id: 'nosubjects',  label: 'No Subjects',  count: students.filter(s => getStudentSummary(s).totalSubjects === 0).length },
+          ].map(chip => (
+            <button key={chip.id} onClick={() => setStatusFilter(chip.id)}
+              style={{
+                background: statusFilter === chip.id ? (chip.urgent ? 'var(--r700)' : 'var(--b700)') : 'var(--bg)',
+                color: statusFilter === chip.id ? '#fff' : (chip.urgent ? 'var(--r700)' : 'var(--s700)'),
+                border: '1px solid ' + (statusFilter === chip.id ? 'transparent' : (chip.urgent ? 'var(--r100)' : 'var(--border)')),
+                padding: '6px 12px', borderRadius: 99,
+                fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 6,
+                transition: 'all .15s',
+              }}>
+              {chip.label}
+              <span style={{
+                background: statusFilter === chip.id ? 'rgba(255,255,255,.2)' : (chip.urgent ? 'var(--r50)' : 'var(--s100)'),
+                color: statusFilter === chip.id ? '#fff' : (chip.urgent ? 'var(--r700)' : 'var(--s600)'),
+                padding: '1px 7px', borderRadius: 99, fontSize: 11, fontWeight: 700,
+              }}>{chip.count}</span>
+            </button>
+          ))}
+
+          <div style={{ width: 1, height: 22, background: 'var(--border)', margin: '0 4px' }}/>
+
+          <select className="fsel" value={curriculumFilter} onChange={e => setCurriculumFilter(e.target.value)}
+            style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600 }}>
+            <option value="all">All Curricula</option>
+            {allCurricula.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+
+          <select className="fsel" value={yearFilter} onChange={e => setYearFilter(e.target.value)}
+            style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600 }}>
+            <option value="all">All Years</option>
+            {allYears.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+
+          <div style={{ flex: 1 }}/>
+
+          <div style={{ display: 'flex', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--rsm)', padding: 2 }}>
+            <button onClick={() => setViewMode('all')}
+              style={{
+                background: viewMode === 'all' ? '#fff' : 'transparent',
+                border: 'none', padding: '5px 12px', borderRadius: 4,
+                fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+                color: viewMode === 'all' ? 'var(--s900)' : 'var(--s500)',
+                boxShadow: viewMode === 'all' ? '0 1px 4px rgba(0,0,0,.06)' : 'none',
+              }}>All</button>
+            <button onClick={() => setViewMode('pending-queue')}
+              style={{
+                background: viewMode === 'pending-queue' ? '#fff' : 'transparent',
+                border: 'none', padding: '5px 12px', borderRadius: 4,
+                fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+                color: viewMode === 'pending-queue' ? 'var(--r700)' : 'var(--s500)',
+                boxShadow: viewMode === 'pending-queue' ? '0 1px 4px rgba(0,0,0,.06)' : 'none',
+              }}>Pending Queue</button>
+          </div>
+        </div>
+      </div>
+
+      {/* TABLE */}
+      {students.length === 0 ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No students found</div>
+          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Add students from the Users module first</div>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No students match your filters</div>
+          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Try adjusting the filter chips above</div>
+          <button className="btn btn-s btn-sm" style={{ marginTop: 14 }} onClick={() => { setStatusFilter('all'); setCurriculumFilter('all'); setYearFilter('all'); setSearch(''); setViewMode('all') }}>Clear all filters</button>
+        </div>
+      ) : (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap' }}>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 14.5 }}>Students Overview</div>
-              <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 4 }}>{filtered.length} students total</div>
+              <div style={{ fontWeight: 700, fontSize: 14.5 }}>
+                {viewMode === 'pending-queue' ? 'Pending Queue' : 'Students Overview'}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 4 }}>
+                {filtered.length} of {students.length} student{students.length === 1 ? '' : 's'}
+                {viewMode === 'pending-queue' && ' · need allocation'}
+              </div>
             </div>
-            <input className="fi" placeholder="Search student name or email..." style={{ width: 280 }} value={search} onChange={e => setSearch(e.target.value)} />
+            <input className="fi" placeholder="Search name or email..." style={{ width: 260 }} value={search} onChange={e => setSearch(e.target.value)}/>
           </div>
-         <table className="tbl">
-           <thead><tr><th>Student</th><th>Curriculum</th><th>Year/Grade</th><th>Fully Allocated</th><th>Pending Allocation</th><th style={{ width: '140px', textAlign: 'center' }}>Action</th></tr></thead>
-           <tbody>
-              {filtered.map((student, i) => {
-                const summary = getStudentSummary(student)
-                // Student has pending if: has unallocated subjects OR has 0 total subjects (needs enrollment)
-                const hasPending = summary.pendingAllocation > 0 || summary.totalSubjects === 0
-                return (
-                  <tr key={student._id} style={{ background: hasPending ? 'var(--a50)' : i % 2 === 0 ? '#fff' : 'var(--s50)' }}>
-                    <td style={{ fontWeight: 600 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <Av init={(student.firstName[0] + student.lastName[0]).toUpperCase()} col={['#3B82F6','#22C55E','#8B5CF6','#F59E0B','#EC4899'][i % 5]} size={32} />
-                        <div>
-                          <div style={{ fontWeight: 700, fontSize: 14 }}>{student.firstName} {student.lastName}</div>
-                          <div style={{ fontSize: 11, color: 'var(--s400)' }}>{student.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td><span className="badge badge-blue">{student.curriculum || 'N/A'}</span></td>
-                    <td style={{ color: 'var(--s600)' }}>{student.grade || 'N/A'}</td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <span style={{ fontWeight: 700, color: 'var(--g700)' }}>{summary.fullyAllocated}</span>
-                        <span style={{ color: 'var(--s400)', fontSize: 12 }}>/ {summary.totalSubjects}</span>
-                      </div>
-                    </td>
-                    <td>
-                      {hasPending ? (
-                        <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)' }}>
-                          {summary.totalSubjects === 0 ? 'No subjects' : `${summary.pendingAllocation} pending`}
-                        </span>
-                      ) : (
-                        <span style={{ color: 'var(--g700)', fontWeight: 600 }}>✓ Complete</span>
-                      )}
-                    </td>
-                    <td style={{ textAlign: 'center' }}>
-                      <button 
-                        className={hasPending ? 'btn btn-r btn-sm' : 'btn btn-g btn-sm'}
-                        onClick={() => setSelectedStudent(student)}
-                      >
-                        Manage
-                      </button>
-                    </td>
-                  </tr>
-                )
-              })}
-           </tbody>
-         </table>
-       </div>
-
-       {/* Student Allocation Details Modal */}
-       {selectedStudent && (
-         <Modal 
-           open={!!selectedStudent} 
-           onClose={() => setSelectedStudent(null)} 
-           title={`${selectedStudent.firstName} ${selectedStudent.lastName} - Allocations`}
-           size="lg"
-         >
-           <div style={{ marginBottom: 20, padding: 14, background: 'var(--s50)', borderRadius: 'var(--rmd)' }}>
-             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-               <div>
-                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase', marginBottom: 4 }}>Curriculum</div>
-                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedStudent.curriculum || 'N/A'}</div>
-               </div>
-               <div>
-                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase', marginBottom: 4 }}>Year / Grade</div>
-                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedStudent.grade || 'N/A'}</div>
-               </div>
-               <div>
-                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase', marginBottom: 4 }}>Email</div>
-                 <div style={{ fontSize: 13, color: 'var(--s700)' }}>{selectedStudent.email}</div>
-               </div>
-               <div>
-                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase', marginBottom: 4 }}>Total Subjects</div>
-                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>
-                   {(() => {
-                     const summary = getStudentSummary(selectedStudent)
-                     return `${summary.fullyAllocated}/${summary.totalSubjects} allocated`
-                   })()}
-                 </div>
-               </div>
-             </div>
-           </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 12 }}>Subject Allocations</div>
-              {(() => {
-                const summary = getStudentSummary(selectedStudent)
-                return (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {summary.subjects.map(subject => {
-                      const subjectId = subject._id || subject
-                      const subjectName = typeof subject === 'object' ? subject.subjectName : 'Unknown'
-                      const allocation = allocations.find(a => 
-                        a.studentId._id === selectedStudent._id && 
-                        a.subjectId._id === subjectId && 
-                        a.status === 'Active'
-                      )
-                      const isAllocated = !!allocation
-                      const teacherBeingLoaded = allocatingSubject?.subjectId === subjectId && loadingTeachers
-                      const subjectTeachers = allocatingSubject?.subjectId === subjectId ? availableTeachers : []
-                      const hasNoTeachers = allocatingSubject?.subjectId === subjectId && !loadingTeachers && subjectTeachers.length === 0
-                      
-                      return (
-                        <div 
-                          key={subjectId}
-                          style={{ 
-                            border: '1px solid var(--border)', 
-                            borderRadius: 'var(--rmd)', 
-                            padding: 14,
-                            background: isAllocated ? '#fff' : (allocatingSubject?.subjectId === subjectId ? 'var(--b50)' : 'var(--r50)'),
-                            transition: 'all 0.2s ease'
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, justifyContent: 'space-between', marginBottom: allocatingSubject?.subjectId === subjectId ? 12 : 0 }}>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--s900)' }}>{subjectName}</div>
-                              {isAllocated && !( allocatingSubject?.subjectId === subjectId) && (
-                                <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 4 }}>
-                                  Assigned to: <span style={{ fontWeight: 600, color: 'var(--g700)' }}>{allocation.teacherId.firstName} {allocation.teacherId.lastName}</span>
-                                </div>
-                              )}
-                              {!isAllocated && !(allocatingSubject?.subjectId === subjectId) && (
-                                <div style={{ fontSize: 12, color: 'var(--r600)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
-                                  <span>⚠️</span> Unassigned
-                                </div>
-                              )}
-                            </div>
-                            {!(allocatingSubject?.subjectId === subjectId) && (
-                              <button
-                                className={isAllocated ? 'btn btn-g btn-sm' : 'btn btn-r btn-sm'}
-                                onClick={() => {
-                                  handleAllocateClick(selectedStudent._id, subjectId, selectedStudent.curriculum)
-                                }}
-                                style={{ whiteSpace: 'nowrap' }}
-                              >
-                                {isAllocated ? '✎ Change' : '➕ Allocate'}
-                              </button>
-                            )}
+          <div style={{ overflowX: 'auto' }}>
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Curriculum</th>
+                  <th>Year/Grade</th>
+                  <th>Allocated</th>
+                  <th>Pending</th>
+                  <th style={{ width: 120, textAlign: 'center' }}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((student) => {
+                  const summary = getStudentSummary(student)
+                  const hasPending = summary.pendingAllocation > 0 || summary.totalSubjects === 0
+                  const fullName = student.firstName + ' ' + student.lastName
+                  return (
+                    <tr key={student._id} style={{ background: hasPending ? 'var(--a50)' : '#fff' }}>
+                      <td style={{ fontWeight: 600 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <Av init={(student.firstName[0] + student.lastName[0]).toUpperCase()} col={avColor(fullName)} size={32}/>
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: 14 }}>{fullName}</div>
+                            <div style={{ fontSize: 11, color: 'var(--s400)' }}>{student.email}</div>
                           </div>
-
-                           {allocatingSubject?.subjectId === subjectId && (
-                             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-                               <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s700)', marginBottom: 8 }}>
-                                 {isAllocated ? 'Reassign Teacher for' : 'Select Teacher for'} {subjectName}
-                               </div>
-                               
-                               {isAllocated && (
-                                 <div style={{
-                                   padding: 8,
-                                   background: 'var(--b50)',
-                                   border: '1px solid var(--b100)',
-                                   borderRadius: 'var(--rmd)',
-                                   fontSize: 11,
-                                   color: 'var(--b700)',
-                                   marginBottom: 12,
-                                   display: 'flex',
-                                   alignItems: 'center',
-                                   gap: 6
-                                 }}>
-                                   <span>ℹ️</span>
-                                   <span>Currently assigned to: <strong>{allocation.teacherId.firstName} {allocation.teacherId.lastName}</strong></span>
-                                 </div>
-                               )}
-                               
-                               {loadingTeachers && (
-                                 <div style={{ padding: 16, textAlign: 'center', color: 'var(--s500)' }}>
-                                   <div style={{ fontSize: 12 }}>🔍 Finding qualified teachers...</div>
-                                 </div>
-                               )}
-
-                               {hasNoTeachers && (
-                                 <div style={{
-                                   padding: 12,
-                                   background: 'var(--r50)',
-                                   border: '1px solid var(--r100)',
-                                   borderRadius: 'var(--rmd)',
-                                   color: 'var(--r700)',
-                                   fontSize: 12,
-                                   textAlign: 'center'
-                                 }}>
-                                   ❌ No qualified teachers available for {subjectName} in {selectedStudent.curriculum}
-                                 </div>
-                               )}
-
-                               {!loadingTeachers && subjectTeachers.length > 0 && (
-                                 <div style={{
-                                   border: '1px solid var(--border)',
-                                   borderRadius: 'var(--rmd)',
-                                   overflow: 'hidden',
-                                   background: '#fff'
-                                 }}>
-                                   <div style={{
-                                     maxHeight: 280,
-                                     overflowY: 'auto',
-                                     overflowX: 'hidden'
-                                   }}>
-                                     {subjectTeachers.map((t, idx) => {
-                                       const isCurrentTeacher = isAllocated && allocation.teacherId._id === t._id;
-                                       return (
-                                         <div
-                                           key={t._id}
-                                           onClick={() => setSelectedTeacher(t._id)}
-                                           style={{
-                                             padding: '12px 14px',
-                                             borderBottom: idx < subjectTeachers.length - 1 ? '1px solid var(--s100)' : 'none',
-                                             cursor: 'pointer',
-                                             background: selectedTeacher === t._id ? 'var(--b50)' : (isCurrentTeacher ? 'var(--s50)' : '#fff'),
-                                             borderLeft: selectedTeacher === t._id ? '3px solid var(--b700)' : (isCurrentTeacher ? '3px solid var(--s400)' : '3px solid transparent'),
-                                             transition: 'all 0.15s ease',
-                                             display: 'flex',
-                                             alignItems: 'center',
-                                             gap: 10
-                                           }}
-                                           onMouseEnter={(e) => {
-                                             if (selectedTeacher !== t._id) {
-                                               e.currentTarget.style.background = 'var(--s50)';
-                                             }
-                                           }}
-                                           onMouseLeave={(e) => {
-                                             if (selectedTeacher !== t._id) {
-                                               e.currentTarget.style.background = isCurrentTeacher ? 'var(--s50)' : '#fff';
-                                             }
-                                           }}
-                                         >
-                                           <div style={{
-                                             width: 32,
-                                             height: 32,
-                                             borderRadius: '50%',
-                                             background: isCurrentTeacher ? 'var(--s300)' : 'var(--b100)',
-                                             color: isCurrentTeacher ? 'var(--s700)' : 'var(--b700)',
-                                             display: 'flex',
-                                             alignItems: 'center',
-                                             justifyContent: 'center',
-                                             fontWeight: 700,
-                                             fontSize: 12,
-                                             flexShrink: 0
-                                           }}>
-                                             {t.firstName.charAt(0)}{t.lastName.charAt(0)}
-                                           </div>
-                                           <div style={{ flex: 1, minWidth: 0 }}>
-                                             <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--s900)' }}>
-                                               {t.firstName} {t.lastName}
-                                               {isCurrentTeacher && <span style={{ fontSize: 11, color: 'var(--s500)', fontWeight: 400, marginLeft: 6 }}>(current)</span>}
-                                             </div>
-                                             <div style={{ fontSize: 11, color: 'var(--s500)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                               {t.email}
-                                             </div>
-                                           </div>
-                                           {selectedTeacher === t._id && (
-                                             <div style={{ color: 'var(--b700)', fontSize: 16 }}>✓</div>
-                                           )}
-                                         </div>
-                                       );
-                                     })}
-                                   </div>
-                                 </div>
-                               )}
-
-                               <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                                 <button
-                                   className="btn btn-p"
-                                   onClick={() => handleAllocateTeacher()}
-                                   disabled={!selectedTeacher || loadingTeachers || hasNoTeachers}
-                                   style={{ flex: 1 }}
-                                 >
-                                   {loadingTeachers ? 'Loading...' : (isAllocated ? 'Update Allocation' : 'Save Allocation')}
-                                 </button>
-                                 <button
-                                   className="btn btn-s"
-                                   onClick={() => {
-                                     setShowAllocateModal(false)
-                                     setAllocatingSubject(null)
-                                     setSelectedTeacher(null)
-                                   }}
-                                 >
-                                   Cancel
-                                 </button>
-                               </div>
-                             </div>
-                           )}
                         </div>
-                      )
-                    })}
+                      </td>
+                      <td>
+                        {student.curriculum ? (
+                          <span className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>{student.curriculum}</span>
+                        ) : (
+                          <span style={{ fontSize: 12, color: 'var(--s400)' }}>N/A</span>
+                        )}
+                      </td>
+                      <td style={{ color: 'var(--s600)' }}>{student.grade || 'N/A'}</td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span style={{ fontWeight: 700, color: 'var(--g700)' }}>{summary.fullyAllocated}</span>
+                          <span style={{ color: 'var(--s400)', fontSize: 12 }}>/ {summary.totalSubjects}</span>
+                        </div>
+                      </td>
+                      <td>
+                        {summary.totalSubjects === 0 ? (
+                          <span className="badge" style={{ color: 'var(--s600)', background: 'var(--s100)', borderColor: 'var(--s200)' }}>No subjects</span>
+                        ) : hasPending ? (
+                          <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)' }}>{summary.pendingAllocation} pending</span>
+                        ) : (
+                          <span style={{ color: 'var(--g700)', fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Complete
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ textAlign: 'center' }}>
+                        <button className={hasPending ? 'btn btn-r btn-sm' : 'btn btn-g btn-sm'}
+                          onClick={() => setSelectedStudent(student)}>
+                          Manage
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* STUDENT ALLOCATION MODAL */}
+      {selectedStudent && (
+        <Modal
+          open={!!selectedStudent}
+          onClose={() => { setSelectedStudent(null); setAllocatingSubject(null); setSelectedTeacher(null) }}
+          title={`${selectedStudent.firstName} ${selectedStudent.lastName} — Allocations`}
+          size="lg"
+        >
+          <div style={{ marginBottom: 20, padding: 14, background: 'var(--s50)', borderRadius: 'var(--rmd)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Curriculum</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedStudent.curriculum || 'N/A'}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Year / Grade</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedStudent.grade || 'N/A'}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Email</div>
+                <div style={{ fontSize: 13, color: 'var(--s700)' }}>{selectedStudent.email}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Subjects</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>
+                  {(() => {
+                    const summary = getStudentSummary(selectedStudent)
+                    return `${summary.fullyAllocated}/${summary.totalSubjects} allocated`
+                  })()}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 12 }}>Subject Allocations</div>
+            {(() => {
+              const summary = getStudentSummary(selectedStudent)
+              if (summary.subjects.length === 0) {
+                return (
+                  <div style={{ padding: 24, textAlign: 'center', background: 'var(--s50)', borderRadius: 'var(--rmd)', border: '1px dashed var(--border)' }}>
+                    <div style={{ fontSize: 13, color: 'var(--s600)', fontWeight: 600 }}>No subjects enrolled</div>
+                    <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 4 }}>This student needs subjects added to their profile first</div>
                   </div>
                 )
-              })()}
+              }
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {summary.subjects.map(subject => {
+                    const subjectId = subject._id || subject
+                    const subjectName = typeof subject === 'object' ? subject.subjectName : 'Unknown'
+                    const allocation = allocations.find(a =>
+                      a.studentId._id === selectedStudent._id &&
+                      a.subjectId._id === subjectId &&
+                      a.status === 'Active'
+                    )
+                    const isAllocated = !!allocation
+                    const teacherBeingLoaded = allocatingSubject?.subjectId === subjectId && loadingTeachers
+                    const subjectTeachers = allocatingSubject?.subjectId === subjectId ? availableTeachers : []
+                    const hasNoTeachers = allocatingSubject?.subjectId === subjectId && !loadingTeachers && subjectTeachers.length === 0
+                    const isExpanded = allocatingSubject?.subjectId === subjectId
+
+                    return (
+                      <div key={subjectId} style={{
+                        border: '1px solid ' + (isExpanded ? 'var(--b200)' : 'var(--border)'),
+                        borderRadius: 'var(--rmd)',
+                        padding: 14,
+                        background: isAllocated ? '#fff' : (isExpanded ? 'var(--b50)' : 'var(--r50)'),
+                        transition: 'all 0.2s ease',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, justifyContent: 'space-between', marginBottom: isExpanded ? 12 : 0 }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{subjectName}</div>
+                            {isAllocated && !isExpanded && (
+                              <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                Assigned to <span style={{ fontWeight: 700, color: 'var(--g700)' }}>{allocation.teacherId.firstName} {allocation.teacherId.lastName}</span>
+                              </div>
+                            )}
+                            {!isAllocated && !isExpanded && (
+                              <div style={{ fontSize: 12, color: 'var(--r600)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                Unassigned
+                              </div>
+                            )}
+                          </div>
+                          {!isExpanded && (
+                            <button className={isAllocated ? 'btn btn-g btn-sm' : 'btn btn-r btn-sm'}
+                              onClick={() => handleAllocateClick(selectedStudent._id, subjectId, selectedStudent.curriculum)}
+                              style={{ whiteSpace: 'nowrap' }}>
+                              {isAllocated ? 'Change' : 'Allocate'}
+                            </button>
+                          )}
+                        </div>
+
+                        {isExpanded && (
+                          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 8 }}>
+                              {isAllocated ? 'Reassign Teacher for' : 'Select Teacher for'} {subjectName}
+                            </div>
+
+                            {isAllocated && (
+                              <div style={{ padding: 8, background: 'var(--b100)', border: '1px solid var(--b200)', borderRadius: 'var(--rmd)', fontSize: 11, color: 'var(--b700)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                <span>Currently assigned to: <strong>{allocation.teacherId.firstName} {allocation.teacherId.lastName}</strong></span>
+                              </div>
+                            )}
+
+                            {teacherBeingLoaded && (
+                              <div style={{ padding: 16, textAlign: 'center', color: 'var(--s500)', fontSize: 12 }}>
+                                Finding qualified teachers...
+                              </div>
+                            )}
+
+                            {hasNoTeachers && (
+                              <div style={{ padding: 12, background: 'var(--r50)', border: '1px solid var(--r100)', borderRadius: 'var(--rmd)', color: 'var(--r700)', fontSize: 12, textAlign: 'center', fontWeight: 600 }}>
+                                No qualified teachers for {subjectName} in {selectedStudent.curriculum}
+                              </div>
+                            )}
+
+                            {!teacherBeingLoaded && subjectTeachers.length > 0 && (
+                              <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--rmd)', overflow: 'hidden', background: '#fff' }}>
+                                <div style={{ maxHeight: 280, overflowY: 'auto', overflowX: 'hidden' }}>
+                                  {subjectTeachers.map((t, idx) => {
+                                    const isCurrentTeacher = isAllocated && allocation.teacherId._id === t._id
+                                    const isBestMatch = idx === 0 && !isAllocated
+                                    const isSelected = selectedTeacher === t._id
+                                    return (
+                                      <div key={t._id} onClick={() => setSelectedTeacher(t._id)}
+                                        style={{
+                                          padding: '12px 14px',
+                                          borderBottom: idx < subjectTeachers.length - 1 ? '1px solid var(--s100)' : 'none',
+                                          cursor: 'pointer',
+                                          background: isSelected ? 'var(--b50)' : (isCurrentTeacher ? 'var(--s50)' : '#fff'),
+                                          borderLeft: '3px solid ' + (isSelected ? 'var(--b700)' : (isCurrentTeacher ? 'var(--s400)' : 'transparent')),
+                                          transition: 'all 0.15s ease',
+                                          display: 'flex', alignItems: 'center', gap: 10,
+                                        }}
+                                        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--s50)' }}
+                                        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = isCurrentTeacher ? 'var(--s50)' : '#fff' }}>
+                                        <div style={{
+                                          width: 32, height: 32, borderRadius: '50%',
+                                          background: isCurrentTeacher ? 'var(--s300)' : 'var(--b100)',
+                                          color: isCurrentTeacher ? 'var(--s700)' : 'var(--b700)',
+                                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                          fontWeight: 700, fontSize: 12, flexShrink: 0,
+                                        }}>
+                                          {t.firstName.charAt(0)}{t.lastName.charAt(0)}
+                                        </div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                          <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--s900)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            {t.firstName} {t.lastName}
+                                            {isBestMatch && (
+                                              <span style={{ background: 'var(--a50)', color: 'var(--a600)', border: '1px solid var(--a100)', fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 99, letterSpacing: '.06em' }}>BEST MATCH</span>
+                                            )}
+                                            {isCurrentTeacher && (
+                                              <span style={{ fontSize: 10, color: 'var(--s500)', fontWeight: 500 }}>(current)</span>
+                                            )}
+                                          </div>
+                                          <div style={{ fontSize: 11, color: 'var(--s500)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {t.email}
+                                          </div>
+                                        </div>
+                                        {isSelected && (
+                                          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        )}
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                              <button className="btn btn-p" onClick={handleAllocateTeacher}
+                                disabled={!selectedTeacher || teacherBeingLoaded || hasNoTeachers}
+                                style={{ flex: 1 }}>
+                                {teacherBeingLoaded ? 'Loading...' : (isAllocated ? 'Update Allocation' : 'Save Allocation')}
+                              </button>
+                              <button className="btn btn-s" onClick={() => { setAllocatingSubject(null); setSelectedTeacher(null) }}>
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
+          </div>
+        </Modal>
+      )}
+
+      {/* BULK ALLOCATION MODAL */}
+      {showBulkModal && (
+        <Modal open={showBulkModal} onClose={closeBulkModal} title="Bulk Allocate Pending Students" size="lg">
+          {bulkLoading && bulkPreview.length === 0 ? (
+            <div style={{ padding: 40, textAlign: 'center' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Preparing Preview</div>
+              <div style={{ fontSize: 13, color: 'var(--s600)' }}>Loading suggested teachers for each pending allocation...</div>
             </div>
-         </Modal>
-       )}
+          ) : bulkExecuting || bulkProgress.done > 0 ? (
+            <div style={{ padding: 16 }}>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 6 }}>
+                  Allocating {bulkProgress.done} of {bulkProgress.total}
+                </div>
+                <div className="prog">
+                  <div className="prog-f" style={{ width: bulkProgress.total > 0 ? (bulkProgress.done / bulkProgress.total * 100) + '%' : '0%', background: 'var(--b700)' }}/>
+                </div>
+              </div>
 
-        {/* Allocate/Reassign Modal - Hidden (now using inline dropdowns) */}
-        {false && showAllocateModal && allocatingSubject && (
-         <div style={{
-           position: 'fixed',
-           inset: 0,
-           background: 'rgba(0,0,0,.5)',
-           display: 'flex',
-           alignItems: 'center',
-           justifyContent: 'center',
-           zIndex: 999,
-           padding: 20
-         }}>
-           <div style={{
-             background: '#fff',
-             borderRadius: 'var(--rmd)',
-             boxShadow: '0 20px 25px -5px rgba(0,0,0,.1)',
-             maxWidth: 500,
-             width: '100%'
-           }}>
-             <div style={{
-               padding: '20px',
-               borderBottom: '1px solid var(--border)',
-               display: 'flex',
-               justifyContent: 'space-between',
-               alignItems: 'center'
-             }}>
-               <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
-                 Select Teacher
-               </h2>
-               <button
-                 onClick={() => setShowAllocateModal(false)}
-                 style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer', color: 'var(--s500)' }}
-               >
-                 ✕
-               </button>
-             </div>
+              {bulkExecuting && (
+                <div style={{ padding: 12, background: 'var(--b50)', border: '1px solid var(--b100)', borderRadius: 'var(--rmd)', fontSize: 12, color: 'var(--b700)', marginBottom: 12 }}>
+                  Bulk allocation in progress · do not close this window
+                </div>
+              )}
 
-             <div style={{ padding: '20px' }}>
-               <div style={{ marginBottom: 16, padding: 12, background: 'var(--s50)', borderRadius: 'var(--rmd)' }}>
-                 <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 4 }}>Subject Assignment</div>
-                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>
-                   {(() => {
-                     const subj = selectedStudent?.subjects?.find(s => (s._id || s) === allocatingSubject.subjectId)
-                     return `${typeof subj === 'object' ? subj?.subjectName : 'Subject'} (${allocatingSubject.curriculum})`
-                   })()}
-                 </div>
-               </div>
+              {!bulkExecuting && bulkProgress.done > 0 && (
+                <>
+                  <div style={{ padding: 12, background: bulkProgress.failed.length === 0 ? 'var(--g50)' : 'var(--a50)', border: '1px solid ' + (bulkProgress.failed.length === 0 ? 'var(--g100)' : 'var(--a100)'), borderRadius: 'var(--rmd)', fontSize: 13, color: bulkProgress.failed.length === 0 ? 'var(--g700)' : 'var(--a600)', marginBottom: 12 }}>
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                      {bulkProgress.failed.length === 0 ? 'All allocations completed successfully' : 'Bulk allocation completed with some failures'}
+                    </div>
+                    <div style={{ fontSize: 12 }}>
+                      Succeeded: <strong>{bulkProgress.total - bulkProgress.failed.length}</strong> · Failed: <strong>{bulkProgress.failed.length}</strong>
+                    </div>
+                  </div>
 
-               <label style={{ display: 'block', fontWeight: 600, marginBottom: 8, color: 'var(--s900)' }}>
-                 Available Teachers
-               </label>
+                  {bulkProgress.failed.length > 0 && (
+                    <div style={{ border: '1px solid var(--r100)', borderRadius: 'var(--rmd)', overflow: 'hidden', marginBottom: 12 }}>
+                      <div style={{ padding: '10px 14px', background: 'var(--r50)', fontSize: 12, fontWeight: 700, color: 'var(--r700)' }}>Failed Allocations</div>
+                      <div style={{ maxHeight: 180, overflowY: 'auto' }}>
+                        {bulkProgress.failed.map((f, i) => (
+                          <div key={i} style={{ padding: '8px 14px', borderTop: i > 0 ? '1px solid var(--s100)' : 'none', fontSize: 12 }}>
+                            <div style={{ fontWeight: 600, color: 'var(--s900)' }}>{f.row.studentName} · {f.row.subjectName}</div>
+                            <div style={{ color: 'var(--r600)', fontSize: 11, marginTop: 2 }}>{f.error}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-               {loadingTeachers ? (
-                 <div style={{ padding: 20, textAlign: 'center', color: 'var(--s500)' }}>
-                   Finding qualified teachers...
-                 </div>
-               ) : availableTeachers.length > 0 ? (
-                 <div style={{
-                   border: '1px solid var(--border)',
-                   borderRadius: 'var(--rmd)',
-                   maxHeight: 300,
-                   overflowY: 'auto'
-                 }}>
-                   {availableTeachers.map(t => (
-                     <div
-                       key={t._id}
-                       onClick={() => setSelectedTeacher(t._id)}
-                       style={{
-                         padding: '12px',
-                         borderBottom: '1px solid var(--border)',
-                         cursor: 'pointer',
-                         background: selectedTeacher === t._id ? 'var(--b50)' : '#fff',
-                         borderLeft: selectedTeacher === t._id ? '4px solid var(--b700)' : 'none'
-                       }}
-                     >
-                       <div style={{ fontWeight: 600, color: 'var(--s900)' }}>
-                         {t.firstName} {t.lastName}
-                       </div>
-                       <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 2 }}>
-                         {t.email}
-                       </div>
-                     </div>
-                   ))}
-                 </div>
-               ) : (
-                 <div style={{
-                   padding: 20,
-                   textAlign: 'center',
-                   color: 'var(--r600)',
-                   background: 'var(--r50)',
-                   borderRadius: 'var(--rmd)',
-                   border: '1px solid var(--r100)'
-                 }}>
-                   No qualified teachers for this subject + curriculum
-                 </div>
-               )}
-             </div>
+                  <button className="btn btn-p" onClick={closeBulkModal} style={{ width: '100%' }}>Close</button>
+                </>
+              )}
+            </div>
+          ) : (
+            <>
+              <div style={{ padding: 14, background: 'var(--a50)', border: '1px solid var(--a100)', borderRadius: 'var(--rmd)', marginBottom: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--a600)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  Review before allocating
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--s700)', lineHeight: 1.6 }}>
+                  Each row shows the system's suggested best teacher. Uncheck rows to skip them, or change the teacher dropdown. Existing active allocations will <strong>not</strong> be touched.
+                </div>
+              </div>
 
-             <div style={{
-               padding: '20px',
-               borderTop: '1px solid var(--border)',
-               display: 'flex',
-               gap: 10,
-               justifyContent: 'flex-end'
-             }}>
-               <button className="btn btn-s" onClick={() => setShowAllocateModal(false)}>
-                 Cancel
-               </button>
-               <button 
-                 className="btn btn-p" 
-                 onClick={handleAllocateTeacher}
-                 disabled={!selectedTeacher || loadingTeachers}
-               >
-                 Allocate
-               </button>
-             </div>
-           </div>
-         </div>
-       )}
-     </>
-   )
- }
+              {/* Email toggle */}
+              <div style={{ padding: '10px 14px', background: bulkSendEmails ? 'var(--r50)' : 'var(--s50)', border: '1px solid ' + (bulkSendEmails ? 'var(--r100)' : 'var(--border)'), borderRadius: 'var(--rmd)', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: bulkSendEmails ? 'var(--r700)' : 'var(--s900)', marginBottom: 2 }}>
+                    {bulkSendEmails ? 'Notification emails ENABLED' : 'Notification emails disabled'}
+                  </div>
+                  <div style={{ fontSize: 11.5, color: 'var(--s600)' }}>
+                    {bulkSendEmails
+                      ? 'Each parent will be emailed about their child\'s new teacher assignment.'
+                      : 'Recommended for bulk operations. You can notify parents individually afterward.'}
+                  </div>
+                </div>
+                <label style={{ position: 'relative', display: 'inline-block', width: 42, height: 22, cursor: 'pointer', flexShrink: 0 }}>
+                  <input type="checkbox" checked={bulkSendEmails} onChange={e => setBulkSendEmails(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }}/>
+                  <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: bulkSendEmails ? 'var(--r600)' : 'var(--s300)', borderRadius: 22, transition: 'background .2s' }}/>
+                  <span style={{ position: 'absolute', top: 3, left: bulkSendEmails ? 23 : 3, width: 16, height: 16, background: '#fff', borderRadius: '50%', transition: 'left .2s' }}/>
+                </label>
+              </div>
+
+              {/* Preview table */}
+              <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--rmd)', overflow: 'hidden', marginBottom: 16 }}>
+                <div style={{ padding: '10px 14px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontSize: 12, fontWeight: 700 }}>
+                    {bulkPreview.length} pending · <span style={{ color: 'var(--g700)' }}>{bulkPreview.filter(r => r.included && r.selectedTeacherId).length} ready</span>
+                    {bulkPreview.filter(r => !r.included).length > 0 && <span style={{ color: 'var(--s400)' }}> · {bulkPreview.filter(r => !r.included).length} skipped</span>}
+                  </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button className="btn btn-s btn-sm" onClick={() => setBulkPreview(p => p.map(r => ({ ...r, included: r.suggestedTeachers.length > 0 })))}>Select all</button>
+                    <button className="btn btn-s btn-sm" onClick={() => setBulkPreview(p => p.map(r => ({ ...r, included: false })))}>Deselect all</button>
+                  </div>
+                </div>
+                <div style={{ maxHeight: 360, overflowY: 'auto' }}>
+                  {bulkPreview.length === 0 ? (
+                    <div style={{ padding: 24, textAlign: 'center', fontSize: 13, color: 'var(--s500)' }}>Loading suggestions...</div>
+                  ) : bulkPreview.map((row, idx) => {
+                    const hasError = !row.suggestedTeachers || row.suggestedTeachers.length === 0
+                    return (
+                      <div key={row.studentId + '-' + row.subjectId} style={{
+                        padding: '10px 14px',
+                        borderTop: idx > 0 ? '1px solid var(--s100)' : 'none',
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        background: hasError ? 'var(--r50)' : (row.included ? '#fff' : 'var(--s50)'),
+                        opacity: hasError ? .8 : 1,
+                      }}>
+                        <input type="checkbox" checked={row.included} disabled={hasError}
+                          onChange={e => updateBulkPreviewRow(idx, { included: e.target.checked })}
+                          style={{ accentColor: 'var(--b700)', flexShrink: 0, width: 16, height: 16 }}/>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--s900)' }}>
+                            {row.studentName} <span style={{ color: 'var(--s500)', fontWeight: 500 }}>· {row.subjectName}</span>
+                          </div>
+                          <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 2 }}>
+                            {row.curriculum} {row.year ? '· ' + row.year : ''}
+                          </div>
+                        </div>
+                        {hasError ? (
+                          <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)', fontSize: 10 }}>NO MATCH</span>
+                        ) : (
+                          <select className="fsel" value={row.selectedTeacherId || ''}
+                            disabled={!row.included}
+                            onChange={e => updateBulkPreviewRow(idx, { selectedTeacherId: e.target.value })}
+                            style={{ width: 220, padding: '6px 10px', fontSize: 12, fontWeight: 600 }}>
+                            {row.suggestedTeachers.map((t, ti) => (
+                              <option key={t._id} value={t._id}>
+                                {ti === 0 ? '★ ' : ''}{t.firstName} {t.lastName}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="btn btn-p" onClick={executeBulkAllocate}
+                  disabled={bulkPreview.filter(r => r.included && r.selectedTeacherId).length === 0}
+                  style={{ flex: 1 }}>
+                  Allocate {bulkPreview.filter(r => r.included && r.selectedTeacherId).length} Selected
+                </button>
+                <button className="btn btn-s" onClick={closeBulkModal}>Cancel</button>
+              </div>
+            </>
+          )}
+        </Modal>
+      )}
+    </>
+  )
+}
 
 function PayrollPage({ toast }) {
   const [payrolls, setPayrolls] = useState([])
