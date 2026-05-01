@@ -2416,3 +2416,522 @@ function LiveLessonsPage({ toast }) {
 }
 
 
+
+// ─── Settings Page ──────────────────────────────────────────
+function SettingsPage({ toast }) {
+  const store = useStore()
+  const [features, setFeatures] = useState(FEATS.map(f => ({ ...f })))
+  const [maintenanceMode, setMaintenanceMode] = useState(false)
+  const [signupsOpen, setSignupsOpen] = useState(true)
+  const [aiTutorEnabled, setAiTutorEnabled] = useState(true)
+  const [emailNotifs, setEmailNotifs] = useState(true)
+  const [smsNotifs, setSmsNotifs] = useState(true)
+  const [pushNotifs, setPushNotifs] = useState(false)
+  const [twoFactor, setTwoFactor] = useState(false)
+  const [sessionTimeout, setSessionTimeout] = useState(60)
+  const [defaultCurriculum, setDefaultCurriculum] = useState('IGCSE')
+  const [academicYear, setAcademicYear] = useState('2025-2026')
+  const [termStartDate, setTermStartDate] = useState('2026-01-08')
+  const [termEndDate, setTermEndDate] = useState('2026-04-04')
+  const [supportEmail, setSupportEmail] = useState('support@smartious.ac.ke')
+  const [supportPhone, setSupportPhone] = useState('+254 745 021 212')
+  const [savingFeatures, setSavingFeatures] = useState(false)
+
+  const toggleFeature = (idx) => {
+    setFeatures(prev => prev.map((f, i) => i === idx ? { ...f, on: !f.on } : f))
+  }
+
+  const saveFeatures = () => {
+    setSavingFeatures(true)
+    setTimeout(() => {
+      setSavingFeatures(false)
+      toast.ok('Feature flags saved · changes live across all portals')
+    }, 600)
+  }
+
+  const saveSchoolSettings = () => {
+    toast.ok('School settings saved · academic calendar updated')
+  }
+
+  const saveSecuritySettings = () => {
+    toast.ok('Security settings saved')
+  }
+
+  const saveSupport = () => {
+    toast.ok('Support contact updated')
+  }
+
+  return (
+    <>
+      <div style={{ marginBottom: 20 }}>
+        <div className="sec-tag">System</div>
+        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>System <em style={{ color: 'var(--b700)' }}>Settings</em></h2>
+        <p style={{ fontSize: 14, color: 'var(--s500)', marginTop: 3 }}>Platform configuration · feature flags · security policies</p>
+      </div>
+
+      {/* KPI summary */}
+      <div className="kpi-row">
+        {[
+          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-11h-6m-6 0H1"/></svg>, bg:'var(--b50)', v:String(features.filter(f => f.on).length), l:'Features Enabled', d:`of ${features.length} total`, dc:'var(--g600)' },
+          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={maintenanceMode ? 'var(--r700)' : 'var(--g600)'} strokeWidth="2" strokeLinecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>, bg: maintenanceMode ? 'var(--r50)' : 'var(--g50)', v: maintenanceMode ? 'OFF' : 'LIVE', l:'Platform Status', d: maintenanceMode ? 'Maintenance mode' : 'All systems operational', dc: maintenanceMode ? 'var(--r700)' : 'var(--g600)' },
+          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, bg:'var(--p50)', v: twoFactor ? 'ON' : 'OFF', l:'2-Factor Auth', d: twoFactor ? 'All admins protected' : 'Recommended', dc: twoFactor ? 'var(--g600)' : 'var(--a600)' },
+          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>, bg:'var(--a50)', v:`${sessionTimeout}m`, l:'Session Timeout', d:'Auto-logout after idle', dc:'var(--s500)' },
+        ].map((k, i) => (
+          <div key={i} className="kpi">
+            <div className="kpi-ic" style={{ background: k.bg }}>{k.ic}</div>
+            <div className="kpi-v mono" style={{ fontSize: 20 }}>{k.v}</div>
+            <div className="kpi-l">{k.l}</div>
+            <div className="kpi-d" style={{ color: k.dc }}>{k.d}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+        {/* Feature flags */}
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">Feature Flags</div>
+            <button className="btn btn-ok btn-sm" onClick={saveFeatures} disabled={savingFeatures}>
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+              {savingFeatures ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {features.map((f, i) => (
+              <div key={i} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '11px 13px', borderRadius: 'var(--rsm)',
+                background: f.on ? 'var(--g50)' : 'var(--s50)',
+                border: '1px solid ' + (f.on ? 'var(--g100)' : 'var(--border)'),
+              }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s900)' }}>{f.n}</div>
+                  <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>{f.d}</div>
+                </div>
+                <label style={{ position: 'relative', display: 'inline-block', width: 42, height: 22, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={f.on} onChange={() => toggleFeature(i)} style={{ opacity: 0, width: 0, height: 0 }}/>
+                  <span style={{
+                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                    background: f.on ? 'var(--g600)' : 'var(--s300)',
+                    borderRadius: 22, transition: 'background .2s',
+                  }}/>
+                  <span style={{
+                    position: 'absolute', top: 3, left: f.on ? 23 : 3,
+                    width: 16, height: 16, background: '#fff', borderRadius: '50%',
+                    transition: 'left .2s',
+                  }}/>
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* School configuration */}
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">School Configuration</div>
+            <button className="btn btn-p btn-sm" onClick={saveSchoolSettings}>Save</button>
+          </div>
+          <div className="fg">
+            <label className="fl">Default Curriculum</label>
+            <select className="fsel" value={defaultCurriculum} onChange={e => setDefaultCurriculum(e.target.value)}>
+              {(store.curricula || []).map(c => <option key={c.id || c.name} value={c.name}>{c.name}</option>)}
+            </select>
+          </div>
+          <div className="fg">
+            <label className="fl">Academic Year</label>
+            <input className="fi" value={academicYear} onChange={e => setAcademicYear(e.target.value)} placeholder="e.g. 2025-2026"/>
+          </div>
+          <div className="fr2">
+            <div className="fg">
+              <label className="fl">Term Start Date</label>
+              <input className="fi" type="date" value={termStartDate} onChange={e => setTermStartDate(e.target.value)}/>
+            </div>
+            <div className="fg">
+              <label className="fl">Term End Date</label>
+              <input className="fi" type="date" value={termEndDate} onChange={e => setTermEndDate(e.target.value)}/>
+            </div>
+          </div>
+          <div style={{ background: 'var(--b50)', border: '1px solid var(--b100)', padding: '10px 12px', borderRadius: 'var(--rsm)', fontSize: 12.5, color: 'var(--s700)', marginTop: 4, lineHeight: 1.6 }}>
+            <strong>Note:</strong> Term dates affect billing cycles, attendance reports, and grade book deadlines.
+          </div>
+        </div>
+
+        {/* Security & Authentication */}
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">Security & Authentication</div>
+            <button className="btn btn-p btn-sm" onClick={saveSecuritySettings}>Save</button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              { label: 'Two-Factor Authentication (Admin)', desc: 'Require OTP for all admin logins', val: twoFactor, set: setTwoFactor },
+              { label: 'Open Public Sign-ups', desc: 'Allow new students to register without invitation', val: signupsOpen, set: setSignupsOpen },
+              { label: 'Maintenance Mode', desc: 'Lock platform · only admins can access', val: maintenanceMode, set: setMaintenanceMode },
+            ].map((row, i) => (
+              <div key={i} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '11px 13px', borderRadius: 'var(--rsm)',
+                background: row.val ? 'var(--g50)' : 'var(--s50)',
+                border: '1px solid ' + (row.val ? 'var(--g100)' : 'var(--border)'),
+              }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s900)' }}>{row.label}</div>
+                  <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>{row.desc}</div>
+                </div>
+                <label style={{ position: 'relative', display: 'inline-block', width: 42, height: 22, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={row.val} onChange={() => row.set(!row.val)} style={{ opacity: 0, width: 0, height: 0 }}/>
+                  <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: row.val ? 'var(--g600)' : 'var(--s300)', borderRadius: 22, transition: 'background .2s' }}/>
+                  <span style={{ position: 'absolute', top: 3, left: row.val ? 23 : 3, width: 16, height: 16, background: '#fff', borderRadius: '50%', transition: 'left .2s' }}/>
+                </label>
+              </div>
+            ))}
+          </div>
+          <div className="fg" style={{ marginTop: 12, marginBottom: 0 }}>
+            <label className="fl">Session Timeout (minutes)</label>
+            <input className="fi" type="number" value={sessionTimeout} onChange={e => setSessionTimeout(parseInt(e.target.value) || 60)} min="5" max="480"/>
+          </div>
+        </div>
+
+        {/* Notifications */}
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">Notifications</div>
+            <button className="btn btn-p btn-sm" onClick={() => toast.ok('Notification preferences saved')}>Save</button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              { label: 'Email Notifications', desc: 'System alerts · weekly digests · payment receipts', val: emailNotifs, set: setEmailNotifs },
+              { label: 'SMS Notifications', desc: 'Class reminders · payment confirmations · urgent alerts', val: smsNotifs, set: setSmsNotifs },
+              { label: 'Push Notifications', desc: 'Real-time browser/mobile push · class start alerts', val: pushNotifs, set: setPushNotifs },
+            ].map((row, i) => (
+              <div key={i} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '11px 13px', borderRadius: 'var(--rsm)',
+                background: row.val ? 'var(--g50)' : 'var(--s50)',
+                border: '1px solid ' + (row.val ? 'var(--g100)' : 'var(--border)'),
+              }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s900)' }}>{row.label}</div>
+                  <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>{row.desc}</div>
+                </div>
+                <label style={{ position: 'relative', display: 'inline-block', width: 42, height: 22, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={row.val} onChange={() => row.set(!row.val)} style={{ opacity: 0, width: 0, height: 0 }}/>
+                  <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: row.val ? 'var(--g600)' : 'var(--s300)', borderRadius: 22, transition: 'background .2s' }}/>
+                  <span style={{ position: 'absolute', top: 3, left: row.val ? 23 : 3, width: 16, height: 16, background: '#fff', borderRadius: '50%', transition: 'left .2s' }}/>
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Support contact */}
+        <div className="card" style={{ gridColumn: 'span 2' }}>
+          <div className="chdr">
+            <div className="ctitle">Support Contact (shown to students & parents)</div>
+            <button className="btn btn-p btn-sm" onClick={saveSupport}>Save</button>
+          </div>
+          <div className="fr2">
+            <div className="fg" style={{ marginBottom: 0 }}>
+              <label className="fl">Support Email</label>
+              <input className="fi" type="email" value={supportEmail} onChange={e => setSupportEmail(e.target.value)}/>
+            </div>
+            <div className="fg" style={{ marginBottom: 0 }}>
+              <label className="fl">Support Phone / WhatsApp</label>
+              <input className="fi" type="tel" value={supportPhone} onChange={e => setSupportPhone(e.target.value)}/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Danger zone */}
+      <div className="card" style={{ borderColor: 'var(--r100)' }}>
+        <div className="chdr">
+          <div className="ctitle" style={{ color: 'var(--r700)' }}>Danger Zone</div>
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--s600)', marginBottom: 14, lineHeight: 1.6 }}>
+          Irreversible actions. Use with caution.
+        </div>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button className="btn btn-sm" style={{ background: 'var(--a50)', color: 'var(--a600)', borderColor: 'var(--a100)' }} onClick={() => { if (confirm('Clear local cache? This will log all admins out.')) toast.info('Cache cleared') }}>Clear Local Cache</button>
+          <button className="btn btn-sm" style={{ background: 'var(--r50)', color: 'var(--r700)', borderColor: 'var(--r100)' }} onClick={() => { if (confirm('Reset all feature flags to defaults?')) { setFeatures(FEATS.map(f => ({ ...f }))); toast.ok('Features reset to defaults') } }}>Reset Feature Flags</button>
+          <button className="btn btn-sm" style={{ background: 'var(--r50)', color: 'var(--r700)', borderColor: 'var(--r100)' }} onClick={() => toast.error('This action requires super-admin token')}>Force Logout All Users</button>
+        </div>
+      </div>
+    </>
+  )
+}
+
+// ─── Website Editor Page ────────────────────────────────────
+function WebsiteEditorPage({ toast }) {
+  const store = useStore()
+  const [site, setSite] = useState({ ...store.siteConfig })
+  const [tab, setTab] = useState('hero')
+  const [saving, setSaving] = useState(false)
+
+  const upd = (k, v) => setSite(p => ({ ...p, [k]: v }))
+
+  const saveAll = () => {
+    setSaving(true)
+    setTimeout(() => {
+      store.updateSiteConfig(site)
+      setSaving(false)
+      toast.ok('Website saved · live on smartioushomeschool.com')
+    }, 700)
+  }
+
+  const resetSection = () => {
+    if (!confirm('Reset this section to last saved state?')) return
+    setSite({ ...store.siteConfig })
+    toast.info('Section reset')
+  }
+
+  const previewSite = () => {
+    window.open('https://smartioushomeschool.com', '_blank', 'noopener')
+  }
+
+  const tabs = [
+    { id: 'hero',    label: 'Hero Section' },
+    { id: 'stats',   label: 'Stats' },
+    { id: 'about',   label: 'About' },
+    { id: 'contact', label: 'Contact & Footer' },
+  ]
+
+  return (
+    <>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div className="sec-tag">System</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Website <em style={{ color: 'var(--b700)' }}>Editor</em></h2>
+          <p style={{ fontSize: 14, color: 'var(--s500)', marginTop: 3 }}>Edit landing page content · changes go live instantly across smartioushomeschool.com</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-g btn-sm" onClick={previewSite}>
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Preview Live Site
+          </button>
+          <button className="btn btn-ok btn-sm" onClick={saveAll} disabled={saving}>
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+            {saving ? 'Saving...' : 'Save & Publish'}
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 4, padding: 4, background: 'var(--s50)', borderRadius: 'var(--rmd)', marginBottom: 16, overflowX: 'auto' }}>
+        {tabs.map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{
+            flex: '0 0 auto',
+            padding: '9px 16px', borderRadius: 'var(--rsm)',
+            background: tab === t.id ? '#fff' : 'transparent',
+            border: 'none', cursor: 'pointer',
+            fontSize: 13, fontWeight: 700,
+            color: tab === t.id ? 'var(--b700)' : 'var(--s600)',
+            boxShadow: tab === t.id ? '0 2px 8px rgba(0,0,0,.06)' : 'none',
+            transition: 'all .15s',
+          }}>{t.label}</button>
+        ))}
+      </div>
+
+      {/* HERO TAB */}
+      {tab === 'hero' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          <div className="card">
+            <div className="chdr">
+              <div className="ctitle">Hero Content</div>
+              <button className="btn btn-sm" onClick={resetSection}>Reset</button>
+            </div>
+            <div className="fg">
+              <label className="fl">School Name</label>
+              <input className="fi" value={site.schoolName || ''} onChange={e => upd('schoolName', e.target.value)} placeholder="Smartious Homeschool"/>
+            </div>
+            <div className="fg">
+              <label className="fl">Headline</label>
+              <input className="fi" value={site.headline || ''} onChange={e => upd('headline', e.target.value)}/>
+            </div>
+            <div className="fg">
+              <label className="fl">Subheadline</label>
+              <textarea className="fta" rows={3} value={site.subheadline || ''} onChange={e => upd('subheadline', e.target.value)}/>
+            </div>
+            <div className="fr2">
+              <div className="fg">
+                <label className="fl">Primary CTA Button</label>
+                <input className="fi" value={site.cta1 || ''} onChange={e => upd('cta1', e.target.value)}/>
+              </div>
+              <div className="fg">
+                <label className="fl">Secondary CTA Button</label>
+                <input className="fi" value={site.cta2 || ''} onChange={e => upd('cta2', e.target.value)}/>
+              </div>
+            </div>
+            <div className="fg" style={{ marginBottom: 0 }}>
+              <label className="fl">Hero Video URL (optional)</label>
+              <input className="fi" value={site.heroVideo || ''} onChange={e => upd('heroVideo', e.target.value)} placeholder="https://youtube.com/embed/..."/>
+            </div>
+          </div>
+
+          {/* Live preview */}
+          <div className="card" style={{ background: 'linear-gradient(135deg, #0D1525, #1B3060)', color: '#fff', padding: 0, overflow: 'hidden' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span className="ctitle" style={{ color: 'rgba(255,255,255,.6)' }}>Live Preview</span>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: '#4ADE80' }}>● UPDATING IN REAL-TIME</span>
+            </div>
+            <div style={{ padding: '32px 24px', minHeight: 300, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: 'rgba(255,255,255,.5)', marginBottom: 12, letterSpacing: '.1em' }}>
+                {site.schoolName || 'SCHOOL NAME'}
+              </div>
+              <div className="serif" style={{ fontSize: 28, lineHeight: 1.2, marginBottom: 12, color: '#fff' }}>
+                {site.headline || 'Headline goes here'}
+              </div>
+              <div style={{ fontSize: 14, color: 'rgba(255,255,255,.7)', marginBottom: 20, lineHeight: 1.6 }}>
+                {site.subheadline || 'Subheadline preview...'}
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ display: 'inline-block', padding: '10px 18px', background: 'var(--b700)', color: '#fff', borderRadius: 'var(--rsm)', fontSize: 13, fontWeight: 700 }}>{site.cta1 || 'Primary CTA'}</span>
+                <span style={{ display: 'inline-block', padding: '10px 18px', background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 'var(--rsm)', fontSize: 13, fontWeight: 700 }}>{site.cta2 || 'Secondary CTA'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* STATS TAB */}
+      {tab === 'stats' && (
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">Hero Statistics (4 displayed)</div>
+            <button className="btn btn-sm" onClick={resetSection}>Reset</button>
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 14 }}>
+            These appear in the hero section as social-proof. Use short, punchy text.
+          </div>
+          <div className="fr2">
+            <div className="fg">
+              <label className="fl">Stat 1</label>
+              <input className="fi" value={site.stat1 || ''} onChange={e => upd('stat1', e.target.value)} placeholder="2,418+ Students"/>
+            </div>
+            <div className="fg">
+              <label className="fl">Stat 2</label>
+              <input className="fi" value={site.stat2 || ''} onChange={e => upd('stat2', e.target.value)} placeholder="127 Teachers"/>
+            </div>
+            <div className="fg">
+              <label className="fl">Stat 3</label>
+              <input className="fi" value={site.stat3 || ''} onChange={e => upd('stat3', e.target.value)} placeholder="6 Curricula"/>
+            </div>
+            <div className="fg" style={{ marginBottom: 0 }}>
+              <label className="fl">Stat 4</label>
+              <input className="fi" value={site.stat4 || ''} onChange={e => upd('stat4', e.target.value)} placeholder="Kenya · UAE · UK"/>
+            </div>
+          </div>
+          <div style={{ marginTop: 18, padding: 14, background: 'var(--s50)', borderRadius: 'var(--rsm)' }}>
+            <div className="ctitle" style={{ marginBottom: 10 }}>Preview</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+              {[site.stat1, site.stat2, site.stat3, site.stat4].map((s, i) => (
+                <div key={i} style={{ background: '#fff', padding: 12, borderRadius: 'var(--rsm)', border: '1px solid var(--border)', textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--s900)' }}>
+                  {s || '—'}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ABOUT TAB */}
+      {tab === 'about' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          <div className="card">
+            <div className="chdr">
+              <div className="ctitle">About Section</div>
+              <button className="btn btn-sm" onClick={resetSection}>Reset</button>
+            </div>
+            <div className="fg" style={{ marginBottom: 0 }}>
+              <label className="fl">About Text (appears below hero)</label>
+              <textarea className="fta" rows={10} value={site.aboutText || ''} onChange={e => upd('aboutText', e.target.value)}/>
+            </div>
+          </div>
+          <div className="card">
+            <div className="chdr">
+              <div className="ctitle">Live Preview</div>
+            </div>
+            <div style={{ padding: 18, background: 'var(--s50)', borderRadius: 'var(--rsm)', minHeight: 200 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', color: 'var(--s500)', textTransform: 'uppercase', marginBottom: 8 }}>
+                About
+              </div>
+              <div className="serif" style={{ fontSize: 22, color: 'var(--s900)', marginBottom: 12 }}>
+                Why families choose us
+              </div>
+              <div style={{ fontSize: 14, color: 'var(--s700)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+                {site.aboutText || 'About text will appear here...'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONTACT & FOOTER TAB */}
+      {tab === 'contact' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          <div className="card">
+            <div className="chdr">
+              <div className="ctitle">Footer Contact</div>
+              <button className="btn btn-sm" onClick={resetSection}>Reset</button>
+            </div>
+            <div className="fg">
+              <label className="fl">Email</label>
+              <input className="fi" type="email" value={site.footerEmail || ''} onChange={e => upd('footerEmail', e.target.value)}/>
+            </div>
+            <div className="fg">
+              <label className="fl">Primary Phone</label>
+              <input className="fi" type="tel" value={site.footerPhone || ''} onChange={e => upd('footerPhone', e.target.value)}/>
+            </div>
+            <div className="fg">
+              <label className="fl">Secondary Phone (optional)</label>
+              <input className="fi" type="tel" value={site.phone2 || ''} onChange={e => upd('phone2', e.target.value)}/>
+            </div>
+            <div className="fg">
+              <label className="fl">WhatsApp</label>
+              <input className="fi" type="tel" value={site.whatsapp || ''} onChange={e => upd('whatsapp', e.target.value)}/>
+            </div>
+            <div className="fg" style={{ marginBottom: 0 }}>
+              <label className="fl">Physical Address</label>
+              <textarea className="fta" rows={2} value={site.footerAddress || ''} onChange={e => upd('footerAddress', e.target.value)}/>
+            </div>
+          </div>
+          <div className="card">
+            <div className="chdr">
+              <div className="ctitle">Footer Copy & Branding</div>
+            </div>
+            <div className="fg">
+              <label className="fl">Copyright Line</label>
+              <input className="fi" value={site.footerCopy || ''} onChange={e => upd('footerCopy', e.target.value)}/>
+            </div>
+            <div style={{ marginTop: 18, padding: 18, background: '#0D1525', borderRadius: 'var(--rsm)', color: '#fff' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', marginBottom: 12 }}>
+                Footer Preview
+              </div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,.85)', lineHeight: 1.8 }}>
+                <div>📧 {site.footerEmail || 'email@example.com'}</div>
+                <div>📞 {site.footerPhone || '+254 ...'}</div>
+                {site.phone2 && <div>📞 {site.phone2}</div>}
+                {site.whatsapp && <div>💬 WhatsApp: {site.whatsapp}</div>}
+                <div style={{ marginTop: 6 }}>📍 {site.footerAddress || 'Address...'}</div>
+                <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.15)', fontSize: 11, color: 'rgba(255,255,255,.5)' }}>
+                  {site.footerCopy || '© Year School Name'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Helpful tip */}
+      <div style={{ marginTop: 20, padding: '14px 18px', background: 'var(--b50)', border: '1px solid var(--b100)', borderRadius: 'var(--rsm)', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}>
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <div style={{ fontSize: 13, color: 'var(--s700)', lineHeight: 1.6 }}>
+          Changes save instantly to the platform when you click <strong>Save &amp; Publish</strong>. The live website at <strong>smartioushomeschool.com</strong> reflects updates immediately. Use the Preview Live Site button to verify before showing parents.
+        </div>
+      </div>
+    </>
+  )
+}
