@@ -935,9 +935,9 @@ function UsersPage({ refreshKey, userStats, onAddUser, onPending, toast, setUser
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState('All Roles')
-  const [statusFilter, setStatusFilter] = useState('All Status')
-  const [planFilter, setPlanFilter] = useState('All Plans')
+  const [roleFilter, setRoleFilter] = useState('all')        // all | student | teacher | parent | admin
+  const [statusFilter, setStatusFilter] = useState('all')    // all | active | pending | suspended
+  const [planFilter, setPlanFilter] = useState('all')
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -953,101 +953,319 @@ function UsersPage({ refreshKey, userStats, onAddUser, onPending, toast, setUser
     fetchUsers()
   }, [refreshKey])
 
+  // ── COMPUTED COUNTS ────────────────────────────────
+  const counts = {
+    total: users.length,
+    students: users.filter(u => u.role === 'student').length,
+    teachers: users.filter(u => u.role === 'teacher').length,
+    parents: users.filter(u => u.role === 'parent').length,
+    admins: users.filter(u => u.role === 'admin').length,
+    pendingLogin: users.filter(u => u.mustChangePassword).length,
+    active: users.filter(u => u.isActive !== false && !u.mustChangePassword).length,
+    suspended: users.filter(u => u.isActive === false).length,
+  }
+
+  // ── DETERMINISTIC AVATAR COLORS (uses crimson palette) ──
+  const avColor = (name) => {
+    const tokens = ['var(--crimson, #7D1025)', '#A51C2E', '#C9A030', 'var(--g600)', 'var(--p600)', 'var(--t600)']
+    let hash = 0
+    for (let i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
+    return tokens[Math.abs(hash) % tokens.length]
+  }
+
+  // ── FILTERED ROWS ──────────────────────────────────
   const filtered = users.filter(u => {
-    // Search filter
-    if (search && !u.firstName.toLowerCase().includes(search.toLowerCase()) && !u.lastName.toLowerCase().includes(search.toLowerCase()) && !u.email.toLowerCase().includes(search.toLowerCase())) {
-      return false
+    if (search) {
+      const q = search.toLowerCase()
+      const matches = (u.firstName || '').toLowerCase().includes(q) ||
+                      (u.lastName || '').toLowerCase().includes(q) ||
+                      (u.email || '').toLowerCase().includes(q)
+      if (!matches) return false
     }
-    // Role filter
-    if (roleFilter !== 'All Roles' && u.role !== roleFilter.toLowerCase()) {
-      return false
+
+    if (roleFilter !== 'all' && u.role !== roleFilter) return false
+
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'pending' && !u.mustChangePassword) return false
+      if (statusFilter === 'active' && (u.mustChangePassword || u.isActive === false)) return false
+      if (statusFilter === 'suspended' && u.isActive !== false) return false
     }
-    // Status filter
-    if (statusFilter !== 'All Status') {
-      const userStatus = u.isActive ? 'Active' : 'Suspended'
-      if (userStatus !== statusFilter) {
-        return false
-      }
-    }
-    // Plan filter
-    if (planFilter !== 'All Plans' && u.plan !== planFilter) {
-      return false
-    }
+
+    if (planFilter !== 'all' && (u.plan || 'Basic') !== planFilter) return false
+
     return true
   })
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 40 }}>Loading users...</div>
-  if (error) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--r600)' }}>Error: {error}</div>
+  // ── ACTIONS ────────────────────────────────────────
+  const handleEdit = (u) => {
+    setUserForm({
+      firstName: u.firstName, lastName: u.lastName, email: u.email,
+      role: u.role, curriculum: u.curriculum || '', plan: u.plan || 'Basic',
+      _id: u._id, subjects: u.subjects || [], grade: u.grade || '',
+      phone: u.phone || '', bio: u.bio || '', parentEmail: u.parentEmail || '',
+      linkedStudents: u.linkedStudents || [], teachingSpecialties: u.teachingSpecialties || []
+    })
+    setUserModal(true)
+  }
 
-   return (
-     <>
-       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
-         <div><div className="sec-tag">Accounts</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>User <em style={{ color: 'var(--b700)' }}>Management</em></h2></div>
-         <div style={{ display: 'flex', gap: 10 }}>
-           <button className="btn btn-s btn-sm" onClick={() => toast.info('Exporting CSV...')}>Export CSV</button>
-           <button className="btn btn-p btn-sm" onClick={onAddUser}>
-             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-             Add User
-           </button>
-         </div>
-       </div>
-       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
-         <input className="fi" style={{ maxWidth: 280 }} placeholder="Search name, email or ID..." value={search} onChange={e => setSearch(e.target.value)} />
-         <select className="fsel" style={{ maxWidth: 130 }} value={roleFilter} onChange={e => setRoleFilter(e.target.value)}><option>All Roles</option><option>student</option><option>teacher</option><option>parent</option><option>admin</option></select>
-         <select className="fsel" style={{ maxWidth: 130 }} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}><option>All Status</option><option>Active</option><option>Suspended</option></select>
-         <select className="fsel" style={{ maxWidth: 130 }} value={planFilter} onChange={e => setPlanFilter(e.target.value)}><option>All Plans</option><option>Basic</option><option>Premium</option><option>IGCSE Pack</option><option>Staff</option></select>
-       </div>
-       {/* PHASE 3-5: User stats badge */}
-       <div style={{ background: 'var(--b50)', border: '1px solid var(--b100)', borderRadius: 'var(--rlg)', padding: '13px 18px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-         <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--b700)' }}>Total Users: {userStats}</span>
+  const handleDelete = async (u) => {
+    if (!confirm(`Delete ${u.firstName} ${u.lastName} permanently? This cannot be undone.`)) return
+    try {
+      await api.delete('/users/' + u._id)
+      setUsers(prev => prev.filter(x => x._id !== u._id))
+      toast.ok(`${u.firstName} deleted`)
+    } catch (e) {
+      toast.error('Delete failed: ' + (e.response?.data?.message || e.message))
+    }
+  }
+
+  // ── LOADING / ERROR STATES ─────────────────────────
+  if (loading) {
+    return (
+      <>
+        <div style={{ marginBottom: 18 }}>
+          <div className="sec-tag">Accounts</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>User <em style={{ color: 'var(--b700)' }}>Management</em></h2>
         </div>
-        <div className="card" style={{ padding: 0, overflow: 'auto', maxWidth: '100%' }}>
-          <table className="tbl" style={{ minWidth: '1000px' }}>
-            <thead><tr><th>User</th><th>Role</th><th>Curriculum</th><th>Plan</th><th>Login Status</th><th>Last Active</th><th style={{ width: '120px', textAlign: 'center' }}>Actions</th></tr></thead>
-            <tbody>
-              {filtered.map((u, i) => (
-                <tr key={u._id || i}>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <Av init={(u.firstName[0] + u.lastName[0]).toUpperCase()} col={['#3B82F6','#22C55E','#8B5CF6','#F59E0B','#EC4899'][i % 5]} />
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{u.firstName} {u.lastName}</div>
-                        <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>{u.email} · {u._id?.slice(-6) || 'ID'}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td><span className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>{u.role}</span></td>
-                  <td style={{ color: 'var(--s500)', maxWidth: '150px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                    {Array.isArray(u.curriculum) ? u.curriculum.join(', ') : (u.curriculum || 'N/A')}
-                  </td>
-                  <td><PlanBadge p={u.plan || 'Basic'} /></td>
-                  {/* PHASE 3-5: Show login status instead of generic "Active" */}
-                  <td><span className="badge" style={u.mustChangePassword ? { color: 'var(--a600)', borderColor: 'var(--a100)', background: 'var(--a50)' } : { color: 'var(--g700)', borderColor: 'var(--g100)', background: 'var(--g50)' }}>{u.mustChangePassword ? 'Pending First Login' : 'Active'}</span></td>
-                  <td style={{ color: 'var(--s400)', fontSize: 13 }}>{u.lastActive || 'Never'}</td>
-                  <td style={{ textAlign: 'center', whiteSpace: 'nowrap', minWidth: '120px' }}>
-                     <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
-                        <button className="btn btn-g btn-sm" onClick={() => {
-                          setUserForm({ firstName: u.firstName, lastName: u.lastName, email: u.email, role: u.role, curriculum: u.curriculum || '', plan: u.plan || 'Basic', _id: u._id, subjects: u.subjects || [], grade: u.grade || '', phone: u.phone || '', bio: u.bio || '', parentEmail: u.parentEmail || '', linkedStudents: u.linkedStudents || [], teachingSpecialties: u.teachingSpecialties || [] })
-                          setUserModal(true)
-                        }}>Edit</button>
-                       <button className="btn btn-d btn-sm" onClick={async () => {
-                         if (!confirm(`Delete ${u.firstName} ${u.lastName} permanently? This cannot be undone.`)) return
-                         try {
-                           await api.delete('/users/' + u._id)
-                           setUsers(prev => prev.filter(x => x._id !== u._id))
-                           toast.ok(`${u.firstName} deleted`)
-                         } catch(e) { toast.error('Delete failed: ' + (e.response?.data?.message || e.message)) }
-                       }}>Delete</button>
-                     </div>
-                   </td>
+        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)', fontSize: 14 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>Loading</div>
+          Fetching all users from your backend...
+        </div>
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <div style={{ marginBottom: 18 }}>
+          <div className="sec-tag">Accounts</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>User <em style={{ color: 'var(--b700)' }}>Management</em></h2>
+        </div>
+        <div className="card" style={{ padding: 24, background: 'var(--r50)', borderColor: 'var(--r100)' }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--r700)', marginBottom: 6 }}>Failed to load users</div>
+          <div style={{ fontSize: 12, color: 'var(--r600)', marginBottom: 12 }}>{error}</div>
+          <button className="btn btn-r btn-sm" onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      {/* HEADER ROW */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div className="sec-tag">Accounts</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>User <em style={{ color: 'var(--b700)' }}>Management</em></h2>
+          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Add, edit, suspend, or delete platform users · Students · Teachers · Parents · Admins</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {counts.pendingLogin > 0 && (
+            <button className="btn btn-am btn-sm" onClick={() => setStatusFilter('pending')}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+              {counts.pendingLogin} Pending First Login
+            </button>
+          )}
+          <button className="btn btn-s btn-sm" onClick={() => toast.info('Exporting CSV...')}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+          <button className="btn btn-p btn-sm" onClick={onAddUser}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add User
+          </button>
+        </div>
+      </div>
+
+      {/* KPI STRIP */}
+      <div className="kpi-row">
+        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('all')}>
+          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div className="kpi-v">{counts.total}</div>
+          <div className="kpi-l">Total Users</div>
+          <div className="kpi-d" style={{ color: 'var(--s500)' }}>All roles combined</div>
+        </div>
+        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('student')}>
+          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <div className="kpi-v">{counts.students}</div>
+          <div className="kpi-l">Students</div>
+          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Click to filter</div>
+        </div>
+        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('teacher')}>
+          <div className="kpi-ic" style={{ background: 'var(--g50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/></svg>
+          </div>
+          <div className="kpi-v">{counts.teachers}</div>
+          <div className="kpi-l">Teachers</div>
+          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Click to filter</div>
+        </div>
+        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('parent')}>
+          <div className="kpi-ic" style={{ background: 'var(--p50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div className="kpi-v">{counts.parents}</div>
+          <div className="kpi-l">Parents</div>
+          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Click to filter</div>
+        </div>
+        <div className="kpi" style={{ cursor: counts.pendingLogin > 0 ? 'pointer' : 'default', borderColor: counts.pendingLogin > 0 ? 'var(--a100)' : undefined }} onClick={() => counts.pendingLogin > 0 && setStatusFilter('pending')}>
+          <div className="kpi-ic" style={{ background: counts.pendingLogin > 0 ? 'var(--a50)' : 'var(--s100)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={counts.pendingLogin > 0 ? 'var(--a600)' : 'var(--s500)'} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div className="kpi-v" style={{ color: counts.pendingLogin > 0 ? 'var(--a600)' : undefined }}>{counts.pendingLogin}</div>
+          <div className="kpi-l">Pending Login</div>
+          <div className="kpi-d" style={{ color: counts.pendingLogin > 0 ? 'var(--a600)' : 'var(--g600)' }}>
+            {counts.pendingLogin > 0 ? 'Need first login' : 'All onboarded'}
+          </div>
+        </div>
+      </div>
+
+      {/* FILTER BAR */}
+      <div className="card" style={{ padding: '14px 16px', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <span className="ctitle" style={{ marginRight: 4 }}>Role:</span>
+          {[
+            { id: 'all',     label: 'All',      count: counts.total },
+            { id: 'student', label: 'Students', count: counts.students },
+            { id: 'teacher', label: 'Teachers', count: counts.teachers },
+            { id: 'parent',  label: 'Parents',  count: counts.parents },
+            { id: 'admin',   label: 'Admins',   count: counts.admins },
+          ].map(chip => (
+            <button key={chip.id} onClick={() => setRoleFilter(chip.id)}
+              style={{
+                background: roleFilter === chip.id ? 'var(--crimson, #7D1025)' : 'var(--bg)',
+                color: roleFilter === chip.id ? '#fff' : 'var(--s700)',
+                border: '1px solid ' + (roleFilter === chip.id ? 'transparent' : 'var(--border)'),
+                padding: '6px 12px', borderRadius: 99,
+                fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 6,
+                transition: 'all .15s',
+              }}>
+              {chip.label}
+              <span style={{
+                background: roleFilter === chip.id ? 'rgba(255,255,255,.2)' : 'var(--s100)',
+                color: roleFilter === chip.id ? '#fff' : 'var(--s600)',
+                padding: '1px 7px', borderRadius: 99, fontSize: 11, fontWeight: 700,
+              }}>{chip.count}</span>
+            </button>
+          ))}
+
+          <div style={{ width: 1, height: 22, background: 'var(--border)', margin: '0 4px' }}/>
+
+          <select className="fsel" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+            style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600 }}>
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="pending">Pending First Login</option>
+            <option value="suspended">Suspended</option>
+          </select>
+
+          <select className="fsel" value={planFilter} onChange={e => setPlanFilter(e.target.value)}
+            style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600 }}>
+            <option value="all">All Plans</option>
+            <option value="Basic">Basic</option>
+            <option value="Premium">Premium</option>
+            <option value="IGCSE Pack">IGCSE Pack</option>
+            <option value="Staff">Staff</option>
+          </select>
+
+          <input className="fi" placeholder="Search name or email..."
+            value={search} onChange={e => setSearch(e.target.value)}
+            style={{ width: 220, marginLeft: 'auto' }}/>
+        </div>
+      </div>
+
+      {/* TABLE */}
+      {users.length === 0 ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No users yet</div>
+          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Click "Add User" to create the first account</div>
+          <button className="btn btn-p btn-sm" style={{ marginTop: 14 }} onClick={onAddUser}>Add First User</button>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No users match your filters</div>
+          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Showing 0 of {users.length} users</div>
+          <button className="btn btn-s btn-sm" style={{ marginTop: 14 }} onClick={() => { setRoleFilter('all'); setStatusFilter('all'); setPlanFilter('all'); setSearch('') }}>Clear all filters</button>
+        </div>
+      ) : (
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s700)' }}>
+              {filtered.length} of {users.length} users
+            </div>
+            <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>
+              Click a user's <strong>Edit</strong> button to modify their profile
+            </div>
+          </div>
+          <div style={{ overflow: 'auto' }}>
+            <table className="tbl" style={{ minWidth: 1000 }}>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Curriculum</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>Last Active</th>
+                  <th style={{ width: 140, textAlign: 'center' }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((u) => {
+                  const fullName = (u.firstName || '') + ' ' + (u.lastName || '')
+                  const initials = ((u.firstName?.[0] || '?') + (u.lastName?.[0] || '')).toUpperCase()
+                  const isPending = u.mustChangePassword
+                  const isSuspended = u.isActive === false
+
+                  return (
+                    <tr key={u._id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <Av init={initials} col={avColor(fullName)} size={36}/>
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{fullName.trim() || 'Unnamed'}</div>
+                            <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>{u.email || 'No email'} · {u._id?.slice(-6) || 'ID'}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)', textTransform: 'capitalize' }}>{u.role}</span>
+                      </td>
+                      <td style={{ color: 'var(--s500)', maxWidth: 150, whiteSpace: 'normal', wordBreak: 'break-word', fontSize: 13 }}>
+                        {Array.isArray(u.curriculum) ? u.curriculum.join(', ') : (u.curriculum || 'N/A')}
+                      </td>
+                      <td><PlanBadge p={u.plan || 'Basic'} /></td>
+                      <td>
+                        {isSuspended ? (
+                          <span className="badge" style={{ color: 'var(--r700)', borderColor: 'var(--r100)', background: 'var(--r50)' }}>Suspended</span>
+                        ) : isPending ? (
+                          <span className="badge" style={{ color: 'var(--a600)', borderColor: 'var(--a100)', background: 'var(--a50)' }}>Pending Login</span>
+                        ) : (
+                          <span className="badge" style={{ color: 'var(--g700)', borderColor: 'var(--g100)', background: 'var(--g50)' }}>Active</span>
+                        )}
+                      </td>
+                      <td style={{ color: 'var(--s400)', fontSize: 13 }}>{u.lastActive || 'Never'}</td>
+                      <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                        <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                          <button className="btn btn-g btn-sm" onClick={() => handleEdit(u)}>Edit</button>
+                          <button className="btn btn-d btn-sm" onClick={() => handleDelete(u)}>Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
-     </>
-   )
+      )}
+    </>
+  )
 }
 
 function TeachersPage({ refreshKey, toast }) {
