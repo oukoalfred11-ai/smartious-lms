@@ -729,15 +729,15 @@ function DashboardPage({ liveSessions, liveClasses, onAddUser, onPending, onNav,
         {/* RIGHT SIDEBAR */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {/* MSHAURI quick-access */}
-          <div className="card" style={{ background: 'linear-gradient(135deg, #0D1525 0%, #1B3060 100%)', color: '#fff', border: 'none' }}>
+          <div className="card" style={{ background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)', color: '#fff', border: 'none', position: 'relative', overflow: 'hidden' }}>
             <div className="chdr">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(255,255,255,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#4ADE80" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(201, 160, 48, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                 </div>
                 <div className="ctitle" style={{ color: 'rgba(255,255,255,.9)' }}>Mshauri AI</div>
               </div>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: '#4ADE80' }}>● ONLINE</span>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: '#F0CC5A' }}>● ONLINE</span>
             </div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', lineHeight: 1.6, marginBottom: 12 }}>
               Ask anything — generate questions, explain concepts, draft messages.
@@ -757,10 +757,11 @@ function DashboardPage({ liveSessions, liveClasses, onAddUser, onPending, onNav,
                 }}
               />
               <button onClick={askMshauri} style={{
-                background: '#4ADE80', color: '#0D1525', border: 'none',
+                background: '#C9A030', color: '#3D0810', border: 'none',
                 padding: '9px 14px', borderRadius: 'var(--rsm, 6px)',
                 fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', gap: 4,
+                boxShadow: '0 2px 8px rgba(201, 160, 48, 0.3)',
               }}>
                 <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 Ask
@@ -3439,7 +3440,7 @@ function WebsiteEditorPage({ toast }) {
           </div>
 
           {/* Live preview */}
-          <div className="card" style={{ background: 'linear-gradient(135deg, #0D1525, #1B3060)', color: '#fff', padding: 0, overflow: 'hidden' }}>
+          <div className="card" style={{ background: 'linear-gradient(135deg, #7D1025, #5A0B1B)', color: '#fff', padding: 0, overflow: 'hidden' }}>
             <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span className="ctitle" style={{ color: 'rgba(255,255,255,.6)' }}>Live Preview</span>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: '#4ADE80' }}>● UPDATING IN REAL-TIME</span>
