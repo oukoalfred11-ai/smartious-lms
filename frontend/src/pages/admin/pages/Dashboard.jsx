@@ -202,14 +202,55 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       }
 
       if (userForm._id) {
-        // Update
-        await api.patch('/users/' + userForm._id, payload)
+        // Update — try multiple endpoint variants
+        const updateEndpoints = ['/users/' + userForm._id, '/admin/users/' + userForm._id]
+        let updated = false
+        let lastErr = null
+        for (const ep of updateEndpoints) {
+          try {
+            await api.patch(ep, payload)
+            updated = true
+            break
+          } catch (e) {
+            lastErr = e
+            if (e.response?.status !== 404) break
+          }
+        }
+        if (!updated) throw lastErr
         toast.ok(userForm.firstName + ' updated')
       } else {
-        // Create
-        const res = await api.post('/users', payload)
-        if (res.data.credentials) {
-          setCredentialsOverlay(res.data.credentials)
+        // Create — try multiple endpoint variants because different backends mount differently
+        const createEndpoints = [
+          '/users',
+          '/admin/users',
+          '/users/create',
+          '/auth/register',
+          '/auth/admin-create',
+          '/auth/create-user',
+        ]
+        let created = false
+        let lastErr = null
+        let createdRes = null
+        for (const ep of createEndpoints) {
+          try {
+            createdRes = await api.post(ep, payload)
+            created = true
+            break
+          } catch (e) {
+            lastErr = e
+            // Only try next endpoint on 404. Stop on other errors (validation, auth, etc).
+            if (e.response?.status !== 404) break
+          }
+        }
+        if (!created) {
+          // Provide a helpful error
+          if (lastErr?.response?.status === 404) {
+            throw new Error('No user creation endpoint found. Tried: ' + createEndpoints.join(', ') + '. Check your backend routes.')
+          }
+          throw lastErr
+        }
+        if (createdRes?.data?.credentials) {
+          setCredentialsOverlay(createdRes.data.credentials)
         }
         toast.ok(userForm.firstName + ' created successfully')
       }
@@ -1765,7 +1806,6 @@ function WebsiteModule({ refreshKey, toast }) {
   const store = useStore()
   const [site, setSite] = useState({ ...store.siteConfig })
   const [tab, setTab] = useState('content')
-  const [iframeKey, setIframeKey] = useState(0)
   const [saving, setSaving] = useState(false)
 
   const upd = (k, v) => setSite(p => ({ ...p, [k]: v }))
@@ -1775,8 +1815,7 @@ function WebsiteModule({ refreshKey, toast }) {
     setTimeout(() => {
       store.updateSiteConfig(site)
       setSaving(false)
-      toast.ok('Saved · refresh iframe to see live changes')
-      setIframeKey(k => k + 1)
+      toast.ok('Saved · open the live site to verify changes')
     }, 500)
   }
 
@@ -1786,13 +1825,12 @@ function WebsiteModule({ refreshKey, toast }) {
         <div>
           <div className="sec-tag">CMS</div>
           <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Website <em style={{ color: 'var(--crimson, #7D1025)' }}>Editor</em></h2>
-          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Edit landing page content · live iframe shows your actual site</p>
+          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Edit landing page content · click "Open Live Site" to verify changes</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-s btn-sm" onClick={() => window.open('https://smartioushomeschool.com', '_blank', 'noopener')}>
             Open in New Tab
           </button>
-          <button className="btn btn-s btn-sm" onClick={() => setIframeKey(k => k + 1)}>Refresh Iframe</button>
           <button className="btn btn-p btn-sm" onClick={save} disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</button>
         </div>
       </div>
@@ -1867,25 +1905,60 @@ function WebsiteModule({ refreshKey, toast }) {
             )}
 
             <div style={{ padding: 10, background: 'var(--gold-pale, #FBF6E3)', border: '1px solid var(--gold, #C9A030)', borderRadius: 6, fontSize: 11, color: 'var(--s700)', marginTop: 12, lineHeight: 1.5 }}>
-              <strong>Note:</strong> Changes to site config save immediately. The iframe shows your LIVE site — refresh it to see published changes.
+              <strong>Note:</strong> Changes save immediately. Click "Open Live Site" to verify in a new tab.
             </div>
           </div>
         </div>
 
-        {/* RIGHT: Real iframe */}
+        {/* RIGHT: Site link card (iframe blocked by X-Frame-Options) */}
         <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '8px 14px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--g500)' }}/>
-            <span className="mono" style={{ fontSize: 12, color: 'var(--s600)', flex: 1 }}>https://smartioushomeschool.com</span>
-            <span className="ctitle" style={{ color: 'var(--s500)', fontSize: 10 }}>LIVE PREVIEW</span>
+            <span className="mono" style={{ fontSize: 12, color: 'var(--s600)', flex: 1 }}>smartioushomeschool.com</span>
+            <span className="ctitle" style={{ color: 'var(--s500)', fontSize: 10 }}>LIVE SITE</span>
           </div>
-          <iframe
-            key={iframeKey}
-            src="https://smartioushomeschool.com"
-            title="Smartious Live Site"
-            style={{ flex: 1, border: 'none', width: '100%' }}
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-          />
+          <div style={{
+            flex: 1,
+            background: 'linear-gradient(135deg, #FBFAF5 0%, #FCE4E8 100%)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            padding: 32, textAlign: 'center', gap: 18,
+          }}>
+            <div style={{
+              width: 88, height: 88, borderRadius: '50%',
+              background: 'var(--crimson, #7D1025)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 12px 32px rgba(125,16,37,.25)',
+            }}>
+              <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </div>
+            <div>
+              <div className="serif" style={{ fontSize: 22, color: 'var(--s900)', marginBottom: 6 }}>
+                Smartious Homeschool
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--s600)', maxWidth: 280, lineHeight: 1.6 }}>
+                Your live website is published at smartioushomeschool.com
+              </div>
+            </div>
+            <button
+              onClick={() => window.open('https://smartioushomeschool.com', '_blank', 'noopener')}
+              className="btn btn-p"
+              style={{ padding: '12px 22px', fontSize: 14 }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Open Live Site in New Tab
+            </button>
+            <div style={{
+              padding: '10px 14px', background: 'rgba(201,160,48,.15)',
+              borderLeft: '3px solid var(--gold, #C9A030)',
+              borderRadius: 6, fontSize: 11.5, color: 'var(--s700)',
+              maxWidth: 320, lineHeight: 1.5, textAlign: 'left',
+            }}>
+              <strong>Why no inline preview?</strong> Your site sets <code>X-Frame-Options: deny</code> for security — that prevents any iframe embedding. This is correct behaviour.
+            </div>
+          </div>
         </div>
       </div>
     </>
@@ -2018,12 +2091,31 @@ function MshauriModule({ refreshKey, toast }) {
     setInput('')
     setLoading(true)
 
-    try {
-      const res = await api.post('/auth/mshauri', { message: userMsg })
-      const reply = res.data.reply || res.data.message || res.data.response || 'No response from Mshauri'
-      setMessages(m => [...m, { role: 'assistant', text: reply }])
-    } catch (e) {
-      setMessages(m => [...m, { role: 'assistant', text: 'Sorry, I could not reach the AI service. Error: ' + (e.response?.data?.message || e.message) }])
+    // Try multiple possible endpoints (different backends use different paths)
+    const endpoints = ['/mshauri', '/auth/mshauri', '/ai/mshauri', '/admin/mshauri']
+    let success = false
+    let lastError = null
+
+    for (const ep of endpoints) {
+      try {
+        const res = await api.post(ep, { message: userMsg, prompt: userMsg })
+        const reply = res.data.reply || res.data.message || res.data.response || res.data.text || 'No response from Mshauri'
+        setMessages(m => [...m, { role: 'assistant', text: reply }])
+        success = true
+        break
+      } catch (e) {
+        lastError = e
+        // If 404, try next endpoint. Otherwise stop trying.
+        if (e.response?.status !== 404) break
+      }
+    }
+
+    if (!success) {
+      const status = lastError?.response?.status
+      const msg = status === 404
+        ? 'Mshauri AI is not yet wired to the backend.\n\nThe frontend is ready, but no /api/mshauri endpoint exists on your Render server. Once you add the endpoint that calls Anthropic\'s API, this chat will work automatically — no frontend changes needed.\n\nFor now, you can use this as a UI placeholder for AI features.'
+        : 'Could not reach Mshauri AI. Error: ' + (lastError?.response?.data?.message || lastError?.message || 'Unknown')
+      setMessages(m => [...m, { role: 'assistant', text: msg }])
     }
 
     setLoading(false)
