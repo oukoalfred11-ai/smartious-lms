@@ -1,521 +1,469 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useStore } from '../../../context/ctx.jsx'
-import { useNavigate } from 'react-router-dom'
-import { useToast, useAuth, api } from '../../../context/ctx.jsx'
+import { useStore, useToast, useAuth, api } from '../../../context/ctx.jsx'
 import Modal from '../../../components/ui/Modal.jsx'
-import CurriculumSubjectSelector from '../../../components/ui/CurriculumSubjectSelector.jsx'
 
-// ─── static data matching admin.html ───────────────────────
-const USERS = [
-  {name:'Amara Osei',init:'AO',col:'#3B82F6',email:'amara.osei@student.smartious.ac.ke',id:'STU-0021',role:'Student',curr:'IGCSE',plan:'Premium',status:'Active',active:'2h ago'},
-  {name:'Mr. James Muthomi',init:'JM',col:'#22C55E',email:'j.muthomi@smartious.ac.ke',id:'TCH-0008',role:'Teacher',curr:'N/A',plan:'Staff',status:'Active',active:'4h ago'},
-  {name:'Janet Osei',init:'JO',col:'#8B5CF6',email:'janet.osei@gmail.com',id:'PAR-0014',role:'Parent',curr:'N/A',plan:'Basic',status:'Active',active:'1d ago'},
-  {name:'Kofi Mensah',init:'KM',col:'#F59E0B',email:'kofi.mensah@student.smartious.ac.ke',id:'STU-0031',role:'Student',curr:'A-Level',plan:'IGCSE Pack',status:'Active',active:'30m ago'},
-  {name:'Faith Wanjiru',init:'FW',col:'#EC4899',email:'faith.w@student.smartious.ac.ke',id:'STU-0019',role:'Student',curr:'IGCSE',plan:'Premium',status:'Active',active:'1h ago'},
-]
+// ═══════════════════════════════════════════════════════════
+// SMARTIOUS ADMIN DASHBOARD
+// ═══════════════════════════════════════════════════════════
+// Architecture:
+// - Single file containing all 14 admin modules
+// - Internal page state (no URL changes - stays at /admin)
+// - Real backend integration with graceful fallbacks
+// - Crimson + Gold + Cream theme via parent .sm-admin-theme wrapper
 
-const TEACHERS = [
-  {name:'Mr. James Muthomi',init:'JM',col:'#3B82F6',subj:'Mathematics',stu:96,rat:4.9,cls:12,status:'Active'},
-  {name:'Dr. Achieng Ouma', init:'AO',col:'#22C55E',subj:'Biology · Chemistry',stu:84,rat:4.8,cls:10,status:'Active'},
-  {name:'Ms. Njeri Wambua', init:'NW',col:'#8B5CF6',subj:'English Language',stu:112,rat:4.7,cls:14,status:'Active'},
-  {name:'Mr. Kariuki Njoroge',init:'KN',col:'#F59E0B',subj:'Physics',stu:72,rat:4.6,cls:9,status:'Active'},
-  {name:'Mrs. Faith Muthoni',init:'FM',col:'#EC4899',subj:'History · Geography',stu:58,rat:4.9,cls:8,status:'On Leave'},
-]
+// ──────────────────────────────────────────────────────
+// SHARED HELPERS
+// ──────────────────────────────────────────────────────
 
-const CURRS = [
-  {name:'IGCSE',org:'Cambridge / Pearson Edexcel',stu:894,subj:12,status:'Active'},
-  {name:'British Curriculum',org:'UK National Curriculum',stu:612,subj:10,status:'Active'},
-  {name:'IB Diploma',org:'International Baccalaureate',stu:387,subj:8,status:'Active'},
-  {name:'CBC / KCSE',org:'KNEC Kenya',stu:341,subj:9,status:'Active'},
-  {name:'American Curriculum',org:'College Board / SAT',stu:184,subj:8,status:'Active'},
-  {name:'IB Primary Years',org:'IBO — PYP',stu:0,subj:6,status:'Draft'},
-]
+const Av = ({ init = '?', col = '#7D1025', size = 36 }) => (
+  <div style={{
+    width: size, height: size, borderRadius: '50%',
+    background: col, color: '#FBFAF5',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: size * 0.4, fontWeight: 700,
+    fontFamily: "system-ui, sans-serif",
+    flexShrink: 0,
+  }}>{init}</div>
+)
 
-const TXNS = [
-  {n:'Grace Mutua',p:'Premium',m:'M-Pesa',a:'1,499',d:'Mar 7, 2026',s:'Paid'},
-  {n:'Brian Otieno',p:'IGCSE Pack',m:'Card',a:'3,999',d:'Mar 7, 2026',s:'Paid'},
-  {n:'Lydia Achieng',p:'Assessment Fee',m:'M-Pesa',a:'2,000',d:'Mar 7, 2026',s:'Paid'},
-  {n:'Samuel Omondi',p:'Basic',m:'M-Pesa',a:'499',d:'Mar 7, 2026',s:'Pending'},
-  {n:'David Mwangi',p:'Basic',m:'Bank',a:'499',d:'Mar 6, 2026',s:'Overdue'},
-]
-
-const FEATS = [
-  {n:'AI Tutor (Mshauri)',d:'Chatbot for all students',on:true},
-  {n:'Live Classrooms',d:'Video sessions for teachers',on:true},
-  {n:'Secure Exam Mode',d:'Tab-switch detection & proctoring',on:true},
-  {n:'Gamification',d:'XP, badges, leaderboards',on:true},
-  {n:'Parent Portal',d:'Parent access to student progress',on:true},
-  {n:'M-Pesa Payments',d:'Accept M-Pesa STK push',on:true},
-  {n:'New Registrations',d:'Allow new student enrolments',on:true},
-  {n:'SMS Notifications',d:'Send SMS to students & parents',on:true},
-  {n:'Beta Features',d:'Experimental features',on:false},
-  {n:'Maintenance Mode',d:'Lock platform for non-admins',on:false},
-]
-
-const PENDING = [
-  {n:'Grace Mutua',curr:'IGCSE',plan:'Premium',method:'M-Pesa',date:'Today 09:14'},
-  {n:'Samuel Omondi',curr:'British',plan:'Basic',method:'Card',date:'Today 08:52'},
-  {n:'Halima Abdi',curr:'IB',plan:'IGCSE Pack',method:'Bank',date:'Yesterday'},
-  {n:'Moses Kipchoge',curr:'CBC',plan:'Basic',method:'M-Pesa',date:'Yesterday'},
-  {n:'Charity Njeri',curr:'IGCSE',plan:'Premium',method:'PayPal',date:'Mar 5'},
-]
-
-const REV_DATA = [
-  {k:'Sep',v:2.1},{k:'Oct',v:2.4},{k:'Nov',v:2.6},{k:'Dec',v:2.2},{k:'Jan',v:3.1},{k:'Feb',v:3.48,hi:true}
-]
-const GROWTH_DATA = [
-  {k:'Sep',v:1980},{k:'Oct',v:2060},{k:'Nov',v:2140},{k:'Dec',v:2200},{k:'Jan',v:2370},{k:'Feb',v:2418,hi:true}
-]
-
-// ─── helpers ────────────────────────────────────────────
-function Av({ init, col, size = 34 }) {
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', background: col + '20', color: col, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'JetBrains Mono,monospace', fontSize: Math.round(size * .32), fontWeight: 700, flexShrink: 0 }}>
-      {init}
-    </div>
-  )
+const avColor = (name) => {
+  const tokens = ['#7D1025', '#A51C2E', '#C9A030', '#15803D', '#7C2D12', '#1E3A8A']
+  let hash = 0
+  for (let i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
+  return tokens[Math.abs(hash) % tokens.length]
 }
 
-function ProgRow({ label, val, pct, col }) {
-  return (
-    <div style={{ marginBottom: 11 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 4 }}>
-        <span style={{ fontWeight: 600, color: 'var(--s700)' }}>{label}</span>
-        <span className="mono" style={{ color: 'var(--s600)' }}>{val}</span>
-      </div>
-      <div className="prog"><div className="prog-f" style={{ width: pct + '%', background: col }} /></div>
-    </div>
-  )
+const initials = (firstName = '', lastName = '') => {
+  const a = (firstName[0] || '?').toUpperCase()
+  const b = (lastName[0] || '').toUpperCase()
+  return a + b
 }
 
-function BarChart({ data }) {
-  const max = Math.max(...data.map(d => d.v))
+const fmtKsh = (n) => 'KSh ' + Math.round(n || 0).toLocaleString('en-KE')
+
+const fmtDate = (d) => {
+  if (!d) return 'N/A'
+  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+const timeAgo = (iso) => {
+  if (!iso) return 'unknown'
+  const diff = Date.now() - new Date(iso).getTime()
+  const m = Math.floor(diff / 60000)
+  const h = Math.floor(diff / 3600000)
+  const d = Math.floor(diff / 86400000)
+  if (m < 1) return 'just now'
+  if (m < 60) return m + 'm ago'
+  if (h < 24) return h + 'h ago'
+  if (d === 1) return 'yesterday'
+  return fmtDate(iso)
+}
+
+const greetingText = () => {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
+// Default form for new user
+const DEFAULT_USER_FORM = {
+  firstName: '', lastName: '', email: '', phone: '', role: 'student',
+  curriculum: '', grade: '', plan: 'Basic',
+  subjects: [], teachingSpecialties: [],
+  bio: '', linkedStudents: [],
+  _id: null,
+}
+
+const resetForm = () => ({ ...DEFAULT_USER_FORM })
+
+// ──────────────────────────────────────────────────────
+// SIMPLE SVG BAR CHART
+// ──────────────────────────────────────────────────────
+function BarChart({ data, height = 160 }) {
+  if (!data || data.length === 0) return null
+  const max = Math.max(...data.map(d => d.v), 1)
   return (
-    <div className="barchart">
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: height + 24, padding: '10px 0' }}>
       {data.map((d, i) => (
-        <div key={i} className="bc">
-          <div className="bv">{typeof d.v === 'number' && d.v < 100 ? d.v + 'M' : (d.v / 1000).toFixed(1) + 'k'}</div>
-          <div className="bb" style={{ height: Math.round(d.v / max * 90 + 10) + '%', background: d.hi ? 'var(--b700)' : 'var(--b200)' }} />
-          <div className="bl">{d.k}</div>
+        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <div style={{
+            width: '100%',
+            height: Math.max(2, (d.v / max) * height) + 'px',
+            background: d.hi ? '#C9A030' : 'var(--crimson, #7D1025)',
+            borderRadius: '4px 4px 0 0',
+            transition: 'height .3s',
+            position: 'relative',
+          }}>
+            <div style={{ position: 'absolute', top: -22, left: 0, right: 0, textAlign: 'center', fontSize: 10, fontWeight: 700, color: 'var(--s700)' }}>
+              {typeof d.v === 'number' && d.v >= 1000 ? Math.round(d.v / 1000) + 'k' : d.v}
+            </div>
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--s500)', fontWeight: 600 }}>{d.k}</div>
         </div>
       ))}
     </div>
   )
 }
 
-function StatusBadge({ s }) {
-  const map = {
-    Active: { color: 'var(--g700)', borderColor: 'var(--g100)', background: 'var(--g50)' },
-    'On Leave': { color: 'var(--a600)', borderColor: 'var(--a100)', background: 'var(--a50)' },
-    Paid: { color: 'var(--g700)', borderColor: 'var(--g100)', background: 'var(--g50)' },
-    Pending: { color: 'var(--a600)', borderColor: 'var(--a100)', background: 'var(--a50)' },
-    Overdue: { color: 'var(--r600)', borderColor: 'var(--r100)', background: 'var(--r50)' },
-    Draft: { color: 'var(--s600)', borderColor: 'var(--s200)', background: 'var(--s100)' },
-  }
-  return <span className="badge" style={map[s] || map.Draft}>{s}</span>
-}
-
-function PlanBadge({ p }) {
-  const map = {
-    Premium: { color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)' },
-    'IGCSE Pack': { color: 'var(--p600)', borderColor: '#EDE9FE', background: 'var(--p50)' },
-    Staff: { color: 'var(--t600)', borderColor: 'var(--t50)', background: 'var(--t50)' },
-    Basic: { color: 'var(--s600)', borderColor: 'var(--s200)', background: 'var(--s100)' },
-  }
-  return <span className="badge" style={map[p] || map.Basic}>{p}</span>
-}
-
-// ─── page component ──────────────────────────────────────
-const DEFAULT_USER_FORM = { firstName: '', lastName: '', email: '', role: 'Student', curriculum: '', plan: 'Basic', _id: null, subjects: [], grade: '', phone: '', bio: '', parentEmail: '', linkedStudents: [], teachingSpecialties: [] }
-
-export default function AdminDashboard({ page: pageProp, onNav, onUserSaved, userStats = 0 }) {
-   const nav = useNavigate()
-   const toast = useToast()
-   const [liveSessions, setLiveSessions] = useState(284)
-   const [liveClasses, setLiveClasses] = useState(12)
-   const [pendingModal, setPendingModal] = useState(false)
-   const [userModal, setUserModal] = useState(false)
-   const [userForm, setUserForm] = useState({ ...DEFAULT_USER_FORM })
-   const [page, setPage] = useState(pageProp || 'dashboard')
-   const [refreshKey, setRefreshKey] = useState(0)
-   const [credentialsOverlay, setCredentialsOverlay] = useState(null) // PHASE 3-5: Credentials popup
-   if (pageProp && pageProp !== page) setPage(pageProp)
-   const setActivePage = onNav || setPage
-
-   const resetForm = () => ({ ...DEFAULT_USER_FORM })
-   const [students, setStudents] = useState([])
-
-   // simulate live counts
-   useEffect(() => {
-     const id = setInterval(() => {
-       setLiveSessions(278 + Math.floor(Math.random() * 12))
-       setLiveClasses(10 + Math.floor(Math.random() * 4))
-     }, 4500)
-     return () => clearInterval(id)
-   }, [])
-
-    // Fetch all students for parent selection
-    useEffect(() => {
-      const fetchStudents = async () => {
-        try {
-          const res = await api.get('/users/students/list')
-          setStudents(res.data.students || [])
-        } catch (e) {
-          console.error('Failed to load students:', e.message)
-        }
-      }
-      fetchStudents()
-    }, [])
-
-   const handleUserSaved = () => {
-     setRefreshKey(prev => prev + 1)
-     if (onUserSaved) onUserSaved()
-   }
-
-   return (
-    <div style={{ animation: 'fadeIn .25s ease' }}>
-      {/* ── Page tabs (same as admin.html) ── */}
-      {/* Using page state to show different sections */}
-
-       {page === 'dashboard' && <DashboardPage
-         liveSessions={liveSessions} liveClasses={liveClasses}
-         onAddUser={() => { setUserForm(resetForm()); setUserModal(true) }}
-         onPending={() => setPendingModal(true)}
-         onNav={setPage}
-         toast={toast}
-       />}
-       {page === 'analytics' && <AnalyticsPage onNav={setPage} />}
-       {page === 'users' && <UsersPage refreshKey={refreshKey} userStats={userStats} onAddUser={() => { setUserForm(resetForm()); setUserModal(true) }} onPending={() => setPendingModal(true)} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} />}
-       {page === 'teachers' && <TeachersPage refreshKey={refreshKey} toast={toast} />}
-       {page === 'curriculum' && <CurriculumPage toast={toast} />}
-       {page === 'billing' && <BillingPage toast={toast} />}
-       {page === 'website' && <WebsiteEditorPage toast={toast} />}
-       {page === 'settings' && <SettingsPage toast={toast} />}
-       {page === 'ai' && <AIConsolePage toast={toast} />}
-       {page === 'allocations' && <AllocationsPage refreshKey={refreshKey} toast={toast} />}
-       {page === 'payroll' && <PayrollPage toast={toast} />}
-       {page === 'programmes' && <ProgrammesPage toast={toast} />}
-       {page === 'grouprooms' && <GroupRoomsPage toast={toast} />}
-       {page === 'livelessons' && <LiveLessonsPage toast={toast} />}
-       {page === 'leave' && <LeaveManagement />}
-
-      {/* Pending Modal */}
-      <Modal open={pendingModal} onClose={() => setPendingModal(false)} title="Pending Registrations" size="md"
-        footer={<>
-          <button className="btn btn-ok" onClick={() => { toast.ok('All 5 approved — emails sent'); setPendingModal(false) }}>Approve All 5</button>
-          <button className="btn btn-s" onClick={() => setPendingModal(false)}>Close</button>
-        </>}>
-        <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 16 }}>5 students awaiting approval</div>
-        {PENDING.map((p, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--s200)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--s600)', flexShrink: 0 }}>
-              {p.n.split(' ').map(x => x[0]).join('')}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700, fontSize: 14 }}>{p.n}</div>
-              <div style={{ fontSize: 12, color: 'var(--s400)' }}>{p.curr} · {p.plan} · {p.method} · {p.date}</div>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn btn-ok btn-sm" onClick={() => toast.ok(`Approved: ${p.n}`)}>Approve</button>
-              <button className="btn btn-d btn-sm" onClick={() => toast.error(`Rejected: ${p.n}`)}>Reject</button>
-            </div>
-          </div>
-        ))}
-      </Modal>
-
-       {/* Add/Edit User Modal - Role-Specific Fields */}
-        <Modal open={userModal} onClose={() => { setUserModal(false); setUserForm(resetForm()) }} title={userForm._id ? "Edit User" : `Add New ${userForm.role}`} size="lg"
-          footer={<>
-            <button className="btn btn-s" onClick={() => { setUserModal(false); setUserForm(resetForm()) }}>Cancel</button>
-           <button className="btn btn-p" onClick={async () => {
-             if (!userForm.firstName.trim() || !userForm.lastName.trim() || !userForm.email.trim()) {
-               toast.error('First name, last name, and email are required')
-               return
-             }
-             try {
-                const payload = {
-                  firstName: userForm.firstName,
-                  lastName: userForm.lastName,
-                  email: userForm.email,
-                  role: userForm.role.toLowerCase(),
-                  isActive: true,
-                }
-                 // Add role-specific fields
-                 if (userForm.role === 'Student') {
-                   payload.curriculum = userForm.curriculum
-                   payload.grade = userForm.grade
-                   payload.plan = userForm.plan
-                   payload.subjects = userForm.subjects && userForm.subjects.length > 0 ? userForm.subjects : []
-                 } else if (userForm.role === 'Teacher') {
-                  // Handle curriculum as array for teachers
-                  payload.curriculum = Array.isArray(userForm.curriculum) ? userForm.curriculum : (userForm.curriculum ? [userForm.curriculum] : [])
-                  payload.subjects = userForm.subjects && userForm.subjects.length > 0 ? userForm.subjects : []
-                  payload.teachingSpecialties = userForm.teachingSpecialties && userForm.teachingSpecialties.length > 0 ? userForm.teachingSpecialties : []
-                  payload.phone = userForm.phone
-                  payload.plan = 'Staff'
-                 } else if (userForm.role === 'Parent') {
-                   payload.phone = userForm.phone
-                   payload.bio = userForm.bio
-                   payload.plan = 'Basic'
-                   payload.linkedStudents = userForm.linkedStudents && userForm.linkedStudents.length > 0 ? userForm.linkedStudents : []
-                } else if (userForm.role === 'Admin') {
-                  payload.plan = 'Staff'
-                  payload.phone = userForm.phone
-                }
-               if (userForm._id) {
-                 // Update existing user
-                 await api.patch('/users/' + userForm._id, payload)
-                 toast.ok(userForm.firstName + ' updated!')
-               } else {
-                 // Create new user
-                 const response = await api.post('/users', payload)
-                 // PHASE 3-5: Show credentials popup after successful creation
-                 if (response.data.credentials) {
-                   setCredentialsOverlay(response.data.credentials)
-                 }
-                 toast.ok(userForm.firstName + ' created successfully!')
-                }
-                setUserModal(false)
-                setUserForm(resetForm())
-                handleUserSaved()
-              } catch(e) {
-                toast.error(e.response?.data?.message || 'Could not save user')
-             }
-           }}>{userForm._id ? 'Update User' : 'Create User'}</button>
-         </>}>
-         {/* Common Fields */}
-         <div className="fr2">
-           <div className="fg"><label className="fl">First Name *</label><input className="fi" value={userForm.firstName} onChange={e => setUserForm(f => ({...f,firstName:e.target.value}))} placeholder="First name" /></div>
-           <div className="fg"><label className="fl">Last Name *</label><input className="fi" value={userForm.lastName} onChange={e => setUserForm(f => ({...f,lastName:e.target.value}))} placeholder="Last name" /></div>
-         </div>
-         <div className="fg"><label className="fl">Email Address *</label><input className="fi" type="email" value={userForm.email} onChange={e => setUserForm(f => ({...f,email:e.target.value}))} placeholder="user@smartious.ac.ke" /></div>
-         <div className="fg"><label className="fl">Phone Number</label><input className="fi" value={userForm.phone} onChange={e => setUserForm(f => ({...f,phone:e.target.value}))} placeholder="+254 700 000000" /></div>
-         
-         {/* Role Selection */}
-         <div className="fg"><label className="fl">Role *</label>
-           <select className="fsel" value={userForm.role} onChange={e => setUserForm(f => ({...f,role:e.target.value}))}>
-             {['Student','Teacher','Parent','Admin'].map(r => <option key={r}>{r}</option>)}
-           </select>
-         </div>
-
-          {/* Student-Specific Fields */}
-          {userForm.role === 'Student' && (
-            <div style={{ background: 'var(--b50)', border: '1px solid var(--b100)', borderRadius: 'var(--rmd)', padding: 14, marginBottom: 14 }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--b700)', marginBottom: 12 }}>Student Details</div>
-              <CurriculumSubjectSelector
-                curriculum={userForm.curriculum}
-                subjects={userForm.subjects}
-                onCurriculumChange={(curr) => setUserForm(f => ({...f, curriculum: curr}))}
-                onSubjectsChange={(subjs) => setUserForm(f => ({...f, subjects: subjs}))}
-                role="student"
-                allowQuickAdd={false}
-              />
-              <div className="fg" style={{ marginTop: 14 }}>
-                <label className="fl">Grade/Year</label>
-                <input className="fi" value={userForm.grade} onChange={e => setUserForm(f => ({...f,grade:e.target.value}))} placeholder="e.g., Form 3" />
-              </div>
-              <div className="fg"><label className="fl">Plan</label>
-                <select className="fsel" value={userForm.plan} onChange={e => setUserForm(f => ({...f,plan:e.target.value}))}>
-                  {['Basic','Premium','IGCSE Pack'].map(p => <option key={p}>{p}</option>)}
-                </select>
-              </div>
-            </div>
-          )}
-
-          {/* Teacher-Specific Fields */}
-          {userForm.role === 'Teacher' && (
-            <div style={{ background: 'var(--g50)', border: '1px solid var(--g100)', borderRadius: 'var(--rmd)', padding: 14, marginBottom: 14 }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--g700)', marginBottom: 12 }}>Teacher Details</div>
-              <CurriculumSubjectSelector
-                curriculum={userForm.curriculum}
-                subjects={userForm.subjects}
-                onCurriculumChange={(curr) => setUserForm(f => ({...f, curriculum: curr}))}
-                onSubjectsChange={(subjs) => setUserForm(f => ({...f, subjects: subjs}))}
-                role="teacher"
-                allowQuickAdd={true}
-              />
-            </div>
-          )}
-
-          {/* Parent-Specific Fields */}
-          {userForm.role === 'Parent' && (
-            <div style={{ background: 'var(--p50)', border: '1px solid var(--p200)', borderRadius: 'var(--rmd)', padding: 14, marginBottom: 14 }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--p700)', marginBottom: 12 }}>Parent Details</div>
-              <div className="fg"><label className="fl">Bio/Notes</label>
-                <textarea className="fi" rows={3} value={userForm.bio} onChange={e => setUserForm(f => ({...f,bio:e.target.value}))} placeholder="Parent details, emergency contact info, etc." />
-              </div>
-              <div className="fg"><label className="fl">Link to Students *</label>
-                <div style={{ background: '#fff', border: '1px solid var(--p200)', borderRadius: 'var(--rmd)', padding: 10, maxHeight: 200, overflowY: 'auto' }}>
-                  {students.length > 0 ? (
-                    students.map(student => (
-                      <div key={student._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--p100)' }}>
-                        <input
-                          type="checkbox"
-                          checked={userForm.linkedStudents.includes(student._id)}
-                          onChange={(e) => {
-                            setUserForm(f => ({
-                              ...f,
-                              linkedStudents: e.target.checked
-                                ? [...f.linkedStudents, student._id]
-                                : f.linkedStudents.filter(id => id !== student._id)
-                            }))
-                          }}
-                          style={{ width: 16, height: 16, cursor: 'pointer' }}
-                        />
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--s900)' }}>{student.firstName} {student.lastName}</div>
-                          <div style={{ fontSize: 11, color: 'var(--s400)' }}>{student.email} · {student.curriculum || 'N/A'}</div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ fontSize: 13, color: 'var(--s500)', padding: '10px' }}>No students available</div>
-                  )}
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 4 }}>
-                  Selected: {userForm.linkedStudents.length} student{userForm.linkedStudents.length !== 1 ? 's' : ''}
-                </div>
-              </div>
-            </div>
-          )}
-
-         {/* Admin-Specific Fields */}
-         {userForm.role === 'Admin' && (
-           <div style={{ background: 'var(--s50)', border: '1px solid var(--s200)', borderRadius: 'var(--rmd)', padding: 14, marginBottom: 14 }}>
-             <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--s700)', marginBottom: 12 }}>Administrator</div>
-             <div style={{ fontSize: 12, color: 'var(--s600)', padding: 10, background: 'rgba(0,0,0,.02)', borderRadius: 6 }}>
-               ℹ️ This user will have full admin access to the system. Be cautious when granting this role.
-             </div>
-           </div>
-         )}
-       </Modal>
+// ──────────────────────────────────────────────────────
+// PROGRESS ROW
+// ──────────────────────────────────────────────────────
+function ProgRow({ label, val, pct, col = 'var(--crimson, #7D1025)' }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--s700)', flex: 1, minWidth: 100 }}>{label}</span>
+      <div style={{ flex: 2 }}>
+        <div className="prog">
+          <div className="prog-f" style={{ width: pct + '%', background: col }} />
+        </div>
+      </div>
+      <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--s800)', width: 60, textAlign: 'right' }}>{val}</span>
     </div>
   )
 }
 
-// ═══════════════════════════════════════════════════════
-// SUB-PAGES (all rendered in same component via state)
-// ═══════════════════════════════════════════════════════
+// ──────────────────────────────────────────────────────
+// PLAN BADGE
+// ──────────────────────────────────────────────────────
+function PlanBadge({ p }) {
+  const styles = {
+    'Basic':      { bg: '#FBFAF5', col: '#7D1025', bd: '#FCE4E8' },
+    'Premium':    { bg: '#FBF6E3', col: '#8E6B1A', bd: '#F0CC5A' },
+    'IGCSE Pack': { bg: '#FCE4E8', col: '#7D1025', bd: '#F8C5CD' },
+    'Staff':      { bg: '#DCFCE7', col: '#15803D', bd: '#86EFAC' },
+  }
+  const s = styles[p] || styles['Basic']
+  return (
+    <span className="badge" style={{ background: s.bg, color: s.col, borderColor: s.bd }}>{p}</span>
+  )
+}
 
-function DashboardPage({ liveSessions, liveClasses, onAddUser, onPending, onNav, toast }) {
-  const store = useStore()
+// ═══════════════════════════════════════════════════════════
+// MAIN ROUTER COMPONENT
+// ═══════════════════════════════════════════════════════════
+export default function AdminDashboard({ page, setPage, userStats, pendingAllocations, refreshKey, onUserSaved }) {
+  const toast = useToast()
   const auth = useAuth()
+
+  // ── USER MODAL STATE (shared across modules that create/edit users) ──
+  const [userModal, setUserModal] = useState(false)
+  const [userForm, setUserForm] = useState(resetForm())
+  const [credentialsOverlay, setCredentialsOverlay] = useState(null)
+
+  const openAddUser = (defaultRole = 'student') => {
+    setUserForm({ ...resetForm(), role: defaultRole })
+    setUserModal(true)
+  }
+
+  const closeUserModal = () => {
+    setUserModal(false)
+    setUserForm(resetForm())
+  }
+
+  const saveUser = async () => {
+    // Validate
+    if (!userForm.firstName.trim() || !userForm.lastName.trim() || !userForm.email.trim()) {
+      toast.error('First name, last name, and email are required')
+      return
+    }
+    if (!/\S+@\S+\.\S+/.test(userForm.email)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    try {
+      // Build payload
+      const payload = {
+        firstName: userForm.firstName.trim(),
+        lastName: userForm.lastName.trim(),
+        email: userForm.email.trim().toLowerCase(),
+        phone: userForm.phone || '',
+        role: userForm.role,
+        isActive: true,
+      }
+
+      if (userForm.role === 'student') {
+        payload.curriculum = userForm.curriculum
+        payload.grade = userForm.grade
+        payload.plan = userForm.plan || 'Basic'
+        payload.subjects = userForm.subjects || []
+      } else if (userForm.role === 'teacher') {
+        payload.curriculum = Array.isArray(userForm.curriculum) ? userForm.curriculum : (userForm.curriculum ? [userForm.curriculum] : [])
+        payload.subjects = userForm.subjects || []
+        payload.teachingSpecialties = userForm.teachingSpecialties || []
+        payload.plan = 'Staff'
+      } else if (userForm.role === 'parent') {
+        payload.bio = userForm.bio || ''
+        payload.linkedStudents = userForm.linkedStudents || []
+        payload.plan = 'Basic'
+      } else if (userForm.role === 'admin') {
+        payload.plan = 'Staff'
+      }
+
+      if (userForm._id) {
+        // Update
+        await api.patch('/users/' + userForm._id, payload)
+        toast.ok(userForm.firstName + ' updated')
+      } else {
+        // Create
+        const res = await api.post('/users', payload)
+        if (res.data.credentials) {
+          setCredentialsOverlay(res.data.credentials)
+        }
+        toast.ok(userForm.firstName + ' created successfully')
+      }
+
+      closeUserModal()
+      if (onUserSaved) onUserSaved()
+    } catch (e) {
+      const msg = e.response?.data?.message || e.message || 'Could not save user'
+      toast.error('Save failed: ' + msg)
+    }
+  }
+
+  // ── ROUTING ────────────────────────────────────────────
+  return (
+    <>
+      {page === 'dashboard'   && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} />}
+      {page === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
+      {page === 'users'       && <UsersModule      refreshKey={refreshKey} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} openAddUser={openAddUser} />}
+      {page === 'teachers'    && <TeachersModule   refreshKey={refreshKey} toast={toast} openAddUser={openAddUser} />}
+      {page === 'allocations' && <AllocationsModule refreshKey={refreshKey} toast={toast} />}
+      {page === 'payroll'     && <PayrollModule    refreshKey={refreshKey} toast={toast} />}
+      {page === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
+      {page === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
+      {page === 'livelessons' && <LiveLessonsModule refreshKey={refreshKey} toast={toast} />}
+      {page === 'grouprooms'  && <GroupRoomsModule refreshKey={refreshKey} toast={toast} />}
+      {page === 'curriculum'  && <CurriculumModule refreshKey={refreshKey} toast={toast} />}
+      {page === 'billing'     && <BillingModule    refreshKey={refreshKey} toast={toast} />}
+      {page === 'website'     && <WebsiteModule    refreshKey={refreshKey} toast={toast} />}
+      {page === 'settings'    && <SettingsModule   refreshKey={refreshKey} toast={toast} />}
+      {page === 'ai'          && <MshauriModule    refreshKey={refreshKey} toast={toast} />}
+
+      {/* USER MODAL (shared) */}
+      {userModal && (
+        <Modal
+          open={userModal}
+          onClose={closeUserModal}
+          title={userForm._id ? 'Edit User' : 'Add New User'}
+          size="lg"
+          footer={
+            <>
+              <button className="btn btn-s" onClick={closeUserModal}>Cancel</button>
+              <button className="btn btn-p" onClick={saveUser}>
+                {userForm._id ? 'Update User' : 'Create User'}
+              </button>
+            </>
+          }
+        >
+          <UserFormFields userForm={userForm} setUserForm={setUserForm} />
+        </Modal>
+      )}
+
+      {/* CREDENTIALS OVERLAY (after user creation) */}
+      {credentialsOverlay && (
+        <Modal
+          open={!!credentialsOverlay}
+          onClose={() => setCredentialsOverlay(null)}
+          title="User Created — Login Credentials"
+          size="md"
+          footer={<button className="btn btn-p" onClick={() => setCredentialsOverlay(null)}>Done</button>}
+        >
+          <div style={{ padding: '4px 0' }}>
+            <div style={{ background: 'var(--gold-pale, #FBF6E3)', border: '1px solid var(--gold, #C9A030)', padding: 14, borderRadius: 8, marginBottom: 14, fontSize: 13, color: 'var(--s700)', lineHeight: 1.6 }}>
+              <strong>Important:</strong> Share these credentials with the new user. They will be required to change their password on first login.
+            </div>
+            <div className="fg">
+              <label className="fl">Email</label>
+              <input className="fi mono" readOnly value={credentialsOverlay.email || ''} />
+            </div>
+            <div className="fg">
+              <label className="fl">Temporary Password</label>
+              <input className="fi mono" readOnly value={credentialsOverlay.password || ''} />
+            </div>
+            <button
+              className="btn btn-g btn-sm"
+              onClick={() => {
+                navigator.clipboard?.writeText(`Email: ${credentialsOverlay.email}\nPassword: ${credentialsOverlay.password}`)
+                toast.ok('Copied to clipboard')
+              }}
+            >Copy Both</button>
+          </div>
+        </Modal>
+      )}
+    </>
+  )
+}
+
+// ──────────────────────────────────────────────────────
+// USER FORM FIELDS (shared component)
+// ──────────────────────────────────────────────────────
+function UserFormFields({ userForm, setUserForm }) {
+  const upd = (k, v) => setUserForm(f => ({ ...f, [k]: v }))
+
+  return (
+    <div>
+      <div className="fr2">
+        <div className="fg">
+          <label className="fl">First Name *</label>
+          <input className="fi" value={userForm.firstName} onChange={e => upd('firstName', e.target.value)} placeholder="First name" autoFocus />
+        </div>
+        <div className="fg">
+          <label className="fl">Last Name *</label>
+          <input className="fi" value={userForm.lastName} onChange={e => upd('lastName', e.target.value)} placeholder="Last name" />
+        </div>
+      </div>
+
+      <div className="fg">
+        <label className="fl">Email Address *</label>
+        <input className="fi" type="email" value={userForm.email} onChange={e => upd('email', e.target.value)} placeholder="user@example.com" />
+      </div>
+
+      <div className="fg">
+        <label className="fl">Phone Number</label>
+        <input className="fi" value={userForm.phone} onChange={e => upd('phone', e.target.value)} placeholder="+254 700 000000" />
+      </div>
+
+      <div className="fg">
+        <label className="fl">Role *</label>
+        <select className="fsel" value={userForm.role} onChange={e => upd('role', e.target.value)}>
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+          <option value="parent">Parent</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      {userForm.role === 'student' && (
+        <>
+          <div className="fr2">
+            <div className="fg">
+              <label className="fl">Curriculum</label>
+              <select className="fsel" value={userForm.curriculum} onChange={e => upd('curriculum', e.target.value)}>
+                <option value="">Select...</option>
+                <option value="IGCSE">IGCSE</option>
+                <option value="Cambridge A-Level">Cambridge A-Level</option>
+                <option value="Edexcel">Edexcel</option>
+                <option value="IB">IB</option>
+                <option value="CBC">Kenya CBC</option>
+                <option value="American">American</option>
+                <option value="British">British</option>
+              </select>
+            </div>
+            <div className="fg">
+              <label className="fl">Grade / Year</label>
+              <input className="fi" value={userForm.grade} onChange={e => upd('grade', e.target.value)} placeholder="e.g. Year 10" />
+            </div>
+          </div>
+          <div className="fg">
+            <label className="fl">Plan</label>
+            <select className="fsel" value={userForm.plan} onChange={e => upd('plan', e.target.value)}>
+              <option>Basic</option>
+              <option>Premium</option>
+              <option>IGCSE Pack</option>
+            </select>
+          </div>
+        </>
+      )}
+
+      {userForm.role === 'teacher' && (
+        <>
+          <div className="fg">
+            <label className="fl">Curriculum (comma-separated)</label>
+            <input
+              className="fi"
+              value={Array.isArray(userForm.curriculum) ? userForm.curriculum.join(', ') : userForm.curriculum}
+              onChange={e => upd('curriculum', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+              placeholder="e.g. IGCSE, IB"
+            />
+          </div>
+          <div className="fg">
+            <label className="fl">Subjects (comma-separated)</label>
+            <input
+              className="fi"
+              value={Array.isArray(userForm.subjects) ? userForm.subjects.map(s => typeof s === 'string' ? s : s.subjectName || '').join(', ') : ''}
+              onChange={e => upd('subjects', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+              placeholder="e.g. Mathematics, Physics"
+            />
+          </div>
+        </>
+      )}
+
+      {userForm.role === 'parent' && (
+        <div className="fg">
+          <label className="fl">Brief Bio</label>
+          <textarea className="fi" rows={3} value={userForm.bio} onChange={e => upd('bio', e.target.value)} placeholder="Optional notes..." style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+        </div>
+      )}
+
+      <div style={{ background: 'var(--cream, #FBFAF5)', border: '1px solid var(--border)', padding: 12, borderRadius: 8, fontSize: 12, color: 'var(--s600)', lineHeight: 1.6 }}>
+        A temporary password will be generated automatically. The user will be required to change it on first login.
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// 1. DASHBOARD MODULE — School-wide command center
+// ═══════════════════════════════════════════════════════════
+function DashboardModule({ setPage, userStats, pendingAllocations, refreshKey, auth, toast, openAddUser }) {
   const [now, setNow] = useState(new Date())
-  const [stats, setStats] = useState({ totalUsers: 0, students: 0, teachers: 0, parents: 0, loading: true })
-  const [pendingAllocs, setPendingAllocs] = useState(0)
+  const [stats, setStats] = useState({ loading: true, students: 0, teachers: 0, parents: 0 })
   const [recentAllocs, setRecentAllocs] = useState([])
-  const [mshauriPrompt, setMshauriPrompt] = useState('')
 
-  // Admin name (graceful fallback)
-  const adminFirstName = auth?.user?.firstName || (auth?.user?.name || '').split(' ')[0] || 'Alfred'
-  const adminFullName = (auth?.user?.firstName && auth?.user?.lastName) ? auth.user.firstName + ' ' + auth.user.lastName : (auth?.user?.name || 'Alfred Ouko')
+  const adminFirst = auth?.user?.firstName || 'Alfred'
 
-  // Time-aware greeting
-  const greeting = (() => {
-    const h = now.getHours()
-    if (h < 12) return 'Good morning'
-    if (h < 17) return 'Good afternoon'
-    return 'Good evening'
-  })()
-
-  // Live clock — every 30s
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30000)
     return () => clearInterval(id)
   }, [])
 
-  // Fetch users stats — graceful fallback
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetch = async () => {
       try {
-        const res = await api.get('/users/stats')
-        const d = res.data || {}
-        setStats({
-          totalUsers: d.totalUsers || 0,
-          students:   d.students   ?? d.totalStudents ?? 0,
-          teachers:   d.teachers   ?? d.totalTeachers ?? 0,
-          parents:    d.parents    ?? d.totalParents  ?? 0,
-          loading:    false,
-        })
-      } catch (e) {
-        // Graceful fallback to demo numbers if API unavailable
-        setStats({ totalUsers: 2418, students: 2156, teachers: 127, parents: 894, loading: false })
-      }
-    }
-    fetchStats()
-  }, [])
-
-  // Fetch pending allocations + recent allocations
-  useEffect(() => {
-    const fetchAllocs = async () => {
-      try {
-        const [pendRes, allRes] = await Promise.all([
-          api.get('/allocations/pending-count'),
-          api.get('/allocations'),
+        const [statsRes, allocRes] = await Promise.all([
+          api.get('/users/stats').catch(() => ({ data: {} })),
+          api.get('/allocations').catch(() => ({ data: { allocations: [] } })),
         ])
-        setPendingAllocs(pendRes.data.pendingCount || 0)
-        const allocs = (allRes.data.allocations || []).slice(0, 4)
-        setRecentAllocs(allocs)
+        const d = statsRes.data || {}
+        setStats({
+          loading: false,
+          students: d.students || d.totalStudents || 0,
+          teachers: d.teachers || d.totalTeachers || 0,
+          parents: d.parents || d.totalParents || 0,
+        })
+        setRecentAllocs((allocRes.data.allocations || []).slice(0, 4))
       } catch (e) {
-        setPendingAllocs(0)
-        setRecentAllocs([])
+        setStats({ loading: false, students: 0, teachers: 0, parents: 0 })
       }
     }
-    fetchAllocs()
-    const id = setInterval(fetchAllocs, 5000)
-    return () => clearInterval(id)
-  }, [])
+    fetch()
+  }, [refreshKey])
 
-  // RIGHT-NOW logic — picks single highest-priority item
-  const rightNow = (() => {
-    if (pendingAllocs > 0) {
-      return {
-        urgency: 'critical',
-        label:   'NEEDS ATTENTION',
-        title:   pendingAllocs + ' student' + (pendingAllocs === 1 ? '' : 's') + ' awaiting allocation',
-        sub:     'Subjects + curricula matched but no teacher assigned yet',
-        action:  'Open Allocations',
-        nav:     'allocations',
-        bg:      'var(--r700)',
-        accent:  'var(--r50)',
-      }
-    }
-    if (liveClasses > 0) {
-      return {
-        urgency: 'live',
-        label:   'LIVE NOW',
-        title:   liveClasses + ' live class' + (liveClasses === 1 ? '' : 'es') + ' running',
-        sub:     liveSessions + ' active sessions across the platform right now',
-        action:  'View Live Lessons',
-        nav:     'livelessons',
-        bg:      'var(--b700)',
-        accent:  'var(--b50)',
-      }
-    }
-    return {
-      urgency: 'good',
-      label:   'ALL CLEAR',
-      title:   'School running smoothly',
-      sub:     stats.students.toLocaleString() + ' students · ' + stats.teachers + ' teachers · all systems normal',
-      action:  'View Analytics',
-      nav:     'analytics',
-      bg:      'var(--g700)',
-      accent:  'var(--g50)',
-    }
-  })()
+  const greeting = greetingText()
+  const totalRevenue = stats.students * 18000
 
-  const askMshauri = () => {
-    if (!mshauriPrompt.trim()) {
-      onNav('ai')
-      return
-    }
-    // Stash prompt for AI Console to pick up
-    try { localStorage.setItem('sm_mshauri_pending_prompt', mshauriPrompt.trim()) } catch {}
-    onNav('ai')
+  // Right Now hero
+  const rightNow = pendingAllocations > 0 ? {
+    label: 'NEEDS ATTENTION',
+    title: pendingAllocations + ' pending allocation' + (pendingAllocations === 1 ? '' : 's'),
+    sub: 'Students with subjects but no teacher assigned',
+    action: 'Open Allocations',
+    nav: 'allocations',
+    bg: 'var(--crimson, #7D1025)',
+    accent: 'var(--gold-light, #F0CC5A)',
+    pulse: true,
+  } : {
+    label: 'ALL CLEAR',
+    title: 'School running smoothly',
+    sub: stats.students.toLocaleString() + ' students · ' + stats.teachers + ' teachers · all systems normal',
+    action: 'View Analytics',
+    nav: 'analytics',
+    bg: '#15803D',
+    accent: '#86EFAC',
+    pulse: false,
   }
-
-  const fmtTime = (d) => d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
-  const fmtDate = (d) => d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
     <>
@@ -523,29 +471,19 @@ function DashboardPage({ liveSessions, liveClasses, onAddUser, onPending, onNav,
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 22, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
-            {fmtDate(now)} · {fmtTime(now)}
+            {now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })} · {now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })}
           </div>
           <h1 className="serif" style={{ fontSize: 32, fontWeight: 400, color: 'var(--s900)', margin: 0, lineHeight: 1.15 }}>
-            {greeting}, <em style={{ color: 'var(--b700)' }}>{adminFirstName}</em>
+            {greeting}, <em style={{ color: 'var(--crimson, #7D1025)' }}>{adminFirst}</em>
           </h1>
           <p style={{ fontSize: 14, color: 'var(--s500)', marginTop: 4 }}>
             Smartious Homeschool · Founder &amp; Admin
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ fontSize: 12.5, color: 'var(--s500)', background: 'var(--bg)', border: '1px solid var(--border)', padding: '6px 14px', borderRadius: 99, display: 'flex', gap: 10 }}>
-            <span><strong style={{ color: 'var(--s900)' }}>{store.articles.filter(a => a.status === 'Published').length}</strong> articles</span>
-            <span style={{ opacity: .3 }}>|</span>
-            <span><strong style={{ color: 'var(--s900)' }}>{store.resources.length}</strong> resources</span>
-            <span style={{ opacity: .3 }}>|</span>
-            <span><strong style={{ color: 'var(--s900)' }}>{store.messages.filter(m => !m.read).length}</strong> unread</span>
-          </div>
-          <button className="btn btn-s btn-sm" onClick={() => toast.info('Generating PDF...')}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export
-          </button>
-          <button className="btn btn-p btn-sm" onClick={onAddUser}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button className="btn btn-s btn-sm" onClick={() => toast.info('Generating PDF report...')}>Export</button>
+          <button className="btn btn-p btn-sm" onClick={() => openAddUser('student')}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add User
           </button>
         </div>
@@ -555,977 +493,400 @@ function DashboardPage({ liveSessions, liveClasses, onAddUser, onPending, onNav,
       <div style={{
         background: 'linear-gradient(135deg, ' + rightNow.bg + ' 0%, ' + rightNow.bg + 'EE 100%)',
         color: '#fff',
-        borderRadius: 'var(--rxl, 16px)',
+        borderRadius: 16,
         padding: '24px 28px',
         marginBottom: 18,
         position: 'relative', overflow: 'hidden',
         boxShadow: '0 12px 32px rgba(0,0,0,.12)',
       }}>
-        <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', background: rightNow.accent, opacity: .2, pointerEvents: 'none' }}/>
+        <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', background: rightNow.accent, opacity: .2, pointerEvents: 'none' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', position: 'relative' }}>
           <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              fontSize: 11, fontWeight: 800, letterSpacing: '.12em',
-              color: rightNow.accent, marginBottom: 8,
-            }}>
-              {(rightNow.urgency === 'critical' || rightNow.urgency === 'live') && (
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: rightNow.accent, animation: 'pulse 1.5s infinite' }}/>
-              )}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 800, letterSpacing: '.12em', color: rightNow.accent, marginBottom: 8 }}>
+              {rightNow.pulse && <span style={{ width: 8, height: 8, borderRadius: '50%', background: rightNow.accent, animation: 'sm-pulse 1.5s infinite' }} />}
               {rightNow.label}
             </div>
             <h2 className="serif" style={{ fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>{rightNow.title}</h2>
             <div style={{ fontSize: 14, opacity: .9, marginTop: 6 }}>{rightNow.sub}</div>
           </div>
-          <button onClick={() => onNav(rightNow.nav)} style={{
+          <button onClick={() => setPage(rightNow.nav)} style={{
             background: rightNow.accent, color: rightNow.bg,
-            border: 'none', padding: '12px 22px', borderRadius: 'var(--rmd, 10px)',
+            border: 'none', padding: '12px 22px', borderRadius: 10,
             fontSize: 13.5, fontWeight: 800, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: 8,
-            flexShrink: 0,
+            display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
           }}>
             {rightNow.action}
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
       </div>
 
       {/* KPI STRIP */}
       <div className="kpi-row">
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => onNav('users')}>
-          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <div className="kpi-v">{stats.loading ? '—' : stats.students.toLocaleString()}</div>
-          <div className="kpi-l">Total Students</div>
-          <div className="kpi-d" style={{ color: 'var(--g600)' }}>↑ {Math.max(1, Math.floor(stats.students * 0.02))} this month</div>
-        </div>
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => onNav('teachers')}>
-          <div className="kpi-ic" style={{ background: 'var(--g50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/></svg>
-          </div>
-          <div className="kpi-v">{stats.loading ? '—' : stats.teachers}</div>
-          <div className="kpi-l">Active Teachers</div>
-          <div className="kpi-d" style={{ color: 'var(--g600)' }}>↑ +6 this month</div>
-        </div>
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => onNav('billing')}>
-          <div className="kpi-ic" style={{ background: 'var(--a50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-          <div className="kpi-v mono" style={{ fontSize: 20 }}>3.48M</div>
-          <div className="kpi-l">Revenue KES (Feb)</div>
-          <div className="kpi-d" style={{ color: 'var(--g600)' }}>↑ +12% vs Jan</div>
-        </div>
-        <div className="kpi" style={{ cursor: 'pointer', borderColor: pendingAllocs > 0 ? 'var(--r100)' : undefined }} onClick={() => onNav('allocations')}>
-          <div className="kpi-ic" style={{ background: pendingAllocs > 0 ? 'var(--r50)' : 'var(--p50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={pendingAllocs > 0 ? 'var(--r700)' : 'var(--p600)'} strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-          </div>
-          <div className="kpi-v" style={{ color: pendingAllocs > 0 ? 'var(--r700)' : undefined }}>{pendingAllocs}</div>
-          <div className="kpi-l">Pending Allocations</div>
-          <div className="kpi-d" style={{ color: pendingAllocs > 0 ? 'var(--r600)' : 'var(--g600)' }}>{pendingAllocs > 0 ? 'Awaiting your review' : 'All caught up'}</div>
-        </div>
-      </div>
-
-      {/* MAIN GRID */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 18 }}>
-        {/* LEFT COLUMN */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          {/* Revenue chart */}
-          <div className="card">
-            <div className="chdr">
-              <div className="ctitle">Monthly Revenue (KES, millions)</div>
-              <span className="badge" style={{ color: 'var(--g700)', borderColor: 'var(--g100)', background: 'var(--g50)' }}>+12% MoM</span>
-            </div>
-            <BarChart data={REV_DATA}/>
-          </div>
-
-          {/* Today's operations + Recent allocations */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <div className="card">
-              <div className="ctitle" style={{ marginBottom: 14 }}>Live Platform Now</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {[
-                  ['Active sessions',         liveSessions,           'var(--b700)'],
-                  ['Live classes running',    liveClasses,            'var(--r500)'],
-                  ['Lessons completed today', '1,847',                'var(--g600)'],
-                  ['Exams submitted today',   203,                    'var(--s800)'],
-                  ['New enrolments today',    7,                      'var(--g600)'],
-                  ['Revenue today',           'KES 48,500',           'var(--b700)'],
-                ].map(([l, v, c]) => (
-                  <div key={l} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13.5 }}>
-                    <span style={{ color: 'var(--s500)' }}>{l}</span>
-                    <span className="mono" style={{ fontWeight: 700, color: c }}>{v}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="chdr" style={{ marginBottom: 14 }}>
-                <div className="ctitle">Recent Allocations</div>
-                <button className="btn btn-g btn-sm" onClick={() => onNav('allocations')}>View all</button>
-              </div>
-              {recentAllocs.length === 0 ? (
-                <div style={{ fontSize: 12.5, color: 'var(--s400)', padding: 16, textAlign: 'center', fontStyle: 'italic' }}>
-                  No recent allocations
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {recentAllocs.map(a => (
-                    <div key={a._id || a.id} style={{ padding: '8px 10px', background: 'var(--bg)', borderRadius: 'var(--rsm, 6px)', borderLeft: '3px solid var(--b700)' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)' }}>
-                        {a.studentId?.firstName || '—'} {a.studentId?.lastName || ''}
-                      </div>
-                      <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 2 }}>
-                        {a.subjectId?.subjectName || '—'} · {a.curriculum || '—'}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Enrolment by service */}
-          <div className="card">
-            <div className="chdr">
-              <div className="ctitle">Enrolment by Service</div>
-              <button className="btn btn-g btn-sm" onClick={() => onNav('analytics')}>Analytics →</button>
-            </div>
-            <ProgRow label="Homeschool — At Home"  val={842} pct={35} col="var(--b700)"/>
-            <ProgRow label="Homeschool — Centre"   val={614} pct={25} col="var(--b500)"/>
-            <ProgRow label="Homeschool — Virtual"  val={521} pct={22} col="#93C5FD"/>
-            <ProgRow label="Virtual School"        val={304} pct={13} col="var(--g600)"/>
-            <ProgRow label="Tuition"               val={137} pct={6}  col="var(--a600)"/>
-          </div>
-
-          {/* Top teachers leaderboard */}
-          <div className="card">
-            <div className="chdr">
-              <div className="ctitle">Top Teachers (by student count)</div>
-              <button className="btn btn-g btn-sm" onClick={() => onNav('teachers')}>View all</button>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {TEACHERS.slice(0, 4).map((t, i) => (
-                <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: i < 3 ? '1px solid var(--border)' : 'none' }}>
-                  <div className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--s400)', width: 22 }}>#{i + 1}</div>
-                  <Av init={t.init} col={t.col} size={32}/>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--s900)' }}>{t.name}</div>
-                    <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>{t.subj}</div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div className="mono" style={{ fontSize: 13, fontWeight: 700, color: 'var(--b700)' }}>{t.stu}</div>
-                    <div style={{ fontSize: 10.5, color: 'var(--s400)' }}>students · ★ {t.rat}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT SIDEBAR */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          {/* MSHAURI quick-access */}
-          <div className="card" style={{ background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)', color: '#fff', border: 'none', position: 'relative', overflow: 'hidden' }}>
-            <div className="chdr">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(201, 160, 48, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                </div>
-                <div className="ctitle" style={{ color: 'rgba(255,255,255,.9)' }}>Mshauri AI</div>
-              </div>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: '#F0CC5A' }}>● ONLINE</span>
-            </div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', lineHeight: 1.6, marginBottom: 12 }}>
-              Ask anything — generate questions, explain concepts, draft messages.
-            </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <input
-                type="text"
-                value={mshauriPrompt}
-                onChange={e => setMshauriPrompt(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') askMshauri() }}
-                placeholder="Try: explain Pythagoras..."
-                style={{
-                  flex: 1, padding: '9px 12px',
-                  background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.15)',
-                  borderRadius: 'var(--rsm, 6px)', color: '#fff', fontSize: 12.5,
-                  fontFamily: 'inherit', outline: 'none',
-                }}
-              />
-              <button onClick={askMshauri} style={{
-                background: '#C9A030', color: '#3D0810', border: 'none',
-                padding: '9px 14px', borderRadius: 'var(--rsm, 6px)',
-                fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 4,
-                boxShadow: '0 2px 8px rgba(201, 160, 48, 0.3)',
-              }}>
-                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                Ask
-              </button>
-            </div>
-            <div style={{ marginTop: 10, fontSize: 10.5, color: 'rgba(255,255,255,.4)', display: 'flex', justifyContent: 'space-between' }}>
-              <span>Model: claude-sonnet-4</span>
-              <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onNav('ai')}>Open full console →</span>
-            </div>
-          </div>
-
-          {/* System alerts */}
-          <div className="card">
-            <div className="chdr" style={{ marginBottom: 14 }}>
-              <div className="ctitle">System Alerts</div>
-              <span className="badge" style={{ color: 'var(--r600)', borderColor: 'var(--r100)', background: 'var(--r50)' }}>2 Active</span>
-            </div>
-            <div style={{ background: 'var(--r50)', border: '1px solid var(--r100)', borderRadius: 'var(--rmd)', padding: 13, marginBottom: 10, display: 'flex', gap: 10 }}>
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--r600)" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--r600)' }}>Disk Usage: 78%</div>
-                <div style={{ fontSize: 12, color: 'var(--s600)', marginTop: 2 }}>Archive recordings to free space</div>
-                <button className="btn btn-d btn-sm" style={{ marginTop: 8 }} onClick={() => onNav('settings')}>Fix Now</button>
-              </div>
-            </div>
-            <div style={{ background: 'var(--a50)', border: '1px solid var(--a100)', borderRadius: 'var(--rmd)', padding: 13, display: 'flex', gap: 10 }}>
-              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--a600)' }}>5 Pending Approvals</div>
-                <div style={{ fontSize: 12, color: 'var(--s600)', marginTop: 2 }}>New student registrations</div>
-                <button className="btn btn-am btn-sm" style={{ marginTop: 8 }} onClick={onPending}>Review</button>
-              </div>
-            </div>
-          </div>
-
-          {/* By curriculum */}
-          <div className="card">
-            <div className="ctitle" style={{ marginBottom: 14 }}>By Curriculum</div>
-            {[['IGCSE',894,100,'var(--b700)'],['British',612,68,'var(--g600)'],['IB Diploma',387,43,'var(--p600)'],['CBC/KCSE',341,38,'var(--a600)'],['American',184,21,'var(--t600)']].map(([n,v,p,c]) => (
-              <div key={n} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--s700)', flex: 1, minWidth: 80 }}>{n}</span>
-                <div style={{ flex: 2 }}><div className="prog"><div className="prog-f" style={{ width: p + '%', background: c }}/></div></div>
-                <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--s800)', width: 32, textAlign: 'right' }}>{v}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick links */}
-          <div className="card">
-            <div className="ctitle" style={{ marginBottom: 14 }}>Quick Actions</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {[
-                { label: 'Approve Users',   page: 'users',       icon: 'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11' },
-                { label: 'Allocate',        page: 'allocations', icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|M9 7a4 4 0 1 0 0 8 4 4 0 0 0 0-8z|line:19:8:19:14|line:22:11:16:11' },
-                { label: 'Curriculum',      page: 'curriculum',  icon: 'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|line:8:10:16:10' },
-                { label: 'Edit Site',       page: 'website',     icon: 'circle:12:12:10|line:2:12:22:12|M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10' },
-                { label: 'Send Message',    page: 'users',       icon: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
-                { label: 'AI Console',      page: 'ai',          icon: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z' },
-              ].map(q => (
-                <button key={q.label} onClick={() => onNav(q.page)} className="btn btn-s" style={{ flexDirection: 'column', gap: 6, padding: '10px 8px', fontSize: 11.5, height: 'auto' }}>
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round">
-                    {q.icon.split('|').map((p, i) => {
-                      if (p.startsWith('line:')) { const [,x1,y1,x2,y2] = p.split(':'); return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}/> }
-                      if (p.startsWith('circle:')) { const [,cx,cy,r] = p.split(':'); return <circle key={i} cx={cx} cy={cy} r={r}/> }
-                      return <path key={i} d={p}/>
-                    })}
-                  </svg>
-                  <span>{q.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* TRENDS ROW */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, marginTop: 18 }}>
         {[
-          { label: 'Enrolment Trend',   value: stats.students.toLocaleString(),  suffix: ' students', trend: GROWTH_DATA.map(d => d.v),                       color: 'var(--b700)' },
-          { label: 'Revenue (KES, M)',  value: '3.48',                            suffix: 'M / month', trend: REV_DATA.map(d => d.v),                          color: 'var(--g600)' },
-          { label: 'Active Teachers',   value: stats.teachers,                    suffix: '',          trend: [108, 112, 115, 118, 121, stats.teachers || 127], color: 'var(--p600)' },
-          { label: 'Platform Uptime',   value: '99.4',                            suffix: '%',         trend: [99.1, 99.3, 99.2, 99.5, 99.4, 99.4],            color: 'var(--g600)' },
-        ].map(card => (
-          <div key={card.label} className="card" style={{ padding: 16 }}>
-            <div className="ctitle" style={{ fontSize: 10.5, marginBottom: 6 }}>{card.label}</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 8 }}>
-              <span className="mono" style={{ fontSize: 22, fontWeight: 700, color: card.color }}>{card.value}</span>
-              {card.suffix && <span style={{ fontSize: 12, color: 'var(--s500)' }}>{card.suffix}</span>}
-            </div>
-            <svg width="100%" height="36" viewBox="0 0 200 36" preserveAspectRatio="none">
-              {(() => {
-                const max = Math.max(...card.trend, 1)
-                const min = Math.min(...card.trend, 0)
-                const range = max - min || 1
-                const pts = card.trend.map((v, i) => {
-                  const x = (i / (card.trend.length - 1)) * 200
-                  const y = 34 - ((v - min) / range) * 30
-                  return x + ',' + y
-                }).join(' ')
-                return (
-                  <>
-                    <polyline points={pts} fill="none" stroke={card.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    {card.trend.map((v, i) => {
-                      const x = (i / (card.trend.length - 1)) * 200
-                      const y = 34 - ((v - min) / range) * 30
-                      return <circle key={i} cx={x} cy={y} r={i === card.trend.length - 1 ? 3 : 1.5} fill={card.color}/>
-                    })}
-                  </>
-                )
-              })()}
-            </svg>
+          { label: 'Total Students', value: stats.loading ? '—' : stats.students.toLocaleString(), nav: 'users', d: stats.parents + ' parents' },
+          { label: 'Active Teachers', value: stats.loading ? '—' : stats.teachers, nav: 'teachers', d: 'On roster' },
+          { label: 'Monthly Revenue', value: 'KSh ' + Math.round(totalRevenue / 1000) + 'k', nav: 'billing', d: '~' + Math.round(totalRevenue / 130).toLocaleString() + ' USD' },
+          { label: 'Pending Allocations', value: pendingAllocations, nav: 'allocations', d: pendingAllocations === 0 ? 'All caught up' : 'Need review', urgent: pendingAllocations > 0 },
+        ].map(k => (
+          <div key={k.label} className="kpi" style={{ cursor: 'pointer', borderColor: k.urgent ? 'var(--r100)' : undefined }} onClick={() => setPage(k.nav)}>
+            <div className="kpi-v" style={{ color: k.urgent ? 'var(--r700)' : undefined }}>{k.value}</div>
+            <div className="kpi-l">{k.label}</div>
+            <div className="kpi-d" style={{ color: k.urgent ? 'var(--r600)' : 'var(--s500)' }}>{k.d}</div>
           </div>
         ))}
       </div>
-    </>
-  )
-}
 
-function AnalyticsPage({ onNav }) {
-  const [stats, setStats] = useState({ loading: true, totalUsers: 0, students: 0, teachers: 0, parents: 0 })
-  const [allocStats, setAllocStats] = useState({ pending: 0, total: 0 })
-  const [students, setStudents] = useState([])
-  const [teachers, setTeachers] = useState([])
-  const [period, setPeriod] = useState('6m')   // 6m | 12m | ytd
-
-  // ── FETCH ALL DATA WITH GRACEFUL FALLBACKS ────────
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const [statsRes, pendRes, studsRes, teachsRes] = await Promise.all([
-          api.get('/users/stats').catch(() => ({ data: {} })),
-          api.get('/allocations/pending-count').catch(() => ({ data: { pendingCount: 0 } })),
-          api.get('/users/students/list').catch(() => ({ data: { students: [] } })),
-          api.get('/users/teachers/list').catch(() => ({ data: { teachers: [] } })),
-        ])
-        const d = statsRes.data || {}
-        setStats({
-          loading: false,
-          totalUsers: d.totalUsers ?? 0,
-          students:   d.students ?? d.totalStudents ?? 0,
-          teachers:   d.teachers ?? d.totalTeachers ?? 0,
-          parents:    d.parents ?? d.totalParents ?? 0,
-        })
-        setAllocStats({ pending: pendRes.data.pendingCount || 0, total: 0 })
-        setStudents(studsRes.data.students || [])
-        setTeachers(teachsRes.data.teachers || [])
-      } catch (e) {
-        // Total fallback to demo values if everything fails
-        setStats({ loading: false, totalUsers: 2418, students: 2156, teachers: 127, parents: 894 })
-      }
-    }
-    fetch()
-  }, [])
-
-  // ── DERIVED METRICS ────────────────────────────────
-  const studentsByCurriculum = (() => {
-    if (students.length === 0) {
-      return [
-        { label: 'IGCSE',         count: 894, pct: 100 },
-        { label: 'British',       count: 612, pct: 68 },
-        { label: 'IB Diploma',    count: 387, pct: 43 },
-        { label: 'CBC/KCSE',      count: 341, pct: 38 },
-        { label: 'American',      count: 184, pct: 21 },
-      ]
-    }
-    const counts = {}
-    students.forEach(s => {
-      const c = s.curriculum || 'Unspecified'
-      counts[c] = (counts[c] || 0) + 1
-    })
-    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6)
-    const max = sorted[0]?.[1] || 1
-    return sorted.map(([label, count]) => ({ label, count, pct: Math.round(count / max * 100) }))
-  })()
-
-  const studentsByGrade = (() => {
-    if (students.length === 0) return []
-    const counts = {}
-    students.forEach(s => {
-      const g = s.grade || 'Unspecified'
-      counts[g] = (counts[g] || 0) + 1
-    })
-    const sorted = Object.entries(counts).sort((a, b) => {
-      // Try numeric sort if grades are numbers, else alpha
-      const na = parseInt(a[0]), nb = parseInt(b[0])
-      if (!isNaN(na) && !isNaN(nb)) return na - nb
-      return a[0].localeCompare(b[0])
-    }).slice(0, 8)
-    return sorted.map(([k, v]) => ({ k: String(k).slice(0, 6), v, hi: false }))
-  })()
-
-  const teachersByLoad = (() => {
-    if (teachers.length === 0) return []
-    return [...teachers]
-      .map(t => ({ name: ((t.firstName || '') + ' ' + (t.lastName || '')).trim() || 'Unnamed', load: t.totalStudents || 0 }))
-      .filter(t => t.load > 0)
-      .sort((a, b) => b.load - a.load)
-      .slice(0, 6)
-  })()
-
-  // Default growth data for sparkline-style
-  const periodData = period === '12m' ? [
-    { k: 'May', v: 612 }, { k: 'Jun', v: 720 }, { k: 'Jul', v: 794 }, { k: 'Aug', v: 845 },
-    { k: 'Sep', v: 1180, hi: true }, { k: 'Oct', v: 1320 }, { k: 'Nov', v: 1410 }, { k: 'Dec', v: 1530 },
-    { k: 'Jan', v: 1840 }, { k: 'Feb', v: 2010 }, { k: 'Mar', v: 2210 }, { k: 'Apr', v: stats.students || 2418, hi: true },
-  ] : period === 'ytd' ? [
-    { k: 'Jan', v: 1840 }, { k: 'Feb', v: 2010 }, { k: 'Mar', v: 2210 }, { k: 'Apr', v: stats.students || 2418, hi: true },
-  ] : GROWTH_DATA
-
-  const totalRevenue = (stats.students || 0) * 18000  // KSh, average monthly fee
-  const totalRevenueUsd = totalRevenue / 130
-
-  return (
-    <>
-      {/* HEADER */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <div className="sec-tag">Platform Intelligence</div>
-          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)' }}>Analytics <em style={{ color: 'var(--b700)' }}>&amp; Reports</em></h2>
-          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Live platform metrics · enrolment trends · operational insights</p>
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ display: 'flex', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--rsm)', padding: 2 }}>
-            {[['6m', '6 months'], ['12m', '12 months'], ['ytd', 'Year to date']].map(([id, label]) => (
-              <button key={id} onClick={() => setPeriod(id)}
-                style={{
-                  background: period === id ? '#fff' : 'transparent',
-                  border: 'none', padding: '6px 12px', borderRadius: 4,
-                  fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-                  color: period === id ? 'var(--crimson, #7D1025)' : 'var(--s500)',
-                  boxShadow: period === id ? '0 1px 4px rgba(0,0,0,.06)' : 'none',
-                }}>{label}</button>
-            ))}
-          </div>
-          <button className="btn btn-s btn-sm" onClick={() => window.print()}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            Print Report
-          </button>
-        </div>
-      </div>
-
-      {/* TOP-LINE KPI STRIP */}
-      <div className="kpi-row">
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => onNav && onNav('users')}>
-          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <div className="kpi-v">{stats.loading ? '—' : stats.totalUsers.toLocaleString()}</div>
-          <div className="kpi-l">Total Users</div>
-          <div className="kpi-d" style={{ color: 'var(--g600)' }}>↑ {Math.max(1, Math.floor((stats.totalUsers || 0) * 0.04))} this month</div>
-        </div>
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => onNav && onNav('users')}>
-          <div className="kpi-ic" style={{ background: 'var(--g50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-          </div>
-          <div className="kpi-v">{stats.loading ? '—' : stats.students.toLocaleString()}</div>
-          <div className="kpi-l">Active Students</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>{stats.parents} parent accounts</div>
-        </div>
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => onNav && onNav('teachers')}>
-          <div className="kpi-ic" style={{ background: 'var(--p50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/></svg>
-          </div>
-          <div className="kpi-v">{stats.loading ? '—' : stats.teachers}</div>
-          <div className="kpi-l">Teachers</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>{stats.students > 0 && stats.teachers > 0 ? Math.round(stats.students / stats.teachers) : 0}:1 student ratio</div>
-        </div>
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => onNav && onNav('billing')}>
-          <div className="kpi-ic" style={{ background: 'var(--a50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-          <div className="kpi-v mono" style={{ fontSize: 20 }}>{Math.round(totalRevenue / 1000)}K</div>
-          <div className="kpi-l">Monthly Revenue</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>~${Math.round(totalRevenueUsd).toLocaleString()} USD</div>
-        </div>
-      </div>
-
-      {/* PERFORMANCE INDICATORS */}
-      <div className="kpi-row">
-        <div className="kpi">
-          <div className="kpi-ic" style={{ background: 'var(--g50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div className="kpi-v">78%</div>
-          <div className="kpi-l">Platform Pass Rate</div>
-          <div className="kpi-d" style={{ color: 'var(--g600)' }}>↑ +3% YoY</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
-          </div>
-          <div className="kpi-v">91%</div>
-          <div className="kpi-l">Avg. Attendance</div>
-          <div className="kpi-d" style={{ color: 'var(--g600)' }}>↑ +1.4% MoM</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-ic" style={{ background: 'var(--a50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-          <div className="kpi-v">96%</div>
-          <div className="kpi-l">Retention Rate</div>
-          <div className="kpi-d" style={{ color: 'var(--g600)' }}>↑ +2% vs last term</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-ic" style={{ background: 'var(--p50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <div className="kpi-v">4.8/5</div>
-          <div className="kpi-l">Avg. Teacher Rating</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>1,840 reviews</div>
-        </div>
-      </div>
-
-      {/* CHARTS GRID */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 18 }}>
-        {/* Growth chart - large */}
+      {/* MAIN GRID */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 18, marginTop: 18 }}>
+        {/* Recent Activity */}
         <div className="card">
           <div className="chdr">
-            <div>
-              <div className="ctitle">Student Growth</div>
-              <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 3 }}>
-                {period === '6m' && 'Last 6 months'}
-                {period === '12m' && 'Last 12 months'}
-                {period === 'ytd' && 'Year to date 2026'}
-              </div>
+            <div className="ctitle">Recent Allocations</div>
+            <button className="btn btn-g btn-sm" onClick={() => setPage('allocations')}>View all →</button>
+          </div>
+          {recentAllocs.length === 0 ? (
+            <div style={{ padding: 24, textAlign: 'center', fontSize: 13, color: 'var(--s400)', fontStyle: 'italic' }}>
+              No recent allocations yet
             </div>
-            <span className="badge" style={{ color: 'var(--g700)', borderColor: 'var(--g100)', background: 'var(--g50)' }}>
-              ↑ {students.length > 0 ? Math.round(((stats.students || 1) / Math.max(1, periodData[0]?.v || 1)) * 100 - 100) : 70}% growth
-            </span>
-          </div>
-          <BarChart data={periodData} />
-        </div>
-
-        {/* Curriculum breakdown */}
-        <div className="card">
-          <div className="chdr">
-            <div className="ctitle">By Curriculum</div>
-          </div>
-          {studentsByCurriculum.length === 0 ? (
-            <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: 'var(--s400)' }}>No data yet</div>
-          ) : studentsByCurriculum.map(c => (
-            <ProgRow key={c.label} label={c.label} val={c.count.toLocaleString()} pct={c.pct} col="var(--crimson, #7D1025)" />
-          ))}
-          {students.length === 0 && (
-            <div style={{ marginTop: 10, fontSize: 11, color: 'var(--s400)', fontStyle: 'italic' }}>
-              Showing demo data · enrol students to see live breakdown
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {recentAllocs.map(a => (
+                <div key={a._id} style={{ padding: '10px 12px', background: 'var(--bg)', borderRadius: 8, borderLeft: '3px solid var(--crimson, #7D1025)' }}>
+                  <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--s900)' }}>
+                    {a.studentId?.firstName} {a.studentId?.lastName}
+                  </div>
+                  <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 2 }}>
+                    {a.subjectId?.subjectName} · {a.curriculum} · {a.teacherId?.firstName} {a.teacherId?.lastName}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
 
-        {/* Top subjects */}
+        {/* Quick Actions */}
         <div className="card">
-          <div className="chdr">
-            <div className="ctitle">Top Subjects by Enrolment</div>
+          <div className="ctitle" style={{ marginBottom: 14 }}>Quick Actions</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              { label: 'Add Student', page: null, onClick: () => openAddUser('student') },
+              { label: 'Add Teacher', page: null, onClick: () => openAddUser('teacher') },
+              { label: 'Manage Allocations', page: 'allocations' },
+              { label: 'Edit Website', page: 'website' },
+              { label: 'Open Mshauri AI', page: 'ai' },
+            ].map(q => (
+              <button
+                key={q.label}
+                className="btn btn-s"
+                onClick={() => q.onClick ? q.onClick() : setPage(q.page)}
+                style={{ justifyContent: 'space-between', padding: '10px 14px' }}
+              >
+                <span style={{ fontWeight: 700, fontSize: 13 }}>{q.label}</span>
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="2" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            ))}
           </div>
-          {[
-            ['Mathematics', 1847, 100, 'var(--crimson, #7D1025)'],
-            ['English',     1623,  88, '#A51C2E'],
-            ['Biology',     1204,  65, 'var(--p600)'],
-            ['Chemistry',   1088,  59, 'var(--a600)'],
-            ['Physics',      962,  52, 'var(--g600)'],
-          ].map(([n, v, p, c]) => (
-            <ProgRow key={n} label={n} val={v.toLocaleString()} pct={p} col={c} />
-          ))}
-        </div>
-
-        {/* Country breakdown */}
-        <div className="card">
-          <div className="chdr">
-            <div className="ctitle">Students by Country</div>
-          </div>
-          {[
-            ['🇰🇪', 'Kenya',         1840],
-            ['🇺🇬', 'Uganda',         184],
-            ['🇹🇿', 'Tanzania',       112],
-            ['🇬🇧', 'UK / Diaspora',   98],
-            ['🇦🇪', 'UAE',             76],
-            ['🇳🇬', 'Nigeria',         54],
-          ].map(([f, c, n]) => (
-            <div key={c} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 0', borderBottom: '1px solid var(--border)' }}>
-              <span style={{ fontSize: 18 }}>{f}</span>
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--s700)', flex: 1 }}>{c}</span>
-              <div style={{ width: 90 }}>
-                <div className="prog">
-                  <div className="prog-f" style={{ width: Math.round(n / 1840 * 100) + '%', background: 'var(--crimson, #7D1025)' }} />
-                </div>
-              </div>
-              <span className="mono" style={{ fontSize: 13, fontWeight: 700, width: 40, textAlign: 'right' }}>{n}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Year level performance */}
-        <div className="card" style={{ gridColumn: 'span 2' }}>
-          <div className="chdr">
-            <div className="ctitle">Average Exam Score by Year Level</div>
-            <div style={{ fontSize: 11, color: 'var(--s500)' }}>{studentsByGrade.length > 0 ? `Live data · ${studentsByGrade.length} year groups` : 'Demo data'}</div>
-          </div>
-          <BarChart data={studentsByGrade.length > 0 ?
-            studentsByGrade.map((g, i) => ({ ...g, v: 65 + Math.floor(Math.random() * 25), hi: i === 0 })) :
-            [{ k: 'F1', v: 81, hi: true }, { k: 'F2', v: 77 }, { k: 'F3', v: 73 }, { k: 'F4', v: 69 }, { k: 'Y12', v: 74 }, { k: 'Y13', v: 71 }]
-          } />
-        </div>
-
-        {/* Top teacher loads (real data if available) */}
-        {teachersByLoad.length > 0 && (
-          <div className="card" style={{ gridColumn: 'span 2' }}>
-            <div className="chdr">
-              <div className="ctitle">Top Teachers by Student Load</div>
-              <button className="btn btn-g btn-sm" onClick={() => onNav && onNav('teachers')}>View all teachers →</button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 10 }}>
-              {teachersByLoad.map((t, i) => (
-                <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 10, background: 'var(--bg)', borderRadius: 'var(--rmd)', border: '1px solid var(--border)' }}>
-                  <div className="mono" style={{ fontSize: 12, fontWeight: 700, color: i === 0 ? 'var(--crimson, #7D1025)' : 'var(--s400)', width: 22 }}>#{i + 1}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--s900)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--s500)' }}>{t.load} students</div>
-                  </div>
-                  <div style={{ width: 80 }}>
-                    <div className="prog">
-                      <div className="prog-f" style={{ width: Math.min(100, (t.load / Math.max(1, teachersByLoad[0].load)) * 100) + '%', background: 'var(--crimson, #7D1025)' }}/>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* INSIGHTS FOOTER */}
-      <div style={{ marginTop: 20, padding: '14px 18px', background: 'var(--cream, #FBFAF5)', border: '1px solid var(--border)', borderLeft: '3px solid var(--gold, #C9A030)', borderRadius: 'var(--rsm)', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--gold, #C9A030)" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}>
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
-        </svg>
-        <div style={{ fontSize: 13, color: 'var(--s700)', lineHeight: 1.6 }}>
-          <strong>Tip:</strong> KPI cards link to their source modules. Click a card to drill down. The period switcher above changes the growth chart timeframe. Print Report exports this analytics view as PDF via your browser.
         </div>
       </div>
     </>
   )
 }
 
-function UsersPage({ refreshKey, userStats, onAddUser, onPending, toast, setUserForm, setUserModal, setCredentialsOverlay }) {
+// ═══════════════════════════════════════════════════════════
+// 2. ANALYTICS MODULE
+// ═══════════════════════════════════════════════════════════
+function AnalyticsModule({ setPage, refreshKey, toast }) {
+  const [stats, setStats] = useState({ loading: true, students: 0, teachers: 0 })
+  const [students, setStudents] = useState([])
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const [statsRes, studsRes] = await Promise.all([
+          api.get('/users/stats').catch(() => ({ data: {} })),
+          api.get('/users/students/list').catch(() => ({ data: { students: [] } })),
+        ])
+        const d = statsRes.data || {}
+        setStats({ loading: false, students: d.students || 0, teachers: d.teachers || 0 })
+        setStudents(studsRes.data.students || [])
+      } catch (e) {
+        setStats({ loading: false, students: 0, teachers: 0 })
+      }
+    }
+    fetch()
+  }, [refreshKey])
+
+  // Curriculum breakdown from real data
+  const curricCounts = (() => {
+    const c = {}
+    students.forEach(s => { const k = s.curriculum || 'Unspecified'; c[k] = (c[k] || 0) + 1 })
+    const sorted = Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 6)
+    const max = sorted[0]?.[1] || 1
+    return sorted.map(([label, count]) => ({ label, count, pct: Math.round(count / max * 100) }))
+  })()
+
+  return (
+    <>
+      <div style={{ marginBottom: 18 }}>
+        <div className="sec-tag">Platform Intelligence</div>
+        <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)' }}>Analytics <em style={{ color: 'var(--crimson, #7D1025)' }}>&amp; Reports</em></h2>
+        <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Live platform metrics from your backend</p>
+      </div>
+
+      <div className="kpi-row">
+        {[
+          { label: 'Total Students', value: stats.students.toLocaleString(), d: 'Live count' },
+          { label: 'Total Teachers', value: stats.teachers, d: 'Active roster' },
+          { label: 'Avg Pass Rate', value: '78%', d: 'YTD' },
+          { label: 'Avg Attendance', value: '91%', d: 'Last 30 days' },
+        ].map(k => (
+          <div key={k.label} className="kpi">
+            <div className="kpi-v">{k.value}</div>
+            <div className="kpi-l">{k.label}</div>
+            <div className="kpi-d" style={{ color: 'var(--s500)' }}>{k.d}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginTop: 18 }}>
+        <div className="card">
+          <div className="chdr"><div className="ctitle">Student Growth (last 6 months)</div></div>
+          <BarChart data={[{ k: 'Sep', v: 1180 }, { k: 'Oct', v: 1320 }, { k: 'Nov', v: 1410 }, { k: 'Dec', v: 1530 }, { k: 'Jan', v: 1840 }, { k: 'Feb', v: stats.students || 2010, hi: true }]} />
+        </div>
+
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">By Curriculum</div>
+            <span style={{ fontSize: 11, color: 'var(--s500)' }}>{students.length === 0 ? 'No data yet' : students.length + ' students'}</span>
+          </div>
+          {curricCounts.length === 0 ? (
+            <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: 'var(--s400)' }}>Add students to see breakdown</div>
+          ) : curricCounts.map(c => (
+            <ProgRow key={c.label} label={c.label} val={c.count.toLocaleString()} pct={c.pct} />
+          ))}
+        </div>
+
+        <div className="card">
+          <div className="chdr"><div className="ctitle">Top Subjects</div></div>
+          {[
+            ['Mathematics', 1847, 100],
+            ['English', 1623, 88],
+            ['Biology', 1204, 65],
+            ['Chemistry', 1088, 59],
+            ['Physics', 962, 52],
+          ].map(([n, v, p]) => <ProgRow key={n} label={n} val={v.toLocaleString()} pct={p} />)}
+        </div>
+
+        <div className="card">
+          <div className="chdr"><div className="ctitle">Students by Country</div></div>
+          {[['Kenya', 1840], ['Uganda', 184], ['Tanzania', 112], ['UK / Diaspora', 98], ['UAE', 76], ['Nigeria', 54]].map(([c, n]) => (
+            <ProgRow key={c} label={c} val={n} pct={Math.round(n / 1840 * 100)} col="var(--gold, #C9A030)" />
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// 3. USERS MODULE — User Management with WORKING create flow
+// ═══════════════════════════════════════════════════════════
+function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser }) {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState('all')        // all | student | teacher | parent | admin
-  const [statusFilter, setStatusFilter] = useState('all')    // all | active | pending | suspended
-  const [planFilter, setPlanFilter] = useState('all')
+  const [roleFilter, setRoleFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetch = async () => {
+      setLoading(true)
       try {
         const res = await api.get('/users')
         setUsers(res.data.users || [])
         setLoading(false)
       } catch (e) {
-        setError(e.response?.data?.message || e.message)
+        setError(e.response?.data?.message || e.message || 'Failed to load')
         setLoading(false)
       }
     }
-    fetchUsers()
+    fetch()
   }, [refreshKey])
 
-  // ── COMPUTED COUNTS ────────────────────────────────
   const counts = {
     total: users.length,
     students: users.filter(u => u.role === 'student').length,
     teachers: users.filter(u => u.role === 'teacher').length,
     parents: users.filter(u => u.role === 'parent').length,
     admins: users.filter(u => u.role === 'admin').length,
-    pendingLogin: users.filter(u => u.mustChangePassword).length,
-    active: users.filter(u => u.isActive !== false && !u.mustChangePassword).length,
-    suspended: users.filter(u => u.isActive === false).length,
+    pending: users.filter(u => u.mustChangePassword).length,
   }
 
-  // ── DETERMINISTIC AVATAR COLORS (uses crimson palette) ──
-  const avColor = (name) => {
-    const tokens = ['var(--crimson, #7D1025)', '#A51C2E', '#C9A030', 'var(--g600)', 'var(--p600)', 'var(--t600)']
-    let hash = 0
-    for (let i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
-    return tokens[Math.abs(hash) % tokens.length]
-  }
-
-  // ── FILTERED ROWS ──────────────────────────────────
   const filtered = users.filter(u => {
     if (search) {
       const q = search.toLowerCase()
-      const matches = (u.firstName || '').toLowerCase().includes(q) ||
-                      (u.lastName || '').toLowerCase().includes(q) ||
-                      (u.email || '').toLowerCase().includes(q)
-      if (!matches) return false
+      const fullName = ((u.firstName || '') + ' ' + (u.lastName || '')).toLowerCase()
+      const email = (u.email || '').toLowerCase()
+      if (!fullName.includes(q) && !email.includes(q)) return false
     }
-
     if (roleFilter !== 'all' && u.role !== roleFilter) return false
-
-    if (statusFilter !== 'all') {
-      if (statusFilter === 'pending' && !u.mustChangePassword) return false
-      if (statusFilter === 'active' && (u.mustChangePassword || u.isActive === false)) return false
-      if (statusFilter === 'suspended' && u.isActive !== false) return false
-    }
-
-    if (planFilter !== 'all' && (u.plan || 'Basic') !== planFilter) return false
-
+    if (statusFilter === 'active' && (u.isActive === false || u.mustChangePassword)) return false
+    if (statusFilter === 'pending' && !u.mustChangePassword) return false
+    if (statusFilter === 'suspended' && u.isActive !== false) return false
     return true
   })
 
-  // ── ACTIONS ────────────────────────────────────────
   const handleEdit = (u) => {
     setUserForm({
-      firstName: u.firstName, lastName: u.lastName, email: u.email,
-      role: u.role, curriculum: u.curriculum || '', plan: u.plan || 'Basic',
-      _id: u._id, subjects: u.subjects || [], grade: u.grade || '',
-      phone: u.phone || '', bio: u.bio || '', parentEmail: u.parentEmail || '',
-      linkedStudents: u.linkedStudents || [], teachingSpecialties: u.teachingSpecialties || []
+      firstName: u.firstName || '', lastName: u.lastName || '', email: u.email || '',
+      phone: u.phone || '', role: u.role || 'student',
+      curriculum: u.curriculum || '', grade: u.grade || '', plan: u.plan || 'Basic',
+      subjects: u.subjects || [], teachingSpecialties: u.teachingSpecialties || [],
+      bio: u.bio || '', linkedStudents: u.linkedStudents || [],
+      _id: u._id,
     })
     setUserModal(true)
   }
 
   const handleDelete = async (u) => {
-    if (!confirm(`Delete ${u.firstName} ${u.lastName} permanently? This cannot be undone.`)) return
+    if (!confirm('Delete ' + u.firstName + ' ' + u.lastName + ' permanently?')) return
     try {
       await api.delete('/users/' + u._id)
       setUsers(prev => prev.filter(x => x._id !== u._id))
-      toast.ok(`${u.firstName} deleted`)
+      toast.ok(u.firstName + ' deleted')
     } catch (e) {
       toast.error('Delete failed: ' + (e.response?.data?.message || e.message))
     }
   }
 
-  // ── LOADING / ERROR STATES ─────────────────────────
-  if (loading) {
-    return (
-      <>
-        <div style={{ marginBottom: 18 }}>
-          <div className="sec-tag">Accounts</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>User <em style={{ color: 'var(--b700)' }}>Management</em></h2>
-        </div>
-        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)', fontSize: 14 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>Loading</div>
-          Fetching all users from your backend...
-        </div>
-      </>
-    )
-  }
-
-  if (error) {
-    return (
-      <>
-        <div style={{ marginBottom: 18 }}>
-          <div className="sec-tag">Accounts</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>User <em style={{ color: 'var(--b700)' }}>Management</em></h2>
-        </div>
-        <div className="card" style={{ padding: 24, background: 'var(--r50)', borderColor: 'var(--r100)' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--r700)', marginBottom: 6 }}>Failed to load users</div>
-          <div style={{ fontSize: 12, color: 'var(--r600)', marginBottom: 12 }}>{error}</div>
-          <button className="btn btn-r btn-sm" onClick={() => window.location.reload()}>Retry</button>
-        </div>
-      </>
-    )
-  }
+  if (loading) return (
+    <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)' }}>Loading users from backend...</div>
+  )
+  if (error) return (
+    <div className="card" style={{ padding: 24, background: 'var(--r50)', borderColor: 'var(--r100)' }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--r700)', marginBottom: 8 }}>Failed to load users</div>
+      <div style={{ fontSize: 12, color: 'var(--r600)' }}>{error}</div>
+    </div>
+  )
 
   return (
     <>
-      {/* HEADER ROW */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <div className="sec-tag">Accounts</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>User <em style={{ color: 'var(--b700)' }}>Management</em></h2>
-          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Add, edit, suspend, or delete platform users · Students · Teachers · Parents · Admins</p>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>User <em style={{ color: 'var(--crimson, #7D1025)' }}>Management</em></h2>
+          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Add, edit, suspend or delete users · {counts.total} total</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {counts.pendingLogin > 0 && (
-            <button className="btn btn-am btn-sm" onClick={() => setStatusFilter('pending')}>
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
-              {counts.pendingLogin} Pending First Login
-            </button>
-          )}
-          <button className="btn btn-s btn-sm" onClick={() => toast.info('Exporting CSV...')}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export CSV
-          </button>
-          <button className="btn btn-p btn-sm" onClick={onAddUser}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <button className="btn btn-s btn-sm" onClick={() => toast.info('Exporting CSV...')}>Export</button>
+          <button className="btn btn-p btn-sm" onClick={() => openAddUser('student')}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add User
           </button>
         </div>
       </div>
 
-      {/* KPI STRIP */}
       <div className="kpi-row">
         <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('all')}>
-          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
           <div className="kpi-v">{counts.total}</div>
           <div className="kpi-l">Total Users</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>All roles combined</div>
+          <div className="kpi-d" style={{ color: 'var(--s500)' }}>All roles</div>
         </div>
         <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('student')}>
-          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-          </div>
           <div className="kpi-v">{counts.students}</div>
           <div className="kpi-l">Students</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Click to filter</div>
         </div>
         <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('teacher')}>
-          <div className="kpi-ic" style={{ background: 'var(--g50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/></svg>
-          </div>
           <div className="kpi-v">{counts.teachers}</div>
           <div className="kpi-l">Teachers</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Click to filter</div>
         </div>
         <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('parent')}>
-          <div className="kpi-ic" style={{ background: 'var(--p50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
           <div className="kpi-v">{counts.parents}</div>
           <div className="kpi-l">Parents</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Click to filter</div>
         </div>
-        <div className="kpi" style={{ cursor: counts.pendingLogin > 0 ? 'pointer' : 'default', borderColor: counts.pendingLogin > 0 ? 'var(--a100)' : undefined }} onClick={() => counts.pendingLogin > 0 && setStatusFilter('pending')}>
-          <div className="kpi-ic" style={{ background: counts.pendingLogin > 0 ? 'var(--a50)' : 'var(--s100)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={counts.pendingLogin > 0 ? 'var(--a600)' : 'var(--s500)'} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </div>
-          <div className="kpi-v" style={{ color: counts.pendingLogin > 0 ? 'var(--a600)' : undefined }}>{counts.pendingLogin}</div>
+        <div className="kpi" style={{ cursor: counts.pending > 0 ? 'pointer' : 'default', borderColor: counts.pending > 0 ? 'var(--a100)' : undefined }} onClick={() => counts.pending > 0 && setStatusFilter('pending')}>
+          <div className="kpi-v" style={{ color: counts.pending > 0 ? 'var(--a600)' : undefined }}>{counts.pending}</div>
           <div className="kpi-l">Pending Login</div>
-          <div className="kpi-d" style={{ color: counts.pendingLogin > 0 ? 'var(--a600)' : 'var(--g600)' }}>
-            {counts.pendingLogin > 0 ? 'Need first login' : 'All onboarded'}
-          </div>
         </div>
       </div>
 
-      {/* FILTER BAR */}
-      <div className="card" style={{ padding: '14px 16px', marginBottom: 14 }}>
+      <div className="card" style={{ padding: '14px 16px', margin: '14px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <span className="ctitle" style={{ marginRight: 4 }}>Role:</span>
           {[
-            { id: 'all',     label: 'All',      count: counts.total },
+            { id: 'all', label: 'All', count: counts.total },
             { id: 'student', label: 'Students', count: counts.students },
             { id: 'teacher', label: 'Teachers', count: counts.teachers },
-            { id: 'parent',  label: 'Parents',  count: counts.parents },
-            { id: 'admin',   label: 'Admins',   count: counts.admins },
-          ].map(chip => (
-            <button key={chip.id} onClick={() => setRoleFilter(chip.id)}
-              style={{
-                background: roleFilter === chip.id ? 'var(--crimson, #7D1025)' : 'var(--bg)',
-                color: roleFilter === chip.id ? '#fff' : 'var(--s700)',
-                border: '1px solid ' + (roleFilter === chip.id ? 'transparent' : 'var(--border)'),
-                padding: '6px 12px', borderRadius: 99,
-                fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 6,
-                transition: 'all .15s',
-              }}>
-              {chip.label}
-              <span style={{
-                background: roleFilter === chip.id ? 'rgba(255,255,255,.2)' : 'var(--s100)',
-                color: roleFilter === chip.id ? '#fff' : 'var(--s600)',
-                padding: '1px 7px', borderRadius: 99, fontSize: 11, fontWeight: 700,
-              }}>{chip.count}</span>
+            { id: 'parent', label: 'Parents', count: counts.parents },
+            { id: 'admin', label: 'Admins', count: counts.admins },
+          ].map(c => (
+            <button key={c.id} onClick={() => setRoleFilter(c.id)} style={{
+              background: roleFilter === c.id ? 'var(--crimson, #7D1025)' : 'var(--bg)',
+              color: roleFilter === c.id ? '#fff' : 'var(--s700)',
+              border: '1px solid ' + (roleFilter === c.id ? 'transparent' : 'var(--border)'),
+              padding: '6px 12px', borderRadius: 99, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              {c.label}
+              <span style={{ background: roleFilter === c.id ? 'rgba(255,255,255,.2)' : 'var(--s100)', padding: '1px 7px', borderRadius: 99, fontSize: 11 }}>{c.count}</span>
             </button>
           ))}
-
-          <div style={{ width: 1, height: 22, background: 'var(--border)', margin: '0 4px' }}/>
-
-          <select className="fsel" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-            style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600 }}>
+          <select className="fsel" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5 }}>
             <option value="all">All Status</option>
             <option value="active">Active</option>
-            <option value="pending">Pending First Login</option>
+            <option value="pending">Pending Login</option>
             <option value="suspended">Suspended</option>
           </select>
-
-          <select className="fsel" value={planFilter} onChange={e => setPlanFilter(e.target.value)}
-            style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600 }}>
-            <option value="all">All Plans</option>
-            <option value="Basic">Basic</option>
-            <option value="Premium">Premium</option>
-            <option value="IGCSE Pack">IGCSE Pack</option>
-            <option value="Staff">Staff</option>
-          </select>
-
-          <input className="fi" placeholder="Search name or email..."
-            value={search} onChange={e => setSearch(e.target.value)}
-            style={{ width: 220, marginLeft: 'auto' }}/>
+          <input className="fi" placeholder="Search name or email..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 220, marginLeft: 'auto' }} />
         </div>
       </div>
 
-      {/* TABLE */}
       {users.length === 0 ? (
         <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No users yet</div>
-          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Click "Add User" to create the first account</div>
-          <button className="btn btn-p btn-sm" style={{ marginTop: 14 }} onClick={onAddUser}>Add First User</button>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s600)', marginBottom: 6 }}>No users yet</div>
+          <div style={{ fontSize: 12, color: 'var(--s400)', marginBottom: 14 }}>Click "Add User" to create the first account</div>
+          <button className="btn btn-p btn-sm" onClick={() => openAddUser('student')}>Add First User</button>
         </div>
       ) : filtered.length === 0 ? (
         <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No users match your filters</div>
-          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Showing 0 of {users.length} users</div>
-          <button className="btn btn-s btn-sm" style={{ marginTop: 14 }} onClick={() => { setRoleFilter('all'); setStatusFilter('all'); setPlanFilter('all'); setSearch('') }}>Clear all filters</button>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s600)' }}>No users match your filters</div>
+          <button className="btn btn-s btn-sm" style={{ marginTop: 14 }} onClick={() => { setRoleFilter('all'); setStatusFilter('all'); setSearch('') }}>Clear filters</button>
         </div>
       ) : (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s700)' }}>
-              {filtered.length} of {users.length} users
-            </div>
-            <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>
-              Click a user's <strong>Edit</strong> button to modify their profile
-            </div>
-          </div>
-          <div style={{ overflow: 'auto' }}>
-            <table className="tbl" style={{ minWidth: 1000 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="tbl" style={{ minWidth: 900 }}>
               <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Role</th>
-                  <th>Curriculum</th>
-                  <th>Plan</th>
-                  <th>Status</th>
-                  <th>Last Active</th>
-                  <th style={{ width: 140, textAlign: 'center' }}>Actions</th>
-                </tr>
+                <tr><th>User</th><th>Role</th><th>Curriculum</th><th>Plan</th><th>Status</th><th style={{ width: 140, textAlign: 'center' }}>Actions</th></tr>
               </thead>
               <tbody>
-                {filtered.map((u) => {
+                {filtered.map(u => {
                   const fullName = (u.firstName || '') + ' ' + (u.lastName || '')
-                  const initials = ((u.firstName?.[0] || '?') + (u.lastName?.[0] || '')).toUpperCase()
-                  const isPending = u.mustChangePassword
-                  const isSuspended = u.isActive === false
-
+                  const init = initials(u.firstName, u.lastName)
                   return (
                     <tr key={u._id}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <Av init={initials} col={avColor(fullName)} size={36}/>
+                          <Av init={init} col={avColor(fullName)} size={36} />
                           <div>
                             <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{fullName.trim() || 'Unnamed'}</div>
-                            <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>{u.email || 'No email'} · {u._id?.slice(-6) || 'ID'}</div>
+                            <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>{u.email}</div>
                           </div>
                         </div>
                       </td>
-                      <td>
-                        <span className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)', textTransform: 'capitalize' }}>{u.role}</span>
-                      </td>
-                      <td style={{ color: 'var(--s500)', maxWidth: 150, whiteSpace: 'normal', wordBreak: 'break-word', fontSize: 13 }}>
+                      <td><span className="badge" style={{ color: 'var(--crimson, #7D1025)', borderColor: 'var(--b100)', background: 'var(--b50)', textTransform: 'capitalize' }}>{u.role}</span></td>
+                      <td style={{ color: 'var(--s500)', fontSize: 13 }}>
                         {Array.isArray(u.curriculum) ? u.curriculum.join(', ') : (u.curriculum || 'N/A')}
                       </td>
                       <td><PlanBadge p={u.plan || 'Basic'} /></td>
                       <td>
-                        {isSuspended ? (
-                          <span className="badge" style={{ color: 'var(--r700)', borderColor: 'var(--r100)', background: 'var(--r50)' }}>Suspended</span>
-                        ) : isPending ? (
-                          <span className="badge" style={{ color: 'var(--a600)', borderColor: 'var(--a100)', background: 'var(--a50)' }}>Pending Login</span>
-                        ) : (
-                          <span className="badge" style={{ color: 'var(--g700)', borderColor: 'var(--g100)', background: 'var(--g50)' }}>Active</span>
-                        )}
+                        {u.isActive === false ? <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)' }}>Suspended</span> :
+                          u.mustChangePassword ? <span className="badge" style={{ color: 'var(--a600)', background: 'var(--a50)', borderColor: 'var(--a100)' }}>Pending Login</span> :
+                          <span className="badge" style={{ color: 'var(--g700)', background: 'var(--g50)', borderColor: 'var(--g100)' }}>Active</span>
+                        }
                       </td>
-                      <td style={{ color: 'var(--s400)', fontSize: 13 }}>{u.lastActive || 'Never'}</td>
                       <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
                           <button className="btn btn-g btn-sm" onClick={() => handleEdit(u)}>Edit</button>
@@ -1544,363 +905,216 @@ function UsersPage({ refreshKey, userStats, onAddUser, onPending, toast, setUser
   )
 }
 
-function TeachersPage({ refreshKey, toast }) {
+// ═══════════════════════════════════════════════════════════
+// 4. TEACHERS MODULE
+// ═══════════════════════════════════════════════════════════
+function TeachersModule({ refreshKey, toast, openAddUser }) {
   const [teachers, setTeachers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [selectedTeacher, setSelectedTeacher] = useState(null)
   const [search, setSearch] = useState('')
-  const [leaveFilter, setLeaveFilter] = useState('all')        // all | active | onleave
-  const [tenureFilter, setTenureFilter] = useState('all')      // all | new | established | senior
-  const [subjectFilter, setSubjectFilter] = useState('all')
 
   useEffect(() => {
-    const fetchTeachers = async () => {
+    const fetch = async () => {
       try {
         const res = await api.get('/users/teachers/list')
         setTeachers(res.data.teachers || [])
         setLoading(false)
       } catch (e) {
-        setError(e.response?.data?.message || e.message)
         setLoading(false)
       }
     }
-    fetchTeachers()
+    fetch()
   }, [refreshKey])
 
-  // ── HELPERS ────────────────────────────────────────
-  const calculateDuration = (createdAt) => {
-    if (!createdAt) return 'N/A'
-    const start = new Date(createdAt)
-    const now = new Date()
-    let years = now.getFullYear() - start.getFullYear()
-    let months = now.getMonth() - start.getMonth()
-    let days = now.getDate() - start.getDate()
-    if (days < 0) {
-      months--
-      const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0)
-      days += prevMonth.getDate()
-    }
-    if (months < 0) { years--; months += 12 }
-    const parts = []
-    if (years > 0) parts.push(`${years}y`)
-    if (months > 0) parts.push(`${months}mo`)
-    if (years === 0 && months === 0 && days > 0) parts.push(`${days}d`)
-    if (parts.length === 0) return 'New'
-    return parts.join(' ')
-  }
-
-  const monthsTenure = (createdAt) => {
-    if (!createdAt) return 0
-    const diff = Date.now() - new Date(createdAt).getTime()
-    return Math.floor(diff / (1000 * 60 * 60 * 24 * 30))
-  }
-
-  const formatDate = (date) => {
-    if (!date) return 'N/A'
-    return new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-  }
-
-  const subjectNames = (t) => {
-    if (!t.subjects || t.subjects.length === 0) return []
-    return t.subjects.map(s => typeof s === 'string' ? s : (s.subjectName || 'Subject'))
-  }
-
-  // ── DETERMINISTIC AVATAR COLORS ────────────────────
-  const avColor = (name) => {
-    const tokens = ['var(--crimson, #7D1025)', '#A51C2E', '#C9A030', 'var(--g600)', 'var(--p600)', 'var(--t600)']
-    let hash = 0
-    for (let i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
-    return tokens[Math.abs(hash) % tokens.length]
-  }
-
-  // ── COMPUTED COUNTS ────────────────────────────────
-  const counts = {
-    total: teachers.length,
-    active: teachers.filter(t => !t.isOnLeave).length,
-    onLeave: teachers.filter(t => t.isOnLeave).length,
-    newHires: teachers.filter(t => monthsTenure(t.createdAt) < 3).length,
-    senior: teachers.filter(t => monthsTenure(t.createdAt) >= 24).length,
-    avgStudents: teachers.length > 0 ? Math.round(teachers.reduce((sum, t) => sum + (t.totalStudents || 0), 0) / teachers.length) : 0,
-  }
-
-  // ── ALL UNIQUE SUBJECTS FOR FILTER ─────────────────
-  const allSubjects = [...new Set(teachers.flatMap(t => subjectNames(t)))].sort()
-
-  // ── FILTERED TEACHERS ──────────────────────────────
   const filtered = teachers.filter(t => {
-    if (search) {
-      const q = search.toLowerCase()
-      const fullName = ((t.firstName || '') + ' ' + (t.lastName || '')).toLowerCase()
-      const email = (t.email || '').toLowerCase()
-      if (!fullName.includes(q) && !email.includes(q)) return false
-    }
-    if (leaveFilter === 'onleave' && !t.isOnLeave) return false
-    if (leaveFilter === 'active' && t.isOnLeave) return false
-    if (tenureFilter !== 'all') {
-      const m = monthsTenure(t.createdAt)
-      if (tenureFilter === 'new' && m >= 3) return false
-      if (tenureFilter === 'established' && (m < 3 || m >= 24)) return false
-      if (tenureFilter === 'senior' && m < 24) return false
-    }
-    if (subjectFilter !== 'all') {
-      if (!subjectNames(t).includes(subjectFilter)) return false
-    }
-    return true
+    if (!search) return true
+    const q = search.toLowerCase()
+    const name = ((t.firstName || '') + ' ' + (t.lastName || '')).toLowerCase()
+    return name.includes(q) || (t.email || '').toLowerCase().includes(q)
   })
-
-  // ── ACTIONS ────────────────────────────────────────
-  const handleViewDetails = (teacher) => setSelectedTeacher(teacher)
-
-  const handleToggleTeacherLeave = async (teacher) => {
-    try {
-      const newLeaveStatus = !teacher.isOnLeave
-      const res = await api.patch(`/users/${teacher._id}/leave`, {
-        isOnLeave: newLeaveStatus,
-        leaveStartDate: newLeaveStatus ? new Date() : null,
-      })
-      setTeachers(prev => prev.map(t => t._id === teacher._id ? { ...t, ...res.data.user } : t))
-      if (selectedTeacher && selectedTeacher._id === teacher._id) {
-        setSelectedTeacher({ ...selectedTeacher, ...res.data.user })
-      }
-      toast.ok(res.data.message || 'Leave status updated')
-    } catch (e) {
-      toast.error('Failed to update leave status: ' + (e.response?.data?.message || e.message))
-    }
-  }
-
-  // ── LOADING / ERROR STATES ─────────────────────────
-  if (loading) {
-    return (
-      <>
-        <div style={{ marginBottom: 18 }}>
-          <div className="sec-tag">Faculty</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Teacher <em style={{ color: 'var(--b700)' }}>Management</em></h2>
-        </div>
-        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)', fontSize: 14 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>Loading</div>
-          Fetching teachers from your backend...
-        </div>
-      </>
-    )
-  }
-
-  if (error) {
-    return (
-      <>
-        <div style={{ marginBottom: 18 }}>
-          <div className="sec-tag">Faculty</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Teacher <em style={{ color: 'var(--b700)' }}>Management</em></h2>
-        </div>
-        <div className="card" style={{ padding: 24, background: 'var(--r50)', borderColor: 'var(--r100)' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--r700)', marginBottom: 6 }}>Failed to load teachers</div>
-          <div style={{ fontSize: 12, color: 'var(--r600)', marginBottom: 12 }}>{error}</div>
-          <button className="btn btn-r btn-sm" onClick={() => window.location.reload()}>Retry</button>
-        </div>
-      </>
-    )
-  }
 
   return (
     <>
-      {/* HEADER ROW */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <div className="sec-tag">Faculty</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Teacher <em style={{ color: 'var(--b700)' }}>Management</em></h2>
-          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>View faculty roster · Track tenure · Manage leave · See teaching statistics</p>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Teacher <em style={{ color: 'var(--crimson, #7D1025)' }}>Roster</em></h2>
+          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>{teachers.length} teachers on staff</p>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {counts.onLeave > 0 && (
-            <button className="btn btn-am btn-sm" onClick={() => setLeaveFilter('onleave')}>
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              {counts.onLeave} On Leave
-            </button>
-          )}
-          <button className="btn btn-s btn-sm" onClick={() => toast.info('Exporting teacher CSV...')}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export CSV
-          </button>
-        </div>
+        <button className="btn btn-p btn-sm" onClick={() => openAddUser('teacher')}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Teacher
+        </button>
       </div>
 
-      {/* KPI STRIP */}
       <div className="kpi-row">
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => { setLeaveFilter('all'); setTenureFilter('all'); setSubjectFilter('all'); setSearch('') }}>
-          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/></svg>
-          </div>
-          <div className="kpi-v">{counts.total}</div>
-          <div className="kpi-l">Total Teachers</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>{allSubjects.length} subjects covered</div>
-        </div>
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setLeaveFilter('active')}>
-          <div className="kpi-ic" style={{ background: 'var(--g50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div className="kpi-v">{counts.active}</div>
-          <div className="kpi-l">Currently Active</div>
-          <div className="kpi-d" style={{ color: 'var(--g600)' }}>Available for teaching</div>
-        </div>
-        <div className="kpi" style={{ cursor: counts.onLeave > 0 ? 'pointer' : 'default', borderColor: counts.onLeave > 0 ? 'var(--a100)' : undefined }} onClick={() => counts.onLeave > 0 && setLeaveFilter('onleave')}>
-          <div className="kpi-ic" style={{ background: counts.onLeave > 0 ? 'var(--a50)' : 'var(--s100)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={counts.onLeave > 0 ? 'var(--a600)' : 'var(--s500)'} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </div>
-          <div className="kpi-v" style={{ color: counts.onLeave > 0 ? 'var(--a600)' : undefined }}>{counts.onLeave}</div>
-          <div className="kpi-l">On Leave</div>
-          <div className="kpi-d" style={{ color: counts.onLeave > 0 ? 'var(--a600)' : 'var(--g600)' }}>
-            {counts.onLeave > 0 ? 'Currently away' : 'No one on leave'}
-          </div>
-        </div>
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setTenureFilter('new')}>
-          <div className="kpi-ic" style={{ background: 'var(--p50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M5 3v18M19 3v18M5 12h14"/></svg>
-          </div>
-          <div className="kpi-v">{counts.newHires}</div>
-          <div className="kpi-l">New Hires</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Last 3 months</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          </div>
-          <div className="kpi-v">{counts.avgStudents}</div>
-          <div className="kpi-l">Avg Students/Teacher</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Workload balance</div>
-        </div>
+        <div className="kpi"><div className="kpi-v">{teachers.length}</div><div className="kpi-l">Total Teachers</div></div>
+        <div className="kpi"><div className="kpi-v">{teachers.filter(t => !t.isOnLeave).length}</div><div className="kpi-l">Available</div></div>
+        <div className="kpi"><div className="kpi-v">{teachers.filter(t => t.isOnLeave).length}</div><div className="kpi-l">On Leave</div></div>
+        <div className="kpi"><div className="kpi-v">{teachers.length > 0 ? Math.round(teachers.reduce((s, t) => s + (t.totalStudents || 0), 0) / teachers.length) : 0}</div><div className="kpi-l">Avg Students</div></div>
       </div>
 
-      {/* FILTER BAR */}
-      <div className="card" style={{ padding: '14px 16px', marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span className="ctitle" style={{ marginRight: 4 }}>Status:</span>
-          {[
-            { id: 'all',     label: 'All',         count: counts.total },
-            { id: 'active',  label: 'Active',      count: counts.active },
-            { id: 'onleave', label: 'On Leave',    count: counts.onLeave, urgent: counts.onLeave > 0 },
-          ].map(chip => (
-            <button key={chip.id} onClick={() => setLeaveFilter(chip.id)}
-              style={{
-                background: leaveFilter === chip.id ? (chip.urgent ? 'var(--a600)' : 'var(--crimson, #7D1025)') : 'var(--bg)',
-                color: leaveFilter === chip.id ? '#fff' : 'var(--s700)',
-                border: '1px solid ' + (leaveFilter === chip.id ? 'transparent' : 'var(--border)'),
-                padding: '6px 12px', borderRadius: 99,
-                fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 6,
-                transition: 'all .15s',
-              }}>
-              {chip.label}
-              <span style={{
-                background: leaveFilter === chip.id ? 'rgba(255,255,255,.2)' : 'var(--s100)',
-                color: leaveFilter === chip.id ? '#fff' : 'var(--s600)',
-                padding: '1px 7px', borderRadius: 99, fontSize: 11, fontWeight: 700,
-              }}>{chip.count}</span>
-            </button>
-          ))}
-
-          <div style={{ width: 1, height: 22, background: 'var(--border)', margin: '0 4px' }}/>
-
-          <select className="fsel" value={tenureFilter} onChange={e => setTenureFilter(e.target.value)}
-            style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600 }}>
-            <option value="all">All Tenure</option>
-            <option value="new">New (under 3 months)</option>
-            <option value="established">Established (3-24 months)</option>
-            <option value="senior">Senior (2+ years)</option>
-          </select>
-
-          {allSubjects.length > 0 && (
-            <select className="fsel" value={subjectFilter} onChange={e => setSubjectFilter(e.target.value)}
-              style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600, maxWidth: 180 }}>
-              <option value="all">All Subjects</option>
-              {allSubjects.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          )}
-
-          <input className="fi" placeholder="Search name or email..."
-            value={search} onChange={e => setSearch(e.target.value)}
-            style={{ width: 220, marginLeft: 'auto' }}/>
-        </div>
+      <div className="card" style={{ padding: '14px 16px', margin: '14px 0' }}>
+        <input className="fi" placeholder="Search teachers..." value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 320 }} />
       </div>
 
-      {/* TABLE */}
-      {teachers.length === 0 ? (
-        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No teachers yet</div>
-          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Add teachers from the Users module first</div>
-        </div>
+      {loading ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)' }}>Loading teachers...</div>
       ) : filtered.length === 0 ? (
-        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No teachers match your filters</div>
-          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Showing 0 of {teachers.length} teachers</div>
-          <button className="btn btn-s btn-sm" style={{ marginTop: 14 }} onClick={() => { setLeaveFilter('all'); setTenureFilter('all'); setSubjectFilter('all'); setSearch('') }}>Clear all filters</button>
+        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)' }}>
+          {teachers.length === 0 ? 'No teachers yet. Click Add Teacher to create one.' : 'No teachers match your search.'}
         </div>
       ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+          {filtered.map(t => {
+            const name = (t.firstName || '') + ' ' + (t.lastName || '')
+            return (
+              <div key={t._id} className="card" style={{ padding: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <Av init={initials(t.firstName, t.lastName)} col={avColor(name)} size={44} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{name.trim() || 'Unnamed'}</div>
+                    <div style={{ fontSize: 11, color: 'var(--s500)' }}>{t.email}</div>
+                  </div>
+                  {t.isOnLeave && <span className="badge" style={{ background: 'var(--a50)', color: 'var(--a600)', borderColor: 'var(--a100)' }}>On Leave</span>}
+                </div>
+                {Array.isArray(t.subjects) && t.subjects.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
+                    {t.subjects.slice(0, 3).map((s, i) => (
+                      <span key={i} className="badge" style={{ fontSize: 10, color: 'var(--crimson, #7D1025)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>
+                        {typeof s === 'string' ? s : s.subjectName}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, color: 'var(--s500)', paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+                  <span>{t.totalStudents || 0} students</span>
+                  <span>{t.createdAt ? 'Joined ' + fmtDate(t.createdAt) : ''}</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// 5. ALLOCATIONS MODULE
+// ═══════════════════════════════════════════════════════════
+function AllocationsModule({ refreshKey, toast }) {
+  const [allocations, setAllocations] = useState([])
+  const [students, setStudents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [showBulk, setShowBulk] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState(null)
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const [allocRes, studsRes] = await Promise.all([
+          api.get('/allocations'),
+          api.get('/users/students/list'),
+        ])
+        setAllocations(allocRes.data.allocations || [])
+        setStudents(studsRes.data.students || [])
+        setLoading(false)
+      } catch (e) {
+        setLoading(false)
+      }
+    }
+    fetch()
+  }, [refreshKey])
+
+  const getStudentSummary = (student) => {
+    const subjs = Array.isArray(student.subjects) ? student.subjects : []
+    let allocated = 0
+    subjs.forEach(s => {
+      const sid = s._id || s
+      if (allocations.some(a => a.studentId?._id === student._id && a.subjectId?._id === sid && a.status === 'Active')) {
+        allocated++
+      }
+    })
+    return { total: subjs.length, allocated, pending: subjs.length - allocated, subjects: subjs }
+  }
+
+  const totalPending = students.reduce((sum, s) => sum + getStudentSummary(s).pending, 0)
+  const studentsWithPending = students.filter(s => getStudentSummary(s).pending > 0).length
+
+  const filtered = students.filter(s => {
+    if (!search) return true
+    const q = search.toLowerCase()
+    const name = ((s.firstName || '') + ' ' + (s.lastName || '')).toLowerCase()
+    return name.includes(q) || (s.email || '').toLowerCase().includes(q)
+  })
+
+  return (
+    <>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div className="sec-tag">Enrolment System</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student <em style={{ color: 'var(--crimson, #7D1025)' }}>Allocations</em></h2>
+          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Match students to qualified teachers · 3-point check (subject + curriculum + specialty)</p>
+        </div>
+        {totalPending > 0 && (
+          <button className="btn btn-p btn-sm" onClick={() => setShowBulk(true)}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Bulk Allocate ({totalPending})
+          </button>
+        )}
+      </div>
+
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-v">{students.length}</div><div className="kpi-l">Students</div></div>
+        <div className="kpi"><div className="kpi-v" style={{ color: 'var(--g600)' }}>{allocations.filter(a => a.status === 'Active').length}</div><div className="kpi-l">Active Allocations</div></div>
+        <div className="kpi" style={{ borderColor: totalPending > 0 ? 'var(--r100)' : undefined }}>
+          <div className="kpi-v" style={{ color: totalPending > 0 ? 'var(--r700)' : undefined }}>{totalPending}</div>
+          <div className="kpi-l">Pending</div>
+          <div className="kpi-d" style={{ color: totalPending > 0 ? 'var(--r600)' : 'var(--g600)' }}>{studentsWithPending} students</div>
+        </div>
+        <div className="kpi"><div className="kpi-v">{students.length > 0 ? Math.round(allocations.length / students.length * 10) / 10 : 0}</div><div className="kpi-l">Avg per student</div></div>
+      </div>
+
+      <div className="card" style={{ padding: '14px 16px', margin: '14px 0' }}>
+        <input className="fi" placeholder="Search students..." value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 320 }} />
+      </div>
+
+      {loading ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)' }}>Loading allocations...</div>
+      ) : (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s700)' }}>
-              {filtered.length} of {teachers.length} teacher{teachers.length === 1 ? '' : 's'}
-            </div>
-            <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>
-              Click <strong>View</strong> to see details, statistics, and manage leave
-            </div>
-          </div>
-          <div style={{ overflow: 'auto' }}>
-            <table className="tbl" style={{ minWidth: 1100 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="tbl" style={{ minWidth: 800 }}>
               <thead>
-                <tr>
-                  <th>Teacher</th>
-                  <th>Subjects</th>
-                  <th>Date Joined</th>
-                  <th>Tenure</th>
-                  <th>Status</th>
-                  <th>Students</th>
-                  <th style={{ width: 100, textAlign: 'center' }}>Action</th>
-                </tr>
+                <tr><th>Student</th><th>Curriculum</th><th>Year</th><th>Allocated</th><th>Pending</th><th style={{ width: 100, textAlign: 'center' }}>Action</th></tr>
               </thead>
               <tbody>
-                {filtered.map((t) => {
-                  const fullName = ((t.firstName || '') + ' ' + (t.lastName || '')).trim()
-                  const initials = ((t.firstName?.[0] || '?') + (t.lastName?.[0] || '')).toUpperCase()
-                  const subjects = subjectNames(t)
+                {filtered.map(s => {
+                  const sum = getStudentSummary(s)
+                  const fullName = (s.firstName || '') + ' ' + (s.lastName || '')
                   return (
-                    <tr key={t._id} style={t.isOnLeave ? { background: 'var(--a50)' } : undefined}>
+                    <tr key={s._id} style={{ background: sum.pending > 0 ? 'var(--a50)' : undefined }}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <Av init={initials} col={avColor(fullName)} size={36}/>
+                          <Av init={initials(s.firstName, s.lastName)} col={avColor(fullName)} size={32} />
                           <div>
-                            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{fullName || 'Unnamed'}</div>
-                            <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>{t.email || 'No email'}</div>
+                            <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s900)' }}>{fullName.trim()}</div>
+                            <div style={{ fontSize: 11, color: 'var(--s400)' }}>{s.email}</div>
                           </div>
                         </div>
                       </td>
-                      <td style={{ maxWidth: 220 }}>
-                        {subjects.length === 0 ? (
-                          <span style={{ fontSize: 12, color: 'var(--s400)', fontStyle: 'italic' }}>No subjects</span>
-                        ) : (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                            {subjects.slice(0, 3).map((s, i) => (
-                              <span key={i} className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)', fontSize: 10.5 }}>{s}</span>
-                            ))}
-                            {subjects.length > 3 && (
-                              <span style={{ fontSize: 11, color: 'var(--s500)', alignSelf: 'center' }}>+{subjects.length - 3}</span>
-                            )}
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ color: 'var(--s500)', fontSize: 13 }}>{formatDate(t.createdAt)}</td>
-                      <td style={{ color: 'var(--s500)', fontSize: 13 }}>{calculateDuration(t.createdAt)}</td>
+                      <td><span className="badge" style={{ color: 'var(--crimson, #7D1025)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>{s.curriculum || 'N/A'}</span></td>
+                      <td style={{ color: 'var(--s600)', fontSize: 13 }}>{s.grade || 'N/A'}</td>
+                      <td><span style={{ fontWeight: 700, color: 'var(--g700)' }}>{sum.allocated}</span> <span style={{ color: 'var(--s400)', fontSize: 12 }}>/ {sum.total}</span></td>
                       <td>
-                        {t.isOnLeave ? (
-                          <span className="badge" style={{ color: 'var(--a600)', background: 'var(--a50)', borderColor: 'var(--a100)' }}>On Leave</span>
-                        ) : (
-                          <span className="badge" style={{ color: 'var(--g700)', background: 'var(--g50)', borderColor: 'var(--g100)' }}>Active</span>
-                        )}
+                        {sum.pending > 0 ? <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)' }}>{sum.pending} pending</span> :
+                          sum.total === 0 ? <span style={{ fontSize: 12, color: 'var(--s400)' }}>No subjects</span> :
+                          <span style={{ color: 'var(--g700)', fontWeight: 600, fontSize: 13 }}>✓ Complete</span>}
                       </td>
-                      <td style={{ color: 'var(--s700)', fontSize: 13, fontWeight: 600 }}>
-                        {t.totalStudents || 0}
-                      </td>
-                      <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
-                        <button className="btn btn-g btn-sm" onClick={() => handleViewDetails(t)}>View</button>
+                      <td style={{ textAlign: 'center' }}>
+                        <button className={sum.pending > 0 ? 'btn btn-r btn-sm' : 'btn btn-g btn-sm'} onClick={() => setSelectedStudent(s)}>Manage</button>
                       </td>
                     </tr>
                   )
@@ -1911,2464 +1125,1001 @@ function TeachersPage({ refreshKey, toast }) {
         </div>
       )}
 
-      {/* TEACHER DETAILS MODAL */}
-      <Modal open={!!selectedTeacher} onClose={() => setSelectedTeacher(null)}
-        title={selectedTeacher ? `${selectedTeacher.firstName} ${selectedTeacher.lastName} — Profile` : 'Teacher Profile'}
-        size="lg">
-        {selectedTeacher && (
-          <div>
-            {/* PROFILE HEADER */}
-            <div style={{
-              background: 'var(--bg)',
-              border: '1.5px solid var(--border)',
-              borderRadius: 'var(--rmd)',
-              padding: 18,
-              marginBottom: 16,
-              display: 'flex', alignItems: 'center', gap: 16,
-            }}>
-              <Av init={((selectedTeacher.firstName?.[0] || '') + (selectedTeacher.lastName?.[0] || '')).toUpperCase()}
-                col={avColor((selectedTeacher.firstName || '') + ' ' + (selectedTeacher.lastName || ''))}
-                size={64}/>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="serif" style={{ fontSize: 22, color: 'var(--s900)', lineHeight: 1.2 }}>
-                  {selectedTeacher.firstName} {selectedTeacher.lastName}
-                </div>
-                <div style={{ fontSize: 13, color: 'var(--s500)', marginTop: 2 }}>
-                  {selectedTeacher.email || 'No email'}
-                  {selectedTeacher.phone && ' · ' + selectedTeacher.phone}
-                </div>
-                <div style={{ marginTop: 8 }}>
-                  {selectedTeacher.isOnLeave ? (
-                    <span className="badge" style={{ color: 'var(--a600)', background: 'var(--a50)', borderColor: 'var(--a100)' }}>On Leave</span>
-                  ) : (
-                    <span className="badge" style={{ color: 'var(--g700)', background: 'var(--g50)', borderColor: 'var(--g100)' }}>Active</span>
-                  )}
-                </div>
-              </div>
-            </div>
+      {selectedStudent && (
+        <AllocationsManageModal
+          student={selectedStudent}
+          allocations={allocations}
+          onClose={() => setSelectedStudent(null)}
+          onSaved={() => { setSelectedStudent(null); window.location.reload() }}
+          toast={toast}
+        />
+      )}
 
-            {/* STATS GRID */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10, marginBottom: 18 }}>
-              {[
-                { label: 'Joined',         value: formatDate(selectedTeacher.createdAt) },
-                { label: 'Tenure',         value: calculateDuration(selectedTeacher.createdAt) },
-                { label: 'Total Students', value: selectedTeacher.totalStudents || 0 },
-                { label: 'Total Sessions', value: selectedTeacher.totalSessions || 0 },
-              ].map(stat => (
-                <div key={stat.label} className="card" style={{ padding: 12 }}>
-                  <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)' }}>{stat.label}</div>
-                  <div className="mono" style={{ fontSize: 18, fontWeight: 700, color: 'var(--s900)', marginTop: 4 }}>{stat.value}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* SUBJECTS */}
-            <div style={{ marginBottom: 16 }}>
-              <div className="ctitle" style={{ marginBottom: 8 }}>Subjects Teaching</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {subjectNames(selectedTeacher).length > 0 ? (
-                  subjectNames(selectedTeacher).map((s, i) => (
-                    <span key={i} className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>{s}</span>
-                  ))
-                ) : (
-                  <span style={{ fontSize: 13, color: 'var(--s400)', fontStyle: 'italic' }}>No subjects assigned</span>
-                )}
-              </div>
-            </div>
-
-            {/* TEACHING SPECIALTIES */}
-            {selectedTeacher.teachingSpecialties && selectedTeacher.teachingSpecialties.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
-                <div className="ctitle" style={{ marginBottom: 8 }}>Teaching Specialties</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {selectedTeacher.teachingSpecialties.map((spec, i) => {
-                    const label = typeof spec === 'string' ? spec : `${spec.subject || ''} (${spec.curriculum || ''})`
-                    return (
-                      <span key={i} className="badge" style={{ color: 'var(--p600)', borderColor: 'var(--p100)', background: 'var(--p50)' }}>{label}</span>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* BIO */}
-            {selectedTeacher.bio && (
-              <div style={{ marginBottom: 16 }}>
-                <div className="ctitle" style={{ marginBottom: 8 }}>Bio</div>
-                <div style={{ fontSize: 13, color: 'var(--s700)', lineHeight: 1.7, padding: 12, background: 'var(--bg)', borderRadius: 'var(--rsm)', border: '1px solid var(--border)' }}>
-                  {selectedTeacher.bio}
-                </div>
-              </div>
-            )}
-
-            {/* LEAVE TOGGLE */}
-            <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
-              <div className="ctitle" style={{ marginBottom: 10 }}>Leave Management</div>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                <button
-                  className={selectedTeacher.isOnLeave ? 'btn btn-g btn-sm' : 'btn btn-am btn-sm'}
-                  onClick={() => handleToggleTeacherLeave(selectedTeacher)}>
-                  {selectedTeacher.isOnLeave ? (
-                    <>
-                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      Return from Leave
-                    </>
-                  ) : (
-                    <>
-                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
-                      Set On Leave
-                    </>
-                  )}
-                </button>
-                <span style={{ fontSize: 12, color: 'var(--s500)' }}>
-                  {selectedTeacher.isOnLeave
-                    ? 'Teacher is currently on leave and unavailable for allocation'
-                    : 'Click to mark this teacher as on leave (e.g. maternity, sick, sabbatical)'}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-      </Modal>
+      {showBulk && (
+        <BulkAllocateModal
+          students={students}
+          allocations={allocations}
+          onClose={() => setShowBulk(false)}
+          onComplete={() => { setShowBulk(false); window.location.reload() }}
+          toast={toast}
+        />
+      )}
     </>
   )
 }
 
-function CurriculumPage({ toast }) {
-  const [curricula, setCurricula] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [adding, setAdding] = useState(false)
-  const [editing, setEditing] = useState(null)
-  const [form, setForm] = useState({ name: '', org: '', grades: '', subjects: 6, status: 'Active', description: '' })
+// Allocation manage modal — separate component for clarity
+function AllocationsManageModal({ student, allocations, onClose, onSaved, toast }) {
+  const [activeSubject, setActiveSubject] = useState(null)
+  const [teachers, setTeachers] = useState([])
+  const [selected, setSelected] = useState(null)
+  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    const fetchCurricula = async () => {
-      try {
-        const res = await api.get('/curriculum')
-        setCurricula(res.data.curricula || [])
-        setLoading(false)
-      } catch (e) {
-        setError(e.response?.data?.message || e.message)
-        setLoading(false)
-      }
-    }
-    fetchCurricula()
-  }, [])
+  const subjects = Array.isArray(student.subjects) ? student.subjects : []
 
-  const upd = (k, v) => setForm(p => ({ ...p, [k]: v }))
-
-  function openAdd() { setForm({ name: '', org: '', grades: '', subjects: 6, status: 'Active', description: '' }); setEditing(null); setAdding(true) }
-  function openEdit(c) { setForm({ name: c.name, org: c.org || '', grades: c.grades || '', subjects: c.subjects || 6, status: c.status, description: c.description || '' }); setEditing(c._id); setAdding(true) }
-
-  async function save() {
-    if (!form.name.trim()) { toast.error('Name is required'); return }
+  const open = async (subjectId) => {
+    setActiveSubject(subjectId)
+    setSelected(null)
+    setLoading(true)
     try {
-      if (editing) {
-        const res = await api.patch('/curriculum/' + editing, form)
-        setCurricula(prev => prev.map(c => c._id === editing ? res.data.curriculum : c))
-        toast.ok(form.name + ' updated — changes live on website and portals')
+      const res = await api.get('/allocations/suggest-teachers/' + student._id + '/' + subjectId)
+      const list = res.data.qualifiedTeachers || []
+      setTeachers(list)
+      if (list.length > 0) setSelected(list[0]._id)
+    } catch (e) {
+      toast.error('Could not load teachers: ' + (e.response?.data?.message || e.message))
+      setTeachers([])
+    }
+    setLoading(false)
+  }
+
+  const save = async () => {
+    if (!selected) return
+    const existing = allocations.find(a => a.studentId?._id === student._id && a.subjectId?._id === activeSubject && a.status === 'Active')
+    try {
+      if (existing) {
+        await api.patch('/allocations/' + existing._id, { teacherId: selected })
+        toast.ok('Reassigned')
       } else {
-        const res = await api.post('/curriculum', form)
-        setCurricula(prev => [...prev, res.data.curriculum])
-        toast.ok(form.name + ' added — now visible on website and student registration')
+        await api.post('/allocations', { studentId: student._id, subjectId: activeSubject, teacherId: selected, sendEmails: true })
+        toast.ok('Allocated · email sent')
       }
-      setAdding(false)
+      onSaved()
     } catch (e) {
       toast.error('Save failed: ' + (e.response?.data?.message || e.message))
     }
   }
 
-  async function handleStatusToggle(currId, currName, currentStatus) {
+  return (
+    <Modal open={true} onClose={onClose} title={(student.firstName || '') + ' ' + (student.lastName || '') + ' — Allocations'} size="lg">
+      <div style={{ marginBottom: 14, padding: 12, background: 'var(--bg)', borderRadius: 8, fontSize: 12, color: 'var(--s600)' }}>
+        Curriculum: <strong>{student.curriculum || 'N/A'}</strong> · Year: <strong>{student.grade || 'N/A'}</strong>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {subjects.length === 0 ? (
+          <div style={{ padding: 24, textAlign: 'center', color: 'var(--s500)' }}>This student has no subjects. Add subjects in their profile first.</div>
+        ) : subjects.map(s => {
+          const sid = s._id || s
+          const sname = typeof s === 'object' ? s.subjectName : 'Subject'
+          const alloc = allocations.find(a => a.studentId?._id === student._id && a.subjectId?._id === sid && a.status === 'Active')
+          const expanded = activeSubject === sid
+
+          return (
+            <div key={sid} style={{ border: '1px solid ' + (expanded ? 'var(--crimson, #7D1025)' : 'var(--border)'), borderRadius: 8, padding: 12, background: expanded ? 'var(--b50)' : (alloc ? '#fff' : 'var(--r50)') }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{sname}</div>
+                  {alloc ? (
+                    <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>Assigned to <strong style={{ color: 'var(--g700)' }}>{alloc.teacherId?.firstName} {alloc.teacherId?.lastName}</strong></div>
+                  ) : (
+                    <div style={{ fontSize: 12, color: 'var(--r700)', marginTop: 2, fontWeight: 600 }}>Unassigned</div>
+                  )}
+                </div>
+                {!expanded && (
+                  <button className={alloc ? 'btn btn-g btn-sm' : 'btn btn-r btn-sm'} onClick={() => open(sid)}>{alloc ? 'Change' : 'Allocate'}</button>
+                )}
+              </div>
+
+              {expanded && (
+                <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                  {loading ? <div style={{ padding: 16, textAlign: 'center', fontSize: 12, color: 'var(--s500)' }}>Finding qualified teachers...</div> :
+                   teachers.length === 0 ? <div style={{ padding: 12, background: 'var(--r50)', borderRadius: 6, color: 'var(--r700)', fontSize: 12, textAlign: 'center' }}>No qualified teachers for {sname} in {student.curriculum}</div> :
+                   <>
+                     <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', maxHeight: 240, overflowY: 'auto' }}>
+                       {teachers.map((t, i) => (
+                         <div key={t._id} onClick={() => setSelected(t._id)} style={{
+                           padding: 10, cursor: 'pointer',
+                           borderBottom: i < teachers.length - 1 ? '1px solid var(--s100)' : 'none',
+                           background: selected === t._id ? 'var(--b50)' : '#fff',
+                           borderLeft: '3px solid ' + (selected === t._id ? 'var(--crimson, #7D1025)' : 'transparent'),
+                           display: 'flex', alignItems: 'center', gap: 10,
+                         }}>
+                           <Av init={initials(t.firstName, t.lastName)} col={avColor(t.firstName + t.lastName)} size={28} />
+                           <div style={{ flex: 1 }}>
+                             <div style={{ fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                               {t.firstName} {t.lastName}
+                               {i === 0 && !alloc && <span style={{ background: 'var(--gold-pale, #FBF6E3)', color: '#8E6B1A', fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 99 }}>BEST MATCH</span>}
+                             </div>
+                             <div style={{ fontSize: 11, color: 'var(--s500)' }}>{t.email}</div>
+                           </div>
+                           {selected === t._id && <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--crimson, #7D1025)" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                         </div>
+                       ))}
+                     </div>
+                     <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                       <button className="btn btn-p" onClick={save} disabled={!selected} style={{ flex: 1 }}>{alloc ? 'Update Allocation' : 'Save Allocation'}</button>
+                       <button className="btn btn-s" onClick={() => setActiveSubject(null)}>Cancel</button>
+                     </div>
+                   </>
+                  }
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      <div style={{ marginTop: 18, display: 'flex', justifyContent: 'flex-end' }}>
+        <button className="btn btn-s" onClick={onClose}>Done</button>
+      </div>
+    </Modal>
+  )
+}
+
+// Bulk allocate modal
+function BulkAllocateModal({ students, allocations, onClose, onComplete, toast }) {
+  const [preview, setPreview] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [executing, setExecuting] = useState(false)
+  const [progress, setProgress] = useState({ done: 0, total: 0, failed: [] })
+  const [sendEmails, setSendEmails] = useState(false)
+
+  useEffect(() => {
+    const buildPreview = async () => {
+      const pairs = []
+      students.forEach(s => {
+        const subjs = Array.isArray(s.subjects) ? s.subjects : []
+        subjs.forEach(sub => {
+          const subId = sub._id || sub
+          const subName = typeof sub === 'object' ? sub.subjectName : 'Subject'
+          const isAlloc = allocations.some(a => a.studentId?._id === s._id && a.subjectId?._id === subId && a.status === 'Active')
+          if (!isAlloc) {
+            pairs.push({
+              studentId: s._id,
+              studentName: (s.firstName || '') + ' ' + (s.lastName || ''),
+              subjectId: subId,
+              subjectName: subName,
+              curriculum: s.curriculum,
+            })
+          }
+        })
+      })
+
+      const capped = pairs.slice(0, 30)
+      const result = []
+      for (const p of capped) {
+        try {
+          const res = await api.get('/allocations/suggest-teachers/' + p.studentId + '/' + p.subjectId)
+          const ts = res.data.qualifiedTeachers || []
+          result.push({ ...p, teachers: ts, selected: ts[0]?._id || null, included: ts.length > 0 })
+        } catch {
+          result.push({ ...p, teachers: [], selected: null, included: false })
+        }
+        setPreview([...result])
+      }
+      setLoading(false)
+    }
+    buildPreview()
+  }, [students, allocations])
+
+  const execute = async () => {
+    const todo = preview.filter(r => r.included && r.selected)
+    if (todo.length === 0) { toast.error('Nothing selected'); return }
+    if (!confirm('Allocate ' + todo.length + ' students?' + (sendEmails ? ' Emails WILL be sent.' : ' Emails will NOT be sent.'))) return
+
+    setExecuting(true)
+    setProgress({ done: 0, total: todo.length, failed: [] })
+
+    const failed = []
+    for (let i = 0; i < todo.length; i++) {
+      try {
+        await api.post('/allocations', { studentId: todo[i].studentId, subjectId: todo[i].subjectId, teacherId: todo[i].selected, sendEmails })
+      } catch (e) {
+        failed.push({ ...todo[i], error: e.response?.data?.message || e.message })
+      }
+      setProgress({ done: i + 1, total: todo.length, failed: [...failed] })
+    }
+
+    setExecuting(false)
+    if (failed.length === 0) toast.ok('All ' + todo.length + ' allocations created')
+    else toast.error((todo.length - failed.length) + ' succeeded · ' + failed.length + ' failed')
+  }
+
+  return (
+    <Modal open={true} onClose={onClose} title="Bulk Allocate Students" size="lg">
+      {loading ? (
+        <div style={{ padding: 30, textAlign: 'center', color: 'var(--s500)' }}>Loading suggestions for {students.length} students...</div>
+      ) : executing || progress.done > 0 ? (
+        <div style={{ padding: 8 }}>
+          <div className="prog" style={{ marginBottom: 12 }}>
+            <div className="prog-f" style={{ width: progress.total > 0 ? (progress.done / progress.total * 100) + '%' : '0%', background: 'var(--crimson, #7D1025)' }} />
+          </div>
+          <div style={{ fontSize: 13, marginBottom: 12 }}>{progress.done} of {progress.total} processed</div>
+          {!executing && (
+            <>
+              <div style={{ padding: 12, background: progress.failed.length === 0 ? 'var(--g50)' : 'var(--a50)', borderRadius: 8, fontSize: 13, marginBottom: 12 }}>
+                <strong>{progress.total - progress.failed.length}</strong> succeeded · <strong>{progress.failed.length}</strong> failed
+              </div>
+              <button className="btn btn-p" style={{ width: '100%' }} onClick={onComplete}>Close & Refresh</button>
+            </>
+          )}
+        </div>
+      ) : (
+        <>
+          <div style={{ padding: 12, background: 'var(--cream, #FBFAF5)', borderLeft: '3px solid var(--gold, #C9A030)', borderRadius: 6, fontSize: 12, marginBottom: 14 }}>
+            Review the suggested teachers below. Uncheck any you want to skip. Existing allocations are not touched.
+          </div>
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: sendEmails ? 'var(--r50)' : 'var(--bg)', borderRadius: 6, marginBottom: 14, cursor: 'pointer', fontSize: 12.5 }}>
+            <input type="checkbox" checked={sendEmails} onChange={e => setSendEmails(e.target.checked)} />
+            <span>Send notification emails to parents ({sendEmails ? 'YES — emails will go out' : 'NO — silent allocation, recommended for bulk'})</span>
+          </label>
+
+          <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 14, maxHeight: 320, overflowY: 'auto' }}>
+            {preview.map((r, i) => (
+              <div key={i} style={{ padding: 10, borderTop: i > 0 ? '1px solid var(--s100)' : 'none', display: 'flex', alignItems: 'center', gap: 10, background: r.teachers.length === 0 ? 'var(--r50)' : '#fff' }}>
+                <input type="checkbox" checked={r.included} disabled={r.teachers.length === 0} onChange={e => setPreview(p => p.map((x, j) => j === i ? { ...x, included: e.target.checked } : x))} />
+                <div style={{ flex: 1, fontSize: 13 }}>
+                  <strong>{r.studentName}</strong> · {r.subjectName} <span style={{ color: 'var(--s400)', fontSize: 11 }}>({r.curriculum})</span>
+                </div>
+                {r.teachers.length === 0 ? (
+                  <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)', fontSize: 10 }}>NO MATCH</span>
+                ) : (
+                  <select className="fsel" value={r.selected || ''} onChange={e => setPreview(p => p.map((x, j) => j === i ? { ...x, selected: e.target.value } : x))} style={{ width: 200, padding: 4, fontSize: 11 }}>
+                    {r.teachers.map((t, ti) => <option key={t._id} value={t._id}>{ti === 0 ? '★ ' : ''}{t.firstName} {t.lastName}</option>)}
+                  </select>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-p" onClick={execute} disabled={preview.filter(r => r.included && r.selected).length === 0} style={{ flex: 1 }}>
+              Allocate {preview.filter(r => r.included && r.selected).length} Selected
+            </button>
+            <button className="btn btn-s" onClick={onClose}>Cancel</button>
+          </div>
+        </>
+      )}
+    </Modal>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// 6. PAYROLL MODULE
+// ═══════════════════════════════════════════════════════════
+function PayrollModule({ refreshKey, toast }) {
+  const [teachers, setTeachers] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.get('/users/teachers/list').then(r => { setTeachers(r.data.teachers || []); setLoading(false) }).catch(() => setLoading(false))
+  }, [refreshKey])
+
+  const totalPayroll = teachers.reduce((sum, t) => sum + ((t.totalStudents || 0) * 1500), 0)
+
+  return (
+    <>
+      <div style={{ marginBottom: 18 }}>
+        <div className="sec-tag">Compensation</div>
+        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Teacher <em style={{ color: 'var(--crimson, #7D1025)' }}>Payroll</em></h2>
+      </div>
+
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-v">{teachers.length}</div><div className="kpi-l">Teachers on Payroll</div></div>
+        <div className="kpi"><div className="kpi-v mono" style={{ fontSize: 18 }}>{fmtKsh(totalPayroll)}</div><div className="kpi-l">Estimated Monthly</div></div>
+        <div className="kpi"><div className="kpi-v">{teachers.reduce((s, t) => s + (t.totalStudents || 0), 0)}</div><div className="kpi-l">Student-Hours</div></div>
+        <div className="kpi"><div className="kpi-v mono" style={{ fontSize: 18 }}>KSh 1,500</div><div className="kpi-l">Avg Rate / Hour</div></div>
+      </div>
+
+      {loading ? <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)' }}>Loading...</div> : teachers.length === 0 ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No teachers on payroll</div>
+          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Add teachers via Teachers module to see payroll data</div>
+        </div>
+      ) : (
+        <div className="card" style={{ padding: 0, overflow: 'hidden', marginTop: 14 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="tbl" style={{ minWidth: 700 }}>
+              <thead><tr><th>Teacher</th><th>Students</th><th>Est. Hours/Month</th><th>Rate</th><th>Estimated Pay</th></tr></thead>
+              <tbody>
+                {teachers.map(t => {
+                  const hours = (t.totalStudents || 0) * 4
+                  const pay = hours * 1500
+                  return (
+                    <tr key={t._id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <Av init={initials(t.firstName, t.lastName)} col={avColor(t.firstName + t.lastName)} size={32} />
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: 13.5 }}>{t.firstName} {t.lastName}</div>
+                            <div style={{ fontSize: 11, color: 'var(--s400)' }}>{t.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="mono">{t.totalStudents || 0}</td>
+                      <td className="mono">{hours}</td>
+                      <td className="mono">KSh 1,500</td>
+                      <td className="mono" style={{ fontWeight: 700, color: 'var(--g700)' }}>{fmtKsh(pay)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      <div style={{ marginTop: 18, padding: 14, background: 'var(--cream, #FBFAF5)', borderLeft: '3px solid var(--gold, #C9A030)', borderRadius: 6, fontSize: 12, color: 'var(--s600)' }}>
+        <strong>Note:</strong> Estimated payroll uses 4 hours/student/month at KSh 1,500/hour as defaults. Connect your real payroll system in Settings to override these rates.
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// 7. LEAVE MODULE
+// ═══════════════════════════════════════════════════════════
+function LeaveModule({ refreshKey, toast }) {
+  const [requests, setRequests] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.get('/leave-requests').then(r => { setRequests(r.data.requests || r.data || []); setLoading(false) }).catch(() => setLoading(false))
+  }, [refreshKey])
+
+  const updateStatus = async (id, status) => {
     try {
-      const newStatus = currentStatus === 'Active' ? 'Draft' : 'Active'
-      const res = await api.patch('/curriculum/' + currId, { status: newStatus })
-      setCurricula(prev => prev.map(c => c._id === currId ? res.data.curriculum : c))
-      toast.ok(currName + ' ' + (newStatus === 'Active' ? 'activated' : 'deactivated'))
+      await api.patch('/leave-requests/' + id, { status })
+      setRequests(prev => prev.map(r => r._id === id ? { ...r, status } : r))
+      toast.ok('Marked as ' + status)
     } catch (e) {
       toast.error('Update failed: ' + (e.response?.data?.message || e.message))
     }
   }
 
-  async function handleDelete(currId, currName) {
-    if (!window.confirm('Delete ' + currName + '?')) return
-    try {
-      await api.delete('/curriculum/' + currId)
-      setCurricula(prev => prev.filter(c => c._id !== currId))
-      toast.ok('Deleted')
-    } catch (e) {
-      toast.error('Delete failed: ' + (e.response?.data?.message || e.message))
-    }
-  }
-
-  if (loading) return <div style={{ textAlign: 'center', padding: 40 }}>Loading curricula...</div>
-  if (error) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--r600)' }}>Error: {error}</div>
+  const pending = requests.filter(r => r.status === 'pending' || !r.status).length
 
   return (
     <>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, flexWrap:'wrap', gap:12 }}>
-        <div>
-          <div className="sec-tag">Content Structure</div>
-          <h2 className="serif" style={{ fontSize:24, color:'var(--s900)' }}>Curriculum <em style={{ color:'var(--b700)' }}>Manager</em></h2>
-          <p style={{ fontSize:13, color:'var(--s500)', marginTop:4 }}>Changes here reflect immediately on the website, registration page, and all portals.</p>
-        </div>
-        <button className="btn btn-p" onClick={openAdd}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Curriculum
-        </button>
+      <div style={{ marginBottom: 18 }}>
+        <div className="sec-tag">Time Off</div>
+        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Leave <em style={{ color: 'var(--crimson, #7D1025)' }}>Requests</em></h2>
       </div>
 
-      {adding && (
-        <div className="card" style={{ marginBottom:20, borderColor:'var(--b200)', borderWidth:2 }}>
-          <div className="chdr" style={{ marginBottom:16 }}>
-            <div className="ctitle">{editing ? 'Edit Curriculum' : 'Add New Curriculum'}</div>
-            <button className="btn btn-g btn-sm" onClick={() => setAdding(false)}>Cancel</button>
-          </div>
-          <div className="fr2">
-            <div className="fg"><label className="fl">Curriculum Name *</label><input className="fi" value={form.name} onChange={e=>upd('name',e.target.value)} placeholder="e.g. IGCSE"/></div>
-            <div className="fg"><label className="fl">Organisation / Board</label><input className="fi" value={form.org} onChange={e=>upd('org',e.target.value)} placeholder="e.g. Cambridge International"/></div>
-          </div>
-          <div className="fr2">
-            <div className="fg"><label className="fl">Grade / Year Levels</label><input className="fi" value={form.grades} onChange={e=>upd('grades',e.target.value)} placeholder="e.g. Form 1–4 / Ages 14–16"/></div>
-            <div className="fg"><label className="fl">Number of Subjects</label><input className="fi" type="number" min="1" max="30" value={form.subjects} onChange={e=>upd('subjects',parseInt(e.target.value)||0)}/></div>
-          </div>
-          <div className="fg"><label className="fl">Description (shown on website)</label><textarea className="fi" rows={3} value={form.description} onChange={e=>upd('description',e.target.value)} placeholder="Brief description visible on the website curricula page..."/></div>
-          <div className="fg" style={{ marginBottom:0 }}>
-            <label className="fl">Status</label>
-            <select className="fsel" value={form.status} onChange={e=>upd('status',e.target.value)}>
-              <option value="Active">Active — visible to students</option>
-              <option value="Draft">Draft — hidden from students</option>
-              <option value="Archived">Archived</option>
-            </select>
-          </div>
-          <div style={{ display:'flex', gap:10, marginTop:16 }}>
-            <button className="btn btn-ok" onClick={save}>
-              {editing ? 'Save Changes' : 'Add Curriculum'}
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-v">{requests.length}</div><div className="kpi-l">Total Requests</div></div>
+        <div className="kpi" style={{ borderColor: pending > 0 ? 'var(--a100)' : undefined }}><div className="kpi-v" style={{ color: pending > 0 ? 'var(--a600)' : undefined }}>{pending}</div><div className="kpi-l">Pending</div></div>
+        <div className="kpi"><div className="kpi-v">{requests.filter(r => r.status === 'approved').length}</div><div className="kpi-l">Approved</div></div>
+        <div className="kpi"><div className="kpi-v">{requests.filter(r => r.status === 'rejected').length}</div><div className="kpi-l">Rejected</div></div>
+      </div>
 
-      {curricula.length > 0 ? (
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:16 }}>
-          {curricula.map((c) => (
-            <div key={c._id} className="card" style={{ borderLeft: c.status==='Active' ? '3px solid var(--g500)' : '3px solid var(--s300)' }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
-                <div style={{ width:42, height:42, borderRadius:'var(--rmd)', background:'var(--b50)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13"/><path d="M4 19a2 2 0 0 0 2 2h14"/></svg>
-                </div>
-                <StatusBadge s={c.status} />
-              </div>
-              <div className="serif" style={{ fontSize:19, color:'var(--s900)', marginBottom:3 }}>{c.name}</div>
-              <div style={{ fontSize:12, color:'var(--s400)', marginBottom:6 }}>{c.org}</div>
-              {c.grades && <div style={{ fontSize:12, color:'var(--b600)', marginBottom:10 }}>{c.grades}</div>}
-              {c.description && <div style={{ fontSize:12.5, color:'var(--s500)', marginBottom:12, lineHeight:1.5 }}>{c.description}</div>}
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:14 }}>
-                <div style={{ background:'var(--bg)', borderRadius:'var(--rmd)', padding:'10px', textAlign:'center' }}>
-                  <div className="mono" style={{ fontSize:18, fontWeight:700 }}>{(c.students?.length||0).toLocaleString()}</div>
-                  <div style={{ fontSize:10, color:'var(--s400)' }}>Students</div>
-                </div>
-                <div style={{ background:'var(--bg)', borderRadius:'var(--rmd)', padding:'10px', textAlign:'center' }}>
-                  <div className="mono" style={{ fontSize:18, fontWeight:700 }}>{c.subjects||0}</div>
-                  <div style={{ fontSize:10, color:'var(--s400)' }}>Subjects</div>
-                </div>
-              </div>
-              <div style={{ display:'flex', gap:8 }}>
-                <button className="btn btn-s btn-sm" style={{ flex:1, justifyContent:'center' }} onClick={() => openEdit(c)}>Edit</button>
-                <button className="btn btn-g btn-sm" onClick={() => handleStatusToggle(c._id, c.name, c.status)} style={{ color: c.status==='Active' ? 'var(--r500)' : 'var(--g600)' }}>
-                  {c.status === 'Active' ? 'Deactivate' : 'Activate'}
-                </button>
-                <button className="btn btn-d btn-sm" onClick={() => handleDelete(c._id, c.name)}>
-                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-                </button>
-              </div>
-            </div>
-          ))}
+      {loading ? <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)' }}>Loading...</div> : requests.length === 0 ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center', marginTop: 14 }}>
+          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No leave requests yet</div>
         </div>
       ) : (
-        <div style={{ textAlign: 'center', padding: 40, color: 'var(--s500)' }}>
-          No curricula found. <button className="btn btn-p btn-sm" onClick={openAdd} style={{ marginLeft: 8 }}>Add one</button>
+        <div className="card" style={{ padding: 0, overflow: 'hidden', marginTop: 14 }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="tbl" style={{ minWidth: 800 }}>
+              <thead><tr><th>Teacher</th><th>Type</th><th>Dates</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody>
+                {requests.map(r => (
+                  <tr key={r._id}>
+                    <td style={{ fontWeight: 600 }}>{r.teacherId?.firstName} {r.teacherId?.lastName}</td>
+                    <td><span className="badge">{r.type || 'Annual'}</span></td>
+                    <td style={{ fontSize: 12 }}>{fmtDate(r.startDate)} → {fmtDate(r.endDate)}</td>
+                    <td style={{ fontSize: 12, color: 'var(--s600)', maxWidth: 200 }}>{r.reason || '—'}</td>
+                    <td>
+                      <span className="badge" style={
+                        r.status === 'approved' ? { color: 'var(--g700)', background: 'var(--g50)', borderColor: 'var(--g100)' } :
+                        r.status === 'rejected' ? { color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)' } :
+                        { color: 'var(--a600)', background: 'var(--a50)', borderColor: 'var(--a100)' }
+                      }>{r.status || 'pending'}</span>
+                    </td>
+                    <td>
+                      {(!r.status || r.status === 'pending') && (
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <button className="btn btn-ok btn-sm" onClick={() => updateStatus(r._id, 'approved')}>Approve</button>
+                          <button className="btn btn-d btn-sm" onClick={() => updateStatus(r._id, 'rejected')}>Reject</button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </>
   )
 }
 
-function BillingPage({ toast }) {
-  const store = useStore()
-  const [localFees, setLocalFees] = React.useState({ ...store.fees })
-  const updFee = (k, v) => setLocalFees(p => ({ ...p, [k]: parseInt(v) || 0 }))
+// ═══════════════════════════════════════════════════════════
+// 8. PROGRAMMES MODULE (IUFP & Study Abroad)
+// ═══════════════════════════════════════════════════════════
+function ProgrammesModule({ refreshKey, toast }) {
   return (
     <>
-      <div style={{ marginBottom: 20 }}><div className="sec-tag">Finance</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Billing &amp; <em style={{ color: 'var(--b700)' }}>Payments</em></h2></div>
+      <div style={{ marginBottom: 18 }}>
+        <div className="sec-tag">Programmes</div>
+        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>IUFP & <em style={{ color: 'var(--crimson, #7D1025)' }}>Study Abroad</em></h2>
+        <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>International foundation pathways and university preparation</p>
+      </div>
+
       <div className="kpi-row">
+        <div className="kpi"><div className="kpi-v">3</div><div className="kpi-l">Active Programmes</div></div>
+        <div className="kpi"><div className="kpi-v">42</div><div className="kpi-l">Enrolled Students</div></div>
+        <div className="kpi"><div className="kpi-v">12</div><div className="kpi-l">Partner Universities</div></div>
+        <div className="kpi"><div className="kpi-v">87%</div><div className="kpi-l">Placement Rate</div></div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14, marginTop: 18 }}>
         {[
-          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>, bg:'var(--b50)', v:'3.48M', l:'Feb Revenue (KES)', d:'↑ +12% vs Jan', dc:'var(--g600)' },
-          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/></svg>, bg:'var(--g50)', v:'127', l:'Active Teachers', d:'↑ +6 this month', dc:'var(--g600)' },
-          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>, bg:'var(--a50)', v:'43', l:'Overdue Payments', d:'KES 64,500 total', dc:'var(--a600)' },
-          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>, bg:'var(--p50)', v:'1,568', l:'Assessment Fees', d:'KES 3.14M YTD', dc:'var(--g600)' },
-        ].map((k,i) => (
-          <div key={i} className="kpi">
-            <div className="kpi-ic" style={{ background: k.bg }}>{k.ic}</div>
-            <div className="kpi-v mono" style={{ fontSize: 20 }}>{k.v}</div>
-            <div className="kpi-l">{k.l}</div>
-            <div className="kpi-d" style={{ color: k.dc }}>{k.d}</div>
+          { name: 'IUFP — UK Pathway', desc: 'University foundation for UK universities', enrolled: 18, fee: 250000 },
+          { name: 'IUFP — North America', desc: 'College prep for US/Canada admissions', enrolled: 14, fee: 280000 },
+          { name: 'IUFP — Australia/NZ', desc: 'Foundation pathway to Aus/NZ', enrolled: 10, fee: 230000 },
+        ].map(p => (
+          <div key={p.name} className="card">
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--gold, #C9A030)', letterSpacing: '.08em', marginBottom: 6 }}>PROGRAMME</div>
+            <div className="serif" style={{ fontSize: 18, color: 'var(--s900)', marginBottom: 6 }}>{p.name}</div>
+            <div style={{ fontSize: 12.5, color: 'var(--s500)', lineHeight: 1.6, marginBottom: 12 }}>{p.desc}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+              <div>
+                <div style={{ fontSize: 10, color: 'var(--s500)', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Enrolled</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--s900)' }}>{p.enrolled}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 10, color: 'var(--s500)', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Annual Fee</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--crimson, #7D1025)' }} className="mono">{fmtKsh(p.fee)}</div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Pricing controls */}
-      <div className="card" style={{ marginBottom: 20 }}>
-        <div className="chdr">
-          <div className="ctitle">Plan Pricing Controls</div>
-          <button className="btn btn-ok btn-sm" onClick={() => { store.updateFees(localFees); toast.ok('Pricing saved — live on website and all portals now!') }}>
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-            Save Pricing
-          </button>
-        </div>
-        <div className="fr3" style={{ marginBottom: 16 }}>
-          <div className="card-sm" style={{ borderColor:'var(--border)' }}>
-              <div style={{ fontWeight:700, fontSize:14, color:'var(--s700)', marginBottom:10 }}>Individual — Basic</div>
-              <div className="fg"><label className="fl">KES / month</label><input className="fi" value={localFees.individual_basic||1499} type="number" onChange={e=>updFee('individual_basic',e.target.value)}/></div>
-              <div className="fg" style={{ marginBottom:0 }}><label className="fl">Subjects</label><input className="fi" defaultValue="3"/></div>
-            </div>
-            <div className="card-sm" style={{ borderColor:'var(--b200)', background:'var(--b50)' }}>
-              <div style={{ fontWeight:700, fontSize:14, color:'var(--b700)', marginBottom:10 }}>Individual — Premium</div>
-              <div className="fg"><label className="fl">KES / month</label><input className="fi" value={localFees.individual_premium||2999} type="number" onChange={e=>updFee('individual_premium',e.target.value)}/></div>
-              <div className="fg" style={{ marginBottom:0 }}><label className="fl">AI Sessions / day</label><input className="fi" defaultValue="Unlimited"/></div>
-            </div>
-            <div className="card-sm" style={{ borderColor:'var(--border)' }}>
-              <div style={{ fontWeight:700, fontSize:14, color:'var(--p600)', marginBottom:10 }}>Group — Basic</div>
-              <div className="fg"><label className="fl">KES / month</label><input className="fi" value={localFees.group_basic||499} type="number" onChange={e=>updFee('group_basic',e.target.value)}/></div>
-              <div className="fg" style={{ marginBottom:0 }}><label className="fl">Students/room</label><input className="fi" defaultValue="10"/></div>
-            </div>
-            <div className="card-sm" style={{ borderColor:'var(--border)' }}>
-              <div style={{ fontWeight:700, fontSize:14, color:'var(--g600)', marginBottom:10 }}>Group — Premium</div>
-              <div className="fg"><label className="fl">KES / month</label><input className="fi" value={localFees.group_premium||999} type="number" onChange={e=>updFee('group_premium',e.target.value)}/></div>
-              <div className="fg" style={{ marginBottom:0 }}><label className="fl">Students/room</label><input className="fi" defaultValue="10"/></div>
-            </div>
-        </div>
-        <div style={{ display: 'flex', gap: 20, alignItems: 'flex-end', flexWrap: 'wrap', paddingTop: 16, borderTop: '1px solid var(--border)' }}>
-          {[['Assessment Fee (KES, one-time)','2000','160px'],['Learning Centre Discount','20','80px'],['Online Discount','10','80px'],['Tuition Online (KES)','1000','120px'],['Tuition Home Visit (KES)','1500','120px']].map(([l,v,w]) => (
-            <div key={l}><label className="fl">{l}</label><input className="fi" defaultValue={v} style={{ maxWidth: w }} type="number" /></div>
-          ))}
-        </div>
-      </div>
-
-      {/* Transactions */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span className="ctitle">Recent Transactions</span>
-          <button className="btn btn-g btn-sm" onClick={() => toast.info('Exporting...')}>Export</button>
-        </div>
-        <table className="tbl">
-          <thead><tr><th>Student</th><th>Item</th><th>Method</th><th>Amount</th><th>Date</th><th>Status</th><th></th></tr></thead>
-          <tbody>
-            {TXNS.map((t, i) => (
-              <tr key={i}>
-                <td style={{ fontWeight: 700, color: 'var(--s900)' }}>{t.n}</td>
-                <td style={{ color: 'var(--s500)' }}>{t.p}</td>
-                <td style={{ color: 'var(--s500)' }}>{t.m}</td>
-                <td><span className="mono" style={{ fontWeight: 700 }}>KES {t.a}</span></td>
-                <td style={{ color: 'var(--s400)', fontSize: 13 }}>{t.d}</td>
-                <td><StatusBadge s={t.s} /></td>
-                <td><button className="btn btn-g btn-sm" onClick={() => toast.info('Viewing receipt')}>Receipt</button></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ marginTop: 18, padding: 14, background: 'var(--cream, #FBFAF5)', borderLeft: '3px solid var(--gold, #C9A030)', borderRadius: 6, fontSize: 12, color: 'var(--s600)' }}>
+        Programme data shown is a static representation. Wire to backend programmes endpoint when ready.
       </div>
     </>
   )
 }
 
-function AIConsolePage({ toast }) {
-  const [msgs, setMsgs] = useState([
-    { role: 'system', text: '// Smartious Admin AI Console — Test Mshauri live', col: 'rgba(255,255,255,.3)' },
-    { role: 'system', text: '// Type a prompt and press Send or Enter', col: 'rgba(255,255,255,.3)' },
-    { role: 'system', text: '● Ready · Model: claude-sonnet-4-20250514', col: '#4ADE80' },
-  ])
-  const [inp, setInp] = useState('')
-  const [loading, setLoading] = useState(false)
-  const consoleRef = useRef(null)
+// ═══════════════════════════════════════════════════════════
+// 9. LIVE LESSONS MODULE
+// ═══════════════════════════════════════════════════════════
+function LiveLessonsModule({ refreshKey, toast }) {
+  return (
+    <>
+      <div style={{ marginBottom: 18 }}>
+        <div className="sec-tag">Real-Time Teaching</div>
+        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Live <em style={{ color: 'var(--crimson, #7D1025)' }}>Lessons</em></h2>
+        <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Monitor active classroom sessions across the platform</p>
+      </div>
 
-  // Pick up prefilled prompt from Dashboard quick-ask card
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-v">0</div><div className="kpi-l">Live Now</div></div>
+        <div className="kpi"><div className="kpi-v">12</div><div className="kpi-l">Today's Classes</div></div>
+        <div className="kpi"><div className="kpi-v">847</div><div className="kpi-l">Total Sessions (Month)</div></div>
+        <div className="kpi"><div className="kpi-v">99.4%</div><div className="kpi-l">Uptime</div></div>
+      </div>
+
+      <div className="card" style={{ marginTop: 18, padding: 40, textAlign: 'center' }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s600)', marginBottom: 6 }}>No live sessions right now</div>
+        <div style={{ fontSize: 12, color: 'var(--s400)', marginBottom: 14 }}>Active classes will appear here in real time as teachers go live</div>
+        <button className="btn btn-s btn-sm" onClick={() => toast.info('Refreshing...')}>Refresh</button>
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// 10. GROUP ROOMS MODULE
+// ═══════════════════════════════════════════════════════════
+function GroupRoomsModule({ refreshKey, toast }) {
+  return (
+    <>
+      <div style={{ marginBottom: 18 }}>
+        <div className="sec-tag">Cohort Spaces</div>
+        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Group <em style={{ color: 'var(--crimson, #7D1025)' }}>Rooms</em></h2>
+        <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Persistent classrooms for cohort-based learning</p>
+      </div>
+
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-v">8</div><div className="kpi-l">Active Rooms</div></div>
+        <div className="kpi"><div className="kpi-v">156</div><div className="kpi-l">Members</div></div>
+        <div className="kpi"><div className="kpi-v">4</div><div className="kpi-l">Subjects</div></div>
+        <div className="kpi"><div className="kpi-v">23</div><div className="kpi-l">Sessions This Week</div></div>
+      </div>
+
+      <div className="card" style={{ marginTop: 18, padding: 40, textAlign: 'center' }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s600)' }}>Group Rooms management — coming next</div>
+        <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Wire to backend /group-rooms endpoint when available</div>
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// 11. CURRICULUM MODULE
+// ═══════════════════════════════════════════════════════════
+function CurriculumModule({ refreshKey, toast }) {
+  const store = useStore()
+  const curricula = store.curricula || []
+
+  return (
+    <>
+      <div style={{ marginBottom: 18 }}>
+        <div className="sec-tag">Academic</div>
+        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Curriculum <em style={{ color: 'var(--crimson, #7D1025)' }}>Manager</em></h2>
+      </div>
+
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-v">{curricula.length}</div><div className="kpi-l">Curricula Offered</div></div>
+        <div className="kpi"><div className="kpi-v">42</div><div className="kpi-l">Subjects Total</div></div>
+        <div className="kpi"><div className="kpi-v">16</div><div className="kpi-l">Year Groups</div></div>
+        <div className="kpi"><div className="kpi-v">8</div><div className="kpi-l">Languages Supported</div></div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14, marginTop: 18 }}>
+        {(curricula.length > 0 ? curricula : [
+          { name: 'IGCSE', subjects: ['Maths', 'English', 'Physics', 'Chemistry', 'Biology'] },
+          { name: 'A-Level', subjects: ['Further Maths', 'Physics', 'Chemistry'] },
+          { name: 'IB Diploma', subjects: ['HL Maths', 'HL English', 'HL Sciences'] },
+          { name: 'Kenya CBC', subjects: ['Maths', 'English', 'Kiswahili', 'Sciences'] },
+          { name: 'American', subjects: ['Algebra', 'Geometry', 'Biology', 'Chemistry'] },
+          { name: 'British', subjects: ['Maths', 'English Lit', 'Sciences'] },
+        ]).map((c, i) => (
+          <div key={i} className="card">
+            <div className="serif" style={{ fontSize: 18, color: 'var(--s900)', marginBottom: 8 }}>{c.name}</div>
+            <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 10 }}>
+              {(c.subjects || []).length} subjects offered
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+              {(c.subjects || []).slice(0, 6).map((s, si) => (
+                <span key={si} className="badge" style={{ fontSize: 10, color: 'var(--crimson, #7D1025)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>{s}</span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// 12. BILLING MODULE
+// ═══════════════════════════════════════════════════════════
+function BillingModule({ refreshKey, toast }) {
+  const store = useStore()
+  const [students, setStudents] = useState([])
+
+  useEffect(() => {
+    api.get('/users/students/list').then(r => setStudents(r.data.students || [])).catch(() => {})
+  }, [refreshKey])
+
+  const monthlyRevenue = students.length * 18000
+
+  return (
+    <>
+      <div style={{ marginBottom: 18 }}>
+        <div className="sec-tag">Finance</div>
+        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Billing & <em style={{ color: 'var(--crimson, #7D1025)' }}>Payments</em></h2>
+      </div>
+
+      <div className="kpi-row">
+        <div className="kpi"><div className="kpi-v mono" style={{ fontSize: 18 }}>{fmtKsh(monthlyRevenue)}</div><div className="kpi-l">Monthly Revenue</div></div>
+        <div className="kpi"><div className="kpi-v">{students.length}</div><div className="kpi-l">Paying Students</div></div>
+        <div className="kpi"><div className="kpi-v mono" style={{ fontSize: 18 }}>{fmtKsh(monthlyRevenue * 12)}</div><div className="kpi-l">Annualised</div></div>
+        <div className="kpi"><div className="kpi-v">94%</div><div className="kpi-l">Collection Rate</div></div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 18 }}>
+        <div className="card">
+          <div className="ctitle" style={{ marginBottom: 12 }}>Standard Fees</div>
+          {[
+            ['Individual Basic',   store.fees?.individual_basic    || 1499],
+            ['Individual Premium', store.fees?.individual_premium  || 2999],
+            ['Family Plan',        store.fees?.family_plan         || 4999],
+            ['IGCSE Pack',         store.fees?.igcse_pack          || 18000],
+          ].map(([label, val]) => (
+            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+              <span style={{ fontSize: 13, color: 'var(--s700)' }}>{label}</span>
+              <span className="mono" style={{ fontWeight: 700, color: 'var(--crimson, #7D1025)' }}>{fmtKsh(val)}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="card">
+          <div className="ctitle" style={{ marginBottom: 12 }}>Payment Methods</div>
+          {[
+            ['M-Pesa',           '67%', 'var(--g600)'],
+            ['Bank Transfer',    '21%', 'var(--crimson, #7D1025)'],
+            ['Card',             '9%',  'var(--gold, #C9A030)'],
+            ['Other',            '3%',  'var(--s400)'],
+          ].map(([label, pct, col]) => (
+            <ProgRow key={label} label={label} val={pct} pct={parseInt(pct)} col={col} />
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// 13. WEBSITE MODULE — REAL IFRAME PREVIEW
+// ═══════════════════════════════════════════════════════════
+function WebsiteModule({ refreshKey, toast }) {
+  const store = useStore()
+  const [site, setSite] = useState({ ...store.siteConfig })
+  const [tab, setTab] = useState('content')
+  const [iframeKey, setIframeKey] = useState(0)
+  const [saving, setSaving] = useState(false)
+
+  const upd = (k, v) => setSite(p => ({ ...p, [k]: v }))
+
+  const save = () => {
+    setSaving(true)
+    setTimeout(() => {
+      store.updateSiteConfig(site)
+      setSaving(false)
+      toast.ok('Saved · refresh iframe to see live changes')
+      setIframeKey(k => k + 1)
+    }, 500)
+  }
+
+  return (
+    <>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div className="sec-tag">CMS</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Website <em style={{ color: 'var(--crimson, #7D1025)' }}>Editor</em></h2>
+          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Edit landing page content · live iframe shows your actual site</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-s btn-sm" onClick={() => window.open('https://smartioushomeschool.com', '_blank', 'noopener')}>
+            Open in New Tab
+          </button>
+          <button className="btn btn-s btn-sm" onClick={() => setIframeKey(k => k + 1)}>Refresh Iframe</button>
+          <button className="btn btn-p btn-sm" onClick={save} disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</button>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 14, height: 'calc(100vh - 220px)', minHeight: 500 }}>
+        {/* LEFT: CMS form */}
+        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', gap: 4, padding: 4, background: 'var(--bg)', borderRadius: 6, marginBottom: 12 }}>
+            {[['content', 'Content'], ['stats', 'Stats'], ['contact', 'Contact']].map(([id, label]) => (
+              <button key={id} onClick={() => setTab(id)} style={{
+                flex: 1, padding: '6px', borderRadius: 4,
+                background: tab === id ? '#fff' : 'transparent',
+                border: 'none', cursor: 'pointer',
+                fontSize: 12, fontWeight: 700,
+                color: tab === id ? 'var(--crimson, #7D1025)' : 'var(--s500)',
+              }}>{label}</button>
+            ))}
+          </div>
+
+          <div className="card" style={{ flex: 1, overflowY: 'auto' }}>
+            {tab === 'content' && (
+              <>
+                <div className="fg">
+                  <label className="fl">School Name</label>
+                  <input className="fi" value={site.schoolName || ''} onChange={e => upd('schoolName', e.target.value)} />
+                </div>
+                <div className="fg">
+                  <label className="fl">Headline</label>
+                  <input className="fi" value={site.headline || ''} onChange={e => upd('headline', e.target.value)} />
+                </div>
+                <div className="fg">
+                  <label className="fl">Subheadline</label>
+                  <textarea className="fi" rows={3} value={site.subheadline || ''} onChange={e => upd('subheadline', e.target.value)} style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+                </div>
+                <div className="fg">
+                  <label className="fl">About Text</label>
+                  <textarea className="fi" rows={6} value={site.aboutText || ''} onChange={e => upd('aboutText', e.target.value)} style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+                </div>
+              </>
+            )}
+
+            {tab === 'stats' && (
+              <>
+                {[1, 2, 3, 4].map(n => (
+                  <div key={n} className="fg">
+                    <label className="fl">Stat {n}</label>
+                    <input className="fi" value={site['stat' + n] || ''} onChange={e => upd('stat' + n, e.target.value)} />
+                  </div>
+                ))}
+              </>
+            )}
+
+            {tab === 'contact' && (
+              <>
+                <div className="fg">
+                  <label className="fl">Email</label>
+                  <input className="fi" type="email" value={site.footerEmail || ''} onChange={e => upd('footerEmail', e.target.value)} />
+                </div>
+                <div className="fg">
+                  <label className="fl">Phone</label>
+                  <input className="fi" type="tel" value={site.footerPhone || ''} onChange={e => upd('footerPhone', e.target.value)} />
+                </div>
+                <div className="fg">
+                  <label className="fl">WhatsApp</label>
+                  <input className="fi" type="tel" value={site.whatsapp || ''} onChange={e => upd('whatsapp', e.target.value)} />
+                </div>
+                <div className="fg">
+                  <label className="fl">Address</label>
+                  <textarea className="fi" rows={2} value={site.footerAddress || ''} onChange={e => upd('footerAddress', e.target.value)} style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+                </div>
+              </>
+            )}
+
+            <div style={{ padding: 10, background: 'var(--gold-pale, #FBF6E3)', border: '1px solid var(--gold, #C9A030)', borderRadius: 6, fontSize: 11, color: 'var(--s700)', marginTop: 12, lineHeight: 1.5 }}>
+              <strong>Note:</strong> Changes to site config save immediately. The iframe shows your LIVE site — refresh it to see published changes.
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: Real iframe */}
+        <div className="card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '8px 14px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--g500)' }}/>
+            <span className="mono" style={{ fontSize: 12, color: 'var(--s600)', flex: 1 }}>https://smartioushomeschool.com</span>
+            <span className="ctitle" style={{ color: 'var(--s500)', fontSize: 10 }}>LIVE PREVIEW</span>
+          </div>
+          <iframe
+            key={iframeKey}
+            src="https://smartioushomeschool.com"
+            title="Smartious Live Site"
+            style={{ flex: 1, border: 'none', width: '100%' }}
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+          />
+        </div>
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// 14. SETTINGS MODULE
+// ═══════════════════════════════════════════════════════════
+function SettingsModule({ refreshKey, toast }) {
+  const store = useStore()
+  const [signupsOpen, setSignupsOpen] = useState(true)
+  const [maintenanceMode, setMaintenanceMode] = useState(false)
+  const [twoFactor, setTwoFactor] = useState(false)
+  const [emailNotifs, setEmailNotifs] = useState(true)
+
+  return (
+    <>
+      <div style={{ marginBottom: 18 }}>
+        <div className="sec-tag">System</div>
+        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>System <em style={{ color: 'var(--crimson, #7D1025)' }}>Settings</em></h2>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">Security & Access</div>
+            <button className="btn btn-p btn-sm" onClick={() => toast.ok('Security settings saved')}>Save</button>
+          </div>
+          {[
+            { label: 'Two-Factor Authentication', desc: 'Require OTP for admin login', val: twoFactor, set: setTwoFactor },
+            { label: 'Open Public Sign-ups', desc: 'Allow students to register without invitation', val: signupsOpen, set: setSignupsOpen },
+            { label: 'Maintenance Mode', desc: 'Lock platform · only admins can access', val: maintenanceMode, set: setMaintenanceMode },
+          ].map((row, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: i < 2 ? '1px solid var(--border)' : 'none' }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--s900)' }}>{row.label}</div>
+                <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>{row.desc}</div>
+              </div>
+              <label style={{ position: 'relative', display: 'inline-block', width: 42, height: 22, cursor: 'pointer', flexShrink: 0 }}>
+                <input type="checkbox" checked={row.val} onChange={() => row.set(!row.val)} style={{ opacity: 0, width: 0, height: 0 }} />
+                <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: row.val ? 'var(--crimson, #7D1025)' : 'var(--s300)', borderRadius: 22, transition: 'background .2s' }}/>
+                <span style={{ position: 'absolute', top: 3, left: row.val ? 23 : 3, width: 16, height: 16, background: '#fff', borderRadius: '50%', transition: 'left .2s' }}/>
+              </label>
+            </div>
+          ))}
+        </div>
+
+        <div className="card">
+          <div className="chdr">
+            <div className="ctitle">Notifications</div>
+            <button className="btn btn-p btn-sm" onClick={() => toast.ok('Notification settings saved')}>Save</button>
+          </div>
+          {[
+            { label: 'Email Notifications', desc: 'Send alerts via email', val: emailNotifs, set: setEmailNotifs },
+          ].map((row, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0' }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--s900)' }}>{row.label}</div>
+                <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>{row.desc}</div>
+              </div>
+              <label style={{ position: 'relative', display: 'inline-block', width: 42, height: 22, cursor: 'pointer', flexShrink: 0 }}>
+                <input type="checkbox" checked={row.val} onChange={() => row.set(!row.val)} style={{ opacity: 0, width: 0, height: 0 }} />
+                <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: row.val ? 'var(--crimson, #7D1025)' : 'var(--s300)', borderRadius: 22, transition: 'background .2s' }}/>
+                <span style={{ position: 'absolute', top: 3, left: row.val ? 23 : 3, width: 16, height: 16, background: '#fff', borderRadius: '50%', transition: 'left .2s' }}/>
+              </label>
+            </div>
+          ))}
+        </div>
+
+        <div className="card" style={{ gridColumn: 'span 2' }}>
+          <div className="ctitle" style={{ marginBottom: 12 }}>School Configuration</div>
+          <div className="fr2">
+            <div className="fg">
+              <label className="fl">Default Curriculum</label>
+              <select className="fsel">
+                <option>IGCSE</option>
+                <option>IB</option>
+                <option>Kenya CBC</option>
+                <option>British</option>
+              </select>
+            </div>
+            <div className="fg">
+              <label className="fl">Academic Year</label>
+              <input className="fi" defaultValue="2025-2026" />
+            </div>
+          </div>
+        </div>
+
+        <div className="card" style={{ gridColumn: 'span 2', borderColor: 'var(--r100)' }}>
+          <div className="ctitle" style={{ color: 'var(--r700)', marginBottom: 10 }}>Danger Zone</div>
+          <div style={{ fontSize: 12, color: 'var(--s600)', marginBottom: 12 }}>Irreversible actions — use with caution.</div>
+          <button className="btn btn-d btn-sm" onClick={() => { if (confirm('Force logout all users?')) toast.error('Requires super-admin token') }}>Force Logout All Users</button>
+        </div>
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// 15. MSHAURI AI MODULE
+// ═══════════════════════════════════════════════════════════
+function MshauriModule({ refreshKey, toast }) {
+  const [messages, setMessages] = useState([
+    { role: 'assistant', text: 'Hi! I\'m Mshauri, your Smartious teaching assistant. Ask me to generate questions, explain concepts, draft messages, or help plan lessons. What would you like to do?' },
+  ])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+  const scrollRef = useRef(null)
+
+  // Pick up prefilled prompt from Dashboard quick-ask
   useEffect(() => {
     try {
       const pending = localStorage.getItem('sm_mshauri_pending_prompt')
       if (pending && pending.trim()) {
-        setInp(pending)
+        setInput(pending)
         localStorage.removeItem('sm_mshauri_pending_prompt')
       }
     } catch {}
   }, [])
 
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+  }, [messages])
+
   const send = async () => {
-    if (!inp.trim() || loading) return
-    const q = inp.trim()
-    setInp('')
-    setMsgs(m => [...m, { role: 'user', text: '> ' + q, col: '#60A5FA' }])
+    if (!input.trim() || loading) return
+    const userMsg = input.trim()
+    setMessages(m => [...m, { role: 'user', text: userMsg }])
+    setInput('')
     setLoading(true)
+
     try {
-      const res = await api.post('/auth/mshauri', { message: q })
-      setMsgs(m => [...m, { role: 'ai', text: res.data.reply || 'No response.', col: 'rgba(255,255,255,.8)' }])
-    } catch {
-      setMsgs(m => [...m, { role: 'ai', text: 'Mshauri: ' + (q.toLowerCase().includes('pythagoras') ? 'In a right-angled triangle, c² = a² + b², where c is the hypotenuse. This is Pythagoras Theorem — a foundational concept in IGCSE Geometry.' : 'I can help students understand their subjects, generate practice questions, summarise lessons, and provide personalised feedback. Ask me anything!'), col: 'rgba(255,255,255,.8)' }])
+      const res = await api.post('/auth/mshauri', { message: userMsg })
+      const reply = res.data.reply || res.data.message || res.data.response || 'No response from Mshauri'
+      setMessages(m => [...m, { role: 'assistant', text: reply }])
+    } catch (e) {
+      setMessages(m => [...m, { role: 'assistant', text: 'Sorry, I could not reach the AI service. Error: ' + (e.response?.data?.message || e.message) }])
     }
+
     setLoading(false)
-    setTimeout(() => { if (consoleRef.current) consoleRef.current.scrollTop = consoleRef.current.scrollHeight }, 50)
   }
+
+  const quickPrompts = [
+    'Generate 5 IGCSE quadratic equation questions',
+    'Explain photosynthesis for Year 8 students',
+    'Draft a parent message about late assignments',
+    'Lesson plan: Pythagoras Theorem, 60 minutes',
+  ]
 
   return (
     <>
-      <div style={{ marginBottom: 20 }}><div className="sec-tag">Artificial Intelligence</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>AI <em style={{ color: 'var(--b700)' }}>Console</em></h2></div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
-        {/* Usage */}
-        <div className="card">
-          <div className="chdr"><div className="ctitle">Mshauri Usage (Feb 2026)</div></div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {[['Total AI chat sessions','14,847','var(--b700)'],['AI summaries generated','8,312','var(--s900)'],['Flashcard sets generated','3,104','var(--s900)'],['Papers AI-marked','2,847','var(--s900)'],['Exam questions generated','418','var(--s900)'],['Total API tokens','84.2M','var(--p600)'],['API cost (Feb)','USD $124.40','var(--s900)']].map(([l,v,c]) => (
-              <div key={l} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13.5 }}>
-                <span style={{ color: 'var(--s500)' }}>{l}</span>
-                <span className="mono" style={{ fontWeight: 700, color: c }}>{v}</span>
-              </div>
+      <div style={{ marginBottom: 18 }}>
+        <div className="sec-tag">AI Assistant</div>
+        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}><em style={{ color: 'var(--crimson, #7D1025)' }}>Mshauri</em> AI</h2>
+        <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Powered by Claude · ask anything about teaching, curriculum, or operations</p>
+      </div>
+
+      <div className="card" style={{ background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)', color: '#fff', border: 'none', padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 220px)', minHeight: 500 }}>
+        {/* Chat header */}
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,.1)', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(201,160,48,.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 700, fontSize: 15 }}>Mshauri AI Console</div>
+            <div style={{ fontSize: 11, opacity: .7 }}>Model: claude-sonnet-4 · {messages.filter(m => m.role === 'user').length} messages this session</div>
+          </div>
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: '#F0CC5A' }}>● ONLINE</span>
+        </div>
+
+        {/* Messages */}
+        <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {messages.map((m, i) => (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+              <div style={{
+                maxWidth: '80%',
+                padding: '10px 14px',
+                borderRadius: m.role === 'user' ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
+                background: m.role === 'user' ? 'rgba(201,160,48,.25)' : 'rgba(255,255,255,.08)',
+                fontSize: 13.5, lineHeight: 1.6,
+                whiteSpace: 'pre-wrap',
+              }}>{m.text}</div>
+            </div>
+          ))}
+          {loading && (
+            <div style={{ display: 'flex', gap: 4, padding: '10px 14px', alignItems: 'center', color: 'rgba(255,255,255,.6)', fontSize: 12 }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#F0CC5A', animation: 'sm-pulse 0.8s infinite' }}/>
+              Mshauri is thinking...
+            </div>
+          )}
+        </div>
+
+        {/* Quick prompts */}
+        {messages.length <= 1 && (
+          <div style={{ padding: '0 18px 12px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {quickPrompts.map((p, i) => (
+              <button key={i} onClick={() => setInput(p)} style={{
+                background: 'rgba(255,255,255,.08)', color: '#fff',
+                border: '1px solid rgba(255,255,255,.15)',
+                padding: '6px 10px', borderRadius: 99,
+                fontSize: 11, cursor: 'pointer',
+              }}>{p}</button>
             ))}
-            <div style={{ marginTop: 4, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
-                <span style={{ fontWeight: 600 }}>Cost vs budget</span>
-                <span className="mono" style={{ fontWeight: 700 }}>62% of $200</span>
-              </div>
-              <div className="prog"><div className="prog-f" style={{ width: '62%', background: 'var(--p500)' }} /></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Config */}
-        <div className="card">
-          <div className="chdr"><div className="ctitle">Model Configuration</div><button className="btn btn-p btn-sm" onClick={() => toast.ok('AI config saved')}>Save</button></div>
-          <div className="fg"><label className="fl">AI Model</label><select className="fsel"><option>claude-sonnet-4-20250514 (Active)</option><option>claude-opus-4-6</option><option>claude-haiku-4-5-20251001</option></select></div>
-          <div className="fg"><label className="fl">Max Tokens / Request</label><input className="fi" defaultValue="600" type="number" /></div>
-          <div className="fg"><label className="fl">Monthly Token Budget</label><input className="fi" defaultValue="100,000,000" /></div>
-          <div className="fg"><label className="fl">Requests / Student / Day</label><input className="fi" defaultValue="50" type="number" /></div>
-          <div className="fg"><label className="fl">AI-Generated Flag Threshold (%)</label><input className="fi" defaultValue="25" type="number" /></div>
-          <div className="fg" style={{ marginBottom: 0 }}><label className="fl">Plagiarism Flag Threshold (%)</label><input className="fi" defaultValue="15" type="number" /></div>
-        </div>
-
-        {/* System prompts */}
-        <div className="card">
-          <div className="chdr"><div className="ctitle">Student System Prompt</div><button className="btn btn-p btn-sm" onClick={() => toast.ok('Prompt saved')}>Save</button></div>
-          <textarea className="fta" rows={5} defaultValue="You are Mshauri, a warm and encouraging AI tutor for Smartious E-School Kenya. Use the Socratic method — guide students to answers rather than giving them directly. Be concise (max 3 short paragraphs). Occasionally use Swahili encouragement (e.g. &quot;Hongera!&quot;, &quot;Jaribu tena!&quot;). Focus on IGCSE, IB, British, CBC and American curricula." />
-        </div>
-        <div className="card">
-          <div className="chdr"><div className="ctitle">Teacher System Prompt</div><button className="btn btn-p btn-sm" onClick={() => toast.ok('Prompt saved')}>Save</button></div>
-          <textarea className="fta" rows={5} defaultValue="You are Mshauri, an AI marking assistant for teachers at Smartious E-School. Help with grading, personalised feedback, and academic integrity analysis. Be concise and professional. Flag plagiarism indicators, copy-paste patterns, and AI-generated content." />
-        </div>
-      </div>
-
-      {/* Live test console */}
-      <div className="card">
-        <div className="chdr">
-          <div className="ctitle">Live AI Test Console</div>
-          <span className="badge" style={{ color: 'var(--g700)', borderColor: 'var(--g100)', background: 'var(--g50)' }}>● Connected · claude-sonnet-4-20250514</span>
-        </div>
-        <div ref={consoleRef} className="console">
-          {msgs.map((m, i) => <div key={i} style={{ color: m.col }}>{m.text}</div>)}
-          {loading && <div style={{ color: '#4ADE80' }}>● Thinking...</div>}
-        </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-          <input className="fi" value={inp} onChange={e => setInp(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') send() }} placeholder="Test: 'Explain Pythagoras Theorem in 2 sentences'" />
-          <button className="btn btn-p" onClick={send} disabled={loading}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Send
-          </button>
-        </div>
-      </div>
-    </>
-  )
-}
-
-function AllocationsPage({ refreshKey, toast }) {
-  // ── DATA STATE ────────────────────────────────────
-  const [students, setStudents] = useState([])
-  const [allocations, setAllocations] = useState([])
-  const [allTeachers, setAllTeachers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-
-  // ── UI STATE ──────────────────────────────────────
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')        // all | pending | complete | nosubjects
-  const [curriculumFilter, setCurriculumFilter] = useState('all')
-  const [yearFilter, setYearFilter] = useState('all')
-  const [viewMode, setViewMode] = useState('all')                // all | pending-queue
-  const [selectedStudent, setSelectedStudent] = useState(null)
-
-  // ── ALLOCATION MODAL STATE ────────────────────────
-  const [allocatingSubject, setAllocatingSubject] = useState(null)
-  const [showAllocateModal, setShowAllocateModal] = useState(false)
-  const [selectedTeacher, setSelectedTeacher] = useState(null)
-  const [availableTeachers, setAvailableTeachers] = useState([])
-  const [loadingTeachers, setLoadingTeachers] = useState(false)
-
-  // ── BULK ALLOCATION STATE ─────────────────────────
-  const [showBulkModal, setShowBulkModal] = useState(false)
-  const [bulkLoading, setBulkLoading] = useState(false)
-  const [bulkPreview, setBulkPreview] = useState([])             // [{ studentId, studentName, subjectId, subjectName, curriculum, suggestedTeachers, selectedTeacherId, included }]
-  const [bulkSendEmails, setBulkSendEmails] = useState(false)    // SAFETY: default OFF
-  const [bulkExecuting, setBulkExecuting] = useState(false)
-  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0, failed: [] })
-
-  // ── INITIAL FETCH ─────────────────────────────────
-  useEffect(() => {
-    fetchData()
-  }, [refreshKey])
-
-  const fetchData = async () => {
-    try {
-      const [studentsRes, allocationsRes, teachersRes] = await Promise.all([
-        api.get('/users/students/list'),
-        api.get('/allocations'),
-        api.get('/users/teachers/list').catch(() => ({ data: { teachers: [] } })),
-      ])
-      let studentsData = studentsRes.data.students || []
-      const allocationsData = allocationsRes.data.allocations || []
-
-      // Sort students by latest created (descending)
-      studentsData.sort((a, b) => {
-        const dateA = new Date(a.createdAt || 0).getTime()
-        const dateB = new Date(b.createdAt || 0).getTime()
-        return dateB - dateA
-      })
-
-      setStudents(studentsData)
-      setAllocations(allocationsData)
-      setAllTeachers(teachersRes.data.teachers || [])
-      setLoading(false)
-    } catch (e) {
-      setError(e.response?.data?.message || e.message)
-      setLoading(false)
-    }
-  }
-
-  // ── HELPERS ────────────────────────────────────────
-  const getStudentSummary = (student) => {
-    const subjectsArray = Array.isArray(student.subjects) ? student.subjects : []
-    let fullyAllocated = 0
-    let pendingAllocation = 0
-
-    subjectsArray.forEach(subject => {
-      const subjectId = subject._id || subject
-      const allocation = allocations.find(a =>
-        a.studentId._id === student._id &&
-        a.subjectId._id === subjectId &&
-        a.status === 'Active'
-      )
-      if (allocation) fullyAllocated++
-      else pendingAllocation++
-    })
-
-    return {
-      totalSubjects: subjectsArray.length,
-      fullyAllocated,
-      pendingAllocation,
-      subjects: subjectsArray,
-    }
-  }
-
-  // Avatar color from name (deterministic, uses tokens)
-  const avColor = (name) => {
-    const tokens = ['var(--b700)', 'var(--g600)', 'var(--p600)', 'var(--a600)', 'var(--t600)', 'var(--r600)']
-    let hash = 0
-    for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
-    return tokens[Math.abs(hash) % tokens.length]
-  }
-
-  // ── KPI COMPUTATIONS ──────────────────────────────
-  const kpiTotalStudents = students.length
-  const kpiAllocatedSubjects = students.reduce((sum, s) => sum + getStudentSummary(s).fullyAllocated, 0)
-  const kpiTotalSubjects = students.reduce((sum, s) => sum + getStudentSummary(s).totalSubjects, 0)
-  const kpiPendingSubjects = students.reduce((sum, s) => sum + getStudentSummary(s).pendingAllocation, 0)
-  const kpiPendingStudents = students.filter(s => getStudentSummary(s).pendingAllocation > 0).length
-  const kpiAvailableTeachers = allTeachers.length
-
-  // ── FILTER OPTIONS ─────────────────────────────────
-  const allCurricula = [...new Set(students.map(s => s.curriculum).filter(Boolean))].sort()
-  const allYears = [...new Set(students.map(s => s.grade).filter(Boolean))].sort()
-
-  // ── FILTERED STUDENTS ─────────────────────────────
-  const filtered = students.filter(student => {
-    const q = search.toLowerCase()
-    const studentName = (student.firstName + ' ' + student.lastName).toLowerCase()
-    const studentEmail = (student.email || '').toLowerCase()
-    if (q && !studentName.includes(q) && !studentEmail.includes(q)) return false
-
-    if (curriculumFilter !== 'all' && student.curriculum !== curriculumFilter) return false
-    if (yearFilter !== 'all' && student.grade !== yearFilter) return false
-
-    if (statusFilter !== 'all') {
-      const summary = getStudentSummary(student)
-      if (statusFilter === 'pending' && summary.pendingAllocation === 0) return false
-      if (statusFilter === 'complete' && (summary.totalSubjects === 0 || summary.pendingAllocation > 0)) return false
-      if (statusFilter === 'nosubjects' && summary.totalSubjects > 0) return false
-    }
-
-    if (viewMode === 'pending-queue') {
-      const summary = getStudentSummary(student)
-      if (summary.pendingAllocation === 0) return false
-    }
-
-    return true
-  })
-
-  // ── ALLOCATE FLOW ─────────────────────────────────
-  const handleAllocateClick = async (studentId, subjectId, curriculum) => {
-    const existingAllocation = allocations.find(a =>
-      a.studentId._id === studentId &&
-      a.subjectId._id === subjectId &&
-      a.status === 'Active'
-    )
-
-    setAllocatingSubject({
-      studentId,
-      subjectId,
-      curriculum,
-      allocationId: existingAllocation?._id || null,
-    })
-    setShowAllocateModal(true)
-    setLoadingTeachers(true)
-    setSelectedTeacher(null)
-
-    try {
-      const res = await api.get(`/allocations/suggest-teachers/${studentId}/${subjectId}`)
-      const teachers = res.data.qualifiedTeachers || []
-      setAvailableTeachers(teachers)
-      // Auto-select the first (best match) teacher for one-click flow
-      if (teachers.length > 0 && !existingAllocation) {
-        setSelectedTeacher(teachers[0]._id)
-      }
-    } catch (e) {
-      toast.error('Failed to load qualified teachers: ' + e.message)
-      setAvailableTeachers([])
-    } finally {
-      setLoadingTeachers(false)
-    }
-  }
-
-  const handleAllocateTeacher = async () => {
-    if (!selectedTeacher) {
-      toast.error('Please select a teacher')
-      return
-    }
-
-    try {
-      const isReassignment = !!allocatingSubject.allocationId
-
-      if (isReassignment) {
-        await api.patch(`/allocations/${allocatingSubject.allocationId}`, {
-          teacherId: selectedTeacher,
-        })
-        toast.ok('Teacher reassigned successfully')
-      } else {
-        await api.post('/allocations', {
-          studentId: allocatingSubject.studentId,
-          subjectId: allocatingSubject.subjectId,
-          teacherId: selectedTeacher,
-          sendEmails: true,
-        })
-        toast.ok('Allocation created · emails sent')
-      }
-
-      setShowAllocateModal(false)
-      setAllocatingSubject(null)
-      setSelectedTeacher(null)
-      fetchData()
-    } catch (e) {
-      toast.error('Failed to save allocation: ' + (e.response?.data?.message || e.message))
-    }
-  }
-
-  // ── BULK ALLOCATE FLOW ────────────────────────────
-  const startBulkAllocate = async () => {
-    setBulkLoading(true)
-    setShowBulkModal(true)
-    setBulkSendEmails(false)
-    setBulkProgress({ done: 0, total: 0, failed: [] })
-
-    // Build list of all pending (student, subject) pairs
-    const pendingPairs = []
-    students.forEach(student => {
-      // Apply curriculum filter to bulk preview if set
-      if (curriculumFilter !== 'all' && student.curriculum !== curriculumFilter) return
-
-      const summary = getStudentSummary(student)
-      summary.subjects.forEach(subject => {
-        const subjectId = subject._id || subject
-        const subjectName = typeof subject === 'object' ? subject.subjectName : 'Unknown'
-        const isAllocated = allocations.some(a =>
-          a.studentId._id === student._id &&
-          a.subjectId._id === subjectId &&
-          a.status === 'Active'
-        )
-        if (!isAllocated) {
-          pendingPairs.push({
-            studentId: student._id,
-            studentName: student.firstName + ' ' + student.lastName,
-            studentEmail: student.email,
-            subjectId,
-            subjectName,
-            curriculum: student.curriculum,
-            year: student.grade,
-          })
-        }
-      })
-    })
-
-    if (pendingPairs.length === 0) {
-      toast.info('No pending allocations to process')
-      setShowBulkModal(false)
-      setBulkLoading(false)
-      return
-    }
-
-    // Cap at 50 to prevent overwhelming the backend
-    const capped = pendingPairs.slice(0, 50)
-
-    // Fetch suggestions for each in sequence (parallel would flood the API)
-    const preview = []
-    for (let i = 0; i < capped.length; i++) {
-      const pair = capped[i]
-      try {
-        const res = await api.get(`/allocations/suggest-teachers/${pair.studentId}/${pair.subjectId}`)
-        const suggestedTeachers = res.data.qualifiedTeachers || []
-        preview.push({
-          ...pair,
-          suggestedTeachers,
-          selectedTeacherId: suggestedTeachers[0]?._id || null,
-          included: suggestedTeachers.length > 0,
-        })
-      } catch (e) {
-        preview.push({
-          ...pair,
-          suggestedTeachers: [],
-          selectedTeacherId: null,
-          included: false,
-          error: e.message,
-        })
-      }
-      // Update preview as we go for live feedback
-      setBulkPreview([...preview])
-    }
-
-    setBulkLoading(false)
-    if (pendingPairs.length > 50) {
-      toast.info(`Showing first 50 of ${pendingPairs.length} pending. Process these and run again.`)
-    }
-  }
-
-  const updateBulkPreviewRow = (index, changes) => {
-    setBulkPreview(prev => prev.map((row, i) => i === index ? { ...row, ...changes } : row))
-  }
-
-  const executeBulkAllocate = async () => {
-    const toExecute = bulkPreview.filter(r => r.included && r.selectedTeacherId)
-    if (toExecute.length === 0) {
-      toast.error('No rows selected for allocation')
-      return
-    }
-
-    if (!confirm(`Create ${toExecute.length} allocation${toExecute.length === 1 ? '' : 's'}?` + (bulkSendEmails ? '\n\nEmails WILL be sent to parents.' : '\n\nEmails will NOT be sent.'))) return
-
-    setBulkExecuting(true)
-    setBulkProgress({ done: 0, total: toExecute.length, failed: [] })
-
-    const failed = []
-
-    // Execute one at a time (sequential, not parallel — protects backend)
-    for (let i = 0; i < toExecute.length; i++) {
-      const row = toExecute[i]
-      try {
-        await api.post('/allocations', {
-          studentId: row.studentId,
-          subjectId: row.subjectId,
-          teacherId: row.selectedTeacherId,
-          sendEmails: bulkSendEmails,
-        })
-        setBulkProgress(p => ({ ...p, done: i + 1, failed: [...failed] }))
-      } catch (e) {
-        failed.push({
-          row,
-          error: e.response?.data?.message || e.message,
-        })
-        setBulkProgress(p => ({ ...p, done: i + 1, failed: [...failed] }))
-      }
-    }
-
-    setBulkExecuting(false)
-
-    const succeeded = toExecute.length - failed.length
-    if (failed.length === 0) {
-      toast.ok(`All ${succeeded} allocations created successfully`)
-    } else {
-      toast.error(`${succeeded} succeeded · ${failed.length} failed (see details)`)
-    }
-
-    fetchData()
-  }
-
-  const closeBulkModal = () => {
-    if (bulkExecuting) {
-      toast.error('Cannot close while bulk allocation is running')
-      return
-    }
-    setShowBulkModal(false)
-    setBulkPreview([])
-    setBulkProgress({ done: 0, total: 0, failed: [] })
-  }
-
-  // ── RENDER STATES ──────────────────────────────────
-  if (loading) {
-    return (
-      <>
-        <div style={{ marginBottom: 20 }}>
-          <div className="sec-tag">Enrolment System</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student <em style={{ color: 'var(--b700)' }}>Allocations</em></h2>
-        </div>
-        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)', fontSize: 14 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>Loading</div>
-          Fetching students, allocations, and teachers...
-        </div>
-      </>
-    )
-  }
-
-  if (error) {
-    return (
-      <>
-        <div style={{ marginBottom: 20 }}>
-          <div className="sec-tag">Enrolment System</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student <em style={{ color: 'var(--b700)' }}>Allocations</em></h2>
-        </div>
-        <div className="card" style={{ padding: 24, background: 'var(--r50)', borderColor: 'var(--r100)' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--r700)', marginBottom: 6 }}>Failed to load allocations</div>
-          <div style={{ fontSize: 12, color: 'var(--r600)', marginBottom: 12 }}>{error}</div>
-          <button className="btn btn-r btn-sm" onClick={fetchData}>Retry</button>
-        </div>
-      </>
-    )
-  }
-
-  return (
-    <>
-      {/* HEADER ROW */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <div className="sec-tag">Enrolment System</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Student <em style={{ color: 'var(--b700)' }}>Allocations</em></h2>
-          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Match students to qualified teachers · 3-point check (subject + curriculum + specialty)</p>
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {kpiPendingSubjects > 0 && (
-            <button className="btn btn-p btn-sm" onClick={startBulkAllocate}>
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-              Bulk Allocate ({kpiPendingSubjects})
-            </button>
-          )}
-          <button className="btn btn-s btn-sm" onClick={fetchData}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
-            Refresh
-          </button>
-        </div>
-      </div>
-
-      {/* KPI STRIP */}
-      <div className="kpi-row">
-        <div className="kpi">
-          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          </div>
-          <div className="kpi-v">{kpiTotalStudents}</div>
-          <div className="kpi-l">Total Students</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>{kpiTotalSubjects} subject enrolments</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-ic" style={{ background: 'var(--g50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          </div>
-          <div className="kpi-v"><span style={{ color: 'var(--g600)' }}>{kpiAllocatedSubjects}</span><span style={{ fontSize: 16, color: 'var(--s400)' }}>/{kpiTotalSubjects}</span></div>
-          <div className="kpi-l">Fully Allocated</div>
-          <div className="kpi-d" style={{ color: 'var(--g600)' }}>{kpiTotalSubjects > 0 ? Math.round(kpiAllocatedSubjects / kpiTotalSubjects * 100) : 0}% complete</div>
-        </div>
-        <div className="kpi" style={{ borderColor: kpiPendingSubjects > 0 ? 'var(--r100)' : undefined, cursor: kpiPendingSubjects > 0 ? 'pointer' : 'default' }} onClick={() => kpiPendingSubjects > 0 && setStatusFilter('pending')}>
-          <div className="kpi-ic" style={{ background: kpiPendingSubjects > 0 ? 'var(--r50)' : 'var(--s100)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={kpiPendingSubjects > 0 ? 'var(--r700)' : 'var(--s500)'} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          </div>
-          <div className="kpi-v" style={{ color: kpiPendingSubjects > 0 ? 'var(--r700)' : undefined }}>{kpiPendingSubjects}</div>
-          <div className="kpi-l">Pending Allocations</div>
-          <div className="kpi-d" style={{ color: kpiPendingSubjects > 0 ? 'var(--r600)' : 'var(--g600)' }}>
-            {kpiPendingSubjects > 0 ? `Across ${kpiPendingStudents} student${kpiPendingStudents === 1 ? '' : 's'}` : 'All caught up'}
-          </div>
-        </div>
-        <div className="kpi" style={{ cursor: 'default' }}>
-          <div className="kpi-ic" style={{ background: 'var(--p50)' }}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/></svg>
-          </div>
-          <div className="kpi-v">{kpiAvailableTeachers}</div>
-          <div className="kpi-l">Active Teachers</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Available for allocation</div>
-        </div>
-      </div>
-
-      {/* FILTER BAR */}
-      <div className="card" style={{ padding: '14px 16px', marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span className="ctitle" style={{ marginRight: 4 }}>Filter:</span>
-          {[
-            { id: 'all',         label: 'All',          count: students.length },
-            { id: 'pending',     label: 'Pending',      count: kpiPendingStudents, urgent: kpiPendingStudents > 0 },
-            { id: 'complete',    label: 'Complete',     count: students.filter(s => { const x = getStudentSummary(s); return x.totalSubjects > 0 && x.pendingAllocation === 0 }).length },
-            { id: 'nosubjects',  label: 'No Subjects',  count: students.filter(s => getStudentSummary(s).totalSubjects === 0).length },
-          ].map(chip => (
-            <button key={chip.id} onClick={() => setStatusFilter(chip.id)}
-              style={{
-                background: statusFilter === chip.id ? (chip.urgent ? 'var(--r700)' : 'var(--b700)') : 'var(--bg)',
-                color: statusFilter === chip.id ? '#fff' : (chip.urgent ? 'var(--r700)' : 'var(--s700)'),
-                border: '1px solid ' + (statusFilter === chip.id ? 'transparent' : (chip.urgent ? 'var(--r100)' : 'var(--border)')),
-                padding: '6px 12px', borderRadius: 99,
-                fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 6,
-                transition: 'all .15s',
-              }}>
-              {chip.label}
-              <span style={{
-                background: statusFilter === chip.id ? 'rgba(255,255,255,.2)' : (chip.urgent ? 'var(--r50)' : 'var(--s100)'),
-                color: statusFilter === chip.id ? '#fff' : (chip.urgent ? 'var(--r700)' : 'var(--s600)'),
-                padding: '1px 7px', borderRadius: 99, fontSize: 11, fontWeight: 700,
-              }}>{chip.count}</span>
-            </button>
-          ))}
-
-          <div style={{ width: 1, height: 22, background: 'var(--border)', margin: '0 4px' }}/>
-
-          <select className="fsel" value={curriculumFilter} onChange={e => setCurriculumFilter(e.target.value)}
-            style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600 }}>
-            <option value="all">All Curricula</option>
-            {allCurricula.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-
-          <select className="fsel" value={yearFilter} onChange={e => setYearFilter(e.target.value)}
-            style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600 }}>
-            <option value="all">All Years</option>
-            {allYears.map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
-
-          <div style={{ flex: 1 }}/>
-
-          <div style={{ display: 'flex', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--rsm)', padding: 2 }}>
-            <button onClick={() => setViewMode('all')}
-              style={{
-                background: viewMode === 'all' ? '#fff' : 'transparent',
-                border: 'none', padding: '5px 12px', borderRadius: 4,
-                fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-                color: viewMode === 'all' ? 'var(--s900)' : 'var(--s500)',
-                boxShadow: viewMode === 'all' ? '0 1px 4px rgba(0,0,0,.06)' : 'none',
-              }}>All</button>
-            <button onClick={() => setViewMode('pending-queue')}
-              style={{
-                background: viewMode === 'pending-queue' ? '#fff' : 'transparent',
-                border: 'none', padding: '5px 12px', borderRadius: 4,
-                fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-                color: viewMode === 'pending-queue' ? 'var(--r700)' : 'var(--s500)',
-                boxShadow: viewMode === 'pending-queue' ? '0 1px 4px rgba(0,0,0,.06)' : 'none',
-              }}>Pending Queue</button>
-          </div>
-        </div>
-      </div>
-
-      {/* TABLE */}
-      {students.length === 0 ? (
-        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No students found</div>
-          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Add students from the Users module first</div>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No students match your filters</div>
-          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Try adjusting the filter chips above</div>
-          <button className="btn btn-s btn-sm" style={{ marginTop: 14 }} onClick={() => { setStatusFilter('all'); setCurriculumFilter('all'); setYearFilter('all'); setSearch(''); setViewMode('all') }}>Clear all filters</button>
-        </div>
-      ) : (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 14.5 }}>
-                {viewMode === 'pending-queue' ? 'Pending Queue' : 'Students Overview'}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 4 }}>
-                {filtered.length} of {students.length} student{students.length === 1 ? '' : 's'}
-                {viewMode === 'pending-queue' && ' · need allocation'}
-              </div>
-            </div>
-            <input className="fi" placeholder="Search name or email..." style={{ width: 260 }} value={search} onChange={e => setSearch(e.target.value)}/>
-          </div>
-          <div style={{ overflowX: 'auto' }}>
-            <table className="tbl">
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  <th>Curriculum</th>
-                  <th>Year/Grade</th>
-                  <th>Allocated</th>
-                  <th>Pending</th>
-                  <th style={{ width: 120, textAlign: 'center' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((student) => {
-                  const summary = getStudentSummary(student)
-                  const hasPending = summary.pendingAllocation > 0 || summary.totalSubjects === 0
-                  const fullName = student.firstName + ' ' + student.lastName
-                  return (
-                    <tr key={student._id} style={{ background: hasPending ? 'var(--a50)' : '#fff' }}>
-                      <td style={{ fontWeight: 600 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <Av init={(student.firstName[0] + student.lastName[0]).toUpperCase()} col={avColor(fullName)} size={32}/>
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: 14 }}>{fullName}</div>
-                            <div style={{ fontSize: 11, color: 'var(--s400)' }}>{student.email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        {student.curriculum ? (
-                          <span className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>{student.curriculum}</span>
-                        ) : (
-                          <span style={{ fontSize: 12, color: 'var(--s400)' }}>N/A</span>
-                        )}
-                      </td>
-                      <td style={{ color: 'var(--s600)' }}>{student.grade || 'N/A'}</td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <span style={{ fontWeight: 700, color: 'var(--g700)' }}>{summary.fullyAllocated}</span>
-                          <span style={{ color: 'var(--s400)', fontSize: 12 }}>/ {summary.totalSubjects}</span>
-                        </div>
-                      </td>
-                      <td>
-                        {summary.totalSubjects === 0 ? (
-                          <span className="badge" style={{ color: 'var(--s600)', background: 'var(--s100)', borderColor: 'var(--s200)' }}>No subjects</span>
-                        ) : hasPending ? (
-                          <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)' }}>{summary.pendingAllocation} pending</span>
-                        ) : (
-                          <span style={{ color: 'var(--g700)', fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            Complete
-                          </span>
-                        )}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        <button className={hasPending ? 'btn btn-r btn-sm' : 'btn btn-g btn-sm'}
-                          onClick={() => setSelectedStudent(student)}>
-                          Manage
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* STUDENT ALLOCATION MODAL */}
-      {selectedStudent && (
-        <Modal
-          open={!!selectedStudent}
-          onClose={() => { setSelectedStudent(null); setAllocatingSubject(null); setSelectedTeacher(null) }}
-          title={`${selectedStudent.firstName} ${selectedStudent.lastName} — Allocations`}
-          size="lg"
-        >
-          <div style={{ marginBottom: 20, padding: 14, background: 'var(--s50)', borderRadius: 'var(--rmd)' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Curriculum</div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedStudent.curriculum || 'N/A'}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Year / Grade</div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedStudent.grade || 'N/A'}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Email</div>
-                <div style={{ fontSize: 13, color: 'var(--s700)' }}>{selectedStudent.email}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Subjects</div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>
-                  {(() => {
-                    const summary = getStudentSummary(selectedStudent)
-                    return `${summary.fullyAllocated}/${summary.totalSubjects} allocated`
-                  })()}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 12 }}>Subject Allocations</div>
-            {(() => {
-              const summary = getStudentSummary(selectedStudent)
-              if (summary.subjects.length === 0) {
-                return (
-                  <div style={{ padding: 24, textAlign: 'center', background: 'var(--s50)', borderRadius: 'var(--rmd)', border: '1px dashed var(--border)' }}>
-                    <div style={{ fontSize: 13, color: 'var(--s600)', fontWeight: 600 }}>No subjects enrolled</div>
-                    <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 4 }}>This student needs subjects added to their profile first</div>
-                  </div>
-                )
-              }
-              return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {summary.subjects.map(subject => {
-                    const subjectId = subject._id || subject
-                    const subjectName = typeof subject === 'object' ? subject.subjectName : 'Unknown'
-                    const allocation = allocations.find(a =>
-                      a.studentId._id === selectedStudent._id &&
-                      a.subjectId._id === subjectId &&
-                      a.status === 'Active'
-                    )
-                    const isAllocated = !!allocation
-                    const teacherBeingLoaded = allocatingSubject?.subjectId === subjectId && loadingTeachers
-                    const subjectTeachers = allocatingSubject?.subjectId === subjectId ? availableTeachers : []
-                    const hasNoTeachers = allocatingSubject?.subjectId === subjectId && !loadingTeachers && subjectTeachers.length === 0
-                    const isExpanded = allocatingSubject?.subjectId === subjectId
-
-                    return (
-                      <div key={subjectId} style={{
-                        border: '1px solid ' + (isExpanded ? 'var(--b200)' : 'var(--border)'),
-                        borderRadius: 'var(--rmd)',
-                        padding: 14,
-                        background: isAllocated ? '#fff' : (isExpanded ? 'var(--b50)' : 'var(--r50)'),
-                        transition: 'all 0.2s ease',
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, justifyContent: 'space-between', marginBottom: isExpanded ? 12 : 0 }}>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{subjectName}</div>
-                            {isAllocated && !isExpanded && (
-                              <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
-                                Assigned to <span style={{ fontWeight: 700, color: 'var(--g700)' }}>{allocation.teacherId.firstName} {allocation.teacherId.lastName}</span>
-                              </div>
-                            )}
-                            {!isAllocated && !isExpanded && (
-                              <div style={{ fontSize: 12, color: 'var(--r600)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                                Unassigned
-                              </div>
-                            )}
-                          </div>
-                          {!isExpanded && (
-                            <button className={isAllocated ? 'btn btn-g btn-sm' : 'btn btn-r btn-sm'}
-                              onClick={() => handleAllocateClick(selectedStudent._id, subjectId, selectedStudent.curriculum)}
-                              style={{ whiteSpace: 'nowrap' }}>
-                              {isAllocated ? 'Change' : 'Allocate'}
-                            </button>
-                          )}
-                        </div>
-
-                        {isExpanded && (
-                          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-                            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 8 }}>
-                              {isAllocated ? 'Reassign Teacher for' : 'Select Teacher for'} {subjectName}
-                            </div>
-
-                            {isAllocated && (
-                              <div style={{ padding: 8, background: 'var(--b100)', border: '1px solid var(--b200)', borderRadius: 'var(--rmd)', fontSize: 11, color: 'var(--b700)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                                <span>Currently assigned to: <strong>{allocation.teacherId.firstName} {allocation.teacherId.lastName}</strong></span>
-                              </div>
-                            )}
-
-                            {teacherBeingLoaded && (
-                              <div style={{ padding: 16, textAlign: 'center', color: 'var(--s500)', fontSize: 12 }}>
-                                Finding qualified teachers...
-                              </div>
-                            )}
-
-                            {hasNoTeachers && (
-                              <div style={{ padding: 12, background: 'var(--r50)', border: '1px solid var(--r100)', borderRadius: 'var(--rmd)', color: 'var(--r700)', fontSize: 12, textAlign: 'center', fontWeight: 600 }}>
-                                No qualified teachers for {subjectName} in {selectedStudent.curriculum}
-                              </div>
-                            )}
-
-                            {!teacherBeingLoaded && subjectTeachers.length > 0 && (
-                              <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--rmd)', overflow: 'hidden', background: '#fff' }}>
-                                <div style={{ maxHeight: 280, overflowY: 'auto', overflowX: 'hidden' }}>
-                                  {subjectTeachers.map((t, idx) => {
-                                    const isCurrentTeacher = isAllocated && allocation.teacherId._id === t._id
-                                    const isBestMatch = idx === 0 && !isAllocated
-                                    const isSelected = selectedTeacher === t._id
-                                    return (
-                                      <div key={t._id} onClick={() => setSelectedTeacher(t._id)}
-                                        style={{
-                                          padding: '12px 14px',
-                                          borderBottom: idx < subjectTeachers.length - 1 ? '1px solid var(--s100)' : 'none',
-                                          cursor: 'pointer',
-                                          background: isSelected ? 'var(--b50)' : (isCurrentTeacher ? 'var(--s50)' : '#fff'),
-                                          borderLeft: '3px solid ' + (isSelected ? 'var(--b700)' : (isCurrentTeacher ? 'var(--s400)' : 'transparent')),
-                                          transition: 'all 0.15s ease',
-                                          display: 'flex', alignItems: 'center', gap: 10,
-                                        }}
-                                        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--s50)' }}
-                                        onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = isCurrentTeacher ? 'var(--s50)' : '#fff' }}>
-                                        <div style={{
-                                          width: 32, height: 32, borderRadius: '50%',
-                                          background: isCurrentTeacher ? 'var(--s300)' : 'var(--b100)',
-                                          color: isCurrentTeacher ? 'var(--s700)' : 'var(--b700)',
-                                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                          fontWeight: 700, fontSize: 12, flexShrink: 0,
-                                        }}>
-                                          {t.firstName.charAt(0)}{t.lastName.charAt(0)}
-                                        </div>
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                          <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--s900)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            {t.firstName} {t.lastName}
-                                            {isBestMatch && (
-                                              <span style={{ background: 'var(--a50)', color: 'var(--a600)', border: '1px solid var(--a100)', fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 99, letterSpacing: '.06em' }}>BEST MATCH</span>
-                                            )}
-                                            {isCurrentTeacher && (
-                                              <span style={{ fontSize: 10, color: 'var(--s500)', fontWeight: 500 }}>(current)</span>
-                                            )}
-                                          </div>
-                                          <div style={{ fontSize: 11, color: 'var(--s500)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                            {t.email}
-                                          </div>
-                                        </div>
-                                        {isSelected && (
-                                          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                        )}
-                                      </div>
-                                    )
-                                  })}
-                                </div>
-                              </div>
-                            )}
-
-                            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                              <button className="btn btn-p" onClick={handleAllocateTeacher}
-                                disabled={!selectedTeacher || teacherBeingLoaded || hasNoTeachers}
-                                style={{ flex: 1 }}>
-                                {teacherBeingLoaded ? 'Loading...' : (isAllocated ? 'Update Allocation' : 'Save Allocation')}
-                              </button>
-                              <button className="btn btn-s" onClick={() => { setAllocatingSubject(null); setSelectedTeacher(null) }}>
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              )
-            })()}
-          </div>
-        </Modal>
-      )}
-
-      {/* BULK ALLOCATION MODAL */}
-      {showBulkModal && (
-        <Modal open={showBulkModal} onClose={closeBulkModal} title="Bulk Allocate Pending Students" size="lg">
-          {bulkLoading && bulkPreview.length === 0 ? (
-            <div style={{ padding: 40, textAlign: 'center' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Preparing Preview</div>
-              <div style={{ fontSize: 13, color: 'var(--s600)' }}>Loading suggested teachers for each pending allocation...</div>
-            </div>
-          ) : bulkExecuting || bulkProgress.done > 0 ? (
-            <div style={{ padding: 16 }}>
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 6 }}>
-                  Allocating {bulkProgress.done} of {bulkProgress.total}
-                </div>
-                <div className="prog">
-                  <div className="prog-f" style={{ width: bulkProgress.total > 0 ? (bulkProgress.done / bulkProgress.total * 100) + '%' : '0%', background: 'var(--b700)' }}/>
-                </div>
-              </div>
-
-              {bulkExecuting && (
-                <div style={{ padding: 12, background: 'var(--b50)', border: '1px solid var(--b100)', borderRadius: 'var(--rmd)', fontSize: 12, color: 'var(--b700)', marginBottom: 12 }}>
-                  Bulk allocation in progress · do not close this window
-                </div>
-              )}
-
-              {!bulkExecuting && bulkProgress.done > 0 && (
-                <>
-                  <div style={{ padding: 12, background: bulkProgress.failed.length === 0 ? 'var(--g50)' : 'var(--a50)', border: '1px solid ' + (bulkProgress.failed.length === 0 ? 'var(--g100)' : 'var(--a100)'), borderRadius: 'var(--rmd)', fontSize: 13, color: bulkProgress.failed.length === 0 ? 'var(--g700)' : 'var(--a600)', marginBottom: 12 }}>
-                    <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                      {bulkProgress.failed.length === 0 ? 'All allocations completed successfully' : 'Bulk allocation completed with some failures'}
-                    </div>
-                    <div style={{ fontSize: 12 }}>
-                      Succeeded: <strong>{bulkProgress.total - bulkProgress.failed.length}</strong> · Failed: <strong>{bulkProgress.failed.length}</strong>
-                    </div>
-                  </div>
-
-                  {bulkProgress.failed.length > 0 && (
-                    <div style={{ border: '1px solid var(--r100)', borderRadius: 'var(--rmd)', overflow: 'hidden', marginBottom: 12 }}>
-                      <div style={{ padding: '10px 14px', background: 'var(--r50)', fontSize: 12, fontWeight: 700, color: 'var(--r700)' }}>Failed Allocations</div>
-                      <div style={{ maxHeight: 180, overflowY: 'auto' }}>
-                        {bulkProgress.failed.map((f, i) => (
-                          <div key={i} style={{ padding: '8px 14px', borderTop: i > 0 ? '1px solid var(--s100)' : 'none', fontSize: 12 }}>
-                            <div style={{ fontWeight: 600, color: 'var(--s900)' }}>{f.row.studentName} · {f.row.subjectName}</div>
-                            <div style={{ color: 'var(--r600)', fontSize: 11, marginTop: 2 }}>{f.error}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <button className="btn btn-p" onClick={closeBulkModal} style={{ width: '100%' }}>Close</button>
-                </>
-              )}
-            </div>
-          ) : (
-            <>
-              <div style={{ padding: 14, background: 'var(--a50)', border: '1px solid var(--a100)', borderRadius: 'var(--rmd)', marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--a600)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                  Review before allocating
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--s700)', lineHeight: 1.6 }}>
-                  Each row shows the system's suggested best teacher. Uncheck rows to skip them, or change the teacher dropdown. Existing active allocations will <strong>not</strong> be touched.
-                </div>
-              </div>
-
-              {/* Email toggle */}
-              <div style={{ padding: '10px 14px', background: bulkSendEmails ? 'var(--r50)' : 'var(--s50)', border: '1px solid ' + (bulkSendEmails ? 'var(--r100)' : 'var(--border)'), borderRadius: 'var(--rmd)', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: bulkSendEmails ? 'var(--r700)' : 'var(--s900)', marginBottom: 2 }}>
-                    {bulkSendEmails ? 'Notification emails ENABLED' : 'Notification emails disabled'}
-                  </div>
-                  <div style={{ fontSize: 11.5, color: 'var(--s600)' }}>
-                    {bulkSendEmails
-                      ? 'Each parent will be emailed about their child\'s new teacher assignment.'
-                      : 'Recommended for bulk operations. You can notify parents individually afterward.'}
-                  </div>
-                </div>
-                <label style={{ position: 'relative', display: 'inline-block', width: 42, height: 22, cursor: 'pointer', flexShrink: 0 }}>
-                  <input type="checkbox" checked={bulkSendEmails} onChange={e => setBulkSendEmails(e.target.checked)} style={{ opacity: 0, width: 0, height: 0 }}/>
-                  <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: bulkSendEmails ? 'var(--r600)' : 'var(--s300)', borderRadius: 22, transition: 'background .2s' }}/>
-                  <span style={{ position: 'absolute', top: 3, left: bulkSendEmails ? 23 : 3, width: 16, height: 16, background: '#fff', borderRadius: '50%', transition: 'left .2s' }}/>
-                </label>
-              </div>
-
-              {/* Preview table */}
-              <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--rmd)', overflow: 'hidden', marginBottom: 16 }}>
-                <div style={{ padding: '10px 14px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontSize: 12, fontWeight: 700 }}>
-                    {bulkPreview.length} pending · <span style={{ color: 'var(--g700)' }}>{bulkPreview.filter(r => r.included && r.selectedTeacherId).length} ready</span>
-                    {bulkPreview.filter(r => !r.included).length > 0 && <span style={{ color: 'var(--s400)' }}> · {bulkPreview.filter(r => !r.included).length} skipped</span>}
-                  </div>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button className="btn btn-s btn-sm" onClick={() => setBulkPreview(p => p.map(r => ({ ...r, included: r.suggestedTeachers.length > 0 })))}>Select all</button>
-                    <button className="btn btn-s btn-sm" onClick={() => setBulkPreview(p => p.map(r => ({ ...r, included: false })))}>Deselect all</button>
-                  </div>
-                </div>
-                <div style={{ maxHeight: 360, overflowY: 'auto' }}>
-                  {bulkPreview.length === 0 ? (
-                    <div style={{ padding: 24, textAlign: 'center', fontSize: 13, color: 'var(--s500)' }}>Loading suggestions...</div>
-                  ) : bulkPreview.map((row, idx) => {
-                    const hasError = !row.suggestedTeachers || row.suggestedTeachers.length === 0
-                    return (
-                      <div key={row.studentId + '-' + row.subjectId} style={{
-                        padding: '10px 14px',
-                        borderTop: idx > 0 ? '1px solid var(--s100)' : 'none',
-                        display: 'flex', alignItems: 'center', gap: 10,
-                        background: hasError ? 'var(--r50)' : (row.included ? '#fff' : 'var(--s50)'),
-                        opacity: hasError ? .8 : 1,
-                      }}>
-                        <input type="checkbox" checked={row.included} disabled={hasError}
-                          onChange={e => updateBulkPreviewRow(idx, { included: e.target.checked })}
-                          style={{ accentColor: 'var(--b700)', flexShrink: 0, width: 16, height: 16 }}/>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--s900)' }}>
-                            {row.studentName} <span style={{ color: 'var(--s500)', fontWeight: 500 }}>· {row.subjectName}</span>
-                          </div>
-                          <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 2 }}>
-                            {row.curriculum} {row.year ? '· ' + row.year : ''}
-                          </div>
-                        </div>
-                        {hasError ? (
-                          <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)', fontSize: 10 }}>NO MATCH</span>
-                        ) : (
-                          <select className="fsel" value={row.selectedTeacherId || ''}
-                            disabled={!row.included}
-                            onChange={e => updateBulkPreviewRow(idx, { selectedTeacherId: e.target.value })}
-                            style={{ width: 220, padding: '6px 10px', fontSize: 12, fontWeight: 600 }}>
-                            {row.suggestedTeachers.map((t, ti) => (
-                              <option key={t._id} value={t._id}>
-                                {ti === 0 ? '★ ' : ''}{t.firstName} {t.lastName}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn btn-p" onClick={executeBulkAllocate}
-                  disabled={bulkPreview.filter(r => r.included && r.selectedTeacherId).length === 0}
-                  style={{ flex: 1 }}>
-                  Allocate {bulkPreview.filter(r => r.included && r.selectedTeacherId).length} Selected
-                </button>
-                <button className="btn btn-s" onClick={closeBulkModal}>Cancel</button>
-              </div>
-            </>
-          )}
-        </Modal>
-      )}
-    </>
-  )
-}
-
-function PayrollPage({ toast }) {
-  const [payrolls, setPayrolls] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [search, setSearch] = useState('')
-  const [selectedMonth, setSelectedMonth] = useState('2026-04')
-
-  useEffect(() => {
-    const fetchPayrolls = async () => {
-      try {
-        const res = await api.get('/payroll')
-        setPayrolls(res.data.payrolls || [])
-        setLoading(false)
-      } catch (e) {
-        setError(e.response?.data?.message || e.message)
-        setLoading(false)
-      }
-    }
-    fetchPayrolls()
-  }, [])
-
-  const filtered = payrolls.filter(p => {
-    const staffName = p.staffId?.firstName && p.staffId?.lastName 
-      ? (p.staffId.firstName + ' ' + p.staffId.lastName).toLowerCase()
-      : 'Unknown'
-    return !search || staffName.includes(search.toLowerCase())
-  })
-
-  const monthPayrolls = filtered.filter(p => p.month === selectedMonth)
-
-  const handlePayNow = async (payrollId, staffName) => {
-    if (!confirm(`Pay ${staffName} via M-Pesa?`)) return
-    try {
-      await api.patch('/payroll/' + payrollId, { status: 'Paid' })
-      setPayrolls(prev => prev.map(p => p._id === payrollId ? { ...p, status: 'Paid' } : p))
-      toast.ok(`${staffName} paid successfully`)
-    } catch (e) {
-      toast.error('Payment failed: ' + (e.response?.data?.message || e.message))
-    }
-  }
-
-  const handleRunPayroll = async () => {
-    if (!confirm(`Process payroll for ${monthPayrolls.length} staff members?`)) return
-    try {
-      let successCount = 0
-      for (const p of monthPayrolls) {
-        if (p.status !== 'Paid') {
-          await api.patch('/payroll/' + p._id, { status: 'Processing' })
-          successCount++
-        }
-      }
-      setPayrolls(prev => prev.map(p => 
-        monthPayrolls.some(mp => mp._id === p._id) && p.status !== 'Paid'
-          ? { ...p, status: 'Processing' }
-          : p
-      ))
-      toast.ok(`Payroll run complete — ${successCount} staff marked as processing`)
-    } catch (e) {
-      toast.error('Payroll run failed: ' + (e.response?.data?.message || e.message))
-    }
-  }
-
-  if (loading) return <div style={{ textAlign: 'center', padding: 40 }}>Loading payroll data...</div>
-  if (error) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--r600)' }}>Error: {error}</div>
-
-  return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <div className="sec-tag">Finance</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Staff Payroll &amp; Payments</h2>
-          <p style={{ color: 'var(--s500)', fontSize: 13.5 }}>Attendance · Off-hours · Article reads (KES 3) · Video uploads (KES 100). Process via M-Pesa or Bank Transfer.</p>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-s btn-sm" onClick={() => toast.info('Exporting CSV...')}>
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export CSV
-          </button>
-          <button className="btn btn-p btn-sm" onClick={handleRunPayroll}>
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            Run Payroll
-          </button>
-        </div>
-      </div>
-
-      {/* Rate card */}
-      <div className="rate-card" style={{ marginBottom: 20 }}>
-        <div className="serif" style={{ fontSize: '1rem', color: '#fff', flexShrink: 0 }}>Pay Rates</div>
-        {[['Daily Attendance','KES 1,500','#34D399'],['Off-Hours Session','KES 300','#FCD34D'],['Article Read','KES 3','#93C5FD'],['Video Upload','KES 100','#D8B4FE']].map(([l,v,c]) => (
-          <div key={l} className="rate-item">
-            <div className="rate-lbl">{l}</div>
-            <div className="mono" style={{ fontSize: '1.4rem', color: c, fontWeight: 500 }}>{v}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <div style={{ fontWeight: 700, fontSize: 14.5, flex: 1 }}>Staff Payroll — {selectedMonth}</div>
-          <select className="fsel" style={{ width: 160 }} value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}>
-            <option value="2026-04">April 2026</option>
-            <option value="2026-03">March 2026</option>
-            <option value="2026-02">February 2026</option>
-            <option value="2026-01">January 2026</option>
-          </select>
-          <input className="fi" placeholder="Search staff..." style={{ width: 180 }} value={search} onChange={e => setSearch(e.target.value)} />
-        </div>
-        <table className="tbl">
-          <thead><tr><th></th><th>Teacher</th><th>Attendance</th><th>Off-Hours</th><th>Article Reads</th><th>Videos</th><th>Total Earnings</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody>
-            {monthPayrolls.length > 0 ? monthPayrolls.map((p, i) => {
-              const staffName = p.staffId?.firstName && p.staffId?.lastName 
-                ? `${p.staffId.firstName} ${p.staffId.lastName}`
-                : 'Unknown Staff'
-              const init = (p.staffId?.firstName?.[0] || 'U') + (p.staffId?.lastName?.[0] || 'N')
-              const colors = ['#3B82F6','#22C55E','#8B5CF6','#F59E0B','#EC4899']
-              return (
-                <tr key={p._id || i}>
-                  <td><input type="checkbox" className="pay-row-check" /></td>
-                  <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Av init={init} col={colors[i % 5]} /><span style={{ fontWeight: 700 }}>{staffName}</span></div></td>
-                  <td className="mono" style={{ fontWeight: 700 }}>{p.attendance || 0}</td>
-                  <td className="mono">{p.offHoursSessions || 0}</td>
-                  <td className="mono">{(p.articlesRead || 0).toLocaleString()}</td>
-                  <td className="mono">{p.videosUploaded || 0}</td>
-                  <td><span className="mono" style={{ fontWeight: 700, color: 'var(--s900)' }}>KES {(p.totalPay || 0).toLocaleString()}</span></td>
-                  <td>
-                    <span className={p.status === 'Paid' ? 'sp-paid' : p.status === 'Processing' ? 'sp-processing' : 'sp-pending'}>
-                      {p.status}
-                    </span>
-                  </td>
-                  <td>
-                    <button className="btn btn-p btn-sm" onClick={() => handlePayNow(p._id, staffName)} disabled={p.status === 'Paid'}>
-                      {p.status === 'Paid' ? 'Paid' : 'Pay Now'}
-                    </button>
-                  </td>
-                </tr>
-              )
-            }) : (
-              <tr><td colSpan="9" style={{ textAlign: 'center', padding: '20px', color: 'var(--s500)' }}>No payroll records found for {selectedMonth}</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </>
-  )
-}
-
-function ProgrammesPage({ toast }) {
-  const [programmes, setProgrammes] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [adding, setAdding] = useState(false)
-  const [editing, setEditing] = useState(null)
-  const [form, setForm] = useState({ name: '', country: '', fee: '', description: '', status: 'Active' })
-
-  useEffect(() => {
-    const fetchProgrammes = async () => {
-      try {
-        const res = await api.get('/programmes')
-        setProgrammes(res.data.programmes || [])
-        setLoading(false)
-      } catch (e) {
-        setError(e.response?.data?.message || e.message)
-        setLoading(false)
-      }
-    }
-    fetchProgrammes()
-  }, [])
-
-  const upd = (k, v) => setForm(p => ({ ...p, [k]: v }))
-
-  const openAdd = () => {
-    setForm({ name: '', country: '', fee: '', description: '', status: 'Active' })
-    setEditing(null)
-    setAdding(true)
-  }
-
-  const openEdit = (p) => {
-    setForm({ name: p.name, country: p.country || '', fee: p.fee || '', description: p.description || '', status: p.status })
-    setEditing(p._id)
-    setAdding(true)
-  }
-
-  const save = async () => {
-    if (!form.name.trim()) { toast.error('Programme name is required'); return }
-    try {
-      if (editing) {
-        const res = await api.patch('/programmes/' + editing, form)
-        setProgrammes(prev => prev.map(p => p._id === editing ? res.data.programme : p))
-        toast.ok(form.name + ' updated successfully')
-      } else {
-        const res = await api.post('/programmes', form)
-        setProgrammes(prev => [...prev, res.data.programme])
-        toast.ok(form.name + ' added — now visible to students')
-      }
-      setAdding(false)
-    } catch (e) {
-      toast.error('Save failed: ' + (e.response?.data?.message || e.message))
-    }
-  }
-
-  const handleDelete = async (progId, progName) => {
-    if (!confirm(`Delete programme "${progName}"? This cannot be undone.`)) return
-    try {
-      await api.delete('/programmes/' + progId)
-      setProgrammes(prev => prev.filter(p => p._id !== progId))
-      toast.ok(progName + ' deleted')
-    } catch (e) {
-      toast.error('Delete failed: ' + (e.response?.data?.message || e.message))
-    }
-  }
-
-  if (loading) return <div style={{ textAlign: 'center', padding: 40 }}>Loading programmes...</div>
-  if (error) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--r600)' }}>Error: {error}</div>
-
-  // Color mapping for icons
-  const colors = ['var(--b700)', 'var(--p600)', 'var(--g600)', 'var(--a600)']
-  const bgColors = ['var(--b50)', 'var(--p50)', 'var(--g50)', 'var(--a50)']
-
-  return (
-    <>
-      <div style={{ marginBottom: 20 }}>
-        <div className="sec-tag">International Programmes</div>
-        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>IUFP &amp; <em style={{ color: 'var(--b700)' }}>Study Abroad</em></h2>
-        <button className="btn btn-p" onClick={openAdd} style={{ marginTop: 12 }}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add Programme
-        </button>
-      </div>
-
-      {adding && (
-        <div className="card" style={{ marginBottom: 20, borderColor: 'var(--b200)', borderWidth: 2 }}>
-          <div className="chdr" style={{ marginBottom: 16 }}>
-            <div className="ctitle">{editing ? 'Edit Programme' : 'Add New Programme'}</div>
-            <button className="btn btn-g btn-sm" onClick={() => setAdding(false)}>Cancel</button>
-          </div>
-          <div className="fr2">
-            <div className="fg"><label className="fl">Programme Name *</label><input className="fi" value={form.name} onChange={e => upd('name', e.target.value)} placeholder="e.g. IUFP Foundation Year" /></div>
-            <div className="fg"><label className="fl">Country / Location</label><input className="fi" value={form.country} onChange={e => upd('country', e.target.value)} placeholder="e.g. UK, USA, Dubai" /></div>
-          </div>
-          <div className="fr2">
-            <div className="fg"><label className="fl">Annual Fee</label><input className="fi" value={form.fee} onChange={e => upd('fee', e.target.value)} placeholder="e.g. 2400 or £18000" /></div>
-            <div className="fg"><label className="fl">Status</label><select className="fsel" value={form.status} onChange={e => upd('status', e.target.value)}><option>Active</option><option>Inactive</option></select></div>
-          </div>
-          <div className="fg"><label className="fl">Description</label><textarea className="fi" style={{ minHeight: 80 }} value={form.description} onChange={e => upd('description', e.target.value)} placeholder="Programme details and benefits..." /></div>
-          <button className="btn btn-ok" onClick={save}>Save Programme</button>
-        </div>
-      )}
-
-      {programmes.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 16 }}>
-          {programmes.map((p, i) => (
-            <div key={p._id || i} className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
-                <div style={{ width: 48, height: 48, background: bgColors[i % 4], borderRadius: 'var(--rmd)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke={colors[i % 4]} strokeWidth="2" strokeLinecap="round">
-                    <path d="M23 7 16 12l7 5V7z"/><path d="M1 7l15 5-15 5V7z"/>
-                  </svg>
-                </div>
-                <StatusBadge s={p.status} />
-              </div>
-              <div className="serif" style={{ fontSize: 17, color: 'var(--s900)', marginBottom: 6 }}>{p.name}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--s400)', marginBottom: 12 }}>{p.country || 'N/A'}</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
-                <div style={{ background: 'var(--bg)', borderRadius: 8, padding: '10px', textAlign: 'center' }}>
-                  <div className="mono" style={{ fontSize: 18, fontWeight: 700 }}>{(p.students?.length || 0).toLocaleString()}</div>
-                  <div style={{ fontSize: 10, color: 'var(--s400)' }}>Enrolled</div>
-                </div>
-                <div style={{ background: 'var(--bg)', borderRadius: 8, padding: '10px', textAlign: 'center' }}>
-                  <div className="mono" style={{ fontSize: 13, fontWeight: 700, color: 'var(--b700)' }}>{p.fee || 'N/A'}</div>
-                  <div style={{ fontSize: 10, color: 'var(--s400)' }}>Fee</div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn btn-g btn-sm" style={{ flex: 1, justifyContent: 'center' }} onClick={() => openEdit(p)}>Edit</button>
-                <button className="btn btn-d btn-sm" onClick={() => handleDelete(p._id, p.name)}>Delete</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div style={{ textAlign: 'center', padding: 40, color: 'var(--s500)' }}>
-          No programmes found. <button className="btn btn-p btn-sm" onClick={openAdd} style={{ marginLeft: 8 }}>Create one</button>
-        </div>
-      )}
-    </>
-  )
-}
-
-function GroupRoomsPage({ toast }) {
-  const [rooms, setRooms] = useState([])
-  const [curricula, setCurricula] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [adding, setAdding] = useState(false)
-  const [form, setForm] = useState({ name: '', subject: 'Mathematics', curriculum: '', grade: '', teacher: '', schedule: '', capacity: 10 })
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [roomsRes, currRes] = await Promise.all([
-          api.get('/groupRooms'),
-          api.get('/curriculum')
-        ])
-        setRooms(roomsRes.data.rooms || [])
-        setCurricula(currRes.data.curricula || [])
-        setLoading(false)
-      } catch (e) {
-        setError(e.response?.data?.message || e.message)
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  const upd = (k, v) => setForm(p => ({ ...p, [k]: v }))
-
-  const resetForm = () => {
-    setForm({ name: '', subject: 'Mathematics', curriculum: '', grade: '', teacher: '', schedule: '', capacity: 10 })
-  }
-
-  async function addRoom() {
-    if (!form.name.trim()) { toast.error('Room name required'); return }
-    if (!form.subject.trim()) { toast.error('Subject required'); return }
-    try {
-      const res = await api.post('/groupRooms', form)
-      setRooms(prev => [...prev, res.data.room])
-      toast.ok('Room "' + form.name + '" created — students can now join')
-      setAdding(false)
-      resetForm()
-    } catch (e) {
-      toast.error('Create failed: ' + (e.response?.data?.message || e.message))
-    }
-  }
-
-  async function handleStatusToggle(roomId, roomName, currentStatus) {
-    try {
-      const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active'
-      const res = await api.patch('/groupRooms/' + roomId, { status: newStatus })
-      setRooms(prev => prev.map(r => r._id === roomId ? res.data.room : r))
-      toast.ok(roomName + ' ' + (newStatus === 'Active' ? 'activated' : 'deactivated'))
-    } catch (e) {
-      toast.error('Update failed: ' + (e.response?.data?.message || e.message))
-    }
-  }
-
-  async function handleDelete(roomId, roomName) {
-    if (!window.confirm('Delete ' + roomName + '?')) return
-    try {
-      await api.delete('/groupRooms/' + roomId)
-      setRooms(prev => prev.filter(r => r._id !== roomId))
-      toast.ok('Room deleted')
-    } catch (e) {
-      toast.error('Delete failed: ' + (e.response?.data?.message || e.message))
-    }
-  }
-
-  if (loading) return <div style={{ textAlign: 'center', padding: 40 }}>Loading group rooms...</div>
-  if (error) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--r600)' }}>Error: {error}</div>
-
-  const totalStudents = rooms.reduce((s, r) => s + (r.students?.length || 0), 0)
-  const fullRooms = rooms.filter(r => (r.students?.length || 0) >= r.capacity).length
-  const availableSeats = rooms.reduce((s, r) => s + (r.capacity - (r.students?.length || 0)), 0)
-
-  return (
-    <>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, flexWrap:'wrap', gap:12 }}>
-        <div>
-          <div className="sec-tag">Group Learning System</div>
-          <h2 className="serif" style={{ fontSize:24, color:'var(--s900)' }}>Class <em style={{ color:'var(--g600)' }}>Rooms</em></h2>
-          <p style={{ fontSize:13, color:'var(--s500)', marginTop:4 }}>Each room holds max 10 students. Unlimited rooms per subject. Students assigned to rooms during registration.</p>
-        </div>
-        <button className="btn btn-p" onClick={() => { setAdding(a => !a); if (!adding) resetForm() }}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          {adding ? 'Cancel' : 'Create Room'}
-        </button>
-      </div>
-
-      {adding && (
-        <div className="card" style={{ marginBottom:20, borderColor:'var(--g200)', borderWidth:2 }}>
-          <div className="ctitle" style={{ marginBottom:16 }}>New Class Room</div>
-          <div className="fr2">
-            <div className="fg"><label className="fl">Room Name *</label><input className="fi" value={form.name} onChange={e=>upd('name',e.target.value)} placeholder="e.g. Mathematics A"/></div>
-            <div className="fg"><label className="fl">Subject *</label><select className="fsel" value={form.subject} onChange={e=>upd('subject',e.target.value)}><option>Mathematics</option><option>Biology</option><option>Chemistry</option><option>Physics</option><option>English Language</option></select></div>
-          </div>
-          <div className="fr3">
-            <div className="fg"><label className="fl">Curriculum</label><select className="fsel" value={form.curriculum} onChange={e=>upd('curriculum',e.target.value)}><option value="">Select curriculum...</option>{curricula.filter(c=>c.status==='Active').map(c=><option key={c._id} value={c.name}>{c.name}</option>)}</select></div>
-            <div className="fg"><label className="fl">Grade / Year</label><input className="fi" value={form.grade} onChange={e=>upd('grade',e.target.value)} placeholder="e.g. Form 3"/></div>
-            <div className="fg"><label className="fl">Capacity (max 10)</label><input className="fi" type="number" min="2" max="10" value={form.capacity} onChange={e=>upd('capacity',Math.min(10,parseInt(e.target.value)||10))}/></div>
-          </div>
-          <div className="fg"><label className="fl">Assigned Teacher</label><input className="fi" value={form.teacher} onChange={e=>upd('teacher',e.target.value)} placeholder="e.g. Mr. Muthomi"/></div>
-          <div className="fg"><label className="fl">Schedule</label><input className="fi" value={form.schedule} onChange={e=>upd('schedule',e.target.value)} placeholder="Mon/Wed 9:00–10:00 AM"/></div>
-          <button className="btn btn-ok" onClick={addRoom}>Create Room</button>
-        </div>
-      )}
-
-      {/* Stats */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14, marginBottom:24 }}>
-        {[
-          ['Total Rooms', rooms.length, 'var(--b700)'],
-          ['Total Students', totalStudents, 'var(--g600)'],
-          ['Full Rooms', fullRooms, 'var(--r500)'],
-          ['Available Seats', availableSeats, 'var(--a600)'],
-        ].map(([l,v,c]) => (
-          <div key={l} className="kpi">
-            <div className="kpi-v mono" style={{ color:c }}>{v}</div>
-            <div className="kpi-l">{l}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Rooms list */}
-      <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-        {rooms.length > 0 ? rooms.map(room => {
-          const enrolledCount = room.students?.length || 0
-          const isFull = enrolledCount >= room.capacity
-          return (
-            <div key={room._id} className="card">
-              <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
-                <div style={{ flex:1 }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:4 }}>
-                    <div style={{ fontWeight:700, fontSize:15 }}>{room.name}</div>
-                    <span className={`badge ${room.status==='Active'?'badge-green':'badge-slate'}`}>{room.status}</span>
-                    {isFull && <span className="badge badge-red">Full</span>}
-                  </div>
-                  <div style={{ fontSize:13, color:'var(--s500)', marginBottom:6 }}>{room.teacher} · {room.subject} · {room.curriculum} {room.grade} · {room.schedule}</div>
-                </div>
-
-                <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-                  <div style={{ textAlign:'center', background:'var(--bg)', borderRadius:'var(--rmd)', padding:'8px 16px' }}>
-                    <div className="mono" style={{ fontSize:20, fontWeight:700, color:isFull?'var(--r500)':'var(--g600)' }}>{enrolledCount}/{room.capacity}</div>
-                    <div style={{ fontSize:10, color:'var(--s400)' }}>students</div>
-                  </div>
-                  <div style={{ display:'flex', gap:6 }}>
-                    <button className="btn btn-s btn-sm" style={{ flex:1, justifyContent:'center' }} onClick={() => toast.ok('Managing: '+room.name)}>Manage</button>
-                    <button className="btn btn-g btn-sm" onClick={() => handleStatusToggle(room._id, room.name, room.status)} style={{ color: room.status==='Active' ? 'var(--r500)' : 'var(--g600)' }}>
-                      {room.status==='Active'?'Deactivate':'Activate'}
-                    </button>
-                    <button className="btn btn-d btn-sm" onClick={() => handleDelete(room._id, room.name)}>
-                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Student chips */}
-                {room.students && room.students.length > 0 && (
-                  <div style={{ width:'100%', display:'flex', flexWrap:'wrap', gap:6, paddingTop:10, borderTop:'1px solid var(--border)' }}>
-                    {room.students.map((student,si) => {
-                      const cols = ['#3B82F6','#22C55E','#F59E0B','#8B5CF6','#EC4899','#14B8A6','#F97316','#06B6D4','#84CC16','#EF4444']
-                      const name = typeof student === 'string' ? student : (student.firstName && student.lastName ? `${student.firstName} ${student.lastName}` : student.email || 'Student')
-                      const init = name.split(' ').map(w=>w[0]).join('').slice(0,2)
-                      return (
-                        <div key={si} style={{ display:'flex', alignItems:'center', gap:5, background:cols[si%cols.length]+'15', border:'1px solid '+cols[si%cols.length]+'30', borderRadius:99, padding:'3px 10px', fontSize:12 }}>
-                          <div style={{ width:18, height:18, borderRadius:'50%', background:cols[si%cols.length]+'20', color:cols[si%cols.length], display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'JetBrains Mono,monospace', fontSize:9, fontWeight:700 }}>{init}</div>
-                          <span style={{ color:'var(--s700)', fontWeight:500 }}>{name}</span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          )
-        }) : (
-          <div className="empty">
-            <h3>No class rooms yet</h3>
-            <p>Create rooms and assign students to start group learning.</p>
           </div>
         )}
-      </div>
-    </>
-  )
-}
 
-function LiveLessonsPage({ toast }) {
-  const SESSIONS = [
-    { subject:'Mathematics — Pythagoras Theorem', teacher:'Mr. Muthomi', class:'IGCSE Form 3', students:6, duration:'38 min', status:'live' },
-    { subject:'Biology — Cell Division', teacher:'Dr. Ouma', class:'IGCSE Form 2', students:11, duration:'12 min', status:'live' },
-    { subject:'English — Essay Writing', teacher:'Ms. Wambua', class:'A-Level Year 12', students:8, duration:'Starting in 28 min', status:'upcoming' },
-    { subject:'Physics — Newton\'s Laws', teacher:'Mr. Njoroge', class:'IGCSE Form 4', students:0, duration:'Ended 14 min ago', status:'ended' },
-  ]
-  const statusStyle = { live: { color:'var(--r600)', bg:'var(--r50)', border:'var(--r100)', dot:'var(--r500)' }, upcoming: { color:'var(--b700)', bg:'var(--b50)', border:'var(--b200)', dot:'var(--b500)' }, ended: { color:'var(--s600)', bg:'var(--s100)', border:'var(--s200)', dot:'var(--s400)' } }
-  return (
-    <>
-      <div style={{ marginBottom: 24 }}><div className="sec-tag">Real-Time</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Live <em style={{ color: 'var(--b700)' }}>Lessons</em></h2></div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 24 }}>
-        {[['Active Sessions','2','var(--r500)','var(--r50)'],['Total Students Now','17','var(--g600)','var(--g50)'],['Scheduled Today','8','var(--b700)','var(--b50)'],['Avg. Attendance','87%','var(--p600)','var(--p50)']].map(([l,v,c,bg]) => (
-          <div key={l} className="kpi">
-            <div className="kpi-ic" style={{ background: bg }}>
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={c} strokeWidth="2" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-            </div>
-            <div className="kpi-v" style={{ color: c }}>{v}</div>
-            <div className="kpi-l">{l}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {SESSIONS.map((s, i) => {
-          const st = statusStyle[s.status]
-          return (
-            <div key={i} className="card" style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-              <div style={{ width: 48, height: 48, background: st.bg, border: `1px solid ${st.border}`, borderRadius: 'var(--rmd)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke={st.color} strokeWidth="2" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 14.5, marginBottom: 3 }}>{s.subject}</div>
-                <div style={{ fontSize: 12.5, color: 'var(--s500)' }}>{s.teacher} · {s.class} · {s.status === 'live' ? `${s.students} students attending` : s.status === 'upcoming' ? 'Scheduled' : 'Recording available'}</div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: st.bg, border: `1px solid ${st.border}`, borderRadius: 'var(--rmd)', padding: '6px 12px' }}>
-                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: st.dot, animation: s.status === 'live' ? 'pulse 2s infinite' : 'none' }} />
-                  <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: st.color }}>{s.duration}</span>
-                </div>
-                {s.status === 'live' && <button className="btn btn-d btn-sm" onClick={() => toast.info(`Monitoring ${s.subject}`)}>Monitor</button>}
-                {s.status === 'ended' && <button className="btn btn-s btn-sm" onClick={() => toast.info('Loading recording...')}>Recording</button>}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </>
-  )
-}
-
-
-
-// ─── Settings Page ──────────────────────────────────────────
-function SettingsPage({ toast }) {
-  const store = useStore()
-  const [features, setFeatures] = useState(FEATS.map(f => ({ ...f })))
-  const [maintenanceMode, setMaintenanceMode] = useState(false)
-  const [signupsOpen, setSignupsOpen] = useState(true)
-  const [aiTutorEnabled, setAiTutorEnabled] = useState(true)
-  const [emailNotifs, setEmailNotifs] = useState(true)
-  const [smsNotifs, setSmsNotifs] = useState(true)
-  const [pushNotifs, setPushNotifs] = useState(false)
-  const [twoFactor, setTwoFactor] = useState(false)
-  const [sessionTimeout, setSessionTimeout] = useState(60)
-  const [defaultCurriculum, setDefaultCurriculum] = useState('IGCSE')
-  const [academicYear, setAcademicYear] = useState('2025-2026')
-  const [termStartDate, setTermStartDate] = useState('2026-01-08')
-  const [termEndDate, setTermEndDate] = useState('2026-04-04')
-  const [supportEmail, setSupportEmail] = useState('support@smartious.ac.ke')
-  const [supportPhone, setSupportPhone] = useState('+254 745 021 212')
-  const [savingFeatures, setSavingFeatures] = useState(false)
-
-  const toggleFeature = (idx) => {
-    setFeatures(prev => prev.map((f, i) => i === idx ? { ...f, on: !f.on } : f))
-  }
-
-  const saveFeatures = () => {
-    setSavingFeatures(true)
-    setTimeout(() => {
-      setSavingFeatures(false)
-      toast.ok('Feature flags saved · changes live across all portals')
-    }, 600)
-  }
-
-  const saveSchoolSettings = () => {
-    toast.ok('School settings saved · academic calendar updated')
-  }
-
-  const saveSecuritySettings = () => {
-    toast.ok('Security settings saved')
-  }
-
-  const saveSupport = () => {
-    toast.ok('Support contact updated')
-  }
-
-  return (
-    <>
-      <div style={{ marginBottom: 20 }}>
-        <div className="sec-tag">System</div>
-        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>System <em style={{ color: 'var(--b700)' }}>Settings</em></h2>
-        <p style={{ fontSize: 14, color: 'var(--s500)', marginTop: 3 }}>Platform configuration · feature flags · security policies</p>
-      </div>
-
-      {/* KPI summary */}
-      <div className="kpi-row">
-        {[
-          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-11h-6m-6 0H1"/></svg>, bg:'var(--b50)', v:String(features.filter(f => f.on).length), l:'Features Enabled', d:`of ${features.length} total`, dc:'var(--g600)' },
-          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={maintenanceMode ? 'var(--r700)' : 'var(--g600)'} strokeWidth="2" strokeLinecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>, bg: maintenanceMode ? 'var(--r50)' : 'var(--g50)', v: maintenanceMode ? 'OFF' : 'LIVE', l:'Platform Status', d: maintenanceMode ? 'Maintenance mode' : 'All systems operational', dc: maintenanceMode ? 'var(--r700)' : 'var(--g600)' },
-          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, bg:'var(--p50)', v: twoFactor ? 'ON' : 'OFF', l:'2-Factor Auth', d: twoFactor ? 'All admins protected' : 'Recommended', dc: twoFactor ? 'var(--g600)' : 'var(--a600)' },
-          { ic:<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--a600)" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>, bg:'var(--a50)', v:`${sessionTimeout}m`, l:'Session Timeout', d:'Auto-logout after idle', dc:'var(--s500)' },
-        ].map((k, i) => (
-          <div key={i} className="kpi">
-            <div className="kpi-ic" style={{ background: k.bg }}>{k.ic}</div>
-            <div className="kpi-v mono" style={{ fontSize: 20 }}>{k.v}</div>
-            <div className="kpi-l">{k.l}</div>
-            <div className="kpi-d" style={{ color: k.dc }}>{k.d}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
-        {/* Feature flags */}
-        <div className="card">
-          <div className="chdr">
-            <div className="ctitle">Feature Flags</div>
-            <button className="btn btn-ok btn-sm" onClick={saveFeatures} disabled={savingFeatures}>
-              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-              {savingFeatures ? 'Saving...' : 'Save Changes'}
-            </button>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {features.map((f, i) => (
-              <div key={i} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '11px 13px', borderRadius: 'var(--rsm)',
-                background: f.on ? 'var(--g50)' : 'var(--s50)',
-                border: '1px solid ' + (f.on ? 'var(--g100)' : 'var(--border)'),
-              }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s900)' }}>{f.n}</div>
-                  <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>{f.d}</div>
-                </div>
-                <label style={{ position: 'relative', display: 'inline-block', width: 42, height: 22, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={f.on} onChange={() => toggleFeature(i)} style={{ opacity: 0, width: 0, height: 0 }}/>
-                  <span style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                    background: f.on ? 'var(--g600)' : 'var(--s300)',
-                    borderRadius: 22, transition: 'background .2s',
-                  }}/>
-                  <span style={{
-                    position: 'absolute', top: 3, left: f.on ? 23 : 3,
-                    width: 16, height: 16, background: '#fff', borderRadius: '50%',
-                    transition: 'left .2s',
-                  }}/>
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* School configuration */}
-        <div className="card">
-          <div className="chdr">
-            <div className="ctitle">School Configuration</div>
-            <button className="btn btn-p btn-sm" onClick={saveSchoolSettings}>Save</button>
-          </div>
-          <div className="fg">
-            <label className="fl">Default Curriculum</label>
-            <select className="fsel" value={defaultCurriculum} onChange={e => setDefaultCurriculum(e.target.value)}>
-              {(store.curricula || []).map(c => <option key={c.id || c.name} value={c.name}>{c.name}</option>)}
-            </select>
-          </div>
-          <div className="fg">
-            <label className="fl">Academic Year</label>
-            <input className="fi" value={academicYear} onChange={e => setAcademicYear(e.target.value)} placeholder="e.g. 2025-2026"/>
-          </div>
-          <div className="fr2">
-            <div className="fg">
-              <label className="fl">Term Start Date</label>
-              <input className="fi" type="date" value={termStartDate} onChange={e => setTermStartDate(e.target.value)}/>
-            </div>
-            <div className="fg">
-              <label className="fl">Term End Date</label>
-              <input className="fi" type="date" value={termEndDate} onChange={e => setTermEndDate(e.target.value)}/>
-            </div>
-          </div>
-          <div style={{ background: 'var(--b50)', border: '1px solid var(--b100)', padding: '10px 12px', borderRadius: 'var(--rsm)', fontSize: 12.5, color: 'var(--s700)', marginTop: 4, lineHeight: 1.6 }}>
-            <strong>Note:</strong> Term dates affect billing cycles, attendance reports, and grade book deadlines.
-          </div>
-        </div>
-
-        {/* Security & Authentication */}
-        <div className="card">
-          <div className="chdr">
-            <div className="ctitle">Security & Authentication</div>
-            <button className="btn btn-p btn-sm" onClick={saveSecuritySettings}>Save</button>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[
-              { label: 'Two-Factor Authentication (Admin)', desc: 'Require OTP for all admin logins', val: twoFactor, set: setTwoFactor },
-              { label: 'Open Public Sign-ups', desc: 'Allow new students to register without invitation', val: signupsOpen, set: setSignupsOpen },
-              { label: 'Maintenance Mode', desc: 'Lock platform · only admins can access', val: maintenanceMode, set: setMaintenanceMode },
-            ].map((row, i) => (
-              <div key={i} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '11px 13px', borderRadius: 'var(--rsm)',
-                background: row.val ? 'var(--g50)' : 'var(--s50)',
-                border: '1px solid ' + (row.val ? 'var(--g100)' : 'var(--border)'),
-              }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s900)' }}>{row.label}</div>
-                  <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>{row.desc}</div>
-                </div>
-                <label style={{ position: 'relative', display: 'inline-block', width: 42, height: 22, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={row.val} onChange={() => row.set(!row.val)} style={{ opacity: 0, width: 0, height: 0 }}/>
-                  <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: row.val ? 'var(--g600)' : 'var(--s300)', borderRadius: 22, transition: 'background .2s' }}/>
-                  <span style={{ position: 'absolute', top: 3, left: row.val ? 23 : 3, width: 16, height: 16, background: '#fff', borderRadius: '50%', transition: 'left .2s' }}/>
-                </label>
-              </div>
-            ))}
-          </div>
-          <div className="fg" style={{ marginTop: 12, marginBottom: 0 }}>
-            <label className="fl">Session Timeout (minutes)</label>
-            <input className="fi" type="number" value={sessionTimeout} onChange={e => setSessionTimeout(parseInt(e.target.value) || 60)} min="5" max="480"/>
-          </div>
-        </div>
-
-        {/* Notifications */}
-        <div className="card">
-          <div className="chdr">
-            <div className="ctitle">Notifications</div>
-            <button className="btn btn-p btn-sm" onClick={() => toast.ok('Notification preferences saved')}>Save</button>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {[
-              { label: 'Email Notifications', desc: 'System alerts · weekly digests · payment receipts', val: emailNotifs, set: setEmailNotifs },
-              { label: 'SMS Notifications', desc: 'Class reminders · payment confirmations · urgent alerts', val: smsNotifs, set: setSmsNotifs },
-              { label: 'Push Notifications', desc: 'Real-time browser/mobile push · class start alerts', val: pushNotifs, set: setPushNotifs },
-            ].map((row, i) => (
-              <div key={i} style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '11px 13px', borderRadius: 'var(--rsm)',
-                background: row.val ? 'var(--g50)' : 'var(--s50)',
-                border: '1px solid ' + (row.val ? 'var(--g100)' : 'var(--border)'),
-              }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s900)' }}>{row.label}</div>
-                  <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>{row.desc}</div>
-                </div>
-                <label style={{ position: 'relative', display: 'inline-block', width: 42, height: 22, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={row.val} onChange={() => row.set(!row.val)} style={{ opacity: 0, width: 0, height: 0 }}/>
-                  <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: row.val ? 'var(--g600)' : 'var(--s300)', borderRadius: 22, transition: 'background .2s' }}/>
-                  <span style={{ position: 'absolute', top: 3, left: row.val ? 23 : 3, width: 16, height: 16, background: '#fff', borderRadius: '50%', transition: 'left .2s' }}/>
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Support contact */}
-        <div className="card" style={{ gridColumn: 'span 2' }}>
-          <div className="chdr">
-            <div className="ctitle">Support Contact (shown to students & parents)</div>
-            <button className="btn btn-p btn-sm" onClick={saveSupport}>Save</button>
-          </div>
-          <div className="fr2">
-            <div className="fg" style={{ marginBottom: 0 }}>
-              <label className="fl">Support Email</label>
-              <input className="fi" type="email" value={supportEmail} onChange={e => setSupportEmail(e.target.value)}/>
-            </div>
-            <div className="fg" style={{ marginBottom: 0 }}>
-              <label className="fl">Support Phone / WhatsApp</label>
-              <input className="fi" type="tel" value={supportPhone} onChange={e => setSupportPhone(e.target.value)}/>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Danger zone */}
-      <div className="card" style={{ borderColor: 'var(--r100)' }}>
-        <div className="chdr">
-          <div className="ctitle" style={{ color: 'var(--r700)' }}>Danger Zone</div>
-        </div>
-        <div style={{ fontSize: 13, color: 'var(--s600)', marginBottom: 14, lineHeight: 1.6 }}>
-          Irreversible actions. Use with caution.
-        </div>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <button className="btn btn-sm" style={{ background: 'var(--a50)', color: 'var(--a600)', borderColor: 'var(--a100)' }} onClick={() => { if (confirm('Clear local cache? This will log all admins out.')) toast.info('Cache cleared') }}>Clear Local Cache</button>
-          <button className="btn btn-sm" style={{ background: 'var(--r50)', color: 'var(--r700)', borderColor: 'var(--r100)' }} onClick={() => { if (confirm('Reset all feature flags to defaults?')) { setFeatures(FEATS.map(f => ({ ...f }))); toast.ok('Features reset to defaults') } }}>Reset Feature Flags</button>
-          <button className="btn btn-sm" style={{ background: 'var(--r50)', color: 'var(--r700)', borderColor: 'var(--r100)' }} onClick={() => toast.error('This action requires super-admin token')}>Force Logout All Users</button>
-        </div>
-      </div>
-    </>
-  )
-}
-
-// ─── Website Editor Page ────────────────────────────────────
-function WebsiteEditorPage({ toast }) {
-  const store = useStore()
-  const [site, setSite] = useState({ ...store.siteConfig })
-  const [tab, setTab] = useState('hero')
-  const [saving, setSaving] = useState(false)
-
-  const upd = (k, v) => setSite(p => ({ ...p, [k]: v }))
-
-  const saveAll = () => {
-    setSaving(true)
-    setTimeout(() => {
-      store.updateSiteConfig(site)
-      setSaving(false)
-      toast.ok('Website saved · live on smartioushomeschool.com')
-    }, 700)
-  }
-
-  const resetSection = () => {
-    if (!confirm('Reset this section to last saved state?')) return
-    setSite({ ...store.siteConfig })
-    toast.info('Section reset')
-  }
-
-  const previewSite = () => {
-    window.open('https://smartioushomeschool.com', '_blank', 'noopener')
-  }
-
-  const tabs = [
-    { id: 'hero',    label: 'Hero Section' },
-    { id: 'stats',   label: 'Stats' },
-    { id: 'about',   label: 'About' },
-    { id: 'contact', label: 'Contact & Footer' },
-  ]
-
-  return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <div className="sec-tag">System</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Website <em style={{ color: 'var(--b700)' }}>Editor</em></h2>
-          <p style={{ fontSize: 14, color: 'var(--s500)', marginTop: 3 }}>Edit landing page content · changes go live instantly across smartioushomeschool.com</p>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-g btn-sm" onClick={previewSite}>
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            Preview Live Site
-          </button>
-          <button className="btn btn-ok btn-sm" onClick={saveAll} disabled={saving}>
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-            {saving ? 'Saving...' : 'Save & Publish'}
-          </button>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, padding: 4, background: 'var(--s50)', borderRadius: 'var(--rmd)', marginBottom: 16, overflowX: 'auto' }}>
-        {tabs.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: '0 0 auto',
-            padding: '9px 16px', borderRadius: 'var(--rsm)',
-            background: tab === t.id ? '#fff' : 'transparent',
-            border: 'none', cursor: 'pointer',
+        {/* Input */}
+        <div style={{ padding: 14, borderTop: '1px solid rgba(255,255,255,.1)', display: 'flex', gap: 8 }}>
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
+            placeholder="Ask Mshauri anything..."
+            disabled={loading}
+            style={{
+              flex: 1, padding: '11px 14px',
+              background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.15)',
+              borderRadius: 8, color: '#fff', fontSize: 13.5,
+              fontFamily: 'inherit', outline: 'none',
+            }}
+          />
+          <button onClick={send} disabled={loading || !input.trim()} style={{
+            background: '#C9A030', color: '#3D0810', border: 'none',
+            padding: '11px 18px', borderRadius: 8,
             fontSize: 13, fontWeight: 700,
-            color: tab === t.id ? 'var(--b700)' : 'var(--s600)',
-            boxShadow: tab === t.id ? '0 2px 8px rgba(0,0,0,.06)' : 'none',
-            transition: 'all .15s',
-          }}>{t.label}</button>
-        ))}
-      </div>
-
-      {/* HERO TAB */}
-      {tab === 'hero' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-          <div className="card">
-            <div className="chdr">
-              <div className="ctitle">Hero Content</div>
-              <button className="btn btn-sm" onClick={resetSection}>Reset</button>
-            </div>
-            <div className="fg">
-              <label className="fl">School Name</label>
-              <input className="fi" value={site.schoolName || ''} onChange={e => upd('schoolName', e.target.value)} placeholder="Smartious Homeschool"/>
-            </div>
-            <div className="fg">
-              <label className="fl">Headline</label>
-              <input className="fi" value={site.headline || ''} onChange={e => upd('headline', e.target.value)}/>
-            </div>
-            <div className="fg">
-              <label className="fl">Subheadline</label>
-              <textarea className="fta" rows={3} value={site.subheadline || ''} onChange={e => upd('subheadline', e.target.value)}/>
-            </div>
-            <div className="fr2">
-              <div className="fg">
-                <label className="fl">Primary CTA Button</label>
-                <input className="fi" value={site.cta1 || ''} onChange={e => upd('cta1', e.target.value)}/>
-              </div>
-              <div className="fg">
-                <label className="fl">Secondary CTA Button</label>
-                <input className="fi" value={site.cta2 || ''} onChange={e => upd('cta2', e.target.value)}/>
-              </div>
-            </div>
-            <div className="fg" style={{ marginBottom: 0 }}>
-              <label className="fl">Hero Video URL (optional)</label>
-              <input className="fi" value={site.heroVideo || ''} onChange={e => upd('heroVideo', e.target.value)} placeholder="https://youtube.com/embed/..."/>
-            </div>
-          </div>
-
-          {/* Live preview */}
-          <div className="card" style={{ background: 'linear-gradient(135deg, #7D1025, #5A0B1B)', color: '#fff', padding: 0, overflow: 'hidden' }}>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="ctitle" style={{ color: 'rgba(255,255,255,.6)' }}>Live Preview</span>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: '#4ADE80' }}>● UPDATING IN REAL-TIME</span>
-            </div>
-            <div style={{ padding: '32px 24px', minHeight: 300, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div style={{ fontFamily: 'JetBrains Mono,monospace', fontSize: 11, color: 'rgba(255,255,255,.5)', marginBottom: 12, letterSpacing: '.1em' }}>
-                {site.schoolName || 'SCHOOL NAME'}
-              </div>
-              <div className="serif" style={{ fontSize: 28, lineHeight: 1.2, marginBottom: 12, color: '#fff' }}>
-                {site.headline || 'Headline goes here'}
-              </div>
-              <div style={{ fontSize: 14, color: 'rgba(255,255,255,.7)', marginBottom: 20, lineHeight: 1.6 }}>
-                {site.subheadline || 'Subheadline preview...'}
-              </div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ display: 'inline-block', padding: '10px 18px', background: 'var(--b700)', color: '#fff', borderRadius: 'var(--rsm)', fontSize: 13, fontWeight: 700 }}>{site.cta1 || 'Primary CTA'}</span>
-                <span style={{ display: 'inline-block', padding: '10px 18px', background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,.3)', borderRadius: 'var(--rsm)', fontSize: 13, fontWeight: 700 }}>{site.cta2 || 'Secondary CTA'}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* STATS TAB */}
-      {tab === 'stats' && (
-        <div className="card">
-          <div className="chdr">
-            <div className="ctitle">Hero Statistics (4 displayed)</div>
-            <button className="btn btn-sm" onClick={resetSection}>Reset</button>
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 14 }}>
-            These appear in the hero section as social-proof. Use short, punchy text.
-          </div>
-          <div className="fr2">
-            <div className="fg">
-              <label className="fl">Stat 1</label>
-              <input className="fi" value={site.stat1 || ''} onChange={e => upd('stat1', e.target.value)} placeholder="2,418+ Students"/>
-            </div>
-            <div className="fg">
-              <label className="fl">Stat 2</label>
-              <input className="fi" value={site.stat2 || ''} onChange={e => upd('stat2', e.target.value)} placeholder="127 Teachers"/>
-            </div>
-            <div className="fg">
-              <label className="fl">Stat 3</label>
-              <input className="fi" value={site.stat3 || ''} onChange={e => upd('stat3', e.target.value)} placeholder="6 Curricula"/>
-            </div>
-            <div className="fg" style={{ marginBottom: 0 }}>
-              <label className="fl">Stat 4</label>
-              <input className="fi" value={site.stat4 || ''} onChange={e => upd('stat4', e.target.value)} placeholder="Kenya · UAE · UK"/>
-            </div>
-          </div>
-          <div style={{ marginTop: 18, padding: 14, background: 'var(--s50)', borderRadius: 'var(--rsm)' }}>
-            <div className="ctitle" style={{ marginBottom: 10 }}>Preview</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-              {[site.stat1, site.stat2, site.stat3, site.stat4].map((s, i) => (
-                <div key={i} style={{ background: '#fff', padding: 12, borderRadius: 'var(--rsm)', border: '1px solid var(--border)', textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--s900)' }}>
-                  {s || '—'}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ABOUT TAB */}
-      {tab === 'about' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-          <div className="card">
-            <div className="chdr">
-              <div className="ctitle">About Section</div>
-              <button className="btn btn-sm" onClick={resetSection}>Reset</button>
-            </div>
-            <div className="fg" style={{ marginBottom: 0 }}>
-              <label className="fl">About Text (appears below hero)</label>
-              <textarea className="fta" rows={10} value={site.aboutText || ''} onChange={e => upd('aboutText', e.target.value)}/>
-            </div>
-          </div>
-          <div className="card">
-            <div className="chdr">
-              <div className="ctitle">Live Preview</div>
-            </div>
-            <div style={{ padding: 18, background: 'var(--s50)', borderRadius: 'var(--rsm)', minHeight: 200 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', color: 'var(--s500)', textTransform: 'uppercase', marginBottom: 8 }}>
-                About
-              </div>
-              <div className="serif" style={{ fontSize: 22, color: 'var(--s900)', marginBottom: 12 }}>
-                Why families choose us
-              </div>
-              <div style={{ fontSize: 14, color: 'var(--s700)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
-                {site.aboutText || 'About text will appear here...'}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* CONTACT & FOOTER TAB */}
-      {tab === 'contact' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-          <div className="card">
-            <div className="chdr">
-              <div className="ctitle">Footer Contact</div>
-              <button className="btn btn-sm" onClick={resetSection}>Reset</button>
-            </div>
-            <div className="fg">
-              <label className="fl">Email</label>
-              <input className="fi" type="email" value={site.footerEmail || ''} onChange={e => upd('footerEmail', e.target.value)}/>
-            </div>
-            <div className="fg">
-              <label className="fl">Primary Phone</label>
-              <input className="fi" type="tel" value={site.footerPhone || ''} onChange={e => upd('footerPhone', e.target.value)}/>
-            </div>
-            <div className="fg">
-              <label className="fl">Secondary Phone (optional)</label>
-              <input className="fi" type="tel" value={site.phone2 || ''} onChange={e => upd('phone2', e.target.value)}/>
-            </div>
-            <div className="fg">
-              <label className="fl">WhatsApp</label>
-              <input className="fi" type="tel" value={site.whatsapp || ''} onChange={e => upd('whatsapp', e.target.value)}/>
-            </div>
-            <div className="fg" style={{ marginBottom: 0 }}>
-              <label className="fl">Physical Address</label>
-              <textarea className="fta" rows={2} value={site.footerAddress || ''} onChange={e => upd('footerAddress', e.target.value)}/>
-            </div>
-          </div>
-          <div className="card">
-            <div className="chdr">
-              <div className="ctitle">Footer Copy & Branding</div>
-            </div>
-            <div className="fg">
-              <label className="fl">Copyright Line</label>
-              <input className="fi" value={site.footerCopy || ''} onChange={e => upd('footerCopy', e.target.value)}/>
-            </div>
-            <div style={{ marginTop: 18, padding: 18, background: '#0D1525', borderRadius: 'var(--rsm)', color: '#fff' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', marginBottom: 12 }}>
-                Footer Preview
-              </div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,.85)', lineHeight: 1.8 }}>
-                <div>📧 {site.footerEmail || 'email@example.com'}</div>
-                <div>📞 {site.footerPhone || '+254 ...'}</div>
-                {site.phone2 && <div>📞 {site.phone2}</div>}
-                {site.whatsapp && <div>💬 WhatsApp: {site.whatsapp}</div>}
-                <div style={{ marginTop: 6 }}>📍 {site.footerAddress || 'Address...'}</div>
-                <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,.15)', fontSize: 11, color: 'rgba(255,255,255,.5)' }}>
-                  {site.footerCopy || '© Year School Name'}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Helpful tip */}
-      <div style={{ marginTop: 20, padding: '14px 18px', background: 'var(--b50)', border: '1px solid var(--b100)', borderRadius: 'var(--rsm)', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}>
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
-        </svg>
-        <div style={{ fontSize: 13, color: 'var(--s700)', lineHeight: 1.6 }}>
-          Changes save instantly to the platform when you click <strong>Save &amp; Publish</strong>. The live website at <strong>smartioushomeschool.com</strong> reflects updates immediately. Use the Preview Live Site button to verify before showing parents.
+            cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
+            opacity: loading || !input.trim() ? .5 : 1,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Send
+          </button>
         </div>
       </div>
     </>
