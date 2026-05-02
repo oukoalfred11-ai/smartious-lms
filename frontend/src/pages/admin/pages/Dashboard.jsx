@@ -1273,209 +1273,484 @@ function TeachersPage({ refreshKey, toast }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedTeacher, setSelectedTeacher] = useState(null)
-  const [teacherDetailsLoading, setTeacherDetailsLoading] = useState(false)
+  const [search, setSearch] = useState('')
+  const [leaveFilter, setLeaveFilter] = useState('all')        // all | active | onleave
+  const [tenureFilter, setTenureFilter] = useState('all')      // all | new | established | senior
+  const [subjectFilter, setSubjectFilter] = useState('all')
 
-    useEffect(() => {
-      const fetchTeachers = async () => {
-        try {
-          const res = await api.get('/users/teachers/list')
-          console.log('Teachers API response:', res.data.teachers)
-          setTeachers(res.data.teachers || [])
-          setLoading(false)
-        } catch (e) {
-          setError(e.response?.data?.message || e.message)
-          setLoading(false)
-        }
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const res = await api.get('/users/teachers/list')
+        setTeachers(res.data.teachers || [])
+        setLoading(false)
+      } catch (e) {
+        setError(e.response?.data?.message || e.message)
+        setLoading(false)
       }
-      fetchTeachers()
-    }, [refreshKey])
+    }
+    fetchTeachers()
+  }, [refreshKey])
 
+  // ── HELPERS ────────────────────────────────────────
   const calculateDuration = (createdAt) => {
     if (!createdAt) return 'N/A'
     const start = new Date(createdAt)
     const now = new Date()
-    
     let years = now.getFullYear() - start.getFullYear()
     let months = now.getMonth() - start.getMonth()
     let days = now.getDate() - start.getDate()
-    
-    // Adjust for negative days
     if (days < 0) {
       months--
       const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0)
       days += prevMonth.getDate()
     }
-    
-    // Adjust for negative months
-    if (months < 0) {
-      years--
-      months += 12
-    }
-    
-    // Format output
+    if (months < 0) { years--; months += 12 }
     const parts = []
     if (years > 0) parts.push(`${years}y`)
     if (months > 0) parts.push(`${months}mo`)
-    if (days > 0) parts.push(`${days}d`)
-    
+    if (years === 0 && months === 0 && days > 0) parts.push(`${days}d`)
     if (parts.length === 0) return 'New'
     return parts.join(' ')
   }
 
-  const formatDate = (date) => {
-    if (!date) return 'N/A'
-    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  const monthsTenure = (createdAt) => {
+    if (!createdAt) return 0
+    const diff = Date.now() - new Date(createdAt).getTime()
+    return Math.floor(diff / (1000 * 60 * 60 * 24 * 30))
   }
 
-   const handleViewDetails = async (teacher) => {
-     setSelectedTeacher(teacher)
-     setTeacherDetailsLoading(true)
-     // Details will be shown in the modal
-     setTeacherDetailsLoading(false)
-   }
+  const formatDate = (date) => {
+    if (!date) return 'N/A'
+    return new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
 
-   const handleToggleTeacherLeave = async (teacher) => {
-     try {
-       const newLeaveStatus = !teacher.isOnLeave
-       const res = await api.patch(`/users/${teacher._id}/leave`, {
-         isOnLeave: newLeaveStatus,
-         leaveStartDate: newLeaveStatus ? new Date() : null
-       })
-       
-       // Update teacher in list
-       setTeachers(prev => prev.map(t => 
-         t._id === teacher._id ? {...t, ...res.data.user} : t
-       ))
-       
-       // Update selected teacher modal
-       if (selectedTeacher && selectedTeacher._id === teacher._id) {
-         setSelectedTeacher({...selectedTeacher, ...res.data.user})
-       }
-       
-       toast.ok(res.data.message || 'Leave status updated')
-     } catch (e) {
-       toast.error('Failed to update leave status: ' + (e.response?.data?.message || e.message))
-     }
-   }
+  const subjectNames = (t) => {
+    if (!t.subjects || t.subjects.length === 0) return []
+    return t.subjects.map(s => typeof s === 'string' ? s : (s.subjectName || 'Subject'))
+  }
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 40 }}>Loading teachers...</div>
-  if (error) return <div style={{ textAlign: 'center', padding: 40, color: 'var(--r600)' }}>Error: {error}</div>
+  // ── DETERMINISTIC AVATAR COLORS ────────────────────
+  const avColor = (name) => {
+    const tokens = ['var(--crimson, #7D1025)', '#A51C2E', '#C9A030', 'var(--g600)', 'var(--p600)', 'var(--t600)']
+    let hash = 0
+    for (let i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
+    return tokens[Math.abs(hash) % tokens.length]
+  }
+
+  // ── COMPUTED COUNTS ────────────────────────────────
+  const counts = {
+    total: teachers.length,
+    active: teachers.filter(t => !t.isOnLeave).length,
+    onLeave: teachers.filter(t => t.isOnLeave).length,
+    newHires: teachers.filter(t => monthsTenure(t.createdAt) < 3).length,
+    senior: teachers.filter(t => monthsTenure(t.createdAt) >= 24).length,
+    avgStudents: teachers.length > 0 ? Math.round(teachers.reduce((sum, t) => sum + (t.totalStudents || 0), 0) / teachers.length) : 0,
+  }
+
+  // ── ALL UNIQUE SUBJECTS FOR FILTER ─────────────────
+  const allSubjects = [...new Set(teachers.flatMap(t => subjectNames(t)))].sort()
+
+  // ── FILTERED TEACHERS ──────────────────────────────
+  const filtered = teachers.filter(t => {
+    if (search) {
+      const q = search.toLowerCase()
+      const fullName = ((t.firstName || '') + ' ' + (t.lastName || '')).toLowerCase()
+      const email = (t.email || '').toLowerCase()
+      if (!fullName.includes(q) && !email.includes(q)) return false
+    }
+    if (leaveFilter === 'onleave' && !t.isOnLeave) return false
+    if (leaveFilter === 'active' && t.isOnLeave) return false
+    if (tenureFilter !== 'all') {
+      const m = monthsTenure(t.createdAt)
+      if (tenureFilter === 'new' && m >= 3) return false
+      if (tenureFilter === 'established' && (m < 3 || m >= 24)) return false
+      if (tenureFilter === 'senior' && m < 24) return false
+    }
+    if (subjectFilter !== 'all') {
+      if (!subjectNames(t).includes(subjectFilter)) return false
+    }
+    return true
+  })
+
+  // ── ACTIONS ────────────────────────────────────────
+  const handleViewDetails = (teacher) => setSelectedTeacher(teacher)
+
+  const handleToggleTeacherLeave = async (teacher) => {
+    try {
+      const newLeaveStatus = !teacher.isOnLeave
+      const res = await api.patch(`/users/${teacher._id}/leave`, {
+        isOnLeave: newLeaveStatus,
+        leaveStartDate: newLeaveStatus ? new Date() : null,
+      })
+      setTeachers(prev => prev.map(t => t._id === teacher._id ? { ...t, ...res.data.user } : t))
+      if (selectedTeacher && selectedTeacher._id === teacher._id) {
+        setSelectedTeacher({ ...selectedTeacher, ...res.data.user })
+      }
+      toast.ok(res.data.message || 'Leave status updated')
+    } catch (e) {
+      toast.error('Failed to update leave status: ' + (e.response?.data?.message || e.message))
+    }
+  }
+
+  // ── LOADING / ERROR STATES ─────────────────────────
+  if (loading) {
+    return (
+      <>
+        <div style={{ marginBottom: 18 }}>
+          <div className="sec-tag">Faculty</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Teacher <em style={{ color: 'var(--b700)' }}>Management</em></h2>
+        </div>
+        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)', fontSize: 14 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 4 }}>Loading</div>
+          Fetching teachers from your backend...
+        </div>
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <div style={{ marginBottom: 18 }}>
+          <div className="sec-tag">Faculty</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Teacher <em style={{ color: 'var(--b700)' }}>Management</em></h2>
+        </div>
+        <div className="card" style={{ padding: 24, background: 'var(--r50)', borderColor: 'var(--r100)' }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--r700)', marginBottom: 6 }}>Failed to load teachers</div>
+          <div style={{ fontSize: 12, color: 'var(--r600)', marginBottom: 12 }}>{error}</div>
+          <button className="btn btn-r btn-sm" onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div><div className="sec-tag">Faculty</div><h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Teacher <em style={{ color: 'var(--b700)' }}>Management</em></h2></div>
+      {/* HEADER ROW */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div className="sec-tag">Faculty</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Teacher <em style={{ color: 'var(--b700)' }}>Management</em></h2>
+          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>View faculty roster · Track tenure · Manage leave · See teaching statistics</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {counts.onLeave > 0 && (
+            <button className="btn btn-am btn-sm" onClick={() => setLeaveFilter('onleave')}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              {counts.onLeave} On Leave
+            </button>
+          )}
+          <button className="btn btn-s btn-sm" onClick={() => toast.info('Exporting teacher CSV...')}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
       </div>
-       <div className="card" style={{ padding: 0, overflow: 'auto', maxWidth: '100%' }}>
-         <table className="tbl" style={{ minWidth: '1400px' }}>
-           <thead><tr><th>Teacher</th><th>Subjects</th><th>Date Joined</th><th>Duration</th><th>Status</th><th>Leave</th><th style={{ width: '100px', textAlign: 'center' }}>Actions</th></tr></thead>
-           <tbody>
-             {teachers.map((t, i) => (
-               <tr key={t._id || i} style={{ background: t.isOnLeave ? 'var(--r50)' : i % 2 === 0 ? '#fff' : 'var(--s50)' }}>
-                 <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Av init={(t.firstName[0] + t.lastName[0]).toUpperCase()} col={['#3B82F6','#22C55E','#8B5CF6','#F59E0B','#EC4899'][i % 5]} size={34} /><span style={{ fontWeight: 700, color: 'var(--s900)' }}>{t.firstName} {t.lastName}</span></div></td>
-                <td style={{ color: 'var(--s500)', fontSize: 13, maxWidth: '200px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                  {t.subjects && t.subjects.length > 0 
-                    ? t.subjects.map(s => typeof s === 'string' ? s : s.subjectName || 'Subject').join(' · ')
-                    : 'N/A'}
-                </td>
-                 <td style={{ color: 'var(--s500)', fontSize: 13 }}>{formatDate(t.createdAt)}</td>
-                 <td style={{ color: 'var(--s500)', fontSize: 13 }}>{calculateDuration(t.createdAt)}</td>
-                 <td><StatusBadge s={t.status} /></td>
-                 <td>
-                   {t.isOnLeave ? (
-                     <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)' }}>
-                       On Leave
-                     </span>
-                   ) : (
-                     <span style={{ color: 'var(--s400)', fontSize: 12 }}>Active</span>
-                   )}
-                 </td>
-                 <td style={{ textAlign: 'center', whiteSpace: 'nowrap', minWidth: '100px' }}>
-                   <div style={{ display: 'flex', gap: 5, justifyContent: 'center' }}>
-                     <button className="btn btn-b btn-sm" onClick={() => handleViewDetails(t)}>View</button>
-                   </div>
-                 </td>
-               </tr>
-             ))}
-           </tbody>
-         </table>
-       </div>
 
-      {/* Teacher Details Modal */}
-      <Modal open={!!selectedTeacher} onClose={() => setSelectedTeacher(null)} title={selectedTeacher ? `${selectedTeacher.firstName} ${selectedTeacher.lastName} - Details` : 'Teacher Details'} size="lg">
+      {/* KPI STRIP */}
+      <div className="kpi-row">
+        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => { setLeaveFilter('all'); setTenureFilter('all'); setSubjectFilter('all'); setSearch('') }}>
+          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/></svg>
+          </div>
+          <div className="kpi-v">{counts.total}</div>
+          <div className="kpi-l">Total Teachers</div>
+          <div className="kpi-d" style={{ color: 'var(--s500)' }}>{allSubjects.length} subjects covered</div>
+        </div>
+        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setLeaveFilter('active')}>
+          <div className="kpi-ic" style={{ background: 'var(--g50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div className="kpi-v">{counts.active}</div>
+          <div className="kpi-l">Currently Active</div>
+          <div className="kpi-d" style={{ color: 'var(--g600)' }}>Available for teaching</div>
+        </div>
+        <div className="kpi" style={{ cursor: counts.onLeave > 0 ? 'pointer' : 'default', borderColor: counts.onLeave > 0 ? 'var(--a100)' : undefined }} onClick={() => counts.onLeave > 0 && setLeaveFilter('onleave')}>
+          <div className="kpi-ic" style={{ background: counts.onLeave > 0 ? 'var(--a50)' : 'var(--s100)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={counts.onLeave > 0 ? 'var(--a600)' : 'var(--s500)'} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div className="kpi-v" style={{ color: counts.onLeave > 0 ? 'var(--a600)' : undefined }}>{counts.onLeave}</div>
+          <div className="kpi-l">On Leave</div>
+          <div className="kpi-d" style={{ color: counts.onLeave > 0 ? 'var(--a600)' : 'var(--g600)' }}>
+            {counts.onLeave > 0 ? 'Currently away' : 'No one on leave'}
+          </div>
+        </div>
+        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setTenureFilter('new')}>
+          <div className="kpi-ic" style={{ background: 'var(--p50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--p600)" strokeWidth="2" strokeLinecap="round"><path d="M5 3v18M19 3v18M5 12h14"/></svg>
+          </div>
+          <div className="kpi-v">{counts.newHires}</div>
+          <div className="kpi-l">New Hires</div>
+          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Last 3 months</div>
+        </div>
+        <div className="kpi">
+          <div className="kpi-ic" style={{ background: 'var(--b50)' }}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div className="kpi-v">{counts.avgStudents}</div>
+          <div className="kpi-l">Avg Students/Teacher</div>
+          <div className="kpi-d" style={{ color: 'var(--s500)' }}>Workload balance</div>
+        </div>
+      </div>
+
+      {/* FILTER BAR */}
+      <div className="card" style={{ padding: '14px 16px', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <span className="ctitle" style={{ marginRight: 4 }}>Status:</span>
+          {[
+            { id: 'all',     label: 'All',         count: counts.total },
+            { id: 'active',  label: 'Active',      count: counts.active },
+            { id: 'onleave', label: 'On Leave',    count: counts.onLeave, urgent: counts.onLeave > 0 },
+          ].map(chip => (
+            <button key={chip.id} onClick={() => setLeaveFilter(chip.id)}
+              style={{
+                background: leaveFilter === chip.id ? (chip.urgent ? 'var(--a600)' : 'var(--crimson, #7D1025)') : 'var(--bg)',
+                color: leaveFilter === chip.id ? '#fff' : 'var(--s700)',
+                border: '1px solid ' + (leaveFilter === chip.id ? 'transparent' : 'var(--border)'),
+                padding: '6px 12px', borderRadius: 99,
+                fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 6,
+                transition: 'all .15s',
+              }}>
+              {chip.label}
+              <span style={{
+                background: leaveFilter === chip.id ? 'rgba(255,255,255,.2)' : 'var(--s100)',
+                color: leaveFilter === chip.id ? '#fff' : 'var(--s600)',
+                padding: '1px 7px', borderRadius: 99, fontSize: 11, fontWeight: 700,
+              }}>{chip.count}</span>
+            </button>
+          ))}
+
+          <div style={{ width: 1, height: 22, background: 'var(--border)', margin: '0 4px' }}/>
+
+          <select className="fsel" value={tenureFilter} onChange={e => setTenureFilter(e.target.value)}
+            style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600 }}>
+            <option value="all">All Tenure</option>
+            <option value="new">New (under 3 months)</option>
+            <option value="established">Established (3-24 months)</option>
+            <option value="senior">Senior (2+ years)</option>
+          </select>
+
+          {allSubjects.length > 0 && (
+            <select className="fsel" value={subjectFilter} onChange={e => setSubjectFilter(e.target.value)}
+              style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5, fontWeight: 600, maxWidth: 180 }}>
+              <option value="all">All Subjects</option>
+              {allSubjects.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          )}
+
+          <input className="fi" placeholder="Search name or email..."
+            value={search} onChange={e => setSearch(e.target.value)}
+            style={{ width: 220, marginLeft: 'auto' }}/>
+        </div>
+      </div>
+
+      {/* TABLE */}
+      {teachers.length === 0 ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No teachers yet</div>
+          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Add teachers from the Users module first</div>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, color: 'var(--s600)', fontWeight: 600 }}>No teachers match your filters</div>
+          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Showing 0 of {teachers.length} teachers</div>
+          <button className="btn btn-s btn-sm" style={{ marginTop: 14 }} onClick={() => { setLeaveFilter('all'); setTenureFilter('all'); setSubjectFilter('all'); setSearch('') }}>Clear all filters</button>
+        </div>
+      ) : (
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s700)' }}>
+              {filtered.length} of {teachers.length} teacher{teachers.length === 1 ? '' : 's'}
+            </div>
+            <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>
+              Click <strong>View</strong> to see details, statistics, and manage leave
+            </div>
+          </div>
+          <div style={{ overflow: 'auto' }}>
+            <table className="tbl" style={{ minWidth: 1100 }}>
+              <thead>
+                <tr>
+                  <th>Teacher</th>
+                  <th>Subjects</th>
+                  <th>Date Joined</th>
+                  <th>Tenure</th>
+                  <th>Status</th>
+                  <th>Students</th>
+                  <th style={{ width: 100, textAlign: 'center' }}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((t) => {
+                  const fullName = ((t.firstName || '') + ' ' + (t.lastName || '')).trim()
+                  const initials = ((t.firstName?.[0] || '?') + (t.lastName?.[0] || '')).toUpperCase()
+                  const subjects = subjectNames(t)
+                  return (
+                    <tr key={t._id} style={t.isOnLeave ? { background: 'var(--a50)' } : undefined}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <Av init={initials} col={avColor(fullName)} size={36}/>
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{fullName || 'Unnamed'}</div>
+                            <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>{t.email || 'No email'}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ maxWidth: 220 }}>
+                        {subjects.length === 0 ? (
+                          <span style={{ fontSize: 12, color: 'var(--s400)', fontStyle: 'italic' }}>No subjects</span>
+                        ) : (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                            {subjects.slice(0, 3).map((s, i) => (
+                              <span key={i} className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)', fontSize: 10.5 }}>{s}</span>
+                            ))}
+                            {subjects.length > 3 && (
+                              <span style={{ fontSize: 11, color: 'var(--s500)', alignSelf: 'center' }}>+{subjects.length - 3}</span>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ color: 'var(--s500)', fontSize: 13 }}>{formatDate(t.createdAt)}</td>
+                      <td style={{ color: 'var(--s500)', fontSize: 13 }}>{calculateDuration(t.createdAt)}</td>
+                      <td>
+                        {t.isOnLeave ? (
+                          <span className="badge" style={{ color: 'var(--a600)', background: 'var(--a50)', borderColor: 'var(--a100)' }}>On Leave</span>
+                        ) : (
+                          <span className="badge" style={{ color: 'var(--g700)', background: 'var(--g50)', borderColor: 'var(--g100)' }}>Active</span>
+                        )}
+                      </td>
+                      <td style={{ color: 'var(--s700)', fontSize: 13, fontWeight: 600 }}>
+                        {t.totalStudents || 0}
+                      </td>
+                      <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                        <button className="btn btn-g btn-sm" onClick={() => handleViewDetails(t)}>View</button>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* TEACHER DETAILS MODAL */}
+      <Modal open={!!selectedTeacher} onClose={() => setSelectedTeacher(null)}
+        title={selectedTeacher ? `${selectedTeacher.firstName} ${selectedTeacher.lastName} — Profile` : 'Teacher Profile'}
+        size="lg">
         {selectedTeacher && (
           <div>
-            <div style={{ background: 'var(--s50)', border: '1px solid var(--s200)', borderRadius: 'var(--rmd)', padding: 14, marginBottom: 16 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase' }}>Email</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedTeacher.email}</div>
+            {/* PROFILE HEADER */}
+            <div style={{
+              background: 'var(--bg)',
+              border: '1.5px solid var(--border)',
+              borderRadius: 'var(--rmd)',
+              padding: 18,
+              marginBottom: 16,
+              display: 'flex', alignItems: 'center', gap: 16,
+            }}>
+              <Av init={((selectedTeacher.firstName?.[0] || '') + (selectedTeacher.lastName?.[0] || '')).toUpperCase()}
+                col={avColor((selectedTeacher.firstName || '') + ' ' + (selectedTeacher.lastName || ''))}
+                size={64}/>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="serif" style={{ fontSize: 22, color: 'var(--s900)', lineHeight: 1.2 }}>
+                  {selectedTeacher.firstName} {selectedTeacher.lastName}
                 </div>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase' }}>Phone</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{selectedTeacher.phone || 'N/A'}</div>
+                <div style={{ fontSize: 13, color: 'var(--s500)', marginTop: 2 }}>
+                  {selectedTeacher.email || 'No email'}
+                  {selectedTeacher.phone && ' · ' + selectedTeacher.phone}
                 </div>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase' }}>Date Joined</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{formatDate(selectedTeacher.createdAt)}</div>
+                <div style={{ marginTop: 8 }}>
+                  {selectedTeacher.isOnLeave ? (
+                    <span className="badge" style={{ color: 'var(--a600)', background: 'var(--a50)', borderColor: 'var(--a100)' }}>On Leave</span>
+                  ) : (
+                    <span className="badge" style={{ color: 'var(--g700)', background: 'var(--g50)', borderColor: 'var(--g100)' }}>Active</span>
+                  )}
                 </div>
-                 <div>
-                   <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase' }}>Duration</div>
-                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)' }}>{calculateDuration(selectedTeacher.createdAt)}</div>
-                 </div>
-                 <div>
-                   <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s500)', textTransform: 'uppercase' }}>Leave Status</div>
-                   <div style={{ fontSize: 14, fontWeight: 600, color: selectedTeacher.isOnLeave ? 'var(--r700)' : 'var(--g700)' }}>
-                     {selectedTeacher.isOnLeave ? '🔴 On Leave' : '🟢 Active'}
-                   </div>
-                 </div>
               </div>
             </div>
 
+            {/* STATS GRID */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 10, marginBottom: 18 }}>
+              {[
+                { label: 'Joined',         value: formatDate(selectedTeacher.createdAt) },
+                { label: 'Tenure',         value: calculateDuration(selectedTeacher.createdAt) },
+                { label: 'Total Students', value: selectedTeacher.totalStudents || 0 },
+                { label: 'Total Sessions', value: selectedTeacher.totalSessions || 0 },
+              ].map(stat => (
+                <div key={stat.label} className="card" style={{ padding: 12 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)' }}>{stat.label}</div>
+                  <div className="mono" style={{ fontSize: 18, fontWeight: 700, color: 'var(--s900)', marginTop: 4 }}>{stat.value}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* SUBJECTS */}
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 10 }}>Subjects Teaching</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {selectedTeacher.subjects && selectedTeacher.subjects.length > 0 ? (
-                  selectedTeacher.subjects.map((s, idx) => (
-                    <span key={idx} className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>
-                      {typeof s === 'string' ? s : s.subjectName || 'Subject'}
-                    </span>
+              <div className="ctitle" style={{ marginBottom: 8 }}>Subjects Teaching</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {subjectNames(selectedTeacher).length > 0 ? (
+                  subjectNames(selectedTeacher).map((s, i) => (
+                    <span key={i} className="badge" style={{ color: 'var(--b700)', borderColor: 'var(--b100)', background: 'var(--b50)' }}>{s}</span>
                   ))
                 ) : (
-                  <span style={{ fontSize: 13, color: 'var(--s400)' }}>No subjects assigned</span>
+                  <span style={{ fontSize: 13, color: 'var(--s400)', fontStyle: 'italic' }}>No subjects assigned</span>
                 )}
               </div>
             </div>
 
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 10 }}>Teaching Statistics</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <div style={{ background: 'var(--b50)', border: '1px solid var(--b100)', borderRadius: 'var(--rmd)', padding: 10 }}>
-                  <div style={{ fontSize: 11, color: 'var(--s500)', fontWeight: 600 }}>Total Students</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--b700)' }}>{selectedTeacher.totalStudents || 0}</div>
-                </div>
-                <div style={{ background: 'var(--g50)', border: '1px solid var(--g100)', borderRadius: 'var(--rmd)', padding: 10 }}>
-                  <div style={{ fontSize: 11, color: 'var(--s500)', fontWeight: 600 }}>Total Sessions</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--g700)' }}>{selectedTeacher.totalSessions || 0}</div>
+            {/* TEACHING SPECIALTIES */}
+            {selectedTeacher.teachingSpecialties && selectedTeacher.teachingSpecialties.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <div className="ctitle" style={{ marginBottom: 8 }}>Teaching Specialties</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {selectedTeacher.teachingSpecialties.map((spec, i) => {
+                    const label = typeof spec === 'string' ? spec : `${spec.subject || ''} (${spec.curriculum || ''})`
+                    return (
+                      <span key={i} className="badge" style={{ color: 'var(--p600)', borderColor: 'var(--p100)', background: 'var(--p50)' }}>{label}</span>
+                    )
+                  })}
                 </div>
               </div>
+            )}
+
+            {/* BIO */}
+            {selectedTeacher.bio && (
+              <div style={{ marginBottom: 16 }}>
+                <div className="ctitle" style={{ marginBottom: 8 }}>Bio</div>
+                <div style={{ fontSize: 13, color: 'var(--s700)', lineHeight: 1.7, padding: 12, background: 'var(--bg)', borderRadius: 'var(--rsm)', border: '1px solid var(--border)' }}>
+                  {selectedTeacher.bio}
+                </div>
+              </div>
+            )}
+
+            {/* LEAVE TOGGLE */}
+            <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+              <div className="ctitle" style={{ marginBottom: 10 }}>Leave Management</div>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  className={selectedTeacher.isOnLeave ? 'btn btn-g btn-sm' : 'btn btn-am btn-sm'}
+                  onClick={() => handleToggleTeacherLeave(selectedTeacher)}>
+                  {selectedTeacher.isOnLeave ? (
+                    <>
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      Return from Leave
+                    </>
+                  ) : (
+                    <>
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+                      Set On Leave
+                    </>
+                  )}
+                </button>
+                <span style={{ fontSize: 12, color: 'var(--s500)' }}>
+                  {selectedTeacher.isOnLeave
+                    ? 'Teacher is currently on leave and unavailable for allocation'
+                    : 'Click to mark this teacher as on leave (e.g. maternity, sick, sabbatical)'}
+                </span>
+              </div>
             </div>
-
-             {selectedTeacher.bio && (
-               <div>
-                 <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)', marginBottom: 8 }}>Bio</div>
-                 <div style={{ fontSize: 13, color: 'var(--s600)', lineHeight: 1.5 }}>{selectedTeacher.bio}</div>
-               </div>
-             )}
-
-             <div style={{ marginTop: 20, borderTop: '1px solid var(--s200)', paddingTop: 16 }}>
-               <button 
-                 className={selectedTeacher.isOnLeave ? 'btn btn-g btn-sm' : 'btn btn-r btn-sm'}
-                 onClick={() => handleToggleTeacherLeave(selectedTeacher)}
-               >
-                 {selectedTeacher.isOnLeave ? '✓ Return from Leave' : '⏸ Set On Leave'}
-               </button>
-             </div>
           </div>
         )}
       </Modal>
