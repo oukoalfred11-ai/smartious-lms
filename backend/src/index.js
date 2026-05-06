@@ -52,7 +52,6 @@ app.use(rateLimit({
 
 // ── Routes ────────────────────────────────────────────────
 app.use('/api/auth',           authLimiter, require('./routes/auth'));
-app.use('/api/bootstrap',      require('./routes/bootstrap'));
 app.use('/api/users',          require('./routes/users'));
 app.use('/api/teachers',       require('./routes/teachers'));
 app.use('/api/allocations',    require('./routes/allocations'));
