@@ -202,55 +202,14 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       }
 
       if (userForm._id) {
-        // Update — try multiple endpoint variants
-        const updateEndpoints = ['/users/' + userForm._id, '/admin/users/' + userForm._id]
-        let updated = false
-        let lastErr = null
-        for (const ep of updateEndpoints) {
-          try {
-            await api.patch(ep, payload)
-            updated = true
-            break
-          } catch (e) {
-            lastErr = e
-            if (e.response?.status !== 404) break
-          }
-        }
-        if (!updated) throw lastErr
+        // Update existing user
+        const res = await api.patch('/users/' + userForm._id, payload)
         toast.ok(userForm.firstName + ' updated')
       } else {
-        // Create — try multiple endpoint variants because different backends mount differently
-        const createEndpoints = [
-          '/users',
-          '/admin/users',
-          '/users/create',
-          '/auth/register',
-          '/auth/admin-create',
-          '/auth/create-user',
-        ]
-        let created = false
-        let lastErr = null
-        let createdRes = null
-        for (const ep of createEndpoints) {
-          try {
-            createdRes = await api.post(ep, payload)
-            created = true
-            break
-          } catch (e) {
-            lastErr = e
-            // Only try next endpoint on 404. Stop on other errors (validation, auth, etc).
-            if (e.response?.status !== 404) break
-          }
-        }
-        if (!created) {
-          // Provide a helpful error
-          if (lastErr?.response?.status === 404) {
-            throw new Error('No user creation endpoint found. Tried: ' + createEndpoints.join(', ') + '. Check your backend routes.')
-          }
-          throw lastErr
-        }
-        if (createdRes?.data?.credentials) {
-          setCredentialsOverlay(createdRes.data.credentials)
+        // Create new user
+        const res = await api.post('/users', payload)
+        if (res.data.credentials) {
+          setCredentialsOverlay(res.data.credentials)
         }
         toast.ok(userForm.firstName + ' created successfully')
       }
@@ -321,12 +280,13 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
             </div>
             <div className="fg">
               <label className="fl">Temporary Password</label>
-              <input className="fi mono" readOnly value={credentialsOverlay.password || ''} />
+              <input className="fi mono" readOnly value={credentialsOverlay.tempPassword || credentialsOverlay.password || ''} />
             </div>
             <button
               className="btn btn-g btn-sm"
               onClick={() => {
-                navigator.clipboard?.writeText(`Email: ${credentialsOverlay.email}\nPassword: ${credentialsOverlay.password}`)
+                const pw = credentialsOverlay.tempPassword || credentialsOverlay.password || ''
+                navigator.clipboard?.writeText(`Email: ${credentialsOverlay.email}\nPassword: ${pw}`)
                 toast.ok('Copied to clipboard')
               }}
             >Copy Both</button>
