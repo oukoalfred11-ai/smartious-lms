@@ -10,6 +10,9 @@ const GroupRoomSchema = new mongoose.Schema({
   students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   schedule: { type: String },
   status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
+  zoomLink: { type: String, default: '' },
+  zoomStartedAt: { type: Date },
+  zoomStartedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
