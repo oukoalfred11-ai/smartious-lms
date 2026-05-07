@@ -1020,24 +1020,23 @@ export default function StudentPortal() {
                 </div>
               ))}
 
-              {store.groupRooms.length === 0 && (
+             {store.groupRooms.length === 0 && (
                 <div className="empty">
                   <h3>No class rooms yet</h3>
                   <p>The admin will assign you to a class room based on your curriculum and subject choices.</p>
                 </div>
-            )}
-          </div>
-        )}
-      </div>
-    </main>
-  );
-}  
+              )}
+            </div>
+          )}
 
-         {/* ════════════════════════════════════════════
-          SUBSCRIPTION
-      ════════════════════════════════════════════ */}
-      {page === 'profile' && <ProfileTab user={user} toast={toast} />}
-      {page === 'subscription' && (<SubscriptionTab user={user} store={store} toast={toast} />)}
+          {/* ════════════════════════════════════════════
+              PROFILE & SUBSCRIPTION
+          ════════════════════════════════════════════ */}
+          {page === 'profile' && <ProfileTab user={user} toast={toast} />}
+          {page === 'subscription' && <SubscriptionTab user={user} store={store} toast={toast} />}
+
+        </div>
+      </main>
     </div>
   );
 }
