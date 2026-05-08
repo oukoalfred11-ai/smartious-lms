@@ -142,7 +142,7 @@ export default function TeacherPortal() {
 
   // ── Message compose state ────────────────────────────
   const [msgModal,     setMsgModal]     = useState(false)
-  const [msgTo,        setMsgTo]        = useState('Janet Osei')
+  const [msgTo,        setMsgTo]        = useState('')
   const [msgToRole,    setMsgToRole]    = useState('parent')
   const [msgSubject,   setMsgSubject]   = useState('')
   const [msgBody,      setMsgBody]      = useState('')
@@ -151,11 +151,24 @@ export default function TeacherPortal() {
 
   // ── Exam result post state ────────────────────────────
   const [resultModal,    setResultModal]    = useState(false)
-  const [resultStudent,  setResultStudent]  = useState('Amara Osei')
+  const [resultStudent,  setResultStudent]  = useState('')
   const [resultExam,     setResultExam]     = useState('Pythagoras Theorem Mock')
   const [resultScore,    setResultScore]    = useState('')
   const [resultTotal,    setResultTotal]    = useState('100')
   const [resultFeedback, setResultFeedback] = useState('')
+  // Real students fetched from backend (used by Send Message + Post Exam Result modals)
+  const [allStudents, setAllStudents] = useState([])
+  useEffect(() => {
+    const token = localStorage.getItem('sm_token')
+    if (!token) return
+    api.get('/users?role=student')
+      .then(res => {
+        if (res.data?.users) {
+          setAllStudents(res.data.users)
+        }
+      })
+      .catch(err => console.error('[teacher] failed to load students:', err))
+  }, [])
 
   // ── Derived from store ───────────────────────────────
   const myArticles = store.articles.filter(a => a.author === teacherName)
@@ -507,9 +520,16 @@ export default function TeacherPortal() {
           <div className="fg">
             <label className="fl">To</label>
             <select className="fsel" value={msgTo} onChange={e => setMsgTo(e.target.value)}>
-              <option value="Janet Osei">Janet Osei (Parent — Amara)</option>
-              <option value="Amara Osei">Amara Osei (Student)</option>
-              <option value="All Parents">All Parents</option>
+              <option value="">-- Select recipient --</option>
+              <option value="all">All Students</option>
+              {allStudents.length === 0 && (
+                <option value="" disabled>No students enrolled yet</option>
+              )}
+              {allStudents.map(s => (
+                <option key={s._id} value={s._id}>
+                  {s.firstName} {s.lastName} (Student)
+                </option>
+              ))}
             </select>
           </div>
           <div className="fg">
@@ -530,8 +550,14 @@ export default function TeacherPortal() {
           <div className="fg">
             <label className="fl">Student</label>
             <select className="fsel" value={resultStudent} onChange={e => setResultStudent(e.target.value)}>
-              {['Amara Osei','Kofi Mensah','Zara Kamau','Brian Otieno','Faith Wanjiru','David Mwangi','Lydia Achieng','Peter Kamau'].map(s => (
-                <option key={s}>{s}</option>
+              <option value="">-- Select student --</option>
+              {allStudents.length === 0 && (
+                <option value="" disabled>No students enrolled yet</option>
+              )}
+              {allStudents.map(s => (
+                <option key={s._id} value={s._id}>
+                  {s.firstName} {s.lastName}
+                </option>
               ))}
             </select>
           </div>
