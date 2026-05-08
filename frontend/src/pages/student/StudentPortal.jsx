@@ -2756,7 +2756,24 @@ function LiveClassesTab({ user, store, setInClassroom, toast }) {
                 fontWeight: 700, padding: '12px 24px',
                 fontSize: 14,
               }}
-              onClick={() => setInClassroom(true)}
+              onClick={async () => {
+                if (!room._id) {
+                  toast?.info?.('Class room not synced to backend yet. Ask admin to sync rooms.')
+                  return
+                }
+                try {
+                  const { data } = await api.get('/grouprooms/' + room._id + '/zoom')
+                  if (data.zoomLink) {
+                    window.open(data.zoomLink, '_blank', 'noopener,noreferrer')
+                    toast?.ok?.('Opening Zoom...')
+                  } else {
+                    toast?.info?.('Teacher has not started the class yet. Please wait.')
+                  }
+                } catch (e) {
+                  console.error('[join-class]', e)
+                  toast?.error?.(e.response?.data?.message || 'Could not load class link')
+                }
+              }}
             >
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ marginRight: 6 }}>
                 <polygon points="5 3 19 12 5 21 5 3"/>
