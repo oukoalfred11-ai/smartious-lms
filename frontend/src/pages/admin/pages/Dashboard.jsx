@@ -1627,32 +1627,213 @@ function LiveLessonsModule({ refreshKey, toast }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 10. GROUP ROOMS MODULE
+// 10. GROUP ROOMS MODULE — backed by /api/grouprooms
 // ═══════════════════════════════════════════════════════════
 function GroupRoomsModule({ refreshKey, toast }) {
+  const store = useStore()
+  const [backendRooms, setBackendRooms] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [error, setError] = useState(null)
+
+  // Load rooms from backend on mount and when refreshKey changes
+  useEffect(() => {
+    loadBackendRooms()
+  }, [refreshKey])
+
+  const loadBackendRooms = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { data } = await api.get('/grouprooms')
+      if (data.success) {
+        setBackendRooms(data.rooms || [])
+      }
+    } catch (e) {
+      console.error('[grouprooms]', e.message)
+      setError(e.response?.data?.message || 'Failed to load rooms')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const syncToBackend = async () => {
+    const localRooms = store.groupRooms || []
+    if (localRooms.length === 0) {
+      toast?.info?.('No local rooms to sync.')
+      return
+    }
+    if (!confirm('Push ' + localRooms.length + ' rooms from local storage to the backend? This will create them in MongoDB so live class features can work.')) {
+      return
+    }
+    setSyncing(true)
+    try {
+      const { data } = await api.post('/grouprooms/sync', { rooms: localRooms })
+      if (data.success) {
+        toast?.ok?.(data.message || 'Sync complete')
+        await loadBackendRooms()
+      } else {
+        toast?.error?.(data.message || 'Sync failed')
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Sync failed: ' + e.message)
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  // Combined view: backend rooms (have _id) + local-only rooms (no _id)
+  const localRooms = store.groupRooms || []
+  const localOnlyRooms = localRooms.filter(lr =>
+    !backendRooms.some(br => br.name === lr.name && br.subject === lr.subject)
+  )
+  const allRooms = [
+    ...backendRooms.map(r => ({ ...r, _source: 'backend' })),
+    ...localOnlyRooms.map(r => ({ ...r, _source: 'local' })),
+  ]
+
+  // Real KPIs
+  const totalRooms = allRooms.length
+  const totalMembers = backendRooms.reduce((sum, r) => sum + (r.students?.length || 0), 0)
+                     + localOnlyRooms.reduce((sum, r) => sum + (r.enrolled || r.students?.length || 0), 0)
+  const uniqueSubjects = new Set(allRooms.map(r => r.subject)).size
+  const liveNow = backendRooms.filter(r => r.zoomLink && r.zoomStartedAt).length
+
   return (
     <>
-      <div style={{ marginBottom: 18 }}>
-        <div className="sec-tag">Cohort Spaces</div>
-        <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Group <em style={{ color: 'var(--crimson, #7D1025)' }}>Rooms</em></h2>
-        <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Persistent classrooms for cohort-based learning</p>
+      <div style={{ marginBottom: 18, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
+        <div>
+          <div className="sec-tag">Cohort Spaces</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Group <em style={{ color: 'var(--crimson, #7D1025)' }}>Rooms</em></h2>
+          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Persistent classrooms backed by MongoDB · Powers live class Zoom links</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={loadBackendRooms}
+            disabled={loading}
+            className="btn btn-s btn-sm"
+            style={{ opacity: loading ? 0.6 : 1 }}
+          >
+            {loading ? 'Loading...' : 'Refresh'}
+          </button>
+          {localOnlyRooms.length > 0 && (
+            <button
+              onClick={syncToBackend}
+              disabled={syncing}
+              className="btn btn-p btn-sm"
+              style={{ opacity: syncing ? 0.6 : 1 }}
+            >
+              {syncing ? 'Syncing...' : 'Sync ' + localOnlyRooms.length + ' to Backend'}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="kpi-row">
-        <div className="kpi"><div className="kpi-v">8</div><div className="kpi-l">Active Rooms</div></div>
-        <div className="kpi"><div className="kpi-v">156</div><div className="kpi-l">Members</div></div>
-        <div className="kpi"><div className="kpi-v">4</div><div className="kpi-l">Subjects</div></div>
-        <div className="kpi"><div className="kpi-v">23</div><div className="kpi-l">Sessions This Week</div></div>
+        <div className="kpi"><div className="kpi-v">{totalRooms}</div><div className="kpi-l">Total Rooms</div></div>
+        <div className="kpi"><div className="kpi-v">{totalMembers}</div><div className="kpi-l">Members</div></div>
+        <div className="kpi"><div className="kpi-v">{uniqueSubjects}</div><div className="kpi-l">Subjects</div></div>
+        <div className="kpi"><div className="kpi-v" style={{ color: liveNow > 0 ? 'var(--crimson, #7D1025)' : undefined }}>{liveNow}</div><div className="kpi-l">Live Now</div></div>
       </div>
 
-      <div className="card" style={{ marginTop: 18, padding: 40, textAlign: 'center' }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s600)' }}>Group Rooms management — coming next</div>
-        <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Wire to backend /group-rooms endpoint when available</div>
+      {error && (
+        <div style={{
+          background: '#FEF2F2', border: '1px solid #FCA5A5',
+          color: '#991B1B', padding: '10px 14px',
+          borderRadius: 8, fontSize: 13, marginTop: 12,
+        }}>
+          Error: {error}
+        </div>
+      )}
+
+      {/* Sync banner if there are local-only rooms */}
+      {localOnlyRooms.length > 0 && (
+        <div style={{
+          background: 'linear-gradient(135deg, #FBF6E3 0%, #FFFBEA 100%)',
+          border: '1px solid #C9A030',
+          borderLeft: '4px solid #C9A030',
+          padding: '14px 18px', marginTop: 14,
+          borderRadius: 8,
+          display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap',
+        }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)', marginBottom: 4 }}>
+              {localOnlyRooms.length} room{localOnlyRooms.length === 1 ? '' : 's'} only in local storage
+            </div>
+            <div style={{ fontSize: 12.5, color: 'var(--s600)' }}>
+              Live class features (Zoom links, student joining) require rooms to exist in the backend database. Click "Sync to Backend" to push them now.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rooms list */}
+      <div style={{ marginTop: 18 }}>
+        {allRooms.length === 0 ? (
+          <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s600)' }}>No group rooms yet</div>
+            <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>
+              Rooms are created by admins. Once created, they appear here. Once synced to backend, teachers can start live classes for them.
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 12 }}>
+            {allRooms.map((room, idx) => {
+              const isBackend = room._source === 'backend'
+              const enrolled = isBackend ? (room.students?.length || 0) : (room.enrolled || room.students?.length || 0)
+              const capacity = room.capacity || 10
+              const isLive = isBackend && room.zoomLink && room.zoomStartedAt
+              return (
+                <div key={room._id || ('local-' + idx)} className="card" style={{
+                  padding: 16,
+                  borderLeft: isLive ? '4px solid #DC2626' : isBackend ? '4px solid #15803D' : '4px solid #C9A030',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, gap: 8 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)' }}>{room.name}</div>
+                      <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>{room.subject} · {room.curriculum || 'IGCSE'} {room.grade ? '· ' + room.grade : ''}</div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
+                      {isLive && (
+                        <span style={{ background: '#DC2626', color: '#FFF', fontSize: 9, fontWeight: 800, padding: '2px 8px', borderRadius: 99, letterSpacing: '.08em' }}>● LIVE</span>
+                      )}
+                      <span style={{
+                        background: isBackend ? '#DCFCE7' : '#FBF6E3',
+                        color: isBackend ? '#15803D' : '#92400E',
+                        fontSize: 9, fontWeight: 700, padding: '2px 8px', borderRadius: 99, letterSpacing: '.08em',
+                      }}>
+                        {isBackend ? 'BACKEND' : 'LOCAL ONLY'}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 10 }}>
+                    {room.schedule || 'No schedule set'}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--s500)' }}>
+                    <span>{enrolled}/{capacity} students</span>
+                    <div style={{ flex: 1, height: 4, background: '#F3F4F6', borderRadius: 99, overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%',
+                        width: Math.min(100, (enrolled / capacity) * 100) + '%',
+                        background: enrolled >= capacity ? '#DC2626' : '#15803D',
+                        borderRadius: 99,
+                      }}/>
+                    </div>
+                  </div>
+                  {isBackend && (
+                    <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #F3F4F6', fontSize: 10, color: 'var(--s400)', fontFamily: 'JetBrains Mono, monospace' }}>
+                      _id: {room._id?.slice(0, 8)}...{room._id?.slice(-4)}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </>
   )
 }
-
 // ═══════════════════════════════════════════════════════════
 // 11. CURRICULUM MODULE
 // ═══════════════════════════════════════════════════════════
