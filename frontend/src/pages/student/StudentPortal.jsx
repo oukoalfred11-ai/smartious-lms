@@ -919,7 +919,7 @@ export default function StudentPortal() {
                       </div>
                       <span className={`badge ${room.status==='Active'?'badge-green':'badge-slate'}`}>{room.status}</span>
                     </div>
-                    <button className="btn btn-p btn-sm" onClick={()=>{setPage('live');setInClassroom(true)}}>Join Class</button>
+                    <button className="btn btn-p btn-sm" onClick={()=>setPage('live')}>Join Class</button>
                   </div>
                 ))}
               </div>
@@ -937,7 +937,7 @@ export default function StudentPortal() {
                 <div className="ctitle" style={{marginBottom:12}}>Quick Actions</div>
                 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
                   {[
-                    ['Join Live Class', () => {setPage('live');setInClassroom(true)}, '<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>'],
+                    ['Join Live Class', () => setPage('live'), '<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>'],
                     ['My Class Rooms', () => goTo('myroom'), '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'],
                     ['Resources', () => goTo('resources'), '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>'],
                     ['Ask Mshauri', () => goTo('tutor'), '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'],
@@ -979,7 +979,7 @@ export default function StudentPortal() {
                         <div className="mono" style={{fontSize:18,fontWeight:700,color:room.enrolled>=room.capacity?'var(--r500)':'var(--g600)'}}>{room.enrolled}/{room.capacity}</div>
                         <div style={{fontSize:11,color:'var(--s400)'}}>students</div>
                       </div>
-                      <button className="btn btn-p btn-sm" onClick={()=>{setPage('live');setInClassroom(true)}}>
+                      <button className="btn btn-p btn-sm" onClick={()=>setPage('live')}>
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
                         Join Class
                       </button>
