@@ -12,7 +12,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
-import LiveClassroom from '../../components/ui/LiveClassroom.jsx'
 
 // ── SVG icon helper ───────────────────────────────────────
 const I = (d) => (
@@ -134,7 +133,6 @@ export default function StudentPortal() {
   // ── Navigation ───────────────────────────────────────
   const [page,        setPage]        = useState('dashboard')
   const [collapsed,   setCollapsed]   = useState(false)
-  const [inClassroom, setInClassroom] = useState(false)
 
   // ── Mastery (from API) ───────────────────────────────
   const [mastery,       setMastery]       = useState(null)
@@ -822,10 +820,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               LIVE CLASSES
           ════════════════════════════════════════════ */}
-          {page === 'live' && !inClassroom && <LiveClassesTab user={user} store={store} setInClassroom={setInClassroom} toast={toast} />}
-          {page === 'live' && inClassroom && (
-            <LiveClassroom role="student" onLeave={() => setInClassroom(false)}/>
-          )}
+          {page === 'live' && <LiveClassesTab user={user} store={store} toast={toast} />}
 
           {/* ════════════════════════════════════════════
               TIMETABLE
@@ -2594,7 +2589,7 @@ const formatMins = (mins) => {
  
 const dayName = (dow) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow]
  
-function LiveClassesTab({ user, store, setInClassroom, toast }) {
+function LiveClassesTab({ user, store, toast }) {
   // Tick state — re-evaluate liveness every 30 seconds
   const [tick, setTick] = useState(0)
   useEffect(() => {
