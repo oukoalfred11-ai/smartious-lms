@@ -49,7 +49,7 @@ router.get('/stats', auth, requireRole('admin'), async (req, res) => {
 });
 
 // GET all users (admin only) with advanced search and filtering
-router.get('/', auth, requireRole(['admin', 'teacher']), async (req, res) => {
+router.get('/', auth, requireRole('admin', 'teacher'), async (req, res) => {
   try {
     const { search, role, curriculum } = req.query;
     let query = {};
