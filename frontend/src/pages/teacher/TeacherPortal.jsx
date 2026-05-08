@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
-import LiveClassroom from '../../components/ui/LiveClassroom.jsx'
 
 // ── SVG icon helper ──────────────────────────────────────
 const Ico = ({ d, w = 18, col = 'currentColor', sw = 2 }) => (
@@ -86,6 +85,34 @@ const BLOG_POSTS = [
 export default function TeacherPortal() {
   const toast  = useToast()
   const store  = useStore()
+
+  // Load logged-in user from localStorage (set during login)
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('sm_user')
+      return stored ? JSON.parse(stored) : null
+    } catch { return null }
+  })
+
+  // Refresh user from backend on mount (in case localStorage is stale)
+  useEffect(() => {
+    const token = localStorage.getItem('sm_token')
+    if (!token) return
+    api.get('/auth/me')
+      .then(res => {
+        if (res.data?.user) {
+          setCurrentUser(res.data.user)
+          try { localStorage.setItem('sm_user', JSON.stringify(res.data.user)) } catch {}
+        }
+      })
+      .catch(() => { /* keep localStorage version */ })
+  }, [])
+
+  // Computed display name (used throughout the portal)
+  const teacherName = currentUser
+    ? ('Mr. ' + (currentUser.firstName || '') + ' ' + (currentUser.lastName || '')).trim()
+    : 'Teacher'
+
   const [page, setPage] = useState('dashboard')
   const [collapsed, setSidebarCollapsed] = useState(false)
   const [uploadModal, setUploadModal] = useState(false)
@@ -131,10 +158,10 @@ export default function TeacherPortal() {
   const [resultFeedback, setResultFeedback] = useState('')
 
   // ── Derived from store ───────────────────────────────
-  const myArticles = store.articles.filter(a => a.author === 'Mr. James Muthomi')
+  const myArticles = store.articles.filter(a => a.author === teacherName)
   const totalReads = myArticles.reduce((s, a) => s + (a.reads || 0), 0)
   const totalEarnings = myArticles.reduce((s, a) => s + (a.earnings || 0), 0)
-  const myThreads  = store.getThreads('teacher', 'Mr. James Muthomi')
+  const myThreads  = store.getThreads('teacher', teacherName)
   const unreadCount = myThreads.reduce((s, t) => s + t.unread, 0)
 
   // ── Blog publish ─────────────────────────────────────
@@ -146,8 +173,8 @@ export default function TeacherPortal() {
       body:       blogBody,
       subject:    blogSubject,
       cat:        blogCat,
-      author:    'Mr. James Muthomi',
-      authorInit: 'JM',
+      author:     teacherName,
+      authorInit: ((currentUser?.firstName?.[0] || 'T') + (currentUser?.lastName?.[0] || '')).toUpperCase(),
       authorCol:  '#3B82F6',
       img:        blogCat === 'igcse' ? 'linear-gradient(135deg,#0D1525,#1B3060)' : 'linear-gradient(135deg,#0D1A0D,#1A3D1A)',
     }
@@ -192,7 +219,7 @@ export default function TeacherPortal() {
       subject:  uploadSubject,
       grade:    uploadGrade,
       size:     '—',
-      addedBy: 'Mr. Muthomi',
+      addedBy:  teacherName,
     })
     // If a YouTube URL was provided, also save as a lesson
     if (uploadYouTube.trim()) {
@@ -209,7 +236,7 @@ export default function TeacherPortal() {
         grade:      uploadGrade,
         youtubeUrl: embedUrl,
         topic:      uploadTopic || uploadTitle,
-        addedBy:   'Mr. Muthomi',
+        addedBy:    teacherName,
         description: 'Lesson video for ' + uploadSubject + ' — ' + uploadGrade,
       })
       toast.ok('Video lesson published! Students can watch it in the Lesson Player.')
@@ -379,10 +406,14 @@ export default function TeacherPortal() {
           ))}
         </nav>
         <div className="sb-user">
-          <Av init="JM" col="#3B82F6" size={36}/>
+          <Av
+            init={((currentUser?.firstName?.[0] || 'T') + (currentUser?.lastName?.[0] || '')).toUpperCase()}
+            col="#3B82F6"
+            size={36}
+          />
           <div className="sb-uinfo">
-            <div className="sb-uname">Mr. James Muthomi</div>
-            <div className="sb-urole">Mathematics · IGCSE</div>
+            <div className="sb-uname">{teacherName}</div>
+            <div className="sb-urole">{currentUser?.subject || 'Teacher'}</div>
           </div>
         </div>
         <div className="sb-back" onClick={() => window.location.href='/'}>
@@ -420,54 +451,54 @@ export default function TeacherPortal() {
         <div className="content" style={{animation:'fadeIn .25s ease'}}>
 
           {/* ── DASHBOARD ── */}
-          {page === 'dashboard' && <TeacherDashboardTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} setMsgModal={setMsgModal} setUploadModal={setUploadModal} />}
+          {page === 'dashboard' && <TeacherDashboardTab user={currentUser} store={store} setPage={setPage} toast={toast} setMsgModal={setMsgModal} setUploadModal={setUploadModal} />}
 
 
           {/* ── LIVE CLASSROOM (PRO) ── */}
           {page === 'classroom' && (
             <TeacherLiveStudio
-              user={store?.currentUser}
+              user={currentUser}
               onLeave={() => { setPage('dashboard'); toast?.ok?.('Session ended. Recording saved.') }}
               toast={toast}
             />
           )}
 
           {/* ── MY STUDENTS ── */}
-          {page === 'students' && <MyStudentsTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} setMsgTo={setMsgTo} setMsgSubject={setMsgSubject} setMsgBody={setMsgBody} setMsgModal={setMsgModal} />}
+          {page === 'students' && <MyStudentsTab user={currentUser} store={store} setPage={setPage} toast={toast} setMsgTo={setMsgTo} setMsgSubject={setMsgSubject} setMsgBody={setMsgBody} setMsgModal={setMsgModal} />}
 
 
           {/* ── QUESTION BANK ── */}
-          {page === 'questionbank' && <QuestionBankTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
+          {page === 'questionbank' && <QuestionBankTab user={currentUser} store={store} setPage={setPage} toast={toast} />}
 
           {/* ── EXAMS ── */}
-          {page === 'exambuilder' && <ExamsTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
+          {page === 'exambuilder' && <ExamsTab user={currentUser} store={store} setPage={setPage} toast={toast} />}
 
 
           {/* ── AI MARKING ── */}
           {/* ── HOMEWORK ── */}
-          {page === 'marking' && <HomeworkTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
+          {page === 'marking' && <HomeworkTab user={currentUser} store={store} setPage={setPage} toast={toast} />}
 
 
          {/* ── LIVE LESSONS ── (real data from backend) */}
           {page === 'liveclass' && (
-            <TeacherLiveClassesTab user={store?.currentUser} toast={toast} />
+            <TeacherLiveClassesTab user={currentUser} toast={toast} />
           )}
 
            {/* ── COMMUNICATION ── */}
-           {page === 'communication' && <CommunicationTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
+           {page === 'communication' && <CommunicationTab user={currentUser} store={store} setPage={setPage} toast={toast} />}
 
            {/* ── MSHAURI AI ── */}
-           {page === 'mshauri' && <MshauriAITab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
+           {page === 'mshauri' && <MshauriAITab user={currentUser} store={store} setPage={setPage} toast={toast} />}
 
            {/* ── PROFILE ── */}
-           {page === 'profile' && <TeacherProfileTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
+           {page === 'profile' && <TeacherProfileTab user={currentUser} store={store} setPage={setPage} toast={toast} />}
 
 
         </div>
       </main>
 
       {/* ── Mshauri Floating Button & Panel ── */}
-      <MshauriFloatingButton user={store?.currentUser} setPage={setPage} toast={toast} currentPage={page}/>
+      <MshauriFloatingButton user={currentUser} setPage={setPage} toast={toast} currentPage={page}/>
 
       {/* ── Send Message Modal ── */}
       <Modal open={msgModal} onClose={() => setMsgModal(false)} title="Send Message" size="md"
