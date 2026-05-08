@@ -2601,17 +2601,58 @@ function LiveClassesTab({ user, store, setInClassroom, toast }) {
     const id = setInterval(() => setTick(t => t + 1), 30000)
     return () => clearInterval(id)
   }, [])
- 
+
+  // Backend rooms (real _id, has zoomLink)
+  const [backendRooms, setBackendRooms] = useState(null)
+  useEffect(() => {
+    let cancelled = false
+    const loadRooms = async () => {
+      try {
+        const { data } = await api.get('/grouprooms')
+        if (!cancelled && data.success) {
+          setBackendRooms(data.rooms || [])
+        }
+      } catch (e) {
+        console.error('[livetab] backend fetch failed:', e.message)
+        if (!cancelled) setBackendRooms([])
+      }
+    }
+    loadRooms()
+    const id = setInterval(loadRooms, 30000)
+    return () => { cancelled = true; clearInterval(id) }
+  }, [])
+
   // Find this student's enrolled rooms
+  // Prefer backend rooms (have _id for Zoom). Fall back to localStorage rooms.
   const studentFullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
-  const allRooms = store?.groupRooms || []
-  const myRooms = allRooms.filter(r =>
-    r.students?.some(s =>
-      s === studentFullName ||
-      s === user?.firstName ||
-      (user?.firstName && s.includes(user.firstName))
-    )
-  )
+  const studentId = user?._id
+
+  // Use backend rooms if loaded; otherwise fall back to local store
+  const allRooms = backendRooms !== null
+    ? backendRooms
+    : (store?.groupRooms || [])
+
+  const myRooms = allRooms.filter(r => {
+    // Backend rooms have students as ObjectIds or populated User objects
+    if (Array.isArray(r.students)) {
+      return r.students.some(s => {
+        // Populated user object
+        if (typeof s === 'object' && s !== null) {
+          return s._id === studentId ||
+                 (s.firstName && s.firstName === user?.firstName)
+        }
+        // Just an ObjectId string
+        if (typeof s === 'string' && /^[a-f\d]{24}$/i.test(s)) {
+          return s === studentId
+        }
+        // Local rooms have name strings
+        return s === studentFullName ||
+               s === user?.firstName ||
+               (user?.firstName && s.includes(user.firstName))
+      })
+    }
+    return false
+  })
  
   // Compute status for each
   const now = new Date()
