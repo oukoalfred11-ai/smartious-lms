@@ -3683,7 +3683,7 @@ function MshauriTab({ user }) {
 // ═══════════════════════════════════════════════════════════
 // TIMETABLE TAB — week grid + list, real student schedule
 // ═══════════════════════════════════════════════════════════
-function TimetableTab({ user, store, setInClassroom, setPage, toast }) {
+function TimetableTab({ user, store, setPage, toast }) {
   const [view, setView]   = useState('grid')   // 'grid' | 'list'
   const [tick, setTick]   = useState(0)
   const [selected, setSelected] = useState(null)  // currently selected slot for action menu
@@ -3796,7 +3796,6 @@ function TimetableTab({ user, store, setInClassroom, setPage, toast }) {
     setSelected(null)
     if (action === 'join') {
       setPage('live')
-      setInClassroom(true)
     } else if (action === 'view-class') {
       setPage('myroom')
     } else if (action === 'add-cal') {
@@ -6926,7 +6925,7 @@ function ProfileTab({ user, toast }) {
 //
 // STEP 3: Paste this single line in its place:
 //
-//          {page === 'dashboard' && <DashboardTab user={user} store={store} setPage={setPage} setInClassroom={setInClassroom} setLearningMode={setLearningMode} learningMode={learningMode} toast={toast} />}
+//          {page === 'dashboard' && <DashboardTab user={user} store={store} setPage={setPage} setLearningMode={setLearningMode} learningMode={learningMode} toast={toast} />}
 //
 // STEP 4: Add the DashboardTab component at the bottom of the file
 //   at COLUMN 1 — paste everything below this line:
@@ -7011,7 +7010,7 @@ const timeAgo = (iso) => {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 
-function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, learningMode, toast }) {
+function DashboardTab({ user, store, setPage, setLearningMode, learningMode, toast }) {
   // Tick to refresh live status every 30s
   const [tick, setTick] = useState(0)
   useEffect(() => {
@@ -7139,7 +7138,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
       subtitle: `${liveNow.subject} with ${liveNow.teacher} - ends at ${formatMinsTime(liveNow.endMins)}`,
       cta: 'Join Class Now',
       colour: '#22C55E',
-      action: () => { setPage('live'); setInClassroom(true) },
+      action: () => setPage('live'),
     }
 
     // Class within 30 min
@@ -7404,7 +7403,7 @@ function DashboardTab({ user, store, setPage, setInClassroom, setLearningMode, l
             </div>
           ) : todayClasses.map((cls, i) => (
             <div key={i}
-              onClick={() => { if (cls.status === 'live') { setPage('live'); setInClassroom(true) } else { setPage('live') } }}
+              onClick={() => setPage('live')}
               style={{
                 display: 'flex', gap: 12, padding: '12px 0',
                 borderBottom: i < todayClasses.length - 1 ? '1px solid var(--border)' : 'none',
