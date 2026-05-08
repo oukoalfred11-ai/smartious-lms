@@ -4098,7 +4098,7 @@ function TimetableTab({ user, store, setInClassroom, setPage, toast }) {
                     <td>{statusBadge}</td>
                     <td>
                       {live && (
-                        <button className="btn btn-d btn-sm" onClick={() => { setPage('live'); setInClassroom(true) }}>
+                        <button className="btn btn-d btn-sm" onClick={() => setPage('live')}>
                           Join
                         </button>
                       )}
