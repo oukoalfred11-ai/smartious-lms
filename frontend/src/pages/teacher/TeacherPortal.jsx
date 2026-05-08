@@ -303,7 +303,8 @@ export default function TeacherPortal() {
   const pageTitles = {
     dashboard: 'Dashboard',
     students: 'My Students',
-    classroom: 'Live Classes',
+    liveclass: 'Live Classes',
+    classroom: 'Live Studio',
     questionbank: 'Question Bank',
     exambuilder: 'Exams',
     marking: 'Homework',
@@ -326,7 +327,7 @@ export default function TeacherPortal() {
     { section:'Teaching', items:[
       {id:'dashboard',     label:'Dashboard',        icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
       {id:'students',      label:'My Students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
-      {id:'classroom',     label:'Live Classes',     icon:'rect:2:3:20:14:2|M8 21h8M12 17v4', live:true},
+      {id:'liveclass',     label:'Live Classes',     icon:'rect:2:3:20:14:2|M8 21h8M12 17v4', live:true},
     ]},
     { section:'Assessment', items:[
       {id:'questionbank',  label:'Question Bank',    icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6|circle:18:18:3'},
@@ -399,10 +400,10 @@ export default function TeacherPortal() {
               <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               Message
             </button>
-            {page === 'classroom' && (
-              <div className="tb-chip live" onClick={() => setPage('classroom')}>
+            {page === 'liveclass' && (
+              <div className="tb-chip live" onClick={() => setPage('liveclass')}>
                 <div style={{width:7,height:7,borderRadius:'50%',background:'var(--r500)',animation:'pulse 2s infinite'}}/>
-                Mathematics — Pythagoras · LIVE
+                Live Classes
               </div>
             )}
             <div className="tb-chip">
@@ -447,22 +448,9 @@ export default function TeacherPortal() {
           {page === 'marking' && <HomeworkTab user={store?.currentUser} store={store} setPage={setPage} toast={toast} />}
 
 
-          {/* ── LIVE LESSONS ── */}
-          {page==='liveclass'&&(
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Scheduled Sessions</div><h2 className="serif" style={{fontSize:24,color:'var(--s900)'}}>Live <em style={{color:'var(--b700)'}}>Lessons</em></h2></div>
-              {[{title:'Pythagoras Theorem',time:'NOW · 38 min remaining',students:6,cls:'IGCSE Form 3',live:true},{title:'Trigonometry Intro',time:'Tue Mar 11 · 10:00–11:00 AM',students:0,cls:'IGCSE Form 3',live:false},{title:'Mock Exam Review',time:'Thu Mar 13 · 2:00–3:30 PM',students:0,cls:'IGCSE Form 3',live:false}].map((s,i) => (
-                <div key={i} className="card" style={{display:'flex',alignItems:'center',gap:16,marginBottom:12,borderLeft:s.live?'3px solid var(--r500)':'none'}}>
-                  <div style={{flex:1}}>
-                    <div style={{fontWeight:700,fontSize:15,marginBottom:3}}>{s.title}</div>
-                    <div style={{fontSize:13,color:'var(--s500)'}}>{s.cls} · {s.time}{s.live?` · ${s.students} attending`:''}</div>
-                  </div>
-                  {s.live
-                    ? <button className="btn btn-d btn-sm" onClick={() => setPage('classroom')}>Join Session</button>
-                    : <button className="btn btn-s btn-sm" onClick={() => toast.info('Preparing session...')}>Prepare</button>}
-                </div>
-              ))}
-            </div>
+         {/* ── LIVE LESSONS ── (real data from backend) */}
+          {page === 'liveclass' && (
+            <TeacherLiveClassesTab user={store?.currentUser} toast={toast} />
           )}
 
            {/* ── COMMUNICATION ── */}
@@ -6983,6 +6971,291 @@ function TeacherProfileTab({ user, store, setPage, toast }) {
 // - If camera works -> use it. If not -> show initials avatar.
 // - Three layout modes: Whiteboard / Mixed / Gallery
 // - All teaching tools work even without camera/mic.
+
+function TeacherLiveClassesTab({ user, toast }) {
+  const [rooms, setRooms] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  // Zoom modal state
+  const [zoomModal, setZoomModal] = useState(null)  // { roomId, roomName } or null
+  const [zoomInput, setZoomInput] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  // Load rooms on mount + auto-refresh every 30s for live status
+  useEffect(() => {
+    let cancelled = false
+    const loadRooms = async () => {
+      try {
+        const { data } = await api.get('/grouprooms')
+        if (!cancelled && data.success) {
+          setRooms(data.rooms || [])
+          setError(null)
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setError(e.response?.data?.message || 'Failed to load rooms')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    loadRooms()
+    const id = setInterval(loadRooms, 30000)
+    return () => { cancelled = true; clearInterval(id) }
+  }, [])
+
+  const refresh = async () => {
+    try {
+      const { data } = await api.get('/grouprooms')
+      if (data.success) setRooms(data.rooms || [])
+    } catch (e) { /* silent */ }
+  }
+
+  // Filter rooms by teacher (if user._id matches room.teacher)
+  // Note: room.teacher is populated as a Teacher document with its own user link.
+  // For now, show all rooms. Backend can filter later when teacher accounts have proper role linking.
+  const myRooms = rooms
+
+  const liveCount = myRooms.filter(r => r.zoomLink && r.zoomStartedAt).length
+  const totalStudents = myRooms.reduce((sum, r) => sum + (r.students?.length || 0), 0)
+
+  const openZoomModal = (room) => {
+    setZoomInput(room.zoomLink || '')
+    setZoomModal({ roomId: room._id, roomName: room.name })
+  }
+
+  const closeZoomModal = () => {
+    setZoomModal(null)
+    setZoomInput('')
+  }
+
+  const saveZoomLink = async () => {
+    const trimmed = zoomInput.trim()
+    if (!trimmed) {
+      toast?.error?.('Please paste a Zoom link.')
+      return
+    }
+    if (!/^https?:\/\/.+/i.test(trimmed)) {
+      toast?.error?.('Zoom link must start with https://')
+      return
+    }
+
+    setSaving(true)
+    try {
+      const { data } = await api.patch('/grouprooms/' + zoomModal.roomId + '/zoom', {
+        zoomLink: trimmed
+      })
+      if (data.success) {
+        toast?.ok?.('Class started! Opening Zoom...')
+        window.open(trimmed, '_blank', 'noopener,noreferrer')
+        closeZoomModal()
+        await refresh()
+      } else {
+        toast?.error?.(data.message || 'Failed to save')
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Failed to save')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const endClass = async (roomId, roomName) => {
+    if (!confirm('End the live class for "' + roomName + '"? Students will no longer be able to join via the saved Zoom link.')) {
+      return
+    }
+    try {
+      const { data } = await api.patch('/grouprooms/' + roomId + '/zoom', { action: 'end' })
+      if (data.success) {
+        toast?.ok?.('Class ended.')
+        await refresh()
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Failed to end class')
+    }
+  }
+
+  const openZoom = (link) => {
+    window.open(link, '_blank', 'noopener,noreferrer')
+    toast?.ok?.('Opening Zoom...')
+  }
+
+  if (loading) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center' }}>
+        <div style={{ fontSize: 14, color: 'var(--s500)' }}>Loading classes...</div>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div style={{ marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+        <div>
+          <div className="sec-tag">Scheduled Sessions</div>
+          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Live <em style={{ color: 'var(--b700)' }}>Lessons</em></h2>
+          <p style={{ fontSize: 13, color: 'var(--s500)', marginTop: 4 }}>Start a class to send the Zoom link to students. They join via their portal.</p>
+        </div>
+        <button className="btn btn-s btn-sm" onClick={refresh}>Refresh</button>
+      </div>
+
+      {/* KPIs */}
+      <div className="kpi-row" style={{ marginBottom: 20 }}>
+        <div className="kpi"><div className="kpi-v">{myRooms.length}</div><div className="kpi-l">My Classes</div></div>
+        <div className="kpi"><div className="kpi-v">{totalStudents}</div><div className="kpi-l">Total Students</div></div>
+        <div className="kpi"><div className="kpi-v" style={{ color: liveCount > 0 ? 'var(--r500)' : undefined }}>{liveCount}</div><div className="kpi-l">Live Now</div></div>
+      </div>
+
+      {error && (
+        <div style={{
+          background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B',
+          padding: '10px 14px', borderRadius: 8, fontSize: 13, marginBottom: 14,
+        }}>
+          {error}
+        </div>
+      )}
+
+      {myRooms.length === 0 ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s600)' }}>No classes yet</div>
+          <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Admin will create classes and assign you as teacher. Synced rooms appear here.</div>
+        </div>
+      ) : (
+        <div>
+          {myRooms.map(room => {
+            const isLive = !!(room.zoomLink && room.zoomStartedAt)
+            const enrolled = room.students?.length || 0
+            return (
+              <div key={room._id} className="card" style={{
+                display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12,
+                borderLeft: isLive ? '3px solid var(--r500)' : '3px solid transparent',
+                flexWrap: 'wrap',
+              }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                    <div style={{ fontWeight: 700, fontSize: 15 }}>{room.name}</div>
+                    {isLive && (
+                      <span style={{
+                        background: '#DC2626', color: '#FFF',
+                        fontSize: 9, fontWeight: 800, padding: '2px 8px',
+                        borderRadius: 99, letterSpacing: '.08em',
+                      }}>● LIVE</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 13, color: 'var(--s500)' }}>
+                    {room.subject} · {room.curriculum || 'IGCSE'} {room.grade ? '· ' + room.grade : ''} · {enrolled}/{room.capacity || 10} students
+                  </div>
+                  {room.schedule && (
+                    <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 2 }}>
+                      {room.schedule}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {isLive ? (
+                    <>
+                      <button className="btn btn-p btn-sm" onClick={() => openZoom(room.zoomLink)}>
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                          <polygon points="23 7 16 12 23 17 23 7"/>
+                          <rect x="1" y="5" width="15" height="14" rx="2"/>
+                        </svg>
+                        Open Zoom
+                      </button>
+                      <button className="btn btn-d btn-sm" onClick={() => endClass(room._id, room.name)}>
+                        End Class
+                      </button>
+                    </>
+                  ) : (
+                    <button className="btn btn-ok btn-sm" onClick={() => openZoomModal(room)}>
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                      </svg>
+                      Start Class
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Zoom Link Modal */}
+      {zoomModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)',
+          zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+        }} onClick={closeZoomModal}>
+          <div style={{
+            background: '#FFF', borderRadius: 16, padding: 0,
+            maxWidth: 520, width: '100%', overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,.3)',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{
+              padding: '20px 28px',
+              background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+              color: '#FBFAF5',
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A' }}>
+                Start Live Class
+              </div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, marginTop: 4 }}>
+                {zoomModal.roomName}
+              </div>
+            </div>
+
+            <div style={{ padding: '24px 28px' }}>
+              <div style={{ fontSize: 13.5, color: 'var(--s600)', marginBottom: 16, lineHeight: 1.6 }}>
+                Paste your Zoom meeting link below. Once saved, your students will be able to join via their portal.
+              </div>
+
+              <div className="fg">
+                <label className="fl">Zoom Meeting Link</label>
+                <input
+                  className="fi"
+                  value={zoomInput}
+                  onChange={e => setZoomInput(e.target.value)}
+                  placeholder="https://zoom.us/j/1234567890?pwd=..."
+                  autoFocus
+                  onKeyDown={e => { if (e.key === 'Enter') saveZoomLink() }}
+                />
+                <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 6 }}>
+                  Tip: open Zoom desktop app, click "New Meeting", then "Copy Invite Link" and paste it here.
+                </div>
+              </div>
+
+              <div style={{
+                background: '#FBF6E3', borderLeft: '3px solid #C9A030',
+                padding: '10px 14px', borderRadius: 6,
+                fontSize: 12, color: 'var(--s700)', lineHeight: 1.6, marginTop: 12,
+              }}>
+                <strong>Note:</strong> After saving, Zoom will open in a new tab. Students see your class as "Live" within 30 seconds and can click "Join Now" to open the same Zoom meeting.
+              </div>
+            </div>
+
+            <div style={{
+              padding: '16px 28px', borderTop: '1px solid var(--border)',
+              background: '#FBFAF5',
+              display: 'flex', justifyContent: 'flex-end', gap: 10,
+            }}>
+              <button className="btn btn-s" onClick={closeZoomModal} disabled={saving}>Cancel</button>
+              <button
+                className="btn btn-p"
+                onClick={saveZoomLink}
+                disabled={saving || !zoomInput.trim()}
+                style={{ opacity: saving ? 0.6 : 1 }}
+              >
+                {saving ? 'Saving...' : 'Save & Open Zoom'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 function TeacherLiveStudio({ user, onLeave, toast }) {
   const teacherFirstName = user?.firstName || 'James'
