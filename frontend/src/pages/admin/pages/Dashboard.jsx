@@ -1906,6 +1906,7 @@ function LiveLessonsModule({ refreshKey, toast }) {
 
 // ═══════════════════════════════════════════════════════════
 // 10. GROUP ROOMS MODULE — backed by /api/grouprooms
+// Phase 2B: full edit/create UI with catalog dropdowns
 // ═══════════════════════════════════════════════════════════
 function GroupRoomsModule({ refreshKey, toast }) {
   const store = useStore()
@@ -1913,54 +1914,181 @@ function GroupRoomsModule({ refreshKey, toast }) {
   const [loading, setLoading] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [error, setError] = useState(null)
-
-  // Load rooms from backend on mount and when refreshKey changes
+ 
+  // Catalog (loaded once)
+  const [catalog, setCatalog] = useState({ curricula: [], gradesByCurriculum: {}, subjects: [] })
+  const [teachers, setTeachers] = useState([])
+ 
+  // Edit/Create modal state
+  const [editModal, setEditModal] = useState(false)
+  const [editForm, setEditForm] = useState(null)  // null | { ...roomFields }
+  const [saving, setSaving] = useState(false)
+ 
+  // Load rooms on mount
+  useEffect(() => { loadBackendRooms() }, [refreshKey])
+ 
+  // Load catalog + teachers on mount
   useEffect(() => {
-    loadBackendRooms()
-  }, [refreshKey])
-
+    api.get('/curriculum/options').then(res => {
+      if (res.data?.success) {
+        setCatalog({
+          curricula: res.data.curricula || [],
+          gradesByCurriculum: res.data.gradesByCurriculum || {},
+          subjects: res.data.subjects || [],
+        })
+      }
+    }).catch(() => {})
+    api.get('/users?role=teacher').then(res => {
+      if (res.data?.users) setTeachers(res.data.users)
+    }).catch(() => {})
+  }, [])
+ 
   const loadBackendRooms = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true); setError(null)
     try {
       const { data } = await api.get('/grouprooms')
-      if (data.success) {
-        setBackendRooms(data.rooms || [])
-      }
+      if (data.success) setBackendRooms(data.rooms || [])
     } catch (e) {
-      console.error('[grouprooms]', e.message)
       setError(e.response?.data?.message || 'Failed to load rooms')
-    } finally {
-      setLoading(false)
-    }
+    } finally { setLoading(false) }
   }
-
+ 
   const syncToBackend = async () => {
     const localRooms = store.groupRooms || []
-    if (localRooms.length === 0) {
-      toast?.info?.('No local rooms to sync.')
-      return
-    }
-    if (!confirm('Push ' + localRooms.length + ' rooms from local storage to the backend? This will create them in MongoDB so live class features can work.')) {
-      return
-    }
+    if (localRooms.length === 0) { toast?.info?.('No local rooms to sync.'); return }
+    if (!confirm('Push ' + localRooms.length + ' rooms from local storage to the backend?')) return
     setSyncing(true)
     try {
       const { data } = await api.post('/grouprooms/sync', { rooms: localRooms })
-      if (data.success) {
-        toast?.ok?.(data.message || 'Sync complete')
-        await loadBackendRooms()
+      if (data.success) { toast?.ok?.(data.message); await loadBackendRooms() }
+      else toast?.error?.(data.message || 'Sync failed')
+    } catch (e) { toast?.error?.(e.response?.data?.message || 'Sync failed') }
+    finally { setSyncing(false) }
+  }
+ 
+  // ── EDIT/CREATE MODAL ──
+  const openCreate = () => {
+    setEditForm({
+      _id: null,
+      name: '',
+      subject: '',
+      curriculum: '',
+      grade: '',
+      capacity: 10,
+      schedule: '',
+      status: 'Active',
+      teacher: '',
+    })
+    setEditModal(true)
+  }
+ 
+  const openEdit = (room) => {
+    setEditForm({
+      _id: room._id,
+      name: room.name || '',
+      subject: room.subject || '',
+      curriculum: room.curriculum || '',
+      grade: room.grade || '',
+      capacity: room.capacity || 10,
+      schedule: room.schedule || '',
+      status: room.status || 'Active',
+      teacher: typeof room.teacher === 'object' && room.teacher !== null ? room.teacher._id : (room.teacher || ''),
+    })
+    setEditModal(true)
+  }
+ 
+  const closeEdit = () => { setEditModal(false); setEditForm(null) }
+ 
+  const updateForm = (k, v) => setEditForm(f => ({ ...f, [k]: v }))
+ 
+  const handleCurriculumChange = (newCurr) => {
+    setEditForm(f => ({
+      ...f,
+      curriculum: newCurr,
+      grade: '',  // reset grade on curriculum change
+      subject: '', // reset subject too
+    }))
+  }
+ 
+  const saveRoom = async () => {
+    if (!editForm.name?.trim()) { toast?.error?.('Room name is required'); return }
+    if (!editForm.subject) { toast?.error?.('Subject is required'); return }
+    if (!editForm.curriculum) { toast?.error?.('Curriculum is required'); return }
+    if (!editForm.grade) { toast?.error?.('Grade is required'); return }
+ 
+    const payload = {
+      name: editForm.name.trim(),
+      subject: editForm.subject,
+      curriculum: editForm.curriculum,
+      grade: editForm.grade,
+      capacity: parseInt(editForm.capacity) || 10,
+      schedule: editForm.schedule || '',
+      status: editForm.status || 'Active',
+      teacher: editForm.teacher || null,
+    }
+ 
+    setSaving(true)
+    try {
+      let result
+      if (editForm._id) {
+        result = await api.patch('/grouprooms/' + editForm._id, payload)
       } else {
-        toast?.error?.(data.message || 'Sync failed')
+        result = await api.post('/grouprooms', payload)
+      }
+      if (result.data?.success) {
+        toast?.ok?.(result.data.message || 'Room saved')
+        await loadBackendRooms()
+        closeEdit()
+      } else {
+        toast?.error?.(result.data?.message || 'Save failed')
       }
     } catch (e) {
-      toast?.error?.(e.response?.data?.message || 'Sync failed: ' + e.message)
-    } finally {
-      setSyncing(false)
-    }
+      toast?.error?.(e.response?.data?.message || 'Save failed: ' + e.message)
+    } finally { setSaving(false) }
   }
-
-  // Combined view: backend rooms (have _id) + local-only rooms (no _id)
+ 
+  const handleDelete = async (room) => {
+    if (!confirm('Delete "' + room.name + '" permanently? This cannot be undone.')) return
+    try {
+      const { data } = await api.delete('/grouprooms/' + room._id)
+      if (data.success) {
+        toast?.ok?.('Room deleted')
+        await loadBackendRooms()
+      } else toast?.error?.(data.message || 'Delete failed')
+    } catch (e) { toast?.error?.(e.response?.data?.message || 'Delete failed') }
+  }
+ 
+  const handleReenroll = async (room) => {
+    try {
+      const { data } = await api.post('/grouprooms/' + room._id + '/reenroll')
+      if (data.success) {
+        toast?.ok?.('Re-enrolled. ' + (data.total || 0) + ' student(s) match.')
+        await loadBackendRooms()
+      }
+    } catch (e) { toast?.error?.('Re-enroll failed') }
+  }
+ 
+  // ── DERIVED FOR MODAL ──
+  const availableGrades = editForm ? (catalog.gradesByCurriculum[editForm.curriculum] || []) : []
+  const availableSubjects = editForm ? catalog.subjects.filter(s =>
+    s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(editForm.curriculum))
+  ) : []
+  const subjectsByCategory = availableSubjects.reduce((acc, s) => {
+    if (!acc[s.category]) acc[s.category] = []
+    acc[s.category].push(s)
+    return acc
+  }, {})
+ 
+  // Filter teachers to those who teach this curriculum + subject
+  const matchingTeachers = editForm ? teachers.filter(t => {
+    if (!t.curriculum || !t.subjects) return true  // permissive if data missing
+    const teacherCurricula = Array.isArray(t.curriculum) ? t.curriculum : [t.curriculum]
+    const matchCurr = teacherCurricula.includes(editForm.curriculum)
+    const matchSubj = !editForm.subject || (Array.isArray(t.subjects) && t.subjects.includes(editForm.subject))
+    return matchCurr && matchSubj
+  }) : []
+ 
+  // ── COMBINED VIEW ──
   const localRooms = store.groupRooms || []
   const localOnlyRooms = localRooms.filter(lr =>
     !backendRooms.some(br => br.name === lr.name && br.subject === lr.subject)
@@ -1969,69 +2097,58 @@ function GroupRoomsModule({ refreshKey, toast }) {
     ...backendRooms.map(r => ({ ...r, _source: 'backend' })),
     ...localOnlyRooms.map(r => ({ ...r, _source: 'local' })),
   ]
-
-  // Real KPIs
+ 
+  // KPIs
   const totalRooms = allRooms.length
   const totalMembers = backendRooms.reduce((sum, r) => sum + (r.students?.length || 0), 0)
                      + localOnlyRooms.reduce((sum, r) => sum + (r.enrolled || r.students?.length || 0), 0)
   const uniqueSubjects = new Set(allRooms.map(r => r.subject)).size
   const liveNow = backendRooms.filter(r => r.zoomLink && r.zoomStartedAt).length
-
+ 
   return (
     <>
       <div style={{ marginBottom: 18, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' }}>
         <div>
           <div className="sec-tag">Cohort Spaces</div>
           <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>Group <em style={{ color: 'var(--crimson, #7D1025)' }}>Rooms</em></h2>
-          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Persistent classrooms backed by MongoDB · Powers live class Zoom links</p>
+          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Persistent classrooms · Auto-enrollment based on curriculum + grade + subjects</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={loadBackendRooms}
-            disabled={loading}
-            className="btn btn-s btn-sm"
-            style={{ opacity: loading ? 0.6 : 1 }}
-          >
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button onClick={loadBackendRooms} disabled={loading} className="btn btn-s btn-sm" style={{ opacity: loading ? 0.6 : 1 }}>
             {loading ? 'Loading...' : 'Refresh'}
           </button>
           {localOnlyRooms.length > 0 && (
-            <button
-              onClick={syncToBackend}
-              disabled={syncing}
-              className="btn btn-p btn-sm"
-              style={{ opacity: syncing ? 0.6 : 1 }}
-            >
+            <button onClick={syncToBackend} disabled={syncing} className="btn btn-s btn-sm" style={{ opacity: syncing ? 0.6 : 1 }}>
               {syncing ? 'Syncing...' : 'Sync ' + localOnlyRooms.length + ' to Backend'}
             </button>
           )}
+          <button onClick={openCreate} className="btn btn-p btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            New Room
+          </button>
         </div>
       </div>
-
+ 
       <div className="kpi-row">
         <div className="kpi"><div className="kpi-v">{totalRooms}</div><div className="kpi-l">Total Rooms</div></div>
         <div className="kpi"><div className="kpi-v">{totalMembers}</div><div className="kpi-l">Members</div></div>
         <div className="kpi"><div className="kpi-v">{uniqueSubjects}</div><div className="kpi-l">Subjects</div></div>
         <div className="kpi"><div className="kpi-v" style={{ color: liveNow > 0 ? 'var(--crimson, #7D1025)' : undefined }}>{liveNow}</div><div className="kpi-l">Live Now</div></div>
       </div>
-
+ 
       {error && (
-        <div style={{
-          background: '#FEF2F2', border: '1px solid #FCA5A5',
-          color: '#991B1B', padding: '10px 14px',
-          borderRadius: 8, fontSize: 13, marginTop: 12,
-        }}>
+        <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '10px 14px', borderRadius: 8, fontSize: 13, marginTop: 12 }}>
           Error: {error}
         </div>
       )}
-
-      {/* Sync banner if there are local-only rooms */}
+ 
       {localOnlyRooms.length > 0 && (
         <div style={{
           background: 'linear-gradient(135deg, #FBF6E3 0%, #FFFBEA 100%)',
-          border: '1px solid #C9A030',
-          borderLeft: '4px solid #C9A030',
-          padding: '14px 18px', marginTop: 14,
-          borderRadius: 8,
+          border: '1px solid #C9A030', borderLeft: '4px solid #C9A030',
+          padding: '14px 18px', marginTop: 14, borderRadius: 8,
           display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap',
         }}>
           <div style={{ flex: 1, minWidth: 200 }}>
@@ -2039,23 +2156,21 @@ function GroupRoomsModule({ refreshKey, toast }) {
               {localOnlyRooms.length} room{localOnlyRooms.length === 1 ? '' : 's'} only in local storage
             </div>
             <div style={{ fontSize: 12.5, color: 'var(--s600)' }}>
-              Live class features (Zoom links, student joining) require rooms to exist in the backend database. Click "Sync to Backend" to push them now.
+              Live class features require rooms to exist in backend. Click "Sync to Backend" to push them.
             </div>
           </div>
         </div>
       )}
-
+ 
       {/* Rooms list */}
       <div style={{ marginTop: 18 }}>
         {allRooms.length === 0 ? (
           <div className="card" style={{ padding: 40, textAlign: 'center' }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s600)' }}>No group rooms yet</div>
-            <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>
-              Rooms are created by admins. Once created, they appear here. Once synced to backend, teachers can start live classes for them.
-            </div>
+            <div style={{ fontSize: 12, color: 'var(--s400)', marginTop: 6 }}>Click "New Room" to create one.</div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 12 }}>
             {allRooms.map((room, idx) => {
               const isBackend = room._source === 'backend'
               const enrolled = isBackend ? (room.students?.length || 0) : (room.enrolled || room.students?.length || 0)
@@ -2069,25 +2184,23 @@ function GroupRoomsModule({ refreshKey, toast }) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, gap: 8 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)' }}>{room.name}</div>
-                      <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>{room.subject} · {room.curriculum || 'IGCSE'} {room.grade ? '· ' + room.grade : ''}</div>
+                      <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>
+                        {room.subject} · {room.curriculum || '—'} {room.grade ? '· ' + room.grade : ''}
+                      </div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end' }}>
-                      {isLive && (
-                        <span style={{ background: '#DC2626', color: '#FFF', fontSize: 9, fontWeight: 800, padding: '2px 8px', borderRadius: 99, letterSpacing: '.08em' }}>● LIVE</span>
-                      )}
+                      {isLive && <span style={{ background: '#DC2626', color: '#FFF', fontSize: 9, fontWeight: 800, padding: '2px 8px', borderRadius: 99, letterSpacing: '.08em' }}>● LIVE</span>}
                       <span style={{
                         background: isBackend ? '#DCFCE7' : '#FBF6E3',
                         color: isBackend ? '#15803D' : '#92400E',
                         fontSize: 9, fontWeight: 700, padding: '2px 8px', borderRadius: 99, letterSpacing: '.08em',
-                      }}>
-                        {isBackend ? 'BACKEND' : 'LOCAL ONLY'}
-                      </span>
+                      }}>{isBackend ? 'BACKEND' : 'LOCAL ONLY'}</span>
                     </div>
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 10 }}>
                     {room.schedule || 'No schedule set'}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--s500)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--s500)', marginBottom: 12 }}>
                     <span>{enrolled}/{capacity} students</span>
                     <div style={{ flex: 1, height: 4, background: '#F3F4F6', borderRadius: 99, overflow: 'hidden' }}>
                       <div style={{
@@ -2098,10 +2211,18 @@ function GroupRoomsModule({ refreshKey, toast }) {
                       }}/>
                     </div>
                   </div>
+ 
                   {isBackend && (
-                    <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #F3F4F6', fontSize: 10, color: 'var(--s400)', fontFamily: 'JetBrains Mono, monospace' }}>
-                      _id: {room._id?.slice(0, 8)}...{room._id?.slice(-4)}
-                    </div>
+                    <>
+                      <div style={{ display: 'flex', gap: 6, paddingTop: 10, borderTop: '1px solid #F3F4F6', flexWrap: 'wrap' }}>
+                        <button onClick={() => openEdit(room)} className="btn btn-s btn-sm" style={{ flex: 1, justifyContent: 'center' }}>Edit</button>
+                        <button onClick={() => handleReenroll(room)} className="btn btn-s btn-sm" style={{ flex: 1, justifyContent: 'center' }}>Re-enroll</button>
+                        <button onClick={() => handleDelete(room)} className="btn btn-s btn-sm" style={{ flex: 1, justifyContent: 'center', color: '#DC2626' }}>Delete</button>
+                      </div>
+                      <div style={{ marginTop: 8, fontSize: 10, color: 'var(--s400)', fontFamily: 'JetBrains Mono, monospace' }}>
+                        _id: {room._id?.slice(0, 8)}...{room._id?.slice(-4)}
+                      </div>
+                    </>
                   )}
                 </div>
               )
@@ -2109,6 +2230,103 @@ function GroupRoomsModule({ refreshKey, toast }) {
           </div>
         )}
       </div>
+ 
+      {/* EDIT/CREATE MODAL */}
+      {editModal && editForm && (
+        <Modal
+          open={editModal}
+          onClose={closeEdit}
+          title={editForm._id ? 'Edit Room' : 'Create New Room'}
+          size="lg"
+          footer={
+            <>
+              <button className="btn btn-s" onClick={closeEdit} disabled={saving}>Cancel</button>
+              <button className="btn btn-p" onClick={saveRoom} disabled={saving}>
+                {saving ? 'Saving...' : (editForm._id ? 'Update Room' : 'Create Room')}
+              </button>
+            </>
+          }
+        >
+          <div>
+            <div className="fg">
+              <label className="fl">Room Name *</label>
+              <input className="fi" value={editForm.name} onChange={e => updateForm('name', e.target.value)} placeholder="e.g. Mathematics A" autoFocus />
+              <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>A friendly name. Can be auto-generated from subject + grade.</div>
+            </div>
+ 
+            <div className="fr2">
+              <div className="fg">
+                <label className="fl">Curriculum *</label>
+                <select className="fsel" value={editForm.curriculum} onChange={e => handleCurriculumChange(e.target.value)}>
+                  <option value="">Select curriculum...</option>
+                  {catalog.curricula.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="fg">
+                <label className="fl">Grade *</label>
+                <select className="fsel" value={editForm.grade} onChange={e => updateForm('grade', e.target.value)} disabled={!editForm.curriculum}>
+                  <option value="">{editForm.curriculum ? 'Select grade...' : 'Select curriculum first'}</option>
+                  {availableGrades.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </div>
+            </div>
+ 
+            <div className="fg">
+              <label className="fl">Subject *</label>
+              <select className="fsel" value={editForm.subject} onChange={e => updateForm('subject', e.target.value)} disabled={!editForm.curriculum}>
+                <option value="">{editForm.curriculum ? 'Select subject...' : 'Select curriculum first'}</option>
+                {Object.entries(subjectsByCategory).map(([cat, subs]) => (
+                  <optgroup key={cat} label={cat}>
+                    {subs.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
+ 
+            <div className="fg">
+              <label className="fl">Teacher</label>
+              <select className="fsel" value={editForm.teacher} onChange={e => updateForm('teacher', e.target.value)}>
+                <option value="">No teacher assigned</option>
+                {matchingTeachers.map(t => (
+                  <option key={t._id} value={t._id}>
+                    {t.firstName} {t.lastName} ({Array.isArray(t.curriculum) ? t.curriculum.join(', ') : t.curriculum})
+                  </option>
+                ))}
+              </select>
+              {editForm.curriculum && editForm.subject && matchingTeachers.length === 0 && (
+                <div style={{ fontSize: 11, color: 'var(--a600)', marginTop: 4 }}>
+                  No teachers match this curriculum + subject. Edit teachers in Users module to set their teaching subjects.
+                </div>
+              )}
+            </div>
+ 
+            <div className="fr2">
+              <div className="fg">
+                <label className="fl">Capacity</label>
+                <input className="fi" type="number" min="1" max="100" value={editForm.capacity} onChange={e => updateForm('capacity', e.target.value)} />
+              </div>
+              <div className="fg">
+                <label className="fl">Status</label>
+                <select className="fsel" value={editForm.status} onChange={e => updateForm('status', e.target.value)}>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+ 
+            <div className="fg">
+              <label className="fl">Schedule</label>
+              <input className="fi" value={editForm.schedule} onChange={e => updateForm('schedule', e.target.value)} placeholder="e.g. Mon/Wed 10:00–11:00 AM" />
+            </div>
+ 
+            <div style={{ background: '#FBF6E3', borderLeft: '3px solid #C9A030', padding: '10px 14px', borderRadius: 6, fontSize: 12, color: 'var(--s700)', lineHeight: 1.6, marginTop: 8 }}>
+              <strong>Auto-enrollment:</strong> When you save, all students with matching curriculum + grade + subject will be automatically added to this room. Existing members no longer matching will be removed.
+            </div>
+          </div>
+        </Modal>
+      )}
     </>
   )
 }
