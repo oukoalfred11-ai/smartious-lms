@@ -8,6 +8,20 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['admin','teacher','student','parent','demo'], default: 'student' },
   grade: String,
+  // Student enrollment fields (only relevant when role === 'student')
+  curriculum: {
+    type: String,
+    enum: ['IGCSE', 'Edexcel', 'Cambridge', 'IB', 'BNC', 'American', 'Canadian', null],
+    default: null,
+  },
+  gradeLevel: {
+    type: String,
+    default: null,
+  },
+  subjects: {
+    type: [String],
+    default: [],
+  },
   // Curriculum: string for students/single curriculum, array for teachers/multi-curriculum
   curriculum: {
     type: mongoose.Schema.Types.Mixed,
