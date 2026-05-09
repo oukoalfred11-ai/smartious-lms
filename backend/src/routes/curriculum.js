@@ -2,6 +2,13 @@ const express = require('express');
 const Curriculum = require('../models/Curriculum');
 const { auth, requireRole } = require('../middleware/auth');
 const router = express.Router();
+const {
+  CURRICULA,
+  GRADES_BY_CURRICULUM,
+  SUBJECTS,
+  getSubjectsForCurriculum,
+  getGradesForCurriculum,
+} = require('../constants/curriculum');
 
 function logAudit(user, action, details) {
   // TODO: Implement persistent audit logging
@@ -56,6 +63,50 @@ router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
   } catch (e) {
     res.status(400).json({ success: false, message: e.message });
   }
+});
+
+// ─────────────────────────────────────────────────────────
+// CATALOG ENDPOINTS — read-only enrollment options
+// These return the hardcoded Smartious-supported catalog
+// (7 curricula, grades per curriculum, subjects).
+// Used by frontend to populate enrollment dropdowns.
+// ─────────────────────────────────────────────────────────
+
+// GET /api/curriculum/options — full catalog
+router.get('/options', auth, (req, res) => {
+  return res.json({
+    success: true,
+    curricula: CURRICULA,
+    gradesByCurriculum: GRADES_BY_CURRICULUM,
+    subjects: SUBJECTS,
+  });
+});
+
+// GET /api/curriculum/grades/:curriculumId — grades for one curriculum
+router.get('/grades/:curriculumId', auth, (req, res) => {
+  const grades = getGradesForCurriculum(req.params.curriculumId);
+  if (grades.length === 0) {
+    return res.status(404).json({
+      success: false,
+      message: 'Unknown curriculum: ' + req.params.curriculumId,
+    });
+  }
+  return res.json({
+    success: true,
+    curriculumId: req.params.curriculumId,
+    grades,
+  });
+});
+
+// GET /api/curriculum/subjects/:curriculumId — subjects for one curriculum
+router.get('/subjects/:curriculumId', auth, (req, res) => {
+  const result = getSubjectsForCurriculum(req.params.curriculumId);
+  return res.json({
+    success: true,
+    curriculumId: req.params.curriculumId,
+    subjects: result.flat,
+    subjectsByCategory: result.grouped,
+  });
 });
 
 module.exports = router;
