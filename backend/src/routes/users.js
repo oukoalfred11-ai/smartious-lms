@@ -293,9 +293,9 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
 
     const updateOpts = { new: true };
      let user = await User.findByIdAndUpdate(req.params.id, req.body, updateOpts).select('-password');
-     // Only populate subjects for teachers (where subjects are ObjectIds)
+     // Only populate teacher subjectRefs (ObjectId references to Subject docs)
      if (user.role === 'teacher') {
-       try { user = await user.populate('subjects', 'subjectName curriculum'); } catch (e) { /* ignore */ }
+       try { user = await user.populate('subjectRefs', 'subjectName curriculum'); } catch (e) { /* ignore */ }
      }
      
      const safe = user.toObject();
@@ -306,7 +306,7 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
          // Build teachingSpecialties array from subjects and curriculum
          const teachingSpecialties = [];
          const teachingCurricula = Array.isArray(user.curriculum) ? user.curriculum : (user.curriculum ? [user.curriculum] : []);
-         const teachingSubjects = Array.isArray(user.subjects) ? user.subjects : [];
+         const teachingSubjects = Array.isArray(user.subjectRefs) ? user.subjectRefs : [];
          
          // Create a specialty for each combination of subject and curriculum
          for (const subject of teachingSubjects) {
