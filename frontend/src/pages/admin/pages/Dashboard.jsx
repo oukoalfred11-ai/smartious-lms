@@ -494,24 +494,173 @@ function UserFormFields({ userForm, setUserForm }) {
 
       {userForm.role === 'teacher' && (
         <>
+          {/* Multi-curriculum checkboxes */}
           <div className="fg">
-            <label className="fl">Curriculum (comma-separated)</label>
-            <input
-              className="fi"
-              value={Array.isArray(userForm.curriculum) ? userForm.curriculum.join(', ') : userForm.curriculum}
-              onChange={e => upd('curriculum', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-              placeholder="e.g. IGCSE, IB"
-            />
+            <label className="fl">Curricula (select all that apply)</label>
+            <div style={{
+              border: '1px solid var(--border)',
+              borderRadius: 8,
+              padding: 10,
+              background: '#FFF',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+              gap: 4,
+            }}>
+              {catalog.curricula.length === 0 ? (
+                <div style={{ fontSize: 12, color: 'var(--s500)' }}>{catalogLoading ? 'Loading...' : 'No curricula available'}</div>
+              ) : (
+                catalog.curricula.map(c => {
+                  const teacherCurricula = Array.isArray(userForm.curriculum) ? userForm.curriculum : (userForm.curriculum ? [userForm.curriculum] : [])
+                  const checked = teacherCurricula.includes(c.id)
+                  return (
+                    <label key={c.id} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '4px 8px',
+                      fontSize: 12.5,
+                      cursor: 'pointer',
+                      borderRadius: 4,
+                      background: checked ? '#FBF6E3' : 'transparent',
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          const current = Array.isArray(userForm.curriculum) ? [...userForm.curriculum] : (userForm.curriculum ? [userForm.curriculum] : [])
+                          if (checked) {
+                            // Removing this curriculum
+                            const next = current.filter(x => x !== c.id)
+                            upd('curriculum', next)
+                            // Also drop any subjects that are no longer valid
+                            const stillValid = (userForm.subjects || []).filter(subjName => {
+                              const subj = catalog.subjects.find(s => s.name === subjName)
+                              if (!subj) return false
+                              if (subj.availableIn === 'all') return true
+                              return Array.isArray(subj.availableIn) && subj.availableIn.some(currId => next.includes(currId))
+                            })
+                            upd('subjects', stillValid)
+                          } else {
+                            // Adding this curriculum
+                            upd('curriculum', [...current, c.id])
+                          }
+                        }}
+                        style={{ cursor: 'pointer', accentColor: '#7D1025' }}
+                      />
+                      <span style={{ color: checked ? '#7D1025' : 'var(--s700)', fontWeight: checked ? 600 : 400 }}>{c.name}</span>
+                    </label>
+                  )
+                })
+              )}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+              {(Array.isArray(userForm.curriculum) ? userForm.curriculum.length : (userForm.curriculum ? 1 : 0))} curricul{(Array.isArray(userForm.curriculum) ? userForm.curriculum.length : 0) === 1 ? 'um' : 'a'} selected
+            </div>
           </div>
-          <div className="fg">
-            <label className="fl">Subjects (comma-separated)</label>
-            <input
-              className="fi"
-              value={Array.isArray(userForm.subjects) ? userForm.subjects.map(s => typeof s === 'string' ? s : s.subjectName || '').join(', ') : ''}
-              onChange={e => upd('subjects', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-              placeholder="e.g. Mathematics, Physics"
-            />
-          </div>
+
+          {/* Multi-subject checkboxes (filtered by selected curricula, grouped by category) */}
+          {(() => {
+            const teacherCurricula = Array.isArray(userForm.curriculum) ? userForm.curriculum : (userForm.curriculum ? [userForm.curriculum] : [])
+            if (teacherCurricula.length === 0) {
+              return (
+                <div className="fg">
+                  <label className="fl">Subjects</label>
+                  <div style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: 8,
+                    padding: 16,
+                    background: 'var(--cream, #FBFAF5)',
+                    fontSize: 12.5,
+                    color: 'var(--s500)',
+                    textAlign: 'center',
+                  }}>
+                    Select at least one curriculum above to see available subjects
+                  </div>
+                </div>
+              )
+            }
+            // Subjects available in any of the teacher's curricula
+            const teacherSubjects = catalog.subjects.filter(s =>
+              s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.some(currId => teacherCurricula.includes(currId)))
+            )
+            const teacherSubjectsByCategory = teacherSubjects.reduce((acc, s) => {
+              if (!acc[s.category]) acc[s.category] = []
+              acc[s.category].push(s)
+              return acc
+            }, {})
+            const selectedSubjects = Array.isArray(userForm.subjects)
+              ? userForm.subjects.filter(s => typeof s === 'string')
+              : []
+            const toggle = (subjectName) => {
+              if (selectedSubjects.includes(subjectName)) {
+                upd('subjects', selectedSubjects.filter(s => s !== subjectName))
+              } else {
+                upd('subjects', [...selectedSubjects, subjectName])
+              }
+            }
+            return (
+              <div className="fg">
+                <label className="fl">Subjects ({selectedSubjects.length} selected)</label>
+                <div style={{
+                  border: '1px solid var(--border)',
+                  borderRadius: 8,
+                  padding: 10,
+                  maxHeight: 320,
+                  overflowY: 'auto',
+                  background: '#FFF',
+                }}>
+                  {teacherSubjects.length === 0 ? (
+                    <div style={{ fontSize: 12, color: 'var(--s500)', textAlign: 'center', padding: 12 }}>
+                      No subjects available for selected curricula
+                    </div>
+                  ) : (
+                    Object.entries(teacherSubjectsByCategory).map(([category, subs]) => (
+                      <div key={category} style={{ marginBottom: 12 }}>
+                        <div style={{
+                          fontSize: 10.5,
+                          fontWeight: 800,
+                          letterSpacing: '.08em',
+                          textTransform: 'uppercase',
+                          color: 'var(--crimson, #7D1025)',
+                          marginBottom: 6,
+                          paddingBottom: 4,
+                          borderBottom: '1px solid var(--border)',
+                        }}>{category}</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 4 }}>
+                          {subs.map(s => {
+                            const checked = selectedSubjects.includes(s.name)
+                            return (
+                              <label key={s.id} style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                padding: '4px 8px',
+                                fontSize: 12.5,
+                                cursor: 'pointer',
+                                borderRadius: 4,
+                                background: checked ? '#FBF6E3' : 'transparent',
+                              }}>
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => toggle(s.name)}
+                                  style={{ cursor: 'pointer', accentColor: '#7D1025' }}
+                                />
+                                <span style={{ color: checked ? '#7D1025' : 'var(--s700)', fontWeight: checked ? 600 : 400 }}>{s.name}</span>
+                              </label>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                  Subjects shown are filtered by the curricula you selected above.
+                </div>
+              </div>
+            )
+          })()}
         </>
       )}
 
