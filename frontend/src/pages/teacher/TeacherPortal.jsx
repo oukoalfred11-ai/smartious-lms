@@ -1584,7 +1584,67 @@ const msSeedIfEmpty = () => {
 }
 
 function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, setMsgBody, setMsgModal }) {
-  const [students, setStudents] = useState(() => msSeedIfEmpty())
+  const [students, setStudents] = useState([])
+  const [loadingStudents, setLoadingStudents] = useState(true)
+
+  // Load real students from backend GroupRooms (where this teacher is assigned)
+  useEffect(() => {
+    const loadRealStudents = async () => {
+      setLoadingStudents(true)
+      try {
+        const teacherId = user?._id
+        if (!teacherId) {
+          setLoadingStudents(false)
+          return
+        }
+        // Fetch all rooms; filter to ones where this teacher is assigned
+        const roomsRes = await api.get('/grouprooms')
+        const allRooms = roomsRes.data?.rooms || []
+        const myRooms = allRooms.filter(r => {
+          if (!r.teacher) return false
+          const tid = typeof r.teacher === 'object' ? r.teacher._id : r.teacher
+          return tid === teacherId || tid?.toString() === teacherId?.toString()
+        })
+
+        // Collect unique students across all my rooms
+        const studentMap = new Map()
+        myRooms.forEach(room => {
+          (room.students || []).forEach(s => {
+            // Backend may return populated objects or just IDs
+            if (typeof s === 'object' && s !== null) {
+              if (!studentMap.has(s._id)) {
+                studentMap.set(s._id, {
+                  id: s._id,
+                  name: ((s.firstName || '') + ' ' + (s.lastName || '')).trim() || 'Unnamed Student',
+                  initials: ((s.firstName?.[0] || '') + (s.lastName?.[0] || '')).toUpperCase() || '?',
+                  curriculum: s.curriculum || '',
+                  year: s.gradeLevel || '',
+                  mastery: 0, attendance: 0,
+                  hwSubmitted: 0, hwTotal: 0,
+                  status: 'on-track', lastActive: 0,
+                  parentName: '', parentEmail: s.email || '', phone: s.phone || '',
+                  rooms: [room.name],
+                })
+              } else {
+                // Already in map - just append the room name
+                const existing = studentMap.get(s._id)
+                if (!existing.rooms.includes(room.name)) existing.rooms.push(room.name)
+              }
+            }
+          })
+        })
+
+        const realStudents = Array.from(studentMap.values())
+        setStudents(realStudents)
+      } catch (e) {
+        console.error('[mystudents] failed to load:', e.message)
+        setStudents([])
+      } finally {
+        setLoadingStudents(false)
+      }
+    }
+    loadRealStudents()
+  }, [user?._id])
   const [view, setView] = useState('roster')  // 'roster' | 'detail'
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [detailTab, setDetailTab] = useState('overview')
@@ -1633,7 +1693,7 @@ function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, s
       text: newNoteText.trim(),
       category: noteCategory,
       createdAt: new Date().toISOString(),
-      author: 'Mr. James Muthomi',
+      author: ('Mr. ' + (user?.firstName || '') + ' ' + (user?.lastName || '')).trim() || 'Teacher',
     }
     const updated = [note, ...studentNotes]
     setStudentNotes(updated)
@@ -1695,6 +1755,15 @@ function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, s
   }
 
   const allYears = [...new Set(students.map(s => s.year))]
+
+  // ── LOADING STATE ──
+  if (loadingStudents) {
+    return (
+      <div style={{ padding: 60, textAlign: 'center' }}>
+        <div style={{ fontSize: 14, color: 'var(--s500)' }}>Loading your students...</div>
+      </div>
+    )
+  }
 
   // ── DETAIL VIEW ─────────────────────────────────────
   if (view === 'detail' && selectedStudent) {
