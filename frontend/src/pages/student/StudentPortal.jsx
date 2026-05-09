@@ -5495,186 +5495,109 @@ function SubscriptionTab({ user, store, toast }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// HOMEWORK TAB — assigned by teachers, submitted by students
+// HOMEWORK TAB — wired to /api/homework/student/list
+// Phase 3.4 + 3.5a: list + submit (MCQ, short, long, upload)
+// Drawing/handwriting canvas comes in Phase 3.5b
 // ═══════════════════════════════════════════════════════════
-const HOMEWORK_ASSIGNED_KEY    = 'sm_homework_assigned'
-const HOMEWORK_SUBMISSIONS_KEY = 'sm_homework_submissions'
-const HOMEWORK_SEEDED_FLAG     = 'sm_homework_seeded'
- 
-// Subject colour palette (mirrors Practice / Exams)
+
 const homeworkSubjColours = {
   'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
   'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
   'Geography': '#0F766E', 'Computer Science': '#1F2937',
 }
 const homeworkColourFor = (s) => homeworkSubjColours[s] || '#8B1A2E'
- 
-// Seed sample homework on first load so UI works without a teacher portal yet
-const seedSampleHomework = (studentName) => {
-  if (localStorage.getItem(HOMEWORK_SEEDED_FLAG)) return
-  const today = new Date()
-  const inDays = (n) => new Date(today.getTime() + n * 86400000).toISOString()
- 
-  const samples = [
-    {
-      id: 'hw-001',
-      title: 'Quadratic Equations Practice',
-      subject: 'Mathematics',
-      teacher: 'Mr. Muthomi',
-      assignedTo: studentName,
-      type: 'mixed',  // can have both text and file
-      description: 'Complete questions 1-10 from your textbook (page 145). Show all your working - partial marks are awarded for correct method even if the final answer is wrong. Type your final answers in the response box and upload a photo or scan of your full working.',
-      questions: [],
-      maxMarks: 50,
-      assignedDate: inDays(-2),
-      dueDate: inDays(2),
-      status: 'assigned',
-    },
-    {
-      id: 'hw-002',
-      title: 'Photosynthesis - Multiple Choice Quiz',
-      subject: 'Biology',
-      teacher: 'Dr. Ouma',
-      assignedTo: studentName,
-      type: 'quiz',
-      description: 'Five questions on photosynthesis. Read each question carefully. You have one attempt.',
-      questions: [
-        { id: 'q1', q: 'Where does photosynthesis primarily take place in plant cells?', options: ['Mitochondria', 'Chloroplasts', 'Nucleus', 'Cell wall'], correct: 'Chloroplasts' },
-        { id: 'q2', q: 'Which gas do plants take in during photosynthesis?', options: ['Oxygen', 'Nitrogen', 'Carbon dioxide', 'Hydrogen'], correct: 'Carbon dioxide' },
-        { id: 'q3', q: 'The green pigment that absorbs light energy is called:', options: ['Haemoglobin', 'Chlorophyll', 'Carotene', 'Melanin'], correct: 'Chlorophyll' },
-        { id: 'q4', q: 'The simplified word equation for photosynthesis is:', options: ['CO2 + Water + Light -> Glucose + Oxygen', 'Glucose + Oxygen -> CO2 + Water', 'Water + Oxygen -> Glucose + CO2', 'CO2 + Oxygen -> Water + Light'], correct: 'CO2 + Water + Light -> Glucose + Oxygen' },
-        { id: 'q5', q: 'Which factor does NOT affect the rate of photosynthesis?', options: ['Light intensity', 'Carbon dioxide concentration', 'Temperature', 'Soil colour'], correct: 'Soil colour' },
-      ],
-      maxMarks: 5,
-      assignedDate: inDays(-1),
-      dueDate: inDays(5),
-      status: 'assigned',
-    },
-    {
-      id: 'hw-003',
-      title: 'Persuasive Essay: Should Schools Have Uniforms?',
-      subject: 'English',
-      teacher: 'Ms. Wambua',
-      assignedTo: studentName,
-      type: 'text',  // typed response only, with paste blocking
-      description: 'Write a persuasive essay of 350-500 words arguing FOR or AGAINST school uniforms. Use at least three supporting reasons. Remember the structure: introduction -> three body paragraphs (one per reason) -> conclusion. Type your essay in the response box. Pasting is disabled to ensure original work.',
-      questions: [],
-      maxMarks: 30,
-      assignedDate: inDays(-7),
-      dueDate: inDays(-1),  // OVERDUE
-      status: 'assigned',
-    },
-    {
-      id: 'hw-004',
-      title: 'Periodic Table Review',
-      subject: 'Chemistry',
-      teacher: 'Dr. Ouma',
-      assignedTo: studentName,
-      type: 'mixed',
-      description: 'Watch the video lesson on the periodic table (in Resources tab), then write a short summary (150 words) covering: groups vs periods, three trends, and one example for each.',
-      questions: [],
-      maxMarks: 20,
-      assignedDate: inDays(-10),
-      dueDate: inDays(-5),
-      status: 'submitted',
-      submittedAt: inDays(-6),
-      submittedText: '[Sample submitted essay would appear here in real submissions]',
-    },
-    {
-      id: 'hw-005',
-      title: 'Newton\'s Laws of Motion',
-      subject: 'Physics',
-      teacher: 'Mr. Njoroge',
-      assignedTo: studentName,
-      type: 'text',
-      description: 'Explain each of Newton\'s three laws in your own words, with one real-world example for each.',
-      questions: [],
-      maxMarks: 30,
-      assignedDate: inDays(-15),
-      dueDate: inDays(-10),
-      status: 'graded',
-      submittedAt: inDays(-11),
-      gradedAt: inDays(-9),
-      grade: 26,
-      gradePercent: 87,
-      feedback: 'Excellent work, Amara! Your explanation of the third law (action-reaction) was particularly clear. Next time, try to give a more original example for the first law - the "ball at rest" example is a classic but slightly overused. Keep it up!',
-    },
-  ]
- 
-  localStorage.setItem(HOMEWORK_ASSIGNED_KEY, JSON.stringify(samples))
-  localStorage.setItem(HOMEWORK_SEEDED_FLAG, '1')
-}
- 
-const loadHomework = () => {
-  try { return JSON.parse(localStorage.getItem(HOMEWORK_ASSIGNED_KEY) || '[]') }
-  catch { return [] }
-}
-const saveHomework = (hw) => {
-  try { localStorage.setItem(HOMEWORK_ASSIGNED_KEY, JSON.stringify(hw)) } catch {}
-}
- 
+
 const formatHomeworkDate = (iso) => {
+  if (!iso) return '—'
   const d = new Date(iso)
   const now = new Date()
   const diffDays = Math.round((d - now) / (1000 * 60 * 60 * 24))
   if (diffDays === 0) return 'Today'
   if (diffDays === 1) return 'Tomorrow'
   if (diffDays === -1) return 'Yesterday'
-  if (diffDays > 0 && diffDays <= 7) return `In ${diffDays} days`
-  if (diffDays < 0 && diffDays >= -7) return `${Math.abs(diffDays)} days ago`
+  if (diffDays > 0 && diffDays <= 7) return 'In ' + diffDays + ' days'
+  if (diffDays < 0 && diffDays >= -7) return Math.abs(diffDays) + ' days ago'
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
- 
+
+const formatHomeworkDateTime = (iso) => {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
+}
+
+const hwTypeLabel = {
+  mcq: 'Multiple Choice',
+  short: 'Short Answer',
+  long: 'Long Answer',
+  drawing: 'Drawing',
+  upload: 'File Upload',
+}
+
 function HomeworkTab({ user, toast }) {
-  const studentName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
- 
-  // Seed on first load
-  useEffect(() => { seedSampleHomework(studentName) }, [studentName])
- 
-  const [homework, setHomework] = useState(() => loadHomework())
-  const [view, setView]         = useState('status')  // 'status' | 'subject' | 'date'
-  const [selected, setSelected] = useState(null)
-  const [responseText, setResponseText] = useState('')
-  const [uploadedFile, setUploadedFile] = useState(null)
-  const [quizAnswers, setQuizAnswers]   = useState({})
-  const [pasteWarning, setPasteWarning] = useState(false)
- 
-  // Filter to this student's assignments only
-  const myHomework = homework.filter(hw =>
-    !hw.assignedTo ||
-    hw.assignedTo === studentName ||
-    hw.assignedTo === user?.firstName ||
-    hw.assignedTo === '*'  // wildcard for whole-class
-  )
- 
-  // Compute auto status: 'overdue' if past due and not submitted
+  // ── DATA ──
+  const [homework, setHomework] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const [view, setView] = useState('status')  // 'status' | 'subject' | 'date'
+  const [selected, setSelected] = useState(null)  // homework being viewed
+  const [submission, setSubmission] = useState(null)  // current student's submission for selected hw
+
+  // ── ANSWER STATE ──
+  // answers indexed by questionIndex: { type, answer, attachment, pasteWarning }
+  const [answers, setAnswers] = useState({})
+  const [pasteWarning, setPasteWarning] = useState({})
+  const [submittingNow, setSubmittingNow] = useState(false)
+  const [uploadingIdx, setUploadingIdx] = useState(null)
+
+  // Load homework on mount
+  useEffect(() => { loadHomework() }, [])
+
+  const loadHomework = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { data } = await api.get('/homework/student/list')
+      if (data.success) {
+        setHomework(data.homework || [])
+      }
+    } catch (e) {
+      setError(e.response?.data?.message || 'Failed to load homework')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // ── DERIVED STATUS ──
   const enrichStatus = (hw) => {
-    const due = new Date(hw.dueDate)
-    const now = new Date()
-    if (hw.status === 'graded') return 'graded'
-    if (hw.status === 'submitted') return 'submitted'
-    if (due < now) return 'overdue'
+    if (hw.locked) return 'locked'
+    if (hw.mySubmission) {
+      if (hw.mySubmission.status === 'released' || hw.mySubmission.status === 'graded') return 'graded'
+      if (hw.mySubmission.status === 'submitted') return 'submitted'
+    }
+    if (hw.overdue) return 'overdue'
     return 'pending'
   }
- 
-  const enriched = myHomework.map(hw => ({ ...hw, computedStatus: enrichStatus(hw) }))
- 
-  // Counts
+
+  const enriched = homework.map(hw => ({ ...hw, computedStatus: enrichStatus(hw) }))
+
   const counts = {
-    pending:   enriched.filter(h => h.computedStatus === 'pending').length,
-    overdue:   enriched.filter(h => h.computedStatus === 'overdue').length,
+    locked: enriched.filter(h => h.computedStatus === 'locked').length,
+    pending: enriched.filter(h => h.computedStatus === 'pending').length,
+    overdue: enriched.filter(h => h.computedStatus === 'overdue').length,
     submitted: enriched.filter(h => h.computedStatus === 'submitted').length,
-    graded:    enriched.filter(h => h.computedStatus === 'graded').length,
+    graded: enriched.filter(h => h.computedStatus === 'graded').length,
   }
- 
-  // Group by chosen view
+
+  // Group by view
   let grouped = {}
   if (view === 'status') {
     grouped = {
-      'Overdue':      enriched.filter(h => h.computedStatus === 'overdue'),
-      'Due This Week': enriched.filter(h => h.computedStatus === 'pending'),
-      'Submitted':    enriched.filter(h => h.computedStatus === 'submitted'),
-      'Graded':       enriched.filter(h => h.computedStatus === 'graded'),
+      'Overdue': enriched.filter(h => h.computedStatus === 'overdue'),
+      'Locked (released later)': enriched.filter(h => h.computedStatus === 'locked'),
+      'Pending': enriched.filter(h => h.computedStatus === 'pending'),
+      'Submitted': enriched.filter(h => h.computedStatus === 'submitted'),
+      'Graded': enriched.filter(h => h.computedStatus === 'graded'),
     }
   } else if (view === 'subject') {
     enriched.forEach(h => {
@@ -5683,127 +5606,191 @@ function HomeworkTab({ user, toast }) {
     })
   } else if (view === 'date') {
     grouped = {
-      'This Week':  enriched.filter(h => {
-        const days = (new Date(h.dueDate) - new Date()) / (1000 * 60 * 60 * 24)
+      'This Week': enriched.filter(h => {
+        if (!h.dueAt) return false
+        const days = (new Date(h.dueAt) - new Date()) / (1000 * 60 * 60 * 24)
         return days >= -7 && days <= 7
       }),
-      'Next Week':  enriched.filter(h => {
-        const days = (new Date(h.dueDate) - new Date()) / (1000 * 60 * 60 * 24)
+      'Next Week': enriched.filter(h => {
+        if (!h.dueAt) return false
+        const days = (new Date(h.dueAt) - new Date()) / (1000 * 60 * 60 * 24)
         return days > 7 && days <= 14
       }),
-      'Later':      enriched.filter(h => {
-        const days = (new Date(h.dueDate) - new Date()) / (1000 * 60 * 60 * 24)
+      'Later': enriched.filter(h => {
+        if (!h.dueAt) return true
+        const days = (new Date(h.dueAt) - new Date()) / (1000 * 60 * 60 * 24)
         return days > 14
       }),
-      'Past':       enriched.filter(h => {
-        const days = (new Date(h.dueDate) - new Date()) / (1000 * 60 * 60 * 24)
-        return days < -7
-      }),
+      'No Due Date': enriched.filter(h => !h.dueAt),
     }
   }
- 
-  // ── Submission handlers ───────────────────────────────
-  const openHomework = (hw) => {
-    setSelected(hw)
-    setResponseText('')
-    setUploadedFile(null)
-    setQuizAnswers({})
-    setPasteWarning(false)
-  }
- 
-  const closeHomework = () => {
-    setSelected(null)
-    setResponseText('')
-    setUploadedFile(null)
-    setQuizAnswers({})
-  }
- 
-  const handleFileUpload = (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (file.size > 1024 * 1024 * 5) {
-      toast?.error?.('File too large. Maximum 5MB.')
+
+  // ── OPEN HOMEWORK ──
+  const openHomework = async (hw) => {
+    if (hw.locked) {
+      toast?.info?.('Homework opens on ' + formatHomeworkDateTime(hw.releaseAt))
       return
     }
-    // Read as data URL so it persists in localStorage
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      setUploadedFile({
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        dataUrl: ev.target.result,
-      })
+    setSelected(hw)
+    setAnswers({})
+    setPasteWarning({})
+
+    // If already submitted, just load the submission for display
+    if (hw.mySubmission) {
+      try {
+        const { data } = await api.get('/homework/' + hw._id + '/my-submission')
+        if (data.success && data.submission) {
+          setSubmission(data.submission)
+          // Pre-fill answers display from existing submission
+          const initial = {}
+          ;(data.submission.answers || []).forEach(a => {
+            initial[a.questionIndex] = a
+          })
+          setAnswers(initial)
+          return
+        }
+      } catch (e) { /* fall through */ }
     }
-    reader.readAsDataURL(file)
+
+    // Otherwise create / fetch in-progress submission
+    try {
+      const { data } = await api.post('/homework/' + hw._id + '/start')
+      if (data.success && data.submission) {
+        setSubmission(data.submission)
+        // Pre-fill any saved answers
+        const initial = {}
+        ;(data.submission.answers || []).forEach(a => {
+          initial[a.questionIndex] = a
+        })
+        setAnswers(initial)
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Could not open homework')
+      setSelected(null)
+    }
   }
- 
-  const submitHomework = () => {
-    if (!selected) return
- 
-    // Validation per type
-    if (selected.type === 'text') {
-      if (!responseText.trim() || responseText.trim().length < 50) {
-        toast?.error?.('Please write a more detailed response (at least 50 characters).')
-        return
-      }
-    } else if (selected.type === 'quiz') {
-      const unanswered = selected.questions.filter(q => !quizAnswers[q.id])
-      if (unanswered.length > 0) {
-        toast?.error?.(`Please answer all ${selected.questions.length} questions. ${unanswered.length} remaining.`)
-        return
-      }
-    } else if (selected.type === 'mixed') {
-      if (!responseText.trim() && !uploadedFile) {
-        toast?.error?.('Please add a written response or upload a file.')
-        return
-      }
-    } else if (selected.type === 'file') {
-      if (!uploadedFile) {
-        toast?.error?.('Please upload a file.')
-        return
-      }
+
+  const closeHomework = () => {
+    setSelected(null)
+    setSubmission(null)
+    setAnswers({})
+    setPasteWarning({})
+  }
+
+  // ── ANSWER HANDLERS ──
+  const setAnswer = (idx, value) => {
+    setAnswers(prev => ({
+      ...prev,
+      [idx]: { ...(prev[idx] || {}), answer: value },
+    }))
+  }
+
+  const setAnswerAttachment = (idx, attachment) => {
+    setAnswers(prev => ({
+      ...prev,
+      [idx]: { ...(prev[idx] || {}), attachment },
+    }))
+  }
+
+  const showPasteWarning = (idx) => {
+    setPasteWarning(prev => ({ ...prev, [idx]: true }))
+    setTimeout(() => setPasteWarning(prev => ({ ...prev, [idx]: false })), 3000)
+    toast?.error?.('Pasting is disabled. Please type your answer.')
+  }
+
+  // Upload an image attachment for a question (for upload-type questions)
+  const uploadAnswerFile = async (idx, file) => {
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      toast?.error?.('File too large (max 5 MB)')
+      return
     }
- 
-    // Auto-grade quiz
-    let autoGrade = null
-    let autoFeedback = ''
-    if (selected.type === 'quiz') {
-      const correct = selected.questions.filter(q => quizAnswers[q.id] === q.correct).length
-      autoGrade = correct
-      autoFeedback = `Auto-graded: ${correct} out of ${selected.questions.length} correct.`
+    setUploadingIdx(idx)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const { data } = await api.post('/questions/upload', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      if (data.success && data.attachment) {
+        setAnswerAttachment(idx, data.attachment)
+        toast?.ok?.('Uploaded')
+      } else {
+        toast?.error?.(data.message || 'Upload failed')
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Upload failed')
+    } finally {
+      setUploadingIdx(null)
     }
- 
-    const updated = homework.map(h => {
-      if (h.id === selected.id) {
-        return {
-          ...h,
-          status: autoGrade !== null ? 'graded' : 'submitted',
-          submittedAt: new Date().toISOString(),
-          submittedText: responseText || null,
-          submittedFile: uploadedFile || null,
-          submittedAnswers: Object.keys(quizAnswers).length > 0 ? quizAnswers : null,
-          ...(autoGrade !== null ? {
-            gradedAt: new Date().toISOString(),
-            grade: autoGrade,
-            gradePercent: Math.round((autoGrade / selected.questions.length) * 100),
-            feedback: autoFeedback,
-          } : {}),
+  }
+
+  // Validate all answers before submit
+  const validateAnswers = (questions) => {
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i]
+      const a = answers[i]
+      if (q.type === 'mcq') {
+        if (!a || a.answer === null || a.answer === undefined) {
+          return 'Question ' + (i + 1) + ' (MCQ): pick an option'
+        }
+      } else if (q.type === 'short' || q.type === 'long') {
+        if (!a || !a.answer || !String(a.answer).trim()) {
+          return 'Question ' + (i + 1) + ': type your answer'
+        }
+        if (q.type === 'short' && String(a.answer).trim().length < 3) {
+          return 'Question ' + (i + 1) + ': answer is too short'
+        }
+      } else if (q.type === 'upload') {
+        if (!a || !a.attachment || !a.attachment.url) {
+          return 'Question ' + (i + 1) + ': upload a file'
+        }
+      } else if (q.type === 'drawing') {
+        // For now, accept either an attachment or skip (drawing canvas not yet implemented)
+        if (!a || !a.attachment || !a.attachment.url) {
+          return 'Question ' + (i + 1) + ' (drawing): drawing answers come in next phase. Skip for now or upload an image.'
         }
       }
-      return h
-    })
- 
-    setHomework(updated)
-    saveHomework(updated)
-    toast?.ok?.(autoGrade !== null
-      ? `Quiz submitted and graded: ${autoGrade}/${selected.questions.length}`
-      : 'Homework submitted successfully.'
-    )
-    closeHomework()
+    }
+    return null
   }
- 
-  // ── Render ────────────────────────────────────────────
+
+  const submitHomework = async () => {
+    if (!selected) return
+    const err = validateAnswers(selected.questions || [])
+    if (err) { toast?.error?.(err); return }
+
+    setSubmittingNow(true)
+    try {
+      // Build payload
+      const answerPayload = (selected.questions || []).map((q, idx) => {
+        const a = answers[idx] || {}
+        return {
+          questionIndex: idx,
+          answer: a.answer !== undefined ? a.answer : null,
+          attachment: a.attachment || undefined,
+        }
+      })
+
+      const { data } = await api.post('/homework/' + selected._id + '/submit', {
+        answers: answerPayload,
+      })
+
+      if (data.success) {
+        toast?.ok?.(data.message || 'Submitted')
+        await loadHomework()
+        closeHomework()
+      } else {
+        toast?.error?.(data.message || 'Submit failed')
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Submit failed: ' + e.message)
+    } finally {
+      setSubmittingNow(false)
+    }
+  }
+
+  // ── RENDER ──
   return (
     <div>
       {/* Hero */}
@@ -5821,10 +5808,9 @@ function HomeworkTab({ user, toast }) {
               Homework
             </h2>
             <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
-              Submit on time. Grades count toward your progress reports.
+              Submit on time. Grades count toward your progress.
             </div>
           </div>
-          {/* View toggle */}
           <div style={{ display: 'flex', background: 'rgba(0,0,0,.2)', borderRadius: 99, padding: 3, gap: 2, flexWrap: 'wrap' }}>
             {[['status', 'Status'], ['subject', 'Subject'], ['date', 'Date']].map(([id, label]) => (
               <button key={id} onClick={() => setView(id)} style={{
@@ -5836,12 +5822,13 @@ function HomeworkTab({ user, toast }) {
             ))}
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
           {[
-            ['Overdue',   counts.overdue,   counts.overdue > 0 ? '#FCA5A5' : 'inherit'],
-            ['Pending',   counts.pending,   'inherit'],
+            ['Locked', counts.locked, 'inherit'],
+            ['Pending', counts.pending, 'inherit'],
+            ['Overdue', counts.overdue, counts.overdue > 0 ? '#FCA5A5' : 'inherit'],
             ['Submitted', counts.submitted, 'inherit'],
-            ['Graded',    counts.graded,    counts.graded > 0 ? '#4ADE80' : 'inherit'],
+            ['Graded', counts.graded, counts.graded > 0 ? '#4ADE80' : 'inherit'],
           ].map(([l, v, c]) => (
             <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
               <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>{l}</div>
@@ -5850,45 +5837,64 @@ function HomeworkTab({ user, toast }) {
           ))}
         </div>
       </div>
- 
-      {/* Empty state */}
-      {enriched.length === 0 && (
+
+      {/* Loading / Error / Empty / List */}
+      {loading && (
+        <div className="card" style={{ padding: 36, textAlign: 'center', color: 'var(--s500)' }}>
+          Loading homework from your teachers...
+        </div>
+      )}
+
+      {error && (
+        <div className="card" style={{ padding: 16, background: '#FEF2F2', borderColor: '#FCA5A5' }}>
+          <div style={{ fontWeight: 700, color: '#991B1B', marginBottom: 4 }}>Failed to load</div>
+          <div style={{ fontSize: 13, color: '#7F1D1D' }}>{error}</div>
+        </div>
+      )}
+
+      {!loading && !error && enriched.length === 0 && (
         <div className="card" style={{ padding: 36, textAlign: 'center' }}>
           <div style={{ width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%', background: 'var(--s100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="1.5" strokeLinecap="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
             </svg>
           </div>
-          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>No homework assigned yet</h3>
+          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>No homework yet</h3>
           <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto' }}>
-            When your teachers assign work, it will appear here organised by status, subject, or due date.
+            When your teachers assign work, it will appear here. Make sure you're enrolled in your subjects.
           </p>
         </div>
       )}
- 
-      {/* Grouped homework lists */}
-      {Object.entries(grouped).map(([groupName, items]) => {
+
+      {!loading && !error && Object.entries(grouped).map(([groupName, items]) => {
         if (!items || items.length === 0) return null
         const isOverdueGroup = groupName === 'Overdue'
+        const isLockedGroup = groupName.startsWith('Locked')
         return (
           <div key={groupName} className="card" style={{ marginBottom: 14 }}>
             <div className="chdr">
-              <div className="ctitle" style={{ color: isOverdueGroup ? 'var(--r600)' : undefined }}>
+              <div className="ctitle" style={{ color: isOverdueGroup ? 'var(--r600)' : isLockedGroup ? 'var(--s500)' : undefined }}>
                 {groupName}
               </div>
-              <span className={`badge ${isOverdueGroup ? 'badge-red' : 'badge-slate'}`} style={isOverdueGroup ? { background: 'var(--r50)', color: 'var(--r600)' } : {}}>
+              <span className={'badge ' + (isOverdueGroup ? 'badge-red' : 'badge-slate')} style={isOverdueGroup ? { background: 'var(--r50)', color: 'var(--r600)' } : {}}>
                 {items.length}
               </span>
             </div>
             {items.map(hw => {
               const col = homeworkColourFor(hw.subject)
+              const teacherName = hw.createdBy
+                ? (typeof hw.createdBy === 'object'
+                    ? ((hw.createdBy.firstName || '') + ' ' + (hw.createdBy.lastName || '')).trim() || 'Teacher'
+                    : 'Teacher')
+                : 'Teacher'
               return (
-                <div key={hw.id} onClick={() => openHomework(hw)} style={{
+                <div key={hw._id} onClick={() => openHomework(hw)} style={{
                   display: 'flex', gap: 14, padding: '14px 0',
                   borderBottom: '1px solid var(--border)',
-                  cursor: 'pointer', alignItems: 'flex-start',
+                  cursor: hw.locked ? 'not-allowed' : 'pointer',
+                  alignItems: 'flex-start',
+                  opacity: hw.locked ? 0.65 : 1,
                 }}>
-                  {/* Subject indicator */}
                   <div style={{
                     width: 4, alignSelf: 'stretch', borderRadius: 2,
                     background: col, flexShrink: 0,
@@ -5901,27 +5907,27 @@ function HomeworkTab({ user, toast }) {
                         </div>
                         <div style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--s900)' }}>{hw.title}</div>
                         <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>
-                          {hw.teacher} · {hw.maxMarks} marks · {
-                            hw.type === 'quiz' ? `${hw.questions?.length || 0} questions` :
-                            hw.type === 'text' ? 'Written response' :
-                            hw.type === 'file' ? 'File upload' :
-                            'Mixed (text + file)'
-                          }
+                          {teacherName} · {hw.questionCount || 0} question{hw.questionCount === 1 ? '' : 's'} · {hw.totalMarks || 0} marks
                         </div>
                       </div>
-                      {/* Status & due */}
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        {hw.computedStatus === 'graded' && (
+                        {hw.computedStatus === 'graded' && hw.mySubmission && (
                           <div>
                             <span className="badge badge-green">Graded</span>
                             <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--g600)', marginTop: 4 }}>
-                              {hw.grade}/{hw.maxMarks}
+                              {hw.mySubmission.totalAwarded || 0}/{hw.mySubmission.totalPossible || 0}
                             </div>
                           </div>
                         )}
                         {hw.computedStatus === 'submitted' && <span className="badge badge-blue">Submitted</span>}
-                        {hw.computedStatus === 'overdue' && <span className="badge badge-red" style={{ background: 'var(--r50)', color: 'var(--r600)' }}>Overdue · {formatHomeworkDate(hw.dueDate)}</span>}
-                        {hw.computedStatus === 'pending' && <span className="badge badge-amber">Due {formatHomeworkDate(hw.dueDate)}</span>}
+                        {hw.computedStatus === 'overdue' && <span className="badge badge-red" style={{ background: 'var(--r50)', color: 'var(--r600)' }}>Overdue · {formatHomeworkDate(hw.dueAt)}</span>}
+                        {hw.computedStatus === 'pending' && hw.dueAt && <span className="badge badge-amber">Due {formatHomeworkDate(hw.dueAt)}</span>}
+                        {hw.computedStatus === 'pending' && !hw.dueAt && <span className="badge badge-slate">Open</span>}
+                        {hw.computedStatus === 'locked' && (
+                          <span className="badge badge-slate">
+                            🔒 Opens {formatHomeworkDate(hw.releaseAt)}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -5931,8 +5937,8 @@ function HomeworkTab({ user, toast }) {
           </div>
         )
       })}
- 
-      {/* Homework detail / submission modal */}
+
+      {/* HOMEWORK DETAIL / SUBMIT MODAL */}
       {selected && (
         <div onClick={closeHomework} style={{
           position: 'fixed', inset: 0, background: 'rgba(15,23,42,.65)', zIndex: 200,
@@ -5941,253 +5947,306 @@ function HomeworkTab({ user, toast }) {
         }}>
           <div onClick={e => e.stopPropagation()} style={{
             background: 'var(--white)', borderRadius: 'var(--rxl)',
-            maxWidth: 720, width: '100%', overflow: 'hidden',
+            maxWidth: 760, width: '100%', overflow: 'hidden',
             boxShadow: '0 20px 60px rgba(0,0,0,.3)', marginTop: 40, marginBottom: 40,
           }}>
             {/* Header */}
             <div style={{
               padding: '22px 28px',
-              background: `linear-gradient(135deg, ${homeworkColourFor(selected.subject)} 0%, ${homeworkColourFor(selected.subject)}DD 100%)`,
+              background: 'linear-gradient(135deg, ' + homeworkColourFor(selected.subject) + ' 0%, ' + homeworkColourFor(selected.subject) + 'DD 100%)',
               color: '#fff',
             }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .8, marginBottom: 4 }}>
-                {selected.subject} · {selected.teacher}
+                {selected.subject} · {selected.curriculum} · {selected.grade}
               </div>
               <h3 className="serif" style={{ fontSize: 22, margin: 0, lineHeight: 1.2 }}>{selected.title}</h3>
               <div style={{ fontSize: 13, opacity: .9, marginTop: 6 }}>
-                Due {formatHomeworkDate(selected.dueDate)} · {selected.maxMarks} marks
+                {selected.dueAt ? 'Due ' + formatHomeworkDate(selected.dueAt) + ' · ' : ''}
+                {selected.questions?.length || 0} question{selected.questions?.length === 1 ? '' : 's'} · {selected.totalMarks} marks
               </div>
             </div>
- 
+
             {/* Body */}
-            <div style={{ padding: '20px 28px', maxHeight: '60vh', overflowY: 'auto' }}>
-              {/* Description */}
-              <div style={{ marginBottom: 18 }}>
-                <div className="sec-tag" style={{ marginBottom: 6 }}>Instructions</div>
-                <div style={{ fontSize: 14, color: 'var(--s700)', lineHeight: 1.65 }}>{selected.description}</div>
-              </div>
- 
-              {/* If already graded — show grade + feedback, no submission UI */}
-              {selected.status === 'graded' && (
+            <div style={{ padding: '20px 28px', maxHeight: '65vh', overflowY: 'auto' }}>
+              {selected.description && (
+                <div style={{ marginBottom: 18 }}>
+                  <div className="sec-tag" style={{ marginBottom: 6 }}>Instructions</div>
+                  <div style={{ fontSize: 14, color: 'var(--s700)', lineHeight: 1.65 }}>{selected.description}</div>
+                </div>
+              )}
+
+              {/* If already submitted/graded — show grade view */}
+              {submission && (submission.status === 'submitted' || submission.status === 'graded' || submission.status === 'released') && (
                 <div style={{
-                  background: 'var(--g50)', border: '1px solid var(--g100)',
+                  background: submission.status === 'released' || submission.status === 'graded' ? 'var(--g50)' : 'var(--b50)',
+                  border: '1px solid ' + (submission.status === 'released' || submission.status === 'graded' ? 'var(--g100)' : 'var(--b100)'),
                   borderRadius: 'var(--rmd)', padding: 18, marginBottom: 18,
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
-                    <div style={{
-                      width: 56, height: 56, borderRadius: '50%',
-                      background: 'var(--g500)', color: '#fff',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: 'JetBrains Mono, monospace',
-                      fontSize: 18, fontWeight: 700,
-                    }}>
-                      {selected.gradePercent || Math.round((selected.grade / selected.maxMarks) * 100)}%
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 700, color: 'var(--g700)' }}>
-                        {selected.grade} / {selected.maxMarks} marks
+                  {(submission.status === 'graded' || submission.status === 'released') && submission.totalPossible > 0 && (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
+                        <div style={{
+                          width: 56, height: 56, borderRadius: '50%',
+                          background: 'var(--g500)', color: '#fff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontFamily: 'JetBrains Mono, monospace',
+                          fontSize: 16, fontWeight: 700,
+                        }}>
+                          {Math.round(((submission.totalAwarded || 0) / submission.totalPossible) * 100)}%
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, color: 'var(--g700)' }}>
+                            {submission.totalAwarded || 0} / {submission.totalPossible} marks
+                          </div>
+                          <div style={{ fontSize: 12, color: 'var(--s500)' }}>
+                            {submission.gradedAt && 'Graded ' + new Date(submission.gradedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                            {submission.isLate && ' · submitted late'}
+                          </div>
+                        </div>
                       </div>
-                      <div style={{ fontSize: 12, color: 'var(--s500)' }}>
-                        Graded {selected.gradedAt ? new Date(selected.gradedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''}
+                      {submission.overallFeedback && (
+                        <div>
+                          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>Teacher Feedback</div>
+                          <div style={{ fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.65, fontStyle: 'italic' }}>"{submission.overallFeedback}"</div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {submission.status === 'submitted' && (
+                    <>
+                      <div style={{ fontWeight: 700, color: 'var(--b700)', marginBottom: 4 }}>
+                        Submitted · awaiting your teacher to grade
                       </div>
-                    </div>
-                  </div>
-                  {selected.feedback && (
-                    <div>
-                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
-                        Teacher feedback
+                      <div style={{ fontSize: 12.5, color: 'var(--s500)' }}>
+                        Submitted {submission.submittedAt && new Date(submission.submittedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                        {submission.isLate && ' · late'}
                       </div>
-                      <div style={{ fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.65, fontStyle: 'italic' }}>
-                        "{selected.feedback}"
-                      </div>
-                    </div>
+                    </>
                   )}
                 </div>
               )}
- 
-              {/* If submitted but not graded */}
-              {selected.status === 'submitted' && (
-                <div style={{
-                  background: 'var(--b50)', border: '1px solid var(--b100)',
-                  borderRadius: 'var(--rmd)', padding: 16, marginBottom: 18,
-                }}>
-                  <div style={{ fontWeight: 700, color: 'var(--b700)', marginBottom: 4 }}>
-                    Submitted · awaiting teacher grade
-                  </div>
-                  <div style={{ fontSize: 12.5, color: 'var(--s500)' }}>
-                    Submitted {new Date(selected.submittedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                    {selected.submittedText && ` · ${selected.submittedText.length} characters`}
-                  </div>
-                </div>
-              )}
- 
-              {/* Submission UI — only if assigned and not already submitted */}
-              {(selected.status === 'assigned' || selected.computedStatus === 'overdue' || selected.computedStatus === 'pending') && selected.status !== 'submitted' && selected.status !== 'graded' && (
-                <>
-                  {/* Quiz type */}
-                  {selected.type === 'quiz' && (
-                    <div>
-                      <div className="sec-tag" style={{ marginBottom: 8 }}>Questions</div>
-                      {selected.questions.map((q, i) => (
-                        <div key={q.id} className="card" style={{ marginBottom: 10, padding: 14 }}>
-                          <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10 }}>
-                            {i + 1}. {q.q}
-                          </div>
-                          {q.options.map(opt => (
-                            <label key={opt} style={{
+
+              {/* Render each question */}
+              {(selected.questions || []).map((q, idx) => {
+                const a = answers[idx] || {}
+                const isReadOnly = submission && (submission.status === 'submitted' || submission.status === 'graded' || submission.status === 'released')
+                return (
+                  <div key={idx} style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--rmd)',
+                    padding: 16,
+                    marginBottom: 12,
+                    background: idx % 2 === 0 ? '#FFF' : 'var(--bg)',
+                  }}>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 10 }}>
+                      <span className="mono" style={{
+                        fontSize: 11, fontWeight: 700, color: '#7D1025',
+                        background: '#FBE8E8', padding: '2px 8px', borderRadius: 4,
+                        flexShrink: 0,
+                      }}>Q{idx + 1}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--s900)', lineHeight: 1.5 }}>{q.questionText}</div>
+                        <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 2 }}>
+                          {hwTypeLabel[q.type]} · {q.marks} mark{q.marks === 1 ? '' : 's'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Question's own attachments (images from teacher) */}
+                    {q.attachments && q.attachments.length > 0 && (
+                      <div style={{ marginBottom: 10, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {q.attachments.map((att, i) => (
+                          <a key={i} href={att.url} target="_blank" rel="noopener noreferrer">
+                            {att.mimeType?.startsWith('image/')
+                              ? <img src={att.url} alt="" style={{ maxWidth: 200, maxHeight: 140, borderRadius: 4, border: '1px solid var(--border)' }}/>
+                              : <span style={{ fontSize: 12, padding: '4px 10px', background: 'var(--bg)', borderRadius: 4 }}>{att.filename || 'File'}</span>}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* MCQ answer */}
+                    {q.type === 'mcq' && (
+                      <div>
+                        {q.options.map((opt, optIdx) => {
+                          const isSelected = a.answer === optIdx
+                          const isCorrect = isReadOnly && a.marksAwarded > 0 && isSelected
+                          const isWrong = isReadOnly && a.marksAwarded === 0 && isSelected
+                          return (
+                            <label key={optIdx} style={{
                               display: 'flex', alignItems: 'center', gap: 10,
-                              padding: '8px 12px', marginBottom: 6,
-                              border: `1.5px solid ${quizAnswers[q.id] === opt ? homeworkColourFor(selected.subject) : 'var(--border)'}`,
-                              borderRadius: 'var(--rsm)', cursor: 'pointer',
-                              background: quizAnswers[q.id] === opt ? homeworkColourFor(selected.subject) + '10' : 'var(--bg)',
+                              padding: '10px 14px', marginBottom: 6,
+                              border: '1.5px solid ' + (isCorrect ? '#22C55E' : isWrong ? '#DC2626' : isSelected ? homeworkColourFor(selected.subject) : 'var(--border)'),
+                              borderRadius: 'var(--rsm)',
+                              cursor: isReadOnly ? 'default' : 'pointer',
+                              background: isCorrect ? '#DCFCE7' : isWrong ? '#FEE2E2' : isSelected ? homeworkColourFor(selected.subject) + '10' : 'var(--bg)',
+                              opacity: isReadOnly && !isSelected ? 0.6 : 1,
                             }}>
                               <input
                                 type="radio"
-                                name={q.id}
-                                checked={quizAnswers[q.id] === opt}
-                                onChange={() => setQuizAnswers(prev => ({ ...prev, [q.id]: opt }))}
+                                name={'q-' + idx}
+                                checked={isSelected}
+                                disabled={isReadOnly}
+                                onChange={() => setAnswer(idx, optIdx)}
                               />
-                              <span style={{ fontSize: 13.5 }}>{opt}</span>
+                              <span style={{ fontSize: 13.5 }}>{String.fromCharCode(65 + optIdx)}. {opt}</span>
                             </label>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  )}
- 
-                  {/* Text response (with paste blocking) */}
-                  {(selected.type === 'text' || selected.type === 'mixed') && (
-                    <div style={{ marginBottom: 16 }}>
-                      <div className="sec-tag" style={{ marginBottom: 6 }}>
-                        {selected.type === 'mixed' ? 'Written Response (optional if uploading file)' : 'Your Response'}
-                      </div>
-                      <div style={{
-                        fontSize: 11.5, color: 'var(--s500)', fontStyle: 'italic',
-                        marginBottom: 8,
-                        background: 'var(--a50)', borderLeft: '3px solid var(--a500, #F59E0B)',
-                        padding: '6px 10px', borderRadius: 4,
-                      }}>
-                        Please type your answer in your own words. Pasting is disabled.
-                      </div>
-                      <textarea
-                        value={responseText}
-                        onChange={e => setResponseText(e.target.value)}
-                        onPaste={(e) => {
-                          e.preventDefault()
-                          setPasteWarning(true)
-                          setTimeout(() => setPasteWarning(false), 3000)
-                          toast?.error?.('Pasting is disabled. Please type your answer.')
-                        }}
-                        onCopy={(e) => e.preventDefault()}
-                        onCut={(e) => e.preventDefault()}
-                        onContextMenu={(e) => e.preventDefault()}
-                        rows={10}
-                        placeholder="Start typing your response here..."
-                        style={{
-                          width: '100%',
-                          padding: 14,
-                          border: `1.5px solid ${pasteWarning ? 'var(--r500)' : 'var(--border)'}`,
-                          borderRadius: 'var(--rmd)',
-                          fontSize: 14, fontFamily: 'inherit',
-                          lineHeight: 1.6, outline: 'none', resize: 'vertical',
-                          background: 'var(--white)', transition: 'border-color .2s',
-                        }}
-                      />
-                      {pasteWarning && (
-                        <div style={{ fontSize: 11, color: 'var(--r500)', marginTop: 4, fontWeight: 600 }}>
-                          [!] Paste blocked - please type your answer
-                        </div>
-                      )}
-                      <div style={{ fontSize: 11.5, color: 'var(--s400)', marginTop: 4, display: 'flex', justifyContent: 'space-between' }}>
-                        <span>{responseText.length} characters · {responseText.trim().split(/\s+/).filter(Boolean).length} words</span>
-                        {selected.type === 'text' && responseText.length < 50 && <span>Minimum 50 characters</span>}
-                      </div>
-                    </div>
-                  )}
- 
-                  {/* File upload */}
-                  {(selected.type === 'file' || selected.type === 'mixed') && (
-                    <div style={{ marginBottom: 16 }}>
-                      <div className="sec-tag" style={{ marginBottom: 6 }}>
-                        {selected.type === 'mixed' ? 'File Upload (optional if writing response)' : 'Upload File'}
-                      </div>
-                      {!uploadedFile ? (
-                        <label style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          gap: 10, padding: '24px 16px',
-                          border: '2px dashed var(--border)', borderRadius: 'var(--rmd)',
-                          background: 'var(--bg)', cursor: 'pointer',
-                          transition: 'all .2s',
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = homeworkColourFor(selected.subject); e.currentTarget.style.background = homeworkColourFor(selected.subject) + '08' }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--bg)' }}
-                        >
-                          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="var(--s500)" strokeWidth="2" strokeLinecap="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="17 8 12 3 7 8"/>
-                            <line x1="12" y1="3" x2="12" y2="15"/>
-                          </svg>
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s700)' }}>
-                              Click to upload a file
-                            </div>
-                            <div style={{ fontSize: 11.5, color: 'var(--s400)', marginTop: 2 }}>
-                              PDF, image, or document · max 5MB
-                            </div>
+                          )
+                        })}
+                        {isReadOnly && a.marksAwarded !== null && a.marksAwarded !== undefined && (
+                          <div style={{ fontSize: 12, color: 'var(--s600)', marginTop: 6 }}>
+                            Awarded: <strong>{a.marksAwarded}</strong> / {q.marks}
                           </div>
-                          <input
-                            type="file"
-                            accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.txt"
-                            onChange={handleFileUpload}
-                            style={{ display: 'none' }}
-                          />
-                        </label>
-                      ) : (
-                        <div style={{
-                          display: 'flex', alignItems: 'center', gap: 12,
-                          padding: 12, border: '1.5px solid var(--g500)',
-                          borderRadius: 'var(--rmd)', background: 'var(--g50)',
-                        }}>
-                          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-                          </svg>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--g700)', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>
-                              {uploadedFile.name}
-                            </div>
-                            <div style={{ fontSize: 11, color: 'var(--s500)' }}>
-                              {(uploadedFile.size / 1024).toFixed(1)} KB
-                            </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Short / Long text answer (paste blocked) */}
+                    {(q.type === 'short' || q.type === 'long') && (
+                      <div>
+                        {!isReadOnly && (
+                          <div style={{ fontSize: 11.5, color: 'var(--s500)', fontStyle: 'italic', marginBottom: 6, background: 'var(--a50)', borderLeft: '3px solid var(--a500, #F59E0B)', padding: '6px 10px', borderRadius: 4 }}>
+                            Type your answer in your own words. Pasting is disabled.
                           </div>
-                          <button
-                            onClick={() => setUploadedFile(null)}
-                            style={{ background: 'transparent', border: 'none', color: 'var(--s500)', cursor: 'pointer', fontSize: 18, padding: 4 }}
-                          >x</button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
+                        )}
+                        <textarea
+                          value={a.answer || ''}
+                          onChange={e => setAnswer(idx, e.target.value)}
+                          onPaste={e => { e.preventDefault(); if (!isReadOnly) showPasteWarning(idx) }}
+                          onCopy={e => e.preventDefault()}
+                          onCut={e => e.preventDefault()}
+                          onContextMenu={e => e.preventDefault()}
+                          disabled={isReadOnly}
+                          rows={q.type === 'long' ? 8 : 3}
+                          placeholder={isReadOnly ? '' : 'Start typing your response...'}
+                          style={{
+                            width: '100%', padding: 12,
+                            border: '1.5px solid ' + (pasteWarning[idx] ? 'var(--r500)' : 'var(--border)'),
+                            borderRadius: 'var(--rsm)', fontSize: 14, fontFamily: 'inherit',
+                            lineHeight: 1.6, outline: 'none', resize: 'vertical',
+                            background: isReadOnly ? 'var(--bg)' : '#FFF',
+                          }}
+                        />
+                        {pasteWarning[idx] && (
+                          <div style={{ fontSize: 11, color: 'var(--r500)', marginTop: 4, fontWeight: 600 }}>
+                            Paste blocked. Please type your answer.
+                          </div>
+                        )}
+                        {!isReadOnly && a.answer && (
+                          <div style={{ fontSize: 11.5, color: 'var(--s400)', marginTop: 4 }}>
+                            {String(a.answer).length} characters · {String(a.answer).trim().split(/\s+/).filter(Boolean).length} words
+                          </div>
+                        )}
+                        {isReadOnly && a.feedback && (
+                          <div style={{ marginTop: 8, padding: 10, background: '#FBF6E3', borderLeft: '3px solid #C9A030', borderRadius: 4, fontSize: 12.5, color: 'var(--s700)' }}>
+                            <strong>Feedback:</strong> {a.feedback}
+                          </div>
+                        )}
+                        {isReadOnly && a.marksAwarded !== null && a.marksAwarded !== undefined && (
+                          <div style={{ fontSize: 12, color: 'var(--s600)', marginTop: 6 }}>
+                            Awarded: <strong>{a.marksAwarded}</strong> / {q.marks}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* File upload answer */}
+                    {q.type === 'upload' && (
+                      <div>
+                        {!a.attachment && !isReadOnly && (
+                          <label style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            gap: 10, padding: '20px 16px',
+                            border: '2px dashed var(--border)', borderRadius: 'var(--rmd)',
+                            background: 'var(--bg)', cursor: uploadingIdx === idx ? 'wait' : 'pointer',
+                          }}>
+                            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--s500)" strokeWidth="2" strokeLinecap="round">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                              <polyline points="17 8 12 3 7 8"/>
+                              <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            <div style={{ fontSize: 13, color: 'var(--s700)', fontWeight: 600 }}>
+                              {uploadingIdx === idx ? 'Uploading...' : 'Click to upload your answer (image/PDF, max 5 MB)'}
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/*,.pdf"
+                              onChange={e => { if (e.target.files?.[0]) uploadAnswerFile(idx, e.target.files[0]); e.target.value = '' }}
+                              disabled={uploadingIdx === idx}
+                              style={{ display: 'none' }}
+                            />
+                          </label>
+                        )}
+                        {a.attachment && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 10, border: '1.5px solid var(--g500)', borderRadius: 'var(--rmd)', background: 'var(--g50)' }}>
+                            {a.attachment.mimeType?.startsWith('image/')
+                              ? <img src={a.attachment.url} alt="" style={{ maxWidth: 100, maxHeight: 80, borderRadius: 4 }}/>
+                              : <span style={{ fontSize: 13, fontWeight: 600 }}>{a.attachment.filename || 'File'}</span>}
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 12, color: 'var(--g700)', fontWeight: 600 }}>{a.attachment.filename}</div>
+                              <a href={a.attachment.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: 'var(--s500)' }}>View</a>
+                            </div>
+                            {!isReadOnly && (
+                              <button onClick={() => setAnswerAttachment(idx, null)} style={{ background: 'transparent', border: 'none', color: 'var(--s500)', cursor: 'pointer', fontSize: 16, padding: 4 }}>×</button>
+                            )}
+                          </div>
+                        )}
+                        {isReadOnly && a.marksAwarded !== null && a.marksAwarded !== undefined && (
+                          <div style={{ fontSize: 12, color: 'var(--s600)', marginTop: 6 }}>
+                            Awarded: <strong>{a.marksAwarded}</strong> / {q.marks}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Drawing — placeholder for next phase */}
+                    {q.type === 'drawing' && (
+                      <div style={{ background: '#FBF6E3', borderLeft: '3px solid #C9A030', padding: 12, borderRadius: 4, fontSize: 12.5, color: 'var(--s700)', lineHeight: 1.6 }}>
+                        <strong>Drawing canvas coming in next phase.</strong> For now, you can answer this question by uploading a photo or scan of your drawn work below.
+                        {!isReadOnly && (
+                          <div style={{ marginTop: 10 }}>
+                            <label style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 6,
+                              padding: '6px 12px', background: '#7D1025', color: '#FBFAF5',
+                              borderRadius: 4, cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                            }}>
+                              {uploadingIdx === idx ? 'Uploading...' : 'Upload your drawing as image'}
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={e => { if (e.target.files?.[0]) uploadAnswerFile(idx, e.target.files[0]); e.target.value = '' }}
+                                disabled={uploadingIdx === idx}
+                                style={{ display: 'none' }}
+                              />
+                            </label>
+                            {a.attachment && (
+                              <div style={{ marginTop: 8 }}>
+                                <img src={a.attachment.url} alt="" style={{ maxWidth: 200, maxHeight: 150, borderRadius: 4, border: '1px solid var(--border)' }}/>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
- 
+
             {/* Footer */}
-            <div style={{
-              padding: '14px 24px', borderTop: '1px solid var(--border)',
-              background: 'var(--bg)',
-              display: 'flex', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap',
-            }}>
+            <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', background: 'var(--bg)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
               <button onClick={closeHomework} className="btn btn-s">Close</button>
-              {selected.status === 'assigned' && (
+              {(!submission || submission.status === 'in_progress') && (
                 <button
                   onClick={submitHomework}
+                  disabled={submittingNow}
                   className="btn btn-p"
                   style={{
                     background: homeworkColourFor(selected.subject),
                     borderColor: homeworkColourFor(selected.subject),
                   }}
                 >
-                  Submit Homework
+                  {submittingNow ? 'Submitting...' : 'Submit Homework'}
                 </button>
               )}
             </div>
