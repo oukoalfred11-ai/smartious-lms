@@ -8,26 +8,28 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['admin','teacher','student','parent','demo'], default: 'student' },
   grade: String,
+
   // Student enrollment fields (only relevant when role === 'student')
+  // - curriculum: string for students (one curriculum), array for teachers (multi-curriculum)
+  // - gradeLevel: student's current grade/year (e.g., 'Year 10', 'Grade 11')
+  // - subjects: list of subject NAMES the student is enrolled in (string array)
+  // - studentSubjects: same as subjects, kept for clarity (legacy alias)
   curriculum: {
-    type: String,
-    enum: ['IGCSE', 'Edexcel', 'Cambridge', 'IB', 'BNC', 'American', 'Canadian', null],
-    default: null,
+    type: mongoose.Schema.Types.Mixed,  // string OR array depending on role
+    default: ''
   },
   gradeLevel: {
     type: String,
     default: null,
   },
+  // Student subjects (strings, e.g. "Mathematics", "Physics")
   subjects: {
     type: [String],
     default: [],
   },
-  // Curriculum: string for students/single curriculum, array for teachers/multi-curriculum
-  curriculum: {
-    type: mongoose.Schema.Types.Mixed,
-    default: ''
-  },
-  subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
+  // Teacher subject ObjectId references (used by Allocation/Subject system)
+  // Renamed from old `subjects` field to avoid collision
+  subjectRefs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
   // PHASE 3-5 REFACTOR: Teacher teaching specialties (multi-curriculum support)
   teachingSpecialties: [{
     subjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' },
