@@ -869,8 +869,11 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
     setUserForm({
       firstName: u.firstName || '', lastName: u.lastName || '', email: u.email || '',
       phone: u.phone || '', role: u.role || 'student',
-      curriculum: u.curriculum || '', grade: u.grade || '', plan: u.plan || 'Basic',
-      subjects: u.subjects || [], teachingSpecialties: u.teachingSpecialties || [],
+      curriculum: u.curriculum || '',
+      grade: u.gradeLevel || u.grade || '',
+      plan: u.plan || 'Basic',
+      subjects: Array.isArray(u.subjects) ? u.subjects.filter(s => typeof s === 'string') : [],
+      teachingSpecialties: u.teachingSpecialties || [],
       bio: u.bio || '', linkedStudents: u.linkedStudents || [],
       _id: u._id,
     })
