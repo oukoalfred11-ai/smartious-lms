@@ -56,7 +56,7 @@ const upload = multer({
 // Returns the Cloudinary URL + publicId so frontend can include
 // in subsequent question creation.
 // ─────────────────────────────────────────────────────────
-router.post('/upload', auth, requireRole('teacher', 'admin'), (req, res) => {
+router.post('/upload', auth, requireRole('teacher', 'admin', 'student'), (req, res) => {
   upload.single('file')(req, res, (err) => {
     if (err) {
       console.error('[questions/upload]', err.message);
