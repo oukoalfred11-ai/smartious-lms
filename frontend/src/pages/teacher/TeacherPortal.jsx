@@ -697,798 +697,418 @@ export default function TeacherPortal() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// QUESTION BANK — for Exams, Homework, Adaptive Practice
+// QUESTION BANK — wired to /api/questions
+// Phase 2.1: browse + filters (no create/edit yet)
 // ═══════════════════════════════════════════════════════════
-
-const QB_CUSTOM_KEY    = 'sm_question_bank_custom'
-const QB_DRAFTS_KEY    = 'sm_question_bank_drafts'
-const QB_SEEDED_KEY    = 'sm_question_bank_seeded'
-
-const qbSubjColours = {
-  'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
-  'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
-  'Geography': '#0F766E', 'Computer Science': '#1F2937',
-  'Business Studies': '#7E22CE', 'Economics': '#9F1239',
-}
-const qbSubjColour = (s) => qbSubjColours[s] || '#8B1A2E'
-
+ 
 const qbDifficultyColours = {
   easy:   { bg: 'var(--g50)', color: 'var(--g600)', label: 'Easy' },
   medium: { bg: 'var(--a50)', color: 'var(--a600)', label: 'Medium' },
   hard:   { bg: 'var(--r50)', color: 'var(--r500)', label: 'Hard' },
 }
-
-const qbTypeIcons = {
-  mcq:       { letter: 'M', color: '#1E3A8A', label: 'Multiple Choice' },
-  short:     { letter: 'S', color: '#166534', label: 'Short Answer' },
-  essay:     { letter: 'E', color: '#7E22CE', label: 'Essay' },
-  truefalse: { letter: 'T', color: '#92400E', label: 'True / False' },
+ 
+const qbTypeMeta = {
+  mcq:      { letter: 'M', color: '#1E3A8A', label: 'Multiple Choice' },
+  short:    { letter: 'S', color: '#166534', label: 'Short Answer' },
+  long:     { letter: 'L', color: '#7E22CE', label: 'Long Answer' },
+  drawing:  { letter: 'D', color: '#DC2626', label: 'Drawing' },
+  upload:   { letter: 'U', color: '#7D1025', label: 'Upload' },
 }
-
-const QB_CURRICULA = {
-  'IGCSE':    { label: 'IGCSE',           years: ['Year 7','Year 8','Year 9','Year 10','Year 11'] },
-  'Edexcel':  { label: 'Edexcel',         years: ['Year 7','Year 8','Year 9','Year 10','Year 11','Year 12','Year 13'] },
-  'IB':       { label: 'IB',              years: ['Grade 9','Grade 10','Grade 11','Grade 12','SL','HL'] },
-  'CBC':      { label: 'Kenya CBC',       years: ['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12'] },
-  'BNC':      { label: 'British Nat. Curr.', years: ['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6','Year 7','Year 8','Year 9','Year 10','Year 11','Year 12','Year 13'] },
-  'American': { label: 'American',        years: ['K','1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th','11th','12th'] },
-}
-
-const QB_SUBJECTS = [
-  'Mathematics', 'Physics', 'Chemistry', 'Biology', 'English',
-  'History', 'Geography', 'Computer Science', 'Business Studies', 'Economics',
-]
-
-const QB_DEFAULT_TOPICS = {
-  'Mathematics':       ['Algebra', 'Geometry', 'Trigonometry', 'Statistics', 'Number', 'Calculus'],
-  'Physics':           ['Forces & Motion', 'Electricity', 'Waves', 'Energy', 'Atomic Physics'],
-  'Chemistry':         ['Atomic Structure', 'Periodic Table', 'Bonding', 'Reactions', 'Organic Chemistry'],
-  'Biology':           ['Cell Biology', 'Genetics', 'Ecology', 'Human Body', 'Evolution'],
-  'English':           ['Reading', 'Writing', 'Grammar', 'Literature', 'Poetry'],
-  'History':           ['Modern History', 'Ancient History', 'World Wars', 'African History'],
-  'Geography':         ['Physical', 'Human', 'Maps & Skills', 'Climate'],
-  'Computer Science':  ['Algorithms', 'Data Structures', 'Programming', 'Networks'],
-  'Business Studies':  ['Marketing', 'Finance', 'Operations', 'HR'],
-  'Economics':         ['Microeconomics', 'Macroeconomics', 'Development', 'Globalisation'],
-}
-
-const seedQuestionBank = (teacherFullName) => {
-  if (localStorage.getItem(QB_SEEDED_KEY)) return
-  const now = new Date().toISOString()
-  const samples = [
-    { id: 'qb-001', curriculum: 'IGCSE', subject: 'Mathematics', topic: 'Algebra', difficulty: 'easy', type: 'mcq',
-      question: 'Solve for x:  3x + 7 = 22',
-      options: ['x = 5', 'x = 7', 'x = 15', 'x = 29/3'], answer: 'x = 5',
-      explanation: 'Subtract 7 from both sides: 3x = 15. Divide by 3: x = 5.',
-      marks: 2, tags: ['linear-equations'], authorId: 'teacher-1', authorName: teacherFullName, status: 'published', visibility: 'school',
-      useInPractice: true, timesUsed: 12, timesAnswered: 87, averageScore: 78, createdAt: now, updatedAt: now },
-    { id: 'qb-002', curriculum: 'IGCSE', subject: 'Mathematics', topic: 'Algebra', difficulty: 'medium', type: 'mcq',
-      question: 'Expand (x + 4)(x - 2)',
-      options: ['x^2 + 2x - 8', 'x^2 - 2x - 8', 'x^2 + 6x - 8', 'x^2 + 2x + 8'], answer: 'x^2 + 2x - 8',
-      explanation: 'FOIL: x*x + x*(-2) + 4*x + 4*(-2) = x^2 + 2x - 8.',
-      marks: 3, tags: ['expansion'], authorId: 'teacher-1', authorName: teacherFullName, status: 'published', visibility: 'school',
-      useInPractice: true, timesUsed: 8, timesAnswered: 56, averageScore: 65, createdAt: now, updatedAt: now },
-    { id: 'qb-003', curriculum: 'IGCSE', subject: 'Mathematics', topic: 'Geometry', difficulty: 'easy', type: 'mcq',
-      question: 'A right-angled triangle has legs 6 cm and 8 cm. The hypotenuse is:',
-      options: ['10 cm', '14 cm', '12 cm', '7 cm'], answer: '10 cm',
-      explanation: 'Pythagoras: c^2 = 6^2 + 8^2 = 100, so c = 10 cm.',
-      marks: 3, tags: ['pythagoras'], authorId: 'teacher-1', authorName: teacherFullName, status: 'published', visibility: 'school',
-      useInPractice: true, timesUsed: 15, timesAnswered: 102, averageScore: 84, createdAt: now, updatedAt: now },
-    { id: 'qb-004', curriculum: 'IGCSE', subject: 'Mathematics', topic: 'Trigonometry', difficulty: 'medium', type: 'short',
-      question: 'In a right triangle, the side opposite to the angle is 5 cm and the hypotenuse is 13 cm. Find the sine of the angle.',
-      answer: '5/13', explanation: 'sin(angle) = opposite / hypotenuse = 5 / 13.',
-      marks: 4, tags: ['sine'], authorId: 'teacher-1', authorName: teacherFullName, status: 'published', visibility: 'school',
-      useInPractice: true, timesUsed: 6, timesAnswered: 32, averageScore: 58, createdAt: now, updatedAt: now },
-    { id: 'qb-005', curriculum: 'IGCSE', subject: 'Mathematics', topic: 'Algebra', difficulty: 'hard', type: 'essay',
-      question: 'Explain three real-world applications of algebra. Include a worked example for each.',
-      answer: '', explanation: 'Mark scheme: 3 marks per application (1 for context, 1 for setup, 1 for solution). Total 9 + 1 for clarity.',
-      marks: 10, tags: ['applications'], authorId: 'teacher-1', authorName: teacherFullName, status: 'published', visibility: 'school',
-      useInPractice: false, timesUsed: 2, timesAnswered: 14, averageScore: 71, createdAt: now, updatedAt: now },
-    { id: 'qb-006', curriculum: 'IGCSE', subject: 'Physics', topic: 'Forces & Motion', difficulty: 'easy', type: 'mcq',
-      question: "Newton's second law is expressed as:",
-      options: ['F = ma', 'F = m/a', 'F = m + a', 'F = m - a'], answer: 'F = ma',
-      explanation: 'Force = mass times acceleration.',
-      marks: 2, tags: ['newton'], authorId: 'teacher-1', authorName: teacherFullName, status: 'published', visibility: 'school',
-      useInPractice: true, timesUsed: 9, timesAnswered: 64, averageScore: 89, createdAt: now, updatedAt: now },
-    { id: 'qb-007', curriculum: 'IGCSE', subject: 'Physics', topic: 'Electricity', difficulty: 'medium', type: 'truefalse',
-      question: 'In a series circuit, current is the same at every point.',
-      answer: 'True', explanation: 'In series, the same current flows through each component because there is only one path.',
-      marks: 2, tags: ['circuits'], authorId: 'teacher-1', authorName: teacherFullName, status: 'published', visibility: 'school',
-      useInPractice: true, timesUsed: 4, timesAnswered: 28, averageScore: 75, createdAt: now, updatedAt: now },
-    { id: 'qb-008', curriculum: 'IGCSE', subject: 'Biology', topic: 'Cell Biology', difficulty: 'easy', type: 'mcq',
-      question: 'Photosynthesis occurs in the:',
-      options: ['Mitochondria', 'Nucleus', 'Chloroplasts', 'Ribosomes'], answer: 'Chloroplasts',
-      explanation: 'Chloroplasts contain chlorophyll and convert light energy into chemical energy.',
-      marks: 2, tags: ['photosynthesis'], authorId: 'teacher-1', authorName: teacherFullName, status: 'published', visibility: 'school',
-      useInPractice: true, timesUsed: 11, timesAnswered: 78, averageScore: 81, createdAt: now, updatedAt: now },
-    { id: 'qb-009', curriculum: 'IGCSE', subject: 'Mathematics', topic: 'Statistics', difficulty: 'medium', type: 'mcq',
-      question: 'Find the mean of: 4, 7, 9, 10, 5',
-      options: ['7', '7.5', '6', '8'], answer: '7',
-      explanation: 'Sum = 35. Mean = 35 / 5 = 7.',
-      marks: 2, tags: ['mean'], authorId: 'teacher-1', authorName: teacherFullName, status: 'draft', visibility: 'private',
-      useInPractice: false, timesUsed: 0, timesAnswered: 0, averageScore: null, createdAt: now, updatedAt: now },
-  ]
-  localStorage.setItem(QB_CUSTOM_KEY, JSON.stringify(samples))
-  localStorage.setItem(QB_SEEDED_KEY, '1')
-}
-
-const loadQuestionBank = () => {
-  try { return JSON.parse(localStorage.getItem(QB_CUSTOM_KEY) || '[]') } catch { return [] }
-}
-const saveQuestionBank = (questions) => {
-  try { localStorage.setItem(QB_CUSTOM_KEY, JSON.stringify(questions.slice(-1000))) } catch {}
-}
-
-const generateQId = () => 'qb-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)
-
+ 
 function QuestionBankTab({ user, store, setPage, toast }) {
-  const teacherFullName = 'Mr. James Muthomi'
-
-  useEffect(() => { seedQuestionBank(teacherFullName) }, [])
-
-  const [questions, setQuestions] = useState(() => loadQuestionBank())
-  const [view, setView] = useState('browse')
-  const [editingQ, setEditingQ] = useState(null)
-  const [detailQ, setDetailQ] = useState(null)
-
-  const [filterCurriculum, setFilterCurriculum] = useState('all')
-  const [filterSubject, setFilterSubject] = useState('all')
-  const [filterDifficulty, setFilterDifficulty] = useState('all')
-  const [filterType, setFilterType] = useState('all')
-  const [filterStatus, setFilterStatus] = useState('all')
+  // ── DATA ──
+  const [catalog, setCatalog] = useState({ curricula: [], gradesByCurriculum: {}, subjects: [] })
+  const [questions, setQuestions] = useState([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+ 
+  // ── FILTERS ──
+  const [filterCurriculum, setFilterCurriculum] = useState('')
+  const [filterSubject, setFilterSubject] = useState('')
+  const [filterGrade, setFilterGrade] = useState('')
+  const [filterType, setFilterType] = useState('')
   const [searchQ, setSearchQ] = useState('')
-
-  const [formCurriculum, setFormCurriculum] = useState('IGCSE')
-  const [formSubject, setFormSubject] = useState('Mathematics')
-  const [formTopic, setFormTopic] = useState('Algebra')
-  const [formCustomTopic, setFormCustomTopic] = useState('')
-  const [formDifficulty, setFormDifficulty] = useState('medium')
-  const [formType, setFormType] = useState('mcq')
-  const [formQuestion, setFormQuestion] = useState('')
-  const [formOptions, setFormOptions] = useState(['', '', '', ''])
-  const [formAnswer, setFormAnswer] = useState('')
-  const [formExplanation, setFormExplanation] = useState('')
-  const [formMarks, setFormMarks] = useState(2)
-  const [formUseInPractice, setFormUseInPractice] = useState(true)
-  const [formVisibility, setFormVisibility] = useState('school')
-
-  const filteredQuestions = questions.filter(q => {
-    if (filterCurriculum !== 'all' && q.curriculum !== filterCurriculum) return false
-    if (filterSubject !== 'all' && q.subject !== filterSubject) return false
-    if (filterDifficulty !== 'all' && q.difficulty !== filterDifficulty) return false
-    if (filterType !== 'all' && q.type !== filterType) return false
-    if (filterStatus !== 'all' && q.status !== filterStatus) return false
-    if (searchQ.trim()) {
-      const search = searchQ.toLowerCase()
-      const haystack = (q.question + ' ' + (q.tags || []).join(' ') + ' ' + q.topic).toLowerCase()
-      if (!haystack.includes(search)) return false
+  const [showOnlyMine, setShowOnlyMine] = useState(false)
+ 
+  // ── DETAIL MODAL ──
+  const [detailQ, setDetailQ] = useState(null)
+ 
+  // Load catalog once
+  useEffect(() => {
+    api.get('/curriculum/options')
+      .then(res => {
+        if (res.data?.success) {
+          setCatalog({
+            curricula: res.data.curricula || [],
+            gradesByCurriculum: res.data.gradesByCurriculum || {},
+            subjects: res.data.subjects || [],
+          })
+        }
+      })
+      .catch(err => console.error('[qbank] catalog load failed:', err.message))
+  }, [])
+ 
+  // Load questions whenever filters change
+  useEffect(() => {
+    const loadQuestions = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const params = new URLSearchParams()
+        if (filterCurriculum) params.append('curriculum', filterCurriculum)
+        if (filterSubject) params.append('subject', filterSubject)
+        if (filterGrade) params.append('grade', filterGrade)
+        if (filterType) params.append('type', filterType)
+        if (searchQ.trim()) params.append('q', searchQ.trim())
+        if (showOnlyMine) params.append('createdBy', 'me')
+        params.append('limit', '100')
+ 
+        const { data } = await api.get('/questions?' + params.toString())
+        if (data.success) {
+          setQuestions(data.questions || [])
+          setTotal(data.total || 0)
+        }
+      } catch (e) {
+        setError(e.response?.data?.message || 'Failed to load questions')
+        setQuestions([])
+      } finally {
+        setLoading(false)
+      }
     }
-    return true
-  })
-
-  const formTopics = (() => {
-    const fromQuestions = [...new Set(questions.filter(q => q.subject === formSubject).map(q => q.topic))]
-    const defaults = QB_DEFAULT_TOPICS[formSubject] || []
-    return [...new Set([...defaults, ...fromQuestions])]
-  })()
-
-  const totalQuestions = questions.length
-  const publishedCount = questions.filter(q => q.status === 'published').length
-  const draftCount = questions.filter(q => q.status === 'draft').length
-  const practiceCount = questions.filter(q => q.useInPractice).length
-  const subjectCount = new Set(questions.map(q => q.subject)).size
-
-  const resetForm = () => {
-    setFormCurriculum('IGCSE'); setFormSubject('Mathematics'); setFormTopic('Algebra'); setFormCustomTopic('')
-    setFormDifficulty('medium'); setFormType('mcq'); setFormQuestion('')
-    setFormOptions(['', '', '', '']); setFormAnswer(''); setFormExplanation('')
-    setFormMarks(2); setFormUseInPractice(true); setFormVisibility('school')
+    // Debounce search by 250ms
+    const handle = setTimeout(loadQuestions, 250)
+    return () => clearTimeout(handle)
+  }, [filterCurriculum, filterSubject, filterGrade, filterType, searchQ, showOnlyMine])
+ 
+  // Available subjects for the selected curriculum (for filter dropdown)
+  const subjectsForFilter = filterCurriculum
+    ? catalog.subjects.filter(s =>
+        s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(filterCurriculum)))
+    : catalog.subjects
+ 
+  // Available grades for the selected curriculum
+  const gradesForFilter = filterCurriculum
+    ? (catalog.gradesByCurriculum[filterCurriculum] || [])
+    : []
+ 
+  // Reset subject/grade when curriculum changes
+  const handleCurriculumChange = (newCurr) => {
+    setFilterCurriculum(newCurr)
+    setFilterSubject('')
+    setFilterGrade('')
   }
-
-  const openAdd = () => { resetForm(); setEditingQ(null); setView('add') }
-
-  const openEdit = (q) => {
-    setFormCurriculum(q.curriculum); setFormSubject(q.subject); setFormTopic(q.topic); setFormCustomTopic('')
-    setFormDifficulty(q.difficulty); setFormType(q.type); setFormQuestion(q.question)
-    setFormOptions(q.options || ['', '', '', '']); setFormAnswer(q.answer || ''); setFormExplanation(q.explanation || '')
-    setFormMarks(q.marks || 2); setFormUseInPractice(q.useInPractice !== false); setFormVisibility(q.visibility || 'school')
-    setEditingQ(q); setView('edit')
+ 
+  const clearFilters = () => {
+    setFilterCurriculum('')
+    setFilterSubject('')
+    setFilterGrade('')
+    setFilterType('')
+    setSearchQ('')
+    setShowOnlyMine(false)
   }
-
-  const saveQuestion = (asDraft) => {
-    if (!formQuestion.trim()) { toast?.error?.('Question text is required.'); return }
-    if (formType === 'mcq') {
-      const filled = formOptions.filter(o => o.trim())
-      if (filled.length < 2) { toast?.error?.('At least 2 options required.'); return }
-      if (!formAnswer.trim()) { toast?.error?.('Select correct answer.'); return }
-      if (!filled.includes(formAnswer)) { toast?.error?.('Correct answer must match an option.'); return }
-    } else if (formType === 'truefalse') {
-      if (formAnswer !== 'True' && formAnswer !== 'False') { toast?.error?.('Select True or False.'); return }
-    } else if (formType !== 'essay' && !formAnswer.trim()) {
-      toast?.error?.('Expected answer is required.'); return
-    }
-
-    const finalTopic = formCustomTopic.trim() || formTopic
-    const now = new Date().toISOString()
-    const record = {
-      id: editingQ ? editingQ.id : generateQId(),
-      curriculum: formCurriculum, subject: formSubject, topic: finalTopic,
-      difficulty: formDifficulty, type: formType, question: formQuestion.trim(),
-      options: formType === 'mcq' ? formOptions.filter(o => o.trim()) : (formType === 'truefalse' ? ['True', 'False'] : undefined),
-      answer: formAnswer.trim(), explanation: formExplanation.trim(),
-      marks: parseInt(formMarks) || 2, tags: [finalTopic.toLowerCase().replace(/\s+/g, '-')],
-      authorId: 'teacher-1', authorName: teacherFullName,
-      status: asDraft ? 'draft' : 'published',
-      visibility: asDraft ? 'private' : formVisibility,
-      useInPractice: !asDraft && formUseInPractice,
-      timesUsed: editingQ ? editingQ.timesUsed : 0,
-      timesAnswered: editingQ ? editingQ.timesAnswered : 0,
-      averageScore: editingQ ? editingQ.averageScore : null,
-      createdAt: editingQ ? editingQ.createdAt : now, updatedAt: now,
-    }
-
-    const updated = editingQ
-      ? questions.map(q => q.id === editingQ.id ? record : q)
-      : [record, ...questions]
-    setQuestions(updated); saveQuestionBank(updated)
-    toast?.ok?.(editingQ ? 'Question updated.' : asDraft ? 'Saved as draft.' : 'Question published.')
-    setView('browse'); setEditingQ(null)
-  }
-
-  const deleteQuestion = (id) => {
-    const updated = questions.filter(q => q.id !== id)
-    setQuestions(updated); saveQuestionBank(updated)
-    toast?.ok?.('Question deleted.'); setDetailQ(null)
-  }
-
-  const togglePractice = (id) => {
-    const updated = questions.map(q => q.id === id ? { ...q, useInPractice: !q.useInPractice, updatedAt: new Date().toISOString() } : q)
-    setQuestions(updated); saveQuestionBank(updated)
-  }
-
-  const publishDraft = (id) => {
-    const updated = questions.map(q => q.id === id ? { ...q, status: 'published', visibility: 'school', updatedAt: new Date().toISOString() } : q)
-    setQuestions(updated); saveQuestionBank(updated)
-    toast?.ok?.('Question published.')
-  }
-
-  if (view === 'add' || view === 'edit') {
-    return (
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-          <button onClick={() => { setView('browse'); setEditingQ(null) }} className="btn btn-g btn-sm">
-            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-            Back
-          </button>
-          <div>
-            <div className="sec-tag">Question Bank</div>
-            <h2 className="serif" style={{ fontSize: 22, color: 'var(--s900)' }}>{editingQ ? 'Edit Question' : 'Add New Question'}</h2>
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>
-          <div>
-            <div className="card" style={{ marginBottom: 14 }}>
-              <div className="ctitle" style={{ marginBottom: 12 }}>Question Type</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 }}>
-                {Object.entries(qbTypeIcons).map(([id, info]) => (
-                  <button key={id} onClick={() => setFormType(id)}
-                    style={{
-                      background: formType === id ? info.color + '15' : 'var(--bg)',
-                      border: '2px solid ' + (formType === id ? info.color : 'var(--border)'),
-                      borderRadius: 'var(--rmd)', padding: '12px 8px', cursor: 'pointer', textAlign: 'center',
-                    }}>
-                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: info.color, color: '#fff',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontWeight: 700, fontSize: 13, margin: '0 auto 6px' }}>{info.letter}</div>
-                    <div style={{ fontSize: 11.5, fontWeight: 700, color: formType === id ? info.color : 'var(--s700)' }}>{info.label}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="card" style={{ marginBottom: 14 }}>
-              <div className="ctitle" style={{ marginBottom: 12 }}>Categorization</div>
-              <div className="fg">
-                <label className="fl">Curriculum</label>
-                <select className="fsel" value={formCurriculum} onChange={e => setFormCurriculum(e.target.value)}>
-                  {Object.entries(QB_CURRICULA).map(([id, info]) => (<option key={id} value={id}>{info.label}</option>))}
-                </select>
-              </div>
-              <div className="fg">
-                <label className="fl">Subject</label>
-                <select className="fsel" value={formSubject} onChange={e => { setFormSubject(e.target.value); setFormTopic((QB_DEFAULT_TOPICS[e.target.value] || ['General'])[0]) }}>
-                  {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
-                </select>
-              </div>
-              <div className="fg">
-                <label className="fl">Topic</label>
-                <select className="fsel" value={formTopic} onChange={e => setFormTopic(e.target.value)}>
-                  {formTopics.map(t => <option key={t}>{t}</option>)}
-                  <option value="__custom__">+ Add custom topic...</option>
-                </select>
-                {formTopic === '__custom__' && (
-                  <input className="fi" style={{ marginTop: 6 }} placeholder="Type new topic name"
-                    value={formCustomTopic} onChange={e => setFormCustomTopic(e.target.value)}/>
-                )}
-              </div>
-              <div className="fg" style={{ marginBottom: 0 }}>
-                <label className="fl">Difficulty</label>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {Object.entries(qbDifficultyColours).map(([id, info]) => (
-                    <button key={id} onClick={() => setFormDifficulty(id)}
-                      style={{
-                        flex: 1, background: formDifficulty === id ? info.color : 'var(--bg)',
-                        color: formDifficulty === id ? '#fff' : info.color,
-                        border: '1.5px solid ' + info.color,
-                        padding: '8px 12px', borderRadius: 'var(--rsm)',
-                        cursor: 'pointer', fontSize: 12.5, fontWeight: 700,
-                      }}>{info.label}</button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="card" style={{ marginBottom: 14 }}>
-              <div className="ctitle" style={{ marginBottom: 12 }}>Question</div>
-              <div className="fg">
-                <label className="fl">Question Text *</label>
-                <textarea className="fi" rows={3} value={formQuestion} onChange={e => setFormQuestion(e.target.value)}
-                  placeholder="e.g. Solve for x:  3x + 7 = 22"
-                  style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
-              </div>
-              {formType === 'mcq' && (
-                <>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--s500)', marginBottom: 8, marginTop: 4 }}>Options (at least 2 required)</div>
-                  {formOptions.map((opt, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
-                      <input type="radio" checked={formAnswer === opt && opt.trim() !== ''}
-                        onChange={() => setFormAnswer(opt)} disabled={!opt.trim()}
-                        style={{ accentColor: 'var(--g600)' }}/>
-                      <input className="fi" value={opt} onChange={e => {
-                        const newOpts = [...formOptions]
-                        newOpts[i] = e.target.value
-                        setFormOptions(newOpts)
-                        if (formAnswer === formOptions[i]) setFormAnswer(e.target.value)
-                      }} placeholder={'Option ' + String.fromCharCode(65 + i)} style={{ flex: 1 }}/>
-                    </div>
-                  ))}
-                  <div style={{ fontSize: 11, color: 'var(--s400)', fontStyle: 'italic' }}>Click the radio next to correct answer</div>
-                </>
-              )}
-              {formType === 'truefalse' && (
-                <div className="fg">
-                  <label className="fl">Correct Answer *</label>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {['True', 'False'].map(v => (
-                      <button key={v} onClick={() => setFormAnswer(v)}
-                        style={{
-                          flex: 1, background: formAnswer === v ? 'var(--g600)' : 'var(--bg)',
-                          color: formAnswer === v ? '#fff' : 'var(--s700)',
-                          border: '1.5px solid ' + (formAnswer === v ? 'var(--g600)' : 'var(--border)'),
-                          padding: 12, borderRadius: 'var(--rmd)', cursor: 'pointer', fontSize: 14, fontWeight: 700,
-                        }}>{v}</button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {(formType === 'short' || formType === 'essay') && (
-                <div className="fg">
-                  <label className="fl">{formType === 'essay' ? 'Mark Scheme / Rubric' : 'Expected Answer *'}</label>
-                  <textarea className="fi" rows={formType === 'essay' ? 4 : 2} value={formAnswer}
-                    onChange={e => setFormAnswer(e.target.value)}
-                    placeholder={formType === 'essay' ? 'e.g. 3 marks per point. Look for: thesis, evidence, analysis.' : 'e.g. 5/13'}
-                    style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
-                </div>
-              )}
-              <div className="fg" style={{ marginBottom: 0 }}>
-                <label className="fl">Explanation (shown to students after answering)</label>
-                <textarea className="fi" rows={2} value={formExplanation} onChange={e => setFormExplanation(e.target.value)}
-                  placeholder="Why is this the correct answer?"
-                  style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
-              </div>
-            </div>
-
-            <div className="card" style={{ marginBottom: 14 }}>
-              <div className="fg" style={{ marginBottom: 0 }}>
-                <label className="fl">Marks</label>
-                <input className="fi" type="number" min="1" max="100" value={formMarks}
-                  onChange={e => setFormMarks(e.target.value)} style={{ maxWidth: 100 }}/>
-                <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>How many marks this question is worth in an exam</div>
-              </div>
-            </div>
-
-            <div className="card" style={{ marginBottom: 14 }}>
-              <div className="ctitle" style={{ marginBottom: 12 }}>Settings</div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: 12, padding: 10, background: 'var(--bg)', borderRadius: 'var(--rmd)' }}>
-                <input type="checkbox" checked={formUseInPractice} onChange={e => setFormUseInPractice(e.target.checked)} style={{ accentColor: 'var(--g600)' }}/>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13 }}>Available for Adaptive Practice</div>
-                  <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>Students can practice this in Adaptive Practice tab</div>
-                </div>
-              </label>
-              <div className="fg" style={{ marginBottom: 0 }}>
-                <label className="fl">Visibility</label>
-                <select className="fsel" value={formVisibility} onChange={e => setFormVisibility(e.target.value)}>
-                  <option value="private">Private (only me)</option>
-                  <option value="school">School (all teachers can use)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div className="card" style={{ position: 'sticky', top: 20 }}>
-              <div className="ctitle" style={{ marginBottom: 14 }}>Live Preview</div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-                <span style={{
-                  background: qbSubjColour(formSubject) + '15', color: qbSubjColour(formSubject),
-                  fontSize: 10, fontWeight: 700, letterSpacing: '.06em',
-                  padding: '3px 8px', borderRadius: 99, textTransform: 'uppercase',
-                }}>{formSubject}</span>
-                <span style={{
-                  background: qbDifficultyColours[formDifficulty]?.bg || 'var(--bg)',
-                  color: qbDifficultyColours[formDifficulty]?.color || 'var(--s500)',
-                  fontSize: 10, fontWeight: 700, letterSpacing: '.06em',
-                  padding: '3px 8px', borderRadius: 99, textTransform: 'uppercase',
-                }}>{qbDifficultyColours[formDifficulty]?.label}</span>
-                <span style={{
-                  background: 'var(--bg)', color: 'var(--s500)', fontSize: 10, fontWeight: 700,
-                  padding: '3px 8px', borderRadius: 99,
-                }}>{formMarks} {formMarks === 1 ? 'mark' : 'marks'}</span>
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--s400)', marginBottom: 4 }}>
-                {formCurriculum} | {formCustomTopic.trim() || formTopic}
-              </div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s900)', marginBottom: 16, lineHeight: 1.5 }}>
-                {formQuestion || <span style={{ color: 'var(--s400)', fontStyle: 'italic' }}>Question text will appear here...</span>}
-              </div>
-              {formType === 'mcq' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
-                  {formOptions.map((opt, i) => (opt.trim() && (
-                    <div key={i} style={{
-                      padding: '10px 12px',
-                      border: '1.5px solid ' + (formAnswer === opt ? 'var(--g500)' : 'var(--border)'),
-                      borderRadius: 'var(--rsm)',
-                      background: formAnswer === opt ? 'var(--g50)' : 'var(--bg)',
-                      fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 10,
-                    }}>
-                      <span style={{
-                        width: 22, height: 22, borderRadius: '50%',
-                        background: formAnswer === opt ? 'var(--g600)' : 'var(--s200)',
-                        color: '#fff', fontSize: 11, fontWeight: 700,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}>{String.fromCharCode(65 + i)}</span>
-                      <span>{opt}</span>
-                    </div>
-                  )))}
-                </div>
-              )}
-              {formType === 'truefalse' && (
-                <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-                  {['True', 'False'].map(v => (
-                    <div key={v} style={{
-                      flex: 1, padding: 12,
-                      border: '1.5px solid ' + (formAnswer === v ? 'var(--g500)' : 'var(--border)'),
-                      borderRadius: 'var(--rsm)',
-                      background: formAnswer === v ? 'var(--g50)' : 'var(--bg)',
-                      textAlign: 'center', fontSize: 14, fontWeight: 700,
-                      color: formAnswer === v ? 'var(--g700)' : 'var(--s700)',
-                    }}>{v}</div>
-                  ))}
-                </div>
-              )}
-              {(formType === 'short' || formType === 'essay') && formAnswer && (
-                <div style={{
-                  background: 'var(--g50)', borderLeft: '3px solid var(--g500)',
-                  padding: '10px 14px', borderRadius: 'var(--rsm)',
-                  fontSize: 13, color: 'var(--g700)', marginBottom: 14,
-                  fontStyle: 'italic', lineHeight: 1.6,
-                }}><strong>Answer:</strong> {formAnswer}</div>
-              )}
-              {formExplanation && (
-                <div style={{
-                  background: 'var(--b50)', borderLeft: '3px solid var(--b500, #3B82F6)',
-                  padding: '10px 14px', borderRadius: 'var(--rsm)',
-                  fontSize: 12.5, color: 'var(--b700)', fontStyle: 'italic', lineHeight: 1.6,
-                }}><strong>Explanation:</strong> {formExplanation}</div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 18, flexWrap: 'wrap' }}>
-          <button onClick={() => { setView('browse'); setEditingQ(null) }} className="btn btn-s">Cancel</button>
-          <button onClick={() => saveQuestion(true)} className="btn btn-s">Save as Draft</button>
-          <button onClick={() => saveQuestion(false)} className="btn btn-p">{editingQ ? 'Update Question' : 'Publish to Bank'}</button>
-        </div>
-      </div>
-    )
-  }
-
+ 
+  const hasActiveFilters = !!(filterCurriculum || filterSubject || filterGrade || filterType || searchQ.trim() || showOnlyMine)
+ 
   return (
     <div>
-      <div className="card" style={{
-        padding: 0, marginBottom: 18, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%)', color: '#fff',
-      }}>
-        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
-              Smartious Question Bank
-            </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>Your Questions</h1>
-            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
-              Build once, use everywhere - exams, homework, adaptive practice
-            </div>
-          </div>
-          <button onClick={openAdd}
-            style={{
-              background: '#F0CC5A', color: '#1E3A8A', border: 'none',
-              padding: '12px 22px', borderRadius: 'var(--rmd)', cursor: 'pointer',
-              fontSize: 14, fontWeight: 700,
-              display: 'flex', alignItems: 'center', gap: 8,
-              boxShadow: '0 4px 14px rgba(240,204,90,.3)',
-            }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <div className="sec-tag">Reusable across exams & homework</div>
+          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)' }}>
+            Question <em style={{ color: '#7D1025' }}>Bank</em>
+          </h2>
+          <p style={{ fontSize: 13.5, color: 'var(--s500)', marginTop: 4 }}>
+            {total} question{total === 1 ? '' : 's'} in your bank
+            {hasActiveFilters && questions.length !== total ? ' (' + questions.length + ' shown)' : ''}
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            onClick={() => toast?.info?.('Create question coming in next phase. Backend is ready.')}
+            className="btn btn-p btn-sm"
+          >
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
             Add Question
           </button>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.2)' }}>
-          {[['Total', totalQuestions], ['Published', publishedCount], ['Drafts', draftCount], ['Practice', practiceCount], ['Subjects', subjectCount]].map(([l, v]) => (
-            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>{l}</div>
-              <div style={{ fontSize: 16, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
-            </div>
-          ))}
-        </div>
       </div>
-
-      <div className="card" style={{ marginBottom: 14 }}>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--s500)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Search</label>
-            <input className="fi" placeholder="Search questions, topics, tags..."
-              value={searchQ} onChange={e => setSearchQ(e.target.value)} style={{ width: '100%' }}/>
-          </div>
-          <div style={{ minWidth: 130 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--s500)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Curriculum</label>
-            <select className="fsel" value={filterCurriculum} onChange={e => setFilterCurriculum(e.target.value)} style={{ width: '100%' }}>
-              <option value="all">All</option>
-              {Object.entries(QB_CURRICULA).map(([id, info]) => <option key={id} value={id}>{info.label}</option>)}
+ 
+      {/* Filters card */}
+      <div className="card" style={{ padding: 14, marginBottom: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10, marginBottom: 10 }}>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4, display: 'block' }}>Curriculum</label>
+            <select className="fsel" value={filterCurriculum} onChange={e => handleCurriculumChange(e.target.value)}>
+              <option value="">All curricula</option>
+              {catalog.curricula.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
             </select>
           </div>
-          <div style={{ minWidth: 140 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--s500)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Subject</label>
-            <select className="fsel" value={filterSubject} onChange={e => setFilterSubject(e.target.value)} style={{ width: '100%' }}>
-              <option value="all">All</option>
-              {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4, display: 'block' }}>Subject</label>
+            <select className="fsel" value={filterSubject} onChange={e => setFilterSubject(e.target.value)} disabled={!filterCurriculum}>
+              <option value="">{filterCurriculum ? 'All subjects' : 'Pick curriculum first'}</option>
+              {subjectsForFilter.map(s => (
+                <option key={s.id} value={s.name}>{s.name}</option>
+              ))}
             </select>
           </div>
-          <div style={{ minWidth: 130 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--s500)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Difficulty</label>
-            <select className="fsel" value={filterDifficulty} onChange={e => setFilterDifficulty(e.target.value)} style={{ width: '100%' }}>
-              <option value="all">All</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4, display: 'block' }}>Grade</label>
+            <select className="fsel" value={filterGrade} onChange={e => setFilterGrade(e.target.value)} disabled={!filterCurriculum}>
+              <option value="">{filterCurriculum ? 'All grades' : 'Pick curriculum first'}</option>
+              {gradesForFilter.map(g => <option key={g} value={g}>{g}</option>)}
             </select>
           </div>
-          <div style={{ minWidth: 110 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--s500)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Type</label>
-            <select className="fsel" value={filterType} onChange={e => setFilterType(e.target.value)} style={{ width: '100%' }}>
-              <option value="all">All</option><option value="mcq">MCQ</option><option value="short">Short</option><option value="essay">Essay</option><option value="truefalse">T/F</option>
-            </select>
-          </div>
-          <div style={{ minWidth: 110 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--s500)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Status</label>
-            <select className="fsel" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ width: '100%' }}>
-              <option value="all">All</option><option value="published">Published</option><option value="draft">Draft</option>
+          <div>
+            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4, display: 'block' }}>Type</label>
+            <select className="fsel" value={filterType} onChange={e => setFilterType(e.target.value)}>
+              <option value="">All types</option>
+              <option value="mcq">Multiple Choice</option>
+              <option value="short">Short Answer</option>
+              <option value="long">Long Answer</option>
+              <option value="drawing">Drawing</option>
+              <option value="upload">Upload</option>
             </select>
           </div>
         </div>
-      </div>
-
-      <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 10 }}>
-        Showing <strong style={{ color: 'var(--s900)' }}>{filteredQuestions.length}</strong> of {totalQuestions} questions
-      </div>
-
-      {filteredQuestions.length === 0 ? (
-        <div className="card" style={{ padding: 36, textAlign: 'center' }}>
-          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>
-            {totalQuestions === 0 ? 'No questions yet' : 'No questions match these filters'}
-          </h3>
-          <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto 14px' }}>
-            {totalQuestions === 0 ? 'Build your question bank.' : 'Try clearing filters or search terms.'}
-          </p>
-          {totalQuestions === 0 && <button onClick={openAdd} className="btn btn-p">Add Your First Question</button>}
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input
+            className="fi"
+            value={searchQ}
+            onChange={e => setSearchQ(e.target.value)}
+            placeholder="Search question text..."
+            style={{ flex: 1, minWidth: 200 }}
+          />
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--s700)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            <input
+              type="checkbox"
+              checked={showOnlyMine}
+              onChange={e => setShowOnlyMine(e.target.checked)}
+              style={{ accentColor: '#7D1025' }}
+            />
+            Only my questions
+          </label>
+          {hasActiveFilters && (
+            <button onClick={clearFilters} className="btn btn-s btn-sm">Clear filters</button>
+          )}
         </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {filteredQuestions.map(q => {
-            const subjCol = qbSubjColour(q.subject)
-            const diffStyle = qbDifficultyColours[q.difficulty]
-            const typeInfo = qbTypeIcons[q.type]
+      </div>
+ 
+      {/* Error state */}
+      {error && (
+        <div style={{
+          background: '#FEF2F2', border: '1px solid #FCA5A5',
+          color: '#991B1B', padding: '10px 14px',
+          borderRadius: 8, fontSize: 13, marginBottom: 14,
+        }}>
+          Failed to load questions: {error}
+        </div>
+      )}
+ 
+      {/* Loading state */}
+      {loading && (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, color: 'var(--s500)' }}>Loading questions from backend...</div>
+        </div>
+      )}
+ 
+      {/* Empty state */}
+      {!loading && !error && questions.length === 0 && (
+        <div className="card" style={{ padding: 50, textAlign: 'center' }}>
+          <div style={{
+            width: 56, height: 56, margin: '0 auto 14px',
+            borderRadius: '50%', background: '#FBF6E3',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: '2px solid #C9A030',
+          }}>
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#C9A030" strokeWidth="2" strokeLinecap="round">
+              <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+          </div>
+          <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', marginBottom: 4 }}>
+            {hasActiveFilters ? 'No questions match your filters' : 'Your question bank is empty'}
+          </div>
+          <div style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 420, margin: '6px auto 0', lineHeight: 1.6 }}>
+            {hasActiveFilters
+              ? 'Try removing some filters to see more questions.'
+              : 'Click "Add Question" to create your first question. Questions you add can be reused in homework and exams.'}
+          </div>
+        </div>
+      )}
+ 
+      {/* Questions list */}
+      {!loading && !error && questions.length > 0 && (
+        <div style={{ display: 'grid', gap: 10 }}>
+          {questions.map(q => {
+            const typeMeta = qbTypeMeta[q.type] || qbTypeMeta.mcq
+            const diffMeta = qbDifficultyColours[q.difficulty] || qbDifficultyColours.medium
+            const author = q.createdBy
+              ? (typeof q.createdBy === 'object'
+                  ? ((q.createdBy.firstName || '') + ' ' + (q.createdBy.lastName || '')).trim()
+                  : 'Unknown')
+              : 'Unknown'
+            const hasAttachments = (q.attachments || []).length > 0
             return (
-              <div key={q.id} className="card" style={{
-                padding: 14, borderLeft: '4px solid ' + subjCol, cursor: 'pointer',
-                opacity: q.status === 'draft' ? 0.7 : 1,
-              }} onClick={() => setDetailQ(q)}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: '50%',
-                    background: typeInfo.color, color: '#fff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 700, fontSize: 13, flexShrink: 0,
-                  }}>{typeInfo.letter}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4, alignItems: 'center' }}>
-                      <span style={{
-                        background: subjCol + '15', color: subjCol,
-                        fontSize: 10, fontWeight: 700, letterSpacing: '.06em',
-                        padding: '2px 7px', borderRadius: 99, textTransform: 'uppercase',
-                      }}>{q.subject}</span>
-                      <span style={{ fontSize: 11, color: 'var(--s500)' }}>{q.curriculum} | {q.topic}</span>
-                      <span style={{
-                        background: diffStyle.bg, color: diffStyle.color,
-                        fontSize: 10, fontWeight: 700, letterSpacing: '.06em',
-                        padding: '2px 7px', borderRadius: 99,
-                      }}>{diffStyle.label}</span>
-                      {q.status === 'draft' && (
-                        <span style={{
-                          background: 'var(--bg)', color: 'var(--s500)', border: '1px solid var(--border)',
-                          fontSize: 10, fontWeight: 700, letterSpacing: '.06em',
-                          padding: '2px 7px', borderRadius: 99,
-                        }}>DRAFT</span>
-                      )}
-                      {q.useInPractice && q.status === 'published' && (
-                        <span style={{
-                          background: 'var(--g50)', color: 'var(--g600)',
-                          fontSize: 10, fontWeight: 700, letterSpacing: '.06em',
-                          padding: '2px 7px', borderRadius: 99,
-                        }}>PRACTICE</span>
-                      )}
-                    </div>
-                    <div style={{
-                      fontSize: 14, fontWeight: 600, color: 'var(--s900)',
-                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                      marginBottom: 4,
-                    }}>{q.question}</div>
-                    <div style={{ fontSize: 11, color: 'var(--s400)' }}>
-                      {q.marks} {q.marks === 1 ? 'mark' : 'marks'}
-                      {q.timesUsed > 0 && ' | Used ' + q.timesUsed + 'x in exams'}
-                      {q.timesAnswered > 0 && ' | Answered ' + q.timesAnswered + 'x'}
-                      {q.averageScore !== null && q.averageScore !== undefined && ' | Avg ' + q.averageScore + '%'}
-                    </div>
+              <div
+                key={q._id}
+                className="card"
+                onClick={() => setDetailQ(q)}
+                style={{
+                  padding: 14, cursor: 'pointer',
+                  display: 'flex', alignItems: 'flex-start', gap: 12,
+                  transition: 'all .15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#7D1025' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)' }}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: 8,
+                  background: typeMeta.color + '15', color: typeMeta.color,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700,
+                  flexShrink: 0,
+                }}>{typeMeta.letter}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, color: 'var(--s900)', marginBottom: 4, fontWeight: 500, lineHeight: 1.5 }}>
+                    {q.questionText}
                   </div>
-                  <div style={{
-                    background: 'var(--bg)', color: 'var(--s700)',
-                    padding: '6px 10px', borderRadius: 'var(--rsm)',
-                    fontSize: 12, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
-                    flexShrink: 0,
-                  }}>{q.marks}m</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--s400)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span>{q.curriculum} · {q.subject} {q.grade ? '· ' + q.grade : ''}</span>
+                    {q.topic && <span>· {q.topic}</span>}
+                    <span style={{
+                      background: diffMeta.bg, color: diffMeta.color,
+                      padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700,
+                    }}>{diffMeta.label}</span>
+                    <span style={{ background: 'var(--s100)', color: 'var(--s600)', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>{typeMeta.label}</span>
+                    {hasAttachments && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: 'var(--s500)' }}>
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                        </svg>
+                        {q.attachments.length}
+                      </span>
+                    )}
+                    <span style={{ marginLeft: 'auto', color: 'var(--s400)' }}>by {author}</span>
+                  </div>
                 </div>
               </div>
             )
           })}
         </div>
       )}
-
+ 
+      {/* DETAIL MODAL */}
       {detailQ && (
         <div onClick={() => setDetailQ(null)} style={{
-          position: 'fixed', inset: 0, background: 'rgba(15,23,42,.65)', zIndex: 200,
-          display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 20, overflowY: 'auto',
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)',
+          zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
         }}>
           <div onClick={e => e.stopPropagation()} style={{
-            background: 'var(--white)', borderRadius: 'var(--rxl)',
-            maxWidth: 720, width: '100%', overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,.3)', marginTop: 40, marginBottom: 40,
+            background: '#FFF', borderRadius: 12,
+            maxWidth: 720, width: '100%', maxHeight: '85vh', overflowY: 'auto',
+            boxShadow: '0 20px 60px rgba(0,0,0,.3)',
           }}>
             <div style={{
-              padding: '22px 28px',
-              background: 'linear-gradient(135deg, ' + qbSubjColour(detailQ.subject) + ', ' + qbSubjColour(detailQ.subject) + 'DD)',
-              color: '#fff',
+              padding: '20px 28px',
+              background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+              color: '#FBFAF5',
             }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .8, marginBottom: 4 }}>
-                {detailQ.subject} | {detailQ.curriculum} | {detailQ.topic}
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>
+                {detailQ.curriculum} · {detailQ.subject} · {detailQ.grade}
               </div>
-              <h3 className="serif" style={{ fontSize: 18, margin: 0, lineHeight: 1.4 }}>{detailQ.question}</h3>
-              <div style={{ fontSize: 12, opacity: .85, marginTop: 6 }}>
-                {qbTypeIcons[detailQ.type]?.label} | {qbDifficultyColours[detailQ.difficulty]?.label} | {detailQ.marks} {detailQ.marks === 1 ? 'mark' : 'marks'}
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>
+                {qbTypeMeta[detailQ.type]?.label || 'Question'}
               </div>
             </div>
-
-            <div style={{ padding: '20px 28px', maxHeight: '60vh', overflowY: 'auto' }}>
-              {detailQ.type === 'mcq' && detailQ.options && (
-                <div style={{ marginBottom: 16 }}>
-                  <div className="sec-tag" style={{ marginBottom: 8 }}>Options</div>
-                  {detailQ.options.map((opt, i) => (
-                    <div key={i} style={{
-                      padding: '10px 14px', marginBottom: 6,
-                      border: '1.5px solid ' + (detailQ.answer === opt ? 'var(--g500)' : 'var(--border)'),
-                      borderRadius: 'var(--rsm)',
-                      background: detailQ.answer === opt ? 'var(--g50)' : 'var(--bg)',
-                      fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 10,
-                    }}>
-                      <span style={{
-                        width: 22, height: 22, borderRadius: '50%',
-                        background: detailQ.answer === opt ? 'var(--g600)' : 'var(--s200)',
-                        color: '#fff', fontSize: 11, fontWeight: 700,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}>{String.fromCharCode(65 + i)}</span>
-                      <span>{opt}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {detailQ.type === 'truefalse' && (
-                <div style={{ marginBottom: 16 }}>
-                  <div className="sec-tag" style={{ marginBottom: 8 }}>Correct Answer</div>
-                  <div style={{
-                    background: 'var(--g50)', color: 'var(--g700)', border: '1.5px solid var(--g500)',
-                    padding: '12px 16px', borderRadius: 'var(--rmd)',
-                    fontSize: 16, fontWeight: 700, textAlign: 'center',
-                  }}>{detailQ.answer}</div>
-                </div>
-              )}
-              {(detailQ.type === 'short' || detailQ.type === 'essay') && detailQ.answer && (
-                <div style={{ marginBottom: 16 }}>
-                  <div className="sec-tag" style={{ marginBottom: 8 }}>{detailQ.type === 'essay' ? 'Mark Scheme' : 'Expected Answer'}</div>
-                  <div style={{
-                    background: 'var(--g50)', borderLeft: '3px solid var(--g500)',
-                    padding: '10px 14px', borderRadius: 'var(--rsm)',
-                    fontSize: 13.5, color: 'var(--g700)',
-                    lineHeight: 1.65, whiteSpace: 'pre-wrap',
-                  }}>{detailQ.answer}</div>
-                </div>
-              )}
-              {detailQ.explanation && (
-                <div style={{ marginBottom: 16 }}>
-                  <div className="sec-tag" style={{ marginBottom: 8 }}>Explanation</div>
-                  <div style={{
-                    background: 'var(--b50)', borderLeft: '3px solid var(--b500, #3B82F6)',
-                    padding: '10px 14px', borderRadius: 'var(--rsm)',
-                    fontSize: 13, color: 'var(--b700)',
-                    fontStyle: 'italic', lineHeight: 1.65,
-                  }}>{detailQ.explanation}</div>
-                </div>
-              )}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, marginBottom: 14 }}>
-                {[
-                  ['Used in exams', detailQ.timesUsed || 0],
-                  ['Answered', detailQ.timesAnswered || 0],
-                  ['Avg score', detailQ.averageScore !== null && detailQ.averageScore !== undefined ? detailQ.averageScore + '%' : 'N/A'],
-                ].map(([l, v]) => (
-                  <div key={l} style={{ background: 'var(--bg)', padding: '10px 12px', borderRadius: 'var(--rsm)' }}>
-                    <div style={{ fontSize: 10, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 700, marginBottom: 2 }}>{l}</div>
-                    <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--s900)' }}>{v}</div>
+            <div style={{ padding: '20px 28px' }}>
+              <div style={{ fontSize: 15, color: 'var(--s900)', lineHeight: 1.6, marginBottom: 14 }}>
+                {detailQ.questionText}
+              </div>
+ 
+              {/* Attachments */}
+              {detailQ.attachments && detailQ.attachments.length > 0 && (
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Attachments</div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {detailQ.attachments.map((a, i) => (
+                      <a key={i} href={a.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block' }}>
+                        {a.mimeType?.startsWith('image/') ? (
+                          <img src={a.url} alt={a.filename || 'attachment'} style={{ maxWidth: 180, maxHeight: 120, borderRadius: 6, border: '1px solid var(--border)' }} />
+                        ) : (
+                          <div style={{ padding: '8px 12px', background: 'var(--s100)', borderRadius: 6, fontSize: 12 }}>{a.filename || 'File'}</div>
+                        )}
+                      </a>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div style={{ fontSize: 11.5, color: 'var(--s400)', marginBottom: 4 }}>
-                Created by {detailQ.authorName} | {new Date(detailQ.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </div>
+              )}
+ 
+              {/* MCQ options */}
+              {detailQ.type === 'mcq' && detailQ.options && detailQ.options.length > 0 && (
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Options</div>
+                  {detailQ.options.map((opt, i) => {
+                    const isCorrect = (typeof detailQ.correctAnswer === 'number' && detailQ.correctAnswer === i) ||
+                                      (typeof detailQ.correctAnswer === 'string' && detailQ.correctAnswer === opt)
+                    return (
+                      <div key={i} style={{
+                        padding: '8px 12px', borderRadius: 6, marginBottom: 4,
+                        background: isCorrect ? '#DCFCE7' : 'var(--bg)',
+                        border: '1px solid ' + (isCorrect ? '#86EFAC' : 'var(--border)'),
+                        fontSize: 13, color: isCorrect ? '#15803D' : 'var(--s700)',
+                        fontWeight: isCorrect ? 600 : 400,
+                        display: 'flex', alignItems: 'center', gap: 8,
+                      }}>
+                        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: isCorrect ? '#15803D' : 'var(--s400)' }}>
+                          {String.fromCharCode(65 + i)}
+                        </span>
+                        {opt}
+                        {isCorrect && (
+                          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#15803D" strokeWidth="3" strokeLinecap="round" style={{ marginLeft: 'auto' }}>
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+ 
+              {/* Text answer for non-MCQ */}
+              {detailQ.type !== 'mcq' && detailQ.correctAnswer && (
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Model Answer</div>
+                  <div style={{ padding: '10px 14px', background: '#FBFAF5', border: '1px solid var(--border)', borderRadius: 6, fontSize: 13.5, lineHeight: 1.6 }}>
+                    {detailQ.correctAnswer}
+                  </div>
+                </div>
+              )}
+ 
+              {/* Explanation */}
+              {detailQ.explanation && (
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Explanation</div>
+                  <div style={{ padding: '10px 14px', background: '#FBF6E3', borderLeft: '3px solid #C9A030', borderRadius: 6, fontSize: 13.5, lineHeight: 1.6, color: 'var(--s700)' }}>
+                    {detailQ.explanation}
+                  </div>
+                </div>
+              )}
+ 
+              {/* Metadata */}
+              <div style={{ paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', gap: 16, fontSize: 12, color: 'var(--s500)', flexWrap: 'wrap' }}>
+                <span><strong>Marks:</strong> {detailQ.marks || 1}</span>
+                <span><strong>Difficulty:</strong> {detailQ.difficulty || 'medium'}</span>
+                {detailQ.usageCount > 0 && <span><strong>Used:</strong> {detailQ.usageCount} time(s)</span>}
               </div>
             </div>
-
-            <div style={{
-              padding: '14px 24px', borderTop: '1px solid var(--border)',
-              background: 'var(--bg)',
-              display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap',
-            }}>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button onClick={() => deleteQuestion(detailQ.id)} className="btn btn-d btn-sm">Delete</button>
-                {detailQ.status === 'draft' && (
-                  <button onClick={() => { publishDraft(detailQ.id); setDetailQ(null) }} className="btn btn-ok btn-sm">Publish</button>
-                )}
-                {detailQ.status === 'published' && (
-                  <button onClick={() => { togglePractice(detailQ.id); setDetailQ({ ...detailQ, useInPractice: !detailQ.useInPractice }) }} className="btn btn-s btn-sm">
-                    {detailQ.useInPractice ? 'Remove from Practice' : 'Add to Practice'}
-                  </button>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button onClick={() => setDetailQ(null)} className="btn btn-s btn-sm">Close</button>
-                <button onClick={() => { setDetailQ(null); openEdit(detailQ) }} className="btn btn-p btn-sm">Edit</button>
-              </div>
+            <div style={{ padding: '14px 28px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button className="btn btn-s" onClick={() => setDetailQ(null)}>Close</button>
             </div>
           </div>
         </div>
@@ -1496,6 +1116,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     </div>
   )
 }
+ 
 
 // ═══════════════════════════════════════════════════════════
 // MY STUDENTS — deep drilldown for individual student management
