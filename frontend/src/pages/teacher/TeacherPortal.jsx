@@ -735,10 +735,12 @@ function QuestionBankTab({ user, store, setPage, toast }) {
   // ── DETAIL MODAL ──
   const [detailQ, setDetailQ] = useState(null)
  
-  // ── CREATE MODAL ──
+ // ── CREATE/EDIT MODAL ──
   const [createOpen, setCreateOpen] = useState(false)
+  const [editingId, setEditingId] = useState(null)  // question _id when editing, null when creating
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
   const [form, setForm] = useState({
     curriculum: '',
     grade: '',
@@ -832,6 +834,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
  
   // ── CREATE MODAL handlers ──
   const openCreate = () => {
+    setEditingId(null)
     setForm({
       curriculum: '', grade: '', subject: '', topic: '', type: 'mcq',
       questionText: '', options: ['', '', '', ''],
@@ -840,8 +843,57 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     })
     setCreateOpen(true)
   }
- 
-  const closeCreate = () => { setCreateOpen(false) }
+
+  const openEdit = (q) => {
+    setEditingId(q._id)
+    // Find correctIndex for MCQ from correctAnswer
+    let correctIndex = null
+    if (q.type === 'mcq' && typeof q.correctAnswer === 'number' && q.options) {
+      correctIndex = q.correctAnswer
+    } else if (q.type === 'mcq' && typeof q.correctAnswer === 'string' && q.options) {
+      const idx = q.options.indexOf(q.correctAnswer)
+      correctIndex = idx >= 0 ? idx : null
+    }
+    setForm({
+      curriculum: q.curriculum || '',
+      grade: q.grade || '',
+      subject: q.subject || '',
+      topic: q.topic || '',
+      type: q.type || 'mcq',
+      questionText: q.questionText || '',
+      options: Array.isArray(q.options) && q.options.length > 0 ? [...q.options] : ['', '', '', ''],
+      correctIndex,
+      correctAnswer: typeof q.correctAnswer === 'string' ? q.correctAnswer : '',
+      explanation: q.explanation || '',
+      marks: q.marks || 1,
+      difficulty: q.difficulty || 'medium',
+      attachments: Array.isArray(q.attachments) ? [...q.attachments] : [],
+    })
+    setDetailQ(null)  // close detail modal if open
+    setCreateOpen(true)
+  }
+
+  const closeCreate = () => { setCreateOpen(false); setEditingId(null) }
+
+  const handleDelete = async (q) => {
+    if (!confirm('Delete this question permanently? This cannot be undone.')) return
+    setDeletingId(q._id)
+    try {
+      const { data } = await api.delete('/questions/' + q._id)
+      if (data.success) {
+        toast?.ok?.('Question deleted')
+        setQuestions(prev => prev.filter(x => x._id !== q._id))
+        setTotal(t => Math.max(0, t - 1))
+        setDetailQ(null)
+      } else {
+        toast?.error?.(data.message || 'Delete failed')
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Delete failed: ' + e.message)
+    } finally {
+      setDeletingId(null)
+    }
+  }
  
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
  
@@ -946,7 +998,9 @@ function QuestionBankTab({ user, store, setPage, toast }) {
         attachments: form.attachments,
       }
  
-      const { data } = await api.post('/questions', payload)
+      const { data } = editingId
+        ? await api.patch('/questions/' + editingId, payload)
+        : await api.post('/questions', payload)
       if (data.success) {
         toast?.ok?.('Question saved')
         // Reload the list
@@ -1180,7 +1234,35 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                 {detailQ.usageCount > 0 && <span><strong>Used:</strong> {detailQ.usageCount} time(s)</span>}
               </div>
             </div>
-            <div style={{ padding: '14px 28px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+            <div style={{ padding: '14px 28px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {(() => {
+                  const isOwner = detailQ.createdBy && (
+                    (typeof detailQ.createdBy === 'object' && detailQ.createdBy._id === user?._id) ||
+                    detailQ.createdBy === user?._id
+                  )
+                  const isAdmin = user?.role === 'admin'
+                  if (!isOwner && !isAdmin) return null
+                  return (
+                    <>
+                      <button onClick={() => openEdit(detailQ)} className="btn btn-s btn-sm">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ marginRight: 4 }}>
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        Edit
+                      </button>
+                      <button onClick={() => handleDelete(detailQ)} disabled={deletingId === detailQ._id} className="btn btn-s btn-sm" style={{ color: '#DC2626' }}>
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ marginRight: 4 }}>
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                        {deletingId === detailQ._id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </>
+                  )
+                })()}
+              </div>
               <button className="btn btn-s" onClick={() => setDetailQ(null)}>Close</button>
             </div>
           </div>
@@ -1191,9 +1273,9 @@ function QuestionBankTab({ user, store, setPage, toast }) {
       {createOpen && (
         <div onClick={closeCreate} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 760, width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
-            <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>New Question</div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>Add to Question Bank</div>
+           <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>{editingId ? 'Edit Question' : 'New Question'}</div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>{editingId ? 'Update existing question' : 'Add to Question Bank'}</div>
             </div>
  
             <div style={{ padding: '24px 28px' }}>
@@ -1366,7 +1448,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
             <div style={{ padding: '16px 28px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
               <button className="btn btn-s" onClick={closeCreate} disabled={saving}>Cancel</button>
               <button className="btn btn-p" onClick={saveQuestion} disabled={saving || uploading}>
-                {saving ? 'Saving...' : 'Save Question'}
+                {saving ? 'Saving...' : (editingId ? 'Update Question' : 'Save Question')}
               </button>
             </div>
           </div>
