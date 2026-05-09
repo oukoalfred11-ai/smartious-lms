@@ -291,9 +291,12 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
       }
     }
 
-     const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true })
-       .select('-password')
-       .populate('subjects', 'subjectName curriculum');
+    const updateOpts = { new: true };
+     let user = await User.findByIdAndUpdate(req.params.id, req.body, updateOpts).select('-password');
+     // Only populate subjects for teachers (where subjects are ObjectIds)
+     if (user.role === 'teacher') {
+       try { user = await user.populate('subjects', 'subjectName curriculum'); } catch (e) { /* ignore */ }
+     }
      
      const safe = user.toObject();
      
