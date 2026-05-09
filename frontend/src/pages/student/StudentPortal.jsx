@@ -13,7 +13,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
-import React, { useState, useEffect, useRef } from 'react'
 
 // ── SVG icon helper ───────────────────────────────────────
 const I = (d) => (
