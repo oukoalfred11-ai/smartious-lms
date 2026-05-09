@@ -6691,33 +6691,6 @@ function HomeworkTab({ user, toast }) {
                         )}
                       </div>
                     )}
-                      <div style={{ background: '#FBF6E3', borderLeft: '3px solid #C9A030', padding: 12, borderRadius: 4, fontSize: 12.5, color: 'var(--s700)', lineHeight: 1.6 }}>
-                        <strong>Drawing canvas coming in next phase.</strong> For now, you can answer this question by uploading a photo or scan of your drawn work below.
-                        {!isReadOnly && (
-                          <div style={{ marginTop: 10 }}>
-                            <label style={{
-                              display: 'inline-flex', alignItems: 'center', gap: 6,
-                              padding: '6px 12px', background: '#7D1025', color: '#FBFAF5',
-                              borderRadius: 4, cursor: 'pointer', fontSize: 12, fontWeight: 700,
-                            }}>
-                              {uploadingIdx === idx ? 'Uploading...' : 'Upload your drawing as image'}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={e => { if (e.target.files?.[0]) uploadAnswerFile(idx, e.target.files[0]); e.target.value = '' }}
-                                disabled={uploadingIdx === idx}
-                                style={{ display: 'none' }}
-                              />
-                            </label>
-                            {a.attachment && (
-                              <div style={{ marginTop: 8 }}>
-                                <img src={a.attachment.url} alt="" style={{ maxWidth: 200, maxHeight: 150, borderRadius: 4, border: '1px solid var(--border)' }}/>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
                 )
               })}
