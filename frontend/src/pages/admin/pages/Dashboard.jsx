@@ -184,8 +184,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       }
 
       if (userForm.role === 'student') {
-        payload.curriculum = userForm.curriculum
-        payload.grade = userForm.grade
+        payload.curriculum = userForm.curriculum || null
+        payload.gradeLevel = userForm.grade || null
         payload.plan = userForm.plan || 'Basic'
         payload.subjects = userForm.subjects || []
       } else if (userForm.role === 'teacher') {
@@ -299,9 +299,67 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
 
 // ──────────────────────────────────────────────────────
 // USER FORM FIELDS (shared component)
+// Wired to /api/curriculum/options for real catalog
 // ──────────────────────────────────────────────────────
 function UserFormFields({ userForm, setUserForm }) {
   const upd = (k, v) => setUserForm(f => ({ ...f, [k]: v }))
+
+  // Load curriculum catalog from backend on mount
+  const [catalog, setCatalog] = useState({ curricula: [], gradesByCurriculum: {}, subjects: [] })
+  const [catalogLoading, setCatalogLoading] = useState(true)
+
+  useEffect(() => {
+    api.get('/curriculum/options')
+      .then(res => {
+        if (res.data?.success) {
+          setCatalog({
+            curricula: res.data.curricula || [],
+            gradesByCurriculum: res.data.gradesByCurriculum || {},
+            subjects: res.data.subjects || [],
+          })
+        }
+      })
+      .catch(err => console.error('[catalog] load failed:', err))
+      .finally(() => setCatalogLoading(false))
+  }, [])
+
+  // For students: subjects available for selected curriculum, grouped by category
+  const studentCurriculum = userForm.curriculum
+  const availableSubjects = catalog.subjects.filter(s =>
+    s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(studentCurriculum))
+  )
+  const subjectsByCategory = availableSubjects.reduce((acc, s) => {
+    if (!acc[s.category]) acc[s.category] = []
+    acc[s.category].push(s)
+    return acc
+  }, {})
+
+  // Grades for selected curriculum
+  const availableGrades = catalog.gradesByCurriculum[studentCurriculum] || []
+
+  // Toggle a subject in the student's subjects array
+  const toggleSubject = (subjectName) => {
+    const current = userForm.subjects || []
+    if (current.includes(subjectName)) {
+      upd('subjects', current.filter(s => s !== subjectName))
+    } else {
+      upd('subjects', [...current, subjectName])
+    }
+  }
+
+  // When curriculum changes, clear grade and remove subjects no longer available
+  const handleCurriculumChange = (newCurriculum) => {
+    upd('curriculum', newCurriculum)
+    // Reset grade since grade options change with curriculum
+    upd('grade', '')
+    // Filter out subjects that aren't available in the new curriculum
+    const stillValid = (userForm.subjects || []).filter(subjName => {
+      const subj = catalog.subjects.find(s => s.name === subjName)
+      if (!subj) return false
+      return subj.availableIn === 'all' || (Array.isArray(subj.availableIn) && subj.availableIn.includes(newCurriculum))
+    })
+    upd('subjects', stillValid)
+  }
 
   return (
     <div>
@@ -341,30 +399,96 @@ function UserFormFields({ userForm, setUserForm }) {
           <div className="fr2">
             <div className="fg">
               <label className="fl">Curriculum</label>
-              <select className="fsel" value={userForm.curriculum} onChange={e => upd('curriculum', e.target.value)}>
-                <option value="">Select...</option>
-                <option value="IGCSE">IGCSE</option>
-                <option value="Cambridge A-Level">Cambridge A-Level</option>
-                <option value="Edexcel">Edexcel</option>
-                <option value="IB">IB</option>
-                <option value="CBC">Kenya CBC</option>
-                <option value="American">American</option>
-                <option value="British">British</option>
+              <select className="fsel" value={userForm.curriculum || ''} onChange={e => handleCurriculumChange(e.target.value)} disabled={catalogLoading}>
+                <option value="">Select curriculum...</option>
+                {catalog.curricula.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
               </select>
             </div>
             <div className="fg">
               <label className="fl">Grade / Year</label>
-              <input className="fi" value={userForm.grade} onChange={e => upd('grade', e.target.value)} placeholder="e.g. Year 10" />
+              <select className="fsel" value={userForm.grade || ''} onChange={e => upd('grade', e.target.value)} disabled={!studentCurriculum}>
+                <option value="">{studentCurriculum ? 'Select grade...' : 'Select curriculum first'}</option>
+                {availableGrades.map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
             </div>
           </div>
+
           <div className="fg">
             <label className="fl">Plan</label>
-            <select className="fsel" value={userForm.plan} onChange={e => upd('plan', e.target.value)}>
+            <select className="fsel" value={userForm.plan || 'Basic'} onChange={e => upd('plan', e.target.value)}>
               <option>Basic</option>
               <option>Premium</option>
               <option>IGCSE Pack</option>
             </select>
           </div>
+
+          {/* Subjects multi-select */}
+          {studentCurriculum && (
+            <div className="fg">
+              <label className="fl">Subjects ({(userForm.subjects || []).length} selected)</label>
+              <div style={{
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                padding: 10,
+                maxHeight: 280,
+                overflowY: 'auto',
+                background: '#FFF',
+              }}>
+                {availableSubjects.length === 0 ? (
+                  <div style={{ fontSize: 12, color: 'var(--s500)', textAlign: 'center', padding: 12 }}>
+                    No subjects available for this curriculum
+                  </div>
+                ) : (
+                  Object.entries(subjectsByCategory).map(([category, subjects]) => (
+                    <div key={category} style={{ marginBottom: 12 }}>
+                      <div style={{
+                        fontSize: 10.5,
+                        fontWeight: 800,
+                        letterSpacing: '.08em',
+                        textTransform: 'uppercase',
+                        color: 'var(--crimson, #7D1025)',
+                        marginBottom: 6,
+                        paddingBottom: 4,
+                        borderBottom: '1px solid var(--border)',
+                      }}>{category}</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 4 }}>
+                        {subjects.map(s => {
+                          const checked = (userForm.subjects || []).includes(s.name)
+                          return (
+                            <label key={s.id} style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 6,
+                              padding: '4px 8px',
+                              fontSize: 12.5,
+                              cursor: 'pointer',
+                              borderRadius: 4,
+                              background: checked ? '#FBF6E3' : 'transparent',
+                            }}>
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleSubject(s.name)}
+                                style={{ cursor: 'pointer', accentColor: '#7D1025' }}
+                              />
+                              <span style={{ color: checked ? '#7D1025' : 'var(--s700)', fontWeight: checked ? 600 : 400 }}>{s.name}</span>
+                            </label>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                Tip: Selecting a subject auto-enrolls this student in matching class rooms.
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -398,8 +522,10 @@ function UserFormFields({ userForm, setUserForm }) {
         </div>
       )}
 
-      <div style={{ background: 'var(--cream, #FBFAF5)', border: '1px solid var(--border)', padding: 12, borderRadius: 8, fontSize: 12, color: 'var(--s600)', lineHeight: 1.6 }}>
-        A temporary password will be generated automatically. The user will be required to change it on first login.
+      <div style={{ background: 'var(--cream, #FBFAF5)', border: '1px solid var(--border)', padding: 12, borderRadius: 8, fontSize: 12, color: 'var(--s600)', lineHeight: 1.6, marginTop: 12 }}>
+        {userForm._id
+          ? 'Changes will apply immediately when you click Update.'
+          : 'A temporary password will be generated automatically. The user will be required to change it on first login.'}
       </div>
     </div>
   )
