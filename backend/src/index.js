@@ -60,6 +60,7 @@ app.use('/api/curriculum',     require('./routes/curriculum'));
 app.use('/api/students',       require('./routes/students'));
 app.use('/api/dashboard',      require('./routes/dashboard'));
 app.use('/api/grouprooms',     require('./routes/grouprooms'));
+app.use('/api/curriculum', require('./routes/curriculum'));
 app.use('/api/status',         require('./routes/status-management'));
 app.use('/api/leave-requests', require('./routes/status-management'));
 
