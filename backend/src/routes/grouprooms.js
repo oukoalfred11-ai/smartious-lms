@@ -29,7 +29,7 @@ router.get('/', auth, async (req, res) => {
   try {
     const rooms = await GroupRoom.find({ status: 'Active' })
       .populate('teacher', 'firstName lastName email')
-      .populate('students', 'firstName lastName email')
+      .populate('students', 'firstName lastName email curriculum gradeLevel subjects phone')
       .sort({ createdAt: -1 })
       .lean();
 
