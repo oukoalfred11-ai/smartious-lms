@@ -1,0 +1,138 @@
+/**
+ * HOMEWORK MODEL
+ * ============================================================
+ * A homework assignment created by a teacher.
+ *
+ * KEY DESIGN DECISIONS:
+ *  - Questions are SNAPSHOTTED into the homework (full copy).
+ *    Edits to bank questions later don't change past homework.
+ *  - Assignment can be by room (every student in room) AND/OR
+ *    specific student IDs. Both can be combined.
+ *  - releaseAt: when students can OPEN the homework (start answering).
+ *    Before this, they see it but it's locked.
+ *  - dueAt: when submissions become late.
+ *  - status: draft (only visible to teacher) | published (active)
+ */
+
+const mongoose = require('mongoose');
+
+const homeworkSchema = new mongoose.Schema({
+  // ── Identity ─────────────────────────────────────
+  title: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  description: {
+    type: String,
+    default: '',
+    trim: true,
+  },
+
+  // ── Categorization (denormalized for fast filtering) ──
+  curriculum: {
+    type: String,
+    required: true,
+  },
+  subject: {
+    type: String,
+    required: true,
+  },
+  grade: {
+    type: String,
+    required: true,
+  },
+
+  // ── Snapshotted questions ────────────────────────
+  // Each entry is a full copy of question data at the moment
+  // the homework was created. We keep questionId for reference
+  // (so we can show "view in bank" but homework displays the snapshot).
+  questions: [{
+    questionId:    { type: mongoose.Schema.Types.ObjectId, ref: 'Question' },  // null for custom-not-saved-to-bank
+    type:          { type: String, enum: ['mcq', 'short', 'long', 'drawing', 'upload'], required: true },
+    questionText:  { type: String, required: true },
+    options:       { type: [String], default: [] },
+    correctAnswer: { type: mongoose.Schema.Types.Mixed, default: null },
+    explanation:   { type: String, default: '' },
+    marks:         { type: Number, default: 1, min: 1 },
+    difficulty:    { type: String, enum: ['easy', 'medium', 'hard'], default: 'medium' },
+    attachments:   [{
+      url:       String,
+      publicId:  String,
+      filename:  String,
+      mimeType:  String,
+      sizeBytes: Number,
+    }],
+    topic: { type: String, default: '' },
+  }],
+
+  // ── Assignment ────────────────────────────────────
+  // Homework can be assigned by room (all students in room get it)
+  // AND/OR by specific student IDs. The actual list of students
+  // who get the homework is computed at query time.
+  assignedRoom: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'GroupRoom',
+    default: null,
+  },
+  assignedStudents: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
+
+  // ── Timing ────────────────────────────────────────
+  // releaseAt: when students can open and answer.
+  // Before releaseAt, students see the homework as "locked".
+  releaseAt: {
+    type: Date,
+    required: true,
+  },
+  // dueAt: optional — submissions after this are marked late.
+  dueAt: {
+    type: Date,
+    default: null,
+  },
+
+  // ── Authorship & status ─────────────────────────
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ['draft', 'published'],
+    default: 'draft',
+  },
+
+  // ── Computed at create time for quick display ──
+  totalMarks: {
+    type: Number,
+    default: 0,
+  },
+  questionCount: {
+    type: Number,
+    default: 0,
+  },
+
+  // ── Soft-delete ──
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+}, { timestamps: true });
+
+// Compound index for student-side queries
+homeworkSchema.index({ status: 1, releaseAt: 1, isActive: 1 });
+homeworkSchema.index({ createdBy: 1, isActive: 1 });
+homeworkSchema.index({ assignedRoom: 1 });
+homeworkSchema.index({ assignedStudents: 1 });
+
+// Pre-save: compute totalMarks and questionCount
+homeworkSchema.pre('save', function(next) {
+  this.totalMarks = (this.questions || []).reduce((sum, q) => sum + (q.marks || 0), 0);
+  this.questionCount = (this.questions || []).length;
+  next();
+});
+
+module.exports = mongoose.model('Homework', homeworkSchema);
