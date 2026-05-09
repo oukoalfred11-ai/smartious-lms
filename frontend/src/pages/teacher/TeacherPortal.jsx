@@ -697,8 +697,9 @@ export default function TeacherPortal() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // QUESTION BANK — wired to /api/questions
-// Phase 2.1: browse + filters (no create/edit yet)
+// Phase 2.2: browse + create (with image upload to Cloudinary)
 // ═══════════════════════════════════════════════════════════
  
 const qbDifficultyColours = {
@@ -734,6 +735,26 @@ function QuestionBankTab({ user, store, setPage, toast }) {
   // ── DETAIL MODAL ──
   const [detailQ, setDetailQ] = useState(null)
  
+  // ── CREATE MODAL ──
+  const [createOpen, setCreateOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [form, setForm] = useState({
+    curriculum: '',
+    grade: '',
+    subject: '',
+    topic: '',
+    type: 'mcq',
+    questionText: '',
+    options: ['', '', '', ''],
+    correctIndex: null,           // for MCQ — index of correct option
+    correctAnswer: '',            // for short/long — model answer text
+    explanation: '',
+    marks: 1,
+    difficulty: 'medium',
+    attachments: [],              // [{url, publicId, filename, mimeType, sizeBytes}]
+  })
+ 
   // Load catalog once
   useEffect(() => {
     api.get('/curriculum/options')
@@ -749,7 +770,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
       .catch(err => console.error('[qbank] catalog load failed:', err.message))
   }, [])
  
-  // Load questions whenever filters change
+  // Load questions when filters change
   useEffect(() => {
     const loadQuestions = async () => {
       setLoading(true)
@@ -776,46 +797,187 @@ function QuestionBankTab({ user, store, setPage, toast }) {
         setLoading(false)
       }
     }
-    // Debounce search by 250ms
     const handle = setTimeout(loadQuestions, 250)
     return () => clearTimeout(handle)
   }, [filterCurriculum, filterSubject, filterGrade, filterType, searchQ, showOnlyMine])
  
-  // Available subjects for the selected curriculum (for filter dropdown)
+  // Available subjects/grades for filter dropdowns
   const subjectsForFilter = filterCurriculum
     ? catalog.subjects.filter(s =>
         s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(filterCurriculum)))
     : catalog.subjects
- 
-  // Available grades for the selected curriculum
   const gradesForFilter = filterCurriculum
     ? (catalog.gradesByCurriculum[filterCurriculum] || [])
     : []
  
-  // Reset subject/grade when curriculum changes
+  // Available subjects/grades for the create form
+  const formSubjects = form.curriculum
+    ? catalog.subjects.filter(s =>
+        s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(form.curriculum)))
+    : []
+  const formGrades = form.curriculum
+    ? (catalog.gradesByCurriculum[form.curriculum] || [])
+    : []
+ 
   const handleCurriculumChange = (newCurr) => {
-    setFilterCurriculum(newCurr)
-    setFilterSubject('')
-    setFilterGrade('')
+    setFilterCurriculum(newCurr); setFilterSubject(''); setFilterGrade('')
   }
  
   const clearFilters = () => {
-    setFilterCurriculum('')
-    setFilterSubject('')
-    setFilterGrade('')
-    setFilterType('')
-    setSearchQ('')
-    setShowOnlyMine(false)
+    setFilterCurriculum(''); setFilterSubject(''); setFilterGrade('')
+    setFilterType(''); setSearchQ(''); setShowOnlyMine(false)
   }
  
   const hasActiveFilters = !!(filterCurriculum || filterSubject || filterGrade || filterType || searchQ.trim() || showOnlyMine)
+ 
+  // ── CREATE MODAL handlers ──
+  const openCreate = () => {
+    setForm({
+      curriculum: '', grade: '', subject: '', topic: '', type: 'mcq',
+      questionText: '', options: ['', '', '', ''],
+      correctIndex: null, correctAnswer: '', explanation: '',
+      marks: 1, difficulty: 'medium', attachments: [],
+    })
+    setCreateOpen(true)
+  }
+ 
+  const closeCreate = () => { setCreateOpen(false) }
+ 
+  const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
+ 
+  const handleFormCurriculumChange = (newCurr) => {
+    setForm(f => ({ ...f, curriculum: newCurr, subject: '', grade: '' }))
+  }
+ 
+  const setOption = (i, v) => {
+    setForm(f => {
+      const next = [...f.options]
+      next[i] = v
+      return { ...f, options: next }
+    })
+  }
+  const addOption = () => setForm(f => ({ ...f, options: [...f.options, ''] }))
+  const removeOption = (i) => setForm(f => {
+    const next = f.options.filter((_, idx) => idx !== i)
+    let newCorrect = f.correctIndex
+    if (f.correctIndex === i) newCorrect = null
+    else if (f.correctIndex > i) newCorrect = f.correctIndex - 1
+    return { ...f, options: next, correctIndex: newCorrect }
+  })
+ 
+  const uploadFile = async (file) => {
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      toast?.error?.('File too large (max 5 MB).')
+      return
+    }
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const { data } = await api.post('/questions/upload', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      if (data.success && data.attachment) {
+        setForm(f => ({ ...f, attachments: [...f.attachments, data.attachment] }))
+        toast?.ok?.('Image uploaded')
+      } else {
+        toast?.error?.(data.message || 'Upload failed')
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Upload failed: ' + e.message)
+    } finally {
+      setUploading(false)
+    }
+  }
+ 
+  const removeAttachment = (idx) => {
+    setForm(f => ({
+      ...f,
+      attachments: f.attachments.filter((_, i) => i !== idx),
+    }))
+  }
+ 
+  const validateForm = () => {
+    if (!form.curriculum) return 'Curriculum is required'
+    if (!form.grade) return 'Grade is required'
+    if (!form.subject) return 'Subject is required'
+    if (!form.questionText.trim()) return 'Question text is required'
+    if (form.type === 'mcq') {
+      const filledOptions = form.options.filter(o => o.trim())
+      if (filledOptions.length < 2) return 'MCQ needs at least 2 options'
+      if (form.correctIndex === null) return 'Mark which option is correct'
+      if (!form.options[form.correctIndex]?.trim()) return 'Correct option must have text'
+    } else if (form.type === 'short' || form.type === 'long') {
+      if (!form.correctAnswer.trim()) return 'Model answer is required'
+    }
+    return null
+  }
+ 
+  const saveQuestion = async () => {
+    const err = validateForm()
+    if (err) { toast?.error?.(err); return }
+    setSaving(true)
+    try {
+      // Filter out empty options
+      const cleanOptions = form.type === 'mcq' ? form.options.filter(o => o.trim()) : []
+      // Adjust correctIndex if empty options were removed
+      let correctAnswer = null
+      if (form.type === 'mcq' && form.correctIndex !== null) {
+        // Find what the original-correct option text is, then find its position in cleanOptions
+        const correctText = form.options[form.correctIndex]
+        correctAnswer = cleanOptions.indexOf(correctText)
+      } else if (form.type === 'short' || form.type === 'long') {
+        correctAnswer = form.correctAnswer.trim()
+      }
+ 
+      const payload = {
+        curriculum: form.curriculum,
+        grade: form.grade,
+        subject: form.subject,
+        topic: form.topic.trim() || '',
+        type: form.type,
+        questionText: form.questionText.trim(),
+        options: cleanOptions,
+        correctAnswer,
+        explanation: form.explanation.trim() || '',
+        marks: parseInt(form.marks) || 1,
+        difficulty: form.difficulty,
+        attachments: form.attachments,
+      }
+ 
+      const { data } = await api.post('/questions', payload)
+      if (data.success) {
+        toast?.ok?.('Question saved')
+        // Reload the list
+        const reloadParams = new URLSearchParams()
+        if (filterCurriculum) reloadParams.append('curriculum', filterCurriculum)
+        if (filterSubject) reloadParams.append('subject', filterSubject)
+        if (filterGrade) reloadParams.append('grade', filterGrade)
+        if (filterType) reloadParams.append('type', filterType)
+        if (showOnlyMine) reloadParams.append('createdBy', 'me')
+        const reload = await api.get('/questions?' + reloadParams.toString())
+        if (reload.data?.success) {
+          setQuestions(reload.data.questions || [])
+          setTotal(reload.data.total || 0)
+        }
+        closeCreate()
+      } else {
+        toast?.error?.(data.message || 'Save failed')
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Save failed: ' + e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
  
   return (
     <div>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <div className="sec-tag">Reusable across exams & homework</div>
+          <div className="sec-tag">Reusable across exams &amp; homework</div>
           <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)' }}>
             Question <em style={{ color: '#7D1025' }}>Bank</em>
           </h2>
@@ -825,10 +987,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button
-            onClick={() => toast?.info?.('Create question coming in next phase. Backend is ready.')}
-            className="btn btn-p btn-sm"
-          >
+          <button onClick={openCreate} className="btn btn-p btn-sm">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
@@ -844,18 +1003,14 @@ function QuestionBankTab({ user, store, setPage, toast }) {
             <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4, display: 'block' }}>Curriculum</label>
             <select className="fsel" value={filterCurriculum} onChange={e => handleCurriculumChange(e.target.value)}>
               <option value="">All curricula</option>
-              {catalog.curricula.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
+              {catalog.curricula.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <div>
             <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4, display: 'block' }}>Subject</label>
             <select className="fsel" value={filterSubject} onChange={e => setFilterSubject(e.target.value)} disabled={!filterCurriculum}>
               <option value="">{filterCurriculum ? 'All subjects' : 'Pick curriculum first'}</option>
-              {subjectsForFilter.map(s => (
-                <option key={s.id} value={s.name}>{s.name}</option>
-              ))}
+              {subjectsForFilter.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
             </select>
           </div>
           <div>
@@ -878,55 +1033,30 @@ function QuestionBankTab({ user, store, setPage, toast }) {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-          <input
-            className="fi"
-            value={searchQ}
-            onChange={e => setSearchQ(e.target.value)}
-            placeholder="Search question text..."
-            style={{ flex: 1, minWidth: 200 }}
-          />
+          <input className="fi" value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="Search question text..." style={{ flex: 1, minWidth: 200 }}/>
           <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--s700)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-            <input
-              type="checkbox"
-              checked={showOnlyMine}
-              onChange={e => setShowOnlyMine(e.target.checked)}
-              style={{ accentColor: '#7D1025' }}
-            />
+            <input type="checkbox" checked={showOnlyMine} onChange={e => setShowOnlyMine(e.target.checked)} style={{ accentColor: '#7D1025' }}/>
             Only my questions
           </label>
-          {hasActiveFilters && (
-            <button onClick={clearFilters} className="btn btn-s btn-sm">Clear filters</button>
-          )}
+          {hasActiveFilters && <button onClick={clearFilters} className="btn btn-s btn-sm">Clear filters</button>}
         </div>
       </div>
  
-      {/* Error state */}
       {error && (
-        <div style={{
-          background: '#FEF2F2', border: '1px solid #FCA5A5',
-          color: '#991B1B', padding: '10px 14px',
-          borderRadius: 8, fontSize: 13, marginBottom: 14,
-        }}>
+        <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '10px 14px', borderRadius: 8, fontSize: 13, marginBottom: 14 }}>
           Failed to load questions: {error}
         </div>
       )}
  
-      {/* Loading state */}
       {loading && (
         <div className="card" style={{ padding: 40, textAlign: 'center' }}>
           <div style={{ fontSize: 14, color: 'var(--s500)' }}>Loading questions from backend...</div>
         </div>
       )}
  
-      {/* Empty state */}
       {!loading && !error && questions.length === 0 && (
         <div className="card" style={{ padding: 50, textAlign: 'center' }}>
-          <div style={{
-            width: 56, height: 56, margin: '0 auto 14px',
-            borderRadius: '50%', background: '#FBF6E3',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: '2px solid #C9A030',
-          }}>
+          <div style={{ width: 56, height: 56, margin: '0 auto 14px', borderRadius: '50%', background: '#FBF6E3', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #C9A030' }}>
             <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#C9A030" strokeWidth="2" strokeLinecap="round">
               <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
             </svg>
@@ -955,36 +1085,17 @@ function QuestionBankTab({ user, store, setPage, toast }) {
               : 'Unknown'
             const hasAttachments = (q.attachments || []).length > 0
             return (
-              <div
-                key={q._id}
-                className="card"
-                onClick={() => setDetailQ(q)}
-                style={{
-                  padding: 14, cursor: 'pointer',
-                  display: 'flex', alignItems: 'flex-start', gap: 12,
-                  transition: 'all .15s',
-                }}
+              <div key={q._id} className="card" onClick={() => setDetailQ(q)}
+                style={{ padding: 14, cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: 12, transition: 'all .15s' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#7D1025' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)' }}
-              >
-                <div style={{
-                  width: 36, height: 36, borderRadius: 8,
-                  background: typeMeta.color + '15', color: typeMeta.color,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700,
-                  flexShrink: 0,
-                }}>{typeMeta.letter}</div>
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: typeMeta.color + '15', color: typeMeta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{typeMeta.letter}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, color: 'var(--s900)', marginBottom: 4, fontWeight: 500, lineHeight: 1.5 }}>
-                    {q.questionText}
-                  </div>
+                  <div style={{ fontSize: 14, color: 'var(--s900)', marginBottom: 4, fontWeight: 500, lineHeight: 1.5 }}>{q.questionText}</div>
                   <div style={{ fontSize: 11.5, color: 'var(--s400)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                     <span>{q.curriculum} · {q.subject} {q.grade ? '· ' + q.grade : ''}</span>
                     {q.topic && <span>· {q.topic}</span>}
-                    <span style={{
-                      background: diffMeta.bg, color: diffMeta.color,
-                      padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700,
-                    }}>{diffMeta.label}</span>
+                    <span style={{ background: diffMeta.bg, color: diffMeta.color, padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>{diffMeta.label}</span>
                     <span style={{ background: 'var(--s100)', color: 'var(--s600)', padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>{typeMeta.label}</span>
                     {hasAttachments && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: 'var(--s500)' }}>
@@ -1005,39 +1116,22 @@ function QuestionBankTab({ user, store, setPage, toast }) {
  
       {/* DETAIL MODAL */}
       {detailQ && (
-        <div onClick={() => setDetailQ(null)} style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)',
-          zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-        }}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: '#FFF', borderRadius: 12,
-            maxWidth: 720, width: '100%', maxHeight: '85vh', overflowY: 'auto',
-            boxShadow: '0 20px 60px rgba(0,0,0,.3)',
-          }}>
-            <div style={{
-              padding: '20px 28px',
-              background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
-              color: '#FBFAF5',
-            }}>
+        <div onClick={() => setDetailQ(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 720, width: '100%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
+            <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>
                 {detailQ.curriculum} · {detailQ.subject} · {detailQ.grade}
               </div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>
-                {qbTypeMeta[detailQ.type]?.label || 'Question'}
-              </div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>{qbTypeMeta[detailQ.type]?.label || 'Question'}</div>
             </div>
             <div style={{ padding: '20px 28px' }}>
-              <div style={{ fontSize: 15, color: 'var(--s900)', lineHeight: 1.6, marginBottom: 14 }}>
-                {detailQ.questionText}
-              </div>
- 
-              {/* Attachments */}
+              <div style={{ fontSize: 15, color: 'var(--s900)', lineHeight: 1.6, marginBottom: 14 }}>{detailQ.questionText}</div>
               {detailQ.attachments && detailQ.attachments.length > 0 && (
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Attachments</div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     {detailQ.attachments.map((a, i) => (
-                      <a key={i} href={a.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block' }}>
+                      <a key={i} href={a.url} target="_blank" rel="noopener noreferrer">
                         {a.mimeType?.startsWith('image/') ? (
                           <img src={a.url} alt={a.filename || 'attachment'} style={{ maxWidth: 180, maxHeight: 120, borderRadius: 6, border: '1px solid var(--border)' }} />
                         ) : (
@@ -1048,8 +1142,6 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                   </div>
                 </div>
               )}
- 
-              {/* MCQ options */}
               {detailQ.type === 'mcq' && detailQ.options && detailQ.options.length > 0 && (
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Options</div>
@@ -1057,17 +1149,8 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                     const isCorrect = (typeof detailQ.correctAnswer === 'number' && detailQ.correctAnswer === i) ||
                                       (typeof detailQ.correctAnswer === 'string' && detailQ.correctAnswer === opt)
                     return (
-                      <div key={i} style={{
-                        padding: '8px 12px', borderRadius: 6, marginBottom: 4,
-                        background: isCorrect ? '#DCFCE7' : 'var(--bg)',
-                        border: '1px solid ' + (isCorrect ? '#86EFAC' : 'var(--border)'),
-                        fontSize: 13, color: isCorrect ? '#15803D' : 'var(--s700)',
-                        fontWeight: isCorrect ? 600 : 400,
-                        display: 'flex', alignItems: 'center', gap: 8,
-                      }}>
-                        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: isCorrect ? '#15803D' : 'var(--s400)' }}>
-                          {String.fromCharCode(65 + i)}
-                        </span>
+                      <div key={i} style={{ padding: '8px 12px', borderRadius: 6, marginBottom: 4, background: isCorrect ? '#DCFCE7' : 'var(--bg)', border: '1px solid ' + (isCorrect ? '#86EFAC' : 'var(--border)'), fontSize: 13, color: isCorrect ? '#15803D' : 'var(--s700)', fontWeight: isCorrect ? 600 : 400, display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: isCorrect ? '#15803D' : 'var(--s400)' }}>{String.fromCharCode(65 + i)}</span>
                         {opt}
                         {isCorrect && (
                           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#15803D" strokeWidth="3" strokeLinecap="round" style={{ marginLeft: 'auto' }}>
@@ -1079,28 +1162,18 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                   })}
                 </div>
               )}
- 
-              {/* Text answer for non-MCQ */}
               {detailQ.type !== 'mcq' && detailQ.correctAnswer && (
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Model Answer</div>
-                  <div style={{ padding: '10px 14px', background: '#FBFAF5', border: '1px solid var(--border)', borderRadius: 6, fontSize: 13.5, lineHeight: 1.6 }}>
-                    {detailQ.correctAnswer}
-                  </div>
+                  <div style={{ padding: '10px 14px', background: '#FBFAF5', border: '1px solid var(--border)', borderRadius: 6, fontSize: 13.5, lineHeight: 1.6 }}>{detailQ.correctAnswer}</div>
                 </div>
               )}
- 
-              {/* Explanation */}
               {detailQ.explanation && (
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Explanation</div>
-                  <div style={{ padding: '10px 14px', background: '#FBF6E3', borderLeft: '3px solid #C9A030', borderRadius: 6, fontSize: 13.5, lineHeight: 1.6, color: 'var(--s700)' }}>
-                    {detailQ.explanation}
-                  </div>
+                  <div style={{ padding: '10px 14px', background: '#FBF6E3', borderLeft: '3px solid #C9A030', borderRadius: 6, fontSize: 13.5, lineHeight: 1.6, color: 'var(--s700)' }}>{detailQ.explanation}</div>
                 </div>
               )}
- 
-              {/* Metadata */}
               <div style={{ paddingTop: 14, borderTop: '1px solid var(--border)', display: 'flex', gap: 16, fontSize: 12, color: 'var(--s500)', flexWrap: 'wrap' }}>
                 <span><strong>Marks:</strong> {detailQ.marks || 1}</span>
                 <span><strong>Difficulty:</strong> {detailQ.difficulty || 'medium'}</span>
@@ -1113,10 +1186,195 @@ function QuestionBankTab({ user, store, setPage, toast }) {
           </div>
         </div>
       )}
+ 
+      {/* CREATE MODAL */}
+      {createOpen && (
+        <div onClick={closeCreate} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 760, width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
+            <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>New Question</div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>Add to Question Bank</div>
+            </div>
+ 
+            <div style={{ padding: '24px 28px' }}>
+              {/* Categorization */}
+              <div className="fr2">
+                <div className="fg">
+                  <label className="fl">Curriculum *</label>
+                  <select className="fsel" value={form.curriculum} onChange={e => handleFormCurriculumChange(e.target.value)}>
+                    <option value="">Select curriculum...</option>
+                    {catalog.curricula.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="fg">
+                  <label className="fl">Grade *</label>
+                  <select className="fsel" value={form.grade} onChange={e => setF('grade', e.target.value)} disabled={!form.curriculum}>
+                    <option value="">{form.curriculum ? 'Select grade...' : 'Pick curriculum first'}</option>
+                    {formGrades.map(g => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                </div>
+              </div>
+ 
+              <div className="fr2">
+                <div className="fg">
+                  <label className="fl">Subject *</label>
+                  <select className="fsel" value={form.subject} onChange={e => setF('subject', e.target.value)} disabled={!form.curriculum}>
+                    <option value="">{form.curriculum ? 'Select subject...' : 'Pick curriculum first'}</option>
+                    {formSubjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                  </select>
+                </div>
+                <div className="fg">
+                  <label className="fl">Topic (optional)</label>
+                  <input className="fi" value={form.topic} onChange={e => setF('topic', e.target.value)} placeholder="e.g. Algebra, Pythagoras"/>
+                </div>
+              </div>
+ 
+              <div className="fg">
+                <label className="fl">Question Type *</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 6 }}>
+                  {Object.entries(qbTypeMeta).map(([type, meta]) => (
+                    <button key={type} type="button" onClick={() => setF('type', type)}
+                      style={{
+                        padding: '10px 12px',
+                        border: '2px solid ' + (form.type === type ? meta.color : 'var(--border)'),
+                        background: form.type === type ? meta.color + '15' : 'transparent',
+                        borderRadius: 8, cursor: 'pointer',
+                        fontSize: 12, fontWeight: 700,
+                        color: form.type === type ? meta.color : 'var(--s600)',
+                      }}>{meta.label}</button>
+                  ))}
+                </div>
+              </div>
+ 
+              <div className="fg">
+                <label className="fl">Question Text *</label>
+                <textarea className="fi" rows={3} value={form.questionText} onChange={e => setF('questionText', e.target.value)} placeholder="Type your question here..." style={{ resize: 'vertical' }}/>
+              </div>
+ 
+              {/* MCQ-specific options */}
+              {form.type === 'mcq' && (
+                <div className="fg">
+                  <label className="fl">Options ({form.options.filter(o => o.trim()).length} filled, mark correct one)</label>
+                  {form.options.map((opt, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+                      <button type="button" onClick={() => setF('correctIndex', i)}
+                        style={{
+                          width: 28, height: 28, borderRadius: '50%',
+                          border: '2px solid ' + (form.correctIndex === i ? '#15803D' : 'var(--border)'),
+                          background: form.correctIndex === i ? '#15803D' : '#FFF',
+                          color: form.correctIndex === i ? '#FFF' : 'var(--s400)',
+                          fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
+                          cursor: 'pointer', flexShrink: 0,
+                        }}>{String.fromCharCode(65 + i)}</button>
+                      <input className="fi" value={opt} onChange={e => setOption(i, e.target.value)} placeholder={'Option ' + (i + 1)}/>
+                      {form.options.length > 2 && (
+                        <button type="button" onClick={() => removeOption(i)} className="btn btn-s btn-sm" style={{ flexShrink: 0 }}>×</button>
+                      )}
+                    </div>
+                  ))}
+                  <button type="button" onClick={addOption} className="btn btn-s btn-sm" style={{ marginTop: 4 }}>+ Add option</button>
+                  {form.correctIndex !== null && (
+                    <div style={{ fontSize: 11, color: 'var(--g600)', marginTop: 4 }}>
+                      ✓ Correct answer: option {String.fromCharCode(65 + form.correctIndex)}
+                    </div>
+                  )}
+                </div>
+              )}
+ 
+              {/* Short/Long answer fields */}
+              {(form.type === 'short' || form.type === 'long') && (
+                <div className="fg">
+                  <label className="fl">Model Answer *</label>
+                  <textarea className="fi" rows={form.type === 'long' ? 5 : 3} value={form.correctAnswer} onChange={e => setF('correctAnswer', e.target.value)} placeholder="The expected answer (used for marking)" style={{ resize: 'vertical' }}/>
+                </div>
+              )}
+ 
+              {(form.type === 'drawing' || form.type === 'upload') && (
+                <div style={{ background: '#FBF6E3', borderLeft: '3px solid #C9A030', padding: '10px 14px', borderRadius: 6, fontSize: 12.5, color: 'var(--s700)', marginBottom: 14, lineHeight: 1.6 }}>
+                  {form.type === 'drawing'
+                    ? 'Students will use a drawing canvas to answer this question. You will manually mark each submission.'
+                    : 'Students will upload an image of their work. You will manually mark each submission.'}
+                </div>
+              )}
+ 
+              {/* Image attachments */}
+              <div className="fg">
+                <label className="fl">Attachments (optional)</label>
+                <div style={{ marginBottom: 8 }}>
+                  <input
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={e => { if (e.target.files?.[0]) uploadFile(e.target.files[0]); e.target.value = '' }}
+                    disabled={uploading}
+                    style={{ display: 'none' }}
+                    id="qbank-file-input"
+                  />
+                  <label htmlFor="qbank-file-input"
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      padding: '8px 14px',
+                      background: uploading ? 'var(--s100)' : '#7D1025',
+                      color: uploading ? 'var(--s500)' : '#FBFAF5',
+                      borderRadius: 6,
+                      cursor: uploading ? 'not-allowed' : 'pointer',
+                      fontSize: 13, fontWeight: 700,
+                    }}>
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    {uploading ? 'Uploading...' : 'Upload image / PDF'}
+                  </label>
+                </div>
+                {form.attachments.length > 0 && (
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {form.attachments.map((a, i) => (
+                      <div key={i} style={{ position: 'relative', border: '1px solid var(--border)', borderRadius: 6, padding: 4 }}>
+                        {a.mimeType?.startsWith('image/') ? (
+                          <img src={a.url} alt={a.filename || 'attachment'} style={{ maxWidth: 100, maxHeight: 80, display: 'block', borderRadius: 4 }}/>
+                        ) : (
+                          <div style={{ padding: '12px 16px', fontSize: 12, color: 'var(--s600)' }}>{a.filename || 'File'}</div>
+                        )}
+                        <button type="button" onClick={() => removeAttachment(i)} style={{ position: 'absolute', top: -8, right: -8, width: 22, height: 22, borderRadius: '50%', background: '#DC2626', color: '#FFF', border: '2px solid #FFF', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+ 
+              {/* Explanation, marks, difficulty */}
+              <div className="fg">
+                <label className="fl">Explanation (optional)</label>
+                <textarea className="fi" rows={2} value={form.explanation} onChange={e => setF('explanation', e.target.value)} placeholder="Help students understand the answer (shown after they submit)" style={{ resize: 'vertical' }}/>
+              </div>
+ 
+              <div className="fr2">
+                <div className="fg">
+                  <label className="fl">Marks</label>
+                  <input className="fi" type="number" min="1" max="100" value={form.marks} onChange={e => setF('marks', e.target.value)}/>
+                </div>
+                <div className="fg">
+                  <label className="fl">Difficulty</label>
+                  <select className="fsel" value={form.difficulty} onChange={e => setF('difficulty', e.target.value)}>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+ 
+            <div style={{ padding: '16px 28px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button className="btn btn-s" onClick={closeCreate} disabled={saving}>Cancel</button>
+              <button className="btn btn-p" onClick={saveQuestion} disabled={saving || uploading}>
+                {saving ? 'Saving...' : 'Save Question'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
-}
- 
+} 
 
 // ═══════════════════════════════════════════════════════════
 // MY STUDENTS — deep drilldown for individual student management
