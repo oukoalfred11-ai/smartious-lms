@@ -5,13 +5,15 @@
  *  - Mastery scores per topic (not hardcoded)
  *  - Practice questions matched to current difficulty
  *  - Mshauri AI receives the student's real mastery context
- *  - Dashboard recommends exactly what to study next
+ *  - Dashboard rec
+ ommends exactly what to study next
  *  - Study plan is personalised per student
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
+import React, { useState, useEffect, useRef } from 'react'
 
 // ── SVG icon helper ───────────────────────────────────────
 const I = (d) => (
@@ -5532,6 +5534,434 @@ const hwTypeLabel = {
   drawing: 'Drawing',
   upload: 'File Upload',
 }
+// ═══════════════════════════════════════════════════════════
+// DRAWING CANVAS — for student homework drawing answers
+// Phase 3.5b
+// ═══════════════════════════════════════════════════════════
+//
+// Self-contained component:
+//   - Pointer events (mouse, touch, pen all unified)
+//   - Pen sizes (3), Eraser, 5 colors
+//   - Undo/Redo (stack of imageData snapshots)
+//   - Clear all
+//   - Save: returns PNG dataURL via onSave callback
+//
+// Props:
+//   value:   optional initial dataURL to load (existing answer)
+//   onSave:  callback(dataURL) — called when student clicks Save
+//   onClose: callback to dismiss (optional, used inside modal)
+//   readOnly: bool — if true, just shows the image, no drawing tools
+//
+// The component is responsive: canvas internal pixel size matches
+// CSS size on mount (and on resize), so strokes don't stretch.
+ 
+const DRAW_COLORS = [
+  { id: 'black', value: '#1a1a1a', label: 'Black' },
+  { id: 'blue',  value: '#1E3A8A', label: 'Blue' },
+  { id: 'red',   value: '#DC2626', label: 'Red' },
+  { id: 'green', value: '#15803D', label: 'Green' },
+  { id: 'gold',  value: '#C9A030', label: 'Gold' },
+]
+ 
+const DRAW_SIZES = [
+  { id: 'fine',   value: 2,  label: 'Fine' },
+  { id: 'medium', value: 4,  label: 'Medium' },
+  { id: 'thick',  value: 8,  label: 'Thick' },
+]
+ 
+function DrawingCanvas({ value, onSave, onClose, readOnly = false }) {
+  const canvasRef = useRef(null)
+  const containerRef = useRef(null)
+  // Drawing state
+  const [color, setColor] = useState(DRAW_COLORS[0].value)
+  const [size, setSize] = useState(DRAW_SIZES[1].value)  // medium default
+  const [tool, setTool] = useState('pen')                // 'pen' | 'eraser'
+  const [isDrawing, setIsDrawing] = useState(false)
+  // History for undo/redo. Each entry is a dataURL snapshot
+  const [history, setHistory] = useState([])
+  const [historyIndex, setHistoryIndex] = useState(-1)
+  // Track last position for line drawing
+  const lastPosRef = useRef({ x: 0, y: 0 })
+ 
+  // ── INIT CANVAS ──
+  // Size canvas to its container, load initial value if present
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const container = containerRef.current
+    if (!canvas || !container) return
+ 
+    const setupCanvas = () => {
+      const rect = container.getBoundingClientRect()
+      // Account for device pixel ratio so strokes are crisp on retina
+      const dpr = window.devicePixelRatio || 1
+      const cssWidth = Math.max(rect.width, 320)
+      const cssHeight = Math.max(rect.height || 400, 320)
+      canvas.style.width = cssWidth + 'px'
+      canvas.style.height = cssHeight + 'px'
+      canvas.width = Math.floor(cssWidth * dpr)
+      canvas.height = Math.floor(cssHeight * dpr)
+      const ctx = canvas.getContext('2d')
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.scale(dpr, dpr)
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      // White background so saved PNG isn't transparent
+      ctx.fillStyle = '#FFFFFF'
+      ctx.fillRect(0, 0, cssWidth, cssHeight)
+      // If we have an initial value, draw it
+      if (value && typeof value === 'string') {
+        const img = new Image()
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, cssWidth, cssHeight)
+          saveSnapshot()
+        }
+        img.src = value
+      } else {
+        saveSnapshot()  // initial blank state
+      }
+    }
+    setupCanvas()
+    // We deliberately don't re-run on resize to avoid losing strokes —
+    // the user can scroll if the container resizes. (Future: snapshot+rescale.)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+ 
+  // ── HISTORY ──
+  const saveSnapshot = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const dataURL = canvas.toDataURL('image/png')
+    setHistory(prev => {
+      // Truncate forward history if we're not at the head
+      const trimmed = historyIndex < prev.length - 1 ? prev.slice(0, historyIndex + 1) : prev
+      const next = [...trimmed, dataURL]
+      // Cap history to 30 entries to limit memory
+      if (next.length > 30) next.shift()
+      return next
+    })
+    setHistoryIndex(idx => Math.min(idx + 1, 29))
+  }
+ 
+  const restoreSnapshot = (dataURL) => {
+    const canvas = canvasRef.current
+    if (!canvas || !dataURL) return
+    const ctx = canvas.getContext('2d')
+    const img = new Image()
+    img.onload = () => {
+      // Clear and draw
+      const dpr = window.devicePixelRatio || 1
+      const cssW = canvas.width / dpr
+      const cssH = canvas.height / dpr
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.scale(dpr, dpr)
+      ctx.drawImage(img, 0, 0, cssW, cssH)
+    }
+    img.src = dataURL
+  }
+ 
+  const undo = () => {
+    if (historyIndex <= 0) return
+    const newIdx = historyIndex - 1
+    setHistoryIndex(newIdx)
+    restoreSnapshot(history[newIdx])
+  }
+ 
+  const redo = () => {
+    if (historyIndex >= history.length - 1) return
+    const newIdx = historyIndex + 1
+    setHistoryIndex(newIdx)
+    restoreSnapshot(history[newIdx])
+  }
+ 
+  const clearCanvas = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const dpr = window.devicePixelRatio || 1
+    const cssW = canvas.width / dpr
+    const cssH = canvas.height / dpr
+    const ctx = canvas.getContext('2d')
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.scale(dpr, dpr)
+    saveSnapshot()
+  }
+ 
+  // ── POINTER HANDLERS ──
+  const getCanvasPos = (e) => {
+    const canvas = canvasRef.current
+    const rect = canvas.getBoundingClientRect()
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    }
+  }
+ 
+  const onPointerDown = (e) => {
+    if (readOnly) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    canvas.setPointerCapture(e.pointerId)
+    const pos = getCanvasPos(e)
+    lastPosRef.current = pos
+    setIsDrawing(true)
+    // Draw initial dot for tap-and-release
+    const ctx = canvas.getContext('2d')
+    ctx.beginPath()
+    ctx.fillStyle = tool === 'eraser' ? '#FFFFFF' : color
+    ctx.arc(pos.x, pos.y, size / 2, 0, Math.PI * 2)
+    ctx.fill()
+  }
+ 
+  const onPointerMove = (e) => {
+    if (!isDrawing || readOnly) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const pos = getCanvasPos(e)
+    const ctx = canvas.getContext('2d')
+    ctx.beginPath()
+    ctx.strokeStyle = tool === 'eraser' ? '#FFFFFF' : color
+    ctx.lineWidth = tool === 'eraser' ? size * 2 : size
+    ctx.moveTo(lastPosRef.current.x, lastPosRef.current.y)
+    ctx.lineTo(pos.x, pos.y)
+    ctx.stroke()
+    lastPosRef.current = pos
+  }
+ 
+  const onPointerUp = (e) => {
+    if (!isDrawing || readOnly) return
+    const canvas = canvasRef.current
+    if (canvas && canvas.hasPointerCapture && canvas.hasPointerCapture(e.pointerId)) {
+      canvas.releasePointerCapture(e.pointerId)
+    }
+    setIsDrawing(false)
+    saveSnapshot()
+  }
+ 
+  // ── SAVE ──
+  const handleSave = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const dataURL = canvas.toDataURL('image/png')
+    if (onSave) onSave(dataURL)
+  }
+ 
+  const canUndo = historyIndex > 0
+  const canRedo = historyIndex < history.length - 1
+ 
+  // ── RENDER ──
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* Toolbar */}
+      {!readOnly && (
+        <div style={{
+          display: 'flex', gap: 14, flexWrap: 'wrap',
+          padding: '10px 12px',
+          background: '#FBFAF5',
+          borderRadius: 8,
+          border: '1px solid var(--border)',
+          alignItems: 'center',
+        }}>
+          {/* Tool: pen vs eraser */}
+          <div style={{ display: 'flex', gap: 4 }}>
+            <button
+              type="button"
+              onClick={() => setTool('pen')}
+              title="Pen"
+              style={{
+                padding: '6px 10px',
+                background: tool === 'pen' ? '#7D1025' : '#FFF',
+                color: tool === 'pen' ? '#FBFAF5' : 'var(--s700)',
+                border: '1px solid ' + (tool === 'pen' ? '#7D1025' : 'var(--border)'),
+                borderRadius: 6, cursor: 'pointer',
+                fontSize: 12, fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                <path d="M2 2l7.586 7.586"/>
+                <circle cx="11" cy="11" r="2"/>
+              </svg>
+              Pen
+            </button>
+            <button
+              type="button"
+              onClick={() => setTool('eraser')}
+              title="Eraser"
+              style={{
+                padding: '6px 10px',
+                background: tool === 'eraser' ? '#7D1025' : '#FFF',
+                color: tool === 'eraser' ? '#FBFAF5' : 'var(--s700)',
+                border: '1px solid ' + (tool === 'eraser' ? '#7D1025' : 'var(--border)'),
+                borderRadius: 6, cursor: 'pointer',
+                fontSize: 12, fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M20 20H7L3 16c-1-1-1-3 0-4l9-9c1-1 3-1 4 0l5 5c1 1 1 3 0 4l-7 7"/>
+                <path d="M14 7l5 5"/>
+              </svg>
+              Eraser
+            </button>
+          </div>
+ 
+          {/* Divider */}
+          <div style={{ width: 1, height: 22, background: 'var(--border)' }}/>
+ 
+          {/* Size buttons */}
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--s500)', letterSpacing: '.06em', textTransform: 'uppercase', marginRight: 4 }}>Size</span>
+            {DRAW_SIZES.map(s => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setSize(s.value)}
+                title={s.label}
+                style={{
+                  padding: '4px 8px',
+                  background: size === s.value ? '#FBE8E8' : '#FFF',
+                  border: '1.5px solid ' + (size === s.value ? '#7D1025' : 'var(--border)'),
+                  borderRadius: 6, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: 28, height: 28,
+                }}>
+                <div style={{
+                  width: s.value * 1.5, height: s.value * 1.5,
+                  background: size === s.value ? '#7D1025' : 'var(--s600)',
+                  borderRadius: '50%',
+                }}/>
+              </button>
+            ))}
+          </div>
+ 
+          {/* Divider */}
+          <div style={{ width: 1, height: 22, background: 'var(--border)' }}/>
+ 
+          {/* Color buttons (only show if pen tool) */}
+          {tool === 'pen' && (
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--s500)', letterSpacing: '.06em', textTransform: 'uppercase', marginRight: 4 }}>Color</span>
+              {DRAW_COLORS.map(c => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setColor(c.value)}
+                  title={c.label}
+                  style={{
+                    width: 26, height: 26, borderRadius: '50%',
+                    background: c.value,
+                    border: color === c.value ? '3px solid #FBFAF5' : '2px solid var(--border)',
+                    boxShadow: color === c.value ? '0 0 0 2px ' + c.value : 'none',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}/>
+              ))}
+            </div>
+          )}
+ 
+          {/* Right-aligned actions */}
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={undo}
+              disabled={!canUndo}
+              title="Undo"
+              style={{
+                padding: '6px 10px',
+                background: '#FFF',
+                color: canUndo ? 'var(--s700)' : 'var(--s400)',
+                border: '1px solid var(--border)',
+                borderRadius: 6,
+                cursor: canUndo ? 'pointer' : 'not-allowed',
+                fontSize: 12, fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M3 7v6h6"/>
+                <path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>
+              </svg>
+              Undo
+            </button>
+            <button
+              type="button"
+              onClick={redo}
+              disabled={!canRedo}
+              title="Redo"
+              style={{
+                padding: '6px 10px',
+                background: '#FFF',
+                color: canRedo ? 'var(--s700)' : 'var(--s400)',
+                border: '1px solid var(--border)',
+                borderRadius: 6,
+                cursor: canRedo ? 'pointer' : 'not-allowed',
+                fontSize: 12, fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M21 7v6h-6"/>
+                <path d="M3 17a9 9 0 0 1 15-6.7L21 13"/>
+              </svg>
+              Redo
+            </button>
+            <button
+              type="button"
+              onClick={() => { if (confirm('Clear the canvas? This cannot be undone except via Undo.')) clearCanvas() }}
+              title="Clear all"
+              style={{
+                padding: '6px 10px',
+                background: '#FFF',
+                color: '#DC2626',
+                border: '1px solid #FCA5A5',
+                borderRadius: 6, cursor: 'pointer',
+                fontSize: 12, fontWeight: 700,
+              }}>
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+ 
+      {/* Canvas container */}
+      <div
+        ref={containerRef}
+        style={{
+          width: '100%',
+          height: 400,
+          background: '#FFF',
+          border: '2px solid ' + (isDrawing ? '#7D1025' : 'var(--border)'),
+          borderRadius: 8,
+          overflow: 'hidden',
+          touchAction: 'none',  // Prevent browser pinch/scroll while drawing
+          position: 'relative',
+        }}>
+        <canvas
+          ref={canvasRef}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          style={{
+            display: 'block',
+            cursor: readOnly ? 'default' : (tool === 'eraser' ? 'cell' : 'crosshair'),
+          }}
+        />
+      </div>
+ 
+      {/* Save / Cancel actions */}
+      {!readOnly && onSave && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          {onClose && (
+            <button type="button" onClick={onClose} className="btn btn-s">Cancel</button>
+          )}
+          <button type="button" onClick={handleSave} className="btn btn-p">Save Drawing</button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 
 function HomeworkTab({ user, toast }) {
   // ── DATA ──
@@ -6199,8 +6629,68 @@ function HomeworkTab({ user, toast }) {
                       </div>
                     )}
 
-                    {/* Drawing — placeholder for next phase */}
+                    {/* Drawing — full canvas */}
                     {q.type === 'drawing' && (
+                      <div>
+                        {a.attachment && a.attachment.url ? (
+                          // Already saved a drawing
+                          <div>
+                            <DrawingCanvas
+                              value={a.attachment.url}
+                              readOnly={isReadOnly}
+                            />
+                            {!isReadOnly && (
+                              <button
+                                type="button"
+                                onClick={() => setAnswerAttachment(idx, null)}
+                                style={{
+                                  background: 'transparent', border: '1px solid var(--border)',
+                                  color: 'var(--s600)', padding: '6px 14px',
+                                  borderRadius: 6, cursor: 'pointer',
+                                  fontSize: 12, fontWeight: 700, marginTop: 8,
+                                }}
+                              >Redo Drawing</button>
+                            )}
+                          </div>
+                        ) : !isReadOnly ? (
+                          <DrawingCanvas
+                            onSave={async (dataURL) => {
+                              // Convert dataURL to blob, upload to Cloudinary
+                              setUploadingIdx(idx)
+                              try {
+                                const blob = await (await fetch(dataURL)).blob()
+                                const file = new File([blob], 'drawing-' + Date.now() + '.png', { type: 'image/png' })
+                                const fd = new FormData()
+                                fd.append('file', file)
+                                const { data } = await api.post('/questions/upload', fd, {
+                                  headers: { 'Content-Type': 'multipart/form-data' },
+                                })
+                                if (data.success && data.attachment) {
+                                  setAnswerAttachment(idx, data.attachment)
+                                  toast?.ok?.('Drawing saved')
+                                } else {
+                                  toast?.error?.(data.message || 'Upload failed')
+                                }
+                              } catch (e) {
+                                toast?.error?.('Save failed: ' + e.message)
+                              } finally {
+                                setUploadingIdx(null)
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div style={{ fontSize: 12, color: 'var(--s500)', fontStyle: 'italic' }}>No drawing submitted.</div>
+                        )}
+                        {uploadingIdx === idx && (
+                          <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 6 }}>Uploading drawing...</div>
+                        )}
+                        {isReadOnly && a.marksAwarded !== null && a.marksAwarded !== undefined && (
+                          <div style={{ fontSize: 12, color: 'var(--s600)', marginTop: 6 }}>
+                            Awarded: <strong>{a.marksAwarded}</strong> / {q.marks}
+                          </div>
+                        )}
+                      </div>
+                    )}
                       <div style={{ background: '#FBF6E3', borderLeft: '3px solid #C9A030', padding: 12, borderRadius: 4, fontSize: 12.5, color: 'var(--s700)', lineHeight: 1.6 }}>
                         <strong>Drawing canvas coming in next phase.</strong> For now, you can answer this question by uploading a photo or scan of your drawn work below.
                         {!isReadOnly && (
