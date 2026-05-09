@@ -6,7 +6,7 @@ const GroupRoomSchema = new mongoose.Schema({
   curriculum: { type: String },
   grade: { type: String },
   capacity: { type: Number, default: 10 },
-  teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher' },
+  teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   schedule: { type: String },
   status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
