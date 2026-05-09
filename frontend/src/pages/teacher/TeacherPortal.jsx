@@ -3321,22 +3321,12 @@ function ExamsTab({ user, store, setPage, toast }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// HOMEWORK — Assign and grade workflow
+// HOMEWORK — wired to /api/homework backend
+// Phase 3.2a: list + create modal (no detail/grade view yet)
 // ═══════════════════════════════════════════════════════════
-// Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
-
-const HW_ASSIGNED_KEY = 'sm_homework_assigned'
-const HW_DRAFTS_KEY   = 'sm_homework_drafts'
-
-const hwSubjColours = {
-  'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
-  'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
-  'Geography': '#0F766E', 'Computer Science': '#1F2937',
-  'Business Studies': '#7E22CE', 'Economics': '#9F1239',
-}
-const hwSubjColour = (s) => hwSubjColours[s] || '#7D1025'
-
+ 
 const hwTimeAgo = (iso) => {
+  if (!iso) return '—'
   const diff = Date.now() - new Date(iso).getTime()
   const mins = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
@@ -3348,13 +3338,14 @@ const hwTimeAgo = (iso) => {
   if (days < 7) return days + 'd ago'
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
-
-const hwTimeUntilDue = (iso) => {
+ 
+const hwTimeUntil = (iso) => {
+  if (!iso) return ''
   const diff = new Date(iso).getTime() - Date.now()
   if (diff < 0) {
-    const overdueDays = Math.floor(-diff / 86400000)
-    if (overdueDays === 0) return 'overdue today'
-    return overdueDays + 'd overdue'
+    const days = Math.floor(-diff / 86400000)
+    if (days === 0) return 'overdue today'
+    return days + 'd overdue'
   }
   const mins = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
@@ -3365,1245 +3356,754 @@ const hwTimeUntilDue = (iso) => {
   if (days < 7) return 'due in ' + days + 'd'
   return 'due ' + new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
-
-const hwFormatDate = (iso) => {
-  const d = new Date(iso)
-  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
-}
-
-const hwLoadAssignments = () => {
-  try { return JSON.parse(localStorage.getItem(HW_ASSIGNED_KEY) || '[]') } catch { return [] }
-}
-const hwSaveAssignments = (items) => {
-  try { localStorage.setItem(HW_ASSIGNED_KEY, JSON.stringify(items.slice(-200))) } catch {}
-}
-const hwLoadStudents = () => {
-  try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
-}
-const hwLoadQuestionBank = () => {
-  try { return JSON.parse(localStorage.getItem('sm_question_bank_custom') || '[]') } catch { return [] }
-}
-
-const hwGenerateId = () => 'hw-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)
-
-const hwDefaultDueDate = () => {
+ 
+const hwDefaultDateTime = (daysFromNow = 7) => {
   const d = new Date()
-  d.setDate(d.getDate() + 7)
+  d.setDate(d.getDate() + daysFromNow)
   d.setHours(23, 59, 0, 0)
   const pad = (n) => String(n).padStart(2, '0')
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes())
 }
-
-// Seed sample homework on first load
-const HW_SEEDED_KEY = 'sm_homework_seeded'
-const hwSeedSample = () => {
-  if (localStorage.getItem(HW_SEEDED_KEY)) return
-  const allStudents = hwLoadStudents()
-  if (allStudents.length === 0) return  // Wait until students exist
-  const studentIds = allStudents.map(s => s.id)
-  const now = Date.now()
-  const samples = [
-    {
-      id: 'hw-sample-1',
-      title: 'Quadratic Equations Practice',
-      subject: 'Mathematics',
-      curriculum: 'IGCSE',
-      year: 'Year 10',
-      questionIds: [],  // Could reference QB if seeded
-      customInstructions: 'Solve all 5 questions on the worksheet. Show all working. Submit photo of your work.',
-      dueDate: new Date(now + 3 * 86400000).toISOString(),
-      assignedStudents: studentIds,
-      totalMarks: 50,
-      status: 'active',
-      teacher: 'Mr. James Muthomi',
-      assignedAt: new Date(now - 1 * 86400000).toISOString(),
-      submissions: [
-        { studentId: 's4', studentName: 'Brian Otieno', submittedAt: new Date(now - 2 * 3600000).toISOString(), responses: { custom: 'See attached photo' }, grade: null, feedback: null },
-        { studentId: 'lydia-id', studentName: 'Lydia Achieng', submittedAt: new Date(now - 4 * 3600000).toISOString(), responses: { custom: 'Worked solutions attached' }, grade: null, feedback: null },
-      ],
-    },
-    {
-      id: 'hw-sample-2',
-      title: 'Photosynthesis Quiz',
-      subject: 'Biology',
-      curriculum: 'IGCSE',
-      year: 'Year 10',
-      questionIds: [],
-      customInstructions: '5 short answer questions on photosynthesis. Define each term clearly.',
-      dueDate: new Date(now + 1 * 86400000).toISOString(),
-      assignedStudents: studentIds,
-      totalMarks: 25,
-      status: 'active',
-      teacher: 'Mr. James Muthomi',
-      assignedAt: new Date(now - 2 * 86400000).toISOString(),
-      submissions: [
-        { studentId: 's1', studentName: 'Amara Osei', submittedAt: new Date(now - 8 * 3600000).toISOString(), responses: { custom: 'Photosynthesis converts light energy into chemical energy in chloroplasts. The process requires CO2, water, and chlorophyll.' }, grade: null, feedback: null },
-      ],
-    },
-    {
-      id: 'hw-sample-3',
-      title: 'Persuasive Essay: My Future Career',
-      subject: 'English',
-      curriculum: 'IGCSE',
-      year: 'Year 10',
-      questionIds: [],
-      customInstructions: 'Write a 500-word persuasive essay on why your chosen career is the best fit for you. Submit as text.',
-      dueDate: new Date(now - 1 * 86400000).toISOString(),
-      assignedStudents: studentIds,
-      totalMarks: 30,
-      status: 'active',
-      teacher: 'Mr. James Muthomi',
-      assignedAt: new Date(now - 7 * 86400000).toISOString(),
-      submissions: [
-        { studentId: 's3', studentName: 'Zara Kamau', submittedAt: new Date(now - 24 * 3600000).toISOString(),
-          responses: { custom: 'I want to be a doctor because I have always been fascinated by how the human body works...' },
-          grade: null, feedback: null },
-      ],
-    },
-  ]
-  hwSaveAssignments(samples)
-  localStorage.setItem(HW_SEEDED_KEY, '1')
+ 
+const hwTypeMeta = {
+  mcq:      { letter: 'M', color: '#1E3A8A', label: 'MCQ' },
+  short:    { letter: 'S', color: '#166534', label: 'Short' },
+  long:     { letter: 'L', color: '#7E22CE', label: 'Long' },
+  drawing:  { letter: 'D', color: '#DC2626', label: 'Drawing' },
+  upload:   { letter: 'U', color: '#7D1025', label: 'Upload' },
 }
-
+ 
 function HomeworkTab({ user, store, setPage, toast }) {
-  const [assignments, setAssignments] = useState(() => { hwSeedSample(); return hwLoadAssignments() })
-  const [view, setView] = useState('list')  // 'list' | 'create' | 'detail' | 'grade'
-  const [selectedHw, setSelectedHw] = useState(null)
-  const [selectedSubmission, setSelectedSubmission] = useState(null)
-  const [activeTab, setActiveTab] = useState('pending')  // 'pending' | 'active' | 'graded' | 'all'
-  const [createStep, setCreateStep] = useState(1)
-
-  // Filters
-  const [filterSubject, setFilterSubject] = useState('all')
-  const [searchQ, setSearchQ] = useState('')
-
-  // Create form state
-  const [formTitle, setFormTitle] = useState('')
-  const [formSubject, setFormSubject] = useState('Mathematics')
-  const [formCurriculum, setFormCurriculum] = useState('IGCSE')
-  const [formYear, setFormYear] = useState('Year 10')
-  const [formDueDate, setFormDueDate] = useState(hwDefaultDueDate())
-  const [formInstructions, setFormInstructions] = useState('')
-  const [formSelectedQuestions, setFormSelectedQuestions] = useState([])
-  const [formSelectedStudents, setFormSelectedStudents] = useState([])
-  const [bankFilter, setBankFilter] = useState({ subject: 'Mathematics', difficulty: 'all', search: '' })
-
-  // Grade form state
-  const [gradeMark, setGradeMark] = useState('')
-  const [gradeFeedback, setGradeFeedback] = useState('')
-  const [gradePerQuestion, setGradePerQuestion] = useState({})
-
-  const allStudents = hwLoadStudents()
-  const questionBank = hwLoadQuestionBank()
-
-  // Derived
-  const enrichedAssignments = assignments.map(hw => {
-    const submissionsCount = (hw.submissions || []).length
-    const gradedCount = (hw.submissions || []).filter(s => s.grade !== null && s.grade !== undefined).length
-    const ungradedCount = submissionsCount - gradedCount
-    const expectedCount = hw.assignedStudents?.length || 0
-    return { ...hw, _submissionsCount: submissionsCount, _gradedCount: gradedCount, _ungradedCount: ungradedCount, _expectedCount: expectedCount }
+  // ── DATA STATE ──
+  const [homework, setHomework] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [activeTab, setActiveTab] = useState('all')  // 'all' | 'draft' | 'published'
+ 
+  // ── CATALOG (for create modal) ──
+  const [catalog, setCatalog] = useState({ curricula: [], gradesByCurriculum: {}, subjects: [] })
+  const [rooms, setRooms] = useState([])
+ 
+  // ── CREATE MODAL ──
+  const [createOpen, setCreateOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState(null)  // null when closed; object when open
+ 
+  // ── BANK PICKER (sub-modal) ──
+  const [bankOpen, setBankOpen] = useState(false)
+  const [bankQuestions, setBankQuestions] = useState([])
+  const [bankLoading, setBankLoading] = useState(false)
+  const [bankFilters, setBankFilters] = useState({ curriculum: '', subject: '', grade: '', type: '', q: '' })
+ 
+  // ── CUSTOM QUESTION SUB-MODAL ──
+  const [customOpen, setCustomOpen] = useState(false)
+  const [customForm, setCustomForm] = useState(null)
+ 
+  // ── DRAG STATE ──
+  const [dragIndex, setDragIndex] = useState(null)
+ 
+  // Load homework on mount
+  useEffect(() => { loadHomework() }, [])
+ 
+  // Load catalog + rooms once (used by create modal)
+  useEffect(() => {
+    api.get('/curriculum/options').then(r => {
+      if (r.data?.success) setCatalog({
+        curricula: r.data.curricula || [],
+        gradesByCurriculum: r.data.gradesByCurriculum || {},
+        subjects: r.data.subjects || [],
+      })
+    }).catch(() => {})
+    api.get('/grouprooms').then(r => {
+      if (r.data?.rooms) {
+        // Filter rooms where I'm the teacher
+        const myRooms = r.data.rooms.filter(rm => {
+          if (!rm.teacher) return false
+          const tid = typeof rm.teacher === 'object' ? rm.teacher._id : rm.teacher
+          return tid?.toString() === user?._id?.toString()
+        })
+        setRooms(myRooms)
+      }
+    }).catch(() => {})
+  }, [user?._id])
+ 
+  const loadHomework = async () => {
+    setLoading(true); setError(null)
+    try {
+      const { data } = await api.get('/homework?createdBy=me')
+      if (data.success) setHomework(data.homework || [])
+    } catch (e) {
+      setError(e.response?.data?.message || 'Failed to load homework')
+    } finally { setLoading(false) }
+  }
+ 
+  // Tab filtering
+  const filteredHw = homework.filter(hw => {
+    if (activeTab === 'draft') return hw.status === 'draft'
+    if (activeTab === 'published') return hw.status === 'published'
+    return true
   })
-
-  // Tab counts
   const counts = {
-    all: enrichedAssignments.length,
-    active: enrichedAssignments.filter(hw => hw.status === 'active' && hw._ungradedCount === 0 && hw._gradedCount < hw._expectedCount).length,
-    pending: enrichedAssignments.filter(hw => hw._ungradedCount > 0).length,
-    graded: enrichedAssignments.filter(hw => hw._gradedCount > 0 && hw._gradedCount === hw._submissionsCount).length,
+    all: homework.length,
+    draft: homework.filter(h => h.status === 'draft').length,
+    published: homework.filter(h => h.status === 'published').length,
   }
-
-  // Filter for active tab
-  const tabFiltered = enrichedAssignments.filter(hw => {
-    if (activeTab === 'pending') return hw._ungradedCount > 0
-    if (activeTab === 'active') return hw.status === 'active'
-    if (activeTab === 'graded') return hw._gradedCount > 0
-    return true
-  })
-
-  const filtered = tabFiltered.filter(hw => {
-    if (filterSubject !== 'all' && hw.subject !== filterSubject) return false
-    if (searchQ.trim()) {
-      const s = searchQ.toLowerCase()
-      if (!hw.title.toLowerCase().includes(s) && !hw.subject.toLowerCase().includes(s)) return false
-    }
-    return true
-  }).sort((a, b) => new Date(b.assignedAt) - new Date(a.assignedAt))
-
-  // Stats for hero
-  const stats = {
-    total: assignments.length,
-    pendingGrading: enrichedAssignments.reduce((sum, hw) => sum + hw._ungradedCount, 0),
-    submissions: enrichedAssignments.reduce((sum, hw) => sum + hw._submissionsCount, 0),
-    students: allStudents.length,
-  }
-
-  // Filter question bank for picker
-  const filteredBank = questionBank.filter(q => {
-    if (q.status !== 'published') return false
-    if (bankFilter.subject !== 'all' && q.subject !== bankFilter.subject) return false
-    if (bankFilter.difficulty !== 'all' && q.difficulty !== bankFilter.difficulty) return false
-    if (bankFilter.search.trim()) {
-      const s = bankFilter.search.toLowerCase()
-      if (!q.question.toLowerCase().includes(s) && !q.topic.toLowerCase().includes(s)) return false
-    }
-    return true
-  })
-
-  const formTotalMarks = formSelectedQuestions.reduce((sum, qid) => {
-    const q = questionBank.find(qq => qq.id === qid)
-    return sum + (q?.marks || 0)
-  }, 0)
-
-  // ── ACTIONS ─────────────────────────────────────────
-  const resetForm = () => {
-    setFormTitle('')
-    setFormSubject('Mathematics')
-    setFormCurriculum('IGCSE')
-    setFormYear('Year 10')
-    setFormDueDate(hwDefaultDueDate())
-    setFormInstructions('')
-    setFormSelectedQuestions([])
-    setFormSelectedStudents([])
-    setCreateStep(1)
-  }
-
+ 
+  // ── CREATE MODAL HANDLERS ──
   const openCreate = () => {
-    resetForm()
-    setView('create')
-  }
-
-  const toggleQuestion = (qid) => {
-    if (formSelectedQuestions.includes(qid)) {
-      setFormSelectedQuestions(formSelectedQuestions.filter(id => id !== qid))
-    } else {
-      setFormSelectedQuestions([...formSelectedQuestions, qid])
-    }
-  }
-
-  const toggleStudent = (sid) => {
-    if (formSelectedStudents.includes(sid)) {
-      setFormSelectedStudents(formSelectedStudents.filter(id => id !== sid))
-    } else {
-      setFormSelectedStudents([...formSelectedStudents, sid])
-    }
-  }
-
-  const validateCreateStep = (step) => {
-    if (step === 1) {
-      if (!formTitle.trim()) { toast?.error?.('Title is required.'); return false }
-      if (!formDueDate) { toast?.error?.('Due date is required.'); return false }
-      return true
-    }
-    if (step === 2) {
-      if (formSelectedQuestions.length === 0 && !formInstructions.trim()) {
-        toast?.error?.('Add at least one question OR write custom instructions.')
-        return false
-      }
-      return true
-    }
-    if (step === 3) {
-      if (formSelectedStudents.length === 0) { toast?.error?.('Assign to at least one student.'); return false }
-      return true
-    }
-    return true
-  }
-
-  const assignHomework = () => {
-    if (!validateCreateStep(1) || !validateCreateStep(2) || !validateCreateStep(3)) return
-    const newHw = {
-      id: hwGenerateId(),
-      title: formTitle.trim(),
-      subject: formSubject,
-      curriculum: formCurriculum,
-      year: formYear,
-      questionIds: formSelectedQuestions,
-      customInstructions: formInstructions.trim(),
-      dueDate: new Date(formDueDate).toISOString(),
-      assignedStudents: formSelectedStudents,
-      totalMarks: formTotalMarks || 100,
-      status: 'active',
-      teacher: 'Mr. James Muthomi',
-      assignedAt: new Date().toISOString(),
-      submissions: [],
-    }
-    const updated = [newHw, ...assignments]
-    setAssignments(updated)
-    hwSaveAssignments(updated)
-    toast?.ok?.('Homework assigned to ' + formSelectedStudents.length + ' students.')
-    setView('list')
-    resetForm()
-  }
-
-  const deleteHomework = (id) => {
-    const updated = assignments.filter(hw => hw.id !== id)
-    setAssignments(updated)
-    hwSaveAssignments(updated)
-    toast?.ok?.('Homework deleted.')
-    setView('list')
-    setSelectedHw(null)
-  }
-
-  const openDetail = (hw) => {
-    setSelectedHw(hw)
-    setView('detail')
-  }
-
-  const openGrade = (hw, submission) => {
-    setSelectedHw(hw)
-    setSelectedSubmission(submission)
-    setGradeMark(submission.grade !== null && submission.grade !== undefined ? String(submission.grade) : '')
-    setGradeFeedback(submission.feedback || '')
-    setGradePerQuestion(submission.perQuestionGrades || {})
-    setView('grade')
-  }
-
-  const saveGrade = () => {
-    if (!gradeMark || isNaN(parseFloat(gradeMark))) {
-      toast?.error?.('Please enter a valid mark.')
-      return
-    }
-    const mark = parseFloat(gradeMark)
-    if (mark < 0 || mark > selectedHw.totalMarks) {
-      toast?.error?.('Mark must be between 0 and ' + selectedHw.totalMarks + '.')
-      return
-    }
-
-    const updated = assignments.map(hw => {
-      if (hw.id !== selectedHw.id) return hw
-      return {
-        ...hw,
-        submissions: (hw.submissions || []).map(sub => {
-          if (sub.studentId !== selectedSubmission.studentId) return sub
-          return {
-            ...sub,
-            grade: mark,
-            feedback: gradeFeedback.trim(),
-            perQuestionGrades: gradePerQuestion,
-            gradedAt: new Date().toISOString(),
-          }
-        }),
-      }
+    setForm({
+      title: '',
+      description: '',
+      curriculum: '',
+      grade: '',
+      subject: '',
+      questions: [],
+      assignedRoom: '',
+      assignedStudents: [],
+      releaseAt: hwDefaultDateTime(0),  // now
+      dueAt: hwDefaultDateTime(7),
+      saveCustomToBank: true,
     })
-    setAssignments(updated)
-    hwSaveAssignments(updated)
-    toast?.ok?.('Grade saved. Student will see ' + mark + '/' + selectedHw.totalMarks + ' (' + Math.round(mark / selectedHw.totalMarks * 100) + '%)')
-    setView('detail')
-    setSelectedSubmission(null)
+    setCreateOpen(true)
   }
-
-  // ── RENDER: GRADE VIEW ──────────────────────────────
-  if (view === 'grade' && selectedHw && selectedSubmission) {
-    const subjCol = hwSubjColour(selectedHw.subject)
-    const hwQuestions = (selectedHw.questionIds || []).map(qid => questionBank.find(q => q.id === qid)).filter(Boolean)
-    const studentRecord = allStudents.find(s => s.id === selectedSubmission.studentId)
-    const previewPercent = gradeMark ? Math.round(parseFloat(gradeMark) / selectedHw.totalMarks * 100) : null
-
-    return (
-      <div>
-        <button onClick={() => { setView('detail'); setSelectedSubmission(null) }}
-          style={{
-            background: 'transparent', border: 'none', color: '#7D1025',
-            fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            padding: '6px 0', marginBottom: 14,
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-          Back to Submissions
-        </button>
-
-        {/* Hero */}
-        <div className="card" style={{
-          padding: 0, marginBottom: 18, overflow: 'hidden',
-          background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
-          color: '#FBFAF5',
-        }}>
-          <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-            <div style={{
-              width: 64, height: 64, borderRadius: '50%',
-              background: '#C9A030',
-              border: '3px solid #F0CC5A',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#7D1025',
-              fontSize: 22, fontWeight: 700,
-              fontFamily: "'Instrument Serif', serif",
-              flexShrink: 0,
-            }}>{studentRecord?.initials || selectedSubmission.studentName.split(' ').map(w => w[0]).join('').slice(0, 2)}</div>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
-                Grading Submission
-              </div>
-              <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 24, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
-                {selectedSubmission.studentName}
-              </h1>
-              <div style={{ fontSize: 13, opacity: .9, marginTop: 4 }}>
-                {selectedHw.title} | Submitted {hwTimeAgo(selectedSubmission.submittedAt)}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 14 }}>
-          {/* LEFT: Student's submission */}
-          <div>
-            <div className="card" style={{ marginBottom: 14 }}>
-              <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Student's Submission</div>
-
-              {selectedSubmission.responses?.custom && (
-                <div style={{
-                  background: '#FBFAF5', borderLeft: '3px solid #C9A030',
-                  padding: '14px 16px', borderRadius: 'var(--rsm)',
-                  fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.7,
-                  whiteSpace: 'pre-wrap', marginBottom: 14,
-                }}>{selectedSubmission.responses.custom}</div>
-              )}
-
-              {hwQuestions.length > 0 && hwQuestions.map((q, i) => {
-                const studentAnswer = selectedSubmission.responses?.[q.id]
-                return (
-                  <div key={q.id} style={{
-                    padding: 14, marginBottom: 10,
-                    background: '#FBFAF5',
-                    border: '1px solid var(--border)',
-                    borderRadius: 'var(--rmd)',
-                  }}>
-                    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 8 }}>
-                      <span className="mono" style={{
-                        fontSize: 11, fontWeight: 700, color: '#7D1025',
-                        background: '#FBE8E8', padding: '2px 8px', borderRadius: 'var(--rsm)',
-                        flexShrink: 0,
-                      }}>Q{i + 1}</span>
-                      <div style={{ flex: 1, fontSize: 13, fontWeight: 600, color: 'var(--s900)' }}>{q.question}</div>
-                    </div>
-
-                    <div style={{ marginBottom: 10 }}>
-                      <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Student's Answer</div>
-                      <div style={{
-                        background: '#FFF',
-                        border: '1px solid var(--border)',
-                        padding: '8px 12px', borderRadius: 'var(--rsm)',
-                        fontSize: 13, color: 'var(--s800)',
-                        whiteSpace: 'pre-wrap', lineHeight: 1.6,
-                      }}>{studentAnswer || <span style={{ color: 'var(--s400)', fontStyle: 'italic' }}>No answer provided</span>}</div>
-                    </div>
-
-                    <div>
-                      <div style={{ fontSize: 10.5, fontWeight: 700, color: '#15803D', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 4 }}>Expected Answer</div>
-                      <div style={{
-                        background: '#DCFCE7',
-                        border: '1px solid #86EFAC',
-                        padding: '8px 12px', borderRadius: 'var(--rsm)',
-                        fontSize: 13, color: '#15803D', fontWeight: 600,
-                      }}>{q.answer || '—'}</div>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12 }}>
-                      <span style={{ fontSize: 11, color: 'var(--s500)' }}>Mark for this question:</span>
-                      <input type="number" min="0" max={q.marks}
-                        value={gradePerQuestion[q.id] || ''}
-                        onChange={e => setGradePerQuestion({ ...gradePerQuestion, [q.id]: e.target.value })}
-                        style={{
-                          width: 70, padding: '6px 10px',
-                          border: '1.5px solid var(--border)',
-                          borderRadius: 'var(--rsm)',
-                          fontSize: 13, fontFamily: 'JetBrains Mono, monospace',
-                        }}/>
-                      <span style={{ fontSize: 12, color: 'var(--s500)', fontFamily: 'JetBrains Mono, monospace' }}>/ {q.marks}</span>
-                    </div>
-                  </div>
-                )
-              })}
-
-              {hwQuestions.length === 0 && !selectedSubmission.responses?.custom && (
-                <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
-                  No submission content available.
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* RIGHT: Grading panel */}
-          <div>
-            <div className="card" style={{ position: 'sticky', top: 20, background: '#FBFAF5', border: '2px solid #C9A030' }}>
-              <div className="ctitle" style={{ marginBottom: 14, color: '#7D1025' }}>Grade & Feedback</div>
-
-              <div className="fg">
-                <label className="fl">Total Mark *</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <input className="fi" type="number" min="0" max={selectedHw.totalMarks}
-                    value={gradeMark} onChange={e => setGradeMark(e.target.value)}
-                    placeholder="0"
-                    style={{ width: 100, fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 700, color: '#7D1025' }}/>
-                  <span style={{ fontSize: 14, color: 'var(--s500)', fontFamily: 'JetBrains Mono, monospace' }}>/ {selectedHw.totalMarks}</span>
-                </div>
-                {previewPercent !== null && (
-                  <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 6 }}>
-                    Percentage: <strong style={{ color: previewPercent >= 75 ? '#15803D' : previewPercent >= 60 ? '#B45309' : '#B91C1C' }}>{previewPercent}%</strong>
-                    {' '}|{' '}Grade: <strong>{previewPercent >= 80 ? 'A' : previewPercent >= 70 ? 'B' : previewPercent >= 60 ? 'C' : previewPercent >= 50 ? 'D' : 'F'}</strong>
-                  </div>
-                )}
-              </div>
-
-              <div className="fg" style={{ marginBottom: 14 }}>
-                <label className="fl">Feedback to Student</label>
-                <textarea className="fi" rows={6} value={gradeFeedback}
-                  onChange={e => setGradeFeedback(e.target.value)}
-                  placeholder="What did they do well? What should they work on next?"
-                  style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
-              </div>
-
-              <button onClick={saveGrade}
-                style={{
-                  background: '#7D1025', color: '#FBFAF5', border: 'none',
-                  padding: '12px 20px', borderRadius: 'var(--rmd)',
-                  cursor: 'pointer', fontSize: 14, fontWeight: 700,
-                  width: '100%',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  boxShadow: '0 4px 14px rgba(125,16,37,.25)',
-                }}>
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-                Save Grade and Release to Student
-              </button>
-
-              <div style={{
-                background: '#FFF', borderLeft: '3px solid #7D1025',
-                padding: '10px 12px', borderRadius: 'var(--rsm)',
-                fontSize: 11.5, color: 'var(--s700)', marginTop: 12,
-                lineHeight: 1.6,
-              }}>
-                <strong style={{ color: '#7D1025' }}>What happens:</strong> Student will see this grade and feedback in their Homework tab. The grade contributes to their mastery and overall stats.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+ 
+  const closeCreate = () => { setCreateOpen(false); setForm(null) }
+  const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
+ 
+  // When room is chosen, auto-populate curriculum/subject/grade
+  const handleRoomChange = (roomId) => {
+    if (!roomId) {
+      setForm(f => ({ ...f, assignedRoom: '' }))
+      return
+    }
+    const room = rooms.find(r => r._id === roomId)
+    if (!room) {
+      setForm(f => ({ ...f, assignedRoom: roomId }))
+      return
+    }
+    setForm(f => ({
+      ...f,
+      assignedRoom: roomId,
+      curriculum: room.curriculum || f.curriculum,
+      grade: room.grade || f.grade,
+      subject: room.subject || f.subject,
+    }))
   }
-
-  // ── RENDER: DETAIL VIEW ─────────────────────────────
-  if (view === 'detail' && selectedHw) {
-    const subjCol = hwSubjColour(selectedHw.subject)
-    const submissions = selectedHw.submissions || []
-    const expectedStudents = (selectedHw.assignedStudents || []).map(sid => allStudents.find(s => s.id === sid)).filter(Boolean)
-    const submittedStudentIds = submissions.map(s => s.studentId)
-    const notSubmittedStudents = expectedStudents.filter(s => !submittedStudentIds.includes(s.id))
-
-    const ungraded = submissions.filter(s => s.grade === null || s.grade === undefined)
-    const graded = submissions.filter(s => s.grade !== null && s.grade !== undefined)
-
-    return (
-      <div>
-        <button onClick={() => { setView('list'); setSelectedHw(null) }}
-          style={{
-            background: 'transparent', border: 'none', color: '#7D1025',
-            fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            padding: '6px 0', marginBottom: 14,
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-          Back to Homework List
-        </button>
-
-        {/* Hero */}
-        <div className="card" style={{
-          padding: 0, marginBottom: 18, overflow: 'hidden',
-          background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
-          color: '#FBFAF5',
-        }}>
-          <div style={{ padding: '28px 30px' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
-              {selectedHw.subject} | {selectedHw.curriculum} {selectedHw.year}
-            </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
-              {selectedHw.title}
-            </h1>
-            <div style={{ fontSize: 13, opacity: .9, marginTop: 6 }}>
-              Assigned {hwTimeAgo(selectedHw.assignedAt)} | <strong style={{ color: '#F0CC5A' }}>{hwTimeUntilDue(selectedHw.dueDate)}</strong>
-            </div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
-            {[
-              ['Assigned',     expectedStudents.length, '#FBFAF5'],
-              ['Submitted',    submissions.length,      submissions.length > 0 ? '#F0CC5A' : '#FBFAF5'],
-              ['To Grade',     ungraded.length,         ungraded.length > 0 ? '#FCA5A5' : '#FBFAF5'],
-              ['Graded',       graded.length,           '#86EFAC'],
-              ['Total Marks',  selectedHw.totalMarks,   '#F0CC5A'],
-            ].map(([l, v, c]) => (
-              <div key={l} style={{ padding: '14px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .7, marginBottom: 2, color: '#F0CC5A' }}>{l}</div>
-                <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: c }}>{v}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Instructions */}
-        {selectedHw.customInstructions && (
-          <div className="card" style={{ marginBottom: 14 }}>
-            <div className="ctitle" style={{ marginBottom: 8, color: '#7D1025' }}>Instructions</div>
-            <div style={{
-              background: '#FBFAF5', borderLeft: '3px solid #C9A030',
-              padding: '12px 16px', borderRadius: 'var(--rsm)',
-              fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.7,
-              whiteSpace: 'pre-wrap',
-            }}>{selectedHw.customInstructions}</div>
-          </div>
-        )}
-
-        {/* Submissions to grade */}
-        {ungraded.length > 0 && (
-          <div className="card" style={{ marginBottom: 14, border: '2px solid #C9A030' }}>
-            <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>
-              Awaiting Your Grade ({ungraded.length})
-            </div>
-            {ungraded.map((sub, i) => (
-              <div key={sub.studentId + i} style={{
-                display: 'flex', gap: 12, padding: '12px 0',
-                borderBottom: i < ungraded.length - 1 ? '1px solid var(--border)' : 'none',
-                alignItems: 'center', cursor: 'pointer',
-              }} onClick={() => openGrade(selectedHw, sub)}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: '50%',
-                  background: msAvatarColor(sub.studentName), color: '#FBFAF5',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 700, fontSize: 12, flexShrink: 0,
-                }}>{sub.studentName.split(' ').map(w => w[0]).join('').slice(0, 2)}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 14 }}>{sub.studentName}</div>
-                  <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>Submitted {hwTimeAgo(sub.submittedAt)}</div>
-                </div>
-                <button onClick={(e) => { e.stopPropagation(); openGrade(selectedHw, sub) }}
-                  style={{
-                    background: '#7D1025', color: '#FBFAF5', border: 'none',
-                    padding: '8px 16px', borderRadius: 'var(--rsm)',
-                    cursor: 'pointer', fontSize: 12, fontWeight: 700,
-                  }}>Grade Now</button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Graded submissions */}
-        {graded.length > 0 && (
-          <div className="card" style={{ marginBottom: 14 }}>
-            <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>
-              Graded ({graded.length})
-            </div>
-            {graded.map((sub, i) => {
-              const pct = Math.round(sub.grade / selectedHw.totalMarks * 100)
-              const gradeCol = pct >= 80 ? '#15803D' : pct >= 60 ? '#B45309' : '#B91C1C'
-              return (
-                <div key={sub.studentId + i} style={{
-                  display: 'flex', gap: 12, padding: '12px 0',
-                  borderBottom: i < graded.length - 1 ? '1px solid var(--border)' : 'none',
-                  alignItems: 'center', cursor: 'pointer',
-                }} onClick={() => openGrade(selectedHw, sub)}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: '50%',
-                    background: msAvatarColor(sub.studentName), color: '#FBFAF5',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 700, fontSize: 12, flexShrink: 0,
-                  }}>{sub.studentName.split(' ').map(w => w[0]).join('').slice(0, 2)}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{sub.studentName}</div>
-                    <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>Graded {hwTimeAgo(sub.gradedAt || sub.submittedAt)}</div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div className="mono" style={{ fontSize: 16, fontWeight: 700, color: gradeCol }}>{sub.grade}/{selectedHw.totalMarks}</div>
-                    <div className="mono" style={{ fontSize: 11, color: gradeCol, fontWeight: 700 }}>{pct}%</div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Not yet submitted */}
-        {notSubmittedStudents.length > 0 && (
-          <div className="card" style={{ marginBottom: 14 }}>
-            <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>
-              Not Yet Submitted ({notSubmittedStudents.length})
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {notSubmittedStudents.map(s => (
-                <span key={s.id} style={{
-                  background: '#FBFAF5', color: 'var(--s500)',
-                  border: '1px solid var(--border)',
-                  fontSize: 12, fontWeight: 600,
-                  padding: '5px 12px', borderRadius: 99,
-                }}>{s.name}</span>
-              ))}
-            </div>
-            <button
-              onClick={() => toast?.info?.('Reminder will be sent (Communication module pending).')}
-              style={{
-                background: 'transparent', color: '#7D1025',
-                border: '1.5px solid #7D1025',
-                padding: '8px 14px', borderRadius: 'var(--rmd)',
-                cursor: 'pointer', fontSize: 12, fontWeight: 700,
-                marginTop: 14,
-              }}>Send Reminder to All</button>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 18, flexWrap: 'wrap' }}>
-          <button onClick={() => { if (confirm('Delete this homework? All submissions will be lost.')) deleteHomework(selectedHw.id) }}
-            style={{
-              background: '#FEE2E2', color: '#B91C1C',
-              border: '1px solid #FCA5A5',
-              padding: '10px 18px', borderRadius: 'var(--rmd)',
-              cursor: 'pointer', fontSize: 13, fontWeight: 700,
-            }}>Delete Homework</button>
-          <button onClick={() => { setView('list'); setSelectedHw(null) }} className="btn btn-s">Close</button>
-        </div>
-      </div>
-    )
+ 
+  // ── BANK PICKER ──
+  const openBankPicker = () => {
+    // Pre-fill filters with form values
+    setBankFilters({
+      curriculum: form?.curriculum || '',
+      subject: form?.subject || '',
+      grade: form?.grade || '',
+      type: '', q: '',
+    })
+    setBankOpen(true)
+    loadBankQuestions(form?.curriculum, form?.subject, form?.grade, '', '')
   }
-
-  // ── RENDER: CREATE FORM ─────────────────────────────
-  if (view === 'create') {
-    return (
-      <div>
-        <button onClick={() => { setView('list'); resetForm() }}
-          style={{
-            background: 'transparent', border: 'none', color: '#7D1025',
-            fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            padding: '6px 0', marginBottom: 14,
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M19 12H5M12 5l-7 7 7 7"/>
-          </svg>
-          Back to Homework List
-        </button>
-
-        <div style={{ marginBottom: 18 }}>
-          <div className="sec-tag" style={{ color: '#7D1025' }}>Assign New Homework</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>
-            Create <em style={{ color: '#7D1025' }}>Homework</em>
-          </h2>
-        </div>
-
-        {/* Step indicators */}
-        <div style={{
-          background: '#FBFAF5', borderRadius: 'var(--rmd)',
-          padding: 14, marginBottom: 18,
-          display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
-        }}>
-          {[
-            { n: 1, label: 'Details' },
-            { n: 2, label: 'Content' },
-            { n: 3, label: 'Assign' },
-          ].map((step, i) => {
-            const isActive = createStep === step.n
-            const isDone = createStep > step.n
-            return (
-              <div key={step.n} style={{ display: 'flex', alignItems: 'center', flex: i < 2 ? 1 : 'auto', gap: 8 }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: '50%',
-                  background: isActive ? '#7D1025' : isDone ? '#C9A030' : '#FFF',
-                  color: isActive || isDone ? '#FBFAF5' : 'var(--s500)',
-                  border: '2px solid ' + (isActive ? '#7D1025' : isDone ? '#C9A030' : 'var(--border)'),
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 13, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
-                  flexShrink: 0,
-                }}>{isDone ? (
-                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                ) : step.n}</div>
-                <span style={{
-                  fontSize: 13, fontWeight: 700,
-                  color: isActive ? '#7D1025' : isDone ? '#C9A030' : 'var(--s400)',
-                }}>{step.label}</span>
-                {i < 2 && <div style={{ flex: 1, height: 2, background: isDone ? '#C9A030' : 'var(--border)', margin: '0 8px' }}/>}
-              </div>
-            )
-          })}
-        </div>
-
-        {/* STEP 1: DETAILS */}
-        {createStep === 1 && (
-          <div className="card">
-            <div className="ctitle" style={{ marginBottom: 16, color: '#7D1025' }}>Homework Details</div>
-            <div className="fg">
-              <label className="fl">Title *</label>
-              <input className="fi" value={formTitle} onChange={e => setFormTitle(e.target.value)}
-                placeholder="e.g. Chapter 5 Practice: Quadratic Equations"/>
-            </div>
-            <div className="fr2">
-              <div className="fg" style={{ marginBottom: 0 }}>
-                <label className="fl">Subject</label>
-                <select className="fsel" value={formSubject} onChange={e => setFormSubject(e.target.value)}>
-                  {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
-                </select>
-              </div>
-              <div className="fg" style={{ marginBottom: 0 }}>
-                <label className="fl">Curriculum</label>
-                <select className="fsel" value={formCurriculum} onChange={e => setFormCurriculum(e.target.value)}>
-                  {Object.entries(QB_CURRICULA).map(([id, info]) => <option key={id} value={id}>{info.label}</option>)}
-                </select>
-              </div>
-            </div>
-            <div className="fg" style={{ marginTop: 14 }}>
-              <label className="fl">Year / Grade</label>
-              <select className="fsel" value={formYear} onChange={e => setFormYear(e.target.value)}>
-                {(QB_CURRICULA[formCurriculum]?.years || []).map(y => <option key={y}>{y}</option>)}
-              </select>
-            </div>
-            <div className="fg" style={{ marginTop: 14, marginBottom: 0 }}>
-              <label className="fl">Due Date *</label>
-              <input className="fi" type="datetime-local" value={formDueDate}
-                onChange={e => setFormDueDate(e.target.value)}/>
-              <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
-                Students can submit anytime before this. Late submissions still allowed but flagged.
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
-              <button onClick={() => { if (validateCreateStep(1)) setCreateStep(2) }}
-                style={{
-                  background: '#7D1025', color: '#FBFAF5', border: 'none',
-                  padding: '10px 20px', borderRadius: 'var(--rmd)',
-                  cursor: 'pointer', fontSize: 14, fontWeight: 700,
-                  display: 'flex', alignItems: 'center', gap: 6,
-                }}>
-                Continue to Content
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2: CONTENT */}
-        {createStep === 2 && (
-          <div>
-            <div className="card" style={{ marginBottom: 14 }}>
-              <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Custom Instructions</div>
-              <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 8 }}>
-                Free-form instructions for students. Use this for essay prompts, worksheets, or open-ended assignments.
-              </div>
-              <textarea className="fi" rows={5} value={formInstructions}
-                onChange={e => setFormInstructions(e.target.value)}
-                placeholder="e.g. Read pages 45-58. Write a 300-word reflection on the main themes. Submit as text by Friday."
-                style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
-            </div>
-
-            <div className="card" style={{ marginBottom: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
-                <div className="ctitle" style={{ color: '#7D1025' }}>
-                  Pick from Question Bank
-                  {formSelectedQuestions.length > 0 && (
-                    <span style={{
-                      marginLeft: 10,
-                      background: '#C9A030', color: '#7D1025',
-                      fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
-                      padding: '3px 10px', borderRadius: 99,
-                    }}>{formSelectedQuestions.length} selected | {formTotalMarks} marks</span>
-                  )}
-                </div>
-                <button onClick={() => setPage('questionbank')}
-                  style={{
-                    background: 'transparent', border: '1px solid #7D1025',
-                    color: '#7D1025', padding: '6px 12px',
-                    borderRadius: 'var(--rsm)', cursor: 'pointer',
-                    fontSize: 12, fontWeight: 700,
-                  }}>+ Add to Question Bank</button>
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 14 }}>
-                Optional: pair instructions with structured questions from your bank. Students answer each one.
-              </div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-                <input className="fi" placeholder="Search questions..."
-                  value={bankFilter.search}
-                  onChange={e => setBankFilter({ ...bankFilter, search: e.target.value })}
-                  style={{ flex: 1, minWidth: 180 }}/>
-                <select className="fsel" value={bankFilter.subject}
-                  onChange={e => setBankFilter({ ...bankFilter, subject: e.target.value })}
-                  style={{ minWidth: 140 }}>
-                  <option value="all">All Subjects</option>
-                  {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
-                </select>
-                <select className="fsel" value={bankFilter.difficulty}
-                  onChange={e => setBankFilter({ ...bankFilter, difficulty: e.target.value })}
-                  style={{ minWidth: 130 }}>
-                  <option value="all">All Difficulty</option>
-                  <option value="easy">Easy</option>
-                  <option value="medium">Medium</option>
-                  <option value="hard">Hard</option>
-                </select>
-              </div>
-              {filteredBank.length === 0 ? (
-                <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
-                  No questions found. Add to Question Bank, or skip and use just instructions.
-                </div>
-              ) : (
-                <div style={{ maxHeight: 380, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {filteredBank.map(q => {
-                    const isSelected = formSelectedQuestions.includes(q.id)
-                    const subjCol = hwSubjColour(q.subject)
-                    return (
-                      <div key={q.id} onClick={() => toggleQuestion(q.id)}
-                        style={{
-                          padding: 10,
-                          border: '1.5px solid ' + (isSelected ? '#7D1025' : 'var(--border)'),
-                          borderRadius: 'var(--rmd)',
-                          background: isSelected ? '#FBE8E8' : '#FBFAF5',
-                          cursor: 'pointer',
-                          display: 'flex', gap: 10, alignItems: 'flex-start',
-                        }}>
-                        <div style={{
-                          width: 20, height: 20, borderRadius: 4,
-                          background: isSelected ? '#7D1025' : '#FFF',
-                          border: '2px solid ' + (isSelected ? '#7D1025' : 'var(--border)'),
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0, marginTop: 2,
-                        }}>
-                          {isSelected && (
-                            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#FBFAF5" strokeWidth="3" strokeLinecap="round">
-                              <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                          )}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
-                            <span style={{
-                              background: subjCol + '15', color: subjCol,
-                              fontSize: 9, fontWeight: 700, letterSpacing: '.06em',
-                              padding: '2px 6px', borderRadius: 99, textTransform: 'uppercase',
-                            }}>{q.subject}</span>
-                            <span style={{ fontSize: 10, color: 'var(--s500)' }}>{q.topic} | {q.difficulty}</span>
-                          </div>
-                          <div style={{ fontSize: 12.5, color: 'var(--s900)', fontWeight: 600 }}>{q.question}</div>
-                        </div>
-                        <span style={{
-                          background: 'var(--bg)', color: 'var(--s700)',
-                          padding: '3px 7px', borderRadius: 'var(--rsm)',
-                          fontSize: 10.5, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
-                          flexShrink: 0,
-                        }}>{q.marks}m</span>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18, gap: 8, flexWrap: 'wrap' }}>
-              <button onClick={() => setCreateStep(1)} className="btn btn-s">Back</button>
-              <button onClick={() => { if (validateCreateStep(2)) setCreateStep(3) }}
-                style={{
-                  background: '#7D1025', color: '#FBFAF5', border: 'none',
-                  padding: '10px 20px', borderRadius: 'var(--rmd)',
-                  cursor: 'pointer', fontSize: 14, fontWeight: 700,
-                  display: 'flex', alignItems: 'center', gap: 6,
-                }}>
-                Continue to Assign
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 3: ASSIGN */}
-        {createStep === 3 && (
-          <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
-              <div className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 6 }}>
-                  <div className="ctitle" style={{ color: '#7D1025' }}>
-                    Students ({formSelectedStudents.length}/{allStudents.length})
-                  </div>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button onClick={() => setFormSelectedStudents(allStudents.map(s => s.id))}
-                      style={{
-                        background: '#FBFAF5', color: '#7D1025',
-                        border: '1px solid #F4C5C5',
-                        padding: '4px 10px', borderRadius: 'var(--rsm)',
-                        cursor: 'pointer', fontSize: 11, fontWeight: 700,
-                      }}>Select All</button>
-                    <button onClick={() => setFormSelectedStudents([])}
-                      style={{
-                        background: 'transparent', color: 'var(--s500)',
-                        border: '1px solid var(--border)',
-                        padding: '4px 10px', borderRadius: 'var(--rsm)',
-                        cursor: 'pointer', fontSize: 11, fontWeight: 700,
-                      }}>Clear</button>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 340, overflowY: 'auto' }}>
-                  {allStudents.map(s => {
-                    const isSelected = formSelectedStudents.includes(s.id)
-                    return (
-                      <label key={s.id}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 10,
-                          padding: '8px 10px',
-                          border: '1.5px solid ' + (isSelected ? '#7D1025' : 'var(--border)'),
-                          borderRadius: 'var(--rmd)',
-                          background: isSelected ? '#FBE8E8' : '#FBFAF5',
-                          cursor: 'pointer',
-                        }}>
-                        <input type="checkbox" checked={isSelected}
-                          onChange={() => toggleStudent(s.id)}
-                          style={{ accentColor: '#7D1025' }}/>
-                        <div style={{
-                          width: 30, height: 30, borderRadius: '50%',
-                          background: msAvatarColor(s.name), color: '#FBFAF5',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontWeight: 700, fontSize: 11, flexShrink: 0,
-                        }}>{s.initials}</div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600 }}>{s.name}</div>
-                          <div style={{ fontSize: 11, color: 'var(--s500)' }}>{s.year} | Mastery {s.mastery}%</div>
-                        </div>
-                      </label>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div className="card" style={{ background: '#FBFAF5', border: '2px solid #C9A030' }}>
-                <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Homework Summary</div>
-                {[
-                  ['Title',          formTitle || '—'],
-                  ['Subject',        formSubject + ' | ' + formCurriculum + ' | ' + formYear],
-                  ['Due',            formDueDate ? hwFormatDate(new Date(formDueDate).toISOString()) : '—'],
-                  ['Questions',      formSelectedQuestions.length || '—'],
-                  ['Total Marks',    formTotalMarks || (formInstructions ? '100 (default)' : 0)],
-                  ['Students',       formSelectedStudents.length],
-                ].map(([l, v]) => (
-                  <div key={l} style={{
-                    display: 'flex', justifyContent: 'space-between',
-                    padding: '8px 0', borderBottom: '1px solid #F4C5C5',
-                    fontSize: 13,
-                  }}>
-                    <span style={{ color: 'var(--s500)' }}>{l}</span>
-                    <span style={{ fontWeight: 700, color: '#7D1025', textAlign: 'right', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</span>
-                  </div>
-                ))}
-                <div style={{
-                  background: '#FFF', borderLeft: '3px solid #7D1025',
-                  padding: '12px 14px', borderRadius: 'var(--rsm)',
-                  fontSize: 12.5, color: 'var(--s700)', marginTop: 14,
-                  lineHeight: 1.6,
-                }}>
-                  <strong style={{ color: '#7D1025' }}>What happens next:</strong>
-                  <br/>Students see this in their Homework tab immediately. They submit by the due date. You grade via the Pending tab.
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 18, gap: 8, flexWrap: 'wrap' }}>
-              <button onClick={() => setCreateStep(2)} className="btn btn-s">Back</button>
-              <button onClick={assignHomework}
-                style={{
-                  background: '#C9A030', color: '#7D1025', border: 'none',
-                  padding: '12px 24px', borderRadius: 'var(--rmd)',
-                  cursor: 'pointer', fontSize: 14, fontWeight: 700,
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  boxShadow: '0 4px 14px rgba(201,160,48,.35)',
-                }}>
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <line x1="22" y1="2" x2="11" y2="13"/>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                </svg>
-                Assign to Students
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    )
+ 
+  const loadBankQuestions = async (curriculum, subject, grade, type, q) => {
+    setBankLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (curriculum) params.append('curriculum', curriculum)
+      if (subject) params.append('subject', subject)
+      if (grade) params.append('grade', grade)
+      if (type) params.append('type', type)
+      if (q?.trim()) params.append('q', q.trim())
+      params.append('limit', '50')
+      const { data } = await api.get('/questions?' + params.toString())
+      if (data.success) setBankQuestions(data.questions || [])
+    } catch (e) {
+      toast?.error?.('Failed to load bank questions')
+    } finally { setBankLoading(false) }
   }
-
-  // ── RENDER: LIST VIEW ───────────────────────────────
+ 
+  // Re-load when bank filters change
+  useEffect(() => {
+    if (!bankOpen) return
+    const handle = setTimeout(() => {
+      loadBankQuestions(bankFilters.curriculum, bankFilters.subject, bankFilters.grade, bankFilters.type, bankFilters.q)
+    }, 250)
+    return () => clearTimeout(handle)
+  }, [bankFilters, bankOpen])
+ 
+  const addBankQuestionToForm = (q) => {
+    // Snapshot the question (deep-ish copy of relevant fields)
+    const snap = {
+      questionId: q._id,
+      type: q.type,
+      questionText: q.questionText,
+      options: Array.isArray(q.options) ? [...q.options] : [],
+      correctAnswer: q.correctAnswer,
+      explanation: q.explanation || '',
+      marks: q.marks || 1,
+      difficulty: q.difficulty || 'medium',
+      attachments: Array.isArray(q.attachments) ? [...q.attachments] : [],
+      topic: q.topic || '',
+    }
+    setForm(f => ({ ...f, questions: [...f.questions, snap] }))
+    toast?.ok?.('Added: ' + q.questionText.slice(0, 40) + (q.questionText.length > 40 ? '...' : ''))
+  }
+ 
+  // ── CUSTOM QUESTION ──
+  const openCustom = () => {
+    setCustomForm({
+      type: 'short',
+      questionText: '',
+      options: ['', '', '', ''],
+      correctIndex: null,
+      correctAnswer: '',
+      explanation: '',
+      marks: 1,
+      difficulty: 'medium',
+      topic: '',
+      saveToBank: true,
+    })
+    setCustomOpen(true)
+  }
+  const closeCustom = () => { setCustomOpen(false); setCustomForm(null) }
+  const setCF = (k, v) => setCustomForm(f => ({ ...f, [k]: v }))
+  const setCustomOption = (i, v) => setCustomForm(f => {
+    const next = [...f.options]; next[i] = v; return { ...f, options: next }
+  })
+  const addCustomOption = () => setCustomForm(f => ({ ...f, options: [...f.options, ''] }))
+  const removeCustomOption = (i) => setCustomForm(f => {
+    const next = f.options.filter((_, idx) => idx !== i)
+    let newCorrect = f.correctIndex
+    if (f.correctIndex === i) newCorrect = null
+    else if (f.correctIndex > i) newCorrect = f.correctIndex - 1
+    return { ...f, options: next, correctIndex: newCorrect }
+  })
+ 
+  const addCustomToForm = () => {
+    if (!customForm.questionText.trim()) { toast?.error?.('Question text is required'); return }
+    if (customForm.type === 'mcq') {
+      const filled = customForm.options.filter(o => o.trim())
+      if (filled.length < 2) { toast?.error?.('MCQ needs at least 2 options'); return }
+      if (customForm.correctIndex === null) { toast?.error?.('Mark which option is correct'); return }
+    } else if (customForm.type === 'short' || customForm.type === 'long') {
+      if (!customForm.correctAnswer.trim()) { toast?.error?.('Model answer is required'); return }
+    }
+    const cleanOptions = customForm.type === 'mcq' ? customForm.options.filter(o => o.trim()) : []
+    let correctAnswer = null
+    if (customForm.type === 'mcq' && customForm.correctIndex !== null) {
+      const correctText = customForm.options[customForm.correctIndex]
+      correctAnswer = cleanOptions.indexOf(correctText)
+    } else {
+      correctAnswer = customForm.correctAnswer.trim()
+    }
+    const snap = {
+      questionId: null,  // backend will save to bank if saveToBank flag is true
+      type: customForm.type,
+      questionText: customForm.questionText.trim(),
+      options: cleanOptions,
+      correctAnswer,
+      explanation: customForm.explanation.trim(),
+      marks: parseInt(customForm.marks) || 1,
+      difficulty: customForm.difficulty,
+      attachments: [],
+      topic: customForm.topic.trim(),
+      saveToBank: customForm.saveToBank,  // backend reads this per-question flag
+    }
+    setForm(f => ({ ...f, questions: [...f.questions, snap] }))
+    toast?.ok?.('Custom question added')
+    closeCustom()
+  }
+ 
+  // ── REMOVE/REORDER ──
+  const removeQuestion = (i) => {
+    setForm(f => ({ ...f, questions: f.questions.filter((_, idx) => idx !== i) }))
+  }
+ 
+  // Drag and drop handlers
+  const onDragStart = (i) => (e) => {
+    setDragIndex(i)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+  const onDragOver = (i) => (e) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+  const onDrop = (toIndex) => (e) => {
+    e.preventDefault()
+    if (dragIndex === null || dragIndex === toIndex) return
+    setForm(f => {
+      const next = [...f.questions]
+      const [moved] = next.splice(dragIndex, 1)
+      next.splice(toIndex, 0, moved)
+      return { ...f, questions: next }
+    })
+    setDragIndex(null)
+  }
+  const onDragEnd = () => setDragIndex(null)
+ 
+  // ── SAVE ──
+  const totalMarks = (form?.questions || []).reduce((sum, q) => sum + (q.marks || 0), 0)
+ 
+  const validateForm = () => {
+    if (!form.title?.trim()) return 'Title is required'
+    if (!form.curriculum) return 'Curriculum is required'
+    if (!form.subject) return 'Subject is required'
+    if (!form.grade) return 'Grade is required'
+    if (!form.questions || form.questions.length === 0) return 'Add at least one question'
+    if (!form.releaseAt) return 'Release date is required'
+    if (!form.assignedRoom && (!form.assignedStudents || form.assignedStudents.length === 0)) {
+      return 'Pick a room or specific students'
+    }
+    return null
+  }
+ 
+  const saveHomework = async (asStatus) => {
+    const err = validateForm()
+    if (err) { toast?.error?.(err); return }
+    setSaving(true)
+    try {
+      const payload = {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        curriculum: form.curriculum,
+        subject: form.subject,
+        grade: form.grade,
+        questions: form.questions,
+        saveCustomToBank: form.saveCustomToBank,
+        assignedRoom: form.assignedRoom || null,
+        assignedStudents: form.assignedStudents || [],
+        releaseAt: new Date(form.releaseAt).toISOString(),
+        dueAt: form.dueAt ? new Date(form.dueAt).toISOString() : null,
+        status: asStatus,  // 'draft' or 'published'
+      }
+      const { data } = await api.post('/homework', payload)
+      if (data.success) {
+        toast?.ok?.('Homework ' + (asStatus === 'published' ? 'published' : 'saved as draft'))
+        await loadHomework()
+        closeCreate()
+      } else {
+        toast?.error?.(data.message || 'Save failed')
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Save failed: ' + e.message)
+    } finally { setSaving(false) }
+  }
+ 
+  // Form-derived data
+  const formGrades = form?.curriculum ? (catalog.gradesByCurriculum[form.curriculum] || []) : []
+  const formSubjects = form?.curriculum
+    ? catalog.subjects.filter(s => s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(form.curriculum)))
+    : []
+ 
+  // Bank picker derived
+  const bankSubjects = bankFilters.curriculum
+    ? catalog.subjects.filter(s => s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(bankFilters.curriculum)))
+    : catalog.subjects
+  const bankGrades = bankFilters.curriculum ? (catalog.gradesByCurriculum[bankFilters.curriculum] || []) : []
+ 
   return (
     <div>
       {/* Hero */}
-      <div className="card" style={{
-        padding: 0, marginBottom: 18, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
-        color: '#FBFAF5',
-      }}>
+      <div className="card" style={{ padding: 0, marginBottom: 18, overflow: 'hidden', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
         <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>
-              Homework
-            </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
-              Assign and Grade
-            </h1>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>Homework</div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>Create &amp; Manage</h1>
             <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
-              Build assignments from Question Bank or write custom prompts. Grade per submission with feedback.
+              Build assignments from Question Bank or write custom prompts. Auto-grade MCQ. Lock until release date.
             </div>
           </div>
           <button onClick={openCreate}
-            style={{
-              background: '#C9A030', color: '#7D1025', border: 'none',
-              padding: '12px 22px', borderRadius: 'var(--rmd)',
-              cursor: 'pointer', fontSize: 14, fontWeight: 700,
-              display: 'flex', alignItems: 'center', gap: 8,
-              boxShadow: '0 4px 14px rgba(201,160,48,.35)',
-            }}>
+            style={{ background: '#C9A030', color: '#7D1025', border: 'none', padding: '12px 22px', borderRadius: 'var(--rmd)', cursor: 'pointer', fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 14px rgba(201,160,48,.35)' }}>
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            Assign Homework
+            New Homework
           </button>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
-          {[
-            ['Total',        stats.total,          '#FBFAF5'],
-            ['To Grade',     stats.pendingGrading, stats.pendingGrading > 0 ? '#FCA5A5' : '#FBFAF5'],
-            ['Submissions',  stats.submissions,    '#F0CC5A'],
-            ['Students',     stats.students,       '#FBFAF5'],
-          ].map(([l, v, c]) => (
-            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .7, marginBottom: 2, color: '#F0CC5A' }}>{l}</div>
-              <div style={{ fontSize: 16, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: c }}>{v}</div>
-            </div>
-          ))}
-        </div>
       </div>
-
-      {/* Tab switcher */}
-      <div style={{
-        display: 'flex',
-        background: '#FBFAF5',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--rmd)',
-        padding: 4, marginBottom: 14, gap: 2, flexWrap: 'wrap',
-      }}>
+ 
+      {/* Tabs */}
+      <div style={{ display: 'flex', background: '#FBFAF5', border: '1px solid var(--border)', borderRadius: 'var(--rmd)', padding: 4, marginBottom: 14, gap: 2 }}>
         {[
-          { id: 'pending', label: 'Pending Grading', count: counts.pending, hot: true },
-          { id: 'active',  label: 'Active',          count: counts.active },
-          { id: 'graded',  label: 'Graded',          count: counts.graded },
-          { id: 'all',     label: 'All',             count: counts.all },
+          { id: 'all', label: 'All', count: counts.all },
+          { id: 'published', label: 'Published', count: counts.published },
+          { id: 'draft', label: 'Draft', count: counts.draft },
         ].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
-            style={{
-              flex: 1, minWidth: 100,
-              background: activeTab === t.id ? '#7D1025' : 'transparent',
-              color: activeTab === t.id ? '#FBFAF5' : 'var(--s500)',
-              border: 'none', padding: '10px 14px',
-              borderRadius: 'var(--rsm)', cursor: 'pointer',
-              fontSize: 13, fontWeight: 700,
-              boxShadow: activeTab === t.id ? '0 4px 16px rgba(125,16,37,.15)' : 'none',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}>
+            style={{ flex: 1, background: activeTab === t.id ? '#7D1025' : 'transparent', color: activeTab === t.id ? '#FBFAF5' : 'var(--s500)', border: 'none', padding: '10px 14px', borderRadius: 'var(--rsm)', cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             {t.label}
             {t.count > 0 && (
-              <span style={{
-                background: activeTab === t.id ? 'rgba(251,250,245,.2)' : (t.hot ? '#FEE2E2' : 'var(--bg)'),
-                color: activeTab === t.id ? '#FBFAF5' : (t.hot ? '#B91C1C' : 'var(--s500)'),
-                fontSize: 10, fontWeight: 800,
-                padding: '2px 7px', borderRadius: 99,
-              }}>{t.count}</span>
+              <span style={{ background: activeTab === t.id ? 'rgba(251,250,245,.2)' : 'var(--bg)', color: activeTab === t.id ? '#FBFAF5' : 'var(--s500)', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 99 }}>{t.count}</span>
             )}
           </button>
         ))}
       </div>
-
-      {/* Filters */}
-      <div className="card" style={{ marginBottom: 14 }}>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Search</label>
-            <input className="fi" placeholder="Search by title or subject..."
-              value={searchQ} onChange={e => setSearchQ(e.target.value)} style={{ width: '100%' }}/>
-          </div>
-          <div style={{ minWidth: 140 }}>
-            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>Subject</label>
-            <select className="fsel" value={filterSubject} onChange={e => setFilterSubject(e.target.value)} style={{ width: '100%' }}>
-              <option value="all">All</option>
-              {QB_SUBJECTS.map(s => <option key={s}>{s}</option>)}
-            </select>
-          </div>
+ 
+      {/* Loading / error / empty / list */}
+      {loading && <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)' }}>Loading homework from backend...</div>}
+      {error && (
+        <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '10px 14px', borderRadius: 8, fontSize: 13 }}>
+          Failed: {error}
         </div>
-      </div>
-
-      <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 10 }}>
-        Showing <strong style={{ color: '#7D1025' }}>{filtered.length}</strong> assignments
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>
-            {stats.total === 0 ? 'No homework yet' : 'Nothing in this tab'}
-          </h3>
-          <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto 14px' }}>
-            {stats.total === 0
-              ? 'Assign your first homework. Pick from Question Bank, write custom instructions, set a due date.'
-              : 'Try a different tab or clear filters.'}
-          </p>
-          {stats.total === 0 && (
-            <button onClick={openCreate}
-              style={{
-                background: '#7D1025', color: '#FBFAF5', border: 'none',
-                padding: '10px 20px', borderRadius: 'var(--rmd)',
-                cursor: 'pointer', fontSize: 14, fontWeight: 700,
-              }}>Assign Your First Homework</button>
+      )}
+ 
+      {!loading && !error && filteredHw.length === 0 && (
+        <div className="card" style={{ padding: 50, textAlign: 'center' }}>
+          <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', marginBottom: 6 }}>
+            {homework.length === 0 ? 'No homework yet' : 'Nothing in this tab'}
+          </div>
+          <div style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto 14px' }}>
+            {homework.length === 0
+              ? 'Click "New Homework" to create your first assignment.'
+              : 'Try a different tab.'}
+          </div>
+          {homework.length === 0 && (
+            <button onClick={openCreate} className="btn btn-p btn-sm">Create homework</button>
           )}
         </div>
-      ) : (
+      )}
+ 
+      {!loading && !error && filteredHw.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {filtered.map(hw => {
-            const subjCol = hwSubjColour(hw.subject)
-            const dueText = hwTimeUntilDue(hw.dueDate)
-            const isOverdue = new Date(hw.dueDate).getTime() < Date.now()
+          {filteredHw.map(hw => {
+            const isOverdue = hw.dueAt && new Date(hw.dueAt) < new Date()
+            const releaseAt = hw.releaseAt ? new Date(hw.releaseAt) : null
+            const isLocked = releaseAt && releaseAt > new Date()
             return (
-              <div key={hw.id} className="card" style={{
-                padding: 14, borderLeft: '4px solid ' + subjCol, cursor: 'pointer',
-              }} onClick={() => openDetail(hw)}>
-                <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1, minWidth: 200 }}>
+              <div key={hw._id} className="card" style={{ padding: 14, borderLeft: '4px solid ' + (hw.status === 'draft' ? '#C9A030' : '#7D1025') }}>
+                <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: 220 }}>
                     <div style={{ display: 'flex', gap: 6, marginBottom: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: subjCol, letterSpacing: '.06em', textTransform: 'uppercase' }}>{hw.subject}</span>
-                      <span style={{ fontSize: 11, color: 'var(--s500)' }}>{hw.curriculum} {hw.year}</span>
-                      {hw._ungradedCount > 0 && (
-                        <span style={{
-                          background: '#FEE2E2', color: '#B91C1C',
-                          fontSize: 9.5, fontWeight: 800, letterSpacing: '.06em',
-                          padding: '2px 8px', borderRadius: 99,
-                        }}>{hw._ungradedCount} TO GRADE</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.06em', textTransform: 'uppercase' }}>{hw.subject}</span>
+                      <span style={{ fontSize: 11, color: 'var(--s500)' }}>{hw.curriculum} · {hw.grade}</span>
+                      <span style={{ background: hw.status === 'draft' ? '#FBF6E3' : '#DCFCE7', color: hw.status === 'draft' ? '#92400E' : '#15803D', fontSize: 9.5, fontWeight: 800, letterSpacing: '.06em', padding: '2px 8px', borderRadius: 99, textTransform: 'uppercase' }}>{hw.status}</span>
+                      {isLocked && hw.status === 'published' && (
+                        <span style={{ background: '#FBE8E8', color: '#7D1025', fontSize: 9.5, fontWeight: 800, padding: '2px 8px', borderRadius: 99, letterSpacing: '.06em' }}>LOCKED</span>
                       )}
                     </div>
                     <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)', marginBottom: 4 }}>{hw.title}</div>
                     <div style={{ fontSize: 12, color: 'var(--s500)' }}>
-                      Assigned {hwTimeAgo(hw.assignedAt)} | <strong style={{ color: isOverdue ? '#B91C1C' : '#7D1025' }}>{dueText}</strong> | {hw.assignedStudents.length} students
+                      Released {hwTimeAgo(hw.releaseAt)}
+                      {hw.dueAt ? <> · <strong style={{ color: isOverdue ? '#B91C1C' : '#7D1025' }}>{hwTimeUntil(hw.dueAt)}</strong></> : ''}
+                      {' · '}{hw.questionCount || 0} question{hw.questionCount === 1 ? '' : 's'} · {hw.totalMarks || 0} marks
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                    <div style={{ textAlign: 'center', minWidth: 80 }}>
-                      <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: 'var(--s700)' }}>
-                        {hw._submissionsCount}/{hw._expectedCount}
-                      </div>
-                      <div style={{ fontSize: 9.5, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Submitted</div>
-                    </div>
-                    <div style={{ textAlign: 'center', minWidth: 70 }}>
-                      <div className="mono" style={{
-                        fontSize: 14, fontWeight: 700,
-                        color: hw._gradedCount === hw._submissionsCount && hw._submissionsCount > 0 ? '#15803D' : '#B45309',
-                      }}>{hw._gradedCount}</div>
-                      <div style={{ fontSize: 9.5, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Graded</div>
-                    </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => toast?.info?.('Detail view in next phase')} className="btn btn-s btn-sm">View</button>
                   </div>
                 </div>
               </div>
             )
           })}
+        </div>
+      )}
+ 
+      {/* CREATE MODAL */}
+      {createOpen && form && (
+        <div onClick={closeCreate} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 800, width: '100%', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
+            <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>New Assignment</div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>Create Homework</div>
+            </div>
+ 
+            <div style={{ padding: '24px 28px' }}>
+              {/* Title + description */}
+              <div className="fg">
+                <label className="fl">Title *</label>
+                <input className="fi" value={form.title} onChange={e => setF('title', e.target.value)} placeholder="e.g. Quadratic Equations Practice" autoFocus/>
+              </div>
+              <div className="fg">
+                <label className="fl">Instructions / Description</label>
+                <textarea className="fi" rows={2} value={form.description} onChange={e => setF('description', e.target.value)} placeholder="Brief description shown to students" style={{ resize: 'vertical' }}/>
+              </div>
+ 
+              {/* Room selector */}
+              <div className="fg">
+                <label className="fl">Assign to Room</label>
+                <select className="fsel" value={form.assignedRoom} onChange={e => handleRoomChange(e.target.value)}>
+                  <option value="">No room — assign by individual students</option>
+                  {rooms.map(r => (
+                    <option key={r._id} value={r._id}>
+                      {r.name} ({r.curriculum} · {r.subject} · {r.grade}, {r.students?.length || 0} students)
+                    </option>
+                  ))}
+                </select>
+                {rooms.length === 0 && (
+                  <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                    No rooms assigned to you yet. Ask admin to create one and assign you as teacher.
+                  </div>
+                )}
+              </div>
+ 
+              {/* Curriculum / Grade / Subject (auto-filled by room, editable) */}
+              <div className="fr2">
+                <div className="fg">
+                  <label className="fl">Curriculum *</label>
+                  <select className="fsel" value={form.curriculum} onChange={e => setForm(f => ({ ...f, curriculum: e.target.value, grade: '', subject: '' }))}>
+                    <option value="">Select...</option>
+                    {catalog.curricula.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="fg">
+                  <label className="fl">Grade *</label>
+                  <select className="fsel" value={form.grade} onChange={e => setF('grade', e.target.value)} disabled={!form.curriculum}>
+                    <option value="">{form.curriculum ? 'Select...' : 'Pick curriculum first'}</option>
+                    {formGrades.map(g => <option key={g} value={g}>{g}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="fg">
+                <label className="fl">Subject *</label>
+                <select className="fsel" value={form.subject} onChange={e => setF('subject', e.target.value)} disabled={!form.curriculum}>
+                  <option value="">{form.curriculum ? 'Select...' : 'Pick curriculum first'}</option>
+                  {formSubjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                </select>
+              </div>
+ 
+              {/* Dates */}
+              <div className="fr2">
+                <div className="fg">
+                  <label className="fl">Release Date *</label>
+                  <input className="fi" type="datetime-local" value={form.releaseAt} onChange={e => setF('releaseAt', e.target.value)}/>
+                  <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>Students see it locked until this time.</div>
+                </div>
+                <div className="fg">
+                  <label className="fl">Due Date</label>
+                  <input className="fi" type="datetime-local" value={form.dueAt} onChange={e => setF('dueAt', e.target.value)}/>
+                  <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>Submissions after this are flagged as late.</div>
+                </div>
+              </div>
+ 
+              {/* Questions section */}
+              <div style={{ marginTop: 18, padding: 14, background: '#FBFAF5', border: '1px solid var(--border)', borderRadius: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#7D1025' }}>
+                    Questions ({form.questions.length})
+                    {form.questions.length > 0 && <span style={{ marginLeft: 8, fontSize: 12, color: 'var(--s500)', fontWeight: 400 }}>· {totalMarks} total marks</span>}
+                  </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button type="button" onClick={openBankPicker} className="btn btn-s btn-sm" disabled={!form.curriculum || !form.subject}>+ From Bank</button>
+                    <button type="button" onClick={openCustom} className="btn btn-s btn-sm">+ Write New</button>
+                  </div>
+                </div>
+ 
+                {form.questions.length === 0 && (
+                  <div style={{ padding: 24, textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
+                    {!form.curriculum ? 'Pick curriculum and subject first.' : 'No questions yet. Add from your Question Bank or write a new one.'}
+                  </div>
+                )}
+ 
+                {form.questions.map((q, i) => {
+                  const meta = hwTypeMeta[q.type] || hwTypeMeta.short
+                  return (
+                    <div key={i}
+                      draggable
+                      onDragStart={onDragStart(i)}
+                      onDragOver={onDragOver(i)}
+                      onDrop={onDrop(i)}
+                      onDragEnd={onDragEnd}
+                      style={{
+                        background: '#FFF',
+                        border: '1px solid ' + (dragIndex === i ? '#C9A030' : 'var(--border)'),
+                        borderRadius: 8,
+                        padding: 10,
+                        marginBottom: 6,
+                        display: 'flex',
+                        gap: 10,
+                        alignItems: 'flex-start',
+                        cursor: 'move',
+                        opacity: dragIndex === i ? 0.5 : 1,
+                      }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+                        <div style={{ color: 'var(--s400)', fontSize: 12, fontWeight: 700 }}>⋮⋮</div>
+                        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700, color: 'var(--s500)' }}>Q{i + 1}</div>
+                      </div>
+                      <div style={{ width: 28, height: 28, borderRadius: 6, background: meta.color + '15', color: meta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{meta.letter}</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, color: 'var(--s900)', marginBottom: 2 }}>{q.questionText}</div>
+                        <div style={{ fontSize: 11, color: 'var(--s500)' }}>
+                          {meta.label} · {q.marks} mark{q.marks === 1 ? '' : 's'} · {q.difficulty}
+                          {q.questionId ? ' · from bank' : (q.saveToBank ? ' · custom (will save to bank)' : ' · custom')}
+                        </div>
+                      </div>
+                      <button type="button" onClick={() => removeQuestion(i)} style={{ background: 'transparent', border: '1px solid var(--border)', color: '#DC2626', width: 26, height: 26, borderRadius: 6, cursor: 'pointer', flexShrink: 0, fontSize: 14 }}>×</button>
+                    </div>
+                  )
+                })}
+ 
+                {form.questions.length > 1 && (
+                  <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 6, fontStyle: 'italic' }}>Drag to reorder questions.</div>
+                )}
+              </div>
+            </div>
+ 
+            <div style={{ padding: '16px 28px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+              <button className="btn btn-s" onClick={closeCreate} disabled={saving}>Cancel</button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => saveHomework('draft')} disabled={saving} className="btn btn-s">
+                  {saving ? 'Saving...' : 'Save as Draft'}
+                </button>
+                <button onClick={() => saveHomework('published')} disabled={saving} className="btn btn-p">
+                  {saving ? 'Publishing...' : 'Publish'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+ 
+      {/* BANK PICKER SUB-MODAL */}
+      {bankOpen && (
+        <div onClick={() => setBankOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 760, width: '100%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.4)' }}>
+            <div style={{ padding: '16px 24px', background: '#7D1025', color: '#FBFAF5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 18 }}>Pick Question from Bank</div>
+              <button onClick={() => setBankOpen(false)} style={{ background: 'transparent', border: 'none', color: '#FBFAF5', cursor: 'pointer', fontSize: 22 }}>×</button>
+            </div>
+            <div style={{ padding: '16px 24px' }}>
+              {/* Filters */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8, marginBottom: 10 }}>
+                <select className="fsel" value={bankFilters.curriculum} onChange={e => setBankFilters(f => ({ ...f, curriculum: e.target.value, subject: '', grade: '' }))}>
+                  <option value="">All curricula</option>
+                  {catalog.curricula.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+                <select className="fsel" value={bankFilters.subject} onChange={e => setBankFilters(f => ({ ...f, subject: e.target.value }))} disabled={!bankFilters.curriculum}>
+                  <option value="">All subjects</option>
+                  {bankSubjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                </select>
+                <select className="fsel" value={bankFilters.grade} onChange={e => setBankFilters(f => ({ ...f, grade: e.target.value }))} disabled={!bankFilters.curriculum}>
+                  <option value="">All grades</option>
+                  {bankGrades.map(g => <option key={g} value={g}>{g}</option>)}
+                </select>
+                <select className="fsel" value={bankFilters.type} onChange={e => setBankFilters(f => ({ ...f, type: e.target.value }))}>
+                  <option value="">All types</option>
+                  <option value="mcq">MCQ</option>
+                  <option value="short">Short</option>
+                  <option value="long">Long</option>
+                  <option value="drawing">Drawing</option>
+                  <option value="upload">Upload</option>
+                </select>
+              </div>
+              <input className="fi" placeholder="Search question text..." value={bankFilters.q} onChange={e => setBankFilters(f => ({ ...f, q: e.target.value }))} style={{ marginBottom: 12 }}/>
+ 
+              {bankLoading && <div style={{ textAlign: 'center', padding: 24, color: 'var(--s500)' }}>Loading...</div>}
+ 
+              {!bankLoading && bankQuestions.length === 0 && (
+                <div style={{ textAlign: 'center', padding: 24, color: 'var(--s400)', fontSize: 13 }}>
+                  No questions match. Adjust filters or write a custom question.
+                </div>
+              )}
+ 
+              {!bankLoading && bankQuestions.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {bankQuestions.map(q => {
+                    const meta = hwTypeMeta[q.type] || hwTypeMeta.short
+                    const alreadyAdded = (form?.questions || []).some(fq => fq.questionId === q._id)
+                    return (
+                      <div key={q._id} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: 10, border: '1px solid var(--border)', borderRadius: 8, background: alreadyAdded ? 'var(--bg)' : '#FFF' }}>
+                        <div style={{ width: 26, height: 26, borderRadius: 6, background: meta.color + '15', color: meta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{meta.letter}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, color: 'var(--s900)', marginBottom: 2 }}>{q.questionText}</div>
+                          <div style={{ fontSize: 11, color: 'var(--s500)' }}>{q.curriculum} · {q.subject} · {q.grade} · {meta.label} · {q.marks}m</div>
+                        </div>
+                        <button onClick={() => addBankQuestionToForm(q)} disabled={alreadyAdded} className="btn btn-p btn-sm" style={{ flexShrink: 0 }}>
+                          {alreadyAdded ? 'Added' : 'Add'}
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+            <div style={{ padding: '12px 24px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'flex-end' }}>
+              <button onClick={() => setBankOpen(false)} className="btn btn-p">Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+ 
+      {/* CUSTOM QUESTION SUB-MODAL */}
+      {customOpen && customForm && (
+        <div onClick={closeCustom} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 680, width: '100%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.4)' }}>
+            <div style={{ padding: '16px 24px', background: '#7D1025', color: '#FBFAF5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 18 }}>Write Custom Question</div>
+              <button onClick={closeCustom} style={{ background: 'transparent', border: 'none', color: '#FBFAF5', cursor: 'pointer', fontSize: 22 }}>×</button>
+            </div>
+ 
+            <div style={{ padding: '20px 24px' }}>
+              <div className="fg">
+                <label className="fl">Question Type *</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 6 }}>
+                  {Object.entries(hwTypeMeta).map(([type, meta]) => (
+                    <button key={type} type="button" onClick={() => setCF('type', type)}
+                      style={{ padding: '8px 10px', border: '2px solid ' + (customForm.type === type ? meta.color : 'var(--border)'), background: customForm.type === type ? meta.color + '15' : 'transparent', borderRadius: 6, cursor: 'pointer', fontSize: 11.5, fontWeight: 700, color: customForm.type === type ? meta.color : 'var(--s600)' }}>{meta.label}</button>
+                  ))}
+                </div>
+              </div>
+ 
+              <div className="fg">
+                <label className="fl">Question Text *</label>
+                <textarea className="fi" rows={3} value={customForm.questionText} onChange={e => setCF('questionText', e.target.value)} placeholder="Type the question..." style={{ resize: 'vertical' }}/>
+              </div>
+ 
+              {customForm.type === 'mcq' && (
+                <div className="fg">
+                  <label className="fl">Options (mark correct one)</label>
+                  {customForm.options.map((opt, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center' }}>
+                      <button type="button" onClick={() => setCF('correctIndex', i)}
+                        style={{ width: 26, height: 26, borderRadius: '50%', border: '2px solid ' + (customForm.correctIndex === i ? '#15803D' : 'var(--border)'), background: customForm.correctIndex === i ? '#15803D' : '#FFF', color: customForm.correctIndex === i ? '#FFF' : 'var(--s400)', fontSize: 11, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>
+                        {String.fromCharCode(65 + i)}
+                      </button>
+                      <input className="fi" value={opt} onChange={e => setCustomOption(i, e.target.value)} placeholder={'Option ' + (i + 1)}/>
+                      {customForm.options.length > 2 && (
+                        <button type="button" onClick={() => removeCustomOption(i)} className="btn btn-s btn-sm">×</button>
+                      )}
+                    </div>
+                  ))}
+                  <button type="button" onClick={addCustomOption} className="btn btn-s btn-sm" style={{ marginTop: 4 }}>+ Add option</button>
+                </div>
+              )}
+ 
+              {(customForm.type === 'short' || customForm.type === 'long') && (
+                <div className="fg">
+                  <label className="fl">Model Answer *</label>
+                  <textarea className="fi" rows={customForm.type === 'long' ? 4 : 2} value={customForm.correctAnswer} onChange={e => setCF('correctAnswer', e.target.value)} placeholder="The expected answer (used for marking)" style={{ resize: 'vertical' }}/>
+                </div>
+              )}
+ 
+              <div className="fg">
+                <label className="fl">Topic (optional)</label>
+                <input className="fi" value={customForm.topic} onChange={e => setCF('topic', e.target.value)} placeholder="e.g. Algebra, Pythagoras"/>
+              </div>
+ 
+              <div className="fr2">
+                <div className="fg">
+                  <label className="fl">Marks</label>
+                  <input className="fi" type="number" min="1" value={customForm.marks} onChange={e => setCF('marks', e.target.value)}/>
+                </div>
+                <div className="fg">
+                  <label className="fl">Difficulty</label>
+                  <select className="fsel" value={customForm.difficulty} onChange={e => setCF('difficulty', e.target.value)}>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </div>
+              </div>
+ 
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--s700)', cursor: 'pointer', marginTop: 6 }}>
+                <input type="checkbox" checked={customForm.saveToBank} onChange={e => setCF('saveToBank', e.target.checked)} style={{ accentColor: '#7D1025' }}/>
+                Also save this question to my Question Bank for reuse
+              </label>
+            </div>
+ 
+            <div style={{ padding: '12px 24px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button onClick={closeCustom} className="btn btn-s">Cancel</button>
+              <button onClick={addCustomToForm} className="btn btn-p">Add to Homework</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
