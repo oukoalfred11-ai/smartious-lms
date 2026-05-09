@@ -1,4 +1,58 @@
 const router = require('express').Router();
+const GroupRoom = require('../models/GroupRoom');
+
+// ─────────────────────────────────────────────────────────
+// HELPER: Sync a student's GroupRoom enrollments based on
+// their curriculum + gradeLevel + subjects.
+// Adds to rooms they now match, removes from rooms they don't.
+// ─────────────────────────────────────────────────────────
+async function syncStudentEnrollments(studentId) {
+  const student = await User.findById(studentId);
+  if (!student || student.role !== 'student' || !student.isActive) {
+    return { matched: 0, addedTo: 0, removedFrom: 0 };
+  }
+
+  // Find rooms matching this student's enrollment criteria
+  const matchingRooms = await GroupRoom.find({
+    status: 'Active',
+    curriculum: student.curriculum,
+    grade: student.gradeLevel,
+    subject: { $in: student.subjects || [] },
+  }).select('_id students');
+
+  const matchingIds = matchingRooms.map(r => r._id.toString());
+
+  // Find rooms where this student is currently enrolled (any room)
+  const currentRooms = await GroupRoom.find({
+    students: student._id,
+  }).select('_id');
+
+  const currentIds = currentRooms.map(r => r._id.toString());
+
+  // Add to: rooms they match but aren't in
+  const toAdd = matchingIds.filter(id => !currentIds.includes(id));
+  // Remove from: rooms they're in but don't match anymore
+  const toRemove = currentIds.filter(id => !matchingIds.includes(id));
+
+  if (toAdd.length > 0) {
+    await GroupRoom.updateMany(
+      { _id: { $in: toAdd } },
+      { $addToSet: { students: student._id } }
+    );
+  }
+  if (toRemove.length > 0) {
+    await GroupRoom.updateMany(
+      { _id: { $in: toRemove } },
+      { $pull: { students: student._id } }
+    );
+  }
+
+  return {
+    matched: matchingIds.length,
+    addedTo: toAdd.length,
+    removedFrom: toRemove.length,
+  };
+}
 const User   = require('../models/User');
 const Teacher = require('../models/Teacher');
 const { auth, requireRole } = require('../middleware/auth');
@@ -228,6 +282,15 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
        }
      }
     
+    // Auto-sync GroupRoom enrollments for newly created students
+   if (newUser.role === 'student') {
+     try {
+       const enrollment = await syncStudentEnrollments(newUser._id);
+       console.log('[users POST] Synced enrollments for new student', newUser.firstName, '· matched', enrollment.matched, '· added', enrollment.addedTo);
+     } catch (enrollError) {
+       console.error('[users POST] Enrollment sync failed:', enrollError.message);
+     }
+   }
     res.status(201).json({ 
       success: true, 
       user: safe,
@@ -344,7 +407,20 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
        }
      }
      
-      res.json({ success: true, user: safe });
+     // Auto-sync GroupRoom enrollments if this is a student and curriculum/grade/subjects changed
+     if (user.role === 'student' && (
+       req.body.curriculum !== undefined ||
+       req.body.gradeLevel !== undefined ||
+       req.body.subjects !== undefined
+     )) {
+       try {
+         const enrollment = await syncStudentEnrollments(user._id);
+         console.log('[users PATCH] Synced enrollments for', user.firstName, '· matched', enrollment.matched, '· added', enrollment.addedTo, '· removed', enrollment.removedFrom);
+       } catch (enrollError) {
+         console.error('[users PATCH] Enrollment sync failed:', enrollError.message);
+       }
+     }
+    res.json({ success: true, user: safe });
    } catch (e) {
      res.status(500).json({ success: false, message: e.message });
    }
