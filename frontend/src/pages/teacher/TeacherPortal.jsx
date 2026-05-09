@@ -5606,6 +5606,14 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
 
   const [now, setNow] = useState(new Date())
 
+  // Real class count from backend (Today's Classes KPI)
+  const [realClassCount, setRealClassCount] = useState(null)
+  useEffect(() => {
+    api.get('/grouprooms')
+      .then(res => setRealClassCount(res.data?.rooms?.length || 0))
+      .catch(() => setRealClassCount(0))
+  }, [])
+
   // Live clock
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 30000)
@@ -5849,7 +5857,7 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
         {[
           { label: 'My Students', value: allStudents.length, change: '+2 this term', color: '#7D1025', icon: 'students', page: 'students' },
           { label: 'Need Grading', value: ungraded, change: ungraded === 0 ? 'All caught up' : 'Awaiting your review', color: ungraded > 0 ? '#B45309' : '#15803D', icon: 'grade', page: 'marking' },
-          { label: 'Today\'s Classes', value: schedule.length, change: doneClasses.length + ' done · ' + (schedule.length - doneClasses.length) + ' to go', color: '#7D1025', icon: 'class', page: 'classroom' },
+          { label: 'My Classes', value: realClassCount === null ? '...' : realClassCount, change: realClassCount === 0 ? 'No classes assigned' : 'Active rooms in backend', color: '#7D1025', icon: 'class', page: 'liveclass' },
           { label: 'Unread Messages', value: unreadMessages, change: unreadMessages === 0 ? 'Inbox clear' : 'From parents & students', color: unreadMessages > 0 ? '#7D1025' : '#15803D', icon: 'mail', page: 'communication' },
         ].map(kpi => (
           <div key={kpi.label} onClick={() => setPage(kpi.page)}
