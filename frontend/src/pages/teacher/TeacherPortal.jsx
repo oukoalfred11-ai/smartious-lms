@@ -5622,7 +5622,7 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
     soon:    { bg: '#7D1025', accent: '#F0CC5A', text: '#FBFAF5' },
     warning: { bg: '#92400E', accent: '#FCD34D', text: '#FBFAF5' },
     normal:  { bg: '#7D1025', accent: '#F0CC5A', text: '#FBFAF5' },
-    good:    { bg: '#166534', accent: '#86EFAC', text: '#FBFAF5' },
+    good:    { bg: '#7D1025', accent: '#C9A030', text: '#FBFAF5' },
   }
   const uColor = urgencyColors[rightNowItem.urgency]
  
@@ -5752,7 +5752,7 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
             label: 'Need Grading',
             value: loading ? '...' : ungradedCount,
             change: loading ? 'Loading...' : (ungradedCount === 0 ? 'All caught up' : 'Awaiting your review'),
-            color: ungradedCount > 0 ? '#B45309' : '#15803D',
+            color: ungradedCount > 0 ? '#B45309' : '#7D1025',
             icon: 'grade', page: 'homework',
           },
           {
@@ -5898,7 +5898,7 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
                       </div>
                     )}
                     {status === 'done' && (
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#15803D', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', display: 'flex', alignItems: 'center', gap: 4 }}>
                         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
                           <polyline points="20 6 9 17 4 12"/>
                         </svg>
