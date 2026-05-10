@@ -49,7 +49,7 @@ const questionSchema = new mongoose.Schema({
   // ── Question content ─────────────────────────────
   type: {
     type: String,
-    enum: ['mcq', 'short', 'long', 'drawing', 'upload'],
+    enum: ['mcq', 'short', 'long', 'drawing', 'handwriting', 'upload'],
     required: true,
     default: 'mcq',
   },
