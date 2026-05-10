@@ -5531,6 +5531,7 @@ const hwTypeLabel = {
   short: 'Short Answer',
   long: 'Long Answer',
   drawing: 'Drawing',
+  handwriting: 'Handwriting',
   upload: 'File Upload',
 }
 // ═══════════════════════════════════════════════════════════
@@ -5961,6 +5962,626 @@ function DrawingCanvas({ value, onSave, onClose, readOnly = false }) {
   )
 }
 
+// ═══════════════════════════════════════════════════════════
+// HANDWRITING CANVAS — for student handwritten answers
+// Phase 3.5c
+// ═══════════════════════════════════════════════════════════
+//
+// Optimized for handwriting (not freehand drawing):
+//   - Pen-only, single dark ink color
+//   - Two pen sizes (fine, medium)
+//   - Quadratic-curve smoothing between points
+//   - Pressure sensitivity (stylus) — line width varies
+//   - Ruled-paper background lines
+//   - Multi-page: add pages, navigate between them
+//   - Composite all pages into ONE tall PNG on save
+//   - Undo/Redo per page
+//   - Backend storage: still uses single attachment field
+//
+// Props:
+//   value:    optional initial PNG dataURL (existing answer composite)
+//   onSave:   callback(dataURL) — called when student clicks Save
+//   readOnly: bool — just shows the image, no controls
+//
+// Multi-page implementation:
+//   - Pages are kept as separate canvases in the `pages` ref
+//   - On save, we paint each page sequentially onto a tall offscreen canvas
+//     and toDataURL the result. Backend never sees more than one image.
+//   - Loading an existing answer (the composited PNG) renders it into a
+//     single page; user can add more pages on top if they want to redo.
+ 
+const INK_COLOR = '#0F1933'  // very dark blue-black, classic ink
+const RULE_COLOR = '#E2E5EA' // very subtle ruled lines
+const PAGE_HEIGHT = 540      // single page height
+const PAGE_LINE_HEIGHT = 30  // line spacing for ruled background
+const HW_SIZES = [
+  { id: 'fine',   value: 1.5, label: 'Fine' },
+  { id: 'medium', value: 2.5, label: 'Medium' },
+]
+ 
+function HandwritingCanvas({ value, onSave, readOnly = false }) {
+  const containerRef = useRef(null)
+  // We render ONE canvas at a time but maintain history per page.
+  // pagesData[i] = the rasterized contents of page i (PNG dataURL)
+  // Plus per-page history for undo/redo.
+  const canvasRef = useRef(null)
+  const [pageIndex, setPageIndex] = useState(0)
+  const [pages, setPages] = useState([null])  // dataURL per page; null = blank
+  // Per-page history stacks. histories[i] = array of dataURLs, indexes[i] = current pointer
+  const [histories, setHistories] = useState([[]])
+  const [historyIndexes, setHistoryIndexes] = useState([-1])
+ 
+  const [size, setSize] = useState(HW_SIZES[1].value)  // medium default
+  const [isDrawing, setIsDrawing] = useState(false)
+  const lastPosRef = useRef({ x: 0, y: 0 })
+  // For quadratic curve smoothing we keep the previous "anchor" point separate
+  // from the current cursor, so we draw from anchor → midpoint(anchor, cursor)
+  // with the previous point as the control. Net effect: smooth curves.
+  const prevPointRef = useRef(null)
+ 
+  // ── INIT CANVAS + LOAD INITIAL ──
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const container = containerRef.current
+    if (!canvas || !container) return
+ 
+    const setupCanvas = () => {
+      const rect = container.getBoundingClientRect()
+      const dpr = window.devicePixelRatio || 1
+      const cssWidth = Math.max(rect.width, 320)
+      const cssHeight = PAGE_HEIGHT
+      canvas.style.width = cssWidth + 'px'
+      canvas.style.height = cssHeight + 'px'
+      canvas.width = Math.floor(cssWidth * dpr)
+      canvas.height = Math.floor(cssHeight * dpr)
+      const ctx = canvas.getContext('2d')
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.scale(dpr, dpr)
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+ 
+      drawBackground(ctx, cssWidth, cssHeight)
+ 
+      // If we have an initial value, draw it as page 0
+      if (value && typeof value === 'string') {
+        const img = new Image()
+        img.onload = () => {
+          // Initial value might be much taller than one page
+          // (because we composited multiple pages on save).
+          // We just draw it scaled to fit the first page's width,
+          // letting the user add more pages on top if they want.
+          const aspectRatio = img.width / img.height
+          const drawWidth = cssWidth
+          const drawHeight = drawWidth / aspectRatio
+          if (drawHeight <= cssHeight) {
+            ctx.drawImage(img, 0, 0, drawWidth, drawHeight)
+          } else {
+            // Just show the top of the previous answer
+            ctx.drawImage(img, 0, 0, drawWidth, drawHeight)
+          }
+          saveSnapshotToHistory()
+        }
+        img.src = value
+      } else {
+        saveSnapshotToHistory()
+      }
+    }
+    setupCanvas()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+ 
+  // Draw the ruled-paper background
+  const drawBackground = (ctx, width, height) => {
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillRect(0, 0, width, height)
+    // Ruled lines
+    ctx.save()
+    ctx.strokeStyle = RULE_COLOR
+    ctx.lineWidth = 1
+    for (let y = PAGE_LINE_HEIGHT; y < height; y += PAGE_LINE_HEIGHT) {
+      ctx.beginPath()
+      ctx.moveTo(0, y)
+      ctx.lineTo(width, y)
+      ctx.stroke()
+    }
+    // Left margin line
+    ctx.strokeStyle = '#FCA5A5'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(50, 0)
+    ctx.lineTo(50, height)
+    ctx.stroke()
+    ctx.restore()
+  }
+ 
+  // ── HISTORY ──
+  const saveSnapshotToHistory = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const dataURL = canvas.toDataURL('image/png')
+    setHistories(prev => {
+      const next = [...prev]
+      const currentHist = next[pageIndex] || []
+      const trimmed = (historyIndexes[pageIndex] || 0) < currentHist.length - 1
+        ? currentHist.slice(0, (historyIndexes[pageIndex] || 0) + 1)
+        : currentHist
+      const newHist = [...trimmed, dataURL]
+      if (newHist.length > 30) newHist.shift()
+      next[pageIndex] = newHist
+      return next
+    })
+    setHistoryIndexes(prev => {
+      const next = [...prev]
+      next[pageIndex] = Math.min((next[pageIndex] || -1) + 1, 29)
+      return next
+    })
+    // Also save current rasterized state to pages[]
+    setPages(prev => {
+      const next = [...prev]
+      next[pageIndex] = dataURL
+      return next
+    })
+  }
+ 
+  const restoreFromDataURL = (dataURL) => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const dpr = window.devicePixelRatio || 1
+    const cssW = canvas.width / dpr
+    const cssH = canvas.height / dpr
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.scale(dpr, dpr)
+    drawBackground(ctx, cssW, cssH)
+    if (dataURL) {
+      const img = new Image()
+      img.onload = () => { ctx.drawImage(img, 0, 0, cssW, cssH) }
+      img.src = dataURL
+    }
+  }
+ 
+  const undo = () => {
+    const idx = historyIndexes[pageIndex] || 0
+    if (idx <= 0) return
+    const newIdx = idx - 1
+    setHistoryIndexes(prev => {
+      const next = [...prev]
+      next[pageIndex] = newIdx
+      return next
+    })
+    restoreFromDataURL(histories[pageIndex][newIdx])
+    // Also update pages[] to reflect undo
+    setPages(prev => {
+      const next = [...prev]
+      next[pageIndex] = histories[pageIndex][newIdx]
+      return next
+    })
+  }
+ 
+  const redo = () => {
+    const hist = histories[pageIndex] || []
+    const idx = historyIndexes[pageIndex] || 0
+    if (idx >= hist.length - 1) return
+    const newIdx = idx + 1
+    setHistoryIndexes(prev => {
+      const next = [...prev]
+      next[pageIndex] = newIdx
+      return next
+    })
+    restoreFromDataURL(hist[newIdx])
+    setPages(prev => {
+      const next = [...prev]
+      next[pageIndex] = hist[newIdx]
+      return next
+    })
+  }
+ 
+  const clearPage = () => {
+    if (!confirm('Clear this page?')) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const dpr = window.devicePixelRatio || 1
+    const cssW = canvas.width / dpr
+    const cssH = canvas.height / dpr
+    const ctx = canvas.getContext('2d')
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.scale(dpr, dpr)
+    drawBackground(ctx, cssW, cssH)
+    saveSnapshotToHistory()
+  }
+ 
+  // ── PAGE NAVIGATION ──
+  // Switching page: save current canvas as the page's snapshot, then load the target page
+  const switchToPage = (toIndex) => {
+    if (toIndex === pageIndex || toIndex < 0 || toIndex >= pages.length) return
+    // Save current page state
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const currentDataURL = canvas.toDataURL('image/png')
+    setPages(prev => {
+      const next = [...prev]
+      next[pageIndex] = currentDataURL
+      return next
+    })
+    // Load target page
+    const target = pages[toIndex]
+    setPageIndex(toIndex)
+    // restore happens after pageIndex updates — use a microtask
+    setTimeout(() => { restoreFromDataURL(target) }, 0)
+  }
+ 
+  const addPage = () => {
+    // Save current page first
+    const canvas = canvasRef.current
+    if (canvas) {
+      const currentDataURL = canvas.toDataURL('image/png')
+      setPages(prev => {
+        const next = [...prev]
+        next[pageIndex] = currentDataURL
+        return next
+      })
+    }
+    // Add a new blank page
+    setPages(prev => [...prev, null])
+    setHistories(prev => [...prev, []])
+    setHistoryIndexes(prev => [...prev, -1])
+    // Switch to the new page
+    const newIdx = pages.length
+    setPageIndex(newIdx)
+    setTimeout(() => {
+      const ctx = canvasRef.current?.getContext('2d')
+      if (!ctx) return
+      const dpr = window.devicePixelRatio || 1
+      const cssW = canvasRef.current.width / dpr
+      const cssH = canvasRef.current.height / dpr
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+      ctx.scale(dpr, dpr)
+      drawBackground(ctx, cssW, cssH)
+      // initial blank snapshot for the new page
+      const dataURL = canvasRef.current.toDataURL('image/png')
+      setHistories(prev => {
+        const next = [...prev]
+        next[newIdx] = [dataURL]
+        return next
+      })
+      setHistoryIndexes(prev => {
+        const next = [...prev]
+        next[newIdx] = 0
+        return next
+      })
+      setPages(prev => {
+        const next = [...prev]
+        next[newIdx] = dataURL
+        return next
+      })
+    }, 0)
+  }
+ 
+  const deletePage = () => {
+    if (pages.length <= 1) {
+      // Don't delete the last page; clear it instead
+      clearPage()
+      return
+    }
+    if (!confirm('Delete this page? Cannot be undone.')) return
+    const newPages = pages.filter((_, i) => i !== pageIndex)
+    const newHistories = histories.filter((_, i) => i !== pageIndex)
+    const newIndexes = historyIndexes.filter((_, i) => i !== pageIndex)
+    const newPageIndex = Math.max(0, pageIndex - 1)
+    setPages(newPages)
+    setHistories(newHistories)
+    setHistoryIndexes(newIndexes)
+    setPageIndex(newPageIndex)
+    setTimeout(() => { restoreFromDataURL(newPages[newPageIndex]) }, 0)
+  }
+ 
+  // ── POINTER HANDLERS ──
+  const getPos = (e) => {
+    const canvas = canvasRef.current
+    const rect = canvas.getBoundingClientRect()
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top }
+  }
+ 
+  // Pen-on-paper style line width using pressure if available
+  const computeWidth = (e) => {
+    const base = size
+    // For mouse, e.pressure is 0.5 by default (or 0 if not pressed); for stylus it varies 0–1.
+    // We give a 50%-150% multiplier on the base size based on pressure.
+    const pressure = (e.pressure !== undefined && e.pressure > 0 && e.pointerType === 'pen')
+      ? Math.max(0.3, Math.min(1.5, e.pressure * 1.5))
+      : 1
+    return base * pressure
+  }
+ 
+  const onPointerDown = (e) => {
+    if (readOnly) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    canvas.setPointerCapture(e.pointerId)
+    const pos = getPos(e)
+    lastPosRef.current = pos
+    prevPointRef.current = pos
+    setIsDrawing(true)
+    // Tap-and-release dot
+    const ctx = canvas.getContext('2d')
+    ctx.beginPath()
+    ctx.fillStyle = INK_COLOR
+    ctx.arc(pos.x, pos.y, computeWidth(e) / 2, 0, Math.PI * 2)
+    ctx.fill()
+  }
+ 
+  const onPointerMove = (e) => {
+    if (!isDrawing || readOnly) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const pos = getPos(e)
+    const ctx = canvas.getContext('2d')
+    const w = computeWidth(e)
+ 
+    // Quadratic curve smoothing:
+    // From the previous "anchor" through current cursor, with the midpoint as the control.
+    // (Or simpler: draw from previous to midpoint(prev, current) using current as control.)
+    const last = lastPosRef.current
+    const midX = (last.x + pos.x) / 2
+    const midY = (last.y + pos.y) / 2
+ 
+    ctx.strokeStyle = INK_COLOR
+    ctx.lineWidth = w
+    ctx.beginPath()
+    ctx.moveTo(last.x, last.y)
+    ctx.quadraticCurveTo(last.x, last.y, midX, midY)
+    ctx.stroke()
+ 
+    lastPosRef.current = pos
+    prevPointRef.current = { x: midX, y: midY }
+  }
+ 
+  const onPointerUp = (e) => {
+    if (!isDrawing || readOnly) return
+    const canvas = canvasRef.current
+    if (canvas && canvas.hasPointerCapture && canvas.hasPointerCapture(e.pointerId)) {
+      canvas.releasePointerCapture(e.pointerId)
+    }
+    setIsDrawing(false)
+    saveSnapshotToHistory()
+  }
+ 
+  // ── SAVE: composite all pages into one tall PNG ──
+  const handleSave = async () => {
+    // First, snapshot the current page so its latest state is in pages[]
+    const canvas = canvasRef.current
+    if (canvas) {
+      const currentDataURL = canvas.toDataURL('image/png')
+      setPages(prev => {
+        const next = [...prev]
+        next[pageIndex] = currentDataURL
+        return next
+      })
+    }
+    // Wait a tick for the state update to settle, then composite
+    await new Promise(r => setTimeout(r, 50))
+    // Read fresh pages from a ref-like approach: we just use the local
+    // value we just computed, OR re-read by calling toDataURL on the current
+    // canvas for this page and using `pages[]` for the rest.
+    const allPages = [...pages]
+    // Make sure current page is up-to-date
+    if (canvas) allPages[pageIndex] = canvas.toDataURL('image/png')
+ 
+    // Build offscreen tall canvas
+    const dpr = window.devicePixelRatio || 1
+    const containerWidth = containerRef.current?.getBoundingClientRect().width || 800
+    const cssWidth = Math.max(containerWidth, 320)
+    const cssHeight = PAGE_HEIGHT * allPages.length
+ 
+    const offscreen = document.createElement('canvas')
+    offscreen.width = Math.floor(cssWidth * dpr)
+    offscreen.height = Math.floor(cssHeight * dpr)
+    const offCtx = offscreen.getContext('2d')
+    offCtx.scale(dpr, dpr)
+    offCtx.fillStyle = '#FFFFFF'
+    offCtx.fillRect(0, 0, cssWidth, cssHeight)
+ 
+    // Sequentially load each page and paint
+    for (let i = 0; i < allPages.length; i++) {
+      const pageDataURL = allPages[i]
+      if (!pageDataURL) continue
+      await new Promise((resolve) => {
+        const img = new Image()
+        img.onload = () => {
+          offCtx.drawImage(img, 0, i * PAGE_HEIGHT, cssWidth, PAGE_HEIGHT)
+          resolve()
+        }
+        img.onerror = () => resolve()
+        img.src = pageDataURL
+      })
+    }
+ 
+    const finalDataURL = offscreen.toDataURL('image/png')
+    if (onSave) onSave(finalDataURL)
+  }
+ 
+  const canUndo = (historyIndexes[pageIndex] || 0) > 0
+  const canRedo = (historyIndexes[pageIndex] || 0) < ((histories[pageIndex] || []).length - 1)
+ 
+  // ── RENDER ──
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* Toolbar */}
+      {!readOnly && (
+        <div style={{
+          display: 'flex', gap: 12, flexWrap: 'wrap',
+          padding: '10px 12px',
+          background: '#FBFAF5',
+          borderRadius: 8,
+          border: '1px solid var(--border)',
+          alignItems: 'center',
+        }}>
+          {/* Pen size */}
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--s500)', letterSpacing: '.06em', textTransform: 'uppercase', marginRight: 4 }}>Pen</span>
+            {HW_SIZES.map(s => (
+              <button key={s.id} type="button" onClick={() => setSize(s.value)} title={s.label}
+                style={{
+                  padding: '6px 12px',
+                  background: size === s.value ? '#7D1025' : '#FFF',
+                  color: size === s.value ? '#FBFAF5' : 'var(--s700)',
+                  border: '1px solid ' + (size === s.value ? '#7D1025' : 'var(--border)'),
+                  borderRadius: 6, cursor: 'pointer',
+                  fontSize: 12, fontWeight: 700,
+                }}>{s.label}</button>
+            ))}
+          </div>
+ 
+          <div style={{ width: 1, height: 22, background: 'var(--border)' }}/>
+ 
+          {/* Page navigation */}
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--s500)', letterSpacing: '.06em', textTransform: 'uppercase' }}>Page</span>
+            <button type="button" onClick={() => switchToPage(pageIndex - 1)} disabled={pageIndex === 0}
+              style={{
+                width: 26, height: 26, padding: 0,
+                background: '#FFF',
+                color: pageIndex === 0 ? 'var(--s400)' : 'var(--s700)',
+                border: '1px solid var(--border)', borderRadius: 4,
+                cursor: pageIndex === 0 ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+            <span style={{ fontSize: 12, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', minWidth: 50, textAlign: 'center', color: 'var(--s700)' }}>
+              {pageIndex + 1} / {pages.length}
+            </span>
+            <button type="button" onClick={() => switchToPage(pageIndex + 1)} disabled={pageIndex >= pages.length - 1}
+              style={{
+                width: 26, height: 26, padding: 0,
+                background: '#FFF',
+                color: pageIndex >= pages.length - 1 ? 'var(--s400)' : 'var(--s700)',
+                border: '1px solid var(--border)', borderRadius: 4,
+                cursor: pageIndex >= pages.length - 1 ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+            <button type="button" onClick={addPage}
+              style={{
+                padding: '4px 10px', background: '#C9A030', color: '#7D1025',
+                border: '1px solid #C9A030', borderRadius: 4,
+                cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Page
+            </button>
+          </div>
+ 
+          {/* Right actions */}
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 4, alignItems: 'center' }}>
+            <button type="button" onClick={undo} disabled={!canUndo}
+              style={{
+                padding: '6px 10px', background: '#FFF',
+                color: canUndo ? 'var(--s700)' : 'var(--s400)',
+                border: '1px solid var(--border)', borderRadius: 6,
+                cursor: canUndo ? 'pointer' : 'not-allowed',
+                fontSize: 12, fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M3 7v6h6"/>
+                <path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>
+              </svg>
+              Undo
+            </button>
+            <button type="button" onClick={redo} disabled={!canRedo}
+              style={{
+                padding: '6px 10px', background: '#FFF',
+                color: canRedo ? 'var(--s700)' : 'var(--s400)',
+                border: '1px solid var(--border)', borderRadius: 6,
+                cursor: canRedo ? 'pointer' : 'not-allowed',
+                fontSize: 12, fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}>
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M21 7v6h-6"/>
+                <path d="M3 17a9 9 0 0 1 15-6.7L21 13"/>
+              </svg>
+              Redo
+            </button>
+            <button type="button" onClick={clearPage}
+              style={{
+                padding: '6px 10px', background: '#FFF', color: 'var(--s700)',
+                border: '1px solid var(--border)', borderRadius: 6,
+                cursor: 'pointer', fontSize: 12, fontWeight: 700,
+              }}>
+              Clear Page
+            </button>
+            {pages.length > 1 && (
+              <button type="button" onClick={deletePage}
+                style={{
+                  padding: '6px 10px', background: '#FFF', color: '#DC2626',
+                  border: '1px solid #FCA5A5', borderRadius: 6,
+                  cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                }}>
+                Delete Page
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+ 
+      {/* Canvas container */}
+      <div
+        ref={containerRef}
+        style={{
+          width: '100%',
+          height: PAGE_HEIGHT,
+          background: '#FFF',
+          border: '2px solid ' + (isDrawing ? '#7D1025' : 'var(--border)'),
+          borderRadius: 8,
+          overflow: 'hidden',
+          touchAction: 'none',
+          position: 'relative',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+        }}>
+        <canvas
+          ref={canvasRef}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          style={{
+            display: 'block',
+            cursor: readOnly ? 'default' : 'crosshair',
+          }}
+        />
+      </div>
+ 
+      {/* Tip line */}
+      {!readOnly && (
+        <div style={{ fontSize: 11, color: 'var(--s400)', fontStyle: 'italic' }}>
+          Tip: write naturally on the lines. Use stylus on tablet for pressure-sensitive ink. Add pages for longer answers.
+        </div>
+      )}
+ 
+      {/* Save action */}
+      {!readOnly && onSave && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <button type="button" onClick={handleSave} className="btn btn-p">
+            Save Handwriting ({pages.length} page{pages.length === 1 ? '' : 's'})
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
 
 function HomeworkTab({ user, toast }) {
   // ── DATA ──
@@ -6178,6 +6799,15 @@ function HomeworkTab({ user, toast }) {
         // For now, accept either an attachment or skip (drawing canvas not yet implemented)
         if (!a || !a.attachment || !a.attachment.url) {
           return 'Question ' + (i + 1) + ' (drawing): drawing answers come in next phase. Skip for now or upload an image.'
+        }
+      }
+     } else if (q.type === 'drawing') {
+        if (!a || !a.attachment || !a.attachment.url) {
+          return 'Question ' + (i + 1) + ' (drawing): please draw your answer'
+        }
+      } else if (q.type === 'handwriting') {
+        if (!a || !a.attachment || !a.attachment.url) {
+          return 'Question ' + (i + 1) + ' (handwriting): please write your answer'
         }
       }
     }
@@ -6682,6 +7312,66 @@ function HomeworkTab({ user, toast }) {
                         )}
                         {uploadingIdx === idx && (
                           <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 6 }}>Uploading drawing...</div>
+                        )}
+                        {isReadOnly && a.marksAwarded !== null && a.marksAwarded !== undefined && (
+                          <div style={{ fontSize: 12, color: 'var(--s600)', marginTop: 6 }}>
+                            Awarded: <strong>{a.marksAwarded}</strong> / {q.marks}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                   {/* Handwriting — full canvas */}
+                    {q.type === 'handwriting' && (
+                      <div>
+                        {a.attachment && a.attachment.url ? (
+                          <div>
+                            <HandwritingCanvas
+                              value={a.attachment.url}
+                              readOnly={isReadOnly}
+                            />
+                            {!isReadOnly && (
+                              <button
+                                type="button"
+                                onClick={() => setAnswerAttachment(idx, null)}
+                                style={{
+                                  background: 'transparent', border: '1px solid var(--border)',
+                                  color: 'var(--s600)', padding: '6px 14px',
+                                  borderRadius: 6, cursor: 'pointer',
+                                  fontSize: 12, fontWeight: 700, marginTop: 8,
+                                }}
+                              >Redo Handwriting</button>
+                            )}
+                          </div>
+                        ) : !isReadOnly ? (
+                          <HandwritingCanvas
+                            onSave={async (dataURL) => {
+                              setUploadingIdx(idx)
+                              try {
+                                const blob = await (await fetch(dataURL)).blob()
+                                const file = new File([blob], 'handwriting-' + Date.now() + '.png', { type: 'image/png' })
+                                const fd = new FormData()
+                                fd.append('file', file)
+                                const { data } = await api.post('/questions/upload', fd, {
+                                  headers: { 'Content-Type': 'multipart/form-data' },
+                                })
+                                if (data.success && data.attachment) {
+                                  setAnswerAttachment(idx, data.attachment)
+                                  toast?.ok?.('Handwriting saved')
+                                } else {
+                                  toast?.error?.(data.message || 'Upload failed')
+                                }
+                              } catch (e) {
+                                toast?.error?.('Save failed: ' + e.message)
+                              } finally {
+                                setUploadingIdx(null)
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div style={{ fontSize: 12, color: 'var(--s500)', fontStyle: 'italic' }}>No handwriting submitted.</div>
+                        )}
+                        {uploadingIdx === idx && (
+                          <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 6 }}>Uploading handwriting...</div>
                         )}
                         {isReadOnly && a.marksAwarded !== null && a.marksAwarded !== undefined && (
                           <div style={{ fontSize: 12, color: 'var(--s600)', marginTop: 6 }}>
