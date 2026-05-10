@@ -965,224 +965,746 @@ function AnalyticsModule({ setPage, refreshKey, toast }) {
   )
 }
 
-// ═══════════════════════════════════════════════════════════
-// 3. USERS MODULE — User Management with WORKING create flow
-// ═══════════════════════════════════════════════════════════
-function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser }) {
-  const [users, setUsers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState('all')
-  const [statusFilter, setStatusFilter] = useState('all')
-
+// ──────────────────────────────────────────────────────
+// USER FORM FIELDS (shared component) — Phase: profiles
+// Wired to /api/curriculum/options + admission lookup
+// ──────────────────────────────────────────────────────
+function UserFormFields({ userForm, setUserForm }) {
+  const upd = (k, v) => setUserForm(f => ({ ...f, [k]: v }))
+ 
+  // Load curriculum catalog from backend on mount
+  const [catalog, setCatalog] = useState({ curricula: [], gradesByCurriculum: {}, subjects: [] })
+  const [catalogLoading, setCatalogLoading] = useState(true)
+ 
+  // ── Chip-input state for teacher multi-add fields ──
+  const [qualInput, setQualInput] = useState('')
+  const [certInput, setCertInput] = useState('')
+  const [specInput, setSpecInput] = useState('')
+ 
+  // ── Parent: linked students lookup ──
+  const [admissionInput, setAdmissionInput] = useState('')
+  const [admissionLooking, setAdmissionLooking] = useState(false)
+  const [linkedStudentDetails, setLinkedStudentDetails] = useState([])  // populated student details for chip display
+ 
   useEffect(() => {
-    const fetch = async () => {
-      setLoading(true)
-      try {
-        const res = await api.get('/users')
-        setUsers(res.data.users || [])
-        setLoading(false)
-      } catch (e) {
-        setError(e.response?.data?.message || e.message || 'Failed to load')
-        setLoading(false)
-      }
-    }
-    fetch()
-  }, [refreshKey])
-
-  const counts = {
-    total: users.length,
-    students: users.filter(u => u.role === 'student').length,
-    teachers: users.filter(u => u.role === 'teacher').length,
-    parents: users.filter(u => u.role === 'parent').length,
-    admins: users.filter(u => u.role === 'admin').length,
-    pending: users.filter(u => u.mustChangePassword).length,
-  }
-
-  const filtered = users.filter(u => {
-    if (search) {
-      const q = search.toLowerCase()
-      const fullName = ((u.firstName || '') + ' ' + (u.lastName || '')).toLowerCase()
-      const email = (u.email || '').toLowerCase()
-      if (!fullName.includes(q) && !email.includes(q)) return false
-    }
-    if (roleFilter !== 'all' && u.role !== roleFilter) return false
-    if (statusFilter === 'active' && (u.isActive === false || u.mustChangePassword)) return false
-    if (statusFilter === 'pending' && !u.mustChangePassword) return false
-    if (statusFilter === 'suspended' && u.isActive !== false) return false
-    return true
-  })
-
-  const handleEdit = (u) => {
-    setUserForm({
-      firstName: u.firstName || '', lastName: u.lastName || '', email: u.email || '',
-      phone: u.phone || '', role: u.role || 'student',
-      curriculum: u.curriculum || '',
-      grade: u.gradeLevel || u.grade || '',
-      plan: u.plan || 'Basic',
-      subjects: Array.isArray(u.subjects) ? u.subjects.filter(s => typeof s === 'string') : [],
-      teachingSpecialties: u.teachingSpecialties || [],
-      bio: u.bio || '', linkedStudents: u.linkedStudents || [],
-      _id: u._id,
-    })
-    setUserModal(true)
-  }
-
-  const handleDelete = async (u) => {
-    if (!confirm('Delete ' + u.firstName + ' ' + u.lastName + ' permanently?')) return
-    try {
-      await api.delete('/users/' + u._id)
-      setUsers(prev => prev.filter(x => x._id !== u._id))
-      toast.ok(u.firstName + ' deleted')
-    } catch (e) {
-      toast.error('Delete failed: ' + (e.response?.data?.message || e.message))
-    }
-  }
-
-  if (loading) return (
-    <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)' }}>Loading users from backend...</div>
+    api.get('/curriculum/options')
+      .then(res => {
+        if (res.data?.success) {
+          setCatalog({
+            curricula: res.data.curricula || [],
+            gradesByCurriculum: res.data.gradesByCurriculum || {},
+            subjects: res.data.subjects || [],
+          })
+        }
+      })
+      .catch(err => console.error('[catalog] load failed:', err))
+      .finally(() => setCatalogLoading(false))
+  }, [])
+ 
+  // When parent form opens with existing linkedStudents IDs, fetch their details for chip display
+  useEffect(() => {
+    if (userForm.role !== 'parent') return
+    const ids = userForm.linkedStudents || []
+    if (ids.length === 0) { setLinkedStudentDetails([]); return }
+    // Fetch all students once and filter
+    api.get('/users/students/list')
+      .then(res => {
+        if (res.data?.success) {
+          const all = res.data.students || []
+          const matched = ids.map(id => {
+            const idStr = typeof id === 'object' ? id._id : id
+            return all.find(s => s._id === idStr || s._id?.toString() === idStr?.toString())
+          }).filter(Boolean)
+          setLinkedStudentDetails(matched)
+        }
+      })
+      .catch(() => {})
+  }, [userForm.role, JSON.stringify(userForm.linkedStudents)])
+ 
+  // For students: subjects available for selected curriculum, grouped by category
+  const studentCurriculum = userForm.curriculum
+  const availableSubjects = catalog.subjects.filter(s =>
+    s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(studentCurriculum))
   )
-  if (error) return (
-    <div className="card" style={{ padding: 24, background: 'var(--r50)', borderColor: 'var(--r100)' }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--r700)', marginBottom: 8 }}>Failed to load users</div>
-      <div style={{ fontSize: 12, color: 'var(--r600)' }}>{error}</div>
+  const subjectsByCategory = availableSubjects.reduce((acc, s) => {
+    if (!acc[s.category]) acc[s.category] = []
+    acc[s.category].push(s)
+    return acc
+  }, {})
+ 
+  const availableGrades = catalog.gradesByCurriculum[studentCurriculum] || []
+ 
+  const toggleSubject = (subjectName) => {
+    const current = userForm.subjects || []
+    if (current.includes(subjectName)) {
+      upd('subjects', current.filter(s => s !== subjectName))
+    } else {
+      upd('subjects', [...current, subjectName])
+    }
+  }
+ 
+  const handleCurriculumChange = (newCurriculum) => {
+    upd('curriculum', newCurriculum)
+    upd('grade', '')
+    const stillValid = (userForm.subjects || []).filter(subjName => {
+      const subj = catalog.subjects.find(s => s.name === subjName)
+      if (!subj) return false
+      return subj.availableIn === 'all' || (Array.isArray(subj.availableIn) && subj.availableIn.includes(newCurriculum))
+    })
+    upd('subjects', stillValid)
+  }
+ 
+  // ── Teacher chip-input handlers ──
+  const addChip = (field, inputValue, setInput) => {
+    const val = inputValue.trim()
+    if (!val) return
+    const current = userForm[field] || []
+    if (current.includes(val)) { setInput(''); return }
+    upd(field, [...current, val])
+    setInput('')
+  }
+  const removeChip = (field, idx) => {
+    const current = userForm[field] || []
+    upd(field, current.filter((_, i) => i !== idx))
+  }
+ 
+  // ── Parent: lookup student by admission number ──
+  const handleAddStudent = async () => {
+    const num = admissionInput.trim()
+    if (!num) return
+    setAdmissionLooking(true)
+    try {
+      const res = await api.get('/users/students/by-admission/' + encodeURIComponent(num))
+      if (res.data?.success && res.data.student) {
+        const student = res.data.student
+        const currentIds = userForm.linkedStudents || []
+        const exists = currentIds.some(id => {
+          const idStr = typeof id === 'object' ? id._id : id
+          return idStr?.toString() === student._id?.toString()
+        })
+        if (exists) {
+          alert('Student is already linked')
+        } else {
+          upd('linkedStudents', [...currentIds, student._id])
+          setLinkedStudentDetails(prev => [...prev, student])
+        }
+        setAdmissionInput('')
+      }
+    } catch (e) {
+      alert(e.response?.data?.message || 'Student not found with that admission number')
+    } finally {
+      setAdmissionLooking(false)
+    }
+  }
+  const removeLinkedStudent = (studentId) => {
+    const currentIds = userForm.linkedStudents || []
+    upd('linkedStudents', currentIds.filter(id => {
+      const idStr = typeof id === 'object' ? id._id : id
+      return idStr?.toString() !== studentId?.toString()
+    }))
+    setLinkedStudentDetails(prev => prev.filter(s => s._id !== studentId))
+  }
+ 
+  // Chip display style helper
+  const chipStyle = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '4px 10px',
+    background: '#FBE8E8',
+    color: '#7D1025',
+    borderRadius: 999,
+    fontSize: 12.5,
+    fontWeight: 600,
+    border: '1px solid #F4C5C5',
+  }
+  const chipRemoveStyle = {
+    background: 'transparent',
+    border: 'none',
+    color: '#7D1025',
+    cursor: 'pointer',
+    padding: 0,
+    fontSize: 14,
+    lineHeight: 1,
+    fontWeight: 700,
+  }
+ 
+  return (
+    <div>
+      <div className="fr2">
+        <div className="fg">
+          <label className="fl">First Name *</label>
+          <input className="fi" value={userForm.firstName} onChange={e => upd('firstName', e.target.value)} placeholder="First name" autoFocus />
+        </div>
+        <div className="fg">
+          <label className="fl">Last Name *</label>
+          <input className="fi" value={userForm.lastName} onChange={e => upd('lastName', e.target.value)} placeholder="Last name" />
+        </div>
+      </div>
+ 
+      <div className="fg">
+        <label className="fl">Email Address *</label>
+        <input className="fi" type="email" value={userForm.email} onChange={e => upd('email', e.target.value)} placeholder="user@example.com" />
+      </div>
+ 
+      <div className="fg">
+        <label className="fl">Phone Number</label>
+        <input className="fi" value={userForm.phone} onChange={e => upd('phone', e.target.value)} placeholder="+254 700 000000" />
+      </div>
+ 
+      <div className="fg">
+        <label className="fl">Role *</label>
+        <select className="fsel" value={userForm.role} onChange={e => upd('role', e.target.value)}>
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+          <option value="parent">Parent</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+ 
+      {/* ── STUDENT FIELDS ── */}
+      {userForm.role === 'student' && (
+        <>
+          {/* Admission number display (read-only, after first save) */}
+          {userForm._id && userForm.admissionNumber && (
+            <div className="fg">
+              <label className="fl">Admission Number</label>
+              <div style={{
+                padding: '10px 14px',
+                background: '#FBF6E3',
+                border: '1px solid #C9A030',
+                borderRadius: 8,
+                fontFamily: 'JetBrains Mono, monospace',
+                fontSize: 14,
+                fontWeight: 700,
+                color: '#7D1025',
+                letterSpacing: '0.04em',
+              }}>{userForm.admissionNumber}</div>
+              <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                Auto-generated. Cannot be changed.
+              </div>
+            </div>
+          )}
+ 
+          <div className="fr2">
+            <div className="fg">
+              <label className="fl">Curriculum</label>
+              <select className="fsel" value={userForm.curriculum || ''} onChange={e => handleCurriculumChange(e.target.value)} disabled={catalogLoading}>
+                <option value="">Select curriculum...</option>
+                {catalog.curricula.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="fg">
+              <label className="fl">Grade / Year</label>
+              <select className="fsel" value={userForm.grade || ''} onChange={e => upd('grade', e.target.value)} disabled={!studentCurriculum}>
+                <option value="">{studentCurriculum ? 'Select grade...' : 'Select curriculum first'}</option>
+                {availableGrades.map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+ 
+          <div className="fg">
+            <label className="fl">Plan</label>
+            <select className="fsel" value={userForm.plan || 'Basic'} onChange={e => upd('plan', e.target.value)}>
+              <option>Basic</option>
+              <option>Premium</option>
+              <option>IGCSE Pack</option>
+            </select>
+          </div>
+ 
+          {/* Subjects */}
+          {studentCurriculum && (
+            <div className="fg">
+              <label className="fl">Subjects ({(userForm.subjects || []).length} selected)</label>
+              <div style={{
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                padding: 10,
+                maxHeight: 280,
+                overflowY: 'auto',
+                background: '#FFF',
+              }}>
+                {availableSubjects.length === 0 ? (
+                  <div style={{ fontSize: 12, color: 'var(--s500)', textAlign: 'center', padding: 12 }}>
+                    No subjects available for this curriculum
+                  </div>
+                ) : (
+                  Object.entries(subjectsByCategory).map(([category, subjects]) => (
+                    <div key={category} style={{ marginBottom: 12 }}>
+                      <div style={{
+                        fontSize: 10.5,
+                        fontWeight: 800,
+                        letterSpacing: '.08em',
+                        textTransform: 'uppercase',
+                        color: 'var(--crimson, #7D1025)',
+                        marginBottom: 6,
+                        paddingBottom: 4,
+                        borderBottom: '1px solid var(--border)',
+                      }}>{category}</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 4 }}>
+                        {subjects.map(s => {
+                          const checked = (userForm.subjects || []).includes(s.name)
+                          return (
+                            <label key={s.id} style={{
+                              display: 'flex', alignItems: 'center', gap: 6,
+                              padding: '4px 8px', fontSize: 12.5, cursor: 'pointer',
+                              borderRadius: 4,
+                              background: checked ? '#FBF6E3' : 'transparent',
+                            }}>
+                              <input type="checkbox" checked={checked} onChange={() => toggleSubject(s.name)} style={{ cursor: 'pointer', accentColor: '#7D1025' }} />
+                              <span style={{ color: checked ? '#7D1025' : 'var(--s700)', fontWeight: checked ? 600 : 400 }}>{s.name}</span>
+                            </label>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                Tip: Selecting a subject auto-enrolls this student in matching class rooms.
+              </div>
+            </div>
+          )}
+ 
+          {/* ── New student profile fields ── */}
+          <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--crimson, #7D1025)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+              Personal Profile
+            </div>
+ 
+            <div className="fr2">
+              <div className="fg">
+                <label className="fl">Date of Birth</label>
+                <input
+                  className="fi"
+                  type="date"
+                  value={userForm.dateOfBirth ? userForm.dateOfBirth.slice(0, 10) : ''}
+                  onChange={e => upd('dateOfBirth', e.target.value)}
+                />
+              </div>
+              <div className="fg">
+                <label className="fl">Photo URL (optional)</label>
+                <input
+                  className="fi"
+                  value={userForm.avatar || ''}
+                  onChange={e => upd('avatar', e.target.value)}
+                  placeholder="https://... or upload later"
+                />
+              </div>
+            </div>
+ 
+            <div className="fg">
+              <label className="fl">Home Address</label>
+              <textarea
+                className="fi"
+                rows={2}
+                value={userForm.homeAddress || ''}
+                onChange={e => upd('homeAddress', e.target.value)}
+                placeholder="Street, city, country..."
+                style={{ resize: 'vertical', fontFamily: 'inherit' }}
+              />
+            </div>
+ 
+            <div className="fg">
+              <label className="fl">Medical Notes (optional)</label>
+              <textarea
+                className="fi"
+                rows={2}
+                value={userForm.medicalNotes || ''}
+                onChange={e => upd('medicalNotes', e.target.value)}
+                placeholder="Allergies, conditions, emergency info..."
+                style={{ resize: 'vertical', fontFamily: 'inherit' }}
+              />
+              <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                Confidential. Only visible to admin and assigned teachers.
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+ 
+      {/* ── TEACHER FIELDS ── */}
+      {userForm.role === 'teacher' && (
+        <>
+          {/* Multi-curriculum checkboxes (existing logic) */}
+          <div className="fg">
+            <label className="fl">Curricula (select all that apply)</label>
+            <div style={{
+              border: '1px solid var(--border)', borderRadius: 8, padding: 10, background: '#FFF',
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 4,
+            }}>
+              {catalog.curricula.length === 0 ? (
+                <div style={{ fontSize: 12, color: 'var(--s500)' }}>{catalogLoading ? 'Loading...' : 'No curricula available'}</div>
+              ) : (
+                catalog.curricula.map(c => {
+                  const teacherCurricula = Array.isArray(userForm.curriculum) ? userForm.curriculum : (userForm.curriculum ? [userForm.curriculum] : [])
+                  const checked = teacherCurricula.includes(c.id)
+                  return (
+                    <label key={c.id} style={{
+                      display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px',
+                      fontSize: 12.5, cursor: 'pointer', borderRadius: 4,
+                      background: checked ? '#FBF6E3' : 'transparent',
+                    }}>
+                      <input
+                        type="checkbox" checked={checked}
+                        onChange={() => {
+                          const current = Array.isArray(userForm.curriculum) ? [...userForm.curriculum] : (userForm.curriculum ? [userForm.curriculum] : [])
+                          if (checked) {
+                            const next = current.filter(x => x !== c.id)
+                            upd('curriculum', next)
+                            const stillValid = (userForm.subjects || []).filter(subjName => {
+                              const subj = catalog.subjects.find(s => s.name === subjName)
+                              if (!subj) return false
+                              if (subj.availableIn === 'all') return true
+                              return Array.isArray(subj.availableIn) && subj.availableIn.some(currId => next.includes(currId))
+                            })
+                            upd('subjects', stillValid)
+                          } else {
+                            upd('curriculum', [...current, c.id])
+                          }
+                        }}
+                        style={{ cursor: 'pointer', accentColor: '#7D1025' }}
+                      />
+                      <span style={{ color: checked ? '#7D1025' : 'var(--s700)', fontWeight: checked ? 600 : 400 }}>{c.name}</span>
+                    </label>
+                  )
+                })
+              )}
+            </div>
+          </div>
+ 
+          {/* Multi-subject checkboxes (existing logic) */}
+          {(() => {
+            const teacherCurricula = Array.isArray(userForm.curriculum) ? userForm.curriculum : (userForm.curriculum ? [userForm.curriculum] : [])
+            if (teacherCurricula.length === 0) {
+              return (
+                <div className="fg">
+                  <label className="fl">Subjects</label>
+                  <div style={{
+                    border: '1px solid var(--border)', borderRadius: 8, padding: 16,
+                    background: 'var(--cream, #FBFAF5)', fontSize: 12.5, color: 'var(--s500)', textAlign: 'center',
+                  }}>
+                    Select at least one curriculum above to see available subjects
+                  </div>
+                </div>
+              )
+            }
+            const teacherSubjects = catalog.subjects.filter(s =>
+              s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.some(currId => teacherCurricula.includes(currId)))
+            )
+            const teacherSubjectsByCategory = teacherSubjects.reduce((acc, s) => {
+              if (!acc[s.category]) acc[s.category] = []
+              acc[s.category].push(s)
+              return acc
+            }, {})
+            const selectedSubjects = Array.isArray(userForm.subjects)
+              ? userForm.subjects.filter(s => typeof s === 'string')
+              : []
+            const toggle = (subjectName) => {
+              if (selectedSubjects.includes(subjectName)) {
+                upd('subjects', selectedSubjects.filter(s => s !== subjectName))
+              } else {
+                upd('subjects', [...selectedSubjects, subjectName])
+              }
+            }
+            return (
+              <div className="fg">
+                <label className="fl">Subjects ({selectedSubjects.length} selected)</label>
+                <div style={{
+                  border: '1px solid var(--border)', borderRadius: 8, padding: 10,
+                  maxHeight: 320, overflowY: 'auto', background: '#FFF',
+                }}>
+                  {teacherSubjects.length === 0 ? (
+                    <div style={{ fontSize: 12, color: 'var(--s500)', textAlign: 'center', padding: 12 }}>
+                      No subjects available for selected curricula
+                    </div>
+                  ) : (
+                    Object.entries(teacherSubjectsByCategory).map(([category, subs]) => (
+                      <div key={category} style={{ marginBottom: 12 }}>
+                        <div style={{
+                          fontSize: 10.5, fontWeight: 800, letterSpacing: '.08em',
+                          textTransform: 'uppercase', color: 'var(--crimson, #7D1025)',
+                          marginBottom: 6, paddingBottom: 4, borderBottom: '1px solid var(--border)',
+                        }}>{category}</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 4 }}>
+                          {subs.map(s => {
+                            const checked = selectedSubjects.includes(s.name)
+                            return (
+                              <label key={s.id} style={{
+                                display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px',
+                                fontSize: 12.5, cursor: 'pointer', borderRadius: 4,
+                                background: checked ? '#FBF6E3' : 'transparent',
+                              }}>
+                                <input type="checkbox" checked={checked} onChange={() => toggle(s.name)} style={{ cursor: 'pointer', accentColor: '#7D1025' }} />
+                                <span style={{ color: checked ? '#7D1025' : 'var(--s700)', fontWeight: checked ? 600 : 400 }}>{s.name}</span>
+                              </label>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )
+          })()}
+ 
+          {/* ── New teacher profile fields ── */}
+          <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--crimson, #7D1025)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+              Teaching Profile
+            </div>
+ 
+            <div className="fr2">
+              <div className="fg">
+                <label className="fl">Years of Experience</label>
+                <input
+                  className="fi"
+                  type="number"
+                  min="0"
+                  max="70"
+                  value={userForm.yearsOfExperience || 0}
+                  onChange={e => upd('yearsOfExperience', parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="fg">
+                <label className="fl">Photo URL (optional)</label>
+                <input
+                  className="fi"
+                  value={userForm.avatar || ''}
+                  onChange={e => upd('avatar', e.target.value)}
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+ 
+            <div className="fg">
+              <label className="fl">Bio</label>
+              <textarea
+                className="fi"
+                rows={3}
+                value={userForm.bio || ''}
+                onChange={e => upd('bio', e.target.value)}
+                placeholder="Brief intro shown to students and parents..."
+                maxLength={1000}
+                style={{ resize: 'vertical', fontFamily: 'inherit' }}
+              />
+              <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                {(userForm.bio || '').length}/1000 characters
+              </div>
+            </div>
+ 
+            {/* Qualifications chip-input */}
+            <div className="fg">
+              <label className="fl">Qualifications ({(userForm.qualifications || []).length})</label>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+                <input
+                  className="fi"
+                  value={qualInput}
+                  onChange={e => setQualInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChip('qualifications', qualInput, setQualInput) } }}
+                  placeholder="e.g. B.Ed. Mathematics, University of Nairobi 2022"
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => addChip('qualifications', qualInput, setQualInput)}
+                  className="btn btn-s btn-sm"
+                  style={{ flexShrink: 0 }}
+                >+ Add</button>
+              </div>
+              {(userForm.qualifications || []).length > 0 && (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {(userForm.qualifications || []).map((q, i) => (
+                    <span key={i} style={chipStyle}>
+                      {q}
+                      <button
+                        type="button"
+                        onClick={() => removeChip('qualifications', i)}
+                        style={chipRemoveStyle}
+                        aria-label="Remove"
+                      >×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+ 
+            {/* Certifications chip-input */}
+            <div className="fg">
+              <label className="fl">Certifications ({(userForm.certifications || []).length})</label>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+                <input
+                  className="fi"
+                  value={certInput}
+                  onChange={e => setCertInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChip('certifications', certInput, setCertInput) } }}
+                  placeholder="e.g. Cambridge IGCSE Mathematics certified"
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => addChip('certifications', certInput, setCertInput)}
+                  className="btn btn-s btn-sm"
+                  style={{ flexShrink: 0 }}
+                >+ Add</button>
+              </div>
+              {(userForm.certifications || []).length > 0 && (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {(userForm.certifications || []).map((c, i) => (
+                    <span key={i} style={chipStyle}>
+                      {c}
+                      <button type="button" onClick={() => removeChip('certifications', i)} style={chipRemoveStyle}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+ 
+            {/* Specializations chip-input */}
+            <div className="fg">
+              <label className="fl">Specializations ({(userForm.specializations || []).length})</label>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+                <input
+                  className="fi"
+                  value={specInput}
+                  onChange={e => setSpecInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addChip('specializations', specInput, setSpecInput) } }}
+                  placeholder="e.g. Calculus, Mechanics, Past paper exam coaching"
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => addChip('specializations', specInput, setSpecInput)}
+                  className="btn btn-s btn-sm"
+                  style={{ flexShrink: 0 }}
+                >+ Add</button>
+              </div>
+              {(userForm.specializations || []).length > 0 && (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {(userForm.specializations || []).map((s, i) => (
+                    <span key={i} style={chipStyle}>
+                      {s}
+                      <button type="button" onClick={() => removeChip('specializations', i)} style={chipRemoveStyle}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+ 
+      {/* ── PARENT FIELDS ── */}
+      {userForm.role === 'parent' && (
+        <>
+          <div className="fg">
+            <label className="fl">Brief Bio</label>
+            <textarea className="fi" rows={3} value={userForm.bio || ''} onChange={e => upd('bio', e.target.value)} placeholder="Optional notes..." style={{ resize: 'vertical', fontFamily: 'inherit' }} />
+          </div>
+ 
+          <div className="fg">
+            <label className="fl">Photo URL (optional)</label>
+            <input
+              className="fi"
+              value={userForm.avatar || ''}
+              onChange={e => upd('avatar', e.target.value)}
+              placeholder="https://..."
+            />
+          </div>
+ 
+          {/* Linked Students by admission number */}
+          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--crimson, #7D1025)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+              Linked Children
+            </div>
+ 
+            <div className="fg">
+              <label className="fl">Add a student by admission number</label>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input
+                  className="fi"
+                  value={admissionInput}
+                  onChange={e => setAdmissionInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddStudent() } }}
+                  placeholder="e.g. SH/2026/001"
+                  style={{ flex: 1, fontFamily: 'JetBrains Mono, monospace' }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddStudent}
+                  disabled={admissionLooking || !admissionInput.trim()}
+                  className="btn btn-p btn-sm"
+                  style={{ flexShrink: 0 }}
+                >
+                  {admissionLooking ? '...' : '+ Add'}
+                </button>
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                Find a student's admission number on their user profile.
+              </div>
+            </div>
+ 
+            {linkedStudentDetails.length > 0 && (
+              <div className="fg">
+                <label className="fl">Linked children ({linkedStudentDetails.length})</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {linkedStudentDetails.map(s => (
+                    <div key={s._id} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '8px 12px',
+                      background: '#FBF6E3',
+                      border: '1px solid #C9A030',
+                      borderRadius: 8,
+                    }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)' }}>
+                          {s.firstName} {s.lastName}
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--s500)', fontFamily: 'JetBrains Mono, monospace' }}>
+                          {s.admissionNumber || 'No admission number'}
+                          {s.gradeLevel && ' · ' + s.gradeLevel}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeLinkedStudent(s._id)}
+                        style={{
+                          background: 'transparent',
+                          border: '1px solid #FCA5A5',
+                          color: '#DC2626',
+                          width: 26, height: 26,
+                          borderRadius: 6,
+                          cursor: 'pointer',
+                          fontSize: 14,
+                          flexShrink: 0,
+                        }}
+                      >×</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+ 
+      <div style={{ background: 'var(--cream, #FBFAF5)', border: '1px solid var(--border)', padding: 12, borderRadius: 8, fontSize: 12, color: 'var(--s600)', lineHeight: 1.6, marginTop: 12 }}>
+        {userForm._id
+          ? 'Changes will apply immediately when you click Update.'
+          : 'A temporary password will be generated automatically and emailed to the user. They will be required to change it on first login.'}
+      </div>
     </div>
   )
-
-  return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <div className="sec-tag">Accounts</div>
-          <h2 className="serif" style={{ fontSize: 24, color: 'var(--s900)' }}>User <em style={{ color: 'var(--crimson, #7D1025)' }}>Management</em></h2>
-          <p style={{ color: 'var(--s500)', fontSize: 13.5, marginTop: 3 }}>Add, edit, suspend or delete users · {counts.total} total</p>
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button className="btn btn-s btn-sm" onClick={() => toast.info('Exporting CSV...')}>Export</button>
-          <button className="btn btn-p btn-sm" onClick={() => openAddUser('student')}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add User
-          </button>
-        </div>
-      </div>
-
-      <div className="kpi-row">
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('all')}>
-          <div className="kpi-v">{counts.total}</div>
-          <div className="kpi-l">Total Users</div>
-          <div className="kpi-d" style={{ color: 'var(--s500)' }}>All roles</div>
-        </div>
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('student')}>
-          <div className="kpi-v">{counts.students}</div>
-          <div className="kpi-l">Students</div>
-        </div>
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('teacher')}>
-          <div className="kpi-v">{counts.teachers}</div>
-          <div className="kpi-l">Teachers</div>
-        </div>
-        <div className="kpi" style={{ cursor: 'pointer' }} onClick={() => setRoleFilter('parent')}>
-          <div className="kpi-v">{counts.parents}</div>
-          <div className="kpi-l">Parents</div>
-        </div>
-        <div className="kpi" style={{ cursor: counts.pending > 0 ? 'pointer' : 'default', borderColor: counts.pending > 0 ? 'var(--a100)' : undefined }} onClick={() => counts.pending > 0 && setStatusFilter('pending')}>
-          <div className="kpi-v" style={{ color: counts.pending > 0 ? 'var(--a600)' : undefined }}>{counts.pending}</div>
-          <div className="kpi-l">Pending Login</div>
-        </div>
-      </div>
-
-      <div className="card" style={{ padding: '14px 16px', margin: '14px 0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span className="ctitle" style={{ marginRight: 4 }}>Role:</span>
-          {[
-            { id: 'all', label: 'All', count: counts.total },
-            { id: 'student', label: 'Students', count: counts.students },
-            { id: 'teacher', label: 'Teachers', count: counts.teachers },
-            { id: 'parent', label: 'Parents', count: counts.parents },
-            { id: 'admin', label: 'Admins', count: counts.admins },
-          ].map(c => (
-            <button key={c.id} onClick={() => setRoleFilter(c.id)} style={{
-              background: roleFilter === c.id ? 'var(--crimson, #7D1025)' : 'var(--bg)',
-              color: roleFilter === c.id ? '#fff' : 'var(--s700)',
-              border: '1px solid ' + (roleFilter === c.id ? 'transparent' : 'var(--border)'),
-              padding: '6px 12px', borderRadius: 99, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}>
-              {c.label}
-              <span style={{ background: roleFilter === c.id ? 'rgba(255,255,255,.2)' : 'var(--s100)', padding: '1px 7px', borderRadius: 99, fontSize: 11 }}>{c.count}</span>
-            </button>
-          ))}
-          <select className="fsel" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ width: 'auto', padding: '6px 10px', fontSize: 12.5 }}>
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="pending">Pending Login</option>
-            <option value="suspended">Suspended</option>
-          </select>
-          <input className="fi" placeholder="Search name or email..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 220, marginLeft: 'auto' }} />
-        </div>
-      </div>
-
-      {users.length === 0 ? (
-        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s600)', marginBottom: 6 }}>No users yet</div>
-          <div style={{ fontSize: 12, color: 'var(--s400)', marginBottom: 14 }}>Click "Add User" to create the first account</div>
-          <button className="btn btn-p btn-sm" onClick={() => openAddUser('student')}>Add First User</button>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--s600)' }}>No users match your filters</div>
-          <button className="btn btn-s btn-sm" style={{ marginTop: 14 }} onClick={() => { setRoleFilter('all'); setStatusFilter('all'); setSearch('') }}>Clear filters</button>
-        </div>
-      ) : (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table className="tbl" style={{ minWidth: 900 }}>
-              <thead>
-                <tr><th>User</th><th>Role</th><th>Curriculum</th><th>Plan</th><th>Status</th><th style={{ width: 140, textAlign: 'center' }}>Actions</th></tr>
-              </thead>
-              <tbody>
-                {filtered.map(u => {
-                  const fullName = (u.firstName || '') + ' ' + (u.lastName || '')
-                  const init = initials(u.firstName, u.lastName)
-                  return (
-                    <tr key={u._id}>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <Av init={init} col={avColor(fullName)} size={36} />
-                          <div>
-                            <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{fullName.trim() || 'Unnamed'}</div>
-                            <div style={{ fontSize: 11.5, color: 'var(--s400)' }}>{u.email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span className="badge" style={{ color: 'var(--crimson, #7D1025)', borderColor: 'var(--b100)', background: 'var(--b50)', textTransform: 'capitalize' }}>{u.role}</span></td>
-                      <td style={{ color: 'var(--s500)', fontSize: 13 }}>
-                        {Array.isArray(u.curriculum) ? u.curriculum.join(', ') : (u.curriculum || 'N/A')}
-                      </td>
-                      <td><PlanBadge p={u.plan || 'Basic'} /></td>
-                      <td>
-                        {u.isActive === false ? <span className="badge" style={{ color: 'var(--r700)', background: 'var(--r50)', borderColor: 'var(--r100)' }}>Suspended</span> :
-                          u.mustChangePassword ? <span className="badge" style={{ color: 'var(--a600)', background: 'var(--a50)', borderColor: 'var(--a100)' }}>Pending Login</span> :
-                          <span className="badge" style={{ color: 'var(--g700)', background: 'var(--g50)', borderColor: 'var(--g100)' }}>Active</span>
-                        }
-                      </td>
-                      <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
-                        <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
-                          <button className="btn btn-g btn-sm" onClick={() => handleEdit(u)}>Edit</button>
-                          <button className="btn btn-d btn-sm" onClick={() => handleDelete(u)}>Delete</button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-    </>
-  )
 }
+ 
 
 // ═══════════════════════════════════════════════════════════
 // 4. TEACHERS MODULE
