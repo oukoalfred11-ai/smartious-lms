@@ -5373,26 +5373,21 @@ function CommunicationTab({ user, store, setPage, toast }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// TEACHER DASHBOARD — Premium daily home screen
+// TEACHER DASHBOARD — wired to real backend data
 // ═══════════════════════════════════════════════════════════
-// Theme: Smartious crimson (#7D1025) + gold (#C9A030) + cream (#FBFAF5)
-//
-// Architecture: A premium dashboard answers 3 questions in 3 seconds:
-// 1. What's happening RIGHT NOW?
-// 2. What's important TODAY?
-// 3. How am I doing?
-
+ 
 const dbGreeting = () => {
   const h = new Date().getHours()
   if (h < 12) return 'Good morning'
   if (h < 17) return 'Good afternoon'
   return 'Good evening'
 }
-
+ 
 const dbFormatTime = (d) => d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
 const dbFormatDate = (d) => d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
-
+ 
 const dbTimeAgo = (iso) => {
+  if (!iso) return ''
   const diff = Date.now() - new Date(iso).getTime()
   const mins = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
@@ -5404,115 +5399,188 @@ const dbTimeAgo = (iso) => {
   if (days < 7) return days + 'd ago'
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
-
+ 
 const dbSubjColor = (subject) => {
   const map = {
     'Mathematics': '#7D1025', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
     'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
+    'Geography': '#0F766E', 'Computer Science': '#1F2937',
+    'Business Studies': '#7E22CE', 'Economics': '#9F1239',
   }
   return map[subject] || '#7D1025'
 }
-
+ 
 const dbAvatarColor = (name) => {
   const colors = ['#7D1025', '#8B1A2E', '#C9A030', '#1E3A8A', '#166534', '#7C2D12']
   let hash = 0
-  for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
+  for (let i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
   return colors[Math.abs(hash) % colors.length]
 }
-
+ 
 const dbInitials = (name) => (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || '?'
-
-// Sample today's schedule (would come from backend in production)
-const dbTodaysSchedule = () => {
-  const now = new Date()
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  return [
-    { id: 'c1', startMinutes: 9 * 60,    durationMins: 60, subject: 'Mathematics', topic: 'Quadratic equations',     yearGroup: 'IGCSE Year 10', students: 8 },
-    { id: 'c2', startMinutes: 11 * 60,   durationMins: 60, subject: 'Mathematics', topic: 'Trigonometry',            yearGroup: 'IGCSE Year 11', students: 6 },
-    { id: 'c3', startMinutes: 14 * 60,   durationMins: 45, subject: 'Mathematics', topic: 'Algebraic fractions',     yearGroup: 'IGCSE Year 10', students: 8 },
-    { id: 'c4', startMinutes: 16 * 60,   durationMins: 60, subject: 'Mathematics', topic: 'Geometry · Pythagoras',   yearGroup: 'IGCSE Year 11', students: 6 },
-  ].map(c => ({
-    ...c,
-    startAt: new Date(today.getTime() + c.startMinutes * 60000),
-    endAt: new Date(today.getTime() + (c.startMinutes + c.durationMins) * 60000),
-  }))
+ 
+// Schedule string parser (same as live classes tab)
+const dbParseSchedule = (s) => {
+  if (!s || typeof s !== 'string') return null
+  const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 }
+  const parts = s.trim().split(/\s+(?=\d)/)
+  if (parts.length < 2) return null
+  const dayMatches = parts[0].toLowerCase().match(/sun|mon|tue|wed|thu|fri|sat/g)
+  if (!dayMatches) return null
+  const days = []
+  dayMatches.forEach(d => { if (dayMap[d] !== undefined && !days.includes(dayMap[d])) days.push(dayMap[d]) })
+  const timeMatch = parts.slice(1).join(' ').match(/(\d{1,2}):?(\d{0,2})\s*(am|pm)?\s*[-–—]\s*(\d{1,2}):?(\d{0,2})\s*(am|pm)/i)
+  if (!timeMatch) return null
+  let startH = parseInt(timeMatch[1], 10)
+  const startM = parseInt(timeMatch[2] || '0', 10)
+  const startMer = (timeMatch[3] || timeMatch[6]).toLowerCase()
+  let endH = parseInt(timeMatch[4], 10)
+  const endM = parseInt(timeMatch[5] || '0', 10)
+  const endMer = timeMatch[6].toLowerCase()
+  const to24 = (h, mer) => mer === 'pm' && h < 12 ? h + 12 : (mer === 'am' && h === 12 ? 0 : h)
+  return {
+    days,
+    startMins: to24(startH, startMer) * 60 + startM,
+    endMins: to24(endH, endMer) * 60 + endM,
+  }
 }
-
-const dbClassStatus = (cls) => {
-  const now = Date.now()
-  if (now < cls.startAt.getTime()) return 'upcoming'
-  if (now < cls.endAt.getTime()) return 'live'
-  return 'done'
-}
-
+ 
 function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUploadModal }) {
-  const teacherFirstName = user?.firstName || 'James'
-  const teacherLastName = user?.lastName || 'Muthomi'
-  const teacherFullName = ('Mr. ' + teacherFirstName + ' ' + teacherLastName).trim()
-
+  const teacherFirstName = user?.firstName || 'Teacher'
+  const teacherLastName = user?.lastName || ''
+  const teacherFullName = (teacherFirstName + ' ' + teacherLastName).trim()
+  const teacherDisplayName = (teacherFullName || 'Teacher').trim()
+ 
   const [now, setNow] = useState(new Date())
-
-  // Real class count from backend (Today's Classes KPI)
-  const [realClassCount, setRealClassCount] = useState(null)
-  useEffect(() => {
-    api.get('/grouprooms')
-      .then(res => setRealClassCount(res.data?.rooms?.length || 0))
-      .catch(() => setRealClassCount(0))
-  }, [])
-
+ 
   // Live clock
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 30000)
     return () => clearInterval(interval)
   }, [])
-
-  const schedule = dbTodaysSchedule()
-  const liveClass = schedule.find(c => dbClassStatus(c) === 'live')
-  const nextClass = schedule.find(c => dbClassStatus(c) === 'upcoming')
-  const doneClasses = schedule.filter(c => dbClassStatus(c) === 'done')
-
-  // Read student data from My Students module
-  const allStudents = (() => {
-    try { return JSON.parse(localStorage.getItem('sm_teacher_students') || '[]') } catch { return [] }
+ 
+  // ── REAL DATA: Rooms, Homework, Submissions ──
+  const [rooms, setRooms] = useState(null)
+  const [homework, setHomework] = useState([])
+  const [ungradedCount, setUngradedCount] = useState(0)
+  const [loading, setLoading] = useState(true)
+ 
+  useEffect(() => {
+    let cancelled = false
+    const loadAll = async () => {
+      try {
+        // Fetch rooms
+        const roomsRes = await api.get('/grouprooms')
+        const allRooms = roomsRes.data?.rooms || []
+        // Filter to MY rooms
+        const myRooms = allRooms.filter(r => {
+          if (!r.teacher) return false
+          const tid = typeof r.teacher === 'object' ? r.teacher._id : r.teacher
+          return tid?.toString() === user?._id?.toString()
+        })
+        if (!cancelled) setRooms(myRooms)
+ 
+        // Fetch homework I created
+        const hwRes = await api.get('/homework?createdBy=me')
+        const myHomework = hwRes.data?.homework || []
+        if (cancelled) return
+        setHomework(myHomework)
+ 
+        // For each homework, fetch submissions to count ungraded
+        // (Backend GET /homework/:id/submissions returns submissions for one hw)
+        let totalUngraded = 0
+        for (const hw of myHomework) {
+          if (hw.status !== 'published') continue
+          try {
+            const subsRes = await api.get('/homework/' + hw._id + '/submissions')
+            const subs = subsRes.data?.submissions || []
+            // Count submissions where status is 'submitted' (not yet graded or released)
+            const ungraded = subs.filter(s => s.status === 'submitted').length
+            totalUngraded += ungraded
+          } catch (e) { /* skip individual failures */ }
+          if (cancelled) return
+        }
+        if (!cancelled) setUngradedCount(totalUngraded)
+      } catch (e) {
+        console.error('[dashboard] load failed:', e.message)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    loadAll()
+    // refresh every 60s
+    const id = setInterval(loadAll, 60000)
+    return () => { cancelled = true; clearInterval(id) }
+  }, [user?._id])
+ 
+  // ── DERIVED: Student count (unique across all my rooms) ──
+  const uniqueStudents = (() => {
+    if (!rooms) return null
+    const seen = new Set()
+    rooms.forEach(r => {
+      if (Array.isArray(r.students)) {
+        r.students.forEach(s => {
+          const id = typeof s === 'object' ? s?._id : s
+          if (id) seen.add(String(id))
+        })
+      }
+    })
+    return seen.size
   })()
-
-  // Read homework data
-  const allHomework = (() => {
-    try { return JSON.parse(localStorage.getItem('sm_homework_assigned') || '[]') } catch { return [] }
+ 
+  // ── DERIVED: Today's schedule from real rooms ──
+  const todaysSchedule = (() => {
+    if (!rooms) return []
+    const today = now.getDay()
+    const items = []
+    rooms.forEach(r => {
+      const parsed = dbParseSchedule(r.schedule)
+      if (!parsed) return
+      if (!parsed.days.includes(today)) return
+      const startAt = new Date(now)
+      startAt.setHours(Math.floor(parsed.startMins / 60), parsed.startMins % 60, 0, 0)
+      const endAt = new Date(now)
+      endAt.setHours(Math.floor(parsed.endMins / 60), parsed.endMins % 60, 0, 0)
+      items.push({
+        _id: r._id,
+        startAt,
+        endAt,
+        startMinutes: parsed.startMins,
+        durationMins: Math.max(1, parsed.endMins - parsed.startMins),
+        subject: r.subject,
+        topic: r.name,
+        yearGroup: (r.curriculum || '') + (r.grade ? ' · ' + r.grade : ''),
+        students: Array.isArray(r.students) ? r.students.length : 0,
+        zoomLink: r.zoomLink,
+        zoomStartedAt: r.zoomStartedAt,
+      })
+    })
+    items.sort((a, b) => a.startMinutes - b.startMinutes)
+    return items
   })()
-
-  // Read exam data
-  const allExams = (() => {
-    try { return JSON.parse(localStorage.getItem('sm_exam_assignments') || '[]') } catch { return [] }
-  })()
-
-  // Read messages
-  const allMessages = (() => {
-    try { return JSON.parse(localStorage.getItem('sm_messages') || '[]') } catch { return [] }
-  })()
-
-  // Compute stats
-  const atRiskStudents = allStudents.filter(s => s.status === 'at-risk' || s.status === 'needs-help')
-  const ungraded = allHomework.reduce((sum, hw) => {
-    const subs = (hw.submissions || []).filter(s => s.grade === null || s.grade === undefined).length
-    return sum + subs
-  }, 0)
-  const liveExams = allExams.filter(e => {
-    const start = new Date(e.startAt).getTime()
-    const end = start + (e.durationMins * 60000)
-    return Date.now() >= start && Date.now() < end
-  }).length
-  const unreadMessages = allMessages.filter(m => !m.read && m.from !== teacherFullName).length
-
-  // Compute the "RIGHT NOW" hero card content
+ 
+  const dbClassStatus = (cls) => {
+    const t = Date.now()
+    if (t < cls.startAt.getTime()) return 'upcoming'
+    if (t < cls.endAt.getTime()) return 'live'
+    return 'done'
+  }
+ 
+  const liveClass = todaysSchedule.find(c => dbClassStatus(c) === 'live')
+  const nextClass = todaysSchedule.find(c => dbClassStatus(c) === 'upcoming')
+  const doneClasses = todaysSchedule.filter(c => dbClassStatus(c) === 'done')
+ 
+  // ── RIGHT NOW hero card ──
   const rightNowItem = (() => {
     if (liveClass) {
+      const teacherStarted = !!(liveClass.zoomLink && liveClass.zoomStartedAt &&
+        (Date.now() - new Date(liveClass.zoomStartedAt).getTime()) < 3 * 60 * 60 * 1000)
       return {
         type: 'live-class',
-        title: 'Class is live now',
-        subtitle: liveClass.subject + ' · ' + liveClass.topic + ' · ' + liveClass.yearGroup,
-        action: 'Re-enter Class',
-        actionPage: 'classroom',
+        title: teacherStarted ? 'Class is live now' : 'Scheduled class — start it',
+        subtitle: liveClass.subject + ' · ' + liveClass.topic + ' · ' + dbFormatTime(liveClass.startAt),
+        action: teacherStarted ? 'Re-enter Class' : 'Start Class',
+        actionPage: 'liveclass',
         urgency: 'live',
       }
     }
@@ -5524,38 +5592,18 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
           title: 'Class starts in ' + minsUntil + ' minutes',
           subtitle: nextClass.subject + ' · ' + nextClass.topic + ' · ' + dbFormatTime(nextClass.startAt),
           action: 'Prepare to Teach',
-          actionPage: 'classroom',
+          actionPage: 'liveclass',
           urgency: 'soon',
         }
       }
     }
-    if (atRiskStudents.length > 0) {
-      return {
-        type: 'at-risk',
-        title: atRiskStudents.length + ' student' + (atRiskStudents.length === 1 ? '' : 's') + ' need your attention',
-        subtitle: atRiskStudents.map(s => s.name).slice(0, 3).join(', ') + (atRiskStudents.length > 3 ? ', and others' : ''),
-        action: 'View Students',
-        actionPage: 'students',
-        urgency: 'warning',
-      }
-    }
-    if (ungraded > 0) {
+    if (ungradedCount > 0) {
       return {
         type: 'grading',
-        title: ungraded + ' submission' + (ungraded === 1 ? '' : 's') + ' need grading',
+        title: ungradedCount + ' submission' + (ungradedCount === 1 ? '' : 's') + ' need grading',
         subtitle: 'Students are waiting for feedback on their homework',
         action: 'Start Grading',
-        actionPage: 'marking',
-        urgency: 'normal',
-      }
-    }
-    if (unreadMessages > 0) {
-      return {
-        type: 'messages',
-        title: unreadMessages + ' unread message' + (unreadMessages === 1 ? '' : 's'),
-        subtitle: 'Parents and students are waiting for replies',
-        action: 'Open Messages',
-        actionPage: 'communication',
+        actionPage: 'homework',
         urgency: 'normal',
       }
     }
@@ -5563,42 +5611,46 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
       type: 'all-clear',
       title: 'You are all caught up',
       subtitle: nextClass ? 'Next class: ' + nextClass.subject + ' at ' + dbFormatTime(nextClass.startAt) : 'No more classes today',
-      action: nextClass ? 'View Schedule' : 'Plan Tomorrow',
-      actionPage: nextClass ? 'classroom' : 'questionbank',
+      action: nextClass ? 'View Schedule' : 'Plan New Homework',
+      actionPage: nextClass ? 'liveclass' : 'homework',
       urgency: 'good',
     }
   })()
-
+ 
   const urgencyColors = {
-    live:    { bg: '#7F1D1D',     accent: '#FCA5A5', text: '#FBFAF5' },
-    soon:    { bg: '#7D1025',     accent: '#F0CC5A', text: '#FBFAF5' },
-    warning: { bg: '#92400E',     accent: '#FCD34D', text: '#FBFAF5' },
-    normal:  { bg: '#7D1025',     accent: '#F0CC5A', text: '#FBFAF5' },
-    good:    { bg: '#166534',     accent: '#86EFAC', text: '#FBFAF5' },
+    live:    { bg: '#7F1D1D', accent: '#FCA5A5', text: '#FBFAF5' },
+    soon:    { bg: '#7D1025', accent: '#F0CC5A', text: '#FBFAF5' },
+    warning: { bg: '#92400E', accent: '#FCD34D', text: '#FBFAF5' },
+    normal:  { bg: '#7D1025', accent: '#F0CC5A', text: '#FBFAF5' },
+    good:    { bg: '#166534', accent: '#86EFAC', text: '#FBFAF5' },
   }
   const uColor = urgencyColors[rightNowItem.urgency]
-
+ 
+  // Upcoming homework deadlines (next 3)
+  const upcomingHomework = homework
+    .filter(hw => hw.status === 'published' && hw.dueAt && new Date(hw.dueAt) > new Date())
+    .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))
+    .slice(0, 3)
+ 
   return (
     <div>
-      {/* ─── GREETING ROW ─── */}
+      {/* GREETING ROW */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
             {dbFormatDate(now)} · {dbFormatTime(now)}
           </div>
-          <h1 style={{
-            fontFamily: "'Instrument Serif', serif",
-            fontSize: 32, fontWeight: 400, color: 'var(--s900)',
-            margin: 0, lineHeight: 1.15,
-          }}>
-            {dbGreeting()}, <em style={{ color: '#7D1025' }}>{teacherFullName}</em>
+          <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 32, fontWeight: 400, color: 'var(--s900)', margin: 0, lineHeight: 1.15 }}>
+            {dbGreeting()}, <em style={{ color: '#7D1025' }}>{teacherDisplayName}</em>
           </h1>
           <div style={{ fontSize: 13.5, color: 'var(--s500)', marginTop: 4 }}>
-            Mathematics · IGCSE · Smartious E-School Nairobi
+            {rooms && rooms.length > 0
+              ? Array.from(new Set(rooms.map(r => r.subject).filter(Boolean))).slice(0, 3).join(' · ') + ' · Smartious E-School'
+              : 'Smartious E-School'}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button onClick={() => setPage('exambuilder')}
+          <button onClick={() => setPage('homework')}
             style={{
               background: 'transparent', color: '#7D1025',
               border: '1.5px solid #7D1025',
@@ -5609,9 +5661,9 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            New Exam
+            New Homework
           </button>
-          <button onClick={() => setPage('classroom')}
+          <button onClick={() => setPage('liveclass')}
             style={{
               background: '#7D1025', color: '#FBFAF5', border: 'none',
               padding: '10px 18px', borderRadius: 'var(--rmd)',
@@ -5622,30 +5674,25 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <polygon points="5 3 19 12 5 21 5 3"/>
             </svg>
-            Enter Live Class
+            Live Classes
           </button>
         </div>
       </div>
-
-      {/* ─── "RIGHT NOW" HERO CARD ─── */}
+ 
+      {/* RIGHT NOW HERO */}
       <div style={{
         background: 'linear-gradient(135deg, ' + uColor.bg + ' 0%, ' + uColor.bg + 'EE 100%)',
-        color: uColor.text,
-        borderRadius: 'var(--rxl)',
-        padding: '28px 32px',
-        marginBottom: 16,
-        position: 'relative',
-        overflow: 'hidden',
+        color: uColor.text, borderRadius: 'var(--rxl)',
+        padding: '28px 32px', marginBottom: 16,
+        position: 'relative', overflow: 'hidden',
         boxShadow: '0 12px 32px rgba(125,16,37,.18)',
       }}>
-        {/* Decorative accent */}
         <div style={{
           position: 'absolute', top: -40, right: -40,
           width: 200, height: 200, borderRadius: '50%',
           background: uColor.accent, opacity: .15,
           pointerEvents: 'none',
         }}/>
-
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', position: 'relative' }}>
           <div style={{ flex: 1, minWidth: 260 }}>
             <div style={{
@@ -5663,24 +5710,19 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
               )}
               {rightNowItem.urgency === 'live' ? 'LIVE NOW' :
                rightNowItem.urgency === 'soon' ? 'STARTING SOON' :
-               rightNowItem.urgency === 'warning' ? 'NEEDS ATTENTION' :
                rightNowItem.urgency === 'good' ? 'ALL CAUGHT UP' :
                'RIGHT NOW'}
             </div>
-            <h2 style={{
-              fontFamily: "'Instrument Serif', serif",
-              fontSize: 28, fontWeight: 400,
-              margin: 0, lineHeight: 1.2,
-            }}>{rightNowItem.title}</h2>
+            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
+              {rightNowItem.title}
+            </h2>
             <div style={{ fontSize: 14, opacity: .85, marginTop: 6 }}>{rightNowItem.subtitle}</div>
           </div>
           <button onClick={() => setPage(rightNowItem.actionPage)}
             style={{
               background: uColor.accent, color: uColor.bg,
-              border: 'none',
-              padding: '14px 28px', borderRadius: 'var(--rmd)',
-              fontSize: 14, fontWeight: 800,
-              cursor: 'pointer',
+              border: 'none', padding: '14px 28px', borderRadius: 'var(--rmd)',
+              fontSize: 14, fontWeight: 800, cursor: 'pointer',
               display: 'flex', alignItems: 'center', gap: 8,
               boxShadow: '0 4px 12px rgba(0,0,0,.2)',
               flexShrink: 0,
@@ -5692,19 +5734,39 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
           </button>
         </div>
       </div>
-
-      {/* ─── KPI STRIP ─── */}
+ 
+      {/* KPI STRIP */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: 12,
-        marginBottom: 16,
+        gap: 12, marginBottom: 16,
       }}>
         {[
-          { label: 'My Students', value: allStudents.length, change: '+2 this term', color: '#7D1025', icon: 'students', page: 'students' },
-          { label: 'Need Grading', value: ungraded, change: ungraded === 0 ? 'All caught up' : 'Awaiting your review', color: ungraded > 0 ? '#B45309' : '#15803D', icon: 'grade', page: 'marking' },
-          { label: 'My Classes', value: realClassCount === null ? '...' : realClassCount, change: realClassCount === 0 ? 'No classes assigned' : 'Active rooms in backend', color: '#7D1025', icon: 'class', page: 'liveclass' },
-          { label: 'Unread Messages', value: unreadMessages, change: unreadMessages === 0 ? 'Inbox clear' : 'From parents & students', color: unreadMessages > 0 ? '#7D1025' : '#15803D', icon: 'mail', page: 'communication' },
+          {
+            label: 'My Students',
+            value: uniqueStudents === null ? '...' : uniqueStudents,
+            change: uniqueStudents === null ? 'Loading...' : (uniqueStudents === 0 ? 'No students yet' : 'Across ' + (rooms?.length || 0) + ' room' + ((rooms?.length || 0) === 1 ? '' : 's')),
+            color: '#7D1025', icon: 'students', page: 'students',
+          },
+          {
+            label: 'Need Grading',
+            value: loading ? '...' : ungradedCount,
+            change: loading ? 'Loading...' : (ungradedCount === 0 ? 'All caught up' : 'Awaiting your review'),
+            color: ungradedCount > 0 ? '#B45309' : '#15803D',
+            icon: 'grade', page: 'homework',
+          },
+          {
+            label: 'My Classes',
+            value: rooms === null ? '...' : (rooms?.length || 0),
+            change: rooms === null ? 'Loading...' : ((rooms?.length || 0) === 0 ? 'No classes assigned' : 'Active rooms'),
+            color: '#7D1025', icon: 'class', page: 'liveclass',
+          },
+          {
+            label: 'Active Homework',
+            value: loading ? '...' : homework.filter(h => h.status === 'published').length,
+            change: loading ? 'Loading...' : 'Published assignments',
+            color: '#7D1025', icon: 'book', page: 'homework',
+          },
         ].map(kpi => (
           <div key={kpi.label} onClick={() => setPage(kpi.page)}
             style={{
@@ -5719,16 +5781,12 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
             }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = kpi.color; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(125,16,37,.1)' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-            <div style={{
-              fontSize: 10.5, fontWeight: 700,
-              letterSpacing: '.1em', textTransform: 'uppercase',
-              color: 'var(--s500)', marginBottom: 6,
-            }}>{kpi.label}</div>
-            <div style={{
-              fontFamily: "'Instrument Serif', serif",
-              fontSize: 36, fontWeight: 400, color: kpi.color,
-              lineHeight: 1, marginBottom: 4,
-            }}>{kpi.value}</div>
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>
+              {kpi.label}
+            </div>
+            <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 36, fontWeight: 400, color: kpi.color, lineHeight: 1, marginBottom: 4 }}>
+              {kpi.value}
+            </div>
             <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>{kpi.change}</div>
             <div style={{
               position: 'absolute', top: 16, right: 16,
@@ -5751,19 +5809,19 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
                   <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
                 </svg>
               )}
-              {kpi.icon === 'mail' && (
+              {kpi.icon === 'book' && (
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke={kpi.color} strokeWidth="2" strokeLinecap="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                 </svg>
               )}
             </div>
           </div>
         ))}
       </div>
-
-      {/* ─── MAIN GRID: SCHEDULE + ACTION QUEUE ─── */}
+ 
+      {/* MAIN GRID: SCHEDULE + ACTION QUEUE */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 380px)', gap: 14, marginBottom: 14 }}>
-        {/* Today's Schedule */}
+        {/* Today's Schedule from real rooms */}
         <div style={{
           background: '#FFF',
           border: '1.5px solid var(--border)',
@@ -5776,87 +5834,92 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
                 Today's Schedule
               </div>
               <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', margin: 0 }}>
-                {schedule.length} classes
+                {todaysSchedule.length === 0 ? 'No classes today' : todaysSchedule.length + ' class' + (todaysSchedule.length === 1 ? '' : 'es')}
               </h3>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--s500)' }}>
-              {doneClasses.length} done · {schedule.length - doneClasses.length} remaining
+            {todaysSchedule.length > 0 && (
+              <div style={{ fontSize: 12, color: 'var(--s500)' }}>
+                {doneClasses.length} done · {todaysSchedule.length - doneClasses.length} remaining
+              </div>
+            )}
+          </div>
+ 
+          {todaysSchedule.length === 0 ? (
+            <div style={{ padding: 24, textAlign: 'center', color: 'var(--s500)', fontSize: 13, fontStyle: 'italic' }}>
+              {rooms === null ? 'Loading...' :
+               (rooms.length === 0
+                 ? 'No rooms assigned. Ask admin to add you to a class.'
+                 : 'Your rooms have no schedule for today.')}
             </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {schedule.map(cls => {
-              const status = dbClassStatus(cls)
-              const subjCol = dbSubjColor(cls.subject)
-              return (
-                <div key={cls.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 14,
-                  padding: '14px 16px',
-                  background: status === 'live' ? '#FEE2E2' : status === 'done' ? '#FBFAF5' : '#FFF',
-                  border: '1.5px solid ' + (status === 'live' ? '#FCA5A5' : 'var(--border)'),
-                  borderLeft: '4px solid ' + (status === 'live' ? '#DC2626' : status === 'done' ? '#94A3B8' : subjCol),
-                  borderRadius: 'var(--rmd)',
-                  opacity: status === 'done' ? .65 : 1,
-                  cursor: status === 'live' ? 'pointer' : 'default',
-                }}
-                onClick={() => { if (status === 'live') setPage('classroom') }}>
-                  {/* Time */}
-                  <div style={{ minWidth: 70 }}>
-                    <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: status === 'done' ? 'var(--s400)' : 'var(--s900)' }}>
-                      {dbFormatTime(cls.startAt)}
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {todaysSchedule.map(cls => {
+                const status = dbClassStatus(cls)
+                const subjCol = dbSubjColor(cls.subject)
+                return (
+                  <div key={cls._id} style={{
+                    display: 'flex', alignItems: 'center', gap: 14,
+                    padding: '14px 16px',
+                    background: status === 'live' ? '#FEE2E2' : status === 'done' ? '#FBFAF5' : '#FFF',
+                    border: '1.5px solid ' + (status === 'live' ? '#FCA5A5' : 'var(--border)'),
+                    borderLeft: '4px solid ' + (status === 'live' ? '#DC2626' : status === 'done' ? '#94A3B8' : subjCol),
+                    borderRadius: 'var(--rmd)',
+                    opacity: status === 'done' ? .65 : 1,
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => setPage('liveclass')}>
+                    <div style={{ minWidth: 70 }}>
+                      <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: status === 'done' ? 'var(--s400)' : 'var(--s900)' }}>
+                        {dbFormatTime(cls.startAt)}
+                      </div>
+                      <div style={{ fontSize: 10.5, color: 'var(--s500)' }}>{cls.durationMins} min</div>
                     </div>
-                    <div style={{ fontSize: 10.5, color: 'var(--s500)' }}>{cls.durationMins} min</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', gap: 6, marginBottom: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <span style={{
+                          background: subjCol + '15', color: subjCol,
+                          fontSize: 9.5, fontWeight: 700, letterSpacing: '.06em',
+                          padding: '2px 7px', borderRadius: 99, textTransform: 'uppercase',
+                        }}>{cls.subject}</span>
+                        <span style={{ fontSize: 11, color: 'var(--s500)' }}>{cls.yearGroup}</span>
+                      </div>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{cls.topic}</div>
+                      <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 2 }}>{cls.students} student{cls.students === 1 ? '' : 's'}</div>
+                    </div>
+                    {status === 'live' && (
+                      <div style={{
+                        background: '#DC2626', color: '#FBFAF5',
+                        fontSize: 10, fontWeight: 800, letterSpacing: '.08em',
+                        padding: '4px 10px', borderRadius: 99,
+                        display: 'flex', alignItems: 'center', gap: 5,
+                      }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#FCA5A5', animation: 'pulse 1.5s infinite' }}/>
+                        LIVE
+                      </div>
+                    )}
+                    {status === 'done' && (
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#15803D', display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Done
+                      </span>
+                    )}
+                    {status === 'upcoming' && (
+                      <button onClick={e => { e.stopPropagation(); setPage('liveclass') }}
+                        style={{
+                          background: '#7D1025', color: '#FBFAF5', border: 'none',
+                          padding: '6px 12px', borderRadius: 'var(--rsm)',
+                          cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                        }}>Open</button>
+                    )}
                   </div>
-
-                  {/* Body */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', gap: 6, marginBottom: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-                      <span style={{
-                        background: subjCol + '15', color: subjCol,
-                        fontSize: 9.5, fontWeight: 700, letterSpacing: '.06em',
-                        padding: '2px 7px', borderRadius: 99, textTransform: 'uppercase',
-                      }}>{cls.subject}</span>
-                      <span style={{ fontSize: 11, color: 'var(--s500)' }}>{cls.yearGroup}</span>
-                    </div>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{cls.topic}</div>
-                    <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 2 }}>{cls.students} students</div>
-                  </div>
-
-                  {/* Status */}
-                  {status === 'live' && (
-                    <div style={{
-                      background: '#DC2626', color: '#FBFAF5',
-                      fontSize: 10, fontWeight: 800, letterSpacing: '.08em',
-                      padding: '4px 10px', borderRadius: 99,
-                      display: 'flex', alignItems: 'center', gap: 5,
-                    }}>
-                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#FCA5A5', animation: 'pulse 1.5s infinite' }}/>
-                      LIVE
-                    </div>
-                  )}
-                  {status === 'done' && (
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#15803D', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                      Done
-                    </span>
-                  )}
-                  {status === 'upcoming' && (
-                    <button
-                      onClick={e => { e.stopPropagation(); setPage('classroom') }}
-                      style={{
-                        background: '#7D1025', color: '#FBFAF5', border: 'none',
-                        padding: '6px 12px', borderRadius: 'var(--rsm)',
-                        cursor: 'pointer', fontSize: 11, fontWeight: 700,
-                      }}>Open</button>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </div>
-
+ 
         {/* Action Queue */}
         <div style={{
           background: '#FFF',
@@ -5872,16 +5935,18 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
               Things to do
             </h3>
           </div>
-
+ 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {ungraded > 0 && (
-              <div onClick={() => setPage('marking')} style={{
+            {ungradedCount > 0 && (
+              <div onClick={() => setPage('homework')} style={{
                 padding: 12, borderRadius: 'var(--rmd)', cursor: 'pointer',
                 background: '#FEF3C7', borderLeft: '3px solid #B45309',
                 display: 'flex', alignItems: 'center', gap: 10,
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13.5, color: '#7C2D12', marginBottom: 2 }}>Grade {ungraded} submission{ungraded === 1 ? '' : 's'}</div>
+                  <div style={{ fontWeight: 700, fontSize: 13.5, color: '#7C2D12', marginBottom: 2 }}>
+                    Grade {ungradedCount} submission{ungradedCount === 1 ? '' : 's'}
+                  </div>
                   <div style={{ fontSize: 11, color: '#92400E' }}>Students are waiting</div>
                 </div>
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#92400E" strokeWidth="2.5" strokeLinecap="round">
@@ -5889,48 +5954,64 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
                 </svg>
               </div>
             )}
-
-            {atRiskStudents.length > 0 && (
-              <div onClick={() => setPage('students')} style={{
+ 
+            {liveClass && (
+              <div onClick={() => setPage('liveclass')} style={{
                 padding: 12, borderRadius: 'var(--rmd)', cursor: 'pointer',
-                background: '#FEE2E2', borderLeft: '3px solid #B91C1C',
+                background: '#FEE2E2', borderLeft: '3px solid #DC2626',
                 display: 'flex', alignItems: 'center', gap: 10,
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13.5, color: '#7F1D1D', marginBottom: 2 }}>{atRiskStudents.length} student{atRiskStudents.length === 1 ? '' : 's'} need attention</div>
-                  <div style={{ fontSize: 11, color: '#991B1B' }}>{atRiskStudents.slice(0, 2).map(s => s.name).join(', ')}{atRiskStudents.length > 2 ? '...' : ''}</div>
+                  <div style={{ fontWeight: 700, fontSize: 13.5, color: '#7F1D1D', marginBottom: 2 }}>
+                    {liveClass.subject} class is live
+                  </div>
+                  <div style={{ fontSize: 11, color: '#991B1B' }}>Started at {dbFormatTime(liveClass.startAt)}</div>
                 </div>
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#991B1B" strokeWidth="2.5" strokeLinecap="round">
                   <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
               </div>
             )}
-
-            {unreadMessages > 0 && (
-              <div onClick={() => setPage('communication')} style={{
-                padding: 12, borderRadius: 'var(--rmd)', cursor: 'pointer',
-                background: '#FBE8E8', borderLeft: '3px solid #7D1025',
-                display: 'flex', alignItems: 'center', gap: 10,
-              }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13.5, color: '#7D1025', marginBottom: 2 }}>{unreadMessages} unread message{unreadMessages === 1 ? '' : 's'}</div>
-                  <div style={{ fontSize: 11, color: '#8B1A2E' }}>Reply to keep relationships warm</div>
-                </div>
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#7D1025" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
+ 
+            {ungradedCount === 0 && !liveClass && upcomingHomework.length === 0 && (
+              <div style={{ fontSize: 12, color: 'var(--s500)', fontStyle: 'italic', textAlign: 'center', padding: 18 }}>
+                Nothing to do right now
               </div>
             )}
-
+ 
+            {/* Upcoming homework deadlines */}
+            {upcomingHomework.length > 0 && (
+              <div style={{ marginTop: ungradedCount > 0 || liveClass ? 4 : 0 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: 'var(--s400)', textTransform: 'uppercase', marginBottom: 6 }}>
+                  Homework Due Soon
+                </div>
+                {upcomingHomework.map(hw => (
+                  <div key={hw._id} onClick={() => setPage('homework')} style={{
+                    padding: '8px 12px', borderRadius: 'var(--rsm)', cursor: 'pointer',
+                    fontSize: 12.5, marginBottom: 4,
+                    background: '#FBFAF5',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6,
+                  }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, color: 'var(--s800)' }}>{hw.title}</div>
+                      <div style={{ fontSize: 10.5, color: 'var(--s500)' }}>
+                        {hw.subject} · due {new Date(hw.dueAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+ 
             {/* Quick actions */}
             <div style={{ borderTop: '1px solid var(--border)', marginTop: 4, paddingTop: 12 }}>
               <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: 'var(--s400)', textTransform: 'uppercase', marginBottom: 8 }}>
                 Quick Actions
               </div>
               {[
-                { label: 'Browse Question Bank', page: 'questionbank', color: '#7D1025' },
-                { label: 'Schedule New Exam', page: 'exambuilder', color: '#7D1025' },
-                { label: 'Send Message', page: 'communication', color: '#7D1025' },
+                { label: 'Question Bank', page: 'questionbank', color: '#7D1025' },
+                { label: 'New Homework', page: 'homework', color: '#7D1025' },
+                { label: 'Live Classes', page: 'liveclass', color: '#7D1025' },
               ].map(a => (
                 <div key={a.label} onClick={() => setPage(a.page)} style={{
                   padding: '8px 12px', borderRadius: 'var(--rsm)', cursor: 'pointer',
@@ -5950,138 +6031,24 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
           </div>
         </div>
       </div>
-
-      {/* ─── CLASS HEALTH + RECENT STUDENTS ─── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
-        {/* Class Health */}
-        <div style={{
-          background: '#FFF',
-          border: '1.5px solid var(--border)',
-          borderRadius: 'var(--rxl)',
-          padding: 22,
-        }}>
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
-              Class Health
-            </div>
-            <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', margin: 0 }}>
-              How you're doing
-            </h3>
-          </div>
-
-          {[
-            { label: 'Average mastery', value: allStudents.length > 0 ? Math.round(allStudents.reduce((s, st) => s + (st.mastery || 0), 0) / allStudents.length) : 75, target: 75, suffix: '%' },
-            { label: 'Attendance this week', value: 92, target: 90, suffix: '%' },
-            { label: 'Homework completion', value: 87, target: 80, suffix: '%' },
-            { label: 'Parent satisfaction', value: 4.8, target: 4.5, suffix: '/5' },
-          ].map(metric => {
-            const isAbove = metric.value >= metric.target
-            const pct = metric.suffix === '/5' ? (metric.value / 5) * 100 : metric.value
-            return (
-              <div key={metric.label} style={{ marginBottom: 14 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 13, color: 'var(--s700)', fontWeight: 600 }}>{metric.label}</span>
-                  <span className="mono" style={{ fontSize: 13, fontWeight: 700, color: isAbove ? '#15803D' : '#B45309' }}>
-                    {metric.value}{metric.suffix}
-                  </span>
-                </div>
-                <div style={{ height: 6, background: '#FBFAF5', borderRadius: 3, overflow: 'hidden', position: 'relative' }}>
-                  <div style={{
-                    height: '100%',
-                    width: pct + '%',
-                    background: isAbove ? 'linear-gradient(90deg, #166534, #15803D)' : 'linear-gradient(90deg, #B45309, #C9A030)',
-                    borderRadius: 3,
-                  }}/>
-                </div>
-              </div>
-            )
-          })}
+ 
+      {/* CLASS HEALTH — placeholder */}
+      <div style={{
+        background: '#FBFAF5',
+        border: '1.5px dashed var(--border)',
+        borderRadius: 'var(--rxl)',
+        padding: 22,
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
+          Class Health
         </div>
-
-        {/* Top performers + Need help */}
-        <div style={{
-          background: '#FFF',
-          border: '1.5px solid var(--border)',
-          borderRadius: 'var(--rxl)',
-          padding: 22,
-        }}>
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
-              Spotlight
-            </div>
-            <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', margin: 0 }}>
-              Students this week
-            </h3>
-          </div>
-
-          {/* Top performer */}
-          {(() => {
-            const top = [...allStudents].sort((a, b) => (b.mastery || 0) - (a.mastery || 0))[0]
-            if (!top) return null
-            return (
-              <div onClick={() => setPage('students')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: 12, marginBottom: 10,
-                  background: '#FBFAF5', borderLeft: '3px solid #C9A030',
-                  borderRadius: 'var(--rsm)', cursor: 'pointer',
-                }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: '50%',
-                  background: dbAvatarColor(top.name), color: '#FBFAF5',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 700, fontSize: 13, flexShrink: 0,
-                }}>{top.initials || dbInitials(top.name)}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
-                    <span style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s900)' }}>{top.name}</span>
-                    <span style={{
-                      background: '#C9A030', color: '#7D1025',
-                      fontSize: 9, fontWeight: 800, letterSpacing: '.08em',
-                      padding: '1px 6px', borderRadius: 99,
-                    }}>TOP</span>
-                  </div>
-                  <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>{top.mastery}% mastery · {top.attendance}% attendance</div>
-                </div>
-              </div>
-            )
-          })()}
-
-          {/* At-risk students */}
-          {atRiskStudents.slice(0, 3).map(s => (
-            <div key={s.id} onClick={() => setPage('students')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: 12, marginBottom: 6,
-                borderLeft: '3px solid ' + (s.status === 'at-risk' ? '#B91C1C' : '#B45309'),
-                borderRadius: 'var(--rsm)', cursor: 'pointer',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#FBFAF5'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: dbAvatarColor(s.name), color: '#FBFAF5',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 700, fontSize: 12, flexShrink: 0,
-              }}>{s.initials || dbInitials(s.name)}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--s900)' }}>{s.name}</div>
-                <div style={{ fontSize: 11.5, color: s.status === 'at-risk' ? '#B91C1C' : '#B45309' }}>
-                  {s.status === 'at-risk' ? 'At risk' : 'Needs help'} · {s.mastery}% mastery
-                </div>
-              </div>
-              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="2" strokeLinecap="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </div>
-          ))}
-
-          {atRiskStudents.length === 0 && (
-            <div style={{ fontSize: 12, color: 'var(--s500)', fontStyle: 'italic', textAlign: 'center', padding: 18 }}>
-              No students need attention right now
-            </div>
-          )}
-        </div>
+        <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', margin: '0 0 6px' }}>
+          Coming soon
+        </h3>
+        <p style={{ fontSize: 13, color: 'var(--s500)', maxWidth: 480, margin: '0 auto', lineHeight: 1.55 }}>
+          Mastery tracking, attendance, homework completion, and parent satisfaction metrics will appear here once we have real data flowing through the system.
+        </p>
       </div>
     </div>
   )
