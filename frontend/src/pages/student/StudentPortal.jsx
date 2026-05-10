@@ -6796,12 +6796,6 @@ function HomeworkTab({ user, toast }) {
           return 'Question ' + (i + 1) + ': upload a file'
         }
       } else if (q.type === 'drawing') {
-        // For now, accept either an attachment or skip (drawing canvas not yet implemented)
-        if (!a || !a.attachment || !a.attachment.url) {
-          return 'Question ' + (i + 1) + ' (drawing): drawing answers come in next phase. Skip for now or upload an image.'
-        }
-      }
-     } else if (q.type === 'drawing') {
         if (!a || !a.attachment || !a.attachment.url) {
           return 'Question ' + (i + 1) + ' (drawing): please draw your answer'
         }
