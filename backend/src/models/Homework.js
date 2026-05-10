@@ -49,7 +49,7 @@ const homeworkSchema = new mongoose.Schema({
   // (so we can show "view in bank" but homework displays the snapshot).
   questions: [{
     questionId:    { type: mongoose.Schema.Types.ObjectId, ref: 'Question' },  // null for custom-not-saved-to-bank
-    type:          { type: String, enum: ['mcq', 'short', 'long', 'drawing', 'upload'], required: true },
+    type:          { type: String, enum: ['mcq', 'short', 'long', 'drawing', 'handwriting', 'upload'], required: true },
     questionText:  { type: String, required: true },
     options:       { type: [String], default: [] },
     correctAnswer: { type: mongoose.Schema.Types.Mixed, default: null },
