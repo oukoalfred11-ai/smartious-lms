@@ -2589,6 +2589,17 @@ const formatMins = (mins) => {
 }
  
 const dayName = (dow) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow]
+
+// Helper: get teacher display name whether teacher is a populated User object or a string
+const teacherDisplayName = (teacher) => {
+  if (!teacher) return 'Teacher'
+  if (typeof teacher === 'string') return teacher
+  if (typeof teacher === 'object') {
+    const name = ((teacher.firstName || '') + ' ' + (teacher.lastName || '')).trim()
+    return name || teacher.email || 'Teacher'
+  }
+  return 'Teacher'
+}
  
 function LiveClassesTab({ user, store, toast }) {
   // Tick state — re-evaluate liveness every 30 seconds
@@ -2783,7 +2794,7 @@ function LiveClassesTab({ user, store, toast }) {
                 {room.name} — {room.subject}
               </div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)' }}>
-                {room.teacher} · {room.curriculum} {room.grade ? '· ' + room.grade : ''} · {room.enrolled || room.students?.length || 0} students
+                {teacherDisplayName(room.teacher)} · {room.curriculum} {room.grade ? '· ' + room.grade : ''} · {room.enrolled || room.students?.length || 0} students
               </div>
             </div>
             <button
@@ -2851,7 +2862,7 @@ function LiveClassesTab({ user, store, toast }) {
                     {room.subject} — {room.name}
                   </div>
                   <div style={{ fontSize: 12.5, color: 'var(--s500)' }}>
-                    {room.teacher} · Starts in <strong style={{ color: col }}>{startsIn < 60 ? `${startsIn} min` : `${Math.floor(startsIn / 60)}h ${startsIn % 60}m`}</strong>
+                    {teacherDisplayName(room.teacher)} · Starts in <strong style={{ color: col }}>{startsIn < 60 ? `${startsIn} min` : `${Math.floor(startsIn / 60)}h ${startsIn % 60}m`}</strong>
                   </div>
                 </div>
                 <button
@@ -2897,7 +2908,7 @@ function LiveClassesTab({ user, store, toast }) {
                     {room.subject} — {room.name}
                   </div>
                   <div style={{ fontSize: 12.5, color: 'var(--s500)' }}>
-                    {room.teacher} · {room.schedule}
+                    {teacherDisplayName(room.teacher)} · {room.schedule}
                   </div>
                 </div>
                 <button
