@@ -35,7 +35,7 @@ const submissionSchema = new mongoose.Schema({
   // ── Answers (one per homework question) ──
   answers: [{
     questionIndex: { type: Number, required: true },
-    type: { type: String, enum: ['mcq', 'short', 'long', 'drawing', 'upload'], required: true },
+    type: { type: String, enum: ['mcq', 'short', 'long', 'drawing', 'handwriting', 'upload'], required: true },
     // For mcq: selected option index. For short/long: string. For drawing/upload: see attachment.
     answer: { type: mongoose.Schema.Types.Mixed, default: null },
     // For drawing/upload questions, the student's submitted attachment
