@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-
+ 
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true, trim: true },
   lastName: { type: String, required: true, trim: true },
@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['admin','teacher','student','parent','demo'], default: 'student' },
   grade: String,
-
+ 
   // Student enrollment fields (only relevant when role === 'student')
   // - curriculum: string for students (one curriculum), array for teachers (multi-curriculum)
   // - gradeLevel: student's current grade/year (e.g., 'Year 10', 'Grade 11')
@@ -42,6 +42,24 @@ const userSchema = new mongoose.Schema({
   children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   linkedStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // For parents: students they manage
   linkedParents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // For students: parents managing them
+ 
+  // ── TEACHER PROFILE FIELDS (Phase: profiles) ──
+  qualifications: [{ type: String, trim: true }],          // e.g. ["B.Ed. Mathematics, University of Nairobi 2022"]
+  certifications: [{ type: String, trim: true }],          // e.g. ["Cambridge IGCSE Mathematics certified", "TSC registered"]
+  specializations: [{ type: String, trim: true }],         // e.g. ["Calculus", "Mechanics"]
+  yearsOfExperience: { type: Number, min: 0, max: 70, default: 0 },
+ 
+  // ── STUDENT-SPECIFIC PROFILE FIELDS (Phase: profiles) ──
+  admissionNumber: {
+    type: String,
+    trim: true,
+    sparse: true,   // allows null, enforces uniqueness when set
+    unique: true,
+    index: true,
+  },
+  dateOfBirth: { type: Date, default: null },
+  homeAddress: { type: String, trim: true, maxlength: 500 },
+  medicalNotes: { type: String, trim: true, maxlength: 500 },
   
   // STUDENT STATUS MANAGEMENT
   studentStatus: { 
@@ -78,20 +96,43 @@ const userSchema = new mongoose.Schema({
   credentialsSentCount: { type: Number, default: 0 },
   lastCredentialsSentAt: { type: Date },
 }, { timestamps: true });
-
+ 
+// Hash password before saving (existing hook — DO NOT REMOVE)
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
-
+ 
+// Auto-generate admission number for students on first save (Phase: profiles)
+userSchema.pre('save', async function(next) {
+  if (this.role === 'student' && !this.admissionNumber) {
+    try {
+      const Counter = require('./Counter')
+      const year = new Date().getFullYear()
+      const counter = await Counter.findOneAndUpdate(
+        { _id: 'admission-' + year },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      )
+      const padded = String(counter.seq).padStart(3, '0')
+      this.admissionNumber = 'SH/' + year + '/' + padded
+    } catch (err) {
+      console.error('[admission-number] generation failed:', err.message)
+      // Don't block save — admission number can be assigned later
+    }
+  }
+  next()
+});
+ 
 userSchema.methods.comparePassword = async function(pw) {
   return bcrypt.compare(pw, this.password);
 };
-
+ 
 // PHASE 3-5: Helper method to generate temporary password
 userSchema.statics.generateTempPassword = function() {
   return Math.random().toString(36).substring(2, 14) + Math.random().toString(36).substring(2, 8);
 };
-
+ 
 module.exports = mongoose.model('User', userSchema);
+ 
