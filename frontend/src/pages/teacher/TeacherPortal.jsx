@@ -709,11 +709,12 @@ const qbDifficultyColours = {
 }
  
 const qbTypeMeta = {
-  mcq:      { letter: 'M', color: '#1E3A8A', label: 'Multiple Choice' },
-  short:    { letter: 'S', color: '#166534', label: 'Short Answer' },
-  long:     { letter: 'L', color: '#7E22CE', label: 'Long Answer' },
-  drawing:  { letter: 'D', color: '#DC2626', label: 'Drawing' },
-  upload:   { letter: 'U', color: '#7D1025', label: 'Upload' },
+  mcq:         { letter: 'M', color: '#1E3A8A', label: 'Multiple Choice' },
+  short:       { letter: 'S', color: '#166534', label: 'Short Answer' },
+  long:        { letter: 'L', color: '#7E22CE', label: 'Long Answer' },
+  drawing:     { letter: 'D', color: '#DC2626', label: 'Drawing' },
+  handwriting: { letter: 'H', color: '#0F1933', label: 'Handwriting' },
+  upload:      { letter: 'U', color: '#7D1025', label: 'Upload' },
 }
  
 function QuestionBankTab({ user, store, setPage, toast }) {
@@ -4047,7 +4048,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
                         </div>
                       )}
 
-                      {(q.type === 'upload' || q.type === 'drawing') && (
+                      {(q.type === 'upload' || q.type === 'drawing' || q.type === 'handwriting') && (
                         a.studentAttachment && a.studentAttachment.url ? (
                           a.studentAttachment.mimeType?.startsWith('image/')
                             ? <img src={a.studentAttachment.url} alt="" style={{ maxWidth: '100%', maxHeight: 300, borderRadius: 4, border: '1px solid var(--border)' }}/>
@@ -4314,6 +4315,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
                   <option value="short">Short</option>
                   <option value="long">Long</option>
                   <option value="drawing">Drawing</option>
+                  <option value="handwriting">Handwriting</option>
                   <option value="upload">Upload</option>
                 </select>
               </div>
