@@ -58,6 +58,7 @@ const Teacher = require('../models/Teacher');
 const { auth, requireRole } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const { sendVerificationEmail } = require('../services/emailService');
+const { sendWelcomeEmail } = require('../lib/email');
 
 // Validation helper for role-specific fields
 function validateRoleFields(user, role) {
@@ -135,6 +136,27 @@ router.get('/', auth, requireRole('admin', 'teacher'), async (req, res) => {
       .limit(200);
     
     res.json({ success: true, users });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// GET student by admission number (for parent linking in admin form)
+router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const { admissionNumber } = req.params;
+    if (!admissionNumber) {
+      return res.status(400).json({ success: false, message: 'Admission number is required' });
+    }
+    const student = await User.findOne({
+      role: 'student',
+      admissionNumber: admissionNumber.trim().toUpperCase(),
+    }).select('_id firstName lastName email curriculum gradeLevel admissionNumber');
+    
+    if (!student) {
+      return res.status(404).json({ success: false, message: 'No student found with admission number ' + admissionNumber });
+    }
+    res.json({ success: true, student });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }
@@ -282,25 +304,54 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
        }
      }
     
-    // Auto-sync GroupRoom enrollments for newly created students
-   if (newUser.role === 'student') {
-     try {
-       const enrollment = await syncStudentEnrollments(newUser._id);
-       console.log('[users POST] Synced enrollments for new student', newUser.firstName, '· matched', enrollment.matched, '· added', enrollment.addedTo);
-     } catch (enrollError) {
-       console.error('[users POST] Enrollment sync failed:', enrollError.message);
-     }
-   }
+  // Auto-sync GroupRoom enrollments for newly created students
+    if (user.role === 'student') {
+      try {
+        const enrollment = await syncStudentEnrollments(user._id);
+        console.log('[users POST] Synced enrollments for new student', user.firstName, '· matched', enrollment.matched, '· added', enrollment.addedTo);
+      } catch (enrollError) {
+        console.error('[users POST] Enrollment sync failed:', enrollError.message);
+      }
+    }
+    // Send welcome email with login credentials
+    let emailStatus = { sent: false, error: null }
+    if (req.body.sendWelcomeEmail !== false) {  // default: send unless explicitly disabled
+      try {
+        const fullName = (user.firstName + ' ' + user.lastName).trim()
+        const loginUrl = (process.env.FRONTEND_URL || 'https://smartioushomeschool.com') + '/login'
+        const emailResult = await sendWelcomeEmail({
+          to: user.email,
+          name: fullName,
+          role: user.role,
+          username: user.email,
+          tempPassword: tempPassword,
+          admissionNumber: user.admissionNumber || null,
+          loginUrl,
+        })
+        if (emailResult.success) {
+          emailStatus.sent = true
+          user.lastCredentialsSentAt = new Date()
+          user.credentialsSentCount = (user.credentialsSentCount || 0) + 1
+          await user.save()
+          console.log('[users POST] Welcome email sent to', user.email)
+        } else {
+          emailStatus.error = emailResult.message
+          console.warn('[users POST] Welcome email failed:', emailResult.message)
+        }
+      } catch (emailErr) {
+        emailStatus.error = emailErr.message
+        console.error('[users POST] Welcome email error:', emailErr.message)
+      }
+    }
     res.status(201).json({ 
       success: true, 
       user: safe,
-      credentials, // PHASE 3-5: Return credentials for display
-      message: 'User created successfully. Credentials sent to email.'
+      credentials,
+      emailStatus,  // { sent: bool, error: string|null }
+      message: emailStatus.sent
+        ? 'User created successfully. Credentials sent to email.'
+        : 'User created successfully. Email delivery failed — share credentials manually.'
     });
-  } catch (e) {
-    res.status(400).json({ success: false, message: e.message });
-  }
-});
 
 // UPDATE user (admin only) — demo users cannot be deleted or have role/isDemo changed
 router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
