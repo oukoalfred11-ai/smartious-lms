@@ -2497,17 +2497,14 @@ function ExamsTab({ user, toast, goTo, store }) {
   return null
 }
 // ═══════════════════════════════════════════════════════════
-// LIVE CLASSES TAB — schedule-aware, reads real groupRooms
+// LIVE CLASSES TAB — unified list, status-based, real Zoom
 // ═══════════════════════════════════════════════════════════
  
 // Parse a schedule string like "Mon/Wed 9:00–10:00 AM"
-// Returns { days: [1,3], startMins: 540, endMins: 600 } where days are 0-6 (Sun-Sat)
-// and times are minutes-since-midnight, OR null if unparseable.
 const parseScheduleString = (scheduleStr) => {
   if (!scheduleStr || typeof scheduleStr !== 'string') return null
   const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 }
  
-  // Split before the first digit so days/time separate cleanly
   const parts = scheduleStr.trim().split(/\s+(?=\d)/)
   if (parts.length < 2) return null
   const daysPart = parts[0]
@@ -2518,7 +2515,6 @@ const parseScheduleString = (scheduleStr) => {
   const days = []
   dayMatches.forEach(d => { if (dayMap[d] !== undefined && !days.includes(dayMap[d])) days.push(dayMap[d]) })
  
-  // Match "9:00-10:00 AM" or "9:00 AM - 10:00 AM" or "2:00–3:00 PM" (any dash type)
   const timeMatch = timePart.match(/(\d{1,2}):?(\d{0,2})\s*(am|pm)?\s*[-–—]\s*(\d{1,2}):?(\d{0,2})\s*(am|pm)/i)
   if (!timeMatch) return null
  
@@ -2544,53 +2540,107 @@ const parseScheduleString = (scheduleStr) => {
   }
 }
  
-// Compute room status RIGHT NOW based on schedule + clock.
-// Returns: 'live' | { startsIn: number-of-mins } | { laterToday: 'HH:MM' } | { tomorrow: 'Day HH:MM' } | { thisWeek: 'Day HH:MM' } | null
-const computeRoomStatus = (scheduleStr, now = new Date()) => {
-  const parsed = parseScheduleString(scheduleStr)
-  if (!parsed) return null
- 
-  const todayDow = now.getDay()
-  const nowMins  = now.getHours() * 60 + now.getMinutes()
- 
-  // 1. Live now? (today is in days, and now is between start and end)
-  if (parsed.days.includes(todayDow) && nowMins >= parsed.startMins && nowMins < parsed.endMins) {
-    return { state: 'live', endMins: parsed.endMins, startedMinsAgo: nowMins - parsed.startMins }
-  }
- 
-  // 2. Starting later today?
-  if (parsed.days.includes(todayDow) && nowMins < parsed.startMins) {
-    return { state: 'today', startMins: parsed.startMins, startsInMins: parsed.startMins - nowMins }
-  }
- 
-  // 3. Find the next upcoming day in this week or next
-  // Start checking from tomorrow
-  for (let i = 1; i <= 7; i++) {
-    const checkDow = (todayDow + i) % 7
-    if (parsed.days.includes(checkDow)) {
-      return {
-        state: i === 1 ? 'tomorrow' : 'upcoming',
-        dow: checkDow,
-        daysAway: i,
-        startMins: parsed.startMins,
-      }
-    }
-  }
-  return null
-}
- 
 const formatMins = (mins) => {
   let h = Math.floor(mins / 60)
   const m = mins % 60
   const mer = h >= 12 ? 'PM' : 'AM'
   h = h % 12
   if (h === 0) h = 12
-  return `${h}:${String(m).padStart(2, '0')} ${mer}`
+  return h + ':' + String(m).padStart(2, '0') + ' ' + mer
 }
  
 const dayName = (dow) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow]
-
-// Helper: get teacher display name whether teacher is a populated User object or a string
+const fullDayName = (dow) => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dow]
+ 
+// Compute the unified status for a room
+// Returns: { kind: 'live' | 'starting' | 'should-be-live' | 'finished' | 'today-later' | 'tomorrow' | 'upcoming' | 'no-schedule',
+//           label, sublabel, canJoin }
+const computeStatus = (room, now) => {
+  const parsed = parseScheduleString(room.schedule)
+  const todayDow = now.getDay()
+  const nowMins = now.getHours() * 60 + now.getMinutes()
+ 
+  // Check if teacher has actually started Zoom (within last 3 hours)
+  const teacherStarted = !!(room.zoomLink && room.zoomStartedAt &&
+    (Date.now() - new Date(room.zoomStartedAt).getTime()) < 3 * 60 * 60 * 1000)
+ 
+  if (teacherStarted) {
+    return {
+      kind: 'live',
+      label: 'LIVE NOW',
+      sublabel: 'Class in progress — join your teacher',
+      canJoin: true,
+    }
+  }
+ 
+  if (!parsed) {
+    return {
+      kind: 'no-schedule',
+      label: 'No schedule set',
+      sublabel: room.schedule || 'Ask your teacher about class times',
+      canJoin: false,
+    }
+  }
+ 
+  const isScheduledToday = parsed.days.includes(todayDow)
+ 
+  // Today, currently within the time window but teacher hasn't started Zoom
+  if (isScheduledToday && nowMins >= parsed.startMins && nowMins < parsed.endMins) {
+    return {
+      kind: 'should-be-live',
+      label: 'WAITING FOR TEACHER',
+      sublabel: 'Scheduled now — teacher hasn\'t started yet',
+      canJoin: false,
+    }
+  }
+ 
+  // Today, before the start time
+  if (isScheduledToday && nowMins < parsed.startMins) {
+    const minsAway = parsed.startMins - nowMins
+    return {
+      kind: 'starting',
+      label: 'STARTS LATER TODAY',
+      sublabel: minsAway < 60
+        ? 'Starts in ' + minsAway + ' min · ' + formatMins(parsed.startMins)
+        : 'Starts at ' + formatMins(parsed.startMins) + ' (in ' + Math.floor(minsAway / 60) + 'h ' + (minsAway % 60) + 'm)',
+      canJoin: false,
+    }
+  }
+ 
+  // Today, after the end time
+  if (isScheduledToday && nowMins >= parsed.endMins) {
+    return {
+      kind: 'finished',
+      label: 'FINISHED FOR TODAY',
+      sublabel: 'Today\'s class ended at ' + formatMins(parsed.endMins),
+      canJoin: false,
+    }
+  }
+ 
+  // Find the next upcoming day
+  for (let i = 1; i <= 7; i++) {
+    const checkDow = (todayDow + i) % 7
+    if (parsed.days.includes(checkDow)) {
+      if (i === 1) {
+        return {
+          kind: 'tomorrow',
+          label: 'TOMORROW',
+          sublabel: 'Tomorrow at ' + formatMins(parsed.startMins),
+          canJoin: false,
+        }
+      }
+      return {
+        kind: 'upcoming',
+        label: fullDayName(checkDow).toUpperCase(),
+        sublabel: dayName(checkDow) + ' at ' + formatMins(parsed.startMins),
+        canJoin: false,
+      }
+    }
+  }
+ 
+  return { kind: 'no-schedule', label: 'No upcoming sessions', sublabel: room.schedule || '', canJoin: false }
+}
+ 
 const teacherDisplayName = (teacher) => {
   if (!teacher) return 'Teacher'
   if (typeof teacher === 'string') return teacher
@@ -2602,23 +2652,19 @@ const teacherDisplayName = (teacher) => {
 }
  
 function LiveClassesTab({ user, store, toast }) {
-  // Tick state — re-evaluate liveness every 30 seconds
   const [tick, setTick] = useState(0)
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 30000)
     return () => clearInterval(id)
   }, [])
-
-  // Backend rooms (real _id, has zoomLink)
+ 
   const [backendRooms, setBackendRooms] = useState(null)
   useEffect(() => {
     let cancelled = false
     const loadRooms = async () => {
       try {
         const { data } = await api.get('/grouprooms')
-        if (!cancelled && data.success) {
-          setBackendRooms(data.rooms || [])
-        }
+        if (!cancelled && data.success) setBackendRooms(data.rooms || [])
       } catch (e) {
         console.error('[livetab] backend fetch failed:', e.message)
         if (!cancelled) setBackendRooms([])
@@ -2628,63 +2674,36 @@ function LiveClassesTab({ user, store, toast }) {
     const id = setInterval(loadRooms, 30000)
     return () => { cancelled = true; clearInterval(id) }
   }, [])
-
-  // Find this student's enrolled rooms
-  // Prefer backend rooms (have _id for Zoom). Fall back to localStorage rooms.
-  const studentFullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
+ 
+  const studentFullName = ((user?.firstName || '') + ' ' + (user?.lastName || '')).trim()
   const studentId = user?._id
-
-  // Use backend rooms if loaded; otherwise fall back to local store
-  const allRooms = backendRooms !== null
-    ? backendRooms
-    : (store?.groupRooms || [])
-
+ 
+  const allRooms = backendRooms !== null ? backendRooms : (store?.groupRooms || [])
+ 
   const myRooms = allRooms.filter(r => {
-    // Backend rooms have students as ObjectIds or populated User objects
     if (Array.isArray(r.students)) {
       return r.students.some(s => {
-        // Populated user object
         if (typeof s === 'object' && s !== null) {
-          return s._id === studentId ||
-                 (s.firstName && s.firstName === user?.firstName)
+          return s._id === studentId || (s.firstName && s.firstName === user?.firstName)
         }
-        // Just an ObjectId string
         if (typeof s === 'string' && /^[a-f\d]{24}$/i.test(s)) {
           return s === studentId
         }
-        // Local rooms have name strings
-        return s === studentFullName ||
-               s === user?.firstName ||
+        return s === studentFullName || s === user?.firstName ||
                (user?.firstName && s.includes(user.firstName))
       })
     }
     return false
   })
  
-  // Compute status for each
+  // Compute status for each, then sort: live first, then starting today, then waiting, then tomorrow, then upcoming, then finished, then no-schedule
   const now = new Date()
-  const roomsWithStatus = myRooms.map(r => ({
-    ...r,
-    statusInfo: computeRoomStatus(r.schedule, now),
-  }))
+  const sortOrder = { live: 0, 'should-be-live': 1, starting: 2, tomorrow: 3, upcoming: 4, finished: 5, 'no-schedule': 6 }
  
-  const liveRooms     = roomsWithStatus.filter(r => r.statusInfo?.state === 'live')
-  const todayRooms    = roomsWithStatus.filter(r => r.statusInfo?.state === 'today')
-  const tomorrowRooms = roomsWithStatus.filter(r => r.statusInfo?.state === 'tomorrow')
-  const upcomingRooms = roomsWithStatus.filter(r => r.statusInfo?.state === 'upcoming')
+  const roomsWithStatus = myRooms
+    .map(r => ({ ...r, status: computeStatus(r, now) }))
+    .sort((a, b) => (sortOrder[a.status.kind] || 99) - (sortOrder[b.status.kind] || 99))
  
-  // Sort upcoming by daysAway then start time
-  const sortByTime = (a, b) => {
-    const aDays = a.statusInfo.daysAway || 0
-    const bDays = b.statusInfo.daysAway || 0
-    if (aDays !== bDays) return aDays - bDays
-    return (a.statusInfo.startMins || 0) - (b.statusInfo.startMins || 0)
-  }
-  todayRooms.sort((a, b) => a.statusInfo.startsInMins - b.statusInfo.startsInMins)
-  tomorrowRooms.sort(sortByTime)
-  upcomingRooms.sort(sortByTime)
- 
-  // Stable subject colours (mirror Practice palette)
   const subjColours = {
     'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
     'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
@@ -2692,6 +2711,40 @@ function LiveClassesTab({ user, store, toast }) {
     'Business Studies': '#7E22CE', 'Economics': '#9F1239',
   }
   const colourFor = (s) => subjColours[s] || '#8B1A2E'
+ 
+  // Status visual styling
+  const statusStyle = (kind) => {
+    switch (kind) {
+      case 'live':           return { bg: '#DCFCE7', color: '#15803D', dot: '#22C55E', dotPulse: true }
+      case 'should-be-live': return { bg: '#FEF3C7', color: '#92400E', dot: '#F59E0B' }
+      case 'starting':       return { bg: '#DBEAFE', color: '#1E3A8A', dot: '#3B82F6' }
+      case 'tomorrow':       return { bg: '#FBE8E8', color: '#7D1025', dot: '#7D1025' }
+      case 'upcoming':       return { bg: '#F1F5F9', color: 'var(--s700)', dot: 'var(--s500)' }
+      case 'finished':       return { bg: '#F3F4F6', color: 'var(--s500)', dot: 'var(--s400)' }
+      case 'no-schedule':    return { bg: '#F3F4F6', color: 'var(--s500)', dot: 'var(--s400)' }
+      default:               return { bg: 'var(--bg)', color: 'var(--s500)', dot: 'var(--s400)' }
+    }
+  }
+ 
+  const handleJoin = async (room) => {
+    if (!room._id) {
+      toast?.info?.('Class room not synced to backend yet. Ask admin to sync rooms.')
+      return
+    }
+    try {
+      const { data } = await api.get('/grouprooms/' + room._id + '/zoom')
+      if (data.zoomLink) {
+        window.open(data.zoomLink, '_blank', 'noopener,noreferrer')
+        toast?.ok?.('Opening Zoom...')
+      } else {
+        toast?.info?.('Teacher has not started the class yet. Please wait.')
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Could not load class link')
+    }
+  }
+ 
+  const liveCount = roomsWithStatus.filter(r => r.status.kind === 'live').length
  
   return (
     <div>
@@ -2709,24 +2762,20 @@ function LiveClassesTab({ user, store, toast }) {
             Live Classes
           </h2>
           <p style={{ fontSize: 13.5, opacity: .85, marginTop: 6, marginBottom: 0, maxWidth: 540, lineHeight: 1.55 }}>
-            Join your scheduled lessons in our virtual classroom — interactive whiteboard, live chat, and your teacher leading the way.
+            All your classes — join when your teacher starts the session.
           </p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
-          {[
-            ['Live Now',        liveRooms.length],
-            ['Today',           todayRooms.length],
-            ['Tomorrow',        tomorrowRooms.length],
-            ['My Classes',      myRooms.length],
-          ].map(([l, v]) => (
-            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
-                {l}
-              </div>
-              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
-            </div>
-          ))}
-        </div>
+        {liveCount > 0 && (
+          <div style={{ background: '#15803D', padding: '10px 30px', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{
+              width: 10, height: 10, borderRadius: '50%', background: '#4ADE80',
+              animation: 'pulse 1.5s infinite', flexShrink: 0,
+            }}/>
+            <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.04em' }}>
+              {liveCount} class{liveCount === 1 ? '' : 'es'} happening right now — join below
+            </span>
+          </div>
+        )}
       </div>
  
       {/* Empty state */}
@@ -2737,202 +2786,86 @@ function LiveClassesTab({ user, store, toast }) {
               <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
             </svg>
           </div>
-          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>No classes scheduled yet</h3>
+          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>No classes yet</h3>
           <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto' }}>
-            Once an admin enrols you in a class room, your live lessons will appear here automatically.
+            Once an admin enrols you in a class room, it will appear here.
           </p>
         </div>
       )}
  
-      {/* LIVE NOW — pulsing crimson card */}
-      {liveRooms.map(room => {
+      {/* Unified list */}
+      {roomsWithStatus.map(room => {
         const col = colourFor(room.subject)
-        const remaining = room.statusInfo.endMins - (now.getHours() * 60 + now.getMinutes())
+        const sStyle = statusStyle(room.status.kind)
+        const isLive = room.status.kind === 'live'
+ 
         return (
-          <div key={room.id} style={{
-            background: `linear-gradient(135deg, ${col} 0%, ${col}DD 100%)`,
-            borderRadius: 'var(--rxl)',
-            padding: '24px 28px',
-            marginBottom: 14,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 20,
-            flexWrap: 'wrap',
-            color: '#fff',
-            boxShadow: `0 8px 24px ${col}55`,
+          <div key={room._id || room.id} className="card" style={{
+            marginBottom: 10,
+            padding: 14,
+            borderLeft: '4px solid ' + col,
+            background: isLive ? 'linear-gradient(90deg, rgba(220,252,231,0.4) 0%, #FFF 100%)' : '#FFF',
           }}>
-            <div style={{
-              width: 52, height: 52, borderRadius: '50%',
-              background: 'rgba(255,255,255,.18)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              position: 'relative',
-              flexShrink: 0,
-            }}>
-              <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" strokeLinecap="round">
-                <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
-              </svg>
-              <span style={{
-                position: 'absolute', top: -2, right: -2,
-                width: 12, height: 12, borderRadius: '50%',
-                background: '#4ADE80',
-                border: '2px solid rgba(255,255,255,.4)',
-                animation: 'pulse 1.5s infinite',
-              }}/>
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+              {/* Subject + name */}
+              <div style={{ flex: 1, minWidth: 220 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+                  <span style={{
+                    background: sStyle.bg, color: sStyle.color,
+                    fontSize: 10, fontWeight: 800, letterSpacing: '.08em',
+                    padding: '4px 10px', borderRadius: 99, textTransform: 'uppercase',
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                  }}>
+                    <span style={{
+                      width: 7, height: 7, borderRadius: '50%',
+                      background: sStyle.dot,
+                      animation: sStyle.dotPulse ? 'pulse 1.5s infinite' : 'none',
+                    }}/>
+                    {room.status.label}
+                  </span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: col, letterSpacing: '.06em', textTransform: 'uppercase' }}>
+                    {room.subject}
+                  </span>
+                </div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)', marginBottom: 2 }}>
+                  {room.name}
+                </div>
+                <div style={{ fontSize: 12.5, color: 'var(--s500)' }}>
+                  {teacherDisplayName(room.teacher)} · {room.status.sublabel}
+                </div>
+              </div>
+ 
+              {/* Join button */}
+              <button
+                disabled={!room.status.canJoin}
+                onClick={() => handleJoin(room)}
+                style={{
+                  background: room.status.canJoin ? '#15803D' : 'var(--bg)',
+                  color: room.status.canJoin ? '#FFF' : 'var(--s400)',
+                  border: '1px solid ' + (room.status.canJoin ? '#15803D' : 'var(--border)'),
+                  padding: '10px 20px',
+                  borderRadius: 'var(--rmd)',
+                  cursor: room.status.canJoin ? 'pointer' : 'not-allowed',
+                  fontSize: 13.5, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  flexShrink: 0,
+                  boxShadow: room.status.canJoin ? '0 4px 12px rgba(21,128,61,.25)' : 'none',
+                }}>
+                {room.status.canJoin ? (
+                  <>
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Join Class
+                  </>
+                ) : (
+                  'Join Class'
+                )}
+              </button>
             </div>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-                <span style={{
-                  background: 'rgba(255,255,255,.2)', color: '#fff',
-                  fontSize: 10, fontWeight: 800, letterSpacing: '.1em',
-                  padding: '4px 10px', borderRadius: 99, textTransform: 'uppercase',
-                }}>● LIVE NOW</span>
-                <span style={{ color: 'rgba(255,255,255,.75)', fontSize: 12.5 }}>
-                  Started {room.statusInfo.startedMinsAgo === 0 ? 'just now' : `${room.statusInfo.startedMinsAgo} min ago`} · {remaining} min left
-                </span>
-              </div>
-              <div className="serif" style={{ fontSize: 20, color: '#fff', marginBottom: 3, lineHeight: 1.2 }}>
-                {room.name} — {room.subject}
-              </div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,.7)' }}>
-                {teacherDisplayName(room.teacher)} · {room.curriculum} {room.grade ? '· ' + room.grade : ''} · {room.enrolled || room.students?.length || 0} students
-              </div>
-            </div>
-            <button
-              className="btn"
-              style={{
-                background: '#fff', color: col,
-                fontWeight: 700, padding: '12px 24px',
-                fontSize: 14,
-              }}
-              onClick={async () => {
-                if (!room._id) {
-                  toast?.info?.('Class room not synced to backend yet. Ask admin to sync rooms.')
-                  return
-                }
-                try {
-                  const { data } = await api.get('/grouprooms/' + room._id + '/zoom')
-                  if (data.zoomLink) {
-                    window.open(data.zoomLink, '_blank', 'noopener,noreferrer')
-                    toast?.ok?.('Opening Zoom...')
-                  } else {
-                    toast?.info?.('Teacher has not started the class yet. Please wait.')
-                  }
-                } catch (e) {
-                  console.error('[join-class]', e)
-                  toast?.error?.(e.response?.data?.message || 'Could not load class link')
-                }
-              }}
-            >
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ marginRight: 6 }}>
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              Join Now
-            </button>
           </div>
         )
       })}
- 
-      {/* TODAY (later) */}
-      {todayRooms.length > 0 && (
-        <div className="card" style={{ marginBottom: 14 }}>
-          <div className="chdr">
-            <div className="ctitle">Later Today</div>
-            <span className="badge badge-amber">{todayRooms.length}</span>
-          </div>
-          {todayRooms.map(room => {
-            const col = colourFor(room.subject)
-            const startsIn = room.statusInfo.startsInMins
-            return (
-              <div key={room.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: 'var(--rmd)',
-                  background: col + '14', borderLeft: `3px solid ${col}`,
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  <div className="mono" style={{ fontSize: 9, fontWeight: 700, color: col, textTransform: 'uppercase' }}>
-                    Today
-                  </div>
-                  <div className="mono" style={{ fontSize: 12, fontWeight: 700, color: col }}>
-                    {formatMins(room.statusInfo.startMins).replace(/:00 /, ' ')}
-                  </div>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>
-                    {room.subject} — {room.name}
-                  </div>
-                  <div style={{ fontSize: 12.5, color: 'var(--s500)' }}>
-                    {teacherDisplayName(room.teacher)} · Starts in <strong style={{ color: col }}>{startsIn < 60 ? `${startsIn} min` : `${Math.floor(startsIn / 60)}h ${startsIn % 60}m`}</strong>
-                  </div>
-                </div>
-                <button
-                  className="btn btn-s btn-sm"
-                  onClick={() => toast?.info?.(`Reminder set for ${room.subject}`)}
-                  style={{ flexShrink: 0 }}
-                >
-                  Remind Me
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      )}
- 
-      {/* TOMORROW + UPCOMING */}
-      {(tomorrowRooms.length > 0 || upcomingRooms.length > 0) && (
-        <div className="card">
-          <div className="chdr">
-            <div className="ctitle">Upcoming This Week</div>
-          </div>
-          {[...tomorrowRooms, ...upcomingRooms].map(room => {
-            const col = colourFor(room.subject)
-            const isTomorrow = room.statusInfo.state === 'tomorrow'
-            return (
-              <div key={room.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: 'var(--rmd)',
-                  background: 'var(--bg)',
-                  borderLeft: `3px solid ${col}`,
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  <div className="mono" style={{ fontSize: 9, fontWeight: 700, color: 'var(--s500)', textTransform: 'uppercase' }}>
-                    {isTomorrow ? 'Tomorrow' : dayName(room.statusInfo.dow)}
-                  </div>
-                  <div className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--s800)' }}>
-                    {formatMins(room.statusInfo.startMins).replace(/:00 /, ' ')}
-                  </div>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>
-                    {room.subject} — {room.name}
-                  </div>
-                  <div style={{ fontSize: 12.5, color: 'var(--s500)' }}>
-                    {teacherDisplayName(room.teacher)} · {room.schedule}
-                  </div>
-                </div>
-                <button
-                  className="btn btn-s btn-sm"
-                  onClick={() => toast?.info?.('Adding to calendar…')}
-                  style={{ flexShrink: 0 }}
-                >
-                  Add to Calendar
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      )}
- 
-      {/* If they have rooms but nothing today/tomorrow */}
-      {myRooms.length > 0 && liveRooms.length === 0 && todayRooms.length === 0 && tomorrowRooms.length === 0 && upcomingRooms.length === 0 && (
-        <div className="card" style={{ padding: 28, textAlign: 'center' }}>
-          <h3 style={{ fontSize: 16, color: 'var(--s700)', marginBottom: 6 }}>No classes scheduled this week</h3>
-          <p style={{ fontSize: 13, color: 'var(--s500)' }}>
-            Check back later or speak with your teacher about upcoming lessons.
-          </p>
-        </div>
-      )}
     </div>
   )
 }
