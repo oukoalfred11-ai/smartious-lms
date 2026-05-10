@@ -3322,9 +3322,9 @@ function ExamsTab({ user, store, setPage, toast }) {
 
 // ═══════════════════════════════════════════════════════════
 // HOMEWORK — wired to /api/homework backend
-// Phase 3.2a: list + create modal (no detail/grade view yet)
+// Phase 3.6 (full): list + create/edit/delete + submissions + grade
 // ═══════════════════════════════════════════════════════════
- 
+
 const hwTimeAgo = (iso) => {
   if (!iso) return '—'
   const diff = Date.now() - new Date(iso).getTime()
@@ -3338,7 +3338,7 @@ const hwTimeAgo = (iso) => {
   if (days < 7) return days + 'd ago'
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
- 
+
 const hwTimeUntil = (iso) => {
   if (!iso) return ''
   const diff = new Date(iso).getTime() - Date.now()
@@ -3356,7 +3356,7 @@ const hwTimeUntil = (iso) => {
   if (days < 7) return 'due in ' + days + 'd'
   return 'due ' + new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
- 
+
 const hwDefaultDateTime = (daysFromNow = 7) => {
   const d = new Date()
   d.setDate(d.getDate() + daysFromNow)
@@ -3364,7 +3364,15 @@ const hwDefaultDateTime = (daysFromNow = 7) => {
   const pad = (n) => String(n).padStart(2, '0')
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes())
 }
- 
+
+// Convert backend ISO date to datetime-local format
+const isoToLocal = (iso) => {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const pad = (n) => String(n).padStart(2, '0')
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes())
+}
+
 const hwTypeMeta = {
   mcq:      { letter: 'M', color: '#1E3A8A', label: 'MCQ' },
   short:    { letter: 'S', color: '#166534', label: 'Short' },
@@ -3372,40 +3380,51 @@ const hwTypeMeta = {
   drawing:  { letter: 'D', color: '#DC2626', label: 'Drawing' },
   upload:   { letter: 'U', color: '#7D1025', label: 'Upload' },
 }
- 
+
 function HomeworkTab({ user, store, setPage, toast }) {
   // ── DATA STATE ──
   const [homework, setHomework] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [activeTab, setActiveTab] = useState('all')  // 'all' | 'draft' | 'published'
- 
+  const [activeTab, setActiveTab] = useState('all')
+
   // ── CATALOG (for create modal) ──
   const [catalog, setCatalog] = useState({ curricula: [], gradesByCurriculum: {}, subjects: [] })
   const [rooms, setRooms] = useState([])
- 
-  // ── CREATE MODAL ──
+
+  // ── CREATE/EDIT MODAL ──
   const [createOpen, setCreateOpen] = useState(false)
+  const [editingId, setEditingId] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState(null)  // null when closed; object when open
- 
-  // ── BANK PICKER (sub-modal) ──
+  const [form, setForm] = useState(null)
+
+  // ── BANK PICKER ──
   const [bankOpen, setBankOpen] = useState(false)
   const [bankQuestions, setBankQuestions] = useState([])
   const [bankLoading, setBankLoading] = useState(false)
   const [bankFilters, setBankFilters] = useState({ curriculum: '', subject: '', grade: '', type: '', q: '' })
- 
+
   // ── CUSTOM QUESTION SUB-MODAL ──
   const [customOpen, setCustomOpen] = useState(false)
   const [customForm, setCustomForm] = useState(null)
- 
+
   // ── DRAG STATE ──
   const [dragIndex, setDragIndex] = useState(null)
- 
+
+  // ── DETAIL VIEW STATE ──
+  const [detailHw, setDetailHw] = useState(null)
+  const [submissions, setSubmissions] = useState([])
+  const [submissionsLoading, setSubmissionsLoading] = useState(false)
+
+  // ── GRADE VIEW STATE ──
+  const [gradeSub, setGradeSub] = useState(null)  // submission being graded
+  const [gradeForm, setGradeForm] = useState(null)  // { answers: [...], overallFeedback }
+  const [gradeSaving, setGradeSaving] = useState(false)
+
   // Load homework on mount
   useEffect(() => { loadHomework() }, [])
- 
-  // Load catalog + rooms once (used by create modal)
+
+  // Load catalog + rooms once
   useEffect(() => {
     api.get('/curriculum/options').then(r => {
       if (r.data?.success) setCatalog({
@@ -3416,7 +3435,6 @@ function HomeworkTab({ user, store, setPage, toast }) {
     }).catch(() => {})
     api.get('/grouprooms').then(r => {
       if (r.data?.rooms) {
-        // Filter rooms where I'm the teacher
         const myRooms = r.data.rooms.filter(rm => {
           if (!rm.teacher) return false
           const tid = typeof rm.teacher === 'object' ? rm.teacher._id : rm.teacher
@@ -3426,7 +3444,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
       }
     }).catch(() => {})
   }, [user?._id])
- 
+
   const loadHomework = async () => {
     setLoading(true); setError(null)
     try {
@@ -3436,7 +3454,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
       setError(e.response?.data?.message || 'Failed to load homework')
     } finally { setLoading(false) }
   }
- 
+
   // Tab filtering
   const filteredHw = homework.filter(hw => {
     if (activeTab === 'draft') return hw.status === 'draft'
@@ -3448,61 +3466,57 @@ function HomeworkTab({ user, store, setPage, toast }) {
     draft: homework.filter(h => h.status === 'draft').length,
     published: homework.filter(h => h.status === 'published').length,
   }
- 
+
   // ── CREATE MODAL HANDLERS ──
   const openCreate = () => {
+    setEditingId(null)
     setForm({
-      title: '',
-      description: '',
-      curriculum: '',
-      grade: '',
-      subject: '',
-      questions: [],
-      assignedRoom: '',
-      assignedStudents: [],
-      releaseAt: hwDefaultDateTime(0),  // now
-      dueAt: hwDefaultDateTime(7),
+      title: '', description: '', curriculum: '', grade: '', subject: '',
+      questions: [], assignedRoom: '', assignedStudents: [],
+      releaseAt: hwDefaultDateTime(0), dueAt: hwDefaultDateTime(7),
       saveCustomToBank: true,
     })
     setCreateOpen(true)
   }
- 
-  const closeCreate = () => { setCreateOpen(false); setForm(null) }
-  const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
- 
-  // When room is chosen, auto-populate curriculum/subject/grade
-  const handleRoomChange = (roomId) => {
-    if (!roomId) {
-      setForm(f => ({ ...f, assignedRoom: '' }))
-      return
-    }
-    const room = rooms.find(r => r._id === roomId)
-    if (!room) {
-      setForm(f => ({ ...f, assignedRoom: roomId }))
-      return
-    }
-    setForm(f => ({
-      ...f,
-      assignedRoom: roomId,
-      curriculum: room.curriculum || f.curriculum,
-      grade: room.grade || f.grade,
-      subject: room.subject || f.subject,
-    }))
+
+  const openEdit = (hw) => {
+    setEditingId(hw._id)
+    setForm({
+      title: hw.title || '',
+      description: hw.description || '',
+      curriculum: hw.curriculum || '',
+      grade: hw.grade || '',
+      subject: hw.subject || '',
+      questions: Array.isArray(hw.questions) ? hw.questions.map(q => ({...q})) : [],
+      assignedRoom: typeof hw.assignedRoom === 'object' && hw.assignedRoom ? hw.assignedRoom._id : (hw.assignedRoom || ''),
+      assignedStudents: Array.isArray(hw.assignedStudents)
+        ? hw.assignedStudents.map(s => typeof s === 'object' ? s._id : s)
+        : [],
+      releaseAt: isoToLocal(hw.releaseAt),
+      dueAt: isoToLocal(hw.dueAt),
+      saveCustomToBank: false,  // edits don't re-save to bank
+    })
+    setDetailHw(null)  // close detail if open
+    setCreateOpen(true)
   }
- 
+
+  const closeCreate = () => { setCreateOpen(false); setForm(null); setEditingId(null) }
+  const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  const handleRoomChange = (roomId) => {
+    if (!roomId) { setForm(f => ({ ...f, assignedRoom: '' })); return }
+    const room = rooms.find(r => r._id === roomId)
+    if (!room) { setForm(f => ({ ...f, assignedRoom: roomId })); return }
+    setForm(f => ({ ...f, assignedRoom: roomId, curriculum: room.curriculum || f.curriculum, grade: room.grade || f.grade, subject: room.subject || f.subject }))
+  }
+
   // ── BANK PICKER ──
   const openBankPicker = () => {
-    // Pre-fill filters with form values
-    setBankFilters({
-      curriculum: form?.curriculum || '',
-      subject: form?.subject || '',
-      grade: form?.grade || '',
-      type: '', q: '',
-    })
+    setBankFilters({ curriculum: form?.curriculum || '', subject: form?.subject || '', grade: form?.grade || '', type: '', q: '' })
     setBankOpen(true)
     loadBankQuestions(form?.curriculum, form?.subject, form?.grade, '', '')
   }
- 
+
   const loadBankQuestions = async (curriculum, subject, grade, type, q) => {
     setBankLoading(true)
     try {
@@ -3515,12 +3529,10 @@ function HomeworkTab({ user, store, setPage, toast }) {
       params.append('limit', '50')
       const { data } = await api.get('/questions?' + params.toString())
       if (data.success) setBankQuestions(data.questions || [])
-    } catch (e) {
-      toast?.error?.('Failed to load bank questions')
-    } finally { setBankLoading(false) }
+    } catch (e) { toast?.error?.('Failed to load bank questions') }
+    finally { setBankLoading(false) }
   }
- 
-  // Re-load when bank filters change
+
   useEffect(() => {
     if (!bankOpen) return
     const handle = setTimeout(() => {
@@ -3528,46 +3540,28 @@ function HomeworkTab({ user, store, setPage, toast }) {
     }, 250)
     return () => clearTimeout(handle)
   }, [bankFilters, bankOpen])
- 
+
   const addBankQuestionToForm = (q) => {
-    // Snapshot the question (deep-ish copy of relevant fields)
     const snap = {
-      questionId: q._id,
-      type: q.type,
-      questionText: q.questionText,
+      questionId: q._id, type: q.type, questionText: q.questionText,
       options: Array.isArray(q.options) ? [...q.options] : [],
-      correctAnswer: q.correctAnswer,
-      explanation: q.explanation || '',
-      marks: q.marks || 1,
-      difficulty: q.difficulty || 'medium',
+      correctAnswer: q.correctAnswer, explanation: q.explanation || '',
+      marks: q.marks || 1, difficulty: q.difficulty || 'medium',
       attachments: Array.isArray(q.attachments) ? [...q.attachments] : [],
       topic: q.topic || '',
     }
     setForm(f => ({ ...f, questions: [...f.questions, snap] }))
     toast?.ok?.('Added: ' + q.questionText.slice(0, 40) + (q.questionText.length > 40 ? '...' : ''))
   }
- 
+
   // ── CUSTOM QUESTION ──
   const openCustom = () => {
-    setCustomForm({
-      type: 'short',
-      questionText: '',
-      options: ['', '', '', ''],
-      correctIndex: null,
-      correctAnswer: '',
-      explanation: '',
-      marks: 1,
-      difficulty: 'medium',
-      topic: '',
-      saveToBank: true,
-    })
+    setCustomForm({ type: 'short', questionText: '', options: ['', '', '', ''], correctIndex: null, correctAnswer: '', explanation: '', marks: 1, difficulty: 'medium', topic: '', saveToBank: true })
     setCustomOpen(true)
   }
   const closeCustom = () => { setCustomOpen(false); setCustomForm(null) }
   const setCF = (k, v) => setCustomForm(f => ({ ...f, [k]: v }))
-  const setCustomOption = (i, v) => setCustomForm(f => {
-    const next = [...f.options]; next[i] = v; return { ...f, options: next }
-  })
+  const setCustomOption = (i, v) => setCustomForm(f => { const next = [...f.options]; next[i] = v; return { ...f, options: next } })
   const addCustomOption = () => setCustomForm(f => ({ ...f, options: [...f.options, ''] }))
   const removeCustomOption = (i) => setCustomForm(f => {
     const next = f.options.filter((_, idx) => idx !== i)
@@ -3576,7 +3570,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
     else if (f.correctIndex > i) newCorrect = f.correctIndex - 1
     return { ...f, options: next, correctIndex: newCorrect }
   })
- 
+
   const addCustomToForm = () => {
     if (!customForm.questionText.trim()) { toast?.error?.('Question text is required'); return }
     if (customForm.type === 'mcq') {
@@ -3591,41 +3585,23 @@ function HomeworkTab({ user, store, setPage, toast }) {
     if (customForm.type === 'mcq' && customForm.correctIndex !== null) {
       const correctText = customForm.options[customForm.correctIndex]
       correctAnswer = cleanOptions.indexOf(correctText)
-    } else {
-      correctAnswer = customForm.correctAnswer.trim()
-    }
+    } else { correctAnswer = customForm.correctAnswer.trim() }
     const snap = {
-      questionId: null,  // backend will save to bank if saveToBank flag is true
-      type: customForm.type,
-      questionText: customForm.questionText.trim(),
-      options: cleanOptions,
-      correctAnswer,
-      explanation: customForm.explanation.trim(),
-      marks: parseInt(customForm.marks) || 1,
-      difficulty: customForm.difficulty,
-      attachments: [],
-      topic: customForm.topic.trim(),
-      saveToBank: customForm.saveToBank,  // backend reads this per-question flag
+      questionId: null, type: customForm.type, questionText: customForm.questionText.trim(),
+      options: cleanOptions, correctAnswer, explanation: customForm.explanation.trim(),
+      marks: parseInt(customForm.marks) || 1, difficulty: customForm.difficulty,
+      attachments: [], topic: customForm.topic.trim(), saveToBank: customForm.saveToBank,
     }
     setForm(f => ({ ...f, questions: [...f.questions, snap] }))
     toast?.ok?.('Custom question added')
     closeCustom()
   }
- 
-  // ── REMOVE/REORDER ──
-  const removeQuestion = (i) => {
-    setForm(f => ({ ...f, questions: f.questions.filter((_, idx) => idx !== i) }))
-  }
- 
-  // Drag and drop handlers
-  const onDragStart = (i) => (e) => {
-    setDragIndex(i)
-    e.dataTransfer.effectAllowed = 'move'
-  }
-  const onDragOver = (i) => (e) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-  }
+
+  // ── REORDER/REMOVE ──
+  const removeQuestion = (i) => setForm(f => ({ ...f, questions: f.questions.filter((_, idx) => idx !== i) }))
+
+  const onDragStart = (i) => (e) => { setDragIndex(i); e.dataTransfer.effectAllowed = 'move' }
+  const onDragOver = (i) => (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
   const onDrop = (toIndex) => (e) => {
     e.preventDefault()
     if (dragIndex === null || dragIndex === toIndex) return
@@ -3638,10 +3614,10 @@ function HomeworkTab({ user, store, setPage, toast }) {
     setDragIndex(null)
   }
   const onDragEnd = () => setDragIndex(null)
- 
-  // ── SAVE ──
+
+  // ── SAVE HOMEWORK ──
   const totalMarks = (form?.questions || []).reduce((sum, q) => sum + (q.marks || 0), 0)
- 
+
   const validateForm = () => {
     if (!form.title?.trim()) return 'Title is required'
     if (!form.curriculum) return 'Curriculum is required'
@@ -3649,56 +3625,153 @@ function HomeworkTab({ user, store, setPage, toast }) {
     if (!form.grade) return 'Grade is required'
     if (!form.questions || form.questions.length === 0) return 'Add at least one question'
     if (!form.releaseAt) return 'Release date is required'
-    if (!form.assignedRoom && (!form.assignedStudents || form.assignedStudents.length === 0)) {
-      return 'Pick a room or specific students'
-    }
+    if (!form.assignedRoom && (!form.assignedStudents || form.assignedStudents.length === 0)) return 'Pick a room or specific students'
     return null
   }
- 
+
   const saveHomework = async (asStatus) => {
     const err = validateForm()
     if (err) { toast?.error?.(err); return }
     setSaving(true)
     try {
       const payload = {
-        title: form.title.trim(),
-        description: form.description.trim(),
-        curriculum: form.curriculum,
-        subject: form.subject,
-        grade: form.grade,
-        questions: form.questions,
-        saveCustomToBank: form.saveCustomToBank,
+        title: form.title.trim(), description: form.description.trim(),
+        curriculum: form.curriculum, subject: form.subject, grade: form.grade,
+        questions: form.questions, saveCustomToBank: form.saveCustomToBank,
         assignedRoom: form.assignedRoom || null,
         assignedStudents: form.assignedStudents || [],
         releaseAt: new Date(form.releaseAt).toISOString(),
         dueAt: form.dueAt ? new Date(form.dueAt).toISOString() : null,
-        status: asStatus,  // 'draft' or 'published'
+        status: asStatus,
       }
-      const { data } = await api.post('/homework', payload)
-      if (data.success) {
-        toast?.ok?.('Homework ' + (asStatus === 'published' ? 'published' : 'saved as draft'))
+      const result = editingId
+        ? await api.patch('/homework/' + editingId, payload)
+        : await api.post('/homework', payload)
+      if (result.data.success) {
+        toast?.ok?.(editingId ? 'Homework updated' : ('Homework ' + (asStatus === 'published' ? 'published' : 'saved as draft')))
         await loadHomework()
         closeCreate()
-      } else {
-        toast?.error?.(data.message || 'Save failed')
-      }
+      } else { toast?.error?.(result.data.message || 'Save failed') }
     } catch (e) {
       toast?.error?.(e.response?.data?.message || 'Save failed: ' + e.message)
     } finally { setSaving(false) }
   }
- 
+
+  // ── DELETE HOMEWORK ──
+  const handleDelete = async (hw) => {
+    if (!confirm('Delete "' + hw.title + '"? This cannot be undone. All student submissions will become inaccessible.')) return
+    try {
+      const { data } = await api.delete('/homework/' + hw._id)
+      if (data.success) {
+        toast?.ok?.('Homework deleted')
+        await loadHomework()
+        setDetailHw(null)
+      } else { toast?.error?.(data.message || 'Delete failed') }
+    } catch (e) { toast?.error?.(e.response?.data?.message || 'Delete failed') }
+  }
+
+  // ── DETAIL VIEW ──
+  const openDetail = async (hw) => {
+    setDetailHw(hw)
+    setSubmissionsLoading(true)
+    setSubmissions([])
+    try {
+      const { data } = await api.get('/homework/' + hw._id + '/submissions')
+      if (data.success) setSubmissions(data.submissions || [])
+    } catch (e) {
+      toast?.error?.('Failed to load submissions')
+    } finally { setSubmissionsLoading(false) }
+  }
+  const closeDetail = () => { setDetailHw(null); setSubmissions([]) }
+
+  // ── GRADE VIEW ──
+  const openGrade = (sub) => {
+    if (!detailHw) return
+    // Initialize grade form with existing answers
+    const answers = (detailHw.questions || []).map((q, idx) => {
+      const existing = (sub.answers || []).find(a => a.questionIndex === idx)
+      return {
+        questionIndex: idx,
+        // existing student answer fields (read-only display)
+        studentAnswer: existing?.answer,
+        studentAttachment: existing?.attachment,
+        type: q.type,
+        // editable grading fields
+        marksAwarded: existing?.marksAwarded !== null && existing?.marksAwarded !== undefined ? existing.marksAwarded : null,
+        feedback: existing?.feedback || '',
+        autoGraded: existing?.autoGraded || false,
+        maxMarks: q.marks || 1,
+      }
+    })
+    setGradeForm({ answers, overallFeedback: sub.overallFeedback || '' })
+    setGradeSub(sub)
+  }
+  const closeGrade = () => { setGradeSub(null); setGradeForm(null) }
+
+  const setGradeAnswer = (idx, field, value) => {
+    setGradeForm(f => {
+      const next = [...f.answers]
+      next[idx] = { ...next[idx], [field]: value }
+      return { ...f, answers: next }
+    })
+  }
+
+  const saveGrade = async (release = false) => {
+    if (!gradeSub || !detailHw || !gradeForm) return
+    // Validate marks are within bounds
+    for (const a of gradeForm.answers) {
+      if (a.marksAwarded === null || a.marksAwarded === undefined || a.marksAwarded === '') {
+        toast?.error?.('Question ' + (a.questionIndex + 1) + ': set marks (0 if wrong)')
+        return
+      }
+      const m = parseFloat(a.marksAwarded)
+      if (isNaN(m) || m < 0 || m > a.maxMarks) {
+        toast?.error?.('Question ' + (a.questionIndex + 1) + ': marks must be 0-' + a.maxMarks)
+        return
+      }
+    }
+    setGradeSaving(true)
+    try {
+      const payload = {
+        answers: gradeForm.answers.map(a => ({
+          questionIndex: a.questionIndex,
+          marksAwarded: parseFloat(a.marksAwarded),
+          feedback: a.feedback || '',
+        })),
+        overallFeedback: gradeForm.overallFeedback || '',
+        release,
+      }
+      const { data } = await api.patch('/homework/' + detailHw._id + '/submissions/' + gradeSub._id + '/grade', payload)
+      if (data.success) {
+        toast?.ok?.(release ? 'Graded and released to student' : 'Grade saved (not yet released)')
+        // Reload submissions
+        const reload = await api.get('/homework/' + detailHw._id + '/submissions')
+        if (reload.data.success) setSubmissions(reload.data.submissions || [])
+        closeGrade()
+      } else { toast?.error?.(data.message || 'Save failed') }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Save failed: ' + e.message)
+    } finally { setGradeSaving(false) }
+  }
+
   // Form-derived data
   const formGrades = form?.curriculum ? (catalog.gradesByCurriculum[form.curriculum] || []) : []
   const formSubjects = form?.curriculum
     ? catalog.subjects.filter(s => s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(form.curriculum)))
     : []
- 
-  // Bank picker derived
   const bankSubjects = bankFilters.curriculum
     ? catalog.subjects.filter(s => s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(bankFilters.curriculum)))
     : catalog.subjects
   const bankGrades = bankFilters.curriculum ? (catalog.gradesByCurriculum[bankFilters.curriculum] || []) : []
- 
+
+  // Submission stats for the detail view
+  const submissionStats = {
+    total: submissions.length,
+    submitted: submissions.filter(s => s.status === 'submitted').length,
+    graded: submissions.filter(s => s.status === 'graded' || s.status === 'released').length,
+    released: submissions.filter(s => s.status === 'released').length,
+  }
+
   return (
     <div>
       {/* Hero */}
@@ -3707,12 +3780,9 @@ function HomeworkTab({ user, store, setPage, toast }) {
           <div style={{ flex: 1, minWidth: 240 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>Homework</div>
             <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>Create &amp; Manage</h1>
-            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
-              Build assignments from Question Bank or write custom prompts. Auto-grade MCQ. Lock until release date.
-            </div>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>Build assignments. Auto-grade MCQ. Lock until release date. Review and grade student submissions.</div>
           </div>
-          <button onClick={openCreate}
-            style={{ background: '#C9A030', color: '#7D1025', border: 'none', padding: '12px 22px', borderRadius: 'var(--rmd)', cursor: 'pointer', fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 14px rgba(201,160,48,.35)' }}>
+          <button onClick={openCreate} style={{ background: '#C9A030', color: '#7D1025', border: 'none', padding: '12px 22px', borderRadius: 'var(--rmd)', cursor: 'pointer', fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 14px rgba(201,160,48,.35)' }}>
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
@@ -3720,48 +3790,29 @@ function HomeworkTab({ user, store, setPage, toast }) {
           </button>
         </div>
       </div>
- 
+
       {/* Tabs */}
       <div style={{ display: 'flex', background: '#FBFAF5', border: '1px solid var(--border)', borderRadius: 'var(--rmd)', padding: 4, marginBottom: 14, gap: 2 }}>
-        {[
-          { id: 'all', label: 'All', count: counts.all },
-          { id: 'published', label: 'Published', count: counts.published },
-          { id: 'draft', label: 'Draft', count: counts.draft },
-        ].map(t => (
+        {[{ id: 'all', label: 'All', count: counts.all }, { id: 'published', label: 'Published', count: counts.published }, { id: 'draft', label: 'Draft', count: counts.draft }].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
             style={{ flex: 1, background: activeTab === t.id ? '#7D1025' : 'transparent', color: activeTab === t.id ? '#FBFAF5' : 'var(--s500)', border: 'none', padding: '10px 14px', borderRadius: 'var(--rsm)', cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             {t.label}
-            {t.count > 0 && (
-              <span style={{ background: activeTab === t.id ? 'rgba(251,250,245,.2)' : 'var(--bg)', color: activeTab === t.id ? '#FBFAF5' : 'var(--s500)', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 99 }}>{t.count}</span>
-            )}
+            {t.count > 0 && <span style={{ background: activeTab === t.id ? 'rgba(251,250,245,.2)' : 'var(--bg)', color: activeTab === t.id ? '#FBFAF5' : 'var(--s500)', fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 99 }}>{t.count}</span>}
           </button>
         ))}
       </div>
- 
-      {/* Loading / error / empty / list */}
+
       {loading && <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)' }}>Loading homework from backend...</div>}
-      {error && (
-        <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '10px 14px', borderRadius: 8, fontSize: 13 }}>
-          Failed: {error}
-        </div>
-      )}
- 
+      {error && <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '10px 14px', borderRadius: 8, fontSize: 13 }}>Failed: {error}</div>}
+
       {!loading && !error && filteredHw.length === 0 && (
         <div className="card" style={{ padding: 50, textAlign: 'center' }}>
-          <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', marginBottom: 6 }}>
-            {homework.length === 0 ? 'No homework yet' : 'Nothing in this tab'}
-          </div>
-          <div style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto 14px' }}>
-            {homework.length === 0
-              ? 'Click "New Homework" to create your first assignment.'
-              : 'Try a different tab.'}
-          </div>
-          {homework.length === 0 && (
-            <button onClick={openCreate} className="btn btn-p btn-sm">Create homework</button>
-          )}
+          <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', marginBottom: 6 }}>{homework.length === 0 ? 'No homework yet' : 'Nothing in this tab'}</div>
+          <div style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto 14px' }}>{homework.length === 0 ? 'Click "New Homework" to create your first assignment.' : 'Try a different tab.'}</div>
+          {homework.length === 0 && <button onClick={openCreate} className="btn btn-p btn-sm">Create homework</button>}
         </div>
       )}
- 
+
       {!loading && !error && filteredHw.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {filteredHw.map(hw => {
@@ -3776,9 +3827,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.06em', textTransform: 'uppercase' }}>{hw.subject}</span>
                       <span style={{ fontSize: 11, color: 'var(--s500)' }}>{hw.curriculum} · {hw.grade}</span>
                       <span style={{ background: hw.status === 'draft' ? '#FBF6E3' : '#DCFCE7', color: hw.status === 'draft' ? '#92400E' : '#15803D', fontSize: 9.5, fontWeight: 800, letterSpacing: '.06em', padding: '2px 8px', borderRadius: 99, textTransform: 'uppercase' }}>{hw.status}</span>
-                      {isLocked && hw.status === 'published' && (
-                        <span style={{ background: '#FBE8E8', color: '#7D1025', fontSize: 9.5, fontWeight: 800, padding: '2px 8px', borderRadius: 99, letterSpacing: '.06em' }}>LOCKED</span>
-                      )}
+                      {isLocked && hw.status === 'published' && <span style={{ background: '#FBE8E8', color: '#7D1025', fontSize: 9.5, fontWeight: 800, padding: '2px 8px', borderRadius: 99, letterSpacing: '.06em' }}>LOCKED</span>}
                     </div>
                     <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)', marginBottom: 4 }}>{hw.title}</div>
                     <div style={{ fontSize: 12, color: 'var(--s500)' }}>
@@ -3788,7 +3837,9 @@ function HomeworkTab({ user, store, setPage, toast }) {
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => toast?.info?.('Detail view in next phase')} className="btn btn-s btn-sm">View</button>
+                    <button onClick={() => openDetail(hw)} className="btn btn-p btn-sm">View</button>
+                    <button onClick={() => openEdit(hw)} className="btn btn-s btn-sm">Edit</button>
+                    <button onClick={() => handleDelete(hw)} className="btn btn-s btn-sm" style={{ color: '#DC2626' }}>Delete</button>
                   </div>
                 </div>
               </div>
@@ -3796,18 +3847,329 @@ function HomeworkTab({ user, store, setPage, toast }) {
           })}
         </div>
       )}
- 
-      {/* CREATE MODAL */}
+
+      {/* DETAIL MODAL — view homework + submissions */}
+      {detailHw && (
+        <div onClick={closeDetail} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 900, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,.3)', marginTop: 30, marginBottom: 30 }}>
+            <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>
+                {detailHw.subject} · {detailHw.curriculum} · {detailHw.grade}
+              </div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 24 }}>{detailHw.title}</div>
+              <div style={{ fontSize: 13, opacity: .9, marginTop: 6, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                <span>Released {hwTimeAgo(detailHw.releaseAt)}</span>
+                {detailHw.dueAt && <span>{hwTimeUntil(detailHw.dueAt)}</span>}
+                <span>{detailHw.questionCount} question{detailHw.questionCount === 1 ? '' : 's'} · {detailHw.totalMarks} marks</span>
+              </div>
+            </div>
+
+            <div style={{ padding: '20px 28px' }}>
+              {detailHw.description && (
+                <div style={{ marginBottom: 16, fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.65 }}>{detailHw.description}</div>
+              )}
+
+              {/* Submission stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, marginBottom: 16 }}>
+                <div className="card" style={{ padding: 10, textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Total</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--s900)' }}>{submissionStats.total}</div>
+                </div>
+                <div className="card" style={{ padding: 10, textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, color: '#92400E', textTransform: 'uppercase', letterSpacing: '.06em' }}>To Grade</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#92400E' }}>{submissionStats.submitted}</div>
+                </div>
+                <div className="card" style={{ padding: 10, textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, color: '#15803D', textTransform: 'uppercase', letterSpacing: '.06em' }}>Graded</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#15803D' }}>{submissionStats.graded}</div>
+                </div>
+                <div className="card" style={{ padding: 10, textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, color: '#1E3A8A', textTransform: 'uppercase', letterSpacing: '.06em' }}>Released</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#1E3A8A' }}>{submissionStats.released}</div>
+                </div>
+              </div>
+
+              {/* Submissions list */}
+              <div style={{ marginBottom: 14, fontSize: 14, fontWeight: 700, color: '#7D1025' }}>Student Submissions</div>
+
+              {submissionsLoading && <div style={{ padding: 24, textAlign: 'center', color: 'var(--s500)' }}>Loading submissions...</div>}
+
+              {!submissionsLoading && submissions.length === 0 && (
+                <div style={{ padding: 24, textAlign: 'center', color: 'var(--s500)', background: 'var(--bg)', borderRadius: 6 }}>
+                  No submissions yet. Students will appear here once they submit.
+                </div>
+              )}
+
+              {!submissionsLoading && submissions.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {submissions.map(sub => {
+                    const studentName = sub.student
+                      ? ((sub.student.firstName || '') + ' ' + (sub.student.lastName || '')).trim()
+                      : 'Unknown'
+                    const score = sub.totalAwarded || 0
+                    const max = sub.totalPossible || detailHw.totalMarks || 0
+                    const pct = max > 0 ? Math.round((score / max) * 100) : 0
+                    const statusColor = sub.status === 'released' ? '#15803D' : sub.status === 'graded' ? '#1E3A8A' : sub.status === 'submitted' ? '#92400E' : 'var(--s500)'
+                    return (
+                      <div key={sub._id} style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: 12, border: '1px solid var(--border)', borderRadius: 8,
+                        background: '#FFF',
+                      }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--s900)' }}>{studentName}</div>
+                          <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>
+                            {sub.submittedAt ? 'Submitted ' + hwTimeAgo(sub.submittedAt) : 'Started ' + hwTimeAgo(sub.startedAt)}
+                            {sub.isLate && ' · late'}
+                            {sub.status === 'released' && sub.releasedAt && ' · released ' + hwTimeAgo(sub.releasedAt)}
+                          </div>
+                        </div>
+                        {sub.status !== 'in_progress' && max > 0 && (
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: 16, fontWeight: 700, color: statusColor, fontFamily: 'JetBrains Mono, monospace' }}>{score}/{max}</div>
+                            <div style={{ fontSize: 10, color: 'var(--s500)' }}>{pct}%</div>
+                          </div>
+                        )}
+                        <span style={{
+                          background: sub.status === 'released' ? '#DCFCE7' : sub.status === 'graded' ? '#DBEAFE' : sub.status === 'submitted' ? '#FEF3C7' : '#F3F4F6',
+                          color: statusColor,
+                          fontSize: 9.5, fontWeight: 800, letterSpacing: '.06em',
+                          padding: '3px 9px', borderRadius: 99, textTransform: 'uppercase',
+                        }}>{sub.status === 'in_progress' ? 'in progress' : sub.status}</span>
+                        {sub.status !== 'in_progress' && (
+                          <button onClick={() => openGrade(sub)} className="btn btn-p btn-sm" style={{ flexShrink: 0 }}>
+                            {sub.status === 'submitted' ? 'Grade' : 'Review'}
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div style={{ padding: '14px 28px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => { closeDetail(); openEdit(detailHw) }} className="btn btn-s btn-sm">Edit Homework</button>
+                <button onClick={() => handleDelete(detailHw)} className="btn btn-s btn-sm" style={{ color: '#DC2626' }}>Delete</button>
+              </div>
+              <button onClick={closeDetail} className="btn btn-s">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GRADE MODAL — review one student's submission */}
+      {gradeSub && gradeForm && detailHw && (
+        <div onClick={closeGrade} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', zIndex: 1100, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 16, overflowY: 'auto' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 880, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,.4)', marginTop: 30, marginBottom: 30 }}>
+            <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>Grading Submission</div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>
+                {gradeSub.student?.firstName} {gradeSub.student?.lastName}
+              </div>
+              <div style={{ fontSize: 13, opacity: .9, marginTop: 4 }}>{detailHw.title}</div>
+            </div>
+
+            <div style={{ padding: '20px 28px', maxHeight: '65vh', overflowY: 'auto' }}>
+              {/* Per-question grading */}
+              {(detailHw.questions || []).map((q, idx) => {
+                const a = gradeForm.answers[idx]
+                if (!a) return null
+                const meta = hwTypeMeta[q.type] || hwTypeMeta.short
+
+                return (
+                  <div key={idx} style={{
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--rmd)',
+                    padding: 16, marginBottom: 12,
+                    background: idx % 2 === 0 ? '#FFF' : 'var(--bg)',
+                  }}>
+                    {/* Question text */}
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 12 }}>
+                      <span className="mono" style={{
+                        fontSize: 11, fontWeight: 700, color: '#7D1025',
+                        background: '#FBE8E8', padding: '2px 8px', borderRadius: 4,
+                        flexShrink: 0,
+                      }}>Q{idx + 1}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--s900)', lineHeight: 1.5 }}>{q.questionText}</div>
+                        <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 2 }}>
+                          {meta.label} · max {q.marks} mark{q.marks === 1 ? '' : 's'}
+                          {a.autoGraded && <span style={{ marginLeft: 8, color: '#1E3A8A', fontWeight: 700 }}>· auto-graded</span>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Question's own attachments */}
+                    {q.attachments && q.attachments.length > 0 && (
+                      <div style={{ marginBottom: 10, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {q.attachments.map((att, i) => (
+                          <a key={i} href={att.url} target="_blank" rel="noopener noreferrer">
+                            {att.mimeType?.startsWith('image/')
+                              ? <img src={att.url} alt="" style={{ maxWidth: 150, maxHeight: 100, borderRadius: 4, border: '1px solid var(--border)' }}/>
+                              : <span style={{ fontSize: 12, padding: '4px 10px', background: 'var(--bg)', borderRadius: 4 }}>{att.filename || 'File'}</span>}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Student's answer (read-only) */}
+                    <div style={{ marginBottom: 12, padding: 10, background: '#F8FAFC', border: '1px solid var(--border)', borderRadius: 6 }}>
+                      <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--s500)', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 6 }}>Student's Answer</div>
+
+                      {q.type === 'mcq' && a.studentAnswer !== null && a.studentAnswer !== undefined && (
+                        <div>
+                          {q.options.map((opt, optIdx) => {
+                            const wasSelected = a.studentAnswer === optIdx
+                            const isCorrect = (typeof q.correctAnswer === 'number' && q.correctAnswer === optIdx) || (typeof q.correctAnswer === 'string' && q.correctAnswer === opt)
+                            return (
+                              <div key={optIdx} style={{
+                                padding: '6px 10px', marginBottom: 3,
+                                border: '1px solid ' + (wasSelected ? (isCorrect ? '#22C55E' : '#DC2626') : 'var(--border)'),
+                                background: wasSelected ? (isCorrect ? '#DCFCE7' : '#FEE2E2') : '#FFF',
+                                borderRadius: 4, fontSize: 12.5,
+                                display: 'flex', alignItems: 'center', gap: 6,
+                              }}>
+                                <span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: 'var(--s500)' }}>{String.fromCharCode(65 + optIdx)}</span>
+                                <span style={{ flex: 1 }}>{opt}</span>
+                                {wasSelected && <span style={{ fontSize: 10, fontWeight: 700, color: isCorrect ? '#15803D' : '#B91C1C' }}>STUDENT PICKED</span>}
+                                {isCorrect && <span style={{ fontSize: 10, fontWeight: 700, color: '#15803D' }}>CORRECT</span>}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+
+                      {(q.type === 'short' || q.type === 'long') && (
+                        <div style={{ fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                          {a.studentAnswer || <em style={{ color: 'var(--s400)' }}>No answer provided</em>}
+                        </div>
+                      )}
+
+                      {(q.type === 'upload' || q.type === 'drawing') && (
+                        a.studentAttachment && a.studentAttachment.url ? (
+                          a.studentAttachment.mimeType?.startsWith('image/')
+                            ? <img src={a.studentAttachment.url} alt="" style={{ maxWidth: '100%', maxHeight: 300, borderRadius: 4, border: '1px solid var(--border)' }}/>
+                            : <a href={a.studentAttachment.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#7D1025' }}>{a.studentAttachment.filename || 'View file'}</a>
+                        ) : <em style={{ color: 'var(--s400)' }}>No file submitted</em>
+                      )}
+                    </div>
+
+                    {/* Model answer for reference */}
+                    {q.correctAnswer !== null && q.correctAnswer !== undefined && q.type !== 'mcq' && (
+                      <div style={{ marginBottom: 12, padding: 10, background: '#FBF6E3', borderLeft: '3px solid #C9A030', borderRadius: 4 }}>
+                        <div style={{ fontSize: 10.5, fontWeight: 700, color: '#92400E', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 4 }}>Model Answer</div>
+                        <div style={{ fontSize: 12.5, color: 'var(--s700)', lineHeight: 1.5 }}>{q.correctAnswer}</div>
+                      </div>
+                    )}
+
+                    {/* Marks input */}
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
+                      <label style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--s700)' }}>Marks:</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max={a.maxMarks}
+                        step="0.5"
+                        value={a.marksAwarded === null || a.marksAwarded === undefined ? '' : a.marksAwarded}
+                        onChange={e => setGradeAnswer(idx, 'marksAwarded', e.target.value)}
+                        style={{
+                          width: 80, padding: '6px 10px',
+                          border: '1.5px solid var(--border)',
+                          borderRadius: 6, fontSize: 14, fontFamily: 'JetBrains Mono, monospace',
+                          textAlign: 'center', fontWeight: 700,
+                        }}
+                      />
+                      <span style={{ fontSize: 12, color: 'var(--s500)', fontFamily: 'JetBrains Mono, monospace' }}>/ {a.maxMarks}</span>
+                      {/* Quick action buttons */}
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button type="button" onClick={() => setGradeAnswer(idx, 'marksAwarded', a.maxMarks)}
+                          style={{ padding: '4px 10px', background: '#DCFCE7', border: '1px solid #86EFAC', color: '#15803D', borderRadius: 4, cursor: 'pointer', fontSize: 11, fontWeight: 700 }}>
+                          Full ({a.maxMarks})
+                        </button>
+                        <button type="button" onClick={() => setGradeAnswer(idx, 'marksAwarded', Math.floor(a.maxMarks / 2))}
+                          style={{ padding: '4px 10px', background: '#FEF3C7', border: '1px solid #FCD34D', color: '#92400E', borderRadius: 4, cursor: 'pointer', fontSize: 11, fontWeight: 700 }}>
+                          Half
+                        </button>
+                        <button type="button" onClick={() => setGradeAnswer(idx, 'marksAwarded', 0)}
+                          style={{ padding: '4px 10px', background: '#FEE2E2', border: '1px solid #FCA5A5', color: '#B91C1C', borderRadius: 4, cursor: 'pointer', fontSize: 11, fontWeight: 700 }}>
+                          Zero
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Per-question feedback */}
+                    <textarea
+                      value={a.feedback || ''}
+                      onChange={e => setGradeAnswer(idx, 'feedback', e.target.value)}
+                      placeholder="Feedback for this question (optional)"
+                      rows={2}
+                      style={{ width: '100%', padding: 8, border: '1px solid var(--border)', borderRadius: 4, fontSize: 12.5, fontFamily: 'inherit', resize: 'vertical', lineHeight: 1.5 }}
+                    />
+                  </div>
+                )
+              })}
+
+              {/* Overall feedback */}
+              <div style={{ marginTop: 16, padding: 14, background: '#FBFAF5', border: '1px solid #C9A030', borderRadius: 8 }}>
+                <label style={{ fontSize: 12, fontWeight: 700, color: '#7D1025', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6, display: 'block' }}>
+                  Overall Feedback
+                </label>
+                <textarea
+                  value={gradeForm.overallFeedback || ''}
+                  onChange={e => setGradeForm(f => ({ ...f, overallFeedback: e.target.value }))}
+                  placeholder="What did the student do well? What can they improve?"
+                  rows={3}
+                  style={{ width: '100%', padding: 10, border: '1px solid var(--border)', borderRadius: 6, fontSize: 13, fontFamily: 'inherit', resize: 'vertical', lineHeight: 1.5 }}
+                />
+              </div>
+
+              {/* Total preview */}
+              <div style={{ marginTop: 14, padding: 14, background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: 11.5, color: '#15803D', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Total Score</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#15803D', fontFamily: 'JetBrains Mono, monospace' }}>
+                    {gradeForm.answers.reduce((sum, a) => sum + (parseFloat(a.marksAwarded) || 0), 0)} / {detailHw.totalMarks}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 11.5, color: '#15803D', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase' }}>Percentage</div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#15803D', fontFamily: 'JetBrains Mono, monospace' }}>
+                    {detailHw.totalMarks > 0
+                      ? Math.round((gradeForm.answers.reduce((sum, a) => sum + (parseFloat(a.marksAwarded) || 0), 0) / detailHw.totalMarks) * 100)
+                      : 0}%
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ padding: '14px 28px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+              <button onClick={closeGrade} className="btn btn-s" disabled={gradeSaving}>Cancel</button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => saveGrade(false)} disabled={gradeSaving} className="btn btn-s">
+                  {gradeSaving ? 'Saving...' : 'Save (don\'t release yet)'}
+                </button>
+                <button onClick={() => saveGrade(true)} disabled={gradeSaving} className="btn btn-p"
+                  style={{ background: '#15803D', borderColor: '#15803D' }}>
+                  {gradeSaving ? 'Releasing...' : 'Save & Release to Student'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CREATE/EDIT MODAL */}
       {createOpen && form && (
         <div onClick={closeCreate} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 800, width: '100%', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
             <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>New Assignment</div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>Create Homework</div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>{editingId ? 'Edit Assignment' : 'New Assignment'}</div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>{editingId ? 'Update Homework' : 'Create Homework'}</div>
             </div>
- 
+
             <div style={{ padding: '24px 28px' }}>
-              {/* Title + description */}
               <div className="fg">
                 <label className="fl">Title *</label>
                 <input className="fi" value={form.title} onChange={e => setF('title', e.target.value)} placeholder="e.g. Quadratic Equations Practice" autoFocus/>
@@ -3816,26 +4178,16 @@ function HomeworkTab({ user, store, setPage, toast }) {
                 <label className="fl">Instructions / Description</label>
                 <textarea className="fi" rows={2} value={form.description} onChange={e => setF('description', e.target.value)} placeholder="Brief description shown to students" style={{ resize: 'vertical' }}/>
               </div>
- 
-              {/* Room selector */}
+
               <div className="fg">
                 <label className="fl">Assign to Room</label>
                 <select className="fsel" value={form.assignedRoom} onChange={e => handleRoomChange(e.target.value)}>
                   <option value="">No room — assign by individual students</option>
-                  {rooms.map(r => (
-                    <option key={r._id} value={r._id}>
-                      {r.name} ({r.curriculum} · {r.subject} · {r.grade}, {r.students?.length || 0} students)
-                    </option>
-                  ))}
+                  {rooms.map(r => <option key={r._id} value={r._id}>{r.name} ({r.curriculum} · {r.subject} · {r.grade}, {r.students?.length || 0} students)</option>)}
                 </select>
-                {rooms.length === 0 && (
-                  <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
-                    No rooms assigned to you yet. Ask admin to create one and assign you as teacher.
-                  </div>
-                )}
+                {rooms.length === 0 && <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>No rooms assigned to you yet. Ask admin to create one and assign you as teacher.</div>}
               </div>
- 
-              {/* Curriculum / Grade / Subject (auto-filled by room, editable) */}
+
               <div className="fr2">
                 <div className="fg">
                   <label className="fl">Curriculum *</label>
@@ -3859,8 +4211,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
                   {formSubjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
                 </select>
               </div>
- 
-              {/* Dates */}
+
               <div className="fr2">
                 <div className="fg">
                   <label className="fl">Release Date *</label>
@@ -3873,8 +4224,8 @@ function HomeworkTab({ user, store, setPage, toast }) {
                   <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>Submissions after this are flagged as late.</div>
                 </div>
               </div>
- 
-              {/* Questions section */}
+
+              {/* Questions */}
               <div style={{ marginTop: 18, padding: 14, background: '#FBFAF5', border: '1px solid var(--border)', borderRadius: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#7D1025' }}>
@@ -3886,33 +4237,22 @@ function HomeworkTab({ user, store, setPage, toast }) {
                     <button type="button" onClick={openCustom} className="btn btn-s btn-sm">+ Write New</button>
                   </div>
                 </div>
- 
+
                 {form.questions.length === 0 && (
                   <div style={{ padding: 24, textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
                     {!form.curriculum ? 'Pick curriculum and subject first.' : 'No questions yet. Add from your Question Bank or write a new one.'}
                   </div>
                 )}
- 
+
                 {form.questions.map((q, i) => {
                   const meta = hwTypeMeta[q.type] || hwTypeMeta.short
                   return (
-                    <div key={i}
-                      draggable
-                      onDragStart={onDragStart(i)}
-                      onDragOver={onDragOver(i)}
-                      onDrop={onDrop(i)}
-                      onDragEnd={onDragEnd}
+                    <div key={i} draggable onDragStart={onDragStart(i)} onDragOver={onDragOver(i)} onDrop={onDrop(i)} onDragEnd={onDragEnd}
                       style={{
-                        background: '#FFF',
-                        border: '1px solid ' + (dragIndex === i ? '#C9A030' : 'var(--border)'),
-                        borderRadius: 8,
-                        padding: 10,
-                        marginBottom: 6,
-                        display: 'flex',
-                        gap: 10,
-                        alignItems: 'flex-start',
-                        cursor: 'move',
-                        opacity: dragIndex === i ? 0.5 : 1,
+                        background: '#FFF', border: '1px solid ' + (dragIndex === i ? '#C9A030' : 'var(--border)'),
+                        borderRadius: 8, padding: 10, marginBottom: 6,
+                        display: 'flex', gap: 10, alignItems: 'flex-start',
+                        cursor: 'move', opacity: dragIndex === i ? 0.5 : 1,
                       }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, flexShrink: 0 }}>
                         <div style={{ color: 'var(--s400)', fontSize: 12, fontWeight: 700 }}>⋮⋮</div>
@@ -3930,29 +4270,23 @@ function HomeworkTab({ user, store, setPage, toast }) {
                     </div>
                   )
                 })}
- 
-                {form.questions.length > 1 && (
-                  <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 6, fontStyle: 'italic' }}>Drag to reorder questions.</div>
-                )}
+
+                {form.questions.length > 1 && <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 6, fontStyle: 'italic' }}>Drag to reorder questions.</div>}
               </div>
             </div>
- 
+
             <div style={{ padding: '16px 28px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
               <button className="btn btn-s" onClick={closeCreate} disabled={saving}>Cancel</button>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => saveHomework('draft')} disabled={saving} className="btn btn-s">
-                  {saving ? 'Saving...' : 'Save as Draft'}
-                </button>
-                <button onClick={() => saveHomework('published')} disabled={saving} className="btn btn-p">
-                  {saving ? 'Publishing...' : 'Publish'}
-                </button>
+                <button onClick={() => saveHomework('draft')} disabled={saving} className="btn btn-s">{saving ? 'Saving...' : 'Save as Draft'}</button>
+                <button onClick={() => saveHomework('published')} disabled={saving} className="btn btn-p">{saving ? 'Publishing...' : (editingId ? 'Update & Keep Published' : 'Publish')}</button>
               </div>
             </div>
           </div>
         </div>
       )}
- 
-      {/* BANK PICKER SUB-MODAL */}
+
+      {/* BANK PICKER */}
       {bankOpen && (
         <div onClick={() => setBankOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 760, width: '100%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.4)' }}>
@@ -3961,7 +4295,6 @@ function HomeworkTab({ user, store, setPage, toast }) {
               <button onClick={() => setBankOpen(false)} style={{ background: 'transparent', border: 'none', color: '#FBFAF5', cursor: 'pointer', fontSize: 22 }}>×</button>
             </div>
             <div style={{ padding: '16px 24px' }}>
-              {/* Filters */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8, marginBottom: 10 }}>
                 <select className="fsel" value={bankFilters.curriculum} onChange={e => setBankFilters(f => ({ ...f, curriculum: e.target.value, subject: '', grade: '' }))}>
                   <option value="">All curricula</option>
@@ -3985,15 +4318,9 @@ function HomeworkTab({ user, store, setPage, toast }) {
                 </select>
               </div>
               <input className="fi" placeholder="Search question text..." value={bankFilters.q} onChange={e => setBankFilters(f => ({ ...f, q: e.target.value }))} style={{ marginBottom: 12 }}/>
- 
+
               {bankLoading && <div style={{ textAlign: 'center', padding: 24, color: 'var(--s500)' }}>Loading...</div>}
- 
-              {!bankLoading && bankQuestions.length === 0 && (
-                <div style={{ textAlign: 'center', padding: 24, color: 'var(--s400)', fontSize: 13 }}>
-                  No questions match. Adjust filters or write a custom question.
-                </div>
-              )}
- 
+              {!bankLoading && bankQuestions.length === 0 && <div style={{ textAlign: 'center', padding: 24, color: 'var(--s400)', fontSize: 13 }}>No questions match. Adjust filters or write a custom question.</div>}
               {!bankLoading && bankQuestions.length > 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {bankQuestions.map(q => {
@@ -4006,9 +4333,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
                           <div style={{ fontSize: 13, color: 'var(--s900)', marginBottom: 2 }}>{q.questionText}</div>
                           <div style={{ fontSize: 11, color: 'var(--s500)' }}>{q.curriculum} · {q.subject} · {q.grade} · {meta.label} · {q.marks}m</div>
                         </div>
-                        <button onClick={() => addBankQuestionToForm(q)} disabled={alreadyAdded} className="btn btn-p btn-sm" style={{ flexShrink: 0 }}>
-                          {alreadyAdded ? 'Added' : 'Add'}
-                        </button>
+                        <button onClick={() => addBankQuestionToForm(q)} disabled={alreadyAdded} className="btn btn-p btn-sm" style={{ flexShrink: 0 }}>{alreadyAdded ? 'Added' : 'Add'}</button>
                       </div>
                     )
                   })}
@@ -4021,7 +4346,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
           </div>
         </div>
       )}
- 
+
       {/* CUSTOM QUESTION SUB-MODAL */}
       {customOpen && customForm && (
         <div onClick={closeCustom} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
@@ -4030,7 +4355,6 @@ function HomeworkTab({ user, store, setPage, toast }) {
               <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 18 }}>Write Custom Question</div>
               <button onClick={closeCustom} style={{ background: 'transparent', border: 'none', color: '#FBFAF5', cursor: 'pointer', fontSize: 22 }}>×</button>
             </div>
- 
             <div style={{ padding: '20px 24px' }}>
               <div className="fg">
                 <label className="fl">Question Type *</label>
@@ -4041,12 +4365,10 @@ function HomeworkTab({ user, store, setPage, toast }) {
                   ))}
                 </div>
               </div>
- 
               <div className="fg">
                 <label className="fl">Question Text *</label>
                 <textarea className="fi" rows={3} value={customForm.questionText} onChange={e => setCF('questionText', e.target.value)} placeholder="Type the question..." style={{ resize: 'vertical' }}/>
               </div>
- 
               {customForm.type === 'mcq' && (
                 <div className="fg">
                   <label className="fl">Options (mark correct one)</label>
@@ -4057,27 +4379,22 @@ function HomeworkTab({ user, store, setPage, toast }) {
                         {String.fromCharCode(65 + i)}
                       </button>
                       <input className="fi" value={opt} onChange={e => setCustomOption(i, e.target.value)} placeholder={'Option ' + (i + 1)}/>
-                      {customForm.options.length > 2 && (
-                        <button type="button" onClick={() => removeCustomOption(i)} className="btn btn-s btn-sm">×</button>
-                      )}
+                      {customForm.options.length > 2 && <button type="button" onClick={() => removeCustomOption(i)} className="btn btn-s btn-sm">×</button>}
                     </div>
                   ))}
                   <button type="button" onClick={addCustomOption} className="btn btn-s btn-sm" style={{ marginTop: 4 }}>+ Add option</button>
                 </div>
               )}
- 
               {(customForm.type === 'short' || customForm.type === 'long') && (
                 <div className="fg">
                   <label className="fl">Model Answer *</label>
                   <textarea className="fi" rows={customForm.type === 'long' ? 4 : 2} value={customForm.correctAnswer} onChange={e => setCF('correctAnswer', e.target.value)} placeholder="The expected answer (used for marking)" style={{ resize: 'vertical' }}/>
                 </div>
               )}
- 
               <div className="fg">
                 <label className="fl">Topic (optional)</label>
                 <input className="fi" value={customForm.topic} onChange={e => setCF('topic', e.target.value)} placeholder="e.g. Algebra, Pythagoras"/>
               </div>
- 
               <div className="fr2">
                 <div className="fg">
                   <label className="fl">Marks</label>
@@ -4092,13 +4409,11 @@ function HomeworkTab({ user, store, setPage, toast }) {
                   </select>
                 </div>
               </div>
- 
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--s700)', cursor: 'pointer', marginTop: 6 }}>
                 <input type="checkbox" checked={customForm.saveToBank} onChange={e => setCF('saveToBank', e.target.checked)} style={{ accentColor: '#7D1025' }}/>
                 Also save this question to my Question Bank for reuse
               </label>
             </div>
- 
             <div style={{ padding: '12px 24px', borderTop: '1px solid var(--border)', background: '#FBFAF5', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
               <button onClick={closeCustom} className="btn btn-s">Cancel</button>
               <button onClick={addCustomToForm} className="btn btn-p">Add to Homework</button>
@@ -4109,7 +4424,6 @@ function HomeworkTab({ user, store, setPage, toast }) {
     </div>
   )
 }
-
 // ═══════════════════════════════════════════════════════════
 // COMMUNICATION — Safety-filtered messaging with admin oversight
 // ═══════════════════════════════════════════════════════════
