@@ -14,12 +14,210 @@ import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
 
-// ── SVG icon helper ───────────────────────────────────────
+// ── Design tokens (mirrored from Admin redesign) ──────────
+const TOKENS = {
+  crimson:     '#7D1025',
+  crimsonDeep: '#5A0B1B',
+  crimsonSoft: '#9C2840',
+  gold:        '#C9A030',
+  goldLight:   '#F0CC5A',
+  goldPale:    '#FBF6E3',
+  cream:       '#FBFAF5',
+  paper:       '#FFFFFF',
+  ink:         '#1A1410',
+  inkSoft:     '#5C5048',
+  inkMuted:    '#9A8F86',
+  line:        '#E8E1D6',
+  lineSoft:    '#F0EBE0',
+  // module accents
+  blue:        '#3B6CB5',
+  teal:        '#0E8C7A',
+  plum:        '#6B2B6B',
+  forest:      '#2F6B3E',
+  rust:        '#A8451B',
+  navy:        '#1F3A66',
+  slate:       '#4B5563',
+  ochre:       '#A8821B',
+}
+
+// ── SVG icon helper (legacy line icons — kept for tab internals) ─
 const I = (d) => (
   <svg width="18" height="18" fill="none" viewBox="0 0 24 24"
     stroke="currentColor" strokeWidth="2" strokeLinecap="round"
     dangerouslySetInnerHTML={{__html: d}}/>
 )
+
+// ── Illustrated module icons (admin-matched picture style) ────
+// Each icon: 24×24, filled with subtle outline, takes a `tint` colour.
+// Used in the new top-nav chrome and sidebar.
+function ModuleIcon({ kind, size = 22, tint = TOKENS.crimson }) {
+  const c = tint
+  const s = c + '22'   // 13% alpha fill tint
+  const props = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', xmlns: 'http://www.w3.org/2000/svg' }
+  switch (kind) {
+    case 'dashboard': // illustrated 4-pane window with chart
+      return (
+        <svg {...props}>
+          <rect x="2.5" y="3.5" width="19" height="17" rx="2.5" fill={s} stroke={c} strokeWidth="1.5"/>
+          <line x1="2.5" y1="8" x2="21.5" y2="8" stroke={c} strokeWidth="1.5"/>
+          <circle cx="5" cy="5.75" r=".75" fill={c}/>
+          <circle cx="7.5" cy="5.75" r=".75" fill={c}/>
+          <path d="M5.5 16.5l3-3 2.5 2 3.5-4.5 4 4" stroke={c} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          <circle cx="5.5" cy="16.5" r="1.1" fill={c}/>
+          <circle cx="14.5" cy="11" r="1.1" fill={c}/>
+        </svg>
+      )
+    case 'curriculum': // open book with bookmark
+      return (
+        <svg {...props}>
+          <path d="M3 5.5C3 4.67 3.67 4 4.5 4H11v15H4.5C3.67 19 3 18.33 3 17.5v-12z" fill={s} stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+          <path d="M21 5.5C21 4.67 20.33 4 19.5 4H13v15h6.5c.83 0 1.5-.67 1.5-1.5v-12z" fill={s} stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+          <line x1="5.5" y1="7.5" x2="9" y2="7.5" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+          <line x1="5.5" y1="10" x2="9" y2="10" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+          <line x1="5.5" y1="12.5" x2="8" y2="12.5" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+          <line x1="15" y1="7.5" x2="18.5" y2="7.5" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+          <line x1="15" y1="10" x2="18.5" y2="10" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+          <line x1="15" y1="12.5" x2="17.5" y2="12.5" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+          <path d="M16 4v5l1.5-1.2 1.5 1.2V4" fill={TOKENS.gold} stroke={c} strokeWidth="1.2" strokeLinejoin="round"/>
+        </svg>
+      )
+    case 'lessons': // play with film-strip
+      return (
+        <svg {...props}>
+          <rect x="2.5" y="5" width="19" height="14" rx="2" fill={s} stroke={c} strokeWidth="1.5"/>
+          <rect x="4" y="6.5" width="1.4" height="2" rx=".3" fill={c}/>
+          <rect x="4" y="10.7" width="1.4" height="2" rx=".3" fill={c}/>
+          <rect x="4" y="14.9" width="1.4" height="2" rx=".3" fill={c}/>
+          <rect x="18.6" y="6.5" width="1.4" height="2" rx=".3" fill={c}/>
+          <rect x="18.6" y="10.7" width="1.4" height="2" rx=".3" fill={c}/>
+          <rect x="18.6" y="14.9" width="1.4" height="2" rx=".3" fill={c}/>
+          <polygon points="10,9 16,12 10,15" fill={c}/>
+        </svg>
+      )
+    case 'practice': // pencil + target rings
+      return (
+        <svg {...props}>
+          <circle cx="9" cy="13" r="6" fill={s} stroke={c} strokeWidth="1.5"/>
+          <circle cx="9" cy="13" r="3.5" fill="none" stroke={c} strokeWidth="1.2"/>
+          <circle cx="9" cy="13" r="1.3" fill={c}/>
+          <path d="M14 9l5-5 2 2-5 5" fill={TOKENS.gold} stroke={c} strokeWidth="1.2" strokeLinejoin="round"/>
+          <path d="M14 9l-1.5 1.5 1.5 1.5" stroke={c} strokeWidth="1.2" fill="none" strokeLinejoin="round"/>
+        </svg>
+      )
+    case 'homework': // clipboard with checks
+      return (
+        <svg {...props}>
+          <rect x="4.5" y="4" width="15" height="17" rx="2" fill={s} stroke={c} strokeWidth="1.5"/>
+          <rect x="8" y="2.5" width="8" height="3.5" rx="1" fill={TOKENS.paper} stroke={c} strokeWidth="1.4"/>
+          <path d="M7.5 11l1.5 1.5 2.5-2.5" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          <line x1="13" y1="11" x2="17" y2="11" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+          <path d="M7.5 16l1.5 1.5 2.5-2.5" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          <line x1="13" y1="16" x2="17" y2="16" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+        </svg>
+      )
+    case 'exams': // shield with star
+      return (
+        <svg {...props}>
+          <path d="M12 2.5l8 2.5v6.5c0 4.5-3.4 8.5-8 10-4.6-1.5-8-5.5-8-10V5l8-2.5z" fill={s} stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+          <polygon points="12,7.5 13.4,10.4 16.5,10.9 14.2,13.1 14.8,16.2 12,14.7 9.2,16.2 9.8,13.1 7.5,10.9 10.6,10.4" fill={TOKENS.gold} stroke={c} strokeWidth="1.1" strokeLinejoin="round"/>
+        </svg>
+      )
+    case 'live': // video camera with red dot
+      return (
+        <svg {...props}>
+          <rect x="2.5" y="6.5" width="13" height="11" rx="2" fill={s} stroke={c} strokeWidth="1.5"/>
+          <polygon points="15.5,9.5 21,6.5 21,17.5 15.5,14.5" fill={s} stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+          <circle cx="6.5" cy="10.5" r="1" fill="#DC2626"/>
+        </svg>
+      )
+    case 'myroom': // group of people
+      return (
+        <svg {...props}>
+          <circle cx="9" cy="8" r="3.2" fill={s} stroke={c} strokeWidth="1.5"/>
+          <path d="M3.5 19c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5" fill={s} stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+          <circle cx="17" cy="9" r="2.5" fill={s} stroke={c} strokeWidth="1.5"/>
+          <path d="M14.5 19c0-2.5 1.5-4.5 3.5-5" stroke={c} strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+        </svg>
+      )
+    case 'timetable': // calendar grid
+      return (
+        <svg {...props}>
+          <rect x="3" y="4.5" width="18" height="16" rx="2" fill={s} stroke={c} strokeWidth="1.5"/>
+          <line x1="3" y1="9.5" x2="21" y2="9.5" stroke={c} strokeWidth="1.4"/>
+          <line x1="7" y1="2.5" x2="7" y2="6" stroke={c} strokeWidth="1.4" strokeLinecap="round"/>
+          <line x1="17" y1="2.5" x2="17" y2="6" stroke={c} strokeWidth="1.4" strokeLinecap="round"/>
+          <rect x="6" y="12" width="2.5" height="2" rx=".4" fill={c}/>
+          <rect x="11" y="12" width="2.5" height="2" rx=".4" fill={c}/>
+          <rect x="16" y="12" width="2.5" height="2" rx=".4" fill={TOKENS.gold}/>
+          <rect x="6" y="16" width="2.5" height="2" rx=".4" fill={c} opacity=".5"/>
+          <rect x="11" y="16" width="2.5" height="2" rx=".4" fill={c} opacity=".5"/>
+        </svg>
+      )
+    case 'tutor': // chat bubble with sparkle
+      return (
+        <svg {...props}>
+          <path d="M3.5 5.5C3.5 4.4 4.4 3.5 5.5 3.5h13c1.1 0 2 .9 2 2v8c0 1.1-.9 2-2 2H10l-3.5 3.5V15.5H5.5c-1.1 0-2-.9-2-2v-8z" fill={s} stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+          <path d="M12 7l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill={TOKENS.gold} stroke={c} strokeWidth="1" strokeLinejoin="round"/>
+          <circle cx="7" cy="8.5" r=".6" fill={c}/>
+          <circle cx="16.5" cy="11" r=".6" fill={c}/>
+        </svg>
+      )
+    case 'studyplan': // calendar with check
+      return (
+        <svg {...props}>
+          <rect x="3" y="4.5" width="18" height="16" rx="2" fill={s} stroke={c} strokeWidth="1.5"/>
+          <line x1="3" y1="9.5" x2="21" y2="9.5" stroke={c} strokeWidth="1.4"/>
+          <line x1="7" y1="2.5" x2="7" y2="6" stroke={c} strokeWidth="1.4" strokeLinecap="round"/>
+          <line x1="17" y1="2.5" x2="17" y2="6" stroke={c} strokeWidth="1.4" strokeLinecap="round"/>
+          <path d="M8 15l2.5 2.5L16 12.5" stroke={TOKENS.gold} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+        </svg>
+      )
+    case 'resources': // document stack
+      return (
+        <svg {...props}>
+          <rect x="6" y="3" width="13" height="16" rx="1.5" fill={TOKENS.paper} stroke={c} strokeWidth="1.4"/>
+          <rect x="4" y="5" width="13" height="16" rx="1.5" fill={s} stroke={c} strokeWidth="1.5"/>
+          <line x1="6.5" y1="9" x2="14" y2="9" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+          <line x1="6.5" y1="12" x2="14" y2="12" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+          <line x1="6.5" y1="15" x2="11.5" y2="15" stroke={c} strokeWidth="1.3" strokeLinecap="round"/>
+        </svg>
+      )
+    case 'profile': // person bust
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="8" r="3.8" fill={s} stroke={c} strokeWidth="1.5"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill={s} stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+        </svg>
+      )
+    case 'achievements': // trophy
+      return (
+        <svg {...props}>
+          <path d="M8 4h8v6a4 4 0 0 1-8 0V4z" fill={TOKENS.gold} stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+          <path d="M5 5h3v3a2.5 2.5 0 0 1-3-2.5V5z" fill={s} stroke={c} strokeWidth="1.4"/>
+          <path d="M19 5h-3v3a2.5 2.5 0 0 0 3-2.5V5z" fill={s} stroke={c} strokeWidth="1.4"/>
+          <rect x="10" y="14" width="4" height="3" fill={s} stroke={c} strokeWidth="1.4"/>
+          <rect x="7" y="17" width="10" height="2" rx=".5" fill={s} stroke={c} strokeWidth="1.4"/>
+          <circle cx="12" cy="8" r="1.4" fill={c}/>
+        </svg>
+      )
+    case 'subscription': // credit card
+      return (
+        <svg {...props}>
+          <rect x="2.5" y="6" width="19" height="12.5" rx="2" fill={s} stroke={c} strokeWidth="1.5"/>
+          <rect x="2.5" y="9" width="19" height="2.5" fill={c}/>
+          <rect x="5" y="14" width="4" height="1.6" rx=".4" fill={c}/>
+          <rect x="11" y="14" width="3" height="1.6" rx=".4" fill={c} opacity=".5"/>
+          <rect x="16" y="13.5" width="3" height="2.5" rx=".4" fill={TOKENS.gold} stroke={c} strokeWidth="1"/>
+        </svg>
+      )
+    default:
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="8" fill={s} stroke={c} strokeWidth="1.5"/>
+        </svg>
+      )
+  }
+}
 
 // ── Avatar ────────────────────────────────────────────────
 function Av({init, col, size=36}) {
@@ -84,27 +282,28 @@ const BADGE_ICONS = {
 }
 
 // ── NAV SECTIONS ──────────────────────────────────────────
+// Each item has `kind` (ModuleIcon variant) and `tint` (per-module accent).
 const NAV_SECTIONS = [
   { label:'Learning', items:[
-    { id:'dashboard',    label:'Dashboard',       svg:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>' },
-    { id:'curriculum',   label:'My Curriculum',   svg:'<path d="M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13"/><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M8 10h8M8 14h6"/>' },
-    { id:'lessons',      label:'Lesson Player',   svg:'<polygon points="5 3 19 12 5 21 5 3"/>' },
-    { id:'practice',     label:'Adaptive Practice',svg:'<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1.5"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/>' },
-    { id:'homework',     label:'Homework',         svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>' },
-    { id:'exams',        label:'Exams',           svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',  badge:'1' },
-    { id:'live',         label:'Live Classes',    svg:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>', live:true },
-    { id:'myroom',       label:'My Class Room',   svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',  groupOnly:true },
-    { id:'timetable',    label:'Timetable',       svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
+    { id:'dashboard',    label:'Dashboard',         kind:'dashboard',    tint:TOKENS.crimson },
+    { id:'curriculum',   label:'My Curriculum',     kind:'curriculum',   tint:TOKENS.plum },
+    { id:'lessons',      label:'Lesson Player',     kind:'lessons',      tint:TOKENS.blue },
+    { id:'practice',     label:'Adaptive Practice', kind:'practice',     tint:TOKENS.rust },
+    { id:'homework',     label:'Homework',          kind:'homework',     tint:TOKENS.teal },
+    { id:'exams',        label:'Exams',             kind:'exams',        tint:TOKENS.crimson, badge:'1' },
+    { id:'live',         label:'Live Classes',      kind:'live',         tint:TOKENS.navy,    live:true },
+    { id:'myroom',       label:'My Class Room',     kind:'myroom',       tint:TOKENS.forest, groupOnly:true },
+    { id:'timetable',    label:'Timetable',         kind:'timetable',    tint:TOKENS.slate },
   ]},
   { label:'Tools', items:[
-    { id:'tutor',        label:'Mshauri AI',      svg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
-    { id:'studyplan',    label:'My Study Plan',   svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/>' },
-    { id:'resources',    label:'Resources',       svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' },
+    { id:'tutor',        label:'Mshauri AI',        kind:'tutor',        tint:TOKENS.gold },
+    { id:'studyplan',    label:'My Study Plan',     kind:'studyplan',    tint:TOKENS.forest },
+    { id:'resources',    label:'Resources',         kind:'resources',    tint:TOKENS.slate },
   ]},
   { label:'Account', items:[
-    { id:'profile',      label:'Profile',          svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
-    { id:'achievements', label:'Achievements',    svg:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' },
-    { id:'subscription', label:'Subscription',   svg:'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>' },
+    { id:'profile',      label:'Profile',           kind:'profile',      tint:TOKENS.crimson },
+    { id:'achievements', label:'Achievements',      kind:'achievements', tint:TOKENS.gold },
+    { id:'subscription', label:'Subscription',      kind:'subscription', tint:TOKENS.ochre },
   ]},
 ]
 
@@ -335,100 +534,320 @@ export default function StudentPortal() {
   const subjects  = mastery?.subjects || []
 
   // ─────────────────────────────────────────────────────
+  // Page title for top bar
+  const pageTitle =
+    page === 'dashboard'    ? `Welcome back, ${firstName}` :
+    page === 'practice'     ? (practiceData ? `Adaptive Practice — ${practiceData.topic}` : 'Adaptive Practice') :
+    page === 'homework'     ? 'Homework' :
+    page === 'tutor'        ? 'Mshauri AI Tutor' :
+    page === 'studyplan'    ? 'My Personalised Study Plan' :
+    page === 'curriculum'   ? 'My Curriculum' :
+    page === 'lessons'      ? 'Lesson Player' :
+    page === 'exams'        ? 'Exams' :
+    page === 'live'         ? 'Live Classes' :
+    page === 'timetable'    ? 'Timetable' :
+    page === 'resources'    ? 'Resources' :
+    page === 'profile'      ? 'My Profile' :
+    page === 'achievements' ? 'Achievements' :
+    page === 'subscription' ? 'Subscription' : 'Portal'
+
+  const pageEyebrow =
+    page === 'dashboard'    ? 'Today' :
+    page === 'practice'     ? 'Adaptive learning' :
+    page === 'homework'     ? 'Assignments' :
+    page === 'tutor'        ? 'AI tutor' :
+    page === 'studyplan'    ? 'Personalised schedule' :
+    page === 'curriculum'   ? 'Subjects & topics' :
+    page === 'lessons'      ? 'Watch & learn' :
+    page === 'exams'        ? 'Assessments' :
+    page === 'live'         ? 'Scheduled sessions' :
+    page === 'timetable'    ? 'Weekly schedule' :
+    page === 'resources'    ? 'Library' :
+    page === 'profile'      ? 'Your account' :
+    page === 'achievements' ? 'Badges & XP' :
+    page === 'subscription' ? 'Billing' : ''
+
   return (
-    <div className="app">
+    <div className="app" style={{background:TOKENS.cream, minHeight:'100vh', display:'block'}}>
 
-      {/* ── SIDEBAR ── */}
-      <aside className={`sidebar${collapsed?' col':''}`}>
-        <div className="sb-logo">
-          <div className="sb-mark">
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" strokeLinecap="round">
-              <path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/>
+      {/* ── Inline chrome styles (self-contained, overrides legacy .sidebar/.topbar) ── */}
+      <style>{`
+        .sm-shell { display:flex; min-height:100vh; background:${TOKENS.cream}; font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; }
+        .sm-side {
+          position:fixed; top:0; left:0; bottom:0; width:248px;
+          background:${TOKENS.cream}; border-right:1px solid ${TOKENS.line};
+          display:flex; flex-direction:column;
+          transition:width .22s cubic-bezier(.4,0,.2,1);
+          z-index:50;
+        }
+        .sm-side.col { width:72px; }
+        .sm-side-logo {
+          padding:22px 20px 18px; display:flex; align-items:center; gap:11px;
+          border-bottom:1px solid ${TOKENS.lineSoft}; min-height:74px;
+        }
+        .sm-side-mark {
+          width:36px; height:36px; flex-shrink:0; border-radius:9px;
+          background:linear-gradient(135deg, ${TOKENS.crimson} 0%, ${TOKENS.crimsonDeep} 100%);
+          display:flex; align-items:center; justify-content:center;
+          box-shadow:0 2px 6px rgba(125,16,37,.22), inset 0 1px 0 rgba(255,255,255,.18);
+        }
+        .sm-side-brand { display:flex; flex-direction:column; line-height:1.1; min-width:0; overflow:hidden; }
+        .sm-side-brand-name {
+          font-family:'Instrument Serif','Cormorant Garamond',Georgia,serif;
+          font-size:21px; color:${TOKENS.ink}; letter-spacing:-.01em;
+        }
+        .sm-side-brand-name span { color:${TOKENS.gold}; }
+        .sm-side-brand-sub {
+          font-size:10px; color:${TOKENS.inkMuted}; text-transform:uppercase;
+          letter-spacing:.13em; margin-top:3px; font-weight:600;
+        }
+        .sm-side.col .sm-side-brand { display:none; }
+        .sm-side-tog {
+          position:absolute; top:32px; right:-13px;
+          width:26px; height:26px; border-radius:50%;
+          background:${TOKENS.paper}; border:1px solid ${TOKENS.line};
+          display:flex; align-items:center; justify-content:center;
+          cursor:pointer; z-index:60;
+          box-shadow:0 2px 5px rgba(26,20,16,.07);
+          transition:background .15s;
+        }
+        .sm-side-tog:hover { background:${TOKENS.goldPale}; border-color:${TOKENS.gold}; }
+        .sm-side-nav { flex:1; padding:14px 0 18px; overflow-y:auto; overflow-x:hidden; }
+        .sm-side-nav::-webkit-scrollbar { width:0; }
+        .sm-side-sec {
+          padding:14px 22px 6px; font-size:10px; font-weight:700;
+          color:${TOKENS.inkMuted}; text-transform:uppercase; letter-spacing:.13em;
+        }
+        .sm-side.col .sm-side-sec { padding:14px 0 6px; text-align:center; font-size:8px; }
+        .sm-side-item {
+          display:flex; align-items:center; gap:11px;
+          margin:1px 12px; padding:9px 11px; border-radius:9px;
+          cursor:pointer; position:relative;
+          color:${TOKENS.inkSoft}; font-size:13.5px; font-weight:500;
+          transition:all .12s; user-select:none;
+        }
+        .sm-side-item:hover { background:${TOKENS.lineSoft}; color:${TOKENS.ink}; }
+        .sm-side-item.active {
+          background:linear-gradient(90deg, ${TOKENS.goldPale} 0%, rgba(251,246,227,.4) 100%);
+          color:${TOKENS.crimson}; font-weight:600;
+          box-shadow:inset 3px 0 0 ${TOKENS.gold};
+        }
+        .sm-side-item.active .sm-side-icon { transform:scale(1.04); }
+        .sm-side-icon {
+          width:30px; height:30px; flex-shrink:0;
+          display:flex; align-items:center; justify-content:center;
+          transition:transform .15s;
+        }
+        .sm-side-lbl { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .sm-side.col .sm-side-lbl,
+        .sm-side.col .sm-side-badge,
+        .sm-side.col .sm-side-live { display:none; }
+        .sm-side.col .sm-side-item { justify-content:center; padding:9px 6px; margin:1px 8px; }
+        .sm-side-badge {
+          background:${TOKENS.crimson}; color:#fff; font-size:10px; font-weight:700;
+          padding:1px 6px; border-radius:8px; min-width:18px; text-align:center;
+        }
+        .sm-side-live {
+          width:7px; height:7px; border-radius:50%; background:#DC2626;
+          box-shadow:0 0 0 0 rgba(220,38,38,.5);
+          animation:smLivePulse 1.6s infinite;
+        }
+        @keyframes smLivePulse {
+          0% { box-shadow:0 0 0 0 rgba(220,38,38,.6); }
+          70% { box-shadow:0 0 0 6px rgba(220,38,38,0); }
+          100% { box-shadow:0 0 0 0 rgba(220,38,38,0); }
+        }
+        .sm-side-foot { border-top:1px solid ${TOKENS.lineSoft}; padding:14px; }
+        .sm-side-user {
+          display:flex; align-items:center; gap:10px;
+          padding:9px 10px; border-radius:9px; background:${TOKENS.paper};
+          border:1px solid ${TOKENS.lineSoft};
+        }
+        .sm-side-user-info { flex:1; min-width:0; }
+        .sm-side-user-name {
+          font-size:13px; font-weight:600; color:${TOKENS.ink};
+          white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .sm-side-user-role {
+          font-size:10.5px; color:${TOKENS.inkMuted}; margin-top:1px;
+          white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .sm-side-mode {
+          display:flex; align-items:center; gap:5px; margin-top:4px;
+        }
+        .sm-side-mode-dot { width:6px; height:6px; border-radius:50%; }
+        .sm-side-mode-lbl {
+          font-size:9px; color:${TOKENS.inkMuted}; text-transform:uppercase; letter-spacing:.08em; font-weight:600;
+        }
+        .sm-side-mode-switch {
+          background:transparent; border:none; color:${TOKENS.gold};
+          cursor:pointer; font-size:9.5px; padding:0; margin-left:2px;
+          font-weight:600; text-decoration:underline;
+        }
+        .sm-side.col .sm-side-user { padding:6px; justify-content:center; }
+        .sm-side.col .sm-side-user-info { display:none; }
+        .sm-side-back {
+          display:flex; align-items:center; gap:9px;
+          margin-top:10px; padding:9px 11px; border-radius:8px;
+          color:${TOKENS.inkMuted}; font-size:12px; cursor:pointer;
+          transition:color .12s;
+        }
+        .sm-side-back:hover { color:${TOKENS.crimson}; background:${TOKENS.lineSoft}; }
+        .sm-side.col .sm-side-back { justify-content:center; }
+        .sm-side.col .sm-side-back span { display:none; }
+
+        .sm-mainwrap { flex:1; margin-left:248px; min-height:100vh; transition:margin-left .22s cubic-bezier(.4,0,.2,1); }
+        .sm-mainwrap.col { margin-left:72px; }
+        .sm-topbar {
+          position:sticky; top:0; z-index:40;
+          background:rgba(251,250,245,.82); backdrop-filter:saturate(140%) blur(14px);
+          -webkit-backdrop-filter:saturate(140%) blur(14px);
+          border-bottom:1px solid ${TOKENS.line};
+          padding:18px 36px;
+          display:flex; align-items:center; justify-content:space-between; gap:20px;
+        }
+        .sm-topbar-title {
+          display:flex; flex-direction:column; gap:2px; min-width:0;
+        }
+        .sm-topbar-eyebrow {
+          font-size:10px; font-weight:700; color:${TOKENS.gold};
+          text-transform:uppercase; letter-spacing:.18em;
+        }
+        .sm-topbar-h {
+          font-family:'Instrument Serif','Cormorant Garamond',Georgia,serif;
+          font-size:26px; color:${TOKENS.ink}; letter-spacing:-.015em;
+          line-height:1.15; font-weight:400;
+          white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .sm-topbar-right { display:flex; align-items:center; gap:11px; flex-shrink:0; }
+        .sm-topbar-chip {
+          display:inline-flex; align-items:center; gap:6px;
+          padding:7px 12px; border-radius:99px;
+          background:${TOKENS.goldPale}; border:1px solid ${TOKENS.gold}55;
+          color:${TOKENS.crimson}; font-size:12px; font-weight:600;
+        }
+        .sm-topbar-btn {
+          display:inline-flex; align-items:center; gap:6px;
+          padding:9px 16px; border-radius:9px; border:none;
+          background:linear-gradient(135deg, ${TOKENS.crimson} 0%, ${TOKENS.crimsonDeep} 100%);
+          color:#fff; font-size:13px; font-weight:600; cursor:pointer;
+          box-shadow:0 2px 6px rgba(125,16,37,.25);
+          transition:transform .12s, box-shadow .12s;
+        }
+        .sm-topbar-btn:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(125,16,37,.32); }
+        .sm-content-wrap { padding:24px 36px 60px; animation:smFadeIn .25s ease; }
+        @keyframes smFadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+
+        @media (max-width: 880px) {
+          .sm-side { width:72px; }
+          .sm-side .sm-side-brand,
+          .sm-side .sm-side-lbl,
+          .sm-side .sm-side-badge,
+          .sm-side .sm-side-live,
+          .sm-side .sm-side-user-info { display:none; }
+          .sm-side .sm-side-item { justify-content:center; padding:9px 6px; margin:1px 8px; }
+          .sm-side .sm-side-sec { padding:14px 0 6px; text-align:center; font-size:8px; }
+          .sm-mainwrap { margin-left:72px; }
+          .sm-topbar { padding:14px 18px; }
+          .sm-topbar-h { font-size:20px; }
+          .sm-content-wrap { padding:18px 18px 50px; }
+        }
+      `}</style>
+
+      <div className="sm-shell">
+
+        {/* ── PREMIUM SIDEBAR ── */}
+        <aside className={`sm-side${collapsed?' col':''}`}>
+          <div className="sm-side-logo">
+            <div className="sm-side-mark">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2.2" strokeLinecap="round">
+                <path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/>
+              </svg>
+            </div>
+            <div className="sm-side-brand">
+              <div className="sm-side-brand-name">Smartious<span>.</span></div>
+              <div className="sm-side-brand-sub">Student Portal</div>
+            </div>
+          </div>
+
+          <button className="sm-side-tog" onClick={() => setCollapsed(c=>!c)} aria-label="Toggle sidebar">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke={TOKENS.inkSoft} strokeWidth="2.5" strokeLinecap="round"
+              style={{transform:collapsed?'rotate(180deg)':'none',transition:'transform .22s'}}>
+              <path d="M15 18l-6-6 6-6"/>
             </svg>
-          </div>
-          <div>
-            <div className="sb-text">Smartious<span>.</span></div>
-            <div className="sb-sub">Student Portal</div>
-          </div>
-        </div>
+          </button>
 
-        <button className="sb-tog" onClick={() => setCollapsed(c=>!c)}
-          style={{background:'var(--s700)',border:'2px solid var(--s600)',position:'absolute',top:22,right:-13,
-            width:26,height:26,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',zIndex:10}}>
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,.7)" strokeWidth="2.5" strokeLinecap="round"
-            style={{transform:collapsed?'rotate(180deg)':'none',transition:'transform .25s'}}>
-            <path d="M15 18l-6-6 6-6"/>
-          </svg>
-        </button>
-
-        <nav style={{flex:1, paddingTop:8}}>
-          {NAV_SECTIONS.map((sec, si) => (
-            <div key={si}>
-              <div className="sb-sec">{sec.label}</div>
-              {sec.items.filter(item => !item.groupOnly || learningMode === 'group').map(item => (
-                <div key={item.id} className={`nav-item${page===item.id?' active':''}`} onClick={() => goTo(item.id)}>
-                  <div className="nav-icon">{I(item.svg)}</div>
-                  <span className="sb-lbl">{item.label}</span>
-                  {item.badge && <span className="sb-badge">{item.badge}</span>}
-                  {item.live  && <div className="sb-live-dot"/>}
-                </div>
-              ))}
-            </div>
-          ))}
-        </nav>
-
-        <div className="sb-user">
-          <Av init={initials} col="#3B82F6" size={36}/>
-          <div className="sb-uinfo">
-            <div className="sb-uname">{user?.firstName} {user?.lastName}</div>
-            <div className="sb-urole">{user?.grade || 'IGCSE'} · {mastery ? mastery.xp.toLocaleString() + ' XP' : '...'}</div>
-            <div style={{display:'flex',alignItems:'center',gap:4,marginTop:3}}>
-              <div style={{width:6,height:6,borderRadius:'50%',background:learningMode==='group'?'#22C55E':'#3B82F6'}}/>
-              <span style={{fontSize:10,color:'rgba(255,255,255,.4)',textTransform:'uppercase',letterSpacing:'.05em'}}>{learningMode==='group'?'Group Class':'Individual'}</span>
-              <button onClick={()=>{const m=learningMode==='group'?'individual':'group';setLearningMode(m);localStorage.setItem('sm_learning_mode',m)}} style={{background:'transparent',border:'none',color:'rgba(255,255,255,.3)',cursor:'pointer',fontSize:10,padding:0,marginLeft:2}}>switch</button>
-            </div>
-          </div>
-        </div>
-        <div className="sb-back" onClick={() => window.location.href='/'}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-          <span className="sb-lbl">Back to Website</span>
-        </div>
-      </aside>
-
-      {/* ── MAIN ── */}
-      <main className="main">
-        <div className="topbar">
-          <div className="tb-title" style={{fontFamily:'Instrument Serif,serif',fontSize:20,color:'var(--s900)'}}>
-            {page === 'dashboard' ? `Welcome back, ${firstName}` :
-             page === 'practice'  ? (practiceData ? `Adaptive Practice — ${practiceData.topic}` : 'Adaptive Practice') :
-             page === 'homework'  ? 'Homework' :
-             page === 'tutor'     ? 'Mshauri AI Tutor' :
-             page === 'studyplan' ? 'My Personalised Study Plan' :
-             page === 'curriculum'? 'My Curriculum' :
-             page === 'lessons'   ? 'Lesson Player' :
-             page === 'exams'     ? 'Exams' :
-             page === 'live'      ? 'Live Classes' :
-             page === 'timetable' ? 'Timetable' :
-             page === 'resources' ? 'Resources' :
-             page === 'profile'   ? 'My Profile' :
-             page === 'achievements' ? 'Achievements' :
-             page === 'subscription' ? 'Subscription' : 'Portal'}
-          </div>
-          <div className="tb-right">
-            {nextRec && (
-              <div className="tb-chip" style={{background:'var(--a50)',borderColor:'var(--a100)',color:'var(--a600)'}}>
-                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                Focus: {nextRec.topic}
+          <nav className="sm-side-nav">
+            {NAV_SECTIONS.map((sec, si) => (
+              <div key={si}>
+                <div className="sm-side-sec">{collapsed ? sec.label.slice(0,3) : sec.label}</div>
+                {sec.items.filter(item => !item.groupOnly || learningMode === 'group').map(item => {
+                  const isActive = page === item.id
+                  return (
+                    <div
+                      key={item.id}
+                      className={`sm-side-item${isActive?' active':''}`}
+                      onClick={() => goTo(item.id)}
+                      title={collapsed ? item.label : ''}
+                    >
+                      <div className="sm-side-icon">
+                        <ModuleIcon kind={item.kind} size={22} tint={isActive ? TOKENS.crimson : item.tint}/>
+                      </div>
+                      <span className="sm-side-lbl">{item.label}</span>
+                      {item.badge && <span className="sm-side-badge">{item.badge}</span>}
+                      {item.live  && <div className="sm-side-live"/>}
+                    </div>
+                  )
+                })}
               </div>
-            )}
-            <button className="btn btn-p btn-sm" onClick={() => { goTo('practice'); loadPractice(nextRec?.subject, nextRec?.topic) }}>
-              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              Practice Now
-            </button>
-          </div>
-        </div>
+            ))}
+          </nav>
 
-        <div className="content" style={{animation:'fadeIn .25s ease'}}>
+          <div className="sm-side-foot">
+            <div className="sm-side-user">
+              <Av init={initials} col={TOKENS.crimson} size={34}/>
+              <div className="sm-side-user-info">
+                <div className="sm-side-user-name">{user?.firstName} {user?.lastName}</div>
+                <div className="sm-side-user-role">{user?.grade || 'IGCSE'} · {mastery ? mastery.xp.toLocaleString() + ' XP' : '...'}</div>
+                <div className="sm-side-mode">
+                  <div className="sm-side-mode-dot" style={{background:learningMode==='group'?TOKENS.forest:TOKENS.blue}}/>
+                  <span className="sm-side-mode-lbl">{learningMode==='group'?'Group':'Individual'}</span>
+                  <button
+                    className="sm-side-mode-switch"
+                    onClick={()=>{const m=learningMode==='group'?'individual':'group';setLearningMode(m);localStorage.setItem('sm_learning_mode',m)}}
+                  >switch</button>
+                </div>
+              </div>
+            </div>
+            <div className="sm-side-back" onClick={() => window.location.href='/'}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+              <span>Back to Website</span>
+            </div>
+          </div>
+        </aside>
+
+        {/* ── MAIN ── */}
+        <main className={`sm-mainwrap${collapsed?' col':''}`}>
+          <div className="sm-topbar">
+            <div className="sm-topbar-title">
+              {pageEyebrow && <div className="sm-topbar-eyebrow">{pageEyebrow}</div>}
+              <div className="sm-topbar-h">{pageTitle}</div>
+            </div>
+            <div className="sm-topbar-right">
+              {nextRec && (
+                <div className="sm-topbar-chip">
+                  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  Focus: {nextRec.topic}
+                </div>
+              )}
+              <button className="sm-topbar-btn" onClick={() => { goTo('practice'); loadPractice(nextRec?.subject, nextRec?.topic) }}>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Practice Now
+              </button>
+            </div>
+          </div>
+
+          <div className="sm-content-wrap">
           
 
           {/* ════════════════════════════════════════════
@@ -1033,6 +1452,7 @@ export default function StudentPortal() {
 
         </div>
       </main>
+      </div>
     </div>
   );
 }
@@ -8793,457 +9213,3 @@ function formatMinsTime(mins) {
   if (h === 0) h = 12
   return `${h}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
