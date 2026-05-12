@@ -2479,6 +2479,32 @@ const exDefaultStartAt = () => {
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes())
 }
 
+// ── Subject + Curriculum reference data for the Exam builder ──
+// (These were referenced by ExamsTab but never declared, causing
+// "ReferenceError: QB_SUBJECTS is not defined" at runtime.)
+const QB_SUBJECTS = [
+  'Mathematics',
+  'Physics',
+  'Chemistry',
+  'Biology',
+  'English',
+  'History',
+  'Geography',
+  'Computer Science',
+  'Business Studies',
+  'Economics',
+  'Accounting',
+]
+
+const QB_CURRICULA = {
+  IGCSE:    { label: 'Cambridge IGCSE', years: ['Year 9', 'Year 10', 'Year 11'] },
+  EDEXCEL:  { label: 'Edexcel',         years: ['Year 9', 'Year 10', 'Year 11'] },
+  IB:       { label: 'IB',              years: ['Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'] },
+  CBC:      { label: 'Kenya CBC',       years: ['Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'] },
+  BNC:      { label: 'British National', years: ['Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13'] },
+  AMERICAN: { label: 'American',        years: ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'] },
+}
+
 function ExamsTab({ user, store, setPage, toast }) {
   const [exams, setExams] = useState(() => exLoadExams())
   const [view, setView] = useState('list')  // 'list' | 'create' | 'detail'
