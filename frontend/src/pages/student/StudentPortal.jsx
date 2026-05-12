@@ -550,7 +550,14 @@ export default function StudentPortal() {
 
   return (
     <div className="app" style={{
+      // Override any global .app { display:flex; height:100vh; overflow:hidden }
+      // that the original chrome assumed. We need block layout + natural scroll.
+      display:'block',
+      position:'relative',
+      width:'100%',
       minHeight:'100vh',
+      height:'auto',
+      overflow:'visible',
       background:TOKENS.cream,
       fontFamily:'Inter,-apple-system,BlinkMacSystemFont,sans-serif',
       color:TOKENS.ink,
@@ -573,6 +580,7 @@ export default function StudentPortal() {
       }}>
         {/* Logo block */}
         <div style={{
+          flexShrink:0,
           padding: collapsed ? '20px 0' : '20px 22px',
           display:'flex',
           alignItems:'center',
@@ -640,10 +648,13 @@ export default function StudentPortal() {
         {/* Nav */}
         <nav style={{
           flex:1,
+          minHeight:0,   // critical: lets flex child shrink below content height so overflow can scroll
           paddingTop:14,
           paddingBottom:14,
           overflowY:'auto',
           overflowX:'hidden',
+          scrollbarWidth:'thin',
+          scrollbarColor:`${TOKENS.line} transparent`,
         }}>
           {NAV_SECTIONS.map((sec, si) => (
             <div key={si} style={{marginBottom:18}}>
@@ -744,6 +755,7 @@ export default function StudentPortal() {
 
         {/* User card */}
         <div style={{
+          flexShrink:0,
           padding: collapsed ? '12px 0 0' : '12px 14px 0',
           borderTop:`1px solid ${TOKENS.lineSoft}`,
         }}>
@@ -862,10 +874,15 @@ export default function StudentPortal() {
           MAIN — frosted top-bar + content
           ═══════════════════════════════════════════════ */}
       <main style={{
+        display:'block',
         marginLeft: sidebarWidth,
+        width: `calc(100% - ${sidebarWidth}px)`,
         minHeight:'100vh',
-        transition:'margin-left .25s cubic-bezier(.22,.61,.36,1)',
+        height:'auto',
+        overflow:'visible',
+        transition:'margin-left .25s cubic-bezier(.22,.61,.36,1), width .25s cubic-bezier(.22,.61,.36,1)',
         background:TOKENS.cream,
+        position:'relative',
       }}>
         {/* Frosted top-bar */}
         <div style={{
@@ -944,7 +961,16 @@ export default function StudentPortal() {
           </div>
         </div>
 
-        <div className="content" style={{animation:'fadeIn .25s ease', padding:'24px 32px 48px'}}>
+        <div className="content" style={{
+          display:'block',
+          width:'100%',
+          minHeight:'calc(100vh - 76px)',
+          height:'auto',
+          overflow:'visible',
+          animation:'fadeIn .25s ease',
+          padding:'24px 32px 48px',
+          boxSizing:'border-box',
+        }}>
           
 
           {/* ════════════════════════════════════════════
