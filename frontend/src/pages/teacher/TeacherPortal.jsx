@@ -17,6 +17,129 @@ const Ico = ({ d, w = 18, col = 'currentColor', sw = 2 }) => (
   </svg>
 )
 
+// ═════════════════════════════════════════════════════════
+// APPLE-STYLE COLOURED NAV ICONS — matches Student Portal
+// Each module renders as a 26×26 squircle tile with its own
+// signature gradient and a white pictogram, like iOS Settings.
+// ═════════════════════════════════════════════════════════
+const NAV_ICON_PALETTE = {
+  dashboard:     ['#FF6B6B', '#EE5253'], // coral red
+  students:      ['#0EA5E9', '#0369A1'], // sky blue
+  liveclass:     ['#EF4444', '#B91C1C'], // signal red
+  questionbank:  ['#5E8CFF', '#3D6FE8'], // bright blue
+  exambuilder:   ['#D97706', '#B45309'], // amber
+  marking:       ['#22C55E', '#15803D'], // green
+  communication: ['#8B5CF6', '#6D28D9'], // royal purple
+  mshauri:       ['#7C3AED', '#5B21B6'], // violet
+  profile:       ['#64748B', '#334155'], // slate
+}
+
+const NavIcon = ({ name, active }) => {
+  const [c1, c2] = NAV_ICON_PALETTE[name] || ['#94A3B8', '#475569']
+  const size = 26
+  const r = 7 // squircle-ish corner radius
+
+  const renderGlyph = () => {
+    switch (name) {
+      case 'dashboard': // tile grid
+        return (
+          <g fill="#fff">
+            <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5"/>
+            <rect x="13" y="3.5" width="7.5" height="7.5" rx="1.5"/>
+            <rect x="3.5" y="13" width="7.5" height="7.5" rx="1.5"/>
+            <rect x="13" y="13" width="7.5" height="7.5" rx="1.5"/>
+          </g>
+        )
+      case 'students': // three people
+        return (
+          <g>
+            <circle cx="8" cy="9" r="3" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.6"/>
+            <circle cx="16" cy="10" r="2.5" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.6"/>
+            <path d="M3 20c.6-3 2.6-5 5-5s4.4 2 5 5" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
+            <path d="M14 20c.4-2 1.8-3.5 3.5-3.5s3.1 1.5 3.5 3.5" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/>
+          </g>
+        )
+      case 'liveclass': // video camera with live dot
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="7" width="13" height="10" rx="2" fill="#fff" fillOpacity=".25"/>
+            <path d="M16 10.5L21 7v10l-5-3.5z" fill="#fff"/>
+            <circle cx="6.5" cy="10.5" r="1" fill="#fff" stroke="none"/>
+          </g>
+        )
+      case 'questionbank': // book with question mark
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 5a2 2 0 0 1 2-2h11a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5z" fill="#fff" fillOpacity=".25"/>
+            <path d="M4 17a2 2 0 0 1 2-2h12" />
+            <path d="M10.5 8.5a1.5 1.5 0 1 1 2.5 1.1c-.7.5-1 .9-1 1.9" stroke="#fff" strokeWidth="1.8"/>
+            <circle cx="12" cy="13.5" r="0.8" fill="#fff" stroke="none"/>
+          </g>
+        )
+      case 'exambuilder': // clipboard with star
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="5" width="14" height="16" rx="2" fill="#fff" fillOpacity=".25"/>
+            <rect x="8.5" y="3" width="7" height="4" rx="1" fill="#fff"/>
+            <path d="M12 10l1.2 2.4 2.6.4-1.9 1.8.4 2.6L12 16l-2.3 1.2.4-2.6L7.2 12.8l2.6-.4L12 10z" fill="#fff" stroke="none"/>
+          </g>
+        )
+      case 'marking': // clipboard with check (homework)
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="5" width="14" height="16" rx="2" fill="#fff" fillOpacity=".25"/>
+            <rect x="8.5" y="3" width="7" height="4" rx="1" fill="#fff"/>
+            <path d="M8 13.5l2.5 2.5 5-5"/>
+          </g>
+        )
+      case 'communication': // chat bubble
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v4a5 5 0 0 1-5 5h-5l-4 3v-3a5 5 0 0 1-4-5V9z" fill="#fff" fillOpacity=".25"/>
+            <circle cx="9" cy="11" r="1" fill="#fff" stroke="none"/>
+            <circle cx="12" cy="11" r="1" fill="#fff" stroke="none"/>
+            <circle cx="15" cy="11" r="1" fill="#fff" stroke="none"/>
+          </g>
+        )
+      case 'mshauri': // chat bubble with sparkle (AI)
+        return (
+          <g>
+            <path d="M3 9a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v4a5 5 0 0 1-5 5h-5l-4 3v-3a5 5 0 0 1-4-5V9z" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/>
+            <path d="M12 7.5l.9 1.9 2 .3-1.5 1.4.4 2L12 12.2l-1.8 1 .4-2-1.5-1.4 2-.3L12 7.5z" fill="#fff"/>
+          </g>
+        )
+      case 'profile': // person
+        return (
+          <g>
+            <circle cx="12" cy="8" r="3.8" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.8"/>
+            <path d="M4.5 20c.6-4 3.8-6.5 7.5-6.5s6.9 2.5 7.5 6.5" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
+          </g>
+        )
+      default:
+        return <circle cx="12" cy="12" r="4" fill="#fff"/>
+    }
+  }
+
+  return (
+    <div style={{
+      width:size, height:size,
+      borderRadius: r,
+      background:`linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`,
+      display:'flex', alignItems:'center', justifyContent:'center',
+      flexShrink:0,
+      boxShadow: active
+        ? `0 4px 10px ${c2}55, inset 0 1px 0 rgba(255,255,255,.35)`
+        : `0 1px 3px ${c2}40, inset 0 1px 0 rgba(255,255,255,.25)`,
+      transition:'box-shadow .15s, transform .15s',
+      transform: active ? 'scale(1.04)' : 'scale(1)',
+    }}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        {renderGlyph()}
+      </svg>
+    </div>
+  )
+}
+
 const Av = ({ init, col, size = 36 }) => (
   <div style={{ width:size, height:size, borderRadius:'50%', background:col+'20', color:col, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'JetBrains Mono,monospace', fontSize:Math.round(size*.32), fontWeight:700, flexShrink:0 }}>{init}</div>
 )
@@ -365,23 +488,23 @@ export default function TeacherPortal() {
 
   const nav = [
     { section:'Teaching', items:[
-      {id:'dashboard',     label:'Dashboard',        icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
-      {id:'students',      label:'My Students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
-      {id:'liveclass',     label:'Live Classes',     icon:'rect:2:3:20:14:2|M8 21h8M12 17v4', live:true},
+      {id:'dashboard',     label:'Dashboard',        iconName:'dashboard',     icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
+      {id:'students',      label:'My Students',      iconName:'students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
+      {id:'liveclass',     label:'Live Classes',     iconName:'liveclass',     icon:'rect:2:3:20:14:2|M8 21h8M12 17v4', live:true},
     ]},
     { section:'Assessment', items:[
-      {id:'questionbank',  label:'Question Bank',    icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6|circle:18:18:3'},
-      {id:'exambuilder',   label:'Exams',            icon:'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2|rect:9:3:6:4:1.5|line:9:12:15:12|line:9:16:12:16'},
-      {id:'marking',       label:'Homework',         icon:'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'},
+      {id:'questionbank',  label:'Question Bank',    iconName:'questionbank',  icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6|circle:18:18:3'},
+      {id:'exambuilder',   label:'Exams',            iconName:'exambuilder',   icon:'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2|rect:9:3:6:4:1.5|line:9:12:15:12|line:9:16:12:16'},
+      {id:'marking',       label:'Homework',         iconName:'marking',       icon:'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'},
     ]},
     { section:'Communication', items:[
-      {id:'communication', label:'Messages',         icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'},
+      {id:'communication', label:'Messages',         iconName:'communication', icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'},
     ]},
     { section:'Assistant', items:[
-      {id:'mshauri',       label:'Mshauri AI',       icon:'M12 2L2 7l10 5 10-5-10-5z|M2 17l10 5 10-5|M2 12l10 5 10-5'},
+      {id:'mshauri',       label:'Mshauri AI',       iconName:'mshauri',       icon:'M12 2L2 7l10 5 10-5-10-5z|M2 17l10 5 10-5|M2 12l10 5 10-5'},
     ]},
     { section:'Account', items:[
-      {id:'profile',       label:'My Profile',       icon:'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2|circle:12:7:4'},
+      {id:'profile',       label:'My Profile',       iconName:'profile',       icon:'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2|circle:12:7:4'},
     ]},
   ]
 
@@ -409,7 +532,9 @@ export default function TeacherPortal() {
               <div className="sb-sec">{s.section}</div>
               {s.items.map(item => (
                 <div key={item.id} className={`nav-item${page===item.id?' active':''}`} onClick={() => setPage(item.id)}>
-                  <div className="nav-icon"><Ico d={item.icon} /></div>
+                  <div className="nav-icon" style={{ width:26, height:26, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <NavIcon name={item.iconName} active={page===item.id}/>
+                  </div>
                   <span className="sb-lbl">{item.label}</span>
                   {item.badge && <span className="sb-badge" style={item.badgeCol?{background:item.badgeCol}:{}}>{item.badge}</span>}
                   {item.live && <div className="sb-live-dot"/>}
@@ -2525,10 +2650,101 @@ function ExamsTab({ user, store, setPage, toast }) {
   const [formInstructions, setFormInstructions] = useState('Answer ALL questions. Show full working. Calculator NOT permitted.')
   const [formSelectedQuestions, setFormSelectedQuestions] = useState([])
   const [formSelectedStudents, setFormSelectedStudents] = useState([])
-  const [bankFilter, setBankFilter] = useState({ subject: 'Mathematics', difficulty: 'all', search: '' })
+  const [bankFilter, setBankFilter] = useState({ subject: 'all', difficulty: 'all', search: '' })
 
-  const allStudents = exLoadStudents()
-  const questionBank = exLoadQuestionBank()
+  // ── Bank questions — loaded from /questions API ──
+  // Mirrors HomeworkTab pattern: filters drive a debounced GET /questions,
+  // results held in state, no localStorage at all.
+  const [bankQuestions, setBankQuestions] = useState([])
+  const [bankLoading, setBankLoading] = useState(false)
+
+  const loadBankQuestions = async () => {
+    setBankLoading(true)
+    try {
+      const params = new URLSearchParams()
+      // Default the bank to the same curriculum/year/subject the teacher
+      // picked in Step 1, so question matches assessment context.
+      if (formCurriculum) params.append('curriculum', formCurriculum)
+      if (formYear)       params.append('grade',      formYear)
+      // Subject filter from picker drop-down (overrides form's subject so
+      // teachers can pull cross-subject questions if they want)
+      const subj = bankFilter.subject === 'all' ? formSubject : bankFilter.subject
+      if (subj) params.append('subject', subj)
+      if (bankFilter.difficulty && bankFilter.difficulty !== 'all') {
+        params.append('difficulty', bankFilter.difficulty)
+      }
+      if (bankFilter.search?.trim()) params.append('q', bankFilter.search.trim())
+      params.append('limit', '100')
+
+      const { data } = await api.get('/questions?' + params.toString())
+      if (data?.success) {
+        setBankQuestions(data.questions || [])
+      } else {
+        setBankQuestions([])
+      }
+    } catch (e) {
+      console.error('[exam-bank] load failed:', e?.response?.data?.message || e.message)
+      toast?.error?.('Failed to load question bank')
+      setBankQuestions([])
+    } finally {
+      setBankLoading(false)
+    }
+  }
+
+  // Debounced reload when filter inputs change AND when the user is on
+  // step 2 of the create flow (where the picker is visible).
+  useEffect(() => {
+    if (view !== 'create' || createStep !== 2) return
+    const handle = setTimeout(loadBankQuestions, 250)
+    return () => clearTimeout(handle)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, createStep, bankFilter.subject, bankFilter.difficulty, bankFilter.search, formSubject, formCurriculum, formYear])
+
+  // ── Students — loaded from /users?role=student API ──
+  const [allStudents, setAllStudents] = useState([])
+  // eslint-disable-next-line no-unused-vars
+  const [studentsLoading, setStudentsLoading] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    const loadStudents = async () => {
+      setStudentsLoading(true)
+      try {
+        const { data } = await api.get('/users?role=student')
+        if (cancelled) return
+        const rows = Array.isArray(data?.users) ? data.users : (Array.isArray(data) ? data : [])
+        // Normalize each student to the shape the form already expects.
+        const normalised = rows.map(s => {
+          const first = s.firstName || ''
+          const last  = s.lastName  || ''
+          const fullName = (first + ' ' + last).trim() || s.email || 'Student'
+          const initials = ((first[0] || '') + (last[0] || '')).toUpperCase() || (fullName[0] || 'S').toUpperCase()
+          return {
+            id: s._id || s.id,
+            _id: s._id || s.id,
+            name: fullName,
+            initials,
+            year: s.grade || s.year || '',
+            curriculum: s.curriculum || '',
+            mastery: typeof s.mastery === 'number' ? s.mastery : 0,
+            email: s.email || '',
+          }
+        })
+        setAllStudents(normalised)
+      } catch (e) {
+        console.error('[exam-students] load failed:', e?.response?.data?.message || e.message)
+        if (!cancelled) setAllStudents([])
+      } finally {
+        if (!cancelled) setStudentsLoading(false)
+      }
+    }
+    loadStudents()
+    return () => { cancelled = true }
+  }, [])
+
+  // Helper: look up a bank question by id (handles both _id and id keys)
+  const findBankQuestion = (qid) =>
+    bankQuestions.find(q => (q._id || q.id) === qid)
 
   // Derived
   const examsWithStatus = exams.map(e => ({ ...e, _status: exComputeStatus(e) }))
@@ -2541,20 +2757,11 @@ function ExamsTab({ user, store, setPage, toast }) {
     return true
   }).sort((a, b) => new Date(b.startAt) - new Date(a.startAt))
 
-  // Filter question bank for picker
-  const filteredBankQuestions = questionBank.filter(q => {
-    if (q.status !== 'published') return false
-    if (bankFilter.subject !== 'all' && q.subject !== bankFilter.subject) return false
-    if (bankFilter.difficulty !== 'all' && q.difficulty !== bankFilter.difficulty) return false
-    if (bankFilter.search.trim()) {
-      const s = bankFilter.search.toLowerCase()
-      if (!q.question.toLowerCase().includes(s) && !q.topic.toLowerCase().includes(s)) return false
-    }
-    return true
-  })
+  // Bank questions are pre-filtered server-side; surface them straight to the UI.
+  const filteredBankQuestions = bankQuestions
 
   const totalMarks = formSelectedQuestions.reduce((sum, qid) => {
-    const q = questionBank.find(qq => qq.id === qid)
+    const q = findBankQuestion(qid)
     return sum + (q?.marks || 0)
   }, 0)
 
@@ -2577,6 +2784,7 @@ function ExamsTab({ user, store, setPage, toast }) {
     setFormInstructions('Answer ALL questions. Show full working. Calculator NOT permitted.')
     setFormSelectedQuestions([])
     setFormSelectedStudents([])
+    setBankFilter({ subject: 'all', difficulty: 'all', search: '' })
     setCreateStep(1)
   }
 
@@ -2675,8 +2883,17 @@ function ExamsTab({ user, store, setPage, toast }) {
   if (view === 'detail' && selectedExam) {
     const status = exComputeStatus(selectedExam)
     const subjCol = exSubjColour(selectedExam.subject)
-    const examQuestions = selectedExam.questionIds.map(qid => questionBank.find(q => q.id === qid)).filter(Boolean)
-    const examStudents = selectedExam.assignedStudents.map(sid => allStudents.find(s => s.id === sid)).filter(Boolean)
+    // Questions may reference IDs that aren't currently loaded in
+    // bankQuestions (e.g. teacher opens detail before opening the bank).
+    // Fall back to a synthesized stub so the detail view still renders.
+    const examQuestions = (selectedExam.questionIds || []).map(qid => {
+      const q = findBankQuestion(qid)
+      if (q) return q
+      return { _id: qid, id: qid, questionText: '(question removed from bank)', marks: 0, subject: selectedExam.subject, topic: '', difficulty: 'medium' }
+    })
+    const examStudents = (selectedExam.assignedStudents || []).map(sid =>
+      allStudents.find(s => (s._id || s.id) === sid)
+    ).filter(Boolean)
     const timeUntil = exTimeUntil(selectedExam.startAt)
     const endTime = new Date(new Date(selectedExam.startAt).getTime() + selectedExam.durationMins * 60000)
 
@@ -2752,7 +2969,7 @@ function ExamsTab({ user, store, setPage, toast }) {
               </div>
             ) : (
               examQuestions.map((q, i) => (
-                <div key={q.id} style={{
+                <div key={q._id || q.id} style={{
                   display: 'flex', gap: 10, padding: '10px 0',
                   borderBottom: i < examQuestions.length - 1 ? '1px solid var(--border)' : 'none',
                 }}>
@@ -2761,9 +2978,9 @@ function ExamsTab({ user, store, setPage, toast }) {
                     <div style={{
                       fontSize: 13, color: 'var(--s900)', fontWeight: 600,
                       marginBottom: 4, lineHeight: 1.5,
-                    }}>{q.question}</div>
+                    }}>{q.questionText || q.question}</div>
                     <div style={{ fontSize: 10.5, color: 'var(--s400)' }}>
-                      {q.topic} | {q.difficulty} | {q.marks} marks
+                      {q.topic || '—'} | {q.difficulty || 'medium'} | {q.marks || 0} marks
                     </div>
                   </div>
                 </div>
@@ -2776,7 +2993,7 @@ function ExamsTab({ user, store, setPage, toast }) {
             <div className="ctitle" style={{ marginBottom: 12, color: '#7D1025' }}>Assigned Students ({examStudents.length})</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {examStudents.map(s => (
-                <span key={s.id} style={{
+                <span key={s._id || s.id} style={{
                   background: '#FBFAF5', color: '#7D1025',
                   border: '1px solid #F4C5C5',
                   fontSize: 12, fontWeight: 600,
@@ -3003,17 +3220,22 @@ function ExamsTab({ user, store, setPage, toast }) {
                 </select>
               </div>
 
-              {filteredBankQuestions.length === 0 ? (
+              {bankLoading ? (
                 <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
-                  No questions found. Add questions in the Question Bank first.
+                  Loading questions from bank...
+                </div>
+              ) : filteredBankQuestions.length === 0 ? (
+                <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
+                  No questions found. Try changing curriculum, year, subject or difficulty — or add new questions in the Question Bank.
                 </div>
               ) : (
                 <div style={{ maxHeight: 480, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {filteredBankQuestions.map(q => {
-                    const isSelected = formSelectedQuestions.includes(q.id)
+                    const qid = q._id || q.id
+                    const isSelected = formSelectedQuestions.includes(qid)
                     const subjCol = exSubjColour(q.subject)
                     return (
-                      <div key={q.id} onClick={() => toggleQuestion(q.id)}
+                      <div key={qid} onClick={() => toggleQuestion(qid)}
                         style={{
                           padding: 12,
                           border: '1.5px solid ' + (isSelected ? '#7D1025' : 'var(--border)'),
@@ -3042,16 +3264,16 @@ function ExamsTab({ user, store, setPage, toast }) {
                               fontSize: 9.5, fontWeight: 700, letterSpacing: '.06em',
                               padding: '2px 7px', borderRadius: 99, textTransform: 'uppercase',
                             }}>{q.subject}</span>
-                            <span style={{ fontSize: 10.5, color: 'var(--s500)' }}>{q.topic} | {q.difficulty}</span>
+                            <span style={{ fontSize: 10.5, color: 'var(--s500)' }}>{q.topic || '—'} | {q.difficulty || 'medium'}</span>
                           </div>
-                          <div style={{ fontSize: 13, color: 'var(--s900)', fontWeight: 600 }}>{q.question}</div>
+                          <div style={{ fontSize: 13, color: 'var(--s900)', fontWeight: 600 }}>{q.questionText || q.question}</div>
                         </div>
                         <span style={{
                           background: 'var(--bg)', color: 'var(--s700)',
                           padding: '4px 8px', borderRadius: 'var(--rsm)',
                           fontSize: 11, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
                           flexShrink: 0,
-                        }}>{q.marks}m</span>
+                        }}>{q.marks || 0}m</span>
                       </div>
                     )
                   })}
