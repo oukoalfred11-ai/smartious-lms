@@ -454,16 +454,6 @@ function PlanBadge({ p }) {
 // HYBRID NAVIGATION — top bar + collapsible left rail
 // ──────────────────────────────────────────────────────
 function PNavigation({ page, setPage, adminFirst, onLogout }) {
-  const [railOpen, setRailOpen] = useState(true)
-
-  // Group modules into nav sections
-  const SECTIONS = [
-    { label: 'Overview', items: ['dashboard', 'analytics'] },
-    { label: 'People', items: ['users', 'teachers', 'allocations'] },
-    { label: 'Operations', items: ['payroll', 'leave', 'programmes'] },
-    { label: 'Teaching', items: ['livelessons', 'grouprooms', 'curriculum'] },
-    { label: 'System', items: ['billing', 'website', 'settings', 'ai'] },
-  ]
 
   const currentMod = MODULES[page] || MODULES.dashboard
 
@@ -481,18 +471,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout }) {
           display: 'flex', alignItems: 'center', gap: 16,
           padding: '12px 28px', maxWidth: 1600, margin: '0 auto',
         }}>
-          {/* Sidebar toggle */}
-          <button onClick={() => setRailOpen(v => !v)} style={{
-            background: 'transparent', border: 'none', cursor: 'pointer',
-            padding: 8, borderRadius: 8, color: TOKENS.s700,
-            display: 'flex', alignItems: 'center',
-          }} title={railOpen ? 'Collapse sidebar' : 'Expand sidebar'}>
-            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <line x1="3" y1="12" x2="21" y2="12"/>
-              <line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
-          </button>
+      
 
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -548,55 +527,6 @@ function PNavigation({ page, setPage, adminFirst, onLogout }) {
               </svg>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* SIDE RAIL */}
-      <div style={{
-        position: 'fixed', top: 60, left: 0, bottom: 0,
-        width: railOpen ? 240 : 0,
-        background: TOKENS.cream,
-        borderRight: railOpen ? '1px solid ' + TOKENS.s100 : 'none',
-        overflow: 'hidden',
-        transition: 'width 0.25s cubic-bezier(.4,0,.2,1)',
-        zIndex: 40,
-      }}>
-        <div style={{ width: 240, padding: '20px 12px', overflowY: 'auto', height: '100%' }}>
-          {SECTIONS.map(section => (
-            <div key={section.label} style={{ marginBottom: 18 }}>
-              <div style={{
-                fontSize: 10, fontWeight: 800, letterSpacing: '.14em',
-                textTransform: 'uppercase', color: TOKENS.s400,
-                padding: '0 12px', marginBottom: 8,
-              }}>{section.label}</div>
-              {section.items.map(modKey => {
-                const mod = MODULES[modKey]
-                const active = page === modKey
-                return (
-                  <button
-                    key={modKey}
-                    onClick={() => setPage(modKey)}
-                    style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '8px 12px', borderRadius: 10,
-                      background: active ? TOKENS.white : 'transparent',
-                      border: 'none', cursor: 'pointer',
-                      color: active ? mod.accent : TOKENS.s700,
-                      fontWeight: active ? 700 : 500, fontSize: 13.5,
-                      textAlign: 'left', marginBottom: 2,
-                      boxShadow: active ? '0 1px 3px rgba(0,0,0,.04), 0 0 0 1px ' + mod.accent + '20' : 'none',
-                      transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,.6)' }}
-                    onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
-                  >
-                    <ModuleIcon kind={mod.icon} size={22} accent={active ? mod.accent : TOKENS.s500}/>
-                    <span>{mod.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-          ))}
         </div>
       </div>
     </>
@@ -703,10 +633,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       <PNavigation page={page} setPage={setPage} adminFirst={adminFirst} onLogout={() => { localStorage.removeItem('sm_token'); localStorage.removeItem('sm_user'); window.location.href = '/login' }}/>
 
       <div style={{
-        marginLeft: 240,
         padding: '40px 48px',
         maxWidth: 1400,
-        transition: 'margin-left 0.25s',
       }}>
         {page === 'dashboard'   && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
         {page === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
