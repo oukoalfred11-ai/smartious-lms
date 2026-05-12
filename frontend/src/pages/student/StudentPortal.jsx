@@ -113,152 +113,193 @@ const TOKENS = {
 }
 
 // ═════════════════════════════════════════════════════════
-// ILLUSTRATED NAV ICONS — bespoke picture marks per module
-// Each icon renders inside a 20×20 viewport, designed to read
-// at small sizes in the sidebar with subject flavour where
-// relevant (DNA / atom / equation / etc.)
+// APPLE-STYLE COLOURED NAV ICONS
+// Each module renders as a 26×26 squircle tile with its own
+// signature gradient and a white pictogram, like iOS Settings.
 // ═════════════════════════════════════════════════════════
-const NavIcon = ({ name, active }) => {
-  const stroke = active ? TOKENS.crimson : TOKENS.inkSoft
-  const fill   = active ? TOKENS.goldPale : 'none'
-  const accent = active ? TOKENS.gold : TOKENS.inkMute
-  const sw = 1.5
-  const common = { width:20, height:20, viewBox:'0 0 20 20', fill:'none', stroke, strokeWidth:sw, strokeLinecap:'round', strokeLinejoin:'round' }
 
-  switch (name) {
-    case 'dashboard': // a layout of tiles
-      return (
-        <svg {...common}>
-          <rect x="3" y="3" width="6" height="6" rx="1" fill={fill}/>
-          <rect x="11" y="3" width="6" height="4" rx="1"/>
-          <rect x="11" y="9" width="6" height="8" rx="1" fill={fill}/>
-          <rect x="3" y="11" width="6" height="6" rx="1"/>
-        </svg>
-      )
-    case 'curriculum': // open book with bookmark ribbon
-      return (
-        <svg {...common}>
-          <path d="M3 4.5C3 3.7 3.7 3 4.5 3H9c.5 0 1 .2 1 1v12c0-.5-.5-1-1-1H4.5c-.8 0-1.5-.6-1.5-1.5V4.5z" fill={fill}/>
-          <path d="M17 4.5c0-.8-.7-1.5-1.5-1.5H11c-.5 0-1 .2-1 1v12c0-.5.5-1 1-1h4.5c.8 0 1.5-.6 1.5-1.5V4.5z"/>
-          <path d="M13 3v6l1.5-1L16 9V3" fill={accent} stroke={accent}/>
-        </svg>
-      )
-    case 'lessons': // play button on film strip
-      return (
-        <svg {...common}>
-          <rect x="2.5" y="4" width="15" height="12" rx="1.5" fill={fill}/>
-          <path d="M2.5 7h2M2.5 10h2M2.5 13h2M15.5 7h2M15.5 10h2M15.5 13h2"/>
-          <path d="M8.5 8l4 2-4 2V8z" fill={accent} stroke="none"/>
-        </svg>
-      )
-    case 'practice': // pencil + target rings
-      return (
-        <svg {...common}>
-          <circle cx="8" cy="12" r="5" fill={fill}/>
-          <circle cx="8" cy="12" r="2.5"/>
-          <circle cx="8" cy="12" r="0.8" fill={accent} stroke="none"/>
-          <path d="M11.5 8.5l4-4 1.5 1.5-4 4-1.5-1.5z" fill={accent} stroke={accent}/>
-          <path d="M15.5 4.5l-1.2-1.2"/>
-        </svg>
-      )
-    case 'homework': // clipboard with check
-      return (
-        <svg {...common}>
-          <path d="M4 5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 9 5h2a1.5 1.5 0 0 1 1.5 1.5V16a1.5 1.5 0 0 1-1.5 1.5h-6A1.5 1.5 0 0 1 3.5 16V6.5A1.5 1.5 0 0 1 5 5z" fill={fill}/>
-          <rect x="6" y="2.5" width="4" height="2.5" rx="0.5"/>
-          <path d="M5.5 11l1.5 1.5L10 9.5" stroke={accent}/>
-          <path d="M13.5 5.5L17 9l-7.5 7.5L6 17l.5-3.5L13.5 5.5z" transform="translate(1,1)"/>
-        </svg>
-      )
-    case 'exams': // shield with star
-      return (
-        <svg {...common}>
-          <path d="M10 2L3.5 4.5v5c0 4 3 7.5 6.5 8.5 3.5-1 6.5-4.5 6.5-8.5v-5L10 2z" fill={fill}/>
-          <path d="M10 7l1.2 2.4 2.6.4-1.9 1.8.4 2.6L10 13l-2.3 1.2.4-2.6L6.2 9.8l2.6-.4L10 7z" fill={accent} stroke={accent} strokeWidth="0.8"/>
-        </svg>
-      )
-    case 'live': // video camera with live signal
-      return (
-        <svg {...common}>
-          <rect x="2" y="6" width="11" height="8" rx="1.5" fill={fill}/>
-          <path d="M13 8.5L17.5 6v8L13 11.5"/>
-          <circle cx="5" cy="9" r="0.8" fill={accent} stroke="none"/>
-        </svg>
-      )
-    case 'myroom': // three figures grouped
-      return (
-        <svg {...common}>
-          <circle cx="7" cy="6.5" r="2.2" fill={fill}/>
-          <circle cx="13.5" cy="7.5" r="1.8" fill={fill}/>
-          <path d="M2.5 16.5c.4-2.3 2.3-4 4.5-4s4.1 1.7 4.5 4"/>
-          <path d="M11.5 16.5c.3-1.7 1.8-3 3.5-3"/>
-        </svg>
-      )
-    case 'timetable': // calendar grid
-      return (
-        <svg {...common}>
-          <rect x="2.5" y="4" width="15" height="13.5" rx="1.5" fill={fill}/>
-          <path d="M2.5 8h15"/>
-          <path d="M6 2.5v3M14 2.5v3"/>
-          <circle cx="7" cy="11.5" r="0.8" fill={accent} stroke="none"/>
-          <circle cx="10" cy="11.5" r="0.8" fill={accent} stroke="none"/>
-        </svg>
-      )
-    case 'tutor': // chat bubble with sparkle (AI)
-      return (
-        <svg {...common}>
-          <path d="M3 8a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v3a4 4 0 0 1-4 4h-4l-3.5 2.5v-2.5A4 4 0 0 1 3 11V8z" fill={fill}/>
-          <path d="M10 6.5l.7 1.4 1.5.2-1.1 1 .3 1.5L10 9.9l-1.4.7.3-1.5-1.1-1 1.5-.2L10 6.5z" fill={accent} stroke={accent} strokeWidth="0.6"/>
-        </svg>
-      )
-    case 'studyplan': // calendar with checks
-      return (
-        <svg {...common}>
-          <rect x="2.5" y="4" width="15" height="13.5" rx="1.5" fill={fill}/>
-          <path d="M2.5 8h15M6 2.5v3M14 2.5v3"/>
-          <path d="M6 11l1.2 1.2L9.5 10" stroke={accent}/>
-          <path d="M11 14l1.2 1.2L14.5 13" stroke={accent}/>
-        </svg>
-      )
-    case 'resources': // stacked documents
-      return (
-        <svg {...common}>
-          <path d="M5 3.5h6l3 3V14a1.5 1.5 0 0 1-1.5 1.5h-7.5A1.5 1.5 0 0 1 3.5 14V5A1.5 1.5 0 0 1 5 3.5z" fill={fill}/>
-          <path d="M11 3.5V6h3"/>
-          <path d="M7 7.5h4M7 10h5M7 12.5h3"/>
-        </svg>
-      )
-    case 'profile': // person with circle
-      return (
-        <svg {...common}>
-          <circle cx="10" cy="7" r="3" fill={fill}/>
-          <path d="M3.5 17c.5-3.3 3.2-5.5 6.5-5.5s6 2.2 6.5 5.5"/>
-        </svg>
-      )
-    case 'achievements': // trophy
-      return (
-        <svg {...common}>
-          <path d="M6 3h8v4a4 4 0 0 1-4 4 4 4 0 0 1-4-4V3z" fill={fill}/>
-          <path d="M6 4.5H3.5v1.5A2.5 2.5 0 0 0 6 8.5"/>
-          <path d="M14 4.5h2.5v1.5A2.5 2.5 0 0 1 14 8.5"/>
-          <path d="M10 11v3.5M7.5 17h5M8 14.5h4l.5 2.5h-5l.5-2.5z"/>
-        </svg>
-      )
-    case 'subscription': // credit card
-      return (
-        <svg {...common}>
-          <rect x="2.5" y="5" width="15" height="10" rx="1.5" fill={fill}/>
-          <path d="M2.5 8.5h15"/>
-          <path d="M5 12h3M10 12h2" stroke={accent}/>
-        </svg>
-      )
-    default:
-      return (
-        <svg {...common}>
-          <circle cx="10" cy="10" r="3" fill={fill}/>
-        </svg>
-      )
+// Each module's signature colour pair (top → bottom of gradient)
+const NAV_ICON_PALETTE = {
+  dashboard:    ['#FF6B6B', '#EE5253'], // coral red
+  curriculum:   ['#5E8CFF', '#3D6FE8'], // bright blue
+  lessons:      ['#FF7B5C', '#F94E3F'], // tomato orange
+  practice:     ['#7C3AED', '#5B21B6'], // violet
+  homework:     ['#22C55E', '#15803D'], // green
+  exams:        ['#D97706', '#B45309'], // amber
+  live:         ['#EF4444', '#B91C1C'], // signal red
+  myroom:       ['#0EA5E9', '#0369A1'], // sky blue
+  timetable:    ['#EC4899', '#BE185D'], // pink
+  tutor:        ['#8B5CF6', '#6D28D9'], // royal purple
+  studyplan:    ['#14B8A6', '#0F766E'], // teal
+  resources:    ['#6366F1', '#4338CA'], // indigo
+  profile:      ['#64748B', '#334155'], // slate
+  achievements: ['#F59E0B', '#D97706'], // gold/amber
+  subscription: ['#10B981', '#047857'], // emerald
+}
+
+const NavIcon = ({ name, active }) => {
+  const [c1, c2] = NAV_ICON_PALETTE[name] || ['#94A3B8', '#475569']
+  const size = 26
+  const r = 7 // squircle-ish corner radius for 26px tile
+
+  // The pictogram is rendered in pure white on top of the coloured tile.
+  // Each path lives inside a 24×24 viewport.
+  const renderGlyph = () => {
+    switch (name) {
+      case 'dashboard':
+        return (
+          <g fill="#fff">
+            <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5"/>
+            <rect x="13" y="3.5" width="7.5" height="7.5" rx="1.5"/>
+            <rect x="3.5" y="13" width="7.5" height="7.5" rx="1.5"/>
+            <rect x="13" y="13" width="7.5" height="7.5" rx="1.5"/>
+          </g>
+        )
+      case 'curriculum': // open book
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3.5 5.5C3.5 4.7 4.2 4 5 4h5.5c.6 0 1 .4 1 1v14c0-.6-.4-1-1-1H5c-.8 0-1.5-.7-1.5-1.5V5.5z" fill="#fff" fillOpacity=".25"/>
+            <path d="M20.5 5.5c0-.8-.7-1.5-1.5-1.5h-5.5c-.6 0-1 .4-1 1v14c0-.6.4-1 1-1h5.5c.8 0 1.5-.7 1.5-1.5V5.5z" fill="#fff" fillOpacity=".25"/>
+            <path d="M12 5v14"/>
+            <path d="M16.5 4v6l1.8-1.2L20 10V4" fill="#fff"/>
+          </g>
+        )
+      case 'lessons': // play triangle in rounded rect
+        return (
+          <g fill="#fff">
+            <rect x="3" y="5" width="18" height="14" rx="2.5" fillOpacity=".25"/>
+            <path d="M10 8.5v7l6-3.5-6-3.5z"/>
+          </g>
+        )
+      case 'practice': // target with arrow
+        return (
+          <g>
+            <circle cx="10" cy="14" r="6" fill="#fff" fillOpacity=".25"/>
+            <circle cx="10" cy="14" r="3.5" fill="none" stroke="#fff" strokeWidth="1.8"/>
+            <circle cx="10" cy="14" r="1.2" fill="#fff"/>
+            <path d="M14 10l4-4M17 5l2 2M16 4l2 2" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            <path d="M14 10l-1.5-1.5L18 3l1.5 1.5L14 10z" fill="#fff"/>
+          </g>
+        )
+      case 'homework': // clipboard with check
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="5" width="14" height="16" rx="2" fill="#fff" fillOpacity=".25"/>
+            <rect x="8.5" y="3" width="7" height="4" rx="1" fill="#fff"/>
+            <path d="M8 13.5l2.5 2.5 5-5"/>
+          </g>
+        )
+      case 'exams': // shield with star
+        return (
+          <g>
+            <path d="M12 3L4 6v6c0 4.5 3.5 8.5 8 9.5 4.5-1 8-5 8-9.5V6l-8-3z" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/>
+            <path d="M12 8.5l1.5 3 3.3.5-2.4 2.3.5 3.3L12 16l-2.9 1.6.5-3.3-2.4-2.3 3.3-.5L12 8.5z" fill="#fff"/>
+          </g>
+        )
+      case 'live': // video camera
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="7" width="13" height="10" rx="2" fill="#fff" fillOpacity=".25"/>
+            <path d="M16 10.5L21 7v10l-5-3.5z" fill="#fff"/>
+            <circle cx="6.5" cy="10.5" r="1" fill="#fff" stroke="none"/>
+          </g>
+        )
+      case 'myroom': // three people
+        return (
+          <g fill="#fff">
+            <circle cx="8" cy="9" r="3" fillOpacity=".25"/>
+            <circle cx="8" cy="9" r="3" fill="none" stroke="#fff" strokeWidth="1.6"/>
+            <circle cx="16" cy="10" r="2.5" fillOpacity=".25"/>
+            <circle cx="16" cy="10" r="2.5" fill="none" stroke="#fff" strokeWidth="1.6"/>
+            <path d="M3 20c.6-3 2.6-5 5-5s4.4 2 5 5" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
+            <path d="M14 20c.4-2 1.8-3.5 3.5-3.5s3.1 1.5 3.5 3.5" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/>
+          </g>
+        )
+      case 'timetable': // calendar
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="5" width="18" height="16" rx="2" fill="#fff" fillOpacity=".25"/>
+            <path d="M3 10h18"/>
+            <path d="M8 3v4M16 3v4"/>
+            <circle cx="8.5" cy="14" r="1" fill="#fff" stroke="none"/>
+            <circle cx="12" cy="14" r="1" fill="#fff" stroke="none"/>
+            <circle cx="15.5" cy="14" r="1" fill="#fff" stroke="none"/>
+            <circle cx="8.5" cy="17.5" r="1" fill="#fff" stroke="none"/>
+            <circle cx="12" cy="17.5" r="1" fill="#fff" stroke="none"/>
+          </g>
+        )
+      case 'tutor': // chat bubble with sparkle
+        return (
+          <g>
+            <path d="M3 9a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v4a5 5 0 0 1-5 5h-5l-4 3v-3a5 5 0 0 1-4-5V9z" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/>
+            <path d="M12 7.5l.9 1.9 2 .3-1.5 1.4.4 2L12 12.2l-1.8 1 .4-2-1.5-1.4 2-.3L12 7.5z" fill="#fff"/>
+          </g>
+        )
+      case 'studyplan': // calendar with checks
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="5" width="18" height="16" rx="2" fill="#fff" fillOpacity=".25"/>
+            <path d="M3 10h18M8 3v4M16 3v4"/>
+            <path d="M7 14l1.5 1.5L11 13"/>
+            <path d="M13 17l1.5 1.5L17 16"/>
+          </g>
+        )
+      case 'resources': // stacked docs
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7 4h7l4 4v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#fff" fillOpacity=".25"/>
+            <path d="M14 4v4h4"/>
+            <path d="M8.5 12h7M8.5 15h7M8.5 18h4"/>
+          </g>
+        )
+      case 'profile': // person
+        return (
+          <g>
+            <circle cx="12" cy="8" r="3.8" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.8"/>
+            <path d="M4.5 20c.6-4 3.8-6.5 7.5-6.5s6.9 2.5 7.5 6.5" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
+          </g>
+        )
+      case 'achievements': // trophy
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7 4h10v5a5 5 0 0 1-5 5 5 5 0 0 1-5-5V4z" fill="#fff" fillOpacity=".25"/>
+            <path d="M7 6H4v2a3 3 0 0 0 3 3"/>
+            <path d="M17 6h3v2a3 3 0 0 1-3 3"/>
+            <path d="M12 14v4M9 21h6M9.5 18h5l.5 3h-6l.5-3z" fill="#fff"/>
+          </g>
+        )
+      case 'subscription': // credit card with chip
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="6" width="18" height="12" rx="2" fill="#fff" fillOpacity=".25"/>
+            <path d="M3 10h18"/>
+            <rect x="6" y="13" width="3" height="2.5" rx="0.5" fill="#fff" stroke="none"/>
+            <path d="M13 15h5"/>
+          </g>
+        )
+      default:
+        return <circle cx="12" cy="12" r="4" fill="#fff"/>
+    }
   }
+
+  return (
+    <div style={{
+      width:size, height:size,
+      borderRadius: r,
+      background:`linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`,
+      display:'flex', alignItems:'center', justifyContent:'center',
+      flexShrink:0,
+      boxShadow: active
+        ? `0 4px 10px ${c2}55, inset 0 1px 0 rgba(255,255,255,.35)`
+        : `0 1px 3px ${c2}40, inset 0 1px 0 rgba(255,255,255,.25)`,
+      transition:'box-shadow .15s, transform .15s',
+      transform: active ? 'scale(1.04)' : 'scale(1)',
+    }}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        {renderGlyph()}
+      </svg>
+    </div>
+  )
 }
 
 // ── NAV SECTIONS ──────────────────────────────────────────
@@ -706,7 +747,7 @@ export default function StudentPortal() {
                         }}/>
                       )}
                       <div style={{
-                        width:20, height:20,
+                        width:26, height:26,
                         display:'flex', alignItems:'center', justifyContent:'center',
                         flexShrink:0,
                       }}>
