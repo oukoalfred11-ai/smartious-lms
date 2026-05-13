@@ -2775,7 +2775,206 @@ function ExamsTab({ user, toast, goTo, store }) {
   const [timeLeft, setTimeLeft] = useState(EXAM_DURATION_SECONDS)
   const [result,   setResult]   = useState(null)
   const [hist,     setHist]     = useState(loadExamHist())
- 
+
+  // ── Real exams assigned by teachers (from backend) ──
+  // Source: GET /api/exams/student/list. Refreshes whenever the student
+  // returns to the list view.
+  const [scheduledExams, setScheduledExams] = useState([])
+  const [scheduledLoading, setScheduledLoading] = useState(true)
+
+  const loadScheduledExams = async () => {
+    setScheduledLoading(true)
+    try {
+      const { data } = await api.get('/exams/student/list')
+      if (data?.success) {
+        setScheduledExams(data.data?.exams || [])
+      } else {
+        setScheduledExams([])
+      }
+    } catch (e) {
+      console.error('[exams student/list] failed:', e?.response?.data?.message || e.message)
+      setScheduledExams([])
+    } finally {
+      setScheduledLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (stage === 'list') loadScheduledExams()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage])
+
+  // ─────────────────────────────────────────────────────
+  // REAL EXAM FLOW — backend-driven (separate from practice)
+  // ─────────────────────────────────────────────────────
+  // The "practice" exam at stage='sitting'/'result' uses the local
+  // QUESTION_BANK and runs entirely client-side. The "real" exam
+  // at stage='real-sitting'/'real-result' is loaded from the backend
+  // via GET /api/exams/:id/take, answered in the UI, and submitted
+  // via POST /api/exams/:id/submit. Auto-grading happens server-side
+  // for MCQs; short/long answers wait for teacher marking.
+  const [realExam, setRealExam] = useState(null)
+  const [realBankQuestions, setRealBankQuestions] = useState([])
+  const [realAnswers, setRealAnswers] = useState({})  // { [questionRef]: { answerText, selectedOption } }
+  const [realTimeLeft, setRealTimeLeft] = useState(0) // seconds
+  const [realSubmitting, setRealSubmitting] = useState(false)
+  const [realResult, setRealResult] = useState(null)
+  const [realIntegrity, setRealIntegrity] = useState({ tabSwitches: 0, copyPasteAttempts: 0 })
+  const realStartTimeRef = useRef(null)
+
+  // Build the unified question list a real exam needs to render:
+  // bank questions (full docs from server) followed by custom questions
+  // (embedded in the exam doc, addressed as 'custom:N').
+  const realQuestionsForRender = (() => {
+    if (!realExam) return []
+    const bank = (realBankQuestions || []).map(q => ({
+      ref: String(q._id),
+      type: q.type || 'short',
+      questionText: q.questionText || q.question || '',
+      options: q.options || [],
+      marks: q.marks || 0,
+      topic: q.topic || '',
+      _source: 'bank',
+    }))
+    const custom = (realExam.customQuestions || []).map((q, i) => ({
+      ref: 'custom:' + i,
+      type: q.type || 'short',
+      questionText: q.questionText || '',
+      options: q.options || [],
+      marks: q.marks || 0,
+      topic: q.topic || '',
+      _source: 'custom',
+    }))
+    return [...bank, ...custom]
+  })()
+
+  const startRealExam = async (examId) => {
+    if (!examId) return
+    try {
+      const { data } = await api.get('/exams/' + examId + '/take')
+      if (!data?.success) {
+        toast?.error?.(data?.message || 'Could not open exam.')
+        return
+      }
+      const exam = data.data?.exam
+      const bank = data.data?.bankQuestions || []
+      const sub  = data.data?.submission
+
+      setRealExam(exam)
+      setRealBankQuestions(bank)
+      setRealAnswers({})
+      setRealResult(null)
+      setRealIntegrity({ tabSwitches: 0, copyPasteAttempts: 0 })
+
+      // Time remaining: durationMins - secondsSinceSubmissionStart
+      // (so refresh doesn't reset; honours the submission record's startedAt)
+      const startedAt = sub?.startedAt ? new Date(sub.startedAt).getTime() : Date.now()
+      realStartTimeRef.current = startedAt
+      const elapsedMs = Date.now() - startedAt
+      const totalMs   = (exam.durationMins || 60) * 60000
+      const remaining = Math.max(0, Math.floor((totalMs - elapsedMs) / 1000))
+      setRealTimeLeft(remaining)
+
+      setStage('real-sitting')
+    } catch (e) {
+      const msg = e?.response?.data?.message || e.message || 'Network error.'
+      console.error('[real-exam start] failed:', msg)
+      toast?.error?.('Could not start: ' + msg)
+    }
+  }
+
+  // Countdown for the real exam timer. Auto-submits at zero.
+  useEffect(() => {
+    if (stage !== 'real-sitting') return
+    if (realTimeLeft <= 0) {
+      submitRealExam(/* timedOut */ true)
+      return
+    }
+    const t = setTimeout(() => setRealTimeLeft(s => s - 1), 1000)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, realTimeLeft])
+
+  // Integrity: detect tab switches and copy/paste attempts during sitting
+  useEffect(() => {
+    if (stage !== 'real-sitting') return
+    const onVisChange = () => {
+      if (document.hidden) setRealIntegrity(s => ({ ...s, tabSwitches: s.tabSwitches + 1 }))
+    }
+    const onPaste = (e) => {
+      setRealIntegrity(s => ({ ...s, copyPasteAttempts: s.copyPasteAttempts + 1 }))
+      // Don't block — just count
+    }
+    document.addEventListener('visibilitychange', onVisChange)
+    document.addEventListener('paste', onPaste)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisChange)
+      document.removeEventListener('paste', onPaste)
+    }
+  }, [stage])
+
+  const submitRealExam = async (timedOut = false) => {
+    if (realSubmitting) return
+    if (!realExam) return
+    setRealSubmitting(true)
+    try {
+      const answersPayload = realQuestionsForRender.map(q => {
+        const a = realAnswers[q.ref] || {}
+        return {
+          questionRef:    q.ref,
+          answerText:     a.answerText || '',
+          selectedOption: a.selectedOption || '',
+        }
+      })
+      const timeSpentSecs = realStartTimeRef.current
+        ? Math.floor((Date.now() - realStartTimeRef.current) / 1000)
+        : 0
+      const { data } = await api.post('/exams/' + realExam._id + '/submit', {
+        answers: answersPayload,
+        timeSpentSecs,
+        tabSwitches:       realIntegrity.tabSwitches,
+        copyPasteAttempts: realIntegrity.copyPasteAttempts,
+      })
+      if (data?.success) {
+        setRealResult(data.data?.submission)
+        setStage('real-result')
+        if (timedOut) toast?.info?.('Time is up — exam auto-submitted.')
+      } else {
+        toast?.error?.(data?.message || 'Failed to submit.')
+      }
+    } catch (e) {
+      const msg = e?.response?.data?.message || e.message || 'Network error.'
+      console.error('[real-exam submit] failed:', msg)
+      toast?.error?.('Could not submit: ' + msg)
+    } finally {
+      setRealSubmitting(false)
+    }
+  }
+
+  // Helper: format mm:ss
+  const formatMSS = (secs) => {
+    const m = Math.floor(secs / 60)
+    const s = secs % 60
+    return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0')
+  }
+
+  // Compute live status from start time + duration
+  const computeExamStatus = (exam) => {
+    if (exam.computedStatus) return exam.computedStatus  // backend already computed it
+    const now = Date.now()
+    const start = new Date(exam.startAt).getTime()
+    const end = start + (exam.durationMins || 0) * 60000
+    if (now < start) return 'scheduled'
+    if (now <= end)  return 'active'
+    return 'ended'
+  }
+  // Format start time relative to now
+  const formatExamWhen = (iso) => {
+    const d = new Date(iso)
+    const opts = { weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }
+    return d.toLocaleString(undefined, opts)
+  }
+
   // Build available exams — one per subject (mixed topics)
   const availableExams = Object.keys(QUESTION_BANK).map(subj => {
     const allQs = []
@@ -2863,7 +3062,293 @@ function ExamsTab({ user, toast, goTo, store }) {
     try { return store?.getStudentResults?.(studentFullName) || [] }
     catch { return [] }
   })()
- 
+
+  // ─────────────────────────────────────────────────────
+  // REAL EXAM — SITTING SCREEN
+  // ─────────────────────────────────────────────────────
+  if (stage === 'real-sitting' && realExam) {
+    const qs = realQuestionsForRender
+    const answered = qs.filter(q => {
+      const a = realAnswers[q.ref]
+      return a && (a.answerText?.trim() || a.selectedOption)
+    }).length
+    const lowTime = realTimeLeft < 60
+    const subjCol = subjectColour(realExam.subject)
+
+    return (
+      <div>
+        {/* Timer + meta header */}
+        <div style={{
+          position:'sticky', top:0, zIndex:10,
+          background:'#fff', borderBottom:'1px solid var(--border)',
+          padding:'12px 0', marginBottom:16,
+          display:'flex', alignItems:'center', gap:14, flexWrap:'wrap',
+        }}>
+          <div style={{
+            background: lowTime ? '#FEE2E2' : '#FEF3C7',
+            border:'2px solid ' + (lowTime ? '#B91C1C' : '#D97706'),
+            padding:'8px 16px', borderRadius:8,
+            fontFamily:'JetBrains Mono,monospace', fontSize:18, fontWeight:700,
+            color: lowTime ? '#B91C1C' : '#92400E',
+            animation: lowTime ? 'pulse 1s infinite' : 'none',
+          }}>
+            {formatMSS(realTimeLeft)}
+          </div>
+          <div style={{ flex:1, minWidth:200 }}>
+            <div style={{ fontWeight:700, fontSize:15, color:'var(--s900)' }}>{realExam.title}</div>
+            <div style={{ fontSize:11.5, color:'var(--s500)', marginTop:2 }}>
+              <span style={{ color:subjCol, fontWeight:600 }}>{realExam.subject}</span>
+              {' · '}{realExam.curriculum} {realExam.grade}
+              {' · '}{qs.length} questions
+              {' · '}{realExam.totalMarks || 0} marks
+            </div>
+          </div>
+          <div style={{ fontSize:12, color:'var(--s500)' }}>
+            <span style={{ fontWeight:700, color:'var(--s900)' }}>{answered}</span>/{qs.length} answered
+          </div>
+          <button
+            onClick={() => {
+              if (window.confirm('Submit now? You will not be able to change answers after this.')) {
+                submitRealExam(false)
+              }
+            }}
+            disabled={realSubmitting}
+            style={{
+              background: realSubmitting ? '#9CA3AF' : '#7D1025',
+              color:'#fff', border:'none',
+              padding:'8px 16px', borderRadius:6,
+              fontSize:12, fontWeight:700,
+              cursor: realSubmitting ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {realSubmitting ? 'Submitting…' : 'Submit Exam'}
+          </button>
+        </div>
+
+        {/* Instructions */}
+        {realExam.instructions && (
+          <div style={{
+            padding:'12px 14px',
+            background:'#FBFAF5', border:'1px solid #E8E2D6',
+            borderRadius:8, marginBottom:16,
+            fontSize:13, color:'var(--s700)', lineHeight:1.55,
+          }}>
+            <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--s500)', marginBottom:4 }}>
+              Instructions
+            </div>
+            {realExam.instructions}
+          </div>
+        )}
+
+        {/* Questions */}
+        <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+          {qs.map((q, i) => {
+            const a = realAnswers[q.ref] || {}
+            return (
+              <div key={q.ref} style={{
+                padding:16,
+                background:'#fff',
+                border:'1px solid var(--border)',
+                borderRadius:8,
+              }}>
+                <div style={{ display:'flex', gap:10, marginBottom:10 }}>
+                  <div className="mono" style={{
+                    minWidth:36, height:28, borderRadius:6,
+                    background:subjCol, color:'#fff',
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    fontSize:12, fontWeight:700, flexShrink:0,
+                  }}>Q{i+1}</div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:14, fontWeight:600, color:'var(--s900)', lineHeight:1.5 }}>
+                      {q.questionText}
+                    </div>
+                    <div style={{ fontSize:10.5, color:'var(--s500)', marginTop:4 }}>
+                      {q.topic ? q.topic + ' · ' : ''}{q.marks} mark{q.marks === 1 ? '' : 's'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Answer input depends on type */}
+                {q.type === 'mcq' && q.options?.length > 0 ? (
+                  <div style={{ display:'flex', flexDirection:'column', gap:8, marginLeft:46 }}>
+                    {q.options.map((opt, oi) => {
+                      const selected = a.selectedOption === opt
+                      return (
+                        <label key={oi} style={{
+                          display:'flex', alignItems:'center', gap:10,
+                          padding:'10px 12px',
+                          background: selected ? '#FBE8E8' : '#FBFAF5',
+                          border:'1.5px solid ' + (selected ? '#7D1025' : 'var(--border)'),
+                          borderRadius:6,
+                          cursor:'pointer', fontSize:13,
+                        }}>
+                          <input
+                            type="radio"
+                            name={'q-' + q.ref}
+                            value={opt}
+                            checked={selected}
+                            onChange={() => setRealAnswers(s => ({ ...s, [q.ref]: { ...s[q.ref], selectedOption: opt, answerText: opt } }))}
+                            style={{ accentColor:'#7D1025' }}
+                          />
+                          <span>{opt}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <textarea
+                    value={a.answerText || ''}
+                    onChange={e => setRealAnswers(s => ({ ...s, [q.ref]: { ...s[q.ref], answerText: e.target.value } }))}
+                    placeholder="Type your answer here…"
+                    rows={q.type === 'long' ? 6 : 3}
+                    style={{
+                      width:'100%', marginLeft:46, maxWidth:'calc(100% - 46px)',
+                      padding:'10px 12px',
+                      background:'#FBFAF5',
+                      border:'1.5px solid var(--border)',
+                      borderRadius:6,
+                      fontSize:13, fontFamily:'inherit',
+                      resize:'vertical',
+                    }}
+                  />
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Submit footer */}
+        <div style={{
+          marginTop:20, padding:'16px 0',
+          borderTop:'1px solid var(--border)',
+          display:'flex', alignItems:'center', gap:14, flexWrap:'wrap',
+        }}>
+          <div style={{ fontSize:12, color:'var(--s500)', flex:1 }}>
+            {answered < qs.length
+              ? <span style={{ color:'#B45309' }}>{qs.length - answered} unanswered</span>
+              : <span style={{ color:'#15803D' }}>All answered ✓</span>}
+            {' · '}{formatMSS(realTimeLeft)} remaining
+          </div>
+          <button
+            onClick={() => {
+              if (window.confirm('Submit now? You will not be able to change answers after this.')) {
+                submitRealExam(false)
+              }
+            }}
+            disabled={realSubmitting}
+            style={{
+              background: realSubmitting ? '#9CA3AF' : '#7D1025',
+              color:'#fff', border:'none',
+              padding:'10px 22px', borderRadius:6,
+              fontSize:13, fontWeight:700,
+              cursor: realSubmitting ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {realSubmitting ? 'Submitting…' : 'Submit Exam'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // ─────────────────────────────────────────────────────
+  // REAL EXAM — RESULT SCREEN
+  // ─────────────────────────────────────────────────────
+  if (stage === 'real-result' && realResult) {
+    const isGraded = realResult.status === 'graded'
+    const pct = realResult.percentage || 0
+    const passed = pct >= 50
+    const subjCol = subjectColour(realExam?.subject)
+    return (
+      <div style={{ maxWidth: 640, margin: '0 auto' }}>
+        <div className="card" style={{ textAlign:'center', padding:32 }}>
+          <div style={{
+            width:80, height:80, borderRadius:'50%',
+            background: isGraded ? (passed ? '#15803D' : '#B45309') : '#64748B',
+            color:'#fff',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            margin:'0 auto 16px',
+            fontSize:32,
+          }}>
+            {isGraded ? (passed ? '✓' : '!') : '⏱'}
+          </div>
+          <div className="serif" style={{ fontSize:24, color:'var(--s900)', marginBottom:6 }}>
+            {isGraded ? (passed ? 'Well done!' : 'Keep going.') : 'Submitted'}
+          </div>
+          <div style={{ fontSize:13.5, color:'var(--s500)', marginBottom:20, maxWidth:420, marginLeft:'auto', marginRight:'auto' }}>
+            {isGraded
+              ? 'Your teacher has finished grading. Detailed feedback below.'
+              : 'Your answers have been submitted. MCQs are auto-graded; written answers are awaiting your teacher\u2019s review.'}
+          </div>
+
+          <div style={{
+            display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:10,
+            marginBottom:20, textAlign:'center',
+          }}>
+            <div style={{ padding:'12px 8px', background:'#FBFAF5', borderRadius:8 }}>
+              <div className="mono" style={{ fontSize:22, fontWeight:700, color:'var(--s900)' }}>
+                {realResult.totalScore || 0}
+              </div>
+              <div style={{ fontSize:10, letterSpacing:'.08em', textTransform:'uppercase', color:'var(--s500)', marginTop:2 }}>
+                Score
+              </div>
+            </div>
+            <div style={{ padding:'12px 8px', background:'#FBFAF5', borderRadius:8 }}>
+              <div className="mono" style={{ fontSize:22, fontWeight:700, color: subjCol }}>
+                {realResult.maxScore || 0}
+              </div>
+              <div style={{ fontSize:10, letterSpacing:'.08em', textTransform:'uppercase', color:'var(--s500)', marginTop:2 }}>
+                Total
+              </div>
+            </div>
+            <div style={{ padding:'12px 8px', background:'#FBFAF5', borderRadius:8 }}>
+              <div className="mono" style={{ fontSize:22, fontWeight:700, color: passed ? '#15803D' : '#B45309' }}>
+                {pct}%
+              </div>
+              <div style={{ fontSize:10, letterSpacing:'.08em', textTransform:'uppercase', color:'var(--s500)', marginTop:2 }}>
+                Percentage
+              </div>
+            </div>
+          </div>
+
+          {isGraded && realResult.grade && (
+            <div style={{
+              display:'inline-block',
+              background: passed ? '#DCFCE7' : '#FEF3C7',
+              color: passed ? '#15803D' : '#92400E',
+              padding:'6px 16px', borderRadius:99,
+              fontSize:14, fontWeight:700, marginBottom:16,
+            }}>
+              Grade: {realResult.grade}
+            </div>
+          )}
+
+          {isGraded && realResult.feedback && (
+            <div style={{
+              padding:'14px 16px',
+              background:'#FBFAF5', border:'1px solid #E8E2D6',
+              borderRadius:8, marginBottom:20,
+              fontSize:13, color:'var(--s700)', lineHeight:1.55, textAlign:'left',
+            }}>
+              <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--s500)', marginBottom:6 }}>
+                Teacher Feedback
+              </div>
+              {realResult.feedback}
+            </div>
+          )}
+
+          <button
+            onClick={() => { setStage('list'); setRealExam(null); setRealResult(null) }}
+            className="btn btn-p"
+            style={{ background:'#7D1025', borderColor:'#7D1025' }}
+          >
+            Back to Exams
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // ── LIST SCREEN ──────────────────────────────────────────
   if (stage === 'list') {
     const passRate = hist.length > 0
@@ -2909,6 +3394,136 @@ function ExamsTab({ user, toast, goTo, store }) {
           </div>
         </div>
  
+        {/* ═══════════════════════════════════════════════
+            SCHEDULED EXAMS — set by teachers, fetched from API
+            ═══════════════════════════════════════════════ */}
+        <div className="card" style={{ marginBottom: 18, padding: 18 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12, gap:12, flexWrap:'wrap' }}>
+            <div>
+              <div className="sec-tag">From Your Teachers</div>
+              <h3 className="serif" style={{ fontSize: 20, color: 'var(--s900)', margin: '4px 0 0' }}>
+                Scheduled Exams
+              </h3>
+            </div>
+            <button
+              onClick={loadScheduledExams}
+              disabled={scheduledLoading}
+              style={{
+                background:'transparent', border:'1px solid var(--border)',
+                padding:'6px 12px', borderRadius:6,
+                fontSize:11, color:'var(--s500)', cursor: scheduledLoading ? 'wait' : 'pointer',
+                fontWeight:600, letterSpacing:'.04em',
+              }}
+            >
+              {scheduledLoading ? 'Loading…' : 'Refresh'}
+            </button>
+          </div>
+
+          {scheduledLoading ? (
+            <div style={{ padding:'16px 0', color:'var(--s500)', fontSize:13, textAlign:'center' }}>
+              Loading exams from server...
+            </div>
+          ) : scheduledExams.length === 0 ? (
+            <div style={{
+              padding:'18px 16px', background:'#FBFAF5',
+              border:'1px dashed #E8E2D6', borderRadius:8,
+              fontSize:13, color:'var(--s500)', textAlign:'center',
+            }}>
+              No exams have been scheduled for you yet. Your teachers will assign exams here when they're ready.
+            </div>
+          ) : (
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              {scheduledExams.map(ex => {
+                const status = computeExamStatus(ex)
+                const submitted = ex.mySubmission && ['submitted','graded','returned'].includes(ex.mySubmission.status)
+                const sCol  = status === 'active'    ? '#B91C1C'
+                            : status === 'scheduled' ? '#B45309'
+                            : '#64748B'
+                const sBg   = status === 'active'    ? '#FEE2E2'
+                            : status === 'scheduled' ? '#FEF3C7'
+                            : '#F1F5F9'
+                const sLabel= status === 'active'    ? 'LIVE NOW'
+                            : status === 'scheduled' ? 'SCHEDULED'
+                            : 'ENDED'
+                const subjCol = subjectColour(ex.subject)
+                const teacherName = ex.teacherId
+                  ? `${ex.teacherId.firstName || ''} ${ex.teacherId.lastName || ''}`.trim()
+                  : ''
+                return (
+                  <div key={ex._id} style={{
+                    padding:14,
+                    background:'#fff',
+                    border:'1px solid var(--border)',
+                    borderLeft: `4px solid ${subjCol}`,
+                    borderRadius:8,
+                    display:'flex', gap:14, alignItems:'center', flexWrap:'wrap',
+                  }}>
+                    <div style={{ flex:1, minWidth:220 }}>
+                      <div style={{ display:'flex', gap:6, marginBottom:5, flexWrap:'wrap', alignItems:'center' }}>
+                        <span style={{
+                          background:sBg, color:sCol,
+                          fontSize:9.5, fontWeight:800, letterSpacing:'.08em',
+                          padding:'2px 8px', borderRadius:99,
+                        }}>{sLabel}</span>
+                        {status === 'active' && (
+                          <span style={{ width:7, height:7, borderRadius:'50%', background:'#B91C1C', animation:'pulse 1.5s infinite' }}/>
+                        )}
+                        <span style={{ fontSize:11, fontWeight:700, color:subjCol, letterSpacing:'.06em', textTransform:'uppercase' }}>{ex.subject}</span>
+                        {ex.grade && <span style={{ fontSize:11, color:'var(--s500)' }}>{ex.curriculum} {ex.grade}</span>}
+                      </div>
+                      <div style={{ fontWeight:700, fontSize:15, color:'var(--s900)', marginBottom:4 }}>
+                        {ex.title}
+                      </div>
+                      <div style={{ fontSize:12, color:'var(--s500)' }}>
+                        {formatExamWhen(ex.startAt)} · {ex.durationMins} min
+                        {(typeof ex.totalQuestions === 'number') ? ` · ${ex.totalQuestions} questions` : ''}
+                        {ex.totalMarks ? ` · ${ex.totalMarks} marks` : ''}
+                        {teacherName && ` · ${teacherName}`}
+                      </div>
+                    </div>
+                    <div style={{ minWidth:140, textAlign:'right' }}>
+                      {submitted ? (
+                        <div>
+                          <div style={{ fontSize:10, fontWeight:700, color:'var(--g600)', letterSpacing:'.08em', textTransform:'uppercase' }}>
+                            {ex.mySubmission.status === 'graded' ? 'Graded' : 'Submitted'}
+                          </div>
+                          {ex.mySubmission.status === 'graded' && (
+                            <div className="mono" style={{ fontSize:16, fontWeight:700, color:'var(--s900)', marginTop:2 }}>
+                              {ex.mySubmission.totalScore}/{ex.mySubmission.maxScore || ex.totalMarks}
+                              <span style={{ fontSize:11, color:'var(--s500)', marginLeft:6 }}>
+                                ({ex.mySubmission.percentage}%)
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ) : status === 'active' ? (
+                        <button
+                          onClick={() => startRealExam(ex._id)}
+                          style={{
+                            background:'#7D1025', color:'#fff', border:'none',
+                            padding:'8px 14px', borderRadius:6,
+                            fontSize:12, fontWeight:700, cursor:'pointer',
+                          }}
+                        >
+                          Start Exam
+                        </button>
+                      ) : status === 'scheduled' ? (
+                        <div style={{ fontSize:11, color:'var(--s500)' }}>
+                          Opens at start time
+                        </div>
+                      ) : (
+                        <div style={{ fontSize:11, color:'var(--s500)' }}>
+                          Closed — not attempted
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Released results from teacher */}
         {releasedResults.length > 0 && (
           <div className="card" style={{ marginBottom: 18 }}>
@@ -2938,12 +3553,15 @@ function ExamsTab({ user, toast, goTo, store }) {
           </div>
         )}
  
-        {/* Available exams */}
+        {/* Practice mode — local fixture-based mock exams */}
         <div style={{ marginBottom: 12 }}>
-          <div className="sec-tag">Available Exams</div>
+          <div className="sec-tag">Practice Mode</div>
           <h3 className="serif" style={{ fontSize: 20, color: 'var(--s900)', margin: '4px 0 0' }}>
-            Sit a {EXAM_QUESTION_COUNT}-question mixed-topic exam
+            Sit a {EXAM_QUESTION_COUNT}-question mixed-topic practice exam
           </h3>
+          <p style={{ fontSize: 12.5, color: 'var(--s500)', margin: '4px 0 0', maxWidth: 560 }}>
+            These are self-practice exams generated from the question bank. They are not graded by your teacher.
+          </p>
         </div>
  
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14, marginBottom: 24 }}>
