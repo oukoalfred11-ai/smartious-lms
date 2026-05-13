@@ -2631,7 +2631,12 @@ const QB_CURRICULA = {
 }
 
 function ExamsTab({ user, store, setPage, toast }) {
-  const [exams, setExams] = useState(() => exLoadExams())
+  // Exams are now loaded from the backend (/api/exams/teacher/list).
+  // We keep using exLoadExams() as a fallback if the API call fails so the
+  // teacher still sees whatever was previously cached, but the source of
+  // truth is the server.
+  const [exams, setExams] = useState([])
+  const [examsLoading, setExamsLoading] = useState(true)
   const [view, setView] = useState('list')  // 'list' | 'create' | 'detail'
   const [selectedExam, setSelectedExam] = useState(null)
   const [createStep, setCreateStep] = useState(1)
@@ -2742,6 +2747,30 @@ function ExamsTab({ user, store, setPage, toast }) {
     return () => { cancelled = true }
   }, [])
 
+  // ── Load exams from backend ──
+  // Source of truth = the server. Refreshes after every mutation
+  // (create/delete) so the list stays in sync.
+  const loadExamsFromServer = async () => {
+    setExamsLoading(true)
+    try {
+      const { data } = await api.get('/exams/teacher/list')
+      if (data?.success) {
+        setExams(data.data?.exams || [])
+      } else {
+        toast?.error?.('Could not load exams.')
+      }
+    } catch (e) {
+      console.error('[exams load] failed:', e?.response?.data?.message || e.message)
+      toast?.error?.('Failed to load exams.')
+    } finally {
+      setExamsLoading(false)
+    }
+  }
+  useEffect(() => {
+    loadExamsFromServer()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Helper: look up a bank question by id (handles both _id and id keys)
   const findBankQuestion = (qid) =>
     bankQuestions.find(q => (q._id || q.id) === qid)
@@ -2837,41 +2866,58 @@ function ExamsTab({ user, store, setPage, toast }) {
     return true
   }
 
-  const scheduleExam = () => {
+  const scheduleExam = async () => {
     if (!validateStep(1) || !validateStep(2) || !validateStep(3)) return
 
-    const newExam = {
-      id: exGenerateId(),
-      title: formTitle.trim(),
-      subject: formSubject,
-      curriculum: formCurriculum,
-      year: formYear,
-      startAt: new Date(formStartAt).toISOString(),
-      durationMins: parseInt(formDuration) || 60,
-      instructions: formInstructions.trim(),
-      questionIds: formSelectedQuestions,
+    // Build the payload in the shape the backend Exam model expects.
+    // The backend uses `grade` (not `year`) and `durationMins` (not `duration`).
+    const payload = {
+      title:            formTitle.trim(),
+      instructions:     formInstructions.trim(),
+      subject:          formSubject,
+      curriculum:       formCurriculum,
+      grade:            formYear, // formYear is the year/grade string e.g. 'Year 10'
+      startAt:          new Date(formStartAt).toISOString(),
+      durationMins:     parseInt(formDuration) || 60,
+      questionIds:      formSelectedQuestions,  // already _id strings from the bank
+      customQuestions: [],                       // (not exposed in current UI; reserved)
       assignedStudents: formSelectedStudents,
-      totalMarks: totalMarks,
-      status: 'scheduled',
-      teacher: 'Mr. James Muthomi',
-      createdAt: new Date().toISOString(),
     }
 
-    const updated = [newExam, ...exams]
-    setExams(updated)
-    exSaveExams(updated)
-    toast?.ok?.('Exam scheduled and locked. ' + formSelectedStudents.length + ' students will be notified.')
-    setView('list')
-    resetForm()
+    try {
+      const { data } = await api.post('/exams', payload)
+      if (data?.success) {
+        toast?.ok?.('Exam scheduled. ' + formSelectedStudents.length + ' student(s) will be notified.')
+        await loadExamsFromServer() // refresh
+        setView('list')
+        resetForm()
+      } else {
+        toast?.error?.(data?.message || 'Failed to schedule exam.')
+      }
+    } catch (e) {
+      const msg = e?.response?.data?.message || e.message || 'Network error.'
+      console.error('[exam schedule] failed:', msg)
+      toast?.error?.('Could not schedule: ' + msg)
+    }
   }
 
-  const deleteExam = (id) => {
-    const updated = exams.filter(e => e.id !== id)
-    setExams(updated)
-    exSaveExams(updated)
-    toast?.ok?.('Exam deleted.')
-    setSelectedExam(null)
-    setView('list')
+  const deleteExam = async (id) => {
+    if (!id) return
+    try {
+      const { data } = await api.delete('/exams/' + id)
+      if (data?.success) {
+        toast?.ok?.('Exam deleted.')
+        await loadExamsFromServer()
+        setSelectedExam(null)
+        setView('list')
+      } else {
+        toast?.error?.(data?.message || 'Failed to delete.')
+      }
+    } catch (e) {
+      const msg = e?.response?.data?.message || e.message || 'Network error.'
+      console.error('[exam delete] failed:', msg)
+      toast?.error?.('Could not delete: ' + msg)
+    }
   }
 
   const openDetail = (exam) => {
@@ -2932,7 +2978,7 @@ function ExamsTab({ user, store, setPage, toast }) {
                 padding: '4px 10px', borderRadius: 99,
               }}>{statusBadge.label}</span>
               <span style={{ fontSize: 11, opacity: .75, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#F0CC5A' }}>
-                {selectedExam.subject} | {selectedExam.curriculum} {selectedExam.year}
+                {selectedExam.subject} | {selectedExam.curriculum} {selectedExam.grade || selectedExam.year}
               </span>
             </div>
             <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 30, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
@@ -2945,10 +2991,10 @@ function ExamsTab({ user, store, setPage, toast }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
             {[
-              ['Questions', selectedExam.questionIds.length,                                 '#FBFAF5'],
+              ['Questions', (selectedExam.questionIds || []).length + ((selectedExam.customQuestions || []).length),  '#FBFAF5'],
               ['Total Marks', selectedExam.totalMarks,                                       '#F0CC5A'],
               ['Duration', selectedExam.durationMins + ' min',                              '#FBFAF5'],
-              ['Students', selectedExam.assignedStudents.length,                            '#FBFAF5'],
+              ['Students', (selectedExam.assignedStudents || []).length,                       '#FBFAF5'],
               ['Ends', endTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }), '#F0CC5A'],
             ].map(([l, v, c]) => (
               <div key={l} style={{ padding: '14px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
@@ -3020,7 +3066,7 @@ function ExamsTab({ user, store, setPage, toast }) {
         {/* Actions */}
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 18, flexWrap: 'wrap' }}>
           {status === 'scheduled' && (
-            <button onClick={() => { if (confirm('Delete this scheduled exam? Students will be unassigned.')) deleteExam(selectedExam.id) }}
+            <button onClick={() => { if (confirm('Delete this scheduled exam? Students will be unassigned.')) deleteExam(selectedExam._id || selectedExam.id) }}
               style={{
                 background: '#FEE2E2', color: '#B91C1C',
                 border: '1px solid #FCA5A5',
@@ -3489,7 +3535,11 @@ function ExamsTab({ user, store, setPage, toast }) {
         Showing <strong style={{ color: '#7D1025' }}>{filteredExams.length}</strong> of {stats.total} exams
       </div>
 
-      {filteredExams.length === 0 ? (
+      {examsLoading ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)', fontSize: 13.5 }}>
+          Loading exams from server...
+        </div>
+      ) : filteredExams.length === 0 ? (
         <div className="card" style={{ padding: 40, textAlign: 'center' }}>
           <div style={{
             width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%',
@@ -3530,7 +3580,7 @@ function ExamsTab({ user, store, setPage, toast }) {
               : { bg: '#F1F5F9', color: '#64748B', label: 'ENDED' }
 
             return (
-              <div key={exam.id} className="card" style={{
+              <div key={exam._id || exam.id} className="card" style={{
                 padding: 14, borderLeft: '4px solid ' + subjCol, cursor: 'pointer',
               }} onClick={() => openDetail(exam)}>
                 <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -3545,17 +3595,17 @@ function ExamsTab({ user, store, setPage, toast }) {
                         <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#B91C1C', animation: 'pulse 1.5s infinite' }}/>
                       )}
                       <span style={{ fontSize: 11, fontWeight: 700, color: subjCol, letterSpacing: '.06em', textTransform: 'uppercase' }}>{exam.subject}</span>
-                      <span style={{ fontSize: 11, color: 'var(--s500)' }}>{exam.curriculum} {exam.year}</span>
+                      <span style={{ fontSize: 11, color: 'var(--s500)' }}>{exam.curriculum} {exam.grade || exam.year}</span>
                     </div>
                     <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)', marginBottom: 4 }}>{exam.title}</div>
                     <div style={{ fontSize: 12, color: 'var(--s500)' }}>
-                      {exFormatDateTime(exam.startAt)} | {exam.durationMins} min | {exam.questionIds.length} questions | {exam.totalMarks} marks
+                      {exFormatDateTime(exam.startAt)} | {exam.durationMins} min | {(typeof exam.totalQuestions === 'number') ? exam.totalQuestions : ((exam.questionIds || []).length + (exam.customQuestions || []).length)} questions | {exam.totalMarks || 0} marks
                       {timeUntil && status === 'scheduled' && <> | <strong style={{ color: '#C9A030' }}>{timeUntil}</strong></>}
                     </div>
                   </div>
                   <div style={{ textAlign: 'center', minWidth: 80 }}>
                     <div className="mono" style={{ fontSize: 18, fontWeight: 700, color: '#7D1025' }}>
-                      {exam.assignedStudents.length}
+                      {(exam.assignedStudents || []).length}
                     </div>
                     <div style={{ fontSize: 10, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Students</div>
                   </div>
