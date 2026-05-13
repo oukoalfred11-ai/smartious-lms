@@ -1227,6 +1227,36 @@ export default function StudentPortal() {
                       Your curriculum and subjects haven't been set up yet. Contact your
                       programme coordinator at <strong style={{color:'#7D1025'}}>hellosmartious@gmail.com</strong> to complete your enrolment.
                     </div>
+
+                    {/* ── DIAGNOSTIC: show raw user fields so we can debug ── */}
+                    <details style={{
+                      marginTop: 24, textAlign:'left',
+                      maxWidth: 560, marginLeft:'auto', marginRight:'auto',
+                      background:'#fff', border:'1px solid #E8E2D6', borderRadius:8,
+                      padding:'10px 14px',
+                    }}>
+                      <summary style={{ cursor:'pointer', fontSize:11, color:'#6B6B6B', fontWeight:600, letterSpacing:'.05em', textTransform:'uppercase' }}>
+                        Diagnostic · what the frontend has
+                      </summary>
+                      <pre style={{
+                        fontSize:11, fontFamily:'JetBrains Mono,monospace',
+                        background:'#FBFAF5', padding:10, borderRadius:6,
+                        marginTop:10, overflow:'auto', maxHeight:260, color:'#3F3F3F',
+                      }}>
+{JSON.stringify({
+  _id: user?._id || user?.id || '(missing)',
+  email: user?.email || '(missing)',
+  curriculum: user?.curriculum || '(empty)',
+  gradeLevel: user?.gradeLevel || '(empty)',
+  grade: user?.grade || '(empty)',
+  subjects: user?.subjects || '(empty)',
+  subjectsType: Array.isArray(user?.subjects) ? 'array(' + user.subjects.length + ')' : typeof user?.subjects,
+  studentSubjects: user?.studentSubjects || '(none)',
+  subjectRefs: user?.subjectRefs || '(none)',
+  allKeys: user ? Object.keys(user).sort() : [],
+}, null, 2)}
+                      </pre>
+                    </details>
                   </div>
                 )}
 
