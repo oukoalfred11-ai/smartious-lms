@@ -1,5 +1,12 @@
 const mongoose = require('mongoose');
 
+// ═══════════════════════════════════════════════════════════
+// NOTE: The Exam model was previously defined here but is now
+// in its own file at backend/models/Exam.js — that version has
+// the full scheduling/assignment fields the portal needs.
+// ExamSubmission lives at backend/models/ExamSubmission.js.
+// ═══════════════════════════════════════════════════════════
+
 // ── LESSON ────────────────────────────────────────
 const lessonSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -17,36 +24,9 @@ const lessonSchema = new mongoose.Schema({
   completions: { type: Number, default: 0 },
 }, { timestamps: true });
 
-// ── EXAM ─────────────────────────────────────────
-const examSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  subject: String,
-  curriculum: String,
-  grade: String,
-  description: String,
-  duration: { type: Number, default: 60 },
-  totalMarks: { type: Number, default: 100 },
-  passMark: { type: Number, default: 50 },
-  status: { type: String, enum: ['draft','published','archived'], default: 'draft' },
-  teacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  questions: [{
-    type: { type: String, enum: ['mcq','short','essay','photo'], default: 'mcq' },
-    question: String,
-    options: [String],
-    correctAnswer: String,
-    marks: { type: Number, default: 2 },
-    explanation: String,
-  }],
-  security: {
-    tabSwitchDetection: { type: Boolean, default: true },
-    copyPasteDisabled: { type: Boolean, default: true },
-    questionRandomisation: { type: Boolean, default: true },
-    answerRandomisation: { type: Boolean, default: true },
-    timeLimitEnforced: { type: Boolean, default: true },
-  },
-}, { timestamps: true });
-
 // ── PROGRESS ─────────────────────────────────────
+// Generic progress record for lessons. Exam submissions now live in
+// their own ExamSubmission collection.
 const progressSchema = new mongoose.Schema({
   studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   lessonId: { type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' },
@@ -102,15 +82,6 @@ const consultationSchema = new mongoose.Schema({
   status: { type: String, enum: ['pending','confirmed','completed','cancelled'], default: 'pending' },
   notes: String,
 }, { timestamps: true });
-
-module.exports = {
-  Lesson: mongoose.model('Lesson', lessonSchema),
-  Exam: mongoose.model('Exam', examSchema),
-  Progress: mongoose.model('Progress', progressSchema),
-  Message: mongoose.model('Message', messageSchema),
-  Consultation: mongoose.model('Consultation', consultationSchema),
-};
-
 
 // ── MASTERY PROFILE ───────────────────────────────────────
 // One document per student. Stores mastery 0-100 per topic.
@@ -192,9 +163,14 @@ const adaptiveSessionSchema = new mongoose.Schema({
   wrongTopics: [String],
 }, { timestamps: true });
 
+// ═══════════════════════════════════════════════════════════
+// EXPORTS
+// Single export block. The Exam model is NOT exported from
+// here anymore — import it directly from './Exam' where needed:
+//   const Exam = require('../models/Exam');
+// ═══════════════════════════════════════════════════════════
 module.exports = {
   Lesson:          mongoose.model('Lesson',          lessonSchema),
-  Exam:            mongoose.model('Exam',            examSchema),
   Progress:        mongoose.model('Progress',        progressSchema),
   Message:         mongoose.model('Message',         messageSchema),
   Consultation:    mongoose.model('Consultation',    consultationSchema),
