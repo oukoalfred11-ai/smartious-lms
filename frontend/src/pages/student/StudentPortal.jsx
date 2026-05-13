@@ -373,6 +373,40 @@ export default function StudentPortal() {
   const [fcFlipped,   setFcFlipped]   = useState(false)
   const [flashcards,  setFlashcards]  = useState([])
 
+  // ── Curriculum view ─────────────────────────────────
+  // Which subject card is expanded in the curriculum drawer (null = all collapsed)
+  const [curriculumExpandedSubject, setCurriculumExpandedSubject] = useState(null)
+  // Map of subjectName → [homework items], fetched once when curriculum is opened
+  const [curriculumHwBySubject, setCurriculumHwBySubject] = useState(null)
+
+  // Fetch the student's homework list the first time they open the curriculum
+  // page, then group by subject for per-card counts. Refresh whenever the
+  // student navigates back into curriculum so counts stay current.
+  useEffect(() => {
+    if (page !== 'curriculum') return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { data } = await api.get('/homework/student/list')
+        if (cancelled) return
+        const items = Array.isArray(data?.homework) ? data.homework
+                    : Array.isArray(data)            ? data
+                    : []
+        const grouped = {}
+        items.forEach(hw => {
+          const subj = hw.subject || 'General'
+          if (!grouped[subj]) grouped[subj] = []
+          grouped[subj].push(hw)
+        })
+        setCurriculumHwBySubject(grouped)
+      } catch (e) {
+        // Non-fatal — cards just won't show homework counts
+        if (!cancelled) setCurriculumHwBySubject({})
+      }
+    })()
+    return () => { cancelled = true }
+  }, [page])
+
   // ── Exams ────────────────────────────────────────────
   const [examActive,  setExamActive]  = useState(false)
   const [examAnswers, setExamAnswers] = useState({})
@@ -1017,32 +1051,83 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               CURRICULUM — topic-by-topic mastery grid
           ════════════════════════════════════════════ */}
+          {/* ════════════════════════════════════════════
+              CURRICULUM — real enrolment data + subject cards
+              Reads user.curriculum / user.gradeLevel / user.subjects
+              from the backend (no hardcoded fallback list).
+              Each subject renders as an image card; click expands a
+              drawer with per-subject lessons / homework / exam counts.
+          ════════════════════════════════════════════ */}
           {page === 'curriculum' && (() => {
-            // Pull real data from store + user object
-            const myCurriculumName = user?.curriculum || 'IGCSE'
-            const curriculumInfo   = store.curricula?.find(c =>
-              c.name === myCurriculumName ||
-              c.name?.toLowerCase() === myCurriculumName?.toLowerCase()
-            )
-            // My class rooms = subjects I'm enrolled in (each room = subject + teacher + schedule)
-            const studentFullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
-            const myRooms = (store.groupRooms || []).filter(r =>
-              r.students?.some(s =>
-                s === studentFullName ||
-                s === user?.firstName ||
-                s.includes(user?.firstName)
-              )
-            )
-            // Subject colour palette — stable per subject name
-            const subjectColours = {
-              'Mathematics': '#8B1A2E', 'Physics':'#1E3A8A', 'Chemistry':'#166534',
-              'Biology':'#7C2D12', 'English':'#6B21A8', 'History':'#92400E',
-              'Geography':'#0F766E', 'Computer Science':'#1F2937', 'Business Studies':'#7E22CE',
-              'Economics':'#9F1239', 'Art':'#BE185D', 'Music':'#0E7490',
-            }
-            const colourFor = (name) => subjectColours[name] || '#8B1A2E'
+            // ── 1. Read real enrolment from the user record ──
+            const enrolledCurriculum = user?.curriculum || ''
+            const enrolledGrade      = user?.gradeLevel || user?.grade || ''
+            // user.subjects is the canonical source per the User model
+            // (string array, e.g. ['Mathematics','Physics','Chemistry'])
+            const enrolledSubjects   = Array.isArray(user?.subjects)
+              ? user.subjects.filter(Boolean)
+              : []
 
-            // Lessons grouped by subject (from the same store the lessons tab uses)
+            // Curriculum metadata (display name, org, description) from store
+            const curriculumInfo = store.curricula?.find(c =>
+              c.name === enrolledCurriculum ||
+              c.name?.toLowerCase() === enrolledCurriculum?.toLowerCase()
+            )
+            const curriculumDisplay = curriculumInfo?.name || enrolledCurriculum
+
+            // ── 2. Curated subject image library (Unsplash) ──
+            // Long-term: replace these with Cloudinary URLs stored against
+            // a Subject document. For now, fixed defaults per common subject.
+            const SUBJECT_IMAGES = {
+              'Mathematics':       'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&h=450&fit=crop',
+              'Maths':             'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&h=450&fit=crop',
+              'Further Mathematics':'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800&h=450&fit=crop',
+              'Physics':           'https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?w=800&h=450&fit=crop',
+              'Chemistry':         'https://images.unsplash.com/photo-1554475901-4538ddfbccc2?w=800&h=450&fit=crop',
+              'Biology':           'https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=800&h=450&fit=crop',
+              'English':           'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=800&h=450&fit=crop',
+              'English Language':  'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=800&h=450&fit=crop',
+              'English Literature':'https://images.unsplash.com/photo-1474932430478-367dbb6832c1?w=800&h=450&fit=crop',
+              'Literature':        'https://images.unsplash.com/photo-1474932430478-367dbb6832c1?w=800&h=450&fit=crop',
+              'History':           'https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=800&h=450&fit=crop',
+              'Geography':         'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&h=450&fit=crop',
+              'Computer Science':  'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=450&fit=crop',
+              'ICT':               'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=450&fit=crop',
+              'Business Studies':  'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&h=450&fit=crop',
+              'Business':          'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&h=450&fit=crop',
+              'Economics':         'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=450&fit=crop',
+              'Accounting':        'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=450&fit=crop',
+              'Art':               'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&h=450&fit=crop',
+              'Art & Design':      'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&h=450&fit=crop',
+              'Visual Arts':       'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&h=450&fit=crop',
+              'Music':             'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&h=450&fit=crop',
+              'French':            'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&h=450&fit=crop',
+              'Spanish':           'https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=800&h=450&fit=crop',
+              'Kiswahili':         'https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=800&h=450&fit=crop',
+              'Religious Studies': 'https://images.unsplash.com/photo-1507692049790-de58290a4334?w=800&h=450&fit=crop',
+              'Physical Education':'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&h=450&fit=crop',
+              'PE':                'https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&h=450&fit=crop',
+              'Psychology':        'https://images.unsplash.com/photo-1559757175-5700dde675bc?w=800&h=450&fit=crop',
+              'Sociology':         'https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=800&h=450&fit=crop',
+            }
+            const SUBJECT_COLOURS = {
+              'Mathematics': '#7D1025', 'Maths': '#7D1025', 'Further Mathematics': '#5A0B1B',
+              'Physics': '#1E3A8A', 'Chemistry': '#166534', 'Biology': '#7C2D12',
+              'English': '#6B21A8', 'English Language': '#6B21A8', 'English Literature': '#581C87',
+              'Literature': '#581C87', 'History': '#92400E', 'Geography': '#0F766E',
+              'Computer Science': '#1F2937', 'ICT': '#1F2937', 'Business Studies': '#7E22CE',
+              'Business': '#7E22CE', 'Economics': '#9F1239', 'Accounting': '#0E7C7B',
+              'Art': '#BE185D', 'Art & Design': '#BE185D', 'Visual Arts': '#BE185D',
+              'Music': '#0E7490', 'French': '#1E40AF', 'Spanish': '#B91C1C',
+              'Kiswahili': '#15803D', 'Religious Studies': '#7C2D12',
+              'Physical Education': '#059669', 'PE': '#059669',
+              'Psychology': '#7C3AED', 'Sociology': '#0369A1',
+            }
+            const imageFor  = (s) => SUBJECT_IMAGES[s]
+            const colourFor = (s) => SUBJECT_COLOURS[s] || '#7D1025'
+
+            // ── 3. Per-subject summary data ──
+            // Lessons: from store (already loaded per session)
             const lessonsBySubject = {}
             ;(store.lessons || []).forEach(l => {
               const s = l.subject || 'General'
@@ -1050,185 +1135,283 @@ export default function StudentPortal() {
               lessonsBySubject[s].push(l)
             })
 
+            // Homework: fetched once on this view's first render, kept in
+            // module-scoped state (a closure over the parent component's
+            // useState). Use a local cache keyed by subject.
+            const hwBySubject = curriculumHwBySubject || {}
+
+            // Empty-enrolment guard
+            const hasEnrolment = !!enrolledCurriculum && enrolledSubjects.length > 0
+
             return (
               <div>
-                {/* Hero card — student's curriculum */}
+                {/* ── HERO: curriculum + grade + counts ── */}
                 <div className="card" style={{
                   padding: 0, marginBottom: 18, overflow: 'hidden',
-                  background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
-                  color: '#fff',
+                  background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
+                  color: '#fff', border: 'none',
                 }}>
-                  <div style={{ padding: '28px 32px 20px' }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
-                      Your Learning Path
-                    </div>
-                    <h2 style={{ fontFamily: "'Instrument Serif', 'Playfair Display', serif", fontSize: 30, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
-                      {curriculumInfo?.name || myCurriculumName}
-                    </h2>
-                    {curriculumInfo?.org && (
-                      <div style={{ fontSize: 13.5, opacity: .8, marginTop: 4 }}>
-                        {curriculumInfo.org}
+                  <div style={{ padding: '28px 32px 22px', display:'flex', alignItems:'flex-start', gap:24, flexWrap:'wrap' }}>
+                    <div style={{ flex:1, minWidth:260 }}>
+                      <div style={{
+                        fontSize: 10.5, fontWeight: 700, letterSpacing: '.16em',
+                        textTransform: 'uppercase', color:'#F0CC5A', marginBottom: 6,
+                      }}>
+                        Your Programme
                       </div>
-                    )}
-                    {curriculumInfo?.description && (
-                      <p style={{ fontSize: 13.5, opacity: .85, marginTop: 12, marginBottom: 0, maxWidth: 560, lineHeight: 1.55 }}>
-                        {curriculumInfo.description}
-                      </p>
-                    )}
-                  </div>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                    background: 'rgba(0,0,0,.18)',
-                  }}>
-                    {[
-                      ['Grade',       user?.grade || curriculumInfo?.grades || '—'],
-                      ['Subjects',    myRooms.length || curriculumInfo?.subjects || '—'],
-                      ['Plan',        user?.plan || 'Basic'],
-                      ['Status',      'Enrolled'],
-                    ].map(([label, value]) => (
-                      <div key={label} style={{ padding: '14px 20px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 3 }}>
-                          {label}
+                      <h2 style={{
+                        fontFamily: "'Instrument Serif','Playfair Display',serif",
+                        fontSize: 34, fontWeight: 400, margin: 0, lineHeight: 1.1,
+                      }}>
+                        {curriculumDisplay || 'No curriculum on file'}
+                      </h2>
+                      {enrolledGrade && (
+                        <div style={{ fontSize: 14, opacity: .88, marginTop: 6, fontFamily:'JetBrains Mono,monospace' }}>
+                          {enrolledGrade}
                         </div>
-                        <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>
-                          {value}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* My Subjects section */}
-                <div style={{ marginBottom: 14, marginTop: 24 }}>
-                  <div className="sec-tag">My Subjects &amp; Teachers</div>
-                  <h3 className="serif" style={{ fontSize: 22, color: 'var(--s900)', margin: '4px 0 0' }}>
-                    {myRooms.length > 0
-                      ? `${myRooms.length} subject${myRooms.length === 1 ? '' : 's'} this term`
-                      : 'No subjects assigned yet'}
-                  </h3>
-                </div>
-
-                {myRooms.length === 0 ? (
-                  <div className="card" style={{ padding: 32, textAlign: 'center' }}>
-                    <div style={{ width: 56, height: 56, margin: '0 auto 14px', borderRadius: '50%', background: 'var(--s100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="1.5" strokeLinecap="round">
-                        <path d="M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13"/><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M8 10h8M8 14h6"/>
-                      </svg>
-                    </div>
-                    <h3 style={{ fontSize: 16, color: 'var(--s800)', marginBottom: 6 }}>Your subjects will appear here</h3>
-                    <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 360, margin: '0 auto' }}>
-                      Once an admin assigns you to subjects, you&apos;ll see your teacher, schedule, and lessons for each one.
-                    </p>
-                  </div>
-                ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
-                    {myRooms.map(room => {
-                      const col = colourFor(room.subject)
-                      const teacherInit = room.teacher
-                        ? room.teacher.replace(/^(Mr\.|Mrs\.|Ms\.|Dr\.)\s*/i, '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-                        : '?'
-                      const subjectLessons = lessonsBySubject[room.subject] || []
-                      return (
-                        <div key={room.id} className="card" style={{
-                          padding: 0, overflow: 'hidden', borderTop: `4px solid ${col}`,
-                          display: 'flex', flexDirection: 'column',
+                      )}
+                      {curriculumInfo?.description && (
+                        <p style={{
+                          fontSize: 13.5, opacity: .85, marginTop: 14, marginBottom: 0,
+                          maxWidth: 560, lineHeight: 1.55,
                         }}>
-                          <div style={{ padding: '18px 20px 14px' }}>
-                            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 14 }}>
-                              <div>
-                                <div className="serif" style={{ fontSize: 19, color: 'var(--s900)', lineHeight: 1.2, marginBottom: 3 }}>
-                                  {room.subject}
-                                </div>
-                                <div style={{ fontSize: 11.5, color: 'var(--s400)', textTransform: 'uppercase', letterSpacing: '.06em', fontWeight: 600 }}>
-                                  {room.curriculum} {room.grade ? '· ' + room.grade : ''}
-                                </div>
-                              </div>
-                              <span className={`badge ${room.status === 'Active' ? 'badge-green' : 'badge-slate'}`}>
-                                {room.status || 'Active'}
-                              </span>
-                            </div>
-
-                            {/* Teacher */}
-                            {room.teacher && (
-                              <div style={{
-                                display: 'flex', alignItems: 'center', gap: 10,
-                                background: 'var(--bg)', borderRadius: 'var(--rmd)',
-                                padding: '10px 12px', marginBottom: 12,
-                              }}>
-                                <div style={{
-                                  width: 32, height: 32, borderRadius: '50%',
-                                  background: col + '22', color: col,
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700,
-                                  flexShrink: 0,
-                                }}>
-                                  {teacherInit}
-                                </div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--s800)' }}>
-                                    {room.teacher}
-                                  </div>
-                                  <div style={{ fontSize: 11, color: 'var(--s500)' }}>
-                                    Subject Teacher
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Schedule */}
-                            {room.schedule && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--s600)', marginBottom: 6 }}>
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke={col} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
-                                  <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                                </svg>
-                                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>{room.schedule}</span>
-                              </div>
-                            )}
-
-                            {/* Classmates count */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--s600)' }}>
-                              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke={col} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                              </svg>
-                              <span>{room.enrolled || room.students?.length || 0} classmates</span>
-                            </div>
-
-                            {/* Lessons available */}
-                            {subjectLessons.length > 0 && (
-                              <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
-                                <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--s400)', marginBottom: 8 }}>
-                                  {subjectLessons.length} lesson{subjectLessons.length === 1 ? '' : 's'} available
-                                </div>
-                                {subjectLessons.slice(0, 2).map((l, li) => (
-                                  <div key={li} style={{ fontSize: 12, color: 'var(--s600)', marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                    · {l.title}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                          {curriculumInfo.description}
+                        </p>
+                      )}
+                    </div>
+                    {hasEnrolment && (
+                      <div style={{ display:'flex', gap:12, flexShrink:0 }}>
+                        <div style={{
+                          background:'rgba(255,255,255,.1)', padding:'14px 18px',
+                          borderRadius:10, minWidth:90, textAlign:'center',
+                          border:'1px solid rgba(255,255,255,.12)',
+                        }}>
+                          <div style={{ fontSize:26, fontWeight:700, fontFamily:'JetBrains Mono,monospace', color:'#F0CC5A' }}>
+                            {enrolledSubjects.length}
                           </div>
-
-                          <div style={{ marginTop: 'auto', padding: '10px 14px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8, background: 'var(--bg)' }}>
-                            <button
-                              className="btn btn-p btn-sm"
-                              style={{ flex: 1, justifyContent: 'center' }}
-                              onClick={() => { setSelectedSubj(room.subject); goTo('lessons') }}
-                            >
-                              Open Lessons
-                            </button>
-                            <button
-                              className="btn btn-s btn-sm"
-                              style={{ flex: 1, justifyContent: 'center' }}
-                              onClick={() => goTo('timetable')}
-                            >
-                              Timetable
-                            </button>
+                          <div style={{ fontSize:10, letterSpacing:'.1em', textTransform:'uppercase', opacity:.8, marginTop:2 }}>
+                            Subjects
                           </div>
                         </div>
-                      )
-                    })}
+                        <div style={{
+                          background:'rgba(255,255,255,.1)', padding:'14px 18px',
+                          borderRadius:10, minWidth:90, textAlign:'center',
+                          border:'1px solid rgba(255,255,255,.12)',
+                        }}>
+                          <div style={{ fontSize:26, fontWeight:700, fontFamily:'JetBrains Mono,monospace', color:'#F0CC5A' }}>
+                            {(store.lessons || []).length}
+                          </div>
+                          <div style={{ fontSize:10, letterSpacing:'.1em', textTransform:'uppercase', opacity:.8, marginTop:2 }}>
+                            Lessons
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                </div>
+
+                {/* ── EMPTY STATE ── */}
+                {!hasEnrolment && (
+                  <div className="card" style={{
+                    padding: '40px 28px', textAlign:'center',
+                    background:'#FBFAF5', border:'1px dashed #E8E2D6',
+                  }}>
+                    <div style={{ fontSize: 48, marginBottom: 12, opacity:.5 }}>📚</div>
+                    <div style={{
+                      fontFamily:"'Instrument Serif',serif", fontSize: 22,
+                      color:'#1A1A1A', marginBottom: 8,
+                    }}>
+                      No subjects enrolled yet
+                    </div>
+                    <div style={{ fontSize: 13.5, color:'#6B6B6B', maxWidth: 480, margin:'0 auto', lineHeight: 1.55 }}>
+                      Your curriculum and subjects haven't been set up yet. Contact your
+                      programme coordinator at <strong style={{color:'#7D1025'}}>hellosmartious@gmail.com</strong> to complete your enrolment.
+                    </div>
+                  </div>
+                )}
+
+                {/* ── SUBJECT CARDS GRID ── */}
+                {hasEnrolment && (
+                  <>
+                    <div className="sec-tag" style={{marginBottom:14}}>My Subjects</div>
+                    <div style={{
+                      display:'grid',
+                      gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',
+                      gap: 16,
+                      marginBottom: 24,
+                    }}>
+                      {enrolledSubjects.map(subjectName => {
+                        const img      = imageFor(subjectName)
+                        const col      = colourFor(subjectName)
+                        const lessonCt = (lessonsBySubject[subjectName] || []).length
+                        const hwCt     = (hwBySubject[subjectName] || []).length
+                        const isOpen   = curriculumExpandedSubject === subjectName
+
+                        return (
+                          <div key={subjectName} style={{
+                            background:'#fff',
+                            borderRadius: 14,
+                            overflow:'hidden',
+                            border:'1px solid #E8E2D6',
+                            transition:'box-shadow .2s, transform .2s, border-color .2s',
+                            cursor:'pointer',
+                            boxShadow: isOpen ? '0 8px 24px rgba(125,16,37,.16)' : '0 1px 3px rgba(0,0,0,.04)',
+                            borderColor: isOpen ? '#7D1025' : '#E8E2D6',
+                          }}
+                            onClick={() => setCurriculumExpandedSubject(isOpen ? null : subjectName)}
+                            onMouseEnter={e => { if (!isOpen) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,.08)' } }}
+                            onMouseLeave={e => { if (!isOpen) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,.04)' } }}
+                          >
+                            {/* Image header */}
+                            <div style={{
+                              position:'relative',
+                              height: 140,
+                              background: img
+                                ? `linear-gradient(135deg, ${col}cc 0%, ${col}66 100%), url("${img}")`
+                                : `linear-gradient(135deg, ${col} 0%, ${col}aa 100%)`,
+                              backgroundSize:'cover',
+                              backgroundPosition:'center',
+                              display:'flex', alignItems:'flex-end',
+                              padding:'14px 16px',
+                              color:'#fff',
+                            }}>
+                              <div style={{ flex:1 }}>
+                                <div style={{
+                                  fontFamily:"'Instrument Serif',serif",
+                                  fontSize:22, lineHeight:1.1, margin:0,
+                                  textShadow:'0 1px 4px rgba(0,0,0,.3)',
+                                }}>
+                                  {subjectName}
+                                </div>
+                                <div style={{
+                                  fontSize:10.5, opacity:.95, marginTop:4,
+                                  letterSpacing:'.08em', textTransform:'uppercase', fontWeight:600,
+                                  textShadow:'0 1px 3px rgba(0,0,0,.4)',
+                                }}>
+                                  {curriculumDisplay} {enrolledGrade ? '· ' + enrolledGrade : ''}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Stats strip */}
+                            <div style={{
+                              padding:'12px 16px',
+                              display:'flex', gap:14, alignItems:'center',
+                              borderBottom: isOpen ? '1px solid #F0EBE0' : 'none',
+                            }}>
+                              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <polygon points="5 3 19 12 5 21 5 3"/>
+                                </svg>
+                                <span style={{ fontSize:12, color:'#3F3F3F', fontWeight:600 }}>{lessonCt} lessons</span>
+                              </div>
+                              <div style={{ width:1, height:14, background:'#E8E2D6' }}/>
+                              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                  <polyline points="14 2 14 8 20 8"/>
+                                </svg>
+                                <span style={{ fontSize:12, color:'#3F3F3F', fontWeight:600 }}>{hwCt} homework</span>
+                              </div>
+                              <div style={{ marginLeft:'auto' }}>
+                                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke={isOpen ? '#7D1025' : '#6B6B6B'} strokeWidth="2.5" strokeLinecap="round" style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition:'transform .2s' }}>
+                                  <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                              </div>
+                            </div>
+
+                            {/* Drawer */}
+                            {isOpen && (
+                              <div style={{ padding:'14px 16px 16px', background:'#FBFAF5' }}>
+                                {/* Quick actions */}
+                                <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:12 }}>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); goTo('lessons') }}
+                                    style={{
+                                      flex:1, minWidth:120,
+                                      padding:'9px 12px',
+                                      background: col, color:'#fff',
+                                      border:'none', borderRadius:8,
+                                      fontSize:12, fontWeight:600, cursor:'pointer',
+                                      display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6,
+                                      boxShadow:`0 2px 6px ${col}44`,
+                                    }}
+                                  >
+                                    <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                    Open Lessons
+                                  </button>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); goTo('homework') }}
+                                    style={{
+                                      flex:1, minWidth:120,
+                                      padding:'9px 12px',
+                                      background:'#fff', color:'#3F3F3F',
+                                      border:'1px solid #E8E2D6', borderRadius:8,
+                                      fontSize:12, fontWeight:600, cursor:'pointer',
+                                      display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6,
+                                    }}
+                                  >
+                                    Homework
+                                  </button>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); goTo('exams') }}
+                                    style={{
+                                      flex:1, minWidth:120,
+                                      padding:'9px 12px',
+                                      background:'#fff', color:'#3F3F3F',
+                                      border:'1px solid #E8E2D6', borderRadius:8,
+                                      fontSize:12, fontWeight:600, cursor:'pointer',
+                                      display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6,
+                                    }}
+                                  >
+                                    Exams
+                                  </button>
+                                </div>
+
+                                {/* Recent lessons preview */}
+                                {lessonCt > 0 ? (
+                                  <div>
+                                    <div style={{ fontSize:10.5, fontWeight:700, color:'#6B6B6B', letterSpacing:'.1em', textTransform:'uppercase', marginBottom:8 }}>
+                                      Recent Lessons
+                                    </div>
+                                    {(lessonsBySubject[subjectName] || []).slice(0,3).map((l, i) => (
+                                      <div key={i} style={{
+                                        display:'flex', alignItems:'center', gap:10,
+                                        padding:'8px 10px',
+                                        background:'#fff', borderRadius:8,
+                                        border:'1px solid #F0EBE0',
+                                        marginBottom: i < 2 ? 6 : 0,
+                                      }}>
+                                        <div style={{
+                                          width:6, height:6, borderRadius:'50%',
+                                          background: col, flexShrink:0,
+                                        }}/>
+                                        <div style={{ flex:1, minWidth:0 }}>
+                                          <div style={{
+                                            fontSize:12.5, color:'#1A1A1A', fontWeight:500,
+                                            whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
+                                          }}>
+                                            {l.title || l.topic || 'Untitled lesson'}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div style={{
+                                    fontSize:12, color:'#6B6B6B', fontStyle:'italic',
+                                    textAlign:'center', padding:'12px 0',
+                                  }}>
+                                    No lessons published yet for this subject.
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </>
                 )}
               </div>
             )
