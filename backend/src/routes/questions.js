@@ -14,18 +14,24 @@
  *   All routes require login. Teachers/admins can create.
  *   Anyone (incl. students) can read questions for self-study.
  *   Only the creator or admin can edit/delete.
+ *
+ * NESTED PARTS:
+ *   Questions can be FLAT (parts: []) or NESTED (parts: [{ ... }]).
+ *   When parts is non-empty, the Question model's pre-save hook
+ *   auto-computes the top-level `marks` from the recursive sum of
+ *   leaf marks. POST and PATCH both accept the parts array verbatim.
  */
- 
+
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
- 
+
 const Question = require('../models/Question');
 const { auth, requireRole } = require('../middleware/auth');
 const { isSubjectValidForCurriculum } = require('../constants/curriculum');
- 
+
 // ─────────────────────────────────────────────────────────
 // CLOUDINARY CONFIG
 // ─────────────────────────────────────────────────────────
@@ -34,8 +40,7 @@ cloudinary.config({
   api_key:    process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
- 
-// Storage engine: pushes uploads directly to Cloudinary
+
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
@@ -44,19 +49,16 @@ const storage = new CloudinaryStorage({
     transformation: [{ quality: 'auto', fetch_format: 'auto' }],
   },
 });
- 
+
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },  // 5 MB per file
+  limits: { fileSize: 5 * 1024 * 1024 },
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // POST /api/questions/upload
-// Accepts a single file under field name "file".
-// Returns the Cloudinary URL + publicId so frontend can include
-// in subsequent question creation.
 // ─────────────────────────────────────────────────────────
-router.post('/upload', auth, requireRole('teacher', 'admin', 'student'), (req, res) => {
+router.post('/upload', auth, requireRole('teacher', 'admin'), (req, res) => {
   upload.single('file')(req, res, (err) => {
     if (err) {
       console.error('[questions/upload]', err.message);
@@ -65,12 +67,12 @@ router.post('/upload', auth, requireRole('teacher', 'admin', 'student'), (req, r
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No file uploaded.' });
     }
- 
+
     return res.json({
       success: true,
       attachment: {
-        url:       req.file.path,        // cloudinary returns full URL
-        publicId:  req.file.filename,    // cloudinary public_id (for deletion)
+        url:       req.file.path,
+        publicId:  req.file.filename,
         filename:  req.file.originalname,
         mimeType:  req.file.mimetype,
         sizeBytes: req.file.size,
@@ -78,9 +80,9 @@ router.post('/upload', auth, requireRole('teacher', 'admin', 'student'), (req, r
     });
   });
 });
- 
+
 // ─────────────────────────────────────────────────────────
-// POST /api/questions  — create a question
+// POST /api/questions  — create a question (flat or nested)
 // ─────────────────────────────────────────────────────────
 router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
@@ -88,8 +90,9 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       curriculum, subject, grade, topic, type,
       questionText, options, correctAnswer, explanation,
       marks, difficulty, attachments,
+      parts,   // ── NEW: nested parts array (optional)
     } = req.body;
- 
+
     // Validation
     if (!curriculum || !subject || !grade) {
       return res.status(400).json({ success: false, message: 'curriculum, subject and grade are required.' });
@@ -100,30 +103,35 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
     if (!type) {
       return res.status(400).json({ success: false, message: 'type is required.' });
     }
-    if (type === 'mcq' && (!Array.isArray(options) || options.length < 2)) {
+
+    const isNested = Array.isArray(parts) && parts.length > 0;
+
+    // For FLAT MCQs the options array is required.
+    // For NESTED questions, MCQ checks happen per-part inside the schema,
+    // so we don't enforce options at the top level.
+    if (!isNested && type === 'mcq' && (!Array.isArray(options) || options.length < 2)) {
       return res.status(400).json({ success: false, message: 'MCQ questions need at least 2 options.' });
     }
-    // Subject must be valid for the curriculum
+
     if (!isSubjectValidForCurriculum(subject, curriculum)) {
-      // We accept subject by NAME (e.g., "Mathematics") — not by id. The helper takes id.
-      // For safety, we'll skip strict validation on subject name here and trust the
-      // frontend/admin to pick from the catalog.
+      // Lenient: trust frontend subject names.
     }
- 
+
     const question = await Question.create({
       curriculum, subject, grade,
       topic: topic || '',
-      type,
+      type: isNested ? 'nested' : type,
       questionText: questionText.trim(),
-      options: Array.isArray(options) ? options : [],
+      options:      Array.isArray(options) ? options : [],
       correctAnswer: correctAnswer !== undefined ? correctAnswer : null,
-      explanation: explanation || '',
-      marks: marks || 1,
-      difficulty: difficulty || 'medium',
-      attachments: Array.isArray(attachments) ? attachments : [],
-      createdBy: req.user._id,
+      explanation:  explanation || '',
+      marks:        marks || 1,
+      difficulty:   difficulty || 'medium',
+      attachments:  Array.isArray(attachments) ? attachments : [],
+      parts:        isNested ? parts : [],
+      createdBy:    req.user._id,
     });
- 
+
     return res.json({
       success: true,
       message: 'Question saved.',
@@ -134,10 +142,9 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to create question: ' + e.message });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // GET /api/questions  — list with filters
-// Query params: curriculum, subject, grade, topic, type, q (search), createdBy
 // ─────────────────────────────────────────────────────────
 router.get('/', auth, async (req, res) => {
   try {
@@ -153,36 +160,27 @@ router.get('/', auth, async (req, res) => {
       filter.createdBy = req.query.createdBy;
     }
     if (req.query.q) {
-      // Simple text search against questionText
       filter.questionText = { $regex: req.query.q, $options: 'i' };
     }
- 
-    const limit  = Math.min(parseInt(req.query.limit) || 50, 200);
-    const skip   = parseInt(req.query.skip) || 0;
- 
+
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const skip  = parseInt(req.query.skip) || 0;
+
     const [questions, total] = await Promise.all([
       Question.find(filter)
         .populate('createdBy', 'firstName lastName email')
         .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+        .skip(skip).limit(limit).lean(),
       Question.countDocuments(filter),
     ]);
- 
-    return res.json({
-      success: true,
-      questions,
-      total,
-      limit,
-      skip,
-    });
+
+    return res.json({ success: true, questions, total, limit, skip });
   } catch (e) {
     console.error('[questions GET]', e.message);
     return res.status(500).json({ success: false, message: 'Failed to load questions.' });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // GET /api/questions/:id
 // ─────────────────────────────────────────────────────────
@@ -193,8 +191,7 @@ router.get('/:id', auth, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid question ID.' });
     }
     const question = await Question.findById(id)
-      .populate('createdBy', 'firstName lastName email')
-      .lean();
+      .populate('createdBy', 'firstName lastName email').lean();
     if (!question || !question.isActive) {
       return res.status(404).json({ success: false, message: 'Question not found.' });
     }
@@ -204,7 +201,7 @@ router.get('/:id', auth, async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to load question.' });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // PATCH /api/questions/:id  — update (creator or admin only)
 // ─────────────────────────────────────────────────────────
@@ -218,14 +215,22 @@ router.patch('/:id', auth, async (req, res) => {
     if (!question || !question.isActive) {
       return res.status(404).json({ success: false, message: 'Question not found.' });
     }
-    // Authz: creator or admin
     if (question.createdBy.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'You can only edit your own questions.' });
     }
-    // Allow updating these fields
-    const allowed = ['curriculum', 'subject', 'grade', 'topic', 'type', 'questionText', 'options', 'correctAnswer', 'explanation', 'marks', 'difficulty', 'attachments'];
+    // Now includes `parts` so teachers can switch between flat and nested,
+    // or edit nested structure after creation.
+    const allowed = [
+      'curriculum', 'subject', 'grade', 'topic', 'type',
+      'questionText', 'options', 'correctAnswer', 'explanation',
+      'marks', 'difficulty', 'attachments', 'parts',
+    ];
     for (const key of allowed) {
       if (req.body[key] !== undefined) question[key] = req.body[key];
+    }
+    // If the update switches to nested, normalise the type tag.
+    if (Array.isArray(question.parts) && question.parts.length > 0) {
+      question.type = 'nested';
     }
     await question.save();
     return res.json({ success: true, question });
@@ -234,7 +239,7 @@ router.patch('/:id', auth, async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to update question.' });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // DELETE /api/questions/:id  — soft delete + Cloudinary cleanup
 // ─────────────────────────────────────────────────────────
@@ -251,28 +256,37 @@ router.delete('/:id', auth, async (req, res) => {
     if (question.createdBy.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: 'You can only delete your own questions.' });
     }
- 
-    // Delete Cloudinary files first (best-effort)
-    for (const att of question.attachments || []) {
-      if (att.publicId) {
-        try {
-          await cloudinary.uploader.destroy(att.publicId);
-        } catch (err) {
-          console.error('[questions DELETE] Cloudinary destroy failed for', att.publicId, ':', err.message);
-        }
+
+    // Collect Cloudinary publicIds from top-level + nested parts
+    const collectPublicIds = (atts, into) => {
+      (atts || []).forEach(a => { if (a.publicId) into.push(a.publicId); });
+    };
+    const walkParts = (parts, into) => {
+      (parts || []).forEach(p => {
+        collectPublicIds(p.attachments, into);
+        if (Array.isArray(p.parts) && p.parts.length) walkParts(p.parts, into);
+      });
+    };
+    const publicIds = [];
+    collectPublicIds(question.attachments, publicIds);
+    walkParts(question.parts, publicIds);
+
+    for (const pid of publicIds) {
+      try {
+        await cloudinary.uploader.destroy(pid);
+      } catch (err) {
+        console.error('[questions DELETE] Cloudinary destroy failed for', pid, ':', err.message);
       }
     }
- 
-    // Soft-delete (don't hard-delete in case it's used in homework/exams)
+
     question.isActive = false;
     await question.save();
- 
+
     return res.json({ success: true, message: 'Question deleted.' });
   } catch (e) {
     console.error('[questions DELETE]', e.message);
     return res.status(500).json({ success: false, message: 'Failed to delete question.' });
   }
 });
- 
+
 module.exports = router;
- 
