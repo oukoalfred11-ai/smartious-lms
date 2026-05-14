@@ -13,6 +13,14 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
+import {
+  NestedQuestionEditor,
+  NestedQuestionRenderer,
+  NestedAnswerCollector,
+  buildAnswersPayload,
+  labelAt,
+  sumLeafMarks,
+} from '../../components/exam/NestedQuestion.jsx'
 
 // ── SVG icon helper ───────────────────────────────────────
 const I = (d) => (
@@ -2834,6 +2842,7 @@ function ExamsTab({ user, toast, goTo, store }) {
       options: q.options || [],
       marks: q.marks || 0,
       topic: q.topic || '',
+      parts: Array.isArray(q.parts) ? q.parts : [],
       _source: 'bank',
     }))
     const custom = (realExam.customQuestions || []).map((q, i) => ({
@@ -2843,6 +2852,7 @@ function ExamsTab({ user, toast, goTo, store }) {
       options: q.options || [],
       marks: q.marks || 0,
       topic: q.topic || '',
+      parts: Array.isArray(q.parts) ? q.parts : [],
       _source: 'custom',
     }))
     return [...bank, ...custom]
@@ -2918,14 +2928,11 @@ function ExamsTab({ user, toast, goTo, store }) {
     if (!realExam) return
     setRealSubmitting(true)
     try {
-      const answersPayload = realQuestionsForRender.map(q => {
-        const a = realAnswers[q.ref] || {}
-        return {
-          questionRef:    q.ref,
-          answerText:     a.answerText || '',
-          selectedOption: a.selectedOption || '',
-        }
-      })
+      // realAnswers is keyed by 'questionRef|partPath'. The helper flattens
+      // that into the API payload shape: { questionRef, partPath, answerText,
+      // selectedOption } — works for both flat (partPath:[]) and nested
+      // questions, without the sitting screen needing to know which is which.
+      const answersPayload = buildAnswersPayload(realAnswers)
       const timeSpentSecs = realStartTimeRef.current
         ? Math.floor((Date.now() - realStartTimeRef.current) / 1000)
         : 0
@@ -3068,10 +3075,23 @@ function ExamsTab({ user, toast, goTo, store }) {
   // ─────────────────────────────────────────────────────
   if (stage === 'real-sitting' && realExam) {
     const qs = realQuestionsForRender
-    const answered = qs.filter(q => {
-      const a = realAnswers[q.ref]
-      return a && (a.answerText?.trim() || a.selectedOption)
+    // Count answered SLOTS, not just top-level questions. For nested
+    // questions each leaf is its own slot. realAnswers is keyed by
+    // 'questionRef|partPath' so every populated key = one answered leaf.
+    const answered = Object.values(realAnswers || {}).filter(a => {
+      return a && ((a.answerText && a.answerText.trim()) || a.selectedOption)
     }).length
+    // Count total leaves across all questions for the denominator
+    const totalSlots = qs.reduce((sum, q) => {
+      if (!Array.isArray(q.parts) || q.parts.length === 0) return sum + 1
+      let leafCount = 0
+      const walk = (parts) => parts.forEach(p => {
+        if (Array.isArray(p.parts) && p.parts.length > 0) walk(p.parts)
+        else leafCount += 1
+      })
+      walk(q.parts)
+      return sum + leafCount
+    }, 0)
     const lowTime = realTimeLeft < 60
     const subjCol = subjectColour(realExam.subject)
 
@@ -3104,7 +3124,7 @@ function ExamsTab({ user, toast, goTo, store }) {
             </div>
           </div>
           <div style={{ fontSize:12, color:'var(--s500)' }}>
-            <span style={{ fontWeight:700, color:'var(--s900)' }}>{answered}</span>/{qs.length} answered
+            <span style={{ fontWeight:700, color:'var(--s900)' }}>{answered}</span>/{totalSlots} answered
           </div>
           <button
             onClick={() => {
@@ -3143,7 +3163,7 @@ function ExamsTab({ user, toast, goTo, store }) {
         {/* Questions */}
         <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
           {qs.map((q, i) => {
-            const a = realAnswers[q.ref] || {}
+            const isNested = Array.isArray(q.parts) && q.parts.length > 0
             return (
               <div key={q.ref} style={{
                 padding:16,
@@ -3151,6 +3171,7 @@ function ExamsTab({ user, toast, goTo, store }) {
                 border:'1px solid var(--border)',
                 borderRadius:8,
               }}>
+                {/* Question number + stem */}
                 <div style={{ display:'flex', gap:10, marginBottom:10 }}>
                   <div className="mono" style={{
                     minWidth:36, height:28, borderRadius:6,
@@ -3159,59 +3180,36 @@ function ExamsTab({ user, toast, goTo, store }) {
                     fontSize:12, fontWeight:700, flexShrink:0,
                   }}>Q{i+1}</div>
                   <div style={{ flex:1 }}>
-                    <div style={{ fontSize:14, fontWeight:600, color:'var(--s900)', lineHeight:1.5 }}>
-                      {q.questionText}
-                    </div>
+                    {/* For nested questions: stem text appears as background context.
+                        For flat questions: this IS the question. */}
+                    {q.questionText && (
+                      <div style={{ fontSize:14, fontWeight:600, color:'var(--s900)', lineHeight:1.5 }}>
+                        {q.questionText}
+                      </div>
+                    )}
                     <div style={{ fontSize:10.5, color:'var(--s500)', marginTop:4 }}>
-                      {q.topic ? q.topic + ' · ' : ''}{q.marks} mark{q.marks === 1 ? '' : 's'}
+                      {q.topic ? q.topic + ' · ' : ''}
+                      {isNested
+                        ? `${sumLeafMarks(q.parts)} marks total · ${q.parts.length} part${q.parts.length===1?'':'s'}`
+                        : `${q.marks} mark${q.marks === 1 ? '' : 's'}`}
                     </div>
                   </div>
                 </div>
 
-                {/* Answer input depends on type */}
-                {q.type === 'mcq' && q.options?.length > 0 ? (
-                  <div style={{ display:'flex', flexDirection:'column', gap:8, marginLeft:46 }}>
-                    {q.options.map((opt, oi) => {
-                      const selected = a.selectedOption === opt
-                      return (
-                        <label key={oi} style={{
-                          display:'flex', alignItems:'center', gap:10,
-                          padding:'10px 12px',
-                          background: selected ? '#FBE8E8' : '#FBFAF5',
-                          border:'1.5px solid ' + (selected ? '#7D1025' : 'var(--border)'),
-                          borderRadius:6,
-                          cursor:'pointer', fontSize:13,
-                        }}>
-                          <input
-                            type="radio"
-                            name={'q-' + q.ref}
-                            value={opt}
-                            checked={selected}
-                            onChange={() => setRealAnswers(s => ({ ...s, [q.ref]: { ...s[q.ref], selectedOption: opt, answerText: opt } }))}
-                            style={{ accentColor:'#7D1025' }}
-                          />
-                          <span>{opt}</span>
-                        </label>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <textarea
-                    value={a.answerText || ''}
-                    onChange={e => setRealAnswers(s => ({ ...s, [q.ref]: { ...s[q.ref], answerText: e.target.value } }))}
-                    placeholder="Type your answer here…"
-                    rows={q.type === 'long' ? 6 : 3}
-                    style={{
-                      width:'100%', marginLeft:46, maxWidth:'calc(100% - 46px)',
-                      padding:'10px 12px',
-                      background:'#FBFAF5',
-                      border:'1.5px solid var(--border)',
-                      borderRadius:6,
-                      fontSize:13, fontFamily:'inherit',
-                      resize:'vertical',
-                    }}
+                {/* Answer area: shared component handles both flat and nested */}
+                <div style={{ marginLeft:46 }}>
+                  <NestedAnswerCollector
+                    questionRef={q.ref}
+                    flatQuestion={!isNested ? {
+                      type: q.type,
+                      options: q.options,
+                      text: '',  // stem already shown above
+                    } : null}
+                    parts={isNested ? q.parts : []}
+                    answers={realAnswers}
+                    onChange={setRealAnswers}
                   />
-                )}
+                </div>
               </div>
             )
           })}
@@ -3224,8 +3222,8 @@ function ExamsTab({ user, toast, goTo, store }) {
           display:'flex', alignItems:'center', gap:14, flexWrap:'wrap',
         }}>
           <div style={{ fontSize:12, color:'var(--s500)', flex:1 }}>
-            {answered < qs.length
-              ? <span style={{ color:'#B45309' }}>{qs.length - answered} unanswered</span>
+            {answered < totalSlots
+              ? <span style={{ color:'#B45309' }}>{totalSlots - answered} unanswered</span>
               : <span style={{ color:'#15803D' }}>All answered ✓</span>}
             {' · '}{formatMSS(realTimeLeft)} remaining
           </div>
