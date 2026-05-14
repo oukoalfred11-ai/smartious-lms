@@ -2663,30 +2663,44 @@ function ExamsTab({ user, store, setPage, toast }) {
   const [bankQuestions, setBankQuestions] = useState([])
   const [bankLoading, setBankLoading] = useState(false)
 
+  // True if we relaxed the grade filter on the last load (so we can warn).
+  const [bankRelaxed, setBankRelaxed] = useState(false)
+
   const loadBankQuestions = async () => {
     setBankLoading(true)
+    setBankRelaxed(false)
     try {
-      const params = new URLSearchParams()
-      // Default the bank to the same curriculum/year/subject the teacher
-      // picked in Step 1, so question matches assessment context.
-      if (formCurriculum) params.append('curriculum', formCurriculum)
-      if (formYear)       params.append('grade',      formYear)
-      // Subject filter from picker drop-down (overrides form's subject so
-      // teachers can pull cross-subject questions if they want)
-      const subj = bankFilter.subject === 'all' ? formSubject : bankFilter.subject
-      if (subj) params.append('subject', subj)
-      if (bankFilter.difficulty && bankFilter.difficulty !== 'all') {
-        params.append('difficulty', bankFilter.difficulty)
+      // Build the strict query first: curriculum + grade + subject + filters
+      const buildParams = (includeGrade) => {
+        const p = new URLSearchParams()
+        if (formCurriculum)        p.append('curriculum', formCurriculum)
+        if (includeGrade && formYear) p.append('grade', formYear)
+        const subj = bankFilter.subject === 'all' ? formSubject : bankFilter.subject
+        if (subj) p.append('subject', subj)
+        if (bankFilter.difficulty && bankFilter.difficulty !== 'all') {
+          p.append('difficulty', bankFilter.difficulty)
+        }
+        if (bankFilter.search?.trim()) p.append('q', bankFilter.search.trim())
+        p.append('limit', '100')
+        return p
       }
-      if (bankFilter.search?.trim()) params.append('q', bankFilter.search.trim())
-      params.append('limit', '100')
 
-      const { data } = await api.get('/questions?' + params.toString())
-      if (data?.success) {
-        setBankQuestions(data.questions || [])
-      } else {
-        setBankQuestions([])
+      // Try strict first
+      let { data } = await api.get('/questions?' + buildParams(true).toString())
+      let questions = (data?.success ? data.questions : []) || []
+
+      // If empty, retry without the grade filter so teachers can still see
+      // questions tagged with a slightly different grade string.
+      if (questions.length === 0 && formYear) {
+        const retry = await api.get('/questions?' + buildParams(false).toString())
+        const retryQs = (retry?.data?.success ? retry.data.questions : []) || []
+        if (retryQs.length > 0) {
+          questions = retryQs
+          setBankRelaxed(true)
+        }
       }
+
+      setBankQuestions(questions)
     } catch (e) {
       console.error('[exam-bank] load failed:', e?.response?.data?.message || e.message)
       toast?.error?.('Failed to load question bank')
@@ -3236,13 +3250,39 @@ function ExamsTab({ user, store, setPage, toast }) {
                     }}>{formSelectedQuestions.length} selected | {totalMarks} marks</span>
                   )}
                 </div>
-                <button onClick={() => setPage('questionbank')}
+                <a
+                  href="/teacher#questionbank"
+                  target="_blank"
+                  rel="noopener"
+                  title="Opens Question Bank in a new tab so you don't lose this exam draft"
                   style={{
                     background: 'transparent', border: '1px solid #7D1025',
                     color: '#7D1025', padding: '6px 12px',
                     borderRadius: 'var(--rsm)', cursor: 'pointer',
                     fontSize: 12, fontWeight: 700,
-                  }}>+ Add to Question Bank</button>
+                    textDecoration: 'none',
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                  }}
+                >
+                  Manage Bank
+                  <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                </a>
+              </div>
+
+              {/* Inline hint so teachers see the picker is RIGHT BELOW */}
+              <div style={{
+                background: '#FBF6E3', border: '1px solid #C9A030',
+                borderRadius: 6, padding: '8px 12px', marginBottom: 14,
+                fontSize: 12, color: '#7D1025', display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span><strong>Click a question card below to select it</strong>. Selected questions appear with a red border and a tick. Use the filters to narrow by subject or difficulty.</span>
               </div>
 
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -3271,17 +3311,51 @@ function ExamsTab({ user, store, setPage, toast }) {
                   Loading questions from bank...
                 </div>
               ) : filteredBankQuestions.length === 0 ? (
-                <div style={{ fontSize: 13, color: 'var(--s400)', textAlign: 'center', padding: 24 }}>
-                  No questions found. Try changing curriculum, year, subject or difficulty — or add new questions in the Question Bank.
+                <div style={{
+                  padding: '20px 16px', textAlign: 'center',
+                  background: '#FBFAF5', border: '1px dashed #E8E2D6',
+                  borderRadius: 8,
+                }}>
+                  <div style={{ fontSize: 13, color: 'var(--s700)', marginBottom: 8, fontWeight: 600 }}>
+                    No questions match these filters
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--s500)', marginBottom: 14, lineHeight: 1.55 }}>
+                    Try clearing the difficulty filter or selecting "All Subjects", or add new questions to your bank.
+                  </div>
+                  <a href="/teacher#questionbank" target="_blank" rel="noopener"
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      background: '#7D1025', color: '#fff',
+                      padding: '7px 14px', borderRadius: 6,
+                      fontSize: 12, fontWeight: 700, textDecoration: 'none',
+                    }}>
+                    Open Question Bank (new tab)
+                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/>
+                      <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                  </a>
                 </div>
               ) : (
-                <div style={{ maxHeight: 480, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {filteredBankQuestions.map(q => {
-                    const qid = q._id || q.id
-                    const isSelected = formSelectedQuestions.includes(qid)
-                    const subjCol = exSubjColour(q.subject)
-                    return (
-                      <div key={qid} onClick={() => toggleQuestion(qid)}
+                <>
+                  {bankRelaxed && (
+                    <div style={{
+                      background: '#FEF3C7', border: '1px solid #D97706',
+                      borderRadius: 6, padding: '8px 12px', marginBottom: 10,
+                      fontSize: 11.5, color: '#92400E',
+                    }}>
+                      <strong>Note:</strong> no questions matched <strong>{formYear}</strong> exactly,
+                      so we're showing all <strong>{formSubject}</strong> questions for {formCurriculum} instead.
+                    </div>
+                  )}
+                  <div style={{ maxHeight: 480, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {filteredBankQuestions.map(q => {
+                      const qid = q._id || q.id
+                      const isSelected = formSelectedQuestions.includes(qid)
+                      const subjCol = exSubjColour(q.subject)
+                      return (
+                        <div key={qid} onClick={() => toggleQuestion(qid)}
                         style={{
                           padding: 12,
                           border: '1.5px solid ' + (isSelected ? '#7D1025' : 'var(--border)'),
@@ -3323,7 +3397,8 @@ function ExamsTab({ user, store, setPage, toast }) {
                       </div>
                     )
                   })}
-                </div>
+                  </div>
+                </>
               )}
             </div>
 
