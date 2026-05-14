@@ -13,6 +13,46 @@ if (!JWT_SECRET) {
 
 const sign = (id) => jwt.sign({ id }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
 
+// ─────────────────────────────────────────────────────────
+// Build the safe user object returned by /login and /me.
+// Single source of truth so the two endpoints can't drift
+// apart. Every field the portals (student / teacher / admin)
+// rely on must be listed here.
+// ─────────────────────────────────────────────────────────
+const buildSafeUser = (u) => ({
+  _id:                   u._id,
+  firstName:             u.firstName,
+  lastName:              u.lastName,
+  email:                 u.email,
+  role:                  u.role,
+  plan:                  u.plan,
+
+  // ── Academic / enrolment ──
+  curriculum:            u.curriculum            || '',
+  gradeLevel:            u.gradeLevel            || '',
+  grade:                 u.grade                 || u.gradeLevel || '',
+  // Subjects is a list of subject names the student is enrolled in
+  // (or the teacher teaches). Always return an array, never undefined,
+  // so the frontend can render confidently.
+  subjects:              Array.isArray(u.subjects) ? u.subjects : [],
+  admissionNumber:       u.admissionNumber       || '',
+
+  // ── Profile ──
+  phone:                 u.phone                 || '',
+  bio:                   u.bio                   || '',
+  avatar:                u.avatar                || '',
+
+  // ── Gamification (mirrored from User for fast reads) ──
+  xp:                    u.xp                    || 0,
+  streak:                u.streak                || 0,
+
+  // ── Auth lifecycle flags ──
+  // PHASE 3-5: requirePasswordChange (renamed from forcePasswordChange)
+  requirePasswordChange: u.mustChangePassword    || false,
+  isEmailVerified:       u.isEmailVerified       || false,
+  isActive:              u.isActive              !== false, // default true
+});
+
 // ── Login ─────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
   try {
@@ -30,22 +70,7 @@ router.post('/login', async (req, res) => {
     user.lastActive = new Date();
     await user.save();
 
-    const safeUser = {
-      _id:        user._id,
-      firstName:  user.firstName,
-      lastName:   user.lastName,
-      email:      user.email,
-      role:       user.role,
-      plan:       user.plan,
-      curriculum: user.curriculum,
-      grade:      user.grade,
-      xp:         user.xp,
-      streak:     user.streak,
-      // PHASE 3-5: Include requirePasswordChange flag (renamed from forcePasswordChange)
-      requirePasswordChange: user.mustChangePassword || false,
-    };
-
-    res.json({ success: true, token: sign(user._id), user: safeUser });
+    res.json({ success: true, token: sign(user._id), user: buildSafeUser(user) });
   } catch (e) {
     console.error('[auth/login]', e.message);
     res.status(500).json({ success: false, message: 'Server error during login.' });
@@ -54,22 +79,7 @@ router.post('/login', async (req, res) => {
 
 // ── Get current user ──────────────────────────────────────
 router.get('/me', auth, (req, res) => {
-  const u = req.user;
-  res.json({
-    success: true,
-    user: {
-      _id:        u._id,
-      firstName:  u.firstName,
-      lastName:   u.lastName,
-      email:      u.email,
-      role:       u.role,
-      plan:       u.plan,
-      curriculum: u.curriculum,
-      grade:      u.grade,
-      xp:         u.xp,
-      streak:     u.streak,
-    }
-  });
+  res.json({ success: true, user: buildSafeUser(req.user) });
 });
 
 // ── Mshauri AI — mastery-aware ────────────────────────────
