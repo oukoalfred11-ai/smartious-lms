@@ -2,6 +2,11 @@ import { useState, useRef, useEffect } from 'react'
 import { useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
+import {
+  NestedQuestionEditor,
+  NestedQuestionRenderer,
+  sumLeafMarks,
+} from '../../components/exam/NestedQuestion.jsx'
 
 // ── SVG icon helper ──────────────────────────────────────
 const Ico = ({ d, w = 18, col = 'currentColor', sw = 2 }) => (
@@ -881,6 +886,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     marks: 1,
     difficulty: 'medium',
     attachments: [],              // [{url, publicId, filename, mimeType, sizeBytes}]
+    parts: [],                    // for NESTED questions — empty = flat question
   })
  
   // Load catalog once
@@ -965,14 +971,13 @@ function QuestionBankTab({ user, store, setPage, toast }) {
       curriculum: '', grade: '', subject: '', topic: '', type: 'mcq',
       questionText: '', options: ['', '', '', ''],
       correctIndex: null, correctAnswer: '', explanation: '',
-      marks: 1, difficulty: 'medium', attachments: [],
+      marks: 1, difficulty: 'medium', attachments: [], parts: [],
     })
     setCreateOpen(true)
   }
 
   const openEdit = (q) => {
     setEditingId(q._id)
-    // Find correctIndex for MCQ from correctAnswer
     let correctIndex = null
     if (q.type === 'mcq' && typeof q.correctAnswer === 'number' && q.options) {
       correctIndex = q.correctAnswer
@@ -994,8 +999,9 @@ function QuestionBankTab({ user, store, setPage, toast }) {
       marks: q.marks || 1,
       difficulty: q.difficulty || 'medium',
       attachments: Array.isArray(q.attachments) ? [...q.attachments] : [],
+      parts: Array.isArray(q.parts) ? q.parts : [],
     })
-    setDetailQ(null)  // close detail modal if open
+    setDetailQ(null)
     setCreateOpen(true)
   }
 
@@ -1122,6 +1128,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
         marks: parseInt(form.marks) || 1,
         difficulty: form.difficulty,
         attachments: form.attachments,
+        parts: Array.isArray(form.parts) ? form.parts : [],
       }
  
       const { data } = editingId
@@ -1568,6 +1575,39 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                     <option value="hard">Hard</option>
                   </select>
                 </div>
+              </div>
+
+              {/* ════════════════════════════════════════════════
+                  NESTED SUB-QUESTIONS (Cambridge format)
+                  Optional. If used, the question text above acts
+                  as the STEM (background context) and the parts
+                  below carry the actual sub-questions with marks.
+                  ════════════════════════════════════════════════ */}
+              <div className="fg" style={{ marginTop: 8, paddingTop: 16, borderTop: '1px dashed #E8E2D6' }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 10 }}>
+                  <div>
+                    <label className="fl" style={{ marginBottom: 2 }}>
+                      Sub-questions (Cambridge nested format)
+                    </label>
+                    <div style={{ fontSize: 11, color: '#6B6B6B', fontStyle: 'italic' }}>
+                      Optional — leave empty for a flat question. Add parts to create (a)(b)(c) with optional (i)(ii)(iii) sub-parts. Marks auto-sum from leaves.
+                    </div>
+                  </div>
+                  {Array.isArray(form.parts) && form.parts.length > 0 && (
+                    <div style={{
+                      background:'#7D1025', color:'#fff',
+                      padding:'4px 10px', borderRadius:99,
+                      fontSize:11, fontWeight:700, fontFamily:'JetBrains Mono,monospace',
+                    }}>
+                      Total: {sumLeafMarks(form.parts)} marks
+                    </div>
+                  )}
+                </div>
+                <NestedQuestionEditor
+                  value={form.parts || []}
+                  onChange={(newParts) => setF('parts', newParts)}
+                  maxDepth={4}
+                />
               </div>
             </div>
  
@@ -3385,6 +3425,14 @@ function ExamsTab({ user, store, setPage, toast }) {
                               padding: '2px 7px', borderRadius: 99, textTransform: 'uppercase',
                             }}>{q.subject}</span>
                             <span style={{ fontSize: 10.5, color: 'var(--s500)' }}>{q.topic || '—'} | {q.difficulty || 'medium'}</span>
+                            {Array.isArray(q.parts) && q.parts.length > 0 && (
+                              <span style={{
+                                background: '#FBF6E3', color: '#7D1025',
+                                fontSize: 9.5, fontWeight: 700, letterSpacing: '.06em',
+                                padding: '2px 7px', borderRadius: 99, textTransform: 'uppercase',
+                                border: '1px solid #C9A030',
+                              }}>Nested · {q.parts.length} part{q.parts.length===1?'':'s'}</span>
+                            )}
                           </div>
                           <div style={{ fontSize: 13, color: 'var(--s900)', fontWeight: 600 }}>{q.questionText || q.question}</div>
                         </div>
@@ -3393,7 +3441,7 @@ function ExamsTab({ user, store, setPage, toast }) {
                           padding: '4px 8px', borderRadius: 'var(--rsm)',
                           fontSize: 11, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
                           flexShrink: 0,
-                        }}>{q.marks || 0}m</span>
+                        }}>{(Array.isArray(q.parts) && q.parts.length > 0 ? sumLeafMarks(q.parts) : q.marks) || 0}m</span>
                       </div>
                     )
                   })}
