@@ -3,11 +3,25 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Exam = require('../models/Exam');
 const ExamSubmission = require('../models/ExamSubmission');
-const User = require('../models/User');
 const { auth, requireRole } = require('../middleware/auth');
 
-// Helper: recompute totalMarks + totalQuestions from a populated exam doc
-// when the teacher creates or updates an exam.
+// ── Helpers ────────────────────────────────────────────────
+
+function sumLeafMarks(parts) {
+  if (!Array.isArray(parts) || parts.length === 0) return 0;
+  let total = 0;
+  for (const p of parts) {
+    if (Array.isArray(p.parts) && p.parts.length > 0) total += sumLeafMarks(p.parts);
+    else total += Number(p.marks) || 0;
+  }
+  return total;
+}
+
+function questionMarks(q) {
+  if (Array.isArray(q.parts) && q.parts.length > 0) return sumLeafMarks(q.parts);
+  return Number(q.marks) || 0;
+}
+
 async function recomputeAggregates(exam) {
   let totalMarks = 0;
   let totalQuestions = 0;
@@ -16,15 +30,16 @@ async function recomputeAggregates(exam) {
     let Question;
     try { Question = require('../models/Question'); } catch { Question = null; }
     if (Question) {
-      const bankDocs = await Question.find({ _id: { $in: exam.questionIds } }).select('marks').lean();
-      bankDocs.forEach(q => { totalMarks += (q.marks || 0); totalQuestions += 1; });
+      const bankDocs = await Question.find({ _id: { $in: exam.questionIds } })
+        .select('marks parts').lean();
+      bankDocs.forEach(q => { totalMarks += questionMarks(q); totalQuestions += 1; });
     } else {
       totalQuestions += exam.questionIds.length;
       totalMarks += exam.questionIds.length;
     }
   }
   if (exam.customQuestions && exam.customQuestions.length) {
-    exam.customQuestions.forEach(q => { totalMarks += (q.marks || 0); totalQuestions += 1; });
+    exam.customQuestions.forEach(q => { totalMarks += questionMarks(q); totalQuestions += 1; });
   }
 
   exam.totalMarks = totalMarks;
@@ -32,11 +47,18 @@ async function recomputeAggregates(exam) {
   return exam;
 }
 
+function stripCorrectAnswersFromParts(parts) {
+  if (!Array.isArray(parts)) return [];
+  return parts.map(p => {
+    const { correctAnswer, ...rest } = p;
+    return { ...rest, parts: stripCorrectAnswersFromParts(p.parts || []) };
+  });
+}
+
 // ═══════════════════════════════════════════════════════════
 // TEACHER ROUTES
 // ═══════════════════════════════════════════════════════════
 
-// POST /api/exams — create a new exam (teacher only)
 router.post('/', auth, requireRole('teacher','admin'), async (req, res) => {
   try {
     const {
@@ -64,18 +86,18 @@ router.post('/', auth, requireRole('teacher','admin'), async (req, res) => {
     const validGroupIds    = (groupRoomIds || []).filter(id => mongoose.isValidObjectId(id));
 
     const exam = new Exam({
-      title:           title.trim(),
-      instructions:    (instructions || '').trim(),
-      subject:         subject.trim(),
-      curriculum:      curriculum.trim(),
-      grade:           grade.trim(),
-      startAt:         startDate,
-      durationMins:    Number(durationMins),
-      teacherId:       req.user._id,
-      questionIds:     validQuestionIds,
+      title: title.trim(),
+      instructions: (instructions || '').trim(),
+      subject: subject.trim(),
+      curriculum: curriculum.trim(),
+      grade: grade.trim(),
+      startAt: startDate,
+      durationMins: Number(durationMins),
+      teacherId: req.user._id,
+      questionIds: validQuestionIds,
       customQuestions: customQuestions || [],
-      assignedStudents:validStudentIds,
-      groupRoomIds:    validGroupIds,
+      assignedStudents: validStudentIds,
+      groupRoomIds: validGroupIds,
     });
 
     await recomputeAggregates(exam);
@@ -88,12 +110,10 @@ router.post('/', auth, requireRole('teacher','admin'), async (req, res) => {
   }
 });
 
-// GET /api/exams/teacher/list — exams created by the current teacher
 router.get('/teacher/list', auth, requireRole('teacher','admin'), async (req, res) => {
   try {
     const exams = await Exam.find({ teacherId: req.user._id })
-      .sort({ startAt: -1 })
-      .lean({ virtuals: true });
+      .sort({ startAt: -1 }).lean({ virtuals: true });
     res.json({ success:true, data: { exams } });
   } catch (e) {
     console.error('[exams teacher/list] failed:', e.message);
@@ -101,7 +121,6 @@ router.get('/teacher/list', auth, requireRole('teacher','admin'), async (req, re
   }
 });
 
-// PUT /api/exams/:id — update an exam
 router.put('/:id', auth, requireRole('teacher','admin'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
@@ -109,7 +128,6 @@ router.put('/:id', auth, requireRole('teacher','admin'), async (req, res) => {
 
     const exam = await Exam.findById(req.params.id);
     if (!exam) return res.status(404).json({ success:false, message:'Exam not found.' });
-
     if (req.user.role !== 'admin' && String(exam.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your exam.' });
 
@@ -119,7 +137,6 @@ router.put('/:id', auth, requireRole('teacher','admin'), async (req, res) => {
 
     await recomputeAggregates(exam);
     await exam.save();
-
     res.json({ success:true, message:'Exam updated.', data: { exam } });
   } catch (e) {
     console.error('[exams PUT] failed:', e.message);
@@ -127,7 +144,6 @@ router.put('/:id', auth, requireRole('teacher','admin'), async (req, res) => {
   }
 });
 
-// DELETE /api/exams/:id — only if no submissions exist
 router.delete('/:id', auth, requireRole('teacher','admin'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
@@ -135,7 +151,6 @@ router.delete('/:id', auth, requireRole('teacher','admin'), async (req, res) => 
 
     const exam = await Exam.findById(req.params.id);
     if (!exam) return res.status(404).json({ success:false, message:'Exam not found.' });
-
     if (req.user.role !== 'admin' && String(exam.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your exam.' });
 
@@ -151,7 +166,6 @@ router.delete('/:id', auth, requireRole('teacher','admin'), async (req, res) => 
   }
 });
 
-// GET /api/exams/:id/submissions — teacher view of student submissions for an exam
 router.get('/:id/submissions', auth, requireRole('teacher','admin'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
@@ -159,14 +173,12 @@ router.get('/:id/submissions', auth, requireRole('teacher','admin'), async (req,
 
     const exam = await Exam.findById(req.params.id);
     if (!exam) return res.status(404).json({ success:false, message:'Exam not found.' });
-
     if (req.user.role !== 'admin' && String(exam.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your exam.' });
 
     const submissions = await ExamSubmission.find({ examId: exam._id })
       .populate('studentId', 'firstName lastName email admissionNumber grade')
-      .sort({ submittedAt: -1, startedAt: -1 })
-      .lean();
+      .sort({ submittedAt: -1, startedAt: -1 }).lean();
 
     res.json({ success:true, data: { exam, submissions } });
   } catch (e) {
@@ -179,17 +191,15 @@ router.get('/:id/submissions', auth, requireRole('teacher','admin'), async (req,
 // STUDENT ROUTES
 // ═══════════════════════════════════════════════════════════
 
-// GET /api/exams/student/list — exams assigned to current student
 router.get('/student/list', auth, async (req, res) => {
   try {
     const studentId = req.user._id;
-
     let groupRoomIds = [];
     try {
       const GroupRoom = require('../models/GroupRoom');
       const rooms = await GroupRoom.find({ students: studentId }).select('_id').lean();
       groupRoomIds = rooms.map(r => r._id);
-    } catch { /* no GroupRoom model — skip */ }
+    } catch {}
 
     const exams = await Exam.find({
       $or: [
@@ -205,14 +215,12 @@ router.get('/student/list', auth, async (req, res) => {
     const submissionMap = {};
     if (exams.length) {
       const subs = await ExamSubmission.find({
-        examId: { $in: exams.map(e => e._id) },
-        studentId,
+        examId: { $in: exams.map(e => e._id) }, studentId,
       }).lean();
       subs.forEach(s => { submissionMap[String(s.examId)] = s; });
     }
     const examsWithSub = exams.map(e => ({
-      ...e,
-      mySubmission: submissionMap[String(e._id)] || null,
+      ...e, mySubmission: submissionMap[String(e._id)] || null,
     }));
 
     res.json({ success:true, data: { exams: examsWithSub } });
@@ -222,7 +230,6 @@ router.get('/student/list', auth, async (req, res) => {
   }
 });
 
-// GET /api/exams/:id/take — load an exam to sit it (student)
 router.get('/:id/take', auth, async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
@@ -239,31 +246,27 @@ router.get('/:id/take', auth, async (req, res) => {
     if (exam.computedStatus !== 'active')
       return res.status(403).json({ success:false, message:`Exam is ${exam.computedStatus}, not active right now.` });
 
-    // Load bank questions — DO NOT strip correctAnswer here, since auto-grading
-    // is now disabled and the server never compares the student's answer to it.
-    // But still strip it from the response sent to the student, just in case
-    // (defence in depth — never trust the front-end with the answer).
     let bankQuestions = [];
     try {
       const Question = require('../models/Question');
-      bankQuestions = await Question.find({ _id: { $in: exam.questionIds || [] } })
-        .select('-correctAnswer -__v')
-        .lean();
-    } catch { /* no Question model */ }
+      const rawBank = await Question.find({ _id: { $in: exam.questionIds || [] } })
+        .select('-__v').lean();
+      bankQuestions = rawBank.map(q => {
+        const { correctAnswer, ...rest } = q;
+        return { ...rest, parts: stripCorrectAnswersFromParts(q.parts || []) };
+      });
+    } catch {}
 
-    // Strip correctAnswer from custom questions too
     const customQuestions = (exam.customQuestions || []).map(q => {
       const { correctAnswer, ...rest } = q;
-      return rest;
+      return { ...rest, parts: stripCorrectAnswersFromParts(q.parts || []) };
     });
 
     let submission = await ExamSubmission.findOne({ examId: exam._id, studentId: req.user._id });
     if (!submission) {
       submission = await ExamSubmission.create({
-        examId: exam._id,
-        studentId: req.user._id,
-        startedAt: new Date(),
-        maxScore: exam.totalMarks,
+        examId: exam._id, studentId: req.user._id,
+        startedAt: new Date(), maxScore: exam.totalMarks,
       });
     }
     if (submission.status === 'submitted' || submission.status === 'graded')
@@ -273,8 +276,7 @@ router.get('/:id/take', auth, async (req, res) => {
       success:true,
       data: {
         exam: { ...exam, customQuestions, questionIds: undefined },
-        bankQuestions,
-        submission,
+        bankQuestions, submission,
       },
     });
   } catch (e) {
@@ -283,15 +285,6 @@ router.get('/:id/take', auth, async (req, res) => {
   }
 });
 
-// POST /api/exams/:id/submit — submit answers (student)
-//
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//  POLICY: NO AUTO-GRADING. Every submission — MCQs, short
-//  answers, long answers — waits for teacher manual review.
-//  This route only persists the student's answers and marks
-//  the submission as 'submitted'. The teacher grades via
-//  POST /submissions/:subId/grade.
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 router.post('/:id/submit', auth, async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
@@ -307,26 +300,26 @@ router.post('/:id/submit', auth, async (req, res) => {
     if (submission.status === 'submitted' || submission.status === 'graded')
       return res.status(409).json({ success:false, message:'Already submitted.' });
 
-    // Persist answers verbatim. isCorrect=null, marksAwarded=0 across the board
-    // until the teacher reviews. The student sees "Awaiting teacher review" on
-    // their result screen until that happens.
-    const persistedAnswers = answers.map(a => ({
-      questionRef:    a.questionRef,
-      answerText:     a.answerText || '',
-      selectedOption: a.selectedOption || '',
-      isCorrect:      null,
-      marksAwarded:   0,
-    }));
+    const persistedAnswers = (answers || []).map(a => ({
+      questionRef: String(a.questionRef || ''),
+      partPath: Array.isArray(a.partPath)
+        ? a.partPath.map(n => Number.isFinite(Number(n)) ? Number(n) : 0)
+        : [],
+      answerText: String(a.answerText || ''),
+      selectedOption: String(a.selectedOption || ''),
+      isCorrect: null,
+      marksAwarded: 0,
+    })).filter(a => a.questionRef.length > 0);
 
-    submission.answers           = persistedAnswers;
-    submission.status            = 'submitted';
-    submission.submittedAt       = new Date();
-    submission.timeSpentSecs     = Number(timeSpentSecs) || 0;
-    submission.tabSwitches       = Number(tabSwitches) || 0;
+    submission.answers = persistedAnswers;
+    submission.status = 'submitted';
+    submission.submittedAt = new Date();
+    submission.timeSpentSecs = Number(timeSpentSecs) || 0;
+    submission.tabSwitches = Number(tabSwitches) || 0;
     submission.copyPasteAttempts = Number(copyPasteAttempts) || 0;
-    submission.totalScore        = 0;  // pending teacher
-    submission.maxScore          = exam.totalMarks;
-    submission.percentage        = 0;  // pending teacher
+    submission.totalScore = 0;
+    submission.maxScore = exam.totalMarks;
+    submission.percentage = 0;
 
     if (tabSwitches > 3 || copyPasteAttempts > 0) {
       submission.flagged = true;
@@ -345,7 +338,6 @@ router.post('/:id/submit', auth, async (req, res) => {
   }
 });
 
-// POST /api/exams/submissions/:subId/grade — teacher grades a submission
 router.post('/submissions/:subId/grade', auth, requireRole('teacher','admin'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.subId))
@@ -354,7 +346,6 @@ router.post('/submissions/:subId/grade', auth, requireRole('teacher','admin'), a
     const { answers = [], feedback = '', grade: gradeLetter = '' } = req.body;
     const submission = await ExamSubmission.findById(req.params.subId).populate('examId');
     if (!submission) return res.status(404).json({ success:false, message:'Submission not found.' });
-
     if (req.user.role !== 'admin' && String(submission.examId.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your exam.' });
 
@@ -373,11 +364,11 @@ router.post('/submissions/:subId/grade', auth, requireRole('teacher','admin'), a
 
     submission.totalScore = total;
     submission.percentage = submission.maxScore ? Math.round((total / submission.maxScore) * 100) : 0;
-    submission.feedback   = feedback;
-    submission.grade      = gradeLetter;
-    submission.status     = 'graded';
-    submission.gradedAt   = new Date();
-    submission.gradedBy   = req.user._id;
+    submission.feedback = feedback;
+    submission.grade = gradeLetter;
+    submission.status = 'graded';
+    submission.gradedAt = new Date();
+    submission.gradedBy = req.user._id;
     await submission.save();
 
     res.json({ success:true, message:'Graded.', data: { submission } });
