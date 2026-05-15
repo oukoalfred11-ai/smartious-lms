@@ -6,6 +6,7 @@ import {
   NestedQuestionEditor,
   NestedQuestionRenderer,
   AttachmentList,
+  AnnotationCanvas,
   sumLeafMarks,
   labelAt,
 } from '../../components/exam/NestedQuestion.jsx'
@@ -2692,15 +2693,16 @@ function ExamsTab({ user, store, setPage, toast }) {
   // gradeForm tracks the teacher's input as they grade.
   const [selectedSubmission, setSelectedSubmission] = useState(null)
   const [gradeForm, setGradeForm] = useState({
-    answerMarks: {},      // { [answerIndex]: number }
-    answerComments: {},   // { [answerIndex]: string }
+    answerMarks: {},          // { [answerIndex]: number }
+    answerComments: {},       // { [answerIndex]: string }
+    answerAnnotations: {},    // { [answerIndex]: dataURL } — teacher's marked-up image
     feedback: '',
     grade: '',
   })
   const [gradeSaving, setGradeSaving] = useState(false)
+  // Annotation modal — when set, the AnnotationCanvas modal is open for this answer index.
+  const [annotatingIndex, setAnnotatingIndex] = useState(null)
   // Cache of full bank-question docs (with parts), keyed by _id.
-  // Populated when the teacher opens the grade screen, so we can render
-  // each question's structure alongside the student's flat answers list.
   const [gradeQuestionCache, setGradeQuestionCache] = useState({})
 
   // Filters
@@ -2886,16 +2888,19 @@ function ExamsTab({ user, store, setPage, toast }) {
   // each question's text + parts alongside the student's answers.
   const openGrade = async (submission) => {
     setSelectedSubmission(submission)
-    // Seed gradeForm from existing values (so re-grading shows previous marks)
-    const initMarks    = {}
-    const initComments = {}
+    // Seed gradeForm from existing values (so re-grading shows previous marks/annotations)
+    const initMarks       = {}
+    const initComments    = {}
+    const initAnnotations = {}
     ;(submission.answers || []).forEach((a, i) => {
-      initMarks[i]    = typeof a.marksAwarded === 'number' ? a.marksAwarded : 0
-      initComments[i] = a.teacherComment || ''
+      initMarks[i]       = typeof a.marksAwarded === 'number' ? a.marksAwarded : 0
+      initComments[i]    = a.teacherComment || ''
+      initAnnotations[i] = a.teacherAnnotation || ''
     })
     setGradeForm({
       answerMarks: initMarks,
       answerComments: initComments,
+      answerAnnotations: initAnnotations,
       feedback: submission.feedback || '',
       grade:    submission.grade    || '',
     })
@@ -2927,11 +2932,18 @@ function ExamsTab({ user, store, setPage, toast }) {
     if (!selectedSubmission) return
     setGradeSaving(true)
     try {
-      // Build the per-answer payload in the order of submission.answers
-      const answers = (selectedSubmission.answers || []).map((a, i) => ({
-        marksAwarded:   Number(gradeForm.answerMarks[i]) || 0,
-        teacherComment: gradeForm.answerComments[i] || '',
-      }))
+      // Build the per-answer payload. Include teacherAnnotation only if
+      // the teacher actually drew on this answer (avoids re-uploading the
+      // same annotation on every re-save).
+      const answers = (selectedSubmission.answers || []).map((a, i) => {
+        const payload = {
+          marksAwarded:   Number(gradeForm.answerMarks[i]) || 0,
+          teacherComment: gradeForm.answerComments[i] || '',
+        }
+        const ann = gradeForm.answerAnnotations?.[i]
+        if (typeof ann === 'string') payload.teacherAnnotation = ann
+        return payload
+      })
       const { data } = await api.post('/exams/submissions/' + selectedSubmission._id + '/grade', {
         answers,
         feedback: gradeForm.feedback,
@@ -4079,17 +4091,88 @@ function ExamsTab({ user, store, setPage, toast }) {
                     <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>
                       Student answer
                     </div>
-                    {/* Drawing / handwriting: show as image */}
-                    {(partType === 'drawing' || partType === 'handwriting') && answer.answerText && answer.answerText.startsWith('data:') ? (
-                      <a href={answer.answerText} target="_blank" rel="noopener noreferrer">
-                        <img src={answer.answerText} alt="Student drawing"
-                          style={{
-                            maxWidth: '100%', maxHeight: 480,
-                            border: '1px solid var(--border)', borderRadius: 6,
-                            background: '#fff', display: 'block',
-                          }}/>
-                      </a>
-                    ) : partType === 'mcq' ? (
+                    {/* Drawing / handwriting: show as image, with Annotate button */}
+                    {(partType === 'drawing' || partType === 'handwriting') && answer.answerText && answer.answerText.startsWith('data:') ? (() => {
+                      const ann = gradeForm.answerAnnotations?.[i]
+                      const displayUrl = ann || answer.answerText
+                      return (
+                        <div>
+                          <div style={{ position:'relative', display:'inline-block', maxWidth:'100%' }}>
+                            <img src={displayUrl} alt="Student drawing"
+                              style={{
+                                maxWidth: '100%', maxHeight: 480,
+                                border: '1px solid var(--border)', borderRadius: 6,
+                                background: '#fff', display: 'block',
+                              }}/>
+                            {ann && (
+                              <div style={{
+                                position:'absolute', top:8, right:8,
+                                background:'rgba(125,16,37,.9)', color:'#fff',
+                                padding:'4px 10px', borderRadius:99,
+                                fontSize:10.5, fontWeight:700, letterSpacing:'.05em', textTransform:'uppercase',
+                              }}>
+                                ✓ Marked
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ marginTop:8, display:'flex', gap:6, flexWrap:'wrap' }}>
+                            <button
+                              type="button"
+                              onClick={() => setAnnotatingIndex(i)}
+                              style={{
+                                background:'#7D1025', color:'#fff', border:'none',
+                                padding:'8px 16px', borderRadius:6,
+                                fontSize:12, fontWeight:700, cursor:'pointer',
+                                display:'inline-flex', alignItems:'center', gap:6,
+                              }}>
+                              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 20h9"/>
+                                <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                              </svg>
+                              {ann ? 'Edit Annotation' : 'Annotate'}
+                            </button>
+                            {ann && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (window.confirm('Remove your annotation? The student\'s original drawing stays.')) {
+                                    setGradeForm(f => ({
+                                      ...f,
+                                      answerAnnotations: { ...f.answerAnnotations, [i]: '' },
+                                    }))
+                                  }
+                                }}
+                                style={{
+                                  background:'transparent', color:'#7D1025',
+                                  border:'1px solid #7D1025',
+                                  padding:'8px 14px', borderRadius:6,
+                                  fontSize:12, fontWeight:700, cursor:'pointer',
+                                }}>
+                                Remove
+                              </button>
+                            )}
+                            <a
+                              href={answer.answerText}
+                              target="_blank" rel="noopener noreferrer"
+                              style={{
+                                background:'transparent', color:'#6B6B6B',
+                                border:'1px solid #E8E2D6',
+                                padding:'8px 14px', borderRadius:6,
+                                fontSize:12, fontWeight:600,
+                                textDecoration:'none',
+                                display:'inline-flex', alignItems:'center', gap:6,
+                              }}>
+                              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                <polyline points="15 3 21 3 21 9"/>
+                                <line x1="10" y1="14" x2="21" y2="3"/>
+                              </svg>
+                              View Original
+                            </a>
+                          </div>
+                        </div>
+                      )
+                    })() : partType === 'mcq' ? (
                       <div style={{ fontSize: 14, color: 'var(--s900)' }}>
                         <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--s500)', marginRight: 8 }}>
                           Selected:
@@ -4208,6 +4291,68 @@ function ExamsTab({ user, store, setPage, toast }) {
             {gradeSaving ? 'Saving...' : 'Save & Mark Graded'}
           </button>
         </div>
+
+        {/* ─── ANNOTATION MODAL ─── */}
+        {annotatingIndex !== null && selectedSubmission?.answers?.[annotatingIndex] && (() => {
+          const answer = selectedSubmission.answers[annotatingIndex]
+          const existing = gradeForm.answerAnnotations?.[annotatingIndex] || ''
+          return (
+            <div style={{
+              position:'fixed', inset:0, zIndex:100,
+              background:'rgba(0,0,0,.7)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              padding:'20px',
+            }}
+              onClick={(e) => { if (e.target === e.currentTarget) setAnnotatingIndex(null) }}
+            >
+              <div style={{
+                background:'#fff', borderRadius:12,
+                maxWidth:'95vw', maxHeight:'95vh', width:1100,
+                display:'flex', flexDirection:'column', overflow:'hidden',
+                boxShadow:'0 24px 64px rgba(0,0,0,.4)',
+              }}>
+                <div style={{
+                  padding:'16px 24px',
+                  background:'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+                  color:'#FBFAF5',
+                  display:'flex', alignItems:'center', justifyContent:'space-between', gap:14,
+                }}>
+                  <div>
+                    <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#F0CC5A' }}>
+                      Annotate Student's Drawing
+                    </div>
+                    <div className="serif" style={{ fontSize:18, marginTop:2 }}>
+                      Mark with red, green, or blue pen
+                    </div>
+                  </div>
+                  <button onClick={() => setAnnotatingIndex(null)}
+                    style={{
+                      background:'rgba(0,0,0,.15)', color:'#fff',
+                      border:'none', padding:'8px 12px', borderRadius:6,
+                      cursor:'pointer', fontSize:13, fontWeight:700,
+                    }}>
+                    Close
+                  </button>
+                </div>
+                <div style={{ padding:'20px 24px', overflow:'auto', flex:1 }}>
+                  <AnnotationCanvas
+                    backgroundImageUrl={answer.answerText}
+                    existingAnnotation={existing}
+                    onCancel={() => setAnnotatingIndex(null)}
+                    onSave={(dataUrl) => {
+                      setGradeForm(f => ({
+                        ...f,
+                        answerAnnotations: { ...f.answerAnnotations, [annotatingIndex]: dataUrl },
+                      }))
+                      setAnnotatingIndex(null)
+                      toast?.ok?.('Annotation saved. Don\'t forget to save the grade.')
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )
+        })()}
       </div>
     )
   }
@@ -4488,6 +4633,8 @@ function HomeworkTab({ user, store, setPage, toast }) {
   const [gradeSub, setGradeSub] = useState(null)  // submission being graded
   const [gradeForm, setGradeForm] = useState(null)  // { answers: [...], overallFeedback }
   const [gradeSaving, setGradeSaving] = useState(false)
+  // Annotation modal index (which gradeForm.answers[idx] is being annotated)
+  const [hwAnnotatingIndex, setHwAnnotatingIndex] = useState(null)
 
   // Load homework on mount
   useEffect(() => { loadHomework() }, [])
@@ -4760,15 +4907,15 @@ function HomeworkTab({ user, store, setPage, toast }) {
       const existing = (sub.answers || []).find(a => a.questionIndex === idx)
       return {
         questionIndex: idx,
-        // existing student answer fields (read-only display)
         studentAnswer: existing?.answer,
         studentAttachment: existing?.attachment,
         type: q.type,
-        // editable grading fields
         marksAwarded: existing?.marksAwarded !== null && existing?.marksAwarded !== undefined ? existing.marksAwarded : null,
         feedback: existing?.feedback || '',
         autoGraded: existing?.autoGraded || false,
         maxMarks: q.marks || 1,
+        // Teacher's marked-up version of the student's image (data URL).
+        teacherAnnotation: existing?.teacherAnnotation || '',
       }
     })
     setGradeForm({ answers, overallFeedback: sub.overallFeedback || '' })
@@ -4801,11 +4948,19 @@ function HomeworkTab({ user, store, setPage, toast }) {
     setGradeSaving(true)
     try {
       const payload = {
-        answers: gradeForm.answers.map(a => ({
-          questionIndex: a.questionIndex,
-          marksAwarded: parseFloat(a.marksAwarded),
-          feedback: a.feedback || '',
-        })),
+        answers: gradeForm.answers.map(a => {
+          const item = {
+            questionIndex: a.questionIndex,
+            marksAwarded: parseFloat(a.marksAwarded),
+            feedback: a.feedback || '',
+          }
+          // Only include teacherAnnotation if the teacher actually drew on
+          // this answer — keeps re-saves small.
+          if (typeof a.teacherAnnotation === 'string') {
+            item.teacherAnnotation = a.teacherAnnotation
+          }
+          return item
+        }),
         overallFeedback: gradeForm.overallFeedback || '',
         release,
       }
@@ -5117,9 +5272,85 @@ function HomeworkTab({ user, store, setPage, toast }) {
 
                       {(q.type === 'upload' || q.type === 'drawing' || q.type === 'handwriting') && (
                         a.studentAttachment && a.studentAttachment.url ? (
-                          a.studentAttachment.mimeType?.startsWith('image/')
-                            ? <img src={a.studentAttachment.url} alt="" style={{ maxWidth: '100%', maxHeight: 300, borderRadius: 4, border: '1px solid var(--border)' }}/>
-                            : <a href={a.studentAttachment.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#7D1025' }}>{a.studentAttachment.filename || 'View file'}</a>
+                          a.studentAttachment.mimeType?.startsWith('image/') ? (
+                            <div>
+                              <div style={{ position:'relative', display:'inline-block', maxWidth:'100%' }}>
+                                <img
+                                  src={a.teacherAnnotation || a.studentAttachment.url}
+                                  alt={a.teacherAnnotation ? 'Marked by teacher' : 'Student work'}
+                                  style={{
+                                    maxWidth: '100%', maxHeight: 300,
+                                    borderRadius: 4, border: '1px solid var(--border)',
+                                    background:'#fff', display:'block',
+                                  }}
+                                />
+                                {a.teacherAnnotation && (
+                                  <div style={{
+                                    position:'absolute', top:6, right:6,
+                                    background:'rgba(125,16,37,.9)', color:'#fff',
+                                    padding:'3px 9px', borderRadius:99,
+                                    fontSize:10, fontWeight:700, letterSpacing:'.05em', textTransform:'uppercase',
+                                  }}>
+                                    ✓ Marked
+                                  </div>
+                                )}
+                              </div>
+                              {/* Annotate / Edit / Remove / View Original buttons */}
+                              <div style={{ marginTop:8, display:'flex', gap:6, flexWrap:'wrap' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => setHwAnnotatingIndex(idx)}
+                                  style={{
+                                    background:'#7D1025', color:'#fff', border:'none',
+                                    padding:'8px 16px', borderRadius:6,
+                                    fontSize:12, fontWeight:700, cursor:'pointer',
+                                    display:'inline-flex', alignItems:'center', gap:6,
+                                  }}>
+                                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 20h9"/>
+                                    <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                                  </svg>
+                                  {a.teacherAnnotation ? 'Edit Annotation' : 'Annotate'}
+                                </button>
+                                {a.teacherAnnotation && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (window.confirm('Remove your annotation? Student\'s original work stays.')) {
+                                        setGradeAnswer(idx, 'teacherAnnotation', '')
+                                      }
+                                    }}
+                                    style={{
+                                      background:'transparent', color:'#7D1025',
+                                      border:'1px solid #7D1025',
+                                      padding:'8px 14px', borderRadius:6,
+                                      fontSize:12, fontWeight:700, cursor:'pointer',
+                                    }}>
+                                    Remove
+                                  </button>
+                                )}
+                                <a
+                                  href={a.studentAttachment.url}
+                                  target="_blank" rel="noopener noreferrer"
+                                  style={{
+                                    background:'transparent', color:'#6B6B6B',
+                                    border:'1px solid #E8E2D6',
+                                    padding:'8px 14px', borderRadius:6,
+                                    fontSize:12, fontWeight:600, textDecoration:'none',
+                                    display:'inline-flex', alignItems:'center', gap:6,
+                                  }}>
+                                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                    <polyline points="15 3 21 3 21 9"/>
+                                    <line x1="10" y1="14" x2="21" y2="3"/>
+                                  </svg>
+                                  View Original
+                                </a>
+                              </div>
+                            </div>
+                          ) : (
+                            <a href={a.studentAttachment.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#7D1025' }}>{a.studentAttachment.filename || 'View file'}</a>
+                          )
                         ) : <em style={{ color: 'var(--s400)' }}>No file submitted</em>
                       )}
                     </div>
@@ -5227,6 +5458,66 @@ function HomeworkTab({ user, store, setPage, toast }) {
           </div>
         </div>
       )}
+
+      {/* ─── HOMEWORK ANNOTATION MODAL ─── */}
+      {hwAnnotatingIndex !== null && gradeForm?.answers?.[hwAnnotatingIndex] && (() => {
+        const a = gradeForm.answers[hwAnnotatingIndex]
+        const bgUrl = a.studentAttachment?.url
+        const existing = a.teacherAnnotation || ''
+        return (
+          <div style={{
+            position:'fixed', inset:0, zIndex:1100,
+            background:'rgba(0,0,0,.7)',
+            display:'flex', alignItems:'center', justifyContent:'center',
+            padding:'20px',
+          }}
+            onClick={(e) => { if (e.target === e.currentTarget) setHwAnnotatingIndex(null) }}
+          >
+            <div style={{
+              background:'#fff', borderRadius:12,
+              maxWidth:'95vw', maxHeight:'95vh', width:1100,
+              display:'flex', flexDirection:'column', overflow:'hidden',
+              boxShadow:'0 24px 64px rgba(0,0,0,.4)',
+            }}>
+              <div style={{
+                padding:'16px 24px',
+                background:'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+                color:'#FBFAF5',
+                display:'flex', alignItems:'center', justifyContent:'space-between', gap:14,
+              }}>
+                <div>
+                  <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#F0CC5A' }}>
+                    Annotate Student's Work
+                  </div>
+                  <div style={{ fontFamily:"'Instrument Serif', serif", fontSize:18, marginTop:2 }}>
+                    Q{a.questionIndex + 1} &middot; Mark with red, green, or blue pen
+                  </div>
+                </div>
+                <button onClick={() => setHwAnnotatingIndex(null)}
+                  style={{
+                    background:'rgba(0,0,0,.15)', color:'#fff',
+                    border:'none', padding:'8px 12px', borderRadius:6,
+                    cursor:'pointer', fontSize:13, fontWeight:700,
+                  }}>
+                  Close
+                </button>
+              </div>
+              <div style={{ padding:'20px 24px', overflow:'auto', flex:1 }}>
+                <AnnotationCanvas
+                  backgroundImageUrl={bgUrl}
+                  existingAnnotation={existing}
+                  onCancel={() => setHwAnnotatingIndex(null)}
+                  onSave={(dataUrl) => {
+                    setGradeAnswer(hwAnnotatingIndex, 'teacherAnnotation', dataUrl)
+                    setHwAnnotatingIndex(null)
+                    toast?.ok?.('Annotation saved. Don\'t forget to save the grade.')
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* CREATE/EDIT MODAL */}
       {createOpen && form && (
