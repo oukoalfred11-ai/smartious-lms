@@ -8721,6 +8721,25 @@ function ScheduleClassesTab({ user, toast }) {
     }
   }
 
+  // ── Save default meeting link to teacher's profile ──
+  const saveDefaultLink = async () => {
+    setSavingSettings(true)
+    try {
+      const { data } = await api.patch('/auth/me', { defaultMeetingLink: defaultLinkInput.trim() })
+      if (data?.success) {
+        setCurrentDefaultLink(data.user?.defaultMeetingLink || '')
+        toast?.ok?.('Default meeting link saved.')
+        setShowSettings(false)
+      } else {
+        toast?.error?.(data?.message || 'Failed to save link.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Failed to save link.')
+    } finally {
+      setSavingSettings(false)
+    }
+  }
+
   // ── Filter and search ──
   const filtered = classes.filter(c => {
     if (filter !== 'all' && c.computedStatus !== filter) return false
@@ -8809,7 +8828,7 @@ function ScheduleClassesTab({ user, toast }) {
                 onChange={e => { setF('curriculum', e.target.value); setF('grade', ''); setF('subject', '') }}
               >
                 <option value="">Select curriculum...</option>
-                {catalog.curricula.map(c => <option key={c} value={c}>{c}</option>)}
+                {catalog.curricula.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div className="fg" style={{ flex: 1, minWidth: 180 }}>
@@ -9137,6 +9156,85 @@ function ScheduleClassesTab({ user, toast }) {
               onEnd={() => endClass(lc)}
             />
           ))}
+        </div>
+      )}
+
+      {/* ─── Default meeting link settings modal ─── */}
+      {showSettings && (
+        <div style={{
+          position:'fixed', inset:0, zIndex:100,
+          background:'rgba(0,0,0,.6)',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          padding:20,
+        }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowSettings(false) }}
+        >
+          <div style={{
+            background:'#fff', borderRadius:12,
+            maxWidth:540, width:'100%', overflow:'hidden',
+            boxShadow:'0 24px 64px rgba(0,0,0,.4)',
+          }}>
+            <div style={{
+              padding:'18px 24px',
+              background:'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+              color:'#FBFAF5',
+            }}>
+              <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#F0CC5A' }}>
+                Settings
+              </div>
+              <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:22, marginTop:2 }}>
+                Default Meeting Link
+              </div>
+            </div>
+            <div style={{ padding:'22px 24px' }}>
+              <p style={{ fontSize:13, color:'#3F3F3F', margin:'0 0 14px', lineHeight:1.55 }}>
+                When you schedule a new live class, this link will be pre-filled in the meeting URL field.
+                You can override it per class if needed.
+              </p>
+              <label style={{ fontSize:11, fontWeight:700, letterSpacing:'.06em', textTransform:'uppercase', color:'#7D1025' }}>
+                Your Zoom personal room (or any video meeting URL)
+              </label>
+              <input
+                value={defaultLinkInput}
+                onChange={e => setDefaultLinkInput(e.target.value)}
+                placeholder="https://us02web.zoom.us/j/1234567890"
+                style={{
+                  width:'100%', boxSizing:'border-box', marginTop:6,
+                  padding:'10px 12px', borderRadius:6,
+                  border:'1.5px solid #E8E2D6',
+                  fontSize:13, fontFamily:'inherit',
+                }}
+              />
+              <div style={{ fontSize:11, color:'#6B6B6B', marginTop:8 }}>
+                Saved to your teacher profile. Visible only to you.
+              </div>
+            </div>
+            <div style={{
+              padding:'14px 24px',
+              background:'#FBFAF5', borderTop:'1px solid #E8E2D6',
+              display:'flex', justifyContent:'flex-end', gap:8,
+            }}>
+              <button onClick={() => setShowSettings(false)} disabled={savingSettings}
+                style={{
+                  background:'#fff', color:'#7D1025',
+                  border:'1.5px solid #E8E2D6',
+                  padding:'9px 18px', borderRadius:6,
+                  cursor:'pointer', fontSize:13, fontWeight:700,
+                }}>
+                Cancel
+              </button>
+              <button onClick={saveDefaultLink} disabled={savingSettings}
+                style={{
+                  background: savingSettings ? '#9CA3AF' : '#7D1025',
+                  color:'#fff', border:'none',
+                  padding:'9px 20px', borderRadius:6,
+                  cursor: savingSettings ? 'not-allowed' : 'pointer',
+                  fontSize:13, fontWeight:700,
+                }}>
+                {savingSettings ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
