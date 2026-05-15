@@ -498,7 +498,8 @@ export default function TeacherPortal() {
     { section:'Teaching', items:[
       {id:'dashboard',     label:'Dashboard',        iconName:'dashboard',     icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
       {id:'students',      label:'My Students',      iconName:'students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
-      {id:'liveclass',     label:'Live Classes',     iconName:'liveclass',     icon:'rect:2:3:20:14:2|M8 21h8M12 17v4', live:true},
+      {id:'liveclass',     label:'Group Rooms',      iconName:'liveclass',     icon:'rect:2:3:20:14:2|M8 21h8M12 17v4', live:true},
+      {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
     ]},
     { section:'Assessment', items:[
       {id:'questionbank',  label:'Question Bank',    iconName:'questionbank',  icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6|circle:18:18:3'},
@@ -628,6 +629,11 @@ export default function TeacherPortal() {
          {/* ── LIVE LESSONS ── (real data from backend) */}
           {page === 'liveclass' && (
             <TeacherLiveClassesTab user={currentUser} toast={toast} />
+          )}
+
+          {/* ── SCHEDULE CLASSES ── (new scheduling system) */}
+          {page === 'scheduleclasses' && (
+            <ScheduleClassesTab user={currentUser} toast={toast} />
           )}
 
            {/* ── COMMUNICATION ── */}
@@ -8489,6 +8495,786 @@ function TeacherLiveClassesTab({ user, toast }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// SCHEDULE CLASSES TAB
+// Teacher-side scheduling for one-off live class sessions.
+// Distinct from TeacherLiveClassesTab (which manages persistent
+// Group Rooms with Zoom links).
+// ═══════════════════════════════════════════════════════════
+function ScheduleClassesTab({ user, toast }) {
+  const [classes, setClasses] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [view, setView] = useState('list') // 'list' | 'create' | 'edit'
+  const [filter, setFilter] = useState('all') // 'all' | 'scheduled' | 'live' | 'ended'
+  const [searchQ, setSearchQ] = useState('')
+  const [editing, setEditing] = useState(null) // class being edited
+
+  // Default-meeting-link settings modal
+  const [showSettings, setShowSettings] = useState(false)
+  const [defaultLinkInput, setDefaultLinkInput] = useState(user?.defaultMeetingLink || '')
+  const [savingSettings, setSavingSettings] = useState(false)
+  const [currentDefaultLink, setCurrentDefaultLink] = useState(user?.defaultMeetingLink || '')
+
+  // Catalog of curriculum/subjects/grades
+  const [catalog, setCatalog] = useState({ curricula: [], gradesByCurriculum: {}, subjects: [] })
+  // Eligible students for the chosen curriculum+grade
+  const [eligibleStudents, setEligibleStudents] = useState([])
+
+  // Form state
+  const initialForm = () => ({
+    title: '',
+    description: '',
+    subject: '',
+    curriculum: '',
+    grade: '',
+    scheduledAt: defaultScheduleDate(),
+    durationMins: 60,
+    meetingLink: currentDefaultLink || '',
+    assignedStudents: [], // array of student _ids
+    notes: '',
+  })
+  const [form, setForm] = useState(initialForm())
+  const [saving, setSaving] = useState(false)
+
+  // ── helpers ──
+  function defaultScheduleDate() {
+    // Round to next hour, default to tomorrow at 9am
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    d.setHours(9, 0, 0, 0)
+    return d.toISOString().slice(0, 16) // YYYY-MM-DDTHH:MM
+  }
+
+  // ── Load all classes + catalog on mount ──
+  useEffect(() => {
+    let cancelled = false
+    const loadAll = async () => {
+      setLoading(true)
+      try {
+        const [classesRes, catalogRes] = await Promise.all([
+          api.get('/liveclasses/teacher/list'),
+          api.get('/curriculum/options'),
+        ])
+        if (cancelled) return
+        if (classesRes.data?.success) {
+          setClasses(classesRes.data.data?.classes || [])
+        }
+        if (catalogRes.data?.success) {
+          setCatalog({
+            curricula: catalogRes.data.curricula || [],
+            gradesByCurriculum: catalogRes.data.gradesByCurriculum || {},
+            subjects: catalogRes.data.subjects || [],
+          })
+        }
+      } catch (e) {
+        if (cancelled) return
+        console.error('[scheduleclasses] load failed:', e?.response?.data?.message || e.message)
+        toast?.error?.('Failed to load classes.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    loadAll()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // ── Reload eligible students when curriculum+grade changes ──
+  useEffect(() => {
+    if (!form.curriculum || !form.grade) { setEligibleStudents([]); return }
+    let cancelled = false
+    const loadStudents = async () => {
+      try {
+        const { data } = await api.get('/users', {
+          params: { role: 'student', curriculum: form.curriculum, gradeLevel: form.grade },
+        })
+        if (cancelled) return
+        const list = data?.users || data?.data?.users || []
+        setEligibleStudents(list.filter(u => u.isActive !== false))
+      } catch (e) {
+        if (cancelled) return
+        setEligibleStudents([])
+      }
+    }
+    loadStudents()
+    return () => { cancelled = true }
+  }, [form.curriculum, form.grade])
+
+  // ── form helpers ──
+  const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const toggleStudent = (sid) => setForm(f => ({
+    ...f,
+    assignedStudents: f.assignedStudents.includes(sid)
+      ? f.assignedStudents.filter(id => id !== sid)
+      : [...f.assignedStudents, sid],
+  }))
+
+  const openCreate = () => {
+    setEditing(null)
+    setForm(initialForm())
+    setView('create')
+  }
+  const openEdit = (lc) => {
+    setEditing(lc)
+    setForm({
+      title: lc.title,
+      description: lc.description || '',
+      subject: lc.subject,
+      curriculum: lc.curriculum,
+      grade: lc.grade,
+      scheduledAt: new Date(lc.scheduledAt).toISOString().slice(0, 16),
+      durationMins: lc.durationMins,
+      meetingLink: lc.meetingLink,
+      assignedStudents: (lc.assignedStudents || []).map(s => s._id || s),
+      notes: lc.notes || '',
+    })
+    setView('edit')
+  }
+  const cancelForm = () => { setView('list'); setEditing(null); setForm(initialForm()) }
+
+  // ── Save (create or edit) ──
+  const saveForm = async () => {
+    if (!form.title.trim()) { toast?.error?.('Title is required.'); return }
+    if (!form.subject || !form.curriculum || !form.grade) {
+      toast?.error?.('Subject, curriculum and grade are required.'); return
+    }
+    if (!form.scheduledAt) { toast?.error?.('Scheduled time is required.'); return }
+    if (!form.meetingLink.trim()) { toast?.error?.('Meeting link is required.'); return }
+    if (form.assignedStudents.length === 0) {
+      if (!window.confirm('No students selected. Save anyway? (You can add students later.)')) return
+    }
+
+    setSaving(true)
+    try {
+      const payload = {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        subject: form.subject,
+        curriculum: form.curriculum,
+        grade: form.grade,
+        scheduledAt: new Date(form.scheduledAt).toISOString(),
+        durationMins: Number(form.durationMins),
+        meetingLink: form.meetingLink.trim(),
+        assignedStudents: form.assignedStudents,
+        notes: form.notes.trim(),
+      }
+      const { data } = editing
+        ? await api.put('/liveclasses/' + editing._id, payload)
+        : await api.post('/liveclasses', payload)
+      if (data?.success) {
+        toast?.ok?.(editing ? 'Class updated.' : 'Class scheduled.')
+        // Reload list
+        const reload = await api.get('/liveclasses/teacher/list')
+        if (reload.data?.success) setClasses(reload.data.data?.classes || [])
+        cancelForm()
+      } else {
+        toast?.error?.(data?.message || 'Save failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Save failed: ' + e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const deleteClass = async (lc) => {
+    if (!window.confirm(`Delete "${lc.title}"? This cannot be undone.`)) return
+    try {
+      const { data } = await api.delete('/liveclasses/' + lc._id)
+      if (data?.success) {
+        toast?.ok?.('Class deleted.')
+        setClasses(cs => cs.filter(c => c._id !== lc._id))
+      } else {
+        toast?.error?.(data?.message || 'Delete failed.')
+      }
+    } catch (e) {
+      toast?.error?.('Delete failed: ' + e.message)
+    }
+  }
+
+  const startClass = async (lc) => {
+    try {
+      const { data } = await api.post('/liveclasses/' + lc._id + '/start')
+      if (data?.success) {
+        toast?.ok?.('Class is now live.')
+        setClasses(cs => cs.map(c => c._id === lc._id ? { ...c, ...data.data.liveClass } : c))
+      }
+    } catch (e) {
+      toast?.error?.('Failed to start.')
+    }
+  }
+  const endClass = async (lc) => {
+    if (!window.confirm('End this class now?')) return
+    try {
+      const { data } = await api.post('/liveclasses/' + lc._id + '/end')
+      if (data?.success) {
+        toast?.ok?.('Class ended.')
+        setClasses(cs => cs.map(c => c._id === lc._id ? { ...c, ...data.data.liveClass } : c))
+      }
+    } catch (e) {
+      toast?.error?.('Failed to end.')
+    }
+  }
+
+  // ── Filter and search ──
+  const filtered = classes.filter(c => {
+    if (filter !== 'all' && c.computedStatus !== filter) return false
+    if (searchQ.trim()) {
+      const q = searchQ.toLowerCase()
+      return (c.title || '').toLowerCase().includes(q)
+        || (c.subject || '').toLowerCase().includes(q)
+    }
+    return true
+  })
+
+  const stats = {
+    total: classes.length,
+    scheduled: classes.filter(c => c.computedStatus === 'scheduled').length,
+    live: classes.filter(c => c.computedStatus === 'live').length,
+    ended: classes.filter(c => c.computedStatus === 'ended').length,
+  }
+
+  // ── Form-derived ──
+  const formGrades = form.curriculum ? (catalog.gradesByCurriculum[form.curriculum] || []) : []
+  const formSubjects = form.curriculum
+    ? catalog.subjects.filter(s => s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(form.curriculum)))
+    : []
+
+  // ─────────────────────────────────────────────────────
+  // CREATE / EDIT FORM
+  // ─────────────────────────────────────────────────────
+  if (view === 'create' || view === 'edit') {
+    return (
+      <div>
+        <button onClick={cancelForm}
+          style={{
+            background: 'transparent', border: 'none', color: '#7D1025',
+            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+            padding: '6px 0', marginBottom: 14,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Back to Schedule
+        </button>
+
+        <div className="card" style={{
+          padding: 0, marginBottom: 18, overflow: 'hidden',
+          background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
+          color: '#FBFAF5',
+        }}>
+          <div style={{ padding: '24px 30px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#F0CC5A', marginBottom: 6 }}>
+              {editing ? 'Edit Live Class' : 'New Live Class'}
+            </div>
+            <h1 className="serif" style={{ fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              {editing ? form.title : 'Schedule a Live Class'}
+            </h1>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              Set the time, topic, and which students to invite. The meeting link can be your Zoom personal room.
+            </div>
+          </div>
+        </div>
+
+        <div className="card" style={{ padding: 22 }}>
+          {/* Basic info */}
+          <div className="fg">
+            <label className="fl">Lesson title *</label>
+            <input className="fi"
+              placeholder="e.g. Quadratic Equations Recap"
+              value={form.title} onChange={e => setF('title', e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="fg">
+            <label className="fl">Description (optional)</label>
+            <textarea className="fi" rows={2}
+              placeholder="What students should expect"
+              value={form.description} onChange={e => setF('description', e.target.value)}
+              style={{ resize: 'vertical' }}
+            />
+          </div>
+
+          {/* Academic context */}
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <div className="fg" style={{ flex: 1, minWidth: 180 }}>
+              <label className="fl">Curriculum *</label>
+              <select className="fsel" value={form.curriculum}
+                onChange={e => { setF('curriculum', e.target.value); setF('grade', ''); setF('subject', '') }}
+              >
+                <option value="">Select curriculum...</option>
+                {catalog.curricula.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="fg" style={{ flex: 1, minWidth: 180 }}>
+              <label className="fl">Grade *</label>
+              <select className="fsel" value={form.grade}
+                onChange={e => setF('grade', e.target.value)}
+                disabled={!form.curriculum}
+              >
+                <option value="">{form.curriculum ? 'Select grade...' : 'Pick curriculum first'}</option>
+                {formGrades.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
+            </div>
+            <div className="fg" style={{ flex: 1, minWidth: 180 }}>
+              <label className="fl">Subject *</label>
+              <select className="fsel" value={form.subject}
+                onChange={e => setF('subject', e.target.value)}
+                disabled={!form.curriculum}
+              >
+                <option value="">{form.curriculum ? 'Select subject...' : 'Pick curriculum first'}</option>
+                {formSubjects.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Time + duration */}
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <div className="fg" style={{ flex: 1, minWidth: 240 }}>
+              <label className="fl">Date &amp; Time *</label>
+              <input className="fi" type="datetime-local"
+                value={form.scheduledAt}
+                onChange={e => setF('scheduledAt', e.target.value)}
+              />
+            </div>
+            <div className="fg" style={{ minWidth: 140 }}>
+              <label className="fl">Duration (min) *</label>
+              <input className="fi" type="number" min={5} max={240} step={5}
+                value={form.durationMins}
+                onChange={e => setF('durationMins', e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Meeting link */}
+          <div className="fg">
+            <label className="fl">
+              Meeting link *
+              {currentDefaultLink && form.meetingLink === currentDefaultLink && (
+                <span style={{ marginLeft: 8, fontSize: 11, color: '#15803D', fontWeight: 700, fontStyle: 'italic' }}>
+                  (pre-filled from your default)
+                </span>
+              )}
+            </label>
+            <input className="fi"
+              type="url"
+              placeholder="https://us02web.zoom.us/j/XXXXXXX"
+              value={form.meetingLink} onChange={e => setF('meetingLink', e.target.value)}
+            />
+            <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 4 }}>
+              Students see a "Join Class" button that opens this link 10 minutes before the start time.
+            </div>
+          </div>
+
+          {/* Student selection */}
+          <div className="fg">
+            <label className="fl">
+              Assign students
+              <span style={{ marginLeft: 8, fontSize: 11, color: '#6B6B6B', fontWeight: 600 }}>
+                ({form.assignedStudents.length} selected)
+              </span>
+            </label>
+            {!form.curriculum || !form.grade ? (
+              <div style={{
+                padding: '12px 14px', background: '#FBFAF5',
+                border: '1px dashed #E8E2D6', borderRadius: 6,
+                fontSize: 12.5, color: '#6B6B6B', textAlign: 'center',
+              }}>
+                Pick a curriculum and grade first to see eligible students.
+              </div>
+            ) : eligibleStudents.length === 0 ? (
+              <div style={{
+                padding: '12px 14px', background: '#FEF3C7',
+                border: '1px solid #FCD34D', borderRadius: 6,
+                fontSize: 12.5, color: '#92400E',
+              }}>
+                No active students found for {form.curriculum} {form.grade}.
+              </div>
+            ) : (
+              <div style={{
+                maxHeight: 240, overflowY: 'auto',
+                border: '1px solid #E8E2D6', borderRadius: 6,
+                background: '#fff',
+              }}>
+                {eligibleStudents.map(s => {
+                  const isSelected = form.assignedStudents.includes(s._id)
+                  return (
+                    <label key={s._id}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '8px 12px', cursor: 'pointer',
+                        background: isSelected ? '#FBF6E3' : 'transparent',
+                        borderBottom: '1px solid #F4EFE5',
+                        fontSize: 13,
+                      }}
+                    >
+                      <input type="checkbox" checked={isSelected}
+                        onChange={() => toggleStudent(s._id)}
+                        style={{ width: 16, height: 16 }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600, color: '#1A1A1A' }}>
+                          {s.firstName} {s.lastName}
+                        </div>
+                        <div style={{ fontSize: 11, color: '#6B6B6B' }}>
+                          {s.admissionNumber || s.email} &middot; {s.gradeLevel || form.grade}
+                        </div>
+                      </div>
+                    </label>
+                  )
+                })}
+              </div>
+            )}
+            {eligibleStudents.length > 0 && (
+              <div style={{ marginTop: 6, display: 'flex', gap: 6 }}>
+                <button type="button"
+                  onClick={() => setF('assignedStudents', eligibleStudents.map(s => s._id))}
+                  style={{
+                    background: 'transparent', border: '1px solid #7D1025',
+                    color: '#7D1025', padding: '4px 12px', borderRadius: 4,
+                    fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+                  }}>
+                  Select All
+                </button>
+                <button type="button"
+                  onClick={() => setF('assignedStudents', [])}
+                  style={{
+                    background: 'transparent', border: '1px solid #E8E2D6',
+                    color: '#6B6B6B', padding: '4px 12px', borderRadius: 4,
+                    fontSize: 11.5, fontWeight: 600, cursor: 'pointer',
+                  }}>
+                  Clear
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="fg">
+            <label className="fl">Notes for students (optional)</label>
+            <textarea className="fi" rows={2}
+              placeholder="What to bring, what to revise, etc."
+              value={form.notes} onChange={e => setF('notes', e.target.value)}
+              style={{ resize: 'vertical' }}
+            />
+          </div>
+
+          {/* Save / cancel */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
+            <button onClick={cancelForm} disabled={saving}
+              style={{
+                background: 'transparent', border: '1.5px solid #E8E2D6',
+                color: '#1A1A1A', padding: '10px 20px', borderRadius: 6,
+                fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
+              }}>Cancel</button>
+            <button onClick={saveForm} disabled={saving}
+              style={{
+                background: saving ? '#9CA3AF' : '#7D1025',
+                color: '#fff', border: 'none',
+                padding: '10px 22px', borderRadius: 6,
+                fontSize: 13, fontWeight: 700,
+                cursor: saving ? 'not-allowed' : 'pointer',
+              }}>
+              {saving ? 'Saving...' : (editing ? 'Save Changes' : 'Schedule Class')}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ─────────────────────────────────────────────────────
+  // LIST VIEW
+  // ─────────────────────────────────────────────────────
+  return (
+    <div>
+      {/* HERO */}
+      <div className="card" style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
+        color: '#FBFAF5',
+      }}>
+        <div style={{
+          padding: '24px 30px',
+          backgroundImage: 'radial-gradient(circle at 95% 50%, rgba(201,160,48,.18) 0%, transparent 50%)',
+          display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap',
+        }}>
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#F0CC5A', marginBottom: 6 }}>
+              Live Class Scheduler
+            </div>
+            <h1 className="serif" style={{ fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              Schedule and run live sessions
+            </h1>
+            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
+              Create one-off lessons, assign students, share your Zoom link.
+            </div>
+          </div>
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+            <button onClick={() => { setDefaultLinkInput(currentDefaultLink); setShowSettings(true) }}
+              title="Set default meeting link"
+              style={{
+                background: 'rgba(0,0,0,.15)', color: '#FBFAF5',
+                border: '1px solid rgba(251,250,245,.25)',
+                padding: '12px 14px', borderRadius: 8,
+                cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+              Default Link
+            </button>
+            <button onClick={openCreate}
+              style={{
+                background: '#C9A030', color: '#7D1025', border: 'none',
+                padding: '12px 22px', borderRadius: 8,
+                cursor: 'pointer', fontSize: 14, fontWeight: 700,
+                display: 'flex', alignItems: 'center', gap: 8,
+                boxShadow: '0 4px 14px rgba(201,160,48,.35)',
+              }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Schedule Class
+            </button>
+          </div>
+        </div>
+        {/* Stats strip */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+          background: 'rgba(0,0,0,.18)',
+        }}>
+          {[
+            ['Total', stats.total, '#FBFAF5'],
+            ['Scheduled', stats.scheduled, '#F0CC5A'],
+            ['Live Now', stats.live, '#FCA5A5'],
+            ['Ended', stats.ended, '#FBFAF5'],
+          ].map(([label, value, color]) => (
+            <div key={label} style={{
+              padding: '12px 18px',
+              borderRight: '1px solid rgba(251,250,245,.08)',
+            }}>
+              <div style={{
+                fontSize: 10, fontWeight: 700, letterSpacing: '.1em',
+                textTransform: 'uppercase', opacity: .7, color: '#F0CC5A',
+                marginBottom: 2,
+              }}>{label}</div>
+              <div className="mono" style={{ fontSize: 16, fontWeight: 700, color }}>
+                {value}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="card" style={{ marginBottom: 14, padding: 14 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>
+              Search
+            </label>
+            <input className="fi" placeholder="Search by title or subject..."
+              value={searchQ} onChange={e => setSearchQ(e.target.value)}
+              style={{ width: '100%' }}
+            />
+          </div>
+          <div style={{ minWidth: 160 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '.06em' }}>
+              Status
+            </label>
+            <select className="fsel" value={filter} onChange={e => setFilter(e.target.value)} style={{ width: '100%' }}>
+              <option value="all">All</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="live">Live Now</option>
+              <option value="ended">Ended</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* List */}
+      {loading ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <div className="mono" style={{ fontSize: 13, color: 'var(--s400)', letterSpacing: '.1em' }}>
+            LOADING CLASSES...
+          </div>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="card" style={{ padding: '40px 32px', textAlign: 'center' }}>
+          <div className="serif" style={{ fontSize: 20, color: '#1A1A1A', marginBottom: 6 }}>
+            {classes.length === 0 ? 'No classes yet' : 'No classes match your filters'}
+          </div>
+          <div style={{ fontSize: 13, color: '#6B6B6B', marginBottom: 16 }}>
+            {classes.length === 0
+              ? 'Schedule your first live class to get started.'
+              : 'Try clearing search or filters.'}
+          </div>
+          {classes.length === 0 && (
+            <button onClick={openCreate}
+              style={{
+                background: '#7D1025', color: '#fff', border: 'none',
+                padding: '10px 22px', borderRadius: 6,
+                fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              }}>Schedule Class</button>
+          )}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filtered.map(lc => (
+            <TeacherClassCard key={lc._id} lc={lc}
+              onEdit={() => openEdit(lc)}
+              onDelete={() => deleteClass(lc)}
+              onStart={() => startClass(lc)}
+              onEnd={() => endClass(lc)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────
+// TeacherClassCard — one card per class in the scheduler list
+// ─────────────────────────────────────────────────────────
+function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd }) {
+  const status = lc.computedStatus
+  const subjCol = ({
+    Mathematics: '#7D1025', Maths: '#7D1025',
+    English: '#0F766E', Physics: '#1E40AF',
+    Chemistry: '#7C3AED', Biology: '#15803D',
+    'Computer Science': '#0369A1', ICT: '#0369A1',
+    Business: '#92400E', Economics: '#92400E',
+    History: '#A16207', Geography: '#A16207',
+  })[lc.subject] || '#7D1025'
+
+  const statusBadge = status === 'scheduled'
+    ? { bg: '#FEF3C7', color: '#92400E', label: 'SCHEDULED' }
+    : status === 'live'
+    ? { bg: '#FEE2E2', color: '#B91C1C', label: 'LIVE NOW' }
+    : { bg: '#F1F5F9', color: '#64748B', label: 'ENDED' }
+
+  const formatDate = (iso) => new Date(iso).toLocaleString('en-GB', {
+    weekday: 'short', day: 'numeric', month: 'short',
+    hour: '2-digit', minute: '2-digit',
+  })
+
+  const studentCount = (lc.assignedStudents || []).length
+
+  return (
+    <div className="card" style={{
+      padding: 14, borderLeft: '4px solid ' + subjCol,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 240 }}>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{
+              background: statusBadge.bg, color: statusBadge.color,
+              fontSize: 9.5, fontWeight: 800, letterSpacing: '.08em',
+              padding: '2px 8px', borderRadius: 99,
+            }}>{statusBadge.label}</span>
+            {status === 'live' && (
+              <span style={{
+                width: 7, height: 7, borderRadius: '50%',
+                background: '#B91C1C', animation: 'pulse 1.5s infinite',
+              }}/>
+            )}
+            <span style={{
+              fontSize: 11, fontWeight: 700, color: subjCol,
+              letterSpacing: '.06em', textTransform: 'uppercase',
+            }}>{lc.subject}</span>
+            <span style={{ fontSize: 11, color: '#6B6B6B' }}>
+              {lc.curriculum} {lc.grade}
+            </span>
+          </div>
+          <div style={{ fontWeight: 700, fontSize: 15, color: '#1A1A1A', marginBottom: 4 }}>
+            {lc.title}
+          </div>
+          <div style={{ fontSize: 12, color: '#6B6B6B' }}>
+            {formatDate(lc.scheduledAt)} &middot; {lc.durationMins} min &middot; {studentCount} student{studentCount === 1 ? '' : 's'}
+          </div>
+          {lc.meetingLink && (
+            <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 4, wordBreak: 'break-all' }}>
+              <strong style={{ color: '#7D1025' }}>Link:</strong>{' '}
+              <a href={lc.meetingLink} target="_blank" rel="noopener noreferrer"
+                style={{ color: '#7D1025' }}>
+                {lc.meetingLink.length > 60 ? lc.meetingLink.slice(0, 60) + '...' : lc.meetingLink}
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {status === 'scheduled' && (
+            <>
+              <button onClick={onStart}
+                style={{
+                  background: '#15803D', color: '#fff', border: 'none',
+                  padding: '8px 14px', borderRadius: 6,
+                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                }}>
+                Start
+              </button>
+              <button onClick={onEdit}
+                style={{
+                  background: 'transparent', border: '1px solid #C9A030',
+                  color: '#7D1025', padding: '8px 14px', borderRadius: 6,
+                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                }}>
+                Edit
+              </button>
+              <button onClick={onDelete}
+                style={{
+                  background: 'transparent', border: '1px solid #FCA5A5',
+                  color: '#B91C1C', padding: '8px 14px', borderRadius: 6,
+                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                }}>
+                Delete
+              </button>
+            </>
+          )}
+          {status === 'live' && (
+            <>
+              <a href={lc.meetingLink} target="_blank" rel="noopener noreferrer"
+                style={{
+                  background: '#7D1025', color: '#fff',
+                  padding: '8px 14px', borderRadius: 6,
+                  fontSize: 12, fontWeight: 700, textDecoration: 'none',
+                }}>
+                Join Zoom
+              </a>
+              <button onClick={onEnd}
+                style={{
+                  background: 'transparent', border: '1px solid #B91C1C',
+                  color: '#B91C1C', padding: '8px 14px', borderRadius: 6,
+                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                }}>
+                End Class
+              </button>
+            </>
+          )}
+          {status === 'ended' && (
+            <button onClick={onDelete}
+              style={{
+                background: 'transparent', border: '1px solid #E8E2D6',
+                color: '#6B6B6B', padding: '8px 14px', borderRadius: 6,
+                fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              }}>
+              Delete
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
