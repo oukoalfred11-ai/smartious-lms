@@ -450,10 +450,14 @@ const NestedRendererInner = ({ parts, basePath, depth, showMarks, compact }) => 
 // Props:
 //   questionRef — '<bankId>' OR 'custom:N'
 //   stem        — parent question text (shown once at top)
+//   flatQuestion — for flat questions: { type, options, text }
 //   parts       — parts tree (may be empty for flat questions)
-//   answers     — current answers map { [key]: { answerText, selectedOption } }
+//   answers     — current answers map
 //   onChange    — (newAnswers) => void
 //   readOnly    — disable inputs (used for review/result screens)
+//   renderers   — { DrawingCanvas, HandwritingCanvas, UploadInput } — passed in
+//                 from the portal so this shared module stays portal-agnostic.
+//                 If a renderer is missing, the type falls back to textarea.
 //
 // For FLAT questions (parts:[]), this renders ONE answer input
 // directly with partPath=[] — same behaviour as before.
@@ -463,11 +467,12 @@ const makeKey = (questionRef, partPath) => questionRef + '|' + (partPath || []).
 export const NestedAnswerCollector = ({
   questionRef,
   stem,
-  flatQuestion = null,  // { type, options, text } — for FLAT questions
+  flatQuestion = null,
   parts = [],
   answers = {},
   onChange,
   readOnly = false,
+  renderers = {},
 }) => {
   const isNested = Array.isArray(parts) && parts.length > 0
 
@@ -498,6 +503,7 @@ export const NestedAnswerCollector = ({
           answer={answers[makeKey(questionRef, [])]}
           onChange={(patch) => updateAnswer([], patch)}
           readOnly={readOnly}
+          renderers={renderers}
         />
       )}
       {/* Nested: walk the tree, rendering an input at every leaf */}
@@ -508,13 +514,14 @@ export const NestedAnswerCollector = ({
           answers={answers}
           updateAnswer={updateAnswer}
           readOnly={readOnly}
+          renderers={renderers}
         />
       )}
     </div>
   )
 }
 
-const NestedAnswerInner = ({ parts, basePath, depth, questionRef, answers, updateAnswer, readOnly }) => {
+const NestedAnswerInner = ({ parts, basePath, depth, questionRef, answers, updateAnswer, readOnly, renderers }) => {
   return (
     <div style={{
       marginLeft: depth > 0 ? 16 : 0,
@@ -557,6 +564,7 @@ const NestedAnswerInner = ({ parts, basePath, depth, questionRef, answers, updat
                   answer={answers[makeKey(questionRef, path)]}
                   onChange={(patch) => updateAnswer(path, patch)}
                   readOnly={readOnly}
+                  renderers={renderers}
                 />
               </div>
             )}
@@ -565,6 +573,7 @@ const NestedAnswerInner = ({ parts, basePath, depth, questionRef, answers, updat
                 parts={part.parts} basePath={path} depth={depth+1}
                 questionRef={questionRef} answers={answers}
                 updateAnswer={updateAnswer} readOnly={readOnly}
+                renderers={renderers}
               />
             )}
           </div>
@@ -574,9 +583,12 @@ const NestedAnswerInner = ({ parts, basePath, depth, questionRef, answers, updat
   )
 }
 
-const AnswerInput = ({ part, path, questionRef, answer, onChange, readOnly }) => {
+const AnswerInput = ({ part, path, questionRef, answer, onChange, readOnly, renderers = {} }) => {
   const a = answer || {}
-  if (part.type === 'mcq' && (part.options || []).length > 0) {
+  const type = part.type || 'short'
+
+  // ── MCQ ──
+  if (type === 'mcq' && (part.options || []).length > 0) {
     return (
       <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
         {part.options.map((opt, oi) => {
@@ -608,13 +620,98 @@ const AnswerInput = ({ part, path, questionRef, answer, onChange, readOnly }) =>
       </div>
     )
   }
-  // short / long / drawing / handwriting / upload — use textarea for all text types
-  const rows = part.type === 'long' ? 6 : 3
+
+  // ── DRAWING (uses portal-provided DrawingCanvas) ──
+  // The drawing is serialised to a single PNG dataURL stored in answerText.
+  if (type === 'drawing' && renderers.DrawingCanvas) {
+    const Canvas = renderers.DrawingCanvas
+    return (
+      <div style={{
+        border:`1.5px solid ${BRAND.line}`, borderRadius:6,
+        background:BRAND.cream, padding:8,
+      }}>
+        <div style={{ fontSize:11, color:BRAND.inkMute, fontWeight:600, marginBottom:6, letterSpacing:'.05em', textTransform:'uppercase' }}>
+          Sketch your answer below
+        </div>
+        <Canvas
+          value={a.answerText || ''}
+          onSave={(dataUrl) => !readOnly && onChange({ answerText: dataUrl })}
+          readOnly={readOnly}
+        />
+      </div>
+    )
+  }
+
+  // ── HANDWRITING (multi-page, uses portal-provided HandwritingCanvas) ──
+  // The canvas's onSave returns a single combined PNG dataURL of all pages.
+  if (type === 'handwriting' && renderers.HandwritingCanvas) {
+    const Canvas = renderers.HandwritingCanvas
+    return (
+      <div style={{
+        border:`1.5px solid ${BRAND.line}`, borderRadius:6,
+        background:BRAND.cream, padding:8,
+      }}>
+        <div style={{ fontSize:11, color:BRAND.inkMute, fontWeight:600, marginBottom:6, letterSpacing:'.05em', textTransform:'uppercase' }}>
+          Write your answer by hand (multi-page)
+        </div>
+        <Canvas
+          value={a.answerText || null}
+          onSave={(dataUrl) => !readOnly && onChange({ answerText: dataUrl })}
+          readOnly={readOnly}
+        />
+      </div>
+    )
+  }
+
+  // ── UPLOAD (uses portal-provided UploadInput, or falls back to plain file input) ──
+  if (type === 'upload') {
+    if (renderers.UploadInput) {
+      const Uploader = renderers.UploadInput
+      return (
+        <Uploader
+          value={a.answerText || ''}
+          onChange={(url) => !readOnly && onChange({ answerText: url })}
+          readOnly={readOnly}
+        />
+      )
+    }
+    // Fallback: plain file input that stores the filename. Without an
+    // uploader the actual upload won't happen, but at least the field renders.
+    return (
+      <div style={{
+        padding:'12px 14px',
+        background:BRAND.goldPale, border:`1px dashed ${BRAND.gold}`, borderRadius:6,
+        fontSize:12, color:BRAND.crimson,
+      }}>
+        File upload type — uploader not configured in this portal. Type a note here for now:
+        <textarea
+          value={a.answerText || ''}
+          onChange={e => !readOnly && onChange({ answerText: e.target.value })}
+          rows={2}
+          readOnly={readOnly}
+          style={{
+            width:'100%', marginTop:6, boxSizing:'border-box',
+            padding:'8px 10px',
+            background:BRAND.white,
+            border:`1px solid ${BRAND.line}`, borderRadius:4,
+            fontSize:13, fontFamily:'inherit',
+          }}
+        />
+      </div>
+    )
+  }
+
+  // ── SHORT / LONG (and fallback for missing renderers) ──
+  const rows = type === 'long' ? 6 : 3
+  const placeholder =
+    type === 'drawing'     ? 'Drawing canvas unavailable — describe your sketch here…' :
+    type === 'handwriting' ? 'Handwriting canvas unavailable — type your answer here…' :
+                             'Type your answer here…'
   return (
     <textarea
       value={a.answerText || ''}
       onChange={e => !readOnly && onChange({ answerText: e.target.value })}
-      placeholder={readOnly ? '' : 'Type your answer here...'}
+      placeholder={readOnly ? '' : placeholder}
       rows={rows}
       readOnly={readOnly}
       style={{
