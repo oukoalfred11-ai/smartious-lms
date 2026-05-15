@@ -87,6 +87,30 @@ router.get('/me', auth, (req, res) => {
   res.json({ success: true, user: buildSafeUser(req.user) });
 });
 
+// ── Self-update — limited safe fields only ───────────────
+// Used by teacher to set their default meeting link, by anyone to
+// update phone/bio/avatar. Never accepts role/email/password/etc.
+router.patch('/me', auth, async (req, res) => {
+  try {
+    const SAFE_FIELDS = ['phone', 'bio', 'avatar', 'defaultMeetingLink'];
+    const updates = {};
+    for (const k of SAFE_FIELDS) {
+      if (k in req.body) updates[k] = (req.body[k] || '').toString().trim();
+    }
+    if (Object.keys(updates).length === 0)
+      return res.status(400).json({ success: false, message: 'Nothing to update.' });
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id, { $set: updates }, { new: true, runValidators: true }
+    ).select('-password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+    res.json({ success: true, user: buildSafeUser(user) });
+  } catch (e) {
+    console.error('[auth /me PATCH]', e.message);
+    res.status(500).json({ success: false, message: 'Failed to update profile.' });
+  }
+});
+
 // ── Mshauri AI — mastery-aware ────────────────────────────
 // The frontend sends masteryContext (from /api/adaptive/mshauri-context)
 // so every reply is personalised to the student's real topic scores.
