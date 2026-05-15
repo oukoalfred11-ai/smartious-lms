@@ -3208,6 +3208,11 @@ function ExamsTab({ user, toast, goTo, store }) {
                     parts={isNested ? q.parts : []}
                     answers={realAnswers}
                     onChange={setRealAnswers}
+                    renderers={{
+                      DrawingCanvas,
+                      HandwritingCanvas,
+                      // UploadInput: TODO — wire to Cloudinary uploader when ready
+                    }}
                   />
                 </div>
               </div>
