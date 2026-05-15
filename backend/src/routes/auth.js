@@ -42,6 +42,11 @@ const buildSafeUser = (u) => ({
   bio:                   u.bio                   || '',
   avatar:                u.avatar                || '',
 
+  // ── Teacher meeting defaults ──
+  // Pre-fills the live-class scheduling form so teacher doesn't paste their
+  // Zoom URL every time. Empty for non-teacher users.
+  defaultMeetingLink:    u.defaultMeetingLink    || '',
+
   // ── Gamification (mirrored from User for fast reads) ──
   xp:                    u.xp                    || 0,
   streak:                u.streak                || 0,
