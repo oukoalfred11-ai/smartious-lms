@@ -8659,17 +8659,31 @@ function MyResultDetail({ subId, detail, loading, onBack }) {
                     <div style={{ marginTop:12 }}>
                       <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'#6B6B6B', marginBottom:6 }}>
                         Your answer
+                        {answer.teacherAnnotation && (
+                          <span style={{
+                            marginLeft:8, padding:'2px 8px', borderRadius:99,
+                            background:'#FBE8E8', color:'#7D1025',
+                            fontSize:9.5, letterSpacing:'.06em',
+                          }}>
+                            ✓ MARKED BY TEACHER
+                          </span>
+                        )}
                       </div>
-                      {(partType === 'drawing' || partType === 'handwriting') && answer.answerText && answer.answerText.startsWith('data:') ? (
-                        <a href={answer.answerText} target="_blank" rel="noopener noreferrer">
-                          <img src={answer.answerText} alt="Your drawing"
-                            style={{
-                              maxWidth:'100%', maxHeight:420,
-                              border:'1px solid #E8E2D6', borderRadius:6,
-                              background:'#fff', display:'block',
-                            }}/>
-                        </a>
-                      ) : partType === 'mcq' ? (
+                      {(partType === 'drawing' || partType === 'handwriting') && answer.answerText && answer.answerText.startsWith('data:') ? (() => {
+                        // Show the teacher's annotated version if it exists,
+                        // otherwise the student's original drawing.
+                        const display = answer.teacherAnnotation || answer.answerText
+                        return (
+                          <a href={display} target="_blank" rel="noopener noreferrer">
+                            <img src={display} alt={answer.teacherAnnotation ? 'Marked by teacher' : 'Your drawing'}
+                              style={{
+                                maxWidth:'100%', maxHeight:420,
+                                border:'1px solid #E8E2D6', borderRadius:6,
+                                background:'#fff', display:'block',
+                              }}/>
+                          </a>
+                        )
+                      })() : partType === 'mcq' ? (
                         <div style={{
                           padding:'10px 14px', background:'#fff', borderRadius:6,
                           border:'1px solid #E8E2D6', fontSize:13.5, color:'#1A1A1A',
@@ -9387,8 +9401,41 @@ function HomeworkTab({ user, toast }) {
                     {/* Drawing — full canvas */}
                     {q.type === 'drawing' && (
                       <div>
-                        {a.attachment && a.attachment.url ? (
-                          // Already saved a drawing
+                        {/* When graded and teacher annotated, show that instead of canvas */}
+                        {isReadOnly && a.teacherAnnotation ? (
+                          <div>
+                            <div style={{
+                              fontSize:10.5, fontWeight:700, color:'#7D1025',
+                              letterSpacing:'.08em', textTransform:'uppercase', marginBottom:6,
+                              display:'flex', alignItems:'center', gap:6,
+                            }}>
+                              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>
+                              Marked by your teacher
+                            </div>
+                            <a href={a.teacherAnnotation} target="_blank" rel="noopener noreferrer">
+                              <img
+                                src={a.teacherAnnotation}
+                                alt="Marked by teacher"
+                                style={{
+                                  maxWidth:'100%', maxHeight:480,
+                                  border:'2px solid #C9A030', borderRadius:8,
+                                  background:'#fff', display:'block',
+                                }}
+                              />
+                            </a>
+                            {a.attachment?.url && (
+                              <div style={{ marginTop:6 }}>
+                                <a href={a.attachment.url} target="_blank" rel="noopener noreferrer"
+                                  style={{ fontSize:11.5, color:'#6B6B6B', textDecoration:'underline' }}>
+                                  View your original (unmarked)
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        ) : a.attachment && a.attachment.url ? (
+                          // Either editing OR graded without annotation — show original
                           <div>
                             <DrawingCanvas
                               value={a.attachment.url}
