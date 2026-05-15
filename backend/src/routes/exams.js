@@ -212,6 +212,76 @@ router.get('/:id/submissions', auth, requireRole('teacher','admin'), async (req,
 // STUDENT ROUTES
 // ═══════════════════════════════════════════════════════════
 
+// GET /api/exams/submissions/my — current student's submissions across
+// all exams, with parent exam populated so the result module can show
+// full context (title, subject, total marks, teacher name, etc).
+// Only returns submitted/graded submissions — in-progress attempts are
+// hidden from the results module.
+router.get('/submissions/my', auth, async (req, res) => {
+  try {
+    const submissions = await ExamSubmission.find({
+      studentId: req.user._id,
+      status: { $in: ['submitted', 'graded'] },
+    })
+      .sort({ submittedAt: -1 })
+      .populate({
+        path: 'examId',
+        select: 'title subject curriculum grade durationMins totalMarks totalQuestions teacherId questionIds customQuestions startAt',
+        populate: { path: 'teacherId', select: 'firstName lastName' },
+      })
+      .lean();
+
+    // Strip submissions whose parent exam was deleted
+    const valid = submissions.filter(s => s.examId);
+
+    res.json({ success: true, data: { submissions: valid } });
+  } catch (e) {
+    console.error('[exams submissions/my] failed:', e.message);
+    res.status(500).json({ success: false, message: 'Failed to load your submissions.' });
+  }
+});
+
+// GET /api/exams/submissions/my/:subId — a single submission with full
+// question context (bank questions populated) so the result detail screen
+// can render every answer with its question text.
+router.get('/submissions/my/:subId', auth, async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.subId))
+      return res.status(400).json({ success:false, message:'Invalid submission id.' });
+
+    const submission = await ExamSubmission.findOne({
+      _id: req.params.subId,
+      studentId: req.user._id,
+    })
+      .populate({
+        path: 'examId',
+        populate: { path: 'teacherId', select: 'firstName lastName' },
+      })
+      .lean();
+
+    if (!submission) return res.status(404).json({ success:false, message:'Submission not found.' });
+
+    // Fetch bank questions for the exam so the result screen can display them.
+    // We keep correctAnswer here because the result screen is shown to the
+    // student AFTER grading — at that point seeing the model answer is helpful.
+    let bankQuestions = [];
+    try {
+      const Question = require('../models/Question');
+      bankQuestions = await Question.find({
+        _id: { $in: submission.examId?.questionIds || [] },
+      }).select('-__v').lean();
+    } catch {}
+
+    res.json({
+      success: true,
+      data: { submission, bankQuestions },
+    });
+  } catch (e) {
+    console.error('[exams submissions/my/:id] failed:', e.message);
+    res.status(500).json({ success:false, message:'Failed to load submission.' });
+  }
+});
+
 router.get('/student/list', auth, async (req, res) => {
   try {
     const studentId = req.user._id;
