@@ -865,11 +865,356 @@ export const buildAnswersPayload = (answersMap) => {
   }).filter(a => a.answerText || a.selectedOption)
 }
 
+// ─────────────────────────────────────────────────────────
+// AnnotationCanvas — teacher-side marking on student's drawing
+// ─────────────────────────────────────────────────────────
+// Loads the student's submitted image as a background, lets the
+// teacher draw on top with a coloured pen (red / green / blue) for
+// ticks, crosses, and circled errors. Saves a composited PNG dataURL.
+//
+// Returns a composited PNG dataURL containing the original drawing
+// PLUS the teacher's strokes. Original is never modified server-side.
+// ─────────────────────────────────────────────────────────
+export const AnnotationCanvas = ({ backgroundImageUrl, existingAnnotation, onSave, onCancel }) => {
+  const canvasRef = useRef(null)
+  const ctxRef = useRef(null)
+  const isDrawingRef = useRef(false)
+  const lastPointRef = useRef(null)
+  const bgImageRef = useRef(null)
+
+  const [color, setColor] = useState('#DC2626')
+  const [penSize, setPenSize] = useState(4)
+  const [history, setHistory] = useState([])
+  const [historyIndex, setHistoryIndex] = useState(-1)
+  const [canvasSize, setCanvasSize] = useState({ w: 800, h: 600 })
+  const [loading, setLoading] = useState(true)
+  const [tainted, setTainted] = useState(false)
+
+  useEffect(() => {
+    if (!backgroundImageUrl) { setLoading(false); return }
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      bgImageRef.current = img
+      const maxW = 1000
+      const ratio = img.naturalWidth > maxW ? maxW / img.naturalWidth : 1
+      setCanvasSize({
+        w: Math.round(img.naturalWidth * ratio),
+        h: Math.round(img.naturalHeight * ratio),
+      })
+      setLoading(false)
+    }
+    img.onerror = () => {
+      const fallback = new Image()
+      fallback.onload = () => {
+        bgImageRef.current = fallback
+        setTainted(true)
+        const maxW = 1000
+        const ratio = fallback.naturalWidth > maxW ? maxW / fallback.naturalWidth : 1
+        setCanvasSize({
+          w: Math.round(fallback.naturalWidth * ratio),
+          h: Math.round(fallback.naturalHeight * ratio),
+        })
+        setLoading(false)
+      }
+      fallback.onerror = () => { setLoading(false); bgImageRef.current = null }
+      fallback.src = backgroundImageUrl
+    }
+    img.src = backgroundImageUrl
+  }, [backgroundImageUrl])
+
+  useEffect(() => {
+    if (loading) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    ctxRef.current = ctx
+
+    canvas.width = canvasSize.w
+    canvas.height = canvasSize.h
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    const drawBackground = () => {
+      if (bgImageRef.current) {
+        try { ctx.drawImage(bgImageRef.current, 0, 0, canvas.width, canvas.height) }
+        catch (e) { console.error('[annotation] drawImage failed:', e.message) }
+      }
+    }
+
+    if (existingAnnotation) {
+      const prev = new Image()
+      prev.onload = () => {
+        ctx.drawImage(prev, 0, 0, canvas.width, canvas.height)
+        try {
+          const snap = ctx.getImageData(0, 0, canvas.width, canvas.height)
+          setHistory([snap]); setHistoryIndex(0)
+        } catch { setTainted(true) }
+      }
+      prev.onerror = () => {
+        drawBackground()
+        try {
+          const snap = ctx.getImageData(0, 0, canvas.width, canvas.height)
+          setHistory([snap]); setHistoryIndex(0)
+        } catch { setTainted(true) }
+      }
+      prev.src = existingAnnotation
+    } else {
+      drawBackground()
+      try {
+        const snap = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        setHistory([snap]); setHistoryIndex(0)
+      } catch { setTainted(true) }
+    }
+  }, [loading, canvasSize, existingAnnotation])
+
+  const pushHistory = () => {
+    const ctx = ctxRef.current
+    const canvas = canvasRef.current
+    if (!ctx || !canvas) return
+    try {
+      const snap = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const nextHistory = history.slice(0, historyIndex + 1)
+      nextHistory.push(snap)
+      if (nextHistory.length > 20) nextHistory.shift()
+      setHistory(nextHistory)
+      setHistoryIndex(nextHistory.length - 1)
+    } catch { setTainted(true) }
+  }
+
+  const getPos = (e) => {
+    const canvas = canvasRef.current
+    const rect = canvas.getBoundingClientRect()
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+    const point = e.touches ? e.touches[0] : e
+    return {
+      x: (point.clientX - rect.left) * scaleX,
+      y: (point.clientY - rect.top) * scaleY,
+    }
+  }
+
+  const handleStart = (e) => {
+    e.preventDefault()
+    isDrawingRef.current = true
+    lastPointRef.current = getPos(e)
+    const ctx = ctxRef.current
+    ctx.strokeStyle = color
+    ctx.lineWidth = penSize
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+  }
+  const handleMove = (e) => {
+    if (!isDrawingRef.current) return
+    e.preventDefault()
+    const pt = getPos(e)
+    const ctx = ctxRef.current
+    ctx.beginPath()
+    ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y)
+    ctx.lineTo(pt.x, pt.y)
+    ctx.stroke()
+    lastPointRef.current = pt
+  }
+  const handleEnd = () => {
+    if (!isDrawingRef.current) return
+    isDrawingRef.current = false
+    pushHistory()
+  }
+
+  const undo = () => {
+    if (historyIndex <= 0) return
+    const newIndex = historyIndex - 1
+    ctxRef.current.putImageData(history[newIndex], 0, 0)
+    setHistoryIndex(newIndex)
+  }
+  const redo = () => {
+    if (historyIndex >= history.length - 1) return
+    const newIndex = historyIndex + 1
+    ctxRef.current.putImageData(history[newIndex], 0, 0)
+    setHistoryIndex(newIndex)
+  }
+  const clearAnnotations = () => {
+    if (!window.confirm('Clear all annotations? (Background image stays.)')) return
+    const ctx = ctxRef.current
+    const canvas = canvasRef.current
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    if (bgImageRef.current) {
+      try { ctx.drawImage(bgImageRef.current, 0, 0, canvas.width, canvas.height) }
+      catch {}
+    }
+    pushHistory()
+  }
+  const doSave = () => {
+    if (tainted) {
+      window.alert(
+        'Cannot save annotation: the student\'s image was loaded from a server without CORS. ' +
+        'Configure CORS on the image host (Cloudinary) to allow cross-origin access, then re-open the annotation.'
+      )
+      return
+    }
+    try {
+      const dataUrl = canvasRef.current.toDataURL('image/png')
+      onSave?.(dataUrl)
+    } catch (e) {
+      window.alert('Could not save annotation: ' + e.message)
+    }
+  }
+
+  const COLORS = [
+    { value: '#DC2626', label: 'Red',   bg: '#FEE2E2' },
+    { value: '#15803D', label: 'Green', bg: '#DCFCE7' },
+    { value: '#1D4ED8', label: 'Blue',  bg: '#DBEAFE' },
+  ]
+  const SIZES = [2, 4, 7, 10]
+
+  if (loading) {
+    return (
+      <div style={{ padding:40, textAlign:'center', background: BRAND.cream, borderRadius:8 }}>
+        <div className="mono" style={{ fontSize:12, color: BRAND.inkMute, letterSpacing:'.1em' }}>
+          LOADING STUDENT'S DRAWING...
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+      {tainted && (
+        <div style={{
+          padding:'10px 14px',
+          background: '#FEF3C7', border: '1px solid #D97706',
+          borderRadius: 6, fontSize: 12, color: '#92400E',
+        }}>
+          <strong>CORS warning:</strong> the image came from a server that doesn't allow cross-origin access.
+          You can draw on it but the annotation cannot be saved. Configure CORS on Cloudinary to fix.
+        </div>
+      )}
+
+      <div style={{
+        display:'flex', gap:14, alignItems:'center', flexWrap:'wrap',
+        padding:'10px 12px',
+        background: BRAND.cream, border:`1px solid ${BRAND.line}`,
+        borderRadius:8,
+      }}>
+        <div style={{ display:'flex', gap:4, alignItems:'center' }}>
+          <span style={{ fontSize:10.5, fontWeight:700, color:BRAND.inkMute, letterSpacing:'.05em', textTransform:'uppercase', marginRight:4 }}>Pen</span>
+          {COLORS.map(c => (
+            <button key={c.value}
+              onClick={() => setColor(c.value)}
+              title={c.label}
+              style={{
+                width:28, height:28, borderRadius:'50%',
+                background: c.value,
+                border:`3px solid ${color === c.value ? '#1A1A1A' : c.bg}`,
+                cursor:'pointer', padding:0,
+                transition:'transform .1s',
+                transform: color === c.value ? 'scale(1.1)' : 'scale(1)',
+              }}
+            />
+          ))}
+        </div>
+
+        <div style={{ display:'flex', gap:4, alignItems:'center' }}>
+          <span style={{ fontSize:10.5, fontWeight:700, color:BRAND.inkMute, letterSpacing:'.05em', textTransform:'uppercase', marginRight:4 }}>Size</span>
+          {SIZES.map(s => (
+            <button key={s}
+              onClick={() => setPenSize(s)}
+              style={{
+                width:30, height:30,
+                background: penSize === s ? BRAND.crimson : BRAND.white,
+                color: penSize === s ? BRAND.white : BRAND.ink,
+                border:`1px solid ${penSize === s ? BRAND.crimson : BRAND.line}`,
+                borderRadius:6, cursor:'pointer',
+                display:'flex', alignItems:'center', justifyContent:'center',
+              }}>
+              <div style={{
+                width: s, height: s, borderRadius:'50%',
+                background: penSize === s ? BRAND.white : BRAND.ink,
+              }}/>
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display:'flex', gap:4, marginLeft:'auto' }}>
+          <button onClick={undo} disabled={historyIndex <= 0}
+            style={{
+              padding:'6px 10px', background:BRAND.white,
+              border:`1px solid ${BRAND.line}`, borderRadius:6,
+              cursor: historyIndex <= 0 ? 'not-allowed' : 'pointer',
+              fontSize:11, fontWeight:600, color:BRAND.ink,
+              opacity: historyIndex <= 0 ? .4 : 1,
+            }}>Undo</button>
+          <button onClick={redo} disabled={historyIndex >= history.length - 1}
+            style={{
+              padding:'6px 10px', background:BRAND.white,
+              border:`1px solid ${BRAND.line}`, borderRadius:6,
+              cursor: historyIndex >= history.length - 1 ? 'not-allowed' : 'pointer',
+              fontSize:11, fontWeight:600, color:BRAND.ink,
+              opacity: historyIndex >= history.length - 1 ? .4 : 1,
+            }}>Redo</button>
+          <button onClick={clearAnnotations}
+            style={{
+              padding:'6px 10px', background:'#FEE2E2',
+              border:'1px solid #FCA5A5', borderRadius:6,
+              cursor:'pointer', fontSize:11, fontWeight:600, color:'#B91C1C',
+            }}>Clear</button>
+        </div>
+      </div>
+
+      <div style={{
+        background: BRAND.white,
+        border:`2px solid ${BRAND.line}`, borderRadius:8,
+        overflow:'auto', maxHeight:'70vh',
+        display:'flex', justifyContent:'center',
+      }}>
+        <canvas
+          ref={canvasRef}
+          width={canvasSize.w}
+          height={canvasSize.h}
+          style={{
+            cursor:'crosshair', touchAction:'none',
+            display:'block', maxWidth:'100%', height:'auto',
+          }}
+          onMouseDown={handleStart}
+          onMouseMove={handleMove}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
+          onTouchStart={handleStart}
+          onTouchMove={handleMove}
+          onTouchEnd={handleEnd}
+        />
+      </div>
+
+      <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
+        {onCancel && (
+          <button onClick={onCancel}
+            style={{
+              padding:'10px 18px', background:BRAND.white,
+              border:`1.5px solid ${BRAND.line}`, borderRadius:6,
+              cursor:'pointer', fontSize:13, fontWeight:700, color:BRAND.ink,
+            }}>Cancel</button>
+        )}
+        <button onClick={doSave} disabled={tainted}
+          style={{
+            padding:'10px 22px',
+            background: tainted ? '#9CA3AF' : BRAND.crimson,
+            color:BRAND.white, border:'none', borderRadius:6,
+            cursor: tainted ? 'not-allowed' : 'pointer',
+            fontSize:13, fontWeight:700,
+          }}>Save Annotation</button>
+      </div>
+    </div>
+  )
+}
+
 // Default export bundles everything for convenience
 export default {
   NestedQuestionEditor,
   NestedQuestionRenderer,
   NestedAnswerCollector,
+  AnnotationCanvas,
+  AttachmentList,
   labelAt,
   walkLeaves,
   sumLeafMarks,
