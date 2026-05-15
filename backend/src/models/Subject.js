@@ -21,6 +21,19 @@ const subjectSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  // ── Visual identity (optional; for student-facing UI) ──
+  // color: hex code that paints the subject card stripe + accents
+  // coverImage: Cloudinary URL for the subject hero image
+  color: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  coverImage: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   isActive: {
     type: Boolean,
     default: true
@@ -39,4 +52,3 @@ const subjectSchema = new mongoose.Schema({
 subjectSchema.index({ curriculum: 1, subjectName: 1 }, { unique: true });
 
 module.exports = mongoose.model('Subject', subjectSchema);
-
