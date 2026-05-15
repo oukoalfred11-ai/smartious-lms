@@ -452,6 +452,12 @@ router.post('/submissions/:subId/grade', auth, requireRole('teacher','admin'), a
         marksAwarded: marks,
         teacherComment: update.teacherComment ?? a.teacherComment,
         isCorrect: typeof update.isCorrect === 'boolean' ? update.isCorrect : a.isCorrect,
+        // Teacher's marked-up version of the student's drawing.
+        // Only update if the request explicitly sent one; otherwise
+        // preserve what was saved before (re-grade-friendly).
+        teacherAnnotation: typeof update.teacherAnnotation === 'string'
+          ? update.teacherAnnotation
+          : (a.teacherAnnotation || ''),
       };
     });
 
