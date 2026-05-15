@@ -10,6 +10,7 @@ import {
   sumLeafMarks,
   labelAt,
 } from '../../components/exam/NestedQuestion.jsx'
+import ManageSubjectTab from './ManageSubjectTab.jsx'
 
 // ── SVG icon helper ──────────────────────────────────────
 const Ico = ({ d, w = 18, col = 'currentColor', sw = 2 }) => (
@@ -500,6 +501,7 @@ export default function TeacherPortal() {
       {id:'students',      label:'My Students',      iconName:'students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
       {id:'liveclass',     label:'Group Rooms',      iconName:'liveclass',     icon:'rect:2:3:20:14:2|M8 21h8M12 17v4', live:true},
       {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
+      {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
     ]},
     { section:'Assessment', items:[
       {id:'questionbank',  label:'Question Bank',    iconName:'questionbank',  icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6|circle:18:18:3'},
@@ -634,6 +636,11 @@ export default function TeacherPortal() {
           {/* ── SCHEDULE CLASSES ── (new scheduling system) */}
           {page === 'scheduleclasses' && (
             <ScheduleClassesTab user={currentUser} toast={toast} />
+          )}
+
+          {/* ── MANAGE MY SUBJECT ── */}
+          {page === 'managesubject' && (
+            <ManageSubjectTab user={currentUser} toast={toast} />
           )}
 
            {/* ── COMMUNICATION ── */}
