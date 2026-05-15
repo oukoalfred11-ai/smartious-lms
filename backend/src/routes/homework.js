@@ -26,22 +26,22 @@
  *   - Lock-until-date: returned in response, frontend respects it
  *   - MCQ auto-grading happens in /submit
  */
- 
+
 const express = require('express');
 const router = express.Router();
- 
+
 const Homework = require('../models/Homework');
 const HomeworkSubmission = require('../models/HomeworkSubmission');
 const Question = require('../models/Question');
 const GroupRoom = require('../models/GroupRoom');
 const User = require('../models/User');
 const { auth, requireRole } = require('../middleware/auth');
- 
+
 // ─────────────────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────────────────
 const isObjectId = (s) => /^[a-f\d]{24}$/i.test(s);
- 
+
 // Snapshot a question (full copy for homework embedding)
 function snapshotQuestion(q) {
   return {
@@ -57,7 +57,7 @@ function snapshotQuestion(q) {
     topic:         q.topic || '',
   };
 }
- 
+
 // Auto-grade MCQ answer (returns awarded marks)
 function autoGradeMCQ(snapshotQuestion, answer) {
   if (snapshotQuestion.type !== 'mcq') return { awarded: null, autoGraded: false };
@@ -74,7 +74,7 @@ function autoGradeMCQ(snapshotQuestion, answer) {
     autoGraded: true,
   };
 }
- 
+
 // ─────────────────────────────────────────────────────────
 // POST /api/homework  — teacher creates homework
 // Body: { title, description, curriculum, subject, grade,
@@ -91,7 +91,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       releaseAt, dueAt,
       status,
     } = req.body;
- 
+
     if (!title || !title.trim()) {
       return res.status(400).json({ success: false, message: 'Title is required.' });
     }
@@ -107,7 +107,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
     if (!assignedRoom && (!Array.isArray(assignedStudents) || assignedStudents.length === 0)) {
       return res.status(400).json({ success: false, message: 'Must assign to a room or specific students.' });
     }
- 
+
     // Build snapshotted questions array
     const snapshots = [];
     for (const q of questions) {
@@ -167,7 +167,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       }
       snapshots.push(snapshot);
     }
- 
+
     // If assigned to a room, validate the room exists and is accessible
     if (assignedRoom) {
       if (!isObjectId(assignedRoom)) {
@@ -178,7 +178,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
         return res.status(404).json({ success: false, message: 'Room not found.' });
       }
     }
- 
+
     // Validate assigned students all exist (if provided)
     if (Array.isArray(assignedStudents) && assignedStudents.length > 0) {
       for (const sid of assignedStudents) {
@@ -187,7 +187,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
         }
       }
     }
- 
+
     const hw = await Homework.create({
       title:        title.trim(),
       description:  description || '',
@@ -200,7 +200,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       createdBy:    req.user._id,
       status:       status || 'draft',
     });
- 
+
     return res.json({
       success: true,
       message: 'Homework created.',
@@ -211,7 +211,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to create homework: ' + e.message });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // GET /api/homework  — teacher lists own homework
 // Query: createdBy=me OR createdBy=<id> (admin), status, curriculum, subject
@@ -219,7 +219,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const filter = { isActive: true };
- 
+
     if (req.query.createdBy === 'me') {
       filter.createdBy = req.user._id;
     } else if (req.query.createdBy && isObjectId(req.query.createdBy) && req.user.role === 'admin') {
@@ -228,26 +228,26 @@ router.get('/', auth, async (req, res) => {
       // Default for teachers: only their own homework
       filter.createdBy = req.user._id;
     }
- 
+
     if (req.query.status)     filter.status = req.query.status;
     if (req.query.curriculum) filter.curriculum = req.query.curriculum;
     if (req.query.subject)    filter.subject = req.query.subject;
     if (req.query.grade)      filter.grade = req.query.grade;
- 
+
     const homework = await Homework.find(filter)
       .populate('assignedRoom', 'name subject')
       .populate('assignedStudents', 'firstName lastName email')
       .populate('createdBy', 'firstName lastName')
       .sort({ createdAt: -1 })
       .lean();
- 
+
     return res.json({ success: true, homework, total: homework.length });
   } catch (e) {
     console.error('[homework GET]', e.message);
     return res.status(500).json({ success: false, message: 'Failed to load homework.' });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // GET /api/homework/student/list  — student sees their homework
 // Returns published homework where student is in assignedRoom or assignedStudents.
@@ -256,11 +256,11 @@ router.get('/', auth, async (req, res) => {
 router.get('/student/list', auth, async (req, res) => {
   try {
     const userId = req.user._id;
- 
+
     // Find rooms this student is in
     const rooms = await GroupRoom.find({ students: userId }).select('_id');
     const roomIds = rooms.map(r => r._id);
- 
+
     const homework = await Homework.find({
       isActive: true,
       status: 'published',
@@ -272,17 +272,17 @@ router.get('/student/list', auth, async (req, res) => {
       .populate('createdBy', 'firstName lastName')
       .sort({ releaseAt: -1 })
       .lean();
- 
+
     // Find which ones the student has already submitted
     const myHwIds = homework.map(h => h._id);
     const mySubmissions = await HomeworkSubmission.find({
       homework: { $in: myHwIds },
       student: userId,
     }).select('homework status submittedAt totalAwarded totalPossible').lean();
- 
+
     const submissionMap = {};
     mySubmissions.forEach(s => { submissionMap[s.homework.toString()] = s; });
- 
+
     const now = new Date();
     const enriched = homework.map(hw => {
       const releaseAt = new Date(hw.releaseAt);
@@ -300,14 +300,14 @@ router.get('/student/list', auth, async (req, res) => {
         mySubmission: submissionMap[hw._id.toString()] || null,
       };
     });
- 
+
     return res.json({ success: true, homework: enriched, total: enriched.length });
   } catch (e) {
     console.error('[homework/student/list]', e.message);
     return res.status(500).json({ success: false, message: 'Failed to load homework.' });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // GET /api/homework/:id  — get one (teacher view)
 // ─────────────────────────────────────────────────────────
@@ -330,7 +330,7 @@ router.get('/:id', auth, async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to load homework.' });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // PATCH /api/homework/:id  — update (creator/admin only)
 // ─────────────────────────────────────────────────────────
@@ -357,7 +357,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
     return res.status(500).json({ success: false, message: 'Failed to update homework.' });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // DELETE /api/homework/:id  — soft-delete (creator/admin only)
 // ─────────────────────────────────────────────────────────
@@ -381,7 +381,7 @@ router.delete('/:id', auth, requireRole('teacher', 'admin'), async (req, res) =>
     return res.status(500).json({ success: false, message: 'Failed to delete homework.' });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // POST /api/homework/:id/start  — student creates an empty submission
 // (called when student opens the homework for the first time)
@@ -429,7 +429,7 @@ router.post('/:id/start', auth, async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to start homework.' });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // POST /api/homework/:id/submit  — student submits answers
 // Body: { answers: [{questionIndex, answer, attachment}] }
@@ -447,12 +447,12 @@ router.post('/:id/submit', auth, async (req, res) => {
       return res.status(403).json({ success: false, message: 'Homework not yet released.' });
     }
     const userId = req.user._id;
- 
+
     // Build the answers array — auto-grade MCQ as we go
     const inputAnswers = Array.isArray(req.body.answers) ? req.body.answers : [];
     const answers = [];
     let totalAwarded = 0;
- 
+
     for (const a of inputAnswers) {
       const idx = a.questionIndex;
       const q = hw.questions[idx];
@@ -474,7 +474,7 @@ router.post('/:id/submit', auth, async (req, res) => {
       }
       answers.push(entry);
     }
- 
+
     let sub = await HomeworkSubmission.findOne({ homework: hw._id, student: userId });
     if (!sub) {
       sub = new HomeworkSubmission({
@@ -485,7 +485,7 @@ router.post('/:id/submit', auth, async (req, res) => {
     if (sub.status === 'submitted' || sub.status === 'graded' || sub.status === 'released') {
       return res.status(400).json({ success: false, message: 'Already submitted.' });
     }
- 
+
     sub.answers = answers;
     sub.status = 'submitted';
     sub.submittedAt = new Date();
@@ -501,14 +501,14 @@ router.post('/:id/submit', auth, async (req, res) => {
       sub.gradedAt = new Date();
     }
     await sub.save();
- 
+
     return res.json({ success: true, submission: sub, message: 'Submitted.' });
   } catch (e) {
     console.error('[homework submit]', e.message);
     return res.status(500).json({ success: false, message: 'Submit failed: ' + e.message });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // GET /api/homework/:id/my-submission — student's own submission
 // ─────────────────────────────────────────────────────────
@@ -523,7 +523,7 @@ router.get('/:id/my-submission', auth, async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to load submission.' });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // GET /api/homework/:id/submissions — teacher views all submissions
 // ─────────────────────────────────────────────────────────
@@ -548,7 +548,7 @@ router.get('/:id/submissions', auth, requireRole('teacher', 'admin'), async (req
     return res.status(500).json({ success: false, message: 'Failed to load submissions.' });
   }
 });
- 
+
 // ─────────────────────────────────────────────────────────
 // PATCH /api/homework/:hwId/submissions/:subId/grade  — teacher grades
 // Body: { answers: [{questionIndex, marksAwarded, feedback}], overallFeedback, release }
@@ -579,6 +579,12 @@ router.patch('/:hwId/submissions/:subId/grade', auth, requireRole('teacher', 'ad
           a.marksAwarded = Math.max(0, Math.min(grade.marksAwarded, hw.questions[a.questionIndex]?.marks || 0));
         }
         if (grade.feedback !== undefined) a.feedback = grade.feedback;
+        // Teacher's annotated version of the student's drawing/upload.
+        // Only update when the request explicitly sends one — preserves
+        // a previous annotation on partial re-saves.
+        if (typeof grade.teacherAnnotation === 'string') {
+          a.teacherAnnotation = grade.teacherAnnotation;
+        }
       }
       totalAwarded += (a.marksAwarded || 0);
     }
@@ -598,6 +604,5 @@ router.patch('/:hwId/submissions/:subId/grade', auth, requireRole('teacher', 'ad
     return res.status(500).json({ success: false, message: 'Grading failed: ' + e.message });
   }
 });
- 
+
 module.exports = router;
- 
