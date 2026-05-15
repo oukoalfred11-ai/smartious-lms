@@ -1,97 +1,110 @@
-
 const express = require('express');
 const Allocation = require('../models/Allocation');
 const User = require('../models/User');
 const Subject = require('../models/Subject');
 const { auth, requireRole } = require('../middleware/auth');
-const { 
-  sendTeacherAllocationNotification, 
+const {
+  sendTeacherAllocationNotification,
   sendStudentAllocationNotification
 } = require('../services/emailService');
 const router = express.Router();
 
-// Audit log stub
 function logAudit(user, action, details) {
-  // TODO: Implement persistent audit logging
   console.log(`[AUDIT] ${user}: ${action}`, details);
 }
 
 // ─────────────────────────────────────────────────────────────────
-// PHASE 7: Subject-Curriculum Allocation System
-// 3-Point Check: Student + Subject + Curriculum match Teacher specialty
+// Allocation System
+// ─────────────────────────────────────────────────────────────────
+// CRITICAL DATA SHAPE NOTE
+// User.subjects is an array of subject-NAME strings ("Mathematics",
+// "Physics") and User.curriculum is a single curriculum code ("IGCSE").
+// User.subjectRefs (ObjectId array) exists in the schema but is empty in
+// production — no enrolment code populates it. Therefore every route
+// that needs Subject documents for a student must resolve them by
+// curriculum + subjectName lookup against the Subject collection.
+//
+// We deliberately do not populate User.subjects — Mongoose populate
+// only works on ref-typed fields, and trying it on a string array is
+// what caused the previous 500s on /pending-count, /stats/summary,
+// /unallocated/:id, and POST /.
 // ─────────────────────────────────────────────────────────────────
 
-// GET /api/allocations - List all allocations with details
+// Helper: resolve a student's enrolled Subject documents.
+async function resolveStudentSubjects(student) {
+  if (!student || !student.curriculum) return [];
+  const names = Array.isArray(student.subjects) ? student.subjects : [];
+  if (names.length === 0) return [];
+  return Subject.find({
+    curriculum: student.curriculum,
+    subjectName: { $in: names },
+    isActive: true,
+  }).lean();
+}
+
+// GET /api/allocations - List all allocations
 router.get('/', auth, requireRole('admin'), async (req, res) => {
   try {
-    // Get all allocations
     let allocations = await Allocation.find()
       .populate('studentId', 'firstName lastName email curriculum')
       .populate('teacherId', 'firstName lastName email isActive isOnLeave')
       .populate('subjectId', 'subjectName curriculum')
       .sort('-createdAt');
 
-    // Filter out allocations where teacher is inactive or on leave
     allocations = allocations.filter(a => {
       return a.teacherId && a.teacherId.isActive && !a.teacherId.isOnLeave;
     });
 
     res.json({ success: true, allocations });
   } catch (e) {
+    console.error('[allocations list]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
 
-// GET /api/allocations/pending-count - Get count of students needing allocation (any unallocated subjects)
+// GET /api/allocations/pending-count
 router.get('/pending-count', auth, requireRole('admin'), async (req, res) => {
   try {
-    // Get all students with subjects
     const students = await User.find({ role: 'student' })
-      .select('_id subjects')
-      .populate('subjects', '_id');
+      .select('_id curriculum subjects')
+      .lean();
 
-    // Get all active allocations with valid teachers
     const allocations = await Allocation.find({ status: 'Active' })
       .populate('teacherId', '_id isActive isOnLeave')
-      .populate('studentId', '_id');
+      .lean();
 
-    // For each student, check if they have any unallocated subjects
-    const studentsNeedingAllocation = new Set();
+    // Build a map: studentId → set of allocated subjectId strings (valid teachers only)
+    const allocatedByStudent = new Map();
+    for (const a of allocations) {
+      if (!a.studentId || !a.teacherId) continue;
+      if (!a.teacherId.isActive || a.teacherId.isOnLeave) continue;
+      const key = a.studentId.toString();
+      if (!allocatedByStudent.has(key)) allocatedByStudent.set(key, new Set());
+      allocatedByStudent.get(key).add(a.subjectId.toString());
+    }
+
+    let pendingCount = 0;
+    const pendingStudentIds = [];
 
     for (const student of students) {
-      if (!student.subjects || student.subjects.length === 0) {
-        continue; // Skip students with no subjects
-      }
-
-      const studentSubjectIds = student.subjects.map(s => s._id.toString());
-
-      // Get valid allocations for this student (teacher must be active and not on leave)
-      const validAllocations = allocations.filter(a => 
-        a.studentId && a.studentId._id.toString() === student._id.toString() &&
-        a.teacherId && a.teacherId.isActive && !a.teacherId.isOnLeave
-      );
-
-      const allocatedSubjectIds = new Set(validAllocations.map(a => a.subjectId.toString()));
-
-      // Check if any subjects are unallocated
-      const hasUnallocated = studentSubjectIds.some(subjectId => !allocatedSubjectIds.has(subjectId));
-
+      const subjects = await resolveStudentSubjects(student);
+      if (subjects.length === 0) continue;
+      const allocatedSet = allocatedByStudent.get(student._id.toString()) || new Set();
+      const hasUnallocated = subjects.some(s => !allocatedSet.has(s._id.toString()));
       if (hasUnallocated) {
-        studentsNeedingAllocation.add(student._id.toString());
+        pendingCount++;
+        pendingStudentIds.push(student._id.toString());
       }
     }
 
-    res.json({ 
-      success: true, 
-      pendingCount: studentsNeedingAllocation.size,
-      pendingStudentIds: Array.from(studentsNeedingAllocation)
-    });
+    res.json({ success: true, pendingCount, pendingStudentIds });
   } catch (e) {
+    console.error('[allocations pending-count]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
 
-// GET /api/allocations/teacher - List allocations for current teacher
+// GET /api/allocations/teacher
 router.get('/teacher', auth, requireRole('teacher'), async (req, res) => {
   try {
     const allocations = await Allocation.find({ teacherId: req.user._id })
@@ -100,46 +113,45 @@ router.get('/teacher', auth, requireRole('teacher'), async (req, res) => {
       .sort('-createdAt');
     res.json({ success: true, allocations });
   } catch (e) {
+    console.error('[allocations teacher]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
 
-// GET /api/allocations/student/:studentId - List allocations for a student
+// GET /api/allocations/student/:studentId
 router.get('/student/:studentId', auth, async (req, res) => {
   try {
-    // Check authorization: user is admin OR is the student
     const isAdmin = req.user.role === 'admin';
     const isStudent = req.user._id.toString() === req.params.studentId;
-    
-    if (!isAdmin && !isStudent) {
+    if (!isAdmin && !isStudent)
       return res.status(403).json({ success: false, message: 'Unauthorized' });
-    }
 
     const allocations = await Allocation.find({ studentId: req.params.studentId })
       .populate('teacherId', 'firstName lastName email')
       .populate('subjectId', 'subjectName curriculum')
       .sort('-createdAt');
-    
+
     res.json({ success: true, allocations });
   } catch (e) {
+    console.error('[allocations student]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
 
-// GET /api/allocations/unallocated/:studentId - Find subjects without teacher assignment
+// GET /api/allocations/unallocated/:studentId
 router.get('/unallocated/:studentId', auth, requireRole('admin'), async (req, res) => {
   try {
     const { studentId } = req.params;
 
-    // Verify student exists
-    const student = await User.findById(studentId).populate('subjects');
-    if (!student || student.role !== 'student') {
+    const student = await User.findById(studentId).select('firstName lastName curriculum subjects role').lean();
+    if (!student || student.role !== 'student')
       return res.status(404).json({ success: false, message: 'Student not found' });
-    }
 
-    if (!student.subjects || student.subjects.length === 0) {
-      return res.json({ 
-        success: true, 
+    const subjects = await resolveStudentSubjects(student);
+
+    if (subjects.length === 0) {
+      return res.json({
+        success: true,
         student: {
           _id: student._id,
           firstName: student.firstName,
@@ -150,31 +162,17 @@ router.get('/unallocated/:studentId', auth, requireRole('admin'), async (req, re
       });
     }
 
-    // Get all subjects the student is enrolled in
-    const studentSubjectIds = student.subjects.map(s => s._id.toString());
+    const allAllocations = await Allocation.find({
+      studentId: studentId,
+      status: { $ne: 'Inactive' }
+    }).populate('teacherId', 'isActive isOnLeave');
 
-     // Find which subjects already have ACTIVE teacher allocations
-     // Exclude allocations where teacher is inactive or on leave
-     const allAllocations = await Allocation.find({ 
-       studentId: studentId,
-       status: { $ne: 'Inactive' }
-     }).populate('teacherId', 'isActive isOnLeave');
+    const validAllocations = allAllocations.filter(a =>
+      a.teacherId && a.teacherId.isActive && !a.teacherId.isOnLeave
+    );
 
-     // Filter to only active teacher allocations
-     const validAllocations = allAllocations.filter(a => 
-       a.teacherId && a.teacherId.isActive && !a.teacherId.isOnLeave
-     );
-     
-     const allocatedSubjectIds = validAllocations.map(a => a.subjectId.toString());
-
-    // Filter unallocated subjects
-    const allocatedSet = new Set(allocatedSubjectIds.map(id => id.toString()));
-    const unallocatedSubjectIds = studentSubjectIds.filter(id => !allocatedSet.has(id));
-
-    // Get full subject details
-    const unallocatedSubjects = await Subject.find({ 
-      _id: { $in: unallocatedSubjectIds } 
-    });
+    const allocatedSet = new Set(validAllocations.map(a => a.subjectId.toString()));
+    const unallocatedSubjects = subjects.filter(s => !allocatedSet.has(s._id.toString()));
 
     res.json({
       success: true,
@@ -187,32 +185,26 @@ router.get('/unallocated/:studentId', auth, requireRole('admin'), async (req, re
       unallocatedSubjects
     });
   } catch (e) {
+    console.error('[allocations unallocated]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
 
-// GET /api/allocations/suggest-teachers/:studentId/:subjectId - Get teachers for subject+curriculum
+// GET /api/allocations/suggest-teachers/:studentId/:subjectId
 router.get('/suggest-teachers/:studentId/:subjectId', auth, requireRole('admin'), async (req, res) => {
   try {
     const { studentId, subjectId } = req.params;
 
-    // Get student with curriculum
     const student = await User.findById(studentId);
-    if (!student || student.role !== 'student') {
+    if (!student || student.role !== 'student')
       return res.status(404).json({ success: false, message: 'Student not found' });
-    }
-
-    if (!student.curriculum) {
+    if (!student.curriculum)
       return res.status(400).json({ success: false, message: 'Student has no curriculum set' });
-    }
 
-    // Get subject details
     const subject = await Subject.findById(subjectId);
-    if (!subject) {
+    if (!subject)
       return res.status(404).json({ success: false, message: 'Subject not found' });
-    }
 
-    // Find teachers with matching teachingSpecialties (Subject + Curriculum pair)
     const qualifiedTeachers = await User.find({
       role: 'teacher',
       isActive: true,
@@ -224,7 +216,6 @@ router.get('/suggest-teachers/:studentId/:subjectId', auth, requireRole('admin')
       }
     }).select('firstName lastName email');
 
-    // Check which teachers are already allocated to this student for this subject
     const existingAllocation = await Allocation.findOne({
       studentId: studentId,
       subjectId: subjectId,
@@ -246,21 +237,21 @@ router.get('/suggest-teachers/:studentId/:subjectId', auth, requireRole('admin')
       },
       qualifiedTeachers,
       currentTeacherId: existingAllocation?.teacherId || null,
-      availableForSelection: qualifiedTeachers.filter(t => 
+      availableForSelection: qualifiedTeachers.filter(t =>
         !existingAllocation || t._id.toString() !== existingAllocation.teacherId.toString()
       )
     });
   } catch (e) {
+    console.error('[allocations suggest-teachers]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
 
-// POST /api/allocations - Create allocation (3-Point Check)
+// POST /api/allocations
 router.post('/', auth, requireRole('admin'), async (req, res) => {
   try {
     const { studentId, subjectId, teacherId, sendEmails = true } = req.body;
 
-    // Validate inputs
     if (!studentId || !subjectId || !teacherId) {
       return res.status(400).json({
         success: false,
@@ -268,46 +259,38 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
       });
     }
 
-    // ── 3-Point Check ──
-    
-    // 1. Verify student exists and has curriculum
-    const student = await User.findById(studentId).populate('subjects');
-    if (!student || student.role !== 'student') {
+    const student = await User.findById(studentId);
+    if (!student || student.role !== 'student')
       return res.status(404).json({ success: false, message: 'Student not found' });
-    }
-    if (!student.curriculum) {
+    if (!student.curriculum)
       return res.status(400).json({ success: false, message: 'Student has no curriculum assigned' });
-    }
 
-    // 2. Verify subject exists and student is enrolled
     const subject = await Subject.findById(subjectId);
-    if (!subject) {
+    if (!subject)
       return res.status(404).json({ success: false, message: 'Subject not found' });
-    }
-    
-    const studentSubjectIds = student.subjects.map(s => s._id.toString());
-    if (!studentSubjectIds.includes(subjectId)) {
+
+    // Verify enrolment: name match + curriculum match
+    const enrolledNames = Array.isArray(student.subjects) ? student.subjects : [];
+    const isEnrolled = enrolledNames.includes(subject.subjectName) &&
+                       subject.curriculum === student.curriculum;
+    if (!isEnrolled)
       return res.status(400).json({ success: false, message: 'Student is not enrolled in this subject' });
-    }
 
-    // 3. Verify teacher has matching teachingSpecialty (Subject + Curriculum pair)
     const teacher = await User.findById(teacherId);
-    if (!teacher || teacher.role !== 'teacher') {
+    if (!teacher || teacher.role !== 'teacher')
       return res.status(404).json({ success: false, message: 'Teacher not found' });
-    }
 
-    const hasSpecialty = teacher.teachingSpecialties?.some(ts => 
+    const hasSpecialty = teacher.teachingSpecialties?.some(ts =>
       ts.subjectId.toString() === subjectId && ts.curriculum === student.curriculum
     );
 
     if (!hasSpecialty) {
-      return res.status(400).json({ 
-        success: false, 
-        message: `Teacher does not have specialty in ${subject.subjectName} for ${student.curriculum}` 
+      return res.status(400).json({
+        success: false,
+        message: `Teacher does not have specialty in ${subject.subjectName} for ${student.curriculum}`
       });
     }
 
-    // ── Constraint: One teacher per subject, per student ──
     const existingAllocation = await Allocation.findOne({
       studentId: studentId,
       subjectId: subjectId,
@@ -321,7 +304,6 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
       });
     }
 
-    // Create allocation
     const allocation = await Allocation.create({
       studentId,
       subjectId,
@@ -331,12 +313,10 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
       createdBy: req.user._id
     });
 
-    // Populate for response
     await allocation.populate('studentId', 'firstName lastName email');
     await allocation.populate('teacherId', 'firstName lastName email');
     await allocation.populate('subjectId', 'subjectName curriculum');
 
-    // Send email notifications if enabled
     if (sendEmails) {
       try {
         await sendTeacherAllocationNotification({
@@ -362,7 +342,6 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
         await allocation.save();
       } catch (emailErr) {
         console.error('Email notification failed:', emailErr.message);
-        // Don't fail the allocation just because emails failed
       }
     }
 
@@ -374,49 +353,45 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
 
     res.status(201).json({ success: true, allocation, emailsSent: sendEmails });
   } catch (e) {
-    console.error('Error creating allocation:', e.message);
+    console.error('[allocations create]', e.message);
     res.status(400).json({ success: false, message: e.message });
   }
 });
 
-// PATCH /api/allocations/:id - Update allocation (e.g., reassign teacher)
+// PATCH /api/allocations/:id
 router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
   try {
     const { teacherId, status } = req.body;
     const allocation = await Allocation.findById(req.params.id);
-    
-    if (!allocation) {
-      return res.status(404).json({ success: false, message: 'Allocation not found' });
-    }
 
-    // If reassigning teacher, verify the new teacher has the specialty
+    if (!allocation)
+      return res.status(404).json({ success: false, message: 'Allocation not found' });
+
     if (teacherId && teacherId !== allocation.teacherId.toString()) {
       const teacher = await User.findById(teacherId);
-      if (!teacher || teacher.role !== 'teacher') {
+      if (!teacher || teacher.role !== 'teacher')
         return res.status(404).json({ success: false, message: 'Teacher not found' });
-      }
 
-      const hasSpecialty = teacher.teachingSpecialties?.some(ts => 
-        ts.subjectId.toString() === allocation.subjectId.toString() && 
+      const hasSpecialty = teacher.teachingSpecialties?.some(ts =>
+        ts.subjectId.toString() === allocation.subjectId.toString() &&
         ts.curriculum === allocation.curriculum
       );
 
       if (!hasSpecialty) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'New teacher does not have required specialty' 
+        return res.status(400).json({
+          success: false,
+          message: 'New teacher does not have required specialty'
         });
       }
     }
 
-    // Update allocation
     const updated = await Allocation.findByIdAndUpdate(
       req.params.id,
-      { 
+      {
         ...(teacherId && { teacherId }),
         ...(status && { status }),
-        updatedBy: req.user._id, 
-        updatedAt: new Date() 
+        updatedBy: req.user._id,
+        updatedAt: new Date()
       },
       { new: true }
     ).populate('studentId', 'firstName lastName email')
@@ -426,32 +401,34 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
     logAudit(req.user?.email || 'system', 'update_allocation', allocation._id);
     res.json({ success: true, allocation: updated });
   } catch (e) {
+    console.error('[allocations patch]', e.message);
     res.status(400).json({ success: false, message: e.message });
   }
 });
 
-// DELETE /api/allocations/:id - Delete allocation (DISABLED for audit trail)
+// DELETE — disabled for audit trail
 router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
-  res.status(403).json({ 
-    success: false, 
-    message: 'Allocation deletion is disabled. Use PATCH with status: Inactive to deactivate.' 
+  res.status(403).json({
+    success: false,
+    message: 'Allocation deletion is disabled. Use PATCH with status: Inactive to deactivate.'
   });
 });
 
-// GET /api/allocations/stats/summary - Dashboard stats
+// GET /api/allocations/stats/summary
 router.get('/stats/summary', auth, requireRole('admin'), async (req, res) => {
   try {
     const totalAllocations = await Allocation.countDocuments({ status: 'Active' });
-    
-    // Count unallocated subject pairs
+
     const students = await User.find({ role: 'student' })
-      .populate('subjects', '_id');
-    
+      .select('_id curriculum subjects')
+      .lean();
+
     let totalSubjectPairs = 0;
     let unallocatedPairs = 0;
 
     for (const student of students) {
-      const subjectCount = student.subjects?.length || 0;
+      const subjects = await resolveStudentSubjects(student);
+      const subjectCount = subjects.length;
       totalSubjectPairs += subjectCount;
 
       if (subjectCount > 0) {
@@ -473,6 +450,7 @@ router.get('/stats/summary', auth, requireRole('admin'), async (req, res) => {
       }
     });
   } catch (e) {
+    console.error('[allocations stats]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
