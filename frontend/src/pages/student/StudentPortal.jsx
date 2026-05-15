@@ -1631,7 +1631,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               LIVE CLASSES
           ════════════════════════════════════════════ */}
-          {page === 'live' && <LiveClassesTab user={user} store={store} toast={toast} />}
+          {page === 'live' && <LiveClassesTab user={user} toast={toast} goTo={goTo} />}
 
           {/* ════════════════════════════════════════════
               TIMETABLE
@@ -4074,224 +4074,376 @@ const teacherDisplayName = (teacher) => {
   return 'Teacher'
 }
  
-function LiveClassesTab({ user, store, toast }) {
+function LiveClassesTab({ user, toast, goTo }) {
+  // ── State ──
+  const [classes, setClasses] = useState([])
+  const [loading, setLoading] = useState(true)
   const [tick, setTick] = useState(0)
+
+  // ── Countdown tick (every 30s) ──
   useEffect(() => {
     const id = setInterval(() => setTick(t => t + 1), 30000)
     return () => clearInterval(id)
   }, [])
- 
-  const [backendRooms, setBackendRooms] = useState(null)
+
+  // ── Load classes from backend ──
   useEffect(() => {
     let cancelled = false
-    const loadRooms = async () => {
+    const load = async () => {
+      setLoading(true)
       try {
-        const { data } = await api.get('/grouprooms')
-        if (!cancelled && data.success) setBackendRooms(data.rooms || [])
+        const { data } = await api.get('/liveclasses/student/list')
+        if (cancelled) return
+        if (data?.success) {
+          setClasses(data.data?.classes || [])
+        } else {
+          setClasses([])
+        }
       } catch (e) {
-        console.error('[livetab] backend fetch failed:', e.message)
-        if (!cancelled) setBackendRooms([])
+        if (cancelled) return
+        console.error('[liveclasses] load failed:', e?.response?.data?.message || e.message)
+        setClasses([])
+      } finally {
+        if (!cancelled) setLoading(false)
       }
     }
-    loadRooms()
-    const id = setInterval(loadRooms, 30000)
+    load()
+    const id = setInterval(load, 60000) // refresh every minute
     return () => { cancelled = true; clearInterval(id) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
- 
-  const studentFullName = ((user?.firstName || '') + ' ' + (user?.lastName || '')).trim()
-  const studentId = user?._id
- 
-  const allRooms = backendRooms !== null ? backendRooms : (store?.groupRooms || [])
- 
-  const myRooms = allRooms.filter(r => {
-    if (Array.isArray(r.students)) {
-      return r.students.some(s => {
-        if (typeof s === 'object' && s !== null) {
-          return s._id === studentId || (s.firstName && s.firstName === user?.firstName)
-        }
-        if (typeof s === 'string' && /^[a-f\d]{24}$/i.test(s)) {
-          return s === studentId
-        }
-        return s === studentFullName || s === user?.firstName ||
-               (user?.firstName && s.includes(user.firstName))
-      })
+
+  // ── Helpers ──
+  const subjectColour = (subj) => {
+    const map = {
+      Mathematics:'#7D1025', Maths:'#7D1025',
+      English:'#0F766E',
+      Physics:'#1E40AF',
+      Chemistry:'#7C3AED',
+      Biology:'#15803D',
+      'Computer Science':'#0369A1', ICT:'#0369A1',
+      Business: '#92400E', Economics:'#92400E',
+      History:'#A16207', Geography:'#A16207',
     }
-    return false
-  })
- 
-  // Compute status for each, then sort: live first, then starting today, then waiting, then tomorrow, then upcoming, then finished, then no-schedule
-  const now = new Date()
-  const sortOrder = { live: 0, 'should-be-live': 1, starting: 2, tomorrow: 3, upcoming: 4, finished: 5, 'no-schedule': 6 }
- 
-  const roomsWithStatus = myRooms
-    .map(r => ({ ...r, status: computeStatus(r, now) }))
-    .sort((a, b) => (sortOrder[a.status.kind] || 99) - (sortOrder[b.status.kind] || 99))
- 
-  const subjColours = {
-    'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
-    'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
-    'Geography': '#0F766E', 'Computer Science': '#1F2937',
-    'Business Studies': '#7E22CE', 'Economics': '#9F1239',
+    return map[subj] || '#7D1025'
   }
-  const colourFor = (s) => subjColours[s] || '#8B1A2E'
- 
-  // Status visual styling
-  const statusStyle = (kind) => {
-    switch (kind) {
-      case 'live':           return { bg: '#DCFCE7', color: '#15803D', dot: '#22C55E', dotPulse: true }
-      case 'should-be-live': return { bg: '#FEF3C7', color: '#92400E', dot: '#F59E0B' }
-      case 'starting':       return { bg: '#DBEAFE', color: '#1E3A8A', dot: '#3B82F6' }
-      case 'tomorrow':       return { bg: '#FBE8E8', color: '#7D1025', dot: '#7D1025' }
-      case 'upcoming':       return { bg: '#F1F5F9', color: 'var(--s700)', dot: 'var(--s500)' }
-      case 'finished':       return { bg: '#F3F4F6', color: 'var(--s500)', dot: 'var(--s400)' }
-      case 'no-schedule':    return { bg: '#F3F4F6', color: 'var(--s500)', dot: 'var(--s400)' }
-      default:               return { bg: 'var(--bg)', color: 'var(--s500)', dot: 'var(--s400)' }
-    }
+
+  const fmtDateTime = (iso) => {
+    if (!iso) return '—'
+    return new Date(iso).toLocaleString('en-GB', {
+      weekday:'short', day:'numeric', month:'short',
+      hour:'2-digit', minute:'2-digit',
+    })
   }
- 
-  const handleJoin = async (room) => {
-    if (!room._id) {
-      toast?.info?.('Class room not synced to backend yet. Ask admin to sync rooms.')
-      return
-    }
-    try {
-      const { data } = await api.get('/grouprooms/' + room._id + '/zoom')
-      if (data.zoomLink) {
-        window.open(data.zoomLink, '_blank', 'noopener,noreferrer')
-        toast?.ok?.('Opening Zoom...')
-      } else {
-        toast?.info?.('Teacher has not started the class yet. Please wait.')
-      }
-    } catch (e) {
-      toast?.error?.(e.response?.data?.message || 'Could not load class link')
-    }
+
+  const minsUntil = (iso) => {
+    if (!iso) return null
+    return Math.round((new Date(iso).getTime() - Date.now()) / 60000)
   }
- 
-  const liveCount = roomsWithStatus.filter(r => r.status.kind === 'live').length
- 
+
+  const canJoin = (lc) => {
+    // Joinable if live OR within 10 min of start time
+    if (lc.computedStatus === 'live') return true
+    const m = minsUntil(lc.scheduledAt)
+    return m !== null && m <= 10 && m >= -((lc.durationMins || 0))
+  }
+
+  const countdownText = (lc) => {
+    const m = minsUntil(lc.scheduledAt)
+    if (m === null) return ''
+    if (lc.computedStatus === 'live') return 'IN PROGRESS'
+    if (lc.computedStatus === 'ended') return 'ended'
+    if (m < 0) return 'starting any moment'
+    if (m === 0) return 'starting now'
+    if (m < 60) return `in ${m} min`
+    const h = Math.floor(m / 60)
+    if (h < 24) return `in ${h}h ${m - h*60}m`
+    const d = Math.floor(h / 24)
+    return `in ${d} day${d === 1 ? '' : 's'}`
+  }
+
+  // ── Categorise ──
+  const upcoming = classes.filter(c => c.computedStatus === 'scheduled')
+  const live     = classes.filter(c => c.computedStatus === 'live')
+  const past     = classes.filter(c => c.computedStatus === 'ended').slice(0, 8)
+
+  // suppress unused-var warning for tick — it forces re-render every 30s
+  void tick
+
+  // ── EMPTY ──
+  if (!loading && classes.length === 0) {
+    return (
+      <div className="card" style={{ padding:'60px 32px', textAlign:'center' }}>
+        <div style={{
+          width:80, height:80, borderRadius:'50%',
+          background:'#FBF6E3', border:'2px solid #C9A030',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          margin:'0 auto 20px', color:'#7D1025',
+        }}>
+          <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="23 7 16 12 23 17 23 7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2"/>
+          </svg>
+        </div>
+        <div className="serif" style={{ fontSize:24, color:'#1A1A1A', marginBottom:6 }}>
+          No live classes scheduled
+        </div>
+        <div style={{ fontSize:13.5, color:'#6B6B6B', maxWidth:380, margin:'0 auto', lineHeight:1.55 }}>
+          When your teacher schedules a live session for you, it will appear here with the time, topic, and a button to prepare and join.
+        </div>
+      </div>
+    )
+  }
+
+  // ── LIST ──
   return (
     <div>
-      {/* Hero */}
+      {/* ─── HERO ─── */}
       <div className="card" style={{
-        padding: 0, marginBottom: 18, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
-        color: '#fff',
+        padding:0, marginBottom:18, overflow:'hidden',
+        background:'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
+        color:'#FBFAF5',
+        boxShadow:'0 12px 40px rgba(125,16,37,.20)',
       }}>
-        <div style={{ padding: '24px 30px' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
+        <div style={{
+          padding:'28px 32px',
+          backgroundImage:'radial-gradient(circle at 95% 50%, rgba(201,160,48,.18) 0%, transparent 50%)',
+        }}>
+          <div style={{ fontSize:11, fontWeight:700, letterSpacing:'.16em', textTransform:'uppercase', color:'#F0CC5A', marginBottom:6 }}>
             Real-Time Learning
           </div>
-          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
-            Live Classes
-          </h2>
-          <p style={{ fontSize: 13.5, opacity: .85, marginTop: 6, marginBottom: 0, maxWidth: 540, lineHeight: 1.55 }}>
-            All your classes — join when your teacher starts the session.
-          </p>
+          <h1 className="serif" style={{ fontSize:30, fontWeight:400, margin:0, lineHeight:1.15 }}>
+            {live.length > 0
+              ? `${live.length} class${live.length === 1 ? '' : 'es'} happening right now`
+              : upcoming.length > 0
+                ? `Your next class ${countdownText(upcoming[0])}`
+                : 'Live Classes'}
+          </h1>
+          <div style={{ fontSize:13, opacity:.85, marginTop:6 }}>
+            {classes.length} scheduled
+            {upcoming.length > 0 && <> &middot; {upcoming.length} upcoming</>}
+            {past.length > 0 && <> &middot; {classes.filter(c=>c.computedStatus==='ended').length} completed</>}
+          </div>
         </div>
-        {liveCount > 0 && (
-          <div style={{ background: '#15803D', padding: '10px 30px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        {live.length > 0 && (
+          <div style={{
+            background:'#15803D', padding:'10px 32px',
+            display:'flex', alignItems:'center', gap:10,
+          }}>
             <span style={{
-              width: 10, height: 10, borderRadius: '50%', background: '#4ADE80',
-              animation: 'pulse 1.5s infinite', flexShrink: 0,
+              width:10, height:10, borderRadius:'50%',
+              background:'#4ADE80', animation:'pulse 1.5s infinite', flexShrink:0,
             }}/>
-            <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '.04em' }}>
-              {liveCount} class{liveCount === 1 ? '' : 'es'} happening right now — join below
+            <span style={{ fontSize:13, fontWeight:700, letterSpacing:'.04em' }}>
+              Join the live session below.
             </span>
           </div>
         )}
       </div>
- 
-      {/* Empty state */}
-      {myRooms.length === 0 && (
-        <div className="card" style={{ padding: 36, textAlign: 'center' }}>
-          <div style={{ width: 64, height: 64, margin: '0 auto 16px', borderRadius: '50%', background: 'var(--s100)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="30" height="30" fill="none" viewBox="0 0 24 24" stroke="var(--s400)" strokeWidth="1.5" strokeLinecap="round">
-              <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
-            </svg>
+
+      {loading && (
+        <div className="card" style={{ padding:40, textAlign:'center' }}>
+          <div className="mono" style={{ fontSize:13, color:'var(--s400)', letterSpacing:'.1em' }}>
+            LOADING YOUR CLASSES...
           </div>
-          <h3 style={{ fontSize: 17, color: 'var(--s800)', marginBottom: 6 }}>No classes yet</h3>
-          <p style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto' }}>
-            Once an admin enrols you in a class room, it will appear here.
-          </p>
         </div>
       )}
- 
-      {/* Unified list */}
-      {roomsWithStatus.map(room => {
-        const col = colourFor(room.subject)
-        const sStyle = statusStyle(room.status.kind)
-        const isLive = room.status.kind === 'live'
- 
-        return (
-          <div key={room._id || room.id} className="card" style={{
-            marginBottom: 10,
-            padding: 14,
-            borderLeft: '4px solid ' + col,
-            background: isLive ? 'linear-gradient(90deg, rgba(220,252,231,0.4) 0%, #FFF 100%)' : '#FFF',
-          }}>
-            <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
-              {/* Subject + name */}
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
-                  <span style={{
-                    background: sStyle.bg, color: sStyle.color,
-                    fontSize: 10, fontWeight: 800, letterSpacing: '.08em',
-                    padding: '4px 10px', borderRadius: 99, textTransform: 'uppercase',
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                  }}>
-                    <span style={{
-                      width: 7, height: 7, borderRadius: '50%',
-                      background: sStyle.dot,
-                      animation: sStyle.dotPulse ? 'pulse 1.5s infinite' : 'none',
-                    }}/>
-                    {room.status.label}
-                  </span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: col, letterSpacing: '.06em', textTransform: 'uppercase' }}>
-                    {room.subject}
-                  </span>
-                </div>
-                <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)', marginBottom: 2 }}>
-                  {room.name}
-                </div>
-                <div style={{ fontSize: 12.5, color: 'var(--s500)' }}>
-                  {teacherDisplayName(room.teacher)} · {room.status.sublabel}
-                </div>
-              </div>
- 
-              {/* Join button */}
-              <button
-                disabled={!room.status.canJoin}
-                onClick={() => handleJoin(room)}
-                style={{
-                  background: room.status.canJoin ? '#15803D' : 'var(--bg)',
-                  color: room.status.canJoin ? '#FFF' : 'var(--s400)',
-                  border: '1px solid ' + (room.status.canJoin ? '#15803D' : 'var(--border)'),
-                  padding: '10px 20px',
-                  borderRadius: 'var(--rmd)',
-                  cursor: room.status.canJoin ? 'pointer' : 'not-allowed',
-                  fontSize: 13.5, fontWeight: 700,
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  flexShrink: 0,
-                  boxShadow: room.status.canJoin ? '0 4px 12px rgba(21,128,61,.25)' : 'none',
-                }}>
-                {room.status.canJoin ? (
-                  <>
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                      <polygon points="5 3 19 12 5 21 5 3"/>
-                    </svg>
-                    Join Class
-                  </>
-                ) : (
-                  'Join Class'
-                )}
-              </button>
-            </div>
+
+      {/* ─── LIVE NOW ─── */}
+      {live.length > 0 && (
+        <div style={{ marginBottom:18 }}>
+          <h2 className="serif" style={{ fontSize:20, fontWeight:400, color:'#1A1A1A', marginBottom:10 }}>
+            Live Now
+          </h2>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            {live.map(lc => (
+              <LiveClassCard key={lc._id} lc={lc} subjectColour={subjectColour}
+                fmtDateTime={fmtDateTime} countdownText={countdownText}
+                canJoin={canJoin} toast={toast} goTo={goTo}/>
+            ))}
           </div>
-        )
-      })}
+        </div>
+      )}
+
+      {/* ─── UPCOMING ─── */}
+      {upcoming.length > 0 && (
+        <div style={{ marginBottom:18 }}>
+          <h2 className="serif" style={{ fontSize:20, fontWeight:400, color:'#1A1A1A', marginBottom:10 }}>
+            Upcoming
+          </h2>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            {upcoming.map(lc => (
+              <LiveClassCard key={lc._id} lc={lc} subjectColour={subjectColour}
+                fmtDateTime={fmtDateTime} countdownText={countdownText}
+                canJoin={canJoin} toast={toast} goTo={goTo}/>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ─── PAST ─── */}
+      {past.length > 0 && (
+        <div>
+          <h2 className="serif" style={{ fontSize:20, fontWeight:400, color:'#1A1A1A', marginBottom:10 }}>
+            Recently Ended
+          </h2>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            {past.map(lc => (
+              <LiveClassCard key={lc._id} lc={lc} subjectColour={subjectColour}
+                fmtDateTime={fmtDateTime} countdownText={countdownText}
+                canJoin={canJoin} toast={toast} goTo={goTo} muted/>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+
+// ─────────────────────────────────────────────────────────
+// LiveClassCard — one card per scheduled session
+// ─────────────────────────────────────────────────────────
+function LiveClassCard({ lc, subjectColour, fmtDateTime, countdownText, canJoin, toast, goTo, muted }) {
+  const col = subjectColour(lc.subject)
+  const isLive = lc.computedStatus === 'live'
+  const isEnded = lc.computedStatus === 'ended'
+  const teacherName = lc.teacherId
+    ? `${lc.teacherId.firstName || ''} ${lc.teacherId.lastName || ''}`.trim()
+    : 'Your teacher'
+
+  const onJoin = () => {
+    if (!lc.meetingLink) {
+      toast?.error?.('No meeting link set for this class.')
+      return
+    }
+    window.open(lc.meetingLink, '_blank', 'noopener,noreferrer')
+  }
+
+  const onPrepare = () => {
+    if (lc.preparationLessonId?._id) {
+      // Future: goTo('lessons', { lessonId: lc.preparationLessonId._id })
+      toast?.info?.('Lesson Player launches next session — for now the prep lesson is "' + (lc.preparationLessonId.title || 'untitled') + '"')
+    } else {
+      toast?.info?.('Your teacher hasn\'t linked prep material yet for this class.')
+    }
+  }
+
+  return (
+    <div className="card" style={{
+      padding:16,
+      borderLeft:`4px solid ${col}`,
+      background: isLive
+        ? 'linear-gradient(90deg, rgba(220,252,231,.5) 0%, #FFF 70%)'
+        : '#FFF',
+      opacity: muted ? .7 : 1,
+    }}>
+      <div style={{ display:'flex', alignItems:'flex-start', gap:14, flexWrap:'wrap' }}>
+        <div style={{ flex:1, minWidth:240 }}>
+          <div style={{ display:'flex', gap:6, marginBottom:6, flexWrap:'wrap', alignItems:'center' }}>
+            {isLive && (
+              <span style={{
+                background:'#FEE2E2', color:'#B91C1C',
+                fontSize:9.5, fontWeight:800, letterSpacing:'.08em',
+                padding:'2px 8px', borderRadius:99,
+                display:'inline-flex', alignItems:'center', gap:5,
+              }}>
+                <span style={{
+                  width:6, height:6, borderRadius:'50%', background:'#B91C1C',
+                  animation:'pulse 1.5s infinite',
+                }}/>
+                LIVE NOW
+              </span>
+            )}
+            {!isLive && !isEnded && (
+              <span style={{
+                background:'#FEF3C7', color:'#92400E',
+                fontSize:9.5, fontWeight:800, letterSpacing:'.08em',
+                padding:'2px 8px', borderRadius:99,
+              }}>SCHEDULED</span>
+            )}
+            {isEnded && (
+              <span style={{
+                background:'#F1F5F9', color:'#64748B',
+                fontSize:9.5, fontWeight:800, letterSpacing:'.08em',
+                padding:'2px 8px', borderRadius:99,
+              }}>ENDED</span>
+            )}
+            <span style={{
+              background: col + '15', color: col,
+              fontSize:9.5, fontWeight:700, letterSpacing:'.06em',
+              padding:'2px 8px', borderRadius:99, textTransform:'uppercase',
+            }}>{lc.subject}</span>
+            <span style={{ fontSize:11, color:'#6B6B6B' }}>
+              {lc.curriculum} {lc.grade}
+            </span>
+          </div>
+          <div style={{ fontWeight:700, fontSize:16, color:'#1A1A1A', marginBottom:4 }}>
+            {lc.title}
+          </div>
+          {lc.description && (
+            <div style={{ fontSize:13, color:'#3F3F3F', marginBottom:6, lineHeight:1.5 }}>
+              {lc.description}
+            </div>
+          )}
+          <div style={{ fontSize:12, color:'#6B6B6B' }}>
+            {fmtDateTime(lc.scheduledAt)} &middot; {lc.durationMins} min &middot; {teacherName}
+            {!isEnded && (
+              <> &middot; <strong style={{ color: isLive ? '#15803D' : '#C9A030' }}>
+                {countdownText(lc)}
+              </strong></>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display:'flex', flexDirection:'column', gap:6, minWidth:170 }}>
+          {!isEnded && (
+            <button onClick={onPrepare}
+              style={{
+                background: lc.preparationLessonId ? '#C9A030' : '#FBF6E3',
+                color: lc.preparationLessonId ? '#fff' : '#7D1025',
+                border: lc.preparationLessonId ? 'none' : '1px solid #C9A030',
+                padding:'8px 16px', borderRadius:6,
+                cursor:'pointer', fontSize:12, fontWeight:700,
+                display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6,
+              }}>
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+              Prepare for Lesson
+            </button>
+          )}
+          {canJoin(lc) ? (
+            <button onClick={onJoin}
+              style={{
+                background:'#7D1025', color:'#fff', border:'none',
+                padding:'10px 18px', borderRadius:6,
+                cursor:'pointer', fontSize:13, fontWeight:700,
+                display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6,
+                boxShadow: isLive ? '0 6px 16px rgba(125,16,37,.3)' : 'none',
+              }}>
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="23 7 16 12 23 17 23 7"/>
+                <rect x="1" y="5" width="15" height="14" rx="2"/>
+              </svg>
+              {isLive ? 'Join Now' : 'Join Class'}
+            </button>
+          ) : !isEnded ? (
+            <button disabled style={{
+              background:'#F1F5F9', color:'#94A3B8', border:'1px solid #E2E8F0',
+              padding:'10px 18px', borderRadius:6,
+              cursor:'not-allowed', fontSize:12, fontWeight:600,
+            }}>
+              Join opens 10 min before
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  )
+}
+
  
 // ═══════════════════════════════════════════════════════════
 // MSHAURI AI — smart rule-based tutor (no API required)
