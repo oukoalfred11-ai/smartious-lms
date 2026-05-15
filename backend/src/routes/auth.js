@@ -111,6 +111,71 @@ router.patch('/me', auth, async (req, res) => {
   }
 });
 
+// ── Teacher self-onboarding: set teaching specialties ────
+// Takes { curricula: ['IGCSE', ...], subjectIds: [<ObjectId>, ...] }
+// and builds the cartesian product as teachingSpecialties pairs.
+// Teacher only — students/admins use other channels.
+router.post('/me/teaching-specialties', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'teacher')
+      return res.status(403).json({ success: false, message: 'Only teachers can set teaching specialties.' });
+
+    const mongoose = require('mongoose');
+    const Subject  = require('../models/Subject');
+
+    const { curricula, subjectIds } = req.body;
+    if (!Array.isArray(curricula) || curricula.length === 0)
+      return res.status(400).json({ success: false, message: 'curricula must be a non-empty array.' });
+    if (!Array.isArray(subjectIds) || subjectIds.length === 0)
+      return res.status(400).json({ success: false, message: 'subjectIds must be a non-empty array.' });
+
+    const VALID_CURRICULA = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American'];
+    const cleanCurricula = curricula.filter(c => VALID_CURRICULA.includes(c));
+    if (cleanCurricula.length === 0)
+      return res.status(400).json({ success: false, message: 'No valid curricula in input.' });
+
+    const cleanIds = subjectIds.filter(id => mongoose.isValidObjectId(id));
+    if (cleanIds.length === 0)
+      return res.status(400).json({ success: false, message: 'No valid subjectIds in input.' });
+
+    // Verify every subjectId actually exists
+    const found = await Subject.countDocuments({ _id: { $in: cleanIds } });
+    if (found !== cleanIds.length)
+      return res.status(400).json({ success: false, message: 'One or more subjectIds do not exist.' });
+
+    // Build the cartesian product of (subjectId × curriculum)
+    // NOTE: Subject records are curriculum-specific — IGCSE Mathematics
+    // and A-Level Mathematics are different Subject docs. So a teacher
+    // pairing a subject with an "incompatible" curriculum (e.g. pairing
+    // an IGCSE-specific Subject with curriculum=A-Level) is technically
+    // allowed by this endpoint but won't match any allocations. We do
+    // not block this — the allocation system already enforces the right
+    // curriculum match downstream.
+    const pairs = [];
+    for (const sid of cleanIds) {
+      for (const curr of cleanCurricula) {
+        pairs.push({ subjectId: sid, curriculum: curr });
+      }
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { teachingSpecialties: pairs } },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    res.json({
+      success: true,
+      message: `Saved ${pairs.length} teaching specialty pair${pairs.length === 1 ? '' : 's'}.`,
+      user: buildSafeUser(user),
+      data: { teachingSpecialties: user.teachingSpecialties }
+    });
+  } catch (e) {
+    console.error('[auth /me/teaching-specialties]', e.message);
+    res.status(500).json({ success: false, message: 'Failed to save teaching specialties.' });
+  }
+});
+
 // ── Mshauri AI — mastery-aware ────────────────────────────
 // The frontend sends masteryContext (from /api/adaptive/mshauri-context)
 // so every reply is personalised to the student's real topic scores.
