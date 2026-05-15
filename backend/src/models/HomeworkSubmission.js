@@ -14,10 +14,18 @@
  *   - drawing:  answer = { dataUrl: 'data:image/png;base64,...' }
  *               OR { attachmentUrl: 'cloudinary url' } if we upload it
  *   - upload:   answer = { attachmentUrl, publicId, filename, mimeType }
+ *
+ * Per-answer fields:
+ *   - marksAwarded     — number, null until graded
+ *   - feedback         — teacher's per-question note
+ *   - autoGraded       — true if MCQ auto-marked
+ *   - teacherAnnotation — for drawing/upload: dataURL of teacher's marked-up
+ *                         version of the student's image. Original (in
+ *                         `attachment.url`) is preserved untouched.
  */
- 
+
 const mongoose = require('mongoose');
- 
+
 const submissionSchema = new mongoose.Schema({
   homework: {
     type: mongoose.Schema.Types.ObjectId,
@@ -31,11 +39,11 @@ const submissionSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
- 
+
   // ── Answers (one per homework question) ──
   answers: [{
     questionIndex: { type: Number, required: true },
-    type: { type: String, enum: ['mcq', 'short', 'long', 'drawing', 'handwriting', 'upload'], required: true },
+    type: { type: String, enum: ['mcq', 'short', 'long', 'drawing', 'upload'], required: true },
     // For mcq: selected option index. For short/long: string. For drawing/upload: see attachment.
     answer: { type: mongoose.Schema.Types.Mixed, default: null },
     // For drawing/upload questions, the student's submitted attachment
@@ -50,22 +58,25 @@ const submissionSchema = new mongoose.Schema({
     marksAwarded: { type: Number, default: null },  // null = not graded yet
     feedback:     { type: String, default: '' },
     autoGraded:   { type: Boolean, default: false },
+    // Teacher's annotated version of the student's drawing/upload.
+    // Stored as PNG dataURL so the original attachment is never overwritten.
+    teacherAnnotation: { type: String, default: '' },
   }],
- 
+
   // ── Status ──
   status: {
     type: String,
     enum: ['in_progress', 'submitted', 'graded', 'released'],
     default: 'in_progress',
   },
- 
+
   // ── Timing ──
   startedAt: { type: Date, default: Date.now },
   submittedAt: { type: Date, default: null },
   gradedAt: { type: Date, default: null },
   releasedAt: { type: Date, default: null },
   isLate: { type: Boolean, default: false },
- 
+
   // ── Aggregate grading ──
   totalAwarded: { type: Number, default: 0 },
   totalPossible: { type: Number, default: 0 },
@@ -76,325 +87,8 @@ const submissionSchema = new mongoose.Schema({
     default: null,
   },
 }, { timestamps: true });
- 
+
 // Unique: one submission per (homework, student)
 submissionSchema.index({ homework: 1, student: 1 }, { unique: true });
- 
+
 module.exports = mongoose.model('HomeworkSubmission', submissionSchema);
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
