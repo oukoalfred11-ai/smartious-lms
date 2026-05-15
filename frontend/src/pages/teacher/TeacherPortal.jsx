@@ -2677,9 +2677,29 @@ function ExamsTab({ user, store, setPage, toast }) {
   // truth is the server.
   const [exams, setExams] = useState([])
   const [examsLoading, setExamsLoading] = useState(true)
-  const [view, setView] = useState('list')  // 'list' | 'create' | 'detail'
+  const [view, setView] = useState('list')  // 'list' | 'create' | 'detail' | 'submissions' | 'grade'
   const [selectedExam, setSelectedExam] = useState(null)
   const [createStep, setCreateStep] = useState(1)
+
+  // ── Submissions list state ──
+  const [submissions, setSubmissions] = useState([])
+  const [submissionsLoading, setSubmissionsLoading] = useState(false)
+
+  // ── Grading state (when view === 'grade') ──
+  // selectedSubmission holds the full submission doc with answers[].
+  // gradeForm tracks the teacher's input as they grade.
+  const [selectedSubmission, setSelectedSubmission] = useState(null)
+  const [gradeForm, setGradeForm] = useState({
+    answerMarks: {},      // { [answerIndex]: number }
+    answerComments: {},   // { [answerIndex]: string }
+    feedback: '',
+    grade: '',
+  })
+  const [gradeSaving, setGradeSaving] = useState(false)
+  // Cache of full bank-question docs (with parts), keyed by _id.
+  // Populated when the teacher opens the grade screen, so we can render
+  // each question's structure alongside the student's flat answers list.
+  const [gradeQuestionCache, setGradeQuestionCache] = useState({})
 
   // Filters
   const [filterStatus, setFilterStatus] = useState('all')
@@ -2828,6 +2848,149 @@ function ExamsTab({ user, store, setPage, toast }) {
   // Helper: look up a bank question by id (handles both _id and id keys)
   const findBankQuestion = (qid) =>
     bankQuestions.find(q => (q._id || q.id) === qid)
+
+  // ── Load submissions for the selected exam ──
+  // Fetches the per-student submission list with student names populated.
+  // Called when the teacher opens 'submissions' view.
+  const loadSubmissions = async (examId) => {
+    if (!examId) return
+    setSubmissionsLoading(true)
+    try {
+      const { data } = await api.get('/exams/' + examId + '/submissions')
+      if (data?.success) {
+        setSubmissions(data.data?.submissions || [])
+      } else {
+        toast?.error?.(data?.message || 'Could not load submissions.')
+        setSubmissions([])
+      }
+    } catch (e) {
+      console.error('[submissions load] failed:', e?.response?.data?.message || e.message)
+      toast?.error?.('Failed to load submissions.')
+      setSubmissions([])
+    } finally {
+      setSubmissionsLoading(false)
+    }
+  }
+
+  const openSubmissions = async (exam) => {
+    setSelectedExam(exam)
+    setSubmissions([])
+    setView('submissions')
+    await loadSubmissions(exam._id)
+  }
+
+  // Open the grading screen for one student's submission.
+  // Pre-loads the bank questions referenced by the exam so we can show
+  // each question's text + parts alongside the student's answers.
+  const openGrade = async (submission) => {
+    setSelectedSubmission(submission)
+    // Seed gradeForm from existing values (so re-grading shows previous marks)
+    const initMarks    = {}
+    const initComments = {}
+    ;(submission.answers || []).forEach((a, i) => {
+      initMarks[i]    = typeof a.marksAwarded === 'number' ? a.marksAwarded : 0
+      initComments[i] = a.teacherComment || ''
+    })
+    setGradeForm({
+      answerMarks: initMarks,
+      answerComments: initComments,
+      feedback: submission.feedback || '',
+      grade:    submission.grade    || '',
+    })
+
+    // Fetch any bank-question IDs we don't yet have cached
+    const neededIds = (selectedExam?.questionIds || [])
+      .filter(qid => !gradeQuestionCache[String(qid)])
+    if (neededIds.length > 0) {
+      try {
+        const fetches = await Promise.all(
+          neededIds.map(qid => api.get('/questions/' + qid).then(r => r.data).catch(() => null))
+        )
+        const cache = { ...gradeQuestionCache }
+        fetches.forEach((res, i) => {
+          if (res?.success && res.question) {
+            cache[String(neededIds[i])] = res.question
+          }
+        })
+        setGradeQuestionCache(cache)
+      } catch (e) {
+        console.error('[grade] question cache load failed:', e.message)
+      }
+    }
+    setView('grade')
+  }
+
+  // Save the grade — calls POST /exams/submissions/:subId/grade
+  const saveGrade = async () => {
+    if (!selectedSubmission) return
+    setGradeSaving(true)
+    try {
+      // Build the per-answer payload in the order of submission.answers
+      const answers = (selectedSubmission.answers || []).map((a, i) => ({
+        marksAwarded:   Number(gradeForm.answerMarks[i]) || 0,
+        teacherComment: gradeForm.answerComments[i] || '',
+      }))
+      const { data } = await api.post('/exams/submissions/' + selectedSubmission._id + '/grade', {
+        answers,
+        feedback: gradeForm.feedback,
+        grade:    gradeForm.grade,
+      })
+      if (data?.success) {
+        toast?.ok?.('Saved & marked as graded.')
+        // Update local submissions list with the new state
+        setSubmissions(subs => subs.map(s =>
+          s._id === selectedSubmission._id ? data.data.submission : s
+        ))
+        setView('submissions')
+        setSelectedSubmission(null)
+      } else {
+        toast?.error?.(data?.message || 'Failed to save grade.')
+      }
+    } catch (e) {
+      console.error('[grade save] failed:', e?.response?.data?.message || e.message)
+      toast?.error?.('Could not save grade.')
+    } finally {
+      setGradeSaving(false)
+    }
+  }
+
+  // Helper: find the question (bank or custom) that an answer refers to.
+  // Returns { question, isCustom } or null.
+  const findQuestionForAnswer = (questionRef) => {
+    if (!questionRef || !selectedExam) return null
+    if (questionRef.startsWith('custom:')) {
+      const idx = parseInt(questionRef.slice(7), 10)
+      const q = (selectedExam.customQuestions || [])[idx]
+      return q ? { question: q, isCustom: true } : null
+    }
+    // Bank reference — look in cache
+    const q = gradeQuestionCache[questionRef]
+    return q ? { question: q, isCustom: false } : null
+  }
+
+  // Helper: descend into a question's parts tree following a partPath
+  // and return the leaf part. Returns null if path doesn't resolve.
+  const findLeafByPath = (question, partPath) => {
+    if (!Array.isArray(partPath) || partPath.length === 0) return null
+    let current = { parts: question.parts || [] }
+    for (const idx of partPath) {
+      if (!Array.isArray(current.parts) || !current.parts[idx]) return null
+      current = current.parts[idx]
+    }
+    return current
+  }
+
+  // Helper: compute max marks for an answer (flat question or leaf part)
+  const maxMarksForAnswer = (answer) => {
+    const found = findQuestionForAnswer(answer.questionRef)
+    if (!found) return 1
+    const { question } = found
+    if (Array.isArray(answer.partPath) && answer.partPath.length > 0) {
+      const leaf = findLeafByPath(question, answer.partPath)
+      return Number(leaf?.marks) || 0
+    }
+    return Number(question.marks) || 0
+  }
 
   // Derived
   const examsWithStatus = exams.map(e => ({ ...e, _status: exComputeStatus(e) }))
@@ -3127,6 +3290,22 @@ function ExamsTab({ user, store, setPage, toast }) {
                 padding: '10px 18px', borderRadius: 'var(--rmd)',
                 cursor: 'pointer', fontSize: 13, fontWeight: 700,
               }}>Cancel Exam</button>
+          )}
+          {(status === 'active' || status === 'ended') && (
+            <button onClick={() => openSubmissions(selectedExam)}
+              style={{
+                background: '#7D1025', color: '#fff',
+                border: 'none',
+                padding: '10px 18px', borderRadius: 'var(--rmd)',
+                cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+              }}>
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 11l3 3L22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
+              View Submissions
+            </button>
           )}
           <button onClick={() => { setView('list'); setSelectedExam(null) }} className="btn btn-s">Close</button>
         </div>
@@ -3584,6 +3763,453 @@ function ExamsTab({ user, store, setPage, toast }) {
     )
   }
 
+  // ─────────────────────────────────────────────────────────
+  // RENDER: SUBMISSIONS LIST VIEW
+  // Teacher sees who has submitted this exam, with status + score.
+  // Click a row to open the grading screen.
+  // ─────────────────────────────────────────────────────────
+  if (view === 'submissions' && selectedExam) {
+    const totalAssigned = (selectedExam.assignedStudents || []).length
+    const submittedCount = submissions.filter(s => s.status === 'submitted' || s.status === 'graded').length
+    const gradedCount    = submissions.filter(s => s.status === 'graded').length
+    const inProgressCount= submissions.filter(s => s.status === 'in_progress').length
+    const notStartedCount = Math.max(0, totalAssigned - submissions.length)
+    const flaggedCount   = submissions.filter(s => s.flagged).length
+
+    const statusColour = (s) => {
+      if (s === 'graded')      return { bg: '#DCFCE7', fg: '#15803D', label: 'GRADED' }
+      if (s === 'submitted')   return { bg: '#FEF3C7', fg: '#92400E', label: 'AWAITING GRADE' }
+      if (s === 'in_progress') return { bg: '#FEE2E2', fg: '#B91C1C', label: 'IN PROGRESS' }
+      return { bg: '#F1F5F9', fg: '#64748B', label: 'NOT STARTED' }
+    }
+
+    return (
+      <div>
+        <button onClick={() => { setView('detail') }}
+          style={{
+            background: 'transparent', border: 'none',
+            color: '#7D1025', fontSize: 13, fontWeight: 700,
+            cursor: 'pointer', padding: '6px 0', marginBottom: 14,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Back to Exam
+        </button>
+
+        {/* Hero */}
+        <div className="card" style={{
+          padding: 0, marginBottom: 18, overflow: 'hidden',
+          background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
+          color: '#FBFAF5',
+        }}>
+          <div style={{ padding: '20px 28px' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#F0CC5A', marginBottom: 4 }}>
+              Submissions for
+            </div>
+            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              {selectedExam.title}
+            </h1>
+            <div style={{ fontSize: 12, opacity: .85, marginTop: 4 }}>
+              {selectedExam.subject} | {selectedExam.curriculum} {selectedExam.grade} | {selectedExam.durationMins} min
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', background: 'rgba(0,0,0,.18)' }}>
+            {[
+              ['Assigned',     totalAssigned,    '#FBFAF5'],
+              ['Submitted',    submittedCount,   '#F0CC5A'],
+              ['Graded',       gradedCount,      '#DCFCE7'],
+              ['In Progress',  inProgressCount,  '#FCA5A5'],
+              ['Not Started',  notStartedCount,  '#FBFAF5'],
+              ...(flaggedCount > 0 ? [['Flagged', flaggedCount, '#FCA5A5']] : []),
+            ].map(([l, v, c]) => (
+              <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .7, marginBottom: 2, color: '#F0CC5A' }}>{l}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: c }}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Submissions list */}
+        {submissionsLoading ? (
+          <div style={{ textAlign: 'center', padding: 40, color: 'var(--s400)' }}>Loading submissions...</div>
+        ) : submissions.length === 0 ? (
+          <div className="card" style={{ padding: 32, textAlign: 'center' }}>
+            <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, color: '#1A1A1A', marginBottom: 6 }}>
+              No submissions yet
+            </div>
+            <div style={{ fontSize: 13, color: '#6B6B6B' }}>
+              Students will appear here once they start the exam.
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {submissions.map(sub => {
+              const studentName = sub.studentId
+                ? (sub.studentId.firstName || '') + ' ' + (sub.studentId.lastName || '')
+                : '(unknown student)'
+              const admissionNo = sub.studentId?.admissionNumber || sub.studentId?.email || ''
+              const sc = statusColour(sub.status)
+              const submittedTime = sub.submittedAt
+                ? new Date(sub.submittedAt).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })
+                : '—'
+              const minsSpent = sub.timeSpentSecs ? Math.round(sub.timeSpentSecs / 60) : null
+              return (
+                <div key={sub._id} className="card" style={{
+                  padding: 14, cursor: sub.status === 'in_progress' ? 'default' : 'pointer',
+                  borderLeft: '4px solid ' + sc.fg,
+                  opacity: sub.status === 'in_progress' ? .7 : 1,
+                }}
+                  onClick={() => sub.status !== 'in_progress' && openGrade(sub)}
+                  title={sub.status === 'in_progress' ? 'Student is still taking the exam' : 'Click to grade'}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: 220 }}>
+                      <div style={{ display: 'flex', gap: 6, marginBottom: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <span style={{
+                          background: sc.bg, color: sc.fg,
+                          fontSize: 9.5, fontWeight: 800, letterSpacing: '.08em',
+                          padding: '2px 8px', borderRadius: 99,
+                        }}>{sc.label}</span>
+                        {sub.flagged && (
+                          <span style={{
+                            background: '#FEE2E2', color: '#B91C1C',
+                            fontSize: 9.5, fontWeight: 800, letterSpacing: '.08em',
+                            padding: '2px 8px', borderRadius: 99,
+                          }} title={sub.flagReason}>⚠ FLAGGED</span>
+                        )}
+                      </div>
+                      <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)' }}>{studentName}</div>
+                      <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 2 }}>
+                        {admissionNo && <>{admissionNo} | </>}
+                        Submitted {submittedTime}
+                        {minsSpent !== null && <> | {minsSpent} min spent</>}
+                      </div>
+                    </div>
+                    {sub.status === 'graded' && (
+                      <div style={{ textAlign: 'center', minWidth: 80 }}>
+                        <div className="mono" style={{ fontSize: 18, fontWeight: 700, color: '#15803D' }}>
+                          {sub.totalScore}/{sub.maxScore}
+                        </div>
+                        <div style={{ fontSize: 10, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                          {sub.percentage}%{sub.grade ? ' | ' + sub.grade : ''}
+                        </div>
+                      </div>
+                    )}
+                    {sub.status === 'submitted' && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); openGrade(sub) }}
+                        style={{
+                          background: '#7D1025', color: '#fff', border: 'none',
+                          padding: '8px 16px', borderRadius: 'var(--rsm)',
+                          cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                          flexShrink: 0,
+                        }}>
+                        Grade Now
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // RENDER: GRADING SCREEN
+  // Per-answer marks + comments + overall feedback + grade letter.
+  // ─────────────────────────────────────────────────────────
+  if (view === 'grade' && selectedSubmission && selectedExam) {
+    const sub = selectedSubmission
+    const studentName = sub.studentId
+      ? (sub.studentId.firstName || '') + ' ' + (sub.studentId.lastName || '')
+      : '(unknown student)'
+
+    // Sum the marks the teacher has entered so far (live total)
+    const liveTotal = Object.values(gradeForm.answerMarks).reduce((s, v) => s + (Number(v) || 0), 0)
+    const maxTotal = selectedExam.totalMarks || 0
+    const livePercentage = maxTotal > 0 ? Math.round((liveTotal / maxTotal) * 100) : 0
+
+    return (
+      <div>
+        <button onClick={() => { setView('submissions'); setSelectedSubmission(null) }}
+          style={{
+            background: 'transparent', border: 'none',
+            color: '#7D1025', fontSize: 13, fontWeight: 700,
+            cursor: 'pointer', padding: '6px 0', marginBottom: 14,
+            display: 'flex', alignItems: 'center', gap: 6,
+          }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Back to Submissions
+        </button>
+
+        {/* Sticky header: student + live score */}
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 5,
+          background: '#fff',
+          borderBottom: '1px solid var(--border)',
+          padding: '14px 0', marginBottom: 16,
+          display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+        }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--s400)' }}>
+              Grading
+            </div>
+            <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--s900)' }}>{studentName}</div>
+            <div style={{ fontSize: 11, color: 'var(--s500)' }}>{selectedExam.title}</div>
+          </div>
+          <div style={{
+            background: '#FBF6E3', border: '1px solid #C9A030',
+            padding: '10px 18px', borderRadius: 8,
+            textAlign: 'center',
+          }}>
+            <div className="mono" style={{ fontSize: 20, fontWeight: 700, color: '#7D1025' }}>
+              {liveTotal}/{maxTotal}
+            </div>
+            <div style={{ fontSize: 10, color: '#7D1025', textTransform: 'uppercase', letterSpacing: '.05em', fontWeight: 700 }}>
+              {livePercentage}% (live)
+            </div>
+          </div>
+          <button
+            onClick={saveGrade}
+            disabled={gradeSaving}
+            style={{
+              background: gradeSaving ? '#9CA3AF' : '#7D1025',
+              color: '#fff', border: 'none',
+              padding: '12px 22px', borderRadius: 'var(--rmd)',
+              cursor: gradeSaving ? 'not-allowed' : 'pointer',
+              fontSize: 13, fontWeight: 700,
+            }}>
+            {gradeSaving ? 'Saving...' : 'Save & Mark Graded'}
+          </button>
+        </div>
+
+        {sub.flagged && (
+          <div style={{
+            background: '#FEE2E2', border: '1px solid #FCA5A5',
+            color: '#B91C1C', padding: '10px 14px', borderRadius: 8,
+            marginBottom: 14, fontSize: 12.5,
+          }}>
+            <strong>⚠ Integrity flag:</strong> {sub.flagReason}
+          </div>
+        )}
+
+        {/* Answers — one block per answer, in submission order */}
+        {(sub.answers || []).length === 0 ? (
+          <div className="card" style={{ padding: 28, textAlign: 'center' }}>
+            <div style={{ fontSize: 13, color: 'var(--s500)' }}>
+              No answers in this submission.
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {sub.answers.map((answer, i) => {
+              const found = findQuestionForAnswer(answer.questionRef)
+              const question = found?.question
+              const isCustom = found?.isCustom
+              const isNested = Array.isArray(answer.partPath) && answer.partPath.length > 0
+              const leafPart = isNested && question ? findLeafByPath(question, answer.partPath) : null
+
+              // Display label: Q3 (flat) or Q3.b.ii (nested)
+              const qIndex = isCustom
+                ? '(custom)'
+                : (selectedExam.questionIds || []).findIndex(qid => String(qid) === String(answer.questionRef))
+              const qLabel = qIndex === -1 || qIndex === '(custom)'
+                ? 'Q?'
+                : 'Q' + (qIndex + 1)
+              const fullLabel = isNested ? qLabel + '.' + labelAt(answer.partPath) : qLabel
+
+              const maxMarks = maxMarksForAnswer(answer)
+              const questionText = leafPart ? leafPart.text : (question?.questionText || '(question not loaded)')
+              const partType = leafPart ? leafPart.type : (question?.type || 'short')
+              const partOptions = leafPart ? (leafPart.options || []) : (question?.options || [])
+              const correctAnswer = leafPart ? leafPart.correctAnswer : question?.correctAnswer
+
+              return (
+                <div key={i} className="card" style={{
+                  padding: 14, borderLeft: '4px solid #7D1025',
+                }}>
+                  {/* Question label + text */}
+                  <div style={{ display: 'flex', gap: 10, marginBottom: 8, alignItems: 'flex-start' }}>
+                    <div className="mono" style={{
+                      minWidth: 48, padding: '4px 8px', borderRadius: 4,
+                      background: '#7D1025', color: '#fff',
+                      fontSize: 11, fontWeight: 700, textAlign: 'center', flexShrink: 0,
+                    }}>{fullLabel}</div>
+                    <div style={{ flex: 1, fontSize: 13.5, color: 'var(--s900)', lineHeight: 1.5 }}>
+                      {questionText}
+                      {/* Show context stem for nested */}
+                      {isNested && question?.questionText && (
+                        <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 6, fontStyle: 'italic' }}>
+                          (Question {qLabel} stem: {question.questionText})
+                        </div>
+                      )}
+                      {/* Attachments */}
+                      {leafPart && Array.isArray(leafPart.attachments) && leafPart.attachments.length > 0 && (
+                        <AttachmentList attachments={leafPart.attachments} />
+                      )}
+                      {!leafPart && question && Array.isArray(question.attachments) && question.attachments.length > 0 && (
+                        <AttachmentList attachments={question.attachments} />
+                      )}
+                    </div>
+                    <div style={{
+                      fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--s500)',
+                      fontWeight: 700, flexShrink: 0, padding: '4px 8px',
+                      background: '#FBFAF5', borderRadius: 4,
+                    }}>
+                      Max: {maxMarks}
+                    </div>
+                  </div>
+
+                  {/* Student answer */}
+                  <div style={{
+                    background: '#FBFAF5', padding: '12px 14px',
+                    borderRadius: 6, marginBottom: 12,
+                    border: '1px solid var(--border)',
+                  }}>
+                    <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>
+                      Student answer
+                    </div>
+                    {/* Drawing / handwriting: show as image */}
+                    {(partType === 'drawing' || partType === 'handwriting') && answer.answerText && answer.answerText.startsWith('data:') ? (
+                      <a href={answer.answerText} target="_blank" rel="noopener noreferrer">
+                        <img src={answer.answerText} alt="Student drawing"
+                          style={{
+                            maxWidth: '100%', maxHeight: 480,
+                            border: '1px solid var(--border)', borderRadius: 6,
+                            background: '#fff', display: 'block',
+                          }}/>
+                      </a>
+                    ) : partType === 'mcq' ? (
+                      <div style={{ fontSize: 14, color: 'var(--s900)' }}>
+                        <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--s500)', marginRight: 8 }}>
+                          Selected:
+                        </span>
+                        {answer.selectedOption || answer.answerText || <em style={{ color: 'var(--s400)' }}>(no answer)</em>}
+                        {/* Show correct answer hint to teacher */}
+                        {correctAnswer !== null && correctAnswer !== undefined && partOptions.length > 0 && (
+                          <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 4 }}>
+                            Model answer: {typeof correctAnswer === 'number' ? (partOptions[correctAnswer] || '(invalid index)') : correctAnswer}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div style={{
+                        whiteSpace: 'pre-wrap',
+                        fontSize: 13.5, color: 'var(--s900)', lineHeight: 1.6,
+                      }}>
+                        {answer.answerText || <em style={{ color: 'var(--s400)' }}>(no answer)</em>}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Marks + comment */}
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    <div style={{ minWidth: 110 }}>
+                      <label style={{ display: 'block', fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
+                        Marks (max {maxMarks})
+                      </label>
+                      <input
+                        type="number" min={0} max={maxMarks} step={0.5}
+                        value={gradeForm.answerMarks[i] ?? 0}
+                        onChange={e => {
+                          const v = Math.max(0, Math.min(maxMarks, parseFloat(e.target.value) || 0))
+                          setGradeForm(f => ({ ...f, answerMarks: { ...f.answerMarks, [i]: v } }))
+                        }}
+                        style={{
+                          width: 90, padding: '8px 10px',
+                          background: '#fff', border: '1.5px solid #7D1025', borderRadius: 6,
+                          fontSize: 16, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace',
+                          color: '#7D1025', textAlign: 'center',
+                        }}/>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 240 }}>
+                      <label style={{ display: 'block', fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
+                        Comment (optional)
+                      </label>
+                      <input
+                        value={gradeForm.answerComments[i] || ''}
+                        onChange={e => setGradeForm(f => ({ ...f, answerComments: { ...f.answerComments, [i]: e.target.value } }))}
+                        placeholder="Feedback on this answer..."
+                        style={{
+                          width: '100%', boxSizing: 'border-box', padding: '8px 10px',
+                          background: '#fff', border: '1px solid var(--border)', borderRadius: 6,
+                          fontSize: 13,
+                        }}/>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Overall feedback + grade letter */}
+        <div className="card" style={{ marginTop: 18, padding: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 8 }}>
+            Overall feedback & grade
+          </div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 280 }}>
+              <label className="fl">Feedback to student (optional)</label>
+              <textarea
+                value={gradeForm.feedback}
+                onChange={e => setGradeForm(f => ({ ...f, feedback: e.target.value }))}
+                rows={4}
+                placeholder="Overall comments shown to the student on their result screen..."
+                style={{
+                  width: '100%', boxSizing: 'border-box', padding: '10px 12px',
+                  background: '#FBFAF5', border: '1px solid var(--border)', borderRadius: 6,
+                  fontSize: 13, fontFamily: 'inherit', resize: 'vertical',
+                }}/>
+            </div>
+            <div style={{ minWidth: 140 }}>
+              <label className="fl">Grade letter</label>
+              <select
+                value={gradeForm.grade}
+                onChange={e => setGradeForm(f => ({ ...f, grade: e.target.value }))}
+                className="fsel"
+                style={{ width: '100%' }}
+              >
+                <option value="">— (none) —</option>
+                <option value="A*">A*</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+                <option value="U">U (ungraded)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom save row */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
+          <button onClick={() => { setView('submissions'); setSelectedSubmission(null) }}
+            className="btn btn-s" disabled={gradeSaving}>Cancel</button>
+          <button onClick={saveGrade} disabled={gradeSaving}
+            style={{
+              background: gradeSaving ? '#9CA3AF' : '#7D1025',
+              color: '#fff', border: 'none',
+              padding: '12px 24px', borderRadius: 'var(--rmd)',
+              cursor: gradeSaving ? 'not-allowed' : 'pointer',
+              fontSize: 13, fontWeight: 700,
+            }}>
+            {gradeSaving ? 'Saving...' : 'Save & Mark Graded'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // ── RENDER: LIST VIEW ───────────────────────────────
   return (
     <div>
@@ -3732,6 +4358,24 @@ function ExamsTab({ user, store, setPage, toast }) {
                     </div>
                     <div style={{ fontSize: 10, color: 'var(--s500)', textTransform: 'uppercase', letterSpacing: '.05em' }}>Students</div>
                   </div>
+                  {(status === 'active' || status === 'ended') && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openSubmissions(exam) }}
+                      style={{
+                        background: '#FBF6E3', border: '1px solid #C9A030',
+                        color: '#7D1025', padding: '8px 14px',
+                        borderRadius: 'var(--rsm)', cursor: 'pointer',
+                        fontSize: 12, fontWeight: 700,
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        flexShrink: 0,
+                      }}>
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                      </svg>
+                      Submissions
+                    </button>
+                  )}
                 </div>
               </div>
             )
