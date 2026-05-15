@@ -58,7 +58,13 @@ const upload = multer({
 // ─────────────────────────────────────────────────────────
 // POST /api/questions/upload
 // ─────────────────────────────────────────────────────────
-router.post('/upload', auth, requireRole('teacher', 'admin'), (req, res) => {
+// ─────────────────────────────────────────────────────────
+// POST /api/questions/upload — upload an attachment to Cloudinary
+// Open to any authenticated user. Teachers use it to attach images
+// to questions; students use it to upload drawing answers in homework
+// and any upload-type answers in exams.
+// ─────────────────────────────────────────────────────────
+router.post('/upload', auth, (req, res) => {
   upload.single('file')(req, res, (err) => {
     if (err) {
       console.error('[questions/upload]', err.message);
