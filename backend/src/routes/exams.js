@@ -55,6 +55,27 @@ function stripCorrectAnswersFromParts(parts) {
   });
 }
 
+// Compute status from raw fields. Use after .lean() because the virtual
+// on the schema doesn't survive .lean() without the lean-virtuals plugin.
+function computeStatus(exam) {
+  if (!exam) return null;
+  if (exam.status === 'archived') return 'archived';
+  const now   = Date.now();
+  const start = new Date(exam.startAt).getTime();
+  const end   = start + (exam.durationMins || 0) * 60000;
+  if (now < start) return 'scheduled';
+  if (now <= end)  return 'active';
+  return 'ended';
+}
+
+// Attach computedStatus to a lean exam doc (or array of them)
+function withComputedStatus(examOrArray) {
+  if (Array.isArray(examOrArray)) {
+    return examOrArray.map(e => ({ ...e, computedStatus: computeStatus(e) }));
+  }
+  return examOrArray ? { ...examOrArray, computedStatus: computeStatus(examOrArray) } : examOrArray;
+}
+
 // ═══════════════════════════════════════════════════════════
 // TEACHER ROUTES
 // ═══════════════════════════════════════════════════════════
@@ -113,8 +134,8 @@ router.post('/', auth, requireRole('teacher','admin'), async (req, res) => {
 router.get('/teacher/list', auth, requireRole('teacher','admin'), async (req, res) => {
   try {
     const exams = await Exam.find({ teacherId: req.user._id })
-      .sort({ startAt: -1 }).lean({ virtuals: true });
-    res.json({ success:true, data: { exams } });
+      .sort({ startAt: -1 }).lean();
+    res.json({ success:true, data: { exams: withComputedStatus(exams) } });
   } catch (e) {
     console.error('[exams teacher/list] failed:', e.message);
     res.status(500).json({ success:false, message:'Failed to load exams.' });
@@ -210,7 +231,7 @@ router.get('/student/list', auth, async (req, res) => {
     })
       .sort({ startAt: -1 })
       .populate('teacherId', 'firstName lastName')
-      .lean({ virtuals: true });
+      .lean();
 
     const submissionMap = {};
     if (exams.length) {
@@ -219,7 +240,7 @@ router.get('/student/list', auth, async (req, res) => {
       }).lean();
       subs.forEach(s => { submissionMap[String(s.examId)] = s; });
     }
-    const examsWithSub = exams.map(e => ({
+    const examsWithSub = withComputedStatus(exams).map(e => ({
       ...e, mySubmission: submissionMap[String(e._id)] || null,
     }));
 
@@ -235,7 +256,7 @@ router.get('/:id/take', auth, async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success:false, message:'Invalid exam id.' });
 
-    const exam = await Exam.findById(req.params.id).lean({ virtuals: true });
+    const exam = await Exam.findById(req.params.id).lean();
     if (!exam) return res.status(404).json({ success:false, message:'Exam not found.' });
 
     const studentId = String(req.user._id);
@@ -243,8 +264,10 @@ router.get('/:id/take', auth, async (req, res) => {
     if (!assigned && req.user.role !== 'admin')
       return res.status(403).json({ success:false, message:'Not assigned to you.' });
 
-    if (exam.computedStatus !== 'active')
-      return res.status(403).json({ success:false, message:`Exam is ${exam.computedStatus}, not active right now.` });
+    // Compute status from raw fields (virtual doesn't survive .lean())
+    const computedStatus = computeStatus(exam);
+    if (computedStatus !== 'active')
+      return res.status(403).json({ success:false, message:`Exam is ${computedStatus}, not active right now.` });
 
     let bankQuestions = [];
     try {
