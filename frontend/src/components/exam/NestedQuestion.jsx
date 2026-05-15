@@ -83,6 +83,65 @@ const BRAND = {
 }
 
 // ─────────────────────────────────────────────────────────
+// AttachmentList — renders Cloudinary-hosted images/files
+// attached to a question or part. Inline images render as
+// thumbnails (click to enlarge); other files render as links.
+// ─────────────────────────────────────────────────────────
+export const AttachmentList = ({ attachments }) => {
+  if (!Array.isArray(attachments) || attachments.length === 0) return null
+  return (
+    <div style={{
+      display:'flex', flexWrap:'wrap', gap:8, marginTop:8,
+    }}>
+      {attachments.map((att, i) => {
+        const isImage = (att.mimeType || '').startsWith('image/') ||
+          /\.(jpe?g|png|gif|webp|svg)$/i.test(att.filename || att.url || '')
+        if (isImage) {
+          return (
+            <a key={i} href={att.url} target="_blank" rel="noopener noreferrer"
+              style={{
+                display:'inline-block',
+                border:`1px solid ${BRAND.line}`,
+                borderRadius:6,
+                overflow:'hidden',
+                background:BRAND.white,
+                lineHeight:0,
+              }}
+              title={att.filename || 'View full size'}
+            >
+              <img src={att.url} alt={att.filename || 'Attachment'}
+                style={{
+                  maxWidth:280, maxHeight:200,
+                  display:'block', objectFit:'contain',
+                }}
+              />
+            </a>
+          )
+        }
+        return (
+          <a key={i} href={att.url} target="_blank" rel="noopener noreferrer"
+            style={{
+              display:'inline-flex', alignItems:'center', gap:6,
+              padding:'8px 12px',
+              background:BRAND.cream, border:`1px solid ${BRAND.line}`,
+              borderRadius:6,
+              fontSize:12, color:BRAND.crimson, fontWeight:600,
+              textDecoration:'none',
+            }}
+          >
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            {att.filename || 'Attachment'}
+          </a>
+        )
+      })}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────
 // <NestedQuestionEditor>  — recursive teacher authoring form
 // ─────────────────────────────────────────────────────────
 // Props:
@@ -404,6 +463,9 @@ const NestedRendererInner = ({ parts, basePath, depth, showMarks, compact }) => 
                 <div style={{ fontSize: compact ? 12.5 : 13.5, color:BRAND.ink, lineHeight:1.5 }}>
                   {part.text}
                 </div>
+                {Array.isArray(part.attachments) && part.attachments.length > 0 && (
+                  <AttachmentList attachments={part.attachments} />
+                )}
                 {part.type === 'mcq' && !hasChildren && (part.options || []).length > 0 && (
                   <div style={{ marginTop:4, paddingLeft:4 }}>
                     {part.options.map((o, oi) => (
@@ -547,6 +609,9 @@ const NestedAnswerInner = ({ parts, basePath, depth, questionRef, answers, updat
               </div>
               <div style={{ flex:1, minWidth:0, fontSize:13.5, color:BRAND.ink, lineHeight:1.5 }}>
                 {part.text}
+                {Array.isArray(part.attachments) && part.attachments.length > 0 && (
+                  <AttachmentList attachments={part.attachments} />
+                )}
               </div>
               <div style={{
                 fontFamily:'JetBrains Mono,monospace', fontSize:11.5, color:BRAND.inkMute,
@@ -623,15 +688,45 @@ const AnswerInput = ({ part, path, questionRef, answer, onChange, readOnly, rend
 
   // ── DRAWING (uses portal-provided DrawingCanvas) ──
   // The drawing is serialised to a single PNG dataURL stored in answerText.
+  // Student must click "Save Drawing" inside the canvas UI for the dataURL
+  // to be captured. We show a status badge to make that clear.
   if (type === 'drawing' && renderers.DrawingCanvas) {
     const Canvas = renderers.DrawingCanvas
+    const hasAnswer = !!(a.answerText && a.answerText.length > 100)  // dataURLs are long
     return (
       <div style={{
         border:`1.5px solid ${BRAND.line}`, borderRadius:6,
         background:BRAND.cream, padding:8,
       }}>
-        <div style={{ fontSize:11, color:BRAND.inkMute, fontWeight:600, marginBottom:6, letterSpacing:'.05em', textTransform:'uppercase' }}>
-          Sketch your answer below
+        <div style={{
+          display:'flex', alignItems:'center', justifyContent:'space-between',
+          marginBottom:8, gap:8,
+        }}>
+          <div style={{ fontSize:11, color:BRAND.inkMute, fontWeight:600, letterSpacing:'.05em', textTransform:'uppercase' }}>
+            Sketch your answer below
+          </div>
+          {hasAnswer ? (
+            <div style={{
+              display:'inline-flex', alignItems:'center', gap:4,
+              background:'#DCFCE7', color:'#15803D',
+              padding:'3px 8px', borderRadius:99,
+              fontSize:10.5, fontWeight:700, letterSpacing:'.05em', textTransform:'uppercase',
+            }}>
+              <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Saved
+            </div>
+          ) : (
+            <div style={{
+              display:'inline-flex', alignItems:'center', gap:4,
+              background:'#FEF3C7', color:'#92400E',
+              padding:'3px 8px', borderRadius:99,
+              fontSize:10.5, fontWeight:700, letterSpacing:'.05em', textTransform:'uppercase',
+            }}>
+              Click "Save Drawing" below
+            </div>
+          )}
         </div>
         <Canvas
           value={a.answerText || ''}
@@ -646,13 +741,41 @@ const AnswerInput = ({ part, path, questionRef, answer, onChange, readOnly, rend
   // The canvas's onSave returns a single combined PNG dataURL of all pages.
   if (type === 'handwriting' && renderers.HandwritingCanvas) {
     const Canvas = renderers.HandwritingCanvas
+    const hasAnswer = !!(a.answerText && a.answerText.length > 100)
     return (
       <div style={{
         border:`1.5px solid ${BRAND.line}`, borderRadius:6,
         background:BRAND.cream, padding:8,
       }}>
-        <div style={{ fontSize:11, color:BRAND.inkMute, fontWeight:600, marginBottom:6, letterSpacing:'.05em', textTransform:'uppercase' }}>
-          Write your answer by hand (multi-page)
+        <div style={{
+          display:'flex', alignItems:'center', justifyContent:'space-between',
+          marginBottom:8, gap:8,
+        }}>
+          <div style={{ fontSize:11, color:BRAND.inkMute, fontWeight:600, letterSpacing:'.05em', textTransform:'uppercase' }}>
+            Write your answer by hand (multi-page)
+          </div>
+          {hasAnswer ? (
+            <div style={{
+              display:'inline-flex', alignItems:'center', gap:4,
+              background:'#DCFCE7', color:'#15803D',
+              padding:'3px 8px', borderRadius:99,
+              fontSize:10.5, fontWeight:700, letterSpacing:'.05em', textTransform:'uppercase',
+            }}>
+              <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Saved
+            </div>
+          ) : (
+            <div style={{
+              display:'inline-flex', alignItems:'center', gap:4,
+              background:'#FEF3C7', color:'#92400E',
+              padding:'3px 8px', borderRadius:99,
+              fontSize:10.5, fontWeight:700, letterSpacing:'.05em', textTransform:'uppercase',
+            }}>
+              Click "Save" in toolbar
+            </div>
+          )}
         </div>
         <Canvas
           value={a.answerText || null}
