@@ -135,6 +135,7 @@ const NAV_ICON_PALETTE = {
   practice:     ['#7C3AED', '#5B21B6'], // violet
   homework:     ['#22C55E', '#15803D'], // green
   exams:        ['#D97706', '#B45309'], // amber
+  results:      ['#C9A030', '#7D1025'], // gold to crimson — premium brand
   live:         ['#EF4444', '#B91C1C'], // signal red
   myroom:       ['#0EA5E9', '#0369A1'], // sky blue
   timetable:    ['#EC4899', '#BE185D'], // pink
@@ -320,6 +321,7 @@ const NAV_SECTIONS = [
     { id:'practice',     label:'Adaptive Practice',icon:'practice',    svg:'<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1.5"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/>' },
     { id:'homework',     label:'Homework',        icon:'homework',     svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>' },
     { id:'exams',        label:'Exams',           icon:'exams',        svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',  badge:'1' },
+    { id:'results',      label:'My Results',      icon:'results',      svg:'<circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>' },
     { id:'live',         label:'Live Classes',    icon:'live',         svg:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>', live:true },
     { id:'myroom',       label:'My Class Room',   icon:'myroom',       svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',  groupOnly:true },
     { id:'timetable',    label:'Timetable',       icon:'timetable',    svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
@@ -607,6 +609,7 @@ export default function StudentPortal() {
     page === 'curriculum'   ? 'My Curriculum' :
     page === 'lessons'      ? 'Lesson Player' :
     page === 'exams'        ? 'Exams' :
+    page === 'results'      ? 'My Results' :
     page === 'live'         ? 'Live Classes' :
     page === 'timetable'    ? 'Timetable' :
     page === 'resources'    ? 'Resources' :
@@ -623,6 +626,7 @@ export default function StudentPortal() {
     page === 'curriculum'   ? 'Programme map' :
     page === 'lessons'      ? 'Recorded lessons' :
     page === 'exams'        ? 'Assessments' :
+    page === 'results'      ? 'Grades & feedback' :
     page === 'live'         ? 'Scheduled sessions' :
     page === 'timetable'    ? 'Weekly schedule' :
     page === 'resources'    ? 'Learning library' :
@@ -1622,6 +1626,7 @@ export default function StudentPortal() {
               EXAMS
           ════════════════════════════════════════════ */}
           {page === 'exams' && <ExamsTab user={user} toast={toast} goTo={goTo} store={store} />}
+          {page === 'results' && <MyResultsTab user={user} toast={toast} setPage={setPage} />}
 
           {/* ════════════════════════════════════════════
               LIVE CLASSES
@@ -3259,98 +3264,95 @@ function ExamsTab({ user, toast, goTo, store }) {
   }
 
   // ─────────────────────────────────────────────────────
-  // REAL EXAM — RESULT SCREEN
+  // REAL EXAM — POST-SUBMISSION CONFIRMATION
+  // Per design: simple confirmation only. The student gets the
+  // premium full breakdown in the Results module, not here.
   // ─────────────────────────────────────────────────────
   if (stage === 'real-result' && realResult) {
     const isGraded = realResult.status === 'graded'
-    const pct = realResult.percentage || 0
-    const passed = pct >= 50
-    const subjCol = subjectColour(realExam?.subject)
     return (
-      <div style={{ maxWidth: 640, margin: '0 auto' }}>
-        <div className="card" style={{ textAlign:'center', padding:32 }}>
+      <div style={{ maxWidth: 560, margin: '40px auto 0' }}>
+        <div className="card" style={{ textAlign:'center', padding:'40px 32px' }}>
+          {/* Confirmation icon */}
           <div style={{
-            width:80, height:80, borderRadius:'50%',
-            background: isGraded ? (passed ? '#15803D' : '#B45309') : '#64748B',
+            width:88, height:88, borderRadius:'50%',
+            background: isGraded
+              ? 'linear-gradient(135deg, #C9A030 0%, #7D1025 100%)'
+              : 'linear-gradient(135deg, #15803D 0%, #047857 100%)',
             color:'#fff',
             display:'flex', alignItems:'center', justifyContent:'center',
-            margin:'0 auto 16px',
-            fontSize:32,
+            margin:'0 auto 20px',
+            boxShadow: isGraded
+              ? '0 8px 32px rgba(125,16,37,.25)'
+              : '0 8px 32px rgba(21,128,61,.25)',
           }}>
-            {isGraded ? (passed ? '✓' : '!') : '⏱'}
+            <svg width="44" height="44" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
           </div>
-          <div className="serif" style={{ fontSize:24, color:'var(--s900)', marginBottom:6 }}>
-            {isGraded ? (passed ? 'Well done!' : 'Keep going.') : 'Submitted'}
+
+          <div className="serif" style={{ fontSize:30, color:'#1A1A1A', marginBottom:8, lineHeight:1.15 }}>
+            {isGraded ? 'Already graded!' : 'Exam submitted'}
           </div>
-          <div style={{ fontSize:13.5, color:'var(--s500)', marginBottom:20, maxWidth:420, marginLeft:'auto', marginRight:'auto' }}>
+          <div style={{ fontSize:14, color:'#6B6B6B', marginBottom:28, lineHeight:1.55 }}>
             {isGraded
-              ? 'Your teacher has finished grading. Detailed feedback below.'
-              : 'Your answers have been submitted. MCQs are auto-graded; written answers are awaiting your teacher\u2019s review.'}
+              ? 'Your teacher has already finished marking. Your full results are ready in the Results section — including per-question feedback.'
+              : 'Your answers are with your teacher for grading. You\u2019ll get a notification when they\u2019re ready. Until then, check your past results below.'}
           </div>
 
-          <div style={{
-            display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:10,
-            marginBottom:20, textAlign:'center',
-          }}>
-            <div style={{ padding:'12px 8px', background:'#FBFAF5', borderRadius:8 }}>
-              <div className="mono" style={{ fontSize:22, fontWeight:700, color:'var(--s900)' }}>
-                {realResult.totalScore || 0}
-              </div>
-              <div style={{ fontSize:10, letterSpacing:'.08em', textTransform:'uppercase', color:'var(--s500)', marginTop:2 }}>
-                Score
-              </div>
-            </div>
-            <div style={{ padding:'12px 8px', background:'#FBFAF5', borderRadius:8 }}>
-              <div className="mono" style={{ fontSize:22, fontWeight:700, color: subjCol }}>
-                {realResult.maxScore || 0}
-              </div>
-              <div style={{ fontSize:10, letterSpacing:'.08em', textTransform:'uppercase', color:'var(--s500)', marginTop:2 }}>
-                Total
-              </div>
-            </div>
-            <div style={{ padding:'12px 8px', background:'#FBFAF5', borderRadius:8 }}>
-              <div className="mono" style={{ fontSize:22, fontWeight:700, color: passed ? '#15803D' : '#B45309' }}>
-                {pct}%
-              </div>
-              <div style={{ fontSize:10, letterSpacing:'.08em', textTransform:'uppercase', color:'var(--s500)', marginTop:2 }}>
-                Percentage
-              </div>
-            </div>
-          </div>
-
-          {isGraded && realResult.grade && (
+          {/* Show inline score teaser only if graded — full detail moves to Results module */}
+          {isGraded && (
             <div style={{
               display:'inline-block',
-              background: passed ? '#DCFCE7' : '#FEF3C7',
-              color: passed ? '#15803D' : '#92400E',
-              padding:'6px 16px', borderRadius:99,
-              fontSize:14, fontWeight:700, marginBottom:16,
+              padding:'14px 28px',
+              background:'#FBF6E3',
+              border:'1px solid #C9A030',
+              borderRadius:8,
+              marginBottom:24,
             }}>
-              Grade: {realResult.grade}
-            </div>
-          )}
-
-          {isGraded && realResult.feedback && (
-            <div style={{
-              padding:'14px 16px',
-              background:'#FBFAF5', border:'1px solid #E8E2D6',
-              borderRadius:8, marginBottom:20,
-              fontSize:13, color:'var(--s700)', lineHeight:1.55, textAlign:'left',
-            }}>
-              <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'var(--s500)', marginBottom:6 }}>
-                Teacher Feedback
+              <div className="mono" style={{ fontSize:28, fontWeight:700, color:'#7D1025' }}>
+                {realResult.percentage || 0}%
               </div>
-              {realResult.feedback}
+              <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'#7D1025', marginTop:2 }}>
+                Your Score{realResult.grade ? ' \u00b7 Grade ' + realResult.grade : ''}
+              </div>
             </div>
           )}
 
-          <button
-            onClick={() => { setStage('list'); setRealExam(null); setRealResult(null) }}
-            className="btn btn-p"
-            style={{ background:'#7D1025', borderColor:'#7D1025' }}
-          >
-            Back to Exams
-          </button>
+          <div style={{ display:'flex', gap:10, justifyContent:'center', flexWrap:'wrap' }}>
+            <button
+              onClick={() => {
+                setStage('list')
+                setRealExam(null)
+                setRealResult(null)
+                // Jump to Results module
+                if (typeof goTo === 'function') goTo('results')
+              }}
+              style={{
+                background:'#7D1025', color:'#fff', border:'none',
+                padding:'12px 24px', borderRadius:8,
+                fontSize:13, fontWeight:700, cursor:'pointer',
+                display:'inline-flex', alignItems:'center', gap:8,
+              }}
+            >
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="6"/>
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+              </svg>
+              View My Results
+            </button>
+            <button
+              onClick={() => { setStage('list'); setRealExam(null); setRealResult(null) }}
+              style={{
+                background:'transparent', color:'#7D1025',
+                border:'1.5px solid #7D1025',
+                padding:'12px 24px', borderRadius:8,
+                fontSize:13, fontWeight:700, cursor:'pointer',
+              }}
+            >
+              Back to Exams
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -7942,6 +7944,771 @@ function HandwritingCanvas({ value, onSave, readOnly = false }) {
           <button type="button" onClick={handleSave} className="btn btn-p">
             Save Handwriting ({pages.length} page{pages.length === 1 ? '' : 's'})
           </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// MY RESULTS — premium grade module
+// Shows all graded exam submissions with radial subject rings,
+// a list of past results, and a detail view per result with
+// per-question breakdown and teacher feedback.
+// ═══════════════════════════════════════════════════════════
+function MyResultsTab({ user, toast, setPage }) {
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selectedSubId, setSelectedSubId] = useState(null)
+  const [detail, setDetail] = useState(null)
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [sortBy, setSortBy] = useState('recent')
+
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      setLoading(true)
+      try {
+        const { data } = await api.get('/exams/submissions/my')
+        if (cancelled) return
+        if (data?.success) {
+          setResults(data.data?.submissions || [])
+        } else {
+          toast?.error?.(data?.message || 'Failed to load results.')
+          setResults([])
+        }
+      } catch (e) {
+        if (cancelled) return
+        console.error('[results] load failed:', e?.response?.data?.message || e.message)
+        toast?.error?.('Could not load results.')
+        setResults([])
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (!selectedSubId) { setDetail(null); return }
+    let cancelled = false
+    const load = async () => {
+      setDetailLoading(true)
+      try {
+        const { data } = await api.get('/exams/submissions/my/' + selectedSubId)
+        if (cancelled) return
+        if (data?.success) setDetail(data.data)
+        else toast?.error?.(data?.message || 'Failed to load result.')
+      } catch (e) {
+        if (cancelled) return
+        console.error('[results detail] load failed:', e.message)
+        toast?.error?.('Could not load result.')
+      } finally {
+        if (!cancelled) setDetailLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [selectedSubId, toast])
+
+  const graded = results.filter(r => r.status === 'graded')
+  const subjectStats = (() => {
+    const map = {}
+    graded.forEach(r => {
+      const subj = r.examId?.subject || 'Other'
+      if (!map[subj]) map[subj] = { totalScore: 0, maxScore: 0, count: 0 }
+      map[subj].totalScore += (r.totalScore || 0)
+      map[subj].maxScore   += (r.maxScore || 0)
+      map[subj].count      += 1
+    })
+    return Object.entries(map).map(([subject, stats]) => ({
+      subject,
+      avgPct: stats.maxScore > 0 ? Math.round((stats.totalScore / stats.maxScore) * 100) : 0,
+      count: stats.count,
+    }))
+  })()
+
+  const overallStats = (() => {
+    if (graded.length === 0) return { avgPct: 0, totalScore: 0, maxScore: 0 }
+    const totalScore = graded.reduce((s, r) => s + (r.totalScore || 0), 0)
+    const maxScore   = graded.reduce((s, r) => s + (r.maxScore || 0), 0)
+    return {
+      avgPct: maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0,
+      totalScore, maxScore,
+    }
+  })()
+
+  const pendingCount = results.filter(r => r.status === 'submitted').length
+
+  const sortedResults = [...results].sort((a, b) => {
+    switch (sortBy) {
+      case 'highest': return (b.percentage || 0) - (a.percentage || 0)
+      case 'lowest':  return (a.percentage || 0) - (b.percentage || 0)
+      case 'subject': return (a.examId?.subject || '').localeCompare(b.examId?.subject || '')
+      default:        return new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0)
+    }
+  })
+
+  if (selectedSubId) {
+    return (
+      <MyResultDetail
+        subId={selectedSubId}
+        detail={detail}
+        loading={detailLoading}
+        onBack={() => { setSelectedSubId(null); setDetail(null) }}
+      />
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="card" style={{ padding:'60px 20px', textAlign:'center' }}>
+        <div className="mono" style={{ fontSize:13, color:'var(--s400)', letterSpacing:'.1em' }}>
+          LOADING YOUR RESULTS...
+        </div>
+      </div>
+    )
+  }
+
+  if (results.length === 0) {
+    return (
+      <div className="card" style={{ padding:'60px 32px', textAlign:'center' }}>
+        <div style={{
+          width:80, height:80, borderRadius:'50%',
+          background:'#FBF6E3', border:'2px solid #C9A030',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          margin:'0 auto 20px', color:'#7D1025',
+        }}>
+          <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="8" r="6"/>
+            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+          </svg>
+        </div>
+        <div className="serif" style={{ fontSize:24, color:'#1A1A1A', marginBottom:6 }}>
+          No results yet
+        </div>
+        <div style={{ fontSize:13.5, color:'#6B6B6B', maxWidth:380, margin:'0 auto 24px', lineHeight:1.55 }}>
+          Once you submit an exam and your teacher grades it, your results will appear here with full per-question feedback.
+        </div>
+        <button onClick={() => setPage?.('exams')}
+          style={{
+            background:'#7D1025', color:'#fff', border:'none',
+            padding:'10px 22px', borderRadius:8,
+            fontSize:13, fontWeight:700, cursor:'pointer',
+          }}>
+          Go to Exams
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className="card" style={{
+        padding:0, marginBottom:18, overflow:'hidden',
+        background:'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
+        color:'#FBFAF5',
+        boxShadow:'0 12px 40px rgba(125,16,37,.20)',
+      }}>
+        <div style={{
+          padding:'28px 32px',
+          display:'flex', alignItems:'center', gap:32, flexWrap:'wrap',
+          backgroundImage:'radial-gradient(circle at 95% 50%, rgba(201,160,48,.18) 0%, transparent 50%)',
+        }}>
+          <div style={{ flex:1, minWidth:220 }}>
+            <div style={{ fontSize:11, fontWeight:700, letterSpacing:'.16em', textTransform:'uppercase', color:'#F0CC5A', marginBottom:6 }}>
+              Academic Performance
+            </div>
+            <h1 className="serif" style={{ fontSize:32, fontWeight:400, margin:0, lineHeight:1.1 }}>
+              {graded.length > 0
+                ? `Averaging ${overallStats.avgPct}% across ${graded.length} exam${graded.length===1?'':'s'}`
+                : 'Awaiting graded results'}
+            </h1>
+            <div style={{ fontSize:13, opacity:.85, marginTop:6 }}>
+              {overallStats.maxScore > 0 && (
+                <>{overallStats.totalScore} of {overallStats.maxScore} marks total
+                  {pendingCount > 0 && <> &middot; {pendingCount} awaiting grading</>}
+                </>
+              )}
+              {graded.length === 0 && pendingCount > 0 && <>{pendingCount} exam{pendingCount===1?'':'s'} awaiting your teacher's review</>}
+            </div>
+          </div>
+          {graded.length > 0 && (
+            <CircularRing
+              percentage={overallStats.avgPct}
+              size={140}
+              stroke={11}
+              trackColor="rgba(251,250,245,.15)"
+              fillColor="#C9A030"
+              label="Overall"
+            />
+          )}
+        </div>
+        {subjectStats.length > 0 && (
+          <div style={{
+            background:'rgba(0,0,0,.18)',
+            padding:'18px 32px',
+            display:'flex', flexWrap:'wrap', gap:18,
+            alignItems:'center',
+          }}>
+            <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'#F0CC5A', marginRight:12 }}>
+              By Subject
+            </div>
+            {subjectStats.map(s => (
+              <div key={s.subject} style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <CircularRing
+                  percentage={s.avgPct}
+                  size={56}
+                  stroke={5}
+                  trackColor="rgba(251,250,245,.18)"
+                  fillColor={s.avgPct >= 70 ? '#86EFAC' : s.avgPct >= 50 ? '#FDE68A' : '#FCA5A5'}
+                />
+                <div>
+                  <div style={{ fontSize:12.5, fontWeight:600, color:'#FBFAF5' }}>{s.subject}</div>
+                  <div style={{ fontSize:10.5, color:'#F0CC5A' }}>
+                    {s.count} exam{s.count===1?'':'s'} &middot; {s.avgPct}%
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div style={{
+        display:'flex', alignItems:'center', gap:10, marginBottom:12, flexWrap:'wrap',
+      }}>
+        <div style={{ fontSize:11, fontWeight:700, color:'#6B6B6B', letterSpacing:'.06em', textTransform:'uppercase' }}>
+          Sort:
+        </div>
+        {[
+          ['recent', 'Most Recent'],
+          ['highest', 'Highest Score'],
+          ['lowest', 'Needs Attention'],
+          ['subject', 'By Subject'],
+        ].map(([id, label]) => (
+          <button key={id} onClick={() => setSortBy(id)}
+            style={{
+              background: sortBy === id ? '#7D1025' : 'transparent',
+              color: sortBy === id ? '#fff' : '#7D1025',
+              border: '1px solid ' + (sortBy === id ? '#7D1025' : '#E8E2D6'),
+              padding:'6px 12px', borderRadius:99,
+              fontSize:11.5, fontWeight:600, cursor:'pointer',
+            }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+        {sortedResults.map(r => {
+          const exam = r.examId
+          const isGraded = r.status === 'graded'
+          const subjCol = subjectColour(exam?.subject)
+          const submittedDate = r.submittedAt
+            ? new Date(r.submittedAt).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
+            : '—'
+
+          return (
+            <div key={r._id} className="card" style={{
+              padding:14, cursor: isGraded ? 'pointer' : 'default',
+              borderLeft:'4px solid ' + subjCol,
+              opacity: isGraded ? 1 : .75,
+              transition:'transform .15s',
+            }}
+              onMouseEnter={(e) => { if (isGraded) e.currentTarget.style.transform = 'translateX(2px)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateX(0)' }}
+              onClick={() => isGraded && setSelectedSubId(r._id)}
+              title={isGraded ? 'Click for full breakdown' : 'Awaiting teacher review'}
+            >
+              <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
+                <div style={{ flex:1, minWidth:200 }}>
+                  <div style={{ display:'flex', gap:6, marginBottom:4, flexWrap:'wrap', alignItems:'center' }}>
+                    <span style={{
+                      background: subjCol + '15', color: subjCol,
+                      fontSize:9.5, fontWeight:700, letterSpacing:'.06em',
+                      padding:'2px 8px', borderRadius:99, textTransform:'uppercase',
+                    }}>{exam?.subject || 'Subject'}</span>
+                    {!isGraded && (
+                      <span style={{
+                        background:'#FEF3C7', color:'#92400E',
+                        fontSize:9.5, fontWeight:700, letterSpacing:'.06em',
+                        padding:'2px 8px', borderRadius:99,
+                      }}>AWAITING GRADE</span>
+                    )}
+                    <span style={{ fontSize:11, color:'#6B6B6B' }}>
+                      {exam?.curriculum} {exam?.grade}
+                    </span>
+                  </div>
+                  <div style={{ fontWeight:700, fontSize:15.5, color:'#1A1A1A', marginBottom:2 }}>
+                    {exam?.title || 'Exam'}
+                  </div>
+                  <div style={{ fontSize:11.5, color:'#6B6B6B' }}>
+                    Submitted {submittedDate}
+                    {exam?.teacherId && <> &middot; Marked by {exam.teacherId.firstName} {exam.teacherId.lastName}</>}
+                  </div>
+                </div>
+                {isGraded ? (
+                  <>
+                    <CircularRing
+                      percentage={r.percentage || 0}
+                      size={64}
+                      stroke={6}
+                      trackColor="#FBF6E3"
+                      fillColor={r.percentage >= 70 ? '#15803D' : r.percentage >= 50 ? '#C9A030' : '#B45309'}
+                    />
+                    <div style={{ minWidth:80, textAlign:'right' }}>
+                      <div className="mono" style={{ fontSize:14, fontWeight:700, color:'#1A1A1A' }}>
+                        {r.totalScore}/{r.maxScore}
+                      </div>
+                      {r.grade && (
+                        <div style={{
+                          display:'inline-block', marginTop:4,
+                          background: r.percentage >= 70 ? '#DCFCE7' : r.percentage >= 50 ? '#FBF6E3' : '#FEE2E2',
+                          color:     r.percentage >= 70 ? '#15803D' : r.percentage >= 50 ? '#7D1025' : '#B45309',
+                          padding:'2px 8px', borderRadius:99,
+                          fontSize:11, fontWeight:700,
+                        }}>
+                          {r.grade}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ minWidth:80, textAlign:'right' }}>
+                    <div style={{ fontSize:11.5, color:'#92400E', fontStyle:'italic' }}>
+                      Pending teacher review
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────
+// CircularRing — animated radial progress indicator
+// ─────────────────────────────────────────────────────────
+function CircularRing({ percentage = 0, size = 64, stroke = 6, trackColor = '#E8E2D6', fillColor = '#7D1025', label }) {
+  const [displayed, setDisplayed] = useState(0)
+  const target = Math.max(0, Math.min(100, percentage))
+
+  useEffect(() => {
+    let frame
+    const startTime = Date.now()
+    const duration = 900
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      const t = Math.min(1, elapsed / duration)
+      const eased = 1 - Math.pow(1 - t, 3)
+      setDisplayed(Math.round(target * eased))
+      if (t < 1) frame = requestAnimationFrame(animate)
+    }
+    frame = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(frame)
+  }, [target])
+
+  const radius = (size - stroke) / 2
+  const circumference = 2 * Math.PI * radius
+  const offset = circumference - (displayed / 100) * circumference
+
+  return (
+    <div style={{ position:'relative', width:size, height:size, flexShrink:0 }}>
+      <svg width={size} height={size}>
+        <circle cx={size/2} cy={size/2} r={radius}
+          fill="transparent" stroke={trackColor} strokeWidth={stroke}/>
+        <circle cx={size/2} cy={size/2} r={radius}
+          fill="transparent" stroke={fillColor} strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          transform={`rotate(-90 ${size/2} ${size/2})`}
+          style={{ transition:'stroke-dashoffset 100ms linear' }}/>
+      </svg>
+      <div style={{
+        position:'absolute', inset:0,
+        display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+        textAlign:'center',
+      }}>
+        <div className="mono" style={{
+          fontSize: size >= 100 ? 28 : size >= 56 ? 14 : 11,
+          fontWeight:700, color: fillColor, lineHeight:1,
+        }}>
+          {displayed}%
+        </div>
+        {label && (
+          <div style={{
+            fontSize: size >= 100 ? 10 : 8.5,
+            fontWeight:700, letterSpacing:'.08em', textTransform:'uppercase',
+            color: fillColor, marginTop:size >= 100 ? 4 : 2, opacity:.75,
+          }}>
+            {label}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────
+// MyResultDetail — premium per-result breakdown
+// ─────────────────────────────────────────────────────────
+function MyResultDetail({ subId, detail, loading, onBack }) {
+  const [expandedAnswers, setExpandedAnswers] = useState({})
+
+  if (loading || !detail) {
+    return (
+      <div>
+        <button onClick={onBack}
+          style={{
+            background:'transparent', border:'none', color:'#7D1025',
+            fontSize:13, fontWeight:700, cursor:'pointer',
+            padding:'6px 0', marginBottom:14,
+            display:'flex', alignItems:'center', gap:6,
+          }}>
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+          </svg>
+          Back to Results
+        </button>
+        <div className="card" style={{ padding:'60px 20px', textAlign:'center' }}>
+          <div className="mono" style={{ fontSize:13, color:'var(--s400)', letterSpacing:'.1em' }}>
+            LOADING RESULT...
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const sub = detail.submission
+  const exam = sub.examId
+  const bank = detail.bankQuestions || []
+  const subjCol = subjectColour(exam?.subject)
+  const pct = sub.percentage || 0
+  const passed = pct >= 50
+  const isGraded = sub.status === 'graded'
+
+  const findQuestion = (ref) => {
+    if (!ref) return null
+    if (ref.startsWith('custom:')) {
+      const idx = parseInt(ref.slice(7), 10)
+      return (exam?.customQuestions || [])[idx] || null
+    }
+    return bank.find(q => String(q._id) === String(ref)) || null
+  }
+  const findLeaf = (question, partPath) => {
+    if (!question || !Array.isArray(partPath) || partPath.length === 0) return null
+    let current = { parts: question.parts || [] }
+    for (const idx of partPath) {
+      if (!Array.isArray(current.parts) || !current.parts[idx]) return null
+      current = current.parts[idx]
+    }
+    return current
+  }
+
+  return (
+    <div>
+      <button onClick={onBack}
+        style={{
+          background:'transparent', border:'none', color:'#7D1025',
+          fontSize:13, fontWeight:700, cursor:'pointer',
+          padding:'6px 0', marginBottom:14,
+          display:'flex', alignItems:'center', gap:6,
+        }}>
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Back to Results
+      </button>
+
+      <div className="card" style={{
+        padding:0, marginBottom:18, overflow:'hidden',
+        boxShadow:'0 12px 40px rgba(125,16,37,.12)',
+      }}>
+        <div style={{ height:6, background: subjCol }}/>
+        <div style={{ padding:'28px 32px' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8, flexWrap:'wrap' }}>
+            <span style={{
+              background: subjCol + '15', color: subjCol,
+              fontSize:10, fontWeight:800, letterSpacing:'.12em',
+              padding:'4px 10px', borderRadius:99, textTransform:'uppercase',
+            }}>{exam?.subject}</span>
+            <span style={{ fontSize:11.5, color:'#6B6B6B', fontWeight:600 }}>
+              {exam?.curriculum} &middot; {exam?.grade}
+            </span>
+          </div>
+          <h1 className="serif" style={{ fontSize:32, fontWeight:400, margin:0, lineHeight:1.1, color:'#1A1A1A' }}>
+            {exam?.title}
+          </h1>
+          <div style={{ fontSize:12.5, color:'#6B6B6B', marginTop:6 }}>
+            Submitted {sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) : '—'}
+            {exam?.teacherId && <> &middot; Graded by {exam.teacherId.firstName} {exam.teacherId.lastName}</>}
+          </div>
+
+          <div style={{
+            display:'flex', alignItems:'center', justifyContent:'center', gap:48,
+            marginTop:32, marginBottom:16, flexWrap:'wrap',
+          }}>
+            <div style={{ position:'relative' }}>
+              <CircularRing
+                percentage={pct}
+                size={200}
+                stroke={14}
+                trackColor="#FBF6E3"
+                fillColor={pct >= 70 ? '#15803D' : pct >= 50 ? '#C9A030' : '#B45309'}
+              />
+              {sub.grade && (
+                <div style={{
+                  position:'absolute',
+                  bottom:-8, left:'50%', transform:'translateX(-50%)',
+                  background: pct >= 70 ? '#15803D' : pct >= 50 ? '#7D1025' : '#B45309',
+                  color:'#fff',
+                  fontFamily:"'Instrument Serif',serif",
+                  fontSize:24, fontWeight:400,
+                  width:56, height:56, borderRadius:'50%',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  boxShadow:'0 6px 16px rgba(0,0,0,.2)',
+                  border:'3px solid #fff',
+                }}>
+                  {sub.grade}
+                </div>
+              )}
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:12, minWidth:160 }}>
+              <div>
+                <div className="mono" style={{ fontSize:32, fontWeight:700, color:'#1A1A1A', lineHeight:1 }}>
+                  {sub.totalScore}/{sub.maxScore}
+                </div>
+                <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'#6B6B6B', marginTop:4 }}>
+                  Total Marks
+                </div>
+              </div>
+              {sub.timeSpentSecs > 0 && (
+                <div>
+                  <div className="mono" style={{ fontSize:20, fontWeight:700, color:'#1A1A1A' }}>
+                    {Math.round(sub.timeSpentSecs / 60)} min
+                  </div>
+                  <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'#6B6B6B', marginTop:2 }}>
+                    Time Spent
+                  </div>
+                </div>
+              )}
+              <div>
+                <div style={{
+                  display:'inline-block',
+                  background: passed ? '#DCFCE7' : '#FEF3C7',
+                  color:      passed ? '#15803D' : '#92400E',
+                  padding:'6px 14px', borderRadius:99,
+                  fontSize:12, fontWeight:700,
+                }}>
+                  {passed ? 'PASSED' : 'Try Again'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {isGraded && sub.feedback && (
+          <div style={{
+            background:'#FBF6E3',
+            borderTop:'1px solid #C9A030',
+            padding:'20px 32px',
+            position:'relative',
+          }}>
+            <div style={{
+              position:'absolute', top:14, left:18,
+              fontSize:64, color:'#C9A030', opacity:.25,
+              fontFamily:"'Instrument Serif',serif", lineHeight:1,
+            }}>"</div>
+            <div style={{ paddingLeft:32 }}>
+              <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#7D1025', marginBottom:6 }}>
+                Teacher Feedback
+              </div>
+              <div className="serif" style={{ fontSize:16, color:'#1A1A1A', lineHeight:1.55, fontStyle:'italic' }}>
+                {sub.feedback}
+              </div>
+              {exam?.teacherId && (
+                <div style={{ fontSize:11.5, color:'#7D1025', marginTop:8, fontWeight:600 }}>
+                  &mdash; {exam.teacherId.firstName} {exam.teacherId.lastName}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ marginBottom:10 }}>
+        <h2 className="serif" style={{ fontSize:22, fontWeight:400, color:'#1A1A1A', marginBottom:4 }}>
+          Question by Question
+        </h2>
+        <div style={{ fontSize:12, color:'#6B6B6B', marginBottom:14 }}>
+          Tap any answer to expand and see your response and your teacher's comment.
+        </div>
+      </div>
+
+      {(sub.answers || []).length === 0 ? (
+        <div className="card" style={{ padding:24, textAlign:'center' }}>
+          <div style={{ fontSize:13, color:'#6B6B6B' }}>No answer breakdown available.</div>
+        </div>
+      ) : (
+        <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+          {sub.answers.map((answer, i) => {
+            const question = findQuestion(answer.questionRef)
+            const isNested = Array.isArray(answer.partPath) && answer.partPath.length > 0
+            const leafPart = isNested ? findLeaf(question, answer.partPath) : null
+
+            const isCustomRef = answer.questionRef?.startsWith('custom:')
+            const qIndex = isCustomRef
+              ? -1
+              : (exam?.questionIds || []).findIndex(qid => String(qid) === String(answer.questionRef))
+            const qLabel = qIndex < 0 ? 'Q?' : 'Q' + (qIndex + 1)
+            const fullLabel = isNested ? qLabel + '.' + labelAt(answer.partPath) : qLabel
+
+            const maxMarks = leafPart
+              ? (Number(leafPart.marks) || 0)
+              : (question ? (Number(question.marks) || 0) : 0)
+            const awarded = Number(answer.marksAwarded) || 0
+            const isFull = maxMarks > 0 && awarded === maxMarks
+            const isZero = awarded === 0 && maxMarks > 0
+            const partial = !isFull && !isZero && maxMarks > 0
+
+            const statusColor = isFull ? '#15803D' : partial ? '#C9A030' : '#B45309'
+            const statusIcon = isFull ? '✓' : partial ? '◐' : '✗'
+
+            const questionText = leafPart ? leafPart.text : (question?.questionText || '(question not found)')
+            const partType = leafPart ? leafPart.type : (question?.type || 'short')
+            const isExpanded = !!expandedAnswers[i]
+
+            return (
+              <div key={i} className="card" style={{
+                padding:0, overflow:'hidden',
+                borderLeft: '4px solid ' + statusColor,
+                cursor: 'pointer',
+                transition:'box-shadow .15s',
+              }}
+                onClick={() => setExpandedAnswers(s => ({ ...s, [i]: !s[i] }))}
+              >
+                <div style={{
+                  padding:'12px 16px',
+                  display:'flex', alignItems:'center', gap:12, flexWrap:'wrap',
+                }}>
+                  <div className="mono" style={{
+                    minWidth:54, padding:'4px 8px', borderRadius:6,
+                    background:'#7D1025', color:'#fff',
+                    fontSize:11, fontWeight:700, textAlign:'center', flexShrink:0,
+                  }}>
+                    {fullLabel}
+                  </div>
+                  <div style={{ flex:1, minWidth:0, fontSize:13.5, color:'#1A1A1A', overflow:'hidden', textOverflow:'ellipsis', whiteSpace: isExpanded ? 'normal' : 'nowrap', lineHeight:1.4 }}>
+                    {questionText}
+                  </div>
+                  <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
+                    <div style={{
+                      width:28, height:28, borderRadius:'50%',
+                      background: statusColor, color:'#fff',
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      fontSize:14, fontWeight:700,
+                    }}>{statusIcon}</div>
+                    <div className="mono" style={{
+                      fontSize:13.5, fontWeight:700, color: statusColor,
+                      minWidth:48, textAlign:'center',
+                    }}>
+                      {awarded}/{maxMarks}
+                    </div>
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"
+                      stroke="#6B6B6B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      style={{ transform: isExpanded ? 'rotate(180deg)' : 'none', transition:'transform .2s' }}>
+                      <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                  </div>
+                </div>
+
+                {isExpanded && (
+                  <div style={{
+                    padding:'4px 16px 16px',
+                    borderTop:'1px solid #E8E2D6',
+                    background:'#FBFAF5',
+                  }} onClick={(e) => e.stopPropagation()}>
+                    {isNested && question?.questionText && (
+                      <div style={{
+                        marginTop:12, padding:'10px 14px',
+                        background:'#FBF6E3', borderLeft:'3px solid #C9A030', borderRadius:4,
+                        fontSize:12, color:'#6B6B6B', fontStyle:'italic', lineHeight:1.55,
+                      }}>
+                        <strong style={{ color:'#7D1025', fontStyle:'normal' }}>Context: </strong>
+                        {question.questionText}
+                      </div>
+                    )}
+                    {leafPart && Array.isArray(leafPart.attachments) && leafPart.attachments.length > 0 && (
+                      <div style={{ marginTop:12 }}>
+                        <AttachmentList attachments={leafPart.attachments}/>
+                      </div>
+                    )}
+                    {!leafPart && question && Array.isArray(question.attachments) && question.attachments.length > 0 && (
+                      <div style={{ marginTop:12 }}>
+                        <AttachmentList attachments={question.attachments}/>
+                      </div>
+                    )}
+
+                    <div style={{ marginTop:12 }}>
+                      <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'#6B6B6B', marginBottom:6 }}>
+                        Your answer
+                      </div>
+                      {(partType === 'drawing' || partType === 'handwriting') && answer.answerText && answer.answerText.startsWith('data:') ? (
+                        <a href={answer.answerText} target="_blank" rel="noopener noreferrer">
+                          <img src={answer.answerText} alt="Your drawing"
+                            style={{
+                              maxWidth:'100%', maxHeight:420,
+                              border:'1px solid #E8E2D6', borderRadius:6,
+                              background:'#fff', display:'block',
+                            }}/>
+                        </a>
+                      ) : partType === 'mcq' ? (
+                        <div style={{
+                          padding:'10px 14px', background:'#fff', borderRadius:6,
+                          border:'1px solid #E8E2D6', fontSize:13.5, color:'#1A1A1A',
+                        }}>
+                          {answer.selectedOption || answer.answerText || <em style={{ color:'#94A3B8' }}>(no answer)</em>}
+                        </div>
+                      ) : (
+                        <div style={{
+                          padding:'12px 14px', background:'#fff', borderRadius:6,
+                          border:'1px solid #E8E2D6',
+                          fontSize:13.5, color:'#1A1A1A', lineHeight:1.6,
+                          whiteSpace:'pre-wrap',
+                        }}>
+                          {answer.answerText || <em style={{ color:'#94A3B8' }}>(no answer)</em>}
+                        </div>
+                      )}
+                    </div>
+
+                    {answer.teacherComment && (
+                      <div style={{ marginTop:12 }}>
+                        <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', color:'#7D1025', marginBottom:6 }}>
+                          Teacher's note
+                        </div>
+                        <div style={{
+                          padding:'10px 14px',
+                          background:'#FBF6E3', border:'1px solid #C9A030',
+                          borderRadius:6,
+                          fontSize:13, color:'#1A1A1A', lineHeight:1.55,
+                          fontStyle:'italic',
+                        }}>
+                          {answer.teacherComment}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
