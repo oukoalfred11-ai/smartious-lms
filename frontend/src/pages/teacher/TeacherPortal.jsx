@@ -5,7 +5,9 @@ import Modal from '../../components/ui/Modal.jsx'
 import {
   NestedQuestionEditor,
   NestedQuestionRenderer,
+  AttachmentList,
   sumLeafMarks,
+  labelAt,
 } from '../../components/exam/NestedQuestion.jsx'
 
 // ── SVG icon helper ──────────────────────────────────────
