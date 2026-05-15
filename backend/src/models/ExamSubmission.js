@@ -41,6 +41,13 @@ const answerSchema = new mongoose.Schema({
   isCorrect:      { type: Boolean, default: null },
   marksAwarded:   { type: Number,  default: 0 },
   teacherComment: { type: String,  default: '' },
+
+  // For drawing/handwriting/upload answers: the teacher's marked-up
+  // version of the student's image, as a PNG dataURL. Stored separately
+  // from answerText so the student's original is never overwritten.
+  // Up to ~5 MB per dataURL — MongoDB doc limit is 16 MB so a typical
+  // exam (10 questions × ~300 KB annotated PNG = 3 MB) fits comfortably.
+  teacherAnnotation: { type: String, default: '' },
 }, { _id: false });
 
 const examSubmissionSchema = new mongoose.Schema({
