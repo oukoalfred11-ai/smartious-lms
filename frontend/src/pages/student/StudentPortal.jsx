@@ -17,6 +17,7 @@ import {
   NestedQuestionEditor,
   NestedQuestionRenderer,
   NestedAnswerCollector,
+  AttachmentList,
   buildAnswersPayload,
   labelAt,
   sumLeafMarks,
@@ -2843,6 +2844,7 @@ function ExamsTab({ user, toast, goTo, store }) {
       marks: q.marks || 0,
       topic: q.topic || '',
       parts: Array.isArray(q.parts) ? q.parts : [],
+      attachments: Array.isArray(q.attachments) ? q.attachments : [],
       _source: 'bank',
     }))
     const custom = (realExam.customQuestions || []).map((q, i) => ({
@@ -2853,6 +2855,7 @@ function ExamsTab({ user, toast, goTo, store }) {
       marks: q.marks || 0,
       topic: q.topic || '',
       parts: Array.isArray(q.parts) ? q.parts : [],
+      attachments: Array.isArray(q.attachments) ? q.attachments : [],
       _source: 'custom',
     }))
     return [...bank, ...custom]
@@ -3180,12 +3183,13 @@ function ExamsTab({ user, toast, goTo, store }) {
                     fontSize:12, fontWeight:700, flexShrink:0,
                   }}>Q{i+1}</div>
                   <div style={{ flex:1 }}>
-                    {/* For nested questions: stem text appears as background context.
-                        For flat questions: this IS the question. */}
                     {q.questionText && (
                       <div style={{ fontSize:14, fontWeight:600, color:'var(--s900)', lineHeight:1.5 }}>
                         {q.questionText}
                       </div>
+                    )}
+                    {Array.isArray(q.attachments) && q.attachments.length > 0 && (
+                      <AttachmentList attachments={q.attachments} />
                     )}
                     <div style={{ fontSize:10.5, color:'var(--s500)', marginTop:4 }}>
                       {q.topic ? q.topic + ' · ' : ''}
