@@ -22,6 +22,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { api } from '../../context/ctx.jsx'
+import { imageForSubject, colorForSubject } from '../../utils/subjectImages.js'
 
 // Brand palette — kept locally so this file is self-contained
 const BRAND = {
@@ -53,19 +54,6 @@ const extractYouTubeId = (url = '') => {
     if (m) return m[1]
   }
   return ''
-}
-
-// Subject card stripe colour from name (deterministic)
-const subjectColour = (name = '') => {
-  const lookup = {
-    Mathematics: BRAND.crimson, Maths: BRAND.crimson,
-    English: '#0F766E', 'English Language': '#0F766E', 'English Literature': '#0F766E',
-    Physics: '#1E40AF', Chemistry: '#7C3AED', Biology: '#15803D',
-    'Computer Science': '#0369A1', ICT: '#0369A1',
-    History: '#9F580A', Geography: '#0E7490',
-    Business: '#92400E', 'Business Studies': '#92400E', Accounting: '#92400E', Economics: '#92400E',
-  }
-  return lookup[name] || BRAND.crimson
 }
 
 export default function ManageSubjectTab({ user, toast }) {
@@ -277,7 +265,7 @@ export default function ManageSubjectTab({ user, toast }) {
     lessons: lessons.filter(l => l.termIndex === t),
   }))
 
-  const subjCol = selectedSubject.color || subjectColour(selectedSubject.subjectName)
+  const subjCol = colorForSubject(selectedSubject, BRAND.crimson)
 
   return (
     <div>
@@ -456,7 +444,8 @@ export default function ManageSubjectTab({ user, toast }) {
 // SUBJECT CARD
 // ═══════════════════════════════════════════════════════════
 function SubjectCard({ subject, onOpen }) {
-  const col = subject.color || subjectColour(subject.subjectName)
+  const col = colorForSubject(subject, BRAND.crimson)
+  const img = imageForSubject(subject)
   const total = subject.lessonCount || 0
   const published = subject.publishedCount || 0
   const pct = total > 0 ? Math.round((published / total) * 100) : 0
@@ -469,26 +458,39 @@ function SubjectCard({ subject, onOpen }) {
       onClick={onOpen}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-2px)'
-        e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,.1)'
+        e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,.12)'
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)'
         e.currentTarget.style.boxShadow = ''
       }}
     >
-      <div style={{ height: 6, background: col }} />
-      <div style={{ padding: '16px 18px' }}>
+      {/* Cover image — falls back to colored block if no image known */}
+      <div style={{
+        position: 'relative',
+        height: 140,
+        background: img
+          ? `linear-gradient(to bottom, rgba(0,0,0,0) 50%, ${col} 100%), url(${img})`
+          : `linear-gradient(135deg, ${col} 0%, ${col}cc 100%)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}>
+        {/* Curriculum badge floating on the image */}
         <div style={{
-          display: 'inline-block',
-          background: col + '15', color: col,
+          position: 'absolute', top: 10, left: 10,
+          background: 'rgba(255,255,255,.95)',
+          color: col,
           fontSize: 9.5, fontWeight: 800, letterSpacing: '.1em',
           padding: '3px 9px', borderRadius: 99, textTransform: 'uppercase',
-          marginBottom: 8,
+          backdropFilter: 'blur(4px)',
         }}>
           {subject.curriculum}
         </div>
+      </div>
+
+      <div style={{ padding: '14px 18px 16px' }}>
         <div style={{
-          fontFamily: "'Instrument Serif',serif", fontSize: 21, fontWeight: 400,
+          fontFamily: "'Instrument Serif',serif", fontSize: 20, fontWeight: 400,
           color: BRAND.ink, lineHeight: 1.15, marginBottom: 4,
         }}>
           {subject.subjectName}
