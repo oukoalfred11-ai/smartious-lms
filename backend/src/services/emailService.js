@@ -768,6 +768,122 @@ async function sendTeacherMemoEmail(options) {
   }
 }
 
+/**
+ * Send one branded email to a single recipient, with optional
+ * file attachments. The lower-level worker behind sendBulkEmail.
+ *
+ * @param {object} opts
+ * @param {string} opts.to
+ * @param {string} opts.recipientName
+ * @param {string} opts.subject
+ * @param {string} opts.bodyText        plain text (admin-written)
+ * @param {string} opts.senderName
+ * @param {Array}  [opts.attachments]   [{ filename, path }] — path is a URL
+ */
+async function sendCommunityEmail(opts) {
+  const {
+    to, recipientName, subject, bodyText,
+    senderName = 'Smartious Homeschool & eSchool',
+    attachments = [],
+  } = opts;
+
+  const transporterInstance = transporter || initializeTransporter();
+  if (!transporterInstance) {
+    return { success: false, error: 'Email service is not configured.' };
+  }
+
+  const esc = (s) => String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const paragraphs = String(bodyText)
+    .split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(Boolean)
+    .map(p => `<p style="margin:0 0 14px;line-height:1.6;color:#2A2A2A;font-size:14px;">${esc(p).replace(/\n/g, '<br>')}</p>`)
+    .join('');
+
+  const html = `
+    <div style="font-family:Georgia,'Times New Roman',serif;max-width:620px;margin:0 auto;background:#FBFAF5;">
+      <div style="background:linear-gradient(135deg,#7D1025 0%,#5A0B1B 100%);padding:26px 32px;">
+        <div style="color:#F0CC5A;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;font-family:Arial,sans-serif;">
+          Smartious Homeschool &amp; eSchool
+        </div>
+      </div>
+      <div style="padding:26px 32px;background:#FFFFFF;">
+        <p style="margin:0 0 16px;font-size:14px;color:#2A2A2A;">Dear ${esc(recipientName || 'Friend')},</p>
+        ${paragraphs}
+        <div style="margin-top:22px;padding-top:16px;border-top:1px solid #E8E2D6;">
+          <p style="margin:0;font-size:14px;color:#2A2A2A;">Kind regards,</p>
+          <p style="margin:2px 0 0;font-size:14px;font-weight:bold;color:#7D1025;">${esc(senderName)}</p>
+          <p style="margin:2px 0 0;font-size:12px;color:#6B6B6B;font-family:Arial,sans-serif;">Smartious Homeschool &amp; eSchool</p>
+        </div>
+      </div>
+      <div style="padding:14px 32px;background:#FBF6E3;text-align:center;">
+        <p style="margin:0;font-size:11px;color:#8A6D1F;font-family:Arial,sans-serif;">
+          Smartious Homeschool &amp; eSchool · hellosmartious@gmail.com
+        </p>
+      </div>
+    </div>
+  `;
+
+  // nodemailer attachments — { filename, path } where path is a URL
+  const mailAttachments = (attachments || [])
+    .filter(a => a && a.path)
+    .map(a => ({ filename: a.filename || 'attachment', path: a.path }));
+
+  try {
+    const info = await transporterInstance.sendMail({
+      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      to,
+      subject,
+      html,
+      attachments: mailAttachments,
+    });
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send a campaign to many recipients, sequentially (Gmail SMTP
+ * does not like parallel bursts). Returns a per-recipient result.
+ *
+ * @param {object} opts
+ * @param {Array}  opts.recipients   [{ email, name }]
+ * @param {string} opts.subject
+ * @param {string} opts.bodyText
+ * @param {string} opts.senderName
+ * @param {Array}  [opts.attachments] [{ filename, path }]
+ */
+async function sendBulkEmail(opts) {
+  const { recipients = [], subject, bodyText, senderName, attachments = [] } = opts;
+  const results = [];
+
+  for (const r of recipients) {
+    if (!r || !r.email) {
+      results.push({ email: r?.email || '', name: r?.name || '', status: 'failed', error: 'No email address.' });
+      continue;
+    }
+    const res = await sendCommunityEmail({
+      to: r.email,
+      recipientName: r.name,
+      subject, bodyText, senderName, attachments,
+    });
+    results.push({
+      email: r.email,
+      name: r.name || '',
+      status: res.success ? 'sent' : 'failed',
+      error: res.success ? undefined : res.error,
+    });
+    // Small gap between sends — keeps Gmail SMTP happy
+    await new Promise(resolve => setTimeout(resolve, 350));
+  }
+
+  const sentCount = results.filter(r => r.status === 'sent').length;
+  const failedCount = results.length - sentCount;
+  return { results, sentCount, failedCount };
+}
+
 module.exports = {
   initializeTransporter,
   sendTeacherAllocationNotification,
@@ -779,5 +895,7 @@ module.exports = {
   sendLeaveRequestApprovedEmail,
   sendLeaveRequestRejectedEmail,
   sendAdminLeaveRequestNotification,
-  sendTeacherMemoEmail
+  sendTeacherMemoEmail,
+  sendCommunityEmail,
+  sendBulkEmail
 };
