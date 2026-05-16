@@ -46,11 +46,16 @@ const lessonSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
+  // teacherId — MODEL A: this is the ORIGINAL AUTHOR / createdBy only.
+  // It is NOT an ownership or access-control field. Lessons belong to
+  // the Subject; any teacher with that subject in their teachingSpecialties
+  // can view and edit them. Kept here purely as an audit trail of who
+  // first created the lesson, and to show a "Created by ..." label.
   teacherId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
-    index: true,
+    required: false,   // a lesson can outlive its author
+    index: false,
   },
 
   // ── Curriculum context (denormalised for easier student-side query) ──
@@ -83,8 +88,8 @@ const lessonSchema = new mongoose.Schema({
 
 // Compound index: most common student query — published lessons for a subject
 lessonSchema.index({ subjectId: 1, status: 1, order: 1 });
-// Teacher's lessons for a subject (any status)
-lessonSchema.index({ teacherId: 1, subjectId: 1, order: 1 });
+// Teacher / admin view: all lessons for a subject in display order
+lessonSchema.index({ subjectId: 1, termIndex: 1, order: 1 });
 
 // Auto-derive videoEmbedId from videoUrl on save
 lessonSchema.pre('save', function (next) {
