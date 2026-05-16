@@ -54,6 +54,17 @@ const userSchema = new mongoose.Schema({
   // "Lead Tutor". Free-text but admin picks from suggested presets in the UI.
   jobTitle: { type: String, trim: true, default: '' },
 
+  // ── ADMIN → TEACHER EMAIL HISTORY ──
+  // A record of branded emails an admin has sent this teacher from the
+  // Teacher Management "Email" tab. Append-only audit trail.
+  sentEmails: [{
+    subject:   { type: String, trim: true },
+    kind:      { type: String, trim: true },     // memo / meeting / commendation / notice / custom
+    sentAt:    { type: Date, default: Date.now },
+    sentBy:    { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    sentByName:{ type: String, trim: true },
+  }],
+
   // Default meeting URL (Zoom personal room, Google Meet, etc.) pre-filled
   // when teacher schedules a new live class. Overridable per-class.
   defaultMeetingLink: { type: String, trim: true, default: '' },
