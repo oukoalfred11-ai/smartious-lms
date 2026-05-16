@@ -71,7 +71,7 @@ router.get('/recipients', auth, requireRole('admin'), async (req, res) => {
 // The frontend uploads each attachment, then includes the
 // returned URLs in the /send payload.
 // ─────────────────────────────────────────────────────────
-router.post('/upload-attachment', auth, requireRole('admin'), (req, res) => {
+router.post('/upload-attachment', auth, requireRole('admin', 'teacher'), (req, res) => {
   if (!uploadAttachment) {
     return res.status(503).json({
       success: false,
@@ -205,6 +205,202 @@ router.get('/history', auth, requireRole('admin'), async (req, res) => {
     res.json({ success: true, data: { history } });
   } catch (e) {
     console.error('[communication history]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// GET /api/communication/teacher/recipients
+// A teacher's allowed audience: their allocated students, those
+// students' linked parents, other teachers, and admins.
+// NO external addresses for teachers.
+// ─────────────────────────────────────────────────────────
+router.get('/teacher/recipients', auth, requireRole('teacher', 'admin'), async (req, res) => {
+  try {
+    const Allocation = require('../models/Allocation');
+
+    // Students allocated to this teacher (active allocations)
+    const allocs = await Allocation.find({ teacherId: req.user._id, status: 'Active' })
+      .select('studentId')
+      .lean();
+    const studentIds = [...new Set(allocs.map(a => String(a.studentId)).filter(Boolean))];
+
+    const students = await User.find({ _id: { $in: studentIds }, role: 'student' })
+      .select('_id firstName lastName email linkedParents parentId')
+      .lean();
+
+    // Collect parent ids referenced by these students
+    const parentIdSet = new Set();
+    students.forEach(s => {
+      (s.linkedParents || []).forEach(p => parentIdSet.add(String(p)));
+      if (s.parentId) parentIdSet.add(String(s.parentId));
+    });
+    const parents = await User.find({ _id: { $in: [...parentIdSet] }, role: 'parent' })
+      .select('_id firstName lastName email')
+      .lean();
+    const parentById = {};
+    parents.forEach(p => { parentById[String(p._id)] = p; });
+
+    // Build the student list, each with their resolved parents
+    const studentList = students.map(s => {
+      const linkedIds = [
+        ...(s.linkedParents || []).map(String),
+        ...(s.parentId ? [String(s.parentId)] : []),
+      ];
+      const myParents = [...new Set(linkedIds)]
+        .map(id => parentById[id])
+        .filter(p => p && p.email)
+        .map(p => ({
+          _id: p._id,
+          name: `${p.firstName || ''} ${p.lastName || ''}`.trim() || p.email,
+          email: p.email,
+        }));
+      return {
+        _id: s._id,
+        name: `${s.firstName || ''} ${s.lastName || ''}`.trim() || s.email,
+        email: s.email || '',
+        parents: myParents,
+      };
+    });
+
+    // Colleagues — other teachers + admins
+    const colleagues = await User.find({
+      role: { $in: ['teacher', 'admin'] },
+      _id: { $ne: req.user._id },
+    })
+      .select('_id firstName lastName email role')
+      .sort('firstName')
+      .lean();
+    const colleagueList = colleagues
+      .filter(c => c.email)
+      .map(c => ({
+        _id: c._id,
+        name: `${c.firstName || ''} ${c.lastName || ''}`.trim() || c.email,
+        email: c.email,
+        role: c.role,
+      }));
+
+    res.json({
+      success: true,
+      data: { students: studentList, colleagues: colleagueList },
+    });
+  } catch (e) {
+    console.error('[communication teacher/recipients]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// POST /api/communication/teacher/send
+// Body: { subject, body, recipientEmails: [{ email, name }], attachments, audience }
+// Teachers send to resolved community emails only — the frontend
+// supplies the addresses it built from /teacher/recipients. We
+// re-validate every address against the teacher's allowed set so
+// a teacher cannot send outside their community.
+// ─────────────────────────────────────────────────────────
+router.post('/teacher/send', auth, requireRole('teacher', 'admin'), async (req, res) => {
+  try {
+    const Allocation = require('../models/Allocation');
+    const { subject, body, recipientEmails = [], attachments = [], audience = '' } = req.body;
+
+    if (!subject || !subject.trim())
+      return res.status(400).json({ success: false, message: 'Subject is required.' });
+    if (!body || !body.trim())
+      return res.status(400).json({ success: false, message: 'Message body is required.' });
+
+    // Rebuild the teacher's allowed email set, server-side
+    const allocs = await Allocation.find({ teacherId: req.user._id, status: 'Active' })
+      .select('studentId').lean();
+    const studentIds = [...new Set(allocs.map(a => String(a.studentId)).filter(Boolean))];
+    const students = await User.find({ _id: { $in: studentIds } })
+      .select('email linkedParents parentId').lean();
+
+    const parentIdSet = new Set();
+    students.forEach(s => {
+      (s.linkedParents || []).forEach(p => parentIdSet.add(String(p)));
+      if (s.parentId) parentIdSet.add(String(s.parentId));
+    });
+    const parents = await User.find({ _id: { $in: [...parentIdSet] } }).select('email').lean();
+    const colleagues = await User.find({ role: { $in: ['teacher', 'admin'] } }).select('email').lean();
+
+    const allowed = new Set();
+    students.forEach(s => s.email && allowed.add(s.email.toLowerCase()));
+    parents.forEach(p => p.email && allowed.add(p.email.toLowerCase()));
+    colleagues.forEach(c => c.email && allowed.add(c.email.toLowerCase()));
+
+    // Filter requested recipients to the allowed set
+    const requested = Array.isArray(recipientEmails) ? recipientEmails : [];
+    const seen = new Set();
+    const finalRecipients = [];
+    let rejected = 0;
+    for (const r of requested) {
+      const email = String(r?.email || '').trim().toLowerCase();
+      if (!email) continue;
+      if (!allowed.has(email)) { rejected++; continue; }
+      if (seen.has(email)) continue;
+      seen.add(email);
+      finalRecipients.push({ email: r.email.trim(), name: r.name || '' });
+    }
+
+    if (finalRecipients.length === 0)
+      return res.status(400).json({
+        success: false,
+        message: rejected > 0
+          ? 'No valid recipients — teachers can only email their own students, those parents, and colleagues.'
+          : 'No recipients selected.',
+      });
+
+    const senderName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Smartious Teacher';
+
+    const mailAttachments = (Array.isArray(attachments) ? attachments : [])
+      .filter(a => a && a.url)
+      .map(a => ({ filename: a.name || 'attachment', path: a.url }));
+
+    const { results, sentCount, failedCount } = await sendBulkEmail({
+      recipients: finalRecipients,
+      subject: subject.trim(),
+      bodyText: body,
+      senderName,
+      attachments: mailAttachments,
+    });
+
+    const record = await Communication.create({
+      sentBy: req.user._id,
+      sentByName: senderName,
+      sentByRole: req.user.role,
+      subject: subject.trim(),
+      body,
+      attachments: (attachments || []).map(a => ({ name: a.name, url: a.url })),
+      recipients: results,
+      recipientCount: finalRecipients.length,
+      sentCount,
+      failedCount,
+      audience: audience || `${finalRecipients.length} recipient${finalRecipients.length === 1 ? '' : 's'}`,
+    });
+
+    res.json({
+      success: true,
+      message: `Sent ${sentCount} of ${finalRecipients.length} email${finalRecipients.length === 1 ? '' : 's'}.`,
+      data: { id: record._id, sentCount, failedCount, rejected, results },
+    });
+  } catch (e) {
+    console.error('[communication teacher/send]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// GET /api/communication/teacher/history — this teacher's campaigns
+// ─────────────────────────────────────────────────────────
+router.get('/teacher/history', auth, requireRole('teacher', 'admin'), async (req, res) => {
+  try {
+    const history = await Communication.find({ sentBy: req.user._id })
+      .sort('-createdAt')
+      .limit(60)
+      .lean();
+    res.json({ success: true, data: { history } });
+  } catch (e) {
+    console.error('[communication teacher/history]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
