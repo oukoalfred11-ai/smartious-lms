@@ -45,9 +45,15 @@ router.post('/toggle', auth, requireRole('teacher', 'admin'), async (req, res) =
     const lesson = await Lesson.findById(lessonId).lean();
     if (!lesson) return res.status(404).json({ success: false, message: 'Lesson not found.' });
 
-    // Authorisation: teacher must own this lesson (unless admin)
-    if (req.user.role !== 'admin' && String(lesson.teacherId) !== String(req.user._id))
-      return res.status(403).json({ success: false, message: 'Not your lesson.' });
+    // MODEL A authorisation: a teacher may mark mastery for any lesson
+    // whose subject is in their teachingSpecialties — not just lessons
+    // they personally created.
+    if (req.user.role !== 'admin') {
+      const hasSpec = (req.user.teachingSpecialties || [])
+        .some(s => String(s.subjectId) === String(lesson.subjectId));
+      if (!hasSpec)
+        return res.status(403).json({ success: false, message: 'You do not teach this subject.' });
+    }
 
     // Verify the student exists
     const student = await User.findById(studentId).select('role').lean();
@@ -92,9 +98,8 @@ router.post('/toggle', auth, requireRole('teacher', 'admin'), async (req, res) =
 
 // ─────────────────────────────────────────────────────────
 // GET /student/:studentId — teacher views one student's progress
-// Returns array of LessonProgress docs the teacher has marked for them.
-// Only returns progress against lessons the requesting teacher owns
-// (or all, if admin).
+// Returns LessonProgress docs for lessons in subjects the teacher
+// teaches (MODEL A — by teachingSpecialties, not lesson authorship).
 // ─────────────────────────────────────────────────────────
 router.get('/student/:studentId', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
@@ -102,8 +107,15 @@ router.get('/student/:studentId', auth, requireRole('teacher', 'admin'), async (
     if (!mongoose.isValidObjectId(studentId))
       return res.status(400).json({ success: false, message: 'Invalid studentId.' });
 
-    // Find lessons this teacher owns
-    const lessonFilter = req.user.role === 'admin' ? {} : { teacherId: req.user._id };
+    // Lessons in scope: admin sees all; a teacher sees lessons for any
+    // subject in their teachingSpecialties.
+    let lessonFilter = {};
+    if (req.user.role !== 'admin') {
+      const mySubjectIds = [...new Set(
+        (req.user.teachingSpecialties || []).map(s => String(s.subjectId)).filter(Boolean)
+      )];
+      lessonFilter = { subjectId: { $in: mySubjectIds } };
+    }
     const lessonIds = await Lesson.find(lessonFilter).distinct('_id');
 
     const progress = await LessonProgress.find({
@@ -174,10 +186,15 @@ router.get('/teacher-roster/:subjectId', auth, requireRole('teacher', 'admin'), 
     if (!mongoose.isValidObjectId(subjectId))
       return res.status(400).json({ success: false, message: 'Invalid subjectId.' });
 
-    // Lessons in this subject owned by the requesting teacher (or all, if admin)
-    const lessonFilter = { subjectId };
-    if (req.user.role !== 'admin') lessonFilter.teacherId = req.user._id;
-    const lessons = await Lesson.find(lessonFilter)
+    // MODEL A: a teacher sees all lessons for the subject (provided the
+    // subject is in their teachingSpecialties). Authorise first.
+    if (req.user.role !== 'admin') {
+      const hasSpec = (req.user.teachingSpecialties || [])
+        .some(s => String(s.subjectId) === String(subjectId));
+      if (!hasSpec)
+        return res.status(403).json({ success: false, message: 'You do not teach this subject.' });
+    }
+    const lessons = await Lesson.find({ subjectId })
       .sort({ termIndex: 1, order: 1 })
       .select('title order termIndex status')
       .lean();
