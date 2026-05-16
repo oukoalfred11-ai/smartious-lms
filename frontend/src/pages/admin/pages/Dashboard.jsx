@@ -293,6 +293,7 @@ const greetingText = () => {
 
 const DEFAULT_USER_FORM = {
   firstName: '', lastName: '', email: '', phone: '', role: 'student',
+  programme: 'Homeschool', deliveryMode: 'Virtual',
   curriculum: '', grade: '', plan: 'Basic',
   subjects: [], teachingSpecialties: [],
   bio: '', linkedStudents: [],
@@ -645,10 +646,16 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       }
 
       if (userForm.role === 'student') {
-        payload.curriculum = userForm.curriculum || null
-        payload.gradeLevel = userForm.grade || null
+        const ACADEMIC = ['Homeschool', 'Tuition', 'IUFP']
+        payload.programme = userForm.programme || 'Homeschool'
+        payload.deliveryMode = userForm.deliveryMode || 'Virtual'
+        // Advisory programmes (Study Abroad, Pre-University) carry no
+        // curriculum / subjects — only academic programmes do.
+        const isAcademic = ACADEMIC.includes(payload.programme)
+        payload.curriculum = isAcademic ? (userForm.curriculum || null) : null
+        payload.gradeLevel = isAcademic ? (userForm.grade || null) : null
         payload.plan = userForm.plan || 'Basic'
-        payload.subjects = userForm.subjects || []
+        payload.subjects = isAcademic ? (userForm.subjects || []) : []
         payload.dateOfBirth = userForm.dateOfBirth || null
         payload.homeAddress = userForm.homeAddress || ''
         payload.medicalNotes = userForm.medicalNotes || ''
@@ -962,6 +969,48 @@ function UserFormFields({ userForm, setUserForm }) {
             </div>
           )}
 
+          {/* Programme + delivery mode */}
+          <div className="fr2">
+            <div className="fg">
+              <label className="fl">Programme</label>
+              <select className="fsel" value={userForm.programme || 'Homeschool'}
+                onChange={e => {
+                  const p = e.target.value
+                  upd('programme', p)
+                  // Advisory programmes carry no curriculum/subjects — clear them
+                  if (!['Homeschool', 'Tuition', 'IUFP'].includes(p)) {
+                    upd('curriculum', ''); upd('grade', ''); upd('subjects', [])
+                  }
+                }}>
+                <option value="Homeschool">Homeschool</option>
+                <option value="Tuition">Tuition</option>
+                <option value="IUFP">IUFP (Foundation Programme)</option>
+                <option value="Study Abroad">Study Abroad</option>
+                <option value="Pre-University">Pre-University</option>
+              </select>
+            </div>
+            <div className="fg">
+              <label className="fl">Delivery Mode</label>
+              <select className="fsel" value={userForm.deliveryMode || 'Virtual'}
+                onChange={e => upd('deliveryMode', e.target.value)}>
+                <option value="Virtual">Virtual</option>
+                <option value="In-person">In-person</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Advisory programmes need no academic fields */}
+          {!['Homeschool', 'Tuition', 'IUFP'].includes(userForm.programme || 'Homeschool') ? (
+            <div style={{
+              padding: 12, background: TOKENS.goldPale,
+              border: '1px solid ' + TOKENS.gold, borderRadius: 8,
+              fontSize: 12.5, color: TOKENS.crimson, lineHeight: 1.5,
+            }}>
+              {userForm.programme} is an advisory programme — no curriculum or
+              subjects are required. The student will be supported by an advisor.
+            </div>
+          ) : (
+            <>
           <div className="fr2">
             <div className="fg">
               <label className="fl">Curriculum</label>
@@ -1012,6 +1061,8 @@ function UserFormFields({ userForm, setUserForm }) {
                 )}
               </div>
             </div>
+          )}
+            </>
           )}
 
           <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid ' + TOKENS.s100 }}>
