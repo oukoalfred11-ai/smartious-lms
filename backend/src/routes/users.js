@@ -196,8 +196,7 @@ router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
 router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
   try {
     const teachers = await User.find({ role: 'teacher' })
-      .select('_id firstName lastName email phone curriculum subjects createdAt status isOnLeave leaveStartDate leaveEndDate')
-      .populate('subjects', 'subjectName curriculum')
+      .select('_id firstName lastName email phone curriculum subjects createdAt status isActive isOnLeave leaveStartDate leaveEndDate jobTitle avatar bio yearsOfExperience teachingSpecialties statusReason')
       .sort('firstName')
       .limit(500);
     res.json({ success: true, teachers });
