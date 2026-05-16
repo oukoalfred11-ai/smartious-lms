@@ -402,4 +402,115 @@ router.delete('/:id', auth, requireRole('teacher', 'admin'), async (req, res) =>
   }
 });
 
+// ─────────────────────────────────────────────────────────
+// STUDENT ROUTES — accessed when student opens Lesson Player
+// ─────────────────────────────────────────────────────────
+
+// GET /api/lessons/student/my-subjects
+// Returns the subjects this student has via Active allocations, with
+// per-subject lesson counts and mastery counts.
+router.get('/student/my-subjects', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'student')
+      return res.status(403).json({ success: false, message: 'Students only.' });
+
+    // Find Active allocations for this student
+    const allocations = await Allocation.find({
+      studentId: req.user._id,
+      status: 'Active',
+    })
+      .populate('subjectId', 'subjectName curriculum category color coverImage')
+      .populate('teacherId', 'firstName lastName isActive isOnLeave')
+      .lean();
+
+    // Filter to allocations whose teacher is still active
+    const valid = allocations.filter(a =>
+      a.teacherId && a.teacherId.isActive && !a.teacherId.isOnLeave && a.subjectId
+    );
+
+    if (valid.length === 0)
+      return res.json({ success: true, data: { subjects: [] } });
+
+    // Pull lesson counts per (teacher, subject) — students see only the
+    // lessons published by their allocated teacher
+    const LessonProgress = require('../models/LessonProgress');
+    const subjects = [];
+    for (const a of valid) {
+      const totalLessons = await Lesson.countDocuments({
+        subjectId: a.subjectId._id,
+        teacherId: a.teacherId._id,
+        status: 'published',
+      });
+      const masteredCount = await LessonProgress.countDocuments({
+        studentId: req.user._id,
+        subjectId: a.subjectId._id,
+      });
+      subjects.push({
+        _id:         a.subjectId._id,
+        subjectName: a.subjectId.subjectName,
+        curriculum:  a.subjectId.curriculum,
+        category:    a.subjectId.category,
+        color:       a.subjectId.color,
+        coverImage:  a.subjectId.coverImage,
+        teacherId:   a.teacherId._id,
+        teacherName: (a.teacherId.firstName || '') + ' ' + (a.teacherId.lastName || ''),
+        lessonCount: totalLessons,
+        masteredCount,
+        progressPct: totalLessons > 0
+          ? Math.round((masteredCount / totalLessons) * 100)
+          : 0,
+      });
+    }
+
+    res.json({ success: true, data: { subjects } });
+  } catch (e) {
+    console.error('[lessons student/my-subjects]', e.message);
+    res.status(500).json({ success: false, message: 'Failed to load subjects: ' + e.message });
+  }
+});
+
+// GET /api/lessons/student/subject/:subjectId
+// Returns all published lessons for one of the student's subjects.
+// Authorisation: student must have an Active allocation for this subject.
+router.get('/student/subject/:subjectId', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'student')
+      return res.status(403).json({ success: false, message: 'Students only.' });
+    if (!mongoose.isValidObjectId(req.params.subjectId))
+      return res.status(400).json({ success: false, message: 'Invalid subject id.' });
+
+    const allocation = await Allocation.findOne({
+      studentId: req.user._id,
+      subjectId: req.params.subjectId,
+      status: 'Active',
+    }).populate('teacherId', 'firstName lastName isActive isOnLeave').lean();
+
+    if (!allocation)
+      return res.status(403).json({ success: false, message: 'Not enrolled in this subject.' });
+    if (!allocation.teacherId || !allocation.teacherId.isActive || allocation.teacherId.isOnLeave)
+      return res.status(403).json({ success: false, message: 'No active teacher allocated.' });
+
+    const lessons = await Lesson.find({
+      subjectId: req.params.subjectId,
+      teacherId: allocation.teacherId._id,
+      status: 'published',
+    }).sort({ termIndex: 1, order: 1 }).lean();
+
+    res.json({
+      success: true,
+      data: {
+        lessons,
+        teacher: {
+          _id:       allocation.teacherId._id,
+          firstName: allocation.teacherId.firstName,
+          lastName:  allocation.teacherId.lastName,
+        },
+      },
+    });
+  } catch (e) {
+    console.error('[lessons student/subject]', e.message);
+    res.status(500).json({ success: false, message: 'Failed to load lessons.' });
+  }
+});
+
 module.exports = router;
