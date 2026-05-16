@@ -404,6 +404,20 @@ const DEFAULT_SUBJECTS = {
     { name: 'Physical Education',                  category: 'Physical Education' },
     { name: 'Health',                              category: 'Physical Education' },
   ],
+
+  // ── IUFP — International University Foundation Programme ──
+  // Default foundation module set. Adjust via the admin subject tools
+  // if Smartious's IUFP curriculum differs.
+  IUFP: [
+    { name: 'Academic English Skills',             category: 'Core Skills' },
+    { name: 'Study & Research Skills',             category: 'Core Skills' },
+    { name: 'Mathematics for Foundation',          category: 'Core Skills' },
+    { name: 'Business & Economics',                category: 'Pathway Modules' },
+    { name: 'Physics',                             category: 'Pathway Modules' },
+    { name: 'Chemistry',                           category: 'Pathway Modules' },
+    { name: 'Biology',                             category: 'Pathway Modules' },
+    { name: 'Computing & IT',                      category: 'Pathway Modules' },
+  ],
 };
 
 router.post('/seed-defaults', auth, requireRole('admin'), async (req, res) => {
