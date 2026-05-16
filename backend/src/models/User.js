@@ -9,6 +9,22 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ['admin','teacher','student','parent','demo'], default: 'student' },
   grade: String,
 
+  // ── PROGRAMME ENROLMENT (students) ──
+  // Which Smartious programme the student is enrolled in.
+  //   Academic programmes  — Homeschool, Tuition, IUFP — have a
+  //     curriculum + subjects + teacher allocations + lessons.
+  //   Advisory programmes  — Study Abroad, Pre-University — are
+  //     advisory services with no curriculum/subjects/teaching.
+  programme: {
+    type: String,
+    enum: ['Homeschool', 'Tuition', 'IUFP', 'Study Abroad', 'Pre-University'],
+  },
+  // Delivery mode for the programme.
+  deliveryMode: {
+    type: String,
+    enum: ['Virtual', 'In-person'],
+  },
+
   // Student enrollment fields (only relevant when role === 'student')
   // - curriculum: string for students (one curriculum), array for teachers (multi-curriculum)
   // - gradeLevel: student's current grade/year (e.g., 'Year 10', 'Grade 11')
@@ -33,7 +49,7 @@ const userSchema = new mongoose.Schema({
   // PHASE 3-5 REFACTOR: Teacher teaching specialties (multi-curriculum support)
   teachingSpecialties: [{
     subjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' },
-    curriculum: { type: String, enum: ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American'] }
+    curriculum: { type: String, enum: ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American', 'IUFP'] }
   }],
   phone: String,
   bio: String,
