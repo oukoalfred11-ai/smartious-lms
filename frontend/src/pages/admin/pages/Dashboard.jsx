@@ -55,7 +55,7 @@ const MODULES = {
   analytics:   { label: 'Analytics',    accent: TOKENS.accentNavy,  icon: 'chart' },
   users:       { label: 'Users',        accent: TOKENS.crimson,     icon: 'users' },
   teachers:    { label: 'Teachers',     accent: TOKENS.accentTeal,  icon: 'teacher' },
-  allocations: { label: 'Allocations',  accent: TOKENS.accentAmber, icon: 'allocations' },
+  allocations: { label: 'Manage Students',  accent: TOKENS.accentAmber, icon: 'allocations' },
   payroll:     { label: 'Payroll',      accent: TOKENS.accentEmerald, icon: 'payroll' },
   leave:       { label: 'Leave',        accent: TOKENS.accentSlate, icon: 'leave' },
   programmes:  { label: 'Programmes',   accent: TOKENS.accentPurple, icon: 'programmes' },
@@ -454,6 +454,16 @@ function PlanBadge({ p }) {
 // HYBRID NAVIGATION — top bar + collapsible left rail
 // ──────────────────────────────────────────────────────
 function PNavigation({ page, setPage, adminFirst, onLogout }) {
+  const [railOpen, setRailOpen] = useState(true)
+
+  // Group modules into nav sections
+  const SECTIONS = [
+    { label: 'Overview', items: ['dashboard', 'analytics'] },
+    { label: 'People', items: ['users', 'teachers', 'allocations'] },
+    { label: 'Operations', items: ['payroll', 'leave', 'programmes'] },
+    { label: 'Teaching', items: ['livelessons', 'grouprooms', 'curriculum'] },
+    { label: 'System', items: ['billing', 'website', 'settings', 'ai'] },
+  ]
 
   const currentMod = MODULES[page] || MODULES.dashboard
 
@@ -471,7 +481,18 @@ function PNavigation({ page, setPage, adminFirst, onLogout }) {
           display: 'flex', alignItems: 'center', gap: 16,
           padding: '12px 28px', maxWidth: 1600, margin: '0 auto',
         }}>
-      
+          {/* Sidebar toggle */}
+          <button onClick={() => setRailOpen(v => !v)} style={{
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            padding: 8, borderRadius: 8, color: TOKENS.s700,
+            display: 'flex', alignItems: 'center',
+          }} title={railOpen ? 'Collapse sidebar' : 'Expand sidebar'}>
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
 
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -527,6 +548,55 @@ function PNavigation({ page, setPage, adminFirst, onLogout }) {
               </svg>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* SIDE RAIL */}
+      <div style={{
+        position: 'fixed', top: 60, left: 0, bottom: 0,
+        width: railOpen ? 240 : 0,
+        background: TOKENS.cream,
+        borderRight: railOpen ? '1px solid ' + TOKENS.s100 : 'none',
+        overflow: 'hidden',
+        transition: 'width 0.25s cubic-bezier(.4,0,.2,1)',
+        zIndex: 40,
+      }}>
+        <div style={{ width: 240, padding: '20px 12px', overflowY: 'auto', height: '100%' }}>
+          {SECTIONS.map(section => (
+            <div key={section.label} style={{ marginBottom: 18 }}>
+              <div style={{
+                fontSize: 10, fontWeight: 800, letterSpacing: '.14em',
+                textTransform: 'uppercase', color: TOKENS.s400,
+                padding: '0 12px', marginBottom: 8,
+              }}>{section.label}</div>
+              {section.items.map(modKey => {
+                const mod = MODULES[modKey]
+                const active = page === modKey
+                return (
+                  <button
+                    key={modKey}
+                    onClick={() => setPage(modKey)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '8px 12px', borderRadius: 10,
+                      background: active ? TOKENS.white : 'transparent',
+                      border: 'none', cursor: 'pointer',
+                      color: active ? mod.accent : TOKENS.s700,
+                      fontWeight: active ? 700 : 500, fontSize: 13.5,
+                      textAlign: 'left', marginBottom: 2,
+                      boxShadow: active ? '0 1px 3px rgba(0,0,0,.04), 0 0 0 1px ' + mod.accent + '20' : 'none',
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,.6)' }}
+                    onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
+                  >
+                    <ModuleIcon kind={mod.icon} size={22} accent={active ? mod.accent : TOKENS.s500}/>
+                    <span>{mod.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          ))}
         </div>
       </div>
     </>
@@ -633,14 +703,16 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       <PNavigation page={page} setPage={setPage} adminFirst={adminFirst} onLogout={() => { localStorage.removeItem('sm_token'); localStorage.removeItem('sm_user'); window.location.href = '/login' }}/>
 
       <div style={{
+        marginLeft: 240,
         padding: '40px 48px',
         maxWidth: 1400,
+        transition: 'margin-left 0.25s',
       }}>
         {page === 'dashboard'   && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
         {page === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
         {page === 'users'       && <UsersModule      refreshKey={refreshKey} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} openAddUser={openAddUser} />}
         {page === 'teachers'    && <TeachersModule   refreshKey={refreshKey} toast={toast} openAddUser={openAddUser} />}
-        {page === 'allocations' && <AllocationsModule refreshKey={refreshKey} toast={toast} />}
+        {page === 'allocations' && <StudentsManagementModule refreshKey={refreshKey} toast={toast} />}
         {page === 'payroll'     && <PayrollModule    refreshKey={refreshKey} toast={toast} />}
         {page === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
         {page === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
@@ -1195,7 +1267,7 @@ function DashboardModule({ setPage, userStats, pendingAllocations, refreshKey, a
     { kind: 'analytics',   page: 'analytics',   accent: MODULES.analytics.accent,   title: 'Analytics',     sub: 'Real-time platform metrics and student insights' },
     { kind: 'users',       page: 'users',       accent: MODULES.users.accent,       title: 'Users',         sub: stats.students + ' students · ' + stats.teachers + ' teachers · ' + stats.parents + ' parents' },
     { kind: 'teacher',     page: 'teachers',    accent: MODULES.teachers.accent,    title: 'Teachers',      sub: stats.teachers + ' faculty members on the roster' },
-    { kind: 'allocations', page: 'allocations', accent: MODULES.allocations.accent, title: 'Allocations',   sub: pendingAllocations > 0 ? pendingAllocations + ' pending matches' : 'Match students to teachers', badge: pendingAllocations },
+    { kind: 'allocations', page: 'allocations', accent: MODULES.allocations.accent, title: 'Manage Students',   sub: pendingAllocations > 0 ? pendingAllocations + ' pending allocations' : 'Subjects & teacher allocations', badge: pendingAllocations },
     { kind: 'curriculum',  page: 'curriculum',  accent: MODULES.curriculum.accent,  title: 'Curriculum',    sub: 'Manage subjects, grades and academic structure' },
     { kind: 'rooms',       page: 'grouprooms',  accent: MODULES.grouprooms.accent,  title: 'Group Rooms',   sub: 'Persistent classrooms with auto-enrollment' },
     { kind: 'live',        page: 'livelessons', accent: MODULES.livelessons.accent, title: 'Live Classes',  sub: 'Real-time classroom sessions in progress' },
@@ -1641,324 +1713,919 @@ function TeachersModule({ refreshKey, toast, openAddUser }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 5. ALLOCATIONS MODULE — using existing logic, refined header
+// STUDENTS MANAGEMENT MODULE — replaces the old AllocationsModule
 // ═══════════════════════════════════════════════════════════
-function AllocationsModule({ refreshKey, toast }) {
+// One place for admin to manage every student: see them, edit their
+// subjects, allocate teachers per subject, view allocation status.
+//
+// Data shape note (the reason this rewrite exists):
+//   User.subjects is an ARRAY OF NAME STRINGS, not refs. We never
+//   populate it. To list/edit subjects we use the Subject collection
+//   keyed by (curriculum, subjectName).
+//
+// Endpoints used:
+//   GET  /api/users/students/list                — all students
+//   GET  /api/allocations                        — all active allocations
+//   PATCH /api/users/:id                         — update student subjects/curriculum
+//   GET  /api/subjects?curriculum=...            — subject catalog by curriculum
+//   GET  /api/users/teachers/qualified?subjectId=...&curriculum=...
+//        — teachers with matching specialty
+//   POST /api/allocations                        — create allocation
+//   PATCH /api/allocations/:id                   — reassign teacher OR set status
+// ═══════════════════════════════════════════════════════════
+
+function StudentsManagementModule({ refreshKey, toast }) {
+  const [students, setStudents]       = useState([])
   const [allocations, setAllocations] = useState([])
-  const [students, setStudents] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [showBulk, setShowBulk] = useState(false)
+  const [loading, setLoading]         = useState(true)
+  const [search, setSearch]           = useState('')
+  const [filterStatus, setFilterStatus] = useState('all')   // all | unallocated | partial | full
   const [selectedStudent, setSelectedStudent] = useState(null)
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const [allocRes, studsRes] = await Promise.all([api.get('/allocations'), api.get('/users/students/list')])
-        setAllocations(allocRes.data.allocations || [])
-        setStudents(studsRes.data.students || [])
-        setLoading(false)
-      } catch (e) { setLoading(false) }
+  const loadAll = async () => {
+    setLoading(true)
+    try {
+      const [studs, allocs] = await Promise.all([
+        api.get('/users/students/list'),
+        api.get('/allocations'),
+      ])
+      setStudents(studs.data.students || studs.data.data?.students || [])
+      setAllocations(allocs.data.allocations || allocs.data.data?.allocations || [])
+    } catch (e) {
+      toast?.error?.('Failed to load students: ' + (e?.response?.data?.message || e.message))
+    } finally {
+      setLoading(false)
     }
-    fetch()
-  }, [refreshKey])
-
-  const getStudentSummary = (student) => {
-    const subjs = Array.isArray(student.subjects) ? student.subjects : []
-    let allocated = 0
-    subjs.forEach(s => {
-      const sid = s._id || s
-      if (allocations.some(a => a.studentId?._id === student._id && a.subjectId?._id === sid && a.status === 'Active')) allocated++
-    })
-    return { total: subjs.length, allocated, pending: subjs.length - allocated, subjects: subjs }
   }
+  useEffect(() => { loadAll() }, [refreshKey])
 
-  const totalPending = students.reduce((sum, s) => sum + getStudentSummary(s).pending, 0)
-  const filtered = students.filter(s => {
-    if (!search) return true
-    const q = search.toLowerCase()
-    return ((s.firstName || '') + ' ' + (s.lastName || '')).toLowerCase().includes(q) || (s.email || '').toLowerCase().includes(q)
+  // Build student summaries — count subjects vs. allocated subjects.
+  // Since student.subjects is name strings, we count distinct teachers per
+  // student rather than trying to map names → subjectIds here. The detail
+  // panel does the proper Subject lookup.
+  const summaries = students.map(s => {
+    const subjectNames = Array.isArray(s.subjects) ? s.subjects : []
+    const myAllocs = allocations.filter(a =>
+      a.studentId?._id === s._id && a.status === 'Active' && a.teacherId
+    )
+    return {
+      ...s,
+      subjectCount:   subjectNames.length,
+      allocatedCount: myAllocs.length,
+      pendingCount:   Math.max(0, subjectNames.length - myAllocs.length),
+      myAllocations:  myAllocs,
+    }
   })
+
+  const totalPending = summaries.reduce((sum, s) => sum + s.pendingCount, 0)
+  const totalAllocated = summaries.reduce((sum, s) => sum + s.allocatedCount, 0)
+  const fullyAllocated = summaries.filter(s => s.subjectCount > 0 && s.pendingCount === 0).length
+
+  const filtered = summaries.filter(s => {
+    // Search
+    if (search) {
+      const q = search.toLowerCase()
+      const name = ((s.firstName || '') + ' ' + (s.lastName || '')).toLowerCase()
+      if (!name.includes(q) && !(s.email || '').toLowerCase().includes(q) && !(s.admissionNumber || '').toLowerCase().includes(q))
+        return false
+    }
+    // Status filter
+    if (filterStatus === 'unallocated' && s.allocatedCount > 0) return false
+    if (filterStatus === 'partial' && (s.pendingCount === 0 || s.allocatedCount === 0)) return false
+    if (filterStatus === 'full' && (s.pendingCount > 0 || s.subjectCount === 0)) return false
+    return true
+  })
+
+  const statusOf = (s) => {
+    if (s.subjectCount === 0)   return { label: 'No subjects', color: TOKENS.accentSlate }
+    if (s.allocatedCount === 0) return { label: 'No allocations', color: TOKENS.accentRose }
+    if (s.pendingCount > 0)     return { label: `${s.pendingCount} pending`, color: TOKENS.accentAmber }
+    return { label: 'All allocated', color: TOKENS.accentEmerald }
+  }
 
   return (
     <>
-      <PSection tag="Enrolment System" title="Student" em="Allocations"
-        sub="Match students to qualified teachers · 3-point check (subject + curriculum + specialty)"
-        action={totalPending > 0 ? <button className="btn btn-p btn-sm" onClick={() => setShowBulk(true)}>Bulk Allocate ({totalPending})</button> : null}
+      <PSection
+        tag="Student Management"
+        title="Manage"
+        em="Students"
+        sub="Curriculum, subjects, and teacher allocations — all in one place."
       />
 
-      <div style={{ display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 14, marginBottom: 22, flexWrap: 'wrap' }}>
         <PKpi label="Students" value={students.length}/>
-        <PKpi label="Active Allocations" value={allocations.filter(a => a.status === 'Active').length}/>
-        <PKpi label="Pending" value={totalPending} delta={totalPending > 0 ? 'Need review' : 'All caught up'} deltaColor={totalPending > 0 ? TOKENS.accentAmber : TOKENS.accentEmerald}/>
-        <PKpi label="Avg per Student" value={students.length > 0 ? Math.round(allocations.length / students.length * 10) / 10 : 0}/>
+        <PKpi label="Fully Allocated" value={fullyAllocated} delta={`${students.length > 0 ? Math.round(fullyAllocated / students.length * 100) : 0}% of cohort`} deltaColor={TOKENS.accentEmerald}/>
+        <PKpi label="Active Allocations" value={totalAllocated}/>
+        <PKpi label="Pending" value={totalPending} delta={totalPending > 0 ? 'Need teachers' : 'All caught up'} deltaColor={totalPending > 0 ? TOKENS.accentAmber : TOKENS.accentEmerald}/>
       </div>
 
       <PCard padding={16} style={{ marginBottom: 16 }}>
-        <input className="fi" placeholder="Search students..." value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 380 }} />
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input
+            className="fi"
+            placeholder="Search by name, email, or admission #..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ flex: 1, minWidth: 240, maxWidth: 420 }}
+          />
+          <div style={{ display: 'flex', gap: 6 }}>
+            {[
+              { id: 'all',         label: 'All' },
+              { id: 'unallocated', label: 'Unallocated' },
+              { id: 'partial',     label: 'Partial' },
+              { id: 'full',        label: 'Fully allocated' },
+            ].map(opt => (
+              <button
+                key={opt.id}
+                onClick={() => setFilterStatus(opt.id)}
+                style={{
+                  padding: '7px 14px',
+                  borderRadius: 99,
+                  border: `1.5px solid ${filterStatus === opt.id ? TOKENS.crimson : TOKENS.line || '#E8E2D6'}`,
+                  background: filterStatus === opt.id ? TOKENS.crimson : '#fff',
+                  color: filterStatus === opt.id ? '#fff' : TOKENS.crimson,
+                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                }}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </PCard>
 
       {loading ? (
-        <PCard><div style={{ padding: 48, textAlign: 'center', color: TOKENS.s500 }}>Loading allocations...</div></PCard>
-      ) : (
-        <PCard padding={0} style={{ overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
-              <thead><tr style={{ background: TOKENS.s50, borderBottom: '1px solid ' + TOKENS.s100 }}>
-                {['Student', 'Curriculum', 'Year', 'Allocated', 'Pending', 'Action'].map((h, i) => (
-                  <th key={i} style={{ padding: '14px 16px', textAlign: i === 5 ? 'center' : 'left', fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: TOKENS.s500 }}>{h}</th>
-                ))}
-              </tr></thead>
-              <tbody>
-                {filtered.map(s => {
-                  const sum = getStudentSummary(s)
-                  const fullName = (s.firstName || '') + ' ' + (s.lastName || '')
-                  return (
-                    <tr key={s._id} style={{ borderBottom: '1px solid ' + TOKENS.s100, background: sum.pending > 0 ? '#FEF9E7' : undefined }}>
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <Av init={initials(s.firstName, s.lastName)} col={avColor(fullName)} size={32}/>
-                          <div>
-                            <div style={{ fontWeight: 600, fontSize: 13.5, color: TOKENS.s900 }}>{fullName.trim()}</div>
-                            <div style={{ fontSize: 11, color: TOKENS.s400 }}>{s.email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px 16px' }}><span style={{ display: 'inline-block', padding: '3px 10px', background: TOKENS.s50, color: TOKENS.crimson, border: '1px solid ' + TOKENS.s200, borderRadius: 99, fontSize: 11, fontWeight: 700 }}>{s.curriculum || 'N/A'}</span></td>
-                      <td style={{ padding: '14px 16px', color: TOKENS.s600, fontSize: 13 }}>{s.grade || 'N/A'}</td>
-                      <td style={{ padding: '14px 16px' }}><span style={{ fontWeight: 700, color: TOKENS.accentEmerald }}>{sum.allocated}</span> <span style={{ color: TOKENS.s400, fontSize: 12 }}>/ {sum.total}</span></td>
-                      <td style={{ padding: '14px 16px' }}>
-                        {sum.pending > 0 ? <span style={{ display: 'inline-block', padding: '3px 10px', background: '#FEE2E2', color: '#991B1B', border: '1px solid #FECACA', borderRadius: 99, fontSize: 11, fontWeight: 700 }}>{sum.pending} pending</span> :
-                          sum.total === 0 ? <span style={{ fontSize: 12, color: TOKENS.s400 }}>No subjects</span> :
-                          <span style={{ color: TOKENS.accentEmerald, fontWeight: 600, fontSize: 13 }}>✓ Complete</span>}
-                      </td>
-                      <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                        <button className={sum.pending > 0 ? 'btn btn-r btn-sm' : 'btn btn-g btn-sm'} onClick={() => setSelectedStudent(s)}>Manage</button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+        <PCard padding={60}>
+          <div style={{ textAlign: 'center', color: '#6B6B6B' }}>Loading students...</div>
         </PCard>
+      ) : filtered.length === 0 ? (
+        <PCard padding={60}>
+          <div style={{ textAlign: 'center', color: '#6B6B6B' }}>No students match.</div>
+        </PCard>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filtered.map(s => {
+            const stat = statusOf(s)
+            return (
+              <PCard key={s._id} padding={14} style={{ cursor: 'pointer' }}>
+                <div onClick={() => setSelectedStudent(s)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                  {/* Avatar */}
+                  <div style={{
+                    width: 44, height: 44, borderRadius: '50%',
+                    background: TOKENS.crimson, color: '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 16, fontWeight: 700,
+                    flexShrink: 0,
+                  }}>
+                    {(s.firstName?.[0] || '') + (s.lastName?.[0] || '')}
+                  </div>
+                  {/* Name + email */}
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: TOKENS.ink || '#1A1A1A' }}>
+                      {s.firstName} {s.lastName}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 2 }}>
+                      {s.email}
+                      {s.admissionNumber && <> · {s.admissionNumber}</>}
+                    </div>
+                  </div>
+                  {/* Curriculum */}
+                  <div style={{
+                    background: TOKENS.goldPale, color: TOKENS.crimson,
+                    fontSize: 10.5, fontWeight: 800, letterSpacing: '.08em',
+                    padding: '4px 10px', borderRadius: 99, textTransform: 'uppercase',
+                    minWidth: 70, textAlign: 'center',
+                  }}>
+                    {s.curriculum || 'No curr'}
+                  </div>
+                  {/* Subject count */}
+                  <div style={{ minWidth: 90, textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: TOKENS.ink || '#1A1A1A' }}>
+                      {s.allocatedCount}/{s.subjectCount}
+                    </div>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, color: '#6B6B6B', letterSpacing: '.06em', textTransform: 'uppercase' }}>
+                      Allocated
+                    </div>
+                  </div>
+                  {/* Status pill */}
+                  <div style={{
+                    background: stat.color + '15', color: stat.color,
+                    fontSize: 10.5, fontWeight: 800, letterSpacing: '.08em',
+                    padding: '4px 10px', borderRadius: 99, textTransform: 'uppercase',
+                  }}>
+                    {stat.label}
+                  </div>
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#6B6B6B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </div>
+              </PCard>
+            )
+          })}
+        </div>
       )}
 
-      {selectedStudent && <AllocationsManageModal student={selectedStudent} allocations={allocations} onClose={() => setSelectedStudent(null)} onSaved={() => { setSelectedStudent(null); window.location.reload() }} toast={toast}/>}
-      {showBulk && <BulkAllocateModal students={students} allocations={allocations} onClose={() => setShowBulk(false)} onComplete={() => { setShowBulk(false); window.location.reload() }} toast={toast}/>}
+      {selectedStudent && (
+        <StudentDetailModal
+          student={selectedStudent}
+          allocations={selectedStudent.myAllocations}
+          onClose={() => setSelectedStudent(null)}
+          onChanged={() => { loadAll() }}
+          toast={toast}
+        />
+      )}
     </>
   )
 }
 
-function AllocationsManageModal({ student, allocations, onClose, onSaved, toast }) {
-  const [activeSubject, setActiveSubject] = useState(null)
-  const [teachers, setTeachers] = useState([])
-  const [selected, setSelected] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const subjects = Array.isArray(student.subjects) ? student.subjects : []
+// ═══════════════════════════════════════════════════════════
+// STUDENT DETAIL MODAL
+// ═══════════════════════════════════════════════════════════
+function StudentDetailModal({ student, allocations: initialAllocs, onClose, onChanged, toast }) {
+  const [curriculum, setCurriculum] = useState(student.curriculum || '')
+  const [subjects, setSubjects]     = useState(Array.isArray(student.subjects) ? [...student.subjects] : [])
+  const [subjectCatalog, setSubjectCatalog] = useState([])     // Subject docs for current curriculum
+  const [catalogLoading, setCatalogLoading] = useState(false)
+  const [allocs, setAllocs] = useState(initialAllocs || [])
+  const [allocateFor, setAllocateFor] = useState(null)         // { subjectName, subjectId }
+  const [showSubjectPicker, setShowSubjectPicker] = useState(false)
+  const [saving, setSaving] = useState(false)
 
-  const open = async (subjectId) => {
-    setActiveSubject(subjectId); setSelected(null); setLoading(true)
-    try {
-      const res = await api.get('/allocations/suggest-teachers/' + student._id + '/' + subjectId)
-      const list = res.data.qualifiedTeachers || []
-      setTeachers(list)
-      if (list.length > 0) setSelected(list[0]._id)
-    } catch (e) {
-      toast.error('Could not load teachers: ' + (e.response?.data?.message || e.message))
-      setTeachers([])
-    }
-    setLoading(false)
-  }
+  const CURRICULA = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American']
 
-  const save = async () => {
-    if (!selected) return
-    const existing = allocations.find(a => a.studentId?._id === student._id && a.subjectId?._id === activeSubject && a.status === 'Active')
-    try {
-      if (existing) {
-        await api.patch('/allocations/' + existing._id, { teacherId: selected })
-        toast.ok('Reassigned')
-      } else {
-        await api.post('/allocations', { studentId: student._id, subjectId: activeSubject, teacherId: selected, sendEmails: true })
-        toast.ok('Allocated · email sent')
+  // Load Subject catalog for the chosen curriculum so we can resolve names→IDs
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      if (!curriculum) { setSubjectCatalog([]); return }
+      setCatalogLoading(true)
+      try {
+        const { data } = await api.get('/subjects', { params: { curriculum } })
+        if (cancelled) return
+        setSubjectCatalog(data.subjects || [])
+      } catch (e) {
+        toast?.error?.('Failed to load subject catalog.')
+      } finally {
+        if (!cancelled) setCatalogLoading(false)
       }
-      onSaved()
-    } catch (e) { toast.error('Save failed: ' + (e.response?.data?.message || e.message)) }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [curriculum, toast])
+
+  // Resolve student.subjects (names) into Subject documents for the picker UI
+  const enrolledSubjectDocs = subjects
+    .map(name => subjectCatalog.find(s => s.subjectName === name))
+    .filter(Boolean)
+
+  // For each enrolled subject, find its allocation (if any)
+  const allocationFor = (subjectId) => {
+    return allocs.find(a =>
+      (a.subjectId?._id || a.subjectId) === subjectId && a.status === 'Active'
+    )
   }
+
+  // Save curriculum + subjects changes
+  const saveBasics = async () => {
+    setSaving(true)
+    try {
+      const { data } = await api.patch('/users/' + student._id, {
+        curriculum,
+        subjects,
+      })
+      if (data?.success || data?.user) {
+        toast?.ok?.('Saved.')
+        onChanged?.()
+      } else {
+        toast?.error?.(data?.message || 'Save failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Save failed.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Removing a subject. If allocated, also deactivate the allocation.
+  const removeSubject = async (subjectName) => {
+    if (!window.confirm(`Remove ${subjectName} from this student? Any teacher allocation for this subject will be deactivated.`)) return
+    const subj = subjectCatalog.find(s => s.subjectName === subjectName)
+    const alloc = subj ? allocationFor(subj._id) : null
+
+    if (alloc) {
+      try {
+        await api.patch('/allocations/' + alloc._id, { status: 'Inactive' })
+      } catch (e) {
+        toast?.error?.('Failed to deactivate allocation: ' + (e?.response?.data?.message || e.message))
+        return
+      }
+    }
+
+    // Now remove from subjects list and save
+    const newSubjects = subjects.filter(s => s !== subjectName)
+    setSubjects(newSubjects)
+    try {
+      await api.patch('/users/' + student._id, { subjects: newSubjects })
+      // Refresh allocations
+      const { data } = await api.get('/allocations/student/' + student._id)
+      setAllocs(data.allocations || [])
+      toast?.ok?.('Subject removed.')
+      onChanged?.()
+    } catch (e) {
+      toast?.error?.('Failed to remove subject.')
+    }
+  }
+
+  // After allocate or reallocate succeeds, refetch allocs
+  const refetchAllocs = async () => {
+    try {
+      const { data } = await api.get('/allocations/student/' + student._id)
+      setAllocs(data.allocations || [])
+      onChanged?.()
+    } catch (e) { /* silent */ }
+  }
+
+  // Unassign a teacher (deactivate)
+  const unassignTeacher = async (alloc) => {
+    if (!window.confirm('Unassign this teacher? The student will lose access to lessons for this subject until reallocated.')) return
+    try {
+      await api.patch('/allocations/' + alloc._id, { status: 'Inactive' })
+      toast?.ok?.('Teacher unassigned.')
+      refetchAllocs()
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Failed to unassign.')
+    }
+  }
+
+  const dirty = curriculum !== (student.curriculum || '') ||
+                JSON.stringify(subjects.sort()) !== JSON.stringify((student.subjects || []).slice().sort())
 
   return (
-    <Modal open={true} onClose={onClose} title={(student.firstName || '') + ' ' + (student.lastName || '') + ' — Allocations'} size="lg">
-      <div style={{ marginBottom: 14, padding: 12, background: TOKENS.cream, borderRadius: 8, fontSize: 12, color: TOKENS.s700 }}>
-        Curriculum: <strong>{student.curriculum || 'N/A'}</strong> · Year: <strong>{student.grade || 'N/A'}</strong>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {subjects.length === 0 ? (
-          <div style={{ padding: 24, textAlign: 'center', color: TOKENS.s500 }}>This student has no subjects.</div>
-        ) : subjects.map(s => {
-          const sid = s._id || s
-          const sname = typeof s === 'object' ? s.subjectName : 'Subject'
-          const alloc = allocations.find(a => a.studentId?._id === student._id && a.subjectId?._id === sid && a.status === 'Active')
-          const expanded = activeSubject === sid
-          return (
-            <div key={sid} style={{ border: '1px solid ' + (expanded ? TOKENS.crimson : TOKENS.s100), borderRadius: 10, padding: 14, background: expanded ? '#FBE8E8' : (alloc ? TOKENS.white : '#FEE2E2') }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: TOKENS.s900 }}>{sname}</div>
-                  {alloc ? (
-                    <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 2 }}>Assigned to <strong style={{ color: TOKENS.accentEmerald }}>{alloc.teacherId?.firstName} {alloc.teacherId?.lastName}</strong></div>
-                  ) : (
-                    <div style={{ fontSize: 12, color: '#991B1B', marginTop: 2, fontWeight: 600 }}>Unassigned</div>
-                  )}
-                </div>
-                {!expanded && <button className={alloc ? 'btn btn-g btn-sm' : 'btn btn-r btn-sm'} onClick={() => open(sid)}>{alloc ? 'Change' : 'Allocate'}</button>}
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 100,
+      background: 'rgba(0,0,0,.6)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 20,
+    }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div style={{
+        background: '#fff', borderRadius: 12,
+        maxWidth: 760, width: '100%', maxHeight: '92vh',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        boxShadow: '0 24px 64px rgba(0,0,0,.4)',
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: '18px 24px',
+          background: `linear-gradient(135deg, ${TOKENS.crimson} 0%, ${TOKENS.crimsonDeep} 100%)`,
+          color: TOKENS.cream,
+        }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A' }}>
+            Manage Student
+          </div>
+          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 24, marginTop: 2 }}>
+            {student.firstName} {student.lastName}
+          </div>
+          <div style={{ fontSize: 12, opacity: .85, marginTop: 4 }}>
+            {student.email}{student.admissionNumber && <> · {student.admissionNumber}</>}
+          </div>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '20px 24px', overflow: 'auto', flex: 1 }}>
+          {/* Curriculum + actions */}
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: TOKENS.crimson, marginBottom: 6 }}>
+              Curriculum
+            </label>
+            <select value={curriculum} onChange={e => setCurriculum(e.target.value)}
+              style={{
+                padding: '8px 12px', borderRadius: 6,
+                border: '1.5px solid #E8E2D6',
+                fontSize: 13, fontFamily: 'inherit',
+                minWidth: 200,
+              }}>
+              <option value="">— Select —</option>
+              {CURRICULA.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            {curriculum && curriculum !== student.curriculum && (
+              <div style={{
+                marginTop: 8, padding: 10,
+                background: '#FEF3C7', border: '1px solid #F59E0B',
+                borderRadius: 6, fontSize: 12, color: '#92400E',
+              }}>
+                Changing curriculum will keep existing subject names, but most won't match the new curriculum's catalog. You'll likely need to re-pick subjects.
               </div>
-              {expanded && (
-                <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid ' + TOKENS.s100 }}>
-                  {loading ? <div style={{ padding: 16, textAlign: 'center', fontSize: 12, color: TOKENS.s500 }}>Finding qualified teachers...</div> :
-                   teachers.length === 0 ? <div style={{ padding: 12, background: '#FEE2E2', borderRadius: 8, color: '#991B1B', fontSize: 12, textAlign: 'center' }}>No qualified teachers for {sname} in {student.curriculum}</div> :
-                   <>
-                     <div style={{ background: TOKENS.white, border: '1px solid ' + TOKENS.s100, borderRadius: 8, overflow: 'hidden', maxHeight: 240, overflowY: 'auto' }}>
-                       {teachers.map((t, i) => (
-                         <div key={t._id} onClick={() => setSelected(t._id)} style={{
-                           padding: 10, cursor: 'pointer', borderBottom: i < teachers.length - 1 ? '1px solid ' + TOKENS.s100 : 'none',
-                           background: selected === t._id ? '#FBE8E8' : TOKENS.white,
-                           borderLeft: '3px solid ' + (selected === t._id ? TOKENS.crimson : 'transparent'),
-                           display: 'flex', alignItems: 'center', gap: 10,
-                         }}>
-                           <Av init={initials(t.firstName, t.lastName)} col={avColor(t.firstName + t.lastName)} size={28}/>
-                           <div style={{ flex: 1 }}>
-                             <div style={{ fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
-                               {t.firstName} {t.lastName}
-                               {i === 0 && !alloc && <span style={{ background: TOKENS.goldPale, color: '#8E6B1A', fontSize: 9, fontWeight: 800, padding: '1px 6px', borderRadius: 99 }}>BEST MATCH</span>}
-                             </div>
-                             <div style={{ fontSize: 11, color: TOKENS.s500 }}>{t.email}</div>
-                           </div>
-                           {selected === t._id && <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke={TOKENS.crimson} strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
-                         </div>
-                       ))}
-                     </div>
-                     <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                       <button className="btn btn-p" onClick={save} disabled={!selected} style={{ flex: 1 }}>{alloc ? 'Update' : 'Save'}</button>
-                       <button className="btn btn-s" onClick={() => setActiveSubject(null)}>Cancel</button>
-                     </div>
-                   </>
-                  }
-                </div>
-              )}
+            )}
+          </div>
+
+          {/* Subjects + Allocations */}
+          <div style={{ marginBottom: 14 }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              marginBottom: 8,
+            }}>
+              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: TOKENS.crimson }}>
+                Subjects &amp; Teachers ({subjects.length})
+              </label>
+              <button onClick={() => setShowSubjectPicker(true)}
+                disabled={!curriculum || catalogLoading}
+                style={{
+                  background: '#fff', color: TOKENS.crimson,
+                  border: `1.5px solid ${TOKENS.crimson}`,
+                  padding: '5px 12px', borderRadius: 6,
+                  cursor: !curriculum || catalogLoading ? 'not-allowed' : 'pointer',
+                  fontSize: 11.5, fontWeight: 700,
+                  opacity: !curriculum || catalogLoading ? .5 : 1,
+                }}>
+                + Edit Subjects
+              </button>
             </div>
-          )
-        })}
+
+            {subjects.length === 0 ? (
+              <div style={{ padding: 18, background: '#FBFAF5', borderRadius: 6, fontSize: 12.5, color: '#6B6B6B', textAlign: 'center' }}>
+                No subjects yet. Click "Edit Subjects" to enrol.
+              </div>
+            ) : catalogLoading ? (
+              <div style={{ padding: 18, fontSize: 12.5, color: '#6B6B6B', textAlign: 'center' }}>
+                Loading catalog...
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {subjects.map(name => {
+                  const subj = subjectCatalog.find(s => s.subjectName === name)
+                  if (!subj) {
+                    return (
+                      <div key={name} style={{
+                        padding: '10px 12px',
+                        background: '#FEE2E2', border: '1px solid #FCA5A5',
+                        borderRadius: 6, fontSize: 12.5, color: '#991B1B',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                      }}>
+                        <span><strong>{name}</strong> — not in {curriculum} catalog</span>
+                        <button onClick={() => removeSubject(name)}
+                          style={{
+                            background: 'transparent', color: '#991B1B',
+                            border: '1px solid #991B1B',
+                            padding: '3px 8px', borderRadius: 4,
+                            cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                          }}>
+                          Remove
+                        </button>
+                      </div>
+                    )
+                  }
+                  const alloc = allocationFor(subj._id)
+                  return (
+                    <div key={name} style={{
+                      padding: '10px 12px',
+                      background: '#fff', border: '1px solid #E8E2D6',
+                      borderRadius: 6,
+                      display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+                    }}>
+                      <div style={{ flex: 1, minWidth: 160 }}>
+                        <div style={{ fontWeight: 700, fontSize: 13, color: '#1A1A1A' }}>
+                          {subj.subjectName}
+                        </div>
+                        <div style={{ fontSize: 11, color: '#6B6B6B' }}>
+                          {subj.category}
+                        </div>
+                      </div>
+                      {alloc ? (
+                        <>
+                          <div style={{
+                            background: '#DCFCE7', color: '#15803D',
+                            fontSize: 11, fontWeight: 700,
+                            padding: '4px 10px', borderRadius: 99,
+                          }}>
+                            ✓ {alloc.teacherId?.firstName} {alloc.teacherId?.lastName}
+                          </div>
+                          <button onClick={() => setAllocateFor({ subjectId: subj._id, subjectName: subj.subjectName, currentAlloc: alloc })}
+                            style={{
+                              background: 'transparent', color: TOKENS.crimson,
+                              border: '1px solid #E8E2D6',
+                              padding: '4px 10px', borderRadius: 4,
+                              cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                            }}>
+                            Reassign
+                          </button>
+                          <button onClick={() => unassignTeacher(alloc)}
+                            style={{
+                              background: '#FEE2E2', color: '#B91C1C',
+                              border: 'none',
+                              padding: '4px 8px', borderRadius: 4,
+                              cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                            }}>
+                            Unassign
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div style={{
+                            background: '#FEF3C7', color: '#92400E',
+                            fontSize: 11, fontWeight: 700,
+                            padding: '4px 10px', borderRadius: 99,
+                          }}>
+                            No teacher
+                          </div>
+                          <button onClick={() => setAllocateFor({ subjectId: subj._id, subjectName: subj.subjectName })}
+                            style={{
+                              background: TOKENS.crimson, color: '#fff',
+                              border: 'none',
+                              padding: '5px 12px', borderRadius: 4,
+                              cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                            }}>
+                            Allocate
+                          </button>
+                        </>
+                      )}
+                      <button onClick={() => removeSubject(name)} title="Remove subject"
+                        style={{
+                          background: 'transparent', border: 'none',
+                          color: '#6B6B6B', cursor: 'pointer',
+                          padding: 4,
+                        }}>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          padding: '12px 24px',
+          background: '#FBFAF5', borderTop: '1px solid #E8E2D6',
+          display: 'flex', justifyContent: 'flex-end', gap: 8,
+        }}>
+          <button onClick={onClose} disabled={saving}
+            style={{
+              background: '#fff', color: TOKENS.crimson,
+              border: '1.5px solid #E8E2D6',
+              padding: '9px 18px', borderRadius: 6,
+              cursor: 'pointer', fontSize: 13, fontWeight: 700,
+            }}>
+            Close
+          </button>
+          <button onClick={saveBasics} disabled={saving || !dirty}
+            style={{
+              background: saving || !dirty ? '#9CA3AF' : TOKENS.crimson,
+              color: '#fff', border: 'none',
+              padding: '9px 22px', borderRadius: 6,
+              cursor: saving || !dirty ? 'not-allowed' : 'pointer',
+              fontSize: 13, fontWeight: 700,
+            }}>
+            {saving ? 'Saving...' : (dirty ? 'Save Changes' : 'No changes')}
+          </button>
+        </div>
       </div>
-      <div style={{ marginTop: 18, display: 'flex', justifyContent: 'flex-end' }}>
-        <button className="btn btn-s" onClick={onClose}>Done</button>
-      </div>
-    </Modal>
+
+      {/* SUBJECT PICKER */}
+      {showSubjectPicker && (
+        <SubjectPickerModal
+          curriculum={curriculum}
+          catalog={subjectCatalog}
+          initial={subjects}
+          onClose={() => setShowSubjectPicker(false)}
+          onSave={(newList) => { setSubjects(newList); setShowSubjectPicker(false) }}
+        />
+      )}
+
+      {/* ALLOCATE TEACHER */}
+      {allocateFor && (
+        <AllocateTeacherModal
+          studentId={student._id}
+          studentName={`${student.firstName} ${student.lastName}`}
+          curriculum={curriculum}
+          subjectId={allocateFor.subjectId}
+          subjectName={allocateFor.subjectName}
+          currentAlloc={allocateFor.currentAlloc}
+          onClose={() => setAllocateFor(null)}
+          onSaved={() => { setAllocateFor(null); refetchAllocs() }}
+          toast={toast}
+        />
+      )}
+    </div>
   )
 }
 
-function BulkAllocateModal({ students, allocations, onClose, onComplete, toast }) {
-  const [preview, setPreview] = useState([])
+// ═══════════════════════════════════════════════════════════
+// SUBJECT PICKER MODAL (for editing student's enrolled subjects)
+// ═══════════════════════════════════════════════════════════
+function SubjectPickerModal({ curriculum, catalog, initial, onClose, onSave }) {
+  const [picked, setPicked] = useState(new Set(initial))
+  const [search, setSearch] = useState('')
+
+  const toggle = (name) => {
+    setPicked(prev => {
+      const next = new Set(prev)
+      if (next.has(name)) next.delete(name)
+      else next.add(name)
+      return next
+    })
+  }
+
+  const filtered = catalog.filter(s =>
+    !search.trim() || s.subjectName.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 110,
+      background: 'rgba(0,0,0,.6)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 20,
+    }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div style={{
+        background: '#fff', borderRadius: 12,
+        maxWidth: 620, width: '100%', maxHeight: '90vh',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        boxShadow: '0 24px 64px rgba(0,0,0,.4)',
+      }}>
+        <div style={{
+          padding: '16px 24px',
+          background: `linear-gradient(135deg, ${TOKENS.crimson} 0%, ${TOKENS.crimsonDeep} 100%)`,
+          color: TOKENS.cream,
+        }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A' }}>
+            Subjects
+          </div>
+          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, marginTop: 2 }}>
+            Edit Enrolled Subjects · {curriculum}
+          </div>
+          <div style={{ fontSize: 12, opacity: .85, marginTop: 4 }}>
+            {picked.size} selected of {catalog.length} available
+          </div>
+        </div>
+        <div style={{ padding: '16px 24px', flex: 1, overflow: 'auto' }}>
+          <input
+            value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search subjects..."
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              padding: '8px 12px', borderRadius: 6,
+              border: '1.5px solid #E8E2D6',
+              fontSize: 13, marginBottom: 10, fontFamily: 'inherit',
+            }}/>
+          {filtered.length === 0 ? (
+            <div style={{ padding: 14, fontSize: 12.5, color: '#6B6B6B', textAlign: 'center' }}>
+              No subjects match.
+            </div>
+          ) : (
+            <div style={{
+              maxHeight: '50vh', overflowY: 'auto',
+              border: '1px solid #E8E2D6', borderRadius: 6, padding: 6,
+            }}>
+              {filtered.map(s => {
+                const isPicked = picked.has(s.subjectName)
+                return (
+                  <div key={s._id}
+                    onClick={() => toggle(s.subjectName)}
+                    style={{
+                      padding: '7px 10px', cursor: 'pointer',
+                      background: isPicked ? '#FBF6E3' : 'transparent',
+                      borderRadius: 4,
+                      display: 'flex', alignItems: 'center', gap: 10,
+                      marginBottom: 2,
+                    }}>
+                    <div style={{
+                      width: 16, height: 16, borderRadius: 3,
+                      border: `1.5px solid ${isPicked ? TOKENS.crimson : '#E8E2D6'}`,
+                      background: isPicked ? TOKENS.crimson : '#fff',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      {isPicked && (
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, fontSize: 13 }}>
+                      <strong>{s.subjectName}</strong>{' '}
+                      <span style={{ color: '#6B6B6B', fontSize: 11.5 }}>({s.category})</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+        <div style={{
+          padding: '12px 24px',
+          background: '#FBFAF5', borderTop: '1px solid #E8E2D6',
+          display: 'flex', justifyContent: 'flex-end', gap: 8,
+        }}>
+          <button onClick={onClose}
+            style={{
+              background: '#fff', color: TOKENS.crimson,
+              border: '1.5px solid #E8E2D6',
+              padding: '9px 18px', borderRadius: 6,
+              cursor: 'pointer', fontSize: 13, fontWeight: 700,
+            }}>
+            Cancel
+          </button>
+          <button onClick={() => onSave([...picked])}
+            style={{
+              background: TOKENS.crimson, color: '#fff', border: 'none',
+              padding: '9px 22px', borderRadius: 6,
+              cursor: 'pointer', fontSize: 13, fontWeight: 700,
+            }}>
+            Use {picked.size} Subject{picked.size === 1 ? '' : 's'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// ALLOCATE TEACHER MODAL
+// ═══════════════════════════════════════════════════════════
+function AllocateTeacherModal({ studentId, studentName, curriculum, subjectId, subjectName, currentAlloc, onClose, onSaved, toast }) {
+  const [qualifiedTeachers, setQualifiedTeachers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [executing, setExecuting] = useState(false)
-  const [progress, setProgress] = useState({ done: 0, total: 0, failed: [] })
-  const [sendEmails, setSendEmails] = useState(false)
+  const [pickedTeacherId, setPickedTeacherId] = useState(currentAlloc?.teacherId?._id || '')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    const buildPreview = async () => {
-      const pairs = []
-      students.forEach(s => {
-        const subjs = Array.isArray(s.subjects) ? s.subjects : []
-        subjs.forEach(sub => {
-          const subId = sub._id || sub
-          const subName = typeof sub === 'object' ? sub.subjectName : 'Subject'
-          const isAlloc = allocations.some(a => a.studentId?._id === s._id && a.subjectId?._id === subId && a.status === 'Active')
-          if (!isAlloc) pairs.push({ studentId: s._id, studentName: (s.firstName || '') + ' ' + (s.lastName || ''), subjectId: subId, subjectName: subName, curriculum: s.curriculum })
+    let cancelled = false
+    const load = async () => {
+      try {
+        const { data } = await api.get('/users/teachers/qualified', {
+          params: { subjectId, curriculum },
         })
-      })
-      const capped = pairs.slice(0, 30)
-      const result = []
-      for (const p of capped) {
-        try {
-          const res = await api.get('/allocations/suggest-teachers/' + p.studentId + '/' + p.subjectId)
-          const ts = res.data.qualifiedTeachers || []
-          result.push({ ...p, teachers: ts, selected: ts[0]?._id || null, included: ts.length > 0 })
-        } catch { result.push({ ...p, teachers: [], selected: null, included: false }) }
-        setPreview([...result])
+        if (cancelled) return
+        setQualifiedTeachers(data.teachers || [])
+      } catch (e) {
+        toast?.error?.('Failed to load teachers: ' + (e?.response?.data?.message || e.message))
+      } finally {
+        if (!cancelled) setLoading(false)
       }
-      setLoading(false)
     }
-    buildPreview()
-  }, [students, allocations])
+    load()
+    return () => { cancelled = true }
+  }, [subjectId, curriculum, toast])
 
-  const execute = async () => {
-    const todo = preview.filter(r => r.included && r.selected)
-    if (todo.length === 0) { toast.error('Nothing selected'); return }
-    if (!confirm('Allocate ' + todo.length + ' students?' + (sendEmails ? ' Emails WILL be sent.' : ' Emails will NOT be sent.'))) return
-    setExecuting(true)
-    setProgress({ done: 0, total: todo.length, failed: [] })
-    const failed = []
-    for (let i = 0; i < todo.length; i++) {
-      try { await api.post('/allocations', { studentId: todo[i].studentId, subjectId: todo[i].subjectId, teacherId: todo[i].selected, sendEmails }) }
-      catch (e) { failed.push({ ...todo[i], error: e.response?.data?.message || e.message }) }
-      setProgress({ done: i + 1, total: todo.length, failed: [...failed] })
+  const save = async () => {
+    if (!pickedTeacherId) { toast?.error?.('Pick a teacher.'); return }
+    if (currentAlloc && pickedTeacherId === currentAlloc.teacherId?._id) { onClose(); return }
+
+    setSaving(true)
+    try {
+      if (currentAlloc) {
+        // Reassign existing allocation
+        const { data } = await api.patch('/allocations/' + currentAlloc._id, {
+          teacherId: pickedTeacherId,
+        })
+        if (data?.success) {
+          toast?.ok?.('Teacher reassigned.')
+          onSaved?.()
+        } else {
+          toast?.error?.(data?.message || 'Failed to reassign.')
+        }
+      } else {
+        // Create new allocation
+        const { data } = await api.post('/allocations', {
+          studentId, subjectId, teacherId: pickedTeacherId,
+          sendEmails: true,
+        })
+        if (data?.success) {
+          toast?.ok?.('Teacher allocated.')
+          onSaved?.()
+        } else {
+          toast?.error?.(data?.message || 'Failed to allocate.')
+        }
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Save failed.')
+    } finally {
+      setSaving(false)
     }
-    setExecuting(false)
-    if (failed.length === 0) toast.ok('All ' + todo.length + ' allocations created')
-    else toast.error((todo.length - failed.length) + ' succeeded · ' + failed.length + ' failed')
   }
 
   return (
-    <Modal open={true} onClose={onClose} title="Bulk Allocate Students" size="lg">
-      {loading ? (
-        <div style={{ padding: 30, textAlign: 'center', color: TOKENS.s500 }}>Loading suggestions...</div>
-      ) : executing || progress.done > 0 ? (
-        <div style={{ padding: 8 }}>
-          <div style={{ height: 6, background: TOKENS.s100, borderRadius: 99, overflow: 'hidden', marginBottom: 12 }}>
-            <div style={{ width: progress.total > 0 ? (progress.done / progress.total * 100) + '%' : '0%', height: '100%', background: TOKENS.crimson }}/>
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 110,
+      background: 'rgba(0,0,0,.6)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 20,
+    }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div style={{
+        background: '#fff', borderRadius: 12,
+        maxWidth: 540, width: '100%', maxHeight: '90vh',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        boxShadow: '0 24px 64px rgba(0,0,0,.4)',
+      }}>
+        <div style={{
+          padding: '16px 24px',
+          background: `linear-gradient(135deg, ${TOKENS.crimson} 0%, ${TOKENS.crimsonDeep} 100%)`,
+          color: TOKENS.cream,
+        }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A' }}>
+            {currentAlloc ? 'Reassign Teacher' : 'Allocate Teacher'}
           </div>
-          <div style={{ fontSize: 13, marginBottom: 12 }}>{progress.done} of {progress.total} processed</div>
-          {!executing && (
-            <>
-              <div style={{ padding: 12, background: progress.failed.length === 0 ? '#DCFCE7' : '#FEF3C7', borderRadius: 8, fontSize: 13, marginBottom: 12 }}>
-                <strong>{progress.total - progress.failed.length}</strong> succeeded · <strong>{progress.failed.length}</strong> failed
+          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, marginTop: 2 }}>
+            {subjectName} · {curriculum}
+          </div>
+          <div style={{ fontSize: 12, opacity: .85, marginTop: 4 }}>
+            For {studentName}
+          </div>
+        </div>
+        <div style={{ padding: '16px 24px', flex: 1, overflow: 'auto' }}>
+          {loading ? (
+            <div style={{ padding: 18, fontSize: 12.5, color: '#6B6B6B', textAlign: 'center' }}>
+              Finding qualified teachers...
+            </div>
+          ) : qualifiedTeachers.length === 0 ? (
+            <div style={{
+              padding: 18, background: '#FEE2E2',
+              border: '1px solid #FCA5A5', borderRadius: 6,
+              fontSize: 12.5, color: '#991B1B',
+            }}>
+              <strong>No qualified teachers found.</strong>
+              <div style={{ marginTop: 4 }}>
+                No active teacher has <strong>{subjectName}</strong> for <strong>{curriculum}</strong> in their teaching specialties.
+                Ask a teacher to add this pair in Manage My Subject → My Specialties.
               </div>
-              <button className="btn btn-p" style={{ width: '100%' }} onClick={onComplete}>Close & Refresh</button>
-            </>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {qualifiedTeachers.map(t => {
+                const isPicked = pickedTeacherId === t._id
+                const isCurrent = currentAlloc?.teacherId?._id === t._id
+                return (
+                  <div key={t._id}
+                    onClick={() => setPickedTeacherId(t._id)}
+                    style={{
+                      padding: '10px 12px', cursor: 'pointer',
+                      border: `1.5px solid ${isPicked ? TOKENS.crimson : '#E8E2D6'}`,
+                      background: isPicked ? '#FBF6E3' : '#fff',
+                      borderRadius: 6,
+                      display: 'flex', alignItems: 'center', gap: 10,
+                    }}>
+                    <div style={{
+                      width: 16, height: 16, borderRadius: '50%',
+                      border: `1.5px solid ${isPicked ? TOKENS.crimson : '#E8E2D6'}`,
+                      background: isPicked ? TOKENS.crimson : '#fff',
+                      flexShrink: 0,
+                    }}/>
+                    <div style={{ flex: 1, fontSize: 13 }}>
+                      <strong>{t.firstName} {t.lastName}</strong>
+                      <div style={{ fontSize: 11, color: '#6B6B6B' }}>{t.email}</div>
+                    </div>
+                    {isCurrent && (
+                      <div style={{
+                        background: '#DCFCE7', color: '#15803D',
+                        fontSize: 10, fontWeight: 700, letterSpacing: '.05em',
+                        padding: '3px 8px', borderRadius: 99, textTransform: 'uppercase',
+                      }}>
+                        Current
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           )}
         </div>
-      ) : (
-        <>
-          <div style={{ padding: 12, background: TOKENS.cream, borderLeft: '3px solid ' + TOKENS.gold, borderRadius: 6, fontSize: 12, marginBottom: 14 }}>
-            Review the suggested teachers. Uncheck any to skip. Existing allocations untouched.
-          </div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: sendEmails ? '#FEE2E2' : TOKENS.s50, borderRadius: 6, marginBottom: 14, cursor: 'pointer', fontSize: 12.5 }}>
-            <input type="checkbox" checked={sendEmails} onChange={e => setSendEmails(e.target.checked)}/>
-            <span>Send notification emails to parents ({sendEmails ? 'YES' : 'NO — silent'})</span>
-          </label>
-          <div style={{ border: '1px solid ' + TOKENS.s100, borderRadius: 8, overflow: 'hidden', marginBottom: 14, maxHeight: 320, overflowY: 'auto' }}>
-            {preview.map((r, i) => (
-              <div key={i} style={{ padding: 10, borderTop: i > 0 ? '1px solid ' + TOKENS.s100 : 'none', display: 'flex', alignItems: 'center', gap: 10, background: r.teachers.length === 0 ? '#FEE2E2' : TOKENS.white }}>
-                <input type="checkbox" checked={r.included} disabled={r.teachers.length === 0} onChange={e => setPreview(p => p.map((x, j) => j === i ? { ...x, included: e.target.checked } : x))}/>
-                <div style={{ flex: 1, fontSize: 13 }}><strong>{r.studentName}</strong> · {r.subjectName}</div>
-                {r.teachers.length === 0 ? (
-                  <span style={{ display: 'inline-block', padding: '3px 8px', background: '#FEE2E2', color: '#991B1B', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>NO MATCH</span>
-                ) : (
-                  <select className="fsel" value={r.selected || ''} onChange={e => setPreview(p => p.map((x, j) => j === i ? { ...x, selected: e.target.value } : x))} style={{ width: 200, padding: 4, fontSize: 11 }}>
-                    {r.teachers.map((t, ti) => <option key={t._id} value={t._id}>{ti === 0 ? '★ ' : ''}{t.firstName} {t.lastName}</option>)}
-                  </select>
-                )}
-              </div>
-            ))}
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-p" onClick={execute} disabled={preview.filter(r => r.included && r.selected).length === 0} style={{ flex: 1 }}>
-              Allocate {preview.filter(r => r.included && r.selected).length} Selected
-            </button>
-            <button className="btn btn-s" onClick={onClose}>Cancel</button>
-          </div>
-        </>
-      )}
-    </Modal>
+        <div style={{
+          padding: '12px 24px',
+          background: '#FBFAF5', borderTop: '1px solid #E8E2D6',
+          display: 'flex', justifyContent: 'flex-end', gap: 8,
+        }}>
+          <button onClick={onClose} disabled={saving}
+            style={{
+              background: '#fff', color: TOKENS.crimson,
+              border: '1.5px solid #E8E2D6',
+              padding: '9px 18px', borderRadius: 6,
+              cursor: 'pointer', fontSize: 13, fontWeight: 700,
+            }}>
+            Cancel
+          </button>
+          <button onClick={save} disabled={saving || loading || !pickedTeacherId}
+            style={{
+              background: saving || !pickedTeacherId ? '#9CA3AF' : TOKENS.crimson,
+              color: '#fff', border: 'none',
+              padding: '9px 22px', borderRadius: 6,
+              cursor: saving || !pickedTeacherId ? 'not-allowed' : 'pointer',
+              fontSize: 13, fontWeight: 700,
+            }}>
+            {saving ? 'Saving...' : (currentAlloc ? 'Reassign' : 'Allocate')}
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
