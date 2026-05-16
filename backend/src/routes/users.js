@@ -8,28 +8,40 @@ const { sendVerificationEmail } = require('../services/emailService');
 const { sendWelcomeEmail } = require('../lib/email');
 
 // ── Cloudinary avatar upload setup ────────────────────────
-const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+// Wrapped defensively: if multer / multer-storage-cloudinary are not
+// installed, we must NOT throw at module load — that would crash the
+// entire server (index.js requires this file at boot). Instead the
+// avatar endpoint degrades to a clear 503 and every other /api/users
+// route keeps working.
+let uploadAvatar = null;
+let avatarUploadError = null;
+try {
+  const multer = require('multer');
+  const cloudinary = require('cloudinary').v2;
+  const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key:    process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
 
-const avatarStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'smartious/avatars',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
-  },
-});
-const uploadAvatar = multer({
-  storage: avatarStorage,
-  limits: { fileSize: 5 * 1024 * 1024 },   // 5 MB cap
-});
+  const avatarStorage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: 'smartious/avatars',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+      transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
+    },
+  });
+  uploadAvatar = multer({
+    storage: avatarStorage,
+    limits: { fileSize: 5 * 1024 * 1024 },   // 5 MB cap
+  });
+} catch (e) {
+  avatarUploadError = e.message;
+  console.error('[users] avatar upload disabled —', e.message);
+}
 
 // ─────────────────────────────────────────────────────────
 // HELPER: Sync a student's GroupRoom enrollments based on
@@ -209,6 +221,12 @@ router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
 // for any user. Returns the Cloudinary URL and also saves it to
 // the user's avatar field.
 router.post('/:id/avatar', auth, requireRole('admin'), (req, res) => {
+  if (!uploadAvatar) {
+    return res.status(503).json({
+      success: false,
+      message: 'Image upload is unavailable on the server: ' + (avatarUploadError || 'upload module not installed.'),
+    });
+  }
   uploadAvatar.single('file')(req, res, async (err) => {
     if (err) {
       console.error('[users avatar upload]', err.message);
