@@ -5982,838 +5982,536 @@ const cmSeedSample = (teacherName) => {
   localStorage.setItem(CM_SEEDED_KEY, '1')
 }
 
+// ═══════════════════════════════════════════════════════════
+// COMMUNICATION TAB — teacher emails to students, parents, staff
+// ═══════════════════════════════════════════════════════════
+// Compose branded emails to the teacher's own students, those
+// students' parents, and colleagues/admin. No external addresses.
+// Templates: weekly report, behaviour report, parent meeting.
+// Multiple attachments. Two-step send. Campaign history.
+// ═══════════════════════════════════════════════════════════
+
 function CommunicationTab({ user, store, setPage, toast }) {
-  const teacherFullName = 'Mr. James Muthomi'
-
-  useEffect(() => { cmSeedSample(teacherFullName) }, [])
-
-  const [messages, setMessages] = useState(() => cmLoadMessages())
-  const [activeChannel, setActiveChannel] = useState('parent')  // 'parent' | 'student' | 'admin'
-  const [activeThreadId, setActiveThreadId] = useState(null)
-  const [showCompose, setShowCompose] = useState(false)
-  const [searchQ, setSearchQ] = useState('')
-
-  // Compose form
-  const [composeTo, setComposeTo] = useState('')
-  const [composeChannel, setComposeChannel] = useState('parent')
-  const [composeSubject, setComposeSubject] = useState('')
-  const [composeBody, setComposeBody] = useState('')
-  const [composeFlags, setComposeFlags] = useState([])
-  const [composeAcknowledged, setComposeAcknowledged] = useState(false)
-
-  // Reply state
-  const [replyText, setReplyText] = useState('')
-  const [replyFlags, setReplyFlags] = useState([])
-  const [replyAcknowledged, setReplyAcknowledged] = useState(false)
-
-  const allStudents = cmLoadStudents()
-
-  // Group messages into threads
-  const allThreads = (() => {
-    const map = new Map()
-    messages.forEach(m => {
-      const tid = m.threadId
-      if (!map.has(tid)) map.set(tid, [])
-      map.get(tid).push(m)
-    })
-    return Array.from(map.entries()).map(([threadId, msgs]) => {
-      msgs.sort((a, b) => new Date(a.sentAt) - new Date(b.sentAt))
-      const last = msgs[msgs.length - 1]
-      const otherParty = last.from === teacherFullName ? last.to : last.from
-      const otherRole = last.from === teacherFullName ? last.toRole : last.fromRole
-      const channel = last.channel
-      const unread = msgs.filter(m => !m.read && m.from !== teacherFullName).length
-      const hasFlags = msgs.some(m => m.flags && m.flags.length > 0)
-      return {
-        threadId, messages: msgs, last,
-        otherParty, otherRole, channel,
-        unread, hasFlags,
-        subject: msgs[0].subject.replace(/^Re: /, ''),
-      }
-    }).sort((a, b) => new Date(b.last.sentAt) - new Date(a.last.sentAt))
-  })()
-
-  const channelThreads = allThreads.filter(t => t.channel === activeChannel)
-  const filteredThreads = channelThreads.filter(t => {
-    if (!searchQ.trim()) return true
-    const search = searchQ.toLowerCase()
-    return t.otherParty.toLowerCase().includes(search) ||
-           t.subject.toLowerCase().includes(search) ||
-           t.messages.some(m => m.body.toLowerCase().includes(search))
-  })
-
-  const channelCounts = {
-    parent:  allThreads.filter(t => t.channel === 'parent').length,
-    student: allThreads.filter(t => t.channel === 'student').length,
-    admin:   allThreads.filter(t => t.channel === 'admin').length,
-  }
-  const unreadCounts = {
-    parent:  allThreads.filter(t => t.channel === 'parent' && t.unread > 0).length,
-    student: allThreads.filter(t => t.channel === 'student' && t.unread > 0).length,
-    admin:   allThreads.filter(t => t.channel === 'admin' && t.unread > 0).length,
-  }
-
-  const activeThread = activeThreadId ? allThreads.find(t => t.threadId === activeThreadId) : null
-
-  // Mark thread as read when opened
-  useEffect(() => {
-    if (activeThread) {
-      const updated = messages.map(m => {
-        if (m.threadId === activeThread.threadId && m.from !== teacherFullName && !m.read) {
-          return { ...m, read: true }
-        }
-        return m
-      })
-      if (JSON.stringify(updated) !== JSON.stringify(messages)) {
-        setMessages(updated)
-        cmSaveMessages(updated)
-      }
-    }
-  }, [activeThreadId])
-
-  // Recompute compose flags as user types
-  useEffect(() => {
-    if (composeChannel === 'student' && composeBody.trim()) {
-      setComposeFlags(cmCheckMessage(composeBody))
-    } else {
-      setComposeFlags([])
-    }
-    setComposeAcknowledged(false)
-  }, [composeBody, composeChannel])
-
-  useEffect(() => {
-    if (activeThread && activeThread.channel === 'student' && replyText.trim()) {
-      setReplyFlags(cmCheckMessage(replyText))
-    } else {
-      setReplyFlags([])
-    }
-    setReplyAcknowledged(false)
-  }, [replyText, activeThread])
-
-  // ── ACTIONS ─────────────────────────────────────────
-  const sendNewMessage = () => {
-    if (!composeTo.trim()) { toast?.error?.('Recipient is required.'); return }
-    if (!composeSubject.trim()) { toast?.error?.('Subject is required.'); return }
-    if (!composeBody.trim()) { toast?.error?.('Message body is required.'); return }
-
-    const flags = composeFlags
-    const hasHighSeverity = flags.some(f => f.severity === 'high')
-
-    if (flags.length > 0 && !composeAcknowledged) {
-      toast?.error?.('Please review and acknowledge the safety warning before sending.')
-      return
-    }
-
-    const role = composeChannel === 'parent' ? 'parent' : composeChannel === 'student' ? 'student' : 'admin'
-    const newMsg = {
-      id: cmGenerateId(),
-      threadId: 'th-' + composeChannel + '-' + Date.now(),
-      from: teacherFullName, fromRole: 'teacher',
-      to: composeTo, toRole: role,
-      channel: composeChannel,
-      subject: composeSubject.trim(),
-      body: composeBody.trim(),
-      sentAt: new Date().toISOString(),
-      read: true,
-      flags: flags,
-      adminVisible: composeChannel === 'student',
-    }
-
-    const updated = [...messages, newMsg]
-    setMessages(updated)
-    cmSaveMessages(updated)
-
-    // Audit log for student channel
-    if (composeChannel === 'student') {
-      cmAppendAudit({
-        id: 'audit-' + Date.now(),
-        messageId: newMsg.id,
-        teacher: teacherFullName,
-        student: composeTo,
-        subject: composeSubject,
-        body: composeBody,
-        sentAt: newMsg.sentAt,
-        flags: flags,
-      })
-    }
-
-    // Flag if any safety patterns triggered
-    if (flags.length > 0) {
-      cmAppendFlag({
-        id: 'flag-' + Date.now(),
-        messageId: newMsg.id,
-        teacher: teacherFullName,
-        student: composeChannel === 'student' ? composeTo : null,
-        flags: flags,
-        severity: hasHighSeverity ? 'high' : 'medium',
-        sentAt: newMsg.sentAt,
-        body: composeBody,
-      })
-      toast?.info?.('Message sent. Safety flag logged to admin.')
-    } else {
-      toast?.ok?.('Message sent.')
-    }
-
-    setShowCompose(false)
-    setComposeTo(''); setComposeChannel('parent'); setComposeSubject(''); setComposeBody(''); setComposeFlags([]); setComposeAcknowledged(false)
-  }
-
-  const sendReply = () => {
-    if (!activeThread || !replyText.trim()) return
-
-    const flags = replyFlags
-    const hasHighSeverity = flags.some(f => f.severity === 'high')
-
-    if (flags.length > 0 && !replyAcknowledged) {
-      toast?.error?.('Please review and acknowledge the safety warning before sending.')
-      return
-    }
-
-    const newMsg = {
-      id: cmGenerateId(),
-      threadId: activeThread.threadId,
-      from: teacherFullName, fromRole: 'teacher',
-      to: activeThread.otherParty, toRole: activeThread.otherRole,
-      channel: activeThread.channel,
-      subject: 'Re: ' + activeThread.subject,
-      body: replyText.trim(),
-      sentAt: new Date().toISOString(),
-      read: true,
-      flags: flags,
-      adminVisible: activeThread.channel === 'student',
-    }
-
-    const updated = [...messages, newMsg]
-    setMessages(updated)
-    cmSaveMessages(updated)
-
-    if (activeThread.channel === 'student') {
-      cmAppendAudit({
-        id: 'audit-' + Date.now(), messageId: newMsg.id,
-        teacher: teacherFullName, student: activeThread.otherParty,
-        subject: newMsg.subject, body: newMsg.body, sentAt: newMsg.sentAt, flags: flags,
-      })
-    }
-
-    if (flags.length > 0) {
-      cmAppendFlag({
-        id: 'flag-' + Date.now(), messageId: newMsg.id,
-        teacher: teacherFullName, student: activeThread.channel === 'student' ? activeThread.otherParty : null,
-        flags: flags, severity: hasHighSeverity ? 'high' : 'medium',
-        sentAt: newMsg.sentAt, body: replyText,
-      })
-      toast?.info?.('Reply sent. Safety flag logged to admin.')
-    } else {
-      toast?.ok?.('Reply sent.')
-    }
-
-    setReplyText(''); setReplyFlags([]); setReplyAcknowledged(false)
-  }
-
-  const reportConversation = () => {
-    if (!activeThread) return
-    if (!confirm('Report this conversation to admin for review? This action cannot be undone.')) return
-    cmAppendFlag({
-      id: 'flag-' + Date.now(),
-      threadId: activeThread.threadId,
-      teacher: teacherFullName,
-      otherParty: activeThread.otherParty,
-      reason: 'Manually reported by teacher',
-      severity: 'high',
-      sentAt: new Date().toISOString(),
-    })
-    toast?.ok?.('Conversation reported to admin.')
-  }
-
-  const channelColors = {
-    parent: '#7D1025',
-    student: '#1E3A8A',
-    admin: '#7E22CE',
-  }
-  const channelLabels = {
-    parent: 'Parents',
-    student: 'Students',
-    admin: 'Admin',
-  }
-  const channelDescriptions = {
-    parent: 'Communication with parents and guardians',
-    student: 'Direct messages with students. ALL messages visible to admin for child safety.',
-    admin: 'Operational communication with school administration',
-  }
+  const [view, setView] = useState('compose')   // compose | history
 
   return (
     <div>
-      {/* Hero */}
-      <div className="card" style={{
-        padding: 0, marginBottom: 18, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)',
-        color: '#FBFAF5',
-      }}>
-        <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 240 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>
-              Communication
-            </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
-              Messages
-            </h1>
-            <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
-              Parents, students, and admin in one place. All student conversations are admin-visible for child safety.
-            </div>
-          </div>
-          <button onClick={() => { setShowCompose(true); setComposeChannel(activeChannel) }}
+      <div style={{ marginBottom: 18 }}>
+        <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, color: 'var(--s900)', margin: 0 }}>
+          Communication
+        </h1>
+        <div style={{ fontSize: 13, color: 'var(--s500)', marginTop: 2 }}>
+          Email your students, their parents, and colleagues.
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+        {[
+          { id: 'compose', label: 'Compose' },
+          { id: 'history', label: 'History' },
+        ].map(t => (
+          <button key={t.id} onClick={() => setView(t.id)}
             style={{
-              background: '#C9A030', color: '#7D1025', border: 'none',
-              padding: '12px 22px', borderRadius: 'var(--rmd)',
-              cursor: 'pointer', fontSize: 14, fontWeight: 700,
-              display: 'flex', alignItems: 'center', gap: 8,
-              boxShadow: '0 4px 14px rgba(201,160,48,.35)',
+              padding: '8px 18px', borderRadius: 99,
+              border: `1.5px solid ${view === t.id ? '#7D1025' : 'var(--border)'}`,
+              background: view === t.id ? '#7D1025' : '#fff',
+              color: view === t.id ? '#fff' : '#7D1025',
+              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
             }}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-            New Message
+            {t.label}
           </button>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', background: 'rgba(0,0,0,.18)' }}>
-          {[
-            ['Parents',  channelCounts.parent,  unreadCounts.parent],
-            ['Students', channelCounts.student, unreadCounts.student],
-            ['Admin',    channelCounts.admin,   unreadCounts.admin],
-          ].map(([l, count, unread]) => (
-            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(251,250,245,.08)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .7, marginBottom: 2, color: '#F0CC5A' }}>{l}</div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
-                <span style={{ fontSize: 16, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: '#FBFAF5' }}>{count}</span>
-                {unread > 0 && (
-                  <span style={{
-                    background: '#FCA5A5', color: '#7D1025',
-                    fontSize: 10, fontWeight: 800,
-                    padding: '2px 7px', borderRadius: 99,
-                  }}>{unread} unread</span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
 
-      {/* Channel tabs */}
-      <div style={{
-        display: 'flex',
-        background: '#FBFAF5',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--rmd)',
-        padding: 4, marginBottom: 18, gap: 2, flexWrap: 'wrap',
-      }}>
-        {['parent', 'student', 'admin'].map(ch => {
-          const isActive = activeChannel === ch
-          const count = channelCounts[ch]
-          const unread = unreadCounts[ch]
-          return (
-            <button key={ch} onClick={() => { setActiveChannel(ch); setActiveThreadId(null) }}
-              style={{
-                flex: 1, minWidth: 120,
-                background: isActive ? channelColors[ch] : 'transparent',
-                color: isActive ? '#FBFAF5' : 'var(--s500)',
-                border: 'none', padding: '10px 14px',
-                borderRadius: 'var(--rsm)', cursor: 'pointer',
-                fontSize: 13, fontWeight: 700,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                boxShadow: isActive ? '0 4px 16px rgba(125,16,37,.15)' : 'none',
-              }}>
-              {channelLabels[ch]}
-              <span style={{
-                background: isActive ? 'rgba(251,250,245,.25)' : 'var(--bg)',
-                color: isActive ? '#FBFAF5' : 'var(--s500)',
-                fontSize: 11, fontWeight: 700,
-                padding: '2px 7px', borderRadius: 99,
-              }}>{count}</span>
-              {unread > 0 && (
-                <span style={{
-                  background: '#FCA5A5', color: '#7D1025',
-                  fontSize: 10, fontWeight: 800,
-                  padding: '1px 6px', borderRadius: 99,
-                }}>{unread}</span>
-              )}
-            </button>
-          )
-        })}
-      </div>
+      {view === 'compose'
+        ? <TeacherComposeView user={user} toast={toast} />
+        : <TeacherCommsHistory toast={toast} />}
+    </div>
+  )
+}
 
-      {/* Channel info banner */}
-      <div style={{
-        background: activeChannel === 'student' ? '#FEF3C7' : '#FBFAF5',
-        border: '1px solid ' + (activeChannel === 'student' ? '#FCD34D' : 'var(--border)'),
-        borderLeft: '3px solid ' + (activeChannel === 'student' ? '#B45309' : '#C9A030'),
-        padding: '10px 14px', borderRadius: 'var(--rsm)',
-        fontSize: 12.5, color: 'var(--s700)', marginBottom: 14,
-        display: 'flex', alignItems: 'center', gap: 10,
-      }}>
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke={activeChannel === 'student' ? '#B45309' : '#C9A030'} strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0 }}>
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-        <div>
-          <strong>{activeChannel === 'student' ? 'Child Safety: ' : 'Note: '}</strong>
-          {channelDescriptions[activeChannel]}
+// ── TEMPLATES ─────────────────────────────────────────────
+const TEACHER_EMAIL_TEMPLATES = {
+  weekly: {
+    label: 'Weekly Report',
+    subject: 'Weekly Progress Report',
+    body: 'This is the weekly progress update for your child.\n\nProgress this week:\n[Describe what was covered and how the student engaged.]\n\nStrengths:\n[What the student did well.]\n\nAreas to work on:\n[What needs attention, and any home support that would help.]\n\nPlease reach out if you have any questions.',
+  },
+  behaviour: {
+    label: 'Behaviour Report',
+    subject: 'Behaviour Update',
+    body: 'I would like to share an update regarding your child\'s conduct in class.\n\n[Describe the behaviour factually — what happened, when, and the context.]\n\n[Note any steps taken and what support would help going forward.]\n\nI welcome the chance to discuss this together.',
+  },
+  meeting: {
+    label: 'Parent-Teacher Meeting',
+    subject: 'Request for a Parent-Teacher Meeting',
+    body: 'I would like to arrange a meeting to discuss your child\'s progress.\n\nReason for the meeting:\n[Briefly state the purpose.]\n\nProposed date and time: [date / time]\nFormat: [video call / in person]\n\nKindly let me know if this works, or suggest an alternative time.',
+  },
+  custom: {
+    label: 'Custom Message',
+    subject: '',
+    body: '',
+  },
+}
+
+// ── COMPOSE ───────────────────────────────────────────────
+function TeacherComposeView({ user, toast }) {
+  const [students, setStudents] = useState([])
+  const [colleagues, setColleagues] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  // recipient selection — keyed by email so students + parents + colleagues mix cleanly
+  const [picked, setPicked] = useState({})   // email -> { email, name }
+  const [search, setSearch] = useState('')
+
+  const [kind, setKind] = useState('weekly')
+  const [subject, setSubject] = useState(TEACHER_EMAIL_TEMPLATES.weekly.subject)
+  const [body, setBody] = useState(TEACHER_EMAIL_TEMPLATES.weekly.body)
+
+  const [attachments, setAttachments] = useState([])
+  const [uploading, setUploading] = useState(false)
+
+  const [sending, setSending] = useState(false)
+  const [confirm, setConfirm] = useState(false)
+  const [result, setResult] = useState(null)
+
+  useEffect(() => {
+    api.get('/communication/teacher/recipients')
+      .then(r => {
+        setStudents(r.data.data?.students || [])
+        setColleagues(r.data.data?.colleagues || [])
+      })
+      .catch(() => toast?.error?.('Failed to load recipients.'))
+      .finally(() => setLoading(false))
+  }, [toast])
+
+  const applyTemplate = (k) => {
+    setKind(k)
+    setSubject(TEACHER_EMAIL_TEMPLATES[k].subject)
+    setBody(TEACHER_EMAIL_TEMPLATES[k].body)
+    setConfirm(false)
+  }
+
+  const toggleRecipient = (email, name) => {
+    if (!email) return
+    setPicked(prev => {
+      const next = { ...prev }
+      if (next[email]) delete next[email]
+      else next[email] = { email, name: name || '' }
+      return next
+    })
+    setConfirm(false)
+  }
+
+  const pickedList = Object.values(picked)
+
+  const uploadFile = async (file) => {
+    if (!file) return
+    if (file.size > 10 * 1024 * 1024) { toast?.error?.('File exceeds 10 MB.'); return }
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const { data } = await api.post('/communication/upload-attachment', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      if (data?.success) {
+        setAttachments(a => [...a, data.data])
+        toast?.ok?.('Attached ' + data.data.name)
+      } else {
+        toast?.error?.(data?.message || 'Upload failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Upload failed.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const send = async () => {
+    if (!subject.trim()) { toast?.error?.('Subject is required.'); return }
+    if (!body.trim())    { toast?.error?.('Message body is required.'); return }
+    if (pickedList.length === 0) { toast?.error?.('Pick at least one recipient.'); return }
+
+    setSending(true)
+    try {
+      const { data } = await api.post('/communication/teacher/send', {
+        subject: subject.trim(),
+        body,
+        recipientEmails: pickedList,
+        attachments,
+        audience: TEACHER_EMAIL_TEMPLATES[kind].label,
+      })
+      if (data?.success) {
+        setResult(data.data)
+        toast?.ok?.(data.message || 'Sent.')
+        setConfirm(false)
+      } else {
+        toast?.error?.(data?.message || 'Send failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Send failed.')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const resetAll = () => {
+    setPicked({}); setSubject(TEACHER_EMAIL_TEMPLATES.weekly.subject)
+    setBody(TEACHER_EMAIL_TEMPLATES.weekly.body); setKind('weekly')
+    setAttachments([]); setConfirm(false); setResult(null)
+  }
+
+  const inp = {
+    width: '100%', boxSizing: 'border-box',
+    padding: '9px 12px', borderRadius: 6,
+    border: '1.5px solid var(--border)', fontSize: 13, fontFamily: 'inherit',
+  }
+  const lbl = {
+    display: 'block', fontSize: 10.5, fontWeight: 700,
+    letterSpacing: '.06em', textTransform: 'uppercase',
+    color: '#7D1025', marginBottom: 5,
+  }
+  const cardStyle = {
+    background: '#fff', border: '1px solid var(--border)',
+    borderRadius: 'var(--rxl)', padding: 20,
+  }
+
+  // Filter students by search
+  const filteredStudents = students.filter(s =>
+    !search.trim() ||
+    s.name.toLowerCase().includes(search.toLowerCase()) ||
+    (s.parents || []).some(p => p.name.toLowerCase().includes(search.toLowerCase()))
+  )
+  const filteredColleagues = colleagues.filter(c =>
+    !search.trim() || c.name.toLowerCase().includes(search.toLowerCase())
+  )
+
+  if (result) {
+    return (
+      <div style={{ ...cardStyle, textAlign: 'center', padding: 28 }}>
+        <div style={{
+          width: 56, height: 56, borderRadius: '50%',
+          background: '#DCFCE7', color: '#15803D',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 14px',
+        }}>
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
         </div>
-      </div>
-
-      {/* Two-column: thread list + active conversation */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 320px) 1fr', gap: 14 }}>
-        {/* Thread list */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden', alignSelf: 'start', maxHeight: 700, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', background: '#FBFAF5' }}>
-            <input className="fi" placeholder="Search conversations..."
-              value={searchQ} onChange={e => setSearchQ(e.target.value)}
-              style={{ width: '100%', fontSize: 13 }}/>
+        <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 24, color: 'var(--s900)' }}>
+          Emails sent
+        </div>
+        <div style={{ fontSize: 13.5, color: 'var(--s500)', marginTop: 6 }}>
+          {result.sentCount} delivered{result.failedCount > 0 ? ` · ${result.failedCount} failed` : ''}
+        </div>
+        {result.failedCount > 0 && (
+          <div style={{
+            marginTop: 14, textAlign: 'left',
+            background: '#FEF2F2', border: '1px solid #FCA5A5',
+            borderRadius: 8, padding: 12, fontSize: 12, color: '#991B1B',
+            maxHeight: 160, overflowY: 'auto',
+          }}>
+            <strong>Failed:</strong>
+            {(result.results || []).filter(r => r.status === 'failed').map((r, i) => (
+              <div key={i}>{r.email} — {r.error || 'unknown error'}</div>
+            ))}
           </div>
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            {filteredThreads.length === 0 ? (
-              <div style={{ padding: 30, textAlign: 'center', color: 'var(--s400)', fontSize: 13 }}>
-                No conversations yet
-              </div>
-            ) : (
-              filteredThreads.map(thread => {
-                const isActive = activeThreadId === thread.threadId
-                return (
-                  <div key={thread.threadId} onClick={() => setActiveThreadId(thread.threadId)}
-                    style={{
-                      padding: '14px 14px',
-                      borderBottom: '1px solid var(--border)',
-                      cursor: 'pointer',
-                      background: isActive ? '#FBE8E8' : '#FFF',
-                      borderLeft: '3px solid ' + (isActive ? channelColors[thread.channel] : 'transparent'),
-                    }}>
-                    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                      <div style={{
-                        width: 36, height: 36, borderRadius: '50%',
-                        background: cmAvatarColor(thread.otherParty), color: '#FBFAF5',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 12, fontWeight: 700, flexShrink: 0,
-                      }}>{cmInitials(thread.otherParty)}</div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                          <span style={{
-                            fontWeight: 700, fontSize: 13.5, color: 'var(--s900)',
-                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                          }}>{thread.otherParty}</span>
-                          {thread.unread > 0 && (
-                            <span style={{
-                              background: '#7D1025', color: '#FBFAF5',
-                              fontSize: 10, fontWeight: 800,
-                              padding: '1px 7px', borderRadius: 99, flexShrink: 0,
-                            }}>{thread.unread}</span>
-                          )}
-                        </div>
-                        <div style={{
-                          fontSize: 11.5, color: 'var(--s500)', marginBottom: 3,
-                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                        }}>{thread.subject}</div>
-                        <div style={{
-                          fontSize: 11, color: 'var(--s400)',
-                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                        }}>{thread.last.body}</div>
-                        <div style={{ fontSize: 10, color: 'var(--s400)', marginTop: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span>{cmTimeAgo(thread.last.sentAt)}</span>
-                          {thread.hasFlags && (
-                            <span style={{
-                              background: '#FEE2E2', color: '#B91C1C',
-                              fontSize: 9, fontWeight: 700, letterSpacing: '.06em',
-                              padding: '1px 6px', borderRadius: 99,
-                            }}>FLAGGED</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })
-            )}
+        )}
+        <button onClick={resetAll}
+          style={{
+            marginTop: 18, background: '#7D1025', color: '#fff',
+            border: 'none', padding: '10px 24px', borderRadius: 6,
+            cursor: 'pointer', fontSize: 13, fontWeight: 700,
+          }}>
+          New Message
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 340px)', gap: 14 }}>
+      {/* LEFT — compose */}
+      <div style={cardStyle}>
+        {/* Templates */}
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Template</label>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {Object.entries(TEACHER_EMAIL_TEMPLATES).map(([k, t]) => (
+              <button key={k} onClick={() => applyTemplate(k)}
+                style={{
+                  background: kind === k ? '#7D1025' : '#fff',
+                  color: kind === k ? '#fff' : '#7D1025',
+                  border: `1.5px solid ${kind === k ? '#7D1025' : 'var(--border)'}`,
+                  padding: '6px 12px', borderRadius: 99,
+                  cursor: 'pointer', fontSize: 11.5, fontWeight: 700,
+                }}>
+                {t.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Active conversation */}
-        <div className="card" style={{ padding: 0, display: 'flex', flexDirection: 'column', minHeight: 500 }}>
-          {!activeThread ? (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--s400)', padding: 40, textAlign: 'center' }}>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Select a conversation</div>
-                <div style={{ fontSize: 13 }}>Or start a new message using the button above</div>
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* Header */}
-              <div style={{
-                padding: '14px 18px', borderBottom: '1px solid var(--border)',
-                display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
-              }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: '50%',
-                  background: cmAvatarColor(activeThread.otherParty), color: '#FBFAF5',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 13, fontWeight: 700, flexShrink: 0,
-                }}>{cmInitials(activeThread.otherParty)}</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{activeThread.otherParty}</span>
-                    <span style={{
-                      background: channelColors[activeThread.channel] + '15',
-                      color: channelColors[activeThread.channel],
-                      fontSize: 9.5, fontWeight: 700, letterSpacing: '.06em',
-                      padding: '2px 7px', borderRadius: 99, textTransform: 'uppercase',
-                    }}>{activeThread.otherRole}</span>
-                    {activeThread.channel === 'student' && (
-                      <span style={{
-                        background: '#FEF3C7', color: '#B45309',
-                        fontSize: 9.5, fontWeight: 700, letterSpacing: '.06em',
-                        padding: '2px 7px', borderRadius: 99,
-                      }}>VISIBLE TO ADMIN</span>
-                    )}
-                  </div>
-                  <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 2 }}>{activeThread.subject}</div>
-                </div>
-                <button onClick={reportConversation}
-                  style={{
-                    background: 'transparent', border: '1px solid #FCA5A5',
-                    color: '#B91C1C',
-                    padding: '6px 12px', borderRadius: 'var(--rsm)',
-                    cursor: 'pointer', fontSize: 11, fontWeight: 700,
-                  }}>Report</button>
-              </div>
+        <div style={{ marginBottom: 12 }}>
+          <label style={lbl}>Subject</label>
+          <input value={subject} onChange={e => { setSubject(e.target.value); setConfirm(false) }}
+            placeholder="Email subject" style={inp}/>
+        </div>
 
-              {/* Messages */}
-              <div style={{
-                flex: 1, padding: 18, overflowY: 'auto',
-                background: '#FBFAF5',
-                display: 'flex', flexDirection: 'column', gap: 12,
-              }}>
-                {activeThread.messages.map(m => {
-                  const isMine = m.from === teacherFullName
-                  return (
-                    <div key={m.id} style={{
-                      display: 'flex', gap: 9, flexDirection: isMine ? 'row-reverse' : 'row',
-                      alignItems: 'flex-end',
-                    }}>
-                      <div style={{
-                        width: 30, height: 30, borderRadius: '50%',
-                        background: cmAvatarColor(m.from), color: '#FBFAF5',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 10, fontWeight: 700, flexShrink: 0,
-                      }}>{cmInitials(m.from)}</div>
-                      <div style={{
-                        background: isMine ? '#7D1025' : '#FFF',
-                        color: isMine ? '#FBFAF5' : 'var(--s800)',
-                        border: isMine ? 'none' : '1px solid var(--border)',
-                        borderRadius: isMine ? '14px 14px 4px 14px' : '4px 14px 14px 14px',
-                        padding: '10px 14px',
-                        maxWidth: '75%',
-                        fontSize: 13.5, lineHeight: 1.6,
-                      }}>
-                        <div style={{ whiteSpace: 'pre-wrap' }}>{m.body}</div>
-                        {m.flags && m.flags.length > 0 && (
-                          <div style={{
-                            marginTop: 8, padding: '6px 10px',
-                            background: isMine ? 'rgba(251,250,245,.15)' : '#FEE2E2',
-                            color: isMine ? '#FCA5A5' : '#B91C1C',
-                            borderRadius: 6, fontSize: 10.5, fontWeight: 700,
-                            display: 'flex', alignItems: 'center', gap: 6,
-                          }}>
-                            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                              <line x1="12" y1="9" x2="12" y2="13"/>
-                              <line x1="12" y1="17" x2="12.01" y2="17"/>
-                            </svg>
-                            Safety flag: {m.flags.map(f => f.label).join(', ')}
-                          </div>
-                        )}
-                        <div style={{
-                          fontSize: 10, marginTop: 6, opacity: .6,
-                          textAlign: isMine ? 'right' : 'left',
-                        }}>{cmFormatTime(m.sentAt)}</div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Message</label>
+          <textarea value={body} onChange={e => { setBody(e.target.value); setConfirm(false) }}
+            rows={11} placeholder="Write your message. Leave a blank line between paragraphs."
+            style={{ ...inp, resize: 'vertical', lineHeight: 1.5 }}/>
+          <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 4 }}>
+            Wrapped in the Smartious branded template and signed with your name.
+          </div>
+        </div>
 
-              {/* Reply box */}
-              <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', background: '#FFF' }}>
-                {/* Safety warning for student channel */}
-                {replyFlags.length > 0 && (
-                  <div style={{
-                    background: '#FEE2E2', border: '1px solid #FCA5A5',
-                    borderRadius: 'var(--rsm)', padding: '10px 12px',
-                    marginBottom: 10, fontSize: 12, color: '#B91C1C',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6, fontWeight: 700 }}>
-                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                      </svg>
-                      Child Safety Warning
-                    </div>
-                    <div style={{ marginBottom: 6 }}>
-                      Your message contains: <strong>{replyFlags.map(f => f.label).join(', ')}</strong>.
-                      This may not be appropriate for adult-to-minor communication on this platform.
-                    </div>
-                    <label style={{ display: 'flex', gap: 6, alignItems: 'center', cursor: 'pointer', fontSize: 11.5 }}>
-                      <input type="checkbox" checked={replyAcknowledged}
-                        onChange={e => setReplyAcknowledged(e.target.checked)}
-                        style={{ accentColor: '#B91C1C' }}/>
-                      I have reviewed and confirm this message is appropriate. (Will be flagged to admin.)
-                    </label>
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-                  <textarea value={replyText} onChange={e => setReplyText(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply() } }}
-                    rows={2} placeholder="Type your reply..."
-                    style={{
-                      flex: 1, padding: '10px 12px',
-                      border: '1px solid var(--border)',
-                      borderRadius: 'var(--rsm)',
-                      fontSize: 13, fontFamily: 'inherit',
-                      resize: 'vertical',
-                    }}/>
-                  <button onClick={sendReply}
-                    disabled={!replyText.trim() || (replyFlags.length > 0 && !replyAcknowledged)}
-                    style={{
-                      background: replyText.trim() && (replyFlags.length === 0 || replyAcknowledged) ? '#7D1025' : 'var(--bg)',
-                      color: replyText.trim() && (replyFlags.length === 0 || replyAcknowledged) ? '#FBFAF5' : 'var(--s400)',
-                      border: 'none',
-                      padding: '10px 16px', borderRadius: 'var(--rsm)',
-                      cursor: replyText.trim() && (replyFlags.length === 0 || replyAcknowledged) ? 'pointer' : 'not-allowed',
-                      fontSize: 13, fontWeight: 700,
-                      display: 'flex', alignItems: 'center', gap: 6,
-                    }}>
-                    Send
-                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                      <line x1="22" y1="2" x2="11" y2="13"/>
-                      <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                    </svg>
+        {/* Attachments */}
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Attachments</label>
+          {attachments.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
+              {attachments.map((a, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '6px 10px', background: '#FBFAF5',
+                  border: '1px solid var(--border)', borderRadius: 6, fontSize: 12,
+                }}>
+                  <span style={{ flex: 1, color: 'var(--s900)' }}>{a.name}</span>
+                  <button onClick={() => setAttachments(list => list.filter((_, idx) => idx !== i))}
+                    style={{ background: 'transparent', border: 'none', color: '#B91C1C', cursor: 'pointer', fontSize: 11, fontWeight: 700 }}>
+                    Remove
                   </button>
                 </div>
-              </div>
+              ))}
+            </div>
+          )}
+          <label style={{
+            display: 'inline-block',
+            background: '#fff', color: '#7D1025',
+            border: '1.5px solid #7D1025',
+            padding: '7px 14px', borderRadius: 6,
+            cursor: uploading ? 'wait' : 'pointer', fontSize: 12, fontWeight: 700,
+          }}>
+            <input type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style={{ display: 'none' }}
+              onChange={e => { uploadFile(e.target.files?.[0]); e.target.value = '' }}/>
+            {uploading ? 'Uploading...' : '+ Add Attachment (max 10 MB)'}
+          </label>
+        </div>
+
+        {/* Send */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, alignItems: 'center' }}>
+          {!confirm ? (
+            <button onClick={() => {
+              if (!subject.trim() || !body.trim()) { toast?.error?.('Subject and message are required.'); return }
+              if (pickedList.length === 0) { toast?.error?.('Pick at least one recipient.'); return }
+              setConfirm(true)
+            }}
+              style={{
+                background: '#7D1025', color: '#fff', border: 'none',
+                padding: '10px 22px', borderRadius: 6,
+                cursor: 'pointer', fontSize: 13, fontWeight: 700,
+              }}>
+              Review &amp; Send
+            </button>
+          ) : (
+            <>
+              <span style={{ fontSize: 12, color: 'var(--s500)' }}>
+                Send to {pickedList.length} recipient{pickedList.length === 1 ? '' : 's'}?
+              </span>
+              <button onClick={() => setConfirm(false)} disabled={sending}
+                style={{
+                  background: '#fff', color: 'var(--s500)', border: '1.5px solid var(--border)',
+                  padding: '10px 16px', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                }}>
+                Cancel
+              </button>
+              <button onClick={send} disabled={sending}
+                style={{
+                  background: sending ? '#9CA3AF' : '#15803D', color: '#fff', border: 'none',
+                  padding: '10px 22px', borderRadius: 6,
+                  cursor: sending ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 700,
+                }}>
+                {sending ? 'Sending...' : 'Confirm Send'}
+              </button>
             </>
           )}
         </div>
       </div>
 
-      {/* Compose modal */}
-      {showCompose && (
-        <div onClick={() => setShowCompose(false)} style={{
-          position: 'fixed', inset: 0, background: 'rgba(15,23,42,.65)', zIndex: 200,
-          display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 20, overflowY: 'auto',
-        }}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: '#FBFAF5', borderRadius: 'var(--rxl)',
-            maxWidth: 640, width: '100%', overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,.3)', marginTop: 40, marginBottom: 40,
-          }}>
-            <div style={{
-              padding: '20px 28px',
-              background: 'linear-gradient(135deg, #7D1025, #8B1A2E)',
-              color: '#FBFAF5',
-            }}>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
-                New Message
-              </div>
-              <h3 className="serif" style={{ fontSize: 22, margin: 0 }}>Compose</h3>
+      {/* RIGHT — recipients */}
+      <div style={{ ...cardStyle, padding: 16 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8 }}>
+          Recipients ({pickedList.length})
+        </div>
+
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search students, parents, staff..."
+          style={{ ...inp, marginBottom: 10 }}/>
+
+        {loading ? (
+          <div style={{ padding: 14, fontSize: 12, color: 'var(--s500)', textAlign: 'center' }}>Loading...</div>
+        ) : (
+          <div style={{ maxHeight: 380, overflowY: 'auto' }}>
+            {/* Students + their parents */}
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--s500)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6 }}>
+              My Students
             </div>
-
-            <div style={{ padding: '20px 28px' }}>
-              {/* Channel */}
-              <div className="fg">
-                <label className="fl">Send to</label>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {['parent', 'student', 'admin'].map(ch => (
-                    <button key={ch} onClick={() => setComposeChannel(ch)}
-                      style={{
-                        flex: 1,
-                        background: composeChannel === ch ? channelColors[ch] : '#FFF',
-                        color: composeChannel === ch ? '#FBFAF5' : 'var(--s700)',
-                        border: '1.5px solid ' + (composeChannel === ch ? channelColors[ch] : 'var(--border)'),
-                        padding: '8px 12px', borderRadius: 'var(--rsm)',
-                        cursor: 'pointer', fontSize: 12.5, fontWeight: 700,
-                      }}>{channelLabels[ch]}</button>
-                  ))}
-                </div>
+            {filteredStudents.length === 0 ? (
+              <div style={{ fontSize: 11.5, color: 'var(--s500)', padding: '4px 0 10px' }}>
+                No students allocated to you yet.
               </div>
-
-              {/* Recipient */}
-              <div className="fg">
-                <label className="fl">Recipient *</label>
-                {composeChannel === 'student' ? (
-                  <select className="fsel" value={composeTo} onChange={e => setComposeTo(e.target.value)}>
-                    <option value="">Select student...</option>
-                    {allStudents.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
-                  </select>
-                ) : composeChannel === 'parent' ? (
-                  <select className="fsel" value={composeTo} onChange={e => setComposeTo(e.target.value)}>
-                    <option value="">Select parent...</option>
-                    {allStudents.filter(s => s.parentName).map(s => (
-                      <option key={s.id} value={s.parentName}>{s.parentName} (parent of {s.name})</option>
-                    ))}
-                  </select>
+            ) : filteredStudents.map(s => (
+              <div key={s._id} style={{
+                border: '1px solid var(--border)', borderRadius: 6,
+                padding: 8, marginBottom: 6,
+              }}>
+                {/* Student */}
+                {s.email ? (
+                  <RecipientRow
+                    label={s.name} sub="Student"
+                    on={!!picked[s.email]}
+                    onClick={() => toggleRecipient(s.email, s.name)}
+                  />
                 ) : (
-                  <input className="fi" value={composeTo} onChange={e => setComposeTo(e.target.value)}
-                    placeholder="School Admin"/>
+                  <div style={{ fontSize: 11.5, color: 'var(--s500)', padding: '3px 0' }}>
+                    {s.name} <span style={{ fontStyle: 'italic' }}>(no email)</span>
+                  </div>
+                )}
+                {/* Parents */}
+                {s.parents.length > 0 ? s.parents.map(p => (
+                  <RecipientRow key={p._id}
+                    label={p.name} sub={'Parent of ' + s.name.split(' ')[0]}
+                    indent
+                    on={!!picked[p.email]}
+                    onClick={() => toggleRecipient(p.email, p.name)}
+                  />
+                )) : (
+                  <div style={{ fontSize: 10.5, color: 'var(--s500)', fontStyle: 'italic', padding: '2px 0 0 22px' }}>
+                    No parent linked
+                  </div>
                 )}
               </div>
+            ))}
 
-              {/* Subject */}
-              <div className="fg">
-                <label className="fl">Subject *</label>
-                <input className="fi" value={composeSubject} onChange={e => setComposeSubject(e.target.value)}
-                  placeholder="Brief subject line"/>
-              </div>
-
-              {/* Body */}
-              <div className="fg">
-                <label className="fl">Message *</label>
-                <textarea className="fi" rows={6} value={composeBody}
-                  onChange={e => setComposeBody(e.target.value)}
-                  placeholder="Type your message..."
-                  style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }}/>
-              </div>
-
-              {/* Safety warning */}
-              {composeFlags.length > 0 && (
-                <div style={{
-                  background: '#FEE2E2', border: '1px solid #FCA5A5',
-                  borderRadius: 'var(--rsm)', padding: '12px 14px',
-                  marginBottom: 14, fontSize: 12.5, color: '#B91C1C',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, fontWeight: 700 }}>
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                    Child Safety Warning
-                  </div>
-                  <div style={{ marginBottom: 8, lineHeight: 1.6 }}>
-                    Your message contains: <strong>{composeFlags.map(f => f.label).join(', ')}</strong>.
-                    These patterns are not typically appropriate for adult-to-minor communication on an education platform.
-                  </div>
-                  <label style={{ display: 'flex', gap: 6, alignItems: 'center', cursor: 'pointer', fontSize: 11.5 }}>
-                    <input type="checkbox" checked={composeAcknowledged}
-                      onChange={e => setComposeAcknowledged(e.target.checked)}
-                      style={{ accentColor: '#B91C1C' }}/>
-                    I have reviewed and confirm this message is appropriate. (Will be flagged to admin.)
-                  </label>
-                </div>
-              )}
-
-              {/* Admin visibility note for student channel */}
-              {composeChannel === 'student' && composeFlags.length === 0 && (
-                <div style={{
-                  background: '#FEF3C7', borderLeft: '3px solid #B45309',
-                  padding: '10px 12px', borderRadius: 'var(--rsm)',
-                  fontSize: 12, color: '#B45309', marginBottom: 14,
-                  fontStyle: 'italic',
-                }}>
-                  This message will be visible to school admin for child safety oversight.
-                </div>
-              )}
+            {/* Colleagues */}
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--s500)', letterSpacing: '.08em', textTransform: 'uppercase', margin: '10px 0 6px' }}>
+              Colleagues &amp; Admin
             </div>
-
-            <div style={{
-              padding: '14px 24px', borderTop: '1px solid var(--border)',
-              background: '#FFF', display: 'flex', justifyContent: 'flex-end', gap: 8,
-            }}>
-              <button onClick={() => setShowCompose(false)} className="btn btn-s">Cancel</button>
-              <button onClick={sendNewMessage}
-                disabled={composeFlags.length > 0 && !composeAcknowledged}
-                style={{
-                  background: composeFlags.length === 0 || composeAcknowledged ? '#7D1025' : 'var(--bg)',
-                  color: composeFlags.length === 0 || composeAcknowledged ? '#FBFAF5' : 'var(--s400)',
-                  border: 'none',
-                  padding: '10px 18px', borderRadius: 'var(--rmd)',
-                  cursor: composeFlags.length === 0 || composeAcknowledged ? 'pointer' : 'not-allowed',
-                  fontSize: 13, fontWeight: 700,
-                }}>Send Message</button>
-            </div>
+            {filteredColleagues.length === 0 ? (
+              <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>No matches.</div>
+            ) : filteredColleagues.map(c => (
+              <RecipientRow key={c._id}
+                label={c.name} sub={c.role === 'admin' ? 'Admin' : 'Teacher'}
+                on={!!picked[c.email]}
+                onClick={() => toggleRecipient(c.email, c.name)}
+              />
+            ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
 
-// ═══════════════════════════════════════════════════════════
-// TEACHER DASHBOARD — wired to real backend data
-// ═══════════════════════════════════════════════════════════
- 
-const dbGreeting = () => {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  return 'Good evening'
+// ── recipient row ─────────────────────────────────────────
+function RecipientRow({ label, sub, on, onClick, indent }) {
+  return (
+    <div onClick={onClick}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        padding: '5px 6px', cursor: 'pointer',
+        background: on ? '#FBF6E3' : 'transparent',
+        borderRadius: 4,
+        marginLeft: indent ? 16 : 0,
+      }}>
+      <div style={{
+        width: 15, height: 15, borderRadius: 3, flexShrink: 0,
+        border: `1.5px solid ${on ? '#7D1025' : 'var(--border)'}`,
+        background: on ? '#7D1025' : '#fff',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        {on && (
+          <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        )}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s900)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {label}
+        </div>
+        <div style={{ fontSize: 10, color: 'var(--s500)' }}>{sub}</div>
+      </div>
+    </div>
+  )
 }
- 
-const dbFormatTime = (d) => d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
-const dbFormatDate = (d) => d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
- 
-const dbTimeAgo = (iso) => {
-  if (!iso) return ''
-  const diff = Date.now() - new Date(iso).getTime()
-  const mins = Math.floor(diff / 60000)
-  const hours = Math.floor(diff / 3600000)
-  const days = Math.floor(diff / 86400000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return mins + 'm ago'
-  if (hours < 24) return hours + 'h ago'
-  if (days === 1) return 'yesterday'
-  if (days < 7) return days + 'd ago'
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-}
- 
-const dbSubjColor = (subject) => {
-  const map = {
-    'Mathematics': '#7D1025', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
-    'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
-    'Geography': '#0F766E', 'Computer Science': '#1F2937',
-    'Business Studies': '#7E22CE', 'Economics': '#9F1239',
+
+// ── HISTORY ───────────────────────────────────────────────
+function TeacherCommsHistory({ toast }) {
+  const [history, setHistory] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.get('/communication/teacher/history')
+      .then(r => setHistory(r.data.data?.history || []))
+      .catch(() => toast?.error?.('Failed to load history.'))
+      .finally(() => setLoading(false))
+  }, [toast])
+
+  const cardStyle = {
+    background: '#fff', border: '1px solid var(--border)',
+    borderRadius: 'var(--rxl)', padding: 14,
   }
-  return map[subject] || '#7D1025'
-}
- 
-const dbAvatarColor = (name) => {
-  const colors = ['#7D1025', '#8B1A2E', '#C9A030', '#1E3A8A', '#166534', '#7C2D12']
-  let hash = 0
-  for (let i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i)
-  return colors[Math.abs(hash) % colors.length]
-}
- 
-const dbInitials = (name) => (name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || '?'
- 
-// Schedule string parser (same as live classes tab)
-const dbParseSchedule = (s) => {
-  if (!s || typeof s !== 'string') return null
-  const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 }
-  const parts = s.trim().split(/\s+(?=\d)/)
-  if (parts.length < 2) return null
-  const dayMatches = parts[0].toLowerCase().match(/sun|mon|tue|wed|thu|fri|sat/g)
-  if (!dayMatches) return null
-  const days = []
-  dayMatches.forEach(d => { if (dayMap[d] !== undefined && !days.includes(dayMap[d])) days.push(dayMap[d]) })
-  const timeMatch = parts.slice(1).join(' ').match(/(\d{1,2}):?(\d{0,2})\s*(am|pm)?\s*[-–—]\s*(\d{1,2}):?(\d{0,2})\s*(am|pm)/i)
-  if (!timeMatch) return null
-  let startH = parseInt(timeMatch[1], 10)
-  const startM = parseInt(timeMatch[2] || '0', 10)
-  const startMer = (timeMatch[3] || timeMatch[6]).toLowerCase()
-  let endH = parseInt(timeMatch[4], 10)
-  const endM = parseInt(timeMatch[5] || '0', 10)
-  const endMer = timeMatch[6].toLowerCase()
-  const to24 = (h, mer) => mer === 'pm' && h < 12 ? h + 12 : (mer === 'am' && h === 12 ? 0 : h)
-  return {
-    days,
-    startMins: to24(startH, startMer) * 60 + startM,
-    endMins: to24(endH, endMer) * 60 + endM,
+
+  if (loading) {
+    return <div style={{ ...cardStyle, padding: 40, textAlign: 'center', color: 'var(--s500)' }}>Loading history...</div>
   }
+  if (history.length === 0) {
+    return <div style={{ ...cardStyle, padding: 40, textAlign: 'center', color: 'var(--s500)' }}>No messages sent yet.</div>
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {history.map(c => (
+        <div key={c._id} style={cardStyle}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--s900)' }}>
+                {c.subject}
+              </div>
+              <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 2 }}>
+                {c.audience} · {c.createdAt ? new Date(c.createdAt).toLocaleDateString() : ''}
+                {Array.isArray(c.attachments) && c.attachments.length > 0 && ` · ${c.attachments.length} attachment${c.attachments.length === 1 ? '' : 's'}`}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <span style={{
+                fontSize: 10.5, fontWeight: 700,
+                background: '#DCFCE7', color: '#15803D',
+                padding: '3px 9px', borderRadius: 99,
+              }}>
+                {c.sentCount} sent
+              </span>
+              {c.failedCount > 0 && (
+                <span style={{
+                  fontSize: 10.5, fontWeight: 700,
+                  background: '#FEE2E2', color: '#B91C1C',
+                  padding: '3px 9px', borderRadius: 99,
+                }}>
+                  {c.failedCount} failed
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 }
  
 function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUploadModal }) {
