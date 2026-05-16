@@ -49,6 +49,11 @@ const userSchema = new mongoose.Schema({
   specializations: [{ type: String, trim: true }],         // e.g. ["Calculus", "Mechanics"]
   yearsOfExperience: { type: Number, min: 0, max: 70, default: 0 },
 
+  // Display title / job role (distinct from `role` which is the system
+  // permission level). e.g. "Senior Mathematics Teacher", "Head of Sciences",
+  // "Lead Tutor". Free-text but admin picks from suggested presets in the UI.
+  jobTitle: { type: String, trim: true, default: '' },
+
   // Default meeting URL (Zoom personal room, Google Meet, etc.) pre-filled
   // when teacher schedules a new live class. Overridable per-class.
   defaultMeetingLink: { type: String, trim: true, default: '' },
