@@ -7005,53 +7005,107 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
  
   return (
     <div>
-      {/* ── COMPACT HEADER LINE ── */}
+      {/* ── PROFILE CARD — crimson, restrained ── */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 14,
-        marginBottom: 22, flexWrap: 'wrap',
+        position: 'relative', overflow: 'hidden',
+        background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
+        borderRadius: 'var(--rxl)',
+        padding: '22px 26px', marginBottom: 16,
       }}>
-        {user?.avatar ? (
-          <img src={user.avatar} alt={teacherDisplayName}
-            style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}/>
-        ) : (
-          <div style={{
-            width: 44, height: 44, borderRadius: '50%',
-            background: '#7D1025', color: '#FBFAF5',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, fontWeight: 700, flexShrink: 0,
-          }}>
-            {((teacherFirstName[0] || '') + (teacherLastName[0] || '')).toUpperCase()}
+        {/* subtle decorative star, low opacity — does not shout */}
+        <svg width="120" height="120" viewBox="0 0 24 24"
+          style={{ position: 'absolute', top: -28, right: -22, opacity: 0.06, pointerEvents: 'none' }}
+          fill="#F0CC5A">
+          <polygon points="12 2 15 9 22 9.3 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.3 9 9"/>
+        </svg>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', position: 'relative' }}>
+          {/* bigger avatar */}
+          {user?.avatar ? (
+            <img src={user.avatar} alt={teacherDisplayName}
+              style={{
+                width: 88, height: 88, borderRadius: '50%', objectFit: 'cover',
+                flexShrink: 0, border: '2.5px solid rgba(240,204,90,.55)',
+              }}/>
+          ) : (
+            <div style={{
+              width: 88, height: 88, borderRadius: '50%',
+              background: 'rgba(251,246,227,.12)',
+              border: '2.5px solid rgba(240,204,90,.55)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 30, fontWeight: 700, color: '#F0CC5A', flexShrink: 0,
+            }}>
+              {((teacherFirstName[0] || '') + (teacherLastName[0] || '')).toUpperCase()}
+            </div>
+          )}
+
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <h1 style={{
+              fontFamily: "'Instrument Serif', serif", fontSize: 26, fontWeight: 400,
+              color: '#FBFAF5', margin: 0, lineHeight: 1.2,
+            }}>
+              {dbGreeting()}, {teacherFirstName}
+            </h1>
+            {/* job title in golden-yellow */}
+            <div style={{
+              fontSize: 12, fontWeight: 700, letterSpacing: '.07em',
+              textTransform: 'uppercase', color: '#F0CC5A', marginTop: 3,
+            }}>
+              {user?.jobTitle || 'Teacher'}
+            </div>
+            {/* bio */}
+            <div style={{
+              fontSize: 12.5, color: 'rgba(251,250,245,.78)',
+              marginTop: 8, lineHeight: 1.5,
+            }}>
+              {user?.bio || 'No bio added yet — an administrator can add one to your profile.'}
+            </div>
+            {/* qualifications */}
+            {Array.isArray(user?.qualifications) && user.qualifications.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                {user.qualifications.map((q, i) => (
+                  <span key={i} style={{
+                    fontSize: 10.5, fontWeight: 600,
+                    color: '#F0CC5A',
+                    background: 'rgba(240,204,90,.12)',
+                    border: '1px solid rgba(240,204,90,.3)',
+                    padding: '3px 9px', borderRadius: 99,
+                  }}>
+                    {q}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-        <div style={{ flex: 1, minWidth: 180 }}>
-          <h1 style={{
-            fontFamily: "'Instrument Serif', serif", fontSize: 24, fontWeight: 400,
-            color: 'var(--s900)', margin: 0, lineHeight: 1.2,
-          }}>
-            {dbGreeting()}, {teacherFirstName}
-          </h1>
-          <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 1 }}>
-            {user?.jobTitle ? user.jobTitle + ' · ' : ''}{dbFormatDate(now)}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+            <button onClick={() => setPage('liveclass')}
+              style={{
+                background: '#F0CC5A', color: '#5A0B1B', border: 'none',
+                padding: '9px 18px', borderRadius: 'var(--rmd)',
+                cursor: 'pointer', fontSize: 12.5, fontWeight: 800,
+              }}>
+              Live Classes
+            </button>
+            <button onClick={() => setPage('homework')}
+              style={{
+                background: 'transparent', color: '#FBFAF5',
+                border: '1.5px solid rgba(251,250,245,.35)',
+                padding: '9px 18px', borderRadius: 'var(--rmd)',
+                cursor: 'pointer', fontSize: 12.5, fontWeight: 700,
+              }}>
+              New Homework
+            </button>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button onClick={() => setPage('homework')}
-            style={{
-              background: 'transparent', color: '#7D1025',
-              border: '1.5px solid var(--border)',
-              padding: '8px 14px', borderRadius: 'var(--rmd)',
-              cursor: 'pointer', fontSize: 12.5, fontWeight: 700,
-            }}>
-            New Homework
-          </button>
-          <button onClick={() => setPage('liveclass')}
-            style={{
-              background: '#7D1025', color: '#FBFAF5', border: 'none',
-              padding: '8px 16px', borderRadius: 'var(--rmd)',
-              cursor: 'pointer', fontSize: 12.5, fontWeight: 700,
-            }}>
-            Live Classes
-          </button>
+
+        {/* date strip */}
+        <div style={{
+          marginTop: 14, paddingTop: 12,
+          borderTop: '1px solid rgba(251,246,227,.14)',
+          fontSize: 11.5, color: 'rgba(251,250,245,.6)',
+        }}>
+          {dbFormatDate(now)} · {dbFormatTime(now)}
         </div>
       </div>
 
