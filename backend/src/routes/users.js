@@ -194,8 +194,7 @@ router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin')
 router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
   try {
     const students = await User.find({ role: 'student' })
-      .select('_id firstName lastName email curriculum grade subjects admissionNumber')
-      .populate('subjects', 'subjectName curriculum')
+      .select('_id firstName lastName email curriculum grade gradeLevel subjects admissionNumber programme deliveryMode isActive status')
       .sort('-createdAt')
       .limit(500);
     res.json({ success: true, students });
