@@ -2359,6 +2359,41 @@ function TeacherStatusTab({ teacher, onSaved, onClose, toast }) {
   const [working, setWorking] = useState(false)
   const isActive = teacher.isActive !== false
 
+  // Delete flow state
+  const [deleteImpact, setDeleteImpact] = useState(null)   // null | {...} | 'loading'
+  const [deleteConfirm, setDeleteConfirm] = useState('')   // typed confirmation
+  const [deleting, setDeleting] = useState(false)
+
+  const loadDeleteImpact = async () => {
+    setDeleteImpact('loading')
+    try {
+      const { data } = await api.get('/users/' + teacher._id + '/delete-impact')
+      if (data?.success) setDeleteImpact(data.data)
+      else { setDeleteImpact(null); toast?.error?.(data?.message || 'Could not check impact.') }
+    } catch (e) {
+      setDeleteImpact(null)
+      toast?.error?.(e?.response?.data?.message || 'Could not check impact.')
+    }
+  }
+
+  const doDelete = async () => {
+    setDeleting(true)
+    try {
+      const { data } = await api.delete('/users/' + teacher._id)
+      if (data?.success) {
+        toast?.ok?.(`Teacher deleted. ${data.data?.deactivatedAllocations || 0} allocation(s) deactivated.`)
+        onSaved?.()
+        onClose?.()
+      } else {
+        toast?.error?.(data?.message || 'Delete failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Delete failed.')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   const setActive = async (makeActive) => {
     if (!makeActive && !reason.trim()) {
       toast?.error?.('Please give a reason for deactivation.')
@@ -2456,20 +2491,95 @@ function TeacherStatusTab({ teacher, onSaved, onClose, toast }) {
         </div>
       )}
 
-      {/* Delete — deferred to Session C */}
+      {/* Permanently delete — MODEL A: content stays with the subject */}
       <div style={{
         padding: 14, borderRadius: 8,
-        background: '#FEF2F2', border: '1px dashed #FCA5A5',
+        background: '#FEF2F2', border: '1px solid #FCA5A5',
       }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: '#B91C1C', marginBottom: 4 }}>
           Permanently delete
         </div>
-        <p style={{ fontSize: 12.5, color: '#6B6B6B', margin: 0, lineHeight: 1.5 }}>
-          Deleting a teacher needs their lessons, allocations, and other content
-          transferred to another teacher first — otherwise students lose access.
-          This safe-transfer workflow is being built separately. For now, use
-          <strong> Deactivate</strong> instead of deleting.
+        <p style={{ fontSize: 12.5, color: '#6B6B6B', margin: '0 0 10px', lineHeight: 1.5 }}>
+          Lessons and other teaching content belong to the subject — they are
+          kept and pass to whoever teaches the subject next. Deleting this
+          teacher only removes their account and deactivates their student
+          allocations (which you can then reassign).
         </p>
+
+        {deleteImpact === null && (
+          <button onClick={loadDeleteImpact}
+            style={{
+              background: '#fff', color: '#B91C1C',
+              border: '1.5px solid #B91C1C',
+              padding: '8px 16px', borderRadius: 6,
+              cursor: 'pointer', fontSize: 12.5, fontWeight: 700,
+            }}>
+            Delete this teacher...
+          </button>
+        )}
+
+        {deleteImpact === 'loading' && (
+          <div style={{ fontSize: 12.5, color: '#6B6B6B' }}>Checking impact...</div>
+        )}
+
+        {deleteImpact && deleteImpact !== 'loading' && (
+          <div>
+            {deleteImpact.blocked ? (
+              <div style={{ fontSize: 12.5, color: '#B91C1C', fontWeight: 600 }}>
+                This account is protected and cannot be deleted.
+              </div>
+            ) : (
+              <>
+                <div style={{
+                  background: '#fff', border: '1px solid #FCA5A5',
+                  borderRadius: 6, padding: 12, marginBottom: 10,
+                  fontSize: 12.5, color: '#1A1A1A',
+                }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Deleting {deleteImpact.teacherName} will:</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <div>• Deactivate <strong>{deleteImpact.activeAllocations}</strong> active student allocation{deleteImpact.activeAllocations === 1 ? '' : 's'} — reassign these to another teacher afterwards</div>
+                    <div>• <strong>Keep</strong> all {deleteImpact.authoredLessons} lesson{deleteImpact.authoredLessons === 1 ? '' : 's'} they authored — these stay with the subject</div>
+                    <div>• Remove the teacher's login and account permanently</div>
+                  </div>
+                </div>
+                <label style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: '#B91C1C', display: 'block', marginBottom: 4 }}>
+                  Type DELETE to confirm
+                </label>
+                <input value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)}
+                  placeholder="DELETE"
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    padding: '8px 12px', borderRadius: 6,
+                    border: '1.5px solid #FCA5A5', fontSize: 13,
+                    fontFamily: 'inherit', marginBottom: 10,
+                  }}/>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => { setDeleteImpact(null); setDeleteConfirm('') }}
+                    disabled={deleting}
+                    style={{
+                      background: '#fff', color: '#6B6B6B',
+                      border: '1.5px solid #E8E2D6',
+                      padding: '8px 16px', borderRadius: 6,
+                      cursor: 'pointer', fontSize: 12.5, fontWeight: 700,
+                    }}>
+                    Cancel
+                  </button>
+                  <button onClick={doDelete}
+                    disabled={deleting || deleteConfirm !== 'DELETE'}
+                    style={{
+                      background: (deleting || deleteConfirm !== 'DELETE') ? '#9CA3AF' : '#B91C1C',
+                      color: '#fff', border: 'none',
+                      padding: '8px 18px', borderRadius: 6,
+                      cursor: (deleting || deleteConfirm !== 'DELETE') ? 'not-allowed' : 'pointer',
+                      fontSize: 12.5, fontWeight: 700,
+                    }}>
+                    {deleting ? 'Deleting...' : 'Permanently Delete'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
