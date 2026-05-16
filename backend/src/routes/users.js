@@ -4,7 +4,7 @@ const User   = require('../models/User');
 const Teacher = require('../models/Teacher');
 const { auth, requireRole } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
-const { sendVerificationEmail } = require('../services/emailService');
+const { sendVerificationEmail, sendTeacherMemoEmail } = require('../services/emailService');
 const { sendWelcomeEmail } = require('../lib/email');
 
 // ── Cloudinary avatar upload setup ────────────────────────
@@ -208,7 +208,7 @@ router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
 router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
   try {
     const teachers = await User.find({ role: 'teacher' })
-      .select('_id firstName lastName email phone curriculum subjects createdAt status isActive isOnLeave leaveStartDate leaveEndDate jobTitle avatar bio yearsOfExperience teachingSpecialties statusReason')
+      .select('_id firstName lastName email phone curriculum subjects createdAt status isActive isOnLeave leaveStartDate leaveEndDate jobTitle avatar bio yearsOfExperience teachingSpecialties statusReason sentEmails')
       .sort('firstName')
       .limit(500);
     res.json({ success: true, teachers });
@@ -648,6 +648,64 @@ router.patch('/:id/leave', auth, requireRole('admin'), async (req, res) => {
       message: isOnLeave ? `${user.firstName} ${user.lastName} is now on leave` : `${user.firstName} ${user.lastName} has returned from leave`
     });
   } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// POST /api/users/:id/send-email — admin sends a branded email to a teacher
+// Body: { subject, body, kind }
+// Records the send in the teacher's sentEmails history.
+router.post('/:id/send-email', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const { subject, body, kind = 'memo' } = req.body;
+
+    if (!subject || !subject.trim())
+      return res.status(400).json({ success: false, message: 'Subject is required.' });
+    if (!body || !body.trim())
+      return res.status(400).json({ success: false, message: 'Message body is required.' });
+
+    const teacher = await User.findById(req.params.id);
+    if (!teacher)
+      return res.status(404).json({ success: false, message: 'Teacher not found.' });
+    if (!teacher.email)
+      return res.status(400).json({ success: false, message: 'This teacher has no email address.' });
+
+    const senderName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Smartious Administration';
+
+    const result = await sendTeacherMemoEmail({
+      to: teacher.email,
+      teacherName: `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim(),
+      subject: subject.trim(),
+      bodyText: body,
+      kind,
+      senderName,
+    });
+
+    if (!result.success) {
+      return res.status(502).json({
+        success: false,
+        message: 'Email could not be sent: ' + (result.error || 'unknown error'),
+      });
+    }
+
+    // Record in history (append-only)
+    teacher.sentEmails = teacher.sentEmails || [];
+    teacher.sentEmails.push({
+      subject: subject.trim(),
+      kind,
+      sentAt: new Date(),
+      sentBy: req.user._id,
+      sentByName: senderName,
+    });
+    await teacher.save();
+
+    res.json({
+      success: true,
+      message: 'Email sent to ' + teacher.email,
+      data: { sentEmails: teacher.sentEmails },
+    });
+  } catch (e) {
+    console.error('[users send-email]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
