@@ -634,8 +634,43 @@ router.patch('/:id/leave', auth, requireRole('admin'), async (req, res) => {
   }
 });
 
+// GET /api/users/:id/delete-impact — preview what deleting a teacher affects
+// MODEL A: lessons/questions belong to subjects and are NOT deleted.
+// Only the teacher's Allocations need handling. This endpoint reports
+// the counts so the admin can confirm with full information.
+router.get('/:id/delete-impact', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const mongoose = require('mongoose');
+    const Allocation = require('../models/Allocation');
+    const Lesson = require('../models/Lesson');
+
+    const target = await User.findById(req.params.id).lean();
+    if (!target) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const activeAllocations = await Allocation.countDocuments({
+      teacherId: req.params.id, status: 'Active',
+    });
+    // Lessons this teacher authored (kept — shown for transparency)
+    const authoredLessons = await Lesson.countDocuments({ teacherId: req.params.id });
+
+    res.json({
+      success: true,
+      data: {
+        teacherName: `${target.firstName || ''} ${target.lastName || ''}`.trim(),
+        activeAllocations,    // these will be deactivated
+        authoredLessons,      // these are KEPT (belong to the subject)
+        blocked: !!target.isMainAdmin || !!target.isDemo,
+      },
+    });
+  } catch (e) {
+    console.error('[users delete-impact]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
   try {
+    const Allocation = require('../models/Allocation');
     const target = await User.findById(req.params.id);
     if (!target) return res.status(404).json({ success: false, message: 'User not found' });
 
@@ -647,7 +682,27 @@ router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
       return res.status(403).json({ success: false, message: 'Demo users cannot be deleted.' });
     }
 
+    let deactivatedAllocations = 0;
+
     if (target.role === 'teacher') {
+      // MODEL A: the teacher's lessons, questions, and other content
+      // belong to their subjects — they are NOT deleted and stay
+      // available to whoever teaches the subject next.
+      //
+      // Their Allocations DO need handling: deactivate them so no
+      // student points at a deleted teacher. Admin can then allocate
+      // a replacement teacher for those (student, subject) pairs.
+      try {
+        const result = await Allocation.updateMany(
+          { teacherId: req.params.id, status: 'Active' },
+          { $set: { status: 'Inactive', updatedBy: req.user._id, updatedAt: new Date() } }
+        );
+        deactivatedAllocations = result.modifiedCount || 0;
+        console.log(`✓ Deactivated ${deactivatedAllocations} allocation(s) for deleted teacher ${target.email}`);
+      } catch (allocErr) {
+        console.error('Failed to deactivate allocations:', allocErr.message);
+      }
+
       try {
         await Teacher.deleteOne({ email: target.email });
         console.log(`✓ Teacher record deleted for ${target.firstName} ${target.lastName}`);
@@ -657,8 +712,13 @@ router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
     }
 
     await target.deleteOne();
-    res.json({ success: true, message: 'User deleted' });
+    res.json({
+      success: true,
+      message: 'User deleted.',
+      data: { deactivatedAllocations },
+    });
   } catch (e) {
+    console.error('[users delete]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
