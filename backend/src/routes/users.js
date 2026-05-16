@@ -6,7 +6,7 @@ const { auth, requireRole } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const { sendVerificationEmail } = require('../services/emailService');
 const { sendWelcomeEmail } = require('../lib/email');
- 
+
 // ─────────────────────────────────────────────────────────
 // HELPER: Sync a student's GroupRoom enrollments based on
 // their curriculum + gradeLevel + subjects.
@@ -17,7 +17,7 @@ async function syncStudentEnrollments(studentId) {
   if (!student || student.role !== 'student' || !student.isActive) {
     return { matched: 0, addedTo: 0, removedFrom: 0 };
   }
- 
+
   // Find rooms matching this student's enrollment criteria
   const matchingRooms = await GroupRoom.find({
     status: 'Active',
@@ -25,21 +25,21 @@ async function syncStudentEnrollments(studentId) {
     grade: student.gradeLevel,
     subject: { $in: student.subjects || [] },
   }).select('_id students');
- 
+
   const matchingIds = matchingRooms.map(r => r._id.toString());
- 
+
   // Find rooms where this student is currently enrolled (any room)
   const currentRooms = await GroupRoom.find({
     students: student._id,
   }).select('_id');
- 
+
   const currentIds = currentRooms.map(r => r._id.toString());
- 
+
   // Add to: rooms they match but aren't in
   const toAdd = matchingIds.filter(id => !currentIds.includes(id));
   // Remove from: rooms they're in but don't match anymore
   const toRemove = currentIds.filter(id => !matchingIds.includes(id));
- 
+
   if (toAdd.length > 0) {
     await GroupRoom.updateMany(
       { _id: { $in: toAdd } },
@@ -52,18 +52,18 @@ async function syncStudentEnrollments(studentId) {
       { $pull: { students: student._id } }
     );
   }
- 
+
   return {
     matched: matchingIds.length,
     addedTo: toAdd.length,
     removedFrom: toRemove.length,
   };
 }
- 
+
 // Validation helper for role-specific fields
 function validateRoleFields(user, role) {
   const errors = [];
- 
+
   switch(role.toLowerCase()) {
     case 'student':
       if (!user.plan) user.plan = 'Basic';
@@ -84,10 +84,10 @@ function validateRoleFields(user, role) {
       if (!user.plan) user.plan = 'Staff';
       break;
   }
- 
+
   return errors;
 }
- 
+
 // GET /stats — Get total user count for sidebar badge
 router.get('/stats', auth, requireRole('admin'), async (req, res) => {
   try {
@@ -97,13 +97,13 @@ router.get('/stats', auth, requireRole('admin'), async (req, res) => {
     res.status(500).json({ success: false, message: e.message });
   }
 });
- 
+
 // GET all users (admin only) with advanced search and filtering
 router.get('/', auth, requireRole('admin', 'teacher'), async (req, res) => {
   try {
     const { search, role, curriculum } = req.query;
     let query = {};
- 
+
     if (search) {
       query.$or = [
         { firstName: { $regex: search, $options: 'i' } },
@@ -111,28 +111,28 @@ router.get('/', auth, requireRole('admin', 'teacher'), async (req, res) => {
         { email: { $regex: search, $options: 'i' } }
       ];
     }
- 
+
     if (role && role !== 'All Roles') {
       query.role = role.toLowerCase();
     }
- 
+
     if (curriculum && curriculum !== 'All') {
       query.curriculum = curriculum;
     }
- 
+
     const users = await User.find(query)
       .select('-password')
       .populate('subjects', 'subjectName curriculum')
       .populate('teachingSpecialties.subjectId', 'subjectName')
       .sort('-createdAt')
       .limit(200);
- 
+
     res.json({ success: true, users });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }
 });
- 
+
 // GET student by admission number (for parent linking in admin form)
 router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin'), async (req, res) => {
   try {
@@ -144,7 +144,7 @@ router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin')
       role: 'student',
       admissionNumber: admissionNumber.trim(),
     }).select('_id firstName lastName email curriculum gradeLevel admissionNumber');
- 
+
     if (!student) {
       return res.status(404).json({ success: false, message: 'No student found with admission number ' + admissionNumber });
     }
@@ -153,7 +153,7 @@ router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin')
     res.status(500).json({ success: false, message: e.message });
   }
 });
- 
+
 // GET all students (for parent selection)
 router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
   try {
@@ -167,7 +167,7 @@ router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
     res.status(500).json({ success: false, message: e.message });
   }
 });
- 
+
 // GET all teachers (for allocations)
 router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
   try {
@@ -181,47 +181,81 @@ router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
     res.status(500).json({ success: false, message: e.message });
   }
 });
- 
+
+// GET /api/users/teachers/qualified?subjectId=...&curriculum=...
+// Returns active teachers whose teachingSpecialties include this
+// subject+curriculum pair. Used by the admin Manage Students module
+// to populate the teacher-allocation dropdown after the admin has
+// chosen a (student, subject) pair to allocate.
+router.get('/teachers/qualified', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const mongoose = require('mongoose');
+    const { subjectId, curriculum } = req.query;
+
+    if (!subjectId || !mongoose.isValidObjectId(subjectId))
+      return res.status(400).json({ success: false, message: 'Valid subjectId is required.' });
+    if (!curriculum)
+      return res.status(400).json({ success: false, message: 'curriculum is required.' });
+
+    const teachers = await User.find({
+      role: 'teacher',
+      isActive: true,
+      isOnLeave: { $ne: true },
+      teachingSpecialties: {
+        $elemMatch: { subjectId, curriculum }
+      }
+    })
+      .select('_id firstName lastName email phone teachingSpecialties')
+      .sort('firstName')
+      .lean();
+
+    res.json({ success: true, teachers });
+  } catch (e) {
+    console.error('[users teachers/qualified]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 // CREATE user (admin only) with role-specific logic and auto-generated temp password
 router.post('/', auth, requireRole('admin'), async (req, res) => {
   try {
     validateRoleFields(req.body, req.body.role);
- 
+
     if (req.body.subjects && !Array.isArray(req.body.subjects)) {
       req.body.subjects = [];
     } else if (!req.body.subjects) {
       req.body.subjects = [];
     }
- 
+
     // Auto-generate temporary password
     const tempPassword = User.generateTempPassword();
     req.body.password = tempPassword;
     req.body.isActive = true;
     req.body.mustChangePassword = true;
- 
+
     const user = await User.create(req.body);
- 
+
     // Generate verification JWT
     const verificationToken = jwt.sign(
       { userId: user._id, action: 'verify_email' },
       process.env.JWT_SECRET || 'dev-secret-key',
       { expiresIn: '24h' }
     );
- 
+
     user.verificationToken = verificationToken;
     await user.save();
- 
+
     await user.populate('subjects', 'subjectName curriculum');
     await user.populate('teachingSpecialties.subjectId', 'subjectName');
- 
+
     const safe = user.toObject();
     delete safe.password;
- 
+
     const credentials = {
       email: user.email,
       tempPassword: tempPassword
     };
- 
+
     // If user is a parent, link to selected students
     if (user.role === 'parent' && req.body.linkedStudents && Array.isArray(req.body.linkedStudents)) {
       try {
@@ -239,14 +273,14 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
         console.error('Failed to link parent to students:', linkError.message);
       }
     }
- 
+
     // If user role is 'teacher', build teachingSpecialties from subjects and curriculum
     if (user.role === 'teacher') {
       try {
         const teachingSpecialties = [];
         const teachingCurricula = Array.isArray(req.body.curriculum) ? req.body.curriculum : (req.body.curriculum ? [req.body.curriculum] : []);
         const teachingSubjects = Array.isArray(req.body.subjects) ? req.body.subjects : [];
- 
+
         for (const subjectId of teachingSubjects) {
           for (const curr of teachingCurricula) {
             teachingSpecialties.push({
@@ -255,18 +289,18 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
             });
           }
         }
- 
+
         if (teachingSpecialties.length > 0) {
           user.teachingSpecialties = teachingSpecialties;
           await user.save();
         }
- 
+
         console.log(`✓ Teacher ${user.firstName} ${user.lastName} assigned ${teachingSpecialties.length} specialties`);
       } catch (specialtyError) {
         console.error('Failed to assign teaching specialties:', specialtyError.message);
       }
     }
- 
+
     // If user role is 'teacher', also create a Teacher record
     if (user.role === 'teacher') {
       try {
@@ -279,7 +313,7 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
           subjects: Array.isArray(user.subjects) && user.subjects.length > 0 ? user.subjects : [],
           status: 'Active',
         };
- 
+
         const teacher = await Teacher.create(teacherData);
         safe.teacherId = teacher._id;
         console.log(`✓ Teacher record created for ${user.firstName} ${user.lastName}`);
@@ -287,7 +321,7 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
         console.error('Failed to create Teacher record:', teacherError.message);
       }
     }
- 
+
     // Auto-sync GroupRoom enrollments for newly created students
     if (user.role === 'student') {
       try {
@@ -297,7 +331,7 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
         console.error('[users POST] Enrollment sync failed:', enrollError.message);
       }
     }
- 
+
     // Send welcome email with login credentials
     let emailStatus = { sent: false, error: null };
     if (req.body.sendWelcomeEmail !== false) {
@@ -328,7 +362,7 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
         console.error('[users POST] Welcome email error:', emailErr.message);
       }
     }
- 
+
     res.status(201).json({
       success: true,
       user: safe,
@@ -342,29 +376,29 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
     res.status(400).json({ success: false, message: e.message });
   }
 });
- 
+
 // UPDATE user (admin only) — demo users cannot be deleted or have role/isDemo changed
 router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
     if (!target) return res.status(404).json({ success: false, message: 'User not found' });
- 
+
     if (target.isDemo) {
       delete req.body.role;
       delete req.body.isDemo;
       delete req.body.isActive;
     }
- 
+
     delete req.body.password;
- 
+
     const newRole = req.body.role || target.role;
     validateRoleFields(req.body, newRole);
- 
+
     // Handle parent-student linking on update
     if (req.body.linkedStudents && Array.isArray(req.body.linkedStudents)) {
       try {
         const oldLinkedStudents = target.linkedStudents || [];
- 
+
         for (const studentId of oldLinkedStudents) {
           if (!req.body.linkedStudents.includes(studentId.toString())) {
             await User.findByIdAndUpdate(
@@ -374,7 +408,7 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
             );
           }
         }
- 
+
         for (const studentId of req.body.linkedStudents) {
           await User.findByIdAndUpdate(
             studentId,
@@ -387,23 +421,23 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
         console.error('Failed to update parent-student links:', linkError.message);
       }
     }
- 
+
     const updateOpts = { new: true };
     let user = await User.findByIdAndUpdate(req.params.id, req.body, updateOpts).select('-password');
- 
+
     if (user.role === 'teacher') {
       try { user = await user.populate('subjectRefs', 'subjectName curriculum'); } catch (e) { /* ignore */ }
     }
- 
+
     const safe = user.toObject();
- 
+
     // If user is a teacher and subjects or curriculum were updated, rebuild teachingSpecialties
     if (user.role === 'teacher' && (req.body.subjects !== undefined || req.body.curriculum !== undefined)) {
       try {
         const teachingSpecialties = [];
         const teachingCurricula = Array.isArray(user.curriculum) ? user.curriculum : (user.curriculum ? [user.curriculum] : []);
         const teachingSubjects = Array.isArray(user.subjectRefs) ? user.subjectRefs : [];
- 
+
         for (const subject of teachingSubjects) {
           const subjectId = subject._id || subject;
           for (const curr of teachingCurricula) {
@@ -413,14 +447,14 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
             });
           }
         }
- 
+
         user.teachingSpecialties = teachingSpecialties;
         await user.save();
         console.log(`✓ Teacher ${user.firstName} ${user.lastName} specialties updated to ${teachingSpecialties.length}`);
       } catch (specialtyError) {
         console.error('Failed to update teaching specialties:', specialtyError.message);
       }
- 
+
       try {
         const teacher = await Teacher.findOne({ email: user.email });
         if (teacher) {
@@ -436,7 +470,7 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
         console.error('Failed to sync Teacher record:', teacherError.message);
       }
     }
- 
+
     // Auto-sync GroupRoom enrollments if this is a student and curriculum/grade/subjects changed
     if (user.role === 'student' && (
       req.body.curriculum !== undefined ||
@@ -450,25 +484,25 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
         console.error('[users PATCH] Enrollment sync failed:', enrollError.message);
       }
     }
- 
+
     res.json({ success: true, user: safe });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }
 });
- 
+
 // PATCH /api/users/:id/leave - Set teacher on leave or return from leave (admin only)
 router.patch('/:id/leave', auth, requireRole('admin'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
- 
+
     if (user.role !== 'teacher') {
       return res.status(400).json({ success: false, message: 'Only teachers can be set on leave' });
     }
- 
+
     const { isOnLeave, leaveStartDate, leaveEndDate } = req.body;
- 
+
     if (isOnLeave) {
       user.isOnLeave = true;
       user.leaveStartDate = leaveStartDate || new Date();
@@ -478,11 +512,11 @@ router.patch('/:id/leave', auth, requireRole('admin'), async (req, res) => {
       user.leaveStartDate = null;
       user.leaveEndDate = null;
     }
- 
+
     await user.save();
     const safe = user.toObject();
     delete safe.password;
- 
+
     res.json({
       success: true,
       user: safe,
@@ -492,20 +526,20 @@ router.patch('/:id/leave', auth, requireRole('admin'), async (req, res) => {
     res.status(500).json({ success: false, message: e.message });
   }
 });
- 
+
 router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
     if (!target) return res.status(404).json({ success: false, message: 'User not found' });
- 
+
     if (target.isMainAdmin) {
       return res.status(403).json({ success: false, message: 'Main admin account cannot be deleted.' });
     }
- 
+
     if (target.isDemo) {
       return res.status(403).json({ success: false, message: 'Demo users cannot be deleted.' });
     }
- 
+
     if (target.role === 'teacher') {
       try {
         await Teacher.deleteOne({ email: target.email });
@@ -514,12 +548,12 @@ router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
         console.error('Failed to delete Teacher record:', teacherError.message);
       }
     }
- 
+
     await target.deleteOne();
     res.json({ success: true, message: 'User deleted' });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
   }
 });
- 
+
 module.exports = router;
