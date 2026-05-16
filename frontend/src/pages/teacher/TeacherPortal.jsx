@@ -7005,509 +7005,240 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
  
   return (
     <div>
-      {/* GREETING ROW */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
-            {dbFormatDate(now)} · {dbFormatTime(now)}
+      {/* ── COMPACT HEADER LINE ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 14,
+        marginBottom: 22, flexWrap: 'wrap',
+      }}>
+        {user?.avatar ? (
+          <img src={user.avatar} alt={teacherDisplayName}
+            style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}/>
+        ) : (
+          <div style={{
+            width: 44, height: 44, borderRadius: '50%',
+            background: '#7D1025', color: '#FBFAF5',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 16, fontWeight: 700, flexShrink: 0,
+          }}>
+            {((teacherFirstName[0] || '') + (teacherLastName[0] || '')).toUpperCase()}
           </div>
-          <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 32, fontWeight: 400, color: 'var(--s900)', margin: 0, lineHeight: 1.15 }}>
-            {dbGreeting()}, <em style={{ color: '#7D1025' }}>{teacherDisplayName}</em>
+        )}
+        <div style={{ flex: 1, minWidth: 180 }}>
+          <h1 style={{
+            fontFamily: "'Instrument Serif', serif", fontSize: 24, fontWeight: 400,
+            color: 'var(--s900)', margin: 0, lineHeight: 1.2,
+          }}>
+            {dbGreeting()}, {teacherFirstName}
           </h1>
-          <div style={{ fontSize: 13.5, color: 'var(--s500)', marginTop: 4 }}>
-            {user?.jobTitle ? user.jobTitle + ' · ' : ''}
-            {rooms && rooms.length > 0
-              ? Array.from(new Set(rooms.map(r => r.subject).filter(Boolean))).slice(0, 3).join(' · ') + ' · Smartious E-School'
-              : 'Smartious E-School'}
+          <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 1 }}>
+            {user?.jobTitle ? user.jobTitle + ' · ' : ''}{dbFormatDate(now)}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button onClick={() => setPage('homework')}
             style={{
               background: 'transparent', color: '#7D1025',
-              border: '1.5px solid #7D1025',
-              padding: '10px 16px', borderRadius: 'var(--rmd)',
-              cursor: 'pointer', fontSize: 13, fontWeight: 700,
-              display: 'flex', alignItems: 'center', gap: 6,
+              border: '1.5px solid var(--border)',
+              padding: '8px 14px', borderRadius: 'var(--rmd)',
+              cursor: 'pointer', fontSize: 12.5, fontWeight: 700,
             }}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
             New Homework
           </button>
           <button onClick={() => setPage('liveclass')}
             style={{
               background: '#7D1025', color: '#FBFAF5', border: 'none',
-              padding: '10px 18px', borderRadius: 'var(--rmd)',
-              cursor: 'pointer', fontSize: 13, fontWeight: 700,
-              display: 'flex', alignItems: 'center', gap: 6,
-              boxShadow: '0 4px 14px rgba(125,16,37,.25)',
+              padding: '8px 16px', borderRadius: 'var(--rmd)',
+              cursor: 'pointer', fontSize: 12.5, fontWeight: 700,
             }}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <polygon points="5 3 19 12 5 21 5 3"/>
-            </svg>
             Live Classes
           </button>
         </div>
       </div>
- 
-      {/* PROFILE CARD — avatar, name, job title, bio */}
-      <div style={{
-        background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
-        borderRadius: 'var(--rxl)',
-        padding: '20px 24px', marginBottom: 16,
-        display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap',
-        boxShadow: '0 4px 14px rgba(125,16,37,.18)',
-      }}>
-        {user?.avatar ? (
-          <img src={user.avatar} alt={teacherDisplayName}
-            style={{
-              width: 72, height: 72, borderRadius: '50%',
-              objectFit: 'cover', flexShrink: 0,
-              border: '2px solid rgba(240,204,90,.5)',
-            }}/>
-        ) : (
-          <div style={{
-            width: 72, height: 72, borderRadius: '50%',
-            background: 'rgba(251,246,227,.12)',
-            border: '2px solid rgba(240,204,90,.5)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 26, fontWeight: 700, color: '#F0CC5A',
-            flexShrink: 0,
-          }}>
-            {((teacherFirstName[0] || '') + (teacherLastName[0] || '')).toUpperCase()}
-          </div>
-        )}
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{
-            fontFamily: "'Instrument Serif', serif", fontSize: 22,
-            color: '#FBFAF5', lineHeight: 1.2,
-          }}>
-            {teacherDisplayName}
-          </div>
-          {user?.jobTitle && (
-            <div style={{
-              fontSize: 11.5, fontWeight: 700, letterSpacing: '.06em',
-              textTransform: 'uppercase', color: '#F0CC5A', marginTop: 3,
-            }}>
-              {user.jobTitle}
-            </div>
-          )}
-          {user?.bio ? (
-            <div style={{
-              fontSize: 12.5, color: 'rgba(251,250,245,.75)',
-              marginTop: 6, lineHeight: 1.5,
-            }}>
-              {user.bio}
-            </div>
-          ) : (
-            <div style={{
-              fontSize: 12, color: 'rgba(251,250,245,.5)',
-              marginTop: 6, fontStyle: 'italic',
-            }}>
-              No bio yet — ask an administrator to add one to your profile.
-            </div>
-          )}
-          {Array.isArray(user?.teachingSpecialties) && user.teachingSpecialties.length > 0 && (
-            <div style={{
-              fontSize: 11, color: 'rgba(251,250,245,.6)', marginTop: 6,
-            }}>
-              {user.teachingSpecialties.length} teaching specialt{user.teachingSpecialties.length === 1 ? 'y' : 'ies'}
-            </div>
-          )}
-        </div>
-        {user?.yearsOfExperience > 0 && (
-          <div style={{ textAlign: 'center', flexShrink: 0 }}>
-            <div style={{
-              fontFamily: "'Instrument Serif', serif", fontSize: 30,
-              color: '#F0CC5A', lineHeight: 1,
-            }}>
-              {user.yearsOfExperience}
-            </div>
-            <div style={{
-              fontSize: 9.5, fontWeight: 700, letterSpacing: '.08em',
-              textTransform: 'uppercase', color: 'rgba(251,250,245,.6)',
-              marginTop: 3,
-            }}>
-              {user.yearsOfExperience === 1 ? 'Year' : 'Years'}<br/>Experience
-            </div>
-          </div>
-        )}
-      </div>
 
-      {/* RIGHT NOW HERO */}
-      <div style={{
-        background: 'linear-gradient(135deg, ' + uColor.bg + ' 0%, ' + uColor.bg + 'EE 100%)',
-        color: uColor.text, borderRadius: 'var(--rxl)',
-        padding: '28px 32px', marginBottom: 16,
-        position: 'relative', overflow: 'hidden',
-        boxShadow: '0 12px 32px rgba(125,16,37,.18)',
-      }}>
+      {/* ── ATTENTION BANNER — only when something genuinely needs action ── */}
+      {(rightNowItem.urgency === 'live' || rightNowItem.urgency === 'soon' ||
+        (rightNowItem.type === 'grading')) && (
         <div style={{
-          position: 'absolute', top: -40, right: -40,
-          width: 200, height: 200, borderRadius: '50%',
-          background: uColor.accent, opacity: .15,
-          pointerEvents: 'none',
-        }}/>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', position: 'relative' }}>
-          <div style={{ flex: 1, minWidth: 260 }}>
+          display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+          background: '#FFF',
+          borderLeft: '3px solid ' + (rightNowItem.urgency === 'live' ? '#B91C1C' : '#7D1025'),
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--rmd)',
+          padding: '14px 18px', marginBottom: 16,
+        }}>
+          <div style={{ flex: 1, minWidth: 220 }}>
             <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              fontSize: 11, fontWeight: 800, letterSpacing: '.12em',
+              fontSize: 10, fontWeight: 800, letterSpacing: '.12em',
               textTransform: 'uppercase',
-              color: uColor.accent, marginBottom: 8,
+              color: rightNowItem.urgency === 'live' ? '#B91C1C' : '#7D1025',
+              marginBottom: 3,
+              display: 'flex', alignItems: 'center', gap: 6,
             }}>
               {rightNowItem.urgency === 'live' && (
-                <span style={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: uColor.accent,
-                  animation: 'pulse 1.5s infinite',
-                }}/>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#B91C1C', animation: 'pulse 1.5s infinite' }}/>
               )}
-              {rightNowItem.urgency === 'live' ? 'LIVE NOW' :
-               rightNowItem.urgency === 'soon' ? 'STARTING SOON' :
-               rightNowItem.urgency === 'good' ? 'ALL CAUGHT UP' :
-               'RIGHT NOW'}
+              {rightNowItem.urgency === 'live' ? 'Live now' :
+               rightNowItem.urgency === 'soon' ? 'Starting soon' : 'Needs attention'}
             </div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--s900)' }}>
               {rightNowItem.title}
-            </h2>
-            <div style={{ fontSize: 14, opacity: .85, marginTop: 6 }}>{rightNowItem.subtitle}</div>
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--s500)', marginTop: 2 }}>
+              {rightNowItem.subtitle}
+            </div>
           </div>
           <button onClick={() => setPage(rightNowItem.actionPage)}
             style={{
-              background: uColor.accent, color: uColor.bg,
-              border: 'none', padding: '14px 28px', borderRadius: 'var(--rmd)',
-              fontSize: 14, fontWeight: 800, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 8,
-              boxShadow: '0 4px 12px rgba(0,0,0,.2)',
+              background: '#7D1025', color: '#FBFAF5', border: 'none',
+              padding: '9px 18px', borderRadius: 'var(--rmd)',
+              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               flexShrink: 0,
             }}>
             {rightNowItem.action}
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
           </button>
         </div>
-      </div>
- 
-      {/* KPI STRIP */}
+      )}
+
+      {/* ── FACTUAL STATS — quiet, understated ── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: 12, marginBottom: 16,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+        gap: 1,
+        background: 'var(--border)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--rxl)',
+        overflow: 'hidden',
+        marginBottom: 16,
       }}>
         {[
           {
             label: 'My Students',
-            value: uniqueStudents === null ? '...' : uniqueStudents,
-            change: uniqueStudents === null ? 'Loading...' : (uniqueStudents === 0 ? 'No students yet' : 'Across ' + (rooms?.length || 0) + ' room' + ((rooms?.length || 0) === 1 ? '' : 's')),
-            color: '#7D1025', icon: 'students', page: 'students',
-          },
-          {
-            label: 'Need Grading',
-            value: loading ? '...' : ungradedCount,
-            change: loading ? 'Loading...' : (ungradedCount === 0 ? 'All caught up' : 'Awaiting your review'),
-            color: ungradedCount > 0 ? '#B45309' : '#7D1025',
-            icon: 'grade', page: 'homework',
+            value: uniqueStudents === null ? '—' : uniqueStudents,
+            sub: uniqueStudents === null ? 'Loading' : 'Across ' + (rooms?.length || 0) + ' room' + ((rooms?.length || 0) === 1 ? '' : 's'),
+            page: 'students',
           },
           {
             label: 'My Classes',
-            value: rooms === null ? '...' : (rooms?.length || 0),
-            change: rooms === null ? 'Loading...' : ((rooms?.length || 0) === 0 ? 'No classes assigned' : 'Active rooms'),
-            color: '#7D1025', icon: 'class', page: 'liveclass',
+            value: rooms === null ? '—' : (rooms?.length || 0),
+            sub: rooms === null ? 'Loading' : ((rooms?.length || 0) === 0 ? 'None assigned' : 'Active rooms'),
+            page: 'liveclass',
+          },
+          {
+            label: 'Need Grading',
+            value: loading ? '—' : ungradedCount,
+            sub: loading ? 'Loading' : (ungradedCount === 0 ? 'All caught up' : 'Awaiting review'),
+            page: 'homework',
+            alert: ungradedCount > 0,
           },
           {
             label: 'Active Homework',
-            value: loading ? '...' : homework.filter(h => h.status === 'published').length,
-            change: loading ? 'Loading...' : 'Published assignments',
-            color: '#7D1025', icon: 'book', page: 'homework',
+            value: loading ? '—' : homework.filter(h => h.status === 'published').length,
+            sub: loading ? 'Loading' : 'Published',
+            page: 'homework',
           },
-        ].map(kpi => (
-          <div key={kpi.label} onClick={() => setPage(kpi.page)}
+        ].map(stat => (
+          <div key={stat.label} onClick={() => setPage(stat.page)}
             style={{
-              background: kpi.label === 'Need Grading' && ungradedCount > 0
-                ? 'linear-gradient(135deg, #92400E 0%, #7A3309 100%)'
-                : 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
-              border: 'none',
-              borderRadius: 'var(--rxl)',
-              padding: 18,
-              cursor: 'pointer',
-              transition: 'all .15s',
-              position: 'relative',
-              overflow: 'hidden',
-              boxShadow: '0 4px 14px rgba(125,16,37,.18)',
+              background: '#FFF', padding: '16px 18px', cursor: 'pointer',
+              transition: 'background .12s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 26px rgba(125,16,37,.28)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(125,16,37,.18)' }}>
-            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#F0CC5A', marginBottom: 6 }}>
-              {kpi.label}
-            </div>
-            <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 36, fontWeight: 400, color: '#FBFAF5', lineHeight: 1, marginBottom: 4 }}>
-              {kpi.value}
-            </div>
-            <div style={{ fontSize: 11.5, color: 'rgba(251,250,245,.7)' }}>{kpi.change}</div>
+            onMouseEnter={e => { e.currentTarget.style.background = '#FBFAF5' }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#FFF' }}>
             <div style={{
-              position: 'absolute', top: 16, right: 16,
-              width: 32, height: 32, borderRadius: '50%',
-              background: 'rgba(251,246,227,.12)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 10, fontWeight: 700, letterSpacing: '.09em',
+              textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 8,
             }}>
-              {kpi.icon === 'students' && (
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                </svg>
-              )}
-              {kpi.icon === 'grade' && (
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round">
-                  <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                </svg>
-              )}
-              {kpi.icon === 'class' && (
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-              )}
-              {kpi.icon === 'book' && (
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                </svg>
-              )}
+              {stat.label}
+            </div>
+            <div style={{
+              fontFamily: "'Instrument Serif', serif", fontSize: 32, fontWeight: 400,
+              lineHeight: 1,
+              color: stat.alert ? '#B45309' : 'var(--s900)',
+            }}>
+              {stat.value}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 4 }}>
+              {stat.sub}
             </div>
           </div>
         ))}
       </div>
- 
-      {/* MAIN GRID: SCHEDULE + ACTION QUEUE */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 380px)', gap: 14, marginBottom: 14 }}>
-        {/* Today's Schedule from real rooms */}
+
+      {/* ── TODAY'S SCHEDULE ── */}
+      <div style={{
+        background: '#FFF',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--rxl)',
+        padding: 22,
+      }}>
         <div style={{
-          background: '#FFF',
-          border: '1.5px solid var(--border)',
-          borderRadius: 'var(--rxl)',
-          padding: 22,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+          marginBottom: 14, flexWrap: 'wrap', gap: 8,
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
-            <div>
-              <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
-                Today's Schedule
-              </div>
-              <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', margin: 0 }}>
-                {todaysSchedule.length === 0 ? 'No classes today' : todaysSchedule.length + ' class' + (todaysSchedule.length === 1 ? '' : 'es')}
-              </h3>
-            </div>
-            {todaysSchedule.length > 0 && (
-              <div style={{ fontSize: 12, color: 'var(--s500)' }}>
-                {doneClasses.length} done · {todaysSchedule.length - doneClasses.length} remaining
-              </div>
-            )}
-          </div>
- 
-          {todaysSchedule.length === 0 ? (
-            <div style={{ padding: 24, textAlign: 'center', color: 'var(--s500)', fontSize: 13, fontStyle: 'italic' }}>
-              {rooms === null ? 'Loading...' :
-               (rooms.length === 0
-                 ? 'No rooms assigned. Ask admin to add you to a class.'
-                 : 'Your rooms have no schedule for today.')}
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {todaysSchedule.map(cls => {
-                const status = dbClassStatus(cls)
-                const subjCol = dbSubjColor(cls.subject)
-                return (
-                  <div key={cls._id} style={{
-                    display: 'flex', alignItems: 'center', gap: 14,
-                    padding: '14px 16px',
-                    background: status === 'live' ? '#FEE2E2' : status === 'done' ? '#FBFAF5' : '#FFF',
-                    border: '1.5px solid ' + (status === 'live' ? '#FCA5A5' : 'var(--border)'),
-                    borderLeft: '4px solid ' + (status === 'live' ? '#DC2626' : status === 'done' ? '#94A3B8' : subjCol),
-                    borderRadius: 'var(--rmd)',
-                    opacity: status === 'done' ? .65 : 1,
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => setPage('liveclass')}>
-                    <div style={{ minWidth: 70 }}>
-                      <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: status === 'done' ? 'var(--s400)' : 'var(--s900)' }}>
-                        {dbFormatTime(cls.startAt)}
-                      </div>
-                      <div style={{ fontSize: 10.5, color: 'var(--s500)' }}>{cls.durationMins} min</div>
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', gap: 6, marginBottom: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-                        <span style={{
-                          background: subjCol + '15', color: subjCol,
-                          fontSize: 9.5, fontWeight: 700, letterSpacing: '.06em',
-                          padding: '2px 7px', borderRadius: 99, textTransform: 'uppercase',
-                        }}>{cls.subject}</span>
-                        <span style={{ fontSize: 11, color: 'var(--s500)' }}>{cls.yearGroup}</span>
-                      </div>
-                      <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)' }}>{cls.topic}</div>
-                      <div style={{ fontSize: 11, color: 'var(--s500)', marginTop: 2 }}>{cls.students} student{cls.students === 1 ? '' : 's'}</div>
-                    </div>
-                    {status === 'live' && (
-                      <div style={{
-                        background: '#DC2626', color: '#FBFAF5',
-                        fontSize: 10, fontWeight: 800, letterSpacing: '.08em',
-                        padding: '4px 10px', borderRadius: 99,
-                        display: 'flex', alignItems: 'center', gap: 5,
-                      }}>
-                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#FCA5A5', animation: 'pulse 1.5s infinite' }}/>
-                        LIVE
-                      </div>
-                    )}
-                    {status === 'done' && (
-                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--s500)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                        Done
-                      </span>
-                    )}
-                    {status === 'upcoming' && (
-                      <button onClick={e => { e.stopPropagation(); setPage('liveclass') }}
-                        style={{
-                          background: '#7D1025', color: '#FBFAF5', border: 'none',
-                          padding: '6px 12px', borderRadius: 'var(--rsm)',
-                          cursor: 'pointer', fontSize: 11, fontWeight: 700,
-                        }}>Open</button>
-                    )}
-                  </div>
-                )
-              })}
+          <h3 style={{
+            fontFamily: "'Instrument Serif', serif", fontSize: 20, fontWeight: 400,
+            color: 'var(--s900)', margin: 0,
+          }}>
+            Today's Schedule
+          </h3>
+          {todaysSchedule.length > 0 && (
+            <div style={{ fontSize: 12, color: 'var(--s500)' }}>
+              {doneClasses.length} done · {todaysSchedule.length - doneClasses.length} remaining
             </div>
           )}
         </div>
- 
-        {/* Action Queue */}
-        <div style={{
-          background: '#FFF',
-          border: '1.5px solid var(--border)',
-          borderRadius: 'var(--rxl)',
-          padding: 22,
-        }}>
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
-              Action Queue
-            </div>
-            <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', margin: 0 }}>
-              Things to do
-            </h3>
+
+        {todaysSchedule.length === 0 ? (
+          <div style={{
+            padding: '20px 0', textAlign: 'center',
+            color: 'var(--s500)', fontSize: 13,
+          }}>
+            {rooms === null ? 'Loading…' :
+             (rooms.length === 0
+               ? 'No rooms assigned yet. Ask an administrator to add you to a class.'
+               : 'No classes scheduled for today.')}
           </div>
- 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {ungradedCount > 0 && (
-              <div onClick={() => setPage('homework')} style={{
-                padding: 12, borderRadius: 'var(--rmd)', cursor: 'pointer',
-                background: '#FEF3C7', borderLeft: '3px solid #B45309',
-                display: 'flex', alignItems: 'center', gap: 10,
-              }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13.5, color: '#7C2D12', marginBottom: 2 }}>
-                    Grade {ungradedCount} submission{ungradedCount === 1 ? '' : 's'}
-                  </div>
-                  <div style={{ fontSize: 11, color: '#92400E' }}>Students are waiting</div>
-                </div>
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#92400E" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </div>
-            )}
- 
-            {liveClass && (
-              <div onClick={() => setPage('liveclass')} style={{
-                padding: 12, borderRadius: 'var(--rmd)', cursor: 'pointer',
-                background: '#FEE2E2', borderLeft: '3px solid #DC2626',
-                display: 'flex', alignItems: 'center', gap: 10,
-              }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13.5, color: '#7F1D1D', marginBottom: 2 }}>
-                    {liveClass.subject} class is live
-                  </div>
-                  <div style={{ fontSize: 11, color: '#991B1B' }}>Started at {dbFormatTime(liveClass.startAt)}</div>
-                </div>
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#991B1B" strokeWidth="2.5" strokeLinecap="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </div>
-            )}
- 
-            {ungradedCount === 0 && !liveClass && upcomingHomework.length === 0 && (
-              <div style={{ fontSize: 12, color: 'var(--s500)', fontStyle: 'italic', textAlign: 'center', padding: 18 }}>
-                Nothing to do right now
-              </div>
-            )}
- 
-            {/* Upcoming homework deadlines */}
-            {upcomingHomework.length > 0 && (
-              <div style={{ marginTop: ungradedCount > 0 || liveClass ? 4 : 0 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: 'var(--s400)', textTransform: 'uppercase', marginBottom: 6 }}>
-                  Homework Due Soon
-                </div>
-                {upcomingHomework.map(hw => (
-                  <div key={hw._id} onClick={() => setPage('homework')} style={{
-                    padding: '8px 12px', borderRadius: 'var(--rsm)', cursor: 'pointer',
-                    fontSize: 12.5, marginBottom: 4,
-                    background: '#FBFAF5',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6,
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {todaysSchedule.map(cls => {
+              const status = dbClassStatus(cls)
+              const statusMeta = status === 'live'
+                ? { label: 'Live', color: '#B91C1C' }
+                : status === 'done'
+                  ? { label: 'Done', color: 'var(--s500)' }
+                  : { label: dbFormatTime(cls.startAt), color: '#7D1025' }
+              return (
+                <div key={cls._id} onClick={() => setPage('liveclass')}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '11px 14px',
+                    background: status === 'done' ? '#FBFAF5' : '#FFF',
+                    border: '1px solid var(--border)',
+                    borderLeft: '3px solid ' + statusMeta.color,
+                    borderRadius: 'var(--rmd)',
+                    cursor: 'pointer',
+                    opacity: status === 'done' ? 0.65 : 1,
                   }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, color: 'var(--s800)' }}>{hw.title}</div>
-                      <div style={{ fontSize: 10.5, color: 'var(--s500)' }}>
-                        {hw.subject} · due {new Date(hw.dueAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                      </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--s900)' }}>
+                      {cls.subject}{cls.topic ? ' · ' + cls.topic : ''}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 1 }}>
+                      {dbFormatTime(cls.startAt)} – {dbFormatTime(cls.endAt)}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
- 
-            {/* Quick actions */}
-            <div style={{ borderTop: '1px solid var(--border)', marginTop: 4, paddingTop: 12 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.08em', color: 'var(--s400)', textTransform: 'uppercase', marginBottom: 8 }}>
-                Quick Actions
-              </div>
-              {[
-                { label: 'Question Bank', page: 'questionbank', color: '#7D1025' },
-                { label: 'New Homework', page: 'homework', color: '#7D1025' },
-                { label: 'Live Classes', page: 'liveclass', color: '#7D1025' },
-              ].map(a => (
-                <div key={a.label} onClick={() => setPage(a.page)} style={{
-                  padding: '8px 12px', borderRadius: 'var(--rsm)', cursor: 'pointer',
-                  fontSize: 12.5, color: 'var(--s700)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6,
-                  marginBottom: 2,
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#FBFAF5'; e.currentTarget.style.color = a.color }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--s700)' }}>
-                  <span>{a.label}</span>
-                  <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                  </svg>
+                  <div style={{
+                    fontSize: 10.5, fontWeight: 700, letterSpacing: '.04em',
+                    textTransform: 'uppercase', color: statusMeta.color,
+                    flexShrink: 0,
+                  }}>
+                    {statusMeta.label}
+                  </div>
                 </div>
-              ))}
-            </div>
+              )
+            })}
           </div>
-        </div>
-      </div>
- 
-      {/* CLASS HEALTH — placeholder */}
-      <div style={{
-        background: '#FBFAF5',
-        border: '1.5px dashed var(--border)',
-        borderRadius: 'var(--rxl)',
-        padding: 22,
-        textAlign: 'center',
-      }}>
-        <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 4 }}>
-          Class Health
-        </div>
-        <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', margin: '0 0 6px' }}>
-          Coming soon
-        </h3>
-        <p style={{ fontSize: 13, color: 'var(--s500)', maxWidth: 480, margin: '0 auto', lineHeight: 1.55 }}>
-          Mastery tracking, attendance, homework completion, and parent satisfaction metrics will appear here once we have real data flowing through the system.
-        </p>
+        )}
       </div>
     </div>
   )
