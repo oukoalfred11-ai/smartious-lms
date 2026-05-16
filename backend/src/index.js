@@ -57,6 +57,7 @@ app.use('/api/teachers',       require('./routes/teachers'));
 app.use('/api/allocations',    require('./routes/allocations'));
 app.use('/api/subjects',       require('./routes/subjects'));
 app.use('/api/lessons', require('./routes/lessons'));
+app.use('/api/lesson-progress', require('./routes/lesson-progress'));
 app.use('/api/curriculum',     require('./routes/curriculum'));
 app.use('/api/students',       require('./routes/students'));
 app.use('/api/dashboard',      require('./routes/dashboard'));
