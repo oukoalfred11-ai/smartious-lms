@@ -1771,6 +1771,7 @@ function TeacherDetailModal({ teacher, onClose, onChanged, toast }) {
     { id: 'profile',     label: 'Profile' },
     { id: 'specialties', label: 'Specialties' },
     { id: 'students',    label: 'Students' },
+    { id: 'email',       label: 'Email' },
     { id: 'status',      label: 'Status' },
   ]
 
@@ -1852,6 +1853,9 @@ function TeacherDetailModal({ teacher, onClose, onChanged, toast }) {
           )}
           {tab === 'students' && (
             <TeacherStudentsTab teacher={tch} toast={toast} />
+          )}
+          {tab === 'email' && (
+            <TeacherEmailTab teacher={tch} onSent={refreshTeacher} toast={toast} />
           )}
           {tab === 'status' && (
             <TeacherStatusTab teacher={tch} onSaved={refreshTeacher} onClose={onClose} toast={toast} />
@@ -2349,6 +2353,221 @@ function TeacherStudentsTab({ teacher, toast }) {
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+// ── EMAIL TAB (admin → teacher branded emails) ────────────
+function TeacherEmailTab({ teacher, onSent, toast }) {
+  // Templates — starting points the admin edits before sending.
+  const TEMPLATES = {
+    memo: {
+      label: 'Internal Memo',
+      subject: 'Internal Memo from Smartious Administration',
+      body: 'This memo is to inform you of the following:\n\n[Write the announcement or information here.]\n\nPlease take note accordingly.',
+    },
+    meeting: {
+      label: 'Meeting Request',
+      subject: 'Request for a Meeting',
+      body: 'We would like to schedule a meeting with you to discuss the following:\n\n[State the purpose of the meeting.]\n\nProposed date and time: [date / time]\nLocation / link: [venue or video link]\n\nKindly confirm your availability.',
+    },
+    commendation: {
+      label: 'Letter of Commendation',
+      subject: 'Recognition of Your Work',
+      body: 'We would like to formally recognise and commend you for:\n\n[Describe the achievement or contribution.]\n\nYour effort makes a real difference at Smartious. Thank you.',
+    },
+    notice: {
+      label: 'Formal Notice',
+      subject: 'Formal Notice',
+      body: 'This letter is to formally bring the following matter to your attention:\n\n[Describe the matter clearly and factually.]\n\nWe would like to discuss this with you. Please respond by [date], or contact the administration to arrange a meeting.\n\nThis notice is part of our standard process and a copy is retained on file.',
+    },
+    custom: {
+      label: 'Custom Message',
+      subject: '',
+      body: '',
+    },
+  }
+
+  const [kind, setKind] = useState('memo')
+  const [subject, setSubject] = useState(TEMPLATES.memo.subject)
+  const [body, setBody] = useState(TEMPLATES.memo.body)
+  const [sending, setSending] = useState(false)
+  const [confirm, setConfirm] = useState(false)
+
+  const applyTemplate = (k) => {
+    setKind(k)
+    setSubject(TEMPLATES[k].subject)
+    setBody(TEMPLATES[k].body)
+    setConfirm(false)
+  }
+
+  const send = async () => {
+    if (!subject.trim()) { toast?.error?.('Subject is required.'); return }
+    if (!body.trim())    { toast?.error?.('Message body is required.'); return }
+    setSending(true)
+    try {
+      const { data } = await api.post('/users/' + teacher._id + '/send-email', {
+        subject: subject.trim(), body, kind,
+      })
+      if (data?.success) {
+        toast?.ok?.(data.message || 'Email sent.')
+        setConfirm(false)
+        onSent?.()
+      } else {
+        toast?.error?.(data?.message || 'Send failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Send failed.')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const history = Array.isArray(teacher.sentEmails)
+    ? [...teacher.sentEmails].sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt))
+    : []
+
+  const inp = {
+    width: '100%', boxSizing: 'border-box',
+    padding: '8px 12px', borderRadius: 6,
+    border: '1.5px solid #E8E2D6', fontSize: 13, fontFamily: 'inherit',
+  }
+  const lbl = {
+    display: 'block', fontSize: 10.5, fontWeight: 700,
+    letterSpacing: '.06em', textTransform: 'uppercase',
+    color: TOKENS.crimson, marginBottom: 4,
+  }
+
+  return (
+    <div>
+      <div style={{ fontSize: 12.5, color: '#6B6B6B', marginBottom: 14, lineHeight: 1.5 }}>
+        Compose an email to <strong>{teacher.firstName} {teacher.lastName}</strong> ({teacher.email}).
+        Pick a template as a starting point, then edit the wording before sending.
+      </div>
+
+      {/* Template picker */}
+      <div style={{ marginBottom: 14 }}>
+        <label style={lbl}>Template</label>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {Object.entries(TEMPLATES).map(([k, t]) => (
+            <button key={k} onClick={() => applyTemplate(k)}
+              style={{
+                background: kind === k ? TOKENS.crimson : '#fff',
+                color: kind === k ? '#fff' : TOKENS.crimson,
+                border: `1.5px solid ${kind === k ? TOKENS.crimson : '#E8E2D6'}`,
+                padding: '6px 12px', borderRadius: 99,
+                cursor: 'pointer', fontSize: 11.5, fontWeight: 700,
+              }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {kind === 'notice' && (
+        <div style={{
+          padding: 10, marginBottom: 12,
+          background: '#FEF3C7', border: '1px solid #F59E0B',
+          borderRadius: 6, fontSize: 11.5, color: '#92400E', lineHeight: 1.5,
+        }}>
+          A formal notice is a sensitive document. Write it factually and
+          specifically. Review every line before sending — this is recorded
+          in the teacher's email history.
+        </div>
+      )}
+
+      <div style={{ marginBottom: 12 }}>
+        <label style={lbl}>Subject</label>
+        <input value={subject} onChange={e => { setSubject(e.target.value); setConfirm(false) }}
+          placeholder="Email subject" style={inp}/>
+      </div>
+
+      <div style={{ marginBottom: 14 }}>
+        <label style={lbl}>Message</label>
+        <textarea value={body} onChange={e => { setBody(e.target.value); setConfirm(false) }}
+          rows={10} placeholder="Write your message. Leave a blank line between paragraphs."
+          style={{ ...inp, resize: 'vertical', lineHeight: 1.5 }}/>
+        <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 4 }}>
+          The message is wrapped in the Smartious branded template, addressed to the teacher, and signed with your name. Blank lines become paragraph breaks.
+        </div>
+      </div>
+
+      {/* Send with two-step confirm */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 22 }}>
+        {!confirm ? (
+          <button onClick={() => setConfirm(true)}
+            style={{
+              background: TOKENS.crimson, color: '#fff', border: 'none',
+              padding: '9px 22px', borderRadius: 6,
+              cursor: 'pointer', fontSize: 13, fontWeight: 700,
+            }}>
+            Review &amp; Send
+          </button>
+        ) : (
+          <>
+            <span style={{ fontSize: 12, color: '#6B6B6B', alignSelf: 'center' }}>
+              Send this email to {teacher.email}?
+            </span>
+            <button onClick={() => setConfirm(false)} disabled={sending}
+              style={{
+                background: '#fff', color: '#6B6B6B',
+                border: '1.5px solid #E8E2D6',
+                padding: '9px 16px', borderRadius: 6,
+                cursor: 'pointer', fontSize: 13, fontWeight: 700,
+              }}>
+              Cancel
+            </button>
+            <button onClick={send} disabled={sending}
+              style={{
+                background: sending ? '#9CA3AF' : '#15803D',
+                color: '#fff', border: 'none',
+                padding: '9px 22px', borderRadius: 6,
+                cursor: sending ? 'not-allowed' : 'pointer',
+                fontSize: 13, fontWeight: 700,
+              }}>
+              {sending ? 'Sending...' : 'Confirm Send'}
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* History */}
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: TOKENS.crimson, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8 }}>
+          Email History ({history.length})
+        </div>
+        {history.length === 0 ? (
+          <div style={{ padding: 14, background: '#FBFAF5', borderRadius: 6, fontSize: 12.5, color: '#6B6B6B', textAlign: 'center' }}>
+            No emails sent to this teacher yet.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {history.map((h, i) => (
+              <div key={i} style={{
+                padding: '8px 12px',
+                background: '#fff', border: '1px solid #E8E2D6', borderRadius: 6,
+                display: 'flex', alignItems: 'center', gap: 10,
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: '#1A1A1A' }}>
+                    {h.subject}
+                  </div>
+                  <div style={{ fontSize: 11, color: '#6B6B6B' }}>
+                    {h.sentByName || 'Admin'} · {h.sentAt ? new Date(h.sentAt).toLocaleDateString() : ''}
+                  </div>
+                </div>
+                <div style={{
+                  fontSize: 9.5, fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase',
+                  background: '#FBF6E3', color: TOKENS.crimson,
+                  padding: '3px 8px', borderRadius: 99,
+                }}>
+                  {h.kind || 'memo'}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
