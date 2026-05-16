@@ -41,6 +41,20 @@ const buildSafeUser = (u) => ({
   phone:                 u.phone                 || '',
   bio:                   u.bio                   || '',
   avatar:                u.avatar                || '',
+  jobTitle:              u.jobTitle              || '',
+  qualifications:        Array.isArray(u.qualifications) ? u.qualifications : [],
+  certifications:        Array.isArray(u.certifications) ? u.certifications : [],
+  specializations:       Array.isArray(u.specializations) ? u.specializations : [],
+  yearsOfExperience:     u.yearsOfExperience     || 0,
+
+  // ── Teacher specialties ──
+  // [{ subjectId, curriculum }] — the subjects/curricula a teacher
+  // delivers. The teacher portal reads this to know what they teach.
+  teachingSpecialties:   Array.isArray(u.teachingSpecialties) ? u.teachingSpecialties : [],
+
+  // ── Programme enrolment (students) ──
+  programme:             u.programme             || '',
+  deliveryMode:          u.deliveryMode          || '',
 
   // ── Teacher meeting defaults ──
   // Pre-fills the live-class scheduling form so teacher doesn't paste their
