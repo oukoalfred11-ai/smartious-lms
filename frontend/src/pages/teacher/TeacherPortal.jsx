@@ -6514,6 +6514,55 @@ function TeacherCommsHistory({ toast }) {
   )
 }
  
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD HELPERS — greeting, date/time, schedule parsing
+// ═══════════════════════════════════════════════════════════
+const dbGreeting = () => {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
+const dbFormatTime = (d) => d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true })
+const dbFormatDate = (d) => d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
+
+const dbSubjColor = (subject) => {
+  const map = {
+    'Mathematics': '#7D1025', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
+    'Biology': '#7C2D12', 'English': '#6B21A8', 'History': '#92400E',
+    'Geography': '#0F766E', 'Computer Science': '#1F2937',
+    'Business Studies': '#7E22CE', 'Economics': '#9F1239',
+  }
+  return map[subject] || '#7D1025'
+}
+
+// Schedule string parser (same as live classes tab)
+const dbParseSchedule = (s) => {
+  if (!s || typeof s !== 'string') return null
+  const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 }
+  const parts = s.trim().split(/\s+(?=\d)/)
+  if (parts.length < 2) return null
+  const dayMatches = parts[0].toLowerCase().match(/sun|mon|tue|wed|thu|fri|sat/g)
+  if (!dayMatches) return null
+  const days = []
+  dayMatches.forEach(d => { if (dayMap[d] !== undefined && !days.includes(dayMap[d])) days.push(dayMap[d]) })
+  const timeMatch = parts.slice(1).join(' ').match(/(\d{1,2}):?(\d{0,2})\s*(am|pm)?\s*[-–—]\s*(\d{1,2}):?(\d{0,2})\s*(am|pm)/i)
+  if (!timeMatch) return null
+  let startH = parseInt(timeMatch[1], 10)
+  const startM = parseInt(timeMatch[2] || '0', 10)
+  const startMer = (timeMatch[3] || timeMatch[6]).toLowerCase()
+  let endH = parseInt(timeMatch[4], 10)
+  const endM = parseInt(timeMatch[5] || '0', 10)
+  const endMer = timeMatch[6].toLowerCase()
+  const to24 = (h, mer) => mer === 'pm' && h < 12 ? h + 12 : (mer === 'am' && h === 12 ? 0 : h)
+  return {
+    days,
+    startMins: to24(startH, startMer) * 60 + startM,
+    endMins: to24(endH, endMer) * 60 + endM,
+  }
+}
+
 function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUploadModal }) {
   const teacherFirstName = user?.firstName || 'Teacher'
   const teacherLastName = user?.lastName || ''
