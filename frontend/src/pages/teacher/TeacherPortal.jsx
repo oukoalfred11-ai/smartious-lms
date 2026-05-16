@@ -7051,6 +7051,90 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
         </div>
       </div>
  
+      {/* PROFILE CARD — avatar, name, job title, bio */}
+      <div style={{
+        background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
+        borderRadius: 'var(--rxl)',
+        padding: '20px 24px', marginBottom: 16,
+        display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap',
+        boxShadow: '0 4px 14px rgba(125,16,37,.18)',
+      }}>
+        {user?.avatar ? (
+          <img src={user.avatar} alt={teacherDisplayName}
+            style={{
+              width: 72, height: 72, borderRadius: '50%',
+              objectFit: 'cover', flexShrink: 0,
+              border: '2px solid rgba(240,204,90,.5)',
+            }}/>
+        ) : (
+          <div style={{
+            width: 72, height: 72, borderRadius: '50%',
+            background: 'rgba(251,246,227,.12)',
+            border: '2px solid rgba(240,204,90,.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 26, fontWeight: 700, color: '#F0CC5A',
+            flexShrink: 0,
+          }}>
+            {((teacherFirstName[0] || '') + (teacherLastName[0] || '')).toUpperCase()}
+          </div>
+        )}
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <div style={{
+            fontFamily: "'Instrument Serif', serif", fontSize: 22,
+            color: '#FBFAF5', lineHeight: 1.2,
+          }}>
+            {teacherDisplayName}
+          </div>
+          {user?.jobTitle && (
+            <div style={{
+              fontSize: 11.5, fontWeight: 700, letterSpacing: '.06em',
+              textTransform: 'uppercase', color: '#F0CC5A', marginTop: 3,
+            }}>
+              {user.jobTitle}
+            </div>
+          )}
+          {user?.bio ? (
+            <div style={{
+              fontSize: 12.5, color: 'rgba(251,250,245,.75)',
+              marginTop: 6, lineHeight: 1.5,
+            }}>
+              {user.bio}
+            </div>
+          ) : (
+            <div style={{
+              fontSize: 12, color: 'rgba(251,250,245,.5)',
+              marginTop: 6, fontStyle: 'italic',
+            }}>
+              No bio yet — ask an administrator to add one to your profile.
+            </div>
+          )}
+          {Array.isArray(user?.teachingSpecialties) && user.teachingSpecialties.length > 0 && (
+            <div style={{
+              fontSize: 11, color: 'rgba(251,250,245,.6)', marginTop: 6,
+            }}>
+              {user.teachingSpecialties.length} teaching specialt{user.teachingSpecialties.length === 1 ? 'y' : 'ies'}
+            </div>
+          )}
+        </div>
+        {user?.yearsOfExperience > 0 && (
+          <div style={{ textAlign: 'center', flexShrink: 0 }}>
+            <div style={{
+              fontFamily: "'Instrument Serif', serif", fontSize: 30,
+              color: '#F0CC5A', lineHeight: 1,
+            }}>
+              {user.yearsOfExperience}
+            </div>
+            <div style={{
+              fontSize: 9.5, fontWeight: 700, letterSpacing: '.08em',
+              textTransform: 'uppercase', color: 'rgba(251,250,245,.6)',
+              marginTop: 3,
+            }}>
+              {user.yearsOfExperience === 1 ? 'Year' : 'Years'}<br/>Experience
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* RIGHT NOW HERO */}
       <div style={{
         background: 'linear-gradient(135deg, ' + uColor.bg + ' 0%, ' + uColor.bg + 'EE 100%)',
