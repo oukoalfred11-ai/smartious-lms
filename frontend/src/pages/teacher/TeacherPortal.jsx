@@ -7015,6 +7015,7 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
             {dbGreeting()}, <em style={{ color: '#7D1025' }}>{teacherDisplayName}</em>
           </h1>
           <div style={{ fontSize: 13.5, color: 'var(--s500)', marginTop: 4 }}>
+            {user?.jobTitle ? user.jobTitle + ' · ' : ''}
             {rooms && rooms.length > 0
               ? Array.from(new Set(rooms.map(r => r.subject).filter(Boolean))).slice(0, 3).join(' · ') + ' · Smartious E-School'
               : 'Smartious E-School'}
@@ -7141,47 +7142,50 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
         ].map(kpi => (
           <div key={kpi.label} onClick={() => setPage(kpi.page)}
             style={{
-              background: '#FFF',
-              border: '1.5px solid var(--border)',
+              background: kpi.label === 'Need Grading' && ungradedCount > 0
+                ? 'linear-gradient(135deg, #92400E 0%, #7A3309 100%)'
+                : 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%)',
+              border: 'none',
               borderRadius: 'var(--rxl)',
               padding: 18,
               cursor: 'pointer',
               transition: 'all .15s',
               position: 'relative',
               overflow: 'hidden',
+              boxShadow: '0 4px 14px rgba(125,16,37,.18)',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = kpi.color; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(125,16,37,.1)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 26px rgba(125,16,37,.28)' }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(125,16,37,.18)' }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#F0CC5A', marginBottom: 6 }}>
               {kpi.label}
             </div>
-            <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 36, fontWeight: 400, color: kpi.color, lineHeight: 1, marginBottom: 4 }}>
+            <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 36, fontWeight: 400, color: '#FBFAF5', lineHeight: 1, marginBottom: 4 }}>
               {kpi.value}
             </div>
-            <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>{kpi.change}</div>
+            <div style={{ fontSize: 11.5, color: 'rgba(251,250,245,.7)' }}>{kpi.change}</div>
             <div style={{
               position: 'absolute', top: 16, right: 16,
               width: 32, height: 32, borderRadius: '50%',
-              background: kpi.color + '12',
+              background: 'rgba(251,246,227,.12)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {kpi.icon === 'students' && (
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke={kpi.color} strokeWidth="2" strokeLinecap="round">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
                 </svg>
               )}
               {kpi.icon === 'grade' && (
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke={kpi.color} strokeWidth="2" strokeLinecap="round">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round">
                   <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
                 </svg>
               )}
               {kpi.icon === 'class' && (
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke={kpi.color} strokeWidth="2" strokeLinecap="round">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round">
                   <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
                 </svg>
               )}
               {kpi.icon === 'book' && (
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke={kpi.color} strokeWidth="2" strokeLinecap="round">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round">
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                 </svg>
               )}
