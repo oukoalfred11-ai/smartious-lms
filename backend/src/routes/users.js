@@ -7,6 +7,30 @@ const jwt = require('jsonwebtoken');
 const { sendVerificationEmail } = require('../services/emailService');
 const { sendWelcomeEmail } = require('../lib/email');
 
+// ── Cloudinary avatar upload setup ────────────────────────
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const avatarStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'smartious/avatars',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
+  },
+});
+const uploadAvatar = multer({
+  storage: avatarStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },   // 5 MB cap
+});
+
 // ─────────────────────────────────────────────────────────
 // HELPER: Sync a student's GroupRoom enrollments based on
 // their curriculum + gradeLevel + subjects.
@@ -182,6 +206,39 @@ router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
   }
 });
 
+// POST /api/users/:id/avatar — admin uploads a profile image
+// for any user. Returns the Cloudinary URL and also saves it to
+// the user's avatar field.
+router.post('/:id/avatar', auth, requireRole('admin'), (req, res) => {
+  uploadAvatar.single('file')(req, res, async (err) => {
+    if (err) {
+      console.error('[users avatar upload]', err.message);
+      return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
+    }
+    if (!req.file)
+      return res.status(400).json({ success: false, message: 'No file uploaded.' });
+
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        { $set: { avatar: req.file.path } },
+        { new: true }
+      ).select('-password');
+      if (!user)
+        return res.status(404).json({ success: false, message: 'User not found.' });
+
+      res.json({
+        success: true,
+        message: 'Avatar updated.',
+        data: { avatar: req.file.path },
+      });
+    } catch (e) {
+      console.error('[users avatar save]', e.message);
+      res.status(500).json({ success: false, message: 'Failed to save avatar.' });
+    }
+  });
+});
+
 // GET /api/users/teachers/qualified?subjectId=...&curriculum=...
 // Returns active teachers whose teachingSpecialties include this
 // subject+curriculum pair. Used by the admin Manage Students module
@@ -212,6 +269,57 @@ router.get('/teachers/qualified', auth, requireRole('admin'), async (req, res) =
     res.json({ success: true, teachers });
   } catch (e) {
     console.error('[users teachers/qualified]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// PATCH /api/users/teachers/:id/specialties
+// Admin sets a teacher's teachingSpecialties directly.
+// Body: { curricula: [...], subjectIds: [...] } — builds the cartesian
+// product, same shape the teacher self-service endpoint produces.
+// This is separate from PATCH /:id so the admin can manage specialties
+// without triggering the legacy subjectRefs-based rebuild.
+router.patch('/teachers/:id/specialties', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const mongoose = require('mongoose');
+    const Subject  = require('../models/Subject');
+    const { curricula, subjectIds } = req.body;
+
+    const teacher = await User.findById(req.params.id);
+    if (!teacher || teacher.role !== 'teacher')
+      return res.status(404).json({ success: false, message: 'Teacher not found.' });
+
+    if (!Array.isArray(curricula) || !Array.isArray(subjectIds))
+      return res.status(400).json({ success: false, message: 'curricula and subjectIds must be arrays.' });
+
+    const VALID = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American'];
+    const cleanCurricula = curricula.filter(c => VALID.includes(c));
+    const cleanIds = subjectIds.filter(id => mongoose.isValidObjectId(id));
+
+    // Empty is allowed — admin may want to clear specialties
+    if (cleanIds.length > 0) {
+      const found = await Subject.countDocuments({ _id: { $in: cleanIds } });
+      if (found !== cleanIds.length)
+        return res.status(400).json({ success: false, message: 'One or more subjectIds do not exist.' });
+    }
+
+    const pairs = [];
+    for (const sid of cleanIds) {
+      for (const curr of cleanCurricula) {
+        pairs.push({ subjectId: sid, curriculum: curr });
+      }
+    }
+
+    teacher.teachingSpecialties = pairs;
+    await teacher.save();
+
+    res.json({
+      success: true,
+      message: `Saved ${pairs.length} specialty pair${pairs.length === 1 ? '' : 's'}.`,
+      data: { teachingSpecialties: teacher.teachingSpecialties },
+    });
+  } catch (e) {
+    console.error('[users teachers/:id/specialties]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
