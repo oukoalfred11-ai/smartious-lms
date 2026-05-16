@@ -22,6 +22,7 @@ import {
   labelAt,
   sumLeafMarks,
 } from '../../components/exam/NestedQuestion.jsx'
+import LessonPlayerTab from './LessonPlayerTab.jsx'
 
 // ── SVG icon helper ───────────────────────────────────────
 const I = (d) => (
@@ -318,7 +319,6 @@ const NAV_SECTIONS = [
     { id:'dashboard',    label:'Dashboard',       icon:'dashboard',    svg:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>' },
     { id:'curriculum',   label:'My Curriculum',   icon:'curriculum',   svg:'<path d="M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13"/><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M8 10h8M8 14h6"/>' },
     { id:'lessons',      label:'Lesson Player',   icon:'lessons',      svg:'<polygon points="5 3 19 12 5 21 5 3"/>' },
-    { id:'practice',     label:'Adaptive Practice',icon:'practice',    svg:'<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1.5"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/>' },
     { id:'homework',     label:'Homework',        icon:'homework',     svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>' },
     { id:'exams',        label:'Exams',           icon:'exams',        svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',  badge:'1' },
     { id:'results',      label:'My Results',      icon:'results',      svg:'<circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>' },
@@ -328,8 +328,6 @@ const NAV_SECTIONS = [
   ]},
   { label:'Tools', items:[
     { id:'tutor',        label:'Mshauri AI',      icon:'tutor',        svg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
-    { id:'studyplan',    label:'My Study Plan',   icon:'studyplan',    svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/>' },
-    { id:'resources',    label:'Resources',       icon:'resources',    svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>' },
   ]},
   { label:'Account', items:[
     { id:'profile',      label:'Profile',         icon:'profile',      svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
@@ -1463,157 +1461,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               LESSONS — player with adaptive flashcards
           ════════════════════════════════════════════ */}
-          {page === 'lessons' && (
-            <div>
-              <div style={{marginBottom:16}}>
-                <div className="sec-tag">{selectedSubj || (nextRec?.subject || 'Mathematics')} · {nextRec?.topic || 'Pythagoras & Geometry'}</div>
-                <h2 className="serif" style={{fontSize:22,color:'var(--s900)'}}>Lesson Player</h2>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 280px',gap:20,alignItems:'start'}}>
-                <div>
-                  <div className="tabs" style={{marginBottom:16}}>
-                    {['video','notes','flashcards','resources'].map(t => (
-                      <div key={t} className={`tab${lessonTab===t?' active':''}`} onClick={() => {
-                        setLessonTab(t)
-                        if (t === 'flashcards' && flashcards.length === 0) loadFlashcards(nextRec?.topic)
-                      }} style={{textTransform:'capitalize'}}>{t}</div>
-                    ))}
-                  </div>
-
-                  {lessonTab === 'video' && (() => {
-                    // Find a lesson matching the current subject/topic
-                    const subjectName = selectedSubj || nextRec?.subject || 'Mathematics'
-                    const topicName   = nextRec?.topic || 'Pythagoras & Geometry'
-                    const lesson = store.lessons.find(l =>
-                      l.subject === subjectName ||
-                      (l.topic && l.topic === topicName)
-                    ) || store.lessons[0]
-                    return (
-                      <>
-                       {(() => { const embedUrl = toYouTubeEmbed(lesson?.youtubeUrl); return embedUrl ? (
-                          <div style={{position:'relative',paddingBottom:'56.25%',height:0,borderRadius:'var(--rlg)',overflow:'hidden',background:'#000'}}>
-                            <iframe
-                              src={embedUrl}
-                              title={lesson.title}
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                              style={{position:'absolute',top:0,left:0,width:'100%',height:'100%',border:'none'}}
-                            />
-                          </div>
-                        ) : (
-                          <div className="player-wrap" style={{cursor:'default'}}>
-                            <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12}}>
-                              <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,.3)" strokeWidth="1.5" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                              <div style={{fontSize:14,color:'rgba(255,255,255,.4)',textAlign:'center'}}>
-                                No video yet for {subjectName}<br/>
-                                <span style={{fontSize:12,color:'rgba(255,255,255,.25)'}}>Teacher can upload a YouTube lesson from their portal</span>
-                              </div>
-                            </div>
-                         </div>
-                        ) })()}
-                        {lesson && (
-                          <div style={{marginTop:12,padding:'12px 16px',background:'var(--bg)',borderRadius:'var(--rmd)',fontSize:13}}>
-                            <div style={{fontWeight:700,color:'var(--s800)',marginBottom:2}}>{lesson.title}</div>
-                            <div style={{color:'var(--s400)'}}>{lesson.addedBy} · {lesson.subject} · {lesson.date}</div>
-                          </div>
-                        )}
-                        {/* Lesson selector if multiple lessons */}
-                        {store.lessons.filter(l => l.subject === subjectName).length > 1 && (
-                          <div style={{marginTop:10,display:'flex',gap:8,flexWrap:'wrap'}}>
-                            {store.lessons.filter(l => l.subject === subjectName).map((l,i) => (
-                              <button key={i} className="btn btn-s btn-sm" style={{fontSize:12}} onClick={() => setSelectedSubj(l.subject)}>
-                                {l.title.slice(0,30)}{l.title.length>30?'…':''}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                        <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:12}}>
-                          <button className="btn btn-p btn-sm" onClick={() => { goTo('practice'); loadPractice(nextRec?.subject, nextRec?.topic) }}>
-                            Start Adaptive Practice
-                          </button>
-                          <button className="btn btn-s btn-sm" onClick={() => goTo('tutor')}>Ask Mshauri</button>
-                        </div>
-                      </>
-                    )
-                  })()}
-
-                  {lessonTab === 'notes' && (
-                    <div className="card" style={{padding:28}}>
-                      <h3 className="serif" style={{fontSize:20,marginBottom:14}}>{nextRec?.topic || 'Pythagoras & Geometry'} — Study Notes</h3>
-                      <div style={{fontSize:14,color:'var(--s700)',lineHeight:1.9}}>
-                        <p style={{marginBottom:12}}><strong>Definition:</strong> Pythagoras Theorem states that in any right-angled triangle, c² = a² + b², where c is the hypotenuse.</p>
-                        <div style={{background:'var(--b50)',border:'1px solid var(--b100)',borderRadius:'var(--rmd)',padding:16,textAlign:'center',margin:'16px 0'}}>
-                          <div className="mono" style={{fontSize:20,fontWeight:600,color:'var(--b800)'}}>c² = a² + b²</div>
-                          <div style={{fontSize:12,color:'var(--s500)',marginTop:6}}>c = hypotenuse (opposite the right angle)</div>
-                        </div>
-                        <p><strong>Pythagorean triples:</strong> (3,4,5), (5,12,13), (8,15,17) — memorise these for speed in exams.</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {lessonTab === 'flashcards' && (
-                    <div>
-                      {flashcards.length === 0 ? (
-                        <div className="lc"><div className="spinner"/></div>
-                      ) : (
-                        <>
-                          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
-                            <div style={{fontSize:13,color:'var(--s500)'}}>Card {fcIdx+1} of {flashcards.length} — click to flip</div>
-                            <button className="btn btn-s btn-sm" onClick={() => loadFlashcards(nextRec?.topic)}>Refresh</button>
-                          </div>
-                          <div className={`fc-wrap${fcFlipped?' flipped':''}`} onClick={() => setFcFlipped(f=>!f)}>
-                            <div className="fc-inner">
-                              <div className="fc-front"><div className="serif" style={{fontSize:18}}>{flashcards[fcIdx]?.q}</div></div>
-                              <div className="fc-back"><div>{flashcards[fcIdx]?.a}</div></div>
-                            </div>
-                          </div>
-                          <div style={{display:'flex',gap:10,justifyContent:'center',marginTop:14}}>
-                            <button className="btn btn-s btn-sm" onClick={() => {setFcIdx(i=>(i-1+flashcards.length)%flashcards.length);setFcFlipped(false)}}>Previous</button>
-                            <button className="btn btn-p btn-sm" onClick={() => {setFcIdx(i=>(i+1)%flashcards.length);setFcFlipped(false)}}>Next Card</button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-
-                  {lessonTab === 'resources' && (
-                    <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                      {[
-                        {name:'Past Paper Questions — '+( nextRec?.topic||'Pythagoras'),meta:'PDF · Cambridge 2018–2023',action:'Download'},
-                        {name:'Worksheet — '+(nextRec?.topic||'Geometry'),meta:'PDF · 12 practice questions',action:'Download'},
-                        {name:'Khan Academy — '+(nextRec?.topic||'Pythagoras'),meta:'External · Interactive',action:'Open'},
-                      ].map((r,i) => (
-                        <div key={i} className="card-sm" style={{display:'flex',gap:12,alignItems:'center'}}>
-                          <div style={{width:40,height:40,borderRadius:'var(--rmd)',background:'var(--b50)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                          </div>
-                          <div style={{flex:1}}><div style={{fontWeight:600,fontSize:13.5}}>{r.name}</div><div style={{fontSize:11.5,color:'var(--s400)'}}>{r.meta}</div></div>
-                          <button className="btn btn-s btn-sm" onClick={() => toast.ok(`${r.action}ing…`)}>{r.action}</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Lesson path sidebar */}
-                <div className="card" style={{padding:16}}>
-                  <div className="card-label" style={{marginBottom:12}}>Your Progress Path</div>
-                  {subjects.find(s => s.name === (nextRec?.subject || 'Mathematics'))?.topics.slice(0,6).map((t,i) => (
-                    <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'9px 0',borderBottom:'1px solid var(--border)',cursor:'pointer'}}
-                      onClick={() => { loadPractice(nextRec?.subject, t.name); goTo('practice') }}>
-                      <div style={{width:22,height:22,borderRadius:'50%',background:t.pct>=80?'var(--g500)':t.pct>=60?'var(--b600)':'var(--s200)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                        {t.pct >= 80
-                          ? <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                          : <span className="mono" style={{fontSize:9,fontWeight:700,color:t.pct>=60?'#fff':'var(--s500)'}}>{t.pct}%</span>
-                        }
-                      </div>
-                      <span style={{fontSize:12.5,flex:1,color:t.pct>=60?'var(--s800)':'var(--s500)',fontWeight:t.name===nextRec?.topic?700:400}}>{t.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+          {page === 'lessons' && <LessonPlayerTab user={user} toast={toast} />}
 
           {/* ════════════════════════════════════════════
               ADAPTIVE PRACTICE — live questions from API
