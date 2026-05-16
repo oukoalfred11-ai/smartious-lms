@@ -347,10 +347,83 @@ const TIMETABLE = [
 ]
 
 // ─────────────────────────────────────────────────────────
+// ── ADVISORY DASHBOARD ────────────────────────────────────
+// Shown to Study Abroad and Pre-University students. These are
+// advisory programmes — the full experience (application tracking,
+// course pathways, counselling) is a separate build track. For now
+// this is a clean, welcoming placeholder.
+function AdvisoryDashboard({ programme, deliveryMode, firstName }) {
+  const COPY = {
+    'Study Abroad': {
+      tag: 'Study Abroad Programme',
+      blurb: 'Your dedicated advisor will guide you through every step of your study-abroad journey — university selection, applications, documentation, and visa support.',
+      next: 'Your advisor will reach out shortly to begin your consultation. You can also contact the Smartious team any time at hellosmartious@gmail.com.',
+    },
+    'Pre-University': {
+      tag: 'Pre-University Programme',
+      blurb: 'A programme designed to keep you engaged and prepared for university — exploring career pathways, course options, and the units that map to them.',
+      next: 'Your personalised pathway and course overview are being prepared. Your advisor will be in touch soon to plan your next steps.',
+    },
+  }
+  const c = COPY[programme] || COPY['Study Abroad']
+
+  return (
+    <div style={{ maxWidth: 640 }}>
+      <div style={{
+        background: `linear-gradient(135deg, ${TOKENS.crimson} 0%, ${TOKENS.crimsonD || '#5A0B1B'} 100%)`,
+        borderRadius: 14, padding: '30px 32px', color: '#FBFAF5',
+        boxShadow: '0 12px 40px rgba(125,16,37,.20)',
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#F0CC5A' }}>
+          {c.tag}{deliveryMode ? ` · ${deliveryMode}` : ''}
+        </div>
+        <h1 style={{ fontFamily: "'Instrument Serif',serif", fontSize: 30, fontWeight: 400, margin: '8px 0 0', lineHeight: 1.15 }}>
+          Welcome, {firstName}
+        </h1>
+        <p style={{ fontSize: 14, opacity: .9, marginTop: 8, lineHeight: 1.6 }}>
+          {c.blurb}
+        </p>
+      </div>
+
+      <div style={{
+        marginTop: 16, background: '#fff',
+        border: `1px solid ${TOKENS.line || '#E8E2D6'}`, borderRadius: 12,
+        padding: '22px 24px',
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: TOKENS.crimson, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 8 }}>
+          What happens next
+        </div>
+        <p style={{ fontSize: 13.5, color: TOKENS.ink || '#1A1A1A', lineHeight: 1.6, margin: 0 }}>
+          {c.next}
+        </p>
+      </div>
+
+      <div style={{
+        marginTop: 12, padding: '14px 18px',
+        background: TOKENS.goldPale || '#FBF6E3',
+        border: `1px solid ${TOKENS.gold || '#C9A030'}`, borderRadius: 10,
+        fontSize: 12.5, color: TOKENS.crimson, lineHeight: 1.5,
+      }}>
+        Your full programme dashboard is being prepared and will appear here soon.
+      </div>
+    </div>
+  )
+}
+
 export default function StudentPortal() {
   const { user } = useAuth()
   const toast    = useToast()
   const store    = useStore()
+
+  // ── Programme ────────────────────────────────────────
+  // Academic programmes (Homeschool, Tuition, IUFP) get the full
+  // learning experience. Advisory programmes (Study Abroad,
+  // Pre-University) get a focused placeholder dashboard for now —
+  // their full experience is a separate build track.
+  const programme = user?.programme || 'Homeschool'
+  const deliveryMode = user?.deliveryMode || ''
+  const ADVISORY_PROGRAMMES = ['Study Abroad', 'Pre-University']
+  const isAdvisory = ADVISORY_PROGRAMMES.includes(programme)
 
   // ── Learning mode (set at login) ─────────────────────
   // 'individual' = personalised AI mastery system
@@ -362,6 +435,14 @@ export default function StudentPortal() {
   // ── Navigation ───────────────────────────────────────
   const [page,        setPage]        = useState('dashboard')
   const [collapsed,   setCollapsed]   = useState(false)
+
+  // Advisory students may only visit dashboard / profile / subscription.
+  // If they somehow land elsewhere, send them back to the dashboard.
+  useEffect(() => {
+    if (isAdvisory && !['dashboard', 'profile', 'subscription'].includes(page)) {
+      setPage('dashboard')
+    }
+  }, [isAdvisory, page])
 
   // ── Mastery (from API) ───────────────────────────────
   const [mastery,       setMastery]       = useState(null)
@@ -615,8 +696,15 @@ export default function StudentPortal() {
     page === 'achievements' ? 'Achievements' :
     page === 'subscription' ? 'Subscription' : 'Portal'
 
+  const programmeLine = (() => {
+    const p = user?.programme || 'Homeschool'
+    const mode = user?.deliveryMode ? ` (${user.deliveryMode})` : ''
+    const curr = (typeof user?.curriculum === 'string' && user.curriculum) ? ` · ${user.curriculum}` : ''
+    return `${p}${mode}${curr}`
+  })()
+
   const pageEyebrow =
-    page === 'dashboard'    ? 'Today\u2019s overview' :
+    page === 'dashboard'    ? programmeLine :
     page === 'practice'     ? 'Adaptive learning' :
     page === 'homework'     ? 'Assignments' :
     page === 'tutor'        ? 'AI companion' :
@@ -756,6 +844,7 @@ export default function StudentPortal() {
               )}
               {sec.items
                 .filter(item => !item.groupOnly || learningMode === 'group')
+                .filter(item => !isAdvisory || ['dashboard', 'profile', 'subscription'].includes(item.id))
                 .map(item => {
                   const active = page === item.id
                   return (
@@ -1466,7 +1555,10 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               ADAPTIVE PRACTICE — live questions from API
           ════════════════════════════════════════════ */}
-          {page === 'dashboard' && <DashboardTab user={user} store={store} setPage={setPage} setLearningMode={setLearningMode} learningMode={learningMode} toast={toast} />}
+          {page === 'dashboard' && isAdvisory && (
+            <AdvisoryDashboard programme={programme} deliveryMode={deliveryMode} firstName={user?.firstName || 'there'} />
+          )}
+          {page === 'dashboard' && !isAdvisory && <DashboardTab user={user} store={store} setPage={setPage} setLearningMode={setLearningMode} learningMode={learningMode} toast={toast} />}
           {page === 'practice' && <PracticeTab user={user} toast={toast} goTo={goTo} />}
           {page === 'homework' && <HomeworkTab user={user} toast={toast} />}
 
