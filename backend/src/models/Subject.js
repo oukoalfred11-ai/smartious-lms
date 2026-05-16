@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const subjectSchema = new mongoose.Schema({
   curriculum: {
     type: String,
-    enum: ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American'],
+    enum: ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American', 'IUFP'],
     required: true,
     trim: true
   },
