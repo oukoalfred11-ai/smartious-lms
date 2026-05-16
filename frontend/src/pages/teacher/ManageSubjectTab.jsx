@@ -395,6 +395,7 @@ export default function ManageSubjectTab({ user, toast }) {
                     <LessonRow
                       key={l._id}
                       lesson={l}
+                      isAdmin={user?.role === 'admin'}
                       onEdit={() => { setEditingLesson(l); setShowAddLesson(true) }}
                       onDelete={() => deleteLesson(l)}
                       onTogglePublish={() => togglePublish(l)}
@@ -527,7 +528,7 @@ function SubjectCard({ subject, onOpen }) {
 // ═══════════════════════════════════════════════════════════
 // LESSON ROW
 // ═══════════════════════════════════════════════════════════
-function LessonRow({ lesson, onEdit, onDelete, onTogglePublish }) {
+function LessonRow({ lesson, isAdmin, onEdit, onDelete, onTogglePublish }) {
   const isPublished = lesson.status === 'published'
   return (
     <div className="card" style={{
@@ -568,6 +569,11 @@ function LessonRow({ lesson, onEdit, onDelete, onTogglePublish }) {
           {!lesson.videoEmbedId && !lesson.notesPdfUrl && (
             <span style={{ color: '#B45309' }}>No content yet</span>
           )}
+          {lesson.teacherId && (lesson.teacherId.firstName || lesson.teacherId.lastName) && (
+            <span style={{ color: BRAND.inkMute }}>
+              By {lesson.teacherId.firstName || ''} {lesson.teacherId.lastName || ''}
+            </span>
+          )}
         </div>
       </div>
       <div style={{
@@ -596,16 +602,18 @@ function LessonRow({ lesson, onEdit, onDelete, onTogglePublish }) {
           }}>
           Edit
         </button>
-        <button onClick={onDelete} title="Delete lesson"
-          style={{
-            background: '#FEE2E2', color: '#B91C1C', border: 'none',
-            padding: '6px 10px', borderRadius: 6, cursor: 'pointer',
-          }}>
-          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
-          </svg>
-        </button>
+        {isAdmin && (
+          <button onClick={onDelete} title="Delete lesson (admin only)"
+            style={{
+              background: '#FEE2E2', color: '#B91C1C', border: 'none',
+              padding: '6px 10px', borderRadius: 6, cursor: 'pointer',
+            }}>
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   )
