@@ -14,25 +14,28 @@ let transporter = null;
 function initializeTransporter() {
   if (transporter) return transporter;
 
-  // Get SMTP configuration from environment
-  const smtpHost = process.env.SMTP_HOST;
-  const smtpPort = process.env.SMTP_PORT || 587;
+  // Get SMTP configuration from environment.
+  // Accept BOTH naming conventions — some deployments use EMAIL_*,
+  // others use SMTP_*. We fall back across both so a name mismatch
+  // can't silently disable email.
+  const smtpHost = process.env.SMTP_HOST || process.env.EMAIL_HOST;
+  const smtpPort = process.env.SMTP_PORT || process.env.EMAIL_PORT || 587;
   const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
-  const smtpPass = process.env.SMTP_PASS;
+  const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS;
 
   // Validate required fields
   if (!smtpHost) {
-    console.error('❌ SMTP_HOST not configured in .env');
+    console.error('❌ SMTP_HOST / EMAIL_HOST not configured in environment');
     return null;
   }
 
   if (!smtpUser) {
-    console.error('❌ SMTP_USER (or EMAIL_USER) not configured in .env');
+    console.error('❌ SMTP_USER / EMAIL_USER not configured in environment');
     return null;
   }
 
   if (!smtpPass) {
-    console.error('❌ SMTP_PASS not configured in .env');
+    console.error('❌ SMTP_PASS / EMAIL_PASSWORD not configured in environment');
     return null;
   }
 
