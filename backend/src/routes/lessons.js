@@ -82,9 +82,10 @@ async function getTeacherSubjects(teacher) {
   });
 }
 
-// Compute next lesson order within a subject + teacher pair
-async function nextOrder(teacherId, subjectId) {
-  const last = await Lesson.findOne({ teacherId, subjectId })
+// Compute next lesson order within a subject (Model A: subject-scoped,
+// not teacher-scoped — all teachers of a subject share one ordered list)
+async function nextOrder(subjectId) {
+  const last = await Lesson.findOne({ subjectId })
     .sort({ order: -1 })
     .select('order')
     .lean();
@@ -104,13 +105,13 @@ router.get('/my-subjects', auth, requireRole('teacher', 'admin'), async (req, re
       subjects = await getTeacherSubjects(req.user);
     }
 
-    // Count lessons per subject (for the teacher's own lessons)
+    // Count lessons per subject. MODEL A: lessons belong to the subject,
+    // so the count is the same for every teacher of that subject.
     const subjectIds = subjects.map(s => s._id);
     const lessonCounts = await Lesson.aggregate([
       {
         $match: {
           subjectId: { $in: subjectIds.map(id => new mongoose.Types.ObjectId(String(id))) },
-          ...(req.user.role === 'teacher' ? { teacherId: req.user._id } : {}),
         }
       },
       {
@@ -139,17 +140,25 @@ router.get('/my-subjects', auth, requireRole('teacher', 'admin'), async (req, re
 
 // ─────────────────────────────────────────────────────────
 // GET /api/lessons/subject/:subjectId
+// MODEL A: returns ALL lessons for the subject. Any teacher with
+// the subject in their teachingSpecialties may view them.
 // ─────────────────────────────────────────────────────────
 router.get('/subject/:subjectId', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.subjectId))
       return res.status(400).json({ success: false, message: 'Invalid subject id.' });
 
-    const filter = { subjectId: req.params.subjectId };
-    if (req.user.role !== 'admin') filter.teacherId = req.user._id;
+    // Authorise teachers: must have this subject in their specialties
+    if (req.user.role === 'teacher') {
+      const hasSpec = (req.user.teachingSpecialties || [])
+        .some(s => String(s.subjectId) === String(req.params.subjectId));
+      if (!hasSpec)
+        return res.status(403).json({ success: false, message: 'You do not teach this subject.' });
+    }
 
-    const lessons = await Lesson.find(filter)
+    const lessons = await Lesson.find({ subjectId: req.params.subjectId })
       .sort({ termIndex: 1, order: 1 })
+      .populate('teacherId', 'firstName lastName')   // creator label only
       .lean();
 
     res.json({ success: true, data: { lessons } });
@@ -187,8 +196,9 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
         return res.status(403).json({ success: false, message: 'You do not teach this subject.' });
     }
 
+    // teacherId here is recorded as createdBy / original author only.
     const teacherId = req.user._id;
-    const ord = Number.isFinite(Number(order)) ? Number(order) : await nextOrder(teacherId, subjectId);
+    const ord = Number.isFinite(Number(order)) ? Number(order) : await nextOrder(subjectId);
 
     const lesson = await Lesson.create({
       subjectId, teacherId,
@@ -233,10 +243,10 @@ router.post('/bulk', auth, requireRole('teacher', 'admin'), async (req, res) => 
         return res.status(403).json({ success: false, message: 'You do not teach this subject.' });
     }
 
-    const teacherId = req.user._id;
+    const teacherId = req.user._id;   // createdBy / original author
     const baseOrder = Number.isFinite(Number(startOrder))
       ? Number(startOrder)
-      : await nextOrder(teacherId, subjectId);
+      : await nextOrder(subjectId);
 
     // Filter blanks, trim, dedupe within this batch
     const cleanTitles = titles
@@ -306,21 +316,27 @@ router.get('/:id', auth, async (req, res) => {
       .lean();
     if (!lesson) return res.status(404).json({ success: false, message: 'Lesson not found.' });
 
-    const isOwner = String(lesson.teacherId?._id || lesson.teacherId) === String(req.user._id);
     const isAdmin = req.user.role === 'admin';
+    const subjectId = lesson.subjectId?._id || lesson.subjectId;
+    let canRead = isAdmin;
 
-    let canRead = isOwner || isAdmin;
+    // MODEL A: a teacher may read any lesson for a subject in their
+    // teachingSpecialties — not just lessons they personally created.
+    if (!canRead && req.user.role === 'teacher') {
+      const hasSpec = (req.user.teachingSpecialties || [])
+        .some(s => String(s.subjectId) === String(subjectId));
+      if (hasSpec) canRead = true;
+    }
 
-    // Students can read the lesson if they're allocated to this teacher
-    // for this subject (which is how the student-side Lesson Player will fetch).
+    // Students can read a PUBLISHED lesson if they have an Active
+    // allocation for its subject (the allocated teacher is irrelevant
+    // to access — content belongs to the subject).
     if (!canRead && req.user.role === 'student') {
       const alloc = await Allocation.findOne({
         studentId: req.user._id,
-        subjectId: lesson.subjectId._id,
-        teacherId: lesson.teacherId._id,
+        subjectId: subjectId,
         status: 'Active',
       });
-      // Only allow if lesson is published
       if (alloc && lesson.status === 'published') canRead = true;
     }
 
@@ -345,8 +361,14 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
     const lesson = await Lesson.findById(req.params.id);
     if (!lesson) return res.status(404).json({ success: false, message: 'Lesson not found.' });
 
-    if (req.user.role !== 'admin' && String(lesson.teacherId) !== String(req.user._id))
-      return res.status(403).json({ success: false, message: 'Not your lesson.' });
+    // MODEL A: any teacher with this subject in their teachingSpecialties
+    // may edit the lesson — content belongs to the subject, not a person.
+    if (req.user.role !== 'admin') {
+      const hasSpec = (req.user.teachingSpecialties || [])
+        .some(s => String(s.subjectId) === String(lesson.subjectId));
+      if (!hasSpec)
+        return res.status(403).json({ success: false, message: 'You do not teach this subject.' });
+    }
 
     const allowed = [
       'title', 'description', 'termIndex', 'order',
@@ -375,18 +397,18 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
 });
 
 // ─────────────────────────────────────────────────────────
-// DELETE /api/lessons/:id
+// DELETE /api/lessons/:id — ADMIN ONLY
+// MODEL A decision: shared edit rights, but deletion is restricted
+// to admin to protect against accidental loss of a shared library.
+// Teachers who want a lesson gone should unpublish it, or ask admin.
 // ─────────────────────────────────────────────────────────
-router.delete('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'Invalid lesson id.' });
 
     const lesson = await Lesson.findById(req.params.id);
     if (!lesson) return res.status(404).json({ success: false, message: 'Lesson not found.' });
-
-    if (req.user.role !== 'admin' && String(lesson.teacherId) !== String(req.user._id))
-      return res.status(403).json({ success: false, message: 'Not your lesson.' });
 
     // Best-effort cleanup of Cloudinary PDF (don't fail the delete if it errors)
     if (lesson.notesPdfPublicId) {
@@ -431,14 +453,14 @@ router.get('/student/my-subjects', auth, async (req, res) => {
     if (valid.length === 0)
       return res.json({ success: true, data: { subjects: [] } });
 
-    // Pull lesson counts per (teacher, subject) — students see only the
-    // lessons published by their allocated teacher
+    // Lesson counts per subject. MODEL A: lessons belong to the subject,
+    // so we count all published lessons for the subject — the allocated
+    // teacher's identity does not filter the content.
     const LessonProgress = require('../models/LessonProgress');
     const subjects = [];
     for (const a of valid) {
       const totalLessons = await Lesson.countDocuments({
         subjectId: a.subjectId._id,
-        teacherId: a.teacherId._id,
         status: 'published',
       });
       const masteredCount = await LessonProgress.countDocuments({
@@ -492,7 +514,6 @@ router.get('/student/subject/:subjectId', auth, async (req, res) => {
 
     const lessons = await Lesson.find({
       subjectId: req.params.subjectId,
-      teacherId: allocation.teacherId._id,
       status: 'published',
     }).sort({ termIndex: 1, order: 1 }).lean();
 
