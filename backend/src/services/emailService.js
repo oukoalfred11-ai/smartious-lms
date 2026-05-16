@@ -672,6 +672,99 @@ async function sendLeaveRequestSubmittedEmail(options) {
   }
 }
 
+/**
+ * Send a branded admin → teacher email.
+ * Generic sender used by the Teacher Management "Email" tab.
+ * The admin composes plain-text paragraphs; we wrap them in the
+ * Smartious crimson/gold HTML shell. Plain-text line breaks become
+ * paragraph breaks.
+ *
+ * @param {object} options
+ * @param {string} options.to            recipient email
+ * @param {string} options.teacherName   recipient display name
+ * @param {string} options.subject       email subject
+ * @param {string} options.bodyText      plain-text body (admin-written)
+ * @param {string} [options.kind]        template kind label (memo / notice / etc.)
+ * @param {string} [options.senderName]  admin/sender display name
+ */
+async function sendTeacherMemoEmail(options) {
+  try {
+    const {
+      to, teacherName, subject, bodyText,
+      kind = 'memo', senderName = 'Smartious Administration',
+    } = options;
+
+    if (!to || !subject || !bodyText) {
+      return { success: false, error: 'Missing required email fields.' };
+    }
+
+    const transporterInstance = transporter || initializeTransporter();
+    if (!transporterInstance) {
+      return { success: false, error: 'Email service is not configured.' };
+    }
+
+    // Convert plain-text body to HTML paragraphs. Blank lines split
+    // paragraphs; single newlines become <br>. Escape HTML first.
+    const esc = (s) => String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const paragraphs = String(bodyText)
+      .split(/\n\s*\n/)
+      .map(p => p.trim())
+      .filter(Boolean)
+      .map(p => `<p style="margin:0 0 14px;line-height:1.6;color:#2A2A2A;font-size:14px;">${esc(p).replace(/\n/g, '<br>')}</p>`)
+      .join('');
+
+    // Kind → small label shown in the email header strip
+    const KIND_LABELS = {
+      memo:         'Internal Memo',
+      meeting:      'Meeting Request',
+      commendation: 'Letter of Commendation',
+      notice:       'Formal Notice',
+      custom:       'Message',
+    };
+    const kindLabel = KIND_LABELS[kind] || 'Message';
+
+    const html = `
+      <div style="font-family:Georgia,'Times New Roman',serif;max-width:620px;margin:0 auto;background:#FBFAF5;">
+        <div style="background:linear-gradient(135deg,#7D1025 0%,#5A0B1B 100%);padding:28px 32px;">
+          <div style="color:#F0CC5A;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;font-family:Arial,sans-serif;">
+            Smartious Homeschool &amp; eSchool
+          </div>
+          <div style="color:#FBFAF5;font-size:24px;margin-top:6px;">${esc(kindLabel)}</div>
+        </div>
+        <div style="padding:28px 32px;background:#FFFFFF;">
+          <p style="margin:0 0 18px;font-size:14px;color:#2A2A2A;">Dear ${esc(teacherName || 'Colleague')},</p>
+          ${paragraphs}
+          <div style="margin-top:24px;padding-top:18px;border-top:1px solid #E8E2D6;">
+            <p style="margin:0;font-size:14px;color:#2A2A2A;">Kind regards,</p>
+            <p style="margin:2px 0 0;font-size:14px;font-weight:bold;color:#7D1025;">${esc(senderName)}</p>
+            <p style="margin:2px 0 0;font-size:12px;color:#6B6B6B;font-family:Arial,sans-serif;">Smartious Homeschool &amp; eSchool</p>
+          </div>
+        </div>
+        <div style="padding:16px 32px;background:#FBF6E3;text-align:center;">
+          <p style="margin:0;font-size:11px;color:#8A6D1F;font-family:Arial,sans-serif;">
+            This message was sent to ${esc(to)} by Smartious Administration.
+          </p>
+        </div>
+      </div>
+    `;
+
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
+      to,
+      subject,
+      html,
+    };
+
+    const info = await transporterInstance.sendMail(mailOptions);
+    console.log(`✓ Teacher ${kind} email sent to ${to}`);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('✗ Failed to send teacher email:', error.message);
+    return { success: false, error: error.message };
+  }
+}
+
 module.exports = {
   initializeTransporter,
   sendTeacherAllocationNotification,
@@ -682,6 +775,6 @@ module.exports = {
   sendLeaveRequestSubmittedEmail,
   sendLeaveRequestApprovedEmail,
   sendLeaveRequestRejectedEmail,
-  sendAdminLeaveRequestNotification
+  sendAdminLeaveRequestNotification,
+  sendTeacherMemoEmail
 };
-
