@@ -758,7 +758,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
             </>
           }
         >
-          <UserFormFields userForm={userForm} setUserForm={setUserForm} />
+          <UserFormFields userForm={userForm} setUserForm={setUserForm} toast={toast} />
         </Modal>
       )}
 
@@ -800,7 +800,295 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
 // ──────────────────────────────────────────────────────
 // USER FORM FIELDS — Phase: profiles + admission lookup
 // ──────────────────────────────────────────────────────
-function UserFormFields({ userForm, setUserForm }) {
+// ── PARENT / GUARDIAN LINK (student edit form) ────────────
+// Shows the student's currently linked parent and lets admin
+// link an existing parent, create one inline, or unlink.
+// One parent per student. Only rendered when editing a saved
+// student (a studentId is required for the link endpoints).
+function ParentLinkSection({ studentId, toast }) {
+  const [linked, setLinked]   = useState(null)   // { _id, name, email } | null
+  const [loading, setLoading] = useState(true)
+  const [mode, setMode]       = useState('view') // view | pickExisting | createNew
+  const [working, setWorking] = useState(false)
+
+  // pick-existing state
+  const [parents, setParents] = useState([])
+  const [search, setSearch]   = useState('')
+  const [parentsLoaded, setParentsLoaded] = useState(false)
+
+  // create-new state
+  const [np, setNp] = useState({ firstName: '', lastName: '', email: '', phone: '' })
+
+  // Load the student's current parent
+  const loadCurrent = async () => {
+    setLoading(true)
+    try {
+      const { data } = await api.get('/users/' + studentId)
+      const student = data.user || data.data?.user || data
+      const pid = (student.linkedParents && student.linkedParents[0]) || student.parentId
+      if (pid) {
+        // pid may be an object (populated) or an id
+        if (typeof pid === 'object' && pid.firstName !== undefined) {
+          setLinked({
+            _id: pid._id,
+            name: `${pid.firstName || ''} ${pid.lastName || ''}`.trim() || pid.email,
+            email: pid.email || '',
+          })
+        } else {
+          const pRes = await api.get('/users/' + (pid._id || pid))
+          const p = pRes.data.user || pRes.data.data?.user || pRes.data
+          setLinked({
+            _id: p._id,
+            name: `${p.firstName || ''} ${p.lastName || ''}`.trim() || p.email,
+            email: p.email || '',
+          })
+        }
+      } else {
+        setLinked(null)
+      }
+    } catch (e) {
+      // non-fatal
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => { if (studentId) loadCurrent() }, [studentId])
+
+  const loadParents = async () => {
+    if (parentsLoaded) return
+    try {
+      const { data } = await api.get('/users', { params: { role: 'parent' } })
+      setParents(data.users || data.data?.users || [])
+      setParentsLoaded(true)
+    } catch (e) {
+      toast?.error?.('Failed to load parents.')
+    }
+  }
+
+  const linkExisting = async (parentId) => {
+    setWorking(true)
+    try {
+      const { data } = await api.post('/users/' + studentId + '/link-parent', { parentId })
+      if (data?.success) {
+        setLinked(data.data.parent)
+        setMode('view')
+        toast?.ok?.('Parent linked.')
+      } else {
+        toast?.error?.(data?.message || 'Link failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Link failed.')
+    } finally {
+      setWorking(false)
+    }
+  }
+
+  const createAndLink = async () => {
+    if (!np.firstName.trim() || !np.email.trim()) {
+      toast?.error?.('Parent first name and email are required.')
+      return
+    }
+    setWorking(true)
+    try {
+      const { data } = await api.post('/users/' + studentId + '/create-and-link-parent', np)
+      if (data?.success) {
+        setLinked(data.data.parent)
+        setMode('view')
+        setNp({ firstName: '', lastName: '', email: '', phone: '' })
+        toast?.ok?.(data.message || 'Parent linked.')
+      } else {
+        toast?.error?.(data?.message || 'Failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Failed.')
+    } finally {
+      setWorking(false)
+    }
+  }
+
+  const unlink = async () => {
+    if (!window.confirm('Unlink this parent from the student?')) return
+    setWorking(true)
+    try {
+      const { data } = await api.delete('/users/' + studentId + '/parent')
+      if (data?.success) {
+        setLinked(null)
+        toast?.ok?.('Parent unlinked.')
+      } else {
+        toast?.error?.(data?.message || 'Failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Failed.')
+    } finally {
+      setWorking(false)
+    }
+  }
+
+  const filteredParents = parents.filter(p => {
+    if (!search.trim()) return true
+    const q = search.toLowerCase()
+    const name = `${p.firstName || ''} ${p.lastName || ''}`.toLowerCase()
+    return name.includes(q) || (p.email || '').toLowerCase().includes(q)
+  })
+
+  const fi = {
+    width: '100%', boxSizing: 'border-box',
+    padding: '8px 11px', borderRadius: 6,
+    border: '1.5px solid ' + TOKENS.s100, fontSize: 13, fontFamily: 'inherit',
+  }
+
+  return (
+    <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid ' + TOKENS.s100 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: TOKENS.crimson, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+        Parent / Guardian
+      </div>
+
+      {loading ? (
+        <div style={{ fontSize: 12.5, color: TOKENS.s400 }}>Loading…</div>
+      ) : (
+        <>
+          {/* Current parent */}
+          {linked ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '10px 12px', background: TOKENS.goldPale,
+              border: '1px solid ' + TOKENS.gold, borderRadius: 8,
+              marginBottom: mode === 'view' ? 0 : 10,
+            }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: TOKENS.crimson }}>{linked.name}</div>
+                <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>{linked.email}</div>
+              </div>
+              <button type="button" onClick={unlink} disabled={working}
+                style={{
+                  background: 'transparent', color: '#B91C1C',
+                  border: '1px solid #FCA5A5', borderRadius: 5,
+                  padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                }}>
+                Unlink
+              </button>
+            </div>
+          ) : (
+            mode === 'view' && (
+              <div style={{ fontSize: 12.5, color: TOKENS.s500, marginBottom: 10 }}>
+                No parent linked. Link one so they receive teacher reports and updates.
+              </div>
+            )
+          )}
+
+          {/* Mode switch buttons */}
+          {mode === 'view' && (
+            <div style={{ display: 'flex', gap: 8, marginTop: linked ? 10 : 0 }}>
+              <button type="button" onClick={() => { setMode('pickExisting'); loadParents() }}
+                style={{
+                  background: '#fff', color: TOKENS.crimson,
+                  border: '1.5px solid ' + TOKENS.crimson, borderRadius: 6,
+                  padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                }}>
+                {linked ? 'Change Parent' : 'Link Existing Parent'}
+              </button>
+              <button type="button" onClick={() => setMode('createNew')}
+                style={{
+                  background: TOKENS.crimson, color: '#fff', border: 'none', borderRadius: 6,
+                  padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                }}>
+                + Create New Parent
+              </button>
+            </div>
+          )}
+
+          {/* Pick existing */}
+          {mode === 'pickExisting' && (
+            <div>
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search parents by name or email…" style={{ ...fi, marginBottom: 8 }}/>
+              <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid ' + TOKENS.s100, borderRadius: 6, padding: 5 }}>
+                {!parentsLoaded ? (
+                  <div style={{ padding: 12, fontSize: 12, color: TOKENS.s400, textAlign: 'center' }}>Loading…</div>
+                ) : filteredParents.length === 0 ? (
+                  <div style={{ padding: 12, fontSize: 12, color: TOKENS.s400, textAlign: 'center' }}>
+                    No parent accounts found. Use "Create New Parent" instead.
+                  </div>
+                ) : filteredParents.map(p => (
+                  <div key={p._id} onClick={() => !working && linkExisting(p._id)}
+                    style={{
+                      padding: '7px 10px', cursor: working ? 'wait' : 'pointer',
+                      borderRadius: 4, marginBottom: 2,
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = TOKENS.goldPale}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: TOKENS.s900 }}>
+                      {`${p.firstName || ''} ${p.lastName || ''}`.trim() || p.email}
+                    </div>
+                    <div style={{ fontSize: 11, color: TOKENS.s500 }}>{p.email}</div>
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => setMode('view')}
+                style={{
+                  marginTop: 8, background: 'transparent', color: TOKENS.s500,
+                  border: '1px solid ' + TOKENS.s100, borderRadius: 6,
+                  padding: '6px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                }}>
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {/* Create new */}
+          {mode === 'createNew' && (
+            <div>
+              <div className="fr2">
+                <div className="fg">
+                  <label className="fl">First Name *</label>
+                  <input style={fi} value={np.firstName} onChange={e => setNp(s => ({ ...s, firstName: e.target.value }))}/>
+                </div>
+                <div className="fg">
+                  <label className="fl">Last Name</label>
+                  <input style={fi} value={np.lastName} onChange={e => setNp(s => ({ ...s, lastName: e.target.value }))}/>
+                </div>
+              </div>
+              <div className="fr2">
+                <div className="fg">
+                  <label className="fl">Email *</label>
+                  <input style={fi} value={np.email} onChange={e => setNp(s => ({ ...s, email: e.target.value }))}/>
+                </div>
+                <div className="fg">
+                  <label className="fl">Phone</label>
+                  <input style={fi} value={np.phone} onChange={e => setNp(s => ({ ...s, phone: e.target.value }))}/>
+                </div>
+              </div>
+              <div style={{ fontSize: 11, color: TOKENS.s400, margin: '2px 0 10px' }}>
+                A parent account is created with a temporary password, and a welcome email is sent.
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" onClick={() => setMode('view')} disabled={working}
+                  style={{
+                    background: 'transparent', color: TOKENS.s500,
+                    border: '1px solid ' + TOKENS.s100, borderRadius: 6,
+                    padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  }}>
+                  Cancel
+                </button>
+                <button type="button" onClick={createAndLink} disabled={working}
+                  style={{
+                    background: working ? '#9CA3AF' : TOKENS.crimson, color: '#fff',
+                    border: 'none', borderRadius: 6,
+                    padding: '7px 16px', fontSize: 12, fontWeight: 700,
+                    cursor: working ? 'not-allowed' : 'pointer',
+                  }}>
+                  {working ? 'Saving…' : 'Create & Link'}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+function UserFormFields({ userForm, setUserForm, toast }) {
   const upd = (k, v) => setUserForm(f => ({ ...f, [k]: v }))
 
   const [catalog, setCatalog] = useState({ curricula: [], gradesByCurriculum: {}, subjects: [] })
@@ -1098,6 +1386,20 @@ function UserFormFields({ userForm, setUserForm }) {
               <div style={{ fontSize: 11, color: TOKENS.s400, marginTop: 4 }}>Confidential. Only visible to admin and assigned teachers.</div>
             </div>
           </div>
+
+          {/* Parent / Guardian — only for an already-saved student */}
+          {userForm._id ? (
+            <ParentLinkSection studentId={userForm._id} toast={toast} />
+          ) : (
+            <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid ' + TOKENS.s100 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: TOKENS.crimson, letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6 }}>
+                Parent / Guardian
+              </div>
+              <div style={{ fontSize: 12.5, color: TOKENS.s500 }}>
+                Save the student first, then reopen to link a parent or guardian.
+              </div>
+            </div>
+          )}
         </>
       )}
 
