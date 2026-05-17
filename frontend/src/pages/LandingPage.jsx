@@ -2380,10 +2380,11 @@ export default function LandingPage() {
 
     const isOnline = enrollForm.assessmentMode === 'online'
 
-    // Auto-score only when the online test was actually completed
+    // Assessment is no longer taken on the landing page — it is
+    // completed in the student portal after enrolment.
     let correctCount = 0, mathCorrect = 0, mathTotal = 0, engCorrect = 0, engTotal = 0
-    let assessmentLines = '— To be administered in person —'
-    let scorePct = 0, scoreBand = 'Pending in-person assessment'
+    let assessmentLines = '— Placement assessment to be completed in the student portal after enrolment —'
+    let scorePct = 0, scoreBand = 'Pending — student portal assessment'
     if (isOnline && assessment.length > 0) {
       assessmentLines = assessment.map((q, i) => {
         const ans = enrollForm.answers[q.id] || '— not answered —'
@@ -2461,7 +2462,7 @@ export default function LandingPage() {
         body: JSON.stringify(payload),
       })
       if (!res.ok) throw new Error('Network error')
-      setWizStep(5); setWizDone(true)
+      setWizStep(3); setWizDone(true)
     } catch (e) {
       setEnrollError('Submission failed. Please try again or WhatsApp us at +254 745 021 212.')
     }
@@ -3612,13 +3613,13 @@ export default function LandingPage() {
           <div className="pg-hero"><div className="wrap">
             <div className="eyebrow">Join Smartious</div>
             <h1 className="pg-h">Start Your <em>Journey Today</em></h1>
-            <p className="pg-sub" style={{marginTop:12}}>Enrollment takes less than 10 minutes. $15 placement fee. First lesson within 48 hours.</p>
+            <p className="pg-sub" style={{marginTop:12}}>Enrollment takes less than 5 minutes. Our team contacts you within 48 hours.</p>
           </div></div>
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div className="wiz-shell">
               {/* Steps */}
               <div className="wiz-steps">
-                {[['Programme'],['Your Details'],['Assessment Fee'],['Placement Test'],['All Done!']].map(([l],i) => (
+                {[['Programme'],['Your Details'],['All Done!']].map(([l],i) => (
                   <div key={i} className={`wst${wizStep===i+1?' on':''}`} id={`wst${i+1}`} onClick={() => i < wizStep - 1 && setWizStep(i+1)}>
                     <div className="ws-n">{wizStep > i+1 ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg> : i+1}</div>
                     <div className="ws-l">{l}</div>
@@ -3740,7 +3741,7 @@ export default function LandingPage() {
                     {enrollError && <div style={{marginTop:14,color:'#8B1A2E',fontSize:13,padding:'10px 14px',background:'rgba(139,26,46,.06)',borderRadius:6,border:'1px solid rgba(139,26,46,.15)'}}>{enrollError}</div>}
                     <div className="wiz-nav">
                       <button className="wb wb-bk" onClick={() => setWizStep(1)}>&larr; Back</button>
-                      <button className="wb wb-nx" onClick={() => {
+                      <button className="wb wb-nx" disabled={enrollSending} onClick={() => {
                         const phoneDigits = (enrollForm.whatsapp || '').replace(/\D/g,'')
                         if (!enrollForm.firstName || !enrollForm.lastName || !enrollForm.parentEmail || !enrollForm.dob || !enrollForm.country) {
                           setEnrollError('Please fill in all required fields marked with *'); return
@@ -3752,242 +3753,16 @@ export default function LandingPage() {
                           setEnrollError('Please enter a valid email address'); return
                         }
                         setEnrollError('')
-                        setWizStep(3)
-                      }}>Continue to Assessment Fee <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                    </div>
-                  </div>
-                )}
-
-                {/* STEP 3 */}
-                {wizStep === 3 && (
-                  <div>
-                    <div className="wiz-h">Assessment Fee — $15 USD</div>
-                    <div className="wiz-sub">One-time, non-refundable. Covers your placement test, written curriculum report and tutor matching. Counts towards first month's fees.</div>
-
-                    {/* Paystack unified checkout — cards, M-Pesa, bank transfer, Apple Pay */}
-                    <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:28,marginBottom:18}}>
-                      <div style={{display:'flex',alignItems:'center',gap:16,marginBottom:22,paddingBottom:20,borderBottom:`1px solid ${V.bone3}`}}>
-                        <div style={{width:52,height:52,borderRadius:12,background:'linear-gradient(135deg,#0BA4DB,#00C3F7)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,boxShadow:'0 6px 16px rgba(11,164,219,.3)'}}>
-                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                        </div>
-                        <div style={{flex:1}}>
-                          <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:3}}>Secure Payment — Paystack</div>
-                          <div style={{fontSize:12.5,color:V.sl,lineHeight:1.5}}>PCI-DSS compliant · 256-bit encryption · Live payment processing</div>
-                        </div>
-                        <div style={{textAlign:'right'}}>
-                          <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.6rem',fontWeight:700,color:V.cr,lineHeight:1}}>$15</div>
-                          <div style={{fontSize:11,color:V.sl3,marginTop:4}}>≈ KES 1,950</div>
-                        </div>
-                      </div>
-
-                      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:20}}>
-                        {[
-                          {l:'M-Pesa',c:'#00A651',svg:'<rect x="5" y="2" width="14" height="20" rx="2.5"/><line x1="12" y1="18" x2="12.01" y2="18"/>'},
-                          {l:'Cards',c:'#1E40AF',svg:'<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>'},
-                          {l:'Bank',c:'#6B5E52',svg:'<line x1="3" y1="22" x2="21" y2="22"/><polygon points="12 2 20 7 4 7"/><line x1="6" y1="11" x2="6" y2="18"/><line x1="10" y1="11" x2="10" y2="18"/><line x1="14" y1="11" x2="14" y2="18"/><line x1="18" y1="11" x2="18" y2="18"/>'},
-                          {l:'Apple Pay',c:'#0A0806',svg:'<path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09M12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25"/>'},
-                        ].map(m => (
-                          <div key={m.l} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:8,padding:'12px 8px',display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={m.c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{__html:m.svg}}/>
-                            <div style={{fontSize:10.5,fontWeight:700,color:V.ink2,letterSpacing:'.02em'}}>{m.l}</div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div style={{fontSize:12.5,color:V.sl,lineHeight:1.7,marginBottom:4,padding:'10px 12px',background:'rgba(11,164,219,.05)',borderRadius:6,border:'1px solid rgba(11,164,219,.12)'}}>
-                        <strong style={{color:V.ink2}}>How it works:</strong> Click "Pay $15 Securely" below. A Paystack window will open where you can choose M-Pesa, card, bank transfer, or Apple Pay. After payment, you'll return here to complete your placement test.
-                      </div>
-                    </div>
-
-                    {payError && <div style={{color:'#8B1A2E',fontSize:13,padding:'10px 14px',background:'rgba(139,26,46,.06)',borderRadius:6,border:'1px solid rgba(139,26,46,.15)',marginBottom:12}}>{payError}</div>}
-                    {paySuccess && <div style={{color:'#0A7D32',fontSize:13,padding:'10px 14px',background:'rgba(10,125,50,.06)',borderRadius:6,border:'1px solid rgba(10,125,50,.18)',marginBottom:12,display:'flex',alignItems:'center',gap:8}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A7D32" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg> <span>Payment successful! Reference: <strong>{paySuccess}</strong></span></div>}
-
-                    {/* Assessment-mode picker — shown only after successful payment */}
-                    {paySuccess && (
-                      <div style={{marginTop:18,marginBottom:8,padding:'22px 22px 18px',background:'linear-gradient(135deg,rgba(139,26,46,.03),rgba(184,150,12,.04))',border:`1px solid ${V.bone3}`,borderRadius:14}}>
-                        <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:6}}>
-                          How would you like to take the <em style={{color:V.cr,fontStyle:'italic'}}>placement assessment?</em>
-                        </div>
-                        <p style={{fontSize:13,color:V.sl,lineHeight:1.65,marginBottom:16}}>
-                          Pick the option that works best for your family. The placement test takes roughly 10 minutes.
-                        </p>
-
-                        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:10}}>
-                          {[
-                            {id:'online', title:'Online — now', sub:'Sit the 6-question test online right here',  icon:'<rect x="2" y="4" width="20" height="14" rx="2"/><polyline points="7 22 12 18 17 22"/>'},
-                            {id:'centre', title:'In-person at our centre', sub:'Diamond Plaza I · Parklands · Nairobi', icon:'<path d="M3 21h18M5 21V7l7-5 7 5v14"/><rect x="9" y="10" width="6" height="11"/>'},
-                            {id:'home',   title:'In-person at home', sub:'Our assessor comes to you (Nairobi metro)', icon:'<path d="M3 10l9-7 9 7M5 10v10h14V10"/>'},
-                          ].map(o => {
-                            const on = enrollForm.assessmentMode === o.id
-                            return (
-                              <button key={o.id} type="button" onClick={() => setEF('assessmentMode', o.id)}
-                                style={{textAlign:'left',padding:'14px 14px',border:`1.5px solid ${on?V.cr:V.bone3}`,borderRadius:10,background:on?V.white:'rgba(254,253,251,.6)',cursor:'pointer',fontFamily:"'Syne',sans-serif",transition:'all .2s',display:'flex',alignItems:'flex-start',gap:10,position:'relative'}}>
-                                <div style={{width:30,height:30,borderRadius:7,background:on?V.cr:'#F7F3ED',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={on?'#fff':V.cr} strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:o.icon}}/>
-                                </div>
-                                <div style={{flex:1,minWidth:0}}>
-                                  <div style={{fontWeight:700,fontSize:13,color:V.ink,marginBottom:2}}>{o.title}</div>
-                                  <div style={{fontSize:11.5,color:V.sl,lineHeight:1.45}}>{o.sub}</div>
-                                </div>
-                                {on && (
-                                  <div style={{position:'absolute',top:10,right:10,width:16,height:16,borderRadius:'50%',background:V.cr,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                                    <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#fff" strokeWidth="2.3" strokeLinecap="round"><path d="M2 6l3 3 5-5"/></svg>
-                                  </div>
-                                )}
-                              </button>
-                            )
-                          })}
-                        </div>
-
-                        {/* Home visit address */}
-                        {enrollForm.assessmentMode === 'home' && (
-                          <div style={{marginTop:14,padding:'14px 16px',background:V.white,border:'1px dashed rgba(139,26,46,.3)',borderRadius:10}}>
-                            <label className="fl" style={{marginBottom:5,display:'block'}}>Home visit address *</label>
-                            <input className="fi-i" placeholder="Estate, street, house number, nearest landmark…" value={enrollForm.assessmentAddress} onChange={e => setEF('assessmentAddress', e.target.value)}/>
-                            <div style={{fontSize:11.5,color:V.sl2,marginTop:6,lineHeight:1.5}}>
-                              Available within the Nairobi metro area. Our admissions team will confirm the appointment time when we call you back.
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Contextual note about what happens next */}
-                        {enrollForm.assessmentMode && enrollForm.assessmentMode !== 'online' && (
-                          <div style={{marginTop:12,padding:'10px 14px',background:'rgba(184,150,12,.06)',border:'1px solid rgba(184,150,12,.2)',borderRadius:8,fontSize:12,color:V.ink2,lineHeight:1.55,display:'flex',gap:8,alignItems:'flex-start'}}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={V.gold2} strokeWidth="2" strokeLinecap="round" style={{flexShrink:0,marginTop:1}}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                            <span>You'll skip the online test — our assessor will administer the placement in person. Click Continue to finish your enrollment.</span>
-                          </div>
-                        )}
-                        {enrollForm.assessmentMode === 'online' && (
-                          <div style={{marginTop:12,padding:'10px 14px',background:'rgba(10,125,50,.05)',border:'1px solid rgba(10,125,50,.18)',borderRadius:8,fontSize:12,color:'#0A7D32',lineHeight:1.55,display:'flex',gap:8,alignItems:'flex-start'}}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A7D32" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0,marginTop:1}}><polyline points="20 6 9 17 4 12"/></svg>
-                            <span>Great — click Continue to start your 10-minute placement test.</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="wiz-nav">
-                      <button className="wb wb-bk" onClick={() => setWizStep(2)} disabled={payProcessing}>&larr; Back</button>
-                      {paySuccess ? (
-                        <button
-                          className="wb wb-nx"
-                          disabled={!enrollForm.assessmentMode || (enrollForm.assessmentMode === 'home' && !enrollForm.assessmentAddress.trim()) || enrollSending}
-                          onClick={() => {
-                            if (enrollForm.assessmentMode === 'online') {
-                              setWizStep(4)
-                            } else {
-                              // In-person at centre or home — submit now and skip the exam
-                              submitEnrollment()
-                            }
-                          }}
-                          style={(!enrollForm.assessmentMode || (enrollForm.assessmentMode === 'home' && !enrollForm.assessmentAddress.trim())) ? {opacity:.5,cursor:'not-allowed'} : undefined}
-                        >
-                          {enrollSending
-                            ? 'Submitting…'
-                            : enrollForm.assessmentMode === 'online'
-                              ? <>Continue to Placement Test <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></>
-                              : enrollForm.assessmentMode
-                                ? <>Finish Enrollment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></>
-                                : <>Choose an option above</>}
-                        </button>
-                      ) : (
-                        <button className="wb wb-nx" onClick={payWithPaystack} disabled={payProcessing} style={{background:'linear-gradient(135deg,#0BA4DB,#00C3F7)',borderColor:'#0BA4DB'}}>
-                          {payProcessing ? 'Opening Paystack…' : <>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                            Pay $15 Securely <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                          </>}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* STEP 4 — Adaptive Placement Assessment */}
-                {wizStep === 4 && (
-                  <div>
-                    <div className="wiz-h">Placement Assessment</div>
-                    <div className="wiz-sub">
-                      6 questions · ~10 minutes · Mathematics &amp; English · Adapted to <strong style={{color:V.cr}}>{(LEVELS.find(l=>l.id===assessmentLevel)||{label:'your level'}).label}</strong>
-                    </div>
-
-                    {/* Subtle level-detection banner with option to change */}
-                    <div style={{background:'linear-gradient(135deg,rgba(139,26,46,.04),rgba(184,150,12,.04))',border:`1px solid ${V.bone3}`,borderRadius:10,padding:'12px 16px',marginBottom:16,display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}}>
-                      <div style={{width:30,height:30,borderRadius:8,background:'rgba(139,26,46,.1)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                      </div>
-                      <div style={{flex:1,minWidth:200,fontSize:12.5,color:V.sl,lineHeight:1.55}}>
-                        Questions are randomised from our bank and matched to your child&rsquo;s stage. Answers are reviewed by a qualified teacher within 24 hours.
-                      </div>
-                      <select
-                        value={assessmentLevel}
-                        onChange={e => {
-                          setEF('gradeLevel', e.target.value)
-                          setAssessment(buildAssessment(e.target.value))
-                          setAssessmentLevel(e.target.value)
-                          setEnrollForm(f => ({...f, answers: {}}))
-                        }}
-                        style={{padding:'6px 10px',border:`1px solid ${V.bone3}`,borderRadius:6,fontSize:12,background:V.white,color:V.ink,cursor:'pointer',fontFamily:"'Syne',sans-serif"}}
-                      >
-                        {LEVELS.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
-                      </select>
-                    </div>
-
-                    {assessment.map((q, qi) => (
-                      <div key={q.id} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:20,marginBottom:12}}>
-                        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10,gap:8,flexWrap:'wrap'}}>
-                          <div style={{fontFamily:"'Syne Mono',monospace",fontSize:'10.5px',color:V.sl3,letterSpacing:'.12em'}}>
-                            Question {qi+1} / {assessment.length}
-                          </div>
-                          <div style={{fontSize:10,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',padding:'3px 9px',borderRadius:20,background:q.subject==='Mathematics'?'rgba(11,164,219,.1)':'rgba(139,26,46,.08)',color:q.subject==='Mathematics'?'#0BA4DB':V.cr,border:`1px solid ${q.subject==='Mathematics'?'rgba(11,164,219,.2)':'rgba(139,26,46,.15)'}`}}>
-                            {q.subject}
-                          </div>
-                        </div>
-                        <p style={{fontWeight:600,fontSize:14.5,color:V.ink,marginBottom:14,lineHeight:1.6}}>{q.q}</p>
-                        <div style={{display:'flex',flexDirection:'column',gap:7}}>
-                          {q.opts.map(o => {
-                            const selected = enrollForm.answers[q.id] === o
-                            return (
-                              <label key={o} style={{display:'flex',alignItems:'center',gap:10,padding:'9px 13px',border:`1px solid ${selected?V.cr:V.bone3}`,borderRadius:6,cursor:'pointer',fontSize:13,background:selected?'rgba(139,26,46,.05)':V.white,transition:'all .15s'}}>
-                                <input type="radio" name={q.id} checked={selected} onChange={()=>setAnswer(q.id, o)} style={{accentColor:V.cr}}/>
-                                <span>{o}</span>
-                              </label>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    ))}
-
-                    {/* Answered progress indicator */}
-                    <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:8,padding:'10px 14px',marginBottom:12,display:'flex',alignItems:'center',justifyContent:'space-between',fontSize:12.5}}>
-                      <span style={{color:V.sl}}>Answered: <strong style={{color:V.ink}}>{Object.keys(enrollForm.answers).length}</strong> / {assessment.length}</span>
-                      <div style={{flex:1,height:6,background:V.bone2,borderRadius:3,margin:'0 14px',overflow:'hidden'}}>
-                        <div style={{height:'100%',background:`linear-gradient(90deg,${V.cr},${V.gold2})`,width:`${(Object.keys(enrollForm.answers).length/Math.max(assessment.length,1))*100}%`,transition:'width .3s'}}/>
-                      </div>
-                      <span style={{color:V.sl3,fontSize:11}}>
-                        {Object.keys(enrollForm.answers).length === assessment.length ? 'All done ✓' : `${assessment.length - Object.keys(enrollForm.answers).length} left`}
-                      </span>
-                    </div>
-
-                    {enrollError && <div style={{marginTop:14,marginBottom:8,color:'#8B1A2E',fontSize:13,padding:'10px 14px',background:'rgba(139,26,46,.06)',borderRadius:6,border:'1px solid rgba(139,26,46,.15)'}}>{enrollError}</div>}
-                    <div className="wiz-nav">
-                      <button className="wb wb-bk" onClick={() => setWizStep(3)} disabled={enrollSending}>&larr; Back</button>
-                      <button className="wb wb-nx" disabled={enrollSending} onClick={() => {
-                        const answeredCount = Object.keys(enrollForm.answers).length
-                        if (answeredCount < assessment.length) {
-                          setEnrollError(`Please answer all ${assessment.length} questions before submitting. ${assessment.length - answeredCount} remaining.`)
-                          return
-                        }
-                        setEnrollError('')
                         submitEnrollment()
                       }}>
-                        {enrollSending ? 'Submitting…' : <>Submit Assessment &amp; Complete <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></>}
+                        {enrollSending ? 'Submitting…' : <>Submit Enrollment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></>}
                       </button>
                     </div>
                   </div>
                 )}
 
-                {/* STEP 5 */}
-                {wizStep === 5 && (
+                {/* STEP 3 — CONFIRMATION */}
+                {wizStep === 3 && (
                   <div style={{textAlign:'center',padding:'20px 0'}}>
                     <div style={{width:76,height:76,borderRadius:'50%',background:`linear-gradient(135deg,${V.cr},${V.cr2})`,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px',animation:'lp-float 3s ease-in-out infinite'}}>
                       <svg width="34" height="34" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
