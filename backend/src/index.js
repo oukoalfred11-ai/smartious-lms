@@ -61,6 +61,7 @@ app.use('/api/lessons', require('./routes/lessons'));
 app.use('/api/lesson-progress', require('./routes/lesson-progress'));
 app.use('/api/curriculum',     require('./routes/curriculum'));
 app.use('/api/students',       require('./routes/students'));
+app.use('/api/parents', require('./routes/parents'));
 app.use('/api/dashboard',      require('./routes/dashboard'));
 app.use('/api/grouprooms',     require('./routes/grouprooms'));
 app.use('/api/liveclasses', require('./routes/liveclasses'));
