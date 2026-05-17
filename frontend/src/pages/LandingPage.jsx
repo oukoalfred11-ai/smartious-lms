@@ -2219,7 +2219,7 @@ export default function LandingPage() {
     return () => observer.disconnect()
   }, [page])
   const [faqOpen, setFaqOpen] = useState(null)
-  const [priceTabs, setPriceTab] = useState('hs')
+  const [priceTabs, setPriceTab] = useState('full')
   const [billingCycle, setBillingCycle] = useState('monthly')
   const [blogCat, setBlogCat] = useState('all')
   const [blogCountry, setBlogCountry] = useState('all')
@@ -3121,63 +3121,152 @@ export default function LandingPage() {
       ══════════════════════════════════════════ */}
       {page === 'pricing' && (
         <>
-          <div className="pg-hero"><div className="wrap"><div className="eyebrow">Global Pricing in USD</div><h1 className="pg-h">Transparent Fees, <em>No Surprises</em></h1><p className="pg-sub" style={{marginTop:12}}>All prices in US Dollars. One-time $15 placement assessment. Cancel anytime with 30 days notice. No contracts.</p></div></div>
+          <div className="pg-hero"><div className="wrap"><div className="eyebrow">Fee Structure 2026</div><h1 className="pg-h">Transparent Fees, <em>No Surprises</em></h1><p className="pg-sub" style={{marginTop:12}}>Per student. A one-time registration fee of $38 applies on enrolment. 10% sibling discount on every additional child.</p></div></div>
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div className="p-tabs">
-              {[['hs','Homeschool · In-Person'],['vs','Online / Virtual School'],['tu','Private Tuition']].map(([id,l]) => (
+              {[['full','Full Homeschool Programmes'],['senior','A-Level & IB Diploma'],['tuition','Single Subject & Tuition']].map(([id,l]) => (
                 <button key={id} className={`ptab${priceTabs===id?' on':''}`} onClick={() => setPriceTab(id)}>{l}</button>
               ))}
             </div>
 
-            {/* Billing cycle toggle */}
-            <div style={{display:'flex',justifyContent:'center',marginTop:24,marginBottom:36}}>
-              <div style={{display:'inline-flex',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:4,gap:2,boxShadow:'0 2px 10px rgba(10,8,6,.05)'}}>
+            {/* Billing cycle toggle — hidden on the hourly tuition tab */}
+            {priceTabs !== 'tuition' && (
+              <>
+                <div style={{display:'flex',justifyContent:'center',marginTop:24,marginBottom:8}}>
+                  <div style={{display:'inline-flex',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:4,gap:2,boxShadow:'0 2px 10px rgba(10,8,6,.05)'}}>
+                    {[
+                      ['monthly','Monthly'],
+                      ['termly','Termly'],
+                      ['annually','Annually'],
+                    ].map(([id,lbl]) => (
+                      <button key={id} onClick={() => setBillingCycle(id)} style={{padding:'10px 18px',border:'none',borderRadius:7,background:billingCycle===id?V.cr:'transparent',color:billingCycle===id?V.white:V.ink2,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:"'Syne',sans-serif",transition:'all .2s'}}>
+                        {lbl}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{textAlign:'center',fontSize:12,color:V.sl2,marginTop:8,marginBottom:32,fontStyle:'italic'}}>
+                  {billingCycle === 'monthly'  && 'Billed monthly · Due 1st–5th of each month'}
+                  {billingCycle === 'termly'   && 'Billed every 3 months · Save ~10% · 60% deposit before term, 40% by the 5th of next month'}
+                  {billingCycle === 'annually' && 'Full year paid in advance · Best value'}
+                </div>
+              </>
+            )}
+
+            {priceTabs === 'full' && (
+              <div className="price-grid">
                 {[
-                  ['monthly','Monthly','',''],
-                  ['termly','Termly','Save 5%','(every 3 months)'],
-                  ['annually','Annually','Save 12%','(full year)'],
-                ].map(([id,lbl,save,sub]) => (
-                  <button key={id} onClick={() => setBillingCycle(id)} style={{padding:'10px 18px',border:'none',borderRadius:7,background:billingCycle===id?V.cr:'transparent',color:billingCycle===id?V.white:V.ink2,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:"'Syne',sans-serif",transition:'all .2s',position:'relative'}}>
-                    {lbl}
-                    {save && <span style={{marginLeft:7,fontSize:10,fontWeight:700,letterSpacing:'.04em',padding:'2px 7px',background:billingCycle===id?'rgba(255,255,255,.18)':'rgba(139,26,46,.1)',color:billingCycle===id?V.gold3:V.cr,borderRadius:20,verticalAlign:'middle'}}>{save}</span>}
-                  </button>
-                ))}
+                  {lbl:'Year 1–6 · Ages 5–11',ti:'Primary Homeschool',pr:'Cambridge Primary / CBC',base:423,term:1142,annual:4062,kes:'55,000 / month',kesTerm:'148,500 / term',kesAnnual:'528,000 / year',
+                    fs:['Cambridge Primary or CBC, Grade 1–6','All subjects · per student','Dedicated, TSC-registered class teacher','All textbooks, workbooks & materials','Weekly lesson reports to parents','Termly progress reports with grades','Smartious LMS + Mshauri AI tutor'],gold:false},
+                  {lbl:'Year 7–9 · Ages 11–14',ti:'Junior Secondary',pr:'Cambridge Lower Secondary / CBC',base:538,term:1454,annual:5169,kes:'70,000 / month',kesTerm:'189,000 / term',kesAnnual:'672,000 / year',
+                    fs:['Cambridge Lower Secondary or CBC, Grade 7–9','All subjects · per student','Subject-specialist teachers','All teaching materials & past papers','Weekly lesson reports to parents','Mid-term & end-of-term assessments','Smartious LMS + Mshauri AI tutor'],gold:false},
+                  {lbl:'Year 10–11 · Ages 14–16',ti:'Cambridge IGCSE',pr:'CIE / Edexcel · Full Programme',base:654,term:1765,annual:6277,kes:'85,000 / month',kesTerm:'229,500 / term',kesAnnual:'816,000 / year',
+                    fs:['Full IGCSE programme · CIE or Edexcel','All subjects · per student','Specialist subject tutors','Complete past paper & marking scheme library','Mock exams with examiner-style feedback','Exam technique coaching','Smartious LMS + unlimited Mshauri AI'],gold:true,badge:'Most Popular'},
+                ].map((p,i) => <PriceCard key={i} {...p} P={P} cycle={billingCycle}/>)}
               </div>
-            </div>
-            <div style={{textAlign:'center',fontSize:12,color:V.sl2,marginTop:-20,marginBottom:32,fontStyle:'italic'}}>
-              {billingCycle === 'monthly'  && 'Billed monthly · Cancel anytime'}
-              {billingCycle === 'termly'   && 'Billed every 3 months · Save 5% vs monthly'}
-              {billingCycle === 'annually' && 'Billed annually · Save 12% vs monthly'}
+            )}
+
+            {priceTabs === 'senior' && (
+              <div className="price-grid">
+                {[
+                  {lbl:'Senior · Year 12–13 · Ages 16–19',ti:'Cambridge A-Level',pr:'CIE / Edexcel · up to 4 subjects',base:769,term:2077,annual:7385,kes:'100,000 / month',kesTerm:'270,000 / term',kesAnnual:'960,000 / year',
+                    fs:['Complete A-Level homeschool programme','Up to 4 subjects · CIE or Edexcel','Specialist subject teachers','University counselling & UCAS support','Full past paper library + mock exams','Smartious LMS + unlimited Mshauri AI'],gold:true,badge:'Most Popular'},
+                  {lbl:'Senior · Year 12–13 · Ages 16–19',ti:'IB Diploma',pr:'IBO · Full Diploma Programme',base:923,term:2492,annual:8862,kes:'120,000 / month',kesTerm:'324,000 / term',kesAnnual:'1,152,000 / year',
+                    fs:['Full IB Diploma Programme','6 subjects + TOK / EE / CAS support','Extended Essay & Internal Assessment supervision','University & application guidance','Specialist IB-trained teachers','Smartious LMS + unlimited Mshauri AI'],gold:false},
+                  {lbl:'Single Subject',ti:'A-Level — Single Subject',pr:'CIE / Edexcel · one subject',base:231,term:623,annual:2215,kes:'30,000 / month',kesTerm:'81,000 / term',kesAnnual:'288,000 / year',
+                    fs:['One A-Level subject','Specialist subject teacher','Past papers & exam technique','Ideal for resits or supplementary study'],gold:false},
+                  {lbl:'Single Subject',ti:'IB — Single Subject',pr:'IBO · HL or SL · one subject',base:269,term:727,annual:2585,kes:'35,000 / month',kesTerm:'94,500 / term',kesAnnual:'336,000 / year',
+                    fs:['One IB subject · Higher or Standard Level','Specialist IB-trained teacher','Internal Assessment support','Ideal for supplementary study'],gold:false},
+                ].map((p,i) => <PriceCard key={i} {...p} P={P} cycle={billingCycle}/>)}
+              </div>
+            )}
+
+            {priceTabs === 'tuition' && (
+              <>
+                <div style={{textAlign:'center',marginTop:24,marginBottom:28,fontSize:13,color:V.sl,fontStyle:'italic'}}>
+                  One-on-one tuition · in-centre at Parklands or online worldwide. Rate confirmed at enrolment based on level.
+                </div>
+                <div className="price-grid">
+                  {[
+                    {lbl:'Primary · Year 1–6',ti:'Primary Tuition',base:8,pr:'per hour · 1-on-1',kes:'≈ KES 1,000 – 1,300 / hr',
+                      fs:['One-on-one · in-centre or online','USD 8 – 10 per hour','Qualified primary teachers','All materials provided'],gold:false,cta:'Book Now',hourly:true},
+                    {lbl:'Junior Secondary · Year 7–9',ti:'Junior Secondary Tuition',base:10,pr:'per hour · 1-on-1',kes:'≈ KES 1,300 – 1,560 / hr',
+                      fs:['One-on-one · in-centre or online','USD 10 – 12 per hour','Subject-specialist tutors','Curriculum-aligned sessions'],gold:false,cta:'Book Now',hourly:true},
+                    {lbl:'IGCSE · Year 10–11',ti:'IGCSE Tuition',base:12,pr:'per hour · 1-on-1',kes:'≈ KES 1,560 – 1,820 / hr',
+                      fs:['One-on-one · in-centre or online','USD 12 – 14 per hour','Specialist subject tutors','Exam-focused coaching'],gold:true,badge:'Popular',cta:'Book Now',hourly:true},
+                    {lbl:'A-Level / IB · Year 12–13',ti:'A-Level / IB Tuition',base:15,pr:'per hour · 1-on-1',kes:'≈ KES 1,950 – 2,000 / hr',
+                      fs:['One-on-one · in-centre or online','USD 15 per hour · maximum rate','Expert subject tutors','University-level exam preparation'],gold:false,cta:'Book Now',hourly:true},
+                  ].map((p,i) => <PriceCard key={i} {...p} P={P} cycle={billingCycle}/>)}
+                </div>
+
+                {/* Supplementary services */}
+                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,margin:'44px 0 18px',textAlign:'center'}}>Supplementary &amp; Specialist Services</h3>
+                <div style={{maxWidth:760,margin:'0 auto',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
+                  {[
+                    ['Computer Packages & ICT','MS Office · Basic Computing · Digital Literacy · 2 hrs/session','$15 / session'],
+                    ['Accounting Introduction','Book-keeping · Financial literacy basics · 1 hr/session','$12 / session'],
+                    ['Languages — French, English, Kiswahili','Beginner to advanced · 1 hr/session','$10 / session'],
+                    ['Exam Preparation Intensive','Past paper coaching · IGCSE / A-Level / IB · 2 hrs/session','$30 / session'],
+                    ['International Online Tuition','Diaspora students · UK / UAE / USA / Canada','$8 – 15 / hr'],
+                  ].map(([s,d,r],i) => (
+                    <div key={i} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 20px',borderBottom:i<4?`1px solid ${V.bone2}`:'none',flexWrap:'wrap'}}>
+                      <div style={{flex:1,minWidth:200}}>
+                        <div style={{fontWeight:700,fontSize:14,color:V.ink}}>{s}</div>
+                        <div style={{fontSize:12,color:V.sl2,marginTop:2}}>{d}</div>
+                      </div>
+                      <div style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,color:V.cr,whiteSpace:'nowrap'}}>{r}</div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Registration & one-off fees */}
+            <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,margin:'48px 0 18px',textAlign:'center'}}>Registration &amp; One-Off Fees</h3>
+            <div style={{maxWidth:760,margin:'0 auto',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
+              {[
+                ['Enrolment / Registration Fee','One-time per student · non-refundable','$38'],
+                ['Curriculum & Learning Materials','Books · workbooks · past papers · quoted at enrolment','$62 – 154'],
+                ['Cambridge / IB Exam Entry','Payable directly to the exam board','As invoiced'],
+                ['Termly Progress Reports','Full programme students','Included'],
+              ].map(([s,d,r],i) => (
+                <div key={i} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 20px',borderBottom:i<3?`1px solid ${V.bone2}`:'none',flexWrap:'wrap'}}>
+                  <div style={{flex:1,minWidth:200}}>
+                    <div style={{fontWeight:700,fontSize:14,color:V.ink}}>{s}</div>
+                    <div style={{fontSize:12,color:V.sl2,marginTop:2}}>{d}</div>
+                  </div>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,color:V.cr,whiteSpace:'nowrap'}}>{r}</div>
+                </div>
+              ))}
             </div>
 
-            {priceTabs === 'hs' && (
-              <div className="price-grid">
-                {[
-                  {lbl:'Homeschool · At Home',ti:'Primary (CBC · British · American)',base:400,pr:'Grades 1–6',kes:52000,fs:['Full CBC, British or American curriculum','Dedicated class teacher (home or video)','All teaching materials, textbooks & workbooks','Monthly written progress report','Parent portal with weekly check-ins','Mshauri AI — 20 guided sessions/month'],gold:false},
-                  {lbl:'Homeschool · At Home',ti:'High School (IGCSE · Edexcel)',base:423,pr:'Year 7–11',kes:55000,fs:['IGCSE, Edexcel, British or American pathway','Subject specialist tutors per subject','All Cambridge & Edexcel past papers','Mock exams with examiner-style feedback','Mshauri AI — unlimited access','Weekly 1-on-1 parent progress calls'],gold:true,badge:'Most Popular'},
-                  {lbl:'Homeschool · At Home',ti:'A-Level / IB Diploma',base:515,pr:'Year 12–13',kes:67000,fs:['Cambridge A-Level or IB Diploma (DP)','University counselling included','UCAS / Common App application support','Unlimited Mshauri AI + live Zoom sessions','IB Extended Essay + IA supervision','Scholarship & visa guidance'],gold:false},
-                ].map((p,i) => <PriceCard key={i} {...p} P={P} cycle={billingCycle}/>)}
+            {/* Payment terms */}
+            <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,margin:'48px 0 18px',textAlign:'center'}}>Payment Terms</h3>
+            <div className="price-grid" style={{maxWidth:920,margin:'0 auto'}}>
+              {[
+                ['Monthly Payment','Fee due on or before the 5th of each month. A 3-day grace period applies. Sessions may be suspended after 8 days of non-payment without prior arrangement.'],
+                ['Termly / Instalment','60% deposit required before the term begins to confirm enrolment. The remaining 40% is due by the 5th of the following month.'],
+                ['Annual','Full annual fee payable in advance for maximum saving.'],
+              ].map(([h,d],i) => (
+                <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'20px 22px'}}>
+                  <div style={{fontWeight:700,fontSize:14.5,color:V.cr,marginBottom:8}}>{h}</div>
+                  <div style={{fontSize:13,color:V.sl,lineHeight:1.7}}>{d}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{maxWidth:760,margin:'28px auto 0',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'20px 24px'}}>
+              <div style={{fontWeight:700,fontSize:14,color:V.ink,marginBottom:10}}>Payment Details</div>
+              <div style={{fontSize:13,color:V.sl,lineHeight:1.9}}>
+                M-Pesa Paybill: <strong style={{color:V.ink}}>247247</strong> · Account No: <strong style={{color:V.ink}}>745021</strong><br/>
+                Account Name: <strong style={{color:V.ink}}>Smartious Edtech</strong> · Bank transfer available on request<br/>
+                Always quote your invoice number when paying.
               </div>
-            )}
-            {priceTabs === 'vs' && (
-              <div className="price-grid">
-                {[
-                  {lbl:'Online / Virtual School',ti:'Basic Online',base:180,pr:'All ages',fs:['Full recorded video lesson library','Interactive practice quizzes & worksheets','Mshauri AI — 20 sessions/month','Monthly online assessments','Parent progress dashboard','Email & chat support'],gold:false},
-                  {lbl:'Online / Virtual School',ti:'Premium Online',base:260,pr:'All ages',fs:['Everything in Basic Online','Live weekly Zoom group classes (max 8 students)','Unlimited Mshauri AI Tutor','Monthly mock exams + expert marking','Bi-weekly 1-on-1 tutor check-in','Full past paper + marking scheme library'],gold:true,badge:'Best Value'},
-                  {lbl:'Online / Virtual School',ti:'IGCSE Full Pack',base:360,pr:'Year 9–11',fs:['Complete IGCSE curriculum across all subjects','All Cambridge past papers 2015–2025','Official Cambridge marking schemes','Exam-focused Mshauri AI coaching','Weekly examiner tip live sessions','Predicted grades & UCAS reference letters'],gold:false},
-                ].map((p,i) => <PriceCard key={i} {...p} P={P} cycle={billingCycle}/>)}
-              </div>
-            )}
-            {priceTabs === 'tu' && (
-              <div className="price-grid">
-                {[
-                  {lbl:'Private Tuition · Online',ti:'Online Session',base:8,pr:'per hour · Any subject',fs:['Video session with subject specialist','Interactive shared digital whiteboard','Session recording sent to parent','Book anytime with 24hrs notice'],gold:false,cta:'Book Now',hourly:true},
-                  {lbl:'Private Tuition · Nairobi',ti:'Home Visit',base:12,pr:'per hour · Nairobi area',fs:['Tutor comes to your home in Nairobi','Background-checked, verified tutors','All teaching materials provided','Written session note sent to parent'],gold:true,badge:'Popular',cta:'Book Now',hourly:true},
-                  {lbl:'Private Tuition · Bundle',ti:'Monthly Bundle',base:235,pr:'20 hours per month',fs:['20 hours — online or home visit','Same dedicated tutor each week','Monthly written progress report','Curriculum-aligned lesson planning','Priority scheduling','Save 50% vs hourly rate'],gold:false,cta:'Get Bundle'},
-                ].map((p,i) => <PriceCard key={i} {...p} P={P} cycle={billingCycle}/>)}
-                <p style={{fontSize:'11.5px',textAlign:'center',color:V.sl2,marginTop:22,gridColumn:'1/-1'}}>All prices in USD. $15 one-time assessment fee for all new students. M-Pesa, card, bank transfer & Apple Pay accepted via Paystack.</p>
-              </div>
-            )}
+            </div>
+
+            <p style={{fontSize:'11.5px',textAlign:'center',color:V.sl2,marginTop:28,maxWidth:760,marginLeft:'auto',marginRight:'auto',lineHeight:1.7}}>
+              10% sibling discount on the second and any subsequent sibling enrolled in a full programme. Cambridge, Edexcel and IB examination entry fees are quoted separately and are not included in tuition. Fees may be revised annually with 30 days&rsquo; written notice to existing families. Registration fees are non-refundable; advance tuition for unused sessions is refunded pro-rata with 14 days&rsquo; written notice.
+            </p>
           </div></section>
           <Footer P={P}/>
         </>
@@ -4061,26 +4150,39 @@ export default function LandingPage() {
 }
 
 // ── Price Card Component ──────────────────────────────────
-function PriceCard({ lbl, ti, base, am, pr, fs, gold, badge, cta = 'Enroll Now', P, cycle = 'monthly', kes, hourly }) {
+function PriceCard({ lbl, ti, base, am, pr, fs, gold, badge, cta = 'Enroll Now', P, cycle = 'monthly', kes, kesTerm, kesAnnual, term, annual, hourly }) {
   // If old-style `am` was passed, use it as the base
   const baseAmt = typeof base === 'number' ? base : Number(am) || 0
   // For hourly pricing (private tuition per-hour rates), don't apply the cycle discount
-  let amt, periodLabel
+  let amt, periodLabel, kesShown
   if (hourly) {
     amt = baseAmt
     periodLabel = pr  // e.g. "per hour · Any subject"
+    kesShown = kes
   } else if (cycle === 'termly') {
-    amt = Math.round(baseAmt * 3 * 0.95)
+    // Use the explicit term price when supplied; otherwise fall back to a computed estimate
+    amt = (typeof term === 'number') ? term : Math.round(baseAmt * 3 * 0.95)
     periodLabel = `per term · ${pr}`
+    kesShown = kesTerm
   } else if (cycle === 'annually') {
-    amt = Math.round(baseAmt * 12 * 0.88)
+    amt = (typeof annual === 'number') ? annual : Math.round(baseAmt * 12 * 0.88)
     periodLabel = `per year · ${pr}`
+    kesShown = kesAnnual
   } else {
     amt = baseAmt
     periodLabel = `per month · ${pr}`
+    kesShown = kes
   }
-  // Discount savings badge for non-hourly annual/termly
-  const savings = !hourly && cycle === 'termly' ? Math.round(baseAmt * 3 - amt) : !hourly && cycle === 'annually' ? Math.round(baseAmt * 12 - amt) : 0
+  // Savings vs paying monthly across the same span
+  const savings = !hourly && cycle === 'termly' && typeof term === 'number'
+    ? Math.round(baseAmt * 3 - term)
+    : !hourly && cycle === 'annually' && typeof annual === 'number'
+      ? Math.round(baseAmt * 12 - annual)
+      : !hourly && cycle === 'termly'
+        ? Math.round(baseAmt * 3 - amt)
+        : !hourly && cycle === 'annually'
+          ? Math.round(baseAmt * 12 - amt)
+          : 0
 
   return (
     <div className={`pc${gold?' ft':''}`}>
@@ -4089,9 +4191,9 @@ function PriceCard({ lbl, ti, base, am, pr, fs, gold, badge, cta = 'Enroll Now',
       <div className="p-ti">{ti}</div>
       <div className="p-am"><sup>$</sup>{amt.toLocaleString()}</div>
       <div className="p-pr">{periodLabel}</div>
-      {kes && cycle === 'monthly' && !hourly && (
+      {kesShown && !hourly && (
         <div style={{fontSize:'11.5px',color:gold?'rgba(247,243,237,.6)':'#8A7B6E',marginTop:2,marginBottom:6,fontStyle:'italic'}}>
-          ≈ KES {kes.toLocaleString()} per month
+          ≈ KES {kesShown.toLocaleString()}
         </div>
       )}
       {savings > 0 && (
