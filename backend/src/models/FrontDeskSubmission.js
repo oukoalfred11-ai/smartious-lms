@@ -67,6 +67,15 @@ const frontDeskSubmissionSchema = new mongoose.Schema({
   },
   adminNotes: { type: String, trim: true, default: '' },
 
+  // ── Emails sent to this lead from the Front Desk ──
+  emailsSent: [{
+    template:  { type: String, trim: true },   // which template was used
+    subject:   { type: String, trim: true },
+    sentBy:    { type: String, trim: true },    // admin name
+    sentAt:    { type: Date, default: Date.now },
+    delivered: { type: Boolean, default: true },
+  }],
+
   // Light source metadata
   sourcePage: { type: String, trim: true },   // which page/section the form was on
 
