@@ -328,6 +328,7 @@ const NAV_SECTIONS = [
   ]},
   { label:'Tools', items:[
     { id:'tutor',        label:'Mshauri AI',      icon:'tutor',        svg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
+    { id:'communication', label:'Communication',  icon:'communication', svg:'<path d="M4 4h16v12H5.17L4 17.17V4z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="12" x2="13" y2="12"/>' },
   ]},
   { label:'Account', items:[
     { id:'profile',      label:'Profile',         icon:'profile',      svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
@@ -1780,6 +1781,7 @@ export default function StudentPortal() {
           ════════════════════════════════════════════ */}
           {page === 'profile' && <ProfileTab user={user} toast={toast} />}
           {page === 'subscription' && <SubscriptionTab user={user} store={store} toast={toast} />}
+          {page === 'communication' && <StudentCommunicationTab user={user} toast={toast} />}
 
         </div>
       </main>
@@ -9712,6 +9714,471 @@ const initialsColor = (name) => {
   return colors[Math.abs(hash) % colors.length]
 }
  
+// ═══════════════════════════════════════════════════════════
+// STUDENT COMMUNICATION TAB — email teachers + admin only
+// ═══════════════════════════════════════════════════════════
+// A student may email the teachers allocated to them and the
+// administration — nobody else. No parents, no other students,
+// no external addresses. Attachments allowed (e.g. homework).
+// ═══════════════════════════════════════════════════════════
+
+const STUDENT_EMAIL_TEMPLATES = {
+  question: {
+    label: 'Ask a Question',
+    subject: 'Question about my lesson',
+    body: 'Hello,\n\nI have a question about [subject / topic]:\n\n[Write your question clearly.]\n\nThank you for your help.',
+  },
+  homework: {
+    label: 'Submit / Ask About Homework',
+    subject: 'Homework',
+    body: 'Hello,\n\nThis is regarding the homework for [subject].\n\n[Explain — e.g. "I have attached my completed work" or "I need help with question 3".]\n\nThank you.',
+  },
+  absence: {
+    label: 'Explain an Absence',
+    subject: 'Absence from class',
+    body: 'Hello,\n\nI was / will be absent from [class] on [date] because [reason].\n\nPlease let me know what I missed and how to catch up.\n\nThank you.',
+  },
+  custom: {
+    label: 'Custom Message',
+    subject: '',
+    body: '',
+  },
+}
+
+function StudentCommunicationTab({ user, toast }) {
+  const [view, setView] = useState('compose')   // compose | history
+
+  return (
+    <div>
+      <div style={{ marginBottom: 18 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--s900)', margin: 0 }}>
+          Communication
+        </h1>
+        <div style={{ fontSize: 13, color: 'var(--s500)', marginTop: 2 }}>
+          Email your teachers and the school administration.
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+        {[
+          { id: 'compose', label: 'Compose' },
+          { id: 'history', label: 'History' },
+        ].map(t => (
+          <button key={t.id} onClick={() => setView(t.id)}
+            style={{
+              padding: '8px 18px', borderRadius: 99,
+              border: `1.5px solid ${view === t.id ? 'var(--b700)' : 'var(--border)'}`,
+              background: view === t.id ? 'var(--b700)' : '#fff',
+              color: view === t.id ? '#fff' : 'var(--b700)',
+              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+            }}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {view === 'compose'
+        ? <StudentComposeView user={user} toast={toast} />
+        : <StudentCommsHistory toast={toast} />}
+    </div>
+  )
+}
+
+function StudentComposeView({ user, toast }) {
+  const [teachers, setTeachers] = useState([])
+  const [admins, setAdmins]     = useState([])
+  const [loading, setLoading]   = useState(true)
+
+  const [picked, setPicked] = useState({})   // email -> { email, name }
+
+  const [kind, setKind]       = useState('question')
+  const [subject, setSubject] = useState(STUDENT_EMAIL_TEMPLATES.question.subject)
+  const [body, setBody]       = useState(STUDENT_EMAIL_TEMPLATES.question.body)
+
+  const [attachments, setAttachments] = useState([])
+  const [uploading, setUploading]     = useState(false)
+
+  const [sending, setSending] = useState(false)
+  const [confirm, setConfirm] = useState(false)
+  const [result, setResult]   = useState(null)
+
+  useEffect(() => {
+    api.get('/communication/student/recipients')
+      .then(r => {
+        setTeachers(r.data.data?.teachers || [])
+        setAdmins(r.data.data?.admins || [])
+      })
+      .catch(() => toast?.error?.('Failed to load recipients.'))
+      .finally(() => setLoading(false))
+  }, [toast])
+
+  const applyTemplate = (k) => {
+    setKind(k)
+    setSubject(STUDENT_EMAIL_TEMPLATES[k].subject)
+    setBody(STUDENT_EMAIL_TEMPLATES[k].body)
+    setConfirm(false)
+  }
+
+  const toggle = (email, name) => {
+    if (!email) return
+    setPicked(prev => {
+      const next = { ...prev }
+      if (next[email]) delete next[email]
+      else next[email] = { email, name: name || '' }
+      return next
+    })
+    setConfirm(false)
+  }
+
+  const pickedList = Object.values(picked)
+
+  const uploadFile = async (file) => {
+    if (!file) return
+    if (file.size > 10 * 1024 * 1024) { toast?.error?.('File exceeds 10 MB.'); return }
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const { data } = await api.post('/communication/upload-attachment', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      if (data?.success) {
+        setAttachments(a => [...a, data.data])
+        toast?.ok?.('Attached ' + data.data.name)
+      } else {
+        toast?.error?.(data?.message || 'Upload failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Upload failed.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const send = async () => {
+    if (!subject.trim()) { toast?.error?.('Subject is required.'); return }
+    if (!body.trim())    { toast?.error?.('Message body is required.'); return }
+    if (pickedList.length === 0) { toast?.error?.('Pick at least one recipient.'); return }
+
+    setSending(true)
+    try {
+      const { data } = await api.post('/communication/student/send', {
+        subject: subject.trim(),
+        body,
+        recipientEmails: pickedList,
+        attachments,
+        audience: STUDENT_EMAIL_TEMPLATES[kind].label,
+      })
+      if (data?.success) {
+        setResult(data.data)
+        toast?.ok?.(data.message || 'Sent.')
+        setConfirm(false)
+      } else {
+        toast?.error?.(data?.message || 'Send failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Send failed.')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const resetAll = () => {
+    setPicked({}); setKind('question')
+    setSubject(STUDENT_EMAIL_TEMPLATES.question.subject)
+    setBody(STUDENT_EMAIL_TEMPLATES.question.body)
+    setAttachments([]); setConfirm(false); setResult(null)
+  }
+
+  const inp = {
+    width: '100%', boxSizing: 'border-box',
+    padding: '9px 12px', borderRadius: 8,
+    border: '1.5px solid var(--border)', fontSize: 13, fontFamily: 'inherit',
+  }
+  const lbl = {
+    display: 'block', fontSize: 10.5, fontWeight: 700,
+    letterSpacing: '.06em', textTransform: 'uppercase',
+    color: 'var(--b700)', marginBottom: 5,
+  }
+  const card = {
+    background: '#fff', border: '1px solid var(--border)',
+    borderRadius: 'var(--rlg)', padding: 20,
+  }
+
+  if (result) {
+    return (
+      <div style={{ ...card, textAlign: 'center', padding: 28 }}>
+        <div style={{
+          width: 54, height: 54, borderRadius: '50%',
+          background: 'var(--g50)', color: 'var(--g600)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 14px',
+        }}>
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div style={{ fontSize: 19, fontWeight: 800, color: 'var(--s900)' }}>Email sent</div>
+        <div style={{ fontSize: 13, color: 'var(--s500)', marginTop: 6 }}>
+          {result.sentCount} delivered{result.failedCount > 0 ? ` · ${result.failedCount} failed` : ''}
+        </div>
+        <button onClick={resetAll}
+          style={{
+            marginTop: 18, background: 'var(--b700)', color: '#fff',
+            border: 'none', padding: '10px 24px', borderRadius: 8,
+            cursor: 'pointer', fontSize: 13, fontWeight: 700,
+          }}>
+          New Message
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(260px, 320px)', gap: 14 }}>
+      {/* compose */}
+      <div style={card}>
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Template</label>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {Object.entries(STUDENT_EMAIL_TEMPLATES).map(([k, t]) => (
+              <button key={k} onClick={() => applyTemplate(k)}
+                style={{
+                  background: kind === k ? 'var(--b700)' : '#fff',
+                  color: kind === k ? '#fff' : 'var(--b700)',
+                  border: `1.5px solid ${kind === k ? 'var(--b700)' : 'var(--border)'}`,
+                  padding: '6px 12px', borderRadius: 99,
+                  cursor: 'pointer', fontSize: 11.5, fontWeight: 700,
+                }}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <label style={lbl}>Subject</label>
+          <input value={subject} onChange={e => { setSubject(e.target.value); setConfirm(false) }}
+            placeholder="Email subject" style={inp}/>
+        </div>
+
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Message</label>
+          <textarea value={body} onChange={e => { setBody(e.target.value); setConfirm(false) }}
+            rows={10} placeholder="Write your message."
+            style={{ ...inp, resize: 'vertical', lineHeight: 1.5 }}/>
+        </div>
+
+        {/* Attachments */}
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Attachments</label>
+          {attachments.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
+              {attachments.map((a, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '6px 10px', background: 'var(--bg)',
+                  border: '1px solid var(--border)', borderRadius: 6, fontSize: 12,
+                }}>
+                  <span style={{ flex: 1, color: 'var(--s900)' }}>{a.name}</span>
+                  <button onClick={() => setAttachments(list => list.filter((_, idx) => idx !== i))}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--r600)', cursor: 'pointer', fontSize: 11, fontWeight: 700 }}>
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <label style={{
+            display: 'inline-block',
+            background: '#fff', color: 'var(--b700)',
+            border: '1.5px solid var(--b700)',
+            padding: '7px 14px', borderRadius: 8,
+            cursor: uploading ? 'wait' : 'pointer', fontSize: 12, fontWeight: 700,
+          }}>
+            <input type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style={{ display: 'none' }}
+              onChange={e => { uploadFile(e.target.files?.[0]); e.target.value = '' }}/>
+            {uploading ? 'Uploading...' : '+ Attach a File (e.g. homework, max 10 MB)'}
+          </label>
+        </div>
+
+        {/* Send */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, alignItems: 'center' }}>
+          {!confirm ? (
+            <button onClick={() => {
+              if (!subject.trim() || !body.trim()) { toast?.error?.('Subject and message are required.'); return }
+              if (pickedList.length === 0) { toast?.error?.('Pick at least one recipient.'); return }
+              setConfirm(true)
+            }}
+              style={{
+                background: 'var(--b700)', color: '#fff', border: 'none',
+                padding: '10px 22px', borderRadius: 8,
+                cursor: 'pointer', fontSize: 13, fontWeight: 700,
+              }}>
+              Review &amp; Send
+            </button>
+          ) : (
+            <>
+              <span style={{ fontSize: 12, color: 'var(--s500)' }}>
+                Send to {pickedList.length} recipient{pickedList.length === 1 ? '' : 's'}?
+              </span>
+              <button onClick={() => setConfirm(false)} disabled={sending}
+                style={{
+                  background: '#fff', color: 'var(--s500)', border: '1.5px solid var(--border)',
+                  padding: '10px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 700,
+                }}>
+                Cancel
+              </button>
+              <button onClick={send} disabled={sending}
+                style={{
+                  background: sending ? '#9CA3AF' : 'var(--g600)', color: '#fff', border: 'none',
+                  padding: '10px 22px', borderRadius: 8,
+                  cursor: sending ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 700,
+                }}>
+                {sending ? 'Sending...' : 'Confirm Send'}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* recipients */}
+      <div style={{ ...card, padding: 16 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--b700)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>
+          Recipients ({pickedList.length})
+        </div>
+
+        {loading ? (
+          <div style={{ padding: 14, fontSize: 12, color: 'var(--s500)', textAlign: 'center' }}>Loading...</div>
+        ) : (
+          <div style={{ maxHeight: 380, overflowY: 'auto' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--s500)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 6 }}>
+              My Teachers
+            </div>
+            {teachers.length === 0 ? (
+              <div style={{ fontSize: 11.5, color: 'var(--s500)', padding: '4px 0 10px' }}>
+                No teachers allocated to you yet.
+              </div>
+            ) : teachers.map(t => (
+              <StudentRecipRow key={t._id}
+                label={t.name}
+                sub={t.subjects && t.subjects.length ? t.subjects.join(', ') : 'Teacher'}
+                on={!!picked[t.email]}
+                onClick={() => toggle(t.email, t.name)}
+              />
+            ))}
+
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--s500)', letterSpacing: '.08em', textTransform: 'uppercase', margin: '10px 0 6px' }}>
+              Administration
+            </div>
+            {admins.length === 0 ? (
+              <div style={{ fontSize: 11.5, color: 'var(--s500)' }}>No admin contacts.</div>
+            ) : admins.map(a => (
+              <StudentRecipRow key={a._id}
+                label={a.name} sub="Admin"
+                on={!!picked[a.email]}
+                onClick={() => toggle(a.email, a.name)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function StudentRecipRow({ label, sub, on, onClick }) {
+  return (
+    <div onClick={onClick}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        padding: '6px 7px', cursor: 'pointer',
+        background: on ? 'var(--b50)' : 'transparent',
+        borderRadius: 5, marginBottom: 2,
+      }}>
+      <div style={{
+        width: 15, height: 15, borderRadius: 3, flexShrink: 0,
+        border: `1.5px solid ${on ? 'var(--b700)' : 'var(--border)'}`,
+        background: on ? 'var(--b700)' : '#fff',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        {on && (
+          <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        )}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--s900)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {label}
+        </div>
+        <div style={{ fontSize: 10, color: 'var(--s500)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {sub}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function StudentCommsHistory({ toast }) {
+  const [history, setHistory] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.get('/communication/student/history')
+      .then(r => setHistory(r.data.data?.history || []))
+      .catch(() => toast?.error?.('Failed to load history.'))
+      .finally(() => setLoading(false))
+  }, [toast])
+
+  const card = {
+    background: '#fff', border: '1px solid var(--border)',
+    borderRadius: 'var(--rlg)', padding: 14,
+  }
+
+  if (loading) {
+    return <div style={{ ...card, padding: 40, textAlign: 'center', color: 'var(--s500)' }}>Loading history...</div>
+  }
+  if (history.length === 0) {
+    return <div style={{ ...card, padding: 40, textAlign: 'center', color: 'var(--s500)' }}>No messages sent yet.</div>
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {history.map(c => (
+        <div key={c._id} style={card}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--s900)' }}>{c.subject}</div>
+              <div style={{ fontSize: 11.5, color: 'var(--s500)', marginTop: 2 }}>
+                {c.audience} · {c.createdAt ? new Date(c.createdAt).toLocaleDateString() : ''}
+                {Array.isArray(c.attachments) && c.attachments.length > 0 && ` · ${c.attachments.length} attachment${c.attachments.length === 1 ? '' : 's'}`}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <span style={{
+                fontSize: 10.5, fontWeight: 700,
+                background: 'var(--g50)', color: 'var(--g600)',
+                padding: '3px 9px', borderRadius: 99,
+              }}>
+                {c.sentCount} sent
+              </span>
+              {c.failedCount > 0 && (
+                <span style={{
+                  fontSize: 10.5, fontWeight: 700,
+                  background: 'var(--r50)', color: 'var(--r600)',
+                  padding: '3px 9px', borderRadius: 99,
+                }}>
+                  {c.failedCount} failed
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 function ProfileTab({ user, toast }) {
   const initialDisplayName = localStorage.getItem(PROFILE_DISPLAY_KEY) || `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
   const initialBio = localStorage.getItem(PROFILE_BIO_KEY) || ''
