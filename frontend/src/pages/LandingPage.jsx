@@ -2,6 +2,29 @@ import { useStore } from '../context/ctx.jsx'
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+/* ── Front Desk capture ───────────────────────────────────
+ * Landing-page forms post here so submissions land in the
+ * admin Front Desk module (not just an email inbox). This is
+ * best-effort: if it fails, the form's existing email send
+ * still runs, so a lead is never lost.
+ * Override the backend origin with VITE_API_URL if needed.
+ */
+const FRONTDESK_API = (import.meta.env?.VITE_API_URL || 'https://smartious-backend.onrender.com')
+  .replace(/\/$/, '') + '/api/frontdesk/submit'
+
+async function captureFrontDesk(payload) {
+  try {
+    await fetch(FRONTDESK_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+  } catch (e) {
+    // Non-fatal — the email send is the safety net.
+    console.error('[front desk capture] failed:', e?.message)
+  }
+}
+
 /* ── CSS variables matching smartious-global.html exactly ── */
 const V = {
   cr:'#8B1A2E', cr2:'#A8203A', gold:'#B8960C', gold2:'#D4AF37', gold3:'#F0CC5A',
@@ -2410,6 +2433,28 @@ export default function LandingPage() {
       'Submitted At': new Date().toLocaleString('en-GB', {timeZone:'Africa/Nairobi'}) + ' EAT',
     }
     try {
+      // Capture into the Front Desk module (best-effort)
+      captureFrontDesk({
+        type: 'registration',
+        name: `${enrollForm.firstName || ''} ${enrollForm.lastName || ''}`.trim(),
+        email: enrollForm.parentEmail,
+        phone: enrollForm.whatsapp,
+        studentFirstName: enrollForm.firstName,
+        studentLastName: enrollForm.lastName,
+        studentDob: enrollForm.dob,
+        currentSchool: enrollForm.currentSchool,
+        country: enrollForm.country,
+        programme: enrollForm.learningMode,
+        curriculum: enrollForm.curriculum,
+        learningMode: enrollForm.learningMode,
+        pathway: enrollForm.pathway,
+        destination: enrollForm.destination,
+        duration: enrollForm.duration,
+        heardFrom: enrollForm.heardFrom,
+        sourcePage: 'enroll-wizard',
+        extra: { assessmentTranscript: assessmentLines },
+      })
+
       const res = await fetch('https://formsubmit.co/ajax/hellosmartious@gmail.com', {
         method: 'POST',
         headers: {'Content-Type':'application/json','Accept':'application/json'},
@@ -2527,7 +2572,6 @@ export default function LandingPage() {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Portal Login
             </button>
-            <button className="nav-login" onClick={goPortal} style={{color:V.gold2,borderColor:'rgba(184,150,12,.35)'}}>Book a Demo</button>
             <div className="nav-cta" onClick={() => P('enroll')}>
               Enroll Now
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -2574,7 +2618,6 @@ export default function LandingPage() {
               <p className="h-sub">Internationally accredited homeschool education — IGCSE, Cambridge, IB, British, American, CBC — delivered to 2,000+ students across 12 countries. Expert tutors. AI-powered learning. Proven exam results.</p>
               <div className="h-act">
                 <button className="btn-p" onClick={() => P('enroll')}>Begin Enrollment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                <button className="btn-o lt" onClick={goPortal} style={{borderColor:'rgba(184,150,12,.5)',color:V.gold2}}>Book a Free Demo</button>
                 <button className="btn-o lt" style={{borderColor:'rgba(139,26,46,.45)',color:V.cr}} onClick={() => P('consult')}>Free Consultation</button>
                 <button className="btn-o lt" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.85)'}} onClick={() => P('curricula')}>Explore Curricula</button>
                 <button className="btn-o lt" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.85)'}} onClick={() => P('pricing')}>View Pricing</button>
@@ -4308,6 +4351,20 @@ function ConsultForm({ P }) {
         ? 'In-person at Smartious Office (Diamond Plaza I, Parklands, Nairobi)'
         : `In-person home visit — ${form.address}`
     try {
+      // Capture into the Front Desk module (best-effort)
+      captureFrontDesk({
+        type: 'consultation',
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        country: form.country,
+        curriculum: form.curriculum,
+        consultFormat: formatLabel,
+        address: form.mode === 'inperson' && form.venue === 'home' ? form.address : '',
+        message: form.message,
+        sourcePage: 'consult-form',
+      })
+
       await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
         method:'POST',
         headers:{'Content-Type':'application/json','Accept':'application/json'},
@@ -4477,6 +4534,16 @@ function ContactForm() {
     if (!form.name || !form.email || !form.message) { setErr('Please fill in all required fields.'); return }
     setSending(true); setErr('')
     try {
+      // Capture into the Front Desk module (best-effort)
+      captureFrontDesk({
+        type: 'contact',
+        name: form.name,
+        email: form.email,
+        subject: form.subject || 'General Enquiry',
+        message: form.message,
+        sourcePage: 'contact-form',
+      })
+
       await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
         method:'POST',
         headers:{'Content-Type':'application/json','Accept':'application/json'},
