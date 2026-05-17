@@ -3788,14 +3788,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginBottom:8}}>Enrollment Submitted!</div>
                     <p style={{fontSize:14.5,color:V.sl,marginBottom:14,lineHeight:1.8,maxWidth:520,margin:'0 auto 14px'}}>
-                      Thank you, {enrollForm.firstName || 'there'}! We have received your enrollment application and $15 assessment fee. Our admissions team will contact you at <strong>{enrollForm.parentEmail}</strong> within 2 hours
-                      {enrollForm.assessmentMode === 'online'
-                        ? ' to review your placement test and introduce your tutor.'
-                        : enrollForm.assessmentMode === 'centre'
-                          ? ' to schedule your in-person placement assessment at our Parklands centre.'
-                          : enrollForm.assessmentMode === 'home'
-                            ? ' to schedule your at-home placement assessment.'
-                            : '.'}
+                      Thank you, {enrollForm.firstName || 'there'}! We have received your enrollment application. Our admissions team will contact you at <strong>{enrollForm.parentEmail}</strong> within 48 hours to guide you through the next steps, including your child&rsquo;s placement assessment in the student portal.
                     </p>
 
                     {/* Assessment mode summary */}
@@ -4144,22 +4137,32 @@ function ConsultForm({ P }) {
       : form.venue === 'office'
         ? 'In-person at Smartious Office (Diamond Plaza I, Parklands, Nairobi)'
         : `In-person home visit — ${form.address}`
+    // Primary store: Front Desk database. Secondary: email copy.
+    // The request succeeds if either path goes through.
+    let fdOk = false, emailOk = false
     try {
-      // Capture into the Front Desk module (best-effort)
-      captureFrontDesk({
-        type: 'consultation',
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        country: form.country,
-        curriculum: form.curriculum,
-        consultFormat: formatLabel,
-        address: form.mode === 'inperson' && form.venue === 'home' ? form.address : '',
-        message: form.message,
-        sourcePage: 'consult-form',
+      const fd = await fetch(FRONTDESK_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'consultation',
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          country: form.country,
+          curriculum: form.curriculum,
+          consultFormat: formatLabel,
+          address: form.mode === 'inperson' && form.venue === 'home' ? form.address : '',
+          message: form.message,
+          sourcePage: 'consult-form',
+        }),
       })
-
-      await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
+      fdOk = fd.ok
+    } catch (e) {
+      console.error('[consult] front desk capture failed:', e?.message)
+    }
+    try {
+      const res = await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
         method:'POST',
         headers:{'Content-Type':'application/json','Accept':'application/json'},
         body: JSON.stringify({
@@ -4175,9 +4178,14 @@ function ConsultForm({ P }) {
           Message: form.message || 'No additional message provided.',
         })
       })
+      emailOk = res.ok
+    } catch (e) {
+      console.error('[consult] email copy failed:', e?.message)
+    }
+    if (fdOk || emailOk) {
       setSent(true)
-    } catch {
-      setErr('Failed to send. Please email us directly at hellosmartious@gmail.com')
+    } else {
+      setErr('Could not send your request. Please check your connection and try again, or WhatsApp us at +254 745 021 212.')
     }
     setSending(false)
   }
@@ -4327,18 +4335,26 @@ function ContactForm() {
   const submit = async () => {
     if (!form.name || !form.email || !form.message) { setErr('Please fill in all required fields.'); return }
     setSending(true); setErr('')
+    let fdOk = false, emailOk = false
     try {
-      // Capture into the Front Desk module (best-effort)
-      captureFrontDesk({
-        type: 'contact',
-        name: form.name,
-        email: form.email,
-        subject: form.subject || 'General Enquiry',
-        message: form.message,
-        sourcePage: 'contact-form',
+      const fd = await fetch(FRONTDESK_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'contact',
+          name: form.name,
+          email: form.email,
+          subject: form.subject || 'General Enquiry',
+          message: form.message,
+          sourcePage: 'contact-form',
+        }),
       })
-
-      await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
+      fdOk = fd.ok
+    } catch (e) {
+      console.error('[contact] front desk capture failed:', e?.message)
+    }
+    try {
+      const res = await fetch(`https://formsubmit.co/ajax/hellosmartious@gmail.com`, {
         method:'POST',
         headers:{'Content-Type':'application/json','Accept':'application/json'},
         body: JSON.stringify({
@@ -4351,9 +4367,14 @@ function ContactForm() {
           Message: form.message,
         })
       })
+      emailOk = res.ok
+    } catch (e) {
+      console.error('[contact] email copy failed:', e?.message)
+    }
+    if (fdOk || emailOk) {
       setSent(true)
-    } catch {
-      setErr('Failed to send. Email us directly at hellosmartious@gmail.com')
+    } else {
+      setErr('Could not send your message. Please check your connection and try again, or email hellosmartious@gmail.com directly.')
     }
     setSending(false)
   }
