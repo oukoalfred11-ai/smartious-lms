@@ -467,9 +467,37 @@ const styles = `
     .lp .wiz-body{padding:24px 18px}
     .lp .bfc{grid-template-columns:1fr}.lp .bfc-l{min-height:180px}
     .lp .lpfs{grid-template-columns:repeat(3,1fr)}
+    /* — added: tighter section + heading sizing on tablets/phones — */
+    .lp .sec-hd{margin-bottom:40px}
+    .lp .pg-hero{padding-top:90px;padding-bottom:48px}
+    .lp .lead,.lp .h-sub{font-size:15.5px}
+    .lp .h-act{flex-direction:column;align-items:stretch;width:100%}
+    .lp .h-act .btn-p,.lp .h-act .btn-o{justify-content:center;width:100%}
+    .lp .p-tabs{width:100%}
+    .lp .ptab{flex:1;text-align:center;padding:9px 12px;font-size:12px}
+    .lp .pc{padding:24px}
+    .lp .p-am{font-size:2.6rem}
   }
   @media(max-width:480px){
     .lp .fg{grid-template-columns:1fr}.lp .pay-o{grid-template-columns:1fr 1fr}.lp .wst{min-width:100%}.lp .hl-grid{grid-template-columns:1fr 1fr}
+    /* — added: small-phone refinements — */
+    .lp .wrap,.lp .nav-wrap,.lp .h-body,.lp .cta-in{padding-left:16px;padding-right:16px}
+    .lp .sec{padding:48px 0}
+    .lp .sec-hd{margin-bottom:32px}
+    .lp .h-body{padding-top:64px;padding-bottom:48px}
+    .lp .h1{font-size:clamp(2.4rem,13vw,3.4rem)}
+    .lp .pg-h{font-size:clamp(2.1rem,9vw,3rem)}
+    .lp .pg-hero{padding-top:80px;padding-bottom:40px}
+    .lp .lead,.lp .h-sub,.lp .pg-sub{font-size:14.5px}
+    .lp .lpfs{grid-template-columns:repeat(2,1fr)}
+    .lp .pc{padding:20px;border-radius:14px}
+    .lp .p-am{font-size:2.3rem}
+    .lp .ptab{font-size:11px;padding:8px 8px}
+    .lp .hl-grid{grid-template-columns:1fr}
+    .lp .pay-o{grid-template-columns:1fr}
+    .lp .btn-p,.lp .nav-cta{padding:12px 22px}
+    .lp .wiz-body{padding:20px 14px}
+    .lp .fab-panel{right:12px;left:12px;width:auto;max-width:none}
   }
 `
 
