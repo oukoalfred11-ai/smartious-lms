@@ -71,7 +71,7 @@ router.get('/recipients', auth, requireRole('admin'), async (req, res) => {
 // The frontend uploads each attachment, then includes the
 // returned URLs in the /send payload.
 // ─────────────────────────────────────────────────────────
-router.post('/upload-attachment', auth, requireRole('admin', 'teacher'), (req, res) => {
+router.post('/upload-attachment', auth, requireRole('admin', 'teacher', 'student'), (req, res) => {
   if (!uploadAttachment) {
     return res.status(503).json({
       success: false,
@@ -401,6 +401,168 @@ router.get('/teacher/history', auth, requireRole('teacher', 'admin'), async (req
     res.json({ success: true, data: { history } });
   } catch (e) {
     console.error('[communication teacher/history]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// GET /api/communication/student/recipients
+// A student's allowed audience: the teachers allocated to them,
+// plus admins. NO parents, NO other students, NO external.
+// ─────────────────────────────────────────────────────────
+router.get('/student/recipients', auth, requireRole('student', 'admin'), async (req, res) => {
+  try {
+    const Allocation = require('../models/Allocation');
+
+    // Teachers allocated to this student (active allocations)
+    const allocs = await Allocation.find({ studentId: req.user._id, status: 'Active' })
+      .populate('teacherId', 'firstName lastName email')
+      .populate('subjectId', 'subjectName')
+      .lean();
+
+    // De-dupe teachers, noting which subject(s) they teach this student
+    const teacherMap = {};
+    allocs.forEach(a => {
+      const t = a.teacherId;
+      if (!t || !t.email) return;
+      const tid = String(t._id);
+      if (!teacherMap[tid]) {
+        teacherMap[tid] = {
+          _id: t._id,
+          name: `${t.firstName || ''} ${t.lastName || ''}`.trim() || t.email,
+          email: t.email,
+          role: 'teacher',
+          subjects: [],
+        };
+      }
+      const subjName = a.subjectId?.subjectName;
+      if (subjName && !teacherMap[tid].subjects.includes(subjName)) {
+        teacherMap[tid].subjects.push(subjName);
+      }
+    });
+    const teachers = Object.values(teacherMap);
+
+    // Admins
+    const admins = await User.find({ role: 'admin' })
+      .select('_id firstName lastName email')
+      .sort('firstName')
+      .lean();
+    const adminList = admins
+      .filter(a => a.email)
+      .map(a => ({
+        _id: a._id,
+        name: `${a.firstName || ''} ${a.lastName || ''}`.trim() || a.email,
+        email: a.email,
+        role: 'admin',
+        subjects: [],
+      }));
+
+    res.json({ success: true, data: { teachers, admins: adminList } });
+  } catch (e) {
+    console.error('[communication student/recipients]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// POST /api/communication/student/send
+// Body: { subject, body, recipientEmails: [{ email, name }], attachments, audience }
+// Server re-validates every address against the student's allowed
+// set (their allocated teachers + admins) — a student cannot email
+// anyone else, regardless of what the frontend sends.
+// ─────────────────────────────────────────────────────────
+router.post('/student/send', auth, requireRole('student', 'admin'), async (req, res) => {
+  try {
+    const Allocation = require('../models/Allocation');
+    const { subject, body, recipientEmails = [], attachments = [], audience = '' } = req.body;
+
+    if (!subject || !subject.trim())
+      return res.status(400).json({ success: false, message: 'Subject is required.' });
+    if (!body || !body.trim())
+      return res.status(400).json({ success: false, message: 'Message body is required.' });
+
+    // Rebuild the student's allowed email set, server-side
+    const allocs = await Allocation.find({ studentId: req.user._id, status: 'Active' })
+      .populate('teacherId', 'email').lean();
+    const admins = await User.find({ role: 'admin' }).select('email').lean();
+
+    const allowed = new Set();
+    allocs.forEach(a => { if (a.teacherId?.email) allowed.add(a.teacherId.email.toLowerCase()); });
+    admins.forEach(a => { if (a.email) allowed.add(a.email.toLowerCase()); });
+
+    // Filter requested recipients to the allowed set
+    const requested = Array.isArray(recipientEmails) ? recipientEmails : [];
+    const seen = new Set();
+    const finalRecipients = [];
+    let rejected = 0;
+    for (const r of requested) {
+      const email = String(r?.email || '').trim().toLowerCase();
+      if (!email) continue;
+      if (!allowed.has(email)) { rejected++; continue; }
+      if (seen.has(email)) continue;
+      seen.add(email);
+      finalRecipients.push({ email: r.email.trim(), name: r.name || '' });
+    }
+
+    if (finalRecipients.length === 0)
+      return res.status(400).json({
+        success: false,
+        message: rejected > 0
+          ? 'No valid recipients — students can only email their own teachers and the administration.'
+          : 'No recipients selected.',
+      });
+
+    const senderName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Smartious Student';
+
+    const mailAttachments = (Array.isArray(attachments) ? attachments : [])
+      .filter(a => a && a.url)
+      .map(a => ({ filename: a.name || 'attachment', path: a.url }));
+
+    const { results, sentCount, failedCount } = await sendBulkEmail({
+      recipients: finalRecipients,
+      subject: subject.trim(),
+      bodyText: body,
+      senderName,
+      attachments: mailAttachments,
+    });
+
+    const record = await Communication.create({
+      sentBy: req.user._id,
+      sentByName: senderName,
+      sentByRole: req.user.role,
+      subject: subject.trim(),
+      body,
+      attachments: (attachments || []).map(a => ({ name: a.name, url: a.url })),
+      recipients: results,
+      recipientCount: finalRecipients.length,
+      sentCount,
+      failedCount,
+      audience: audience || `${finalRecipients.length} recipient${finalRecipients.length === 1 ? '' : 's'}`,
+    });
+
+    res.json({
+      success: true,
+      message: `Sent ${sentCount} of ${finalRecipients.length} email${finalRecipients.length === 1 ? '' : 's'}.`,
+      data: { id: record._id, sentCount, failedCount, rejected, results },
+    });
+  } catch (e) {
+    console.error('[communication student/send]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// GET /api/communication/student/history — this student's sends
+// ─────────────────────────────────────────────────────────
+router.get('/student/history', auth, requireRole('student', 'admin'), async (req, res) => {
+  try {
+    const history = await Communication.find({ sentBy: req.user._id })
+      .sort('-createdAt')
+      .limit(50)
+      .lean();
+    res.json({ success: true, data: { history } });
+  } catch (e) {
+    console.error('[communication student/history]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
