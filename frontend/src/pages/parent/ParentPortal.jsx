@@ -12,6 +12,51 @@ const PAGES = {
 
 const mCol = (pct) => pct >= 70 ? 'var(--g600)' : pct >= 50 ? 'var(--a600)' : 'var(--r500)'
 
+// ── PROGRESS RING — bright golden-yellow donut ─────────────
+// A small SVG ring showing a single percentage. Used per-subject
+// on the parent portal. Gold arc on a soft track, % in the centre.
+function ProgressRing({ pct = 0, size = 92, stroke = 9, label, sublabel }) {
+  const r = (size - stroke) / 2
+  const circ = 2 * Math.PI * r
+  const clamped = Math.max(0, Math.min(100, pct))
+  const dash = (clamped / 100) * circ
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, width:size+24 }}>
+      <div style={{ position:'relative', width:size, height:size }}>
+        <svg width={size} height={size} style={{ transform:'rotate(-90deg)' }}>
+          {/* track */}
+          <circle cx={size/2} cy={size/2} r={r}
+            fill="none" stroke="#F1ECDD" strokeWidth={stroke} />
+          {/* gold progress arc */}
+          <circle cx={size/2} cy={size/2} r={r}
+            fill="none" stroke="#F5C518" strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={`${dash} ${circ - dash}`}
+            style={{ transition:'stroke-dasharray 1s ease' }} />
+        </svg>
+        <div style={{
+          position:'absolute', inset:0,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          flexDirection:'column',
+        }}>
+          <span className="mono" style={{ fontSize:size*0.26, fontWeight:700, color:'var(--s900)', lineHeight:1 }}>
+            {clamped}%
+          </span>
+          {sublabel && (
+            <span style={{ fontSize:9.5, color:'var(--s400)', marginTop:2 }}>{sublabel}</span>
+          )}
+        </div>
+      </div>
+      {label && (
+        <div style={{ fontSize:12, fontWeight:600, color:'var(--s700)', textAlign:'center', lineHeight:1.3, maxWidth:size+20 }}>
+          {label}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function ParentPortal() {
   const toast = useToast()
   const store = useStore()
@@ -266,22 +311,17 @@ export default function ParentPortal() {
                           <button className="btn btn-g btn-sm" onClick={()=>setPage('progress')}>Full Report</button>
                         </div>
                         {subjects.length === 0 ? (
-                          <div style={{padding:'20px 0',color:'var(--s400)',fontSize:13,textAlign:'center'}}>
+                          <div style={{ padding:'20px 0', color:'var(--s400)', fontSize:13, textAlign:'center' }}>
                             No subjects with progress yet. Progress appears as teachers mark lessons mastered.
                           </div>
-                        ) : subjects.map(s => (
-                          <div key={s.name} style={{marginBottom:12}}>
-                            <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:5}}>
-                              <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                                <div style={{width:10,height:10,borderRadius:2,background:s.col}}/>
-                                <span style={{fontWeight:600}}>{s.name}</span>
-                                <span style={{fontSize:11,color:'var(--s400)'}}>{s.mastered}/{s.total} lessons</span>
-                              </div>
-                              <span className="mono" style={{fontWeight:700,color:mCol(s.score)}}>{s.score}%</span>
-                            </div>
-                            <div className="prog-bar"><div className="prog-fill" style={{width:s.score+'%',background:s.col,transition:'width 1s ease'}}/></div>
+                        ) : (
+                          <div style={{ display:'flex', flexWrap:'wrap', gap:14, justifyContent:'center', paddingTop:6 }}>
+                            {subjects.map(s => (
+                              <ProgressRing key={s.name} pct={s.score} label={s.name}
+                                sublabel={`${s.mastered}/${s.total}`} />
+                            ))}
                           </div>
-                        ))}
+                        )}
                       </div>
                       <div style={{display:'flex',flexDirection:'column',gap:14}}>
                         <div className="card">
@@ -332,20 +372,29 @@ export default function ParentPortal() {
                         No subject progress yet. As teachers mark lessons mastered, your child's progress will appear here.
                       </div>
                     ) : (
-                      <table className="tbl">
-                        <thead><tr><th>Subject</th><th>Curriculum</th><th>Lessons Mastered</th><th>Progress</th><th>Status</th></tr></thead>
-                        <tbody>
+                      <>
+                        {/* Ring grid — visual summary */}
+                        <div style={{ display:'flex', flexWrap:'wrap', gap:16, justifyContent:'center', paddingBottom:18, marginBottom:8, borderBottom:'1px solid var(--border)' }}>
                           {(progress?.subjects || []).map((s,i) => (
-                            <tr key={i}>
-                              <td style={{fontWeight:700}}>{s.name}</td>
-                              <td style={{color:'var(--s500)',fontSize:13}}>{s.curriculum}</td>
-                              <td><span className="mono">{s.masteredLessons}/{s.totalLessons}</span></td>
-                              <td><span className="mono" style={{fontWeight:700,color:mCol(s.progressPct)}}>{s.progressPct}%</span></td>
-                              <td><span className={`badge ${s.progressPct>=70?'badge-green':s.progressPct>=40?'badge-amber':'badge-red'}`}>{s.progressPct>=70?'On Track':s.progressPct>=40?'In Progress':'Getting Started'}</span></td>
-                            </tr>
+                            <ProgressRing key={i} pct={s.progressPct} label={s.name}
+                              sublabel={`${s.masteredLessons}/${s.totalLessons}`} />
                           ))}
-                        </tbody>
-                      </table>
+                        </div>
+                        <table className="tbl">
+                          <thead><tr><th>Subject</th><th>Curriculum</th><th>Lessons Mastered</th><th>Progress</th><th>Status</th></tr></thead>
+                          <tbody>
+                            {(progress?.subjects || []).map((s,i) => (
+                              <tr key={i}>
+                                <td style={{fontWeight:700}}>{s.name}</td>
+                                <td style={{color:'var(--s500)',fontSize:13}}>{s.curriculum}</td>
+                                <td><span className="mono">{s.masteredLessons}/{s.totalLessons}</span></td>
+                                <td><span className="mono" style={{fontWeight:700,color:mCol(s.progressPct)}}>{s.progressPct}%</span></td>
+                                <td><span className={`badge ${s.progressPct>=70?'badge-green':s.progressPct>=40?'badge-amber':'badge-red'}`}>{s.progressPct>=70?'On Track':s.progressPct>=40?'In Progress':'Getting Started'}</span></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </>
                     )}
                   </div>
                 </>
