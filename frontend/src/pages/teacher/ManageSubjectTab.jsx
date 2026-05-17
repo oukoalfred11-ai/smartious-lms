@@ -65,6 +65,7 @@ export default function ManageSubjectTab({ user, toast }) {
   const [selectedSubject, setSelectedSubject] = useState(null)
   const [lessons, setLessons] = useState([])
   const [lessonsLoading, setLessonsLoading] = useState(false)
+  const [subjectView, setSubjectView] = useState('lessons')   // lessons | mastery
 
   // Modals
   const [showSettings, setShowSettings] = useState(false)
@@ -107,6 +108,7 @@ export default function ManageSubjectTab({ user, toast }) {
   useEffect(() => {
     if (selectedSubject) loadLessons(selectedSubject._id)
     else setLessons([])
+    setSubjectView('lessons')
   }, [selectedSubject, loadLessons])
 
   // ────────────────────────────────────────────────────────
@@ -342,8 +344,32 @@ export default function ManageSubjectTab({ user, toast }) {
         </div>
       </div>
 
+      {/* ─── VIEW TOGGLE: LESSONS / STUDENT MASTERY ─── */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+        {[
+          { id: 'lessons', label: 'Lessons' },
+          { id: 'mastery', label: 'Student Mastery' },
+        ].map(v => (
+          <button key={v.id} onClick={() => setSubjectView(v.id)}
+            style={{
+              padding: '8px 18px', borderRadius: 99,
+              border: `1.5px solid ${subjectView === v.id ? BRAND.crimson : BRAND.line || '#E8E2D6'}`,
+              background: subjectView === v.id ? BRAND.crimson : BRAND.white,
+              color: subjectView === v.id ? BRAND.white : BRAND.crimson,
+              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+            }}>
+            {v.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ─── STUDENT MASTERY MATRIX ─── */}
+      {subjectView === 'mastery' && (
+        <MasteryMatrix subject={selectedSubject} toast={toast} />
+      )}
+
       {/* ─── LESSONS GROUPED BY TERM ─── */}
-      {lessonsLoading ? (
+      {subjectView === 'lessons' && (lessonsLoading ? (
         <div className="card" style={{ padding: 40, textAlign: 'center' }}>
           <div className="mono" style={{ fontSize: 13, color: BRAND.inkMute, letterSpacing: '.1em' }}>
             LOADING LESSONS...
@@ -406,7 +432,7 @@ export default function ManageSubjectTab({ user, toast }) {
             )
           })}
         </div>
-      )}
+      ))}
 
       {/* ADD/EDIT LESSON MODAL */}
       {showAddLesson && (
@@ -1242,6 +1268,244 @@ const inp = {
   padding: '8px 12px', borderRadius: 6,
   border: `1.5px solid ${BRAND.line}`,
   fontSize: 13, fontFamily: 'inherit',
+}
+
+// ════════════════════════════════════════════════════════════
+// MASTERY MATRIX — students × lessons grid; click a cell to
+// toggle whether a student has mastered a lesson.
+// ════════════════════════════════════════════════════════════
+function MasteryMatrix({ subject, toast }) {
+  const [loading, setLoading]   = useState(true)
+  const [students, setStudents] = useState([])
+  const [lessons, setLessons]   = useState([])
+  const [mastery, setMastery]   = useState({})   // { studentId: { lessonId: true } }
+  const [saving, setSaving]     = useState({})   // { 'sid:lid': true } while a toggle is in flight
+
+  const load = useCallback(async () => {
+    if (!subject?._id) return
+    setLoading(true)
+    try {
+      const { data } = await api.get('/lesson-progress/teacher-roster/' + subject._id)
+      if (data?.success) {
+        setStudents(data.data?.students || [])
+        setLessons(data.data?.lessons || [])
+        // flatten masteryMap → { sid: { lid: true } }
+        const flat = {}
+        const mm = data.data?.masteryMap || {}
+        Object.keys(mm).forEach(sid => {
+          flat[sid] = {}
+          Object.keys(mm[sid]).forEach(lid => { flat[sid][lid] = true })
+        })
+        setMastery(flat)
+      } else {
+        toast?.error?.(data?.message || 'Failed to load mastery roster.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not load mastery roster.')
+    } finally {
+      setLoading(false)
+    }
+  }, [subject, toast])
+
+  useEffect(() => { load() }, [load])
+
+  const toggleCell = async (studentId, lessonId) => {
+    const key = studentId + ':' + lessonId
+    if (saving[key]) return
+    const currentlyMastered = !!mastery[studentId]?.[lessonId]
+    const next = !currentlyMastered
+
+    setSaving(s => ({ ...s, [key]: true }))
+    // optimistic update
+    setMastery(m => ({
+      ...m,
+      [studentId]: { ...(m[studentId] || {}), [lessonId]: next },
+    }))
+
+    try {
+      const { data } = await api.post('/lesson-progress/toggle', {
+        studentId, lessonId, mastered: next,
+      })
+      if (!data?.success) {
+        // revert
+        setMastery(m => ({
+          ...m,
+          [studentId]: { ...(m[studentId] || {}), [lessonId]: currentlyMastered },
+        }))
+        toast?.error?.(data?.message || 'Update failed.')
+      }
+    } catch (e) {
+      setMastery(m => ({
+        ...m,
+        [studentId]: { ...(m[studentId] || {}), [lessonId]: currentlyMastered },
+      }))
+      toast?.error?.(e?.response?.data?.message || 'Update failed.')
+    } finally {
+      setSaving(s => { const c = { ...s }; delete c[key]; return c })
+    }
+  }
+
+  const studentName = (s) => `${s.firstName || ''} ${s.lastName || ''}`.trim() || s.email || 'Student'
+  const masteredCount = (sid) => lessons.reduce((n, l) => n + (mastery[sid]?.[l._id] ? 1 : 0), 0)
+
+  if (loading) {
+    return (
+      <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+        <div className="mono" style={{ fontSize: 13, color: BRAND.inkMute, letterSpacing: '.1em' }}>
+          LOADING MASTERY ROSTER...
+        </div>
+      </div>
+    )
+  }
+
+  if (students.length === 0) {
+    return (
+      <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+        <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, color: BRAND.ink, marginBottom: 6 }}>
+          No students allocated
+        </div>
+        <div style={{ fontSize: 13, color: BRAND.inkMute }}>
+          No students are allocated to you for this subject yet. Mastery tracking appears once students are allocated.
+        </div>
+      </div>
+    )
+  }
+
+  if (lessons.length === 0) {
+    return (
+      <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+        <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, color: BRAND.ink, marginBottom: 6 }}>
+          No lessons to track
+        </div>
+        <div style={{ fontSize: 13, color: BRAND.inkMute }}>
+          Add lessons to this subject first — then mark which students have mastered each.
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div style={{ padding: '16px 20px', borderBottom: `1px solid ${BRAND.line || '#E8E2D6'}` }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: BRAND.ink }}>
+          Student Mastery
+        </div>
+        <div style={{ fontSize: 12, color: BRAND.inkMute, marginTop: 2 }}>
+          Click a cell to mark a lesson mastered. This feeds each student's progress and the parent portal.
+        </div>
+      </div>
+
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: 520 }}>
+          <thead>
+            <tr>
+              <th style={{
+                position: 'sticky', left: 0, zIndex: 2, background: BRAND.white,
+                textAlign: 'left', padding: '10px 14px',
+                fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em',
+                textTransform: 'uppercase', color: BRAND.inkMute,
+                borderBottom: `1px solid ${BRAND.line || '#E8E2D6'}`,
+                minWidth: 160,
+              }}>
+                Student
+              </th>
+              {lessons.map(l => (
+                <th key={l._id} title={l.title}
+                  style={{
+                    padding: '10px 6px', fontSize: 10, fontWeight: 700,
+                    color: BRAND.inkMute,
+                    borderBottom: `1px solid ${BRAND.line || '#E8E2D6'}`,
+                    borderLeft: `1px solid ${BRAND.line || '#E8E2D6'}`,
+                    minWidth: 46, maxWidth: 46,
+                  }}>
+                  <div style={{
+                    writingMode: 'vertical-rl', transform: 'rotate(180deg)',
+                    margin: '0 auto', maxHeight: 90, overflow: 'hidden',
+                    textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600,
+                  }}>
+                    {l.title}
+                  </div>
+                </th>
+              ))}
+              <th style={{
+                padding: '10px 10px', fontSize: 10.5, fontWeight: 700,
+                letterSpacing: '.06em', textTransform: 'uppercase', color: BRAND.inkMute,
+                borderBottom: `1px solid ${BRAND.line || '#E8E2D6'}`,
+                borderLeft: `1px solid ${BRAND.line || '#E8E2D6'}`,
+              }}>
+                Done
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {students.map(s => {
+              const sid = String(s._id)
+              const done = masteredCount(sid)
+              return (
+                <tr key={sid}>
+                  <td style={{
+                    position: 'sticky', left: 0, zIndex: 1, background: BRAND.white,
+                    padding: '8px 14px', borderBottom: `1px solid ${BRAND.line || '#E8E2D6'}`,
+                  }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: BRAND.ink }}>
+                      {studentName(s)}
+                    </div>
+                    {s.admissionNumber && (
+                      <div className="mono" style={{ fontSize: 10, color: BRAND.inkMute }}>
+                        {s.admissionNumber}
+                      </div>
+                    )}
+                  </td>
+                  {lessons.map(l => {
+                    const lid = String(l._id)
+                    const on = !!mastery[sid]?.[lid]
+                    const key = sid + ':' + lid
+                    const busy = !!saving[key]
+                    return (
+                      <td key={lid}
+                        onClick={() => toggleCell(sid, lid)}
+                        style={{
+                          textAlign: 'center', padding: 4,
+                          borderBottom: `1px solid ${BRAND.line || '#E8E2D6'}`,
+                          borderLeft: `1px solid ${BRAND.line || '#E8E2D6'}`,
+                          cursor: busy ? 'wait' : 'pointer',
+                        }}>
+                        <div style={{
+                          width: 26, height: 26, borderRadius: 6, margin: '0 auto',
+                          background: on ? '#15803D' : '#F3F1EC',
+                          border: `1px solid ${on ? '#15803D' : (BRAND.line || '#E8E2D6')}`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          opacity: busy ? 0.5 : 1, transition: 'all .12s',
+                        }}>
+                          {on && (
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          )}
+                        </div>
+                      </td>
+                    )
+                  })}
+                  <td style={{
+                    textAlign: 'center', padding: '8px 10px',
+                    borderBottom: `1px solid ${BRAND.line || '#E8E2D6'}`,
+                    borderLeft: `1px solid ${BRAND.line || '#E8E2D6'}`,
+                  }}>
+                    <span className="mono" style={{
+                      fontSize: 12, fontWeight: 700,
+                      color: done === 0 ? BRAND.inkMute : '#15803D',
+                    }}>
+                      {done}/{lessons.length}
+                    </span>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
 }
 
 function Field({ label, children, wrap }) {
