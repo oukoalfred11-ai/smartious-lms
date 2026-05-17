@@ -213,4 +213,78 @@ router.get('/stats', auth, requireRole('admin'), async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────
+// POST /api/frontdesk/:id/email   — admin: email a lead
+// Body: { subject, body, template, attachments: [{name,url}] }
+// Sends one branded email to the lead's address and logs it.
+// ─────────────────────────────────────────────────────────
+router.post('/:id/email', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const { subject, body, template = 'custom', attachments = [] } = req.body;
+
+    if (!subject || !subject.trim())
+      return res.status(400).json({ success: false, message: 'Subject is required.' });
+    if (!body || !body.trim())
+      return res.status(400).json({ success: false, message: 'Message body is required.' });
+
+    const lead = await FrontDeskSubmission.findById(req.params.id);
+    if (!lead)
+      return res.status(404).json({ success: false, message: 'Lead not found.' });
+    if (!lead.email)
+      return res.status(400).json({ success: false, message: 'This lead has no email address.' });
+
+    // sendCommunityEmail is the single branded-email worker
+    let sendCommunityEmail = null;
+    try {
+      ({ sendCommunityEmail } = require('../services/emailService'));
+    } catch (e) {
+      return res.status(503).json({ success: false, message: 'Email service unavailable.' });
+    }
+
+    const mailAttachments = (Array.isArray(attachments) ? attachments : [])
+      .filter(a => a && a.url)
+      .map(a => ({ filename: a.name || 'attachment', path: a.url }));
+
+    const senderName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim()
+      || 'Smartious Admissions';
+
+    const result = await sendCommunityEmail({
+      to: lead.email,
+      recipientName: lead.name || lead.email,
+      subject: subject.trim(),
+      bodyText: body,
+      senderName,
+      attachments: mailAttachments,
+    });
+
+    // Log the email on the lead, regardless of delivery outcome
+    lead.emailsSent.push({
+      template,
+      subject: subject.trim(),
+      sentBy: senderName,
+      sentAt: new Date(),
+      delivered: !!result.success,
+    });
+    // Sending an email is contact — nudge a 'new' lead to 'contacted'
+    if (lead.status === 'new') lead.status = 'contacted';
+    await lead.save();
+
+    if (!result.success) {
+      return res.status(502).json({
+        success: false,
+        message: 'Email could not be delivered: ' + (result.error || 'unknown error'),
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Email sent to ' + lead.email,
+      data: { status: lead.status, emailsSent: lead.emailsSent },
+    });
+  } catch (e) {
+    console.error('[frontdesk email]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 module.exports = router;
