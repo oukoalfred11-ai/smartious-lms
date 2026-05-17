@@ -398,6 +398,27 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
       }
     }
 
+    // If a STUDENT was created with a parentId, link both ways.
+    // (Inline parent creation is a separate endpoint — see
+    //  POST /:id/create-and-link-parent below.)
+    if (user.role === 'student' && req.body.parentId) {
+      try {
+        const parent = await User.findById(req.body.parentId);
+        if (parent && parent.role === 'parent') {
+          await User.findByIdAndUpdate(user._id, {
+            $addToSet: { linkedParents: parent._id },
+            $set: { parentId: parent._id },
+          });
+          await User.findByIdAndUpdate(parent._id, {
+            $addToSet: { linkedStudents: user._id },
+          });
+          console.log(`✓ Student ${user.firstName} linked to parent ${parent.firstName}`);
+        }
+      } catch (linkErr) {
+        console.error('Failed to link student to parent:', linkErr.message);
+      }
+    }
+
     // If user role is 'teacher', build teachingSpecialties from subjects and curriculum
     if (user.role === 'teacher') {
       try {
@@ -498,6 +519,172 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
     });
   } catch (e) {
     res.status(400).json({ success: false, message: e.message });
+  }
+});
+
+// ── STUDENT ↔ PARENT LINKING ──────────────────────────────
+// POST /api/users/:id/link-parent
+// Links an EXISTING parent account to a student (both ways).
+// Body: { parentId }
+router.post('/:id/link-parent', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const mongoose = require('mongoose');
+    const { parentId } = req.body;
+
+    if (!mongoose.isValidObjectId(parentId))
+      return res.status(400).json({ success: false, message: 'Valid parentId is required.' });
+
+    const student = await User.findById(req.params.id);
+    if (!student || student.role !== 'student')
+      return res.status(404).json({ success: false, message: 'Student not found.' });
+
+    const parent = await User.findById(parentId);
+    if (!parent || parent.role !== 'parent')
+      return res.status(404).json({ success: false, message: 'Parent not found.' });
+
+    // One parent per student — clear any previous link first
+    const prevParentIds = [
+      ...(student.linkedParents || []).map(String),
+      ...(student.parentId ? [String(student.parentId)] : []),
+    ];
+    for (const pid of [...new Set(prevParentIds)]) {
+      if (pid !== String(parent._id)) {
+        await User.findByIdAndUpdate(pid, { $pull: { linkedStudents: student._id } });
+      }
+    }
+
+    student.linkedParents = [parent._id];
+    student.parentId = parent._id;
+    await student.save();
+    await User.findByIdAndUpdate(parent._id, { $addToSet: { linkedStudents: student._id } });
+
+    res.json({
+      success: true,
+      message: 'Parent linked.',
+      data: {
+        parent: {
+          _id: parent._id,
+          name: `${parent.firstName || ''} ${parent.lastName || ''}`.trim(),
+          email: parent.email,
+        },
+      },
+    });
+  } catch (e) {
+    console.error('[users link-parent]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// POST /api/users/:id/create-and-link-parent
+// Creates a NEW parent account and links it to the student.
+// Body: { firstName, lastName, email, phone }
+// The parent gets a real account (temp password, welcome email)
+// via the same path as any admin-created parent.
+router.post('/:id/create-and-link-parent', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone } = req.body;
+
+    if (!firstName || !firstName.trim())
+      return res.status(400).json({ success: false, message: 'Parent first name is required.' });
+    if (!email || !email.trim())
+      return res.status(400).json({ success: false, message: 'Parent email is required.' });
+
+    const student = await User.findById(req.params.id);
+    if (!student || student.role !== 'student')
+      return res.status(404).json({ success: false, message: 'Student not found.' });
+
+    // Reuse an existing parent account if this email already exists
+    let parent = await User.findOne({ email: email.trim().toLowerCase() });
+    let createdNew = false;
+
+    if (parent) {
+      if (parent.role !== 'parent')
+        return res.status(400).json({
+          success: false,
+          message: 'That email already belongs to a non-parent account.',
+        });
+    } else {
+      const tempPassword = User.generateTempPassword();
+      parent = await User.create({
+        firstName: firstName.trim(),
+        lastName: (lastName || '').trim(),
+        email: email.trim().toLowerCase(),
+        phone: (phone || '').trim(),
+        role: 'parent',
+        password: tempPassword,
+        isActive: true,
+        mustChangePassword: true,
+      });
+      createdNew = true;
+
+      // Welcome email — best-effort, mirrors the normal parent-create flow
+      try {
+        await sendWelcomeEmail({
+          to: parent.email,
+          name: `${parent.firstName} ${parent.lastName}`.trim(),
+          tempPassword,
+          role: 'parent',
+        });
+      } catch (mailErr) {
+        console.error('Parent welcome email failed:', mailErr.message);
+      }
+    }
+
+    // Link both ways — one parent per student
+    const prevParentIds = [
+      ...(student.linkedParents || []).map(String),
+      ...(student.parentId ? [String(student.parentId)] : []),
+    ];
+    for (const pid of [...new Set(prevParentIds)]) {
+      if (pid !== String(parent._id)) {
+        await User.findByIdAndUpdate(pid, { $pull: { linkedStudents: student._id } });
+      }
+    }
+    student.linkedParents = [parent._id];
+    student.parentId = parent._id;
+    await student.save();
+    await User.findByIdAndUpdate(parent._id, { $addToSet: { linkedStudents: student._id } });
+
+    res.json({
+      success: true,
+      message: createdNew ? 'Parent account created and linked.' : 'Existing parent linked.',
+      data: {
+        parent: {
+          _id: parent._id,
+          name: `${parent.firstName || ''} ${parent.lastName || ''}`.trim(),
+          email: parent.email,
+        },
+        createdNew,
+      },
+    });
+  } catch (e) {
+    console.error('[users create-and-link-parent]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// DELETE /api/users/:id/parent — unlink a student's parent (both ways)
+router.delete('/:id/parent', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const student = await User.findById(req.params.id);
+    if (!student || student.role !== 'student')
+      return res.status(404).json({ success: false, message: 'Student not found.' });
+
+    const parentIds = [
+      ...(student.linkedParents || []).map(String),
+      ...(student.parentId ? [String(student.parentId)] : []),
+    ];
+    for (const pid of [...new Set(parentIds)]) {
+      await User.findByIdAndUpdate(pid, { $pull: { linkedStudents: student._id } });
+    }
+    student.linkedParents = [];
+    student.parentId = undefined;
+    await student.save();
+
+    res.json({ success: true, message: 'Parent unlinked.' });
+  } catch (e) {
+    console.error('[users unlink-parent]', e.message);
+    res.status(500).json({ success: false, message: e.message });
   }
 });
 
