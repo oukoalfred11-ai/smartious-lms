@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useToast, api } from '../../context/ctx.jsx'
+import { useToast, api, useAuth } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 
 const I = (d) => <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:d}}/>
@@ -15,11 +15,12 @@ const mCol = (pct) => pct >= 70 ? 'var(--g600)' : pct >= 50 ? 'var(--a600)' : 'v
 export default function ParentPortal() {
   const toast = useToast()
   const store = useStore()
+  const { user } = useAuth()
   const [page, setPage] = useState('dashboard')
   const [msgInput, setMsgInput] = useState('')
   const [activeThread, setActiveThread] = useState(null)
   const [aiMsgs, setAiMsgs] = useState([
-    {role:'ai', text:"Habari Mrs. Osei! I am Mshauri. Ask me anything about Amara's progress, the IGCSE curriculum, or how to support her learning at home."}
+    {role:'ai', text:"Habari! I am Mshauri. Ask me anything about your child's progress, the curriculum, or how to support their learning at home."}
   ])
   const [aiInp, setAiInp] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
@@ -27,31 +28,64 @@ export default function ParentPortal() {
   const [payMethod, setPayMethod] = useState('M-Pesa')
   const [payRef, setPayRef] = useState('')
 
-  // ── Live mastery from API ──────────────────────────────
-  const [childMastery, setChildMastery] = useState(null)
+  const parentName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Parent'
+
+  // ── Children + selected child ──────────────────────────
+  const [children, setChildren]       = useState([])
+  const [childrenLoading, setChildrenLoading] = useState(true)
+  const [selectedChildId, setSelectedChildId] = useState(null)
+
+  // Per-child real data
+  const [overview, setOverview]       = useState(null)
+  const [progress, setProgress]       = useState(null)
+  const [childLoading, setChildLoading] = useState(false)
+
+  // Load the parent's children once
   useEffect(() => {
-    api.get('/mastery/me').then(({data}) => { if(data.success) setChildMastery(data.mastery) }).catch(()=>{})
+    api.get('/parents/my-children')
+      .then(({data}) => {
+        if (data?.success) {
+          const kids = data.data?.children || []
+          setChildren(kids)
+          if (kids.length > 0) setSelectedChildId(kids[0]._id)
+        }
+      })
+      .catch(() => toast.error('Could not load your children.'))
+      .finally(() => setChildrenLoading(false))
   }, [])
+
+  // Load overview + progress whenever the selected child changes
+  useEffect(() => {
+    if (!selectedChildId) { setOverview(null); setProgress(null); return }
+    setChildLoading(true)
+    Promise.all([
+      api.get('/parents/child/' + selectedChildId + '/overview'),
+      api.get('/parents/child/' + selectedChildId + '/progress'),
+    ])
+      .then(([ov, pr]) => {
+        if (ov.data?.success) setOverview(ov.data.data)
+        if (pr.data?.success) setProgress(pr.data.data)
+      })
+      .catch(() => toast.error('Could not load your child\'s data.'))
+      .finally(() => setChildLoading(false))
+  }, [selectedChildId])
+
+  const selectedChild = children.find(c => c._id === selectedChildId) || null
+
+  // Subjects from real progress data
+  const subjects = (progress?.subjects || []).map(s => ({
+    name: s.name, score: s.progressPct, col: s.color || '#7D1025',
+    total: s.totalLessons, mastered: s.masteredLessons,
+  }))
+  const avgScore = progress?.overallPct || 0
 
   const mCol2 = (pct) => pct >= 80 ? 'var(--g600)' : pct >= 60 ? 'var(--b600)' : pct >= 40 ? 'var(--a600)' : 'var(--r500)'
 
-  const subjects = childMastery?.subjects?.map(s => ({
-    name:s.name, score:s.overallPct, att:88, col:s.color, velocity:s.velocity||0,
-  })) || [
-    {name:'Mathematics',   score:67, att:88,  col:'#3B82F6', velocity:5},
-    {name:'Biology',       score:54, att:91,  col:'#22C55E', velocity:-2},
-    {name:'Chemistry',     score:41, att:82,  col:'#F59E0B', velocity:3},
-    {name:'Physics',       score:38, att:78,  col:'#8B5CF6', velocity:0},
-    {name:'English Language', score:79, att:95, col:'#EC4899', velocity:7},
-  ]
-  const avgScore = Math.round(subjects.reduce((s,x) => s+x.score, 0) / subjects.length)
-
-  // ── Store-derived data ────────────────────────────────
-  const myThreads = store.getThreads('parent', 'Janet Osei')
+  // ── Store-derived data (messages/announcements — not yet real) ──
+  const myThreads = store.getThreads('parent', parentName)
   const unread    = myThreads.reduce((s,t) => s+t.unread, 0)
   const announcements = store.getAnnouncements('parent')
   const publishedArticles = store.articles.filter(a => a.status === 'Published').slice(0, 6)
-  const amaraResults = store.getStudentResults('Amara Osei')
 
   // ── Mshauri ───────────────────────────────────────────
   const sendAi = async () => {
@@ -140,9 +174,29 @@ export default function ParentPortal() {
             </div>
           ))}
         </nav>
+        {children.length > 0 && (
+          <div style={{padding:'10px 12px',borderTop:'1px solid var(--border)'}}>
+            <div style={{fontSize:10,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:6}}>
+              {children.length > 1 ? 'Viewing Child' : 'Child'}
+            </div>
+            {children.length > 1 ? (
+              <select value={selectedChildId || ''} onChange={e => setSelectedChildId(e.target.value)}
+                style={{width:'100%',padding:'7px 9px',borderRadius:8,border:'1px solid var(--border)',fontSize:13,fontFamily:'inherit',fontWeight:600,color:'var(--s800)'}}>
+                {children.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+              </select>
+            ) : (
+              <div style={{fontSize:13.5,fontWeight:700,color:'var(--s800)'}}>{children[0].name}</div>
+            )}
+          </div>
+        )}
         <div className="sb-user">
-          <div style={{width:36,height:36,borderRadius:'50%',background:'#8B5CF620',color:'#8B5CF6',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'JetBrains Mono,monospace',fontSize:12,fontWeight:700}}>JO</div>
-          <div className="sb-uinfo"><div className="sb-uname">Janet Osei</div><div className="sb-urole">Parent · Amara Osei</div></div>
+          <div style={{width:36,height:36,borderRadius:'50%',background:'#8B5CF620',color:'#8B5CF6',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'JetBrains Mono,monospace',fontSize:12,fontWeight:700}}>
+            {((user?.firstName?.[0]||'')+(user?.lastName?.[0]||'')).toUpperCase() || 'P'}
+          </div>
+          <div className="sb-uinfo">
+            <div className="sb-uname">{parentName}</div>
+            <div className="sb-urole">Parent{selectedChild ? ' · ' + selectedChild.name : ''}</div>
+          </div>
         </div>
         <div className="sb-back" onClick={() => window.location.href='/'}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
@@ -164,126 +218,138 @@ export default function ParentPortal() {
           {/* ── DASHBOARD ── */}
           {page==='dashboard' && (
             <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Welcome back</div><h1 className="serif" style={{fontSize:28,color:'var(--s900)'}}>Good morning, <em style={{color:'var(--b700)'}}>Mrs. Osei</em>!</h1></div>
+              <div style={{marginBottom:20}}><div className="sec-tag">Welcome back</div><h1 className="serif" style={{fontSize:28,color:'var(--s900)'}}>Hello, <em style={{color:'var(--b700)'}}>{user?.firstName || parentName}</em></h1></div>
 
-              {/* Amara profile banner */}
-              <div style={{background:'linear-gradient(135deg,#1B5E20,#2E7D32)',borderRadius:'var(--rxl)',padding:'24px 28px',marginBottom:24,display:'flex',gap:20,flexWrap:'wrap',alignItems:'center'}}>
-                <div style={{width:72,height:72,borderRadius:'50%',background:'rgba(255,255,255,.15)',border:'3px solid rgba(255,255,255,.3)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,fontWeight:700,color:'#fff',fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>AO</div>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:22,fontWeight:700,color:'#fff',marginBottom:4}}>Amara Osei</div>
-                  <div style={{fontSize:13.5,color:'rgba(255,255,255,.7)',marginBottom:12}}>IGCSE · Form 3 · Premium Plan · Nairobi, Kenya</div>
-                  <div style={{display:'flex',gap:24,flexWrap:'wrap'}}>
-                    {[[`${avgScore}%`,'Avg Score'],['88%','Attendance'],[`${childMastery?.streak||12} days`,'Streak'],[(childMastery?.xp||4280).toLocaleString(),'XP']].map(([v,l]) => (
-                      <div key={l}><div style={{fontSize:10,color:'rgba(255,255,255,.5)',fontWeight:700,textTransform:'uppercase',letterSpacing:'.06em'}}>{l}</div><div className="mono" style={{fontSize:16,fontWeight:700,color:'#fff'}}>{v}</div></div>
-                    ))}
+              {childrenLoading ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s400)'}}>Loading…</div>
+              ) : children.length === 0 ? (
+                <div className="card" style={{padding:'48px 32px',textAlign:'center'}}>
+                  <div className="serif" style={{fontSize:22,color:'var(--s900)',marginBottom:8}}>No child linked yet</div>
+                  <div style={{fontSize:13.5,color:'var(--s500)',maxWidth:420,margin:'0 auto',lineHeight:1.6}}>
+                    Your account isn't linked to a student yet. Please contact the Smartious administration to link your child to your account.
                   </div>
                 </div>
-                <div style={{display:'flex',gap:10}}>
-                  <button className="btn" style={{background:'rgba(255,255,255,.15)',color:'#fff',borderColor:'rgba(255,255,255,.25)'}} onClick={()=>setPage('messages')}>Message Teacher</button>
-                  <button className="btn" style={{background:'rgba(255,255,255,.9)',color:'#1B5E20',fontWeight:700,borderColor:'transparent'}} onClick={()=>setPage('progress')}>Full Progress →</button>
-                </div>
-              </div>
-
-              {/* Announcements from teachers */}
-              {announcements.slice(0,3).map((a,i) => (
-                <div key={i} style={{background:a.type==='article'?'var(--b50)':a.type==='resource'?'var(--g50)':'var(--a50)',border:`1px solid ${a.type==='article'?'var(--b100)':a.type==='resource'?'var(--g100)':'var(--a100)'}`,borderRadius:'var(--rlg)',padding:'13px 18px',display:'flex',alignItems:'center',gap:14,marginBottom:12,flexWrap:'wrap'}}>
-                  <div style={{flex:1}}><div style={{fontWeight:700,color:a.type==='article'?'var(--b700)':a.type==='resource'?'var(--g700)':'var(--a600)',marginBottom:2}}>{a.title}</div><div style={{fontSize:13,color:'var(--s600)'}}>{a.body}</div></div>
-                  <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                    <span style={{fontSize:11,color:'var(--s400)'}}>{a.date}</span>
-                    {a.type==='article' && <button className="btn btn-s btn-sm" onClick={()=>setPage('learning')}>Read</button>}
-                    {a.type==='resource' && <button className="btn btn-s btn-sm" onClick={()=>setPage('learning')}>View</button>}
-                  </div>
-                </div>
-              ))}
-
-              {/* Exam results alerts */}
-              {amaraResults.slice(0,2).map((r,i) => (
-                <div key={i} style={{background:r.grade==='A'||r.grade==='B'?'var(--g50)':'var(--a50)',border:`1px solid ${r.grade==='A'||r.grade==='B'?'var(--g100)':'var(--a100)'}`,borderRadius:'var(--rlg)',padding:'13px 18px',display:'flex',alignItems:'center',gap:14,marginBottom:12,flexWrap:'wrap'}}>
-                  <div style={{flex:1}}><div style={{fontWeight:700,color:r.grade==='A'||r.grade==='B'?'var(--g700)':'var(--a600)',marginBottom:2}}>Result Released: {r.exam}</div><div style={{fontSize:13,color:'var(--s600)'}}>{r.student} scored {r.score}/{r.total} — Grade {r.grade}. {r.feedback}</div></div>
-                  <button className="btn btn-s btn-sm" onClick={()=>setPage('progress')}>View Progress</button>
-                </div>
-              ))}
-
-              <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:20,marginTop:8}}>
-                <div className="card">
-                  <div className="chdr">
-                    <div className="ctitle">Subject Performance {childMastery && <span style={{fontSize:11,color:'var(--g600)',marginLeft:8}}>● Live</span>}</div>
-                    <button className="btn btn-g btn-sm" onClick={()=>setPage('progress')}>Full Report</button>
-                  </div>
-                  {subjects.map(s => (
-                    <div key={s.name} style={{marginBottom:12}}>
-                      <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:5}}>
-                        <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                          <div style={{width:10,height:10,borderRadius:2,background:s.col}}/>
-                          <span style={{fontWeight:600}}>{s.name}</span>
-                          {s.velocity!==0 && <span style={{fontSize:11,fontWeight:700,color:s.velocity>0?'var(--g600)':'var(--r500)'}}>{s.velocity>0?'↑':'↓'}{Math.abs(s.velocity)}%</span>}
-                        </div>
-                        <span className="mono" style={{fontWeight:700,color:mCol(s.score)}}>{s.score}%</span>
-                      </div>
-                      <div className="prog-bar"><div className="prog-fill" style={{width:s.score+'%',background:s.col,transition:'width 1s ease'}}/></div>
+              ) : (
+                <>
+                  {/* Child profile banner */}
+                  <div style={{background:'linear-gradient(135deg,#7D1025,#5A0B1B)',borderRadius:'var(--rxl)',padding:'24px 28px',marginBottom:24,display:'flex',gap:20,flexWrap:'wrap',alignItems:'center'}}>
+                    <div style={{width:72,height:72,borderRadius:'50%',background:'rgba(255,255,255,.15)',border:'3px solid rgba(255,255,255,.3)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,fontWeight:700,color:'#fff',fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>
+                      {(selectedChild?.name||'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]?.toUpperCase()).join('') || 'S'}
                     </div>
-                  ))}
-                </div>
-                <div style={{display:'flex',flexDirection:'column',gap:14}}>
-                  <div className="card">
-                    <div className="ctitle" style={{marginBottom:12}}>Quick Actions</div>
-                    {[['View Progress Report','progress'],['Messages','messages'],['Pay April Fees','payments'],['Resources & Articles','learning'],['Ask Mshauri AI','mshauri']].map(([l,p]) => (
-                      <button key={l} className="btn btn-s btn-sm" style={{width:'100%',justifyContent:'flex-start',marginBottom:6}} onClick={()=>setPage(p)}>{l}</button>
-                    ))}
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:22,fontWeight:700,color:'#fff',marginBottom:4}}>{selectedChild?.name}</div>
+                      <div style={{fontSize:13.5,color:'rgba(255,255,255,.7)',marginBottom:12}}>
+                        {[overview?.child?.programme, overview?.child?.deliveryMode, overview?.child?.curriculum, overview?.child?.grade].filter(Boolean).join(' · ')}
+                      </div>
+                      <div style={{display:'flex',gap:24,flexWrap:'wrap'}}>
+                        {[
+                          [`${avgScore}%`,'Overall Progress'],
+                          [`${overview?.stats?.allocatedSubjects ?? 0}`,'Subjects w/ Teacher'],
+                          [`${overview?.stats?.enrolledSubjects ?? 0}`,'Enrolled Subjects'],
+                        ].map(([v,l]) => (
+                          <div key={l}><div style={{fontSize:10,color:'rgba(255,255,255,.5)',fontWeight:700,textTransform:'uppercase',letterSpacing:'.06em'}}>{l}</div><div className="mono" style={{fontSize:16,fontWeight:700,color:'#fff'}}>{v}</div></div>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{display:'flex',gap:10}}>
+                      <button className="btn" style={{background:'rgba(255,255,255,.9)',color:'#7D1025',fontWeight:700,borderColor:'transparent'}} onClick={()=>setPage('progress')}>Full Progress →</button>
+                    </div>
                   </div>
-                </div>
-              </div>
+
+                  {childLoading ? (
+                    <div className="card" style={{padding:30,textAlign:'center',color:'var(--s400)'}}>Loading progress…</div>
+                  ) : (
+                    <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:20,marginTop:8}}>
+                      <div className="card">
+                        <div className="chdr">
+                          <div className="ctitle">Subject Progress</div>
+                          <button className="btn btn-g btn-sm" onClick={()=>setPage('progress')}>Full Report</button>
+                        </div>
+                        {subjects.length === 0 ? (
+                          <div style={{padding:'20px 0',color:'var(--s400)',fontSize:13,textAlign:'center'}}>
+                            No subjects with progress yet. Progress appears as teachers mark lessons mastered.
+                          </div>
+                        ) : subjects.map(s => (
+                          <div key={s.name} style={{marginBottom:12}}>
+                            <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:5}}>
+                              <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                                <div style={{width:10,height:10,borderRadius:2,background:s.col}}/>
+                                <span style={{fontWeight:600}}>{s.name}</span>
+                                <span style={{fontSize:11,color:'var(--s400)'}}>{s.mastered}/{s.total} lessons</span>
+                              </div>
+                              <span className="mono" style={{fontWeight:700,color:mCol(s.score)}}>{s.score}%</span>
+                            </div>
+                            <div className="prog-bar"><div className="prog-fill" style={{width:s.score+'%',background:s.col,transition:'width 1s ease'}}/></div>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                        <div className="card">
+                          <div className="ctitle" style={{marginBottom:12}}>Quick Actions</div>
+                          {[['View Progress Report','progress'],['Programme Details','programme'],['Ask Mshauri AI','mshauri']].map(([l,p]) => (
+                            <button key={l} className="btn btn-s btn-sm" style={{width:'100%',justifyContent:'flex-start',marginBottom:6}} onClick={()=>setPage(p)}>{l}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
           {/* ── PROGRESS ── */}
           {page==='progress' && (
             <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Amara Osei · IGCSE Form 3</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Academic <em style={{color:'var(--b700)'}}>Progress</em></h2></div>
-              <div className="kpi-grid" style={{marginBottom:24}}>
-                {[{v:`${avgScore}%`,l:'Avg Score',d:'Live from mastery data',dc:'var(--g600)'},{v:'88%',l:'Attendance',d:'Above school avg',dc:'var(--g600)'},{v:`${childMastery?.streak||12}`,l:'Day Streak',dc:'var(--a600)',d:'Personal best!'},{v:(childMastery?.xp||4280).toLocaleString(),l:'Total XP',d:'Earned through practice',dc:'var(--b700)'}].map((k,i) => (
-                  <div key={i} className="kpi"><div className="kpi-v">{k.v}</div><div className="kpi-l">{k.l}</div><div className="kpi-d" style={{color:k.dc}}>{k.d}</div></div>
-                ))}
+              <div style={{marginBottom:20}}>
+                <div className="sec-tag">{selectedChild ? selectedChild.name + (overview?.child?.curriculum ? ' · ' + overview.child.curriculum : '') : 'Academic Progress'}</div>
+                <h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Academic <em style={{color:'var(--b700)'}}>Progress</em></h2>
               </div>
-              {/* Exam results */}
-              {amaraResults.length > 0 && (
-                <div className="card" style={{marginBottom:20}}>
-                  <div className="ctitle" style={{marginBottom:14}}>Released Exam Results</div>
-                  <table className="tbl">
-                    <thead><tr><th>Exam</th><th>Subject</th><th>Score</th><th>Grade</th><th>Date</th><th>Feedback</th></tr></thead>
-                    <tbody>
-                      {amaraResults.map((r,i) => (
-                        <tr key={i}>
-                          <td style={{fontWeight:600}}>{r.exam}</td>
-                          <td>{r.subject}</td>
-                          <td><span className="mono" style={{fontWeight:700,color:r.grade==='A'||r.grade==='B'?'var(--g600)':'var(--a600)'}}>{r.score}/{r.total}</span></td>
-                          <td><span className={`badge ${r.grade==='A'||r.grade==='B'?'badge-green':'badge-amber'}`}>{r.grade}</span></td>
-                          <td style={{color:'var(--s500)',fontSize:13}}>{r.date}</td>
-                          <td style={{fontSize:12.5,color:'var(--s500)',maxWidth:200}}>{r.feedback}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+
+              {childrenLoading || childLoading ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s400)'}}>Loading…</div>
+              ) : !selectedChild ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s500)'}}>
+                  No child linked to your account yet.
                 </div>
-              )}
-              <div className="card">
-                <div className="ctitle" style={{marginBottom:14}}>Subject Breakdown</div>
-                <table className="tbl">
-                  <thead><tr><th>Subject</th><th>Mastery</th><th>Attendance</th><th>Trend</th><th>Target</th><th>Status</th></tr></thead>
-                  <tbody>
-                    {subjects.map((s,i) => (
-                      <tr key={i}>
-                        <td style={{fontWeight:700}}>{s.name}</td>
-                        <td><span className="mono" style={{fontWeight:700,color:mCol(s.score)}}>{s.score}%</span></td>
-                        <td><span className="mono">{s.att}%</span></td>
-                        <td><span style={{fontSize:13,fontWeight:700,color:s.velocity>0?'var(--g600)':'var(--r500)'}}>{s.velocity>0?'↑':s.velocity<0?'↓':'→'}</span></td>
-                        <td><span className="mono" style={{color:'var(--s400)'}}>60%</span></td>
-                        <td><span className={`badge ${s.score>=70?'badge-green':s.score>=60?'badge-amber':'badge-red'}`}>{s.score>=70?'On Track':s.score>=60?'Close':'Needs Help'}</span></td>
-                      </tr>
+              ) : (
+                <>
+                  <div className="kpi-grid" style={{marginBottom:24}}>
+                    {[
+                      {v:`${avgScore}%`,l:'Overall Progress',d:'Across all subjects',dc:'var(--g600)'},
+                      {v:`${(progress?.subjects||[]).length}`,l:'Subjects',d:'With an allocated teacher',dc:'var(--b700)'},
+                      {v:`${(progress?.subjects||[]).reduce((s,x)=>s+x.masteredLessons,0)}`,l:'Lessons Mastered',d:'Marked by teachers',dc:'var(--g600)'},
+                      {v:`${(progress?.subjects||[]).reduce((s,x)=>s+x.totalLessons,0)}`,l:'Total Lessons',d:'Published in subjects',dc:'var(--a600)'},
+                    ].map((k,i) => (
+                      <div key={i} className="kpi"><div className="kpi-v">{k.v}</div><div className="kpi-l">{k.l}</div><div className="kpi-d" style={{color:k.dc}}>{k.d}</div></div>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </div>
+
+                  <div className="card">
+                    <div className="ctitle" style={{marginBottom:14}}>Subject Breakdown</div>
+                    {(progress?.subjects || []).length === 0 ? (
+                      <div style={{padding:'20px 0',color:'var(--s400)',fontSize:13,textAlign:'center'}}>
+                        No subject progress yet. As teachers mark lessons mastered, your child's progress will appear here.
+                      </div>
+                    ) : (
+                      <table className="tbl">
+                        <thead><tr><th>Subject</th><th>Curriculum</th><th>Lessons Mastered</th><th>Progress</th><th>Status</th></tr></thead>
+                        <tbody>
+                          {(progress?.subjects || []).map((s,i) => (
+                            <tr key={i}>
+                              <td style={{fontWeight:700}}>{s.name}</td>
+                              <td style={{color:'var(--s500)',fontSize:13}}>{s.curriculum}</td>
+                              <td><span className="mono">{s.masteredLessons}/{s.totalLessons}</span></td>
+                              <td><span className="mono" style={{fontWeight:700,color:mCol(s.progressPct)}}>{s.progressPct}%</span></td>
+                              <td><span className={`badge ${s.progressPct>=70?'badge-green':s.progressPct>=40?'badge-amber':'badge-red'}`}>{s.progressPct>=70?'On Track':s.progressPct>=40?'In Progress':'Getting Started'}</span></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -396,24 +462,45 @@ export default function ParentPortal() {
           {page==='programme' && (
             <div>
               <div style={{marginBottom:20}}><div className="sec-tag">Enrolment</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Programme Details</h2></div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
-                <div className="card">
-                  <div className="ctitle" style={{marginBottom:14}}>Amara's Programme</div>
-                  {[['Programme','IGCSE (Cambridge)'],['Year Level','Form 3 (Grade 10)'],['Service Type','Homeschool — Virtual'],['Plan','Premium — KES 1,499/month'],['Enrolled','September 2025'],['Expected Completion','August 2027'],['School Code','SM-IGC-F3-2025']].map(([l,v]) => (
-                    <div key={l} style={{display:'flex',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--border)',fontSize:13.5}}>
-                      <span style={{color:'var(--s500)'}}>{l}</span><span style={{fontWeight:600,color:'var(--s800)',textAlign:'right'}}>{v}</span>
-                    </div>
-                  ))}
+
+              {childrenLoading || childLoading ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s400)'}}>Loading…</div>
+              ) : !selectedChild ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s500)'}}>
+                  No child linked to your account yet.
                 </div>
-                <div className="card">
-                  <div className="ctitle" style={{marginBottom:14}}>Subject Teachers</div>
-                  {[['Mathematics','Mr. Muthomi','Mon/Wed 9–10 AM'],['Biology','Dr. Ouma','Mon 2–3 PM'],['Chemistry','Dr. Ouma','Wed 1–2 PM'],['Physics','Mr. Njoroge','Thu 11 AM'],['English','Ms. Wambua','Tue/Fri 10 AM']].map(([s,t,slot]) => (
-                    <div key={s} style={{padding:'10px 0',borderBottom:'1px solid var(--border)'}}>
-                      <div style={{fontWeight:700,fontSize:14}}>{s}</div><div style={{fontSize:12.5,color:'var(--s500)'}}>{t} · {slot}</div>
-                    </div>
-                  ))}
+              ) : (
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
+                  <div className="card">
+                    <div className="ctitle" style={{marginBottom:14}}>{selectedChild.name.split(' ')[0]}'s Programme</div>
+                    {[
+                      ['Programme', overview?.child?.programme || '—'],
+                      ['Delivery Mode', overview?.child?.deliveryMode || '—'],
+                      ['Curriculum', overview?.child?.curriculum || '—'],
+                      ['Year / Grade', overview?.child?.grade || '—'],
+                      ['Admission Number', overview?.child?.admissionNumber || '—'],
+                      ['Enrolled Subjects', String(overview?.stats?.enrolledSubjects ?? 0)],
+                    ].map(([l,v]) => (
+                      <div key={l} style={{display:'flex',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--border)',fontSize:13.5}}>
+                        <span style={{color:'var(--s500)'}}>{l}</span><span style={{fontWeight:600,color:'var(--s800)',textAlign:'right'}}>{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="card">
+                    <div className="ctitle" style={{marginBottom:14}}>Subject Teachers</div>
+                    {(overview?.allocations || []).length === 0 ? (
+                      <div style={{padding:'16px 0',color:'var(--s400)',fontSize:13}}>
+                        No subject teachers allocated yet. The administration assigns teachers per subject.
+                      </div>
+                    ) : (overview?.allocations || []).map((a,i) => (
+                      <div key={i} style={{padding:'10px 0',borderBottom:'1px solid var(--border)'}}>
+                        <div style={{fontWeight:700,fontSize:14}}>{a.subjectName}</div>
+                        <div style={{fontSize:12.5,color:'var(--s500)'}}>{a.teacher}{a.curriculum ? ' · ' + a.curriculum : ''}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
