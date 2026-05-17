@@ -2433,38 +2433,57 @@ export default function LandingPage() {
       'Full Assessment Transcript': assessmentLines,
       'Submitted At': new Date().toLocaleString('en-GB', {timeZone:'Africa/Nairobi'}) + ' EAT',
     }
+    // Submit. The Front Desk database is the primary store; the
+    // formsubmit.co email is a secondary copy. The enrolment
+    // succeeds as long as the Front Desk capture goes through.
+    let frontDeskOk = false
     try {
-      // Capture into the Front Desk module (best-effort)
-      captureFrontDesk({
-        type: 'registration',
-        name: `${enrollForm.firstName || ''} ${enrollForm.lastName || ''}`.trim(),
-        email: enrollForm.parentEmail,
-        phone: enrollForm.whatsapp,
-        studentFirstName: enrollForm.firstName,
-        studentLastName: enrollForm.lastName,
-        studentDob: enrollForm.dob,
-        currentSchool: enrollForm.currentSchool,
-        country: enrollForm.country,
-        programme: enrollForm.learningMode,
-        curriculum: enrollForm.curriculum,
-        learningMode: enrollForm.learningMode,
-        pathway: enrollForm.pathway,
-        destination: enrollForm.destination,
-        duration: enrollForm.duration,
-        heardFrom: enrollForm.heardFrom,
-        sourcePage: 'enroll-wizard',
-        extra: { assessmentTranscript: assessmentLines },
+      const fdRes = await fetch(FRONTDESK_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'registration',
+          name: `${enrollForm.firstName || ''} ${enrollForm.lastName || ''}`.trim(),
+          email: enrollForm.parentEmail,
+          phone: enrollForm.whatsapp,
+          studentFirstName: enrollForm.firstName,
+          studentLastName: enrollForm.lastName,
+          studentDob: enrollForm.dob,
+          currentSchool: enrollForm.currentSchool,
+          country: enrollForm.country,
+          programme: enrollForm.learningMode,
+          curriculum: enrollForm.curriculum,
+          learningMode: enrollForm.learningMode,
+          pathway: enrollForm.pathway,
+          destination: enrollForm.destination,
+          duration: enrollForm.duration,
+          heardFrom: enrollForm.heardFrom,
+          sourcePage: 'enroll-wizard',
+          extra: { assessmentTranscript: assessmentLines },
+        }),
       })
+      frontDeskOk = fdRes.ok
+    } catch (e) {
+      console.error('[enroll] front desk capture failed:', e?.message)
+    }
 
+    // Secondary: email copy via formsubmit.co — best-effort, never blocks
+    let emailOk = false
+    try {
       const res = await fetch('https://formsubmit.co/ajax/hellosmartious@gmail.com', {
         method: 'POST',
         headers: {'Content-Type':'application/json','Accept':'application/json'},
         body: JSON.stringify(payload),
       })
-      if (!res.ok) throw new Error('Network error')
-      setWizStep(3); setWizDone(true)
+      emailOk = res.ok
     } catch (e) {
-      setEnrollError('Submission failed. Please try again or WhatsApp us at +254 745 021 212.')
+      console.error('[enroll] email copy failed:', e?.message)
+    }
+
+    if (frontDeskOk || emailOk) {
+      setWizStep(3); setWizDone(true)
+    } else {
+      setEnrollError('Submission failed. Please check your connection and try again, or WhatsApp us at +254 745 021 212.')
     }
     setEnrollSending(false)
   }
