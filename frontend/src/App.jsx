@@ -42,6 +42,7 @@ export default function App() {
               <Route path="/curricula"      element={<LandingPage />} />
               <Route path="/curricula/:slug" element={<LandingPage />} />
               <Route path="/services"       element={<LandingPage />} />
+              <Route path="/services/:slug" element={<LandingPage />} />
               <Route path="/global"         element={<LandingPage />} />
               <Route path="/pricing"        element={<LandingPage />} />
               <Route path="/programs"       element={<LandingPage />} />
