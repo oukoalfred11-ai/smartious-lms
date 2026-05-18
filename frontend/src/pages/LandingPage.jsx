@@ -25,6 +25,35 @@ async function captureFrontDesk(payload) {
   }
 }
 
+/* ── usePageMeta — per-page SEO ────────────────────────────
+ * Sets document.title and meta description / OG tags for the
+ * current page, so each landing page, curriculum and service
+ * page is individually search-friendly. SPA-safe — updates as
+ * the user navigates between pages.
+ */
+function setMetaTag(key, content, attr) {
+  if (!content) return
+  let el = document.head.querySelector('meta[' + attr + '="' + key + '"]')
+  if (!el) {
+    el = document.createElement('meta')
+    el.setAttribute(attr, key)
+    document.head.appendChild(el)
+  }
+  el.setAttribute('content', content)
+}
+function usePageMeta(title, description) {
+  useEffect(() => {
+    if (title) document.title = title
+    if (description) {
+      setMetaTag('description', description, 'name')
+      setMetaTag('og:title', title, 'property')
+      setMetaTag('og:description', description, 'property')
+      setMetaTag('twitter:title', title, 'name')
+      setMetaTag('twitter:description', description, 'name')
+    }
+  }, [title, description])
+}
+
 /* ── CSS variables matching smartious-global.html exactly ── */
 const V = {
   cr:'#8B1A2E', cr2:'#A8203A', gold:'#B8960C', gold2:'#D4AF37', gold3:'#F0CC5A',
@@ -501,7 +530,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','global','pricing','programs','faq','blog','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','faq','blog','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -952,6 +981,192 @@ const CURRICULA = [
     },
   },
 ]
+
+// ════════════════════════════════════════════════════════════
+// SERVICE DETAIL CONTENT
+// Full detail for each service-delivery model. Drafted from the
+// existing service cards — Alfred to review and edit wording.
+// Each entry: slug, h (name), svg icon, desc (card teaser), tags,
+// seoTitle, seoDesc, and a `detail` block.
+// ════════════════════════════════════════════════════════════
+const SERVICES = [
+  {
+    slug: 'homeschool-at-home',
+    h: 'Homeschool at Home',
+    svg: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    desc: 'A qualified tutor visits your home (Nairobi) or connects via video. Structured, accredited curriculum in your own environment. Weekly lesson planning, monthly reports, parent portal. All curricula available.',
+    tags: ['1-on-1 Tutor', 'Flexible Schedule', 'All Curricula', 'Written Reports'],
+    seoTitle: 'Homeschooling in Nairobi, Kenya | Qualified Home Tutors — Smartious',
+    seoDesc: 'Smartious provides structured homeschooling in Nairobi and online — qualified tutors, Cambridge IGCSE, A-Level, IB and CBC curricula, weekly reports and a full parent portal.',
+    detail: {
+      tagline: 'Accredited home education, delivered by a dedicated tutor',
+      summary: 'One-on-one schooling at home — a tutor visits in Nairobi, or teaches live by video anywhere.',
+      overview: 'Homeschool at Home is the Smartious flagship service: a complete, accredited education delivered one-on-one in the comfort of your own home. A qualified subject teacher either visits your home in Nairobi or connects through live video, following a structured curriculum with proper lesson planning, assessment and reporting. It gives families the flexibility of home education without sacrificing academic rigour or accreditation.',
+      sections: [
+        { h: 'How it works', p: 'After enrolment and a placement assessment, your child is matched with a dedicated tutor for each subject. Lessons follow a weekly timetable agreed with your family. Tutors plan every lesson, set and mark work, and submit written lesson reports. A parent portal keeps you informed of progress, attendance and upcoming assessments.' },
+        { h: 'Curricula available', p: 'Every curriculum Smartious offers is available through this service — Cambridge IGCSE and A-Level, the IB Diploma, Pearson Edexcel, the British National Curriculum, the American Curriculum, Kenya\'s CBC, and the Smartious Blended programme. Your child\'s pathway is built around their age, ability and goals.' },
+        { h: 'Who it suits', p: 'Home education suits families who want a tailored, distraction-free learning environment, children who benefit from individual attention, and households with schedules that a conventional school cannot accommodate — including travelling and diaspora families.' },
+      ],
+      whySmartious: 'Smartious has delivered home education in Nairobi since 2018, building a roster of qualified, vetted subject teachers and a structured system of lesson planning, reporting and parent communication that few independent tutors can match. Families choose Smartious because home learning here is genuinely accredited, properly assessed, and backed by a real school — not informal tutoring.',
+    },
+  },
+  {
+    slug: 'learning-centre',
+    h: 'Smartious Learning Centre',
+    svg: '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/>',
+    desc: 'Our supervised study centre at Diamond Plaza I, Parklands, Nairobi. Professional environment with peer interaction and specialist teachers on-site.',
+    tags: ['Parklands Nairobi', 'Supervised', 'Peer Learning', 'Specialist Teachers'],
+    seoTitle: 'Homeschool Learning Centre in Parklands, Nairobi — Smartious',
+    seoDesc: 'The Smartious Learning Centre at Diamond Plaza I, Parklands, Nairobi — a supervised, professional study environment with specialist teachers and peer learning for homeschooled students.',
+    detail: {
+      tagline: 'A supervised study centre in the heart of Parklands',
+      summary: 'In-centre learning at Diamond Plaza I, Parklands — specialist teachers and a focused, professional environment.',
+      overview: 'The Smartious Learning Centre offers homeschooling families a professional, supervised study environment outside the home. Located at Diamond Plaza I in Parklands, Nairobi, the centre brings students together for structured learning with specialist teachers on-site — combining the individual attention of homeschooling with the focus and social interaction of a dedicated learning space.',
+      sections: [
+        { h: 'The environment', p: 'The centre provides a calm, well-equipped study setting designed for concentration and learning. Students work with specialist teachers across subjects, with supervision throughout the day. It removes the distractions of learning at home while keeping class sizes small and attention personal.' },
+        { h: 'Peer interaction', p: 'A key benefit of the centre is structured peer learning. Students interact with others on similar pathways, building the social confidence and collaboration skills that fully isolated home study can lack — without the crowding of a conventional classroom.' },
+        { h: 'Who it suits', p: 'The Learning Centre suits Nairobi families who want the structure of homeschooling but prefer their child learn outside the home, students who focus better in a dedicated environment, and parents who value the social dimension of in-person learning.' },
+      ],
+      whySmartious: 'Few homeschool providers in Nairobi operate a genuine, supervised learning centre with specialist teachers on-site. The Smartious centre at Parklands gives families a real physical home for their child\'s education — a professional middle ground between home tutoring and conventional school that Smartious is uniquely positioned to offer.',
+    },
+  },
+  {
+    slug: 'virtual-school',
+    h: 'Virtual School (Online)',
+    svg: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+    desc: '100% online — available worldwide. Live weekly classes, full recorded library, interactive quizzes, mock exams and real-time parent dashboards. Mshauri AI included.',
+    tags: ['Global Access', 'Live + Recorded', 'Mshauri AI', 'Parent Dashboard'],
+    seoTitle: 'Online School for Diaspora Families | Virtual Homeschooling — Smartious',
+    seoDesc: 'Smartious Virtual School — 100% online education for families worldwide. Live classes, recorded lessons, mock exams and the Mshauri AI tutor, with Cambridge, IB and Edexcel curricula.',
+    detail: {
+      tagline: 'A complete online school, available anywhere in the world',
+      summary: '100% online schooling with live classes and recorded lessons — built for diaspora and internationally mobile families.',
+      overview: 'Smartious Virtual School is a fully online education, delivered to families wherever they are in the world. It combines live, scheduled classes with a complete library of recorded lessons, interactive practice, regular assessment, and real-time progress dashboards for parents. For African diaspora families in the UK, the UAE, the USA and Canada, it offers a genuine school experience with no geographic limit.',
+      sections: [
+        { h: 'Live and recorded learning', p: 'Students attend live online classes on a weekly timetable and have unlimited access to a recorded lesson library for revision and catch-up. This blend means learning continues across time zones and around travel — nothing is missed.' },
+        { h: 'Assessment and the Mshauri AI tutor', p: 'The Virtual School includes interactive quizzes, regular mock examinations with proper marking, and access to Mshauri, the Smartious AI tutor, for revision support at any hour. Parents follow everything through a real-time dashboard.' },
+        { h: 'Who it suits', p: 'Virtual School suits diaspora and expatriate families who want an African-rooted, internationally-accredited education, families who move frequently, and any household, anywhere, that wants a complete online school rather than piecemeal online lessons.' },
+      ],
+      whySmartious: 'Smartious built its Virtual School specifically for diaspora African families — combining internationally-recognised curricula, live teaching, and the Mshauri AI tutor in one platform. It is not a loose collection of online lessons but a structured, accredited online school, designed and run from Nairobi for families who want exactly that connection.',
+    },
+  },
+  {
+    slug: 'private-tuition',
+    h: 'Private Tuition',
+    svg: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+    desc: 'One-on-one expert tuition for any subject, any level, any curriculum — online worldwide or home visits in Nairobi. Tutors bring all materials and submit session notes.',
+    tags: ['Any Subject', 'Online or Home Visit', 'Specialist Tutors', 'Session Notes'],
+    seoTitle: 'Private Tutors in Nairobi & Online | One-on-One Tuition — Smartious',
+    seoDesc: 'Smartious private tuition — one-on-one expert tutors for any subject and curriculum, online worldwide or home visits in Nairobi. IGCSE, A-Level, IB, KCSE and more.',
+    detail: {
+      tagline: 'Expert one-on-one tuition, in any subject, at any level',
+      summary: 'Specialist private tutors — online worldwide or visiting your home in Nairobi.',
+      overview: 'Smartious Private Tuition provides focused, one-on-one teaching in any subject, for any level and any curriculum. Whether a student needs to strengthen a weak area, prepare intensively for an examination, or study a subject not offered at their school, a specialist tutor works with them directly — online from anywhere in the world, or in person at home in Nairobi.',
+      sections: [
+        { h: 'How it works', p: 'Tell us the subject, level and goal, and Smartious matches a specialist tutor. Sessions are booked flexibly around your schedule. Tutors prepare every session, bring or share all materials, and submit a written note after each lesson so parents see exactly what was covered.' },
+        { h: 'Subjects and curricula', p: 'Tuition is available across all curricula Smartious supports and every core and optional subject — from primary literacy and numeracy to A-Level Further Mathematics, IB sciences and KCSE preparation. Rates are confirmed at enrolment based on level.' },
+        { h: 'Who it suits', p: 'Private tuition suits students who need targeted help in specific subjects, those preparing for important examinations, learners studying a subject independently, and families who want supplementary support alongside school or homeschooling.' },
+      ],
+      whySmartious: 'Smartious tuition is delivered by vetted, specialist teachers — not generalist tutors — and is backed by the same lesson-planning, materials and written-reporting standards as the full school programmes. Families get the accountability of a real school behind every private session, whether online or at home in Nairobi.',
+    },
+  },
+  {
+    slug: 'mshauri-ai',
+    h: 'Mshauri AI Tutor',
+    svg: '<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>',
+    desc: 'Mshauri is the Smartious AI tutor — available 24/7 in English and Swahili. Uses the Socratic method: guiding questions, not direct answers. Creates study plans, flashcards, quizzes and lesson summaries.',
+    tags: ['24/7 Available', 'English & Swahili', 'Socratic Method', 'Study Tools'],
+    seoTitle: 'Mshauri — AI Tutor for Students in English & Swahili | Smartious',
+    seoDesc: 'Mshauri is the Smartious AI tutor — available 24/7 in English and Swahili, using guided Socratic questioning to help students revise, with study plans, flashcards and quizzes.',
+    detail: {
+      tagline: 'A 24/7 AI study companion, in English and Swahili',
+      summary: 'The Smartious AI tutor — guided revision support, any hour, in English and Swahili.',
+      overview: 'Mshauri is the Smartious AI tutor, available to students at any hour of the day. Rather than simply handing out answers, Mshauri uses the Socratic method — asking guiding questions that lead students to understand a concept themselves. It supports revision, builds study materials, and gives students a patient, always-available learning companion in both English and Swahili.',
+      sections: [
+        { h: 'How Mshauri teaches', p: 'Mshauri is built to guide, not to shortcut learning. When a student is stuck, it asks questions, offers hints, and works through reasoning step by step — the way a good tutor does. This develops genuine understanding rather than dependence on supplied answers.' },
+        { h: 'Study tools', p: 'Beyond answering questions, Mshauri creates personalised study plans, generates flashcards and practice quizzes, and produces clear summaries of lessons and topics — turning revision from a vague task into a structured one.' },
+        { h: 'Who it suits', p: 'Mshauri supports every Smartious student as a revision aid between lessons. It is especially valuable for independent learners, students revising for examinations, and anyone who benefits from being able to ask for help at any time, day or night.' },
+      ],
+      whySmartious: 'Mshauri is not a generic chatbot bolted onto a website — it is a purpose-built tutor, designed around sound teaching method and available bilingually in English and Swahili for the students Smartious serves. It is included with Smartious programmes as part of a genuinely modern, AI-literate education.',
+    },
+  },
+  {
+    slug: 'exam-preparation',
+    h: 'Exam Preparation',
+    svg: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+    desc: 'Intensive preparation for IGCSE, Cambridge A-Level, IB, KCSE, SAT, ACT and Edexcel. Full past paper library, official marking schemes, weekly mock exams with expert marking.',
+    tags: ['Past Papers', 'Mock Exams', 'Expert Marking', 'All Major Exams'],
+    seoTitle: 'IGCSE, A-Level & IB Exam Preparation | Past Papers & Mocks — Smartious',
+    seoDesc: 'Smartious exam preparation — intensive coaching for IGCSE, A-Level, IB, KCSE, SAT and ACT, with a full past paper library, official marking schemes and weekly mock exams.',
+    detail: {
+      tagline: 'Intensive, exam-focused coaching for every major qualification',
+      summary: 'Targeted preparation for IGCSE, A-Level, IB, KCSE, SAT and ACT — past papers, mocks and expert marking.',
+      overview: 'Smartious Exam Preparation is a focused, intensive service for students approaching major examinations. It concentrates on exam technique, past paper practice and realistic mock examinations — the specific work that turns subject knowledge into strong results. It covers IGCSE, Cambridge A-Level, the IB, Kenya\'s KCSE, and the SAT and ACT.',
+      sections: [
+        { h: 'How it works', p: 'Preparation centres on practice and feedback. Students work through an extensive past paper library, sit weekly mock examinations under timed conditions, and receive expert marking against official mark schemes — with clear analysis of where marks are won and lost.' },
+        { h: 'Exam technique', p: 'Beyond content, the service drills the skills examiners reward: reading questions precisely, structuring answers, managing time, and showing working. Each student\'s weak areas are identified and targeted directly.' },
+        { h: 'Who it suits', p: 'Exam Preparation suits students in their final examination year, those resitting to improve a grade, and any learner who knows their subject but wants to sharpen performance under exam conditions.' },
+      ],
+      whySmartious: 'Smartious exam preparation is built on a deep library of past papers and official marking schemes, and is delivered by teachers who know how each examination is marked. Students are coached not just in their subjects but in the precise craft of the exam — which is what separates a good grade from a great one.',
+    },
+  },
+]
+
+// ── PAGE_META — per-page SEO titles & descriptions ─────────
+// Keyword-rich titles and descriptions for each core landing
+// page. Curriculum and service detail pages derive their meta
+// from CURRICULA / SERVICES. Edit freely to refine targeting.
+const SITE = 'Smartious Homeschool & eSchool'
+const PAGE_META = {
+  home: {
+    title: SITE + ' | Online Homeschooling & International Curricula',
+    desc: 'Smartious Homeschool & eSchool — accredited online and home-based education in Nairobi and worldwide. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and CBC, taught by qualified specialists.',
+  },
+  about: {
+    title: 'About Smartious | Homeschooling & eSchool in Nairobi, Kenya',
+    desc: 'Learn about Smartious Homeschool & eSchool — an international online school founded in Nairobi, delivering accredited curricula to families across Kenya and the diaspora since 2018.',
+  },
+  curricula: {
+    title: 'Curricula | IGCSE, A-Level, IB, Edexcel & CBC — Smartious',
+    desc: 'Explore the curricula offered by Smartious — Cambridge IGCSE and A-Level, IB Diploma, Pearson Edexcel, the British and American curricula, and Kenya\'s CBC. Taught by degree-qualified specialists.',
+  },
+  services: {
+    title: 'Our Services | Homeschooling, Online School & Tuition — Smartious',
+    desc: 'Smartious services — homeschooling at home, the Parklands learning centre, the online Virtual School, private tuition, the Mshauri AI tutor, and intensive exam preparation.',
+  },
+  pricing: {
+    title: 'Fee Structure 2026 | Homeschool & Tuition Fees — Smartious',
+    desc: 'Smartious 2026 fee structure — transparent monthly, termly and annual fees for homeschool programmes, A-Level, IB, single subjects and private tuition.',
+  },
+  programs: {
+    title: 'Programmes | Homeschool, Tuition, IUFP & Study Abroad — Smartious',
+    desc: 'Smartious programmes — full homeschooling, private tuition, the International University Foundation Programme (IUFP) and study-abroad placement support.',
+  },
+  global: {
+    title: 'Global Online School for Diaspora Families — Smartious',
+    desc: 'Smartious delivers accredited online education to African diaspora families in the UK, UAE, USA and Canada — internationally recognised curricula, taught live from Nairobi.',
+  },
+  faq: {
+    title: 'Frequently Asked Questions | Homeschooling — Smartious',
+    desc: 'Answers to common questions about homeschooling with Smartious — curricula, fees, enrolment, the online school, tutors and examinations.',
+  },
+  blog: {
+    title: 'Blog & Resources | Homeschooling & Curricula — Smartious',
+    desc: 'Expert articles from Smartious on homeschooling, choosing a curriculum, exam preparation and AI-supported learning for families in Kenya and worldwide.',
+  },
+  enroll: {
+    title: 'Enroll Now | Begin Homeschooling with Smartious',
+    desc: 'Enroll with Smartious Homeschool & eSchool. Start your child\'s accredited home or online education — Cambridge, IB, Edexcel or CBC — with qualified specialist teachers.',
+  },
+  consult: {
+    title: 'Book a Free Consultation — Smartious Homeschool & eSchool',
+    desc: 'Book a free consultation with Smartious to discuss homeschooling, curricula and the right programme for your child — online or at our Parklands, Nairobi centre.',
+  },
+  contact: {
+    title: 'Contact Smartious Homeschool & eSchool — Nairobi, Kenya',
+    desc: 'Contact Smartious Homeschool & eSchool. Reach our Parklands, Nairobi team by phone, email or WhatsApp for enrolment, curricula and programme enquiries.',
+  },
+}
 
 const FULL_ARTICLES = {
   // GLOBAL (10 articles)
@@ -2435,6 +2650,7 @@ export default function LandingPage() {
   const [blogCountry, setBlogCountry] = useState('all')
   const [currentArticle, setCurrentArticle] = useState(null)
   const [currentCurriculum, setCurrentCurriculum] = useState(null)
+  const [currentService, setCurrentService] = useState(null)
   const [wizStep, setWizStep] = useState(1)
   const [currentProg, setCurrentProg] = useState('homeschool')
   const [loginRole, setLoginRole] = useState('student')
@@ -2736,6 +2952,18 @@ export default function LandingPage() {
       }
       return
     }
+    if (path.startsWith('/services/')) {
+      const slug = decodeURIComponent(path.slice('/services/'.length))
+      const svc = SERVICES.find(s => s.slug === slug)
+      if (svc) {
+        setCurrentService(slug)
+        setPage('service-detail')
+      } else {
+        // Unknown service slug — fall back to the services index
+        setPage('services')
+      }
+      return
+    }
     const id = path === '/' ? 'home' : path.slice(1)
     if (PAGES.includes(id) && id !== 'article') {
       setPage(id)
@@ -2743,6 +2971,34 @@ export default function LandingPage() {
       setPage('home')
     }
   }, [location.pathname])
+
+  // ── Per-page SEO meta ──────────────────────────────────
+  // Derive the title + description for the current page and
+  // apply them. Curriculum and service detail pages use their
+  // own seoTitle/seoDesc; other pages use PAGE_META.
+  let metaTitle = PAGE_META.home.title
+  let metaDesc  = PAGE_META.home.desc
+  if (page === 'curriculum-detail' && currentCurriculum) {
+    const c = CURRICULA.find(x => x.slug === currentCurriculum)
+    if (c) {
+      metaTitle = c.h + ' Curriculum | Homeschooling & Online — ' + SITE
+      metaDesc  = c.detail?.overview ? c.detail.overview.slice(0, 158) : c.desc.slice(0, 158)
+    }
+  } else if (page === 'service-detail' && currentService) {
+    const s = SERVICES.find(x => x.slug === currentService)
+    if (s) {
+      metaTitle = s.seoTitle || (s.h + ' — ' + SITE)
+      metaDesc  = s.seoDesc || s.desc.slice(0, 158)
+    }
+  } else if (page === 'article' && currentArticle && FULL_ARTICLES[currentArticle]) {
+    const a = FULL_ARTICLES[currentArticle]
+    metaTitle = a.title + ' | ' + SITE
+    metaDesc  = (a.excerpt || a.intro || '').slice(0, 158)
+  } else if (PAGE_META[page]) {
+    metaTitle = PAGE_META[page].title
+    metaDesc  = PAGE_META[page].desc
+  }
+  usePageMeta(metaTitle, metaDesc)
 
   // P(id) — navigate to a landing page by URL. The useEffect
   // above then syncs `page` state. Resets per-page form state.
@@ -2777,6 +3033,14 @@ export default function LandingPage() {
   const openCurriculum = (slug) => {
     if (!slug) return
     nav('/curricula/' + encodeURIComponent(slug))
+    window.scrollTo(0, 0)
+    topRef.current?.scrollIntoView()
+  }
+
+  // openService(slug) — navigate to a service detail page URL
+  const openService = (slug) => {
+    if (!slug) return
+    nav('/services/' + encodeURIComponent(slug))
     window.scrollTo(0, 0)
     topRef.current?.scrollIntoView()
   }
@@ -3192,10 +3456,18 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Why choose */}
-              <div style={{background:c.gold?'linear-gradient(135deg,#2D261E,#1A1510)':V.cr,borderRadius:16,padding:'30px 32px',marginBottom:24}}>
+              {/* Why choose this curriculum */}
+              <div style={{background:c.gold?'linear-gradient(135deg,#2D261E,#1A1510)':V.cr,borderRadius:16,padding:'30px 32px',marginBottom:16}}>
                 <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.3rem',fontWeight:700,color:c.gold?V.gold3:V.white,marginBottom:10}}>Why choose {c.h}?</h3>
                 <p style={{fontSize:14.5,color:'rgba(255,255,255,.85)',lineHeight:1.85,margin:0}}>{d.whyChoose}</p>
+              </div>
+
+              {/* Why Smartious for this curriculum */}
+              <div style={{background:V.white,border:`2px solid ${V.gold}`,borderRadius:16,padding:'30px 32px',marginBottom:24}}>
+                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.3rem',fontWeight:700,color:V.cr,marginBottom:10}}>Why Smartious is a top {c.h} provider</h3>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.85,margin:0}}>
+                  {d.whySmartious || `Smartious has taught the ${c.h} curriculum since 2018, with degree-qualified subject specialists, a full library of past papers and marking schemes, and a structured system of lesson planning, assessment and parent reporting. Families across Kenya and the diaspora choose Smartious for ${c.h} because it is delivered as a genuine, accredited school programme — online or at our Parklands, Nairobi centre — not informal tutoring. Every student is supported by the Mshauri AI tutor and a dedicated teacher, and prepared thoroughly for ${c.h} examinations.`}
+                </p>
               </div>
 
               {/* CTA */}
@@ -3217,21 +3489,14 @@ export default function LandingPage() {
           <div className="pg-hero" style={{background:V.ink}}><div className="wrap"><div className="eyebrow">How We Deliver</div><h1 className="pg-h">Six Ways to <em>Learn with Us</em></h1><p className="pg-sub" style={{marginTop:12}}>Every family is different. We've built six service models so Smartious works wherever you are.</p></div></div>
           <section className="sec" style={{background:V.ink}}><div className="wrap">
             <div className="svc-grid">
-              {[
-                {svg:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',h:'Homeschool at Home',p:'A qualified tutor visits your home (Nairobi) or connects via video. Structured, accredited curriculum in your own environment. Weekly lesson planning, monthly reports, parent portal. All 9 curricula available.',tags:['1-on-1 Tutor','Flexible Schedule','All Curricula','Written Reports'],lnk:'View pricing'},
-                {svg:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/>',h:'Smartious Learning Centre',p:'Our supervised study centre at Diamond Plaza I, Parklands, Nairobi. Professional environment with peer interaction and specialist teachers on-site. A 20% discount applies versus home visits.',tags:['20% Discount','Parklands Nairobi','Supervised','Peer Learning'],lnk:'View pricing'},
-                {svg:'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',h:'Virtual School (Online)',p:'100% online — available in all 12+ countries. Live weekly Zoom classes, full recorded library, interactive quizzes, mock exams and real-time parent dashboards. 10% discount. Mshauri AI included.',tags:['Global Access','10% Discount','Live + Recorded','Mshauri AI'],lnk:'View pricing'},
-                {svg:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',h:'Private Tuition',p:'One-on-one expert tuition for any subject, any level, any curriculum. From $8/hr online or $12/hr home visit (Nairobi). Monthly bundles of 12 hours at $85. Tutors bring all materials and submit session notes.',tags:['From $8/hr Online','Any Subject','Home Visit or Online','Session Notes'],lnk:'View pricing'},
-                {svg:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>',h:'Mshauri AI Tutor',p:'Mshauri is built on Anthropic\'s Claude. Available 24/7 in English and Swahili. Uses the Socratic method — guiding questions, not direct answers. Creates study plans, flashcards, quizzes, lesson summaries.',tags:['24/7 Available','English & Swahili','Powered by Claude','Socratic Method'],lnk:'Included in Premium plans'},
-                {svg:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',h:'Exam Preparation',p:'Intensive prep for IGCSE, Cambridge A-Level, IB, KCSE, SAT, ACT and Edexcel. Full past paper library (2015–2024), official marking schemes, weekly mock exams with expert marking.',tags:['Past Papers 2015–2024','Mock Exams','Expert Marking','Weakness Analysis'],lnk:'View pricing'},
-              ].map((s,i) => (
-                <div key={i} className="sc reveal">
+              {SERVICES.map((s,i) => (
+                <div key={s.slug} className="sc reveal" onClick={() => openService(s.slug)} style={{cursor:'pointer'}}>
                   <div className="sc-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:s.svg}}/></div>
                   <div className="sc-h">{s.h}</div>
-                  <div className="sc-p">{s.p}</div>
+                  <div className="sc-p">{s.desc}</div>
                   <div className="sc-tags">{s.tags.map(t => <span key={t} className="sc-tag">{t}</span>)}</div>
-                  <div className="sc-lnk" onClick={() => P('pricing')}>
-                    {s.lnk} {s.lnk !== 'Included in Premium plans' && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>}
+                  <div className="sc-lnk">
+                    View full details <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   </div>
                 </div>
               ))}
@@ -3244,6 +3509,84 @@ export default function LandingPage() {
           <Footer P={P}/>
         </>
       )}
+
+      {/* ══════════════════════════════════════════
+          SERVICE DETAIL PAGE
+      ══════════════════════════════════════════ */}
+      {page === 'service-detail' && (() => {
+        const s = currentService && SERVICES.find(x => x.slug === currentService)
+        if (!s) {
+          return (
+            <>
+              <div className="pg-hero" style={{background:V.ink}}><div className="wrap">
+                <h1 className="pg-h">Service not found</h1>
+                <p className="pg-sub" style={{marginTop:12}}>This service page could not be found.</p>
+                <button className="btn-p" style={{marginTop:24}} onClick={() => P('services')}>← All Services</button>
+              </div></div>
+              <Footer P={P}/>
+            </>
+          )
+        }
+        const d = s.detail
+        return (
+          <>
+            <div className="pg-hero" style={{background:V.ink}}>
+              <div className="wrap">
+                <button onClick={() => P('services')}
+                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Syne',sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  All Services
+                </button>
+                <div style={{width:48,height:48,borderRadius:12,background:'rgba(184,150,12,.15)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:14}}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:s.svg}}/>
+                </div>
+                <h1 className="pg-h">{s.h}</h1>
+                <p className="pg-sub" style={{marginTop:12}}>{d.tagline}</p>
+              </div>
+            </div>
+
+            <section className="sec" style={{background:V.bone}}><div className="wrap" style={{maxWidth:860}}>
+              {/* Overview */}
+              <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'30px 32px',marginBottom:20}}>
+                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:12}}>Overview</h2>
+                <p style={{fontSize:15,color:V.sl,lineHeight:1.85,margin:0}}>{d.overview}</p>
+              </div>
+
+              {/* Detail sections */}
+              {d.sections.map((sec,i) => (
+                <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'26px 32px',marginBottom:16}}>
+                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:10}}>{sec.h}</h3>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.85,margin:0}}>{sec.p}</p>
+                </div>
+              ))}
+
+              {/* At a glance */}
+              <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'26px 32px',marginBottom:16}}>
+                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:14}}>At a glance</h3>
+                <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+                  {s.tags.map(t => (
+                    <span key={t} style={{padding:'6px 13px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:20,fontSize:12.5,fontWeight:600,color:V.ink2}}>{t}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Why Smartious */}
+              <div style={{background:V.cr,borderRadius:16,padding:'30px 32px',marginBottom:24}}>
+                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.3rem',fontWeight:700,color:V.white,marginBottom:10}}>Why choose Smartious?</h3>
+                <p style={{fontSize:14.5,color:'rgba(255,255,255,.85)',lineHeight:1.85,margin:0}}>{d.whySmartious}</p>
+              </div>
+
+              {/* CTA */}
+              <div style={{textAlign:'center',display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+                <button className="btn-p" onClick={() => P('enroll')}>Enroll Now <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <button className="btn-o" onClick={() => P('pricing')}>View Pricing</button>
+              </div>
+            </div></section>
+            <Footer P={P}/>
+          </>
+        )
+      })()}
+
 
       {/* ══════════════════════════════════════════
           GLOBAL
