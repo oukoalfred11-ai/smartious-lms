@@ -3411,6 +3411,9 @@ function DocumentsModule({ toast }) {
   if (docType === 'invoice') {
     return <InvoiceGenerator toast={toast} onBack={() => setDocType(null)} />
   }
+  if (docType === 'receipt') {
+    return <ReceiptGenerator toast={toast} onBack={() => setDocType(null)} />
+  }
 
   const card = {
     background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 14,
@@ -3442,17 +3445,19 @@ function DocumentsModule({ toast }) {
             A branded invoice — billed-to details, line items, auto-calculated totals and payment instructions.
           </div>
         </div>
-        <div style={{ ...card, opacity: .55, cursor: 'default' }}>
+        <div style={card} onClick={() => setDocType('receipt')}>
           <div style={{
-            width: 42, height: 42, borderRadius: 10, background: 'rgba(125,16,37,.06)',
+            width: 42, height: 42, borderRadius: 10, background: 'rgba(125,16,37,.08)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12,
           }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={TOKENS.crimson} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
             </svg>
           </div>
           <div style={{ fontSize: 15, fontWeight: 700, color: TOKENS.s900 }}>Receipt</div>
-          <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 4 }}>Coming soon.</div>
+          <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 4, lineHeight: 1.5 }}>
+            An official payment receipt — amount, reference, payment method and authorisation.
+          </div>
         </div>
       </div>
     </div>
@@ -3748,6 +3753,260 @@ function buildInvoiceHTML(f, t) {
     <div class="sec notes">
       <div class="sec-h">Notes</div>
       <p>${notesHtml}</p>
+    </div>
+  </div>
+
+  <div class="ft">
+    <b>Smartious Homeschool Global</b><br>
+    Diamond Plaza I, Parklands, Nairobi, Kenya<br>
+    +254 745 021 212 &nbsp;|&nbsp; hellosmartious@gmail.com &nbsp;|&nbsp; smartioushomeschool.com
+  </div>
+</div>
+</body></html>`
+}
+
+// ── RECEIPT GENERATOR ──────────────────────────────────────
+function ReceiptGenerator({ toast, onBack }) {
+  const now = new Date()
+  const today = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+  const timeNow = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
+
+  const [f, setF] = useState({
+    currency: 'KES',
+    amount: '',
+    receivedBy: 'Smartious Edtech',
+    mpesaAccount: '745021',
+    referenceNo: '',
+    paymentMethod: 'M-Pesa Paybill — 247247',
+    dateTime: today + ' | ' + timeNow + ' hrs',
+    status: 'Confirmed',
+    paidFor: '',
+    authName: '',
+    authRole: 'Principal, Smartious Homeschool Global',
+    paidDate: today,
+  })
+  const set = (k, v) => setF(p => ({ ...p, [k]: v }))
+
+  const generate = () => {
+    if (!f.amount || !(parseFloat(f.amount) > 0)) { toast?.error?.('A valid amount is required.'); return }
+    if (!f.referenceNo.trim()) { toast?.error?.('Reference number is required.'); return }
+    if (!f.authName.trim())    { toast?.error?.('Authoriser name is required.'); return }
+    const html = buildReceiptHTML(f)
+    const w = window.open('', '_blank')
+    if (!w) { toast?.error?.('Please allow pop-ups to generate the receipt.'); return }
+    w.document.write(html); w.document.close()
+  }
+
+  const lbl = { display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
+    textTransform: 'uppercase', color: TOKENS.crimson, marginBottom: 5 }
+  const inp = { width: '100%', boxSizing: 'border-box', padding: '8px 11px',
+    borderRadius: 7, border: '1.5px solid ' + TOKENS.line, fontSize: 13, fontFamily: 'inherit' }
+  const card = { background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 12,
+    padding: 18, marginBottom: 14 }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+        <button onClick={onBack} style={{
+          background: '#fff', border: '1.5px solid ' + TOKENS.line, borderRadius: 8,
+          padding: '7px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: TOKENS.crimson,
+        }}>← Documents</button>
+        <div>
+          <h1 style={{ fontSize: 21, fontWeight: 800, color: TOKENS.s900, margin: 0 }}>Official Receipt</h1>
+          <div style={{ fontSize: 12, color: TOKENS.s500 }}>Confirm a payment received, then generate the branded PDF.</div>
+        </div>
+      </div>
+
+      {/* Amount + payment details */}
+      <div style={card}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+          <div><label style={lbl}>Currency</label>
+            <select value={f.currency} onChange={e => set('currency', e.target.value)} style={inp}>
+              <option value="KES">KES</option><option value="USD">USD</option>
+            </select></div>
+          <div><label style={lbl}>Amount Paid *</label>
+            <input value={f.amount} onChange={e => set('amount', e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="e.g. 158200" style={inp}/></div>
+          <div><label style={lbl}>Reference No. *</label>
+            <input value={f.referenceNo} onChange={e => set('referenceNo', e.target.value)}
+              placeholder="e.g. UE5S8BDTRX" style={inp}/></div>
+          <div><label style={lbl}>Received By</label>
+            <input value={f.receivedBy} onChange={e => set('receivedBy', e.target.value)} style={inp}/></div>
+          <div><label style={lbl}>M-Pesa Account</label>
+            <input value={f.mpesaAccount} onChange={e => set('mpesaAccount', e.target.value)} style={inp}/></div>
+          <div><label style={lbl}>Payment Method</label>
+            <input value={f.paymentMethod} onChange={e => set('paymentMethod', e.target.value)} style={inp}/></div>
+          <div><label style={lbl}>Date &amp; Time</label>
+            <input value={f.dateTime} onChange={e => set('dateTime', e.target.value)} style={inp}/></div>
+          <div><label style={lbl}>Status</label>
+            <select value={f.status} onChange={e => set('status', e.target.value)} style={inp}>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Pending">Pending</option>
+              <option value="Cleared">Cleared</option>
+            </select></div>
+        </div>
+        <div style={{ marginTop: 12 }}><label style={lbl}>Payment For (optional)</label>
+          <input value={f.paidFor} onChange={e => set('paidFor', e.target.value)}
+            placeholder="e.g. A-Level Mathematics Tuition — May 2026" style={inp}/></div>
+      </div>
+
+      {/* Authorisation */}
+      <div style={card}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+          <div><label style={lbl}>Authorised By (Name) *</label>
+            <input value={f.authName} onChange={e => set('authName', e.target.value)}
+              placeholder="e.g. Alfred Ouko" style={inp}/></div>
+          <div><label style={lbl}>Role / Title</label>
+            <input value={f.authRole} onChange={e => set('authRole', e.target.value)} style={inp}/></div>
+          <div><label style={lbl}>Paid Date (stamp)</label>
+            <input value={f.paidDate} onChange={e => set('paidDate', e.target.value)} style={inp}/></div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 30 }}>
+        <button onClick={generate} style={{
+          background: TOKENS.crimson, color: '#fff', border: 'none', borderRadius: 8,
+          padding: '12px 26px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+        }}>Generate Receipt</button>
+      </div>
+    </div>
+  )
+}
+
+// ── Build the branded receipt HTML ─────────────────────────
+function buildReceiptHTML(f) {
+  const esc = (s) => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const cur = esc(f.currency || 'KES')
+  const amt = Number(parseFloat(f.amount) || 0)
+    .toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Receipt ${esc(f.referenceNo)} — Smartious</title>
+<style>
+  :root{--crimson:#7D1025;--crimsonD:#5A0B1B;--gold:#C9A030;--ink:#1A1A1A;--mute:#6B6B6B;--line:#E8E2D6;--cream:#FBFAF5;--green:#15803D;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#e9e6df;color:var(--ink)}
+  .page{width:210mm;min-height:297mm;background:#fff;margin:18px auto;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.13)}
+  .page-body{padding:0 22mm;flex:1}
+  .topbar{height:8mm;background:linear-gradient(90deg,var(--crimsonD),var(--crimson))}
+  .hd{display:flex;justify-content:space-between;align-items:flex-start;padding:11mm 22mm 0}
+  .brand{display:flex;align-items:center;gap:10px}
+  .shield{width:50px;height:55px;flex-shrink:0}
+  .brand-tx .name{font-size:22px;font-weight:800;letter-spacing:-.5px;line-height:1}
+  .brand-tx .name em{font-style:italic;color:var(--crimson)}
+  .brand-tx .tag{font-size:7px;letter-spacing:3px;color:var(--mute);margin-top:3px;font-weight:600}
+  .hd-r{text-align:right}
+  .doc-title{font-size:26px;font-weight:800;letter-spacing:.5px;color:var(--ink);line-height:1}
+  .doc-sub{font-size:9px;color:var(--mute);margin-top:4px;letter-spacing:.5px}
+  .gold-rule{height:2px;background:var(--gold);margin:9mm 22mm 0}
+  .badge-wrap{text-align:center;margin-top:9mm}
+  .badge{display:inline-block;background:var(--green);color:#fff;font-size:11px;font-weight:800;letter-spacing:.6px;padding:8px 20px;border-radius:6px}
+  .amount-box{background:var(--cream);border:1px solid var(--line);border-radius:10px;text-align:center;padding:18px;margin-top:6mm}
+  .amount-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--mute);text-transform:uppercase}
+  .amount-val{font-size:34px;font-weight:800;color:var(--crimson);margin-top:4px;letter-spacing:-.5px}
+  .amount-for{font-size:10px;color:var(--mute);margin-top:6px}
+  .details{margin:7mm 0 0;border-collapse:collapse;width:100%}
+  .details tr td{padding:9px 13px;font-size:11px}
+  .details .k{background:var(--crimson);color:#fff;font-weight:700;width:34%;font-size:10px;letter-spacing:.3px}
+  .details .v{border:1px solid var(--line);color:var(--ink)}
+  .details tr:nth-child(even) .v{background:var(--cream)}
+  .details .v.accent{color:var(--crimson);font-weight:700}
+  .details .v.green{color:var(--green);font-weight:700}
+  .auth-row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:11mm;gap:24px}
+  .auth-by{flex:1}
+  .auth-lbl{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--mute);text-transform:uppercase;margin-bottom:14px}
+  .sig{font-family:'Brush Script MT','Segoe Script','Snell Roundhand',cursive;font-size:26px;color:var(--ink);line-height:1;margin-bottom:3px;padding-left:6px}
+  .sig-line{border-bottom:1px solid var(--ink);width:62mm}
+  .auth-name{font-size:11px;font-weight:800;color:var(--ink);margin-top:5px}
+  .auth-role{font-size:9.5px;color:var(--mute)}
+  .paid-stamp{border:1.5px solid var(--line);border-radius:7px;padding:11px 18px;text-align:center;min-width:50mm}
+  .paid-stamp .org{font-size:8.5px;font-weight:800;color:var(--ink);letter-spacing:.4px}
+  .paid-stamp .addr{font-size:7.5px;color:var(--mute);margin-top:2px}
+  .paid-stamp .paid{font-size:15px;font-weight:800;color:var(--green);letter-spacing:1px;margin-top:6px}
+  .paid-stamp .pdate{font-size:8px;color:var(--mute);margin-top:1px}
+  .note{margin-top:9mm;background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:10px 14px;text-align:center;font-size:9.5px;font-style:italic;color:var(--mute)}
+  .ft{margin-top:auto;border-top:1px solid var(--line);padding:5mm 22mm;text-align:center;font-size:8.5px;color:var(--mute);line-height:1.6}
+  .ft b{color:var(--crimson);font-size:9.5px;letter-spacing:.5px}
+  .toolbar{position:fixed;top:0;left:0;right:0;background:#7D1025;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:99}
+  .toolbar button{background:#fff;color:#7D1025;border:none;padding:8px 18px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer}
+  .toolbar .hint{font-size:12px;opacity:.85}
+  @media print{
+    body{background:#fff}.toolbar{display:none}
+    .page{margin:0;box-shadow:none;width:100%;min-height:auto}
+    @page{size:A4;margin:0}
+  }
+</style></head><body>
+<div class="toolbar">
+  <span class="hint">Review the receipt, then download. Use "Save as PDF" as the destination.</span>
+  <button onclick="window.print()">Download PDF</button>
+</div>
+<div style="height:48px"></div>
+
+<div class="page">
+  <div class="topbar"></div>
+  <div class="hd">
+    <div class="brand">
+      <svg class="shield" viewBox="0 0 60 66">
+        <path d="M30 2 L56 9 V32 C56 47 44 58 30 63 C16 58 4 47 4 32 V9 Z" fill="#8A1228" stroke="#C9A030" stroke-width="2"/>
+        <path d="M30 13 l2.3 4.7 5.2 .75 -3.75 3.65 .9 5.15 -4.65 -2.45 -4.65 2.45 .9 -5.15 -3.75 -3.65 5.2 -.75 Z" fill="#C9A030"/>
+        <g transform="translate(30 40)">
+          <path d="M0 -6 C-4 -9 -11 -9 -14 -7 L-14 9 C-11 7 -4 7 0 10 Z" fill="#FFFFFF" stroke="#E3D9C4" stroke-width="0.6"/>
+          <path d="M0 -6 C4 -9 11 -9 14 -7 L14 9 C11 7 4 7 0 10 Z" fill="#FFFFFF" stroke="#E3D9C4" stroke-width="0.6"/>
+          <line x1="-10" y1="-3.5" x2="-3.5" y2="-2" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="-10" y1="0" x2="-3.5" y2="1.5" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="-10" y1="3.5" x2="-3.5" y2="5" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="3.5" y1="-2" x2="10" y2="-3.5" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="3.5" y1="1.5" x2="10" y2="0" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="3.5" y1="5" x2="10" y2="3.5" stroke="#E7B7C0" stroke-width="0.8"/>
+        </g>
+      </svg>
+      <div class="brand-tx"><div class="name">Smart<em>ious</em></div>
+        <div class="tag">HOMESCHOOL&nbsp;·&nbsp;GLOBAL</div></div>
+    </div>
+    <div class="hd-r"><div class="doc-title">OFFICIAL RECEIPT</div>
+      <div class="doc-sub">Payment Confirmation</div></div>
+  </div>
+  <div class="gold-rule"></div>
+
+  <div class="page-body">
+    <div class="badge-wrap"><span class="badge">&#10003;&nbsp;&nbsp;PAYMENT RECEIVED</span></div>
+
+    <div class="amount-box">
+      <div class="amount-lbl">Amount Paid</div>
+      <div class="amount-val">${cur} ${amt}</div>
+      ${f.paidFor ? `<div class="amount-for">${esc(f.paidFor)}</div>` : ''}
+    </div>
+
+    <table class="details">
+      <tr><td class="k">Received By</td><td class="v">${esc(f.receivedBy)}</td></tr>
+      <tr><td class="k">M-Pesa Account</td><td class="v">${esc(f.mpesaAccount)}</td></tr>
+      <tr><td class="k">Reference No.</td><td class="v accent">${esc(f.referenceNo)}</td></tr>
+      <tr><td class="k">Payment Method</td><td class="v">${esc(f.paymentMethod)}</td></tr>
+      <tr><td class="k">Date &amp; Time</td><td class="v">${esc(f.dateTime)}</td></tr>
+      <tr><td class="k">Amount</td><td class="v accent">${cur} ${amt}</td></tr>
+      <tr><td class="k">Status</td><td class="v green">${esc(f.status)}</td></tr>
+    </table>
+
+    <div class="auth-row">
+      <div class="auth-by">
+        <div class="auth-lbl">Authorised By</div>
+        <div class="sig">${esc(f.authName)}</div>
+        <div class="sig-line"></div>
+        <div class="auth-name">${esc(f.authName)}</div>
+        <div class="auth-role">${esc(f.authRole)}</div>
+      </div>
+      <div class="paid-stamp">
+        <div class="org">SMARTIOUS HOMESCHOOL GLOBAL</div>
+        <div class="addr">Diamond Plaza I, Parklands</div>
+        <div class="addr">Nairobi, Kenya</div>
+        <div class="paid">PAID</div>
+        <div class="pdate">${esc(f.paidDate)}</div>
+      </div>
+    </div>
+
+    <div class="note">
+      This is an official computer-generated receipt and is valid without a wet signature. Please retain for your records.
     </div>
   </div>
 
