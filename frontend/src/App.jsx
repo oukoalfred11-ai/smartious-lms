@@ -40,6 +40,7 @@ export default function App() {
               {/* Landing-page sections — each its own URL */}
               <Route path="/about"          element={<LandingPage />} />
               <Route path="/curricula"      element={<LandingPage />} />
+              <Route path="/curricula/:slug" element={<LandingPage />} />
               <Route path="/services"       element={<LandingPage />} />
               <Route path="/global"         element={<LandingPage />} />
               <Route path="/pricing"        element={<LandingPage />} />
