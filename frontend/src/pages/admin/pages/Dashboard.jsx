@@ -2678,7 +2678,8 @@ function TeacherSpecialtiesTab({ teacher, onSaved, toast }) {
         if (cancelled) return
         const merged = []
         results.forEach(r => {
-          (r.data?.subjects || []).forEach(s => {
+          const list = Array.isArray(r.data?.subjects) ? r.data.subjects : []
+          list.forEach(s => {
             if (!merged.find(m => String(m._id) === String(s._id))) merged.push(s)
           })
         })
@@ -5546,7 +5547,7 @@ function StudentDetailModal({ student, allocations: initialAllocs, onClose, onCh
   }
 
   const dirty = curriculum !== (student.curriculum || '') ||
-                JSON.stringify(subjects.sort()) !== JSON.stringify((student.subjects || []).slice().sort())
+                JSON.stringify(subjects.sort()) !== JSON.stringify((Array.isArray(student.subjects) ? student.subjects : []).slice().sort())
 
   return (
     <div style={{
@@ -6865,17 +6866,20 @@ function CurriculumModule({ refreshKey, toast }) {
           { name: 'Kenya CBC', subjects: ['Maths', 'English', 'Kiswahili', 'Sciences'] },
           { name: 'American', subjects: ['Algebra', 'Geometry', 'Biology'] },
           { name: 'British', subjects: ['Maths', 'English Lit', 'Sciences'] },
-        ]).map((c, i) => (
+        ]).map((c, i) => {
+          const subjList = Array.isArray(c.subjects) ? c.subjects : []
+          return (
           <PCard key={i} accent={TOKENS.gold}>
             <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, color: TOKENS.s900, marginBottom: 8, fontWeight: 600 }}>{c.name}</h3>
-            <div style={{ fontSize: 12, color: TOKENS.s500, marginBottom: 12 }}>{(c.subjects || []).length} subjects offered</div>
+            <div style={{ fontSize: 12, color: TOKENS.s500, marginBottom: 12 }}>{subjList.length} subjects offered</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-              {(c.subjects || []).slice(0, 6).map((s, si) => (
-                <span key={si} style={{ display: 'inline-block', padding: '3px 9px', background: TOKENS.goldPale, color: '#8E6B1A', border: '1px solid ' + TOKENS.gold, borderRadius: 99, fontSize: 11, fontWeight: 600 }}>{s}</span>
+              {subjList.slice(0, 6).map((s, si) => (
+                <span key={si} style={{ display: 'inline-block', padding: '3px 9px', background: TOKENS.goldPale, color: '#8E6B1A', border: '1px solid ' + TOKENS.gold, borderRadius: 99, fontSize: 11, fontWeight: 600 }}>{typeof s === 'string' ? s : (s && s.name) || ''}</span>
               ))}
             </div>
           </PCard>
-        ))}
+          )
+        })}
       </div>
       </>)}
     </>
