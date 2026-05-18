@@ -907,6 +907,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     grade: '',
     subject: '',
     topic: '',
+    subtopic: '',
     type: 'mcq',
     questionText: '',
     options: ['', '', '', ''],
@@ -998,7 +999,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
   const openCreate = () => {
     setEditingId(null)
     setForm({
-      curriculum: '', grade: '', subject: '', topic: '', type: 'mcq',
+      curriculum: '', grade: '', subject: '', topic: '', subtopic: '', type: 'mcq',
       questionText: '', options: ['', '', '', ''],
       correctIndex: null, correctAnswer: '', explanation: '',
       marks: 1, difficulty: 'medium', attachments: [], parts: [],
@@ -1020,6 +1021,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
       grade: q.grade || '',
       subject: q.subject || '',
       topic: q.topic || '',
+      subtopic: q.subtopic || '',
       type: q.type || 'mcq',
       questionText: q.questionText || '',
       options: Array.isArray(q.options) && q.options.length > 0 ? [...q.options] : ['', '', '', ''],
@@ -1058,7 +1060,30 @@ function QuestionBankTab({ user, store, setPage, toast }) {
   }
  
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }))
- 
+
+  // ── Curriculum-spine integration ───────────────────────
+  // When a subject with a loaded syllabus spine is selected,
+  // Topic becomes Topic + Subtopic dropdowns drawn from the
+  // spine. Subjects without a spine fall back to free text.
+  const [spineTopics, setSpineTopics] = useState([])
+  const [spineLoading, setSpineLoading] = useState(false)
+
+  useEffect(() => {
+    const subjMeta = formSubjects.find(s => s.name === form.subject)
+    const sid = subjMeta && (subjMeta.id || subjMeta._id)
+    if (!sid) { setSpineTopics([]); return }
+    let cancelled = false
+    setSpineLoading(true)
+    api.get('/syllabus/subject/' + sid)
+      .then(r => { if (!cancelled) setSpineTopics(r.data?.data?.topics || []) })
+      .catch(() => { if (!cancelled) setSpineTopics([]) })
+      .finally(() => { if (!cancelled) setSpineLoading(false) })
+    return () => { cancelled = true }
+  }, [form.subject, form.curriculum])  // eslint-disable-line react-hooks/exhaustive-deps
+
+  const hasSpine = spineTopics.length > 0
+  const spineSelectedTopic = spineTopics.find(t => t.topic === form.topic)
+
   const handleFormCurriculumChange = (newCurr) => {
     setForm(f => ({ ...f, curriculum: newCurr, subject: '', grade: '' }))
   }
@@ -1150,6 +1175,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
         grade: form.grade,
         subject: form.subject,
         topic: form.topic.trim() || '',
+        subtopic: (form.subtopic || '').trim() || '',
         type: form.type,
         questionText: form.questionText.trim(),
         options: cleanOptions,
@@ -1470,9 +1496,36 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                 </div>
                 <div className="fg">
                   <label className="fl">Topic (optional)</label>
-                  <input className="fi" value={form.topic} onChange={e => setF('topic', e.target.value)} placeholder="e.g. Algebra, Pythagoras"/>
+                  {hasSpine ? (
+                    <select className="fsel" value={form.topic}
+                      onChange={e => { setF('topic', e.target.value); setF('subtopic', '') }}>
+                      <option value="">Select topic...</option>
+                      {spineTopics.map(t => (
+                        <option key={t._id} value={t.topic}>{t.code ? t.code + '. ' : ''}{t.topic}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input className="fi" value={form.topic} onChange={e => setF('topic', e.target.value)}
+                      placeholder={spineLoading ? 'Loading syllabus...' : 'e.g. Algebra, Pythagoras'}/>
+                  )}
                 </div>
               </div>
+
+              {hasSpine && form.topic && (
+                <div className="fr2">
+                  <div className="fg">
+                    <label className="fl">Subtopic (optional)</label>
+                    <select className="fsel" value={form.subtopic}
+                      onChange={e => setF('subtopic', e.target.value)}>
+                      <option value="">Select subtopic...</option>
+                      {(spineSelectedTopic?.subtopics || []).map((s, i) => (
+                        <option key={i} value={s.name}>{s.code ? s.code + ' ' : ''}{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="fg"></div>
+                </div>
+              )}
  
               <div className="fg">
                 <label className="fl">Question Type *</label>
