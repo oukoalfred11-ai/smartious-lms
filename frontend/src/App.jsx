@@ -49,6 +49,7 @@ export default function App() {
               <Route path="/faq"            element={<LandingPage />} />
               <Route path="/blog"           element={<LandingPage />} />
               <Route path="/blog/:slug"     element={<LandingPage />} />
+              <Route path="/teachers"       element={<LandingPage />} />
               <Route path="/enroll"         element={<LandingPage />} />
               <Route path="/consult"        element={<LandingPage />} />
               <Route path="/contact"        element={<LandingPage />} />
