@@ -38,6 +38,7 @@ const NAV_ICON_PALETTE = {
   questionbank:  ['#5E8CFF', '#3D6FE8'], // bright blue
   exambuilder:   ['#D97706', '#B45309'], // amber
   marking:       ['#22C55E', '#15803D'], // green
+  documents:     ['#C9A030', '#9A7B16'], // gold
   communication: ['#8B5CF6', '#6D28D9'], // royal purple
   mshauri:       ['#7C3AED', '#5B21B6'], // violet
   profile:       ['#64748B', '#334155'], // slate
@@ -122,6 +123,15 @@ const NavIcon = ({ name, active }) => {
           <g>
             <circle cx="12" cy="8" r="3.8" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.8"/>
             <path d="M4.5 20c.6-4 3.8-6.5 7.5-6.5s6.9 2.5 7.5 6.5" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
+          </g>
+        )
+      case 'documents': // document with lines
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z" fill="#fff" fillOpacity=".25"/>
+            <path d="M13 3v6h6"/>
+            <line x1="15" y1="13" x2="9" y2="13"/>
+            <line x1="15" y1="16.5" x2="9" y2="16.5"/>
           </g>
         )
       default:
@@ -508,6 +518,9 @@ export default function TeacherPortal() {
       {id:'exambuilder',   label:'Exams',            iconName:'exambuilder',   icon:'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2|rect:9:3:6:4:1.5|line:9:12:15:12|line:9:16:12:16'},
       {id:'marking',       label:'Homework',         iconName:'marking',       icon:'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'},
     ]},
+    { section:'Documents', items:[
+      {id:'documents',     label:'Reports & Documents', iconName:'documents',  icon:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z|M14 2v6h6|line:16:13:8:13|line:16:17:8:17|line:10:9:8:9'},
+    ]},
     { section:'Communication', items:[
       {id:'communication', label:'Messages',         iconName:'communication', icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'},
     ]},
@@ -645,6 +658,7 @@ export default function TeacherPortal() {
 
            {/* ── COMMUNICATION ── */}
            {page === 'communication' && <CommunicationTab user={currentUser} store={store} setPage={setPage} toast={toast} />}
+           {page === 'documents' && <DocumentsTab user={currentUser} store={store} setPage={setPage} toast={toast} />}
 
            {/* ── MSHAURI AI ── */}
            {page === 'mshauri' && <MshauriAITab user={currentUser} store={store} setPage={setPage} toast={toast} />}
@@ -5990,6 +6004,422 @@ const cmSeedSample = (teacherName) => {
 // Templates: weekly report, behaviour report, parent meeting.
 // Multiple attachments. Two-step send. Campaign history.
 // ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// DOCUMENTS TAB — academic document generators (Teacher portal)
+// First generator: Weekly Academic Report. Fills a form, then
+// generates the branded report and opens it for PDF download.
+// ═══════════════════════════════════════════════════════════
+function DocumentsTab({ user, store, setPage, toast }) {
+  const [docType, setDocType] = useState(null)   // null = picker; 'weekly' = weekly report
+
+  if (docType === 'weekly') {
+    return <WeeklyReportGenerator user={user} toast={toast} onBack={() => setDocType(null)} />
+  }
+
+  // Document picker
+  const cardStyle = {
+    background: '#fff', border: '1px solid #E8E2D6', borderRadius: 14,
+    padding: 22, cursor: 'pointer', transition: 'all .18s',
+  }
+  return (
+    <div>
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>
+          Reports &amp; Documents
+        </h1>
+        <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 2 }}>
+          Generate branded academic documents for your students.
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+        <div style={cardStyle} onClick={() => setDocType('weekly')}>
+          <div style={{
+            width: 42, height: 42, borderRadius: 10, background: 'rgba(125,16,37,.08)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12,
+          }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7D1025" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>Weekly Academic Report</div>
+          <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 4, lineHeight: 1.5 }}>
+            A branded weekly lesson report — topics, activities, performance, assessment marks and remarks.
+          </div>
+        </div>
+
+        {/* Future generators — shown as coming soon */}
+        <div style={{ ...cardStyle, opacity: .55, cursor: 'default' }}>
+          <div style={{
+            width: 42, height: 42, borderRadius: 10, background: 'rgba(125,16,37,.06)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12,
+          }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>Termly Report</div>
+          <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 4 }}>Coming soon.</div>
+        </div>
+        <div style={{ ...cardStyle, opacity: .55, cursor: 'default' }}>
+          <div style={{
+            width: 42, height: 42, borderRadius: 10, background: 'rgba(125,16,37,.06)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12,
+          }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A' }}>Study Plan</div>
+          <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 4 }}>Coming soon.</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── WEEKLY REPORT GENERATOR ────────────────────────────────
+function WeeklyReportGenerator({ user, toast, onBack }) {
+  const teacherName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Teacher'
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+
+  const [f, setF] = useState({
+    studentName: '', classLevel: '', subject: '',
+    teacher: teacherName, week: '', period: '',
+    topics: [''],
+    subTopics: [''],
+    activities: [''],
+    understanding: '', participation: '', generalPerf: '',
+    strengths: [''],
+    improvements: [''],
+    assessments: [{ desc: '', score: '', outOf: '' }],
+    homework: [''],
+    remarks: '',
+    teacherDate: today,
+  })
+
+  const set = (k, v) => setF(p => ({ ...p, [k]: v }))
+
+  // generic list-field helpers
+  const listAdd = (k) => setF(p => ({ ...p, [k]: [...p[k], ''] }))
+  const listSet = (k, i, v) => setF(p => ({ ...p, [k]: p[k].map((x, idx) => idx === i ? v : x) }))
+  const listDel = (k, i) => setF(p => ({ ...p, [k]: p[k].filter((_, idx) => idx !== i).length ? p[k].filter((_, idx) => idx !== i) : [''] }))
+
+  // assessment rows
+  const aAdd = () => setF(p => ({ ...p, assessments: [...p.assessments, { desc: '', score: '', outOf: '' }] }))
+  const aSet = (i, key, v) => setF(p => ({ ...p, assessments: p.assessments.map((r, idx) => idx === i ? { ...r, [key]: v } : r) }))
+  const aDel = (i) => setF(p => {
+    const next = p.assessments.filter((_, idx) => idx !== i)
+    return { ...p, assessments: next.length ? next : [{ desc: '', score: '', outOf: '' }] }
+  })
+
+  const generate = () => {
+    if (!f.studentName.trim()) { toast?.error?.('Student name is required.'); return }
+    if (!f.subject.trim())     { toast?.error?.('Subject is required.'); return }
+    const html = buildWeeklyReportHTML(f)
+    const w = window.open('', '_blank')
+    if (!w) { toast?.error?.('Please allow pop-ups to generate the report.'); return }
+    w.document.write(html)
+    w.document.close()
+  }
+
+  // ── styles ──
+  const lbl = { display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
+    textTransform: 'uppercase', color: '#7D1025', marginBottom: 5 }
+  const inp = { width: '100%', boxSizing: 'border-box', padding: '8px 11px',
+    borderRadius: 7, border: '1.5px solid #E8E2D6', fontSize: 13, fontFamily: 'inherit' }
+  const card = { background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12,
+    padding: 18, marginBottom: 14 }
+  const addBtn = { background: 'transparent', border: '1.5px dashed #C9A030',
+    color: '#9A7B16', borderRadius: 7, padding: '6px 12px', fontSize: 12,
+    fontWeight: 700, cursor: 'pointer', marginTop: 6 }
+  const delBtn = { background: 'transparent', border: 'none', color: '#B91C1C',
+    cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '0 4px', flexShrink: 0 }
+
+  // a reusable list editor
+  const ListEditor = ({ label, k, placeholder }) => (
+    <div style={{ marginBottom: 14 }}>
+      <label style={lbl}>{label}</label>
+      {f[k].map((val, i) => (
+        <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 5, alignItems: 'center' }}>
+          <input value={val} onChange={e => listSet(k, i, e.target.value)}
+            placeholder={placeholder} style={inp}/>
+          <button onClick={() => listDel(k, i)} style={delBtn} title="Remove">×</button>
+        </div>
+      ))}
+      <button onClick={() => listAdd(k)} style={addBtn}>+ Add</button>
+    </div>
+  )
+
+  return (
+    <div>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+        <button onClick={onBack} style={{
+          background: '#fff', border: '1.5px solid #E8E2D6', borderRadius: 8,
+          padding: '7px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: '#7D1025',
+        }}>← Documents</button>
+        <div>
+          <h1 style={{ fontSize: 21, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>
+            Weekly Academic Report
+          </h1>
+          <div style={{ fontSize: 12, color: '#6B6B6B' }}>Fill the report, then generate the branded PDF.</div>
+        </div>
+      </div>
+
+      {/* Basic info */}
+      <div style={card}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+          <div><label style={lbl}>Student Name *</label>
+            <input value={f.studentName} onChange={e => set('studentName', e.target.value)} placeholder="e.g. Jeremy" style={inp}/></div>
+          <div><label style={lbl}>Class / Level</label>
+            <input value={f.classLevel} onChange={e => set('classLevel', e.target.value)} placeholder="e.g. Year 8" style={inp}/></div>
+          <div><label style={lbl}>Subject *</label>
+            <input value={f.subject} onChange={e => set('subject', e.target.value)} placeholder="e.g. Mathematics" style={inp}/></div>
+          <div><label style={lbl}>Teacher</label>
+            <input value={f.teacher} onChange={e => set('teacher', e.target.value)} style={inp}/></div>
+          <div><label style={lbl}>Week</label>
+            <input value={f.week} onChange={e => set('week', e.target.value)} placeholder="e.g. Week of 11 – 14 May 2026" style={inp}/></div>
+          <div><label style={lbl}>Period</label>
+            <input value={f.period} onChange={e => set('period', e.target.value)} placeholder="e.g. 11/05/2026 – 14/05/2026" style={inp}/></div>
+        </div>
+      </div>
+
+      {/* Topics / sub-topics / activities */}
+      <div style={card}>
+        <ListEditor label="Topics Covered" k="topics" placeholder="e.g. Integers"/>
+        <ListEditor label="Sub-Topics Taught" k="subTopics" placeholder="e.g. Adding and subtracting integers"/>
+        <ListEditor label="Class Activities" k="activities" placeholder="Describe a class activity"/>
+      </div>
+
+      {/* Performance */}
+      <div style={card}>
+        <div style={{ marginBottom: 12 }}><label style={lbl}>Understanding Concepts</label>
+          <textarea value={f.understanding} onChange={e => set('understanding', e.target.value)} rows={2}
+            placeholder="How well the student grasped the concepts" style={{ ...inp, resize: 'vertical' }}/></div>
+        <div style={{ marginBottom: 12 }}><label style={lbl}>Class Participation</label>
+          <textarea value={f.participation} onChange={e => set('participation', e.target.value)} rows={2}
+            placeholder="The student's participation and engagement" style={{ ...inp, resize: 'vertical' }}/></div>
+        <div><label style={lbl}>General Performance</label>
+          <textarea value={f.generalPerf} onChange={e => set('generalPerf', e.target.value)} rows={2}
+            placeholder="Overall performance summary" style={{ ...inp, resize: 'vertical' }}/></div>
+      </div>
+
+      {/* Strengths / improvements */}
+      <div style={card}>
+        <ListEditor label="Strengths Observed" k="strengths" placeholder="A strength observed this week"/>
+        <ListEditor label="Areas to Improve" k="improvements" placeholder="An area to work on"/>
+      </div>
+
+      {/* Assessment Done — with optional marks */}
+      <div style={card}>
+        <label style={lbl}>Assessment Done</label>
+        <div style={{ fontSize: 11, color: '#6B6B6B', marginBottom: 8 }}>
+          Leave score blank for informal assessment. Fill score &amp; total when the student sat an exam.
+        </div>
+        {f.assessments.map((row, i) => (
+          <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            <input value={row.desc} onChange={e => aSet(i, 'desc', e.target.value)}
+              placeholder="Assessment description" style={{ ...inp, flex: '1 1 220px' }}/>
+            <input value={row.score} onChange={e => aSet(i, 'score', e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="Score" style={{ ...inp, width: 80, flex: '0 0 80px' }}/>
+            <span style={{ fontSize: 13, color: '#6B6B6B' }}>/</span>
+            <input value={row.outOf} onChange={e => aSet(i, 'outOf', e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="Out of" style={{ ...inp, width: 80, flex: '0 0 80px' }}/>
+            <button onClick={() => aDel(i)} style={delBtn} title="Remove">×</button>
+          </div>
+        ))}
+        <button onClick={aAdd} style={addBtn}>+ Add Assessment</button>
+      </div>
+
+      {/* Homework */}
+      <div style={card}>
+        <ListEditor label="Homework / Follow-Up Work" k="homework" placeholder="A homework or follow-up task"/>
+      </div>
+
+      {/* Remarks + confirmation */}
+      <div style={card}>
+        <div style={{ marginBottom: 12 }}><label style={lbl}>Teacher's Remarks</label>
+          <textarea value={f.remarks} onChange={e => set('remarks', e.target.value)} rows={4}
+            placeholder="Closing remarks to the student and parent" style={{ ...inp, resize: 'vertical' }}/></div>
+        <div style={{ maxWidth: 220 }}><label style={lbl}>Confirmation Date</label>
+          <input value={f.teacherDate} onChange={e => set('teacherDate', e.target.value)} style={inp}/></div>
+      </div>
+
+      {/* Generate */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginBottom: 30 }}>
+        <button onClick={generate} style={{
+          background: '#7D1025', color: '#fff', border: 'none', borderRadius: 8,
+          padding: '12px 26px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+        }}>
+          Generate Report
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Build the branded report HTML (opens in new tab for PDF) ──
+function buildWeeklyReportHTML(f) {
+  const esc = (s) => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const clean = (arr) => (arr || []).map(x => (x || '').trim()).filter(Boolean)
+  const topics = clean(f.topics), subTopics = clean(f.subTopics), activities = clean(f.activities)
+  const strengths = clean(f.strengths), improvements = clean(f.improvements), homework = clean(f.homework)
+  const assessments = (f.assessments || []).filter(a => (a.desc || '').trim())
+
+  const bullets = (arr) => arr.map(x => `<li>${esc(x)}</li>`).join('') || '<li style="color:#999">—</li>'
+
+  const assessRows = assessments.map(a => {
+    const hasMark = a.score !== '' && a.outOf !== '' && Number(a.outOf) > 0
+    const pct = hasMark ? Math.round((Number(a.score) / Number(a.outOf)) * 100) : null
+    return `<div class="assess-row">
+      <span class="assess-desc">${esc(a.desc)}</span>
+      ${hasMark ? `<span class="assess-mark">
+        <span class="mark-pill">${esc(a.score)} / ${esc(a.outOf)}</span>
+        <span class="mark-pct">${pct}%</span></span>` : ''}
+    </div>`
+  }).join('') || '<div class="assess-row"><span class="assess-desc" style="color:#999">—</span></div>'
+
+  const shield = `<svg class="shield" viewBox="0 0 60 66">
+    <path d="M30 2 L56 9 V32 C56 47 44 58 30 63 C16 58 4 47 4 32 V9 Z" fill="#8A1228" stroke="#C9A030" stroke-width="2"/>
+    <path d="M30 13 l2.3 4.7 5.2 .75 -3.75 3.65 .9 5.15 -4.65 -2.45 -4.65 2.45 .9 -5.15 -3.75 -3.65 5.2 -.75 Z" fill="#C9A030"/>
+    <g transform="translate(30 40)">
+      <path d="M0 -6 C-4 -9 -11 -9 -14 -7 L-14 9 C-11 7 -4 7 0 10 Z" fill="#FFFFFF" stroke="#E3D9C4" stroke-width="0.6"/>
+      <path d="M0 -6 C4 -9 11 -9 14 -7 L14 9 C11 7 4 7 0 10 Z" fill="#FFFFFF" stroke="#E3D9C4" stroke-width="0.6"/>
+      <line x1="-10" y1="-3.5" x2="-3.5" y2="-2" stroke="#E7B7C0" stroke-width="0.8"/>
+      <line x1="-10" y1="0" x2="-3.5" y2="1.5" stroke="#E7B7C0" stroke-width="0.8"/>
+      <line x1="-10" y1="3.5" x2="-3.5" y2="5" stroke="#E7B7C0" stroke-width="0.8"/>
+      <line x1="3.5" y1="-2" x2="10" y2="-3.5" stroke="#E7B7C0" stroke-width="0.8"/>
+      <line x1="3.5" y1="1.5" x2="10" y2="0" stroke="#E7B7C0" stroke-width="0.8"/>
+      <line x1="3.5" y1="5" x2="10" y2="3.5" stroke="#E7B7C0" stroke-width="0.8"/>
+    </g></svg>`
+
+  const header = (rightH1, rightH2) => `<div class="topbar"></div>
+    <div class="hd">
+      <div class="brand">${shield}
+        <div class="brand-tx"><div class="name">Smart<em>ious</em></div>
+        <div class="tag">HOMESCHOOL&nbsp;·&nbsp;GLOBAL</div></div>
+      </div>
+      <div class="hd-r"><div class="h1">${rightH1}</div><div class="h2">${rightH2}</div></div>
+    </div><div class="gold-rule"></div>`
+
+  const footer = (n) => `<div class="ft">
+    <span>Smartious Homeschool Global · Est. 2018 · Confidential Academic Record</span>
+    <span>Page ${n} of 2</span></div>`
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Weekly Report — ${esc(f.studentName)}</title>
+<style>
+  :root{--crimson:#7D1025;--crimsonD:#5A0B1B;--gold:#C9A030;--ink:#1A1A1A;--mute:#6B6B6B;--line:#E8E2D6;--cream:#FBFAF5;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#e9e6df;color:var(--ink)}
+  .page{width:210mm;min-height:297mm;background:#fff;margin:18px auto;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.13)}
+  .page-body{padding:0 22mm 18mm;flex:1}
+  .topbar{height:8mm;background:linear-gradient(90deg,var(--crimsonD),var(--crimson))}
+  .hd{display:flex;justify-content:space-between;align-items:flex-start;padding:11mm 22mm 0}
+  .brand{display:flex;align-items:center;gap:10px}
+  .shield{width:50px;height:55px;flex-shrink:0}
+  .brand-tx .name{font-size:22px;font-weight:800;letter-spacing:-.5px;line-height:1}
+  .brand-tx .name em{font-style:italic;color:var(--crimson)}
+  .brand-tx .tag{font-size:7px;letter-spacing:3px;color:var(--mute);margin-top:3px;font-weight:600}
+  .hd-r{text-align:right}
+  .hd-r .h1{font-size:19px;font-weight:800;letter-spacing:.5px}
+  .hd-r .h2{font-size:9px;color:var(--mute);margin-top:3px;letter-spacing:.5px}
+  .gold-rule{height:2px;background:var(--gold);margin:9mm 22mm 0}
+  .info{margin:7mm 0 0;border-collapse:collapse;width:100%}
+  .info td{border:1px solid var(--line);padding:7px 11px;font-size:11px}
+  .info .k{background:var(--cream);font-weight:700;color:var(--crimson);width:24%;font-size:9.5px;letter-spacing:.4px;text-transform:uppercase}
+  .sh{font-size:11px;font-weight:800;color:var(--crimson);letter-spacing:.7px;text-transform:uppercase;margin:8mm 0 0;padding-bottom:4px;border-bottom:1.5px solid var(--gold)}
+  .sh.tight{margin-top:6mm}
+  ul.b{list-style:none;margin:4mm 0 0}
+  ul.b li{font-size:10.5px;line-height:1.55;padding:2.5px 0 2.5px 16px;position:relative;color:#2c2c2c}
+  ul.b li::before{content:'';position:absolute;left:3px;top:9px;width:4px;height:4px;border-radius:50%;background:var(--gold)}
+  .assess{margin:4mm 0 0}
+  .assess-row{display:flex;align-items:center;gap:10px;padding:4px 0 4px 16px;position:relative;font-size:10.5px;line-height:1.5;color:#2c2c2c;border-bottom:1px solid #F1ECE0}
+  .assess-row:last-child{border-bottom:none}
+  .assess-row::before{content:'';position:absolute;left:3px;top:10px;width:4px;height:4px;border-radius:50%;background:var(--gold)}
+  .assess-desc{flex:1}
+  .assess-mark{flex-shrink:0;display:flex;align-items:center;gap:6px}
+  .mark-pill{background:var(--crimson);color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:4px;letter-spacing:.3px;white-space:nowrap}
+  .mark-pct{font-size:9.5px;font-weight:700;color:var(--gold)}
+  .perf{margin:5mm 0 0;border-collapse:collapse;width:100%}
+  .perf td{border:1px solid var(--line);padding:9px 11px;font-size:10.5px;vertical-align:top;line-height:1.5}
+  .perf .k{background:var(--cream);font-weight:700;color:var(--crimson);width:30%;font-size:10px}
+  .remarks{margin:5mm 0 0;background:var(--cream);border:1px solid var(--line);border-left:3px solid var(--gold);padding:11px 14px;font-size:10.5px;line-height:1.6;color:#2c2c2c;font-style:italic}
+  .confirm{margin:7mm 0 0;display:flex;justify-content:space-between;align-items:flex-end}
+  .confirm .who{font-size:10.5px;line-height:1.9}
+  .confirm .who b{color:var(--crimson)}
+  .sig-line{border-bottom:1px solid var(--ink);width:55mm;margin-top:14px}
+  .verified{border:1.5px solid var(--gold);border-radius:7px;padding:8px 16px;text-align:center}
+  .verified .v{font-size:11px;font-weight:800;color:var(--crimson);letter-spacing:1.5px}
+  .verified .vs{font-size:7.5px;color:var(--mute);margin-top:2px;letter-spacing:.5px}
+  .ft{margin-top:auto;border-top:1px solid var(--line);padding:5mm 22mm;display:flex;justify-content:space-between;font-size:8px;color:var(--mute)}
+  .toolbar{position:fixed;top:0;left:0;right:0;background:#7D1025;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:99;font-family:'Helvetica Neue',Arial,sans-serif}
+  .toolbar button{background:#fff;color:#7D1025;border:none;padding:8px 18px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer}
+  .toolbar .hint{font-size:12px;opacity:.85}
+  @media print{
+    body{background:#fff}.toolbar{display:none}
+    .page{margin:0;box-shadow:none;width:100%;min-height:auto}
+    @page{size:A4;margin:0}.page-break{page-break-before:always}
+  }
+</style></head><body>
+<div class="toolbar">
+  <span class="hint">Review the report below, then download. Use "Save as PDF" as the destination.</span>
+  <button onclick="window.print()">Download PDF</button>
+</div>
+<div style="height:48px"></div>
+
+<div class="page">
+  ${header('WEEKLY ACADEMIC REPORT', 'Lesson Report &nbsp;·&nbsp; Confidential')}
+  <div class="page-body">
+    <table class="info">
+      <tr><td class="k">Student Name</td><td>${esc(f.studentName)}</td>
+          <td class="k">Teacher</td><td>${esc(f.teacher)}</td></tr>
+      <tr><td class="k">Class / Level</td><td>${esc(f.classLevel)}</td>
+          <td class="k">Week</td><td>${esc(f.week)}</td></tr>
+      <tr><td class="k">Subject</td><td>${esc(f.subject)}</td>
+          <td class="k">Period</td><td>${esc(f.period)}</td></tr>
+    </table>
+    <div class="sh">Topics Covered</div><ul class="b">${bullets(topics)}</ul>
+    <div class="sh">Sub-Topics Taught</div><ul class="b">${bullets(subTopics)}</ul>
+    <div class="sh">Class Activities</div><ul class="b">${bullets(activities)}</ul>
+    <div class="sh">Student Performance &amp; Participation</div>
+    <table class="perf">
+      <tr><td class="k">Understanding Concepts</td><td>${esc(f.understanding) || '—'}</td></tr>
+      <tr><td class="k">Class Participation</td><td>${esc(f.participation) || '—'}</td></tr>
+      <tr><td class="k">General Performance</td><td>${esc(f.generalPerf) || '—'}</td></tr>
+    </table>
+  </div>
+  ${footer(1)}
+</div>
+
+<div class="page page-break">
+  ${header(esc(f.studentName) + ' · ' + esc(f.subject), esc(f.week))}
+  <div class="page-body">
+    <div class="sh tight">Strengths Observed</div><ul class="b">${bullets(strengths)}</ul>
+    <div class="sh">Areas to Improve</div><ul class="b">${bullets(improvements)}</ul>
+    <div class="sh">Assessment Done</div><div class="assess">${assessRows}</div>
+    <div class="sh">Homework / Follow-Up Work</div><ul class="b">${bullets(homework)}</ul>
+    <div class="sh">Teacher's Remarks</div>
+    <div class="remarks">${esc(f.remarks) || '—'}</div>
+    <div class="sh">Teacher's Confirmation</div>
+    <div class="confirm">
+      <div class="who">Teacher's Name: <b>${esc(f.teacher)}</b><br>
+        Date: <b>${esc(f.teacherDate)}</b>
+        <div class="sig-line"></div>
+        <span style="font-size:8.5px;color:#6B6B6B">Signature</span></div>
+      <div class="verified"><div class="v">VERIFIED</div>
+        <div class="vs">SMARTIOUS HOMESCHOOL GLOBAL</div>
+        <div class="vs">Parklands · Nairobi · Kenya</div></div>
+    </div>
+  </div>
+  ${footer(2)}
+</div>
+</body></html>`
+}
 
 function CommunicationTab({ user, store, setPage, toast }) {
   const [view, setView] = useState('compose')   // compose | history
