@@ -1170,50 +1170,52 @@ const PAGE_META = {
 
 const FULL_ARTICLES = {
   // GLOBAL (10 articles)
-  'online-tutoring-services-2026': {
-    cat:'tuition', country:'global',
-    img:'linear-gradient(135deg,#0A1020,#1E2F5F)', splash:'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1000&q=70',
-    t:'Best Online Tutoring Services for Students (2026)',
-    date:'April 2026 · 9 min read',
-    author:'Alfred Ouko', role:'Founder & CEO',
-    intro:'Online tutoring has moved from pandemic-era stopgap to first-choice learning solution for millions of families worldwide. In 2026 the global online tutoring market is worth over $13 billion. Here is how to identify the services actually worth paying for.',
+  'why-pythagoras-igcse-exam': {
+    cat:'igcse', country:'global', featured:true,
+    img:'linear-gradient(135deg,#0A1020,#1E2F5F)', splash:'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&q=75',
+    t:'Why Pythagoras Appears in Every IGCSE Exam',
+    date:'May 2026 · 7 min read',
+    author:'Julius Owano', role:'Mathematics Teacher',
+    metaTitle:'Why Pythagoras Appears in Every IGCSE Maths Exam — Smartious',
+    metaDesc:'Pythagoras\' theorem appears in every IGCSE Maths exam. A Smartious IGCSE teacher explains why, where it hides, and how to never lose marks on it.',
+    intro:'Open any past IGCSE Mathematics paper and you will find it: Pythagoras\' theorem, somewhere, every single year. It is one of the most reliable sources of marks on the entire paper — and also one of the most commonly missed. Here is why it appears so often, and how Smartious students learn to catch it every time.',
     sections:[
-      {h:'What makes a good online tutoring service in 2026',p:'The best online tutoring services share five traits: verified and background-checked tutors, adaptive learning software that identifies knowledge gaps, recorded sessions parents can review, clear written progress reports, and flat transparent pricing. Services that tick fewer than three of these should be treated with caution.'},
-      {h:'One-on-one vs group tutoring',p:'One-on-one tutoring is measurably more effective per hour, with a 2-sigma improvement in outcomes according to the landmark Bloom study. Group tutoring (3–6 students) is 50–60% cheaper and works well for students who learn from peer discussion. For exam preparation the evidence favours one-on-one. For long-term subject reinforcement, small groups work fine.'},
-      {h:'Typical costs in 2026',p:'Across the major international markets, online tutoring costs roughly $15–$80 per hour. The low end covers university-student tutors working with primary school children. The middle ($25–$40) is qualified teachers for secondary school. The premium ($50+) covers specialist exam-prep tutors for SAT, IGCSE, A-Level, IB, and competitive university entrance tests.'},
-      {h:'Major platforms compared',p:'Global platforms like Preply, Wyzant, Tutorful, and Varsity Tutors run marketplaces where tutors set their own rates. Specialist providers like Smartious run managed services with vetted staff and integrated curriculum. Marketplaces are cheaper but variable; managed services are pricier but predictable.'},
-      {h:'Red flags to avoid',p:'Avoid services that require a full term\'s payment upfront, refuse to name the tutor before payment, have only glowing five-star reviews (look for balanced feedback), do not offer a money-back guarantee on the first session, or cannot explain their teaching methodology in one minute.'},
-      {h:'How to trial a service properly',p:'Book a single one-hour session with two different services. Give each tutor the same specific problem your child struggles with. Afterwards ask your child three questions: did you understand more than before, did the tutor ask you to explain your reasoning back, would you want another session. That data tells you more than any review.'},
+      {h:'It is the foundation of an entire topic area',p:'Pythagoras\' theorem — that the square of the hypotenuse equals the sum of the squares of the other two sides — is not a single skill. It is the gateway to a whole cluster of the IGCSE syllabus: trigonometry, coordinate geometry, vectors, 3D problems and bearings all rest on it. Examiners test it constantly because it underpins so much of what follows.'},
+      {h:'Where it hides in the exam',p:'Most students recognise Pythagoras when they see an obvious right-angled triangle. They lose marks when it is disguised. It hides inside the distance between two coordinates, inside the diagonal of a cuboid, inside an isosceles triangle split in two, and inside circle problems where a radius meets a tangent. Recognising the hidden right angle is the real skill being assessed.'},
+      {h:'Why students lose easy marks',p:'The three most common mistakes are: adding the squares when you should subtract to find a shorter side, forgetting to take the square root at the end, and rounding too early so the final answer falls outside the accepted range. None of these are difficulty problems — they are habit problems, and habits can be trained.'},
+      {h:'How to never miss it again',p:'Train one reflex: whenever you see a right angle, or can create one by drawing a single line, write down the Pythagoras relationship before doing anything else. At Smartious, our IGCSE Mathematics students drill this through past-paper practice until spotting the hidden right angle becomes automatic — because in the exam, that recognition is worth real marks.'},
+      {h:'The 3D problems examiners love',p:'Higher-tier IGCSE papers almost always include a 3D Pythagoras question — the longest diagonal of a box, the slant height of a pyramid. These look intimidating but are simply Pythagoras applied twice: once to find a diagonal across the base, then again using that diagonal and the vertical height. Students who have practised the two-step method find these among the easiest marks on the paper.'},
     ],
     faqs:[
-      {q:'How many hours of tutoring per week does a struggling student need?',a:'For a student one grade behind in a single subject, budget 2 hours a week for 3 months. For exam preparation in the final year of secondary school, 3 hours a week per subject for 9 months is a realistic baseline.'},
-      {q:'Is online tutoring as effective as in-person tutoring?',a:'For students aged 11 and above with normal attention span, the evidence shows online tutoring matches in-person outcomes. For younger children and those with attention challenges, in-person is usually more effective.'},
-      {q:'At what age should my child start online tutoring?',a:'Most providers accept students from age 7. Below that, parent-led learning or in-person micro-schools usually work better.'},
+      {q:'Is Pythagoras on both Foundation and Higher IGCSE papers?',a:'Yes. It appears on Core/Foundation and Extended/Higher tiers in every major IGCSE board (CIE and Edexcel). The Higher tier simply adds 3D applications and combines it with trigonometry.'},
+      {q:'How much of the IGCSE Maths paper depends on Pythagoras?',a:'Directly, usually 4–8 marks. Indirectly — through trigonometry, coordinate geometry and vectors that rely on it — considerably more. It is one of the highest-value single concepts to master.'},
+      {q:'What is the best way to practise it?',a:'Past papers, sorted by topic. Working through every Pythagoras question from several years of papers trains pattern recognition far faster than textbook exercises.'},
     ],
-    conclusion:'The online tutoring market is now mature enough that the good services are genuinely transformative and the bad ones are easy to spot. Trial two services side by side before committing. For families wanting a managed, vetted option with integrated curriculum, Smartious offers one-on-one tutoring from $8/hour with recorded sessions and written progress reports.',
+    conclusion:'Pythagoras appears in every IGCSE exam because it is the foundation the rest of the geometry syllabus is built on. The marks are reliable and the mistakes are avoidable. At Smartious, our IGCSE Mathematics teachers coach students to spot the hidden right angle every time — turning a guaranteed exam question into guaranteed marks.',
   },
   
-  'homeschooling-vs-traditional-school': {
-    cat:'homeschool', country:'global',
-    img:'linear-gradient(135deg,#12061A,#2D0F3D)', splash:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1000&q=70',
-    t:'Homeschooling vs Traditional School: Which Is Better in 2026?',
-    date:'April 2026 · 8 min read',
-    author:'Dr. Susan Kariuki', role:'Head of Curriculum',
-    intro:'Homeschooling enrolment globally has grown 4x since 2019. Traditional school enrolment has stayed flat. But growth does not automatically mean better — here is the honest comparison between homeschooling and traditional school.',
+  'make-quadratic-equations-fun': {
+    cat:'igcse', country:'global',
+    img:'linear-gradient(135deg,#12061A,#2D0F3D)', splash:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=75',
+    t:'5 Ways to Make Quadratic Equations Fun',
+    date:'May 2026 · 6 min read',
+    author:'Cynthia Kemunto', role:'Mathematics Teacher',
+    metaTitle:'5 Ways to Make Quadratic Equations Fun — Smartious Maths',
+    metaDesc:'Quadratic equations do not have to be dreaded. A Smartious Maths teacher shares 5 ways to make them genuinely enjoyable for IGCSE and secondary students.',
+    intro:'For many students, "quadratic equations" is the moment maths stops being fun. It does not have to be. After years of teaching IGCSE Mathematics at Smartious, I have found that the students who enjoy quadratics are not the ones with special talent — they are the ones who were shown the subject differently. Here are five approaches that work.',
     sections:[
-      {h:'Academic outcomes',p:'Meta-analyses of homeschool research consistently show homeschooled students score 15–30 percentile points above their conventionally-schooled peers on standardised tests. However the research is heavily self-selected — homeschooling families are typically more engaged than average. Matched-pair studies narrow the gap to 5–10 percentile points, still favouring homeschoolers.'},
-      {h:'Socialisation',p:'The stereotype of isolated homeschooled children does not match modern evidence. A 2020 Cardus Education Survey of 3,000 adults found homeschooled adults participated in civic life, volunteering, and close friendships at higher rates than conventionally-schooled peers. Modern homeschooling includes co-ops, sports clubs, and learning-centre days that deliver a stronger social experience than a 30-child classroom.'},
-      {h:'Cost',p:'Homeschooling costs roughly 30–50% of a private international school. Public school is essentially free, so public school remains the cheapest option where it exists at acceptable quality. For families in countries where public education is weak, homeschooling is cheaper than the private alternative.'},
-      {h:'Flexibility',p:'Homeschooling adapts to family schedules, travel, and individual learning pace. A child struggling with algebra can spend four weeks on one topic; a child gifted in history can read three university-level texts in a term. Traditional school cannot flex in these ways.'},
-      {h:'Discipline and structure',p:'Traditional school wins here. A child who cannot self-motivate will drift in a homeschool environment unless the parent imposes strict routine. The external pressure of classmates, teachers, and bell times matters for some personality types.'},
-      {h:'When traditional school wins',p:'If your child thrives on peer competition, if you both work full-time and cannot supervise learning, if your local school is genuinely excellent, or if your child has developmental needs best served by specialist staff, traditional school is the right call. Homeschooling is not morally superior — it is one option among several.'},
+      {h:'1. Start with the picture, not the formula',p:'Every quadratic is a parabola — a curve with a real shape. Before a student ever meets the quadratic formula, show them the curve: where it crosses the x-axis, where it turns, why it is symmetrical. When students see that solving a quadratic just means finding where the curve meets the line, the algebra stops feeling arbitrary and starts feeling like a map.'},
+      {h:'2. Connect it to things that actually curve',p:'A thrown ball, a fountain of water, the cables of a suspension bridge, the path of a long jump — all parabolas. When a student realises the equation describes the arc of a basketball shot, quadratics stop being abstract symbols and become a description of the real world. Smartious lessons deliberately anchor every quadratic in something physical.'},
+      {h:'3. Turn factorising into a puzzle',p:'Factorising a quadratic is genuinely a puzzle: find two numbers that multiply to one value and add to another. Framed as a logic puzzle rather than a procedure, students compete to solve them quickly. The satisfaction of "cracking" a factorisation is real — and it builds the speed examiners reward.'},
+      {h:'4. Let students break it, then fix it',p:'Give a student a wrong worked solution and ask them to find the mistake. Hunting for the error — a sign slip, a dropped term — is more engaging than copying a correct method, and it teaches the exact mistakes they need to avoid in their own work. Teaching by debugging works remarkably well for quadratics.'},
+      {h:'5. Show the three methods and let them choose',p:'Factorising, completing the square, and the quadratic formula each solve the same equation. Rather than forcing one, show all three and let students discover which they prefer and when each is fastest. Ownership of the method turns a dreaded topic into one where the student feels in control.'},
     ],
     faqs:[
-      {q:'Can a homeschooled child still go to university?',a:'Yes. Homeschooled students apply to universities worldwide every year. Cambridge, Harvard, Oxford, and the University of Nairobi all admit homeschooled applicants when their academic record is properly documented by a registered provider.'},
-      {q:'Is homeschooling legal everywhere?',a:'It is legal in most countries. Germany bans it outright. France and Sweden have significant restrictions. The US, UK, Kenya, Nigeria, South Africa, and Australia allow it with varying registration requirements.'},
-      {q:'Do homeschooled children miss the "school experience"?',a:'They miss some things (school plays, prom, full-team sports). They gain other things (family closeness, individual pace, no bullying). It is a trade, not a loss.'},
+      {q:'At what level do students meet quadratic equations?',a:'Quadratics appear from around Year 9–10 and are a major topic in IGCSE, GCSE and equivalent secondary curricula, continuing into A-Level and IB.'},
+      {q:'Which method should students learn first?',a:'Factorising first, because it builds number sense. The quadratic formula is the reliable fallback for equations that do not factorise neatly. Completing the square matters most for understanding the curve and for later topics.'},
+      {q:'Why do so many students struggle with quadratics?',a:'Usually because they were taught the formula before the meaning. A student who understands the parabola first finds the algebra far easier — which is exactly how Smartious sequences the topic.'},
     ],
-    conclusion:'Neither option is universally better. Homeschooling produces stronger academic outcomes on average but requires committed parents. Traditional school produces more socially-adapted students on average but offers less flexibility. Pick based on your child\'s temperament and your family\'s capacity — not based on ideology.',
+    conclusion:'Quadratic equations become enjoyable when students see the curve, connect it to the real world, and feel ownership of the method. None of this requires special talent — only better teaching. At Smartious, our Mathematics teachers make quadratics one of the topics students end up enjoying most.',
   },
   
   'how-to-choose-online-tutor': {
@@ -3011,8 +3013,8 @@ export default function LandingPage() {
     }
   } else if (page === 'article' && currentArticle && FULL_ARTICLES[currentArticle]) {
     const a = FULL_ARTICLES[currentArticle]
-    metaTitle = a.title + ' | ' + SITE
-    metaDesc  = (a.excerpt || a.intro || '').slice(0, 158)
+    metaTitle = a.metaTitle || ((a.t || 'Article') + ' | ' + SITE)
+    metaDesc  = a.metaDesc || (a.intro || '').slice(0, 158)
   } else if (PAGE_META[page]) {
     metaTitle = PAGE_META[page].title
     metaDesc  = PAGE_META[page].desc
