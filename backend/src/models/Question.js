@@ -101,6 +101,24 @@ const questionSchema = new mongoose.Schema({
     default: '',
   },
 
+  // ── Curriculum-spine link (ADDITIVE — optional) ──
+  // `subtopic` aligns the question to a SyllabusTopic subtopic;
+  // `topicRef` links to the SyllabusTopic document. Both optional —
+  // existing questions leave them empty and keep working. The
+  // existing free-text `topic` field above is retained.
+  subtopic: {
+    type: String,
+    trim: true,
+    index: true,
+    default: '',
+  },
+  topicRef: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'SyllabusTopic',
+    default: null,
+    index: true,
+  },
+
   // ── Question content (flat or nested) ────────────
   // For a FLAT question: `type`, `questionText`, `options`,
   // `correctAnswer`, `marks` are the answer-bearing fields and
