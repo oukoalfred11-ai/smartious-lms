@@ -1,6 +1,6 @@
 import { useStore } from '../context/ctx.jsx'
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 
 /* ── Front Desk capture ───────────────────────────────────
  * Landing-page forms post here so submissions land in the
@@ -2517,21 +2517,63 @@ export default function LandingPage() {
   }
 
   const nav = useNavigate()
+  const location = useLocation()
+  const routeParams = useParams()
   const topRef = useRef(null)
 
+  // ── URL ⇄ page-state sync ──────────────────────────────
+  // Map a URL pathname to a landing-page id. '/' → 'home',
+  // '/curricula' → 'curricula', '/blog/:slug' → 'article'.
+  const pageToPath = (id) => (id === 'home' ? '/' : '/' + id)
+
+  // Apply the URL to internal page state. Driven by a useEffect
+  // so browser back/forward and direct links all work.
+  useEffect(() => {
+    const path = location.pathname.replace(/\/+$/, '') || '/'
+    if (path.startsWith('/blog/')) {
+      const slug = decodeURIComponent(path.slice('/blog/'.length))
+      if (slug && FULL_ARTICLES[slug]) {
+        setCurrentArticle(slug)
+        setPage('article')
+      } else {
+        // Unknown article slug — fall back to the blog index
+        setPage('blog')
+      }
+      return
+    }
+    const id = path === '/' ? 'home' : path.slice(1)
+    if (PAGES.includes(id) && id !== 'article') {
+      setPage(id)
+    } else {
+      setPage('home')
+    }
+  }, [location.pathname])
+
+  // P(id) — navigate to a landing page by URL. The useEffect
+  // above then syncs `page` state. Resets per-page form state.
   const P = (id) => {
     if (!PAGES.includes(id)) return
-    setPage(id)
     setWizStep(1)
     setWizDone(false)
-    // Reset payment + form state so a fresh enrollment starts clean
     setPaySuccess('')
     setPayError('')
     setPayProcessing(false)
     setEnrollError('')
-    // Reset assessment so a new enrollment gets freshly-shuffled questions
     setAssessment([])
     setAssessmentLevel('')
+    if (id === 'article') {
+      // Article navigation handled by openArticle(); ignore here
+      return
+    }
+    nav(pageToPath(id))
+    window.scrollTo(0, 0)
+    topRef.current?.scrollIntoView()
+  }
+
+  // openArticle(slug) — navigate to an individual blog post URL
+  const openArticle = (slug) => {
+    if (!slug) return
+    nav('/blog/' + encodeURIComponent(slug))
     window.scrollTo(0, 0)
     topRef.current?.scrollIntoView()
   }
@@ -3473,7 +3515,7 @@ export default function LandingPage() {
               })}
             </div>
             {featuredBlog && (
-              <div className="bfc" onClick={() => { setCurrentArticle(featuredBlog.slug); P('article') }}>
+              <div className="bfc" onClick={() => openArticle(featuredBlog.slug)}>
                 <div className="bfc-l" style={{background: featuredBlog.img}}>
                   {featuredBlog.splash && (
                     <img
@@ -3522,7 +3564,7 @@ export default function LandingPage() {
             )}
             <div className="blog-grid">
               {visibleBlog.map((b,i) => (
-                <div key={i} className="bc reveal" onClick={() => { setCurrentArticle(b.slug); P('article') }}>
+                <div key={i} className="bc reveal" onClick={() => openArticle(b.slug)}>
                   <div className="bc-img" style={{background:b.img}}>
                     {b.splash && (
                       <img
@@ -3700,7 +3742,7 @@ export default function LandingPage() {
                     <div style={{fontSize:11,fontWeight:700,color:V.cr,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:16}}>Related Articles</div>
                     <div className="blog-grid">
                       {related.map(([slug, r]) => (
-                        <div key={slug} className="bc" onClick={() => { setCurrentArticle(slug); window.scrollTo(0,0) }} style={{cursor:'pointer'}}>
+                        <div key={slug} className="bc" onClick={() => openArticle(slug)} style={{cursor:'pointer'}}>
                           <div className="bc-img" style={{background:r.img}}>
                             {r.splash && (
                               <img
