@@ -1065,19 +1065,46 @@ function QuestionBankTab({ user, store, setPage, toast }) {
   // When a subject with a loaded syllabus spine is selected,
   // Topic becomes Topic + Subtopic dropdowns drawn from the
   // spine. Subjects without a spine fall back to free text.
+  //
+  // NOTE: the question form's subject list comes from the static
+  // /curriculum/options catalog, whose ids are NOT real database
+  // Subject._ids. The spine is keyed by real Subject._id. So we
+  // resolve the real subject by querying /subjects (DB-backed)
+  // and matching on curriculum + name, then fetch its spine.
   const [spineTopics, setSpineTopics] = useState([])
   const [spineLoading, setSpineLoading] = useState(false)
 
   useEffect(() => {
-    const subjMeta = formSubjects.find(s => s.name === form.subject)
-    const sid = subjMeta && (subjMeta.id || subjMeta._id)
-    if (!sid) { setSpineTopics([]); return }
+    if (!form.curriculum || !form.subject) { setSpineTopics([]); return }
     let cancelled = false
     setSpineLoading(true)
-    api.get('/syllabus/subject/' + sid)
-      .then(r => { if (!cancelled) setSpineTopics(r.data?.data?.topics || []) })
-      .catch(() => { if (!cancelled) setSpineTopics([]) })
-      .finally(() => { if (!cancelled) setSpineLoading(false) })
+    setSpineTopics([])
+    ;(async () => {
+      try {
+        // 1. Resolve the real Subject._id from the DB-backed list
+        const subjRes = await api.get('/subjects', { params: { curriculum: form.curriculum } })
+        const dbSubjects = subjRes.data?.subjects || []
+        const norm = (s) => String(s || '').trim().toLowerCase()
+        const want = norm(form.subject)
+        // Match exact first; then fall back to a contains-match either
+        // way (handles "Mathematics" vs "IGCSE Mathematics" naming).
+        let match = dbSubjects.find(s => norm(s.subjectName) === want)
+        if (!match) {
+          match = dbSubjects.find(s => {
+            const have = norm(s.subjectName)
+            return have && want && (have.includes(want) || want.includes(have))
+          })
+        }
+        if (!match) { if (!cancelled) setSpineTopics([]); return }
+        // 2. Fetch the spine for that real subject id
+        const spineRes = await api.get('/syllabus/subject/' + match._id)
+        if (!cancelled) setSpineTopics(spineRes.data?.data?.topics || [])
+      } catch (e) {
+        if (!cancelled) setSpineTopics([])
+      } finally {
+        if (!cancelled) setSpineLoading(false)
+      }
+    })()
     return () => { cancelled = true }
   }, [form.subject, form.curriculum])  // eslint-disable-line react-hooks/exhaustive-deps
 
