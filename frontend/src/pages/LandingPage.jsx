@@ -326,7 +326,7 @@ const styles = `
   .lp .blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   .lp .bc{background:${V.white};border-radius:24px;overflow:hidden;border:1px solid ${V.bone3};transition:all .28s;display:flex;flex-direction:column;cursor:pointer}
   .lp .bc:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(10,8,6,.14);border-color:transparent}
-  .lp .bc-img{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .lp .bc-img{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;flex-shrink:0}
   /* Premium splash image — the photo itself */
   .lp .bc-splash{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.6,.3,1),filter .4s ease}
   .lp .bc:hover .bc-splash{transform:scale(1.06);filter:saturate(1.15) brightness(1.03)}
@@ -2637,11 +2637,30 @@ export default function LandingPage() {
   const [page, setPage] = useState('home')
 
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible') })
-    }, { threshold: 0.12 })
-    document.querySelectorAll('.lp .reveal').forEach(el => observer.observe(el))
-    return () => observer.disconnect()
+    let observer
+    // Wait for React to paint the new page's elements before observing,
+    // otherwise querySelectorAll runs before the .reveal nodes exist and
+    // above-the-fold cards never get the .visible class.
+    const raf = requestAnimationFrame(() => {
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') })
+      }, { threshold: 0.12 })
+      const els = document.querySelectorAll('.lp .reveal')
+      els.forEach(el => {
+        // Reveal anything already within the viewport immediately —
+        // an IntersectionObserver will not fire for elements that are
+        // already on screen and never scrolled into view.
+        const r = el.getBoundingClientRect()
+        if (r.top < window.innerHeight && r.bottom > 0) {
+          el.classList.add('visible')
+        }
+        observer.observe(el)
+      })
+    })
+    return () => {
+      cancelAnimationFrame(raf)
+      if (observer) observer.disconnect()
+    }
   }, [page])
   const [faqOpen, setFaqOpen] = useState(null)
   const [priceTabs, setPriceTab] = useState('full')
@@ -4177,7 +4196,7 @@ export default function LandingPage() {
                 <div className="blog-grid">
                   {store.articles.filter(a => a.status === 'Published').map((a) => (
                     <div key={a.id} className="bc reveal" onClick={() => showToast('Article: ' + a.title)}>
-                      <div className="bc-img" style={{background:a.img}}/>
+                      <div className="bc-img" style={{background:a.img || 'linear-gradient(135deg,#8B1A2E,#5A0B1B)'}}/>
                       <div className="bc-body">
                         <span className="bc-tag">{a.cat || 'IGCSE'}</span>
                         <h3 className="bc-t">{a.title}</h3>
