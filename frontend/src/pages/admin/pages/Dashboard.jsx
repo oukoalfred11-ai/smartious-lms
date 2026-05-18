@@ -1796,20 +1796,21 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
   const [roleFilter, setRoleFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
 
-  useEffect(() => {
-    const fetch = async () => {
-      setLoading(true)
-      try {
-        const res = await api.get('/users')
-        setUsers(res.data.users || [])
-        setLoading(false)
-      } catch (e) {
-        setError(e.response?.data?.message || e.message || 'Failed to load')
-        setLoading(false)
-      }
+  const [showImportFD, setShowImportFD] = useState(false)
+
+  const loadUsers = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await api.get('/users')
+      setUsers(res.data.users || [])
+      setLoading(false)
+    } catch (e) {
+      setError(e.response?.data?.message || e.message || 'Failed to load')
+      setLoading(false)
     }
-    fetch()
-  }, [refreshKey])
+  }, [])
+
+  useEffect(() => { loadUsers() }, [refreshKey, loadUsers])
 
   const counts = {
     total: users.length,
@@ -1887,12 +1888,20 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
         sub={'Manage students, teachers, parents and admins · ' + counts.total + ' total'}
         action={
           <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-s btn-sm" onClick={() => setShowImportFD(true)}>Import from Front Desk</button>
             <button className="btn btn-s btn-sm" onClick={() => toast.info('Exporting CSV...')}>Export</button>
             <button className="btn btn-p btn-sm" onClick={() => openAddUser('student')}>+ Add User</button>
           </div>
         }
       />
 
+      {showImportFD && (
+        <ImportFromFrontDesk
+          toast={toast}
+          onClose={() => setShowImportFD(false)}
+          onImported={() => { loadUsers() }}
+        />
+      )}
       <div style={{ display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap' }}>
         <PKpi label="Total" value={counts.total} delta="All accounts"/>
         <PKpi label="Students" value={counts.students} delta="Active learners"/>
@@ -2000,6 +2009,182 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
         </PCard>
       )}
     </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// IMPORT FROM FRONT DESK — turn registration leads into accounts
+// ═══════════════════════════════════════════════════════════
+// Lists registration-type Front Desk submissions. Importing one
+// creates a Student account + a linked Parent account, emails
+// temp credentials to both, and marks the lead converted.
+// ═══════════════════════════════════════════════════════════
+function ImportFromFrontDesk({ toast, onClose, onImported }) {
+  const [leads, setLeads]     = useState([])
+  const [loading, setLoading] = useState(true)
+  const [busyId, setBusyId]   = useState(null)
+  const [editEmail, setEditEmail] = useState({})   // leadId -> custom student email
+
+  const load = useCallback(() => {
+    setLoading(true)
+    api.get('/frontdesk/submissions?type=registration')
+      .then(r => setLeads(r.data.data?.submissions || []))
+      .catch(() => toast?.error?.('Failed to load registration leads.'))
+      .finally(() => setLoading(false))
+  }, [toast])
+
+  useEffect(() => { load() }, [load])
+
+  const importLead = async (lead) => {
+    setBusyId(lead._id)
+    try {
+      const body = {}
+      const customEmail = (editEmail[lead._id] || '').trim()
+      if (customEmail) body.studentEmail = customEmail
+      const { data } = await api.post('/frontdesk/' + lead._id + '/import', body)
+      if (data?.success) {
+        toast?.ok?.(data.message || 'Lead imported.')
+        // Reflect import locally
+        setLeads(list => list.map(l => l._id === lead._id
+          ? { ...l, status: 'converted', importedUserId: data.data?.studentId || 'done' }
+          : l))
+        onImported && onImported()
+      } else {
+        toast?.error?.(data?.message || 'Import failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Import failed.')
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const importable = leads.filter(l => !l.importedUserId)
+  const done       = leads.filter(l => l.importedUserId)
+
+  return (
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, background: 'rgba(10,8,6,.55)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 1000, padding: 20,
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: '#fff', borderRadius: 16, width: '100%', maxWidth: 720,
+        maxHeight: '86vh', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+      }}>
+        {/* Header */}
+        <div style={{ padding: '18px 22px', borderBottom: '1px solid ' + (TOKENS.line || '#E8E2D6') }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: TOKENS.ink || '#1A1A1A' }}>
+                Import from Front Desk
+              </div>
+              <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 2 }}>
+                Registration enquiries from the website. Importing creates a student account and a linked parent account.
+              </div>
+            </div>
+            <button onClick={onClose} style={{
+              background: 'transparent', border: 'none', fontSize: 22,
+              color: TOKENS.s400, cursor: 'pointer', lineHeight: 1,
+            }}>×</button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: 18, overflowY: 'auto' }}>
+          {loading ? (
+            <div style={{ textAlign: 'center', color: TOKENS.s500, padding: 30 }}>Loading registration leads…</div>
+          ) : leads.length === 0 ? (
+            <div style={{ textAlign: 'center', color: TOKENS.s500, padding: 30 }}>
+              No registration leads yet. They appear here when families register via the website.
+            </div>
+          ) : (
+            <>
+              {importable.length === 0 && (
+                <div style={{ fontSize: 13, color: TOKENS.s500, marginBottom: 12 }}>
+                  All registration leads have been imported.
+                </div>
+              )}
+
+              {importable.map(lead => (
+                <div key={lead._id} style={{
+                  border: '1px solid ' + (TOKENS.line || '#E8E2D6'), borderRadius: 10,
+                  padding: 14, marginBottom: 10,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: 200 }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: TOKENS.ink || '#1A1A1A' }}>
+                        {[lead.studentFirstName, lead.studentLastName].filter(Boolean).join(' ') || lead.name || 'Unnamed student'}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: TOKENS.s500, marginTop: 2 }}>
+                        {[
+                          lead.curriculum,
+                          lead.programme,
+                          lead.country,
+                          lead.studentDob ? 'DOB ' + lead.studentDob : '',
+                        ].filter(Boolean).join(' · ')}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: TOKENS.s500, marginTop: 2 }}>
+                        Parent: {lead.name || '—'} · {lead.email || 'no email'} · {lead.phone || 'no phone'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Optional custom student email */}
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase', color: TOKENS.s400, marginBottom: 3 }}>
+                      Student login email <span style={{ textTransform: 'none', fontWeight: 400 }}>(optional — leave blank to derive from the parent email)</span>
+                    </div>
+                    <input
+                      value={editEmail[lead._id] || ''}
+                      onChange={e => setEditEmail(m => ({ ...m, [lead._id]: e.target.value }))}
+                      placeholder="e.g. student.name@email.com"
+                      style={{
+                        width: '100%', boxSizing: 'border-box', padding: '7px 10px',
+                        borderRadius: 6, fontSize: 12.5,
+                        border: '1.5px solid ' + (TOKENS.line || '#E8E2D6'),
+                      }}/>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                    <button
+                      onClick={() => importLead(lead)}
+                      disabled={busyId === lead._id || !lead.email}
+                      style={{
+                        background: !lead.email ? '#9CA3AF' : TOKENS.crimson,
+                        color: '#fff', border: 'none', borderRadius: 6,
+                        padding: '8px 18px', fontSize: 12.5, fontWeight: 700,
+                        cursor: (busyId === lead._id || !lead.email) ? 'not-allowed' : 'pointer',
+                      }}>
+                      {busyId === lead._id ? 'Importing…' : 'Import as Student + Parent'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {done.length > 0 && (
+                <div style={{ marginTop: 14 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: TOKENS.s400, marginBottom: 6 }}>
+                    Already imported ({done.length})
+                  </div>
+                  {done.map(lead => (
+                    <div key={lead._id} style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      padding: '8px 12px', fontSize: 12.5, color: TOKENS.s500,
+                      background: '#FBFAF5', borderRadius: 6, marginBottom: 4,
+                    }}>
+                      <span style={{ color: '#15803D', fontWeight: 700 }}>✓</span>
+                      {[lead.studentFirstName, lead.studentLastName].filter(Boolean).join(' ') || lead.name}
+                      <span style={{ color: TOKENS.s400 }}>· {lead.email}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }
 
