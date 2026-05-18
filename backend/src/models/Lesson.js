@@ -65,6 +65,21 @@ const lessonSchema = new mongoose.Schema({
   order: { type: Number, default: 0, index: true },
   termIndex: { type: Number, enum: [1, 2, 3], default: 1, index: true },
 
+  // ── Curriculum-spine link (ADDITIVE — optional) ──
+  // Links this lesson to a SyllabusTopic + subtopic so the lesson
+  // sits in the syllabus structure. Optional: existing lessons
+  // leave these null and keep working exactly as before. New
+  // lessons can be scaffolded from the spine.
+  topicRef: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'SyllabusTopic',
+    default: null,
+    index: true,
+  },
+  // The subtopic name within that topic (the subtopic is an
+  // embedded doc, so we store its name for display/grouping).
+  subtopicName: { type: String, trim: true, default: '' },
+
   // ── Content ──
   title:       { type: String, required: true, trim: true, maxlength: 200 },
   description: { type: String, default: '', maxlength: 2000 },
