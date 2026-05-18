@@ -336,9 +336,40 @@ router.post('/:id/import', auth, requireRole('admin'), async (req, res) => {
         message: `A user with email ${studentEmail} already exists. Provide a different student email.`,
       });
 
+    // ── Map the lead's free-text programme label to the User
+    // model's programme enum. The landing page stores descriptive
+    // labels ("Homeschool — Tutor Visits Home (Nairobi)") that are
+    // not valid enum values, so match on keywords. Unmatched →
+    // left unset (the field is optional) rather than crashing.
+    const mapProgramme = (raw) => {
+      const s = (raw || '').toLowerCase()
+      if (!s) return undefined
+      if (s.includes('iufp') || s.includes('foundation')) return 'IUFP'
+      if (s.includes('pre-university') || s.includes('pre university')) return 'Pre-University'
+      if (s.includes('study abroad') || s.includes('abroad')) return 'Study Abroad'
+      if (s.includes('tuition') || s.includes('tutor')) {
+        // "Homeschool — Tutor Visits Home" is still a Homeschool programme;
+        // only treat it as Tuition when 'homeschool' is absent.
+        if (s.includes('homeschool')) return 'Homeschool'
+        return 'Tuition'
+      }
+      if (s.includes('homeschool') || s.includes('home school')) return 'Homeschool'
+      return undefined
+    }
+    // Delivery mode from the lead's learning-mode / programme text.
+    const mapDelivery = (raw) => {
+      const s = (raw || '').toLowerCase()
+      if (s.includes('virtual') || s.includes('online') || s.includes('remote')) return 'Virtual'
+      if (s.includes('in-person') || s.includes('centre') || s.includes('center')
+          || s.includes('home') || s.includes('visit')) return 'In-person'
+      return undefined
+    }
+    const mappedProgramme = mapProgramme(lead.programme)
+    const mappedDelivery  = mapDelivery(lead.learningMode || lead.programme)
+
     // ── Create the STUDENT account ──
     const studentTempPw = User.generateTempPassword();
-    const student = await User.create({
+    const studentDoc = {
       firstName: studentFirst,
       lastName: studentLast,
       email: studentEmail,
@@ -349,11 +380,18 @@ router.post('/:id/import', auth, requireRole('admin'), async (req, res) => {
       plan: 'Basic',
       subjects: [],
       curriculum: lead.curriculum || '',
-      programme: lead.programme || '',
       country: lead.country || '',
-      dateOfBirth: lead.studentDob || undefined,
       phone: lead.phone || '',
-    });
+    };
+    // dateOfBirth is a Date — only set it when the lead value parses
+    if (lead.studentDob) {
+      const dob = new Date(lead.studentDob);
+      if (!isNaN(dob.getTime())) studentDoc.dateOfBirth = dob;
+    }
+    // Only set enum fields when we have a valid mapped value
+    if (mappedProgramme) studentDoc.programme = mappedProgramme;
+    if (mappedDelivery)  studentDoc.deliveryMode = mappedDelivery;
+    const student = await User.create(studentDoc);
 
     // ── Create the linked PARENT account ──
     // Reuse an existing parent with this email if there is one.
