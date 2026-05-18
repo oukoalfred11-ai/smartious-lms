@@ -287,4 +287,156 @@ router.post('/:id/email', auth, requireRole('admin'), async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────
+// POST /api/frontdesk/:id/import   — admin
+// Convert a registration lead into a real Student account plus
+// a linked Parent account. Auto-generates temp passwords and
+// emails welcome credentials to both. Marks the lead converted
+// and records the created user ids so it cannot be re-imported.
+// ─────────────────────────────────────────────────────────
+router.post('/:id/import', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const User = require('../models/User');
+    let sendWelcomeEmail = null;
+    try { ({ sendWelcomeEmail } = require('../lib/email')); }
+    catch (e) { console.error('[frontdesk import] welcome email helper unavailable —', e.message); }
+
+    const lead = await FrontDeskSubmission.findById(req.params.id);
+    if (!lead)
+      return res.status(404).json({ success: false, message: 'Lead not found.' });
+    if (lead.type !== 'registration')
+      return res.status(400).json({ success: false, message: 'Only registration leads can be imported.' });
+    if (lead.importedUserId)
+      return res.status(409).json({ success: false, message: 'This lead has already been imported.' });
+
+    // ── Resolve student name ──
+    // Lead stores the student name; fall back to the contact name.
+    const studentFirst = (lead.studentFirstName || lead.name || '').trim().split(/\s+/)[0] || 'Student';
+    const studentLast  = (lead.studentLastName  || lead.name || '').trim().split(/\s+/).slice(1).join(' ') || studentFirst;
+
+    // Student needs its own email. A registration lead usually
+    // only has the PARENT email — so derive a placeholder student
+    // login email from it unless a distinct one was provided.
+    const parentEmail = (lead.email || '').trim().toLowerCase();
+    if (!parentEmail)
+      return res.status(400).json({ success: false, message: 'Lead has no email — cannot create accounts.' });
+
+    let studentEmail = (req.body.studentEmail || '').trim().toLowerCase();
+    if (!studentEmail) {
+      // e.g. parent@gmail.com → parent+student@gmail.com
+      const [local, domain] = parentEmail.split('@');
+      studentEmail = domain ? `${local}+student@${domain}` : parentEmail;
+    }
+
+    // Guard against colliding with existing accounts
+    const existingStudent = await User.findOne({ email: studentEmail });
+    if (existingStudent)
+      return res.status(409).json({
+        success: false,
+        message: `A user with email ${studentEmail} already exists. Provide a different student email.`,
+      });
+
+    // ── Create the STUDENT account ──
+    const studentTempPw = User.generateTempPassword();
+    const student = await User.create({
+      firstName: studentFirst,
+      lastName: studentLast,
+      email: studentEmail,
+      password: studentTempPw,
+      role: 'student',
+      isActive: true,
+      mustChangePassword: true,
+      plan: 'Basic',
+      subjects: [],
+      curriculum: lead.curriculum || '',
+      programme: lead.programme || '',
+      country: lead.country || '',
+      dateOfBirth: lead.studentDob || undefined,
+      phone: lead.phone || '',
+    });
+
+    // ── Create the linked PARENT account ──
+    // Reuse an existing parent with this email if there is one.
+    let parent = await User.findOne({ email: parentEmail, role: 'parent' });
+    let parentTempPw = null;
+    let parentCreated = false;
+    if (!parent) {
+      const parentFirst = (lead.name || 'Parent').trim().split(/\s+/)[0] || 'Parent';
+      const parentLast  = (lead.name || '').trim().split(/\s+/).slice(1).join(' ') || parentFirst;
+      parentTempPw = User.generateTempPassword();
+      parent = await User.create({
+        firstName: parentFirst,
+        lastName: parentLast,
+        email: parentEmail,
+        password: parentTempPw,
+        role: 'parent',
+        isActive: true,
+        mustChangePassword: true,
+        plan: 'Basic',
+        phone: lead.phone || '',
+        country: lead.country || '',
+      });
+      parentCreated = true;
+    }
+
+    // ── Link parent ⇄ student both ways ──
+    await User.findByIdAndUpdate(student._id, {
+      $addToSet: { linkedParents: parent._id },
+      $set: { parentId: parent._id },
+    });
+    await User.findByIdAndUpdate(parent._id, {
+      $addToSet: { linkedStudents: student._id },
+    });
+
+    // ── Welcome emails (best-effort) ──
+    const loginUrl = (process.env.FRONTEND_URL || 'https://smartioushomeschool.com') + '/login';
+    const emailReport = { student: false, parent: false };
+    if (sendWelcomeEmail) {
+      try {
+        const r = await sendWelcomeEmail({
+          to: student.email, name: `${student.firstName} ${student.lastName}`.trim(),
+          role: 'student', username: student.email, tempPassword: studentTempPw,
+          admissionNumber: student.admissionNumber || null, loginUrl,
+        });
+        emailReport.student = !!r.success;
+      } catch (e) { console.error('[frontdesk import] student email failed:', e.message); }
+
+      if (parentCreated) {
+        try {
+          const r = await sendWelcomeEmail({
+            to: parent.email, name: `${parent.firstName} ${parent.lastName}`.trim(),
+            role: 'parent', username: parent.email, tempPassword: parentTempPw,
+            admissionNumber: null, loginUrl,
+          });
+          emailReport.parent = !!r.success;
+        } catch (e) { console.error('[frontdesk import] parent email failed:', e.message); }
+      }
+    }
+
+    // ── Mark the lead converted + record the import ──
+    lead.status = 'converted';
+    lead.importedUserId = student._id;
+    lead.importedParentId = parent._id;
+    lead.importedAt = new Date();
+    await lead.save();
+
+    res.json({
+      success: true,
+      message: `Imported ${student.firstName} ${student.lastName} as a student`
+        + (parentCreated ? ' with a linked parent account.' : ' (linked to existing parent).'),
+      data: {
+        studentId: student._id,
+        studentEmail: student.email,
+        admissionNumber: student.admissionNumber || null,
+        parentId: parent._id,
+        parentCreated,
+        emails: emailReport,
+      },
+    });
+  } catch (e) {
+    console.error('[frontdesk import]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 module.exports = router;
