@@ -67,6 +67,12 @@ const frontDeskSubmissionSchema = new mongoose.Schema({
   },
   adminNotes: { type: String, trim: true, default: '' },
 
+  // ── Import tracking — set once a registration lead is
+  // imported into a real student account (prevents re-import) ──
+  importedUserId:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  importedParentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  importedAt:       { type: Date, default: null },
+
   // ── Emails sent to this lead from the Front Desk ──
   emailsSent: [{
     template:  { type: String, trim: true },   // which template was used
