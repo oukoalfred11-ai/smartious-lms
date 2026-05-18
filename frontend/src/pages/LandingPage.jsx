@@ -240,6 +240,34 @@ const styles = `
   .lp .ps:last-child .ps-arr{display:none}
   /* CURRICULA */
   .lp .cur-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
+  /* ── Meet Our Team grid ── */
+  .lp .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px}
+  .lp .tm-card{background:${V.white};border:1px solid ${V.bone3};border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column;position:relative}
+  .lp .tm-card:hover{transform:translateY(-4px);box-shadow:0 14px 38px rgba(10,8,6,.14);border-color:transparent}
+  .lp .tm-open{grid-column:1/-1}
+  .lp .tm-photo{position:relative;width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,${V.cr},${V.cr2});overflow:hidden;flex-shrink:0}
+  .lp .tm-open .tm-photo{aspect-ratio:auto;height:240px;max-width:240px}
+  .lp .tm-img{width:100%;height:100%;object-fit:cover;display:block}
+  .lp .tm-initials{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:3.4rem;font-weight:700;color:${V.gold3}}
+  .lp .tm-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,rgba(10,8,6,.55));pointer-events:none}
+  .lp .tm-plate{padding:14px 16px 8px;text-align:center}
+  .lp .tm-name{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:${V.ink};line-height:1.25}
+  .lp .tm-role{font-size:11.5px;color:${V.gold};font-weight:700;letter-spacing:.04em;margin-top:3px}
+  .lp .tm-hint{padding:0 16px 14px;text-align:center;font-size:10.5px;color:${V.sl3};font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+  .lp .tm-detail{padding:4px 22px 18px;text-align:left}
+  .lp .tm-open{flex-direction:row;flex-wrap:wrap;align-items:flex-start}
+  .lp .tm-open .tm-plate{flex:0 0 240px;text-align:left;padding-left:0;padding-right:0}
+  .lp .tm-open .tm-detail{flex:1;min-width:280px}
+  .lp .tm-open .tm-hint{position:absolute;top:14px;right:18px;padding:0}
+  .lp .tm-exp{display:inline-block;background:rgba(184,150,12,.12);color:${V.gold};font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;margin-bottom:12px}
+  .lp .tm-exp strong{font-size:14px}
+  .lp .tm-bio{font-size:13.5px;color:${V.sl};line-height:1.75;margin:0 0 14px}
+  .lp .tm-block{margin-bottom:12px}
+  .lp .tm-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${V.sl3};margin-bottom:6px}
+  .lp .tm-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .lp .tm-chip{background:${V.bone};border:1px solid ${V.bone3};border-radius:20px;padding:4px 11px;font-size:11.5px;font-weight:600;color:${V.ink2}}
+  .lp .tm-list{margin:0;padding-left:18px}
+  .lp .tm-list li{font-size:12.5px;color:${V.sl};line-height:1.7}
   .lp .cc{background:${V.white};border:1px solid ${V.bone3};border-radius:24px;overflow:hidden;transition:all .3s;display:flex;flex-direction:column}
   .lp .cc:hover{transform:translateY(-5px);box-shadow:0 12px 40px rgba(10,8,6,.14);border-color:transparent}
   .lp .cc-top{padding:24px 24px 0}
@@ -477,7 +505,7 @@ const styles = `
   @media(max-width:1200px){
     .lp .h-stats{display:none}
     .lp .ft-grid{grid-template-columns:1fr 1fr;gap:36px}
-    .lp .cur-grid,.lp .svc-grid,.lp .tgrid,.lp .blog-grid,.lp .price-grid{grid-template-columns:repeat(2,1fr)}
+    .lp .cur-grid,.lp .svc-grid,.lp .tgrid,.lp .blog-grid,.lp .price-grid,.lp .team-grid{grid-template-columns:repeat(2,1fr)}
     .lp .hl-grid,.lp .stat-grid,.lp .proc-grid,.lp .prog-info-grid,.lp .prog-path-grid,.lp .sa-grid{grid-template-columns:repeat(2,1fr)}
   }
   @media(max-width:768px){
@@ -489,7 +517,7 @@ const styles = `
     .lp .wrap,.lp .nav-wrap,.lp .h-body,.lp .cta-in{padding-left:20px;padding-right:20px}
     .lp .sec{padding:64px 0}
     .lp .h1{font-size:clamp(2.8rem,12vw,4rem)}
-    .lp .hl-grid,.lp .stat-grid,.lp .proc-grid,.lp .cur-grid,.lp .svc-grid,.lp .tgrid,.lp .blog-grid,.lp .price-grid,.lp .prog-info-grid,.lp .prog-path-grid,.lp .sa-grid{grid-template-columns:1fr}
+    .lp .hl-grid,.lp .stat-grid,.lp .proc-grid,.lp .cur-grid,.lp .svc-grid,.lp .tgrid,.lp .blog-grid,.lp .price-grid,.lp .prog-info-grid,.lp .prog-path-grid,.lp .sa-grid,.lp .team-grid{grid-template-columns:1fr}
     .lp .fg,.lp .pay-o{grid-template-columns:1fr 1fr}
     .lp .ft-grid{grid-template-columns:1fr}
     .lp .wiz-steps{flex-wrap:wrap}.lp .wst{min-width:50%}
@@ -530,7 +558,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','faq','blog','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1153,6 +1181,10 @@ const PAGE_META = {
   blog: {
     title: 'Blog & Resources | Homeschooling & Curricula — Smartious',
     desc: 'Expert articles from Smartious on homeschooling, choosing a curriculum, exam preparation and AI-supported learning for families in Kenya and worldwide.',
+  },
+  teachers: {
+    title: 'Meet Our Teachers | Qualified Homeschool Tutors — Smartious',
+    desc: 'Meet the Smartious teaching team — qualified, experienced subject specialists delivering Cambridge IGCSE, A-Level, IB and CBC education to students in Kenya and worldwide.',
   },
   enroll: {
     title: 'Enroll Now | Begin Homeschooling with Smartious',
@@ -2672,6 +2704,10 @@ export default function LandingPage() {
   const [currentArticle, setCurrentArticle] = useState(null)
   const [currentCurriculum, setCurrentCurriculum] = useState(null)
   const [currentService, setCurrentService] = useState(null)
+  const [publicTeachers, setPublicTeachers] = useState([])
+  const [teachersLoading, setTeachersLoading] = useState(false)
+  const [teachersLoaded, setTeachersLoaded] = useState(false)
+  const [expandedTeacher, setExpandedTeacher] = useState(null)
   const [wizStep, setWizStep] = useState(1)
   const [currentProg, setCurrentProg] = useState('homeschool')
   const [loginRole, setLoginRole] = useState('student')
@@ -3021,6 +3057,19 @@ export default function LandingPage() {
   }
   usePageMeta(metaTitle, metaDesc)
 
+  // Load public teacher profiles when the Teachers page is opened.
+  // Fetched once, from the public (no-auth) endpoint.
+  useEffect(() => {
+    if (page !== 'teachers' || teachersLoaded) return
+    setTeachersLoading(true)
+    const base = (import.meta.env?.VITE_API_URL || 'https://smartious-backend.onrender.com').replace(/\/$/, '')
+    fetch(base + '/api/users/public-teachers')
+      .then(r => r.json())
+      .then(d => { if (d?.success) setPublicTeachers(d.data?.teachers || []) })
+      .catch(e => console.error('[teachers] load failed:', e?.message))
+      .finally(() => { setTeachersLoading(false); setTeachersLoaded(true) })
+  }, [page, teachersLoaded])
+
   // P(id) — navigate to a landing page by URL. The useEffect
   // above then syncs `page` state. Resets per-page form state.
   const P = (id) => {
@@ -3137,7 +3186,7 @@ export default function LandingPage() {
             <SmartiousLogo size={36} withText={true} tone="light"/>
           </div>
           <div className="nav-links">
-            {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Global','global'],['Pricing','pricing'],['Programs','programs'],['FAQ','faq'],['Blog','blog']].map(([l,id]) => (
+            {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Global','global'],['Pricing','pricing'],['Programs','programs'],['Teachers','teachers'],['FAQ','faq'],['Blog','blog']].map(([l,id]) => (
               <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
             ))}
           </div>
@@ -4087,6 +4136,96 @@ export default function LandingPage() {
       {/* ══════════════════════════════════════════
           FAQ
       ══════════════════════════════════════════ */}
+      {page === 'teachers' && (
+        <>
+          <div className="pg-hero"><div className="wrap">
+            <div className="eyebrow">Our People</div>
+            <h1 className="pg-h">Meet Our <em>Teachers</em></h1>
+            <p className="pg-sub" style={{marginTop:12}}>Qualified, experienced subject specialists — the people behind every Smartious lesson. Tap any teacher to read their full profile.</p>
+          </div></div>
+          <section className="sec" style={{background:V.bone}}><div className="wrap">
+            {teachersLoading ? (
+              <div style={{textAlign:'center',padding:'60px 0',color:V.sl2,fontSize:14}}>Loading our teaching team…</div>
+            ) : publicTeachers.length === 0 ? (
+              <div style={{textAlign:'center',padding:'60px 0',color:V.sl2,fontSize:14}}>
+                Our teaching team will be listed here shortly.
+              </div>
+            ) : (
+              <div className="team-grid">
+                {publicTeachers.map(t => {
+                  const open = expandedTeacher === t.id
+                  const initials = t.name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
+                  return (
+                    <div key={t.id} className={`tm-card${open?' tm-open':''}`}
+                      onClick={() => setExpandedTeacher(open ? null : t.id)}>
+                      {/* Portrait */}
+                      <div className="tm-photo">
+                        {t.avatar
+                          ? <img src={t.avatar} alt={t.name} className="tm-img"/>
+                          : <div className="tm-initials">{initials || 'S'}</div>}
+                        <div className="tm-scrim"/>
+                      </div>
+                      {/* Name plate */}
+                      <div className="tm-plate">
+                        <div className="tm-name">{t.name}</div>
+                        <div className="tm-role">{t.jobTitle}</div>
+                      </div>
+                      {/* Expandable detail */}
+                      {open && (
+                        <div className="tm-detail" onClick={e => e.stopPropagation()}>
+                          {t.yearsOfExperience > 0 && (
+                            <div className="tm-exp">
+                              <strong>{t.yearsOfExperience}</strong> year{t.yearsOfExperience === 1 ? '' : 's'} of teaching experience
+                            </div>
+                          )}
+                          {t.bio && <p className="tm-bio">{t.bio}</p>}
+                          {t.subjects && t.subjects.length > 0 && (
+                            <div className="tm-block">
+                              <div className="tm-lbl">Subjects</div>
+                              <div className="tm-chips">{t.subjects.map((s,i) => <span key={i} className="tm-chip">{s}</span>)}</div>
+                            </div>
+                          )}
+                          {t.curriculum && t.curriculum.length > 0 && (
+                            <div className="tm-block">
+                              <div className="tm-lbl">Curricula</div>
+                              <div className="tm-chips">{t.curriculum.map((c,i) => <span key={i} className="tm-chip">{c}</span>)}</div>
+                            </div>
+                          )}
+                          {t.qualifications && t.qualifications.length > 0 && (
+                            <div className="tm-block">
+                              <div className="tm-lbl">Qualifications</div>
+                              <ul className="tm-list">{t.qualifications.map((q,i) => <li key={i}>{q}</li>)}</ul>
+                            </div>
+                          )}
+                          {t.certifications && t.certifications.length > 0 && (
+                            <div className="tm-block">
+                              <div className="tm-lbl">Certifications</div>
+                              <ul className="tm-list">{t.certifications.map((c,i) => <li key={i}>{c}</li>)}</ul>
+                            </div>
+                          )}
+                          {t.specializations && t.specializations.length > 0 && (
+                            <div className="tm-block">
+                              <div className="tm-lbl">Specialisations</div>
+                              <div className="tm-chips">{t.specializations.map((s,i) => <span key={i} className="tm-chip">{s}</span>)}</div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {/* Tap hint */}
+                      <div className="tm-hint">{open ? 'Tap to close' : 'Tap for full profile'}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            <div style={{textAlign:'center',marginTop:48}}>
+              <button className="btn-p" onClick={() => P('enroll')}>Learn With Our Teachers <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+            </div>
+          </div></section>
+          <Footer P={P}/>
+        </>
+      )}
+
       {page === 'faq' && (
         <>
           <div className="pg-hero"><div className="wrap"><div className="eyebrow">Common Questions</div><h1 className="pg-h">Everything You <em>Need to Know</em></h1><p className="pg-sub" style={{marginTop:12}}>Browse our most common questions — or WhatsApp us for an answer within 2 hours.</p></div></div>
