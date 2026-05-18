@@ -61,6 +61,7 @@ const MODULES = {
   payroll:     { label: 'Payroll',      accent: TOKENS.accentEmerald, icon: 'payroll' },
   leave:       { label: 'Leave',        accent: TOKENS.accentSlate, icon: 'leave' },
   programmes:  { label: 'Programmes',   accent: TOKENS.accentPurple, icon: 'programmes' },
+  documents:   { label: 'Documents',    accent: TOKENS.gold,        icon: 'documents' },
   livelessons: { label: 'Live Classes', accent: TOKENS.accentRose,  icon: 'live' },
   grouprooms:  { label: 'Group Rooms',  accent: TOKENS.accentOcean, icon: 'rooms' },
   curriculum:  { label: 'Curriculum',   accent: TOKENS.gold,        icon: 'curriculum' },
@@ -264,6 +265,17 @@ function ModuleIcon({ kind, size = 64, accent = TOKENS.crimson }) {
         <path d="M14 42 V30 a18 18 0 0 1 36 0 V42" stroke={accent} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
         <rect x="10" y="42" width="44" height="8" rx="2" stroke={accent} strokeWidth="2.5" fill="none"/>
         <circle cx="32" cy="26" r="5" fill={gold}/>
+      </svg>
+    ),
+    documents: (
+      <svg viewBox="0 0 64 64" width={size} height={size}>
+        <circle cx="32" cy="32" r="30" fill={accent} opacity="0.08"/>
+        <path d="M20 12 h16 l10 10 v30 a2 2 0 0 1-2 2 H20 a2 2 0 0 1-2-2 V14 a2 2 0 0 1 2-2 Z" fill={accent} opacity="0.18"/>
+        <path d="M20 12 h16 l10 10 v30 a2 2 0 0 1-2 2 H20 a2 2 0 0 1-2-2 V14 a2 2 0 0 1 2-2 Z" stroke={accent} strokeWidth="2.5" fill="none" strokeLinejoin="round"/>
+        <path d="M36 12 v10 h10" stroke={accent} strokeWidth="2.5" fill="none" strokeLinejoin="round"/>
+        <line x1="25" y1="34" x2="39" y2="34" stroke={accent} strokeWidth="2.5" strokeLinecap="round"/>
+        <line x1="25" y1="42" x2="39" y2="42" stroke={accent} strokeWidth="2.5" strokeLinecap="round"/>
+        <circle cx="44" cy="46" r="4" fill={gold}/>
       </svg>
     ),
   }
@@ -481,7 +493,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout }) {
   const SECTIONS = [
     { label: 'Overview', items: ['dashboard', 'analytics'] },
     { label: 'People', items: ['users', 'teachers', 'allocations', 'communication'] },
-    { label: 'Operations', items: ['frontdesk', 'payroll', 'leave', 'programmes'] },
+    { label: 'Operations', items: ['frontdesk', 'documents', 'payroll', 'leave', 'programmes'] },
     { label: 'Teaching', items: ['livelessons', 'grouprooms', 'curriculum'] },
     { label: 'System', items: ['billing', 'website', 'settings', 'ai'] },
   ]
@@ -742,6 +754,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {page === 'allocations' && <StudentsManagementModule refreshKey={refreshKey} toast={toast} />}
         {page === 'communication' && <CommunicationModule refreshKey={refreshKey} toast={toast} />}
         {page === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
+        {page === 'documents' && <DocumentsModule toast={toast} />}
         {page === 'payroll'     && <PayrollModule    refreshKey={refreshKey} toast={toast} />}
         {page === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
         {page === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
@@ -3385,6 +3398,366 @@ const FD_TYPE = {
   registration: { label: 'Registration', bg: '#7B0D0D', fg: '#fff' },
   consultation: { label: 'Consultation', bg: '#C9A030', fg: '#3A2A00' },
   contact:      { label: 'Message',      bg: '#E8E2D6', fg: '#3A3A3A' },
+}
+
+// ═══════════════════════════════════════════════════════════
+// DOCUMENTS MODULE — financial document generators (Admin)
+// First generator: Invoice. Fills a form, then generates the
+// branded invoice and opens it for PDF download.
+// ═══════════════════════════════════════════════════════════
+function DocumentsModule({ toast }) {
+  const [docType, setDocType] = useState(null)
+
+  if (docType === 'invoice') {
+    return <InvoiceGenerator toast={toast} onBack={() => setDocType(null)} />
+  }
+
+  const card = {
+    background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 14,
+    padding: 22, cursor: 'pointer', transition: 'all .18s',
+  }
+  return (
+    <div>
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: TOKENS.s900, margin: 0 }}>
+          Documents
+        </h1>
+        <div style={{ fontSize: 13, color: TOKENS.s500, marginTop: 2 }}>
+          Generate branded financial documents.
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+        <div style={card} onClick={() => setDocType('invoice')}>
+          <div style={{
+            width: 42, height: 42, borderRadius: 10, background: 'rgba(125,16,37,.08)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12,
+          }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={TOKENS.crimson} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: TOKENS.s900 }}>Invoice</div>
+          <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 4, lineHeight: 1.5 }}>
+            A branded invoice — billed-to details, line items, auto-calculated totals and payment instructions.
+          </div>
+        </div>
+        <div style={{ ...card, opacity: .55, cursor: 'default' }}>
+          <div style={{
+            width: 42, height: 42, borderRadius: 10, background: 'rgba(125,16,37,.06)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12,
+          }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: TOKENS.s900 }}>Receipt</div>
+          <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 4 }}>Coming soon.</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── INVOICE GENERATOR ──────────────────────────────────────
+function InvoiceGenerator({ toast, onBack }) {
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+  const [f, setF] = useState({
+    billedTo: '', studentName: '',
+    invoiceNo: '', dateIssued: today, dueDate: '', period: '',
+    currency: 'KES',
+    items: [{ desc: '', period: '', amount: '' }],
+    discount: '', vatPct: '0',
+    paymentNote: 'Please use the invoice number as the payment reference.',
+    notes: 'This invoice is computer-generated and valid without a signature.\nLate payment may result in suspension of tuition sessions.',
+  })
+  const set = (k, v) => setF(p => ({ ...p, [k]: v }))
+  const itemAdd = () => setF(p => ({ ...p, items: [...p.items, { desc: '', period: '', amount: '' }] }))
+  const itemSet = (i, key, v) => setF(p => ({ ...p, items: p.items.map((r, idx) => idx === i ? { ...r, [key]: v } : r) }))
+  const itemDel = (i) => setF(p => {
+    const next = p.items.filter((_, idx) => idx !== i)
+    return { ...p, items: next.length ? next : [{ desc: '', period: '', amount: '' }] }
+  })
+
+  // ── live totals ──
+  const subTotal = f.items.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0)
+  const discount = parseFloat(f.discount) || 0
+  const vatPct = parseFloat(f.vatPct) || 0
+  const vatAmount = (subTotal - discount) * (vatPct / 100)
+  const totalDue = subTotal - discount + vatAmount
+
+  const generate = () => {
+    if (!f.billedTo.trim())  { toast?.error?.('Billed-to name is required.'); return }
+    if (!f.invoiceNo.trim()) { toast?.error?.('Invoice number is required.'); return }
+    if (!f.items.some(it => (it.desc || '').trim() && (parseFloat(it.amount) || 0) > 0)) {
+      toast?.error?.('Add at least one line item with an amount.'); return
+    }
+    const html = buildInvoiceHTML(f, { subTotal, discount, vatAmount, vatPct, totalDue })
+    const w = window.open('', '_blank')
+    if (!w) { toast?.error?.('Please allow pop-ups to generate the invoice.'); return }
+    w.document.write(html); w.document.close()
+  }
+
+  const lbl = { display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
+    textTransform: 'uppercase', color: TOKENS.crimson, marginBottom: 5 }
+  const inp = { width: '100%', boxSizing: 'border-box', padding: '8px 11px',
+    borderRadius: 7, border: '1.5px solid ' + TOKENS.line, fontSize: 13, fontFamily: 'inherit' }
+  const card = { background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 12,
+    padding: 18, marginBottom: 14 }
+  const addBtn = { background: 'transparent', border: '1.5px dashed ' + TOKENS.gold,
+    color: '#9A7B16', borderRadius: 7, padding: '6px 12px', fontSize: 12,
+    fontWeight: 700, cursor: 'pointer', marginTop: 6 }
+  const delBtn = { background: 'transparent', border: 'none', color: '#B91C1C',
+    cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '0 4px', flexShrink: 0 }
+  const money = (n) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+        <button onClick={onBack} style={{
+          background: '#fff', border: '1.5px solid ' + TOKENS.line, borderRadius: 8,
+          padding: '7px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: TOKENS.crimson,
+        }}>← Documents</button>
+        <div>
+          <h1 style={{ fontSize: 21, fontWeight: 800, color: TOKENS.s900, margin: 0 }}>Invoice</h1>
+          <div style={{ fontSize: 12, color: TOKENS.s500 }}>Fill the invoice, then generate the branded PDF.</div>
+        </div>
+      </div>
+
+      {/* Billed-to + meta */}
+      <div style={card}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+          <div><label style={lbl}>Billed To *</label>
+            <input value={f.billedTo} onChange={e => set('billedTo', e.target.value)} placeholder="Client / parent name" style={inp}/></div>
+          <div><label style={lbl}>Student Name</label>
+            <input value={f.studentName} onChange={e => set('studentName', e.target.value)} placeholder="Student name" style={inp}/></div>
+          <div><label style={lbl}>Invoice No. *</label>
+            <input value={f.invoiceNo} onChange={e => set('invoiceNo', e.target.value)} placeholder="e.g. SMT-2026-0515" style={inp}/></div>
+          <div><label style={lbl}>Date Issued</label>
+            <input value={f.dateIssued} onChange={e => set('dateIssued', e.target.value)} style={inp}/></div>
+          <div><label style={lbl}>Due Date</label>
+            <input value={f.dueDate} onChange={e => set('dueDate', e.target.value)} placeholder="e.g. 16 May 2026" style={inp}/></div>
+          <div><label style={lbl}>Period</label>
+            <input value={f.period} onChange={e => set('period', e.target.value)} placeholder="e.g. May 2026" style={inp}/></div>
+          <div><label style={lbl}>Currency</label>
+            <select value={f.currency} onChange={e => set('currency', e.target.value)} style={inp}>
+              <option value="KES">KES</option><option value="USD">USD</option>
+            </select></div>
+        </div>
+      </div>
+
+      {/* Line items */}
+      <div style={card}>
+        <label style={lbl}>Line Items</label>
+        <div style={{ fontSize: 11, color: TOKENS.s500, marginBottom: 8 }}>
+          Sub-total and total are calculated automatically from the amounts below.
+        </div>
+        {f.items.map((row, i) => (
+          <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            <input value={row.desc} onChange={e => itemSet(i, 'desc', e.target.value)}
+              placeholder="Description" style={{ ...inp, flex: '1 1 240px' }}/>
+            <input value={row.period} onChange={e => itemSet(i, 'period', e.target.value)}
+              placeholder="Period" style={{ ...inp, width: 120, flex: '0 0 120px' }}/>
+            <input value={row.amount} onChange={e => itemSet(i, 'amount', e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="Amount" style={{ ...inp, width: 110, flex: '0 0 110px', textAlign: 'right' }}/>
+            <button onClick={() => itemDel(i)} style={delBtn} title="Remove">×</button>
+          </div>
+        ))}
+        <button onClick={itemAdd} style={addBtn}>+ Add Line Item</button>
+      </div>
+
+      {/* Discount / VAT + live totals */}
+      <div style={card}>
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ flex: '0 0 150px' }}><label style={lbl}>Discount ({f.currency})</label>
+            <input value={f.discount} onChange={e => set('discount', e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="0.00" style={inp}/></div>
+          <div style={{ flex: '0 0 110px' }}><label style={lbl}>VAT %</label>
+            <input value={f.vatPct} onChange={e => set('vatPct', e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="0" style={inp}/></div>
+          <div style={{ flex: 1, minWidth: 200, background: TOKENS.cream, borderRadius: 8, padding: '10px 14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: TOKENS.s500, padding: '2px 0' }}>
+              <span>Sub-total</span><span>{f.currency} {money(subTotal)}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: TOKENS.s500, padding: '2px 0' }}>
+              <span>Discount</span><span>− {money(discount)}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: TOKENS.s500, padding: '2px 0' }}>
+              <span>VAT ({vatPct}%)</span><span>{money(vatAmount)}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, fontWeight: 800, color: TOKENS.crimson, padding: '4px 0 0', borderTop: '1px solid ' + TOKENS.line, marginTop: 4 }}>
+              <span>TOTAL DUE</span><span>{f.currency} {money(totalDue)}</span></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Payment + notes */}
+      <div style={card}>
+        <div style={{ marginBottom: 12 }}><label style={lbl}>Payment Note</label>
+          <textarea value={f.paymentNote} onChange={e => set('paymentNote', e.target.value)} rows={2}
+            style={{ ...inp, resize: 'vertical' }}/></div>
+        <div><label style={lbl}>Notes</label>
+          <textarea value={f.notes} onChange={e => set('notes', e.target.value)} rows={3}
+            style={{ ...inp, resize: 'vertical' }}/></div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 30 }}>
+        <button onClick={generate} style={{
+          background: TOKENS.crimson, color: '#fff', border: 'none', borderRadius: 8,
+          padding: '12px 26px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+        }}>Generate Invoice</button>
+      </div>
+    </div>
+  )
+}
+
+// ── Build the branded invoice HTML ─────────────────────────
+function buildInvoiceHTML(f, t) {
+  const esc = (s) => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const cur = esc(f.currency || 'KES')
+  const items = (f.items || []).filter(it => (it.desc || '').trim())
+
+  const itemRows = items.map(it => `<tr>
+    <td class="desc">${esc(it.desc).replace(/\n/g, '<br>')}</td>
+    <td>${esc(it.period)}</td>
+    <td class="r">${money(parseFloat(it.amount) || 0)}</td>
+  </tr>`).join('')
+
+  const notesHtml = esc(f.notes).split('\n').map(l => l.trim()).filter(Boolean)
+    .map(l => `${l}<br>`).join('')
+  const payHtml = esc(f.paymentNote).split('\n').map(l => l.trim()).filter(Boolean)
+    .map(l => `${l}<br>`).join('')
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Invoice ${esc(f.invoiceNo)} — Smartious</title>
+<style>
+  :root{--crimson:#7D1025;--crimsonD:#5A0B1B;--gold:#C9A030;--ink:#1A1A1A;--mute:#6B6B6B;--line:#E8E2D6;--cream:#FBFAF5;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#e9e6df;color:var(--ink)}
+  .page{width:210mm;min-height:297mm;background:#fff;margin:18px auto;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.13)}
+  .page-body{padding:0 22mm;flex:1}
+  .topbar{height:8mm;background:linear-gradient(90deg,var(--crimsonD),var(--crimson))}
+  .hd{display:flex;justify-content:space-between;align-items:flex-start;padding:11mm 22mm 0}
+  .brand{display:flex;align-items:center;gap:10px}
+  .shield{width:50px;height:55px;flex-shrink:0}
+  .brand-tx .name{font-size:22px;font-weight:800;letter-spacing:-.5px;line-height:1}
+  .brand-tx .name em{font-style:italic;color:var(--crimson)}
+  .brand-tx .tag{font-size:7px;letter-spacing:3px;color:var(--mute);margin-top:3px;font-weight:600}
+  .hd-r{text-align:right}
+  .doc-title{font-size:32px;font-weight:800;letter-spacing:1px;color:var(--ink);line-height:1}
+  .doc-underline{height:3px;width:100%;background:var(--gold);margin-top:5px}
+  .meta-row{display:flex;justify-content:space-between;margin-top:9mm;gap:20px}
+  .billed .lbl{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--mute);text-transform:uppercase}
+  .billed .who{font-size:17px;font-weight:800;color:var(--ink);margin-top:5px}
+  .billed .sub{font-size:11px;color:var(--mute);margin-top:2px}
+  .inv-meta{font-size:10.5px;min-width:62mm}
+  .inv-meta .mr{display:flex;justify-content:space-between;padding:3px 0}
+  .inv-meta .mk{color:var(--mute)}
+  .inv-meta .mv{font-weight:700;color:var(--ink)}
+  .items{margin-top:8mm;border-collapse:collapse;width:100%}
+  .items thead td{background:var(--crimson);color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:9px 12px}
+  .items thead td.r{text-align:right}
+  .items tbody td{border-bottom:1px solid var(--line);padding:11px 12px;font-size:11px;vertical-align:top}
+  .items tbody td.r{text-align:right}
+  .items .desc{font-weight:600;color:var(--ink)}
+  .totals{margin-top:6mm;display:flex;justify-content:flex-end}
+  .totals-box{width:72mm}
+  .tr{display:flex;justify-content:space-between;padding:6px 12px;font-size:11px}
+  .tr .tk{color:var(--mute)}
+  .tr .tv{font-weight:600}
+  .tr.total{background:var(--crimson);color:#fff;padding:11px 12px;margin-top:5px}
+  .tr.total .tk{color:#fff;font-weight:700;font-size:11px;letter-spacing:.5px}
+  .tr.total .tv{color:#fff;font-weight:800;font-size:15px}
+  .sec{margin-top:9mm}
+  .sec-h{font-size:9.5px;font-weight:700;letter-spacing:1px;color:var(--mute);text-transform:uppercase;margin-bottom:6px}
+  .sec p{font-size:10.5px;line-height:1.7;color:#2c2c2c}
+  .notes p{font-style:italic;color:var(--mute)}
+  .ft{margin-top:auto;border-top:1px solid var(--line);padding:5mm 22mm;text-align:center;font-size:8.5px;color:var(--mute);line-height:1.6}
+  .ft b{color:var(--crimson);font-size:9.5px;letter-spacing:.5px}
+  .toolbar{position:fixed;top:0;left:0;right:0;background:#7D1025;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:99}
+  .toolbar button{background:#fff;color:#7D1025;border:none;padding:8px 18px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer}
+  .toolbar .hint{font-size:12px;opacity:.85}
+  @media print{
+    body{background:#fff}.toolbar{display:none}
+    .page{margin:0;box-shadow:none;width:100%;min-height:auto}
+    @page{size:A4;margin:0}
+  }
+</style></head><body>
+<div class="toolbar">
+  <span class="hint">Review the invoice, then download. Use "Save as PDF" as the destination.</span>
+  <button onclick="window.print()">Download PDF</button>
+</div>
+<div style="height:48px"></div>
+
+<div class="page">
+  <div class="topbar"></div>
+  <div class="hd">
+    <div class="brand">
+      <svg class="shield" viewBox="0 0 60 66">
+        <path d="M30 2 L56 9 V32 C56 47 44 58 30 63 C16 58 4 47 4 32 V9 Z" fill="#8A1228" stroke="#C9A030" stroke-width="2"/>
+        <path d="M30 13 l2.3 4.7 5.2 .75 -3.75 3.65 .9 5.15 -4.65 -2.45 -4.65 2.45 .9 -5.15 -3.75 -3.65 5.2 -.75 Z" fill="#C9A030"/>
+        <g transform="translate(30 40)">
+          <path d="M0 -6 C-4 -9 -11 -9 -14 -7 L-14 9 C-11 7 -4 7 0 10 Z" fill="#FFFFFF" stroke="#E3D9C4" stroke-width="0.6"/>
+          <path d="M0 -6 C4 -9 11 -9 14 -7 L14 9 C11 7 4 7 0 10 Z" fill="#FFFFFF" stroke="#E3D9C4" stroke-width="0.6"/>
+          <line x1="-10" y1="-3.5" x2="-3.5" y2="-2" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="-10" y1="0" x2="-3.5" y2="1.5" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="-10" y1="3.5" x2="-3.5" y2="5" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="3.5" y1="-2" x2="10" y2="-3.5" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="3.5" y1="1.5" x2="10" y2="0" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="3.5" y1="5" x2="10" y2="3.5" stroke="#E7B7C0" stroke-width="0.8"/>
+        </g>
+      </svg>
+      <div class="brand-tx"><div class="name">Smart<em>ious</em></div>
+        <div class="tag">HOMESCHOOL&nbsp;·&nbsp;GLOBAL</div></div>
+    </div>
+    <div class="hd-r"><div class="doc-title">INVOICE</div><div class="doc-underline"></div></div>
+  </div>
+
+  <div class="page-body">
+    <div class="meta-row">
+      <div class="billed">
+        <div class="lbl">Billed To</div>
+        <div class="who">${esc(f.billedTo)}</div>
+        ${f.studentName ? `<div class="sub">Student: ${esc(f.studentName)}</div>` : ''}
+      </div>
+      <div class="inv-meta">
+        <div class="mr"><span class="mk">Invoice No.</span><span class="mv">${esc(f.invoiceNo)}</span></div>
+        <div class="mr"><span class="mk">Date Issued</span><span class="mv">${esc(f.dateIssued)}</span></div>
+        <div class="mr"><span class="mk">Due Date</span><span class="mv">${esc(f.dueDate) || '—'}</span></div>
+        <div class="mr"><span class="mk">Period</span><span class="mv">${esc(f.period) || '—'}</span></div>
+      </div>
+    </div>
+
+    <table class="items">
+      <thead><tr><td>Description</td><td>Period</td><td class="r">Amount (${cur})</td></tr></thead>
+      <tbody>${itemRows}</tbody>
+    </table>
+
+    <div class="totals"><div class="totals-box">
+      <div class="tr"><span class="tk">Sub-total</span><span class="tv">${cur} ${money(t.subTotal)}</span></div>
+      <div class="tr"><span class="tk">Discount</span><span class="tv">${money(t.discount)}</span></div>
+      <div class="tr"><span class="tk">VAT (${t.vatPct}%)</span><span class="tv">${money(t.vatAmount)}</span></div>
+      <div class="tr total"><span class="tk">TOTAL DUE</span><span class="tv">${cur} ${money(t.totalDue)}</span></div>
+    </div></div>
+
+    <div class="sec">
+      <div class="sec-h">Payment Instructions</div>
+      <p>M-Pesa Paybill No: <b style="color:var(--ink)">247247</b><br>
+         Account Number: <b style="color:var(--ink)">745021</b><br>
+         ${payHtml}</p>
+    </div>
+    <div class="sec notes">
+      <div class="sec-h">Notes</div>
+      <p>${notesHtml}</p>
+    </div>
+  </div>
+
+  <div class="ft">
+    <b>Smartious Homeschool Global</b><br>
+    Diamond Plaza I, Parklands, Nairobi, Kenya<br>
+    +254 745 021 212 &nbsp;|&nbsp; hellosmartious@gmail.com &nbsp;|&nbsp; smartioushomeschool.com
+  </div>
+</div>
+</body></html>`
 }
 
 function FrontDeskModule({ refreshKey, toast }) {
