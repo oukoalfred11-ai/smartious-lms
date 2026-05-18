@@ -6484,12 +6484,373 @@ function GroupRoomsModule({ refreshKey, toast }) {
 // ═══════════════════════════════════════════════════════════
 // 11. CURRICULUM MODULE
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// SYLLABUS SPINE TAB — manage the curriculum spine per subject
+// Pick a subject → view/add/edit/delete/reorder topics and their
+// subtopics. Topics drive the question bank, lesson setting and
+// lesson player. Includes a one-click loader for the verified
+// IGCSE Mathematics 0580 structure.
+// ═══════════════════════════════════════════════════════════
+
+// Verified IGCSE Mathematics 0580 structure (2025–2027), confirmed
+// by Smartious. Used by the "Load IGCSE Maths" action.
+const IGCSE_MATHS_0580 = [
+  { topic: 'Number', code: '1', subtopics: [
+    { name: 'Types of number (integers, primes, squares, cubes, factors, multiples, HCF, LCM)', code: '1.1', suggestedLessons: 2 },
+    { name: 'Sets and Venn diagrams', code: '1.2', suggestedLessons: 2 },
+    { name: 'Powers and roots', code: '1.3', suggestedLessons: 1 },
+    { name: 'Fractions, decimals and percentages', code: '1.4', suggestedLessons: 2 },
+    { name: 'Ordering and the four operations', code: '1.5', suggestedLessons: 1 },
+    { name: 'Indices, standard form and estimation', code: '1.6', suggestedLessons: 2 },
+    { name: 'Ratio, proportion and rates', code: '1.7', suggestedLessons: 2 },
+    { name: 'Percentages, money and finance (interest, exchange)', code: '1.8', suggestedLessons: 2 },
+    { name: 'Surds, bounds and exponential growth & decay', code: '1.9', suggestedLessons: 2 },
+  ]},
+  { topic: 'Algebra and graphs', code: '2', subtopics: [
+    { name: 'Introduction to algebra (notation, substitution)', code: '2.1', suggestedLessons: 1 },
+    { name: 'Algebraic manipulation (simplifying, expanding, factorising)', code: '2.2', suggestedLessons: 3 },
+    { name: 'Algebraic fractions', code: '2.3', suggestedLessons: 2 },
+    { name: 'Indices II (rules of indices)', code: '2.4', suggestedLessons: 1 },
+    { name: 'Equations (linear, simultaneous, quadratic)', code: '2.5', suggestedLessons: 4 },
+    { name: 'Inequalities', code: '2.6', suggestedLessons: 2 },
+    { name: 'Sequences (linear, quadratic, geometric)', code: '2.7', suggestedLessons: 2 },
+    { name: 'Proportion (direct and inverse)', code: '2.8', suggestedLessons: 1 },
+    { name: 'Graphs in practical situations', code: '2.9', suggestedLessons: 1 },
+    { name: 'Graphs of functions', code: '2.10', suggestedLessons: 2 },
+    { name: 'Sketching curves', code: '2.11', suggestedLessons: 1 },
+    { name: 'Differentiation', code: '2.12', suggestedLessons: 1 },
+    { name: 'Functions (notation, composite, inverse)', code: '2.13', suggestedLessons: 1 },
+  ]},
+  { topic: 'Coordinate geometry', code: '3', subtopics: [
+    { name: 'Coordinates', code: '3.1', suggestedLessons: 1 },
+    { name: 'Drawing linear graphs', code: '3.2', suggestedLessons: 1 },
+    { name: 'Gradient of linear graphs', code: '3.3', suggestedLessons: 1 },
+    { name: 'Length and midpoint', code: '3.4', suggestedLessons: 1 },
+    { name: 'Equations of linear graphs', code: '3.5', suggestedLessons: 2 },
+    { name: 'Parallel lines', code: '3.6', suggestedLessons: 1 },
+    { name: 'Perpendicular lines', code: '3.7', suggestedLessons: 1 },
+  ]},
+  { topic: 'Geometry', code: '4', subtopics: [
+    { name: 'Geometrical terms', code: '4.1', suggestedLessons: 1 },
+    { name: 'Geometrical constructions', code: '4.2', suggestedLessons: 2 },
+    { name: 'Scale drawings', code: '4.3', suggestedLessons: 1 },
+    { name: 'Similarity', code: '4.4', suggestedLessons: 2 },
+    { name: 'Symmetry', code: '4.5', suggestedLessons: 1 },
+    { name: 'Angles', code: '4.6', suggestedLessons: 2 },
+    { name: 'Circle theorems I', code: '4.7', suggestedLessons: 2 },
+    { name: 'Circle theorems II', code: '4.8', suggestedLessons: 2 },
+  ]},
+  { topic: 'Mensuration', code: '5', subtopics: [
+    { name: 'Units of measure', code: '5.1', suggestedLessons: 1 },
+    { name: 'Area and perimeter', code: '5.2', suggestedLessons: 2 },
+    { name: 'Circles, arcs and sectors', code: '5.3', suggestedLessons: 2 },
+    { name: 'Surface area and volume', code: '5.4', suggestedLessons: 2 },
+    { name: 'Compound shapes and parts of shapes', code: '5.5', suggestedLessons: 2 },
+  ]},
+  { topic: 'Trigonometry', code: '6', subtopics: [
+    { name: "Pythagoras' theorem", code: '6.1', suggestedLessons: 2 },
+    { name: 'Right-angled triangle trigonometry', code: '6.2', suggestedLessons: 3 },
+    { name: 'Exact trigonometric values', code: '6.3', suggestedLessons: 1 },
+    { name: 'Trigonometric functions (graphs)', code: '6.4', suggestedLessons: 1 },
+    { name: 'Non-right-angled trigonometry (sine & cosine rules)', code: '6.5', suggestedLessons: 2 },
+    { name: 'Three-dimensional trigonometry', code: '6.6', suggestedLessons: 2 },
+  ]},
+  { topic: 'Transformations and vectors', code: '7', subtopics: [
+    { name: 'Transformations (reflection, rotation, translation, enlargement)', code: '7.1', suggestedLessons: 3 },
+    { name: 'Vectors in two dimensions', code: '7.2', suggestedLessons: 2 },
+    { name: 'Magnitude of a vector', code: '7.3', suggestedLessons: 1 },
+    { name: 'Vector geometry', code: '7.4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Probability', code: '8', subtopics: [
+    { name: 'Introduction to probability', code: '8.1', suggestedLessons: 1 },
+    { name: 'Relative and expected frequency', code: '8.2', suggestedLessons: 1 },
+    { name: 'Probability of combined events', code: '8.3', suggestedLessons: 2 },
+    { name: 'Conditional probability', code: '8.4', suggestedLessons: 2 },
+    { name: 'Tree diagrams and Venn diagrams in probability', code: '8.5', suggestedLessons: 2 },
+  ]},
+  { topic: 'Statistics', code: '9', subtopics: [
+    { name: 'Classifying statistical data', code: '9.1', suggestedLessons: 1 },
+    { name: 'Interpreting statistical data', code: '9.2', suggestedLessons: 1 },
+    { name: 'Averages and measures of spread', code: '9.3', suggestedLessons: 2 },
+    { name: 'Statistical charts and diagrams', code: '9.4', suggestedLessons: 2 },
+    { name: 'Scatter diagrams', code: '9.5', suggestedLessons: 2 },
+    { name: 'Cumulative frequency diagrams', code: '9.6', suggestedLessons: 3 },
+  ]},
+]
+
+function SyllabusSpineTab({ toast }) {
+  const [curricula] = useState(['IGCSE', 'Cambridge A-Level', 'Edexcel', 'IB Diploma', 'Kenya CBC', 'American', 'British National Curriculum'])
+  const [curriculum, setCurriculum] = useState('IGCSE')
+  const [subjects, setSubjects] = useState([])
+  const [subjectId, setSubjectId] = useState('')
+  const [topics, setTopics] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [expanded, setExpanded] = useState({})   // topicId -> bool
+  const [busy, setBusy] = useState(false)
+
+  // ── load subjects when curriculum changes ──
+  useEffect(() => {
+    let cancelled = false
+    api.get('/subjects', { params: { curriculum } })
+      .then(r => { if (!cancelled) { setSubjects(r.data.subjects || []); setSubjectId('') ; setTopics([]) } })
+      .catch(() => toast?.error?.('Failed to load subjects.'))
+    return () => { cancelled = true }
+  }, [curriculum, toast])
+
+  // ── load spine when subject changes ──
+  const loadSpine = useCallback((sid) => {
+    if (!sid) { setTopics([]); return }
+    setLoading(true)
+    api.get('/syllabus/subject/' + sid)
+      .then(r => setTopics(r.data.data?.topics || []))
+      .catch(() => toast?.error?.('Failed to load the syllabus spine.'))
+      .finally(() => setLoading(false))
+  }, [toast])
+
+  useEffect(() => { loadSpine(subjectId) }, [subjectId, loadSpine])
+
+  const subjectName = (subjects.find(s => s._id === subjectId) || {}).subjectName || ''
+
+  // ── topic operations ──
+  const addTopic = async () => {
+    const name = window.prompt('New topic name:')
+    if (!name || !name.trim()) return
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/topic', { subjectId, topic: name.trim() })
+      if (data?.success) { toast?.ok?.('Topic added.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to add topic.') }
+    finally { setBusy(false) }
+  }
+
+  const renameTopic = async (t) => {
+    const name = window.prompt('Rename topic:', t.topic)
+    if (!name || !name.trim() || name.trim() === t.topic) return
+    setBusy(true)
+    try {
+      await api.patch('/syllabus/topic/' + t._id, { topic: name.trim() })
+      toast?.ok?.('Topic renamed.'); loadSpine(subjectId)
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed.') }
+    finally { setBusy(false) }
+  }
+
+  const deleteTopic = async (t) => {
+    if (!window.confirm(`Delete topic "${t.topic}" and all its subtopics?`)) return
+    setBusy(true)
+    try {
+      await api.delete('/syllabus/topic/' + t._id)
+      toast?.ok?.('Topic deleted.'); loadSpine(subjectId)
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed.') }
+    finally { setBusy(false) }
+  }
+
+  const moveTopic = async (idx, dir) => {
+    const next = [...topics]
+    const j = idx + dir
+    if (j < 0 || j >= next.length) return
+    ;[next[idx], next[j]] = [next[j], next[idx]]
+    setTopics(next)
+    try { await api.patch('/syllabus/reorder', { order: next.map(t => t._id) }) }
+    catch { toast?.error?.('Failed to save order.'); loadSpine(subjectId) }
+  }
+
+  // ── subtopic operations (patch the whole subtopics array) ──
+  const saveSubtopics = async (topic, subtopics) => {
+    setBusy(true)
+    try {
+      await api.patch('/syllabus/topic/' + topic._id, { subtopics })
+      loadSpine(subjectId)
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed.') }
+    finally { setBusy(false) }
+  }
+  const addSubtopic = (topic) => {
+    const name = window.prompt('New subtopic name:')
+    if (!name || !name.trim()) return
+    const subs = [...(topic.subtopics || []), { name: name.trim(), code: '', suggestedLessons: 1, subOrder: (topic.subtopics || []).length }]
+    saveSubtopics(topic, subs)
+  }
+  const editSubtopic = (topic, idx) => {
+    const s = topic.subtopics[idx]
+    const name = window.prompt('Subtopic name:', s.name)
+    if (name === null) return
+    const lessonsRaw = window.prompt('Suggested lessons:', String(s.suggestedLessons ?? 1))
+    if (lessonsRaw === null) return
+    const subs = topic.subtopics.map((x, i) => i === idx
+      ? { ...x, name: (name || '').trim() || x.name, suggestedLessons: parseInt(lessonsRaw, 10) || 0 }
+      : x)
+    saveSubtopics(topic, subs)
+  }
+  const deleteSubtopic = (topic, idx) => {
+    if (!window.confirm('Delete this subtopic?')) return
+    saveSubtopics(topic, topic.subtopics.filter((_, i) => i !== idx))
+  }
+  const moveSubtopic = (topic, idx, dir) => {
+    const subs = [...topic.subtopics]
+    const j = idx + dir
+    if (j < 0 || j >= subs.length) return
+    ;[subs[idx], subs[j]] = [subs[j], subs[idx]]
+    saveSubtopics(topic, subs.map((s, i) => ({ ...s, subOrder: i })))
+  }
+
+  // ── load verified IGCSE Maths structure ──
+  const loadIgcseMaths = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    if (!/math/i.test(subjectName)) {
+      if (!window.confirm(`The selected subject is "${subjectName}", not Mathematics. Load the IGCSE Maths structure into it anyway?`)) return
+    }
+    if (topics.length > 0 && !window.confirm('This REPLACES the entire existing spine for this subject. Continue?')) return
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: IGCSE_MATHS_0580,
+        sourceSyllabus: 'Cambridge IGCSE Mathematics 0580 (2025–2027)',
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to load structure.') }
+    finally { setBusy(false) }
+  }
+
+  // ── styles ──
+  const sel = { padding: '8px 11px', borderRadius: 7, border: '1.5px solid ' + TOKENS.line,
+    fontSize: 13, fontFamily: 'inherit', background: '#fff' }
+  const totalSub = topics.reduce((s, t) => s + (t.subtopics || []).length, 0)
+  const totalLessons = topics.reduce((s, t) =>
+    s + (t.subtopics || []).reduce((a, x) => a + (x.suggestedLessons || 0), 0), 0)
+
+  return (
+    <div>
+      {/* Subject picker */}
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 18 }}>
+        <select value={curriculum} onChange={e => setCurriculum(e.target.value)} style={sel}>
+          {curricula.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select value={subjectId} onChange={e => setSubjectId(e.target.value)} style={{ ...sel, minWidth: 200 }}>
+          <option value="">— Select a subject —</option>
+          {subjects.map(s => <option key={s._id} value={s._id}>{s.subjectName}</option>)}
+        </select>
+        {subjectId && (
+          <>
+            <button onClick={addTopic} disabled={busy} style={{
+              background: TOKENS.crimson, color: '#fff', border: 'none', borderRadius: 7,
+              padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+            }}>+ Add Topic</button>
+            <button onClick={loadIgcseMaths} disabled={busy} style={{
+              background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+              borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+            }}>Load IGCSE Maths 0580</button>
+          </>
+        )}
+      </div>
+
+      {!subjectId ? (
+        <div style={{ textAlign: 'center', color: TOKENS.s500, padding: 40, fontSize: 13 }}>
+          Select a curriculum and subject to view or build its syllabus spine.
+        </div>
+      ) : loading ? (
+        <div style={{ textAlign: 'center', color: TOKENS.s500, padding: 40, fontSize: 13 }}>Loading spine…</div>
+      ) : topics.length === 0 ? (
+        <div style={{ textAlign: 'center', color: TOKENS.s500, padding: 40, fontSize: 13 }}>
+          No syllabus spine yet for <b>{subjectName}</b>. Add topics, or load the verified IGCSE Maths structure.
+        </div>
+      ) : (
+        <>
+          {/* Summary */}
+          <div style={{ display: 'flex', gap: 18, marginBottom: 16, fontSize: 12.5, color: TOKENS.s500 }}>
+            <span><b style={{ color: TOKENS.s900 }}>{topics.length}</b> topics</span>
+            <span><b style={{ color: TOKENS.s900 }}>{totalSub}</b> subtopics</span>
+            <span><b style={{ color: TOKENS.s900 }}>{totalLessons}</b> suggested lessons</span>
+          </div>
+
+          {/* Topic list */}
+          {topics.map((t, ti) => {
+            const open = expanded[t._id]
+            const tLessons = (t.subtopics || []).reduce((a, x) => a + (x.suggestedLessons || 0), 0)
+            return (
+              <div key={t._id} style={{ border: '1px solid ' + TOKENS.line, borderRadius: 10, marginBottom: 10, overflow: 'hidden' }}>
+                {/* Topic header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 14px', background: TOKENS.cream }}>
+                  <button onClick={() => setExpanded(e => ({ ...e, [t._id]: !open }))} style={{
+                    background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: TOKENS.crimson, fontWeight: 800,
+                  }}>{open ? '▾' : '▸'}</button>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ fontWeight: 800, fontSize: 14, color: TOKENS.s900 }}>
+                      {t.code ? t.code + '. ' : ''}{t.topic}
+                    </span>
+                    <span style={{ fontSize: 11.5, color: TOKENS.s500, marginLeft: 10 }}>
+                      {(t.subtopics || []).length} subtopics · {tLessons} lessons
+                    </span>
+                  </div>
+                  <button onClick={() => moveTopic(ti, -1)} disabled={ti === 0} style={miniBtn}>↑</button>
+                  <button onClick={() => moveTopic(ti, 1)} disabled={ti === topics.length - 1} style={miniBtn}>↓</button>
+                  <button onClick={() => renameTopic(t)} style={miniBtn}>Rename</button>
+                  <button onClick={() => addSubtopic(t)} style={miniBtn}>+ Sub</button>
+                  <button onClick={() => deleteTopic(t)} style={{ ...miniBtn, color: '#B91C1C' }}>Delete</button>
+                </div>
+
+                {/* Subtopics */}
+                {open && (
+                  <div style={{ padding: '6px 14px 12px 36px' }}>
+                    {(t.subtopics || []).length === 0 ? (
+                      <div style={{ fontSize: 12, color: TOKENS.s500, padding: '8px 0' }}>No subtopics. Use “+ Sub”.</div>
+                    ) : t.subtopics.map((s, si) => (
+                      <div key={si} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', borderBottom: si < t.subtopics.length - 1 ? '1px solid ' + TOKENS.cream : 'none' }}>
+                        <span style={{ flex: 1, fontSize: 12.5, color: TOKENS.s900 }}>
+                          {s.code ? <b style={{ color: TOKENS.s500 }}>{s.code} </b> : ''}{s.name}
+                        </span>
+                        <span style={{ fontSize: 11, color: TOKENS.s500, background: TOKENS.cream, padding: '2px 8px', borderRadius: 20 }}>
+                          {s.suggestedLessons || 0} lesson{(s.suggestedLessons || 0) === 1 ? '' : 's'}
+                        </span>
+                        <button onClick={() => moveSubtopic(t, si, -1)} disabled={si === 0} style={miniBtn}>↑</button>
+                        <button onClick={() => moveSubtopic(t, si, 1)} disabled={si === t.subtopics.length - 1} style={miniBtn}>↓</button>
+                        <button onClick={() => editSubtopic(t, si)} style={miniBtn}>Edit</button>
+                        <button onClick={() => deleteSubtopic(t, si)} style={{ ...miniBtn, color: '#B91C1C' }}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </>
+      )}
+    </div>
+  )
+}
+
+const miniBtn = {
+  background: '#fff', border: '1px solid #E8E2D6', borderRadius: 6,
+  padding: '4px 9px', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+  color: '#7D1025', whiteSpace: 'nowrap',
+}
+
 function CurriculumModule({ refreshKey, toast }) {
   const store = useStore()
   const curricula = store.curricula || []
+  const [tab, setTab] = useState('overview')
+
+  const tabBtn = (id, label) => (
+    <button onClick={() => setTab(id)} style={{
+      padding: '9px 18px', border: 'none', borderRadius: 8,
+      background: tab === id ? TOKENS.crimson : '#fff',
+      color: tab === id ? '#fff' : TOKENS.s700,
+      border: '1.5px solid ' + (tab === id ? TOKENS.crimson : TOKENS.line),
+      fontWeight: 700, fontSize: 13, cursor: 'pointer',
+    }}>{label}</button>
+  )
+
   return (
     <>
-      <PSection tag="Academic" title="Curriculum" em="Manager" sub="Subjects, grades and academic structure"/>
+      <PSection tag="Academic" title="Curriculum" em="Manager" sub="Subjects, grades and the syllabus spine"/>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 22 }}>
+        {tabBtn('overview', 'Overview')}
+        {tabBtn('spine', 'Syllabus Spine')}
+      </div>
+
+      {tab === 'spine' && <SyllabusSpineTab toast={toast} />}
+
+      {tab === 'overview' && (<>
       <div style={{ display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap' }}>
         <PKpi label="Curricula" value={curricula.length}/>
         <PKpi label="Subjects" value="42"/>
@@ -6516,6 +6877,7 @@ function CurriculumModule({ refreshKey, toast }) {
           </PCard>
         ))}
       </div>
+      </>)}
     </>
   )
 }
