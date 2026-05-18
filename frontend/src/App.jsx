@@ -37,6 +37,23 @@ export default function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/"               element={<LandingPage />} />
+              {/* Landing-page sections — each its own URL */}
+              <Route path="/about"          element={<LandingPage />} />
+              <Route path="/curricula"      element={<LandingPage />} />
+              <Route path="/services"       element={<LandingPage />} />
+              <Route path="/global"         element={<LandingPage />} />
+              <Route path="/pricing"        element={<LandingPage />} />
+              <Route path="/programs"       element={<LandingPage />} />
+              <Route path="/faq"            element={<LandingPage />} />
+              <Route path="/blog"           element={<LandingPage />} />
+              <Route path="/blog/:slug"     element={<LandingPage />} />
+              <Route path="/enroll"         element={<LandingPage />} />
+              <Route path="/consult"        element={<LandingPage />} />
+              <Route path="/contact"        element={<LandingPage />} />
+              <Route path="/privacy"        element={<LandingPage />} />
+              <Route path="/terms"          element={<LandingPage />} />
+              <Route path="/cookies"        element={<LandingPage />} />
+              <Route path="/gdpr"           element={<LandingPage />} />
               <Route path="/login"          element={<LoginPage />} />
               <Route path="/admin-login"    element={<AdminLoginPage />} />
               <Route path="/verify-email"   element={<VerifyEmailPage />} />
