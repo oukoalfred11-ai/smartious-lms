@@ -93,7 +93,7 @@ router.post('/upload', auth, (req, res) => {
 router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
     const {
-      curriculum, subject, grade, topic, type,
+      curriculum, subject, grade, topic, subtopic, type,
       questionText, options, correctAnswer, explanation,
       marks, difficulty, attachments,
       parts,   // ── NEW: nested parts array (optional)
@@ -126,6 +126,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
     const question = await Question.create({
       curriculum, subject, grade,
       topic: topic || '',
+      subtopic: subtopic || '',
       type: isNested ? 'nested' : type,
       questionText: questionText.trim(),
       options:      Array.isArray(options) ? options : [],
@@ -227,7 +228,7 @@ router.patch('/:id', auth, async (req, res) => {
     // Now includes `parts` so teachers can switch between flat and nested,
     // or edit nested structure after creation.
     const allowed = [
-      'curriculum', 'subject', 'grade', 'topic', 'type',
+      'curriculum', 'subject', 'grade', 'topic', 'subtopic', 'type',
       'questionText', 'options', 'correctAnswer', 'explanation',
       'marks', 'difficulty', 'attachments', 'parts',
     ];
