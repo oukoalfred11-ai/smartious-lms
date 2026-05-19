@@ -8643,7 +8643,381 @@ function TeacherLiveClassesTab({ user, toast }) {
 // Distinct from TeacherLiveClassesTab (which manages persistent
 // Group Rooms with Zoom links).
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// SCHEDULE CLASSES — shell with two tabs:
+//   • Live Sessions   — one-off scheduled live classes
+//   • Weekly Timetable — recurring per-student timetable
+// ═══════════════════════════════════════════════════════════
 function ScheduleClassesTab({ user, toast }) {
+  const [tab, setTab] = useState('live')
+
+  const tabBtn = (id, label) => (
+    <button onClick={() => setTab(id)} style={{
+      padding: '9px 18px', borderRadius: 8, cursor: 'pointer',
+      fontWeight: 700, fontSize: 13,
+      background: tab === id ? '#7D1025' : '#fff',
+      color: tab === id ? '#fff' : '#5A5048',
+      border: '1.5px solid ' + (tab === id ? '#7D1025' : '#E8E2D6'),
+    }}>{label}</button>
+  )
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        {tabBtn('live', 'Live Sessions')}
+        {tabBtn('timetable', 'Weekly Timetable')}
+      </div>
+      {tab === 'live' && <LiveSessionsTab user={user} toast={toast} />}
+      {tab === 'timetable' && <WeeklyTimetableTab user={user} toast={toast} />}
+    </div>
+  )
+}
+
+// ── WEEKLY TIMETABLE — recurring per-student schedule ──────
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+function WeeklyTimetableTab({ user, toast }) {
+  const [view, setView] = useState('list')        // 'list' | 'create' | 'detail'
+  const [timetables, setTimetables] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [active, setActive] = useState(null)      // timetable being viewed
+
+  // builder data
+  const [students, setStudents] = useState([])
+  const [curricula] = useState(['IGCSE', 'Cambridge A-Level', 'Edexcel', 'IB Diploma', 'Kenya CBC', 'American', 'British National Curriculum'])
+
+  const loadMine = useCallback(() => {
+    setLoading(true)
+    api.get('/timetables/mine')
+      .then(r => setTimetables(r.data?.data?.timetables || []))
+      .catch(() => toast?.error?.('Failed to load timetables.'))
+      .finally(() => setLoading(false))
+  }, [toast])
+
+  useEffect(() => { loadMine() }, [loadMine])
+  useEffect(() => {
+    api.get('/users?role=student')
+      .then(r => setStudents(r.data?.data?.users || r.data?.users || []))
+      .catch(() => {})
+  }, [])
+
+  // ── LIST VIEW ──
+  if (view === 'list') {
+    return (
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, flexWrap: 'wrap', gap: 10 }}>
+          <div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#231715', margin: 0 }}>Weekly Timetables</h2>
+            <div style={{ fontSize: 12.5, color: '#857973' }}>Recurring per-student schedules — generated from the subject's lessons.</div>
+          </div>
+          <button onClick={() => setView('create')} style={{
+            background: '#7D1025', color: '#fff', border: 'none', borderRadius: 8,
+            padding: '10px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+          }}>+ New Timetable</button>
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: 40, color: '#857973', fontSize: 13 }}>Loading…</div>
+        ) : timetables.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: 50, color: '#857973', fontSize: 13, border: '1px dashed #E8E2D6', borderRadius: 12 }}>
+            No timetables yet. Click “New Timetable” to build one.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+            {timetables.map(tt => {
+              const delivered = (tt.sessions || []).filter(s => s.status === 'delivered').length
+              const total = (tt.sessions || []).length
+              const end = tt.sessions && tt.sessions.length ? tt.sessions[tt.sessions.length - 1].date : null
+              return (
+                <div key={tt._id} onClick={() => { setActive(tt); setView('detail') }} style={{
+                  background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12,
+                  padding: 16, cursor: 'pointer',
+                }}>
+                  <div style={{ fontWeight: 800, fontSize: 15, color: '#231715' }}>{tt.studentName || 'Student'}</div>
+                  <div style={{ fontSize: 13, color: '#7D1025', fontWeight: 700, marginTop: 2 }}>{tt.subjectName}</div>
+                  <div style={{ fontSize: 11.5, color: '#857973', marginTop: 8 }}>
+                    {(tt.weeklySlots || []).map(s => DAY_SHORT[s.dayOfWeek] + ' ' + s.time).join('  ·  ')}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 11.5, color: '#857973' }}>
+                    <span><b style={{ color: '#231715' }}>{delivered}</b> / {total} delivered</span>
+                    {end && <span>ends {new Date(end).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ── CREATE VIEW ──
+  if (view === 'create') {
+    return <TimetableBuilder
+      students={students} curricula={curricula} toast={toast}
+      onBack={() => setView('list')}
+      onCreated={() => { setView('list'); loadMine() }}
+    />
+  }
+
+  // ── DETAIL VIEW ──
+  if (view === 'detail' && active) {
+    return <TimetableDetail
+      timetable={active} toast={toast}
+      onBack={() => { setActive(null); setView('list') }}
+      onChanged={(updated) => setActive(updated)}
+      onDeleted={() => { setActive(null); setView('list'); loadMine() }}
+    />
+  }
+  return null
+}
+
+// ── TIMETABLE BUILDER ──────────────────────────────────────
+function TimetableBuilder({ students, curricula, toast, onBack, onCreated }) {
+  const [studentId, setStudentId] = useState('')
+  const [curriculum, setCurriculum] = useState('IGCSE')
+  const [subjects, setSubjects] = useState([])
+  const [subjectId, setSubjectId] = useState('')
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date(); d.setDate(d.getDate() + 1)
+    return d.toISOString().slice(0, 10)
+  })
+  const [slots, setSlots] = useState([{ dayOfWeek: 1, time: '10:00' }])
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    api.get('/subjects', { params: { curriculum } })
+      .then(r => { setSubjects(r.data?.subjects || []); setSubjectId('') })
+      .catch(() => setSubjects([]))
+  }, [curriculum])
+
+  const addSlot = () => setSlots(s => [...s, { dayOfWeek: 1, time: '10:00' }])
+  const setSlot = (i, k, v) => setSlots(s => s.map((x, idx) => idx === i ? { ...x, [k]: v } : x))
+  const delSlot = (i) => setSlots(s => s.filter((_, idx) => idx !== i).length ? s.filter((_, idx) => idx !== i) : s)
+
+  const create = async () => {
+    if (!studentId) { toast?.error?.('Pick a student.'); return }
+    if (!subjectId) { toast?.error?.('Pick a subject.'); return }
+    if (!slots.length) { toast?.error?.('Add at least one weekly slot.'); return }
+    setSaving(true)
+    try {
+      const { data } = await api.post('/timetables', {
+        studentId, subjectId, weeklySlots: slots, startDate,
+      })
+      if (data?.success) { toast?.ok?.('Timetable created.'); onCreated?.() }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Failed to create timetable.')
+    } finally { setSaving(false) }
+  }
+
+  const lbl = { display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
+    textTransform: 'uppercase', color: '#7D1025', marginBottom: 5 }
+  const inp = { width: '100%', boxSizing: 'border-box', padding: '8px 11px',
+    borderRadius: 7, border: '1.5px solid #E8E2D6', fontSize: 13, fontFamily: 'inherit', background: '#fff' }
+  const card = { background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12, padding: 18, marginBottom: 14 }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+        <button onClick={onBack} style={{
+          background: '#fff', border: '1.5px solid #E8E2D6', borderRadius: 8,
+          padding: '7px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: '#7D1025',
+        }}>← Timetables</button>
+        <h2 style={{ fontSize: 20, fontWeight: 800, color: '#231715', margin: 0 }}>New Weekly Timetable</h2>
+      </div>
+
+      <div style={card}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+          <div><label style={lbl}>Student *</label>
+            <select value={studentId} onChange={e => setStudentId(e.target.value)} style={inp}>
+              <option value="">— Select student —</option>
+              {students.map(s => (
+                <option key={s._id} value={s._id}>
+                  {`${s.firstName || ''} ${s.lastName || ''}`.trim() || s.email}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div><label style={lbl}>Curriculum</label>
+            <select value={curriculum} onChange={e => setCurriculum(e.target.value)} style={inp}>
+              {curricula.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div><label style={lbl}>Subject *</label>
+            <select value={subjectId} onChange={e => setSubjectId(e.target.value)} style={inp}>
+              <option value="">— Select subject —</option>
+              {subjects.map(s => <option key={s._id} value={s._id}>{s.subjectName}</option>)}
+            </select>
+          </div>
+          <div><label style={lbl}>Start Date *</label>
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={inp}/>
+          </div>
+        </div>
+      </div>
+
+      <div style={card}>
+        <label style={lbl}>Weekly Slots</label>
+        <div style={{ fontSize: 11.5, color: '#857973', marginBottom: 8 }}>
+          The recurring days &amp; times. One session per lesson is generated across these slots until the subject's lessons run out.
+        </div>
+        {slots.map((s, i) => (
+          <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 6, alignItems: 'center' }}>
+            <select value={s.dayOfWeek} onChange={e => setSlot(i, 'dayOfWeek', Number(e.target.value))}
+              style={{ ...inp, flex: '1 1 140px' }}>
+              {DAY_NAMES.map((d, di) => <option key={di} value={di}>{d}</option>)}
+            </select>
+            <input type="time" value={s.time} onChange={e => setSlot(i, 'time', e.target.value)}
+              style={{ ...inp, flex: '0 0 130px' }}/>
+            <button onClick={() => delSlot(i)} style={{
+              background: 'transparent', border: 'none', color: '#B91C1C',
+              cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: '0 4px',
+            }}>×</button>
+          </div>
+        ))}
+        <button onClick={addSlot} style={{
+          background: 'transparent', border: '1.5px dashed #C9A030', color: '#9A7B16',
+          borderRadius: 7, padding: '6px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer', marginTop: 4,
+        }}>+ Add Slot</button>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 30 }}>
+        <button onClick={create} disabled={saving} style={{
+          background: saving ? '#9CA3AF' : '#7D1025', color: '#fff', border: 'none', borderRadius: 8,
+          padding: '12px 26px', fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
+        }}>{saving ? 'Generating…' : 'Generate Timetable'}</button>
+      </div>
+    </div>
+  )
+}
+
+// ── TIMETABLE DETAIL — the generated calendar ──────────────
+function TimetableDetail({ timetable, toast, onBack, onChanged, onDeleted }) {
+  const [tt, setTt] = useState(timetable)
+  const [busy, setBusy] = useState(false)
+
+  const refresh = (updated) => { setTt(updated); onChanged?.(updated) }
+
+  const setSessionStatus = async (sessionId, status) => {
+    setBusy(true)
+    try {
+      const { data } = await api.patch('/timetables/' + tt._id, {
+        sessionUpdate: { sessionId, status },
+      })
+      if (data?.success) refresh(data.data.timetable)
+    } catch (e) { toast?.error?.('Failed to update session.') }
+    finally { setBusy(false) }
+  }
+
+  const regenerate = async () => {
+    if (!window.confirm('Regenerate this timetable from the current lesson list? Delivered sessions are kept; pending ones are recomputed.')) return
+    setBusy(true)
+    try {
+      const { data } = await api.post('/timetables/' + tt._id + '/regenerate')
+      if (data?.success) { refresh(data.data.timetable); toast?.ok?.('Regenerated.') }
+    } catch (e) { toast?.error?.('Failed to regenerate.') }
+    finally { setBusy(false) }
+  }
+
+  const remove = async () => {
+    if (!window.confirm('Delete this timetable? This cannot be undone.')) return
+    setBusy(true)
+    try {
+      await api.delete('/timetables/' + tt._id)
+      toast?.ok?.('Timetable deleted.'); onDeleted?.()
+    } catch (e) { toast?.error?.('Failed to delete.'); setBusy(false) }
+  }
+
+  const sessions = tt.sessions || []
+  const delivered = sessions.filter(s => s.status === 'delivered').length
+  const fmtDate = (d) => new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })
+
+  const stChip = (status) => {
+    const map = {
+      delivered: { bg: '#DCFCE7', fg: '#15803D', label: 'Delivered' },
+      cancelled: { bg: '#FEE2E2', fg: '#B91C1C', label: 'Cancelled' },
+      pending:   { bg: '#FEF3C7', fg: '#B45309', label: 'Pending' },
+    }
+    const c = map[status] || map.pending
+    return <span style={{ background: c.bg, color: c.fg, fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>{c.label}</span>
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+        <button onClick={onBack} style={{
+          background: '#fff', border: '1.5px solid #E8E2D6', borderRadius: 8,
+          padding: '7px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: '#7D1025',
+        }}>← Timetables</button>
+        <div style={{ flex: 1 }}>
+          <h2 style={{ fontSize: 19, fontWeight: 800, color: '#231715', margin: 0 }}>
+            {tt.studentName} · {tt.subjectName}
+          </h2>
+          <div style={{ fontSize: 12, color: '#857973' }}>
+            {(tt.weeklySlots || []).map(s => DAY_SHORT[s.dayOfWeek] + ' ' + s.time).join('  ·  ')}
+            {'   —   '}{delivered} of {sessions.length} delivered
+          </div>
+        </div>
+        <button onClick={regenerate} disabled={busy} style={{
+          background: '#fff', border: '1.5px solid #C9A030', color: '#9A7B16',
+          borderRadius: 7, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+        }}>Regenerate</button>
+        <button onClick={remove} disabled={busy} style={{
+          background: '#fff', border: '1.5px solid #E8E2D6', color: '#B91C1C',
+          borderRadius: 7, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+        }}>Delete</button>
+      </div>
+
+      {sessions.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: 40, color: '#857973', fontSize: 13 }}>
+          No sessions generated.
+        </div>
+      ) : (
+        <div style={{ border: '1px solid #E8E2D6', borderRadius: 12, overflow: 'hidden' }}>
+          {sessions.map((s, i) => (
+            <div key={s._id || i} style={{
+              display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
+              borderBottom: i < sessions.length - 1 ? '1px solid #F1ECE0' : 'none',
+              background: s.status === 'delivered' ? '#FAFCFA' : '#fff',
+            }}>
+              <div style={{
+                width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
+                background: '#FBFAF5', border: '1px solid #E8E2D6',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11, fontWeight: 800, color: '#7D1025',
+              }}>{s.lessonNumber || i + 1}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#231715', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {s.lessonTitle || 'Lesson ' + (s.lessonNumber || i + 1)}
+                </div>
+                <div style={{ fontSize: 11.5, color: '#857973' }}>
+                  {fmtDate(s.date)}{s.time ? ' · ' + s.time : ''}
+                </div>
+              </div>
+              {stChip(s.status)}
+              <select value={s.status} disabled={busy}
+                onChange={e => setSessionStatus(s._id, e.target.value)}
+                style={{
+                  border: '1.5px solid #E8E2D6', borderRadius: 6, padding: '4px 8px',
+                  fontSize: 11.5, fontFamily: 'inherit', background: '#fff', cursor: 'pointer',
+                }}>
+                <option value="pending">Pending</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── LIVE SESSIONS — one-off scheduled live classes ─────────
+// (Previously "ScheduleClassesTab" — now the Live Sessions tab
+// inside the Schedule Classes shell. Logic unchanged.)
+function LiveSessionsTab({ user, toast }) {
   const [classes, setClasses] = useState([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState('list') // 'list' | 'create' | 'edit'
