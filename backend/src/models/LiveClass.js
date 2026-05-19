@@ -45,6 +45,19 @@ const liveClassSchema = new mongoose.Schema({
   // ── Meeting link ────────────────────────────────
   meetingLink:  { type: String, required: true, trim: true },
 
+  // ── Delivery mode ───────────────────────────────
+  // 'virtual' = online via meetingLink; 'physical' = in-person.
+  // Defaults to virtual. Set per class.
+  deliveryMode: {
+    type: String,
+    enum: ['virtual', 'physical'],
+    default: 'virtual',
+  },
+
+  // Set when this class was auto-created by the timetable
+  // roll-forward promotion (vs. manually scheduled).
+  fromTimetable: { type: Boolean, default: false },
+
   // ── Ownership ───────────────────────────────────
   teacherId: {
     type: mongoose.Schema.Types.ObjectId,
