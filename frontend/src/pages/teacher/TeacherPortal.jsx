@@ -8910,6 +8910,27 @@ function TimetableDetail({ timetable, toast, onBack, onChanged, onDeleted }) {
     finally { setBusy(false) }
   }
 
+  const setDeliveryMode = async (sessionId, deliveryMode) => {
+    setBusy(true)
+    try {
+      const { data } = await api.patch('/timetables/' + tt._id, {
+        sessionUpdate: { sessionId, deliveryMode },
+      })
+      if (data?.success) refresh(data.data.timetable)
+    } catch (e) { toast?.error?.('Failed to update delivery mode.') }
+    finally { setBusy(false) }
+  }
+
+  const promoteSession = async (sessionId) => {
+    setBusy(true)
+    try {
+      const { data } = await api.post('/timetables/' + tt._id + '/promote-session', { sessionId })
+      if (data?.success) { refresh(data.data.timetable); toast?.ok?.('Live class created for this session.') }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to create live class.') }
+    finally { setBusy(false) }
+  }
+
   const regenerate = async () => {
     if (!window.confirm('Regenerate this timetable from the current lesson list? Delivered sessions are kept; pending ones are recomputed.')) return
     setBusy(true)
@@ -8996,6 +9017,30 @@ function TimetableDetail({ timetable, toast, onBack, onChanged, onDeleted }) {
                 </div>
               </div>
               {stChip(s.status)}
+              <select value={s.deliveryMode || 'virtual'} disabled={busy}
+                onChange={e => setDeliveryMode(s._id, e.target.value)}
+                title="Delivery mode"
+                style={{
+                  border: '1.5px solid #E8E2D6', borderRadius: 6, padding: '4px 8px',
+                  fontSize: 11.5, fontFamily: 'inherit', background: '#fff', cursor: 'pointer',
+                }}>
+                <option value="virtual">Virtual</option>
+                <option value="physical">Physical</option>
+              </select>
+              {s.liveClassId ? (
+                <span style={{
+                  fontSize: 10.5, fontWeight: 700, color: '#15803D',
+                  background: '#DCFCE7', padding: '4px 9px', borderRadius: 20, whiteSpace: 'nowrap',
+                }}>✓ Live class</span>
+              ) : (
+                <button onClick={() => promoteSession(s._id)} disabled={busy}
+                  title="Create a live class for this session now"
+                  style={{
+                    border: '1.5px solid #C9A030', background: '#fff', color: '#9A7B16',
+                    borderRadius: 6, padding: '4px 9px', fontSize: 11, fontWeight: 700,
+                    cursor: 'pointer', whiteSpace: 'nowrap',
+                  }}>+ Live class</button>
+              )}
               <select value={s.status} disabled={busy}
                 onChange={e => setSessionStatus(s._id, e.target.value)}
                 style={{
