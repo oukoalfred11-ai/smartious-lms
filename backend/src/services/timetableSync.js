@@ -119,10 +119,20 @@ function recomputeTimetable(tt, lessons) {
 
   const occ = buildOccurrences(tt.weeklySlots, from, remaining.length);
 
+  // Build a lookup of existing (non-delivered) sessions by lessonId,
+  // so any per-session data already set — deliveryMode, and a
+  // liveClassId if a live class was already created — survives the
+  // reflow. Only the DATE changes; the link does not.
+  const priorByLesson = {};
+  ;(tt.sessions || []).forEach(s => {
+    if (s.lessonId) priorByLesson[String(s.lessonId)] = s;
+  });
+
   // Future sessions, numbered to continue after the delivered ones
   const baseNumber = delivered.length;
   const futureSessions = remaining.map((les, i) => {
     const o = occ[i];
+    const prior = priorByLesson[String(les._id)];
     return {
       date: o ? o.date : null,
       dayOfWeek: o ? o.dayOfWeek : undefined,
@@ -131,6 +141,8 @@ function recomputeTimetable(tt, lessons) {
       lessonTitle: les.title || '',
       lessonNumber: baseNumber + i + 1,
       status: 'pending',
+      deliveryMode: (prior && prior.deliveryMode) || 'virtual',
+      liveClassId: (prior && prior.liveClassId) || null,
     };
   }).filter(s => s.date);
 
@@ -173,10 +185,106 @@ async function syncTimetablesForSubject(subjectId) {
   }
 }
 
+// ── ROLL-FORWARD PROMOTION ─────────────────────────────────
+// Promote timetable sessions that fall within the next
+// `windowDays` days into real LiveClass records, using the
+// teacher's default meeting link. A session is promoted at most
+// once (guarded by session.liveClassId).
+//
+// Also reconciles: if a session already linked to a LiveClass
+// has had its date shifted (by auto-sync), the LiveClass's
+// scheduledAt is updated to match.
+async function promoteUpcomingSessions(windowDays = 14) {
+  const LiveClass = require('../models/LiveClass');
+  const User = require('../models/User');
+  const Lesson = require('../models/Lesson');
+
+  const now = new Date();
+  const horizon = new Date(now.getTime() + windowDays * 24 * 60 * 60 * 1000);
+
+  let promoted = 0, reconciled = 0;
+
+  try {
+    const tts = await Timetable.find({ isActive: true });
+    // Cache teacher default links so we don't refetch per session
+    const teacherCache = {};
+
+    for (const tt of tts) {
+      let dirty = false;
+      for (const s of (tt.sessions || [])) {
+        if (s.status !== 'pending') continue;
+        if (!s.date) continue;
+        const sDate = new Date(s.date);
+
+        // ── Reconcile an existing link whose date moved ──
+        if (s.liveClassId) {
+          try {
+            const lc = await LiveClass.findById(s.liveClassId);
+            if (lc && Math.abs(new Date(lc.scheduledAt).getTime() - sDate.getTime()) > 60000) {
+              lc.scheduledAt = sDate;
+              await lc.save();
+              reconciled++;
+            }
+          } catch { /* link broken — fall through to re-promote below */ }
+          continue;
+        }
+
+        // ── Promote sessions inside the window ──
+        if (sDate < now || sDate > horizon) continue;
+
+        // Teacher default meeting link
+        let teacher = teacherCache[String(tt.teacherId)];
+        if (teacher === undefined) {
+          teacher = await User.findById(tt.teacherId).lean();
+          teacherCache[String(tt.teacherId)] = teacher || null;
+        }
+        const link = (teacher && teacher.defaultMeetingLink) || '';
+
+        // LiveClass requires a meetingLink. For physical sessions,
+        // or when the teacher has no default link, use a clear
+        // placeholder so the record is still valid and visible.
+        const meetingLink = link
+          || (s.deliveryMode === 'physical' ? 'In-person class' : 'Link to be added');
+
+        try {
+          const lesson = s.lessonId ? await Lesson.findById(s.lessonId).lean() : null;
+          const lc = await LiveClass.create({
+            title: s.lessonTitle || ('Lesson ' + (s.lessonNumber || '')),
+            description: '',
+            subject: tt.subjectName || 'Subject',
+            curriculum: tt.curriculum || '',
+            grade: '',
+            preparationLessonId: s.lessonId || null,
+            scheduledAt: sDate,
+            durationMins: 60,
+            meetingLink,
+            deliveryMode: s.deliveryMode || 'virtual',
+            fromTimetable: true,
+            teacherId: tt.teacherId,
+            assignedStudents: tt.studentId ? [tt.studentId] : [],
+          });
+          s.liveClassId = lc._id;
+          dirty = true;
+          promoted++;
+        } catch (inner) {
+          console.error('[promote] session failed', tt._id, inner.message);
+        }
+      }
+      if (dirty) {
+        try { await tt.save(); } catch (e) { console.error('[promote] save failed', tt._id, e.message); }
+      }
+    }
+  } catch (e) {
+    console.error('[promote] run failed', e.message);
+  }
+  return { promoted, reconciled };
+}
+
 module.exports = {
   orderedLessons,
   buildOccurrences,
   generateSessions,
   recomputeTimetable,
   syncTimetablesForSubject,
+  promoteUpcomingSessions,
 };
