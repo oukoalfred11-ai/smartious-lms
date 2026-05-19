@@ -114,14 +114,28 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
     const tt = await Timetable.findById(req.params.id);
     if (!tt) return res.status(404).json({ success: false, message: 'Timetable not found.' });
 
-    // Session status update (deliver / cancel / pending)
+    // Session update — status and/or delivery mode for one session
     if (req.body.sessionUpdate) {
-      const { sessionId, status } = req.body.sessionUpdate;
-      if (!['pending', 'delivered', 'cancelled'].includes(status))
-        return res.status(400).json({ success: false, message: 'Invalid session status.' });
+      const { sessionId, status, deliveryMode } = req.body.sessionUpdate;
       const sess = tt.sessions.id(sessionId);
       if (!sess) return res.status(404).json({ success: false, message: 'Session not found.' });
-      sess.status = status;
+      if (status !== undefined) {
+        if (!['pending', 'delivered', 'cancelled'].includes(status))
+          return res.status(400).json({ success: false, message: 'Invalid session status.' });
+        sess.status = status;
+      }
+      if (deliveryMode !== undefined) {
+        if (!['virtual', 'physical'].includes(deliveryMode))
+          return res.status(400).json({ success: false, message: 'Invalid delivery mode.' });
+        sess.deliveryMode = deliveryMode;
+        // If a live class already exists for this session, keep its mode in step
+        if (sess.liveClassId) {
+          try {
+            const LiveClass = require('../models/LiveClass');
+            await LiveClass.findByIdAndUpdate(sess.liveClassId, { deliveryMode });
+          } catch { /* non-fatal */ }
+        }
+      }
       await tt.save();
       return res.json({ success: true, message: 'Session updated.', data: { timetable: tt } });
     }
@@ -161,6 +175,47 @@ router.post('/:id/regenerate', auth, requireRole('teacher', 'admin'), async (req
     await tt.save();
     res.json({ success: true, message: 'Timetable regenerated.', data: { timetable: tt } });
   } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ── POST /api/timetables/:id/promote-session ───────────────
+// Manually turn one timetable session into a LiveClass now,
+// without waiting for the roll-forward window. Body: { sessionId }
+router.post('/:id/promote-session', auth, requireRole('teacher', 'admin'), async (req, res) => {
+  try {
+    const tt = await Timetable.findById(req.params.id);
+    if (!tt) return res.status(404).json({ success: false, message: 'Timetable not found.' });
+    const sess = tt.sessions.id(req.body.sessionId);
+    if (!sess) return res.status(404).json({ success: false, message: 'Session not found.' });
+    if (sess.liveClassId)
+      return res.status(409).json({ success: false, message: 'A live class already exists for this session.' });
+
+    const LiveClass = require('../models/LiveClass');
+    const teacher = await User.findById(tt.teacherId).lean();
+    const link = (teacher && teacher.defaultMeetingLink) || '';
+    const meetingLink = link
+      || (sess.deliveryMode === 'physical' ? 'In-person class' : 'Link to be added');
+
+    const lc = await LiveClass.create({
+      title: sess.lessonTitle || ('Lesson ' + (sess.lessonNumber || '')),
+      subject: tt.subjectName || 'Subject',
+      curriculum: tt.curriculum || '',
+      grade: '',
+      preparationLessonId: sess.lessonId || null,
+      scheduledAt: new Date(sess.date),
+      durationMins: 60,
+      meetingLink,
+      deliveryMode: sess.deliveryMode || 'virtual',
+      fromTimetable: true,
+      teacherId: tt.teacherId,
+      assignedStudents: tt.studentId ? [tt.studentId] : [],
+    });
+    sess.liveClassId = lc._id;
+    await tt.save();
+    res.json({ success: true, message: 'Live class created for this session.', data: { timetable: tt } });
+  } catch (e) {
+    console.error('[timetables promote-session]', e.message);
     res.status(500).json({ success: false, message: e.message });
   }
 });
