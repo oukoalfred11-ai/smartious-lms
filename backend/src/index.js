@@ -94,6 +94,19 @@ app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
   });
 });
 
+// ── Timetable roll-forward promotion job ──────────────────
+// Promotes near-term timetable sessions into LiveClass records.
+// Best-effort daily interval (not a precise cron). On Render's
+// free tier the timer pauses while the instance sleeps and
+// catches up on wake — the 14-day window absorbs that lag.
+const { promoteUpcomingSessions } = require('./services/timetableSync');
+
+const runTimetablePromotion = () => {
+  promoteUpcomingSessions(14)
+    .then(r => console.log('[timetable promotion]', JSON.stringify(r)))
+    .catch(e => console.error('[timetable promotion] failed:', e.message));
+};
+
 // ── Database + start ──────────────────────────────────────
 const PORT        = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -109,6 +122,11 @@ mongoose.connect(MONGODB_URI)
     app.listen(PORT, () =>
       console.log(`🚀  API running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`)
     );
+
+    // Start the timetable promotion job: first run 60s after boot
+    // (let the DB settle), then every 24 hours.
+    setTimeout(runTimetablePromotion, 60 * 1000);
+    setInterval(runTimetablePromotion, 24 * 60 * 60 * 1000);
   })
   .catch(err => {
     console.error('❌  MongoDB connection error:', err.message);
