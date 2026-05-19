@@ -178,6 +178,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       termIndex = 1, order,
       videoUrl = '', notesPdfUrl = '', notesPdfPublicId = '',
       durationMins = 0, status = 'draft',
+      topicRef = null, subtopicName = '',
     } = req.body;
 
     if (!subjectId || !mongoose.isValidObjectId(subjectId))
@@ -210,6 +211,8 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       videoUrl, notesPdfUrl, notesPdfPublicId,
       durationMins: Number(durationMins) || 0,
       status: ['draft', 'published'].includes(status) ? status : 'draft',
+      topicRef: (topicRef && mongoose.isValidObjectId(topicRef)) ? topicRef : null,
+      subtopicName: typeof subtopicName === 'string' ? subtopicName.trim() : '',
     });
 
     res.status(201).json({ success: true, message: 'Lesson created.', data: { lesson } });
@@ -374,6 +377,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
       'title', 'description', 'termIndex', 'order',
       'videoUrl', 'notesPdfUrl', 'notesPdfPublicId',
       'durationMins', 'status',
+      'topicRef', 'subtopicName',
     ];
     for (const k of allowed) {
       if (k in req.body) {
@@ -382,6 +386,9 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
           if ([1, 2, 3].includes(t)) lesson.termIndex = t;
         } else if (k === 'status') {
           if (['draft', 'published'].includes(req.body.status)) lesson.status = req.body.status;
+        } else if (k === 'topicRef') {
+          lesson.topicRef = (req.body.topicRef && mongoose.isValidObjectId(req.body.topicRef))
+            ? req.body.topicRef : null;
         } else {
           lesson[k] = req.body[k];
         }
