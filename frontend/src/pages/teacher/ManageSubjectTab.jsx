@@ -659,14 +659,36 @@ function LessonFormModal({ subject, editing, toast, onClose, onSaved }) {
     notesPdfPublicId: editing.notesPdfPublicId || '',
     durationMins: editing.durationMins || 0,
     status:       editing.status || 'draft',
+    topicRef:     editing.topicRef || '',
+    subtopicName: editing.subtopicName || '',
   } : {
     title: '', description: '',
     termIndex: 1, order: '',
     videoUrl: '', notesPdfUrl: '', notesPdfPublicId: '',
     durationMins: 0, status: 'draft',
+    topicRef: '', subtopicName: '',
   })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+
+  // ── Curriculum-spine integration ───────────────────────
+  // subject._id IS the real database Subject id, so the spine
+  // can be fetched directly — no name-matching needed. When a
+  // spine exists, Topic + Subtopic dropdowns appear; picking a
+  // subtopic prefills the lesson title. No spine → form is
+  // unchanged.
+  const [spineTopics, setSpineTopics] = useState([])
+  useEffect(() => {
+    if (!subject?._id) return
+    let cancelled = false
+    api.get('/syllabus/subject/' + subject._id)
+      .then(r => { if (!cancelled) setSpineTopics(r.data?.data?.topics || []) })
+      .catch(() => { if (!cancelled) setSpineTopics([]) })
+    return () => { cancelled = true }
+  }, [subject?._id])
+
+  const hasSpine = spineTopics.length > 0
+  const spineSelTopic = spineTopics.find(t => String(t._id) === String(form.topicRef))
 
   const ytId = useMemo(() => extractYouTubeId(form.videoUrl), [form.videoUrl])
   const ytInvalid = form.videoUrl.trim() && !ytId
@@ -719,6 +741,8 @@ function LessonFormModal({ subject, editing, toast, onClose, onSaved }) {
         notesPdfPublicId: form.notesPdfPublicId,
         durationMins: Number(form.durationMins) || 0,
         status: form.status,
+        topicRef: form.topicRef || null,
+        subtopicName: form.subtopicName || '',
       }
       if (form.order !== '' && form.order !== null) payload.order = Number(form.order)
       if (!editing) payload.subjectId = subject._id
@@ -777,6 +801,47 @@ function LessonFormModal({ subject, editing, toast, onClose, onSaved }) {
             <textarea value={form.description} onChange={e => update('description', e.target.value)}
               rows={3} placeholder="Brief blurb about this lesson..." style={{ ...inp, resize: 'vertical' }} />
           </Field>
+
+          {hasSpine && (
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <Field label="Syllabus Topic" wrap={{ minWidth: 200, flex: 1 }}>
+                <select value={form.topicRef}
+                  onChange={e => { update('topicRef', e.target.value); update('subtopicName', '') }}
+                  style={inp}>
+                  <option value="">— Not linked —</option>
+                  {spineTopics.map(t => (
+                    <option key={t._id} value={t._id}>{t.code ? t.code + '. ' : ''}{t.topic}</option>
+                  ))}
+                </select>
+              </Field>
+              {form.topicRef && (
+                <Field label="Subtopic" wrap={{ minWidth: 200, flex: 1 }}>
+                  <select value={form.subtopicName}
+                    onChange={e => {
+                      const name = e.target.value
+                      update('subtopicName', name)
+                      // Prefill the title from the subtopic (teacher can edit)
+                      if (name && !form.title.trim()) update('title', name)
+                    }}
+                    style={inp}>
+                    <option value="">— Select subtopic —</option>
+                    {(spineSelTopic?.subtopics || []).map((s, i) => (
+                      <option key={i} value={s.name}>{s.code ? s.code + ' ' : ''}{s.name}</option>
+                    ))}
+                  </select>
+                </Field>
+              )}
+            </div>
+          )}
+          {hasSpine && form.subtopicName && spineSelTopic && (() => {
+            const sub = (spineSelTopic.subtopics || []).find(s => s.name === form.subtopicName)
+            const sug = sub && sub.suggestedLessons
+            return sug ? (
+              <div style={{ fontSize: 11.5, color: BRAND.crimson, margin: '-4px 0 10px', fontWeight: 600 }}>
+                Syllabus guidance: this subtopic suggests {sug} lesson{sug === 1 ? '' : 's'}.
+              </div>
+            ) : null
+          })()}
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Field label="Term" wrap={{ minWidth: 140, flex: 1 }}>
               <select value={form.termIndex} onChange={e => update('termIndex', Number(e.target.value))} style={inp}>
@@ -904,6 +969,36 @@ function BulkImportModal({ subject, toast, onClose, onSaved }) {
   const [termIndex, setTermIndex] = useState(1)
   const [saving, setSaving] = useState(false)
 
+  // ── Curriculum-spine integration ───────────────────────
+  // If this subject has a spine, the teacher can pick a topic and
+  // pull its subtopics straight into the list — generating lessons
+  // from the syllabus structure. Free pasting still works as before.
+  const [spineTopics, setSpineTopics] = useState([])
+  const [pickedTopic, setPickedTopic] = useState('')
+  useEffect(() => {
+    if (!subject?._id) return
+    let cancelled = false
+    api.get('/syllabus/subject/' + subject._id)
+      .then(r => { if (!cancelled) setSpineTopics(r.data?.data?.topics || []) })
+      .catch(() => { if (!cancelled) setSpineTopics([]) })
+    return () => { cancelled = true }
+  }, [subject?._id])
+  const hasSpine = spineTopics.length > 0
+
+  const loadTopicSubtopics = (topicId) => {
+    setPickedTopic(topicId)
+    const t = spineTopics.find(x => String(x._id) === String(topicId))
+    if (!t) return
+    const names = (t.subtopics || []).map(s => s.name).filter(Boolean)
+    // Append to anything already typed, avoiding duplicates
+    setText(prev => {
+      const existing = prev.split('\n').map(x => x.trim()).filter(Boolean)
+      const merged = [...existing]
+      names.forEach(n => { if (!merged.includes(n)) merged.push(n) })
+      return merged.join('\n')
+    })
+  }
+
   const titles = text.split('\n').map(t => t.trim()).filter(Boolean)
   const count = titles.length
   const tooMany = count > 200
@@ -968,6 +1063,22 @@ function BulkImportModal({ subject, toast, onClose, onSaved }) {
               <option value={3}>Term 3</option>
             </select>
           </Field>
+
+          {hasSpine && (
+            <Field label="Generate from syllabus topic (optional)">
+              <select value={pickedTopic} onChange={e => loadTopicSubtopics(e.target.value)} style={inp}>
+                <option value="">— Pick a topic to add its subtopics —</option>
+                {spineTopics.map(t => (
+                  <option key={t._id} value={t._id}>
+                    {t.code ? t.code + '. ' : ''}{t.topic} ({(t.subtopics || []).length} subtopics)
+                  </option>
+                ))}
+              </select>
+              <div style={{ fontSize: 11.5, color: BRAND.crimson, marginTop: 5, fontWeight: 600 }}>
+                Picking a topic adds its subtopics to the list below. You can pick several, then edit before importing.
+              </div>
+            </Field>
+          )}
           <Field label={`Lesson titles (${count} detected${tooMany ? ' — too many!' : ''})`}>
             <textarea
               value={text}
