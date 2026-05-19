@@ -38,6 +38,23 @@ const sessionSchema = new mongoose.Schema({
   // 1-based position in the subject's lesson sequence
   lessonNumber: { type: Number, default: 0 },
 
+  // ── Delivery ──
+  // How this session is delivered. Per-session — defaults to
+  // virtual, can be changed individually.
+  deliveryMode: {
+    type: String,
+    enum: ['virtual', 'physical'],
+    default: 'virtual',
+  },
+  // Once a LiveClass has been created for this session (by the
+  // roll-forward promotion or manually), its id is recorded here
+  // so it is never created twice.
+  liveClassId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'LiveClass',
+    default: null,
+  },
+
   // Delivery state. 'delivered' sessions are FROZEN — auto-sync
   // never recomputes them.
   status: {
