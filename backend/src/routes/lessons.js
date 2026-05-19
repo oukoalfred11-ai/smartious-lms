@@ -30,6 +30,7 @@ const Subject = require('../models/Subject');
 const User    = require('../models/User');
 const Allocation = require('../models/Allocation');
 const { auth, requireRole } = require('../middleware/auth');
+const { syncTimetablesForSubject } = require('../services/timetableSync');
 
 const router = express.Router();
 
@@ -216,6 +217,10 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
     });
 
     res.status(201).json({ success: true, message: 'Lesson created.', data: { lesson } });
+
+    // Auto-sync: a lesson was added → recompute timetables for the
+    // subject. Fire-and-forget so it never blocks the response.
+    syncTimetablesForSubject(lesson.subjectId).catch(() => {});
   } catch (e) {
     console.error('[lessons create]', e.message);
     res.status(500).json({ success: false, message: 'Failed to create lesson: ' + e.message });
@@ -275,6 +280,11 @@ router.post('/bulk', auth, requireRole('teacher', 'admin'), async (req, res) => 
       message: `${created.length} lesson${created.length === 1 ? '' : 's'} created.`,
       data: { lessons: created },
     });
+
+    // Auto-sync: lessons were added in bulk → recompute timetables.
+    if (created.length) {
+      syncTimetablesForSubject(created[0].subjectId).catch(() => {});
+    }
   } catch (e) {
     console.error('[lessons bulk]', e.message);
     res.status(500).json({ success: false, message: 'Failed to bulk-create lessons: ' + e.message });
@@ -423,8 +433,12 @@ router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
       catch (e) { console.error('[lessons delete] cloudinary cleanup failed:', e.message); }
     }
 
+    const deletedSubjectId = lesson.subjectId;
     await lesson.deleteOne();
     res.json({ success: true, message: 'Lesson deleted.' });
+
+    // Auto-sync: a lesson was removed → recompute timetables.
+    syncTimetablesForSubject(deletedSubjectId).catch(() => {});
   } catch (e) {
     console.error('[lessons delete]', e.message);
     res.status(500).json({ success: false, message: 'Failed to delete lesson.' });
