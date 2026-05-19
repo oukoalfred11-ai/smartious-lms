@@ -4711,6 +4711,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
   // ── CATALOG (for create modal) ──
   const [catalog, setCatalog] = useState({ curricula: [], gradesByCurriculum: {}, subjects: [] })
   const [rooms, setRooms] = useState([])
+  const [students, setStudents] = useState([])
 
   // ── CREATE/EDIT MODAL ──
   const [createOpen, setCreateOpen] = useState(false)
@@ -4764,6 +4765,10 @@ function HomeworkTab({ user, store, setPage, toast }) {
         })
         setRooms(myRooms)
       }
+    }).catch(() => {})
+    // Students — for assigning homework directly, no group room needed
+    api.get('/users?role=student').then(r => {
+      setStudents(r.data?.data?.users || r.data?.users || [])
     }).catch(() => {})
   }, [user?._id])
 
@@ -5645,14 +5650,56 @@ function HomeworkTab({ user, store, setPage, toast }) {
                 <textarea className="fi" rows={2} value={form.description} onChange={e => setF('description', e.target.value)} placeholder="Brief description shown to students" style={{ resize: 'vertical' }}/>
               </div>
 
+              {/* ── ASSIGN TO STUDENTS — direct, no group room needed ── */}
               <div className="fg">
-                <label className="fl">Assign to Room</label>
-                <select className="fsel" value={form.assignedRoom} onChange={e => handleRoomChange(e.target.value)}>
-                  <option value="">No room — assign by individual students</option>
-                  {rooms.map(r => <option key={r._id} value={r._id}>{r.name} ({r.curriculum} · {r.subject} · {r.grade}, {r.students?.length || 0} students)</option>)}
-                </select>
-                {rooms.length === 0 && <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>No rooms assigned to you yet. Ask admin to create one and assign you as teacher.</div>}
+                <label className="fl">Assign to Students *</label>
+                <div style={{
+                  border: '1.5px solid var(--border)', borderRadius: 8, maxHeight: 180,
+                  overflowY: 'auto', padding: 6, background: '#fff',
+                }}>
+                  {students.length === 0 ? (
+                    <div style={{ fontSize: 12, color: 'var(--s400)', padding: 8 }}>No students found.</div>
+                  ) : students.map(st => {
+                    const sid = st._id
+                    const checked = (form.assignedStudents || []).includes(sid)
+                    const name = `${st.firstName || ''} ${st.lastName || ''}`.trim() || st.email
+                    return (
+                      <label key={sid} style={{
+                        display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px',
+                        cursor: 'pointer', borderRadius: 6,
+                        background: checked ? '#FBF3F4' : 'transparent', fontSize: 13,
+                      }}>
+                        <input type="checkbox" checked={checked}
+                          onChange={() => setForm(f => {
+                            const cur = f.assignedStudents || []
+                            return { ...f, assignedStudents: checked
+                              ? cur.filter(x => x !== sid)
+                              : [...cur, sid] }
+                          })}/>
+                        <span style={{ fontWeight: 600, color: '#231715' }}>{name}</span>
+                        {st.curriculum && <span style={{ fontSize: 11, color: 'var(--s400)' }}>
+                          · {Array.isArray(st.curriculum) ? st.curriculum.join(', ') : st.curriculum}
+                        </span>}
+                      </label>
+                    )
+                  })}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--s400)', marginTop: 4 }}>
+                  {(form.assignedStudents || []).length} student(s) selected.
+                  {rooms.length > 0 && ' You can also assign to a whole group room below.'}
+                </div>
               </div>
+
+              {/* Optional — assign to a whole group room as well */}
+              {rooms.length > 0 && (
+                <div className="fg">
+                  <label className="fl">Or Assign to a Group Room (optional)</label>
+                  <select className="fsel" value={form.assignedRoom} onChange={e => handleRoomChange(e.target.value)}>
+                    <option value="">No room — use the student list above</option>
+                    {rooms.map(r => <option key={r._id} value={r._id}>{r.name} ({r.curriculum} · {r.subject} · {r.grade}, {r.students?.length || 0} students)</option>)}
+                  </select>
+                </div>
+              )}
 
               <div className="fr2">
                 <div className="fg">
