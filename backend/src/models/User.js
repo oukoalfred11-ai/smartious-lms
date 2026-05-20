@@ -49,7 +49,15 @@ const userSchema = new mongoose.Schema({
   // PHASE 3-5 REFACTOR: Teacher teaching specialties (multi-curriculum support)
   teachingSpecialties: [{
     subjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' },
-    curriculum: { type: String, enum: ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American', 'IUFP'] }
+    curriculum: { type: String, enum: [
+      // New 15-curriculum catalog
+      'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
+      'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
+      'AQALowerSec', 'AQAGCSE', 'AQAALevel',
+      'IB', 'BNC', 'American', 'Canadian', 'KenyaCBC',
+      // Legacy values (backwards-compat for existing records — not used for new writes)
+      'IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'IUFP',
+    ] }
   }],
   phone: String,
   bio: String,
