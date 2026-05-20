@@ -7074,8 +7074,24 @@ const PRIMARY_LIBRARY = [
 ]
 
 function SyllabusSpineTab({ toast }) {
-  const [curricula] = useState(['Primary', 'IGCSE', 'Cambridge A-Level', 'Edexcel', 'IB Diploma', 'Kenya CBC', 'American', 'British National Curriculum'])
-  const [curriculum, setCurriculum] = useState('IGCSE')
+  const [curricula] = useState([
+    { id: 'CambridgePrimary',   name: 'Cambridge Primary' },
+    { id: 'CambridgeLowerSec',  name: 'Cambridge Lower Secondary' },
+    { id: 'CambridgeIGCSE',     name: 'Cambridge IGCSE' },
+    { id: 'CambridgeALevel',    name: 'Cambridge A-Level' },
+    { id: 'EdexcelLowerSec',    name: 'Edexcel Lower Secondary' },
+    { id: 'EdexcelIGCSE',       name: 'Edexcel IGCSE' },
+    { id: 'EdexcelALevel',      name: 'Edexcel A-Level' },
+    { id: 'AQALowerSec',        name: 'AQA Lower Secondary' },
+    { id: 'AQAGCSE',            name: 'AQA GCSE' },
+    { id: 'AQAALevel',          name: 'AQA A-Level' },
+    { id: 'IB',                 name: 'International Baccalaureate (IB)' },
+    { id: 'BNC',                name: 'British National Curriculum' },
+    { id: 'American',           name: 'American Curriculum' },
+    { id: 'Canadian',           name: 'Canadian Curriculum' },
+    { id: 'KenyaCBC',           name: 'Kenya CBC' },
+  ])
+  const [curriculum, setCurriculum] = useState('CambridgeIGCSE')
   const [subjects, setSubjects] = useState([])
   const [subjectId, setSubjectId] = useState('')
   const [topics, setTopics] = useState([])
@@ -7239,7 +7255,7 @@ function SyllabusSpineTab({ toast }) {
       {/* Subject picker */}
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 18 }}>
         <select value={curriculum} onChange={e => setCurriculum(e.target.value)} style={sel}>
-          {curricula.map(c => <option key={c} value={c}>{c}</option>)}
+          {curricula.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         <select value={subjectId} onChange={e => setSubjectId(e.target.value)} style={{ ...sel, minWidth: 200 }}>
           <option value="">— Select a subject —</option>
@@ -7255,7 +7271,7 @@ function SyllabusSpineTab({ toast }) {
               background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
               borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
             }}>Load IGCSE Maths 0580</button>
-            {curriculum === 'Primary' && (
+            {curriculum === 'CambridgePrimary' && (
               <button onClick={loadPrimarySpine} disabled={busy} title="Auto-detects which Primary spine matches the selected subject" style={{
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
