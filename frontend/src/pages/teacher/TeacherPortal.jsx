@@ -2818,7 +2818,7 @@ function ExamsTab({ user, store, setPage, toast }) {
   // Create form state
   const [formTitle, setFormTitle] = useState('')
   const [formSubject, setFormSubject] = useState('Mathematics')
-  const [formCurriculum, setFormCurriculum] = useState('IGCSE')
+  const [formCurriculum, setFormCurriculum] = useState('CambridgeIGCSE')
   const [formYear, setFormYear] = useState('Year 10')
   const [formStartAt, setFormStartAt] = useState(exDefaultStartAt())
   const [formDuration, setFormDuration] = useState(60)
@@ -8731,7 +8731,12 @@ function WeeklyTimetableTab({ user, toast }) {
 
   // builder data
   const [students, setStudents] = useState([])
-  const [curricula] = useState(['IGCSE', 'Cambridge A-Level', 'Edexcel', 'IB Diploma', 'Kenya CBC', 'American', 'British National Curriculum'])
+  const [curricula] = useState([
+    'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
+    'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
+    'AQALowerSec', 'AQAGCSE', 'AQAALevel',
+    'IB', 'BNC', 'American', 'Canadian', 'KenyaCBC',
+  ])
 
   const loadMine = useCallback(() => {
     setLoading(true)
@@ -8822,7 +8827,7 @@ function WeeklyTimetableTab({ user, toast }) {
 // ── TIMETABLE BUILDER ──────────────────────────────────────
 function TimetableBuilder({ students, curricula, toast, onBack, onCreated }) {
   const [studentId, setStudentId] = useState('')
-  const [curriculum, setCurriculum] = useState('IGCSE')
+  const [curriculum, setCurriculum] = useState('CambridgeIGCSE')
   const [subjects, setSubjects] = useState([])
   const [subjectId, setSubjectId] = useState('')
   const [startDate, setStartDate] = useState(() => {
