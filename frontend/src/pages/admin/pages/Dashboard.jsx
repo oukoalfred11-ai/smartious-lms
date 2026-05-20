@@ -6579,8 +6579,502 @@ const IGCSE_MATHS_0580 = [
   ]},
 ]
 
+// ═══════════════════════════════════════════════════════════
+// CAMBRIDGE PRIMARY SPINES
+// Verified against the official Cambridge framework documents
+// by Smartious. Stage tags follow Cambridge convention.
+// Stage N at Cambridge = Year N at Smartious.
+// ═══════════════════════════════════════════════════════════
+
+// ── PRIMARY MATHEMATICS 0096 ───────────────────────────────
+// 10 topics (sub-strands), 60 stage-level subtopics, 155 lessons.
+const PRIMARY_MATHS_0096 = [
+  { topic: 'Counting and sequences (Nc)', code: 'Nc', subtopics: [
+    { name: 'Stage 1: Counting to 20; counting in 1s, 2s, 10s; recognising sequences', code: 'Nc.1', suggestedLessons: 4 },
+    { name: 'Stage 2: Counting to 100; counting in 2s, 5s, 10s; odd/even', code: 'Nc.2', suggestedLessons: 3 },
+    { name: 'Stage 3: Counting in 4s, 8s, 50s, 100s; linear sequences', code: 'Nc.3', suggestedLessons: 3 },
+    { name: 'Stage 4: Counting forwards/backwards in steps; non-unit fractions in sequence', code: 'Nc.4', suggestedLessons: 3 },
+    { name: 'Stage 5: Sequences with whole numbers, fractions, decimals; term-to-term rules', code: 'Nc.5', suggestedLessons: 3 },
+    { name: 'Stage 6: Sequences involving negatives, fractions, decimals; nth-term thinking', code: 'Nc.6', suggestedLessons: 3 },
+  ]},
+  { topic: 'Place value, ordering and rounding (Np)', code: 'Np', subtopics: [
+    { name: 'Stage 1: Numbers to 20; tens and ones; ordering small numbers', code: 'Np.1', suggestedLessons: 3 },
+    { name: 'Stage 2: Numbers to 100; place value tens and ones; ordering and comparing', code: 'Np.2', suggestedLessons: 3 },
+    { name: 'Stage 3: Numbers to 1000; place value HTO; rounding to nearest 10', code: 'Np.3', suggestedLessons: 3 },
+    { name: 'Stage 4: Numbers to 10 000; rounding to nearest 10/100; decimals to tenths', code: 'Np.4', suggestedLessons: 4 },
+    { name: 'Stage 5: Numbers to 1 000 000; decimals to hundredths; rounding decimals', code: 'Np.5', suggestedLessons: 4 },
+    { name: 'Stage 6: Decimals to thousandths; rounding to nearest 10/100/1000 and decimal places', code: 'Np.6', suggestedLessons: 4 },
+  ]},
+  { topic: 'Integers and powers (Ni)', code: 'Ni', subtopics: [
+    { name: 'Stage 1: Addition and subtraction within 10; doubles to 10; halving', code: 'Ni.1', suggestedLessons: 4 },
+    { name: 'Stage 2: Addition/subtraction within 100; multiplication as repeated addition; division by sharing', code: 'Ni.2', suggestedLessons: 5 },
+    { name: 'Stage 3: Multiplication tables 2, 3, 4, 5, 10; written addition/subtraction HTO', code: 'Ni.3', suggestedLessons: 5 },
+    { name: 'Stage 4: Tables to 10×10; column addition/subtraction; short multiplication and division; multiples and factors', code: 'Ni.4', suggestedLessons: 6 },
+    { name: 'Stage 5: Long multiplication and short division; primes; squares; order of operations', code: 'Ni.5', suggestedLessons: 6 },
+    { name: 'Stage 6: Long division; squares, cubes and roots; negative numbers in context; BODMAS', code: 'Ni.6', suggestedLessons: 5 },
+  ]},
+  { topic: 'Money (Nm)', code: 'Nm', subtopics: [
+    { name: 'Stage 1: Recognising coins and notes; small totals', code: 'Nm.1', suggestedLessons: 1 },
+    { name: 'Stage 2: Adding/subtracting amounts of money; change', code: 'Nm.2', suggestedLessons: 1 },
+    { name: 'Stage 3: Money in real-life contexts; converting pounds and pence (or local equivalent)', code: 'Nm.3', suggestedLessons: 2 },
+    { name: 'Stage 4: Word problems involving money calculations', code: 'Nm.4', suggestedLessons: 2 },
+    { name: 'Stage 5: Budgeting; percentage discounts (simple cases)', code: 'Nm.5', suggestedLessons: 2 },
+    { name: 'Stage 6: Profit and loss; percentage change in money contexts', code: 'Nm.6', suggestedLessons: 2 },
+  ]},
+  { topic: 'Fractions, decimals, percentages, ratio and proportion (Nf)', code: 'Nf', subtopics: [
+    { name: 'Stage 1: Halves of shapes and small quantities', code: 'Nf.1', suggestedLessons: 1 },
+    { name: 'Stage 2: Halves and quarters; equivalence of halves and quarters', code: 'Nf.2', suggestedLessons: 2 },
+    { name: 'Stage 3: Unit fractions; equivalent fractions; comparing fractions', code: 'Nf.3', suggestedLessons: 3 },
+    { name: 'Stage 4: Tenths and hundredths; mixed numbers; decimals to tenths; fraction-decimal links', code: 'Nf.4', suggestedLessons: 4 },
+    { name: 'Stage 5: Adding/subtracting fractions with same denominator; decimals to hundredths; simple percentages', code: 'Nf.5', suggestedLessons: 5 },
+    { name: 'Stage 6: Operations with fractions and decimals; percentage of a quantity; ratio and direct proportion', code: 'Nf.6', suggestedLessons: 6 },
+  ]},
+  { topic: 'Geometrical reasoning, shapes and measurements (Gg)', code: 'Gg', subtopics: [
+    { name: 'Stage 1: Naming 2D shapes (circle, square, triangle, rectangle) and 3D shapes; non-standard measurement', code: 'Gg.1', suggestedLessons: 3 },
+    { name: 'Stage 2: Properties of 2D shapes; standard units of length, mass, capacity', code: 'Gg.2', suggestedLessons: 4 },
+    { name: 'Stage 3: Right angles; symmetry; perimeter of rectangles; mm, cm, m, g, kg, ml, l', code: 'Gg.3', suggestedLessons: 4 },
+    { name: 'Stage 4: Acute, right, obtuse angles; area of rectangles by counting squares; converting units', code: 'Gg.4', suggestedLessons: 5 },
+    { name: 'Stage 5: Angles on a straight line; area and perimeter; volume of cuboids by counting cubes; circles (parts)', code: 'Gg.5', suggestedLessons: 5 },
+    { name: 'Stage 6: Angles in shapes; sum of angles; compound shapes; area and volume formulae; nets of 3D shapes', code: 'Gg.6', suggestedLessons: 6 },
+  ]},
+  { topic: 'Position and transformation (Gp)', code: 'Gp', subtopics: [
+    { name: 'Stage 1: Positional language: above/below, left/right, behind/in front', code: 'Gp.1', suggestedLessons: 1 },
+    { name: 'Stage 2: Following directions; quarter, half, three-quarter turns', code: 'Gp.2', suggestedLessons: 2 },
+    { name: 'Stage 3: Coordinates of a grid (first quadrant); reflection in a line', code: 'Gp.3', suggestedLessons: 2 },
+    { name: 'Stage 4: Coordinates; reflection in horizontal and vertical lines; translation', code: 'Gp.4', suggestedLessons: 3 },
+    { name: 'Stage 5: Coordinates in four quadrants; rotation about a point', code: 'Gp.5', suggestedLessons: 3 },
+    { name: 'Stage 6: Combinations of reflections, rotations, translations; bearings (intro)', code: 'Gp.6', suggestedLessons: 3 },
+  ]},
+  { topic: 'Time (Gt)', code: 'Gt', subtopics: [
+    { name: 'Stage 1: Days of the week; o\u2019clock and half past', code: 'Gt.1', suggestedLessons: 1 },
+    { name: 'Stage 2: Quarter past/to; minutes; reading analogue clocks', code: 'Gt.2', suggestedLessons: 2 },
+    { name: 'Stage 3: Digital and analogue time; intervals; reading timetables', code: 'Gt.3', suggestedLessons: 2 },
+    { name: 'Stage 4: 12- and 24-hour time; time intervals across hours', code: 'Gt.4', suggestedLessons: 3 },
+    { name: 'Stage 5: Time-zone problems; converting time units', code: 'Gt.5', suggestedLessons: 2 },
+    { name: 'Stage 6: Compound time problems; timetables and schedules', code: 'Gt.6', suggestedLessons: 2 },
+  ]},
+  { topic: 'Statistics (Ss)', code: 'Ss', subtopics: [
+    { name: 'Stage 1: Sorting objects into groups; simple pictograms', code: 'Ss.1', suggestedLessons: 1 },
+    { name: 'Stage 2: Pictograms and block diagrams; Carroll and Venn diagrams (one criterion)', code: 'Ss.2', suggestedLessons: 2 },
+    { name: 'Stage 3: Bar charts; tally charts; mode (informally)', code: 'Ss.3', suggestedLessons: 2 },
+    { name: 'Stage 4: Bar charts with scaled axes; mode; range', code: 'Ss.4', suggestedLessons: 3 },
+    { name: 'Stage 5: Line graphs; mode, median and range', code: 'Ss.5', suggestedLessons: 3 },
+    { name: 'Stage 6: Pie charts; mean, median, mode and range; the statistical enquiry cycle', code: 'Ss.6', suggestedLessons: 4 },
+  ]},
+  { topic: 'Probability (Sp)', code: 'Sp', subtopics: [
+    { name: 'Stage 1: Likelihood: certain, possible, impossible', code: 'Sp.1', suggestedLessons: 1 },
+    { name: 'Stage 2: More likely / less likely / equally likely', code: 'Sp.2', suggestedLessons: 1 },
+    { name: 'Stage 3: Listing outcomes of simple events', code: 'Sp.3', suggestedLessons: 1 },
+    { name: 'Stage 4: Likelihood scale (0 \u2013 certain); fairness of games', code: 'Sp.4', suggestedLessons: 2 },
+    { name: 'Stage 5: Probability as a fraction; experimental probability', code: 'Sp.5', suggestedLessons: 2 },
+    { name: 'Stage 6: Probability of combined simple events; expected vs experimental outcomes', code: 'Sp.6', suggestedLessons: 2 },
+  ]},
+]
+// ── PRIMARY ENGLISH 0058 ───────────────────────────────────
+// 19 topics (sub-strands), 110 stage-level subtopics, 261 lessons.
+// Reading: Rp, Rw, Rv, Rg, Rs, Rc, Re (Rp Stages 1-4 only).
+// Writing: Wp, Ww, Wv, Wg, Ws, Wc, We (Wp Stages 1-4 only).
+// Speaking & Listening: SLm, SLs, SLg, SLp, SLr.
+const PRIMARY_ENGLISH_0058 = [
+  // ─── READING ────────────────────────────────────────────
+  { topic: 'Reading: Word structure / phonics (Rp)', code: 'Rp', subtopics: [
+    { name: 'Stage 1: Phonemic awareness; letter-sound correspondences; blending simple CVC words', code: '1Rp', suggestedLessons: 4 },
+    { name: 'Stage 2: Consonant clusters, digraphs, trigraphs; reading multi-syllable words', code: '2Rp', suggestedLessons: 3 },
+    { name: 'Stage 3: Less common letter-sound correspondences; reading words with prefixes/suffixes', code: '3Rp', suggestedLessons: 2 },
+    { name: 'Stage 4: Reading complex multi-syllable words; alternative spellings of phonemes', code: '4Rp', suggestedLessons: 2 },
+  ]},
+  { topic: 'Reading: Word structure / spelling (Rw)', code: 'Rw', subtopics: [
+    { name: 'Stage 1: High-frequency words; simple word families', code: '1Rw', suggestedLessons: 2 },
+    { name: 'Stage 2: Common prefixes and suffixes; spelling patterns in known words', code: '2Rw', suggestedLessons: 2 },
+    { name: 'Stage 3: Root words; compound words; common affixes', code: '3Rw', suggestedLessons: 2 },
+    { name: 'Stage 4: Less common affixes; spelling rules in reading', code: '4Rw', suggestedLessons: 2 },
+    { name: 'Stage 5: Word origins; word families across languages', code: '5Rw', suggestedLessons: 2 },
+    { name: 'Stage 6: Etymology; complex word families', code: '6Rw', suggestedLessons: 2 },
+  ]},
+  { topic: 'Reading: Vocabulary and language (Rv)', code: 'Rv', subtopics: [
+    { name: 'Stage 1: Vocabulary in familiar texts; talking about word meanings', code: '1Rv', suggestedLessons: 2 },
+    { name: 'Stage 2: Inferring word meanings from context; simple synonyms', code: '2Rv', suggestedLessons: 3 },
+    { name: 'Stage 3: Word choice for effect; basic figurative language (similes)', code: '3Rv', suggestedLessons: 3 },
+    { name: 'Stage 4: Connotations; idiomatic phrases; metaphors', code: '4Rv', suggestedLessons: 3 },
+    { name: 'Stage 5: Figurative language: metaphor, personification; commenting on writer\u2019s choices', code: '5Rv', suggestedLessons: 4 },
+    { name: 'Stage 6: Subtle vocabulary effects; figurative imagery beyond literal', code: '6Rv', suggestedLessons: 4 },
+  ]},
+  { topic: 'Reading: Grammar and punctuation (Rg)', code: 'Rg', subtopics: [
+    { name: 'Stage 1: Simple sentences; full stops, capital letters, question marks', code: '1Rg', suggestedLessons: 2 },
+    { name: 'Stage 2: Conjunctions (and, but, because, if, when); commands and questions', code: '2Rg', suggestedLessons: 3 },
+    { name: 'Stage 3: Tense in texts; speech punctuation; apostrophes', code: '3Rg', suggestedLessons: 3 },
+    { name: 'Stage 4: Clauses; commas in lists; possessive apostrophes', code: '4Rg', suggestedLessons: 3 },
+    { name: 'Stage 5: Complex sentences; punctuation for clarity; relative clauses', code: '5Rg', suggestedLessons: 3 },
+    { name: 'Stage 6: Colons, semicolons, parenthetic commas, dashes, brackets; active/passive', code: '6Rg', suggestedLessons: 4 },
+  ]},
+  { topic: 'Reading: Structure of texts (Rs)', code: 'Rs', subtopics: [
+    { name: 'Stage 1: Beginning, middle, end of simple stories', code: '1Rs', suggestedLessons: 2 },
+    { name: 'Stage 2: Features of fiction vs non-fiction; simple poems', code: '2Rs', suggestedLessons: 3 },
+    { name: 'Stage 3: Chapters; headings; paragraphs; story structures', code: '3Rs', suggestedLessons: 3 },
+    { name: 'Stage 4: Compare structures across text types; narrative arcs', code: '4Rs', suggestedLessons: 3 },
+    { name: 'Stage 5: Identifying organisational features in complex texts', code: '5Rs', suggestedLessons: 3 },
+    { name: 'Stage 6: Effects of structural choices; sophisticated narrative structures', code: '6Rs', suggestedLessons: 3 },
+  ]},
+  { topic: 'Reading for comprehension (Rc)', code: 'Rc', subtopics: [
+    { name: 'Stage 1: Retrieving information from simple texts; predicting', code: '1Rc', suggestedLessons: 3 },
+    { name: 'Stage 2: Inferring feelings and reasons; making simple predictions', code: '2Rc', suggestedLessons: 4 },
+    { name: 'Stage 3: Comprehension across fiction and non-fiction; summarising', code: '3Rc', suggestedLessons: 4 },
+    { name: 'Stage 4: Inference using evidence; tracing ideas through a text', code: '4Rc', suggestedLessons: 4 },
+    { name: 'Stage 5: Theme; viewpoint; comparing texts', code: '5Rc', suggestedLessons: 4 },
+    { name: 'Stage 6: Multi-text comparison; evaluating reliability of sources', code: '6Rc', suggestedLessons: 5 },
+  ]},
+  { topic: 'Reading: Reflection and evaluation (Re)', code: 'Re', subtopics: [
+    { name: 'Stage 1: Talking about likes/dislikes in texts', code: '1Re', suggestedLessons: 1 },
+    { name: 'Stage 2: Talking about characters and events', code: '2Re', suggestedLessons: 2 },
+    { name: 'Stage 3: Reflecting on writer\u2019s intention; preferences', code: '3Re', suggestedLessons: 2 },
+    { name: 'Stage 4: Comparing own response to others\u2019', code: '4Re', suggestedLessons: 2 },
+    { name: 'Stage 5: Evaluating a writer\u2019s effectiveness', code: '5Re', suggestedLessons: 3 },
+    { name: 'Stage 6: Critical evaluation; judging reliability and bias', code: '6Re', suggestedLessons: 3 },
+  ]},
+  // ─── WRITING ────────────────────────────────────────────
+  { topic: 'Writing: Word structure / phonics (Wp)', code: 'Wp', subtopics: [
+    { name: 'Stage 1: Forming letters; writing CVC words using phonics', code: '1Wp', suggestedLessons: 4 },
+    { name: 'Stage 2: Segmenting and writing words with digraphs and clusters', code: '2Wp', suggestedLessons: 3 },
+    { name: 'Stage 3: Spelling words using known phonic patterns', code: '3Wp', suggestedLessons: 2 },
+    { name: 'Stage 4: Applying phonics to complex words', code: '4Wp', suggestedLessons: 2 },
+  ]},
+  { topic: 'Writing: Word structure / spelling (Ww)', code: 'Ww', subtopics: [
+    { name: 'Stage 1: Spelling common high-frequency words; own name', code: '1Ww', suggestedLessons: 2 },
+    { name: 'Stage 2: Common prefixes and suffixes in writing', code: '2Ww', suggestedLessons: 2 },
+    { name: 'Stage 3: Compound words; common spelling patterns', code: '3Ww', suggestedLessons: 3 },
+    { name: 'Stage 4: Spelling rules: doubling, dropping e, adding suffixes', code: '4Ww', suggestedLessons: 3 },
+    { name: 'Stage 5: Less common spelling patterns; homophones', code: '5Ww', suggestedLessons: 3 },
+    { name: 'Stage 6: Complex spelling; etymology-informed spelling', code: '6Ww', suggestedLessons: 3 },
+  ]},
+  { topic: 'Writing: Vocabulary and language (Wv)', code: 'Wv', subtopics: [
+    { name: 'Stage 1: Using simple descriptive words in own writing', code: '1Wv', suggestedLessons: 2 },
+    { name: 'Stage 2: Choosing adjectives, verbs, adverbs; word banks', code: '2Wv', suggestedLessons: 3 },
+    { name: 'Stage 3: Synonyms in own writing; alternatives to "said"', code: '3Wv', suggestedLessons: 3 },
+    { name: 'Stage 4: Using thesaurus; precise word choice', code: '4Wv', suggestedLessons: 3 },
+    { name: 'Stage 5: Using figurative language: simile, metaphor in writing', code: '5Wv', suggestedLessons: 4 },
+    { name: 'Stage 6: Sustained figurative imagery; controlled language for effect', code: '6Wv', suggestedLessons: 4 },
+  ]},
+  { topic: 'Writing: Grammar and punctuation (Wg)', code: 'Wg', subtopics: [
+    { name: 'Stage 1: Writing simple sentences with capital letters and full stops', code: '1Wg', suggestedLessons: 2 },
+    { name: 'Stage 2: Using conjunctions; punctuating commands and questions', code: '2Wg', suggestedLessons: 3 },
+    { name: 'Stage 3: Using past, present, future tense; speech punctuation', code: '3Wg', suggestedLessons: 3 },
+    { name: 'Stage 4: Compound sentences; commas in lists; possessive apostrophes', code: '4Wg', suggestedLessons: 4 },
+    { name: 'Stage 5: Complex sentences; punctuation for clarity', code: '5Wg', suggestedLessons: 4 },
+    { name: 'Stage 6: Sophisticated punctuation: colons, semicolons, brackets, dashes; active/passive', code: '6Wg', suggestedLessons: 4 },
+  ]},
+  { topic: 'Writing: Structure of texts (Ws)', code: 'Ws', subtopics: [
+    { name: 'Stage 1: Writing a simple sequence of events', code: '1Ws', suggestedLessons: 2 },
+    { name: 'Stage 2: Writing stories with beginning/middle/end; grouping related ideas', code: '2Ws', suggestedLessons: 3 },
+    { name: 'Stage 3: Paragraphs; headings; organising non-fiction', code: '3Ws', suggestedLessons: 3 },
+    { name: 'Stage 4: Linking paragraphs; topic sentences', code: '4Ws', suggestedLessons: 4 },
+    { name: 'Stage 5: Structuring extended texts; planning a narrative arc', code: '5Ws', suggestedLessons: 4 },
+    { name: 'Stage 6: Crafted structural choices; cohesive devices across a text', code: '6Ws', suggestedLessons: 4 },
+  ]},
+  { topic: 'Writing for purpose (Wc)', code: 'Wc', subtopics: [
+    { name: 'Stage 1: Writing labels, captions, simple sentences for a reason', code: '1Wc', suggestedLessons: 2 },
+    { name: 'Stage 2: Writing simple stories, recounts, letters', code: '2Wc', suggestedLessons: 4 },
+    { name: 'Stage 3: Writing for different text types (instructions, reports, narratives)', code: '3Wc', suggestedLessons: 4 },
+    { name: 'Stage 4: Adapting tone for audience; persuasive writing', code: '4Wc', suggestedLessons: 4 },
+    { name: 'Stage 5: Sustained writing for varied purposes', code: '5Wc', suggestedLessons: 5 },
+    { name: 'Stage 6: Writing with deliberate authorial voice for chosen audiences', code: '6Wc', suggestedLessons: 5 },
+  ]},
+  { topic: 'Writing: Reflection and evaluation (We)', code: 'We', subtopics: [
+    { name: 'Stage 1: Talking about own writing; simple corrections', code: '1We', suggestedLessons: 1 },
+    { name: 'Stage 2: Re-reading and correcting own writing', code: '2We', suggestedLessons: 2 },
+    { name: 'Stage 3: Editing for clarity and accuracy', code: '3We', suggestedLessons: 2 },
+    { name: 'Stage 4: Self- and peer-editing for content and grammar', code: '4We', suggestedLessons: 3 },
+    { name: 'Stage 5: Evaluating own writing against criteria', code: '5We', suggestedLessons: 3 },
+    { name: 'Stage 6: Critical self-evaluation; redrafting for effect', code: '6We', suggestedLessons: 3 },
+  ]},
+  // ─── SPEAKING & LISTENING ───────────────────────────────
+  { topic: 'Speaking & Listening: Making yourself understood (SLm)', code: 'SLm', subtopics: [
+    { name: 'Stage 1: Speaking audibly; sharing news about self', code: '1SLm', suggestedLessons: 1 },
+    { name: 'Stage 2: Sequencing speech; using vocabulary clearly', code: '2SLm', suggestedLessons: 2 },
+    { name: 'Stage 3: Speaking to inform; pacing and volume', code: '3SLm', suggestedLessons: 2 },
+    { name: 'Stage 4: Adapting language to audience; clarity of explanation', code: '4SLm', suggestedLessons: 2 },
+    { name: 'Stage 5: Organising spoken information; using register', code: '5SLm', suggestedLessons: 3 },
+    { name: 'Stage 6: Formal and informal registers; structuring main and supporting points', code: '6SLm', suggestedLessons: 3 },
+  ]},
+  { topic: 'Speaking & Listening: Showing understanding (SLs)', code: 'SLs', subtopics: [
+    { name: 'Stage 1: Listening to instructions; responding to simple questions', code: '1SLs', suggestedLessons: 1 },
+    { name: 'Stage 2: Listening to stories and explanations; responding with relevance', code: '2SLs', suggestedLessons: 2 },
+    { name: 'Stage 3: Listening for key information; recall and questioning', code: '3SLs', suggestedLessons: 2 },
+    { name: 'Stage 4: Active listening; clarifying and confirming understanding', code: '4SLs', suggestedLessons: 2 },
+    { name: 'Stage 5: Responding with reasoned ideas; building on others\u2019 contributions', code: '5SLs', suggestedLessons: 2 },
+    { name: 'Stage 6: Reflective listening; reasoned response with reference to specific points', code: '6SLs', suggestedLessons: 3 },
+  ]},
+  { topic: 'Speaking & Listening: Group work and discussion (SLg)', code: 'SLg', subtopics: [
+    { name: 'Stage 1: Taking turns in talk; simple paired conversation', code: '1SLg', suggestedLessons: 1 },
+    { name: 'Stage 2: Small-group talk; staying on topic', code: '2SLg', suggestedLessons: 2 },
+    { name: 'Stage 3: Group roles; agreeing and disagreeing politely', code: '3SLg', suggestedLessons: 2 },
+    { name: 'Stage 4: Cooperative talk; building on others\u2019 ideas', code: '4SLg', suggestedLessons: 2 },
+    { name: 'Stage 5: Leading and following in discussions; reaching consensus', code: '5SLg', suggestedLessons: 3 },
+    { name: 'Stage 6: Taking assigned roles; helping assign roles in groups', code: '6SLg', suggestedLessons: 3 },
+  ]},
+  { topic: 'Speaking & Listening: Performance (SLp)', code: 'SLp', subtopics: [
+    { name: 'Stage 1: Reading aloud familiar texts; simple recitation', code: '1SLp', suggestedLessons: 1 },
+    { name: 'Stage 2: Reading with expression; short rehearsed presentations', code: '2SLp', suggestedLessons: 2 },
+    { name: 'Stage 3: Performing poetry and short drama', code: '3SLp', suggestedLessons: 2 },
+    { name: 'Stage 4: Giving short prepared presentations', code: '4SLp', suggestedLessons: 2 },
+    { name: 'Stage 5: Performing with control of voice and gesture', code: '5SLp', suggestedLessons: 2 },
+    { name: 'Stage 6: Extended presentations; engaging an audience', code: '6SLp', suggestedLessons: 3 },
+  ]},
+  { topic: 'Speaking & Listening: Reflection and evaluation (SLr)', code: 'SLr', subtopics: [
+    { name: 'Stage 1: Saying what was enjoyable; noticing non-verbal communication', code: '1SLr', suggestedLessons: 1 },
+    { name: 'Stage 2: Reflecting on own contributions in group talk', code: '2SLr', suggestedLessons: 1 },
+    { name: 'Stage 3: Reviewing what worked in a presentation', code: '3SLr', suggestedLessons: 2 },
+    { name: 'Stage 4: Self- and peer-feedback on speaking', code: '4SLr', suggestedLessons: 2 },
+    { name: 'Stage 5: Evaluating effectiveness of speaking against criteria', code: '5SLr', suggestedLessons: 2 },
+    { name: 'Stage 6: Critical reflection on talk; suggesting improvements', code: '6SLr', suggestedLessons: 2 },
+  ]},
+]
+// ── PRIMARY SCIENCE 0097 ───────────────────────────────────
+// 17 topics, 97 stage-level subtopics, 266 lessons.
+// Skills: TWSm, TWSp, TWSc, TWSa (Thinking & Working Scientifically).
+// Content: Bs/Bp/Be (Biology, Be starts Stage 2);
+//          Cm/Cp/Cc (Chemistry); Pf/Pl/Pe (Physics);
+//          Ep/Ec/Es (Earth & Space, Ec only Stages 5-6).
+// Context: SiC (Science in Context).
+const PRIMARY_SCIENCE_0097 = [
+  // ─── SKILLS — THINKING & WORKING SCIENTIFICALLY ─────────
+  { topic: 'TWS: Models and representations (TWSm)', code: 'TWSm', subtopics: [
+    { name: 'Stage 1: Use simple drawings and models to show ideas', code: '1TWSm', suggestedLessons: 1 },
+    { name: 'Stage 2: Use diagrams and labelled drawings to represent observations', code: '2TWSm', suggestedLessons: 1 },
+    { name: 'Stage 3: Describe how models help us understand simple phenomena', code: '3TWSm', suggestedLessons: 2 },
+    { name: 'Stage 4: Identify the limitations of simple models', code: '4TWSm', suggestedLessons: 2 },
+    { name: 'Stage 5: Use models to explain scientific ideas; compare alternative models', code: '5TWSm', suggestedLessons: 2 },
+    { name: 'Stage 6: Describe how a model helps us understand a phenomenon; recognise model limitations', code: '6TWSm', suggestedLessons: 2 },
+  ]},
+  { topic: 'TWS: Purpose and planning of scientific enquiry (TWSp)', code: 'TWSp', subtopics: [
+    { name: 'Stage 1: Ask simple "what" and "how" questions; make simple predictions', code: '1TWSp', suggestedLessons: 2 },
+    { name: 'Stage 2: Make predictions about what they think will happen', code: '2TWSp', suggestedLessons: 2 },
+    { name: 'Stage 3: Plan a simple enquiry; identify what to change and what to measure', code: '3TWSp', suggestedLessons: 2 },
+    { name: 'Stage 4: Describe possible outcomes; identify variables informally', code: '4TWSp', suggestedLessons: 3 },
+    { name: 'Stage 5: Plan a fair test; predict using scientific knowledge', code: '5TWSp', suggestedLessons: 3 },
+    { name: 'Stage 6: Plan investigations with control of variables; refer to relevant knowledge in predictions', code: '6TWSp', suggestedLessons: 3 },
+  ]},
+  { topic: 'TWS: Carrying out scientific enquiry (TWSc)', code: 'TWSc', subtopics: [
+    { name: 'Stage 1: Observe and describe; sort and group objects', code: '1TWSc', suggestedLessons: 2 },
+    { name: 'Stage 2: Make and record observations; sort by simple criteria', code: '2TWSc', suggestedLessons: 2 },
+    { name: 'Stage 3: Take measurements using simple equipment; record in tables', code: '3TWSc', suggestedLessons: 3 },
+    { name: 'Stage 4: Record results in tables and simple charts; classify using keys', code: '4TWSc', suggestedLessons: 3 },
+    { name: 'Stage 5: Take repeat measurements; record accurately; identify anomalies', code: '5TWSc', suggestedLessons: 3 },
+    { name: 'Stage 6: Sort, group and classify using testing, observation and secondary information', code: '6TWSc', suggestedLessons: 4 },
+  ]},
+  { topic: 'TWS: Analysis, evaluation and conclusions (TWSa)', code: 'TWSa', subtopics: [
+    { name: 'Stage 1: Describe what was found; say what surprised them', code: '1TWSa', suggestedLessons: 1 },
+    { name: 'Stage 2: Compare what they found with their predictions', code: '2TWSa', suggestedLessons: 2 },
+    { name: 'Stage 3: Look for patterns in simple results; describe what they show', code: '3TWSa', suggestedLessons: 2 },
+    { name: 'Stage 4: Identify trends; suggest reasons for results', code: '4TWSa', suggestedLessons: 3 },
+    { name: 'Stage 5: Draw conclusions supported by evidence; suggest improvements', code: '5TWSa', suggestedLessons: 3 },
+    { name: 'Stage 6: Evaluate enquiries; identify limitations; suggest further investigation', code: '6TWSa', suggestedLessons: 3 },
+  ]},
+  // ─── CONTENT — BIOLOGY ──────────────────────────────────
+  { topic: 'Biology: Structure and function (Bs)', code: 'Bs', subtopics: [
+    { name: 'Stage 1: Identify the senses and body parts that detect them; main external body parts', code: '1Bs', suggestedLessons: 3 },
+    { name: 'Stage 2: Parts of plants; basic functions (roots, stems, leaves)', code: '2Bs', suggestedLessons: 3 },
+    { name: 'Stage 3: Skeletons and muscles; how they work together', code: '3Bs', suggestedLessons: 3 },
+    { name: 'Stage 4: Teeth and digestion; basic structure of the digestive system', code: '4Bs', suggestedLessons: 4 },
+    { name: 'Stage 5: Circulatory system: heart, blood vessels, blood; lungs and breathing', code: '5Bs', suggestedLessons: 4 },
+    { name: 'Stage 6: Reproduction in plants and animals; flower parts; pollination', code: '6Bs', suggestedLessons: 4 },
+  ]},
+  { topic: 'Biology: Life processes (Bp)', code: 'Bp', subtopics: [
+    { name: 'Stage 1: Living vs non-living; needs of living things (water, food, air)', code: '1Bp', suggestedLessons: 2 },
+    { name: 'Stage 2: Life cycles of familiar animals and plants', code: '2Bp', suggestedLessons: 3 },
+    { name: 'Stage 3: What plants need to grow; basic photosynthesis idea', code: '3Bp', suggestedLessons: 3 },
+    { name: 'Stage 4: Healthy diet; food groups; effects of exercise', code: '4Bp', suggestedLessons: 3 },
+    { name: 'Stage 5: Reproduction and growth in humans; life cycles compared', code: '5Bp', suggestedLessons: 4 },
+    { name: 'Stage 6: Effect of diet, exercise, drugs and lifestyle on the body', code: '6Bp', suggestedLessons: 4 },
+  ]},
+  { topic: 'Biology: Ecosystems (Be) — Stages 2-6', code: 'Be', subtopics: [
+    { name: 'Stage 2: Different habitats; what lives where', code: '2Be', suggestedLessons: 2 },
+    { name: 'Stage 3: Simple food chains; producers and consumers', code: '3Be', suggestedLessons: 3 },
+    { name: 'Stage 4: Food webs; predators and prey; habitat adaptations', code: '4Be', suggestedLessons: 3 },
+    { name: 'Stage 5: Classification of living things; environmental change effects', code: '5Be', suggestedLessons: 3 },
+    { name: 'Stage 6: Interdependence; effect of human activity on ecosystems; conservation', code: '6Be', suggestedLessons: 4 },
+  ]},
+  // ─── CONTENT — CHEMISTRY ────────────────────────────────
+  { topic: 'Chemistry: Materials and their structure (Cm)', code: 'Cm', subtopics: [
+    { name: 'Stage 1: Identify common materials; group simple objects by material', code: '1Cm', suggestedLessons: 2 },
+    { name: 'Stage 2: Materials in everyday use; natural vs human-made', code: '2Cm', suggestedLessons: 2 },
+    { name: 'Stage 3: Solids, liquids and gases — basic identification', code: '3Cm', suggestedLessons: 3 },
+    { name: 'Stage 4: Differences between solids, liquids and gases (particle idea informal)', code: '4Cm', suggestedLessons: 3 },
+    { name: 'Stage 5: Pure substances vs mixtures; element/compound idea (intro)', code: '5Cm', suggestedLessons: 3 },
+    { name: 'Stage 6: Particle model of matter applied to states', code: '6Cm', suggestedLessons: 3 },
+  ]},
+  { topic: 'Chemistry: Properties of materials (Cp)', code: 'Cp', subtopics: [
+    { name: 'Stage 1: Describe materials: hard/soft, rough/smooth, waterproof', code: '1Cp', suggestedLessons: 2 },
+    { name: 'Stage 2: Magnetic and non-magnetic; transparent / opaque', code: '2Cp', suggestedLessons: 2 },
+    { name: 'Stage 3: Properties and uses: hardness, flexibility, absorbency', code: '3Cp', suggestedLessons: 3 },
+    { name: 'Stage 4: Conductors and insulators (heat and electricity, basic)', code: '4Cp', suggestedLessons: 3 },
+    { name: 'Stage 5: Solubility and floating/sinking; density (informal)', code: '5Cp', suggestedLessons: 3 },
+    { name: 'Stage 6: Properties used to choose materials for specific purposes', code: '6Cp', suggestedLessons: 3 },
+  ]},
+  { topic: 'Chemistry: Changes to materials (Cc)', code: 'Cc', subtopics: [
+    { name: 'Stage 1: Simple changes by squashing, bending, stretching, twisting', code: '1Cc', suggestedLessons: 2 },
+    { name: 'Stage 2: Reversible changes: melting and freezing, simple cases', code: '2Cc', suggestedLessons: 2 },
+    { name: 'Stage 3: Changes of state: melting, freezing, evaporation, condensation', code: '3Cc', suggestedLessons: 3 },
+    { name: 'Stage 4: Heating and cooling effects on materials', code: '4Cc', suggestedLessons: 3 },
+    { name: 'Stage 5: Mixtures: dissolving; separating mixtures (filtering, evaporation)', code: '5Cc', suggestedLessons: 4 },
+    { name: 'Stage 6: Reversible vs irreversible changes; burning, rusting', code: '6Cc', suggestedLessons: 3 },
+  ]},
+  // ─── CONTENT — PHYSICS ──────────────────────────────────
+  { topic: 'Physics: Forces and energy (Pf)', code: 'Pf', subtopics: [
+    { name: 'Stage 1: Pushes and pulls; how forces make things move, slow down or change direction', code: '1Pf', suggestedLessons: 2 },
+    { name: 'Stage 2: Floating and sinking; effects of gravity (objects fall down)', code: '2Pf', suggestedLessons: 2 },
+    { name: 'Stage 3: Friction in everyday contexts; surfaces and movement', code: '3Pf', suggestedLessons: 3 },
+    { name: 'Stage 4: Forces in opposition; simple energy stores and transfers (informal)', code: '4Pf', suggestedLessons: 3 },
+    { name: 'Stage 5: Energy in food and fuel; gravity, weight (informal); levers (intro)', code: '5Pf', suggestedLessons: 3 },
+    { name: 'Stage 6: Mass vs weight; effect of gravity on weight; renewable and non-renewable energy', code: '6Pf', suggestedLessons: 4 },
+  ]},
+  { topic: 'Physics: Light and sound (Pl)', code: 'Pl', subtopics: [
+    { name: 'Stage 1: Sources of light; dark as absence of light; sources of sound', code: '1Pl', suggestedLessons: 2 },
+    { name: 'Stage 2: Day and night; light from the Sun; loud and soft sounds', code: '2Pl', suggestedLessons: 2 },
+    { name: 'Stage 3: Shadows: formation and size; reflection of light (basic)', code: '3Pl', suggestedLessons: 3 },
+    { name: 'Stage 4: How we see (light enters the eye); pitch of sounds', code: '4Pl', suggestedLessons: 3 },
+    { name: 'Stage 5: Light travels in straight lines; refraction (intro); how the ear works', code: '5Pl', suggestedLessons: 4 },
+    { name: 'Stage 6: Reflection in mirrors; spectrum and colour; sound travel through materials', code: '6Pl', suggestedLessons: 4 },
+  ]},
+  { topic: 'Physics: Electricity and magnetism (Pe)', code: 'Pe', subtopics: [
+    { name: 'Stage 1: Safety with electricity; everyday electrical appliances', code: '1Pe', suggestedLessons: 1 },
+    { name: 'Stage 2: Magnets attract and repel; magnetic materials', code: '2Pe', suggestedLessons: 2 },
+    { name: 'Stage 3: Simple electric circuits; switches; what makes a circuit work', code: '3Pe', suggestedLessons: 3 },
+    { name: 'Stage 4: Conductors and insulators in circuits; series circuits', code: '4Pe', suggestedLessons: 3 },
+    { name: 'Stage 5: Parallel circuits (intro); circuit diagrams using symbols', code: '5Pe', suggestedLessons: 4 },
+    { name: 'Stage 6: Effect of changing components on current; uses of electromagnets', code: '6Pe', suggestedLessons: 3 },
+  ]},
+  // ─── CONTENT — EARTH & SPACE ────────────────────────────
+  { topic: 'Earth and Space: Planet Earth (Ep)', code: 'Ep', subtopics: [
+    { name: 'Stage 1: Weather and seasons; describing the weather', code: '1Ep', suggestedLessons: 2 },
+    { name: 'Stage 2: Rocks and soils — observe and describe', code: '2Ep', suggestedLessons: 2 },
+    { name: 'Stage 3: Properties of rocks; uses of rocks', code: '3Ep', suggestedLessons: 3 },
+    { name: 'Stage 4: Soil formation and uses; the water cycle (intro)', code: '4Ep', suggestedLessons: 3 },
+    { name: 'Stage 5: Volcanoes, earthquakes and tectonic processes (introductory)', code: '5Ep', suggestedLessons: 3 },
+    { name: 'Stage 6: Climate vs weather; climate change basics', code: '6Ep', suggestedLessons: 3 },
+  ]},
+  { topic: 'Earth and Space: Cycles on Earth (Ec) — Stages 5-6', code: 'Ec', subtopics: [
+    { name: 'Stage 5: The water cycle; states of water in the cycle', code: '5Ec', suggestedLessons: 3 },
+    { name: 'Stage 6: Rock cycle (introductory); links between cycles on Earth', code: '6Ec', suggestedLessons: 3 },
+  ]},
+  { topic: 'Earth and Space: Earth in space (Es)', code: 'Es', subtopics: [
+    { name: 'Stage 1: The Sun, Moon and stars — describing what we see', code: '1Es', suggestedLessons: 1 },
+    { name: 'Stage 2: Day and night; the Sun in the sky', code: '2Es', suggestedLessons: 2 },
+    { name: 'Stage 3: Phases of the Moon (observational)', code: '3Es', suggestedLessons: 2 },
+    { name: 'Stage 4: Earth\u2019s rotation causes day and night', code: '4Es', suggestedLessons: 2 },
+    { name: 'Stage 5: The Solar System: planets in order from the Sun', code: '5Es', suggestedLessons: 3 },
+    { name: 'Stage 6: Orbits and moons; movement of planets and moons (informal)', code: '6Es', suggestedLessons: 3 },
+  ]},
+  // ─── CONTEXT — SCIENCE IN CONTEXT ───────────────────────
+  { topic: 'Science in Context (SiC)', code: 'SiC', subtopics: [
+    { name: 'Stage 1: Science in everyday life: home, school, surroundings', code: '1SiC', suggestedLessons: 1 },
+    { name: 'Stage 2: People who use science in their work', code: '2SiC', suggestedLessons: 1 },
+    { name: 'Stage 3: Science in local contexts: weather, food, water', code: '3SiC', suggestedLessons: 1 },
+    { name: 'Stage 4: Scientists and their discoveries (simple stories)', code: '4SiC', suggestedLessons: 2 },
+    { name: 'Stage 5: Applications of science: medicine, technology, environment', code: '5SiC', suggestedLessons: 2 },
+    { name: 'Stage 6: Science, ethics and global issues (intro): climate, conservation', code: '6SiC', suggestedLessons: 2 },
+  ]},
+]
+// ── PRIMARY COMPUTING 0059 ─────────────────────────────────
+// 5 strands (no internal sub-strands), 30 stage-level
+// subtopics, 116 lessons. Codes: CT, PG, MD, NW, CS.
+const PRIMARY_COMPUTING_0059 = [
+  { topic: 'Computational Thinking (CT)', code: 'CT', subtopics: [
+    { name: 'Stage 1: Following and creating simple sequences of instructions (e.g. how to brush teeth)', code: '1CT', suggestedLessons: 4 },
+    { name: 'Stage 2: Sequence of instructions matters; predicting outcomes of simple instruction sets', code: '2CT', suggestedLessons: 4 },
+    { name: 'Stage 3: Decomposing tasks into smaller parts; spotting repeated steps', code: '3CT', suggestedLessons: 5 },
+    { name: 'Stage 4: Identifying patterns; introduction to algorithms as a formal idea', code: '4CT', suggestedLessons: 5 },
+    { name: 'Stage 5: Algorithmic thinking with branching choices (IF\u2026); flowchart basics', code: '5CT', suggestedLessons: 5 },
+    { name: 'Stage 6: More complex algorithms; combining sequence, selection and repetition logically', code: '6CT', suggestedLessons: 5 },
+  ]},
+  { topic: 'Programming (PG)', code: 'PG', subtopics: [
+    { name: 'Stage 1: Move a character on screen with simple commands; floor robot / Bee-Bot programs', code: '1PG', suggestedLessons: 4 },
+    { name: 'Stage 2: Sequence multiple commands; predict the output of a short program', code: '2PG', suggestedLessons: 4 },
+    { name: 'Stage 3: Use of events (e.g. "when key pressed"); simple animations in a block language', code: '3PG', suggestedLessons: 5 },
+    { name: 'Stage 4: Repetition / iteration introduced (loops); fixing a program that doesn\u2019t work (debugging)', code: '4PG', suggestedLessons: 6 },
+    { name: 'Stage 5: Selection (IF statements); variables in programs (basic)', code: '5PG', suggestedLessons: 6 },
+    { name: 'Stage 6: Combining loops, selection and variables; planning and testing a small project', code: '6PG', suggestedLessons: 6 },
+  ]},
+  { topic: 'Managing Data (MD)', code: 'MD', subtopics: [
+    { name: 'Stage 1: Sorting objects and information into groups', code: '1MD', suggestedLessons: 2 },
+    { name: 'Stage 2: Collecting simple data (e.g. tallying favourites); pictograms', code: '2MD', suggestedLessons: 3 },
+    { name: 'Stage 3: Recording data in tables; simple bar charts on a computer', code: '3MD', suggestedLessons: 3 },
+    { name: 'Stage 4: Sorting and filtering data; searching for information', code: '4MD', suggestedLessons: 4 },
+    { name: 'Stage 5: Spreadsheet basics: rows, columns, simple formulas (SUM, AVG)', code: '5MD', suggestedLessons: 4 },
+    { name: 'Stage 6: Interpreting datasets; introduction to databases (records and fields)', code: '6MD', suggestedLessons: 4 },
+  ]},
+  { topic: 'Networks and Digital Communication (NW)', code: 'NW', subtopics: [
+    { name: 'Stage 1: What devices we use; rules for using devices safely; trusted adults', code: '1NW', suggestedLessons: 2 },
+    { name: 'Stage 2: Sending and receiving messages (email idea); keeping personal info safe', code: '2NW', suggestedLessons: 2 },
+    { name: 'Stage 3: What the internet is (informally); searching for information; reliable vs unreliable', code: '3NW', suggestedLessons: 3 },
+    { name: 'Stage 4: Networks: how devices connect (basic); responsible communication online', code: '4NW', suggestedLessons: 3 },
+    { name: 'Stage 5: How information moves across networks (high level); digital footprint', code: '5NW', suggestedLessons: 4 },
+    { name: 'Stage 6: Cyberbullying and how to respond; security: passwords, suspicious messages', code: '6NW', suggestedLessons: 4 },
+  ]},
+  { topic: 'Computer Systems (CS)', code: 'CS', subtopics: [
+    { name: 'Stage 1: Identifying everyday computing devices; parts you can see (screen, keyboard)', code: '1CS', suggestedLessons: 2 },
+    { name: 'Stage 2: Inputs and outputs (mouse, keyboard, speakers, screen)', code: '2CS', suggestedLessons: 3 },
+    { name: 'Stage 3: Hardware vs software (basic difference); operating system idea (informal)', code: '3CS', suggestedLessons: 3 },
+    { name: 'Stage 4: Storage devices; what RAM does (very basic intro)', code: '4CS', suggestedLessons: 3 },
+    { name: 'Stage 5: Robotics: sensors and outputs; simple robotic behaviour', code: '5CS', suggestedLessons: 4 },
+    { name: 'Stage 6: Benefits of robotics in industry; introduction to AI ideas', code: '6CS', suggestedLessons: 4 },
+  ]},
+]
+// ── PRIMARY GLOBAL PERSPECTIVES 0838 ───────────────────────
+// 6 skill strands, 24 stage-band subtopics (4 per skill —
+// Stage 1, Stage 2, Stage 3-4 shared, Stage 5-6 shared),
+// 92 lessons. Codes: Re (Research), An (Analysis), Ev (Evaluation),
+// Rf (Reflection), Co (Collaboration), Cm (Communication).
+const PRIMARY_GLOBAL_0838 = [
+  { topic: 'Research', code: 'Re', subtopics: [
+    { name: 'Stage 1: Asking simple questions about familiar topics; using pictures and simple texts as sources', code: '1Re', suggestedLessons: 3 },
+    { name: 'Stage 2: Asking "who/what/where" questions; identifying simple sources in books and online', code: '2Re', suggestedLessons: 3 },
+    { name: 'Stage 3-4: Planning a small research task; identifying suitable sources; gathering information through observation, interviews or simple questionnaires', code: '34Re', suggestedLessons: 6 },
+    { name: 'Stage 5-6: Conducting structured investigations; using multiple sources; distinguishing between fact and opinion; identifying reliable information', code: '56Re', suggestedLessons: 6 },
+  ]},
+  { topic: 'Analysis', code: 'An', subtopics: [
+    { name: 'Stage 1: Talking about what they notice in a picture or story; simple sorting', code: '1An', suggestedLessons: 2 },
+    { name: 'Stage 2: Comparing two things; identifying simple similarities and differences', code: '2An', suggestedLessons: 3 },
+    { name: 'Stage 3-4: Identifying patterns in information; recognising different perspectives on an issue; spotting bias informally', code: '34An', suggestedLessons: 5 },
+    { name: 'Stage 5-6: Analysing perspectives in depth: personal, local/national, global; identifying causes and effects of issues', code: '56An', suggestedLessons: 6 },
+  ]},
+  { topic: 'Evaluation', code: 'Ev', subtopics: [
+    { name: 'Stage 1: Saying what they like / don\u2019t like and why; simple "good idea / bad idea" judgements', code: '1Ev', suggestedLessons: 2 },
+    { name: 'Stage 2: Giving simple reasons for opinions; saying whether a story / source is interesting and why', code: '2Ev', suggestedLessons: 3 },
+    { name: 'Stage 3-4: Comparing sources; saying which is more helpful/reliable and why; evaluating own and others\u2019 suggestions', code: '34Ev', suggestedLessons: 5 },
+    { name: 'Stage 5-6: Evaluating evidence for an argument; judging strengths/weaknesses of different solutions to an issue', code: '56Ev', suggestedLessons: 5 },
+  ]},
+  { topic: 'Reflection', code: 'Rf', subtopics: [
+    { name: 'Stage 1: Talking about what they\u2019ve done and enjoyed', code: '1Rf', suggestedLessons: 1 },
+    { name: 'Stage 2: Saying what they\u2019ve learned; what they found easy / hard', code: '2Rf', suggestedLessons: 2 },
+    { name: 'Stage 3-4: Reflecting on what they\u2019ve learned about a topic AND about themselves; identifying changes in their own thinking', code: '34Rf', suggestedLessons: 4 },
+    { name: 'Stage 5-6: Reflecting on impact of their actions; how perspectives changed; what they would do differently next time', code: '56Rf', suggestedLessons: 4 },
+  ]},
+  { topic: 'Collaboration', code: 'Co', subtopics: [
+    { name: 'Stage 1: Taking turns; working in pairs on simple tasks', code: '1Co', suggestedLessons: 2 },
+    { name: 'Stage 2: Working in small groups; sharing resources fairly', code: '2Co', suggestedLessons: 3 },
+    { name: 'Stage 3-4: Taking on simple roles in a team; helping each other complete a shared task', code: '34Co', suggestedLessons: 5 },
+    { name: 'Stage 5-6: Planning team work; dividing tasks fairly considering team members\u2019 skills; resolving disagreements constructively', code: '56Co', suggestedLessons: 6 },
+  ]},
+  { topic: 'Communication', code: 'Cm', subtopics: [
+    { name: 'Stage 1: Speaking simply about own ideas and findings; drawing pictures to explain', code: '1Cm', suggestedLessons: 2 },
+    { name: 'Stage 2: Presenting findings to a small group; using pictures and labels', code: '2Cm', suggestedLessons: 3 },
+    { name: 'Stage 3-4: Giving short presentations; choosing appropriate ways to communicate (poster, talk, drawing) for different audiences', code: '34Cm', suggestedLessons: 5 },
+    { name: 'Stage 5-6: Adapting communication for purpose and audience; structuring an argument with evidence; team presentation skills', code: '56Cm', suggestedLessons: 6 },
+  ]},
+]
+// ── PRIMARY SPINE LIBRARY — used by the loader ──────────────
+// Maps a subject-name regex to its verified spine constant.
+// The loader auto-detects which spine fits the selected subject.
+const PRIMARY_LIBRARY = [
+  { match: /\bmath/i,        const_: PRIMARY_MATHS_0096,    source: 'Cambridge Primary Mathematics 0096' },
+  { match: /\benglish\b/i,   const_: PRIMARY_ENGLISH_0058,  source: 'Cambridge Primary English 0058' },
+  { match: /\bscience\b/i,   const_: PRIMARY_SCIENCE_0097,  source: 'Cambridge Primary Science 0097' },
+  { match: /comput/i,        const_: PRIMARY_COMPUTING_0059, source: 'Cambridge Primary Computing 0059' },
+  { match: /global/i,        const_: PRIMARY_GLOBAL_0838,   source: 'Cambridge Primary Global Perspectives 0838' },
+]
+
 function SyllabusSpineTab({ toast }) {
-  const [curricula] = useState(['IGCSE', 'Cambridge A-Level', 'Edexcel', 'IB Diploma', 'Kenya CBC', 'American', 'British National Curriculum'])
+  const [curricula] = useState(['Primary', 'IGCSE', 'Cambridge A-Level', 'Edexcel', 'IB Diploma', 'Kenya CBC', 'American', 'British National Curriculum'])
   const [curriculum, setCurriculum] = useState('IGCSE')
   const [subjects, setSubjects] = useState([])
   const [subjectId, setSubjectId] = useState('')
@@ -6713,6 +7207,26 @@ function SyllabusSpineTab({ toast }) {
     finally { setBusy(false) }
   }
 
+  // ── load Primary spine — auto-detects which subject ─────
+  const loadPrimarySpine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const entry = PRIMARY_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.('No Primary spine matches "' + subjectName + '". Expected one of: Mathematics, English, Science, Computing, Global Perspectives.')
+      return
+    }
+    if (topics.length > 0 && !window.confirm('This REPLACES the entire existing spine for this subject. Continue?')) return
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to load structure.') }
+    finally { setBusy(false) }
+  }
+
   // ── styles ──
   const sel = { padding: '8px 11px', borderRadius: 7, border: '1.5px solid ' + TOKENS.line,
     fontSize: 13, fontFamily: 'inherit', background: '#fff' }
@@ -6741,6 +7255,12 @@ function SyllabusSpineTab({ toast }) {
               background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
               borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
             }}>Load IGCSE Maths 0580</button>
+            {curriculum === 'Primary' && (
+              <button onClick={loadPrimarySpine} disabled={busy} title="Auto-detects which Primary spine matches the selected subject" style={{
+                background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+                borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+              }}>Load Cambridge Primary spine</button>
+            )}
           </>
         )}
       </div>
