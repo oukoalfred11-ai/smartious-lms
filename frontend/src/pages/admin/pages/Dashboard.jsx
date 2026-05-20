@@ -7073,6 +7073,262 @@ const PRIMARY_LIBRARY = [
   { match: /global/i,        const_: PRIMARY_GLOBAL_0838,   source: 'Cambridge Primary Global Perspectives 0838' },
 ]
 
+
+// ═══════════════════════════════════════════════════════════
+// SUBJECTS TAB — Admin management of Subject records.
+// Wired to existing /api/subjects endpoints (POST/PATCH/DELETE
+// all require admin role on the backend).
+// ═══════════════════════════════════════════════════════════
+function SubjectsTab({ toast }) {
+  // The 15 curricula from the new catalog
+  const CURRICULA_LIST = [
+    { id: 'CambridgePrimary',   name: 'Cambridge Primary' },
+    { id: 'CambridgeLowerSec',  name: 'Cambridge Lower Secondary' },
+    { id: 'CambridgeIGCSE',     name: 'Cambridge IGCSE' },
+    { id: 'CambridgeALevel',    name: 'Cambridge A-Level' },
+    { id: 'EdexcelLowerSec',    name: 'Edexcel Lower Secondary' },
+    { id: 'EdexcelIGCSE',       name: 'Edexcel IGCSE' },
+    { id: 'EdexcelALevel',      name: 'Edexcel A-Level' },
+    { id: 'AQALowerSec',        name: 'AQA Lower Secondary' },
+    { id: 'AQAGCSE',            name: 'AQA GCSE' },
+    { id: 'AQAALevel',          name: 'AQA A-Level' },
+    { id: 'IB',                 name: 'International Baccalaureate (IB)' },
+    { id: 'BNC',                name: 'British National Curriculum' },
+    { id: 'American',           name: 'American Curriculum' },
+    { id: 'Canadian',           name: 'Canadian Curriculum' },
+    { id: 'KenyaCBC',           name: 'Kenya CBC' },
+  ]
+  const CATEGORIES = [
+    'Mathematics', 'English', 'Sciences', 'Humanities', 'Modern Languages',
+    'Classical Languages', 'Arts', 'Technology', 'Business & Social Sciences',
+    'Physical Education', 'IB Core',
+  ]
+
+  const [filterCurriculum, setFilterCurriculum] = useState('CambridgeIGCSE')
+  const [search, setSearch] = useState('')
+  const [subjects, setSubjects] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [editing, setEditing] = useState(null)        // subject object being edited
+  const [creating, setCreating] = useState(false)
+  const [busy, setBusy] = useState(false)
+
+  const load = useCallback(() => {
+    setLoading(true)
+    api.get('/subjects', { params: { curriculum: filterCurriculum } })
+      .then(r => setSubjects(r.data?.subjects || []))
+      .catch(() => toast?.error?.('Failed to load subjects.'))
+      .finally(() => setLoading(false))
+  }, [filterCurriculum, toast])
+
+  useEffect(() => { load() }, [load])
+
+  const filtered = search
+    ? subjects.filter(s => s.subjectName?.toLowerCase().includes(search.toLowerCase()))
+    : subjects
+
+  const toggleActive = async (s) => {
+    if (!window.confirm(`${s.isActive ? 'Deactivate' : 'Reactivate'} "${s.subjectName}"?`)) return
+    setBusy(true)
+    try {
+      await api.patch('/subjects/' + s._id, { isActive: !s.isActive })
+      toast?.ok?.(s.isActive ? 'Deactivated.' : 'Reactivated.')
+      load()
+    } catch (e) { toast?.error?.('Failed.') }
+    finally { setBusy(false) }
+  }
+
+  const lbl = { display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
+    textTransform: 'uppercase', color: TOKENS.crimson, marginBottom: 5 }
+  const inp = { width: '100%', boxSizing: 'border-box', padding: '8px 11px',
+    borderRadius: 7, border: '1.5px solid ' + TOKENS.line, fontSize: 13, fontFamily: 'inherit', background: '#fff' }
+
+  return (
+    <div>
+      {/* Filter row */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 18, alignItems: 'end', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 240px' }}>
+          <label style={lbl}>Curriculum</label>
+          <select value={filterCurriculum} onChange={e => setFilterCurriculum(e.target.value)} style={inp}>
+            {CURRICULA_LIST.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div style={{ flex: '2 1 280px' }}>
+          <label style={lbl}>Search subject name</label>
+          <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="e.g. Mathematics" style={inp}/>
+        </div>
+        <button onClick={() => setCreating(true)} style={{
+          background: TOKENS.crimson, color: '#fff', border: 'none', borderRadius: 8,
+          padding: '10px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', height: 38,
+        }}>+ Add Subject</button>
+      </div>
+
+      {/* List */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: 40, color: TOKENS.s500, fontSize: 13 }}>Loading…</div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: 50, color: TOKENS.s500, fontSize: 13,
+          border: '1px dashed ' + TOKENS.line, borderRadius: 12 }}>
+          No subjects {search ? 'match the search' : 'in ' + filterCurriculum + ' yet'}. Click <b>+ Add Subject</b> to create one.
+        </div>
+      ) : (
+        <div style={{ border: '1px solid ' + TOKENS.line, borderRadius: 12, overflow: 'hidden' }}>
+          {filtered.map((s, i) => (
+            <div key={s._id} style={{
+              display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+              borderBottom: i < filtered.length - 1 ? '1px solid #F1ECE0' : 'none',
+              background: s.isActive ? '#fff' : '#FAFAF8', opacity: s.isActive ? 1 : 0.6,
+            }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: TOKENS.s900 }}>
+                  {s.subjectName}
+                  {!s.isActive && <span style={{ marginLeft: 8, fontSize: 10, color: '#B91C1C', fontWeight: 700 }}>INACTIVE</span>}
+                </div>
+                <div style={{ fontSize: 11.5, color: TOKENS.s500, marginTop: 2 }}>
+                  {s.category}{s.code ? ' · ' + s.code : ''}
+                </div>
+              </div>
+              <button onClick={() => setEditing(s)} disabled={busy} style={{
+                border: '1.5px solid ' + TOKENS.line, background: '#fff', color: TOKENS.s700,
+                borderRadius: 6, padding: '5px 12px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+              }}>Edit</button>
+              <button onClick={() => toggleActive(s)} disabled={busy} style={{
+                border: '1.5px solid ' + (s.isActive ? '#FECACA' : TOKENS.line),
+                background: '#fff', color: s.isActive ? '#B91C1C' : TOKENS.accentEmerald,
+                borderRadius: 6, padding: '5px 12px', fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+              }}>{s.isActive ? 'Deactivate' : 'Reactivate'}</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {(creating || editing) && (
+        <SubjectFormModal
+          editing={editing}
+          curricula={CURRICULA_LIST}
+          categories={CATEGORIES}
+          defaultCurriculum={filterCurriculum}
+          onClose={() => { setCreating(false); setEditing(null) }}
+          onSaved={() => { setCreating(false); setEditing(null); load(); toast?.ok?.('Saved.') }}
+          onError={(m) => toast?.error?.(m)}
+        />
+      )}
+    </div>
+  )
+}
+
+function SubjectFormModal({ editing, curricula, categories, defaultCurriculum, onClose, onSaved, onError }) {
+  const [form, setForm] = useState(() => editing ? {
+    curriculum: editing.curriculum,
+    subjectName: editing.subjectName || '',
+    category: editing.category || 'Mathematics',
+    code: editing.code || '',
+    isActive: editing.isActive !== false,
+  } : {
+    curriculum: defaultCurriculum,
+    subjectName: '',
+    category: 'Mathematics',
+    code: '',
+    isActive: true,
+  })
+  const [saving, setSaving] = useState(false)
+  const update = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  const save = async () => {
+    if (!form.subjectName.trim()) { onError?.('Subject name required.'); return }
+    if (!form.category.trim()) { onError?.('Category required.'); return }
+    setSaving(true)
+    try {
+      if (editing) {
+        await api.patch('/subjects/' + editing._id, {
+          subjectName: form.subjectName.trim(),
+          category: form.category.trim(),
+          code: form.code.trim() || undefined,
+          isActive: form.isActive,
+        })
+      } else {
+        await api.post('/subjects', {
+          curriculum: form.curriculum,
+          subjectName: form.subjectName.trim(),
+          category: form.category.trim(),
+          code: form.code.trim() || undefined,
+        })
+      }
+      onSaved?.()
+    } catch (e) {
+      onError?.(e?.response?.data?.message || 'Failed to save subject.')
+    } finally { setSaving(false) }
+  }
+
+  const lbl = { display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
+    textTransform: 'uppercase', color: TOKENS.crimson, marginBottom: 5 }
+  const inp = { width: '100%', boxSizing: 'border-box', padding: '9px 12px',
+    borderRadius: 7, border: '1.5px solid ' + TOKENS.line, fontSize: 13, fontFamily: 'inherit', background: '#fff' }
+
+  return (
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, background: 'rgba(35,23,21,0.5)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20,
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: '#fff', borderRadius: 14, padding: 24, maxWidth: 480, width: '100%',
+        boxShadow: '0 30px 60px rgba(0,0,0,0.2)',
+      }}>
+        <h3 style={{ fontSize: 18, fontWeight: 800, color: TOKENS.s900, margin: '0 0 18px' }}>
+          {editing ? 'Edit Subject' : 'New Subject'}
+        </h3>
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Curriculum *</label>
+          <select value={form.curriculum} onChange={e => update('curriculum', e.target.value)}
+            style={inp} disabled={!!editing}>
+            {curricula.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          {editing && (
+            <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>
+              Curriculum can't be changed after creation (would orphan the spine).
+            </div>
+          )}
+        </div>
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Subject Name *</label>
+          <input type="text" value={form.subjectName} onChange={e => update('subjectName', e.target.value)}
+            placeholder="e.g. Primary Mathematics" style={inp}/>
+        </div>
+        <div style={{ marginBottom: 14 }}>
+          <label style={lbl}>Category *</label>
+          <input type="text" list="cat-list" value={form.category}
+            onChange={e => update('category', e.target.value)} style={inp}/>
+          <datalist id="cat-list">
+            {categories.map(c => <option key={c} value={c}/>)}
+          </datalist>
+        </div>
+        <div style={{ marginBottom: 18 }}>
+          <label style={lbl}>Code (optional)</label>
+          <input type="text" value={form.code} onChange={e => update('code', e.target.value)}
+            placeholder="e.g. 0096" style={inp}/>
+        </div>
+        {editing && (
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18, fontSize: 13 }}>
+            <input type="checkbox" checked={form.isActive}
+              onChange={e => update('isActive', e.target.checked)}/>
+            Active
+          </label>
+        )}
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+          <button onClick={onClose} disabled={saving} style={{
+            background: '#fff', border: '1.5px solid ' + TOKENS.line, color: TOKENS.s700,
+            borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+          }}>Cancel</button>
+          <button onClick={save} disabled={saving} style={{
+            background: saving ? '#9CA3AF' : TOKENS.crimson, color: '#fff', border: 'none',
+            borderRadius: 8, padding: '9px 22px', fontSize: 13, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
+          }}>{saving ? 'Saving…' : 'Save'}</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function SyllabusSpineTab({ toast }) {
   const [curricula] = useState([
     { id: 'CambridgePrimary',   name: 'Cambridge Primary' },
@@ -7382,9 +7638,11 @@ function CurriculumModule({ refreshKey, toast }) {
       <PSection tag="Academic" title="Curriculum" em="Manager" sub="Subjects, grades and the syllabus spine"/>
       <div style={{ display: 'flex', gap: 8, marginBottom: 22 }}>
         {tabBtn('overview', 'Overview')}
+        {tabBtn('subjects', 'Subjects')}
         {tabBtn('spine', 'Syllabus Spine')}
       </div>
 
+      {tab === 'subjects' && <SubjectsTab toast={toast} />}
       {tab === 'spine' && <SyllabusSpineTab toast={toast} />}
 
       {tab === 'overview' && (<>
