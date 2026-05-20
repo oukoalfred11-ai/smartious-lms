@@ -3,7 +3,16 @@ const mongoose = require('mongoose');
 const subjectSchema = new mongoose.Schema({
   curriculum: {
     type: String,
-    enum: ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American', 'IUFP'],
+    enum: [
+      // Current 15-curriculum catalog
+      'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
+      'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
+      'AQALowerSec', 'AQAGCSE', 'AQAALevel',
+      'IB', 'BNC', 'American', 'Canadian', 'KenyaCBC',
+      // Legacy values kept for backwards-compat with any pre-migration records
+      'IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'IUFP',
+      'Primary', 'Cambridge', 'Edexcel',
+    ],
     required: true,
     trim: true
   },
