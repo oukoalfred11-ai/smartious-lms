@@ -2,16 +2,22 @@ const router = require('express').Router();
 const Subject = require('../models/Subject');
 const { auth, requireRole } = require('../middleware/auth');
 
-// GET all subjects, optionally filtered by curriculum
+// GET all subjects, optionally filtered by curriculum.
+// By default returns only Active subjects (correct for student/teacher
+// dropdowns and lesson/question forms). Pass ?includeInactive=true to
+// also return deactivated subjects (used by the admin Subjects UI so
+// admins can see and reactivate them).
 router.get('/', async (req, res) => {
   try {
-    const { curriculum } = req.query;
-    const filter = curriculum ? { curriculum, isActive: true } : { isActive: true };
-    
+    const { curriculum, includeInactive } = req.query;
+    const filter = {};
+    if (curriculum) filter.curriculum = curriculum;
+    if (includeInactive !== 'true') filter.isActive = true;
+
     const subjects = await Subject.find(filter)
       .sort('subjectName')
       .lean();
-    
+
     res.json({ success: true, subjects });
   } catch (e) {
     res.status(500).json({ success: false, message: e.message });
