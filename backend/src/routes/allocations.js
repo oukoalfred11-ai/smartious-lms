@@ -2,6 +2,7 @@ const express = require('express');
 const Allocation = require('../models/Allocation');
 const User = require('../models/User');
 const Subject = require('../models/Subject');
+const GroupRoom = require('../models/GroupRoom');
 const { auth, requireRole } = require('../middleware/auth');
 const {
   sendTeacherAllocationNotification,
@@ -11,6 +12,58 @@ const router = express.Router();
 
 function logAudit(user, action, details) {
   console.log(`[AUDIT] ${user}: ${action}`, details);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Group room auto-allocation
+// ─────────────────────────────────────────────────────────────────
+// When a student is allocated to a teacher via the Allocations UI,
+// they also need to appear in the teacher's My Students view (which
+// reads from GroupRoom membership). To keep group rooms as the
+// single source of truth for teacher-student relationships, every
+// admin allocation either creates or updates a default "all students"
+// auto-allocation room per teacher.
+//
+// The room is identified by isAutoAllocation:true + teacher:teacherId.
+// One per teacher; students are added/removed in lockstep with
+// allocations.
+async function ensureAutoRoomAndAddStudent(teacher, studentId) {
+  // Find existing auto-allocation room for this teacher
+  let room = await GroupRoom.findOne({
+    teacher: teacher._id,
+    isAutoAllocation: true,
+  });
+
+  if (!room) {
+    // Create a default room for this teacher
+    const teacherName = `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim() || 'Teacher';
+    room = await GroupRoom.create({
+      name: `${teacherName} — All Students`,
+      subject: 'General',
+      teacher: teacher._id,
+      students: [studentId],
+      capacity: 100,
+      status: 'Active',
+      isAutoAllocation: true,
+    });
+    console.log(`[allocations] auto-created room '${room.name}' for teacher ${teacher._id}`);
+    return room;
+  }
+
+  // Add student to existing room (idempotent — $addToSet won't duplicate)
+  await GroupRoom.findByIdAndUpdate(room._id, {
+    $addToSet: { students: studentId },
+    $set: { updatedAt: new Date() },
+  });
+  return room;
+}
+
+async function removeStudentFromTeacherAutoRoom(teacherId, studentId) {
+  if (!teacherId || !studentId) return;
+  await GroupRoom.findOneAndUpdate(
+    { teacher: teacherId, isAutoAllocation: true },
+    { $pull: { students: studentId }, $set: { updatedAt: new Date() } }
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -313,6 +366,16 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
       createdBy: req.user._id
     });
 
+    // Ensure student appears in teacher's auto-allocation group room so the
+    // teacher's "My Students" view picks them up. Failures here are logged
+    // but don't roll back the allocation — the room can be reconciled via
+    // the backfill script if it goes wrong.
+    try {
+      await ensureAutoRoomAndAddStudent(teacher, studentId);
+    } catch (roomErr) {
+      console.error('[allocations create] auto-room update failed:', roomErr.message);
+    }
+
     await allocation.populate('studentId', 'firstName lastName email');
     await allocation.populate('teacherId', 'firstName lastName email');
     await allocation.populate('subjectId', 'subjectName curriculum');
@@ -385,6 +448,10 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
       }
     }
 
+    const oldTeacherId = allocation.teacherId.toString();
+    const willChangeTeacher = teacherId && teacherId !== oldTeacherId;
+    const willGoInactive = status === 'Inactive' && allocation.status !== 'Inactive';
+
     const updated = await Allocation.findByIdAndUpdate(
       req.params.id,
       {
@@ -397,6 +464,20 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
     ).populate('studentId', 'firstName lastName email')
      .populate('teacherId', 'firstName lastName email')
      .populate('subjectId', 'subjectName curriculum');
+
+    // Reconcile group room membership for teacher changes / deactivation.
+    // Failures here are logged but don't roll back the allocation update.
+    try {
+      if (willChangeTeacher) {
+        await removeStudentFromTeacherAutoRoom(oldTeacherId, allocation.studentId);
+        const newTeacher = await User.findById(teacherId);
+        if (newTeacher) await ensureAutoRoomAndAddStudent(newTeacher, allocation.studentId);
+      } else if (willGoInactive) {
+        await removeStudentFromTeacherAutoRoom(oldTeacherId, allocation.studentId);
+      }
+    } catch (roomErr) {
+      console.error('[allocations patch] auto-room reconcile failed:', roomErr.message);
+    }
 
     logAudit(req.user?.email || 'system', 'update_allocation', allocation._id);
     res.json({ success: true, allocation: updated });
