@@ -23,6 +23,17 @@ const subjectSchema = new mongoose.Schema({
   },
   category: {
     type: String,
+    enum: [
+      // Smartious's 8-category taxonomy (decided 2026-05-20)
+      'Mathematics',
+      'Sciences',
+      'Languages',
+      'Arts',
+      'Business',
+      'Humanities',
+      'Technology',
+      'Physical Education',
+    ],
     required: true,
     trim: true
   },
