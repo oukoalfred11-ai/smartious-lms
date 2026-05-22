@@ -27,6 +27,11 @@ const GroupRoomSchema = new mongoose.Schema({
   schedule:   { type: String },
   status:     { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
 
+  // Flag for rooms auto-created by the allocations route (vs admin-built
+  // rooms). Used by the reconciliation script to identify which rooms it
+  // owns and may modify. Manual rooms should not have this flag.
+  isAutoAllocation: { type: Boolean, default: false },
+
   // Zoom integration fields. Declared here so Mongoose persists them
   // (under strict mode, undeclared fields are silently dropped on write).
   zoomLink:      { type: String, default: '' },
