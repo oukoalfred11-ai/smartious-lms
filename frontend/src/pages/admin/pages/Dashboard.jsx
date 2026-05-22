@@ -7099,9 +7099,8 @@ function SubjectsTab({ toast }) {
     { id: 'KenyaCBC',           name: 'Kenya CBC' },
   ]
   const CATEGORIES = [
-    'Mathematics', 'English', 'Sciences', 'Humanities', 'Modern Languages',
-    'Classical Languages', 'Arts', 'Technology', 'Business & Social Sciences',
-    'Physical Education', 'IB Core',
+    'Mathematics', 'Sciences', 'Languages', 'Arts',
+    'Business', 'Humanities', 'Technology', 'Physical Education',
   ]
 
   const [filterCurriculum, setFilterCurriculum] = useState('CambridgeIGCSE')
@@ -7299,11 +7298,10 @@ function SubjectFormModal({ editing, curricula, categories, defaultCurriculum, o
         </div>
         <div style={{ marginBottom: 14 }}>
           <label style={lbl}>Category *</label>
-          <input type="text" list="cat-list" value={form.category}
-            onChange={e => update('category', e.target.value)} style={inp}/>
-          <datalist id="cat-list">
-            {categories.map(c => <option key={c} value={c}/>)}
-          </datalist>
+          <select value={form.category}
+            onChange={e => update('category', e.target.value)} style={inp}>
+            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
         </div>
         <div style={{ marginBottom: 18 }}>
           <label style={lbl}>Code (optional)</label>
