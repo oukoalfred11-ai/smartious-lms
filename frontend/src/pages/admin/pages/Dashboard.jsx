@@ -7114,7 +7114,10 @@ function SubjectsTab({ toast }) {
 
   const load = useCallback(() => {
     setLoading(true)
-    api.get('/subjects', { params: { curriculum: filterCurriculum } })
+    // includeInactive=true so admins see deactivated subjects (with the
+    // INACTIVE badge and a Reactivate button). Other consumers of /subjects
+    // (lesson forms, student dropdowns) omit this param and get active only.
+    api.get('/subjects', { params: { curriculum: filterCurriculum, includeInactive: true } })
       .then(r => setSubjects(r.data?.subjects || []))
       .catch(() => toast?.error?.('Failed to load subjects.'))
       .finally(() => setLoading(false))
