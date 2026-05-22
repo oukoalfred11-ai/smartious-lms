@@ -1823,7 +1823,10 @@ function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, s
   const [students, setStudents] = useState([])
   const [loadingStudents, setLoadingStudents] = useState(true)
 
-  // Load real students from backend GroupRooms (where this teacher is assigned)
+  // Load students from this teacher's allocations.
+  // (Migrated from GroupRoom-based loading. Allocations are the source
+  // of truth for "who teaches whom"; GroupRooms are for live-class
+  // infrastructure only.)
   useEffect(() => {
     const loadRealStudents = async () => {
       setLoadingStudents(true)
@@ -1833,41 +1836,41 @@ function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, s
           setLoadingStudents(false)
           return
         }
-        // Fetch all rooms; filter to ones where this teacher is assigned
-        const roomsRes = await api.get('/grouprooms')
-        const allRooms = roomsRes.data?.rooms || []
-        const myRooms = allRooms.filter(r => {
-          if (!r.teacher) return false
-          const tid = typeof r.teacher === 'object' ? r.teacher._id : r.teacher
-          return tid === teacherId || tid?.toString() === teacherId?.toString()
-        })
+        // Fetch this teacher's allocations (admin or teacher both work;
+        // /allocations/teacher returns only the current user's).
+        const allocRes = await api.get('/allocations/teacher')
+        const allocations = allocRes.data?.allocations || []
 
-        // Collect unique students across all my rooms
+        // Aggregate by student — one student may have multiple allocations
+        // (different subjects with this teacher). Each allocation contributes
+        // a subject to that student's list.
         const studentMap = new Map()
-        myRooms.forEach(room => {
-          (room.students || []).forEach(s => {
-            // Backend may return populated objects or just IDs
-            if (typeof s === 'object' && s !== null) {
-              if (!studentMap.has(s._id)) {
-                studentMap.set(s._id, {
-                  id: s._id,
-                  name: ((s.firstName || '') + ' ' + (s.lastName || '')).trim() || 'Unnamed Student',
-                  initials: ((s.firstName?.[0] || '') + (s.lastName?.[0] || '')).toUpperCase() || '?',
-                  curriculum: s.curriculum || '',
-                  year: s.gradeLevel || '',
-                  mastery: 0, attendance: 0,
-                  hwSubmitted: 0, hwTotal: 0,
-                  status: 'on-track', lastActive: 0,
-                  parentName: '', parentEmail: s.email || '', phone: s.phone || '',
-                  rooms: [room.name],
-                })
-              } else {
-                // Already in map - just append the room name
-                const existing = studentMap.get(s._id)
-                if (!existing.rooms.includes(room.name)) existing.rooms.push(room.name)
-              }
-            }
-          })
+        allocations.forEach(a => {
+          // Only count Active allocations in My Students view
+          if (a.status && a.status !== 'Active') return
+
+          const s = a.studentId
+          if (!s || typeof s !== 'object' || !s._id) return
+
+          const subjectName = a.subjectId?.subjectName || ''
+
+          if (!studentMap.has(s._id)) {
+            studentMap.set(s._id, {
+              id: s._id,
+              name: ((s.firstName || '') + ' ' + (s.lastName || '')).trim() || 'Unnamed Student',
+              initials: ((s.firstName?.[0] || '') + (s.lastName?.[0] || '')).toUpperCase() || '?',
+              curriculum: s.curriculum || '',
+              year: s.gradeLevel || '',
+              mastery: 0, attendance: 0,
+              hwSubmitted: 0, hwTotal: 0,
+              status: 'on-track', lastActive: 0,
+              parentName: '', parentEmail: s.email || '', phone: s.phone || '',
+              subjects: subjectName ? [subjectName] : [],
+            })
+          } else if (subjectName) {
+            const existing = studentMap.get(s._id)
+            if (!existing.subjects.includes(subjectName)) existing.subjects.push(subjectName)
+          }
         })
 
         const realStudents = Array.from(studentMap.values())
