@@ -7075,6 +7075,317 @@ const PRIMARY_LIBRARY = [
 
 
 // ═══════════════════════════════════════════════════════════
+// CAMBRIDGE LOWER SECONDARY SPINES
+// Verified against the official Cambridge framework documents
+// by Smartious. Stage tags follow Cambridge convention.
+// Stage 7-9 at Cambridge = Year 7-9 at Smartious.
+// ═══════════════════════════════════════════════════════════
+
+// ── LOWER SECONDARY MATHEMATICS 0862/1112 ──────────────────
+// 9 sub-strands across 4 strands, 27 stage-level subtopics, 186 lessons.
+// Strands: Number (Ni/Np/Nf), Algebra NEW (Ae/As),
+//          Geometry (Gg/Gp), Statistics & Probability (Ss/Sp).
+const LS_MATHS_0862 = [
+  // STRAND 1 — NUMBER
+  { topic: 'Integers, powers and roots (Ni)', code: 'Ni', subtopics: [
+    { name: 'Stage 7: Order, add, subtract, multiply, divide positive and negative integers; squares, cubes and roots; order of operations', code: '7Ni', suggestedLessons: 8 },
+    { name: 'Stage 8: Multiples, factors, primes, HCF and LCM; squares and cubes of negative integers; index notation (positive integer indices); estimating roots', code: '8Ni', suggestedLessons: 7 },
+    { name: 'Stage 9: Positive, negative and zero indices; index laws; standard form (intro); systematic listing', code: '9Ni', suggestedLessons: 7 },
+  ]},
+  { topic: 'Place value, ordering and rounding (Np)', code: 'Np', subtopics: [
+    { name: 'Stage 7: Place value with decimals; multiply and divide by powers of 10; round to nearest 10/100/1000 and to decimal places', code: '7Np', suggestedLessons: 5 },
+    { name: 'Stage 8: Round to a given number of decimal places; estimate calculations', code: '8Np', suggestedLessons: 4 },
+    { name: 'Stage 9: Round to significant figures; use to give solutions to a stated accuracy', code: '9Np', suggestedLessons: 4 },
+  ]},
+  { topic: 'Fractions, decimals, percentages, ratio and proportion (Nf)', code: 'Nf', subtopics: [
+    { name: 'Stage 7: Equivalent fractions/decimals/percentages; add/subtract/multiply/divide simple fractions; percentages of quantities; ratio notation; direct proportion (simple)', code: '7Nf', suggestedLessons: 9 },
+    { name: 'Stage 8: Operations on mixed numbers and decimals; percentage increase/decrease; ratio sharing; direct and inverse proportion', code: '8Nf', suggestedLessons: 9 },
+    { name: 'Stage 9: Add, subtract, multiply, divide fractions including mixed numbers; reverse percentages; compound percentages; ratio in 3 parts; rates', code: '9Nf', suggestedLessons: 9 },
+  ]},
+  // STRAND 2 — ALGEBRA (NEW at Lower Secondary)
+  { topic: 'Expressions, equations and formulae (Ae)', code: 'Ae', subtopics: [
+    { name: 'Stage 7: Letters as unknowns/variables; collect like terms; distributive law (constant); represent situations as expressions/formulae/equations; solve linear equations (integer coefficients, unknown one side)', code: '7Ae', suggestedLessons: 9 },
+    { name: 'Stage 8: Expand single brackets; substitute into expressions and formulae; solve linear equations with unknowns on both sides; rearrange simple formulae', code: '8Ae', suggestedLessons: 9 },
+    { name: 'Stage 9: Expand products of two binomials; factorise simple quadratic and linear expressions; solve linear equations with brackets and fractions; solve linear inequalities; rearrange more complex formulae', code: '9Ae', suggestedLessons: 10 },
+  ]},
+  { topic: 'Sequences, functions and graphs (As)', code: 'As', subtopics: [
+    { name: 'Stage 7: Term-to-term and nth-term rules (linear); functions as input-output relationships; coordinate plane (all 4 quadrants); plot points and simple linear graphs', code: '7As', suggestedLessons: 7 },
+    { name: 'Stage 8: Linear sequences with non-unit common difference; plot and interpret y = mx + c; gradient (informal); real-life graphs', code: '8As', suggestedLessons: 8 },
+    { name: 'Stage 9: Quadratic sequences; gradient and y-intercept of straight lines; parallel and perpendicular lines; plot and interpret quadratic and reciprocal graphs', code: '9As', suggestedLessons: 8 },
+  ]},
+  // STRAND 3 — GEOMETRY AND MEASURE
+  { topic: 'Geometrical reasoning, shapes and measurements (Gg)', code: 'Gg', subtopics: [
+    { name: 'Stage 7: Angles on a line and around a point; angles in triangles and quadrilaterals; perimeter and area of rectangles, triangles, parallelograms; volume of cuboids; metric units conversions', code: '7Gg', suggestedLessons: 9 },
+    { name: 'Stage 8: Angles in parallel lines and polygons; properties of polygons; circumference and area of circles; surface area and volume of prisms', code: '8Gg', suggestedLessons: 9 },
+    { name: "Stage 9: Pythagoras' theorem (right-angled triangles); area of compound shapes including circles; surface area and volume of cylinders and pyramids; constructions using ruler and compass", code: '9Gg', suggestedLessons: 10 },
+  ]},
+  { topic: 'Position and transformation (Gp)', code: 'Gp', subtopics: [
+    { name: 'Stage 7: Coordinates in 4 quadrants; reflect and translate 2D shapes', code: '7Gp', suggestedLessons: 4 },
+    { name: 'Stage 8: Rotation about a point through 90°, 180°, 270°; enlargement by a positive integer scale factor; describe transformations', code: '8Gp', suggestedLessons: 5 },
+    { name: 'Stage 9: Combine transformations; enlargement by fractional scale factors; bearings; interpret scale on maps and plans', code: '9Gp', suggestedLessons: 5 },
+  ]},
+  // STRAND 4 — STATISTICS AND PROBABILITY
+  { topic: 'Statistics (Ss)', code: 'Ss', subtopics: [
+    { name: 'Stage 7: Plan a statistical enquiry; collect data; bar charts, pictograms, pie charts; mode, median, mean, range for ungrouped data', code: '7Ss', suggestedLessons: 7 },
+    { name: 'Stage 8: Frequency tables; stem-and-leaf diagrams; compound bar charts; mean and modal class from grouped data; compare two distributions', code: '8Ss', suggestedLessons: 7 },
+    { name: 'Stage 9: Scatter diagrams and correlation (informal); line of best fit; back-to-back stem-and-leaf; quartiles and interquartile range; evaluating statistical claims', code: '9Ss', suggestedLessons: 7 },
+  ]},
+  { topic: 'Probability (Sp)', code: 'Sp', subtopics: [
+    { name: 'Stage 7: Probability as a number 0–1; experimental probability; sample space for one event; mutually exclusive events', code: '7Sp', suggestedLessons: 4 },
+    { name: 'Stage 8: Probability of single events as fractions, decimals, percentages; sample space diagrams for two events; expected frequency', code: '8Sp', suggestedLessons: 4 },
+    { name: 'Stage 9: Probability of combined events; tree diagrams (simple cases); independent vs dependent events (informal); compare theoretical and experimental', code: '9Sp', suggestedLessons: 5 },
+  ]},
+]
+// ── LOWER SECONDARY ENGLISH 0861/1111 ──────────────────────
+// 13 sub-strands across 3 strands, 39 stage-level subtopics, 128 lessons.
+// Reading (R, Rv, Rw, Rg, Rs); Writing (W, Wv, Ww, Wg, Ws);
+// Speaking & Listening (SLm, SLs, SLg) — S&L not Checkpoint-assessed
+// but is part of the curriculum framework.
+const LS_ENGLISH_1111 = [
+  // STRAND 1 — READING
+  { topic: 'Broad reading skills (R)', code: 'R', subtopics: [
+    { name: 'Stage 7: Read widely across genres (fiction, non-fiction, poetry); use library resources; develop reading stamina', code: '7R', suggestedLessons: 3 },
+    { name: 'Stage 8: Read texts of increasing complexity; engage with texts from different periods and cultures', code: '8R', suggestedLessons: 3 },
+    { name: 'Stage 9: Read sophisticated literary and non-literary texts; develop independent reading habits', code: '9R', suggestedLessons: 3 },
+  ]},
+  { topic: 'Reading: Viewpoints and themes (Rv)', code: 'Rv', subtopics: [
+    { name: 'Stage 7: Identify main ideas, viewpoints, themes and purposes in a text; locate and retrieve information', code: '7Rv', suggestedLessons: 4 },
+    { name: 'Stage 8: Compare viewpoints in different texts on the same topic; identify implicit themes', code: '8Rv', suggestedLessons: 5 },
+    { name: "Stage 9: Analyse multiple viewpoints; evaluate writers' purposes and how they shape meaning", code: '9Rv', suggestedLessons: 5 },
+  ]},
+  { topic: "Reading: Writer's craft and language (Rw)", code: 'Rw', subtopics: [
+    { name: 'Stage 7: Identify and describe literary devices (image, simile, metaphor, onomatopoeia); comment on formal/informal language; setting and genre', code: '7Rw', suggestedLessons: 5 },
+    { name: 'Stage 8: Comment on how writers achieve effects through language choices; explore tone, voice, register; recognise authorial techniques', code: '8Rw', suggestedLessons: 6 },
+    { name: "Stage 9: Analyse stylistic and structural features; evaluate effectiveness of techniques; comment on writers' intentions", code: '9Rw', suggestedLessons: 6 },
+  ]},
+  { topic: 'Reading: Grammar and syntax (Rg)', code: 'Rg', subtopics: [
+    { name: 'Stage 7: Recognise sentence types and clauses; identify punctuation effects', code: '7Rg', suggestedLessons: 3 },
+    { name: 'Stage 8: Recognise active and passive voice; complex sentence structures; nuanced punctuation', code: '8Rg', suggestedLessons: 3 },
+    { name: 'Stage 9: Analyse grammatical choices for effect; recognise sophisticated syntax in literary texts', code: '9Rg', suggestedLessons: 3 },
+  ]},
+  { topic: 'Reading: Structure and text types (Rs)', code: 'Rs', subtopics: [
+    { name: 'Stage 7: Recognise structures of stories, articles, reports, poems; identify openings and endings', code: '7Rs', suggestedLessons: 4 },
+    { name: 'Stage 8: Compare structural conventions across genres; recognise non-linear narratives', code: '8Rs', suggestedLessons: 4 },
+    { name: 'Stage 9: Analyse complex narrative structures; comment on how structure shapes reader experience', code: '9Rs', suggestedLessons: 4 },
+  ]},
+  // STRAND 2 — WRITING
+  { topic: 'Broad writing skills (W)', code: 'W', subtopics: [
+    { name: 'Stage 7: Write for a range of purposes; develop personal style; experiment with form', code: '7W', suggestedLessons: 3 },
+    { name: 'Stage 8: Sustain writing over longer pieces; develop a recognisable voice', code: '8W', suggestedLessons: 3 },
+    { name: 'Stage 9: Write with control across genres; experiment with sophisticated form and voice', code: '9W', suggestedLessons: 3 },
+  ]},
+  { topic: 'Writing: Purpose and audience (Wv)', code: 'Wv', subtopics: [
+    { name: 'Stage 7: Write to inform, entertain, persuade; adapt tone for audience', code: '7Wv', suggestedLessons: 5 },
+    { name: 'Stage 8: Sustain purpose across longer texts; address specific audiences with appropriate register', code: '8Wv', suggestedLessons: 6 },
+    { name: 'Stage 9: Craft texts with sophisticated awareness of purpose, audience and context', code: '9Wv', suggestedLessons: 6 },
+  ]},
+  { topic: 'Writing: Vocabulary and style (Ww)', code: 'Ww', subtopics: [
+    { name: 'Stage 7: Use vocabulary precisely; employ simile, metaphor, personification in own writing', code: '7Ww', suggestedLessons: 4 },
+    { name: 'Stage 8: Use figurative language with control; vary sentence openings; consider word connotations', code: '8Ww', suggestedLessons: 5 },
+    { name: 'Stage 9: Use sophisticated vocabulary; develop a distinctive style; sustained imagery', code: '9Ww', suggestedLessons: 5 },
+  ]},
+  { topic: 'Writing: Grammar and punctuation (Wg)', code: 'Wg', subtopics: [
+    { name: 'Stage 7: Use complex sentences; correct use of commas, semi-colons, colons', code: '7Wg', suggestedLessons: 4 },
+    { name: 'Stage 8: Active and passive voice for effect; sophisticated punctuation (dashes, parentheses)', code: '8Wg', suggestedLessons: 4 },
+    { name: 'Stage 9: Master varied sentence structures and punctuation for stylistic effect', code: '9Wg', suggestedLessons: 4 },
+  ]},
+  { topic: 'Writing: Structure and organisation (Ws)', code: 'Ws', subtopics: [
+    { name: 'Stage 7: Use paragraphs effectively; topic sentences; clear openings and endings', code: '7Ws', suggestedLessons: 4 },
+    { name: 'Stage 8: Vary structural choices for effect; develop narrative arcs in fiction writing', code: '8Ws', suggestedLessons: 4 },
+    { name: 'Stage 9: Craft sophisticated structures; experiment with non-linear narrative in own writing', code: '9Ws', suggestedLessons: 4 },
+  ]},
+  // STRAND 3 — SPEAKING AND LISTENING
+  { topic: 'Making yourself understood (SLm)', code: 'SLm', subtopics: [
+    { name: 'Stage 7: Speak audibly; adapt register for formal/informal contexts; structure spoken response', code: '7SLm', suggestedLessons: 2 },
+    { name: 'Stage 8: Sustain extended spoken explanations; use precise vocabulary; vary pace and tone', code: '8SLm', suggestedLessons: 2 },
+    { name: 'Stage 9: Deliver structured presentations; use rhetorical techniques; engage an audience', code: '9SLm', suggestedLessons: 3 },
+  ]},
+  { topic: 'Showing understanding (SLs)', code: 'SLs', subtopics: [
+    { name: 'Stage 7: Listen actively; ask clarifying questions; respond with relevance', code: '7SLs', suggestedLessons: 2 },
+    { name: 'Stage 8: Identify key points and implicit meanings; respond with reasoned counter-points', code: '8SLs', suggestedLessons: 2 },
+    { name: "Stage 9: Evaluate the strength of others' arguments; respond critically and constructively", code: '9SLs', suggestedLessons: 2 },
+  ]},
+  { topic: 'Group discussion (SLg)', code: 'SLg', subtopics: [
+    { name: "Stage 7: Take turns; build on others' contributions; stay on topic", code: '7SLg', suggestedLessons: 2 },
+    { name: 'Stage 8: Take on different roles in group talk (chair, contributor, summariser); manage disagreement', code: '8SLg', suggestedLessons: 2 },
+    { name: 'Stage 9: Lead and facilitate group discussion; synthesise different viewpoints; reach consensus', code: '9SLg', suggestedLessons: 2 },
+  ]},
+]
+// ── LOWER SECONDARY SCIENCE 0893/1113 ──────────────────────
+// 17 topics across 6 strands in 3 categories, 51 subtopics, 173 lessons.
+// Skills: TWS (TWSm, TWSp, TWSc, TWSa)
+// Content: Biology (Bs, Bp, Be), Chemistry (Cm, Cp, Cc),
+//          Physics (Pf, Pl, Pe), Earth & Space (Ep, Ec, Es)
+// Context: Science in Context (SiC)
+const LS_SCIENCE_1113 = [
+  // CATEGORY 1 — SKILLS (Thinking and Working Scientifically)
+  { topic: 'TWS: Models and representations (TWSm)', code: 'TWSm', subtopics: [
+    { name: 'Stage 7: Use diagrams and models to represent atoms, cells, forces, simple ecosystems', code: '7TWSm', suggestedLessons: 2 },
+    { name: 'Stage 8: Compare alternative models (particle model, atomic models); identify limitations', code: '8TWSm', suggestedLessons: 2 },
+    { name: 'Stage 9: Use sophisticated models (DNA, electromagnetic spectrum, Solar System scale)', code: '9TWSm', suggestedLessons: 2 },
+  ]},
+  { topic: 'TWS: Purpose and planning of scientific enquiry (TWSp)', code: 'TWSp', subtopics: [
+    { name: 'Stage 7: Identify variables (dependent, independent, control); plan fair tests', code: '7TWSp', suggestedLessons: 3 },
+    { name: 'Stage 8: Refine plans considering precision, repeatability, range of measurements', code: '8TWSp', suggestedLessons: 3 },
+    { name: 'Stage 9: Plan complex investigations; consider ethical, practical, and safety factors', code: '9TWSp', suggestedLessons: 3 },
+  ]},
+  { topic: 'TWS: Carrying out scientific enquiry (TWSc)', code: 'TWSc', subtopics: [
+    { name: 'Stage 7: Use scientific equipment safely; record observations and measurements accurately', code: '7TWSc', suggestedLessons: 3 },
+    { name: 'Stage 8: Take repeat measurements; calculate means; identify and explain anomalous results', code: '8TWSc', suggestedLessons: 4 },
+    { name: 'Stage 9: Use complex apparatus; plan and execute multi-step investigations', code: '9TWSc', suggestedLessons: 4 },
+  ]},
+  { topic: 'TWS: Analysis, evaluation and conclusions (TWSa)', code: 'TWSa', subtopics: [
+    { name: 'Stage 7: Identify patterns in data; draw simple conclusions linked to evidence', code: '7TWSa', suggestedLessons: 3 },
+    { name: 'Stage 8: Use evidence to support or refute predictions; evaluate enquiry quality', code: '8TWSa', suggestedLessons: 3 },
+    { name: 'Stage 9: Draw conclusions linking multiple lines of evidence; evaluate and suggest improvements', code: '9TWSa', suggestedLessons: 3 },
+  ]},
+  // CATEGORY 2 — CONTENT
+  { topic: 'Biology: Structure and function (Bs)', code: 'Bs', subtopics: [
+    { name: 'Stage 7: Cells: structure of plant and animal cells; organelles; specialised cells', code: '7Bs', suggestedLessons: 4 },
+    { name: 'Stage 8: Tissues, organs, organ systems; digestive and respiratory systems', code: '8Bs', suggestedLessons: 4 },
+    { name: 'Stage 9: Circulatory and nervous systems; reproductive system; hormones', code: '9Bs', suggestedLessons: 4 },
+  ]},
+  { topic: 'Biology: Life processes (Bp)', code: 'Bp', subtopics: [
+    { name: 'Stage 7: Characteristics of living things; photosynthesis (basic); plant nutrition', code: '7Bp', suggestedLessons: 4 },
+    { name: 'Stage 8: Respiration (cellular); enzymes; digestion of food', code: '8Bp', suggestedLessons: 4 },
+    { name: 'Stage 9: Reproduction in plants and humans; growth and development; genetics (intro)', code: '9Bp', suggestedLessons: 5 },
+  ]},
+  { topic: 'Biology: Ecosystems (Be)', code: 'Be', subtopics: [
+    { name: 'Stage 7: Food chains, food webs; energy flow; classification of organisms', code: '7Be', suggestedLessons: 3 },
+    { name: 'Stage 8: Adaptations; competition; population dynamics', code: '8Be', suggestedLessons: 3 },
+    { name: 'Stage 9: Human impact on ecosystems; biodiversity; conservation; climate change', code: '9Be', suggestedLessons: 4 },
+  ]},
+  { topic: 'Chemistry: Materials and their structure (Cm)', code: 'Cm', subtopics: [
+    { name: 'Stage 7: Particle model of solids, liquids, gases; states of matter changes', code: '7Cm', suggestedLessons: 4 },
+    { name: 'Stage 8: Atomic structure (protons, neutrons, electrons); elements vs compounds; molecules', code: '8Cm', suggestedLessons: 4 },
+    { name: 'Stage 9: Atoms, elements, compounds; periodic table (intro); chemical formulae', code: '9Cm', suggestedLessons: 4 },
+  ]},
+  { topic: 'Chemistry: Properties of materials (Cp)', code: 'Cp', subtopics: [
+    { name: 'Stage 7: Density; mass and volume; pure substances vs mixtures', code: '7Cp', suggestedLessons: 3 },
+    { name: 'Stage 8: Solubility; conductors and insulators; magnetic properties', code: '8Cp', suggestedLessons: 3 },
+    { name: 'Stage 9: Acids, alkalis, pH scale; indicators; properties of metals and non-metals', code: '9Cp', suggestedLessons: 4 },
+  ]},
+  { topic: 'Chemistry: Changes to materials (Cc)', code: 'Cc', subtopics: [
+    { name: 'Stage 7: Physical changes; dissolving and separating techniques (filtration, evaporation, distillation, chromatography)', code: '7Cc', suggestedLessons: 4 },
+    { name: 'Stage 8: Chemical reactions; conservation of mass; word equations', code: '8Cc', suggestedLessons: 4 },
+    { name: 'Stage 9: Types of reactions (combustion, neutralisation, displacement, decomposition); balanced equations', code: '9Cc', suggestedLessons: 5 },
+  ]},
+  { topic: 'Physics: Forces and energy (Pf)', code: 'Pf', subtopics: [
+    { name: 'Stage 7: Forces and motion; speed; gravity; mass vs weight', code: '7Pf', suggestedLessons: 4 },
+    { name: 'Stage 8: Energy stores and transfers; work done; pressure (in fluids)', code: '8Pf', suggestedLessons: 4 },
+    { name: "Stage 9: Newton's laws (intro); momentum (informal); efficiency; renewable energy", code: '9Pf', suggestedLessons: 5 },
+  ]},
+  { topic: 'Physics: Light and sound (Pl)', code: 'Pl', subtopics: [
+    { name: 'Stage 7: Reflection and refraction; how the eye works; mirrors and lenses', code: '7Pl', suggestedLessons: 3 },
+    { name: 'Stage 8: The visible spectrum; colour; sound waves (frequency, amplitude, pitch, loudness)', code: '8Pl', suggestedLessons: 3 },
+    { name: 'Stage 9: The electromagnetic spectrum; sound and hearing limits; ultrasound', code: '9Pl', suggestedLessons: 4 },
+  ]},
+  { topic: 'Physics: Electricity and magnetism (Pe)', code: 'Pe', subtopics: [
+    { name: 'Stage 7: Static electricity; current; simple circuits; cells and batteries', code: '7Pe', suggestedLessons: 3 },
+    { name: 'Stage 8: Voltage, current, resistance; series and parallel circuits; circuit symbols', code: '8Pe', suggestedLessons: 4 },
+    { name: 'Stage 9: Electromagnets; motors and generators (intro); using electricity safely', code: '9Pe', suggestedLessons: 4 },
+  ]},
+  { topic: 'Earth and Space: Planet Earth (Ep)', code: 'Ep', subtopics: [
+    { name: 'Stage 7: Structure of the Earth; rock types (igneous, sedimentary, metamorphic); rock cycle', code: '7Ep', suggestedLessons: 3 },
+    { name: 'Stage 8: The atmosphere; weather and climate; greenhouse effect', code: '8Ep', suggestedLessons: 3 },
+    { name: 'Stage 9: Plate tectonics; earthquakes and volcanoes; climate change evidence', code: '9Ep', suggestedLessons: 4 },
+  ]},
+  { topic: 'Earth and Space: Cycles on Earth (Ec)', code: 'Ec', subtopics: [
+    { name: 'Stage 7: Water cycle; carbon cycle (basic)', code: '7Ec', suggestedLessons: 2 },
+    { name: 'Stage 8: Nitrogen cycle; rock cycle in depth', code: '8Ec', suggestedLessons: 3 },
+    { name: 'Stage 9: Interactions between cycles; human disruption to Earth cycles', code: '9Ec', suggestedLessons: 3 },
+  ]},
+  { topic: 'Earth and Space: Earth in space (Es)', code: 'Es', subtopics: [
+    { name: 'Stage 7: Earth, Moon, Sun system; seasons; eclipses', code: '7Es', suggestedLessons: 3 },
+    { name: 'Stage 8: The Solar System: planets and moons; gravity in space', code: '8Es', suggestedLessons: 3 },
+    { name: 'Stage 9: Stars and galaxies; life cycle of stars (basic); the Universe', code: '9Es', suggestedLessons: 3 },
+  ]},
+  // CATEGORY 3 — CONTEXT
+  { topic: 'Science in Context (SiC)', code: 'SiC', subtopics: [
+    { name: 'Stage 7: Scientists and their discoveries; applications in everyday life', code: '7SiC', suggestedLessons: 2 },
+    { name: 'Stage 8: Science and technology in society; ethical considerations', code: '8SiC', suggestedLessons: 2 },
+    { name: 'Stage 9: Global scientific issues: climate, sustainability, health, biotechnology', code: '9SiC', suggestedLessons: 3 },
+  ]},
+]
+// ── LOWER SECONDARY COMPUTING 0860/1129 ────────────────────
+// 5 strands × 3 stages = 15 stage-level subtopics, 74 lessons.
+// Same 5-strand structure as Primary Computing.
+// Major change: text-based programming (Python typically) replaces
+// Primary's block-based approach at Stage 7+.
+const LS_COMPUTING_1129 = [
+  { topic: 'Computational Thinking (CT)', code: 'CT', subtopics: [
+    { name: 'Stage 7: Decompose problems into sub-problems; design algorithms using flowcharts and pseudocode', code: '7CT', suggestedLessons: 5 },
+    { name: 'Stage 8: Sub-routines and procedures; abstraction; using libraries (modular thinking)', code: '8CT', suggestedLessons: 5 },
+    { name: 'Stage 9: Complex algorithm design; recursion (intro); algorithm efficiency (informal)', code: '9CT', suggestedLessons: 5 },
+  ]},
+  { topic: 'Programming (PG)', code: 'PG', subtopics: [
+    { name: 'Stage 7: Move from block-based to text-based programming (Python typically); variables, input/output; sequence', code: '7PG', suggestedLessons: 6 },
+    { name: 'Stage 8: Selection (if/elif/else); loops (while, for); data types (string, int, float); functions with parameters', code: '8PG', suggestedLessons: 7 },
+    { name: 'Stage 9: Lists and arrays; nested loops; file handling (intro); debugging strategies', code: '9PG', suggestedLessons: 7 },
+  ]},
+  { topic: 'Managing Data (MD)', code: 'MD', subtopics: [
+    { name: 'Stage 7: Spreadsheet formulas (SUM, AVERAGE, IF); cell references (absolute and relative); charts', code: '7MD', suggestedLessons: 4 },
+    { name: 'Stage 8: Sorting and filtering data; lookup functions; data validation', code: '8MD', suggestedLessons: 4 },
+    { name: 'Stage 9: Database basics: tables, records, fields; simple queries; relational data (intro)', code: '9MD', suggestedLessons: 5 },
+  ]},
+  { topic: 'Networks and Digital Communication (NW)', code: 'NW', subtopics: [
+    { name: 'Stage 7: How the internet works (basic); LAN vs WAN; URLs and websites; online safety, digital footprint', code: '7NW', suggestedLessons: 4 },
+    { name: 'Stage 8: Network components (servers, routers, switches); IP addresses (basic); cybersecurity threats', code: '8NW', suggestedLessons: 4 },
+    { name: 'Stage 9: Encryption (basic); authentication; ethical issues in digital communication; data protection', code: '9NW', suggestedLessons: 5 },
+  ]},
+  { topic: 'Computer Systems (CS)', code: 'CS', subtopics: [
+    { name: 'Stage 7: CPU, memory, storage; binary representation of numbers (intro)', code: '7CS', suggestedLessons: 4 },
+    { name: 'Stage 8: How software runs; operating system functions; binary representation of text and images', code: '8CS', suggestedLessons: 4 },
+    { name: 'Stage 9: Logic gates (AND, OR, NOT); compression; introduction to AI and machine learning concepts', code: '9CS', suggestedLessons: 5 },
+  ]},
+]
+// ── LOWER SECONDARY GLOBAL PERSPECTIVES 1129 ───────────────
+// 6 skill strands × 3 stages = 18 subtopics, 77 lessons.
+// Same 6 skills as Primary, but stages NOT banded at Lower Sec —
+// each stage has distinct objectives.
+const LS_GLOBAL_1129 = [
+  { topic: 'Research (Re)', code: 'Re', subtopics: [
+    { name: 'Stage 7: Pose researchable questions; identify primary and secondary sources; use multiple sources', code: '7Re', suggestedLessons: 4 },
+    { name: 'Stage 8: Plan research using a range of methods (interviews, surveys, observation); identify reliable vs unreliable', code: '8Re', suggestedLessons: 5 },
+    { name: 'Stage 9: Conduct independent research on a self-chosen issue; triangulate findings across sources', code: '9Re', suggestedLessons: 5 },
+  ]},
+  { topic: 'Analysis (An)', code: 'An', subtopics: [
+    { name: 'Stage 7: Identify different perspectives on an issue (personal, local, national, global)', code: '7An', suggestedLessons: 4 },
+    { name: 'Stage 8: Analyse cause and effect; identify underlying values in arguments', code: '8An', suggestedLessons: 5 },
+    { name: 'Stage 9: Analyse the complexity of issues; identify interconnections between issues', code: '9An', suggestedLessons: 5 },
+  ]},
+  { topic: 'Evaluation (Ev)', code: 'Ev', subtopics: [
+    { name: 'Stage 7: Evaluate evidence quality; distinguish between fact, opinion and bias', code: '7Ev', suggestedLessons: 4 },
+    { name: 'Stage 8: Evaluate strengths and weaknesses of arguments; consider counter-arguments', code: '8Ev', suggestedLessons: 4 },
+    { name: 'Stage 9: Evaluate the impact of actions and decisions; judge multiple proposed solutions', code: '9Ev', suggestedLessons: 4 },
+  ]},
+  { topic: 'Reflection (Rf)', code: 'Rf', subtopics: [
+    { name: 'Stage 7: Reflect on personal learning and viewpoints; identify how views have changed', code: '7Rf', suggestedLessons: 3 },
+    { name: 'Stage 8: Reflect on own assumptions and biases; reflect on contributions to teamwork', code: '8Rf', suggestedLessons: 3 },
+    { name: 'Stage 9: Reflect on the impact of personal and group actions; consider future implications', code: '9Rf', suggestedLessons: 3 },
+  ]},
+  { topic: 'Collaboration (Co)', code: 'Co', subtopics: [
+    { name: 'Stage 7: Work in small groups with assigned roles; share resources and tasks fairly', code: '7Co', suggestedLessons: 4 },
+    { name: 'Stage 8: Take leadership roles; manage disagreements constructively', code: '8Co', suggestedLessons: 5 },
+    { name: 'Stage 9: Lead complex group projects; coordinate across diverse roles', code: '9Co', suggestedLessons: 5 },
+  ]},
+  { topic: 'Communication (Cm)', code: 'Cm', subtopics: [
+    { name: 'Stage 7: Communicate findings in multiple formats (presentation, poster, written report)', code: '7Cm', suggestedLessons: 4 },
+    { name: 'Stage 8: Adapt communication for different audiences; structured arguments with evidence', code: '8Cm', suggestedLessons: 5 },
+    { name: 'Stage 9: Deliver sophisticated communications; persuasive presentations; team presentations', code: '9Cm', suggestedLessons: 5 },
+  ]},
+]
+
+const LOWER_SEC_LIBRARY = [
+  { match: /\bmath/i,      const_: LS_MATHS_0862,    source: 'Cambridge Lower Secondary Mathematics 1112' },
+  { match: /\benglish\b/i, const_: LS_ENGLISH_1111,  source: 'Cambridge Lower Secondary English 1111' },
+  { match: /\bscience\b/i, const_: LS_SCIENCE_1113,  source: 'Cambridge Lower Secondary Science 1113' },
+  { match: /comput/i,      const_: LS_COMPUTING_1129, source: 'Cambridge Lower Secondary Computing 1129' },
+  { match: /global/i,      const_: LS_GLOBAL_1129,   source: 'Cambridge Lower Secondary Global Perspectives 1129' },
+]
+
+
+// ═══════════════════════════════════════════════════════════
 // SUBJECTS TAB — Admin management of Subject records.
 // Wired to existing /api/subjects endpoints (POST/PATCH/DELETE
 // all require admin role on the backend).
@@ -7529,6 +7840,25 @@ function SyllabusSpineTab({ toast }) {
     finally { setBusy(false) }
   }
 
+  const loadLowerSecondarySpine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const entry = LOWER_SEC_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.('No Lower Secondary spine matches "' + subjectName + '". Expected one of: Mathematics, English, Science, Computing, Global Perspectives.')
+      return
+    }
+    if (topics.length > 0 && !window.confirm('This REPLACES the entire existing spine for this subject. Continue?')) return
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to load structure.') }
+    finally { setBusy(false) }
+  }
+
   // ── styles ──
   const sel = { padding: '8px 11px', borderRadius: 7, border: '1.5px solid ' + TOKENS.line,
     fontSize: 13, fontFamily: 'inherit', background: '#fff' }
@@ -7562,6 +7892,12 @@ function SyllabusSpineTab({ toast }) {
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load Cambridge Primary spine</button>
+            )}
+            {curriculum === 'CambridgeLowerSec' && (
+              <button onClick={loadLowerSecondarySpine} disabled={busy} title="Auto-detects which Lower Secondary spine matches the selected subject" style={{
+                background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+                borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+              }}>Load Cambridge Lower Secondary spine</button>
             )}
           </>
         )}
