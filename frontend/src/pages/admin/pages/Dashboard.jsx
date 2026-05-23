@@ -7669,12 +7669,168 @@ const IGCSE_PHYSICS_0625 = [
 // ── IGCSE SCIENCES LIBRARY ─────────────────────────────────
 // Maps Subject names to the appropriate spine constant.
 // 0580 IGCSE Maths is handled separately by loadIgcseMaths (the original
-// pattern); these three are loaded via loadIgcseSciencesSpine.
+// pattern). All other IGCSE subjects are loaded via loadIgcseSpine,
+// using the IGCSE_LIBRARY below.
 const IGCSE_SCIENCES_LIBRARY = [
   { match: /\bbiology\b/i,    const_: IGCSE_BIOLOGY_0610,   source: 'Cambridge IGCSE Biology 0610' },
   { match: /\bchemistry\b/i,  const_: IGCSE_CHEMISTRY_0620, source: 'Cambridge IGCSE Chemistry 0620' },
   { match: /\bphysics\b/i,    const_: IGCSE_PHYSICS_0625,   source: 'Cambridge IGCSE Physics 0625' },
 ]
+
+// ── IGCSE FIRST LANGUAGE ENGLISH 0500 ───────────────────────
+// 3 strand topics × ~6 subtopics each = ~18 subtopics.
+// Source: Cambridge IGCSE First Language English 0500 Syllabus 2027-2029.
+// Built around the 15 official Assessment Objectives (R1-R5, W1-W5, SL1-SL5).
+const IGCSE_ENGLISH_LANG_0500 = [
+  { topic: 'Reading skills (R)', code: 'R', subtopics: [
+    { name: 'R1: Demonstrate understanding of explicit meanings (literal comprehension; locating information; following narrative)', code: 'R1', suggestedLessons: 4 },
+    { name: 'R2: Demonstrate understanding of implicit meanings and attitudes (inference; reading between the lines; identifying tone)', code: 'R2', suggestedLessons: 5 },
+    { name: 'R3: Analyse, evaluate and develop facts, ideas and opinions, using appropriate support from the text (engaging with arguments; evaluating viewpoints; using textual evidence)', code: 'R3', suggestedLessons: 6 },
+    { name: "R4: Demonstrate understanding of how writers achieve effects and influence readers (language analysis; figurative devices; structural choices; word-level effects)", code: 'R4', suggestedLessons: 8 },
+    { name: 'R5: Select and use information for specific purposes (selective reading; summary writing; synthesising across multiple texts)', code: 'R5', suggestedLessons: 6 },
+    { name: 'Exam practice: Paper 1 directed-response writing tasks from non-fiction passages', code: 'REX', suggestedLessons: 4 },
+  ]},
+  { topic: 'Writing skills (W)', code: 'W', subtopics: [
+    { name: 'W1: Articulate experience and express what is thought, felt and imagined (descriptive writing; narrative writing; personal voice)', code: 'W1', suggestedLessons: 6 },
+    { name: 'W2: Organise and structure facts, ideas and opinions for deliberate effect (paragraphing; openings and endings; coherence and cohesion)', code: 'W2', suggestedLessons: 5 },
+    { name: 'W3: Use a range of vocabulary and sentence structures appropriate to context (lexical range; varied syntax; sophisticated diction)', code: 'W3', suggestedLessons: 6 },
+    { name: 'W4: Use language appropriate to purpose and to engage the audience (register; tone; rhetoric; persuasive techniques)', code: 'W4', suggestedLessons: 5 },
+    { name: 'W5: Make accurate use of spelling, punctuation and grammar (technical accuracy; proofreading; sentence-level correctness)', code: 'W5', suggestedLessons: 4 },
+    { name: 'Exam practice: Paper 2 composition tasks (narrative and descriptive)', code: 'WEX1', suggestedLessons: 5 },
+    { name: 'Exam practice: Directed writing tasks (letter, article, speech, report, journal)', code: 'WEX2', suggestedLessons: 5 },
+  ]},
+  { topic: 'Speaking and Listening (SL)', code: 'SL', subtopics: [
+    { name: 'SL1: Articulate experience and express what is thought, felt and imagined orally (individual talk preparation; structured oral presentation)', code: 'SL1', suggestedLessons: 4 },
+    { name: 'SL2: Organise and structure ideas and opinions orally for deliberate effect (planning extended talk; signposting; conclusions)', code: 'SL2', suggestedLessons: 3 },
+    { name: 'SL3: Use a range of vocabulary and grammatical structures in spoken English (precision in spoken vocabulary; spoken sentence variety)', code: 'SL3', suggestedLessons: 3 },
+    { name: 'SL4: Use spoken register appropriate to context (formal vs informal; adapting to audience; tone in speech)', code: 'SL4', suggestedLessons: 3 },
+    { name: 'SL5: Listen and respond appropriately in conversation (active listening; responding to questions; sustaining dialogue; turn-taking)', code: 'SL5', suggestedLessons: 4 },
+    { name: 'Exam practice: Individual task (2-3 min presentation) and conversation with examiner (6-7 min)', code: 'SLEX', suggestedLessons: 4 },
+  ]},
+]
+// ── IGCSE LITERATURE IN ENGLISH 0475 ────────────────────────
+// 8 topics: AO foundations + per-form (Poetry, Prose, Drama, Unseen)
+// + cross-cutting (Comparative, Context, Personal Response).
+// Source: Cambridge IGCSE Literature in English 0475 Syllabus 2028-2030.
+// Skills-based (text-agnostic — durable across set-text rotations).
+const IGCSE_ENGLISH_LIT_0475 = [
+  { topic: 'Foundations: The 4 Assessment Objectives (AO)', code: 'AO', subtopics: [
+    { name: 'AO1 — Knowledge of text content: detailed recall, use of quotations, supporting reference to text', code: 'AO1', suggestedLessons: 3 },
+    { name: 'AO2 — Understanding meanings and contexts: explicit and implicit meanings; awareness of historical, cultural, social context', code: 'AO2', suggestedLessons: 4 },
+    { name: "AO3 — Analysis of writers' methods: language, structure, form; literary devices and their effects", code: 'AO3', suggestedLessons: 5 },
+    { name: 'AO4 — Personal response: sensitive, informed, communicating own engagement with the text', code: 'AO4', suggestedLessons: 3 },
+  ]},
+  { topic: 'Poetry (POE)', code: 'POE', subtopics: [
+    { name: 'Approaching poetry: form, structure (stanzas, line breaks, enjambement), voice, persona', code: 'POE1', suggestedLessons: 4 },
+    { name: 'Poetic language: metaphor, simile, personification, imagery, symbolism, sound devices (alliteration, assonance, sibilance)', code: 'POE2', suggestedLessons: 5 },
+    { name: 'Poetic structure: rhyme schemes, metre (iambic pentameter, trochaic), free verse, sonnets, ballads', code: 'POE3', suggestedLessons: 4 },
+    { name: 'Themes and contexts in poetry: how to identify themes; placing poems in their cultural/historical context', code: 'POE4', suggestedLessons: 3 },
+    { name: 'Comparing poems: similarities and differences in treatment of theme, tone, technique', code: 'POE5', suggestedLessons: 4 },
+    { name: 'Writing about poetry: close-reading essay; quotation embedding; analysis paragraphs (PEEL/PETAL/PEAL)', code: 'POE6', suggestedLessons: 5 },
+  ]},
+  { topic: 'Prose (PRO)', code: 'PRO', subtopics: [
+    { name: 'Narrative voice: first person, third person omniscient, third person limited; reliability of narrator', code: 'PRO1', suggestedLessons: 3 },
+    { name: 'Characterisation: methods writers use to create characters; direct and indirect characterisation', code: 'PRO2', suggestedLessons: 4 },
+    { name: 'Setting and atmosphere: how place and time function; symbolic settings; pathetic fallacy', code: 'PRO3', suggestedLessons: 3 },
+    { name: 'Plot and structure: exposition, rising action, climax, falling action, resolution; flashback, foreshadowing', code: 'PRO4', suggestedLessons: 3 },
+    { name: 'Themes in prose: identifying central themes; tracing themes across a novel; how writers develop themes', code: 'PRO5', suggestedLessons: 4 },
+    { name: 'Writing about prose: essay structure; using quotations effectively; balancing detail and overview', code: 'PRO6', suggestedLessons: 5 },
+  ]},
+  { topic: 'Drama (DRA)', code: 'DRA', subtopics: [
+    { name: 'Dramatic form: acts, scenes, dialogue, soliloquy, aside, stage directions', code: 'DRA1', suggestedLessons: 3 },
+    { name: 'Characterisation in drama: speech as characterisation; relationships revealed through dialogue; dramatic foils', code: 'DRA2', suggestedLessons: 4 },
+    { name: 'Shakespearean conventions: blank verse, iambic pentameter, rhymed couplets at scene endings, prose vs verse', code: 'DRA3', suggestedLessons: 4 },
+    { name: 'Dramatic devices: dramatic irony, foreshadowing, comic relief, tragic structure, pathos', code: 'DRA4', suggestedLessons: 4 },
+    { name: 'Themes in drama: identifying themes through action and dialogue; how productions interpret themes', code: 'DRA5', suggestedLessons: 3 },
+    { name: 'Writing about drama: responding to passage-based questions; whole-play essay questions; quoting from drama', code: 'DRA6', suggestedLessons: 5 },
+  ]},
+  { topic: 'Unseen analysis (UNS)', code: 'UNS', subtopics: [
+    { name: 'Reading an unseen poem: first read, second read, annotation method', code: 'UNS1', suggestedLessons: 3 },
+    { name: 'Reading an unseen prose extract: identifying genre, narrative voice, key features quickly', code: 'UNS2', suggestedLessons: 3 },
+    { name: 'Structuring an unseen response: introduction, body paragraphs by feature (language, structure, theme), conclusion', code: 'UNS3', suggestedLessons: 3 },
+    { name: 'Time management in unseen analysis: planning, drafting, checking under exam conditions', code: 'UNS4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Comparative analysis (CMP)', code: 'CMP', subtopics: [
+    { name: 'Comparing two texts: identifying similarities and differences in theme, style, technique', code: 'CMP1', suggestedLessons: 3 },
+    { name: 'Comparing two passages within a single text: how meaning develops; how characters/themes evolve', code: 'CMP2', suggestedLessons: 3 },
+    { name: 'Comparative essay structure: integrated vs block comparison; comparative connectives', code: 'CMP3', suggestedLessons: 3 },
+  ]},
+  { topic: 'Literary contexts (CON)', code: 'CON', subtopics: [
+    { name: 'Historical context: era, key events, social conditions affecting a text', code: 'CON1', suggestedLessons: 3 },
+    { name: 'Cultural context: cultural attitudes, beliefs, customs reflected in a text', code: 'CON2', suggestedLessons: 3 },
+    { name: "Biographical context: author's life and times (used carefully — secondary to text analysis)", code: 'CON3', suggestedLessons: 2 },
+    { name: 'Literary context: where a text sits in genre history; influences and echoes', code: 'CON4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Personal response and critical voice (PRS)', code: 'PRS', subtopics: [
+    { name: 'Developing critical opinions: forming, testing, refining personal interpretations', code: 'PRS1', suggestedLessons: 3 },
+    { name: 'Justifying personal response with textual evidence: "I think X because the text shows Y"', code: 'PRS2', suggestedLessons: 3 },
+    { name: 'Sustaining critical voice through an essay: maintaining stance; avoiding flat summary', code: 'PRS3', suggestedLessons: 3 },
+    { name: 'Sensitivity in response: nuance; recognising complexity; avoiding simplistic judgements', code: 'PRS4', suggestedLessons: 3 },
+  ]},
+]
+// ── IGCSE BUSINESS STUDIES 0450 ─────────────────────────────
+// 6 units × ~4 subtopics each.
+// Source: Cambridge IGCSE Business Studies 0450 Syllabus 2026
+// (stable since 2024). Matches official 6-unit structure exactly.
+const IGCSE_BUSINESS_0450 = [
+  { topic: 'Understanding business activity (UBA)', code: 'UBA', subtopics: [
+    { name: '1.1 Business activity: purpose and nature of business; needs and wants; specialisation; value-added; opportunity cost', code: 'UBA1', suggestedLessons: 4 },
+    { name: '1.2 Classification of businesses: primary, secondary, tertiary sectors; changing economic structures; mixed economy', code: 'UBA2', suggestedLessons: 3 },
+    { name: '1.3 Enterprise, business growth and size: entrepreneurship; reasons for business growth; methods of growth (internal, external); measuring size; reasons businesses fail', code: 'UBA3', suggestedLessons: 4 },
+    { name: '1.4 Types of business organisation: sole trader, partnership, private and public limited companies, franchises, cooperatives, joint ventures; public corporations', code: 'UBA4', suggestedLessons: 5 },
+    { name: '1.5 Business objectives and stakeholder objectives: SMART objectives; survival, growth, profit, market share, service; stakeholders and their objectives', code: 'UBA5', suggestedLessons: 4 },
+  ]},
+  { topic: 'People in business (PIB)', code: 'PIB', subtopics: [
+    { name: '2.1 Motivating employees: importance of well-motivated workforce; theories (Maslow, Taylor, Herzberg); financial and non-financial motivators', code: 'PIB1', suggestedLessons: 5 },
+    { name: '2.2 Organisation and management: organisation structures; spans of control; chain of command; delegation; leadership styles (autocratic, democratic, laissez-faire); functions of management', code: 'PIB2', suggestedLessons: 5 },
+    { name: '2.3 Recruitment, selection and training of employees: internal vs external recruitment; recruitment process; types of training (induction, on-the-job, off-the-job); reducing workforce', code: 'PIB3', suggestedLessons: 4 },
+    { name: '2.4 Internal and external communication: methods of communication; barriers to effective communication; impact of poor communication', code: 'PIB4', suggestedLessons: 3 },
+  ]},
+  { topic: 'Marketing (MKT)', code: 'MKT', subtopics: [
+    { name: '3.1 Marketing, competition and the customer: role of marketing; identifying customer needs; mass and niche markets; market segmentation; market change', code: 'MKT1', suggestedLessons: 4 },
+    { name: '3.2 Market research: primary and secondary research; methods (questionnaires, interviews, focus groups); accuracy of data; presenting findings', code: 'MKT2', suggestedLessons: 4 },
+    { name: '3.3 Marketing mix — Product: product range; product development; brand image; packaging; product life cycle; Boston Matrix', code: 'MKT3', suggestedLessons: 5 },
+    { name: '3.3 Marketing mix — Price: pricing methods (cost-plus, competitive, penetration, skimming, promotional, dynamic); price elasticity (informal)', code: 'MKT4', suggestedLessons: 4 },
+    { name: '3.3 Marketing mix — Place: distribution channels (retailer, wholesaler, direct); e-commerce; advantages and disadvantages of each', code: 'MKT5', suggestedLessons: 3 },
+    { name: '3.3 Marketing mix — Promotion: advertising (above- and below-the-line); sales promotions; technology in promotion; legal controls', code: 'MKT6', suggestedLessons: 4 },
+    { name: '3.4 Marketing strategy: integrated marketing mix decisions; legal controls on marketing; opportunities and problems of global markets; multinational marketing', code: 'MKT7', suggestedLessons: 4 },
+  ]},
+  { topic: 'Operations management (OPS)', code: 'OPS', subtopics: [
+    { name: '4.1 Production of goods and services: production methods (job, batch, flow); productivity; efficiency; lean production (JIT, kaizen)', code: 'OPS1', suggestedLessons: 5 },
+    { name: '4.2 Costs, scale of production and break-even analysis: fixed/variable/total costs; economies and diseconomies of scale; break-even charts; calculations', code: 'OPS2', suggestedLessons: 6 },
+    { name: '4.3 Achieving quality production: importance of quality; quality control vs quality assurance; total quality management', code: 'OPS3', suggestedLessons: 3 },
+    { name: '4.4 Location decisions: factors affecting location (market, raw materials, labour, transport, government); relocation; international location', code: 'OPS4', suggestedLessons: 4 },
+  ]},
+  { topic: 'Financial information and decisions (FIN)', code: 'FIN', subtopics: [
+    { name: '5.1 Business finance: needs and sources: short-term vs long-term finance; internal sources (retained profit, sale of assets); external sources (loans, share issue, debentures, grants); factors affecting choice', code: 'FIN1', suggestedLessons: 5 },
+    { name: '5.2 Cash-flow forecasting and working capital: importance of cash flow; cash-flow forecast structure; calculations; importance of working capital', code: 'FIN2', suggestedLessons: 5 },
+    { name: '5.3 Income statements (profit & loss account): gross profit, net profit; calculations; importance of profit', code: 'FIN3', suggestedLessons: 4 },
+    { name: '5.4 Statement of financial position (balance sheet): assets, liabilities, capital; basic structure', code: 'FIN4', suggestedLessons: 3 },
+    { name: '5.5 Analysis of accounts: profitability ratios (gross profit margin, net profit margin, ROCE); liquidity ratios (current ratio, acid test); user groups', code: 'FIN5', suggestedLessons: 5 },
+  ]},
+  { topic: 'External influences on business activity (EXT)', code: 'EXT', subtopics: [
+    { name: '6.1 Economic issues: business cycle (boom, slump, recession, recovery); effects of inflation, unemployment, exchange rates; government economic policies (taxation, interest rates)', code: 'EXT1', suggestedLessons: 5 },
+    { name: '6.2 Environmental and ethical issues: environmental impact of business; sustainable development; externalities; business ethics; conflicts between profit and ethics', code: 'EXT2', suggestedLessons: 4 },
+    { name: '6.3 Business and the international economy: globalisation (opportunities and threats); multinational companies; exchange rate changes affecting importers and exporters', code: 'EXT3', suggestedLessons: 4 },
+  ]},
+]
+
+// ── UNIFIED IGCSE LIBRARY ──────────────────────────────────
+// Covers all IGCSE subjects with spines (except Maths 0580 which
+// has its own hard-wired loader). Loader auto-detects by subject name.
+const IGCSE_LIBRARY = [
+  // Sciences (also in IGCSE_SCIENCES_LIBRARY for legacy compat)
+  { match: /\bbiology\b/i,                       const_: IGCSE_BIOLOGY_0610,      source: 'Cambridge IGCSE Biology 0610' },
+  { match: /\bchemistry\b/i,                     const_: IGCSE_CHEMISTRY_0620,    source: 'Cambridge IGCSE Chemistry 0620' },
+  { match: /\bphysics\b/i,                       const_: IGCSE_PHYSICS_0625,      source: 'Cambridge IGCSE Physics 0625' },
+  // English pair — Literature must be matched before Language
+  // (otherwise "English Literature" matches the broader Language regex)
+  { match: /\b(literature|english\s+lit)\b/i,    const_: IGCSE_ENGLISH_LIT_0475,  source: 'Cambridge IGCSE Literature in English 0475' },
+  { match: /\benglish\b/i,                       const_: IGCSE_ENGLISH_LANG_0500, source: 'Cambridge IGCSE First Language English 0500' },
+  // Business
+  { match: /\bbusiness\b/i,                      const_: IGCSE_BUSINESS_0450,     source: 'Cambridge IGCSE Business Studies 0450' },
+]
+
 
 
 // ═══════════════════════════════════════════════════════════
@@ -8151,11 +8307,11 @@ function SyllabusSpineTab({ toast }) {
     finally { setBusy(false) }
   }
 
-  const loadIgcseSciencesSpine = async () => {
+  const loadIgcseSpine = async () => {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
-    const entry = IGCSE_SCIENCES_LIBRARY.find(e => e.match.test(subjectName))
+    const entry = IGCSE_LIBRARY.find(e => e.match.test(subjectName))
     if (!entry) {
-      toast?.error?.('No IGCSE Sciences spine matches "' + subjectName + '". Expected one of: Biology, Chemistry, Physics.')
+      toast?.error?.('No IGCSE spine matches "' + subjectName + '". Available: Mathematics (use the IGCSE Maths 0580 button), Biology, Chemistry, Physics, English Language, Literature in English, Business Studies.')
       return
     }
     if (topics.length > 0 && !window.confirm('This REPLACES the entire existing spine for this subject. Continue?')) return
@@ -8211,10 +8367,10 @@ function SyllabusSpineTab({ toast }) {
               }}>Load Cambridge Lower Secondary spine</button>
             )}
             {curriculum === 'CambridgeIGCSE' && (
-              <button onClick={loadIgcseSciencesSpine} disabled={busy} title="Auto-detects which IGCSE Sciences spine matches the selected subject (Biology, Chemistry, Physics)" style={{
+              <button onClick={loadIgcseSpine} disabled={busy} title="Auto-detects which IGCSE spine matches the selected subject (Biology, Chemistry, Physics, English Language, Literature in English, Business Studies)" style={{
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-              }}>Load IGCSE Sciences spine</button>
+              }}>Load IGCSE spine</button>
             )}
           </>
         )}
