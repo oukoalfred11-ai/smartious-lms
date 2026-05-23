@@ -7098,10 +7098,31 @@ function SubjectsTab({ toast }) {
     { id: 'Canadian',           name: 'Canadian Curriculum' },
     { id: 'KenyaCBC',           name: 'Kenya CBC' },
   ]
-  const CATEGORIES = [
-    'Mathematics', 'Sciences', 'Languages', 'Arts',
-    'Business', 'Humanities', 'Technology', 'Physical Education',
+  // Categories grouped by curriculum family — drives the <optgroup>
+  // dropdown in the form so admin sees categories organised by which
+  // curricula use them. CATEGORIES (flat) is exposed for any code path
+  // that just needs the list of valid values.
+  const CATEGORY_GROUPS = [
+    { label: 'Cambridge / Edexcel / AQA', categories: [
+      'Mathematics', 'Sciences', 'Languages', 'Arts',
+      'Business', 'Humanities', 'Technology', 'Physical Education',
+    ]},
+    { label: 'International Baccalaureate (IB)', categories: [
+      'Studies in Language and Literature', 'Language and Literature',
+      'Language Acquisition', 'Individuals and Societies',
+      'The Arts', 'Physical and Health Education', 'IB Core',
+    ]},
+    { label: 'British National Curriculum', categories: [
+      'Core', 'English', 'Practical', 'Design',
+    ]},
+    { label: 'Kenya CBC', categories: [
+      'STEM', 'Social Studies', 'Life Skills',
+    ]},
+    { label: 'American / Other', categories: [
+      'Electives',
+    ]},
   ]
+  const CATEGORIES = CATEGORY_GROUPS.flatMap(g => g.categories)
 
   const [filterCurriculum, setFilterCurriculum] = useState('CambridgeIGCSE')
   const [search, setSearch] = useState('')
@@ -7209,6 +7230,7 @@ function SubjectsTab({ toast }) {
           editing={editing}
           curricula={CURRICULA_LIST}
           categories={CATEGORIES}
+          categoryGroups={CATEGORY_GROUPS}
           defaultCurriculum={filterCurriculum}
           onClose={() => { setCreating(false); setEditing(null) }}
           onSaved={() => { setCreating(false); setEditing(null); load(); toast?.ok?.('Saved.') }}
@@ -7219,7 +7241,7 @@ function SubjectsTab({ toast }) {
   )
 }
 
-function SubjectFormModal({ editing, curricula, categories, defaultCurriculum, onClose, onSaved, onError }) {
+function SubjectFormModal({ editing, curricula, categories, categoryGroups, defaultCurriculum, onClose, onSaved, onError }) {
   const [form, setForm] = useState(() => editing ? {
     curriculum: editing.curriculum,
     subjectName: editing.subjectName || '',
@@ -7300,7 +7322,14 @@ function SubjectFormModal({ editing, curricula, categories, defaultCurriculum, o
           <label style={lbl}>Category *</label>
           <select value={form.category}
             onChange={e => update('category', e.target.value)} style={inp}>
-            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+            <option value="" disabled>— select a category —</option>
+            {(categoryGroups || []).map(g => (
+              <optgroup key={g.label} label={g.label}>
+                {g.categories.map(c => <option key={c} value={c}>{c}</option>)}
+              </optgroup>
+            ))}
+            {/* Fallback to flat list if categoryGroups not provided */}
+            {!categoryGroups && categories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div style={{ marginBottom: 18 }}>
