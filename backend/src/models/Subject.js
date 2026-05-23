@@ -4,14 +4,15 @@ const subjectSchema = new mongoose.Schema({
   curriculum: {
     type: String,
     enum: [
-      // Current 15-curriculum catalog
+      // 15-curriculum catalog. Legacy values (IGCSE, A-Level, IB Diploma,
+      // IB MYP, Kenya CBC, IUFP, Primary, Cambridge, Edexcel) were
+      // removed on 2026-05-22 after verified-clean migrations of all
+      // four collections (subjects, allocations, timetables, liveclasses)
+      // and both user views (student top-level, teacher arrays).
       'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
       'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
       'AQALowerSec', 'AQAGCSE', 'AQAALevel',
       'IB', 'BNC', 'American', 'Canadian', 'KenyaCBC',
-      // Legacy values kept for backwards-compat with any pre-migration records
-      'IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'IUFP',
-      'Primary', 'Cambridge', 'Edexcel',
     ],
     required: true,
     trim: true
