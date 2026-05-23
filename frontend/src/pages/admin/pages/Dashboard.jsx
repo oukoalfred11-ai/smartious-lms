@@ -7385,6 +7385,298 @@ const LOWER_SEC_LIBRARY = [
 ]
 
 
+// ── IGCSE BIOLOGY 0610 ─────────────────────────────────────
+// 21 topics covering full Cambridge IGCSE Biology syllabus.
+// Source: Cambridge IGCSE Biology 0610 Syllabus 2026-2028.
+// Extended (Supplement) content integrated into subtopic descriptions.
+const IGCSE_BIOLOGY_0610 = [
+  { topic: 'Characteristics and classification of living organisms (CCL)', code: 'CCL', subtopics: [
+    { name: 'Characteristics of living organisms (MRS GREN: movement, respiration, sensitivity, growth, reproduction, excretion, nutrition)', code: 'CCL1', suggestedLessons: 2 },
+    { name: 'Concept and uses of classification systems; binomial system', code: 'CCL2', suggestedLessons: 2 },
+    { name: 'Five-kingdom classification (animals, plants, fungi, prokaryotes, protoctists); main features', code: 'CCL3', suggestedLessons: 3 },
+    { name: 'Main groups of vertebrates and arthropods', code: 'CCL4', suggestedLessons: 2 },
+    { name: 'Features of plant kingdom (ferns, flowering plants — dicotyledons vs monocotyledons)', code: 'CCL5', suggestedLessons: 2 },
+    { name: 'Features of viruses (protein coat, genetic material); use of dichotomous keys', code: 'CCL6', suggestedLessons: 2 },
+  ]},
+  { topic: 'Organisation of the organism (ORG)', code: 'ORG', subtopics: [
+    { name: 'Cell structure: plant, animal, and bacterial cells (organelles)', code: 'ORG1', suggestedLessons: 3 },
+    { name: 'Specialised cells: ciliated, root hair, palisade mesophyll, neurones, red blood, sperm/egg', code: 'ORG2', suggestedLessons: 3 },
+    { name: 'Levels of organisation: cell → tissue → organ → organ system → organism', code: 'ORG3', suggestedLessons: 2 },
+    { name: 'Sizes of specimens: magnification formula and unit conversion', code: 'ORG4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Movement into and out of cells (MOV)', code: 'MOV', subtopics: [
+    { name: 'Diffusion: definition, factors affecting rate, examples in living organisms', code: 'MOV1', suggestedLessons: 3 },
+    { name: 'Osmosis: definition, effect on plant and animal cells (turgor, plasmolysis, haemolysis)', code: 'MOV2', suggestedLessons: 4 },
+    { name: 'Water potential and concentration gradient (Extended)', code: 'MOV3', suggestedLessons: 2 },
+    { name: 'Active transport: definition, role of protein carriers, examples (root hair uptake, glucose absorption)', code: 'MOV4', suggestedLessons: 3 },
+  ]},
+  { topic: 'Biological molecules (MOL)', code: 'MOL', subtopics: [
+    { name: 'Elements in carbohydrates, proteins, fats; chemical structure (simple sugars, amino acids, glycerol/fatty acids)', code: 'MOL1', suggestedLessons: 3 },
+    { name: "Food tests: Benedict's, iodine, biuret, ethanol emulsion, DCPIP", code: 'MOL2', suggestedLessons: 3 },
+    { name: 'Roles of water; structure of DNA (double helix, four bases)', code: 'MOL3', suggestedLessons: 2 },
+  ]},
+  { topic: 'Enzymes (ENZ)', code: 'ENZ', subtopics: [
+    { name: 'Enzymes as biological catalysts; specificity; lock-and-key model', code: 'ENZ1', suggestedLessons: 3 },
+    { name: 'Effect of temperature and pH on enzyme activity; denaturation', code: 'ENZ2', suggestedLessons: 3 },
+    { name: 'Investigations into enzyme action', code: 'ENZ3', suggestedLessons: 2 },
+  ]},
+  { topic: 'Plant nutrition (PNU)', code: 'PNU', subtopics: [
+    { name: 'Photosynthesis: word and balanced chemical equation; raw materials and products', code: 'PNU1', suggestedLessons: 3 },
+    { name: 'Investigating photosynthesis: testing leaves for starch, controlling variables', code: 'PNU2', suggestedLessons: 3 },
+    { name: 'Leaf structure: cellular adaptations for photosynthesis; gas exchange', code: 'PNU3', suggestedLessons: 3 },
+    { name: 'Limiting factors: light, CO2, temperature; glasshouse applications', code: 'PNU4', suggestedLessons: 2 },
+    { name: 'Mineral requirements: nitrogen for proteins, magnesium for chlorophyll', code: 'PNU5', suggestedLessons: 2 },
+  ]},
+  { topic: 'Human nutrition (HNU)', code: 'HNU', subtopics: [
+    { name: 'Balanced diet: nutrients (carbohydrates, fats, proteins, vitamins C/D, minerals, fibre, water); deficiency diseases', code: 'HNU1', suggestedLessons: 3 },
+    { name: 'Alimentary canal: structure and functions (ingestion, digestion, absorption, assimilation, egestion)', code: 'HNU2', suggestedLessons: 3 },
+    { name: 'Mechanical and chemical digestion; role of teeth and enzymes (amylase, protease, lipase)', code: 'HNU3', suggestedLessons: 4 },
+    { name: 'Absorption in the small intestine; villi adaptations', code: 'HNU4', suggestedLessons: 3 },
+    { name: 'Role of the liver in assimilation; absorption of water in colon', code: 'HNU5', suggestedLessons: 2 },
+  ]},
+  { topic: 'Transport in plants (TPL)', code: 'TPL', subtopics: [
+    { name: 'Xylem and phloem: structure, location, functions (water/mineral transport, translocation)', code: 'TPL1', suggestedLessons: 3 },
+    { name: 'Water uptake by root hair cells; pathway through plant', code: 'TPL2', suggestedLessons: 3 },
+    { name: 'Transpiration: definition, factors affecting rate, investigations', code: 'TPL3', suggestedLessons: 3 },
+    { name: 'Translocation of sucrose and amino acids (Extended)', code: 'TPL4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Transport in animals (TAN)', code: 'TAN', subtopics: [
+    { name: 'Circulatory systems: single (fish) vs double (mammals); pulmonary and systemic', code: 'TAN1', suggestedLessons: 2 },
+    { name: 'Heart structure: chambers, valves, vessels; coronary circulation', code: 'TAN2', suggestedLessons: 4 },
+    { name: 'Heart function: cardiac cycle, heart rate measurement; effect of exercise', code: 'TAN3', suggestedLessons: 3 },
+    { name: 'Blood vessels: arteries, veins, capillaries — structure and function', code: 'TAN4', suggestedLessons: 3 },
+    { name: 'Blood: composition (red and white cells, platelets, plasma); roles in transport and defence', code: 'TAN5', suggestedLessons: 3 },
+  ]},
+  { topic: 'Diseases and immunity (DIS)', code: 'DIS', subtopics: [
+    { name: 'Pathogens and transmissible diseases; transmission methods', code: 'DIS1', suggestedLessons: 2 },
+    { name: 'Body defences: mechanical and chemical barriers; phagocytes', code: 'DIS2', suggestedLessons: 2 },
+    { name: 'Active and passive immunity; lymphocytes and antibody production', code: 'DIS3', suggestedLessons: 3 },
+    { name: 'Vaccination: principles, herd immunity, role in disease control', code: 'DIS4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Gas exchange in humans (GAS)', code: 'GAS', subtopics: [
+    { name: 'Structure of the breathing system: trachea, bronchi, bronchioles, alveoli', code: 'GAS1', suggestedLessons: 2 },
+    { name: 'Adaptations of alveoli for gas exchange', code: 'GAS2', suggestedLessons: 2 },
+    { name: 'Inspiration and expiration: role of intercostal muscles and diaphragm', code: 'GAS3', suggestedLessons: 3 },
+    { name: 'Effects of physical activity and smoking on the breathing system', code: 'GAS4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Respiration (RES)', code: 'RES', subtopics: [
+    { name: 'Aerobic respiration: word and balanced equation; uses of energy', code: 'RES1', suggestedLessons: 3 },
+    { name: 'Anaerobic respiration in muscles (lactic acid) and yeast (alcoholic fermentation)', code: 'RES2', suggestedLessons: 3 },
+    { name: 'Comparing energy released; oxygen debt (Extended)', code: 'RES3', suggestedLessons: 2 },
+  ]},
+  { topic: 'Excretion in humans (EXC)', code: 'EXC', subtopics: [
+    { name: 'Excretory products: CO2 from lungs, urea from kidneys', code: 'EXC1', suggestedLessons: 2 },
+    { name: 'Kidney structure: cortex, medulla, ureter, bladder', code: 'EXC2', suggestedLessons: 2 },
+    { name: 'Filtration in the nephron; selective reabsorption; urine formation', code: 'EXC3', suggestedLessons: 3 },
+    { name: 'Dialysis and kidney transplant (Extended)', code: 'EXC4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Coordination and response (COR)', code: 'COR', subtopics: [
+    { name: 'Nervous system: CNS and peripheral nerves; neurones (sensory, motor, relay)', code: 'COR1', suggestedLessons: 3 },
+    { name: 'Reflex arc; synapses (Extended)', code: 'COR2', suggestedLessons: 3 },
+    { name: 'Sense organs: structure and function of the eye; accommodation, pupil reflex', code: 'COR3', suggestedLessons: 3 },
+    { name: 'Hormones: definition; insulin and adrenaline; comparing nervous vs hormonal', code: 'COR4', suggestedLessons: 3 },
+    { name: 'Homeostasis: principle, body temperature control, blood glucose control', code: 'COR5', suggestedLessons: 3 },
+    { name: 'Tropisms in plants: phototropism, gravitropism; role of auxin', code: 'COR6', suggestedLessons: 2 },
+  ]},
+  { topic: 'Drugs (DRG)', code: 'DRG', subtopics: [
+    { name: 'Definition of a drug; medicinal drugs (antibiotics)', code: 'DRG1', suggestedLessons: 2 },
+    { name: 'Misused drugs: heroin (effects, addiction); alcohol and tobacco effects', code: 'DRG2', suggestedLessons: 2 },
+  ]},
+  { topic: 'Reproduction (REP)', code: 'REP', subtopics: [
+    { name: 'Asexual reproduction vs sexual reproduction; advantages and disadvantages', code: 'REP1', suggestedLessons: 2 },
+    { name: 'Sexual reproduction in plants: flower structure, pollination, fertilisation, seed and fruit', code: 'REP2', suggestedLessons: 4 },
+    { name: 'Sexual reproduction in humans: male and female reproductive systems', code: 'REP3', suggestedLessons: 3 },
+    { name: 'Menstrual cycle; hormones involved (FSH, LH, oestrogen, progesterone)', code: 'REP4', suggestedLessons: 3 },
+    { name: 'Development of the fetus; role of placenta and amniotic sac', code: 'REP5', suggestedLessons: 2 },
+    { name: 'Sexually transmitted infections (HIV/AIDS); contraception methods', code: 'REP6', suggestedLessons: 2 },
+  ]},
+  { topic: 'Inheritance (INH)', code: 'INH', subtopics: [
+    { name: 'Chromosomes, genes, alleles; mitosis and meiosis', code: 'INH1', suggestedLessons: 4 },
+    { name: 'Monohybrid inheritance: genotype, phenotype, homozygous, heterozygous; Punnett squares', code: 'INH2', suggestedLessons: 4 },
+    { name: 'Sex determination (XX/XY); sex-linked characteristics', code: 'INH3', suggestedLessons: 2 },
+    { name: 'Codominance (Extended); inherited disorders', code: 'INH4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Variation and selection (VAR)', code: 'VAR', subtopics: [
+    { name: 'Variation: continuous vs discontinuous; genetic and environmental causes', code: 'VAR1', suggestedLessons: 2 },
+    { name: 'Mutation as a source of variation; gene mutation and chromosome mutation', code: 'VAR2', suggestedLessons: 2 },
+    { name: 'Natural selection; evolution by natural selection (Darwin)', code: 'VAR3', suggestedLessons: 3 },
+    { name: 'Adaptive features; selective breeding (artificial selection)', code: 'VAR4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Organisms and their environment (ENV)', code: 'ENV', subtopics: [
+    { name: 'Energy flow: producers, consumers, decomposers; food chains and food webs', code: 'ENV1', suggestedLessons: 3 },
+    { name: 'Pyramids of number, biomass, energy', code: 'ENV2', suggestedLessons: 2 },
+    { name: 'Nutrient cycles: carbon cycle, nitrogen cycle (Extended)', code: 'ENV3', suggestedLessons: 3 },
+    { name: 'Population growth: factors affecting; lag, exponential, stationary, death phases', code: 'ENV4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Human influences on ecosystems (HIE)', code: 'HIE', subtopics: [
+    { name: 'Food supply: agriculture, monoculture, intensive farming impacts', code: 'HIE1', suggestedLessons: 2 },
+    { name: 'Habitat destruction; effects on biodiversity', code: 'HIE2', suggestedLessons: 2 },
+    { name: 'Pollution: air (sulfur dioxide, CO2, methane), water (sewage, fertilisers, eutrophication)', code: 'HIE3', suggestedLessons: 3 },
+    { name: 'Conservation: sustainable resources, captive breeding, seed banks', code: 'HIE4', suggestedLessons: 2 },
+    { name: 'Endangered species and extinction', code: 'HIE5', suggestedLessons: 2 },
+  ]},
+  { topic: 'Biotechnology and genetic modification (BGM)', code: 'BGM', subtopics: [
+    { name: 'Biotechnology uses: yeast in bread/alcohol, lactobacillus in yoghurt, fungi for penicillin', code: 'BGM1', suggestedLessons: 2 },
+    { name: 'Genetic modification: principle, uses (insulin production, GM crops, bacterial transformation)', code: 'BGM2', suggestedLessons: 3 },
+    { name: 'Social, ethical and environmental implications', code: 'BGM3', suggestedLessons: 2 },
+  ]},
+]
+// ── IGCSE CHEMISTRY 0620 ───────────────────────────────────
+// 12 topics covering full Cambridge IGCSE Chemistry syllabus.
+// Source: Cambridge IGCSE Chemistry 0620 Syllabus 2026-2028.
+// Extended (Supplement) content integrated into subtopic descriptions.
+const IGCSE_CHEMISTRY_0620 = [
+  { topic: 'States of matter (SOM)', code: 'SOM', subtopics: [
+    { name: 'Solids, liquids and gases: properties; arrangement and motion of particles', code: 'SOM1', suggestedLessons: 2 },
+    { name: 'Changes of state: melting, boiling, evaporation, freezing, condensation, sublimation', code: 'SOM2', suggestedLessons: 3 },
+    { name: 'Kinetic particle theory; effect of temperature and pressure on gases', code: 'SOM3', suggestedLessons: 3 },
+    { name: 'Diffusion in gases and liquids; effect of relative molecular mass on rate (Extended)', code: 'SOM4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Atoms, elements and compounds (AEC)', code: 'AEC', subtopics: [
+    { name: 'Elements, compounds and mixtures; symbols and formulae', code: 'AEC1', suggestedLessons: 3 },
+    { name: 'Atomic structure: protons, neutrons, electrons; mass number and atomic number', code: 'AEC2', suggestedLessons: 3 },
+    { name: 'Isotopes; relative atomic mass', code: 'AEC3', suggestedLessons: 2 },
+    { name: 'Electronic configuration; relationship to periodic table position', code: 'AEC4', suggestedLessons: 3 },
+    { name: 'Ionic bonding: formation of ions; ionic structures (giant lattice)', code: 'AEC5', suggestedLessons: 4 },
+    { name: 'Covalent bonding: simple molecules; dot-and-cross diagrams; giant covalent structures (diamond, graphite, silicon dioxide)', code: 'AEC6', suggestedLessons: 4 },
+    { name: 'Metallic bonding; properties of metals (Extended)', code: 'AEC7', suggestedLessons: 2 },
+  ]},
+  { topic: 'Stoichiometry (STO)', code: 'STO', subtopics: [
+    { name: 'Chemical formulae and equations; balancing', code: 'STO1', suggestedLessons: 3 },
+    { name: 'Relative formula mass; percentage composition; empirical and molecular formulae', code: 'STO2', suggestedLessons: 3 },
+    { name: 'The mole concept; Avogadro constant; mole calculations (mass, gas volume, concentration)', code: 'STO3', suggestedLessons: 5 },
+    { name: 'Reacting masses; limiting reactant; percentage yield and atom economy (Extended)', code: 'STO4', suggestedLessons: 4 },
+  ]},
+  { topic: 'Electrochemistry (ECH)', code: 'ECH', subtopics: [
+    { name: 'Electrolysis: principles; ions migration in molten/aqueous solutions', code: 'ECH1', suggestedLessons: 3 },
+    { name: 'Electrolysis examples: molten lead bromide, aqueous sodium chloride, aqueous copper sulfate', code: 'ECH2', suggestedLessons: 4 },
+    { name: 'Industrial electrolysis: aluminium extraction, chlor-alkali process', code: 'ECH3', suggestedLessons: 3 },
+    { name: 'Hydrogen-oxygen fuel cells; advantages (Extended)', code: 'ECH4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Chemical energetics (ENG)', code: 'ENG', subtopics: [
+    { name: 'Exothermic and endothermic reactions; temperature change and energy profile diagrams', code: 'ENG1', suggestedLessons: 3 },
+    { name: 'Bond breaking and bond making; calculating energy change from bond energies (Extended)', code: 'ENG2', suggestedLessons: 3 },
+  ]},
+  { topic: 'Chemical reactions (RXN)', code: 'RXN', subtopics: [
+    { name: 'Physical and chemical changes', code: 'RXN1', suggestedLessons: 1 },
+    { name: 'Rate of reaction: factors affecting (concentration, temperature, surface area, catalyst)', code: 'RXN2', suggestedLessons: 4 },
+    { name: 'Investigations into rate of reaction; collision theory', code: 'RXN3', suggestedLessons: 3 },
+    { name: "Reversible reactions and dynamic equilibrium; Le Chatelier's principle (Extended)", code: 'RXN4', suggestedLessons: 3 },
+    { name: 'Redox reactions: oxidation and reduction; oxidation states (Extended)', code: 'RXN5', suggestedLessons: 3 },
+  ]},
+  { topic: 'Acids, bases and salts (ABS)', code: 'ABS', subtopics: [
+    { name: 'Properties of acids, alkalis and bases; pH scale and indicators', code: 'ABS1', suggestedLessons: 3 },
+    { name: 'Strong and weak acids (Extended); neutralisation reactions', code: 'ABS2', suggestedLessons: 3 },
+    { name: 'Oxides: acidic, basic, amphoteric, neutral', code: 'ABS3', suggestedLessons: 2 },
+    { name: 'Preparation of soluble and insoluble salts; titration; crystallisation', code: 'ABS4', suggestedLessons: 4 },
+    { name: 'Identification of ions: cations (flame tests, NaOH, ammonia) and anions (carbonate, halide, sulfate, nitrate)', code: 'ABS5', suggestedLessons: 3 },
+    { name: 'Identification of gases: H2, O2, CO2, NH3, Cl2', code: 'ABS6', suggestedLessons: 1 },
+  ]},
+  { topic: 'The Periodic Table (PTB)', code: 'PTB', subtopics: [
+    { name: 'Arrangement of elements: groups and periods; structure of periodic table', code: 'PTB1', suggestedLessons: 2 },
+    { name: 'Group I — alkali metals: properties, reactivity trend', code: 'PTB2', suggestedLessons: 3 },
+    { name: 'Group VII — halogens: properties, reactivity trend, displacement reactions', code: 'PTB3', suggestedLessons: 3 },
+    { name: 'Group VIII — noble gases: properties and uses', code: 'PTB4', suggestedLessons: 1 },
+    { name: 'Transition elements: properties and uses', code: 'PTB5', suggestedLessons: 2 },
+  ]},
+  { topic: 'Metals (MET)', code: 'MET', subtopics: [
+    { name: 'Physical properties of metals; alloys (brass, stainless steel) and their uses', code: 'MET1', suggestedLessons: 2 },
+    { name: 'Reactivity series; reactions of metals with water, acids, and oxygen', code: 'MET2', suggestedLessons: 4 },
+    { name: 'Displacement reactions of metals; redox in context (Extended)', code: 'MET3', suggestedLessons: 2 },
+    { name: 'Extraction of metals: iron in blast furnace; recycling', code: 'MET4', suggestedLessons: 4 },
+    { name: 'Aluminium: extraction by electrolysis; uses; corrosion of iron (rusting)', code: 'MET5', suggestedLessons: 2 },
+  ]},
+  { topic: 'Chemistry of the environment (ENV)', code: 'ENV', subtopics: [
+    { name: 'Water: tests for purity; treatment of domestic water', code: 'ENV1', suggestedLessons: 2 },
+    { name: 'Fertilisers: NPK; ammonia production (Haber process)', code: 'ENV2', suggestedLessons: 3 },
+    { name: 'Air composition; air pollutants (CO, SO2, NOx, particulates); methods of reducing', code: 'ENV3', suggestedLessons: 3 },
+    { name: 'Greenhouse effect, global warming; climate change', code: 'ENV4', suggestedLessons: 2 },
+  ]},
+  { topic: 'Organic chemistry (ORG)', code: 'ORG', subtopics: [
+    { name: 'Fuels: petroleum (crude oil); fractional distillation; uses of fractions', code: 'ORG1', suggestedLessons: 3 },
+    { name: 'Naming organic compounds; functional groups; homologous series', code: 'ORG2', suggestedLessons: 3 },
+    { name: 'Alkanes: structure, properties, combustion reactions', code: 'ORG3', suggestedLessons: 3 },
+    { name: 'Alkenes: structure, properties; addition reactions (with bromine, hydrogen)', code: 'ORG4', suggestedLessons: 3 },
+    { name: 'Alcohols: structure, properties; combustion; production of ethanol (fermentation, hydration of ethene)', code: 'ORG5', suggestedLessons: 3 },
+    { name: 'Carboxylic acids: structure, properties; reactions with metals, carbonates, alkalis', code: 'ORG6', suggestedLessons: 2 },
+    { name: 'Polymers: addition polymerisation; uses; environmental issues (plastics)', code: 'ORG7', suggestedLessons: 3 },
+    { name: 'Condensation polymerisation; proteins, carbohydrates (Extended)', code: 'ORG8', suggestedLessons: 2 },
+  ]},
+  { topic: 'Experimental techniques and chemical analysis (EXP)', code: 'EXP', subtopics: [
+    { name: 'Measurement: mass, time, temperature, volume (liquids and gases)', code: 'EXP1', suggestedLessons: 2 },
+    { name: 'Methods of separation: filtration, crystallisation, simple/fractional distillation', code: 'EXP2', suggestedLessons: 3 },
+    { name: 'Chromatography: paper chromatography; Rf values; locating agents', code: 'EXP3', suggestedLessons: 3 },
+    { name: 'Criteria of purity: melting and boiling points', code: 'EXP4', suggestedLessons: 2 },
+  ]},
+]
+// ── IGCSE PHYSICS 0625 ─────────────────────────────────────
+// 6 topics covering full Cambridge IGCSE Physics syllabus.
+// Source: Cambridge IGCSE Physics 0625 Syllabus 2026-2028.
+// Extended (Supplement) content integrated into subtopic descriptions.
+const IGCSE_PHYSICS_0625 = [
+  { topic: 'Motion, forces and energy (MFE)', code: 'MFE', subtopics: [
+    { name: '1.1 Physical quantities and measurement techniques (length, volume, time, mass, density)', code: 'MFE1', suggestedLessons: 4 },
+    { name: '1.2 Motion: speed, velocity, acceleration; distance-time and speed-time graphs', code: 'MFE2', suggestedLessons: 5 },
+    { name: '1.3 Mass and weight; gravitational field strength; weight = mass × g', code: 'MFE3', suggestedLessons: 2 },
+    { name: '1.4 Density: definition, formula, methods of measuring density of solids and liquids', code: 'MFE4', suggestedLessons: 3 },
+    { name: '1.5 Forces: types, effects on motion; resultant force; friction and drag', code: 'MFE5', suggestedLessons: 4 },
+    { name: "1.5 Newton's first, second and third laws (Extended); F = ma", code: 'MFE6', suggestedLessons: 4 },
+    { name: '1.5 Circular motion: qualitative description (centripetal force)', code: 'MFE7', suggestedLessons: 2 },
+    { name: '1.5 Turning effects: moment of a force; principle of moments; centre of gravity', code: 'MFE8', suggestedLessons: 4 },
+    { name: '1.5 Momentum and impulse (Extended); conservation of momentum', code: 'MFE9', suggestedLessons: 3 },
+    { name: '1.6 Energy stores; energy transfers; conservation of energy', code: 'MFE10', suggestedLessons: 3 },
+    { name: '1.6 Work, power; kinetic energy and gravitational potential energy formulae; efficiency', code: 'MFE11', suggestedLessons: 4 },
+    { name: '1.7 Energy resources: renewable (solar, wind, hydroelectric, geothermal, biofuels, tidal, wave) and non-renewable (fossil fuels, nuclear); advantages/disadvantages', code: 'MFE12', suggestedLessons: 3 },
+    { name: '1.8 Pressure: definition; pressure in fluids; manometer; atmospheric pressure', code: 'MFE13', suggestedLessons: 3 },
+  ]},
+  { topic: 'Thermal physics (TPH)', code: 'TPH', subtopics: [
+    { name: '2.1 Kinetic particle model of matter: states of matter; pressure and temperature effects on gases; absolute zero (Extended)', code: 'TPH1', suggestedLessons: 4 },
+    { name: '2.2 Thermal properties and temperature: thermal expansion of solids/liquids/gases; thermometers; specific heat capacity; specific latent heat (Extended)', code: 'TPH2', suggestedLessons: 5 },
+    { name: '2.3 Transfer of thermal energy: conduction, convection, radiation; good and bad emitters/absorbers; everyday applications', code: 'TPH3', suggestedLessons: 4 },
+  ]},
+  { topic: 'Waves (WAV)', code: 'WAV', subtopics: [
+    { name: '3.1 General properties of waves: transverse and longitudinal; wavelength, frequency, period, amplitude, speed; wave equation v = fλ', code: 'WAV1', suggestedLessons: 4 },
+    { name: "3.2 Light: reflection (laws of); refraction (laws of, Snell's law); refractive index; total internal reflection; critical angle", code: 'WAV2', suggestedLessons: 5 },
+    { name: '3.2 Lenses: thin converging lens; ray diagrams; real and virtual images; uses (camera, projector, magnifier)', code: 'WAV3', suggestedLessons: 4 },
+    { name: '3.3 Electromagnetic spectrum: order of components; properties; uses and dangers (radio, microwave, infrared, visible, UV, X-ray, gamma)', code: 'WAV4', suggestedLessons: 3 },
+    { name: '3.4 Sound: production and propagation; speed in different media; reflection (echoes); ultrasound; range of human hearing', code: 'WAV5', suggestedLessons: 3 },
+  ]},
+  { topic: 'Electricity and magnetism (EMG)', code: 'EMG', subtopics: [
+    { name: '4.1 Simple magnetism: properties of magnets; magnetic materials; magnetic fields and field lines', code: 'EMG1', suggestedLessons: 3 },
+    { name: "4.2 Electrical quantities: electric charge (positive/negative); current; potential difference; resistance; Ohm's law", code: 'EMG2', suggestedLessons: 5 },
+    { name: '4.2 Electrical energy and power; energy = IVt; cost of electricity', code: 'EMG3', suggestedLessons: 3 },
+    { name: '4.3 Electric circuits: circuit symbols; series and parallel circuits; current/voltage rules; combining resistances', code: 'EMG4', suggestedLessons: 5 },
+    { name: '4.4 Practical electricity: household wiring; fuses, earthing; dangers; choosing fuse rating', code: 'EMG5', suggestedLessons: 3 },
+    { name: '4.5 Electromagnetic effects: electromagnetic induction; AC generator', code: 'EMG6', suggestedLessons: 3 },
+    { name: '4.5 Magnetic effect of current; electromagnets and uses; transformers (Extended)', code: 'EMG7', suggestedLessons: 4 },
+    { name: '4.5 Force on a current-carrying conductor; the d.c. motor', code: 'EMG8', suggestedLessons: 3 },
+  ]},
+  { topic: 'Nuclear physics (NUC)', code: 'NUC', subtopics: [
+    { name: "5.1 The nuclear atom: structure (protons, neutrons, electrons); nuclide notation; isotopes; Rutherford's alpha-particle scattering", code: 'NUC1', suggestedLessons: 4 },
+    { name: '5.2 Radioactivity: types of nuclear radiation (alpha, beta, gamma); properties and penetration; detection; background radiation', code: 'NUC2', suggestedLessons: 4 },
+    { name: '5.2 Random nature of decay; half-life (definition and calculations); nuclear equations (Extended)', code: 'NUC3', suggestedLessons: 3 },
+    { name: '5.2 Uses of radioactivity (medical, industrial); safety; nuclear fission and fusion (Extended)', code: 'NUC4', suggestedLessons: 3 },
+  ]},
+  { topic: 'Space physics (SPA)', code: 'SPA', subtopics: [
+    { name: '6.1 Earth: rotation (day/night, time zones); orbit (year, seasons); the Moon (phases, eclipses)', code: 'SPA1', suggestedLessons: 3 },
+    { name: '6.1 The Solar System: planets, dwarf planets, asteroids, comets; gravitational attraction and orbits', code: 'SPA2', suggestedLessons: 3 },
+    { name: '6.2 Stars and the Universe: galaxies and the Milky Way; light-years; classification of stars; the Sun as a star', code: 'SPA3', suggestedLessons: 3 },
+    { name: '6.2 Stellar evolution: nebula → star → main sequence → red giant/supergiant → white dwarf / supernova → neutron star/black hole; Hertzsprung-Russell diagram (Extended)', code: 'SPA4', suggestedLessons: 3 },
+    { name: '6.2 The expanding Universe: red-shift; Big Bang theory; cosmic microwave background (Extended)', code: 'SPA5', suggestedLessons: 3 },
+  ]},
+]
+
+// ── IGCSE SCIENCES LIBRARY ─────────────────────────────────
+// Maps Subject names to the appropriate spine constant.
+// 0580 IGCSE Maths is handled separately by loadIgcseMaths (the original
+// pattern); these three are loaded via loadIgcseSciencesSpine.
+const IGCSE_SCIENCES_LIBRARY = [
+  { match: /\bbiology\b/i,    const_: IGCSE_BIOLOGY_0610,   source: 'Cambridge IGCSE Biology 0610' },
+  { match: /\bchemistry\b/i,  const_: IGCSE_CHEMISTRY_0620, source: 'Cambridge IGCSE Chemistry 0620' },
+  { match: /\bphysics\b/i,    const_: IGCSE_PHYSICS_0625,   source: 'Cambridge IGCSE Physics 0625' },
+]
+
+
 // ═══════════════════════════════════════════════════════════
 // SUBJECTS TAB — Admin management of Subject records.
 // Wired to existing /api/subjects endpoints (POST/PATCH/DELETE
@@ -7859,6 +8151,25 @@ function SyllabusSpineTab({ toast }) {
     finally { setBusy(false) }
   }
 
+  const loadIgcseSciencesSpine = async () => {
+    if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
+    const entry = IGCSE_SCIENCES_LIBRARY.find(e => e.match.test(subjectName))
+    if (!entry) {
+      toast?.error?.('No IGCSE Sciences spine matches "' + subjectName + '". Expected one of: Biology, Chemistry, Physics.')
+      return
+    }
+    if (topics.length > 0 && !window.confirm('This REPLACES the entire existing spine for this subject. Continue?')) return
+    setBusy(true)
+    try {
+      const { data } = await api.post('/syllabus/bulk', {
+        subjectId, topics: entry.const_, sourceSyllabus: entry.source,
+      })
+      if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
+      else toast?.error?.(data?.message || 'Failed.')
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Failed to load structure.') }
+    finally { setBusy(false) }
+  }
+
   // ── styles ──
   const sel = { padding: '8px 11px', borderRadius: 7, border: '1.5px solid ' + TOKENS.line,
     fontSize: 13, fontFamily: 'inherit', background: '#fff' }
@@ -7898,6 +8209,12 @@ function SyllabusSpineTab({ toast }) {
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load Cambridge Lower Secondary spine</button>
+            )}
+            {curriculum === 'CambridgeIGCSE' && (
+              <button onClick={loadIgcseSciencesSpine} disabled={busy} title="Auto-detects which IGCSE Sciences spine matches the selected subject (Biology, Chemistry, Physics)" style={{
+                background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
+                borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+              }}>Load IGCSE Sciences spine</button>
             )}
           </>
         )}
