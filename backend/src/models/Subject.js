@@ -24,7 +24,7 @@ const subjectSchema = new mongoose.Schema({
   category: {
     type: String,
     enum: [
-      // Smartious's 8-category taxonomy (decided 2026-05-20)
+      // ── Cambridge / Edexcel / AQA — Western-style 8-category taxonomy ──
       'Mathematics',
       'Sciences',
       'Languages',
@@ -33,6 +33,31 @@ const subjectSchema = new mongoose.Schema({
       'Humanities',
       'Technology',
       'Physical Education',
+
+      // ── IB — IB Diploma / MYP / PYP framework ──
+      'Studies in Language and Literature',
+      'Language and Literature',
+      'Language Acquisition',
+      'Individuals and Societies',
+      'The Arts',
+      'IB Core',
+
+      // ── Kenya CBC ──
+      'STEM',
+      'Social Studies',
+      'Life Skills',
+
+      // ── BNC (British National Curriculum) ──
+      'Core',
+      'English',
+      'Practical',
+      'Design',
+
+      // ── American / Canadian (future-prep) ──
+      'Electives',
+
+      // ── IB / cross-curriculum ──
+      'Physical and Health Education',
     ],
     required: true,
     trim: true
