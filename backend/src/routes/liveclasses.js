@@ -58,6 +58,8 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       assignedStudents = [],
       preparationLessonId = null,
       notes = '',
+      syllabusTopicName = '',
+      syllabusSubtopicName = '',
     } = req.body;
 
     if (!title || !title.trim())
@@ -100,6 +102,9 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       preparationLessonId: mongoose.isValidObjectId(preparationLessonId) ? preparationLessonId : null,
       notes: notes.trim(),
       status: 'scheduled',
+      // Spine linkage — nullable; only set if teacher picked them
+      syllabusTopicName:    syllabusTopicName    ? String(syllabusTopicName).trim()    || null : null,
+      syllabusSubtopicName: syllabusSubtopicName ? String(syllabusSubtopicName).trim() || null : null,
     });
 
     res.status(201).json({ success:true, message:'Live class scheduled.', data: { liveClass } });
@@ -186,7 +191,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
     if (req.user.role !== 'admin' && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
-    const allowed = ['title','description','subject','curriculum','grade','scheduledAt','durationMins','meetingLink','assignedStudents','notes','preparationLessonId'];
+    const allowed = ['title','description','subject','curriculum','grade','scheduledAt','durationMins','meetingLink','assignedStudents','notes','preparationLessonId','syllabusTopicName','syllabusSubtopicName'];
     for (const k of allowed) {
       if (k in req.body) {
         if (k === 'scheduledAt') {
