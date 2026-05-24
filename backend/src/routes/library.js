@@ -58,14 +58,15 @@ const libraryStorage = new CloudinaryStorage({
   },
 });
 
-// 200 MB cap per book — large enough for big coursebooks, small
-// enough to prevent runaway uploads. Cloudinary free tier accepts
-// up to 100 MB on raw; paid tiers go higher. If a 150 MB book
-// is rejected, the cap will surface as a clear error before the
-// upload finishes.
+// File size limit — set to 10 MB to match Cloudinary's free tier
+// per-file ceiling for raw uploads. Once on a paid Cloudinary plan
+// (Plus or higher) this can be raised to 200 MB. Lowering this
+// here means uploads fail fast in the route with a clear message
+// rather than reaching Cloudinary only to be rejected there.
+const LIBRARY_MAX_BYTES = 10 * 1024 * 1024;
 const uploadBook = multer({
   storage: libraryStorage,
-  limits: { fileSize: 200 * 1024 * 1024 },
+  limits: { fileSize: LIBRARY_MAX_BYTES },
 });
 
 // ─────────────────────────────────────────────────────────
@@ -178,8 +179,14 @@ router.post('/upload', auth, requireRole('teacher', 'admin'), uploadBook.single(
     return ok(res, { book }, 'Book uploaded.');
   } catch (err) {
     console.error('[library upload]', err.message);
-    if (err.message && err.message.includes('File too large')) {
-      return fail(res, 413, 'File exceeds 200 MB limit.');
+    // Cloudinary rejects files above the free-tier 10 MB raw limit
+    // with a message containing "File size too large".
+    const msg = err.message || '';
+    if (msg.includes('File too large') || msg.includes('File size too large')) {
+      return fail(res, 413,
+        'File exceeds 10 MB limit. Please compress the PDF (most coursebooks ' +
+        'compress to <10 MB with no visible quality loss), or upgrade the ' +
+        'Cloudinary plan to enable larger uploads.');
     }
     return fail(res, 500, err.message || 'Upload failed.');
   }
