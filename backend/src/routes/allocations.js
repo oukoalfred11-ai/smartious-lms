@@ -344,27 +344,50 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
       });
     }
 
+    // Allocation existence check — covers two cases:
+    //   1. An ACTIVE allocation already exists → reject (admin should
+    //      use PATCH to change teacher instead).
+    //   2. An INACTIVE allocation exists for this (student, subject)
+    //      pair → reactivate it with the new teacher rather than
+    //      inserting a duplicate (the unique compound index on
+    //      (studentId, subjectId) would reject any insert).
     const existingAllocation = await Allocation.findOne({
-      studentId: studentId,
-      subjectId: subjectId,
-      status: { $ne: 'Inactive' }
+      studentId,
+      subjectId,
     });
 
-    if (existingAllocation) {
+    if (existingAllocation && existingAllocation.status === 'Active') {
       return res.status(400).json({
         success: false,
-        message: 'Student already has a teacher for this subject'
+        message: 'Student already has an active teacher for this subject. ' +
+                 'To change teachers, edit the existing allocation instead.'
       });
     }
 
-    const allocation = await Allocation.create({
-      studentId,
-      subjectId,
-      teacherId,
-      curriculum: student.curriculum,
-      status: 'Active',
-      createdBy: req.user._id
-    });
+    let allocation;
+    if (existingAllocation) {
+      // Reactivation path — there's an Inactive record blocking insert.
+      // Flip it back to Active with the new teacher; keeps the document
+      // _id stable for audit.
+      existingAllocation.teacherId = teacherId;
+      existingAllocation.curriculum = student.curriculum;
+      existingAllocation.status = 'Active';
+      existingAllocation.updatedBy = req.user._id;
+      existingAllocation.updatedAt = new Date();
+      await existingAllocation.save();
+      allocation = existingAllocation;
+    } else {
+      // Fresh allocation — first time this (student, subject) pair
+      // is being assigned.
+      allocation = await Allocation.create({
+        studentId,
+        subjectId,
+        teacherId,
+        curriculum: student.curriculum,
+        status: 'Active',
+        createdBy: req.user._id
+      });
+    }
 
     // Ensure student appears in teacher's auto-allocation group room so the
     // teacher's "My Students" view picks them up. Failures here are logged
@@ -417,6 +440,16 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
     res.status(201).json({ success: true, allocation, emailsSent: sendEmails });
   } catch (e) {
     console.error('[allocations create]', e.message);
+    // E11000 = Mongo unique-index violation. Reaches here only on a
+    // race condition (two near-simultaneous POSTs for the same
+    // student+subject) since the in-handler check above normally
+    // catches duplicates first.
+    if (e && e.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'This student already has an allocation for this subject. Please refresh and try again.'
+      });
+    }
     res.status(400).json({ success: false, message: e.message });
   }
 });
