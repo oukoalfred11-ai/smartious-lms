@@ -7818,17 +7818,233 @@ const IGCSE_BUSINESS_0450 = [
 // ── UNIFIED IGCSE LIBRARY ──────────────────────────────────
 // Covers all IGCSE subjects with spines (except Maths 0580 which
 // has its own hard-wired loader). Loader auto-detects by subject name.
+// ── IGCSE GEOGRAPHY 0460 ───────────────────────────────────
+// 3 themes covering full Cambridge IGCSE Geography syllabus.
+// Source: Cambridge IGCSE Geography 0460 Syllabus (current, stable 2026-2027).
+// Numbering follows official syllabus (1.1, 1.2, etc.).
+const IGCSE_GEOGRAPHY_0460 = [
+  { topic: 'Population and settlement (POP)', code: 'POP', subtopics: [
+    { name: '1.1 Population dynamics: birth rate, death rate, natural change; demographic transition; population policies', code: 'POP1', suggestedLessons: 5 },
+    { name: '1.2 Migration: causes of migration; impact on origin and destination; refugees vs economic migrants', code: 'POP2', suggestedLessons: 4 },
+    { name: '1.3 Population structure: population pyramids; ageing populations; youthful populations; dependency', code: 'POP3', suggestedLessons: 3 },
+    { name: '1.4 Population density and distribution: factors affecting density; over- and under-populated regions', code: 'POP4', suggestedLessons: 3 },
+    { name: '1.5 Settlements and service provision: rural vs urban; settlement hierarchy; site, situation, function', code: 'POP5', suggestedLessons: 4 },
+    { name: '1.6 Urban settlements: land use patterns (CBD, residential, industrial); urban problems', code: 'POP6', suggestedLessons: 4 },
+    { name: '1.7 Urbanisation: causes, advantages, disadvantages; counter-urbanisation; case studies in LICs and HICs', code: 'POP7', suggestedLessons: 5 },
+  ]},
+  { topic: 'The natural environment (NAT)', code: 'NAT', subtopics: [
+    { name: '2.1 Earthquakes and volcanoes: plate tectonics; types of plate boundary; effects and responses', code: 'NAT1', suggestedLessons: 5 },
+    { name: '2.2 Rivers: hydrological cycle; processes (erosion, transport, deposition); landforms; flooding and management', code: 'NAT2', suggestedLessons: 6 },
+    { name: '2.3 Coasts: marine processes; coastal landforms (cliffs, beaches, spits); coral reefs and mangroves; coastal management', code: 'NAT3', suggestedLessons: 6 },
+    { name: '2.4 Weather: weather measurement; weather instruments; describing weather conditions', code: 'NAT4', suggestedLessons: 3 },
+    { name: '2.5 Climate and natural vegetation: hot deserts, tropical rainforests, savanna; climate characteristics and adaptations', code: 'NAT5', suggestedLessons: 5 },
+  ]},
+  { topic: 'Economic development (ECO)', code: 'ECO', subtopics: [
+    { name: '3.1 Development: indicators of development (GDP, HDI); inequalities between and within countries', code: 'ECO1', suggestedLessons: 4 },
+    { name: '3.2 Food production: types of farming; agricultural systems; effects of agricultural change; food security', code: 'ECO2', suggestedLessons: 5 },
+    { name: '3.3 Industry: types of industry; location factors; multinational corporations', code: 'ECO3', suggestedLessons: 4 },
+    { name: '3.4 Tourism: growth of tourism; benefits and disadvantages; sustainable tourism', code: 'ECO4', suggestedLessons: 4 },
+    { name: '3.5 Energy: types (fossil, nuclear, renewable); world distribution; energy security', code: 'ECO5', suggestedLessons: 4 },
+    { name: '3.6 Water: supply and demand; water use; water scarcity; water management', code: 'ECO6', suggestedLessons: 3 },
+    { name: '3.7 Environmental risks of economic development: pollution, deforestation, climate change; sustainability', code: 'ECO7', suggestedLessons: 4 },
+  ]},
+]
+// ── IGCSE HISTORY 0470 ─────────────────────────────────────
+// Cambridge IGCSE History 0470 Syllabus 2027-2028.
+// Option B (20th century — most commonly taught) + Germany 1918-45 Depth Study.
+// Includes Historical Skills topic (option-agnostic; applies regardless of option chosen).
+const IGCSE_HISTORY_0470 = [
+  { topic: 'Core Content Option B — International Relations since 1919 (CORE)', code: 'CORE', subtopics: [
+    { name: 'KQ1: Were the peace treaties of 1919-23 fair? Treaty of Versailles; impact on Germany; other treaties', code: 'CORE1', suggestedLessons: 6 },
+    { name: 'KQ2: To what extent was the League of Nations a success? Successes and failures; collapse', code: 'CORE2', suggestedLessons: 5 },
+    { name: "KQ3: Why had international peace collapsed by 1939? Hitler's foreign policy; appeasement; outbreak of WW2", code: 'CORE3', suggestedLessons: 6 },
+    { name: 'KQ4: Who was to blame for the Cold War? Origins; Yalta and Potsdam; Truman Doctrine; Marshall Plan', code: 'CORE4', suggestedLessons: 5 },
+    { name: 'KQ5: How effectively did the USA contain Communism? Korean War; Vietnam War; Cuban Missile Crisis', code: 'CORE5', suggestedLessons: 5 },
+    { name: 'KQ6: How secure was Soviet control over Eastern Europe? Hungary 1956; Czechoslovakia 1968; Solidarity; 1989', code: 'CORE6', suggestedLessons: 5 },
+    { name: 'KQ7: Why did events in the Gulf matter c.1970-2000? Iran-Iraq War; First Gulf War; impact on global politics', code: 'CORE7', suggestedLessons: 4 },
+  ]},
+  { topic: 'Depth Study — Germany 1918-45 (GER)', code: 'GER', subtopics: [
+    { name: 'Weimar Republic 1918-1929: origins; problems 1919-23; recovery under Stresemann; cultural changes', code: 'GER1', suggestedLessons: 5 },
+    { name: 'The rise of the Nazi Party: early years; 1923 putsch; reorganisation; impact of Depression; 1933 takeover', code: 'GER2', suggestedLessons: 5 },
+    { name: "Hitler's consolidation of power: Reichstag Fire; Enabling Act; Night of the Long Knives; Hindenburg's death", code: 'GER3', suggestedLessons: 4 },
+    { name: 'Nazi state and economy: police state; propaganda; economic recovery; rearmament', code: 'GER4', suggestedLessons: 5 },
+    { name: 'Life in Nazi Germany: women, young people, workers, church, opposition; persecution of minorities', code: 'GER5', suggestedLessons: 5 },
+    { name: 'The Holocaust: from persecution to genocide; Final Solution; resistance and rescue', code: 'GER6', suggestedLessons: 4 },
+    { name: 'Germany at war 1939-1945: war economy; home front; defeat and aftermath', code: 'GER7', suggestedLessons: 3 },
+  ]},
+  { topic: 'Historical Skills (SKL)', code: 'SKL', subtopics: [
+    { name: 'Source analysis: identifying purpose; assessing reliability; corroborating across sources', code: 'SKL1', suggestedLessons: 5 },
+    { name: 'Cause and consequence: short- vs long-term causes; weighing different factors', code: 'SKL2', suggestedLessons: 4 },
+    { name: 'Change and continuity: identifying turning points; assessing significance', code: 'SKL3', suggestedLessons: 3 },
+    { name: 'Essay writing: structure; argument development; evidence-based reasoning; conclusion', code: 'SKL4', suggestedLessons: 5 },
+  ]},
+]
+// ── IGCSE SOCIOLOGY 0495 ───────────────────────────────────
+// Cambridge IGCSE Sociology 0495 Syllabus 2025-2027.
+// 4 AOs + 6 content areas across 2 papers.
+// Note: 0495 moves to O Level 2251 from 2028; spine valid for 2025-2027 exams.
+const IGCSE_SOCIOLOGY_0495 = [
+  { topic: 'Foundations: 4 Assessment Objectives (AO)', code: 'AO', subtopics: [
+    { name: 'AO1 — Knowledge and understanding of sociological concepts, theories, evidence, views, and research methods', code: 'AO1', suggestedLessons: 3 },
+    { name: 'AO2 — Application of sociological concepts and research methods to support points or arguments', code: 'AO2', suggestedLessons: 4 },
+    { name: 'AO3 — Analysis of evidence; how concepts apply to particular issues', code: 'AO3', suggestedLessons: 4 },
+    { name: 'AO4 — Evaluation: weighing evidence, assessing strengths and weaknesses of views', code: 'AO4', suggestedLessons: 4 },
+  ]},
+  { topic: 'Paper 1 Section A — Research Methods (RES)', code: 'RES', subtopics: [
+    { name: 'Primary vs secondary data; quantitative vs qualitative methods', code: 'RES1', suggestedLessons: 3 },
+    { name: 'Sampling: random, systematic, stratified, snowball, opportunity; representativeness', code: 'RES2', suggestedLessons: 3 },
+    { name: 'Surveys and questionnaires: design, advantages, disadvantages', code: 'RES3', suggestedLessons: 3 },
+    { name: 'Interviews: structured, unstructured, semi-structured; advantages and disadvantages', code: 'RES4', suggestedLessons: 3 },
+    { name: 'Observation: participant, non-participant, covert, overt; ethics', code: 'RES5', suggestedLessons: 3 },
+    { name: 'Experiments and case studies; secondary sources (official statistics, documents, media)', code: 'RES6', suggestedLessons: 3 },
+    { name: 'Reliability, validity, generalisability; ethics in sociological research', code: 'RES7', suggestedLessons: 3 },
+  ]},
+  { topic: 'Paper 1 Section B — Identity (IDT)', code: 'IDT', subtopics: [
+    { name: 'Socialisation: primary (family) and secondary (school, peers, media, religion, workplace); nature vs nurture', code: 'IDT1', suggestedLessons: 4 },
+    { name: 'Culture, norms, values, roles, status; subcultures and counter-cultures', code: 'IDT2', suggestedLessons: 3 },
+    { name: 'Gender identity: feminine and masculine roles; changes over time', code: 'IDT3', suggestedLessons: 3 },
+    { name: 'Ethnic identity, national identity, social class identity', code: 'IDT4', suggestedLessons: 3 },
+    { name: 'Age identities: childhood, youth, middle age, old age — as social constructs', code: 'IDT5', suggestedLessons: 3 },
+  ]},
+  { topic: 'Paper 1 Section C — Social Inequality (INQ)', code: 'INQ', subtopics: [
+    { name: 'Social stratification: class, gender, ethnicity, age; theories of stratification', code: 'INQ1', suggestedLessons: 4 },
+    { name: 'Poverty and wealth: absolute vs relative poverty; causes; effects', code: 'INQ2', suggestedLessons: 3 },
+    { name: 'Social mobility: upward, downward, intergenerational; factors affecting', code: 'INQ3', suggestedLessons: 3 },
+    { name: 'Power and authority: types of authority; political power; influence', code: 'INQ4', suggestedLessons: 3 },
+  ]},
+  { topic: 'Paper 2 Section A — Family (FAM)', code: 'FAM', subtopics: [
+    { name: 'Types of family: nuclear, extended, lone-parent, reconstituted, same-sex; cross-cultural variation', code: 'FAM1', suggestedLessons: 3 },
+    { name: 'Family roles and relationships: changes in gender roles; division of labour; conjugal roles', code: 'FAM2', suggestedLessons: 4 },
+    { name: 'Marriage and divorce: trends; explanations for changes; impact', code: 'FAM3', suggestedLessons: 3 },
+    { name: 'Childhood: changing nature of childhood; child-centred families; abuse and neglect', code: 'FAM4', suggestedLessons: 3 },
+    { name: 'Functions of the family; theoretical perspectives (functionalist, feminist, Marxist)', code: 'FAM5', suggestedLessons: 4 },
+  ]},
+  { topic: 'Paper 2 Section B — Education (EDU)', code: 'EDU', subtopics: [
+    { name: 'Functions of education: theoretical perspectives; hidden curriculum', code: 'EDU1', suggestedLessons: 3 },
+    { name: 'Types of school; vocational vs academic; private vs state', code: 'EDU2', suggestedLessons: 3 },
+    { name: 'Differential educational achievement: by class, gender, ethnicity', code: 'EDU3', suggestedLessons: 4 },
+    { name: 'Teacher-pupil relationships; labelling; self-fulfilling prophecy; subcultures in school', code: 'EDU4', suggestedLessons: 4 },
+  ]},
+  { topic: 'Paper 2 Section C — Crime, Deviance and Social Control (CRM)', code: 'CRM', subtopics: [
+    { name: 'Definitions: crime vs deviance; social construction of deviance', code: 'CRM1', suggestedLessons: 3 },
+    { name: 'Patterns of crime: by class, gender, age, ethnicity; victims of crime', code: 'CRM2', suggestedLessons: 3 },
+    { name: 'Causes of crime: biological, psychological, sociological explanations', code: 'CRM3', suggestedLessons: 4 },
+    { name: 'Measuring crime: official statistics, victim surveys, self-report studies; dark figure of crime', code: 'CRM4', suggestedLessons: 3 },
+    { name: 'Formal and informal social control: police, courts, prisons; family, peers, media', code: 'CRM5', suggestedLessons: 3 },
+  ]},
+]
+// ── IGCSE ECONOMICS 0455 ───────────────────────────────────
+// Cambridge IGCSE Economics 0455 Syllabus 2026.
+// 6 sections covering full syllabus. Sub-section numbering (1.1, 1.2, etc.)
+// matches official structure exactly.
+const IGCSE_ECONOMICS_0455 = [
+  { topic: 'The basic economic problem (BEP)', code: 'BEP', subtopics: [
+    { name: '1.1 The nature of the economic problem: finite resources vs unlimited wants; scarcity', code: 'BEP1', suggestedLessons: 2 },
+    { name: '1.2 Factors of production: land, labour, capital, enterprise; rewards (rent, wages, interest, profit)', code: 'BEP2', suggestedLessons: 3 },
+    { name: '1.3 Opportunity cost: definition; influence on decision-making by consumers, workers, firms, government', code: 'BEP3', suggestedLessons: 3 },
+    { name: '1.4 Production possibility curve (PPC): drawing and interpreting; points on/under/beyond; shifts', code: 'BEP4', suggestedLessons: 4 },
+  ]},
+  { topic: 'The allocation of resources (ALR)', code: 'ALR', subtopics: [
+    { name: '2.1 Microeconomics and macroeconomics: definitions; the role of markets', code: 'ALR1', suggestedLessons: 2 },
+    { name: '2.2 Demand: definition; law of demand; demand curve; non-price determinants; movements vs shifts', code: 'ALR2', suggestedLessons: 4 },
+    { name: '2.3 Supply: definition; law of supply; supply curve; non-price determinants; movements vs shifts', code: 'ALR3', suggestedLessons: 4 },
+    { name: '2.4 Price determination: equilibrium price and quantity; effect of changes in demand/supply', code: 'ALR4', suggestedLessons: 4 },
+    { name: '2.5 Price changes: causes and consequences for consumers, firms, workers, government', code: 'ALR5', suggestedLessons: 3 },
+    { name: '2.6 Price elasticity of demand (PED): definition; calculation; determinants; applications', code: 'ALR6', suggestedLessons: 4 },
+    { name: '2.7 Price elasticity of supply (PES): definition; calculation; determinants', code: 'ALR7', suggestedLessons: 3 },
+    { name: '2.8 Market economic system: advantages and disadvantages; allocation of resources', code: 'ALR8', suggestedLessons: 3 },
+    { name: '2.9 Market failure: causes (externalities, public goods, monopoly, lack of information)', code: 'ALR9', suggestedLessons: 4 },
+    { name: '2.10 Mixed economic system: government intervention (taxes, subsidies, regulation, price controls)', code: 'ALR10', suggestedLessons: 4 },
+  ]},
+  { topic: 'Microeconomic decision makers (MIC)', code: 'MIC', subtopics: [
+    { name: '3.1 Money and banking: functions of money; role of central and commercial banks', code: 'MIC1', suggestedLessons: 3 },
+    { name: '3.2 Households: influences on spending, saving, borrowing', code: 'MIC2', suggestedLessons: 3 },
+    { name: '3.3 Workers: factors influencing wage determination; wage differentials; division of labour', code: 'MIC3', suggestedLessons: 4 },
+    { name: '3.4 Trade unions: role; collective bargaining; advantages and disadvantages', code: 'MIC4', suggestedLessons: 2 },
+    { name: '3.5 Firms: classification (sector, size); growth of firms; mergers; small firms', code: 'MIC5', suggestedLessons: 3 },
+    { name: '3.6 Firms and production: productivity; costs (fixed, variable, total, average); economies of scale', code: 'MIC6', suggestedLessons: 4 },
+    { name: "3.7 Firms' objectives: profit, growth, survival, social welfare; profit maximisation", code: 'MIC7', suggestedLessons: 3 },
+    { name: '3.8 Market structure: competitive markets vs monopoly; characteristics, advantages, disadvantages', code: 'MIC8', suggestedLessons: 4 },
+  ]},
+  { topic: 'Government and the macroeconomy (MAC)', code: 'MAC', subtopics: [
+    { name: '4.1 The role of government: local, national, international; provision of public goods', code: 'MAC1', suggestedLessons: 3 },
+    { name: '4.2 Macroeconomic aims: economic growth, low unemployment, price stability, balance of payments', code: 'MAC2', suggestedLessons: 4 },
+    { name: '4.3 Fiscal policy: government spending; taxation (direct, indirect, progressive, regressive); budget', code: 'MAC3', suggestedLessons: 5 },
+    { name: '4.4 Monetary policy: interest rates; money supply; central bank role', code: 'MAC4', suggestedLessons: 4 },
+    { name: '4.5 Supply-side policy: labour market reform; tax incentives; deregulation; education and training', code: 'MAC5', suggestedLessons: 3 },
+    { name: '4.6 Economic growth: GDP; causes of growth; benefits and costs of growth', code: 'MAC6', suggestedLessons: 4 },
+    { name: '4.7 Employment and unemployment: types of unemployment; causes; consequences; measures to reduce', code: 'MAC7', suggestedLessons: 4 },
+    { name: '4.8 Inflation and deflation: types and causes; consequences; measures (CPI); ways to control', code: 'MAC8', suggestedLessons: 4 },
+  ]},
+  { topic: 'Economic development (DEV)', code: 'DEV', subtopics: [
+    { name: '5.1 Living standards: GDP per capita; HDI; comparing living standards across countries and over time', code: 'DEV1', suggestedLessons: 4 },
+    { name: '5.2 Poverty: absolute and relative poverty; causes; policies to alleviate', code: 'DEV2', suggestedLessons: 3 },
+    { name: '5.3 Population: factors affecting birth rate, death rate, migration; consequences of population change', code: 'DEV3', suggestedLessons: 4 },
+    { name: '5.4 Differences in economic development: developed vs developing; characteristics; reasons', code: 'DEV4', suggestedLessons: 4 },
+  ]},
+  { topic: 'International trade and globalisation (INT)', code: 'INT', subtopics: [
+    { name: '6.1 International specialisation: principle of comparative advantage; benefits and disadvantages', code: 'INT1', suggestedLessons: 3 },
+    { name: '6.2 Free trade and protection: methods of protection (tariffs, quotas, subsidies); arguments for protection', code: 'INT2', suggestedLessons: 4 },
+    { name: '6.3 Foreign exchange rates: determination; floating vs fixed; consequences of changes', code: 'INT3', suggestedLessons: 4 },
+    { name: '6.4 Current account of the balance of payments: components; surplus and deficit', code: 'INT4', suggestedLessons: 3 },
+    { name: '6.5 Globalisation: causes and effects; role of multinational corporations', code: 'INT5', suggestedLessons: 3 },
+  ]},
+]
+// ── IGCSE ENGLISH AS A SECOND LANGUAGE 0510 ─────────────────
+// Cambridge IGCSE English as a Second Language 0510 Syllabus (current, 2024+).
+// 4 skill strands — Reading (R1-R4), Writing (W1-W5), Listening (L1-L4), Speaking (SP1-SP5).
+// Spine works for both 0510 (speaking non-counting) and 0511 (speaking count-in).
+const IGCSE_ESL_0510 = [
+  { topic: 'Reading skills (R)', code: 'R', subtopics: [
+    { name: 'R1: Identify and select relevant information (skimming and scanning; locating specific details)', code: 'R1', suggestedLessons: 5 },
+    { name: 'R2: Understand ideas, opinions and attitudes (literal and inferential comprehension)', code: 'R2', suggestedLessons: 6 },
+    { name: 'R3: Show understanding of connections between ideas, opinions and attitudes (linking across a text)', code: 'R3', suggestedLessons: 5 },
+    { name: "R4: Understand what is implied but not directly stated (gist, writer's purpose, intention, feelings)", code: 'R4', suggestedLessons: 6 },
+    { name: 'Exam practice: Reading exercises (Paper 1) — text types, question formats, time management', code: 'REX', suggestedLessons: 5 },
+  ]},
+  { topic: 'Writing skills (W)', code: 'W', subtopics: [
+    { name: 'W1: Communicate information, ideas, opinions clearly, accurately, effectively', code: 'W1', suggestedLessons: 6 },
+    { name: 'W2: Organise ideas into coherent paragraphs using a range of linking devices', code: 'W2', suggestedLessons: 5 },
+    { name: 'W3: Use a range of grammatical structures and vocabulary appropriate to task', code: 'W3', suggestedLessons: 6 },
+    { name: 'W4: Use register and tone appropriate to context (formal vs informal)', code: 'W4', suggestedLessons: 4 },
+    { name: 'W5: Make accurate use of spelling, punctuation, grammar (technical accuracy)', code: 'W5', suggestedLessons: 4 },
+    { name: 'Exam practice: Writing tasks — emails, articles, reports, reviews, letters; planning and drafting', code: 'WEX', suggestedLessons: 6 },
+  ]},
+  { topic: 'Listening skills (L)', code: 'L', subtopics: [
+    { name: 'L1: Identify and select relevant information from spoken texts', code: 'L1', suggestedLessons: 4 },
+    { name: 'L2: Understand ideas, opinions and attitudes expressed in spoken text', code: 'L2', suggestedLessons: 4 },
+    { name: 'L3: Show understanding of connections between ideas in spoken text', code: 'L3', suggestedLessons: 3 },
+    { name: "L4: Understand what is implied (gist, speaker's purpose, attitude, feelings)", code: 'L4', suggestedLessons: 4 },
+    { name: 'Exam practice: Listening exercises (Paper 2) — short and longer texts, monologue and dialogue', code: 'LEX', suggestedLessons: 4 },
+  ]},
+  { topic: 'Speaking skills (SP)', code: 'SP', subtopics: [
+    { name: 'SP1: Communicate ideas and information clearly in spoken English', code: 'SP1', suggestedLessons: 3 },
+    { name: 'SP2: Develop ideas during conversation (extending answers, giving reasons)', code: 'SP2', suggestedLessons: 4 },
+    { name: 'SP3: Use a range of vocabulary and grammatical structures in speech', code: 'SP3', suggestedLessons: 3 },
+    { name: 'SP4: Use intonation, stress, and pace effectively', code: 'SP4', suggestedLessons: 2 },
+    { name: 'SP5: Interact appropriately in conversation (turn-taking, responding to prompts, asking for clarification)', code: 'SP5', suggestedLessons: 4 },
+    { name: 'Exam practice: Speaking test (Paper 3) — warm-up, topic discussion (~6-7 minutes)', code: 'SPEX', suggestedLessons: 4 },
+  ]},
+]
+
 const IGCSE_LIBRARY = [
   // Sciences (also in IGCSE_SCIENCES_LIBRARY for legacy compat)
   { match: /\bbiology\b/i,                       const_: IGCSE_BIOLOGY_0610,      source: 'Cambridge IGCSE Biology 0610' },
   { match: /\bchemistry\b/i,                     const_: IGCSE_CHEMISTRY_0620,    source: 'Cambridge IGCSE Chemistry 0620' },
   { match: /\bphysics\b/i,                       const_: IGCSE_PHYSICS_0625,      source: 'Cambridge IGCSE Physics 0625' },
-  // English pair — Literature must be matched before Language
-  // (otherwise "English Literature" matches the broader Language regex)
+  // English subjects — order matters: ESL and Literature must be matched
+  // BEFORE the broader English Language regex (otherwise "English Literature"
+  // and "English as a Second Language" would match the Language pattern first)
+  { match: /\b(esl|english\s+as\s+a?\s*second)\b/i, const_: IGCSE_ESL_0510,         source: 'Cambridge IGCSE English as a Second Language 0510' },
   { match: /\b(literature|english\s+lit)\b/i,    const_: IGCSE_ENGLISH_LIT_0475,  source: 'Cambridge IGCSE Literature in English 0475' },
   { match: /\benglish\b/i,                       const_: IGCSE_ENGLISH_LANG_0500, source: 'Cambridge IGCSE First Language English 0500' },
-  // Business
+  // Business / Economics
   { match: /\bbusiness\b/i,                      const_: IGCSE_BUSINESS_0450,     source: 'Cambridge IGCSE Business Studies 0450' },
+  { match: /\beconomics\b/i,                     const_: IGCSE_ECONOMICS_0455,    source: 'Cambridge IGCSE Economics 0455' },
+  // Humanities
+  { match: /\bgeography\b/i,                     const_: IGCSE_GEOGRAPHY_0460,    source: 'Cambridge IGCSE Geography 0460' },
+  { match: /\bhistory\b/i,                       const_: IGCSE_HISTORY_0470,      source: 'Cambridge IGCSE History 0470 (Option B + Germany Depth)' },
+  { match: /\bsociology\b/i,                     const_: IGCSE_SOCIOLOGY_0495,    source: 'Cambridge IGCSE Sociology 0495' },
 ]
 
 
@@ -8311,7 +8527,7 @@ function SyllabusSpineTab({ toast }) {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
     const entry = IGCSE_LIBRARY.find(e => e.match.test(subjectName))
     if (!entry) {
-      toast?.error?.('No IGCSE spine matches "' + subjectName + '". Available: Mathematics (use the IGCSE Maths 0580 button), Biology, Chemistry, Physics, English Language, Literature in English, Business Studies.')
+      toast?.error?.('No IGCSE spine matches "' + subjectName + '". Available: Mathematics (use the IGCSE Maths 0580 button), Biology, Chemistry, Physics, English Language, Literature in English, ESL, Business Studies, Economics, Geography, History, Sociology.')
       return
     }
     if (topics.length > 0 && !window.confirm('This REPLACES the entire existing spine for this subject. Continue?')) return
@@ -8367,7 +8583,7 @@ function SyllabusSpineTab({ toast }) {
               }}>Load Cambridge Lower Secondary spine</button>
             )}
             {curriculum === 'CambridgeIGCSE' && (
-              <button onClick={loadIgcseSpine} disabled={busy} title="Auto-detects which IGCSE spine matches the selected subject (Biology, Chemistry, Physics, English Language, Literature in English, Business Studies)" style={{
+              <button onClick={loadIgcseSpine} disabled={busy} title="Auto-detects which IGCSE spine matches the selected subject (Biology, Chemistry, Physics, English Language, Literature in English, ESL, Business Studies, Economics, Geography, History, Sociology)" style={{
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load IGCSE spine</button>
