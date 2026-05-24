@@ -9422,8 +9422,38 @@ function LiveSessionsTab({ user, toast }) {
 
   // ── Form-derived ──
   const formGrades = form.curriculum ? (catalog.gradesByCurriculum[form.curriculum] || []) : []
+  // Subject list is scoped to the chosen curriculum via a DB-backed
+  // fetch (not the static catalog). DB Subjects are tightly scoped
+  // by curriculum at creation time; this prevents IGCSE subjects
+  // from appearing under Lower Secondary etc.
+  const [dbSubjects, setDbSubjects] = useState([])
+  useEffect(() => {
+    if (!form.curriculum) { setDbSubjects([]); return }
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { data } = await api.get('/subjects', { params: { curriculum: form.curriculum } })
+        if (cancelled) return
+        const list = (data?.subjects || []).filter(s => s.isActive !== false)
+        setDbSubjects(list)
+      } catch (e) {
+        if (!cancelled) setDbSubjects([])
+      }
+    })()
+    return () => { cancelled = true }
+  }, [form.curriculum])
+  // Fallback: if the currently-saved subject isn't in the fetched list
+  // (e.g. an old class with a slightly different name), still show it
+  // so the form doesn't appear broken.
   const formSubjects = form.curriculum
-    ? catalog.subjects.filter(s => s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(form.curriculum)))
+    ? (() => {
+        const names = new Set(dbSubjects.map(s => s.subjectName))
+        const arr = dbSubjects.map(s => ({ id: s._id, name: s.subjectName }))
+        if (form.subject && !names.has(form.subject)) {
+          arr.unshift({ id: 'legacy', name: form.subject })
+        }
+        return arr
+      })()
     : []
 
   // ─────────────────────────────────────────────────────
@@ -9534,7 +9564,20 @@ function LiveSessionsTab({ user, toast }) {
               <div className="fg" style={{ flex: 1, minWidth: 240 }}>
                 <label className="fl">Subtopic (optional)</label>
                 <select className="fsel" value={form.syllabusSubtopicName}
-                  onChange={e => setF('syllabusSubtopicName', e.target.value)}
+                  onChange={e => {
+                    const picked = e.target.value
+                    setF('syllabusSubtopicName', picked)
+                    // Auto-fill title with the subtopic name, but only if
+                    // title is empty OR title matches a previously-picked
+                    // subtopic name (i.e. the teacher hasn't typed a custom
+                    // title). This way custom titles are preserved.
+                    if (picked) {
+                      setForm(f => {
+                        const titleIsCustom = f.title && f.title !== f.syllabusSubtopicName
+                        return titleIsCustom ? { ...f, syllabusSubtopicName: picked } : { ...f, syllabusSubtopicName: picked, title: picked }
+                      })
+                    }
+                  }}
                   disabled={!spineSelectedTopic}
                 >
                   <option value="">{spineSelectedTopic ? 'Select subtopic...' : 'Pick a topic first'}</option>
