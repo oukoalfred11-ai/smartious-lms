@@ -10044,7 +10044,7 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
               marginBottom: 4,
               border: '1px solid #E8D58F',
             }}>
-              📚 {lc.syllabusTopicName ? lc.syllabusTopicName + ' → ' : ''}{lc.syllabusSubtopicName}
+              {lc.syllabusTopicName ? lc.syllabusTopicName + ' → ' : ''}{lc.syllabusSubtopicName}
             </div>
           )}
           <div style={{ fontSize: 12, color: '#6B6B6B' }}>
@@ -10122,7 +10122,7 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
                     padding: '8px 14px', borderRadius: 6,
                     fontSize: 12, fontWeight: 700, cursor: 'pointer',
                   }}>
-                  {showMarkPanel ? 'Close' : '📚 Mark progress'}
+                  {showMarkPanel ? 'Close' : 'Mark progress'}
                 </button>
               )}
               <button onClick={onDelete}
@@ -10322,7 +10322,7 @@ function MarkProgressPanel({ lc, onClose, toast }) {
                   fontSize: 10, fontWeight: 700,
                   padding: '2px 7px', borderRadius: 99,
                   letterSpacing: '.04em',
-                }}>✓ ALREADY DONE</span>
+                }}>ALREADY DONE</span>
               )}
             </label>
           )
