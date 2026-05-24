@@ -6279,7 +6279,13 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
     cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '0 4px', flexShrink: 0 }
 
   // a reusable list editor
-  const ListEditor = ({ label, k, placeholder }) => (
+  // ListEditor renders a labelled list of editable text inputs with
+  // add/remove buttons. Implemented as a PLAIN FUNCTION (not a React
+  // component) so it doesn't get a new identity on every parent
+  // re-render — that was causing inputs to lose focus after every
+  // keystroke. Called as {listEditor({label, k, placeholder})}, not
+  // <ListEditor .../>.
+  const listEditor = ({ label, k, placeholder }) => (
     <div style={{ marginBottom: 14 }}>
       <label style={lbl}>{label}</label>
       {f[k].map((val, i) => (
@@ -6329,9 +6335,9 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
 
       {/* Topics / sub-topics / activities */}
       <div style={card}>
-        <ListEditor label="Topics Covered" k="topics" placeholder="e.g. Integers"/>
-        <ListEditor label="Sub-Topics Taught" k="subTopics" placeholder="e.g. Adding and subtracting integers"/>
-        <ListEditor label="Class Activities" k="activities" placeholder="Describe a class activity"/>
+        {listEditor({label:"Topics Covered", k:"topics", placeholder:"e.g. Integers"})}
+        {listEditor({label:"Sub-Topics Taught", k:"subTopics", placeholder:"e.g. Adding and subtracting integers"})}
+        {listEditor({label:"Class Activities", k:"activities", placeholder:"Describe a class activity"})}
       </div>
 
       {/* Performance */}
@@ -6349,8 +6355,8 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
 
       {/* Strengths / improvements */}
       <div style={card}>
-        <ListEditor label="Strengths Observed" k="strengths" placeholder="A strength observed this week"/>
-        <ListEditor label="Areas to Improve" k="improvements" placeholder="An area to work on"/>
+        {listEditor({label:"Strengths Observed", k:"strengths", placeholder:"A strength observed this week"})}
+        {listEditor({label:"Areas to Improve", k:"improvements", placeholder:"An area to work on"})}
       </div>
 
       {/* Assessment Done — with optional marks */}
@@ -6376,7 +6382,7 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
 
       {/* Homework */}
       <div style={card}>
-        <ListEditor label="Homework / Follow-Up Work" k="homework" placeholder="A homework or follow-up task"/>
+        {listEditor({label:"Homework / Follow-Up Work", k:"homework", placeholder:"A homework or follow-up task"})}
       </div>
 
       {/* Remarks + confirmation */}
