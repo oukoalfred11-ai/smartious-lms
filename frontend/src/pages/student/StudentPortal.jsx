@@ -23,6 +23,7 @@ import {
   sumLeafMarks,
 } from '../../components/exam/NestedQuestion.jsx'
 import LessonPlayerTab from './LessonPlayerTab.jsx'
+import SubjectProgressCard from '../../components/SubjectProgressCard.jsx'
 
 // ── SVG icon helper ───────────────────────────────────────
 const I = (d) => (
@@ -1536,6 +1537,16 @@ export default function StudentPortal() {
                                     No lessons published yet for this subject.
                                   </div>
                                 )}
+
+                                {/* Syllabus progress widget — % covered */}
+                                <div style={{ marginTop: 14 }}>
+                                  <SubjectProgressCard
+                                    studentId={user?._id}
+                                    subjectName={subjectName}
+                                    curriculum={user?.curriculum}
+                                    api={api}
+                                  />
+                                </div>
                               </div>
                             )}
                           </div>
