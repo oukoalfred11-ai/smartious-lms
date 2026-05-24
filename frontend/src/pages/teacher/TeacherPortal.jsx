@@ -11,6 +11,7 @@ import {
   labelAt,
 } from '../../components/exam/NestedQuestion.jsx'
 import ManageSubjectTab from './ManageSubjectTab.jsx'
+import LibraryViewer from '../../components/LibraryViewer.jsx'
 
 // ── SVG icon helper ──────────────────────────────────────
 const Ico = ({ d, w = 18, col = 'currentColor', sw = 2 }) => (
@@ -75,6 +76,15 @@ const NavIcon = ({ name, active }) => {
             <rect x="5" y="4" width="14" height="17" rx="2" fill="#fff" fillOpacity=".25"/>
             <rect x="9" y="2" width="6" height="3" rx="1" fill="#fff" stroke="#fff" strokeWidth="1.6"/>
             <path d="M8.5 12.5l2 2 4-4.5"/>
+          </g>
+        )
+      case 'library': // stack of books
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" fill="#fff" fillOpacity=".25"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" fill="#fff" fillOpacity=".25"/>
+            <line x1="8" y1="7" x2="16" y2="7"/>
+            <line x1="8" y1="11" x2="16" y2="11"/>
           </g>
         )
       case 'liveclass': // video camera with live dot
@@ -518,6 +528,7 @@ export default function TeacherPortal() {
       {id:'dashboard',     label:'Dashboard',        iconName:'dashboard',     icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
       {id:'students',      label:'My Students',      iconName:'students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
       {id:'attendance',    label:'Attendance',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
+      {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
       {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
       {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
     ]},
@@ -637,6 +648,8 @@ export default function TeacherPortal() {
           {page === 'students' && <MyStudentsTab user={currentUser} store={store} setPage={setPage} toast={toast} setMsgTo={setMsgTo} setMsgSubject={setMsgSubject} setMsgBody={setMsgBody} setMsgModal={setMsgModal} />}
 
           {page === 'attendance' && <AttendanceTab user={currentUser} toast={toast} />}
+
+          {page === 'library' && <TeacherLibraryTab user={currentUser} toast={toast} />}
 
 
           {/* ── QUESTION BANK ── */}
@@ -13365,6 +13378,428 @@ function ExternalEmailAdder({ onAdd, pickedEmails, toast }) {
             border: '1px solid #E8E2D6', padding: '7px 12px',
             borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
           }}>Cancel</button>
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// TEACHER LIBRARY TAB
+// Upload + manage coursebook PDFs for the teacher's subjects.
+// Files go to Cloudinary (folder smartious/library) via the
+// backend; only metadata flows through React.
+// ═══════════════════════════════════════════════════════════
+function TeacherLibraryTab({ user, toast }) {
+  const [books, setBooks] = useState([])
+  const [loadingBooks, setLoadingBooks] = useState(true)
+  const [subjects, setSubjects] = useState([])
+  const [loadingSubjects, setLoadingSubjects] = useState(true)
+
+  // Upload form state
+  const [showUploadForm, setShowUploadForm] = useState(false)
+  const [upSubjectId, setUpSubjectId] = useState('')
+  const [upTitle, setUpTitle] = useState('')
+  const [upDescription, setUpDescription] = useState('')
+  const [upAuthor, setUpAuthor] = useState('')
+  const [upGrades, setUpGrades] = useState('')
+  const [upFile, setUpFile] = useState(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const fileInputRef = useRef(null)
+
+  // Viewer state
+  const [viewerBook, setViewerBook] = useState(null)
+
+  // Load books visible to this teacher
+  const loadBooks = async () => {
+    setLoadingBooks(true)
+    try {
+      const { data } = await api.get('/library')
+      setBooks(data?.data?.books || [])
+    } catch (e) {
+      toast?.error?.('Failed to load books: ' + (e?.response?.data?.message || e.message))
+    } finally {
+      setLoadingBooks(false)
+    }
+  }
+
+  // Load teacher's subjects (for upload form dropdown)
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        // Use the teacher-subjects endpoint which respects allocations
+        const { data } = await api.get('/lessons/my-subjects')
+        if (cancelled) return
+        const list = data?.subjects || data?.data?.subjects || []
+        setSubjects(list)
+      } catch (e) {
+        // Fallback: try the generic /subjects endpoint
+        try {
+          const { data } = await api.get('/subjects')
+          if (!cancelled) setSubjects(data?.subjects || [])
+        } catch {}
+      } finally {
+        if (!cancelled) setLoadingSubjects(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => { loadBooks() // eslint-disable-next-line
+  }, [])
+
+  const onFilePick = (file) => {
+    if (!file) return
+    if (file.type !== 'application/pdf') {
+      toast?.error?.('Only PDF files are accepted.')
+      return
+    }
+    if (file.size > 200 * 1024 * 1024) {
+      toast?.error?.('File exceeds 200 MB limit.')
+      return
+    }
+    setUpFile(file)
+    if (!upTitle) setUpTitle(file.name.replace(/\.pdf$/i, ''))
+  }
+
+  const resetForm = () => {
+    setUpSubjectId('')
+    setUpTitle('')
+    setUpDescription('')
+    setUpAuthor('')
+    setUpGrades('')
+    setUpFile(null)
+    setUploadProgress(0)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const submitUpload = async () => {
+    if (!upSubjectId)         { toast?.error?.('Pick a subject.'); return }
+    if (!upTitle.trim())      { toast?.error?.('Title is required.'); return }
+    if (!upFile)              { toast?.error?.('Choose a PDF file.'); return }
+
+    setUploading(true)
+    setUploadProgress(0)
+    try {
+      const fd = new FormData()
+      fd.append('file', upFile)
+      fd.append('subjectId', upSubjectId)
+      fd.append('title', upTitle.trim())
+      fd.append('description', upDescription.trim())
+      fd.append('author', upAuthor.trim())
+      fd.append('grades', upGrades.trim())
+
+      const { data } = await api.post('/library/upload', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (evt) => {
+          if (evt.total) {
+            const pct = Math.round((evt.loaded / evt.total) * 100)
+            setUploadProgress(pct)
+          }
+        },
+      })
+      if (data?.success) {
+        toast?.ok?.('Book uploaded.')
+        resetForm()
+        setShowUploadForm(false)
+        loadBooks()
+      } else {
+        toast?.error?.(data?.message || 'Upload failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Upload failed: ' + e.message)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const removeBook = async (book) => {
+    if (!window.confirm(`Delete "${book.title}"? This permanently removes the PDF.`)) return
+    try {
+      const { data } = await api.delete(`/library/${book._id}`)
+      if (data?.success) {
+        toast?.ok?.('Book deleted.')
+        loadBooks()
+      } else {
+        toast?.error?.(data?.message || 'Delete failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Delete failed: ' + e.message)
+    }
+  }
+
+  // Group books by subject for display
+  const booksBySubject = (() => {
+    const groups = {}
+    for (const b of books) {
+      const k = b.subjectName + ' · ' + b.curriculum
+      if (!groups[k]) groups[k] = []
+      groups[k].push(b)
+    }
+    return groups
+  })()
+
+  return (
+    <div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom: 20 }}>
+        <div>
+          <div className="sec-tag">Coursebooks by subject</div>
+          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
+            Library
+          </h2>
+          <div style={{ fontSize: 13, color: '#6B6B6B' }}>
+            Upload PDF coursebooks. Your students will be able to read them inline (no download).
+          </div>
+        </div>
+        {!showUploadForm && (
+          <button onClick={() => setShowUploadForm(true)}
+            style={{
+              background: '#7D1025', color: '#fff', border: 'none',
+              padding: '10px 18px', borderRadius: 8,
+              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+            }}>
+            + Upload book
+          </button>
+        )}
+      </div>
+
+      {/* Upload form */}
+      {showUploadForm && (
+        <div className="card" style={{ padding: 20, marginBottom: 22, border: '1.5px solid #C9A030' }}>
+          <div style={{
+            fontSize: 11, fontWeight: 700, color: '#7D5A0F',
+            letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 14,
+          }}>Upload a coursebook</div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 14 }}>
+            <div>
+              <label className="fl">Subject *</label>
+              <select className="fsel" value={upSubjectId}
+                onChange={e => setUpSubjectId(e.target.value)}
+                disabled={loadingSubjects || uploading}>
+                <option value="">
+                  {loadingSubjects ? 'Loading subjects...' : 'Select subject...'}
+                </option>
+                {subjects.map(s => (
+                  <option key={s._id} value={s._id}>
+                    {s.subjectName} · {s.curriculum}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="fl">Title *</label>
+              <input className="finput" value={upTitle}
+                onChange={e => setUpTitle(e.target.value)}
+                placeholder="e.g. Cambridge IGCSE Mathematics Coursebook"
+                disabled={uploading}/>
+            </div>
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 14 }}>
+            <div>
+              <label className="fl">Author (optional)</label>
+              <input className="finput" value={upAuthor}
+                onChange={e => setUpAuthor(e.target.value)}
+                placeholder="e.g. Karen Morrison"
+                disabled={uploading}/>
+            </div>
+            <div>
+              <label className="fl">Grade(s) (optional, comma-separated)</label>
+              <input className="finput" value={upGrades}
+                onChange={e => setUpGrades(e.target.value)}
+                placeholder="e.g. Year 10, Year 11"
+                disabled={uploading}/>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <label className="fl">Description (optional)</label>
+            <textarea className="finput" value={upDescription}
+              onChange={e => setUpDescription(e.target.value)}
+              placeholder="A short description of the book"
+              rows={2}
+              style={{ resize:'vertical' }}
+              disabled={uploading}/>
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label className="fl">PDF file * (max 200 MB)</label>
+            <input ref={fileInputRef} type="file" accept="application/pdf"
+              onChange={e => onFilePick(e.target.files?.[0])}
+              disabled={uploading}
+              style={{ fontSize: 12, marginTop: 4 }}/>
+            {upFile && (
+              <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 6 }}>
+                {upFile.name} ({(upFile.size / (1024*1024)).toFixed(1)} MB)
+              </div>
+            )}
+          </div>
+
+          {uploading && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{
+                height: 8, borderRadius: 99,
+                background: '#E8E2D6', overflow: 'hidden', marginBottom: 4,
+              }}>
+                <div style={{
+                  width: uploadProgress + '%', height: '100%',
+                  background: '#C9A030',
+                  transition: 'width 200ms ease',
+                }}/>
+              </div>
+              <div style={{ fontSize: 11, color: '#7D5A0F' }}>
+                Uploading... {uploadProgress}%
+              </div>
+            </div>
+          )}
+
+          <div style={{ display:'flex', gap: 8 }}>
+            <button onClick={submitUpload}
+              disabled={uploading || !upFile || !upTitle.trim() || !upSubjectId}
+              style={{
+                background: '#7D1025', color: '#fff', border: 'none',
+                padding: '9px 18px', borderRadius: 7,
+                fontSize: 12.5, fontWeight: 700,
+                cursor: (uploading || !upFile || !upTitle.trim() || !upSubjectId) ? 'not-allowed' : 'pointer',
+                opacity: (uploading || !upFile || !upTitle.trim() || !upSubjectId) ? 0.5 : 1,
+              }}>
+              {uploading ? 'Uploading...' : 'Upload book'}
+            </button>
+            <button onClick={() => { resetForm(); setShowUploadForm(false) }}
+              disabled={uploading}
+              style={{
+                background: 'transparent', color: '#6B6B6B',
+                border: '1px solid #E8E2D6', padding: '9px 18px',
+                borderRadius: 7, fontSize: 12.5, fontWeight: 700,
+                cursor: uploading ? 'not-allowed' : 'pointer',
+              }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Books list, grouped by subject */}
+      {loadingBooks ? (
+        <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic', padding: 20 }}>
+          Loading library...
+        </div>
+      ) : books.length === 0 ? (
+        <div className="card" style={{ padding: 30, textAlign: 'center' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
+            No books yet
+          </div>
+          <div style={{ fontSize: 12.5, color: '#6B6B6B' }}>
+            Click "Upload book" to add your first coursebook PDF.
+          </div>
+        </div>
+      ) : (
+        <div style={{ display:'flex', flexDirection:'column', gap: 22 }}>
+          {Object.keys(booksBySubject).sort().map(groupKey => (
+            <div key={groupKey}>
+              <div style={{
+                fontSize: 11, fontWeight: 700, color: '#7D1025',
+                letterSpacing: '.08em', textTransform: 'uppercase',
+                marginBottom: 8, paddingBottom: 6, borderBottom: '1px solid #E8E2D6',
+              }}>
+                {groupKey}
+              </div>
+              <div style={{
+                display:'grid',
+                gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: 12,
+              }}>
+                {booksBySubject[groupKey].map(book => (
+                  <BookCard key={book._id} book={book}
+                    onView={() => setViewerBook(book)}
+                    onDelete={() => removeBook(book)}
+                    canDelete={String(book.uploadedBy) === String(user?._id) || user?.role === 'admin'}/>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Viewer modal */}
+      {viewerBook && (
+        <LibraryViewer book={viewerBook} api={api} onClose={() => setViewerBook(null)}/>
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────
+// BookCard
+// Compact card showing one library book with view / delete actions.
+// Used by both teacher and student library lists.
+// ─────────────────────────────────────────────────────────
+function BookCard({ book, onView, onDelete, canDelete }) {
+  const sizeMB = book.sizeBytes ? (book.sizeBytes / (1024 * 1024)).toFixed(1) + ' MB' : ''
+  return (
+    <div style={{
+      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 10,
+      padding: 14, display: 'flex', flexDirection: 'column',
+    }}>
+      <div style={{ display:'flex', gap: 10, marginBottom: 10 }}>
+        <div style={{
+          width: 38, height: 48, borderRadius: 4,
+          background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
+          flexShrink: 0,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
+        }}>PDF</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontWeight: 700, fontSize: 13, color: '#1A1A1A',
+            lineHeight: 1.3,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>{book.title}</div>
+          {book.author && (
+            <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 3 }}>{book.author}</div>
+          )}
+        </div>
+      </div>
+
+      {book.description && (
+        <div style={{
+          fontSize: 11.5, color: '#6B6B6B', marginBottom: 8,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+          overflow: 'hidden', lineHeight: 1.4,
+        }}>
+          {book.description}
+        </div>
+      )}
+
+      <div style={{ fontSize: 10.5, color: '#9A9A9A', marginBottom: 10 }}>
+        {sizeMB}
+        {book.grades?.length ? ' · ' + book.grades.join(', ') : ''}
+        {book.uploadedByName ? ' · by ' + book.uploadedByName : ''}
+      </div>
+
+      <div style={{ display:'flex', gap: 6, marginTop: 'auto' }}>
+        <button onClick={onView}
+          style={{
+            flex: 1,
+            background: '#7D1025', color: '#fff', border: 'none',
+            padding: '7px 12px', borderRadius: 6,
+            fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+          }}>
+          Open
+        </button>
+        {canDelete && onDelete && (
+          <button onClick={onDelete}
+            style={{
+              background: 'transparent', color: '#9A2434',
+              border: '1px solid #E8E2D6', padding: '7px 12px',
+              borderRadius: 6, fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+            }}>
+            Delete
+          </button>
+        )}
       </div>
     </div>
   )
