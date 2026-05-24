@@ -60,6 +60,7 @@ app.use('/api/subjects',       require('./routes/subjects'));
 app.use('/api/lessons', require('./routes/lessons'));
 app.use('/api/lesson-progress', require('./routes/lesson-progress'));
 app.use('/api/curriculum',     require('./routes/curriculum'));
+app.use('/api/syllabus-progress', require('./routes/syllabus-progress'));
 app.use('/api/timetables', require('./routes/timetables'));
 app.use('/api/syllabus', require('./routes/syllabus'));
 app.use('/api/students',       require('./routes/students'));
