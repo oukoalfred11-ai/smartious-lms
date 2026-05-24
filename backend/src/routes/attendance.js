@@ -32,6 +32,12 @@ const Attendance = require('../models/Attendance');
 const User = require('../models/User');
 const { auth, requireRole } = require('../middleware/auth');
 
+// Local copy of valid status values — kept in lockstep with the
+// model's enum. Decoupled from the model's optional static export
+// (STATUS_VALUES) so route works even when an older
+// model version is loaded.
+const STATUS_VALUES = ['present', 'absent', 'half_day'];
+
 // ─────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────
@@ -62,8 +68,8 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
 
     if (!studentId || !mongoose.isValidObjectId(studentId))
       return fail(res, 400, 'Valid studentId required.');
-    if (!Attendance.STATUS_VALUES.includes(status))
-      return fail(res, 400, 'status must be one of: ' + Attendance.STATUS_VALUES.join(', '));
+    if (!STATUS_VALUES.includes(status))
+      return fail(res, 400, 'status must be one of: ' + STATUS_VALUES.join(', '));
 
     const dateNorm = normaliseDate(date);
     if (!dateNorm) return fail(res, 400, 'Valid date required (YYYY-MM-DD or ISO).');
@@ -115,8 +121,8 @@ router.post('/bulk', auth, requireRole('teacher', 'admin'), async (req, res) => 
 
     if (!Array.isArray(studentIds) || studentIds.length === 0)
       return fail(res, 400, 'studentIds array required.');
-    if (!Attendance.STATUS_VALUES.includes(status))
-      return fail(res, 400, 'status must be one of: ' + Attendance.STATUS_VALUES.join(', '));
+    if (!STATUS_VALUES.includes(status))
+      return fail(res, 400, 'status must be one of: ' + STATUS_VALUES.join(', '));
 
     const dateNorm = normaliseDate(date);
     if (!dateNorm) return fail(res, 400, 'Valid date required (YYYY-MM-DD or ISO).');
