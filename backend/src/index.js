@@ -55,6 +55,7 @@ app.use('/api/auth',           authLimiter, require('./routes/auth'));
 app.use('/api/users',          require('./routes/users'));
 app.use('/api/communication', require('./routes/communication'));
 app.use('/api/teachers',       require('./routes/teachers'));
+app.use('/api/teacher-profile', require('./routes/teacher-profile'));
 app.use('/api/allocations',    require('./routes/allocations'));
 app.use('/api/subjects',       require('./routes/subjects'));
 app.use('/api/lessons', require('./routes/lessons'));
