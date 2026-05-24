@@ -69,6 +69,14 @@ const NavIcon = ({ name, active }) => {
             <path d="M14 20c.4-2 1.8-3.5 3.5-3.5s3.1 1.5 3.5 3.5" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/>
           </g>
         )
+      case 'attendance': // clipboard with checkmark
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="4" width="14" height="17" rx="2" fill="#fff" fillOpacity=".25"/>
+            <rect x="9" y="2" width="6" height="3" rx="1" fill="#fff" stroke="#fff" strokeWidth="1.6"/>
+            <path d="M8.5 12.5l2 2 4-4.5"/>
+          </g>
+        )
       case 'liveclass': // video camera with live dot
         return (
           <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -509,6 +517,7 @@ export default function TeacherPortal() {
     { section:'Teaching', items:[
       {id:'dashboard',     label:'Dashboard',        iconName:'dashboard',     icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
       {id:'students',      label:'My Students',      iconName:'students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
+      {id:'attendance',    label:'Attendance',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
       {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
       {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
     ]},
@@ -626,6 +635,8 @@ export default function TeacherPortal() {
 
           {/* ── MY STUDENTS ── */}
           {page === 'students' && <MyStudentsTab user={currentUser} store={store} setPage={setPage} toast={toast} setMsgTo={setMsgTo} setMsgSubject={setMsgSubject} setMsgBody={setMsgBody} setMsgModal={setMsgModal} />}
+
+          {page === 'attendance' && <AttendanceTab user={currentUser} toast={toast} />}
 
 
           {/* ── QUESTION BANK ── */}
@@ -12778,5 +12789,352 @@ function MshauriFloatingButton({ user, setPage, toast, currentPage }) {
         </div>
       )}
     </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// ATTENDANCE TAB
+// Mark daily attendance per student. Cross-teacher visibility:
+// when teacher A marks a student absent on a day, teacher B (also
+// allocated to that student) sees the same status.
+//
+// Statuses: 'present', 'absent', 'half_day'. Reason required when
+// 'absent' per the backend Attendance model's pre-validate hook.
+// ═══════════════════════════════════════════════════════════
+function AttendanceTab({ user, toast }) {
+  // ── List of teacher's students (from existing allocations endpoint) ──
+  const [students, setStudents] = useState([])
+  const [studentsLoading, setStudentsLoading] = useState(true)
+  const [selectedStudent, setSelectedStudent] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    setStudentsLoading(true)
+    ;(async () => {
+      try {
+        // Use the existing /allocations/teacher endpoint — returns
+        // populated student objects we can deduplicate.
+        const { data } = await api.get('/allocations/teacher')
+        if (cancelled) return
+        const allocs = data?.allocations || []
+        // Deduplicate by studentId (a student may appear under multiple subjects)
+        const byId = new Map()
+        for (const a of allocs) {
+          const s = a.studentId
+          if (!s || !s._id) continue
+          if (!byId.has(String(s._id))) {
+            const fn = s.firstName || ''
+            const ln = s.lastName || ''
+            byId.set(String(s._id), {
+              _id: s._id,
+              firstName: fn,
+              lastName: ln,
+              fullName: (fn + ' ' + ln).trim() || s.email || '(student)',
+              email: s.email || '',
+              curriculum: s.curriculum || '',
+            })
+          }
+        }
+        const list = Array.from(byId.values()).sort((a,b) => a.fullName.localeCompare(b.fullName))
+        setStudents(list)
+      } catch (e) {
+        if (!cancelled) toast?.error?.('Failed to load students: ' + (e?.response?.data?.message || e.message))
+      } finally {
+        if (!cancelled) setStudentsLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return (
+    <div>
+      <div style={{ marginBottom: 20 }}>
+        <div className="sec-tag">Daily attendance</div>
+        <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
+          Attendance
+        </h2>
+        <div style={{ fontSize: 13, color: '#6B6B6B' }}>
+          Mark daily attendance for your students. Other teachers allocated to the same student will see your marks.
+        </div>
+      </div>
+
+      {/* Student picker */}
+      <div className="card" style={{ padding: 18, marginBottom: 18 }}>
+        <div className="fl" style={{ marginBottom: 8 }}>Select student</div>
+        {studentsLoading ? (
+          <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic' }}>Loading students...</div>
+        ) : students.length === 0 ? (
+          <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic' }}>
+            No students allocated to you yet.
+          </div>
+        ) : (
+          <select className="fsel" value={selectedStudent?._id || ''}
+            onChange={e => {
+              const id = e.target.value
+              setSelectedStudent(students.find(s => s._id === id) || null)
+            }}
+          >
+            <option value="">Select a student...</option>
+            {students.map(s => (
+              <option key={s._id} value={s._id}>
+                {s.fullName}{s.curriculum ? ' · ' + s.curriculum : ''}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {/* 30-day attendance grid for selected student */}
+      {selectedStudent && (
+        <AttendanceGrid student={selectedStudent} markedByUser={user} toast={toast} />
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────
+// AttendanceGrid
+// Renders the last 30 days for a given student. Each day is a
+// row with status buttons (Present / Absent / Half day) and a
+// reason field that's required when status is Absent.
+// ─────────────────────────────────────────────────────────
+function AttendanceGrid({ student, markedByUser, toast }) {
+  const [records, setRecords] = useState({})  // map: 'YYYY-MM-DD' -> Attendance doc
+  const [loading, setLoading] = useState(false)
+  const [savingKey, setSavingKey] = useState(null)
+  // Drafts: per-day in-progress edits BEFORE save
+  const [drafts, setDrafts] = useState({})    // map: 'YYYY-MM-DD' -> { status, reason }
+
+  // Generate last 30 days (most recent first)
+  const days = (() => {
+    const out = []
+    const today = new Date()
+    today.setHours(0,0,0,0)
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(today)
+      d.setDate(today.getDate() - i)
+      const key = d.toISOString().slice(0, 10)
+      out.push({ key, date: d })
+    }
+    return out
+  })()
+
+  // Fetch existing records for this student
+  useEffect(() => {
+    if (!student?._id) return
+    let cancelled = false
+    setLoading(true)
+    setRecords({})
+    setDrafts({})
+    ;(async () => {
+      try {
+        // Compute 30-day range
+        const to = new Date()
+        const from = new Date()
+        from.setDate(from.getDate() - 30)
+        const fromStr = from.toISOString().slice(0,10)
+        const toStr   = to.toISOString().slice(0,10)
+        const { data } = await api.get(`/attendance/student/${student._id}`, {
+          params: { from: fromStr, to: toStr },
+        })
+        if (cancelled) return
+        const items = data?.data?.items || []
+        const byKey = {}
+        for (const r of items) {
+          const k = new Date(r.date).toISOString().slice(0,10)
+          byKey[k] = r
+        }
+        setRecords(byKey)
+      } catch (e) {
+        if (!cancelled) toast?.error?.('Failed to load attendance: ' + (e?.response?.data?.message || e.message))
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student?._id])
+
+  // Get the displayed status for a day: draft if set, else record, else null
+  const statusFor = (key) => drafts[key]?.status ?? records[key]?.status ?? null
+  const reasonFor = (key) => drafts[key]?.reason ?? records[key]?.reason ?? ''
+
+  // Has the user changed anything from the saved record?
+  const isDirty = (key) => {
+    const d = drafts[key]
+    if (!d) return false
+    const r = records[key]
+    if (!r) return true
+    return d.status !== r.status || (d.reason || '') !== (r.reason || '')
+  }
+
+  const setDraft = (key, patch) => {
+    setDrafts(prev => {
+      const cur = prev[key] || {
+        status: records[key]?.status ?? null,
+        reason: records[key]?.reason ?? '',
+      }
+      return { ...prev, [key]: { ...cur, ...patch } }
+    })
+  }
+
+  const save = async (key, date) => {
+    const draft = drafts[key]
+    if (!draft || !draft.status) return
+    if (draft.status === 'absent' && !draft.reason?.trim()) {
+      toast?.error?.('Reason is required when marking absent.')
+      return
+    }
+    setSavingKey(key)
+    try {
+      const { data } = await api.post('/attendance', {
+        studentId: student._id,
+        date: key,                  // YYYY-MM-DD, server normalises
+        status: draft.status,
+        reason: draft.reason || '',
+      })
+      if (data?.success) {
+        const saved = data.data?.attendance
+        if (saved) {
+          setRecords(prev => ({ ...prev, [key]: saved }))
+        }
+        // Drop the draft now that it's saved
+        setDrafts(prev => {
+          const next = { ...prev }
+          delete next[key]
+          return next
+        })
+        toast?.ok?.('Attendance saved.')
+      } else {
+        toast?.error?.(data?.message || 'Save failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Save failed: ' + e.message)
+    } finally {
+      setSavingKey(null)
+    }
+  }
+
+  const formatDate = (d) => {
+    const wd = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]
+    const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]
+    return `${wd}, ${d.getDate()} ${mo}`
+  }
+
+  const STATUS_BTNS = [
+    { key: 'present',  label: 'Present',   bg: '#15803D', bgLight: '#DCFCE7', text: '#15803D' },
+    { key: 'half_day', label: 'Half day',  bg: '#C9A030', bgLight: '#FDF7E2', text: '#7D5A0F' },
+    { key: 'absent',   label: 'Absent',    bg: '#7D1025', bgLight: '#FDE7EC', text: '#7D1025' },
+  ]
+
+  return (
+    <div className="card" style={{ padding: 18 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom: 14 }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 16, color: '#1A1A1A' }}>{student.fullName}</div>
+          <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 2 }}>
+            Showing last 30 days{student.curriculum ? ' · ' + student.curriculum : ''}
+          </div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic', padding: '12px 0' }}>
+          Loading attendance...
+        </div>
+      ) : (
+        <div style={{ display:'flex', flexDirection:'column', gap: 8 }}>
+          {days.map(({ key, date }) => {
+            const status = statusFor(key)
+            const reason = reasonFor(key)
+            const dirty  = isDirty(key)
+            const rec    = records[key]
+            const needsReason = status === 'absent'
+
+            return (
+              <div key={key} style={{
+                display: 'grid',
+                gridTemplateColumns: '150px 1fr auto',
+                alignItems: 'center', gap: 12,
+                padding: '10px 12px',
+                background: dirty ? '#FDF7E2' : '#FBFAF5',
+                border: '1px solid ' + (dirty ? '#C9A030' : '#E8E2D6'),
+                borderRadius: 8,
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#1A1A1A' }}>{formatDate(date)}</div>
+                  {rec && !dirty && (
+                    <div style={{ fontSize: 10.5, color: '#6B6B6B', marginTop: 2 }}>
+                      by {rec.markedBy?.firstName || ''} {rec.markedBy?.lastName || ''}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display:'flex', flexDirection:'column', gap: 6 }}>
+                  <div style={{ display:'flex', gap: 6, flexWrap:'wrap' }}>
+                    {STATUS_BTNS.map(btn => {
+                      const active = status === btn.key
+                      return (
+                        <button key={btn.key}
+                          onClick={() => setDraft(key, { status: btn.key })}
+                          style={{
+                            padding: '6px 12px', borderRadius: 6,
+                            background: active ? btn.bg : btn.bgLight,
+                            color: active ? '#fff' : btn.text,
+                            border: '1px solid ' + (active ? btn.bg : btn.text + '44'),
+                            fontSize: 11.5, fontWeight: 700, cursor:'pointer',
+                            opacity: savingKey === key ? 0.5 : 1,
+                          }}
+                          disabled={savingKey === key}
+                        >
+                          {btn.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {needsReason && (
+                    <input
+                      type="text"
+                      value={reason}
+                      placeholder="Reason (required for absent)"
+                      onChange={e => setDraft(key, { reason: e.target.value })}
+                      style={{
+                        padding: '6px 10px', borderRadius: 6,
+                        border: '1px solid ' + ((!reason || !reason.trim()) ? '#7D1025' : '#E8E2D6'),
+                        fontSize: 12, background:'#fff',
+                      }}
+                      disabled={savingKey === key}
+                    />
+                  )}
+                </div>
+
+                <div>
+                  {dirty && (
+                    <button onClick={() => save(key, date)}
+                      disabled={savingKey === key || !status || (needsReason && !reason?.trim())}
+                      style={{
+                        padding: '7px 14px', borderRadius: 6,
+                        background: '#7D1025', color: '#fff', border: 'none',
+                        fontSize: 11.5, fontWeight: 700,
+                        cursor: (savingKey === key || !status || (needsReason && !reason?.trim())) ? 'not-allowed' : 'pointer',
+                        opacity: (savingKey === key || !status || (needsReason && !reason?.trim())) ? 0.5 : 1,
+                      }}>
+                      {savingKey === key ? 'Saving...' : 'Save'}
+                    </button>
+                  )}
+                  {!dirty && rec && (
+                    <div style={{
+                      fontSize: 10, fontWeight: 700, color: '#15803D',
+                      letterSpacing: '.06em', textTransform: 'uppercase',
+                    }}>Saved</div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
   )
 }
