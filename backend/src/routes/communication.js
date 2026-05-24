@@ -293,10 +293,15 @@ router.get('/teacher/recipients', auth, requireRole('teacher', 'admin'), async (
 // ─────────────────────────────────────────────────────────
 // POST /api/communication/teacher/send
 // Body: { subject, body, recipientEmails: [{ email, name }], attachments, audience }
-// Teachers send to resolved community emails only — the frontend
-// supplies the addresses it built from /teacher/recipients. We
-// re-validate every address against the teacher's allowed set so
-// a teacher cannot send outside their community.
+//
+// Recipients come from two sources:
+//   1. Community recipients — students allocated to this teacher,
+//      those students' parents, and colleague teachers/admins.
+//      Server re-validates these against the teacher's allowed set.
+//   2. External recipients — any well-formed email address typed
+//      manually by the teacher (e.g. an outside parent contact,
+//      a colleague at another school, a guest speaker). These pass
+//      a format check and go through. All sends are audit-logged.
 // ─────────────────────────────────────────────────────────
 router.post('/teacher/send', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
@@ -308,7 +313,7 @@ router.post('/teacher/send', auth, requireRole('teacher', 'admin'), async (req, 
     if (!body || !body.trim())
       return res.status(400).json({ success: false, message: 'Message body is required.' });
 
-    // Rebuild the teacher's allowed email set, server-side
+    // Build the teacher's community allowed-set, server-side
     const allocs = await Allocation.find({ teacherId: req.user._id, status: 'Active' })
       .select('studentId').lean();
     const studentIds = [...new Set(allocs.map(a => String(a.studentId)).filter(Boolean))];
@@ -323,30 +328,48 @@ router.post('/teacher/send', auth, requireRole('teacher', 'admin'), async (req, 
     const parents = await User.find({ _id: { $in: [...parentIdSet] } }).select('email').lean();
     const colleagues = await User.find({ role: { $in: ['teacher', 'admin'] } }).select('email').lean();
 
-    const allowed = new Set();
-    students.forEach(s => s.email && allowed.add(s.email.toLowerCase()));
-    parents.forEach(p => p.email && allowed.add(p.email.toLowerCase()));
-    colleagues.forEach(c => c.email && allowed.add(c.email.toLowerCase()));
+    const allowedCommunity = new Set();
+    students.forEach(s => s.email && allowedCommunity.add(s.email.toLowerCase()));
+    parents.forEach(p => p.email && allowedCommunity.add(p.email.toLowerCase()));
+    colleagues.forEach(c => c.email && allowedCommunity.add(c.email.toLowerCase()));
 
-    // Filter requested recipients to the allowed set
+    // Split each requested recipient into community vs external.
+    // Community recipients are validated against the allowedCommunity set.
+    // External recipients pass through if the address looks well-formed.
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const requested = Array.isArray(recipientEmails) ? recipientEmails : [];
     const seen = new Set();
     const finalRecipients = [];
+    let communityCount = 0;
+    let externalCount = 0;
     let rejected = 0;
     for (const r of requested) {
-      const email = String(r?.email || '').trim().toLowerCase();
-      if (!email) continue;
-      if (!allowed.has(email)) { rejected++; continue; }
-      if (seen.has(email)) continue;
-      seen.add(email);
-      finalRecipients.push({ email: r.email.trim(), name: r.name || '' });
+      const emailRaw = String(r?.email || '').trim();
+      if (!emailRaw) continue;
+      const emailLc = emailRaw.toLowerCase();
+      if (seen.has(emailLc)) continue;
+
+      if (allowedCommunity.has(emailLc)) {
+        // Community recipient — known user
+        seen.add(emailLc);
+        finalRecipients.push({ email: emailRaw, name: r.name || '' });
+        communityCount++;
+      } else if (EMAIL_RE.test(emailRaw)) {
+        // External recipient — typed manually, format-valid
+        seen.add(emailLc);
+        finalRecipients.push({ email: emailRaw, name: r.name || '' });
+        externalCount++;
+      } else {
+        // Malformed address
+        rejected++;
+      }
     }
 
     if (finalRecipients.length === 0)
       return res.status(400).json({
         success: false,
         message: rejected > 0
-          ? 'No valid recipients — teachers can only email their own students, those parents, and colleagues.'
+          ? 'No valid recipients — one or more addresses were malformed.'
           : 'No recipients selected.',
       });
 
@@ -364,6 +387,15 @@ router.post('/teacher/send', auth, requireRole('teacher', 'admin'), async (req, 
       attachments: mailAttachments,
     });
 
+    // Build a human-readable audience label that reflects the split.
+    let audienceLabel = audience;
+    if (!audienceLabel) {
+      const parts = [];
+      if (communityCount) parts.push(`${communityCount} from community`);
+      if (externalCount)  parts.push(`${externalCount} external`);
+      audienceLabel = parts.join(', ') || `${finalRecipients.length} recipient(s)`;
+    }
+
     const record = await Communication.create({
       sentBy: req.user._id,
       sentByName: senderName,
@@ -375,13 +407,14 @@ router.post('/teacher/send', auth, requireRole('teacher', 'admin'), async (req, 
       recipientCount: finalRecipients.length,
       sentCount,
       failedCount,
-      audience: audience || `${finalRecipients.length} recipient${finalRecipients.length === 1 ? '' : 's'}`,
+      audience: audienceLabel,
     });
 
     res.json({
       success: true,
-      message: `Sent ${sentCount} of ${finalRecipients.length} email${finalRecipients.length === 1 ? '' : 's'}.`,
-      data: { id: record._id, sentCount, failedCount, rejected, results },
+      message: `Sent ${sentCount} of ${finalRecipients.length} email${finalRecipients.length === 1 ? '' : 's'}`
+        + (externalCount > 0 ? ` (${externalCount} external).` : '.'),
+      data: { id: record._id, sentCount, failedCount, rejected, communityCount, externalCount, results },
     });
   } catch (e) {
     console.error('[communication teacher/send]', e.message);
