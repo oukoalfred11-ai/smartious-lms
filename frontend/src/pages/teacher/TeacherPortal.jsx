@@ -13,6 +13,149 @@ import {
 import ManageSubjectTab from './ManageSubjectTab.jsx'
 import LibraryViewer from '../../components/LibraryViewer.jsx'
 
+// ──────────────────────────────────────────────────────
+// DESIGN TOKENS — mirrors the admin Dashboard's TOKENS
+// for visual consistency across portals. Same colours,
+// same spacing scale. Used by newer components in this
+// file; older legacy components still use inline hex
+// values until refactored.
+// ──────────────────────────────────────────────────────
+const TOKENS = {
+  // Brand
+  crimson: '#7D1025',
+  crimsonDeep: '#5A0B1B',
+  crimsonLight: '#A51C2E',
+  gold: '#C9A030',
+  goldLight: '#F0CC5A',
+  goldPale: '#FBF6E3',
+  cream: '#FBFAF5',
+  // Module accents (warm, refined)
+  accentTeal: '#0F766E',
+  accentEmerald: '#15803D',
+  accentNavy: '#1E3A8A',
+  accentAmber: '#B45309',
+  accentPurple: '#6B21A8',
+  accentRose: '#BE123C',
+  accentSlate: '#475569',
+  accentOcean: '#0369A1',
+  // Neutrals
+  ink: '#1A0F0E',
+  s900: '#231715',
+  s700: '#564844',
+  s500: '#857973',
+  s400: '#A89E99',
+  s300: '#CFC7C2',
+  s200: '#E8E1DC',
+  s100: '#F4EFEB',
+  s50:  '#FAF7F4',
+  white: '#FFFFFF',
+  // Spacing scale
+  spacing: { xs: 4, sm: 8, md: 14, lg: 22, xl: 32, xxl: 48 },
+}
+
+// Shared serif font stack (matches admin's Playfair Display
+// when available, falls back gracefully).
+const SERIF = "'Playfair Display', Georgia, serif"
+
+// ──────────────────────────────────────────────────────
+// SHARED UI PRIMITIVES — admin-portal style
+// Use these in new components for visual consistency.
+// ──────────────────────────────────────────────────────
+
+// Page header (sec-tag + serif title + subtitle). Use at the
+// top of any new tab/page to match admin's header treatment.
+function PageHeader({ tag, title, subtitle }) {
+  return (
+    <div style={{ marginBottom: 22 }}>
+      {tag && (
+        <div style={{
+          fontSize: 11, fontWeight: 700,
+          letterSpacing: '.12em', textTransform: 'uppercase',
+          color: TOKENS.crimson, marginBottom: 6,
+        }}>{tag}</div>
+      )}
+      <h2 style={{
+        fontFamily: SERIF, fontSize: 28, fontWeight: 500,
+        color: TOKENS.s900, margin: 0, letterSpacing: '-.01em',
+      }}>{title}</h2>
+      {subtitle && (
+        <div style={{ fontSize: 13, color: TOKENS.s500, marginTop: 4 }}>{subtitle}</div>
+      )}
+    </div>
+  )
+}
+
+// KPI card — small stat tile. Used in dashboards.
+function PKpi({ label, value, delta, accent = TOKENS.crimson, deltaColor }) {
+  return (
+    <div style={{
+      background: TOKENS.white,
+      borderRadius: 14,
+      padding: '18px 20px',
+      border: '1px solid ' + TOKENS.s100,
+      flex: 1, minWidth: 160,
+    }}>
+      <div style={{
+        fontSize: 11, fontWeight: 700,
+        letterSpacing: '.12em', textTransform: 'uppercase',
+        color: TOKENS.s500, marginBottom: 8,
+      }}>{label}</div>
+      <div style={{
+        fontFamily: SERIF, fontSize: 30, fontWeight: 500,
+        color: TOKENS.s900, lineHeight: 1, marginBottom: 4,
+        letterSpacing: '-.01em',
+      }}>{value}</div>
+      {delta && (
+        <div style={{ fontSize: 12, color: deltaColor || TOKENS.s500, fontWeight: 500 }}>{delta}</div>
+      )}
+    </div>
+  )
+}
+
+// Full-bleed white panel matching admin's content panels.
+function Panel({ children, padding = 22, style }) {
+  return (
+    <div style={{
+      background: TOKENS.white,
+      border: '1px solid ' + TOKENS.s100,
+      borderRadius: 14,
+      padding,
+      ...(style || {}),
+    }}>{children}</div>
+  )
+}
+
+// Primary button — crimson background, white text.
+function PrimaryBtn({ children, onClick, disabled, style, type = 'button' }) {
+  return (
+    <button type={type} onClick={onClick} disabled={disabled}
+      style={{
+        background: TOKENS.crimson, color: TOKENS.white,
+        border: 'none', padding: '10px 18px', borderRadius: 8,
+        fontSize: 13, fontWeight: 700,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        ...(style || {}),
+      }}>{children}</button>
+  )
+}
+
+// Secondary button — outlined, neutral.
+function SecondaryBtn({ children, onClick, disabled, style, type = 'button' }) {
+  return (
+    <button type={type} onClick={onClick} disabled={disabled}
+      style={{
+        background: 'transparent', color: TOKENS.s700,
+        border: '1.5px solid ' + TOKENS.s200,
+        padding: '10px 18px', borderRadius: 8,
+        fontSize: 13, fontWeight: 700,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        ...(style || {}),
+      }}>{children}</button>
+  )
+}
+
 // ── SVG icon helper ──────────────────────────────────────
 const Ico = ({ d, w = 18, col = 'currentColor', sw = 2 }) => (
   <svg width={w} height={w} fill="none" viewBox="0 0 24 24" stroke={col} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
@@ -12989,23 +13132,22 @@ function AttendanceTab({ user, toast }) {
 
   return (
     <div>
-      <div style={{ marginBottom: 20 }}>
-        <div className="sec-tag">Daily attendance</div>
-        <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
-          Attendance
-        </h2>
-        <div style={{ fontSize: 13, color: '#6B6B6B' }}>
-          Mark daily attendance for your students. Other teachers allocated to the same student will see your marks.
-        </div>
-      </div>
+      <PageHeader
+        tag="Daily attendance"
+        title="Attendance"
+        subtitle="Mark daily attendance for your students. Other teachers allocated to the same student will see your marks."/>
 
       {/* Student picker */}
-      <div className="card" style={{ padding: 18, marginBottom: 18 }}>
-        <div className="fl" style={{ marginBottom: 8 }}>Select student</div>
+      <Panel padding={18} style={{ marginBottom: 18 }}>
+        <div style={{
+          fontSize: 11, fontWeight: 700,
+          letterSpacing: '.08em', textTransform: 'uppercase',
+          color: TOKENS.s500, marginBottom: 10,
+        }}>Select student</div>
         {studentsLoading ? (
-          <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic' }}>Loading students...</div>
+          <div style={{ fontSize: 13, color: TOKENS.s400, fontStyle: 'italic' }}>Loading students...</div>
         ) : students.length === 0 ? (
-          <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic' }}>
+          <div style={{ fontSize: 13, color: TOKENS.s400, fontStyle: 'italic' }}>
             No students allocated to you yet.
           </div>
         ) : (
@@ -13023,7 +13165,7 @@ function AttendanceTab({ user, toast }) {
             ))}
           </select>
         )}
-      </div>
+      </Panel>
 
       {/* 30-day attendance grid for selected student */}
       {selectedStudent && (
@@ -13551,34 +13693,31 @@ function TeacherLibraryTab({ user, toast }) {
 
   return (
     <div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom: 20 }}>
-        <div>
-          <div className="sec-tag">Coursebooks by subject</div>
-          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
-            Library
-          </h2>
-          <div style={{ fontSize: 13, color: '#6B6B6B' }}>
-            Upload PDF coursebooks. Your students will be able to read them inline (no download).
-          </div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom: 22 }}>
+        <div style={{ flex: 1 }}>
+          <PageHeader
+            tag="Coursebooks by subject"
+            title="Library"
+            subtitle="Upload PDF coursebooks. Your students will be able to read them inline (no download)."/>
         </div>
         {!showUploadForm && (
-          <button onClick={() => setShowUploadForm(true)}
-            style={{
-              background: '#7D1025', color: '#fff', border: 'none',
-              padding: '10px 18px', borderRadius: 8,
-              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-            }}>
+          <PrimaryBtn onClick={() => setShowUploadForm(true)} style={{ marginTop: 4 }}>
             + Upload book
-          </button>
+          </PrimaryBtn>
         )}
       </div>
 
       {/* Upload form */}
       {showUploadForm && (
-        <div className="card" style={{ padding: 20, marginBottom: 22, border: '1.5px solid #C9A030' }}>
+        <div style={{
+          background: TOKENS.white,
+          border: '1.5px solid ' + TOKENS.gold,
+          borderRadius: 14,
+          padding: 22, marginBottom: 22,
+        }}>
           <div style={{
-            fontSize: 11, fontWeight: 700, color: '#7D5A0F',
-            letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 14,
+            fontSize: 11, fontWeight: 700, color: TOKENS.crimson,
+            letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 14,
           }}>Upload a coursebook</div>
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 14 }}>
