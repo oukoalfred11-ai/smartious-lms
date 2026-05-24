@@ -9890,6 +9890,7 @@ function LiveSessionsTab({ user, toast }) {
               onDelete={() => deleteClass(lc)}
               onStart={() => startClass(lc)}
               onEnd={() => endClass(lc)}
+              toast={toast}
             />
           ))}
         </div>
@@ -9980,8 +9981,9 @@ function LiveSessionsTab({ user, toast }) {
 // ─────────────────────────────────────────────────────────
 // TeacherClassCard — one card per class in the scheduler list
 // ─────────────────────────────────────────────────────────
-function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd }) {
+function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd, toast }) {
   const status = lc.computedStatus
+  const [showMarkPanel, setShowMarkPanel] = useState(false)
   const subjCol = ({
     Mathematics: '#7D1025', Maths: '#7D1025',
     English: '#0F766E', Physics: '#1E40AF',
@@ -10110,16 +10112,247 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd }) {
             </>
           )}
           {status === 'ended' && (
-            <button onClick={onDelete}
-              style={{
-                background: 'transparent', border: '1px solid #E8E2D6',
-                color: '#6B6B6B', padding: '8px 14px', borderRadius: 6,
-                fontSize: 12, fontWeight: 700, cursor: 'pointer',
-              }}>
-              Delete
-            </button>
+            <>
+              {lc.syllabusSubtopicName && (
+                <button onClick={() => setShowMarkPanel(s => !s)}
+                  style={{
+                    background: showMarkPanel ? '#7D5A0F' : '#FDF7E2',
+                    color: showMarkPanel ? '#fff' : '#7D5A0F',
+                    border: '1px solid #E8D58F',
+                    padding: '8px 14px', borderRadius: 6,
+                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                  }}>
+                  {showMarkPanel ? 'Close' : '📚 Mark progress'}
+                </button>
+              )}
+              <button onClick={onDelete}
+                style={{
+                  background: 'transparent', border: '1px solid #E8E2D6',
+                  color: '#6B6B6B', padding: '8px 14px', borderRadius: 6,
+                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                }}>
+                Delete
+              </button>
+            </>
           )}
         </div>
+      </div>
+
+      {/* Mark-progress inline panel (only when 'ended' AND spine-linked AND opened) */}
+      {status === 'ended' && lc.syllabusSubtopicName && showMarkPanel && (
+        <MarkProgressPanel lc={lc} onClose={() => setShowMarkPanel(false)} toast={toast} />
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────
+// MarkProgressPanel
+// Inline panel on a live class card. Lets teacher select which
+// students to mark as having completed the linked syllabus subtopic.
+// Calls POST /api/syllabus-progress/bulk on submit.
+// ─────────────────────────────────────────────────────────
+function MarkProgressPanel({ lc, onClose, toast }) {
+  // assignedStudents may be populated User objects OR raw ObjectIds.
+  // Normalise to { _id, firstName, lastName, fullName } objects.
+  const initialStudents = (lc.assignedStudents || []).map(s => {
+    if (typeof s === 'string') return { _id: s, firstName: '', lastName: '', fullName: '' }
+    const fn = s.firstName || ''
+    const ln = s.lastName || ''
+    return {
+      _id: s._id || s,
+      firstName: fn, lastName: ln,
+      fullName: (fn + ' ' + ln).trim() || s.username || s.email || '(student)',
+    }
+  })
+
+  const [students, setStudents] = useState(initialStudents)
+  const [picked, setPicked] = useState(() => new Set(initialStudents.map(s => s._id))) // default all
+  const [alreadyDone, setAlreadyDone] = useState(new Set())
+  const [saving, setSaving] = useState(false)
+  const [loadingNames, setLoadingNames] = useState(false)
+
+  // ── Resolve real subject._id by curriculum + name (same resolver
+  // used by the schedule form). Required for the progress POST.
+  const [subjectId, setSubjectId] = useState(null)
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const { data } = await api.get('/subjects', { params: { curriculum: lc.curriculum } })
+        if (cancelled) return
+        const list = data?.subjects || []
+        const norm = (s) => String(s || '').trim().toLowerCase()
+        const want = norm(lc.subject)
+        let match = list.find(s => norm(s.subjectName) === want)
+        if (!match) {
+          match = list.find(s => {
+            const have = norm(s.subjectName)
+            return have && want && (have.includes(want) || want.includes(have))
+          })
+        }
+        if (match) setSubjectId(match._id)
+      } catch (e) { /* leave subjectId null; save will warn */ }
+    })()
+    return () => { cancelled = true }
+  }, [lc.curriculum, lc.subject])
+
+  // ── Fetch student names if not already populated ──
+  useEffect(() => {
+    const missingNames = students.filter(s => !s.fullName).map(s => s._id)
+    if (missingNames.length === 0) return
+    let cancelled = false
+    setLoadingNames(true)
+    ;(async () => {
+      try {
+        const { data } = await api.get('/users', { params: { ids: missingNames.join(',') } })
+        if (cancelled) return
+        const users = data?.users || data?.data?.users || []
+        const byId = new Map(users.map(u => [String(u._id), u]))
+        setStudents(prev => prev.map(s => {
+          const u = byId.get(String(s._id))
+          if (!u) return s
+          const fn = u.firstName || ''
+          const ln = u.lastName || ''
+          return {
+            ...s,
+            firstName: fn, lastName: ln,
+            fullName: (fn + ' ' + ln).trim() || u.username || u.email || '(student)',
+          }
+        }))
+      } catch (e) { /* leave names blank; UI shows id */ }
+      finally { if (!cancelled) setLoadingNames(false) }
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // ── Fetch existing "done" status for each student for this subtopic ──
+  // So teacher can see who's already been marked (and avoid double-marking).
+  useEffect(() => {
+    if (!subjectId) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const checks = await Promise.all(students.map(async (s) => {
+          try {
+            const { data } = await api.get(`/syllabus-progress/student/${s._id}`, { params: { subjectId } })
+            const items = data?.data?.items || []
+            return items.some(i => i.syllabusSubtopicName === lc.syllabusSubtopicName) ? s._id : null
+          } catch { return null }
+        }))
+        if (cancelled) return
+        setAlreadyDone(new Set(checks.filter(Boolean)))
+      } catch (e) { /* silent */ }
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subjectId])
+
+  const togglePick = (sid) => setPicked(prev => {
+    const next = new Set(prev)
+    if (next.has(sid)) next.delete(sid); else next.add(sid)
+    return next
+  })
+
+  const saveProgress = async () => {
+    if (!subjectId) { toast?.error?.('Could not resolve subject. Try reloading.'); return }
+    if (picked.size === 0) { toast?.error?.('Pick at least one student.'); return }
+    setSaving(true)
+    try {
+      const { data } = await api.post('/syllabus-progress/bulk', {
+        studentIds: Array.from(picked),
+        subjectId,
+        syllabusTopicName: lc.syllabusTopicName || '',
+        syllabusSubtopicName: lc.syllabusSubtopicName,
+        linkedLiveClassId: lc._id,
+      })
+      if (data?.success) {
+        toast?.ok?.(data.message || 'Progress saved.')
+        // Update alreadyDone locally so the UI reflects the new state
+        setAlreadyDone(prev => {
+          const next = new Set(prev)
+          picked.forEach(id => next.add(id))
+          return next
+        })
+        onClose()
+      } else {
+        toast?.error?.(data?.message || 'Save failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Save failed: ' + e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div style={{
+      marginTop: 14, paddingTop: 14,
+      borderTop: '1.5px dashed #E8D58F',
+    }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#7D5A0F', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 8 }}>
+        Mark students who completed this lesson
+      </div>
+      <div style={{ fontSize: 12, color: '#6B6B6B', marginBottom: 10 }}>
+        Subtopic: <strong>{lc.syllabusSubtopicName}</strong>
+        {loadingNames && <span style={{ marginLeft: 8, color: '#9A7B16' }}>(loading names...)</span>}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+        {students.map(s => {
+          const done = alreadyDone.has(s._id)
+          const isPicked = picked.has(s._id)
+          return (
+            <label key={s._id} style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '6px 10px', borderRadius: 6,
+              border: '1px solid ' + (isPicked ? '#C9A030' : '#E8E2D6'),
+              background: isPicked ? '#FDF7E2' : '#fff',
+              cursor: 'pointer', fontSize: 13,
+            }}>
+              <input type="checkbox"
+                checked={isPicked}
+                onChange={() => togglePick(s._id)}
+                style={{ cursor: 'pointer' }}
+              />
+              <span style={{ flex: 1 }}>{s.fullName || s._id}</span>
+              {done && (
+                <span style={{
+                  background: '#15803D', color: '#fff',
+                  fontSize: 10, fontWeight: 700,
+                  padding: '2px 7px', borderRadius: 99,
+                  letterSpacing: '.04em',
+                }}>✓ ALREADY DONE</span>
+              )}
+            </label>
+          )
+        })}
+        {students.length === 0 && (
+          <div style={{ fontSize: 12, color: '#9A9A9A', fontStyle: 'italic', padding: '6px 10px' }}>
+            No students assigned to this class.
+          </div>
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={saveProgress}
+          disabled={saving || picked.size === 0 || !subjectId}
+          style={{
+            background: '#7D5A0F', color: '#fff', border: 'none',
+            padding: '8px 16px', borderRadius: 6,
+            fontSize: 12, fontWeight: 700,
+            cursor: (saving || picked.size === 0 || !subjectId) ? 'not-allowed' : 'pointer',
+            opacity: (saving || picked.size === 0 || !subjectId) ? 0.5 : 1,
+          }}>
+          {saving ? 'Saving...' : `Mark ${picked.size} done`}
+        </button>
+        <button onClick={onClose}
+          style={{
+            background: 'transparent', border: '1px solid #E8E2D6',
+            color: '#6B6B6B', padding: '8px 16px', borderRadius: 6,
+            fontSize: 12, fontWeight: 700, cursor: 'pointer',
+          }}>
+          Cancel
+        </button>
       </div>
     </div>
   )
