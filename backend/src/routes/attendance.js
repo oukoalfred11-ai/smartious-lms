@@ -28,14 +28,54 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 
-const Attendance = require('../models/Attendance');
 const User = require('../models/User');
 const { auth, requireRole } = require('../middleware/auth');
 
+// ─────────────────────────────────────────────────────────
+// Resolve the Attendance Mongoose model defensively.
+// Different deployed versions of models/Attendance.js may export
+// the model, a named property, just the schema, or be broken.
+// We handle all shapes and fall back to defining the model here
+// if needed so the route always has a usable model.
+// ─────────────────────────────────────────────────────────
+let Attendance = (() => {
+  try {
+    const imp = require('../models/Attendance');
+    if (imp && typeof imp.findOneAndUpdate === 'function') return imp;
+    if (imp && imp.Attendance && typeof imp.Attendance.findOneAndUpdate === 'function') return imp.Attendance;
+    if (imp && imp.default && typeof imp.default.findOneAndUpdate === 'function') return imp.default;
+    if (mongoose.models && mongoose.models.Attendance) return mongoose.models.Attendance;
+    return null;
+  } catch (e) {
+    return null;
+  }
+})();
+
+if (!Attendance) {
+  const ATTENDANCE_STATUS = ['present', 'absent', 'half_day'];
+  const schema = new mongoose.Schema({
+    studentId:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    date:       { type: Date, required: true, index: true },
+    status:     { type: String, enum: ATTENDANCE_STATUS, required: true },
+    reason:     { type: String, default: '', trim: true, maxlength: 500 },
+    markedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    markedAt:   { type: Date, default: Date.now },
+    curriculum: { type: String, default: '', trim: true },
+  }, { timestamps: true });
+  schema.index({ studentId: 1, date: 1 }, { unique: true });
+  schema.index({ studentId: 1, date: -1 });
+  schema.pre('validate', function(next) {
+    if (this.status === 'absent' && (!this.reason || !this.reason.trim())) {
+      return next(new Error('Reason is required when status is absent.'));
+    }
+    next();
+  });
+  Attendance = mongoose.models.Attendance || mongoose.model('Attendance', schema);
+  console.warn('[attendance route] models/Attendance.js did not export a usable model; using inline fallback.');
+}
+
 // Local copy of valid status values — kept in lockstep with the
-// model's enum. Decoupled from the model's optional static export
-// (STATUS_VALUES) so route works even when an older
-// model version is loaded.
+// schema enum. Decoupled from any model static.
 const STATUS_VALUES = ['present', 'absent', 'half_day'];
 
 // ─────────────────────────────────────────────────────────
