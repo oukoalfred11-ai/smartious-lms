@@ -156,6 +156,73 @@ function SecondaryBtn({ children, onClick, disabled, style, type = 'button' }) {
   )
 }
 
+// ──────────────────────────────────────────────────────
+// GoldenPie — branded gold percentage pie chart
+// Used for any "X out of Y" statistic across the teacher
+// portal. Renders as an SVG donut chart with a centered
+// percent label. Always gold (#C9A030) so visual
+// consistency holds wherever it appears.
+// ──────────────────────────────────────────────────────
+function GoldenPie({ value, total, size = 110, label, sublabel, color = TOKENS.gold, trackColor = TOKENS.s100 }) {
+  const safeTotal = Number.isFinite(total) && total > 0 ? total : 0
+  const safeValue = Number.isFinite(value) ? Math.max(0, Math.min(value, safeTotal)) : 0
+  const pct = safeTotal > 0 ? safeValue / safeTotal : 0
+  const pctText = safeTotal > 0 ? Math.round(pct * 100) : 0
+
+  const r = size / 2 - 8
+  const cx = size / 2
+  const cy = size / 2
+  const circumference = 2 * Math.PI * r
+  const filled = circumference * pct
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+      <div style={{ position: 'relative', width: size, height: size }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          {/* Track */}
+          <circle cx={cx} cy={cy} r={r}
+            fill="none" stroke={trackColor} strokeWidth="10"/>
+          {/* Filled arc — starts from top (rotate -90°) */}
+          <circle cx={cx} cy={cy} r={r}
+            fill="none" stroke={color} strokeWidth="10"
+            strokeLinecap="round"
+            strokeDasharray={`${filled} ${circumference}`}
+            transform={`rotate(-90 ${cx} ${cy})`}
+            style={{ transition: 'stroke-dasharray 400ms ease' }}/>
+        </svg>
+        {/* Percent label centered */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          pointerEvents: 'none',
+        }}>
+          <div style={{
+            fontFamily: SERIF,
+            fontSize: size * 0.28, fontWeight: 500,
+            color: TOKENS.s900, lineHeight: 1,
+          }}>{pctText}%</div>
+          {safeTotal > 0 && (
+            <div style={{ fontSize: size * 0.085, color: TOKENS.s500, marginTop: 2 }}>
+              {safeValue} / {safeTotal}
+            </div>
+          )}
+        </div>
+      </div>
+      {label && (
+        <div style={{
+          fontSize: 11, fontWeight: 700,
+          letterSpacing: '.08em', textTransform: 'uppercase',
+          color: TOKENS.s700, textAlign: 'center',
+        }}>{label}</div>
+      )}
+      {sublabel && (
+        <div style={{ fontSize: 11.5, color: TOKENS.s500, textAlign: 'center' }}>{sublabel}</div>
+      )}
+    </div>
+  )
+}
+
 // ── SVG icon helper ──────────────────────────────────────
 const Ico = ({ d, w = 18, col = 'currentColor', sw = 2 }) => (
   <svg width={w} height={w} fill="none" viewBox="0 0 24 24" stroke={col} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
@@ -204,13 +271,23 @@ const NavIcon = ({ name, active }) => {
             <rect x="13" y="13" width="7.5" height="7.5" rx="1.5"/>
           </g>
         )
-      case 'students': // three people
+      case 'students': // students with graduation cap — distinctly "students" not just "people"
         return (
-          <g>
-            <circle cx="8" cy="9" r="3" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.6"/>
-            <circle cx="16" cy="10" r="2.5" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.6"/>
-            <path d="M3 20c.6-3 2.6-5 5-5s4.4 2 5 5" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
-            <path d="M14 20c.4-2 1.8-3.5 3.5-3.5s3.1 1.5 3.5 3.5" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"/>
+          <g fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            {/* Mortarboard cap above the central figure */}
+            <path d="M5 7.5 L12 4.5 L19 7.5 L12 10.5 Z" fill="#fff" fillOpacity=".9" stroke="#fff"/>
+            <line x1="12" y1="10.5" x2="12" y2="13"/>
+            <path d="M8 8.5 L8 11 Q8 12.5 12 12.5 Q16 12.5 16 11 L16 8.5" stroke="#fff" strokeWidth="1.4"/>
+            {/* Tassel */}
+            <line x1="18.5" y1="7.5" x2="18.5" y2="11.2"/>
+            <circle cx="18.5" cy="11.6" r="0.7" fill="#fff" stroke="none"/>
+            {/* Three student heads + shoulders below */}
+            <circle cx="7" cy="16.5" r="1.6" fill="#fff" fillOpacity=".25"/>
+            <circle cx="12" cy="16.5" r="1.6" fill="#fff" fillOpacity=".25"/>
+            <circle cx="17" cy="16.5" r="1.6" fill="#fff" fillOpacity=".25"/>
+            <path d="M4.5 21 Q4.5 19 7 19 Q9.5 19 9.5 21" strokeWidth="1.5"/>
+            <path d="M9.5 21 Q9.5 19 12 19 Q14.5 19 14.5 21" strokeWidth="1.5"/>
+            <path d="M14.5 21 Q14.5 19 17 19 Q19.5 19 19.5 21" strokeWidth="1.5"/>
           </g>
         )
       case 'attendance': // clipboard with checkmark
@@ -293,6 +370,25 @@ const NavIcon = ({ name, active }) => {
             <path d="M13 3v6h6"/>
             <line x1="15" y1="13" x2="9" y2="13"/>
             <line x1="15" y1="16.5" x2="9" y2="16.5"/>
+          </g>
+        )
+      case 'scheduleclasses': // calendar with clock overlay — schedule + time
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            {/* Calendar body */}
+            <rect x="3" y="5" width="14" height="14" rx="2" fill="#fff" fillOpacity=".25"/>
+            {/* Calendar binding rings on top */}
+            <line x1="7" y1="3" x2="7" y2="6"/>
+            <line x1="13" y1="3" x2="13" y2="6"/>
+            {/* Header bar of calendar */}
+            <line x1="3" y1="9" x2="17" y2="9" strokeWidth="1.4"/>
+            {/* Dotted day cells */}
+            <circle cx="6.5" cy="12.5" r="0.7" fill="#fff" stroke="none"/>
+            <circle cx="10" cy="12.5" r="0.7" fill="#fff" stroke="none"/>
+            <circle cx="6.5" cy="15.5" r="0.7" fill="#fff" stroke="none"/>
+            {/* Clock overlay at bottom-right indicating "scheduled time" */}
+            <circle cx="17.5" cy="16" r="4.5" fill="#7D1025" stroke="#fff" strokeWidth="1.4"/>
+            <path d="M17.5 13.5 L17.5 16 L19.5 17" stroke="#fff" strokeWidth="1.4" strokeLinecap="round"/>
           </g>
         )
       default:
@@ -699,13 +795,41 @@ export default function TeacherPortal() {
       {/* SIDEBAR */}
       <aside className={`sidebar${collapsed?' col':''}`}>
         <div className="sb-logo">
-          <div className="sb-mark">
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" strokeLinecap="round">
-              <path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/>
+          <div className="sb-mark" style={{ background: 'transparent', padding: 0, width: 36, height: 40 }}>
+            {/* Smartious shield mark — crimson shield with gold star above an open book.
+                Matches the official brand mark exactly. Inline SVG so it scales crisply
+                at any sidebar size and respects the collapsed state. */}
+            <svg viewBox="0 0 64 72" width="36" height="40" xmlns="http://www.w3.org/2000/svg">
+              {/* Gold outer trim */}
+              <path d="M4 4 L60 4 L60 44 Q60 56 32 68 Q4 56 4 44 Z"
+                fill="#C9A030"/>
+              {/* Crimson shield body */}
+              <path d="M7 7 L57 7 L57 44 Q57 54 32 65 Q7 54 7 44 Z"
+                fill="#7D1025"/>
+              {/* Inner gold pinstripe (subtle) */}
+              <path d="M11 11 L53 11 L53 44 Q53 52 32 61 Q11 52 11 44 Z"
+                fill="none" stroke="#C9A030" strokeWidth="0.5" opacity="0.4"/>
+              {/* Gold star */}
+              <polygon points="32,16 33.6,20.8 38.7,20.8 34.6,23.8 36.2,28.6 32,25.6 27.8,28.6 29.4,23.8 25.3,20.8 30.4,20.8"
+                fill="#C9A030"/>
+              {/* Open book — white pages */}
+              <path d="M16 36 Q24 32 32 34 L32 52 Q24 50 16 54 Z"
+                fill="#FFFFFF"/>
+              <path d="M48 36 Q40 32 32 34 L32 52 Q40 50 48 54 Z"
+                fill="#FFFFFF"/>
+              {/* Book spine */}
+              <line x1="32" y1="34" x2="32" y2="52" stroke="#E8D58F" strokeWidth="0.5"/>
+              {/* Text lines on pages */}
+              <line x1="20" y1="40" x2="29" y2="39" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
+              <line x1="20" y1="43" x2="29" y2="42" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
+              <line x1="20" y1="46" x2="29" y2="45" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
+              <line x1="35" y1="39" x2="44" y2="40" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
+              <line x1="35" y1="42" x2="44" y2="43" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
+              <line x1="35" y1="45" x2="44" y2="46" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
             </svg>
           </div>
           <div>
-            <div className="sb-text">Smartious<span>.</span></div>
+            <div className="sb-text">Smart<span style={{ fontStyle: 'italic', color: 'var(--crimson)' }}>ious</span></div>
             <div className="sb-sub">Teacher Portal</div>
           </div>
         </div>
@@ -7316,6 +7440,7 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
   const [rooms, setRooms] = useState(null)
   const [homework, setHomework] = useState([])
   const [ungradedCount, setUngradedCount] = useState(0)
+  const [totalSubmissions, setTotalSubmissions] = useState(0)
   const [loading, setLoading] = useState(true)
  
   useEffect(() => {
@@ -7342,6 +7467,7 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
         // For each homework, fetch submissions to count ungraded
         // (Backend GET /homework/:id/submissions returns submissions for one hw)
         let totalUngraded = 0
+        let totalSubmissions = 0
         for (const hw of myHomework) {
           if (hw.status !== 'published') continue
           try {
@@ -7350,10 +7476,14 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
             // Count submissions where status is 'submitted' (not yet graded or released)
             const ungraded = subs.filter(s => s.status === 'submitted').length
             totalUngraded += ungraded
+            totalSubmissions += subs.length
           } catch (e) { /* skip individual failures */ }
           if (cancelled) return
         }
-        if (!cancelled) setUngradedCount(totalUngraded)
+        if (!cancelled) {
+          setUngradedCount(totalUngraded)
+          setTotalSubmissions(totalSubmissions)
+        }
       } catch (e) {
         console.error('[dashboard] load failed:', e.message)
       } finally {
@@ -7632,6 +7762,52 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
             }}>
             {rightNowItem.action}
           </button>
+        </div>
+      )}
+
+      {/* ── GRADING PROGRESS — golden pie ── */}
+      {totalSubmissions > 0 && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 24,
+          background: '#FFF',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--rxl)',
+          padding: '18px 22px', marginBottom: 16,
+        }}>
+          <GoldenPie
+            value={totalSubmissions - ungradedCount}
+            total={totalSubmissions}
+            size={120}/>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: 10, fontWeight: 800, letterSpacing: '.12em',
+              textTransform: 'uppercase', color: '#7D1025', marginBottom: 4,
+            }}>Grading progress</div>
+            <div style={{
+              fontFamily: "'Instrument Serif', serif", fontSize: 22, fontWeight: 400,
+              color: 'var(--s900)', lineHeight: 1.2, marginBottom: 4,
+            }}>
+              {ungradedCount === 0
+                ? 'All submissions graded'
+                : ungradedCount + ' submission' + (ungradedCount === 1 ? '' : 's') + ' awaiting your review'}
+            </div>
+            <div style={{ fontSize: 12.5, color: 'var(--s500)', lineHeight: 1.5 }}>
+              Across {homework.filter(h => h.status === 'published').length} published
+              homework{homework.filter(h => h.status === 'published').length === 1 ? '' : 's'}.
+              {ungradedCount > 0 ? ' Open the homework module to start grading.' : ' Great job staying on top of feedback.'}
+            </div>
+            {ungradedCount > 0 && (
+              <button onClick={() => setPage('homework')}
+                style={{
+                  marginTop: 12,
+                  background: '#7D1025', color: '#FBFAF5', border: 'none',
+                  padding: '8px 16px', borderRadius: 'var(--rmd)',
+                  fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                }}>
+                Start grading
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -13132,22 +13308,23 @@ function AttendanceTab({ user, toast }) {
 
   return (
     <div>
-      <PageHeader
-        tag="Daily attendance"
-        title="Attendance"
-        subtitle="Mark daily attendance for your students. Other teachers allocated to the same student will see your marks."/>
+      <div style={{ marginBottom: 20 }}>
+        <div className="sec-tag">Daily attendance</div>
+        <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
+          Attendance
+        </h2>
+        <div style={{ fontSize: 13, color: '#6B6B6B' }}>
+          Mark daily attendance for your students. Other teachers allocated to the same student will see your marks.
+        </div>
+      </div>
 
       {/* Student picker */}
-      <Panel padding={18} style={{ marginBottom: 18 }}>
-        <div style={{
-          fontSize: 11, fontWeight: 700,
-          letterSpacing: '.08em', textTransform: 'uppercase',
-          color: TOKENS.s500, marginBottom: 10,
-        }}>Select student</div>
+      <div className="card" style={{ padding: 18, marginBottom: 18 }}>
+        <div className="fl" style={{ marginBottom: 8 }}>Select student</div>
         {studentsLoading ? (
-          <div style={{ fontSize: 13, color: TOKENS.s400, fontStyle: 'italic' }}>Loading students...</div>
+          <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic' }}>Loading students...</div>
         ) : students.length === 0 ? (
-          <div style={{ fontSize: 13, color: TOKENS.s400, fontStyle: 'italic' }}>
+          <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic' }}>
             No students allocated to you yet.
           </div>
         ) : (
@@ -13165,7 +13342,7 @@ function AttendanceTab({ user, toast }) {
             ))}
           </select>
         )}
-      </Panel>
+      </div>
 
       {/* 30-day attendance grid for selected student */}
       {selectedStudent && (
@@ -13693,31 +13870,34 @@ function TeacherLibraryTab({ user, toast }) {
 
   return (
     <div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom: 22 }}>
-        <div style={{ flex: 1 }}>
-          <PageHeader
-            tag="Coursebooks by subject"
-            title="Library"
-            subtitle="Upload PDF coursebooks. Your students will be able to read them inline (no download)."/>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom: 20 }}>
+        <div>
+          <div className="sec-tag">Coursebooks by subject</div>
+          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
+            Library
+          </h2>
+          <div style={{ fontSize: 13, color: '#6B6B6B' }}>
+            Upload PDF coursebooks. Your students will be able to read them inline (no download).
+          </div>
         </div>
         {!showUploadForm && (
-          <PrimaryBtn onClick={() => setShowUploadForm(true)} style={{ marginTop: 4 }}>
+          <button onClick={() => setShowUploadForm(true)}
+            style={{
+              background: '#7D1025', color: '#fff', border: 'none',
+              padding: '10px 18px', borderRadius: 8,
+              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+            }}>
             + Upload book
-          </PrimaryBtn>
+          </button>
         )}
       </div>
 
       {/* Upload form */}
       {showUploadForm && (
-        <div style={{
-          background: TOKENS.white,
-          border: '1.5px solid ' + TOKENS.gold,
-          borderRadius: 14,
-          padding: 22, marginBottom: 22,
-        }}>
+        <div className="card" style={{ padding: 20, marginBottom: 22, border: '1.5px solid #C9A030' }}>
           <div style={{
-            fontSize: 11, fontWeight: 700, color: TOKENS.crimson,
-            letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 14,
+            fontSize: 11, fontWeight: 700, color: '#7D5A0F',
+            letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 14,
           }}>Upload a coursebook</div>
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 14 }}>
