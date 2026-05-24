@@ -34,9 +34,8 @@ const SyllabusTopic = require('../models/SyllabusTopic');
 const User = require('../models/User');
 const Subject = require('../models/Subject');
 
-// Reuse the project's auth middleware. Path may differ in your repo —
-// adjust this require if it's elsewhere.
-const { authRequired } = require('../middleware/auth');
+// Auth middleware — matches the pattern used in lessons-route.js, etc.
+const { auth, requireRole } = require('../middleware/auth');
 
 // Helper: standardised JSON response
 const ok = (res, data, message) => res.json({ success: true, data, message });
@@ -45,12 +44,8 @@ const fail = (res, status, message) => res.status(status).json({ success: false,
 // ── POST / — Mark one subtopic done for one student ──────────
 // Body: { studentId, subjectId, syllabusTopicName, syllabusSubtopicName,
 //         linkedLiveClassId?, notes? }
-router.post('/', authRequired, async (req, res) => {
+router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
-    if (!['teacher', 'admin'].includes(req.user.role)) {
-      return fail(res, 403, 'Only teachers or admins can mark progress.');
-    }
-
     const {
       studentId, subjectId,
       syllabusTopicName, syllabusSubtopicName,
@@ -118,12 +113,8 @@ router.post('/', authRequired, async (req, res) => {
 // ── POST /bulk — Mark one subtopic done for multiple students ──
 // Body: { studentIds: [...], subjectId, syllabusTopicName, syllabusSubtopicName,
 //         linkedLiveClassId?, notes? }
-router.post('/bulk', authRequired, async (req, res) => {
+router.post('/bulk', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
-    if (!['teacher', 'admin'].includes(req.user.role)) {
-      return fail(res, 403, 'Only teachers or admins can mark progress.');
-    }
-
     const {
       studentIds, subjectId,
       syllabusTopicName, syllabusSubtopicName,
@@ -186,7 +177,7 @@ router.post('/bulk', authRequired, async (req, res) => {
 
 // ── GET /student/:studentId — list all progress for a student ──
 // Optional ?subjectId=...
-router.get('/student/:studentId', authRequired, async (req, res) => {
+router.get('/student/:studentId', auth, async (req, res) => {
   try {
     const { studentId } = req.params;
     if (!mongoose.isValidObjectId(studentId)) return fail(res, 400, 'Invalid studentId.');
@@ -217,7 +208,7 @@ router.get('/student/:studentId', authRequired, async (req, res) => {
 // Returns { totalSubtopics, doneCount, percent, doneSubtopicNames }
 // totalSubtopics is computed from the loaded SyllabusTopic spine for that subject.
 // If no spine is loaded for the subject, totalSubtopics is 0 and percent is null.
-router.get('/student/:studentId/subject/:subjectId/summary', authRequired, async (req, res) => {
+router.get('/student/:studentId/subject/:subjectId/summary', auth, async (req, res) => {
   try {
     const { studentId, subjectId } = req.params;
     if (!mongoose.isValidObjectId(studentId)) return fail(res, 400, 'Invalid studentId.');
@@ -275,11 +266,8 @@ router.get('/student/:studentId/subject/:subjectId/summary', authRequired, async
 
 // ── DELETE /:progressId — Remove a "done" mark ────────────
 // Correction case: teacher marked done by mistake.
-router.delete('/:progressId', authRequired, async (req, res) => {
+router.delete('/:progressId', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
-    if (!['teacher', 'admin'].includes(req.user.role)) {
-      return fail(res, 403, 'Only teachers or admins can remove progress marks.');
-    }
     const { progressId } = req.params;
     if (!mongoose.isValidObjectId(progressId)) return fail(res, 400, 'Invalid progressId.');
 
