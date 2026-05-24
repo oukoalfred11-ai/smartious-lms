@@ -24,6 +24,7 @@ import {
 } from '../../components/exam/NestedQuestion.jsx'
 import LessonPlayerTab from './LessonPlayerTab.jsx'
 import SubjectProgressCard from '../../components/SubjectProgressCard.jsx'
+import LibraryViewer from '../../components/LibraryViewer.jsx'
 
 // ── SVG icon helper ───────────────────────────────────────
 const I = (d) => (
@@ -264,6 +265,15 @@ const NavIcon = ({ name, active }) => {
             <path d="M8.5 12h7M8.5 15h7M8.5 18h4"/>
           </g>
         )
+      case 'library': // open book
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" fill="#fff" fillOpacity=".25"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" fill="#fff" fillOpacity=".25"/>
+            <line x1="8" y1="7" x2="16" y2="7"/>
+            <line x1="8" y1="11" x2="16" y2="11"/>
+          </g>
+        )
       case 'profile': // person
         return (
           <g>
@@ -326,6 +336,7 @@ const NAV_SECTIONS = [
     { id:'live',         label:'Live Classes',    icon:'live',         svg:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>', live:true },
     { id:'myroom',       label:'My Class Room',   icon:'myroom',       svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',  groupOnly:true },
     { id:'timetable',    label:'Timetable',       icon:'timetable',    svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
+    { id:'library',      label:'Library',         icon:'library',      svg:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/>' },
   ]},
   { label:'Tools', items:[
     { id:'tutor',        label:'Mshauri AI',      icon:'tutor',        svg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
@@ -693,6 +704,7 @@ export default function StudentPortal() {
     page === 'results'      ? 'My Results' :
     page === 'live'         ? 'Live Classes' :
     page === 'timetable'    ? 'Timetable' :
+    page === 'library'      ? 'Library' :
     page === 'resources'    ? 'Resources' :
     page === 'profile'      ? 'My Profile' :
     page === 'achievements' ? 'Achievements' :
@@ -717,6 +729,7 @@ export default function StudentPortal() {
     page === 'results'      ? 'Grades & feedback' :
     page === 'live'         ? 'Scheduled sessions' :
     page === 'timetable'    ? 'Weekly schedule' :
+    page === 'library'      ? 'Coursebook PDFs' :
     page === 'resources'    ? 'Learning library' :
     page === 'profile'      ? 'Account details' :
     page === 'achievements' ? 'Badges & milestones' :
@@ -1599,6 +1612,11 @@ export default function StudentPortal() {
               PERSONALISED STUDY PLAN
           ════════════════════════════════════════════ */}
           {page === 'studyplan' && <StudyPlanTab user={user} store={store} setPage={setPage} toast={toast} />}
+
+          {/* ════════════════════════════════════════════
+              LIBRARY — coursebook PDFs by subject
+          ════════════════════════════════════════════ */}
+          {page === 'library' && <StudentLibraryPage user={user} toast={toast} />}
 
           {/* ════════════════════════════════════════════
               RESOURCES — live from teacher uploads
@@ -11597,4 +11615,189 @@ function formatMinsTime(mins) {
   h = h % 12
   if (h === 0) h = 12
   return `${h}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
+}
+
+// ═══════════════════════════════════════════════════════════
+// STUDENT LIBRARY PAGE
+// Browse coursebook PDFs for the student's subjects. Books are
+// grouped by subject. Clicking "Open" launches the LibraryViewer
+// in full-screen mode with download deterrence.
+// ═══════════════════════════════════════════════════════════
+function StudentLibraryPage({ user, toast }) {
+  const [books, setBooks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [viewerBook, setViewerBook] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    ;(async () => {
+      try {
+        const { data } = await api.get('/library')
+        if (cancelled) return
+        setBooks(data?.data?.books || [])
+      } catch (e) {
+        if (!cancelled) toast?.error?.('Failed to load library: ' + (e?.response?.data?.message || e.message))
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Filter by search term
+  const filtered = (() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return books
+    return books.filter(b =>
+      (b.title || '').toLowerCase().includes(q) ||
+      (b.description || '').toLowerCase().includes(q) ||
+      (b.author || '').toLowerCase().includes(q) ||
+      (b.subjectName || '').toLowerCase().includes(q)
+    )
+  })()
+
+  // Group by subject
+  const grouped = (() => {
+    const out = {}
+    for (const b of filtered) {
+      const k = b.subjectName || 'Other'
+      if (!out[k]) out[k] = []
+      out[k].push(b)
+    }
+    return out
+  })()
+
+  return (
+    <div>
+      <div style={{ marginBottom: 18 }}>
+        <div className="sec-tag">Coursebook PDFs</div>
+        <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
+          Library
+        </h2>
+        <div style={{ fontSize: 13, color: '#6B6B6B' }}>
+          Read your coursebooks inline. Books open in full-screen mode and cannot be downloaded.
+        </div>
+      </div>
+
+      {/* Search */}
+      <div style={{ marginBottom: 18, maxWidth: 420 }}>
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search by title, author, or subject..."
+          style={{
+            width: '100%', boxSizing: 'border-box',
+            padding: '10px 14px', borderRadius: 8,
+            border: '1.5px solid #E8E2D6',
+            fontSize: 13, background: '#FBFAF5',
+          }}/>
+      </div>
+
+      {loading ? (
+        <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic', padding: 20 }}>
+          Loading library...
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="empty">
+          <h3>{books.length === 0 ? 'No books in your library yet' : 'No books match your search'}</h3>
+          <p>{books.length === 0
+            ? 'Your teachers will upload coursebook PDFs here as they become available.'
+            : 'Try a different search term, or clear the search to see all books.'}</p>
+        </div>
+      ) : (
+        <div style={{ display:'flex', flexDirection:'column', gap: 22 }}>
+          {Object.keys(grouped).sort().map(subj => (
+            <div key={subj}>
+              <div style={{
+                fontSize: 11, fontWeight: 700, color: '#7D1025',
+                letterSpacing: '.08em', textTransform: 'uppercase',
+                marginBottom: 10, paddingBottom: 6, borderBottom: '1px solid #E8E2D6',
+              }}>
+                {subj}
+                <span style={{ color: '#9A9A9A', fontWeight: 600, marginLeft: 8 }}>
+                  ({grouped[subj].length})
+                </span>
+              </div>
+              <div style={{
+                display:'grid',
+                gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: 12,
+              }}>
+                {grouped[subj].map(book => (
+                  <StudentBookCard key={book._id} book={book}
+                    onOpen={() => setViewerBook(book)}/>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {viewerBook && (
+        <LibraryViewer book={viewerBook} api={api} onClose={() => setViewerBook(null)}/>
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────
+// StudentBookCard
+// Compact book card for the student library. Read-only,
+// no delete button.
+// ─────────────────────────────────────────────────────────
+function StudentBookCard({ book, onOpen }) {
+  const sizeMB = book.sizeBytes ? (book.sizeBytes / (1024 * 1024)).toFixed(1) + ' MB' : ''
+  return (
+    <div style={{
+      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 10,
+      padding: 14, display: 'flex', flexDirection: 'column',
+    }}>
+      <div style={{ display:'flex', gap: 10, marginBottom: 10 }}>
+        <div style={{
+          width: 42, height: 52, borderRadius: 4,
+          background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
+          flexShrink: 0,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
+        }}>PDF</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontWeight: 700, fontSize: 13.5, color: '#1A1A1A',
+            lineHeight: 1.3,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>{book.title}</div>
+          {book.author && (
+            <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 3 }}>{book.author}</div>
+          )}
+        </div>
+      </div>
+
+      {book.description && (
+        <div style={{
+          fontSize: 11.5, color: '#6B6B6B', marginBottom: 8,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+          overflow: 'hidden', lineHeight: 1.4,
+        }}>
+          {book.description}
+        </div>
+      )}
+
+      <div style={{ fontSize: 10.5, color: '#9A9A9A', marginBottom: 10 }}>
+        {sizeMB}
+        {book.grades?.length ? ' · ' + book.grades.join(', ') : ''}
+      </div>
+
+      <button onClick={onOpen}
+        style={{
+          background: '#7D1025', color: '#fff', border: 'none',
+          padding: '8px 14px', borderRadius: 6,
+          fontSize: 12, fontWeight: 700, cursor: 'pointer',
+          marginTop: 'auto',
+        }}>
+        Open book
+      </button>
+    </div>
+  )
 }
