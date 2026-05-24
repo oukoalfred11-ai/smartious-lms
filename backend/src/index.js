@@ -76,6 +76,7 @@ app.use('/api/curriculum', require('./routes/curriculum'));
 app.use('/api/exams', require('./routes/exams'));
 app.use('/api/status',         require('./routes/status-management'));
 app.use('/api/frontdesk', require('./routes/frontdesk'));
+app.use('/api/library', require('./routes/library'));
 app.use('/api/leave-requests', require('./routes/status-management'));
 
 // ── Health check ──────────────────────────────────────────
