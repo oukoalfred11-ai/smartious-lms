@@ -6929,6 +6929,9 @@ function TeacherComposeView({ user, toast }) {
           placeholder="Search students, parents, staff..."
           style={{ ...inp, marginBottom: 10 }}/>
 
+        {/* External email — for parents/contacts not in the system */}
+        <ExternalEmailAdder onAdd={(email, name) => toggleRecipient(email, name)} pickedEmails={Object.keys(picked)} toast={toast} />
+
         {loading ? (
           <div style={{ padding: 14, fontSize: 12, color: 'var(--s500)', textAlign: 'center' }}>Loading...</div>
         ) : (
@@ -13259,6 +13262,110 @@ function AttendanceGrid({ student, markedByUser, toast }) {
           })}
         </div>
       )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// ExternalEmailAdder
+// Small input + "Add" button that lets a teacher add an arbitrary
+// external email address (not a student/parent/colleague in the
+// system) as an email recipient. The existing backend send route
+// already accepts arbitrary recipientEmails so no backend change
+// needed.
+// ═══════════════════════════════════════════════════════════
+function ExternalEmailAdder({ onAdd, pickedEmails, toast }) {
+  const [open, setOpen] = useState(false)
+  const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+  const submit = () => {
+    const e = email.trim().toLowerCase()
+    if (!EMAIL_RE.test(e)) {
+      toast?.error?.('Enter a valid email address.')
+      return
+    }
+    if (pickedEmails.includes(e)) {
+      toast?.error?.('That email is already in the recipient list.')
+      return
+    }
+    onAdd(e, name.trim() || e)
+    setEmail('')
+    setName('')
+    setOpen(false)
+    toast?.ok?.('Added ' + e)
+  }
+
+  if (!open) {
+    return (
+      <div style={{ marginBottom: 10 }}>
+        <button onClick={() => setOpen(true)}
+          style={{
+            width: '100%',
+            background: 'transparent', color: '#7D5A0F',
+            border: '1.5px dashed #C9A030', borderRadius: 7,
+            padding: '8px 12px', fontSize: 12, fontWeight: 700,
+            cursor: 'pointer', textAlign: 'center',
+          }}>
+          + Add an external email
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{
+      marginBottom: 10,
+      background: '#FDF7E2',
+      border: '1.5px solid #C9A030',
+      borderRadius: 7, padding: 10,
+    }}>
+      <div style={{
+        fontSize: 10, fontWeight: 700, color: '#7D5A0F',
+        letterSpacing: '.06em', textTransform: 'uppercase',
+        marginBottom: 6,
+      }}>Add external recipient</div>
+      <input value={email}
+        onChange={e => setEmail(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter') submit() }}
+        placeholder="email@example.com (required)"
+        type="email"
+        style={{
+          width: '100%', boxSizing: 'border-box',
+          padding: '7px 10px', borderRadius: 6,
+          border: '1px solid #E8D58F',
+          fontSize: 12, marginBottom: 6, background: '#fff',
+        }}
+        autoFocus
+      />
+      <input value={name}
+        onChange={e => setName(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter') submit() }}
+        placeholder="Display name (optional, e.g. 'John's mum')"
+        style={{
+          width: '100%', boxSizing: 'border-box',
+          padding: '7px 10px', borderRadius: 6,
+          border: '1px solid #E8D58F',
+          fontSize: 12, marginBottom: 8, background: '#fff',
+        }}
+      />
+      <div style={{ display: 'flex', gap: 6 }}>
+        <button onClick={submit}
+          style={{
+            flex: 1,
+            background: '#7D5A0F', color: '#fff', border: 'none',
+            padding: '7px 12px', borderRadius: 6,
+            fontSize: 12, fontWeight: 700, cursor: 'pointer',
+          }}>Add</button>
+        <button onClick={() => { setOpen(false); setEmail(''); setName('') }}
+          style={{
+            background: 'transparent', color: '#6B6B6B',
+            border: '1px solid #E8E2D6', padding: '7px 12px',
+            borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+          }}>Cancel</button>
+      </div>
     </div>
   )
 }
