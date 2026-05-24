@@ -674,7 +674,7 @@ export default function TeacherPortal() {
            {page === 'mshauri' && <MshauriAITab user={currentUser} store={store} setPage={setPage} toast={toast} />}
 
            {/* ── PROFILE ── */}
-           {page === 'profile' && <TeacherProfileTab user={currentUser} store={store} setPage={setPage} toast={toast} />}
+           {page === 'profile' && <TeacherProfileTab user={currentUser} setCurrentUser={setCurrentUser} store={store} setPage={setPage} toast={toast} />}
 
 
         </div>
@@ -7631,49 +7631,88 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
 
 const TP_PROFILE_KEY = 'sm_teacher_profile'
 
-const tpDefaultProfile = (firstName, lastName) => ({
-  firstName: firstName || 'James',
-  lastName: lastName || 'Muthomi',
-  title: 'Mr.',
-  email: 'james.muthomi@smartioushomeschool.com',
-  phone: '+254 712 345 678',
-  whatsapp: '+254 712 345 678',
-  photoUrl: '',
-  bio: 'Passionate Mathematics teacher with over 8 years of experience preparing students for IGCSE and A-Level examinations. Specialised in helping students who struggle with mathematical reasoning develop confidence through structured practice and visual problem-solving techniques.',
-  location: 'Nairobi, Kenya',
-  timezone: 'Africa/Nairobi (EAT, UTC+3)',
-  languages: 'English, Kiswahili, Luo',
-  // Professional
-  subjects: 'Mathematics, Physics',
-  curricula: 'Cambridge IGCSE, Cambridge A-Level, Kenya CBC',
-  qualifications: 'B.Ed Mathematics — Kenyatta University (2015)\nPGCE Secondary Mathematics — University of London (2018)\nIGCSE Mathematics Examiner — Cambridge International (since 2020)',
-  yearsTeaching: 8,
-  hourlyRate: 25,
-  joinedDate: '2022-03-15',
-  // Preferences
+// Fields that are DB-backed (saved via PATCH /api/teacher-profile/me).
+// Everything NOT in this list is local-only (kept in localStorage as
+// teacher preference, not synced to backend).
+const TP_DB_FIELDS = [
+  'firstName', 'lastName', 'phone', 'bio', 'avatar', 'jobTitle',
+  'qualifications', 'certifications', 'specializations', 'yearsOfExperience',
+]
+
+// Build the default profile from a REAL user object (from /auth/me or
+// the currentUser state). Fills DB-backed fields from the user record;
+// uses empty/sensible defaults for local-only fields.
+const tpDefaultProfile = (user) => ({
+  // DB-backed (read from user)
+  firstName:        user?.firstName || '',
+  lastName:         user?.lastName  || '',
+  email:            user?.email     || '',
+  phone:            user?.phone     || '',
+  bio:              user?.bio       || '',
+  avatar:           user?.avatar    || '',
+  photoUrl:         user?.avatar    || '',
+  jobTitle:         user?.jobTitle  || '',
+  qualifications:   Array.isArray(user?.qualifications)   ? user.qualifications.join('\n') : (user?.qualifications || ''),
+  certifications:   Array.isArray(user?.certifications)   ? user.certifications.join('\n') : (user?.certifications || ''),
+  specializations:  Array.isArray(user?.specializations)  ? user.specializations.join(', ') : (user?.specializations || ''),
+  yearsOfExperience: typeof user?.yearsOfExperience === 'number' ? user.yearsOfExperience : 0,
+  yearsTeaching:    typeof user?.yearsOfExperience === 'number' ? user.yearsOfExperience : 0,
+  // Display-only (read-only in the form)
+  title:            'Mr.',  // Local convention; not in User model
+  subjects:         Array.isArray(user?.subjects) ? user.subjects.join(', ') :
+                    Array.isArray(user?.subjectRefs) ? '' :
+                    (typeof user?.subjects === 'string' ? user.subjects : ''),
+  curricula:        Array.isArray(user?.curriculum) ? user.curriculum.join(', ') :
+                    (typeof user?.curriculum === 'string' ? user.curriculum : ''),
+  joinedDate:       user?.createdAt || '',
+  // Local-only (kept in localStorage; not synced to backend)
+  whatsapp:         '',
+  location:         '',
+  timezone:         'Africa/Nairobi (EAT, UTC+3)',
+  languages:        '',
+  hourlyRate:       0,
   notifyEmailMessages: true,
-  notifyEmailGrading: true,
-  notifyEmailExams: true,
-  notifySmsUrgent: false,
+  notifyEmailGrading:  true,
+  notifyEmailExams:    true,
+  notifySmsUrgent:     false,
   notifySmsClassReminder: true,
-  preferredChannel: 'email',
+  preferredChannel:  'email',
   workingHoursStart: '08:00',
-  workingHoursEnd: '18:00',
-  workingDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-  // Security (UI placeholders, real auth in backend)
-  twoFactorEnabled: false,
+  workingHoursEnd:   '18:00',
+  workingDays:       ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+  twoFactorEnabled:  false,
 })
 
-const tpLoadProfile = (firstName, lastName) => {
+// Load profile: start from real user object, then layer over any
+// local-only fields the teacher has saved previously.
+const tpLoadProfile = (user) => {
+  const base = tpDefaultProfile(user)
   try {
     const saved = localStorage.getItem(TP_PROFILE_KEY)
-    if (saved) return { ...tpDefaultProfile(firstName, lastName), ...JSON.parse(saved) }
+    if (saved) {
+      const local = JSON.parse(saved)
+      // Only layer local-only fields; DB-backed fields come from `user`
+      const localOnly = {}
+      for (const k of Object.keys(local || {})) {
+        if (!TP_DB_FIELDS.includes(k)) localOnly[k] = local[k]
+      }
+      return { ...base, ...localOnly }
+    }
   } catch {}
-  return tpDefaultProfile(firstName, lastName)
+  return base
 }
 
-const tpSaveProfile = (profile) => {
-  try { localStorage.setItem(TP_PROFILE_KEY, JSON.stringify(profile)) } catch {}
+// Save profile: split into DB-bound (PATCH to /api/teacher-profile/me)
+// and local-only (localStorage). Returns the API promise so callers
+// can chain on success.
+const tpSaveProfileLocalOnly = (profile) => {
+  try {
+    const localOnly = {}
+    for (const k of Object.keys(profile || {})) {
+      if (!TP_DB_FIELDS.includes(k)) localOnly[k] = profile[k]
+    }
+    localStorage.setItem(TP_PROFILE_KEY, JSON.stringify(localOnly))
+  } catch {}
 }
 
 const tpFormatJoinedDate = (iso) => {
@@ -7683,16 +7722,45 @@ const tpFormatJoinedDate = (iso) => {
   } catch { return iso }
 }
 
-function TeacherProfileTab({ user, store, setPage, toast }) {
-  const fName = user?.firstName || 'James'
-  const lName = user?.lastName || 'Muthomi'
-
-  const [profile, setProfile] = useState(() => tpLoadProfile(fName, lName))
+function TeacherProfileTab({ user, setCurrentUser, store, setPage, toast }) {
+  // Profile state is hydrated from the REAL user object (passed in
+  // from the portal shell). DB-backed fields originate from the User
+  // document; local-only fields (notifications, working hours, etc.)
+  // come from localStorage.
+  const [profile, setProfile] = useState(() => tpLoadProfile(user))
   const [tab, setTab] = useState('personal')
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [savedFlash, setSavedFlash] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [showPhotoModal, setShowPhotoModal] = useState(false)
+
+  // Re-hydrate profile when the underlying user object changes (e.g.
+  // /auth/me responds after initial mount). Without this, an early
+  // mount could leave the form with empty defaults.
+  useEffect(() => {
+    if (user) setProfile(tpLoadProfile(user))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?._id])
+
+  // On mount, fetch the freshest profile from the new endpoint so
+  // any out-of-band updates (e.g. admin edits) are picked up.
+  useEffect(() => {
+    let cancelled = false
+    api.get('/teacher-profile/me')
+      .then(res => {
+        if (cancelled) return
+        const p = res.data?.data?.profile
+        if (p) {
+          setProfile(tpLoadProfile(p))
+          // Sync the global user too so the rest of the portal sees it
+          if (setCurrentUser) setCurrentUser(prev => ({ ...(prev || {}), ...p }))
+        }
+      })
+      .catch(() => { /* keep what we already have */ })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Password change form state
   const [pwCurrent, setPwCurrent] = useState('')
@@ -7716,17 +7784,64 @@ function TeacherProfileTab({ user, store, setPage, toast }) {
     updateField('workingDays', days)
   }
 
-  const saveAll = () => {
-    tpSaveProfile(profile)
-    setHasUnsavedChanges(false)
-    setSavedFlash(true)
-    toast?.ok?.('Profile saved.')
-    setTimeout(() => setSavedFlash(false), 2000)
+  // Save: split into DB PATCH (for fields the backend knows about)
+  // and localStorage (for preferences). DB save is awaited so any
+  // validation error surfaces; local save happens regardless.
+  const saveAll = async () => {
+    setSaving(true)
+    try {
+      // Build the DB payload from current profile state.
+      // `avatar` lives on the User model; the UI binds to `photoUrl`.
+      const dbPayload = {
+        firstName: profile.firstName,
+        lastName:  profile.lastName,
+        phone:     profile.phone,
+        bio:       profile.bio,
+        avatar:    profile.photoUrl,           // UI uses photoUrl, DB uses avatar
+        jobTitle:  profile.jobTitle || '',
+        qualifications:  profile.qualifications  || '',  // backend splits by newline
+        certifications:  profile.certifications  || '',
+        specializations: profile.specializations || '',  // backend splits by comma
+        yearsOfExperience: Number(profile.yearsTeaching || profile.yearsOfExperience || 0),
+      }
+
+      const { data } = await api.patch('/teacher-profile/me', dbPayload)
+      if (!data?.success) {
+        toast?.error?.(data?.message || 'Server rejected the changes.')
+        setSaving(false)
+        return
+      }
+
+      // Persist local-only preferences
+      tpSaveProfileLocalOnly(profile)
+
+      // Reflect the saved user back into the portal's currentUser so
+      // sidebar / header refresh without a page reload.
+      const updated = data.data?.profile
+      if (updated) {
+        if (setCurrentUser) {
+          setCurrentUser(prev => ({ ...(prev || {}), ...updated }))
+        }
+        try {
+          const stored = JSON.parse(localStorage.getItem('sm_user') || '{}')
+          localStorage.setItem('sm_user', JSON.stringify({ ...stored, ...updated }))
+        } catch {}
+      }
+
+      setHasUnsavedChanges(false)
+      setSavedFlash(true)
+      toast?.ok?.('Profile saved.')
+      setTimeout(() => setSavedFlash(false), 2000)
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Save failed: ' + e.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const discardChanges = () => {
     if (!confirm('Discard all unsaved changes?')) return
-    setProfile(tpLoadProfile(fName, lName))
+    setProfile(tpLoadProfile(user))
     setHasUnsavedChanges(false)
   }
 
@@ -7862,12 +7977,15 @@ function TeacherProfileTab({ user, store, setPage, toast }) {
                       fontSize: 12, fontWeight: 700, cursor: 'pointer',
                     }}>Discard</button>
                   <button onClick={saveAll}
+                    disabled={saving}
                     style={{
                       background: '#C9A030', color: '#7D1025', border: 'none',
                       padding: '8px 16px', borderRadius: 'var(--rsm)',
-                      fontSize: 12, fontWeight: 800, cursor: 'pointer',
+                      fontSize: 12, fontWeight: 800,
+                      cursor: saving ? 'not-allowed' : 'pointer',
+                      opacity: saving ? 0.6 : 1,
                       boxShadow: '0 4px 12px rgba(201,160,48,.4)',
-                    }}>Save Changes</button>
+                    }}>{saving ? 'Saving...' : 'Save Changes'}</button>
                 </div>
               </div>
             ) : savedFlash ? (
