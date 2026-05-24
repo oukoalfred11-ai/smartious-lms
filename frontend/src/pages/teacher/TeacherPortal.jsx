@@ -9147,9 +9147,56 @@ function LiveSessionsTab({ user, toast }) {
     meetingLink: currentDefaultLink || '',
     assignedStudents: [], // array of student _ids
     notes: '',
+    // Spine linkage (optional — picked when subject has a loaded spine)
+    syllabusTopicName: '',
+    syllabusSubtopicName: '',
   })
   const [form, setForm] = useState(initialForm())
   const [saving, setSaving] = useState(false)
+
+  // ── Curriculum-spine integration ───────────────────────
+  // When the chosen subject has a loaded syllabus spine, show
+  // Topic + Subtopic dropdowns. Both optional. Subjects without
+  // a spine show the dropdowns empty (or hidden). Mirrors the
+  // pattern used by the question-bank form.
+  // Resolves the real Subject._id by matching subject name within
+  // the chosen curriculum, then fetches the spine for that id.
+  const [spineTopics, setSpineTopics] = useState([])
+  const [spineLoading, setSpineLoading] = useState(false)
+
+  useEffect(() => {
+    if (!form.curriculum || !form.subject) { setSpineTopics([]); return }
+    let cancelled = false
+    setSpineLoading(true)
+    setSpineTopics([])
+    ;(async () => {
+      try {
+        const subjRes = await api.get('/subjects', { params: { curriculum: form.curriculum } })
+        const dbSubjects = subjRes.data?.subjects || []
+        const norm = (s) => String(s || '').trim().toLowerCase()
+        const want = norm(form.subject)
+        let match = dbSubjects.find(s => norm(s.subjectName) === want)
+        if (!match) {
+          match = dbSubjects.find(s => {
+            const have = norm(s.subjectName)
+            return have && want && (have.includes(want) || want.includes(have))
+          })
+        }
+        if (!match) { if (!cancelled) setSpineTopics([]); return }
+        const spineRes = await api.get('/syllabus/subject/' + match._id)
+        if (!cancelled) setSpineTopics(spineRes.data?.data?.topics || [])
+      } catch (e) {
+        if (!cancelled) setSpineTopics([])
+      } finally {
+        if (!cancelled) setSpineLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.subject, form.curriculum])
+
+  const hasSpine = spineTopics.length > 0
+  const spineSelectedTopic = spineTopics.find(t => t.topic === form.syllabusTopicName)
 
   // ── helpers ──
   function defaultScheduleDate() {
@@ -9242,6 +9289,8 @@ function LiveSessionsTab({ user, toast }) {
       meetingLink: lc.meetingLink,
       assignedStudents: (lc.assignedStudents || []).map(s => s._id || s),
       notes: lc.notes || '',
+      syllabusTopicName:    lc.syllabusTopicName || '',
+      syllabusSubtopicName: lc.syllabusSubtopicName || '',
     })
     setView('edit')
   }
@@ -9272,6 +9321,9 @@ function LiveSessionsTab({ user, toast }) {
         meetingLink: form.meetingLink.trim(),
         assignedStudents: form.assignedStudents,
         notes: form.notes.trim(),
+        // Spine linkage (null when not picked)
+        syllabusTopicName:    form.syllabusTopicName?.trim() || null,
+        syllabusSubtopicName: form.syllabusSubtopicName?.trim() || null,
       }
       const { data } = editing
         ? await api.put('/liveclasses/' + editing._id, payload)
@@ -9454,7 +9506,7 @@ function LiveSessionsTab({ user, toast }) {
             <div className="fg" style={{ flex: 1, minWidth: 180 }}>
               <label className="fl">Subject *</label>
               <select className="fsel" value={form.subject}
-                onChange={e => setF('subject', e.target.value)}
+                onChange={e => { setF('subject', e.target.value); setF('syllabusTopicName', ''); setF('syllabusSubtopicName', '') }}
                 disabled={!form.curriculum}
               >
                 <option value="">{form.curriculum ? 'Select subject...' : 'Pick curriculum first'}</option>
@@ -9462,6 +9514,37 @@ function LiveSessionsTab({ user, toast }) {
               </select>
             </div>
           </div>
+
+          {/* Syllabus spine: Topic + Subtopic dropdowns. Only shows when
+              the chosen subject has a loaded spine. Both optional. */}
+          {form.subject && (hasSpine || spineLoading) && (
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <div className="fg" style={{ flex: 1, minWidth: 240 }}>
+                <label className="fl">Syllabus topic (optional)</label>
+                <select className="fsel" value={form.syllabusTopicName}
+                  onChange={e => { setF('syllabusTopicName', e.target.value); setF('syllabusSubtopicName', '') }}
+                  disabled={spineLoading || !hasSpine}
+                >
+                  <option value="">{spineLoading ? 'Loading syllabus...' : (hasSpine ? 'Select topic...' : 'No spine loaded')}</option>
+                  {spineTopics.map(t => (
+                    <option key={t._id} value={t.topic}>{t.code ? t.code + '. ' : ''}{t.topic}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="fg" style={{ flex: 1, minWidth: 240 }}>
+                <label className="fl">Subtopic (optional)</label>
+                <select className="fsel" value={form.syllabusSubtopicName}
+                  onChange={e => setF('syllabusSubtopicName', e.target.value)}
+                  disabled={!spineSelectedTopic}
+                >
+                  <option value="">{spineSelectedTopic ? 'Select subtopic...' : 'Pick a topic first'}</option>
+                  {(spineSelectedTopic?.subtopics || []).map(st => (
+                    <option key={st._id || st.name} value={st.name}>{st.code ? st.code + ': ' : ''}{st.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
 
           {/* Time + duration */}
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -9907,6 +9990,18 @@ function TeacherClassCard({ lc, onEdit, onDelete, onStart, onEnd }) {
           <div style={{ fontWeight: 700, fontSize: 15, color: '#1A1A1A', marginBottom: 4 }}>
             {lc.title}
           </div>
+          {lc.syllabusSubtopicName && (
+            <div style={{
+              display: 'inline-block',
+              background: '#FDF7E2', color: '#7D5A0F',
+              fontSize: 10.5, fontWeight: 700,
+              padding: '2px 8px', borderRadius: 5,
+              marginBottom: 4,
+              border: '1px solid #E8D58F',
+            }}>
+              📚 {lc.syllabusTopicName ? lc.syllabusTopicName + ' → ' : ''}{lc.syllabusSubtopicName}
+            </div>
+          )}
           <div style={{ fontSize: 12, color: '#6B6B6B' }}>
             {formatDate(lc.scheduledAt)} &middot; {lc.durationMins} min &middot; {studentCount} student{studentCount === 1 ? '' : 's'}
           </div>
