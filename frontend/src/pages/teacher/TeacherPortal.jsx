@@ -13423,27 +13423,33 @@ function TeacherLibraryTab({ user, toast }) {
     }
   }
 
-  // Load teacher's subjects (for upload form dropdown)
+  // Load all available subjects for the upload form dropdown.
+  // We deliberately use /subjects (full active list) rather than
+  // /lessons/my-subjects — a teacher should be able to upload a
+  // library book for any subject they think relevant, not be
+  // restricted to subjects they happen to author lessons for.
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
-        // Use the teacher-subjects endpoint which respects allocations
-        const { data } = await api.get('/lessons/my-subjects')
+        const { data } = await api.get('/subjects')
         if (cancelled) return
-        const list = data?.subjects || data?.data?.subjects || []
+        const list = (data?.subjects || []).filter(s => s.isActive !== false)
+        // Sort by curriculum then subject name for easy scanning
+        list.sort((a, b) => {
+          const c = String(a.curriculum || '').localeCompare(String(b.curriculum || ''))
+          if (c !== 0) return c
+          return String(a.subjectName || '').localeCompare(String(b.subjectName || ''))
+        })
         setSubjects(list)
       } catch (e) {
-        // Fallback: try the generic /subjects endpoint
-        try {
-          const { data } = await api.get('/subjects')
-          if (!cancelled) setSubjects(data?.subjects || [])
-        } catch {}
+        if (!cancelled) toast?.error?.('Failed to load subjects: ' + (e?.response?.data?.message || e.message))
       } finally {
         if (!cancelled) setLoadingSubjects(false)
       }
     })()
     return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => { loadBooks() // eslint-disable-next-line
@@ -13455,8 +13461,11 @@ function TeacherLibraryTab({ user, toast }) {
       toast?.error?.('Only PDF files are accepted.')
       return
     }
-    if (file.size > 200 * 1024 * 1024) {
-      toast?.error?.('File exceeds 200 MB limit.')
+    if (file.size > 10 * 1024 * 1024) {
+      toast?.error?.(
+        'File exceeds 10 MB limit. Please compress the PDF first ' +
+        '(most coursebooks compress to under 10 MB with no visible loss).'
+      )
       return
     }
     setUpFile(file)
@@ -13625,7 +13634,7 @@ function TeacherLibraryTab({ user, toast }) {
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <label className="fl">PDF file * (max 200 MB)</label>
+            <label className="fl">PDF file * (max 10 MB)</label>
             <input ref={fileInputRef} type="file" accept="application/pdf"
               onChange={e => onFilePick(e.target.files?.[0])}
               disabled={uploading}
@@ -13635,6 +13644,16 @@ function TeacherLibraryTab({ user, toast }) {
                 {upFile.name} ({(upFile.size / (1024*1024)).toFixed(1)} MB)
               </div>
             )}
+            <div style={{
+              fontSize: 11, color: '#7D5A0F', marginTop: 8,
+              background: '#FDF7E2', border: '1px solid #E8D58F',
+              borderRadius: 5, padding: '6px 10px', lineHeight: 1.5,
+            }}>
+              <strong>Tip:</strong> If your PDF is larger than 10 MB,
+              compress it first using a free online tool like ilovepdf.com
+              or smallpdf.com. Most coursebooks shrink to under 10 MB
+              with no visible quality loss.
+            </div>
           </div>
 
           {uploading && (
