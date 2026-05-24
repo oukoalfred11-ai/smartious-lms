@@ -72,6 +72,32 @@ const MODULES = {
 }
 
 // ──────────────────────────────────────────────────────
+// CANONICAL CURRICULA — single source of truth
+// Used by every place admins pick a curriculum (Manage
+// Students, Teacher Specialties, etc). The `id` is what
+// gets stored on User documents / Subject docs / spines;
+// the `name` is what admins see.
+// Mirrors the list in CurriculumModule (line ~8059).
+// ──────────────────────────────────────────────────────
+const SCHOOL_CURRICULA = [
+  { id: 'CambridgePrimary',   name: 'Cambridge Primary' },
+  { id: 'CambridgeLowerSec',  name: 'Cambridge Lower Secondary' },
+  { id: 'CambridgeIGCSE',     name: 'Cambridge IGCSE' },
+  { id: 'CambridgeALevel',    name: 'Cambridge A-Level' },
+  { id: 'EdexcelLowerSec',    name: 'Edexcel Lower Secondary' },
+  { id: 'EdexcelIGCSE',       name: 'Edexcel IGCSE' },
+  { id: 'EdexcelALevel',      name: 'Edexcel A-Level' },
+  { id: 'AQALowerSec',        name: 'AQA Lower Secondary' },
+  { id: 'AQAGCSE',            name: 'AQA GCSE' },
+  { id: 'AQAALevel',          name: 'AQA A-Level' },
+  { id: 'IB',                 name: 'International Baccalaureate (IB)' },
+  { id: 'BNC',                name: 'British National Curriculum' },
+  { id: 'American',           name: 'American Curriculum' },
+  { id: 'Canadian',           name: 'Canadian Curriculum' },
+  { id: 'KenyaCBC',           name: 'Kenya CBC' },
+]
+
+// ──────────────────────────────────────────────────────
 // ILLUSTRATED MODULE ICONS — inline SVG with brand colors
 // Each icon is 64x64, designed to feel warm/refined
 // ──────────────────────────────────────────────────────
@@ -2651,7 +2677,10 @@ function TeacherProfileTab({ teacher, onSaved, toast }) {
 
 // ── SPECIALTIES TAB ───────────────────────────────────────
 function TeacherSpecialtiesTab({ teacher, onSaved, toast }) {
-  const CURRICULA = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American']
+  // Canonical curricula (matches Subject catalog ids stored server-side).
+  // Old admin-edited teachers may have legacy curriculum strings in
+  // teachingSpecialties — handled in render below.
+  const CURRICULA = SCHOOL_CURRICULA
 
   // Derive current curricula + subjectIds from teachingSpecialties
   const existingSpecs = Array.isArray(teacher.teachingSpecialties) ? teacher.teachingSpecialties : []
@@ -2738,10 +2767,32 @@ function TeacherSpecialtiesTab({ teacher, onSaved, toast }) {
           Step 1 — Curricula
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {/* If teacher has any legacy curriculum strings in their
+              existing specialties that aren't in the canonical list,
+              show those as toggle pills too so the admin can see and
+              clean them up. */}
+          {[...new Set(existingSpecs.map(s => s.curriculum).filter(Boolean))]
+            .filter(legacy => !CURRICULA.some(c => c.id === legacy))
+            .map(legacy => {
+              const on = pickedCurricula.includes(legacy)
+              return (
+                <button key={'legacy:'+legacy} onClick={() => toggleCurr(legacy)}
+                  style={{
+                    background: on ? '#9A2434' : '#FEF3C7',
+                    color: on ? '#fff' : '#92400E',
+                    border: `1.5px solid ${on ? '#9A2434' : '#F59E0B'}`,
+                    padding: '7px 14px', borderRadius: 99,
+                    cursor: 'pointer', fontSize: 12, fontWeight: 700,
+                  }}
+                  title="Legacy curriculum value — re-pick from the canonical list to clean up">
+                  {on ? 'on · ' : ''}{legacy} (legacy)
+                </button>
+              )
+            })}
           {CURRICULA.map(c => {
-            const on = pickedCurricula.includes(c)
+            const on = pickedCurricula.includes(c.id)
             return (
-              <button key={c} onClick={() => toggleCurr(c)}
+              <button key={c.id} onClick={() => toggleCurr(c.id)}
                 style={{
                   background: on ? TOKENS.crimson : '#fff',
                   color: on ? '#fff' : TOKENS.crimson,
@@ -2749,7 +2800,7 @@ function TeacherSpecialtiesTab({ teacher, onSaved, toast }) {
                   padding: '7px 14px', borderRadius: 99,
                   cursor: 'pointer', fontSize: 12, fontWeight: 700,
                 }}>
-                {on ? '✓ ' : ''}{c}
+                {on ? 'on · ' : ''}{c.name}
               </button>
             )
           })}
@@ -5440,7 +5491,11 @@ function StudentDetailModal({ student, allocations: initialAllocs, onClose, onCh
   const [showSubjectPicker, setShowSubjectPicker] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  const CURRICULA = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American']
+  // Canonical curricula list (matches Subject catalog ids stored
+  // server-side). Old admin-edited students may have a legacy
+  // curriculum string ('IGCSE', 'A-Level' etc.) that doesn't match
+  // any canonical id — handled in the dropdown render below.
+  const CURRICULA = SCHOOL_CURRICULA
 
   // Load Subject catalog for the chosen curriculum so we can resolve names→IDs
   useEffect(() => {
@@ -5593,10 +5648,17 @@ function StudentDetailModal({ student, allocations: initialAllocs, onClose, onCh
                 padding: '8px 12px', borderRadius: 6,
                 border: '1.5px solid #E8E2D6',
                 fontSize: 13, fontFamily: 'inherit',
-                minWidth: 200,
+                minWidth: 240,
               }}>
               <option value="">— Select —</option>
-              {CURRICULA.map(c => <option key={c} value={c}>{c}</option>)}
+              {/* If the student's saved curriculum isn't in the canonical
+                  list (legacy 'IGCSE', 'A-Level' etc.), show it as a
+                  disabled "legacy" option so the dropdown reflects the
+                  saved value rather than appearing blank. */}
+              {curriculum && !CURRICULA.some(c => c.id === curriculum) && (
+                <option value={curriculum}>{curriculum} (legacy — please re-select)</option>
+              )}
+              {CURRICULA.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             {curriculum && curriculum !== student.curriculum && (
               <div style={{
