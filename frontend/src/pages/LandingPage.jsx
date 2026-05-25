@@ -4172,8 +4172,8 @@ export default function LandingPage() {
             <p className="pg-sub" style={{marginTop:12}}>Smartious students participate in engaging weekly activities designed to build confidence, teamwork, creativity, wellness and global exposure. A world-class enrichment ecosystem alongside an internationally recognised academic programme.</p>
             <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
               <button className="btn-p" onClick={() => P('enroll')}>Join Activities <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-              <button className="btn-s" onClick={() => P('consult')}>Book Consultation</button>
-              <button className="btn-s" onClick={() => { const el = document.getElementById('student-life'); if (el) el.scrollIntoView({behavior:'smooth'}); }}>Explore Student Life</button>
+              <button className="btn-o lt" onClick={() => P('consult')}>Book Consultation</button>
+              <button className="btn-o lt" onClick={() => { const el = document.getElementById('student-life'); if (el) el.scrollIntoView({behavior:'smooth'}); }}>Explore Student Life</button>
             </div>
           </div></div>
 
