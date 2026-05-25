@@ -3,40 +3,53 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <!-- Performance: preconnect to font CDN -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <!-- Performance: preload the hero image used on homepage -->
-  <link rel="preload" as="image" href="/hero-learning-centre.jpg" fetchpriority="high">
-
-  <!-- Performance: DNS prefetch for third-party origins -->
-  <link rel="dns-prefetch" href="https://smartious-backend.onrender.com">
-  <link rel="dns-prefetch" href="https://formsubmit.co">
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <!-- ═══════════════════════════════════════════════════
+       PERFORMANCE — preconnect + preload (order matters)
+       Place these FIRST so the browser starts resolving DNS
+       and fetching critical resources before parsing the rest.
+       ═══════════════════════════════════════════════════ -->
+
+  <!-- Preconnect to font hosts (DNS + TLS handshake in parallel with HTML parse) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+
+  <!-- Preload the hero image (LCP element on homepage) -->
+  <link rel="preload" as="image" href="/hero-learning-centre.jpg" fetchpriority="high"/>
+
+  <!-- Preload the single most-visible web font weight so the H1 doesn't FOUT -->
+  <link rel="preload" as="font" type="font/woff2"
+        href="https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.woff2"
+        crossorigin/>
+
+  <!-- DNS prefetch for third-party origins -->
+  <link rel="dns-prefetch" href="https://smartious-backend.onrender.com"/>
+  <link rel="dns-prefetch" href="https://formsubmit.co"/>
 
   <!-- ═══════════════════════════════════════════════════
        Permissions Policy — explicitly ALLOW camera, microphone,
        and display-capture (screen-share) for our own origin.
-       This is required for Live Classes to work.
+       Required for Live Classes to work.
        ═══════════════════════════════════════════════════ -->
   <meta http-equiv="Permissions-Policy" content="camera=(self), microphone=(self), display-capture=(self), autoplay=(self)"/>
   <meta http-equiv="Feature-Policy" content="camera 'self'; microphone 'self'; display-capture 'self'"/>
 
   <!-- ═══════════════════════════════════════════════════
        Primary page title & description (used by search engines)
+       LandingPage.jsx will override these on client-side
+       navigation, but these are the defaults for the first paint
+       and for non-JS crawlers.
        ═══════════════════════════════════════════════════ -->
-  <title>Smartious Homeschool — International Online School · IGCSE, A-Level, IB, CBC</title>
-  <meta name="description" content="Smartious Homeschool is a premium international online school and homeschool provider. Cambridge IGCSE, A-Level, IB, CBC and American curricula — serving families across Kenya, the UK, UAE, Canada, and the USA since 2018."/>
-  <meta name="keywords" content="homeschool Kenya, homeschooling Nairobi, IGCSE tuition, private tutor Nairobi, online school, Cambridge IGCSE, A-Level, IB, CBC, American curriculum, Smartious"/>
+  <title>Online Homeschool | IGCSE, A-Level, IB & American — Smartious</title>
+  <meta name="description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 85/month."/>
+  <meta name="keywords" content="online homeschool, homeschooling Kenya, IGCSE online school, Cambridge IGCSE, A-Level online, IB Diploma, online school UAE, homeschool Canada, homeschool Australia, homeschool Nigeria, homeschool South Africa, Smartious"/>
   <meta name="author" content="Smartious Homeschool"/>
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1"/>
   <link rel="canonical" href="https://smartioushomeschool.com/"/>
 
   <!-- ═══════════════════════════════════════════════════
        Favicons — proper multi-format package
-       The .ico is for legacy browsers + search engine bots.
-       The .svg is sharp on every display. PNGs for Android/iOS.
        ═══════════════════════════════════════════════════ -->
   <link rel="icon"           type="image/x-icon"  href="/favicon.ico"/>
   <link rel="icon"           type="image/svg+xml" href="/favicon.svg"/>
@@ -55,8 +68,8 @@
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://smartioushomeschool.com/"/>
   <meta property="og:site_name" content="Smartious Homeschool"/>
-  <meta property="og:title" content="Smartious Homeschool — International Online School"/>
-  <meta property="og:description" content="Premium online school and homeschool provider. Cambridge IGCSE, A-Level, IB, CBC and American curricula for families worldwide."/>
+  <meta property="og:title" content="Online Homeschool | IGCSE, A-Level, IB & American — Smartious"/>
+  <meta property="og:description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula."/>
   <meta property="og:image" content="https://smartioushomeschool.com/favicon-512x512.png"/>
   <meta property="og:image:width" content="512"/>
   <meta property="og:image:height" content="512"/>
@@ -65,39 +78,107 @@
 
   <!-- Twitter / X card -->
   <meta name="twitter:card" content="summary"/>
-  <meta name="twitter:title" content="Smartious Homeschool — International Online School"/>
-  <meta name="twitter:description" content="Premium online school and homeschool provider. IGCSE, A-Level, IB, CBC and American curricula."/>
+  <meta name="twitter:title" content="Online Homeschool | IGCSE, A-Level, IB & American — Smartious"/>
+  <meta name="twitter:description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya."/>
   <meta name="twitter:image" content="https://smartioushomeschool.com/favicon-512x512.png"/>
 
   <!-- ═══════════════════════════════════════════════════
-       Fonts (preconnect speeds up first paint)
+       Fonts (non-blocking load technique)
+       Loaded with media="print" then swapped to "all" once
+       loaded. This stops the stylesheet from blocking render.
+       Saves ~700ms-1200ms of FCP on mobile.
+       The <noscript> fallback ensures fonts still load if JS
+       is disabled.
        ═══════════════════════════════════════════════════ -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&family=Syne+Mono&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&family=Syne+Mono&display=swap"
+        media="print"
+        onload="this.media='all'"/>
+  <noscript>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&family=Syne+Mono&display=swap"/>
+  </noscript>
 
   <!-- ═══════════════════════════════════════════════════
-       Structured data — organisation schema (helps Google)
+       Structured data — EducationalOrganization
+       This is the canonical Organization schema for the site.
+       LandingPage.jsx should NOT inject another one (would
+       conflict with this). FAQ + page-specific schemas are
+       still safe to add per-page from React.
        ═══════════════════════════════════════════════════ -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
-    "name": "Smartious Homeschool",
-    "alternateName": "Smartious",
-    "url": "https://smartioushomeschool.com",
+    "@id": "https://smartioushomeschool.com/#organization",
+    "name": "Smartious Homeschool & eSchool",
+    "alternateName": ["Smartious", "Smartious Homeschool", "Smartious eSchool"],
+    "url": "https://smartioushomeschool.com/",
     "logo": "https://smartioushomeschool.com/favicon-512x512.png",
-    "description": "International online school and homeschool provider offering Cambridge IGCSE, A-Level, IB, CBC and American curricula.",
+    "image": "https://smartioushomeschool.com/favicon-512x512.png",
+    "description": "Smartious Homeschool & eSchool is an accredited international online and home-based school. We deliver Cambridge IGCSE, Cambridge A-Level, IB Diploma, Pearson Edexcel and the British and American curricula to students across Kenya, the diaspora and worldwide. Live classes, qualified specialists, and full university-application support.",
     "foundingDate": "2018",
+    "foundingLocation": {
+      "@type": "Place",
+      "name": "Nairobi, Kenya"
+    },
     "email": "hellosmartious@gmail.com",
     "telephone": "+254745021212",
     "address": {
       "@type": "PostalAddress",
+      "streetAddress": "Diamond Plaza I, 4th Parklands Avenue",
       "addressLocality": "Nairobi",
+      "addressRegion": "Parklands",
+      "postalCode": "00100",
       "addressCountry": "KE"
     },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": -1.2606,
+      "longitude": 36.8186
+    },
+    "contactPoint": [{
+      "@type": "ContactPoint",
+      "telephone": "+254-745-021212",
+      "contactType": "admissions",
+      "areaServed": ["KE", "AE", "GB", "US", "CA", "AU", "NG", "ZA", "QA", "EG"],
+      "availableLanguage": ["English"]
+    }],
+    "areaServed": [
+      { "@type": "Country", "name": "Kenya" },
+      { "@type": "Country", "name": "United Arab Emirates" },
+      { "@type": "Country", "name": "United Kingdom" },
+      { "@type": "Country", "name": "United States" },
+      { "@type": "Country", "name": "Canada" },
+      { "@type": "Country", "name": "Australia" },
+      { "@type": "Country", "name": "Nigeria" },
+      { "@type": "Country", "name": "South Africa" },
+      { "@type": "Country", "name": "Qatar" },
+      { "@type": "Country", "name": "Egypt" }
+    ],
     "sameAs": [
-      "https://smartioushomeschool.com"
+      "https://www.facebook.com/smartioushomeschool",
+      "https://www.instagram.com/smartioushomeschool",
+      "https://www.linkedin.com/company/smartious-homeschool",
+      "https://www.tiktok.com/@smartioushomeschool",
+      "https://wa.me/254745021212"
+    ],
+    "hasCredential": [
+      {
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": "certification",
+        "name": "Cambridge International Examinations (IGCSE & A-Level)"
+      },
+      {
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": "certification",
+        "name": "International Baccalaureate (IB) Diploma Programme"
+      },
+      {
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": "certification",
+        "name": "Pearson Edexcel International"
+      }
     ]
   }
   </script>
