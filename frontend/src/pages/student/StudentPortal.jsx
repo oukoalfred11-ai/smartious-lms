@@ -209,6 +209,30 @@ const NavIcon = ({ name, active }) => {
             <path d="M12 8.5l1.5 3 3.3.5-2.4 2.3.5 3.3L12 16l-2.9 1.6.5-3.3-2.4-2.3 3.3-.5L12 8.5z" fill="#fff"/>
           </g>
         )
+      case 'results': // medal with ribbon — achievement/grades
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            {/* Ribbon — two ends */}
+            <path d="M8 3 L8 11 L12 9 L16 11 L16 3" fill="#fff" fillOpacity=".25"/>
+            {/* Medal circle */}
+            <circle cx="12" cy="15.5" r="5.5" fill="#fff" fillOpacity=".3" stroke="#fff" strokeWidth="1.6"/>
+            {/* Star on medal */}
+            <path d="M12 12.3 L13 14.4 L15.3 14.6 L13.6 16.1 L14.1 18.3 L12 17.1 L9.9 18.3 L10.4 16.1 L8.7 14.6 L11 14.4 Z"
+              fill="#fff" stroke="none"/>
+          </g>
+        )
+      case 'communication': // chat bubble with reply lines
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            {/* Main bubble */}
+            <path d="M4 5 Q4 3.5 5.5 3.5 L18.5 3.5 Q20 3.5 20 5 L20 14 Q20 15.5 18.5 15.5 L9 15.5 L5 19 L5 15.5 Q4 15.5 4 14 Z"
+              fill="#fff" fillOpacity=".25"/>
+            {/* Message lines */}
+            <line x1="8" y1="7.5" x2="16" y2="7.5" strokeWidth="1.5"/>
+            <line x1="8" y1="10" x2="14" y2="10" strokeWidth="1.5"/>
+            <line x1="8" y1="12.5" x2="12" y2="12.5" strokeWidth="1.5"/>
+          </g>
+        )
       case 'live': // video camera
         return (
           <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -334,7 +358,6 @@ const NAV_SECTIONS = [
     { id:'exams',        label:'Exams',           icon:'exams',        svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',  badge:'1' },
     { id:'results',      label:'My Results',      icon:'results',      svg:'<circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>' },
     { id:'live',         label:'Live Classes',    icon:'live',         svg:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>', live:true },
-    { id:'myroom',       label:'My Class Room',   icon:'myroom',       svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',  groupOnly:true },
     { id:'timetable',    label:'Timetable',       icon:'timetable',    svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
     { id:'library',      label:'Library',         icon:'library',      svg:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/>' },
   ]},
@@ -437,13 +460,6 @@ export default function StudentPortal() {
   const deliveryMode = user?.deliveryMode || ''
   const ADVISORY_PROGRAMMES = ['Study Abroad', 'Pre-University']
   const isAdvisory = ADVISORY_PROGRAMMES.includes(programme)
-
-  // ── Learning mode (set at login) ─────────────────────
-  // 'individual' = personalised AI mastery system
-  // 'group'      = shared classroom with up to 10 students/room
-  const [learningMode, setLearningMode] = useState(
-    () => localStorage.getItem('sm_learning_mode') || 'individual'
-  )
 
   // ── Navigation ───────────────────────────────────────
   const [page,        setPage]        = useState('dashboard')
@@ -779,25 +795,45 @@ export default function StudentPortal() {
           minHeight:72,
         }}>
           <div style={{
-            width:38, height:38, borderRadius:10,
-            background:`linear-gradient(135deg, ${TOKENS.crimson} 0%, ${TOKENS.crimsonDeep} 100%)`,
+            width:42, height:46,
             display:'flex', alignItems:'center', justifyContent:'center',
-            boxShadow:`0 2px 8px ${TOKENS.crimson}40, inset 0 1px 0 rgba(255,255,255,.15)`,
             flexShrink:0,
           }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={TOKENS.goldLight} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 3L1 9l11 6 11-6-11-6z"/>
-              <path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/>
+            {/* Smartious shield mark — crimson shield with gold star above
+                an open book. Matches the official brand mark. */}
+            <svg viewBox="0 0 64 72" width="38" height="42" xmlns="http://www.w3.org/2000/svg">
+              {/* Gold outer trim */}
+              <path d="M4 4 L60 4 L60 44 Q60 56 32 68 Q4 56 4 44 Z" fill="#C9A030"/>
+              {/* Crimson shield body */}
+              <path d="M7 7 L57 7 L57 44 Q57 54 32 65 Q7 54 7 44 Z" fill="#7D1025"/>
+              {/* Inner gold pinstripe */}
+              <path d="M11 11 L53 11 L53 44 Q53 52 32 61 Q11 52 11 44 Z"
+                fill="none" stroke="#C9A030" strokeWidth="0.5" opacity="0.4"/>
+              {/* Gold star */}
+              <polygon points="32,16 33.6,20.8 38.7,20.8 34.6,23.8 36.2,28.6 32,25.6 27.8,28.6 29.4,23.8 25.3,20.8 30.4,20.8"
+                fill="#C9A030"/>
+              {/* Open book — white pages */}
+              <path d="M16 36 Q24 32 32 34 L32 52 Q24 50 16 54 Z" fill="#FFFFFF"/>
+              <path d="M48 36 Q40 32 32 34 L32 52 Q40 50 48 54 Z" fill="#FFFFFF"/>
+              {/* Book spine */}
+              <line x1="32" y1="34" x2="32" y2="52" stroke="#E8D58F" strokeWidth="0.5"/>
+              {/* Text lines on pages */}
+              <line x1="20" y1="40" x2="29" y2="39" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
+              <line x1="20" y1="43" x2="29" y2="42" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
+              <line x1="20" y1="46" x2="29" y2="45" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
+              <line x1="35" y1="39" x2="44" y2="40" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
+              <line x1="35" y1="42" x2="44" y2="43" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
+              <line x1="35" y1="45" x2="44" y2="46" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
             </svg>
           </div>
           {!collapsed && (
             <div style={{minWidth:0}}>
               <div style={{
                 fontFamily:'Instrument Serif,Georgia,serif',
-                fontSize:20, fontWeight:400,
+                fontSize:22, fontWeight:400,
                 color:TOKENS.ink, lineHeight:1,
               }}>
-                Smartious<span style={{color:TOKENS.gold}}>.</span>
+                Smart<span style={{fontStyle:'italic', color:TOKENS.crimson}}>ious</span>
               </div>
               <div style={{
                 fontSize:10, color:TOKENS.inkMute,
@@ -858,7 +894,6 @@ export default function StudentPortal() {
                 </div>
               )}
               {sec.items
-                .filter(item => !item.groupOnly || learningMode === 'group')
                 .filter(item => !isAdvisory || ['dashboard', 'profile', 'subscription'].includes(item.id))
                 .map(item => {
                   const active = page === item.id
@@ -983,35 +1018,6 @@ export default function StudentPortal() {
                   marginTop:2,
                 }}>
                   {user?.grade || 'IGCSE'} · {mastery ? mastery.xp.toLocaleString() + ' XP' : '...'}
-                </div>
-                <div style={{display:'flex',alignItems:'center',gap:4,marginTop:4}}>
-                  <span style={{
-                    width:6, height:6, borderRadius:'50%',
-                    background: learningMode==='group' ? '#22C55E' : TOKENS.crimson,
-                  }}/>
-                  <span style={{
-                    fontSize:9, color:TOKENS.inkMute,
-                    textTransform:'uppercase', letterSpacing:'.08em',
-                    fontWeight:600,
-                  }}>
-                    {learningMode==='group' ? 'Group' : 'Individual'}
-                  </span>
-                  <button
-                    onClick={() => {
-                      const m = learningMode==='group' ? 'individual' : 'group'
-                      setLearningMode(m)
-                      localStorage.setItem('sm_learning_mode', m)
-                    }}
-                    style={{
-                      background:'transparent', border:'none',
-                      color:TOKENS.gold, cursor:'pointer',
-                      fontSize:9, padding:0, marginLeft:'auto',
-                      fontWeight:600, letterSpacing:'.05em',
-                      textTransform:'uppercase',
-                    }}
-                  >
-                    switch
-                  </button>
                 </div>
               </div>
             )}
@@ -1583,7 +1589,7 @@ export default function StudentPortal() {
           {page === 'dashboard' && isAdvisory && (
             <AdvisoryDashboard programme={programme} deliveryMode={deliveryMode} firstName={user?.firstName || 'there'} />
           )}
-          {page === 'dashboard' && !isAdvisory && <DashboardTab user={user} store={store} setPage={setPage} setLearningMode={setLearningMode} learningMode={learningMode} toast={toast} />}
+          {page === 'dashboard' && !isAdvisory && <DashboardTab user={user} store={store} setPage={setPage} toast={toast} />}
           {page === 'practice' && <PracticeTab user={user} toast={toast} goTo={goTo} />}
           {page === 'homework' && <HomeworkTab user={user} toast={toast} />}
 
@@ -1650,160 +1656,6 @@ export default function StudentPortal() {
               ACHIEVEMENTS — live badges + XP
           ════════════════════════════════════════════ */}
           {page === 'achievements' && <AchievementsTab user={user} />}
-
-          {/* ════════════════════════════════════════════
-              GROUP MODE DASHBOARD OVERRIDE
-              When learningMode === 'group', show group dashboard
-              instead of individual mastery dashboard
-          ════════════════════════════════════════════ */}
-          {page === 'dashboard' && learningMode === 'group' && (
-            <div>
-              <div style={{marginBottom:20}}>
-                <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4}}>
-                  <div style={{background:'#22C55E20',border:'1px solid #22C55E40',borderRadius:99,padding:'3px 12px',fontSize:12,fontWeight:700,color:'#22C55E'}}>Group Class Mode</div>
-                  <button onClick={()=>{setLearningMode('individual');localStorage.setItem('sm_learning_mode','individual')}} style={{background:'transparent',border:'none',fontSize:12,color:'var(--s400)',cursor:'pointer',textDecoration:'underline'}}>Switch to Individual</button>
-                </div>
-                <h1 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Welcome back, <em style={{color:'var(--g600)'}}>{firstName}</em>!</h1>
-              </div>
-
-              {/* My rooms */}
-              <div className="kpi-grid" style={{marginBottom:24}}>
-                {[
-                  {v:store.groupRooms.filter(r=>r.students.includes(firstName+' Osei')).length||2, l:'My Class Rooms', d:'Enrolled', dc:'var(--g600)'},
-                  {v:store.groupRooms.reduce((s,r)=>s+(r.students.includes(firstName+' Osei')?r.enrolled:0),0)||13, l:'Classmates', d:'Across all rooms', dc:'var(--b700)'},
-                  {v:'10', l:'Max per Room', d:'Group class limit', dc:'var(--a600)'},
-                  {v:store.fees.group_premium||999, l:'KES/month', d:'Group Premium plan', dc:'var(--p600)'},
-                ].map((k,i) => (
-                  <div key={i} className="kpi"><div className="kpi-v" style={{fontSize:i===3?18:undefined}}>{k.v}</div><div className="kpi-l">{k.l}</div><div className="kpi-d" style={{color:k.dc}}>{k.d}</div></div>
-                ))}
-              </div>
-
-              {/* My class rooms */}
-              <div className="card" style={{marginBottom:20}}>
-                <div className="chdr">
-                  <div className="ctitle">My Class Rooms</div>
-                  <button className="btn btn-g btn-sm" onClick={()=>goTo('myroom')}>View All</button>
-                </div>
-                {store.groupRooms.slice(0,3).map(room => (
-                  <div key={room.id} style={{display:'flex',alignItems:'center',gap:14,padding:'12px 0',borderBottom:'1px solid var(--border)',flexWrap:'wrap'}}>
-                    <div style={{width:44,height:44,borderRadius:'var(--rmd)',background:'var(--g50)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--g600)" strokeWidth="2" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    </div>
-                    <div style={{flex:1}}>
-                      <div style={{fontWeight:700,fontSize:14}}>{room.name}</div>
-                      <div style={{fontSize:12.5,color:'var(--s500)'}}>{room.teacher} · {room.schedule}</div>
-                    </div>
-                    <div style={{display:'flex',alignItems:'center',gap:8}}>
-                      <div style={{fontSize:12,color:'var(--s400)'}}>{room.enrolled}/{room.capacity} students</div>
-                      <div style={{height:8,width:60,background:'var(--s100)',borderRadius:999,overflow:'hidden'}}>
-                        <div style={{height:'100%',width:(room.enrolled/room.capacity*100)+'%',background:room.enrolled>=room.capacity?'var(--r500)':'var(--g500)',borderRadius:999}}/>
-                      </div>
-                      <span className={`badge ${room.status==='Active'?'badge-green':'badge-slate'}`}>{room.status}</span>
-                    </div>
-                    <button className="btn btn-p btn-sm" onClick={()=>setPage('live')}>Join Class</button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Announcements */}
-              {store.getAnnouncements('student').slice(0,2).map((a,i) => (
-                <div key={i} style={{background:'var(--b50)',border:'1px solid var(--b100)',borderRadius:'var(--rlg)',padding:'12px 16px',display:'flex',alignItems:'center',gap:12,marginBottom:10,flexWrap:'wrap'}}>
-                  <div style={{flex:1}}><div style={{fontWeight:700,fontSize:13.5,color:'var(--b700)',marginBottom:2}}>{a.title}</div><div style={{fontSize:12.5,color:'var(--s500)'}}>{a.body}</div></div>
-                  <span style={{fontSize:11,color:'var(--s400)'}}>{a.date}</span>
-                </div>
-              ))}
-
-              {/* Quick actions */}
-              <div className="card">
-                <div className="ctitle" style={{marginBottom:12}}>Quick Actions</div>
-                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-                  {[
-                    ['Join Live Class', () => setPage('live'), '<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>'],
-                    ['My Class Rooms', () => goTo('myroom'), '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'],
-                    ['Resources', () => goTo('resources'), '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>'],
-                    ['Ask Mshauri', () => goTo('tutor'), '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'],
-                  ].map(([label, action, icon]) => (
-                    <button key={label} className="btn btn-s" style={{justifyContent:'flex-start',gap:8,padding:'12px 14px'}} onClick={action}>
-                      <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:icon}}/>
-                      <span style={{fontSize:13}}>{label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ════════════════════════════════════════════
-              MY CLASS ROOM (Group mode)
-          ════════════════════════════════════════════ */}
-          {page === 'myroom' && (
-            <div>
-              <div style={{marginBottom:20}}>
-                <div className="sec-tag">Group Learning</div>
-                <h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>My <em style={{color:'var(--g600)'}}>Class Rooms</em></h2>
-                <p style={{fontSize:14,color:'var(--s500)',marginTop:4}}>Each room holds up to 10 students. You share lessons, resources and live classes with your classmates.</p>
-              </div>
-
-              {store.groupRooms.map(room => (
-                <div key={room.id} className="card" style={{marginBottom:16}}>
-                  <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:14,flexWrap:'wrap',gap:10}}>
-                    <div>
-                      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:4}}>
-                        <div className="serif" style={{fontSize:20,color:'var(--s900)'}}>{room.name}</div>
-                        <span className={`badge ${room.status==='Active'?'badge-green':'badge-slate'}`}>{room.status}</span>
-                      </div>
-                      <div style={{fontSize:13,color:'var(--s500)'}}>{room.teacher} · {room.subject} · {room.curriculum} {room.grade}</div>
-                      <div style={{fontSize:13,color:'var(--b600)',marginTop:2}}>{room.schedule}</div>
-                    </div>
-                    <div style={{display:'flex',gap:8}}>
-                      <div style={{textAlign:'center',background:'var(--bg)',borderRadius:'var(--rmd)',padding:'8px 14px'}}>
-                        <div className="mono" style={{fontSize:18,fontWeight:700,color:room.enrolled>=room.capacity?'var(--r500)':'var(--g600)'}}>{room.enrolled}/{room.capacity}</div>
-                        <div style={{fontSize:11,color:'var(--s400)'}}>students</div>
-                      </div>
-                      <button className="btn btn-p btn-sm" onClick={()=>setPage('live')}>
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-                        Join Class
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Capacity bar */}
-                  <div style={{marginBottom:14}}>
-                    <div style={{display:'flex',justifyContent:'space-between',fontSize:12,color:'var(--s400)',marginBottom:4}}>
-                      <span>Room capacity</span>
-                      <span>{room.capacity - room.enrolled} seats available</span>
-                    </div>
-                    <div className="prog-bar" style={{height:8}}>
-                      <div className="prog-fill" style={{width:(room.enrolled/room.capacity*100)+'%',background:room.enrolled>=room.capacity?'var(--r500)':'var(--g500)',transition:'width 1s ease'}}/>
-                    </div>
-                  </div>
-
-                  {/* Classmates */}
-                  <div>
-                    <div style={{fontSize:12,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:8}}>Classmates ({room.enrolled})</div>
-                    <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
-                      {room.students.map((name, si) => {
-                        const cols = ['#3B82F6','#22C55E','#F59E0B','#8B5CF6','#EC4899','#14B8A6','#F97316','#06B6D4','#84CC16','#EF4444']
-                        const init = name.split(' ').map(w=>w[0]).join('').slice(0,2)
-                        return (
-                          <div key={si} title={name} style={{width:36,height:36,borderRadius:'50%',background:cols[si%cols.length]+'20',color:cols[si%cols.length],display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'JetBrains Mono,monospace',fontSize:11,fontWeight:700,border:'2px solid '+cols[si%cols.length]+'40',cursor:'default'}}>
-                            {init}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-             {store.groupRooms.length === 0 && (
-                <div className="empty">
-                  <h3>No class rooms yet</h3>
-                  <p>The admin will assign you to a class room based on your curriculum and subject choices.</p>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* ════════════════════════════════════════════
               PROFILE & SUBSCRIPTION
@@ -10209,37 +10061,89 @@ function StudentCommsHistory({ toast }) {
   )
 }
 function ProfileTab({ user, toast }) {
-  const initialDisplayName = localStorage.getItem(PROFILE_DISPLAY_KEY) || `${user?.firstName || ''} ${user?.lastName || ''}`.trim()
-  const initialBio = localStorage.getItem(PROFILE_BIO_KEY) || ''
-  const initialAvatar = localStorage.getItem(PROFILE_AVATAR_KEY) || null
- 
-  const [section, setSection] = useState('account')  // 'account' | 'security' | 'notifications' | 'communication'
-  const [displayName, setDisplayName] = useState(initialDisplayName)
-  const [bio, setBio] = useState(initialBio)
-  const [avatar, setAvatar] = useState(initialAvatar)
+  // Initialise from the user prop. The mount effect below refetches
+  // from /api/student-profile/me to pick up any recent changes.
+  const [section, setSection] = useState('account')
+  const [displayName, setDisplayName] = useState(`${user?.firstName || ''} ${user?.lastName || ''}`.trim())
+  const [firstName, setFirstName] = useState(user?.firstName || '')
+  const [lastName, setLastName] = useState(user?.lastName || '')
+  const [phone, setPhone] = useState(user?.phone || '')
+  const [bio, setBio] = useState(user?.bio || localStorage.getItem(PROFILE_BIO_KEY) || '')
+  const [avatar, setAvatar] = useState(user?.avatar || localStorage.getItem(PROFILE_AVATAR_KEY) || null)
   const [prefs, setPrefs] = useState(() => loadProfilePrefs())
- 
+  const [saving, setSaving] = useState(false)
+
+  // Refetch on mount
+  useEffect(() => {
+    let cancelled = false
+    api.get('/student-profile/me')
+      .then(res => {
+        if (cancelled) return
+        const p = res.data?.data?.profile
+        if (!p) return
+        setFirstName(p.firstName || '')
+        setLastName(p.lastName || '')
+        setDisplayName(`${p.firstName || ''} ${p.lastName || ''}`.trim())
+        setPhone(p.phone || '')
+        if (p.bio !== undefined) setBio(p.bio || '')
+        if (p.avatar !== undefined) setAvatar(p.avatar || null)
+      })
+      .catch(() => { /* keep what we already have */ })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Password change state
   const [currentPwd, setCurrentPwd] = useState('')
   const [newPwd, setNewPwd] = useState('')
   const [confirmPwd, setConfirmPwd] = useState('')
   const [showPwd, setShowPwd] = useState(false)
   const [pwdSubmitting, setPwdSubmitting] = useState(false)
+
+  // Delete account state
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteConfirmation, setDeleteConfirmation] = useState('')
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false)
  
   const initials = (displayName || 'S').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase()).join('') || 'S'
   const avatarBg = initialsColor(displayName || 'Student')
  
-  // Save handlers
-  const saveAccountInfo = () => {
-    if (!displayName.trim()) {
-      toast?.error?.('Display name cannot be empty.')
+  // Save real DB profile via PATCH /student-profile/me.
+  // Bio + avatar are also mirrored to localStorage for offline
+  // first-paint of the avatar.
+  const saveAccountInfo = async () => {
+    if (!firstName.trim()) {
+      toast?.error?.('First name cannot be empty.')
       return
     }
-    localStorage.setItem(PROFILE_DISPLAY_KEY, displayName.trim())
-    localStorage.setItem(PROFILE_BIO_KEY, bio.trim())
-    if (avatar) localStorage.setItem(PROFILE_AVATAR_KEY, avatar)
-    else localStorage.removeItem(PROFILE_AVATAR_KEY)
-    toast?.ok?.('Profile updated.')
+    setSaving(true)
+    try {
+      const payload = {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        phone: phone.trim(),
+        bio: bio.trim(),
+        avatar: avatar || '',
+      }
+      const { data } = await api.patch('/student-profile/me', payload)
+      if (!data?.success) {
+        toast?.error?.(data?.message || 'Server rejected the changes.')
+        setSaving(false)
+        return
+      }
+      // Mirror locally for fast load
+      localStorage.setItem(PROFILE_DISPLAY_KEY, `${firstName} ${lastName}`.trim())
+      localStorage.setItem(PROFILE_BIO_KEY, bio.trim())
+      if (avatar) localStorage.setItem(PROFILE_AVATAR_KEY, avatar)
+      else localStorage.removeItem(PROFILE_AVATAR_KEY)
+      setDisplayName(`${firstName} ${lastName}`.trim())
+      toast?.ok?.('Profile updated.')
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Save failed: ' + e.message)
+    } finally {
+      setSaving(false)
+    }
   }
  
   const handleAvatarUpload = (e) => {
@@ -10283,43 +10187,65 @@ function ProfileTab({ user, toast }) {
     }
  
     setPwdSubmitting(true)
- 
+
     try {
-      // Try backend if api is available
-      const apiBase = import.meta?.env?.VITE_API_BASE || ''
-      const token = localStorage.getItem('sm_token') || ''
- 
-      if (apiBase && token) {
-        const response = await fetch(`${apiBase}/api/auth/change-password`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            currentPassword: currentPwd,
-            newPassword: newPwd,
-          }),
-        })
-        if (response.ok) {
-          toast?.ok?.('Password changed successfully.')
-          setCurrentPwd(''); setNewPwd(''); setConfirmPwd('')
-        } else {
-          const errBody = await response.json().catch(() => ({}))
-          toast?.error?.(errBody.message || 'Could not change password. Check current password.')
-        }
+      const { data } = await api.post('/student-profile/change-password', {
+        currentPassword: currentPwd,
+        newPassword: newPwd,
+      })
+      if (data?.success) {
+        toast?.ok?.('Password changed successfully.')
+        setCurrentPwd(''); setNewPwd(''); setConfirmPwd('')
       } else {
-        // Backend not available — show informative message
-        toast?.info?.('Password change requires backend connection. Try again later.')
+        toast?.error?.(data?.message || 'Could not change password.')
       }
     } catch (e) {
-      console.error('[password]', e)
-      toast?.error?.('Network error. Please try again.')
+      toast?.error?.(e?.response?.data?.message || 'Could not change password.')
     } finally {
       setPwdSubmitting(false)
     }
   }
  
+  // Delete account — soft-deletes the user via the backend.
+  // After success, clears the auth token and reloads to login.
+  const submitDeleteAccount = async () => {
+    if (deleteSubmitting) return
+    if (deleteConfirmation !== 'DELETE') {
+      toast?.error?.('Type DELETE in uppercase to confirm.')
+      return
+    }
+    if (!deletePassword) {
+      toast?.error?.('Enter your password.')
+      return
+    }
+    setDeleteSubmitting(true)
+    try {
+      const { data } = await api.post('/student-profile/delete-account', {
+        password: deletePassword,
+        confirmation: deleteConfirmation,
+      })
+      if (data?.success) {
+        toast?.ok?.('Account deactivated. Logging out...')
+        // Clear local auth + cached profile
+        try {
+          localStorage.removeItem('sm_token')
+          localStorage.removeItem('sm_user')
+          localStorage.removeItem(PROFILE_DISPLAY_KEY)
+          localStorage.removeItem(PROFILE_BIO_KEY)
+          localStorage.removeItem(PROFILE_AVATAR_KEY)
+        } catch {}
+        // Hard reload to clear in-memory React state and force re-auth
+        setTimeout(() => { window.location.href = '/' }, 1500)
+      } else {
+        toast?.error?.(data?.message || 'Could not delete account.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not delete account.')
+    } finally {
+      setDeleteSubmitting(false)
+    }
+  }
+
   const updatePref = (key, value) => {
     const newPrefs = { ...prefs, [key]: value }
     setPrefs(newPrefs)
@@ -10332,6 +10258,7 @@ function ProfileTab({ user, toast }) {
     { id: 'security',       label: 'Password & Security', iconPath: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>' },
     { id: 'notifications',  label: 'Notifications',    iconPath: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>' },
     { id: 'communication',  label: 'Communication',    iconPath: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
+    { id: 'danger',         label: 'Account & Privacy', iconPath: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
   ]
  
   return (
@@ -10452,32 +10379,64 @@ function ProfileTab({ user, toast }) {
             </div>
           </div>
  
-          {/* Display name */}
+          {/* Name */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 16 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 6 }}>
+                First Name
+              </label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                placeholder="First name"
+                style={{
+                  width: '100%', padding: '10px 14px', fontSize: 14, fontFamily: 'inherit',
+                  border: '1.5px solid var(--border)', borderRadius: 'var(--rmd)',
+                  outline: 'none', background: 'var(--white)',
+                }}
+                onFocus={e => e.target.style.borderColor = '#8B1A2E'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 6 }}>
+                Last Name
+              </label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                placeholder="Last name"
+                style={{
+                  width: '100%', padding: '10px 14px', fontSize: 14, fontFamily: 'inherit',
+                  border: '1.5px solid var(--border)', borderRadius: 'var(--rmd)',
+                  outline: 'none', background: 'var(--white)',
+                }}
+                onFocus={e => e.target.style.borderColor = '#8B1A2E'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
+              />
+            </div>
+          </div>
+
+          {/* Phone */}
           <div style={{ marginBottom: 16 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 6 }}>
-              Display Name
+              Phone <span style={{ fontWeight: 400, color: 'var(--s400)' }}>(optional)</span>
             </label>
             <input
-              type="text"
-              value={displayName}
-              onChange={e => setDisplayName(e.target.value)}
-              placeholder="How should we address you?"
+              type="tel"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              placeholder="+254 7XX XXX XXX"
               style={{
-                width: '100%',
-                padding: '10px 14px',
-                fontSize: 14,
-                fontFamily: 'inherit',
-                border: '1.5px solid var(--border)',
-                borderRadius: 'var(--rmd)',
-                outline: 'none',
-                background: 'var(--white)',
+                width: '100%', padding: '10px 14px', fontSize: 14, fontFamily: 'inherit',
+                border: '1.5px solid var(--border)', borderRadius: 'var(--rmd)',
+                outline: 'none', background: 'var(--white)',
               }}
               onFocus={e => e.target.style.borderColor = '#8B1A2E'}
               onBlur={e => e.target.style.borderColor = 'var(--border)'}
             />
-            <div style={{ fontSize: 11.5, color: 'var(--s400)', marginTop: 4 }}>
-              This is shown in chat, leaderboards, and your dashboard.
-            </div>
           </div>
  
           {/* Email (read-only — managed by admin) */}
@@ -10570,8 +10529,10 @@ function ProfileTab({ user, toast }) {
             </div>
           </div>
  
-          <button onClick={saveAccountInfo} className="btn btn-p">
-            Save Changes
+          <button onClick={saveAccountInfo} disabled={saving}
+            className="btn btn-p"
+            style={{ opacity: saving ? 0.5 : 1, cursor: saving ? 'not-allowed' : 'pointer' }}>
+            {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       )}
@@ -10868,6 +10829,127 @@ function ProfileTab({ user, toast }) {
           </div>
         </div>
       )}
+
+      {/* ═══════════════════════════════════════════════════
+          ACCOUNT & PRIVACY (danger zone)
+          Delete account flow. Soft-delete on the backend;
+          requires password + literal "DELETE" confirmation.
+      ═══════════════════════════════════════════════════ */}
+      {section === 'danger' && (
+        <div>
+          <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--s900)', marginBottom: 6 }}>
+            Account & Privacy
+          </h3>
+          <p style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 20 }}>
+            Manage your data and account status.
+          </p>
+
+          <div style={{
+            background: '#FFF7ED',
+            border: '1.5px solid #FB923C',
+            borderRadius: 'var(--rmd, 8px)',
+            padding: 20, marginBottom: 16,
+          }}>
+            <div style={{
+              fontSize: 11, fontWeight: 800, color: '#9A3412',
+              letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 8,
+            }}>Danger zone</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--s900)', marginBottom: 6 }}>
+              Delete my account
+            </div>
+            <div style={{ fontSize: 12.5, color: 'var(--s500)', lineHeight: 1.6, marginBottom: 14 }}>
+              Deactivates your account immediately. You will be logged out and
+              cannot log back in. Your homework submissions, attendance records,
+              and grades are preserved for the school's records. If this is a
+              mistake, contact your school administrator to restore access.
+            </div>
+            <button onClick={() => setShowDeleteModal(true)}
+              style={{
+                background: '#7D1025', color: '#fff', border: 'none',
+                padding: '10px 18px', borderRadius: 7,
+                fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              }}>
+              Delete my account
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete account confirmation modal */}
+      {showDeleteModal && (
+        <div style={{
+          position: 'fixed', inset: 0,
+          background: 'rgba(0,0,0,0.6)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: 20,
+        }} onClick={() => !deleteSubmitting && setShowDeleteModal(false)}>
+          <div style={{
+            background: '#fff', borderRadius: 10,
+            maxWidth: 440, width: '100%',
+            padding: 28, boxShadow: '0 10px 40px rgba(0,0,0,.3)',
+          }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontSize: 19, fontWeight: 700, color: '#7D1025', marginTop: 0, marginBottom: 8 }}>
+              Permanently deactivate your account?
+            </h3>
+            <p style={{ fontSize: 13.5, color: 'var(--s700)', lineHeight: 1.6, marginBottom: 16 }}>
+              You will be logged out immediately. The school administrator
+              can restore your account later if needed, but you will not
+              be able to log in yourself once this is done.
+            </p>
+
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 4 }}>
+              Your current password
+            </label>
+            <input type="password" value={deletePassword}
+              onChange={e => setDeletePassword(e.target.value)}
+              disabled={deleteSubmitting}
+              placeholder="••••••••"
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                padding: '9px 12px', borderRadius: 6,
+                border: '1.5px solid var(--border)',
+                fontSize: 13, marginBottom: 12,
+              }}/>
+
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--s700)', marginBottom: 4 }}>
+              Type <span style={{ fontFamily: 'monospace', background: '#FEE2E2', padding: '1px 6px', borderRadius: 3, color: '#7D1025' }}>DELETE</span> in uppercase to confirm
+            </label>
+            <input type="text" value={deleteConfirmation}
+              onChange={e => setDeleteConfirmation(e.target.value)}
+              disabled={deleteSubmitting}
+              placeholder="DELETE"
+              autoComplete="off"
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                padding: '9px 12px', borderRadius: 6,
+                border: '1.5px solid ' + (deleteConfirmation === 'DELETE' ? '#7D1025' : 'var(--border)'),
+                fontSize: 13, fontFamily: 'monospace', marginBottom: 18,
+              }}/>
+
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowDeleteModal(false)}
+                disabled={deleteSubmitting}
+                style={{
+                  background: 'transparent', color: 'var(--s700)',
+                  border: '1.5px solid var(--border)',
+                  padding: '9px 16px', borderRadius: 6,
+                  fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                }}>Cancel</button>
+              <button onClick={submitDeleteAccount}
+                disabled={deleteSubmitting || deleteConfirmation !== 'DELETE' || !deletePassword}
+                style={{
+                  background: '#7D1025', color: '#fff', border: 'none',
+                  padding: '9px 16px', borderRadius: 6,
+                  fontSize: 13, fontWeight: 700,
+                  cursor: (deleteSubmitting || deleteConfirmation !== 'DELETE' || !deletePassword) ? 'not-allowed' : 'pointer',
+                  opacity: (deleteSubmitting || deleteConfirmation !== 'DELETE' || !deletePassword) ? 0.5 : 1,
+                }}>
+                {deleteSubmitting ? 'Deactivating...' : 'Delete my account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -10982,7 +11064,7 @@ const timeAgo = (iso) => {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 
-function DashboardTab({ user, store, setPage, setLearningMode, learningMode, toast }) {
+function DashboardTab({ user, store, setPage, toast }) {
   // Tick to refresh live status every 30s
   const [tick, setTick] = useState(0)
   useEffect(() => {
@@ -11173,7 +11255,6 @@ function DashboardTab({ user, store, setPage, setLearningMode, learningMode, toa
 
   const greeting = greetingFor()
   const affirmation = "Welcome back! Ready to learn today?"
-  const isGroupMode = learningMode === 'group'
 
   return (
     <div>
@@ -11199,28 +11280,6 @@ function DashboardTab({ user, store, setPage, setLearningMode, learningMode, toa
             {avatar ? <img src={avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/> : initials}
           </div>
           <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-              <div style={{
-                background: isGroupMode ? 'rgba(34,197,94,.2)' : 'rgba(59,130,246,.2)',
-                border: `1px solid ${isGroupMode ? 'rgba(34,197,94,.4)' : 'rgba(59,130,246,.4)'}`,
-                borderRadius: 99, padding: '3px 10px',
-                fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase',
-                color: isGroupMode ? '#86EFAC' : '#93C5FD',
-              }}>{isGroupMode ? 'Group Class' : 'Individual'}</div>
-              <button
-                onClick={() => {
-                  const newMode = isGroupMode ? 'individual' : 'group'
-                  setLearningMode(newMode)
-                  localStorage.setItem('sm_learning_mode', newMode)
-                  toast?.ok?.(`Switched to ${newMode === 'group' ? 'Group' : 'Individual'} mode`)
-                }}
-                style={{
-                  background: 'transparent', border: 'none',
-                  color: 'rgba(255,255,255,.6)', fontSize: 11.5,
-                  cursor: 'pointer', textDecoration: 'underline',
-                }}
-              >Switch to {isGroupMode ? 'Individual' : 'Group'}</button>
-            </div>
             <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
               {greeting}, <em style={{ color: '#F0CC5A', fontStyle: 'italic' }}>{firstName}</em>
             </h1>
