@@ -1589,8 +1589,8 @@ const SERVICES = [
 const SITE = 'Smartious Homeschool & eSchool'
 const PAGE_META = {
   home: {
-    title: SITE + ' | Online Homeschooling & International Curricula',
-    desc: 'Smartious Homeschool & eSchool — accredited online and home-based education in Nairobi and worldwide. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and CBC, taught by qualified specialists.',
+    title: 'Online Homeschool | IGCSE, A-Level, IB & American — Smartious',
+    desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 85/month.',
   },
   about: {
     title: 'About Smartious | Homeschooling & eSchool in Nairobi, Kenya',
@@ -3723,11 +3723,11 @@ export default function LandingPage() {
                 <SmartiousLogo size={56} withText={true} tone="light"/>
               </div>
               <h1 className="h1">
-                <span>Where Every</span>
-                <span>Child Learns</span>
-                <span>to <em>Lead</em></span>
+                <span>The Online</span>
+                <span>Homeschool That</span>
+                <span>Travels with <em>You</em></span>
               </h1>
-              <p className="h-sub">Internationally accredited homeschool education — IGCSE, Cambridge, IB, British, American, CBC — delivered to 2,000+ students across 12 countries. Expert tutors. AI-powered learning. Proven exam results.</p>
+              <p className="h-sub">Accredited Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula — taught live, online, by qualified specialists. Serving 2,000+ students across the UAE, UK, Canada, Australia, Nigeria and Kenya. From USD 85/month.</p>
               <div className="h-act">
                 <button className="btn-p" onClick={() => P('enroll')}>Begin Enrollment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 <button className="btn-o lt" style={{borderColor:'rgba(139,26,46,.45)',color:V.cr}} onClick={() => P('consult')}>Free Consultation</button>
@@ -3772,6 +3772,271 @@ export default function LandingPage() {
               )))}
             </div>
           </div>
+
+          {/* ═══════════════════════════════════════════
+              HOMEPAGE FAQ SCHEMA (for AI Overviews)
+              Injected as JSON-LD so Google AI Overviews,
+              Gemini, ChatGPT and Perplexity have direct
+              answers to common homeschool questions.
+          ═══════════════════════════════════════════ */}
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            'mainEntity': [
+              { '@type': 'Question', 'name': 'What is Smartious Homeschool?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious Homeschool & eSchool is an accredited international online school founded in Nairobi in 2018. We deliver Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American High School curricula to over 2,000 students across Kenya, the UAE, UK, USA, Canada, Australia, Nigeria, South Africa, Qatar and Egypt. All classes are taught live by degree-qualified specialists.' } },
+              { '@type': 'Question', 'name': 'How much does Smartious cost?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious tuition starts from USD 85 per month for single subjects and ranges from USD 4,000 to USD 6,000 per year for full homeschool programmes. This is a fraction of private international school fees (typically USD 15,000 to USD 45,000 per year). Payment plans, sibling discounts and termly billing are available.' } },
+              { '@type': 'Question', 'name': 'Which countries does Smartious serve?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious serves students worldwide with dedicated country support for the United Arab Emirates (Dubai, Abu Dhabi, Sharjah), United Kingdom, United States, Canada, Australia, Nigeria, South Africa, Qatar, Egypt, and Kenya. Live classes are scheduled to suit multiple time zones with full recording access for asynchronous review.' } },
+              { '@type': 'Question', 'name': 'Will my child get a real qualification through Smartious?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes. Smartious students sit official Cambridge International (IGCSE, A-Level), Pearson Edexcel, IB Diploma and American High School Diploma examinations at registered British Council and Cambridge International centres worldwide. The qualifications earned are identical to those from any other school using the same boards and are accepted by universities globally.' } },
+              { '@type': 'Question', 'name': 'How do online students at Smartious socialise?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious students join live virtual classes daily with classmates across multiple countries. Every Wednesday from 2:00 PM to 4:00 PM students participate in the enrichment programme covering sports, clubs, leadership and arts. Online clubs include debate, coding, AI, Model UN, journalism and entrepreneurship.' } },
+              { '@type': 'Question', 'name': 'Can my child join Smartious mid-year?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes. Smartious accepts enrolments year-round. Mid-year transfers are common, especially for families relocating internationally. Our admissions team assesses where your child is in their curriculum and places them at the right point with no loss of progress.' } },
+            ],
+          })}}/>
+
+          {/* ═══════════════════════════════════════════
+              TRUST BAND — directly under hero
+              Above-the-fold credibility before scroll.
+          ═══════════════════════════════════════════ */}
+          <section style={{background:V.bone,borderBottom:'1px solid '+V.bone3}}>
+            <div className="wrap" style={{padding:'32px 48px'}}>
+              <div style={{
+                display:'grid',
+                gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))',
+                gap:24,
+                textAlign:'center',
+              }}>
+                {[
+                  ['Since 2018', 'Founded in Nairobi'],
+                  ['Cambridge & Edexcel', 'Officially registered exam pathway'],
+                  ['IB Diploma', 'Full Diploma Programme'],
+                  ['British Council', 'Exam centres worldwide'],
+                  ['98% pass rate', '2024 IGCSE & A-Level cohort'],
+                ].map(([h, sub]) => (
+                  <div key={h}>
+                    <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,lineHeight:1.25}}>{h}</div>
+                    <div style={{fontSize:11.5,color:V.sl,marginTop:4,letterSpacing:'.02em'}}>{sub}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ═══════════════════════════════════════════
+              COUNTRY ROUTER — links to the 10 country pages
+              Big SEO win: surfaces all country pages from
+              homepage so they get internal-link authority.
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.white}}><div className="wrap">
+            <div className="sec-hd reveal" style={{textAlign:'center'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Built for global families</div>
+              <h2 className="display">An Online School That <em>Travels With You</em></h2>
+              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>Same curriculum, same teachers, same friends — wherever life takes you. Click your country for local exam centres, fee guidance and regulatory information.</p>
+            </div>
+            <div style={{
+              display:'grid',
+              gridTemplateColumns:'repeat(auto-fill, minmax(180px, 1fr))',
+              gap:12,
+              marginTop:36,
+            }}>
+              {[
+                {country:'UAE', slug:'uae', sub:'Dubai · Abu Dhabi'},
+                {country:'Qatar', slug:'qatar', sub:'Doha'},
+                {country:'United Kingdom', slug:'uk', sub:'London · Manchester'},
+                {country:'United States', slug:'usa', sub:'Coast to coast'},
+                {country:'Canada', slug:'canada', sub:'Toronto · Vancouver'},
+                {country:'Australia', slug:'australia', sub:'Sydney · Melbourne'},
+                {country:'Nigeria', slug:'nigeria', sub:'Lagos · Abuja'},
+                {country:'South Africa', slug:'south-africa', sub:'Johannesburg · Cape Town'},
+                {country:'Egypt', slug:'egypt', sub:'Cairo · Alexandria'},
+                {country:'Kenya', slug:null, sub:'Nairobi HQ · Diamond Plaza'},
+              ].map(c => (
+                <div key={c.country}
+                  onClick={() => c.slug ? openCountry(c.slug) : P('global')}
+                  style={{
+                    padding:'14px 16px',
+                    background:V.bone,
+                    border:'1px solid '+V.line,
+                    borderRadius:8,
+                    cursor:'pointer',
+                    transition:'transform .15s, border-color .15s, box-shadow .15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.borderColor=V.cr+'60'; e.currentTarget.style.boxShadow='0 6px 18px rgba(139,26,46,.10)' }}
+                  onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.borderColor=V.line; e.currentTarget.style.boxShadow='none' }}>
+                  <div style={{fontSize:13.5,fontWeight:700,color:V.ink,marginBottom:2}}>{c.country}</div>
+                  <div style={{fontSize:11,color:V.sl}}>{c.sub}</div>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* ═══════════════════════════════════════════
+              HOW IT WORKS — 4 steps
+              Demystifies the model so first-time visitors
+              understand before being asked to enrol.
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.bone}}><div className="wrap">
+            <div className="sec-hd reveal" style={{textAlign:'center'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>How Smartious works</div>
+              <h2 className="display">From Enquiry to <em>University Offer</em></h2>
+              <p className="lead" style={{marginTop:14,maxWidth:640,margin:'14px auto 0'}}>A clear, four-step path. Most families complete steps 1–2 in under a week.</p>
+            </div>
+
+            <div style={{
+              display:'grid',
+              gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))',
+              gap:16,
+              marginTop:36,
+            }}>
+              {[
+                ['01', 'Free consultation', 'Speak with our admissions team. We review your child\'s current academic level, family goals, and the curriculum that best fits. No commitment.'],
+                ['02', 'Personalised plan', 'We map a study plan: subjects, weekly timetable, exam pathway and teacher allocation. Year-round enrolment — start within days.'],
+                ['03', 'Live online classes', 'Daily live lessons with degree-qualified specialists. Recordings available. Weekly progress reports for parents. Wednesday enrichment programme included.'],
+                ['04', 'Exams & university', 'Sit Cambridge, Edexcel, IB or American exams at registered centres locally. Full UCAS, Common App and university application support.'],
+              ].map(([n, h, p]) => (
+                <div key={n} style={{
+                  background:V.white,
+                  border:'1px solid '+V.line,
+                  borderRadius:10,
+                  padding:'24px 22px',
+                  position:'relative',
+                }}>
+                  <div style={{
+                    fontFamily:"'Playfair Display',serif",
+                    fontSize:'2.2rem',
+                    fontWeight:400,
+                    color:V.gold2,
+                    lineHeight:1,
+                    marginBottom:12,
+                    fontStyle:'italic',
+                  }}>{n}</div>
+                  <h3 style={{
+                    fontSize:15,
+                    fontWeight:700,
+                    color:V.ink,
+                    marginBottom:8,
+                    lineHeight:1.3,
+                  }}>{h}</h3>
+                  <p style={{
+                    fontSize:13,
+                    color:V.sl,
+                    lineHeight:1.65,
+                  }}>{p}</p>
+                </div>
+              ))}
+            </div>
+
+            <div style={{textAlign:'center',marginTop:32}}>
+              <button className="btn-p" onClick={() => P('consult')}>
+                Book Free Consultation
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div></section>
+
+          {/* ═══════════════════════════════════════════
+              WHY SMARTIOUS — comparison-intent capture
+              Targets "Smartious vs Wolsey Hall", "vs
+              CambriLearn", "vs international school"
+              search intent without naming competitors
+              directly.
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.ink, color:'#fff'}}><div className="wrap">
+            <div className="sec-hd reveal" style={{textAlign:'center'}}>
+              <div className="eyebrow" style={{justifyContent:'center',color:V.gold2}}>Why Smartious</div>
+              <h2 className="display" style={{color:'#fff'}}>The Smartious <em style={{color:V.gold3}}>Advantage</em></h2>
+              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0',color:'rgba(255,255,255,.7)'}}>What separates Smartious from a typical online school or a high-fee international school.</p>
+            </div>
+
+            <div style={{
+              display:'grid',
+              gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))',
+              gap:18,
+              marginTop:36,
+            }}>
+              {[
+                ['Live, not self-paced','Every Smartious class is taught live by a qualified teacher in real time. Recordings are a supplement, not the product. This is how children actually learn — not watching videos alone.'],
+                ['Fraction of private fees','USD 4,000–6,000 per year for a full programme. Private international schools in Dubai, Lagos and Cairo charge 5–25× more for the same Cambridge or American curriculum.'],
+                ['Real exam credentials','Students sit Cambridge IGCSE, A-Level, IB, Edexcel and AP examinations at official British Council and Cambridge centres. Qualifications are identical to brick-and-mortar school graduates.'],
+                ['Continuity across moves','One school that follows your family from Nairobi to Dubai to London. Same teachers, same curriculum, same friends — no disruption when life changes.'],
+                ['Wednesday enrichment','Every week, 2-hour reserved window for sports, clubs, leadership and music. The kind of holistic education premium private schools charge a fortune to provide.'],
+                ['AI-augmented, human-led','Mshauri AI tutor reinforces concepts between live lessons. Adaptive practice, instant feedback. AI accelerates the human teacher rather than replacing them.'],
+              ].map(([h, p]) => (
+                <div key={h} style={{
+                  background:'rgba(255,255,255,.03)',
+                  border:'1px solid rgba(255,255,255,.08)',
+                  borderRadius:10,
+                  padding:'20px 18px',
+                }}>
+                  <div style={{
+                    width:32, height:32, borderRadius:6,
+                    background:'rgba(212,175,55,.15)',
+                    border:'1px solid rgba(212,175,55,.35)',
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    marginBottom:14,
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={V.gold2} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <h3 style={{
+                    fontSize:14.5, fontWeight:700, color:'#fff',
+                    marginBottom:8, lineHeight:1.3,
+                  }}>{h}</h3>
+                  <p style={{fontSize:12.5, color:'rgba(255,255,255,.65)', lineHeight:1.65}}>{p}</p>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* ═══════════════════════════════════════════
+              HOMEPAGE FAQ — fast intent capture
+              Visible accordion answers common questions
+              on the homepage itself. Schema injected above.
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.bone}}><div className="wrap">
+            <div className="sec-hd reveal" style={{textAlign:'center'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Common questions</div>
+              <h2 className="display">Quick <em>Answers</em></h2>
+              <p className="lead" style={{marginTop:14,maxWidth:580,margin:'14px auto 0'}}>The most common questions, answered briefly. See the FAQ page for more.</p>
+            </div>
+            <div style={{maxWidth:780, margin:'36px auto 0'}}>
+              {[
+                ['What is Smartious Homeschool?', 'Smartious Homeschool & eSchool is an accredited international online school founded in Nairobi in 2018. We deliver Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula to over 2,000 students worldwide. All classes are live, taught by degree-qualified specialists.'],
+                ['How much does Smartious cost?', 'From USD 85 per month for single subjects. Full-year programmes are USD 4,000–6,000 — a fraction of private international school fees. Payment plans and sibling discounts available.'],
+                ['Will my child get a real qualification?', 'Yes. Students sit official Cambridge International, Pearson Edexcel, IB Diploma or American High School Diploma exams at British Council and Cambridge centres worldwide. Qualifications are identical to those from any other school.'],
+                ['Which countries do you serve?', 'Dedicated country pages and support for the UAE, UK, USA, Canada, Australia, Nigeria, South Africa, Qatar, Egypt and Kenya. Live classes scheduled across time zones with recordings for asynchronous catch-up.'],
+                ['How do online students socialise?', 'Daily live classes with international classmates. Wednesday enrichment programme (2–4 PM) with sports, clubs, leadership and arts. Active online clubs in debate, coding, AI, Model UN and journalism.'],
+                ['Can my child join mid-year?', 'Yes. We accept enrolments year-round. Mid-year transfers are common for relocating families. We assess current academic level and place students at the right point with no loss of progress.'],
+              ].map(([q, a], i) => (
+                <details key={i} style={{
+                  padding:'18px 22px', marginBottom:10,
+                  background:V.white,
+                  border:'1px solid '+V.line,
+                  borderRadius:8, cursor:'pointer',
+                }}>
+                  <summary style={{
+                    fontSize:15, fontWeight:700, color:V.ink,
+                    listStyle:'none', outline:'none',
+                  }}>{q}</summary>
+                  <p style={{
+                    fontSize:13.5, color:V.sl,
+                    lineHeight:1.75, marginTop:12,
+                  }}>{a}</p>
+                </details>
+              ))}
+              <div style={{textAlign:'center', marginTop:24}}>
+                <button className="btn-o" onClick={() => P('faq')}>
+                  Full FAQ
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+            </div>
+          </div></section>
 
           {/* HIGHLIGHTS */}
           <section className="sec" style={{background:V.bone}}>
