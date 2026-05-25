@@ -12193,3 +12193,395 @@ function StudentBookCard({ book, onOpen }) {
     </div>
   )
 }
+
+// ═══════════════════════════════════════════════════════════
+// LessonPracticeTab
+// ═══════════════════════════════════════════════════════════
+// Embedded adaptive practice for the Lesson Player. Pulls
+// questions from the real Question Bank (GET /api/questions)
+// filtered by the lesson's subject + curriculum + topic, so
+// students practice on exactly what they just watched/read.
+//
+// Props:
+//   subject     — subject name (matches Question.subject)
+//   curriculum  — curriculum id (matches Question.curriculum)
+//   topic       — topic name (matches Question.topic). Optional;
+//                 when absent the practice covers the whole subject.
+//   user        — current student (for XP tracking)
+//   toast       — toast helper
+//
+// Render stages: 'loading' | 'empty' | 'quiz' | 'result'
+//
+// Question shape (from /api/questions): supports nested parts.
+// For embedded practice we currently render MCQs only — a
+// question without an MCQ leaf is skipped. This keeps the
+// embedded loop fast-feedback. Long-form questions belong in
+// homework / exams, not lesson practice.
+// ═══════════════════════════════════════════════════════════
+function LessonPracticeTab({ subject, curriculum, topic, user, toast }) {
+  const [stage, setStage] = useState('loading')
+  const [questions, setQuestions] = useState([])
+  const [answers, setAnswers] = useState({})  // { qIndex: optionString }
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState(null)
+
+  // Local XP — uses same key as PracticeTab so stats unify.
+  const [xp, setXp] = useState(() => {
+    try { return parseInt(localStorage.getItem('sm_practice_xp') || '0', 10) || 0 } catch { return 0 }
+  })
+
+  // Pick an MCQ leaf out of a possibly-nested question. Returns null
+  // if no MCQ found. We pick the first MCQ leaf we hit in DFS order.
+  const findMcqLeaf = (q) => {
+    if (q.type === 'mcq' && Array.isArray(q.options) && q.options.length >= 2) {
+      return {
+        text: q.questionText || q.text || '(no question text)',
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation || '',
+        marks: q.marks || 1,
+      }
+    }
+    const parts = Array.isArray(q.parts) ? q.parts : []
+    for (const p of parts) {
+      if (p.type === 'mcq' && Array.isArray(p.options) && p.options.length >= 2) {
+        return {
+          text: (q.questionText || q.text || '') + (p.text ? ' — ' + p.text : ''),
+          options: p.options,
+          correctAnswer: p.correctAnswer,
+          explanation: p.explanation || q.explanation || '',
+          marks: p.marks || 1,
+        }
+      }
+      const nested = findMcqLeaf(p)
+      if (nested) return nested
+    }
+    return null
+  }
+
+  // Shuffle helper
+  const shuffle = (arr) => {
+    const a = [...arr]
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[a[i], a[j]] = [a[j], a[i]]
+    }
+    return a
+  }
+
+  // Fetch questions for this lesson context
+  const loadQuestions = async () => {
+    setStage('loading')
+    setError(null)
+    setAnswers({})
+    setResult(null)
+    try {
+      const params = { type: 'mcq', limit: 40 }
+      if (curriculum) params.curriculum = curriculum
+      if (subject)    params.subject    = subject
+      if (topic)      params.topic      = topic
+
+      const { data } = await api.get('/questions', { params })
+      const raw = data?.questions || []
+
+      // Reduce each question to a renderable MCQ leaf (if any)
+      const playable = []
+      for (const q of raw) {
+        const leaf = findMcqLeaf(q)
+        if (!leaf) continue
+        playable.push({
+          _id: q._id,
+          text: leaf.text,
+          options: leaf.options,
+          correctAnswer: leaf.correctAnswer,
+          explanation: leaf.explanation,
+          marks: leaf.marks,
+          shuffledOptions: shuffle(leaf.options),
+        })
+      }
+
+      if (playable.length === 0) {
+        setStage('empty')
+        setQuestions([])
+        return
+      }
+
+      // Pick up to 5 random ones
+      const picked = shuffle(playable).slice(0, 5).map((q, i) => ({ ...q, qIndex: i }))
+      setQuestions(picked)
+      setStage('quiz')
+    } catch (e) {
+      setError(e?.response?.data?.message || e.message || 'Failed to load practice questions.')
+      setStage('empty')
+    }
+  }
+
+  useEffect(() => {
+    loadQuestions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subject, curriculum, topic])
+
+  // Compare student's answer to correctAnswer. correctAnswer in the
+  // schema is `Mixed` so it can be:
+  //   - a string (the option text)                              → direct compare
+  //   - an array of strings (multi-correct, all required)       → not handled here; first match only
+  //   - an index number into options                            → resolve to option text first
+  // We coerce to the option *string* for comparison.
+  const normalizeCorrect = (q) => {
+    const c = q.correctAnswer
+    if (typeof c === 'string') return c
+    if (Array.isArray(c) && c.length > 0) return String(c[0])
+    if (typeof c === 'number' && q.options && q.options[c] !== undefined) return q.options[c]
+    return null
+  }
+
+  const submit = () => {
+    let correct = 0
+    const breakdown = questions.map(q => {
+      const studentAns = answers[q.qIndex]
+      const correctOpt = normalizeCorrect(q)
+      const isCorrect = studentAns != null && correctOpt != null && studentAns === correctOpt
+      if (isCorrect) correct++
+      return { ...q, studentAns, correctOpt, isCorrect }
+    })
+    const total = questions.length
+    const score = total > 0 ? Math.round((correct / total) * 100) : 0
+    const xpEarned = correct * 20
+    const newXp = xp + xpEarned
+    setXp(newXp)
+    try { localStorage.setItem('sm_practice_xp', String(newXp)) } catch {}
+
+    // Append to practice history so the dashboard stat carries over
+    try {
+      const hist = JSON.parse(localStorage.getItem('sm_practice_history') || '[]')
+      hist.push({
+        subject, topic, score, correct, total,
+        xpEarned,
+        date: new Date().toISOString(),
+        source: 'lesson-player',
+      })
+      localStorage.setItem('sm_practice_history', JSON.stringify(hist))
+    } catch {}
+
+    setResult({ correct, total, score, xpEarned, breakdown })
+    setStage('result')
+    if (score >= 80)      toast?.ok?.(`Excellent! +${xpEarned} XP`)
+    else if (score >= 60) toast?.ok?.(`Good work! +${xpEarned} XP`)
+    else                  toast?.info?.(`+${xpEarned} XP. Try again to improve!`)
+  }
+
+  const tryAgain = () => loadQuestions()
+
+  // ── LOADING ──
+  if (stage === 'loading') {
+    return (
+      <div style={{ padding: '40px 20px', textAlign: 'center', color: '#9A9A9A', fontSize: 13 }}>
+        Loading practice questions...
+      </div>
+    )
+  }
+
+  // ── EMPTY (no questions in bank yet, or fetch failed) ──
+  if (stage === 'empty') {
+    return (
+      <div style={{
+        padding: 28, background: '#FBFAF5',
+        border: '1px solid #E8E2D6', borderRadius: 10,
+        textAlign: 'center',
+      }}>
+        <div style={{
+          fontFamily: "'Instrument Serif', serif",
+          fontSize: 20, color: '#1A1A1A', marginBottom: 8,
+        }}>
+          No practice questions for this topic yet
+        </div>
+        <div style={{ fontSize: 13, color: '#6B6B6B', lineHeight: 1.6, marginBottom: 14, maxWidth: 460, margin: '0 auto 14px' }}>
+          {topic
+            ? <>Your teacher hasn't added practice questions for <strong>{topic}</strong> yet. Check back soon, or try another topic in the meantime.</>
+            : <>No multiple-choice questions are available for this subject yet.</>}
+        </div>
+        {error && (
+          <div style={{ fontSize: 11.5, color: '#9A2434', marginBottom: 12 }}>
+            {error}
+          </div>
+        )}
+        <button onClick={loadQuestions}
+          style={{
+            background: '#7D1025', color: '#fff', border: 'none',
+            padding: '8px 18px', borderRadius: 7,
+            fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+          }}>
+          Refresh
+        </button>
+      </div>
+    )
+  }
+
+  // ── RESULT ──
+  if (stage === 'result' && result) {
+    const colour = result.score >= 80 ? '#15803D' : result.score >= 60 ? '#C9A030' : '#9A2434'
+    return (
+      <div>
+        <div style={{
+          padding: '22px 26px',
+          background: `linear-gradient(135deg, ${colour}, ${colour}DD)`,
+          color: '#fff',
+          borderRadius: 12, marginBottom: 16,
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6 }}>
+            Practice complete
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 38, fontWeight: 400, lineHeight: 1 }}>
+              {result.score}%
+            </div>
+            <div style={{ fontSize: 14, opacity: .9 }}>
+              {result.correct} of {result.total} correct · +{result.xpEarned} XP
+            </div>
+          </div>
+        </div>
+
+        {/* Per-question breakdown */}
+        <div style={{ marginBottom: 16 }}>
+          {result.breakdown.map((q, i) => (
+            <div key={i} style={{
+              padding: 14, marginBottom: 10,
+              background: '#fff',
+              border: '1px solid ' + (q.isCorrect ? '#BBF7D0' : '#FECACA'),
+              borderLeft: '4px solid ' + (q.isCorrect ? '#15803D' : '#9A2434'),
+              borderRadius: 7,
+            }}>
+              <div style={{
+                fontSize: 10.5, fontWeight: 800,
+                color: q.isCorrect ? '#15803D' : '#9A2434',
+                letterSpacing: '.08em', textTransform: 'uppercase',
+                marginBottom: 6,
+              }}>
+                Q{i + 1} · {q.isCorrect ? 'Correct' : 'Incorrect'}
+              </div>
+              <div style={{ fontSize: 13, color: '#1A1A1A', lineHeight: 1.5, marginBottom: 8 }}>
+                {q.text}
+              </div>
+              <div style={{ fontSize: 12, color: '#6B6B6B', marginBottom: 4 }}>
+                Your answer: <strong style={{ color: q.isCorrect ? '#15803D' : '#9A2434' }}>
+                  {q.studentAns || '(no answer)'}
+                </strong>
+              </div>
+              {!q.isCorrect && q.correctOpt && (
+                <div style={{ fontSize: 12, color: '#15803D', marginBottom: 4 }}>
+                  Correct: <strong>{q.correctOpt}</strong>
+                </div>
+              )}
+              {q.explanation && (
+                <div style={{
+                  fontSize: 11.5, color: '#6B6B6B',
+                  background: '#FBFAF5', padding: 8, borderRadius: 5,
+                  marginTop: 6, lineHeight: 1.5,
+                }}>
+                  <strong>Why:</strong> {q.explanation}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <button onClick={tryAgain}
+          style={{
+            background: '#7D1025', color: '#fff', border: 'none',
+            padding: '10px 20px', borderRadius: 7,
+            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+          }}>
+          Try another set
+        </button>
+      </div>
+    )
+  }
+
+  // ── QUIZ ──
+  const allAnswered = questions.every(q => answers[q.qIndex] != null)
+  return (
+    <div>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginBottom: 14, flexWrap: 'wrap', gap: 8,
+      }}>
+        <div>
+          <div style={{
+            fontSize: 10, fontWeight: 800, color: '#7D1025',
+            letterSpacing: '.12em', textTransform: 'uppercase',
+            marginBottom: 3,
+          }}>Adaptive practice</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>
+            {topic || subject || 'Practice'} · {questions.length} questions
+          </div>
+        </div>
+        <div style={{
+          fontSize: 11, color: '#6B6B6B',
+          background: '#FBFAF5', padding: '5px 12px', borderRadius: 99,
+          border: '1px solid #E8E2D6',
+        }}>
+          {Object.keys(answers).length} / {questions.length} answered
+        </div>
+      </div>
+
+      {questions.map((q, i) => (
+        <div key={q._id} style={{
+          padding: 16, marginBottom: 12,
+          background: '#fff',
+          border: '1px solid #E8E2D6',
+          borderRadius: 8,
+        }}>
+          <div style={{
+            fontSize: 10.5, fontWeight: 800, color: '#7D1025',
+            letterSpacing: '.08em', textTransform: 'uppercase',
+            marginBottom: 8,
+          }}>Question {i + 1}</div>
+          <div style={{
+            fontSize: 14, color: '#1A1A1A', lineHeight: 1.55,
+            marginBottom: 12, whiteSpace: 'pre-wrap',
+          }}>
+            {q.text}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+            {q.shuffledOptions.map((opt, oi) => {
+              const selected = answers[q.qIndex] === opt
+              return (
+                <label key={oi}
+                  style={{
+                    display: 'flex', alignItems: 'flex-start', gap: 10,
+                    padding: '10px 12px',
+                    background: selected ? '#FDF7E2' : '#FBFAF5',
+                    border: '1.5px solid ' + (selected ? '#C9A030' : '#E8E2D6'),
+                    borderRadius: 6, cursor: 'pointer',
+                    transition: 'background .12s, border-color .12s',
+                  }}>
+                  <input type="radio"
+                    name={`q-${q.qIndex}`}
+                    checked={selected}
+                    onChange={() => setAnswers({ ...answers, [q.qIndex]: opt })}
+                    style={{ marginTop: 2, cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: 13, color: '#1A1A1A', lineHeight: 1.45 }}>{opt}</span>
+                </label>
+              )
+            })}
+          </div>
+        </div>
+      ))}
+
+      <button onClick={submit} disabled={!allAnswered}
+        style={{
+          background: allAnswered ? '#7D1025' : '#D5CFC8',
+          color: '#fff', border: 'none',
+          padding: '11px 22px', borderRadius: 8,
+          fontSize: 13.5, fontWeight: 800,
+          cursor: allAnswered ? 'pointer' : 'not-allowed',
+        }}>
+        {allAnswered ? 'Submit answers' : `Answer all ${questions.length} questions to submit`}
+      </button>
+    </div>
+  )
+}
+
+// Export so LessonPlayerTab can import it
+export { LessonPracticeTab }
