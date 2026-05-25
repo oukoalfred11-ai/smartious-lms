@@ -1943,7 +1943,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               TIMETABLE
           ════════════════════════════════════════════ */}
-          {page === 'timetable' && <TimetableTab user={user} store={store} setPage={setPage} toast={toast} />}
+          {page === 'timetable' && <RealTimetableTab user={user} setPage={setPage} toast={toast} />}
 
           {page === 'attendance' && <StudentAttendancePage user={user} toast={toast} />}
 
@@ -13035,6 +13035,542 @@ function StudentAttendancePage({ user, toast }) {
           )}
         </>
       )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// RealTimetableTab
+// ═══════════════════════════════════════════════════════════
+// Backend-driven student timetable. Reads recurring weekly slots
+// from /api/timetable/me where the student is in `assignedStudents`
+// or matches the entry's audience curriculum + grade.
+//
+// View modes:
+//   - week-grid: 7-column × time-row grid for this week's slots
+//   - list:      chronological list grouped by day
+//
+// Click any slot to open the teacher's profile preview modal —
+// shows display picture and basic info, NO contact details
+// (students must use the Communication module to reach teachers).
+// ═══════════════════════════════════════════════════════════
+function RealTimetableTab({ user, setPage, toast }) {
+  const [entries, setEntries] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError]   = useState(null)
+  const [view, setView]     = useState('grid')   // 'grid' | 'list'
+  const [tick, setTick]     = useState(0)
+  const [teacherModal, setTeacherModal] = useState(null)   // teacher object to preview
+
+  // Re-evaluate "live now" every 30s
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 30000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Load from backend
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    api.get('/timetable/me')
+      .then(res => {
+        if (cancelled) return
+        setEntries(res.data?.data?.entries || [])
+      })
+      .catch(e => {
+        if (cancelled) return
+        setError(e?.response?.data?.message || e.message || 'Failed to load timetable.')
+        setEntries([])
+      })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [user?._id])
+
+  // ── Display helpers ──
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const DAYS_LONG = {
+    Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',
+    Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday',
+  }
+
+  // Convert "HH:MM" to minutes since midnight
+  const toMinutes = (hhmm) => {
+    if (!hhmm) return 0
+    const [h, m] = hhmm.split(':').map(Number)
+    return (h || 0) * 60 + (m || 0)
+  }
+
+  // Format "HH:MM" as "9:00 am" / "1:30 pm"
+  const fmt = (hhmm) => {
+    if (!hhmm) return ''
+    const [h, m] = hhmm.split(':').map(Number)
+    const mer = h >= 12 ? 'PM' : 'AM'
+    let hr = h % 12
+    if (hr === 0) hr = 12
+    return `${hr}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
+  }
+
+  // Current week's "today" + now-in-minutes for live highlighting
+  const now = new Date()
+  const todayIdx = (now.getDay() + 6) % 7   // Convert Sun-first to Mon-first 0..6
+  const nowMins = now.getHours() * 60 + now.getMinutes()
+  const isLive = (entry) => {
+    const dIdx = DAYS.indexOf(entry.dayOfWeek)
+    if (dIdx !== todayIdx) return false
+    const s = toMinutes(entry.startTime)
+    const e = toMinutes(entry.endTime)
+    return nowMins >= s && nowMins < e
+  }
+  const isPastToday = (entry) => {
+    const dIdx = DAYS.indexOf(entry.dayOfWeek)
+    if (dIdx !== todayIdx) return false
+    return nowMins >= toMinutes(entry.endTime)
+  }
+
+  // Subject colour mapping (matches the rest of the portal)
+  const subjColours = {
+    'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
+    'Biology': '#7C2D12', 'English': '#6B21A8', 'English Language': '#6B21A8',
+    'Literature': '#A21CAF', 'English Literature': '#A21CAF',
+    'History': '#92400E', 'Geography': '#0F766E',
+    'Computer Science': '#1F2937', 'Business Studies': '#7E22CE',
+    'Economics': '#9F1239', 'Sociology': '#0369A1',
+    'ESL': '#475569',
+  }
+  const colourFor = (subject) => subjColours[subject] || '#8B1A2E'
+
+  // ── PAGE HEADER ──
+  const header = (
+    <div style={{ marginBottom: 20 }}>
+      <div className="sec-tag">Weekly schedule</div>
+      <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
+        My Timetable
+      </h2>
+      <div style={{ fontSize: 13, color: '#6B6B6B' }}>
+        Your recurring weekly classes. Click any class to view the teacher.
+      </div>
+    </div>
+  )
+
+  if (loading) {
+    return (
+      <div>
+        {header}
+        <div style={{ padding: '40px 20px', textAlign: 'center', color: '#9A9A9A', fontSize: 13 }}>
+          Loading timetable...
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div>
+        {header}
+        <div style={{
+          background: '#FDE7EC',
+          border: '1px solid #F8B4C0',
+          borderRadius: 8, padding: '14px 18px',
+          fontSize: 13, color: '#7D1025',
+        }}>
+          Could not load timetable: {error}
+        </div>
+      </div>
+    )
+  }
+
+  if (entries.length === 0) {
+    return (
+      <div>
+        {header}
+        <div style={{
+          padding: 28, background: '#FBFAF5',
+          border: '1px solid #E8E2D6', borderRadius: 10,
+          textAlign: 'center',
+        }}>
+          <div style={{
+            fontFamily: "'Instrument Serif', serif",
+            fontSize: 20, color: '#1A0F0E', marginBottom: 6,
+          }}>
+            No timetable entries yet
+          </div>
+          <div style={{ fontSize: 13, color: '#857973', lineHeight: 1.6, maxWidth: 460, margin: '0 auto' }}>
+            Your teachers haven't added you to any recurring class slots.
+            Once they do, your weekly schedule will show here.
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Group entries by day-of-week ──
+  const byDay = {}
+  for (const d of DAYS) byDay[d] = []
+  for (const e of entries) {
+    if (byDay[e.dayOfWeek]) byDay[e.dayOfWeek].push(e)
+  }
+  for (const d of DAYS) {
+    byDay[d].sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime))
+  }
+
+  return (
+    <div>
+      {header}
+
+      {/* View switcher */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        {[
+          ['grid', 'Week grid'],
+          ['list', 'List view'],
+        ].map(([k, l]) => (
+          <button key={k} onClick={() => setView(k)}
+            style={{
+              background: view === k ? '#7D1025' : 'transparent',
+              color: view === k ? '#fff' : '#564844',
+              border: '1.5px solid ' + (view === k ? '#7D1025' : '#E8E2D6'),
+              padding: '7px 14px', borderRadius: 6,
+              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+            }}>{l}</button>
+        ))}
+      </div>
+
+      {/* ── GRID VIEW ── */}
+      {view === 'grid' && (
+        <div style={{
+          background: '#fff',
+          border: '1px solid #E8E2D6',
+          borderRadius: 10, padding: 14,
+          overflowX: 'auto',
+        }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(140px, 1fr))', gap: 8, minWidth: 700 }}>
+            {DAYS.map((d, idx) => (
+              <div key={d} style={{
+                fontSize: 10, fontWeight: 800,
+                letterSpacing: '.1em', textTransform: 'uppercase',
+                color: idx === todayIdx ? '#7D1025' : '#857973',
+                textAlign: 'center',
+                paddingBottom: 8,
+                borderBottom: idx === todayIdx ? '2px solid #C9A030' : '1px solid #F4EFEB',
+              }}>
+                {DAYS_LONG[d]}
+                {idx === todayIdx && <div style={{ fontSize: 8, marginTop: 2, fontWeight: 700, color: '#C9A030' }}>TODAY</div>}
+              </div>
+            ))}
+            {DAYS.map((d, idx) => (
+              <div key={'col-' + d} style={{
+                display: 'flex', flexDirection: 'column', gap: 6,
+                minHeight: 100,
+                opacity: byDay[d].length === 0 ? 0.4 : 1,
+              }}>
+                {byDay[d].length === 0 && (
+                  <div style={{
+                    fontSize: 11, color: '#CFC7C2', textAlign: 'center',
+                    paddingTop: 30, fontStyle: 'italic',
+                  }}>—</div>
+                )}
+                {byDay[d].map(entry => {
+                  const live = isLive(entry)
+                  const past = isPastToday(entry)
+                  const col = colourFor(entry.subject)
+                  return (
+                    <div key={entry._id} onClick={() => setTeacherModal(entry.teacherId)}
+                      style={{
+                        background: live
+                          ? `linear-gradient(135deg, ${col}, ${col}DD)`
+                          : '#fff',
+                        color: live ? '#fff' : '#1A0F0E',
+                        border: '1.5px solid ' + (live ? col : col + '40'),
+                        borderRadius: 8,
+                        padding: '10px 12px',
+                        cursor: 'pointer',
+                        opacity: past ? 0.55 : 1,
+                        transition: 'transform .12s, box-shadow .12s',
+                        boxShadow: live ? `0 4px 12px ${col}40` : 'none',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; if (!live) e.currentTarget.style.boxShadow = `0 4px 12px ${col}25` }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; if (!live) e.currentTarget.style.boxShadow = 'none' }}
+                    >
+                      {live && (
+                        <div style={{
+                          fontSize: 9, fontWeight: 800, letterSpacing: '.1em',
+                          textTransform: 'uppercase', marginBottom: 4,
+                          display: 'flex', alignItems: 'center', gap: 4,
+                        }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }}/>
+                          Live now
+                        </div>
+                      )}
+                      <div style={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.3, marginBottom: 4 }}>
+                        {entry.subject}
+                      </div>
+                      <div style={{ fontSize: 10.5, opacity: live ? .95 : .65, marginBottom: 2 }}>
+                        {fmt(entry.startTime)} – {fmt(entry.endTime)}
+                      </div>
+                      {entry.teacherId && (
+                        <div style={{ fontSize: 10.5, opacity: live ? .9 : .55, fontWeight: 500 }}>
+                          {entry.teacherId.firstName} {(entry.teacherId.lastName || '')[0]}.
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── LIST VIEW ── */}
+      {view === 'list' && (
+        <div>
+          {DAYS.map((d, idx) => {
+            const items = byDay[d]
+            if (items.length === 0) return null
+            return (
+              <div key={'list-' + d} style={{ marginBottom: 18 }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  marginBottom: 8, paddingBottom: 6,
+                  borderBottom: '1px solid #F4EFEB',
+                }}>
+                  <div style={{
+                    fontSize: 11, fontWeight: 800,
+                    letterSpacing: '.1em', textTransform: 'uppercase',
+                    color: idx === todayIdx ? '#7D1025' : '#564844',
+                  }}>{DAYS_LONG[d]}</div>
+                  {idx === todayIdx && (
+                    <span style={{
+                      fontSize: 9, fontWeight: 800,
+                      letterSpacing: '.08em', color: '#C9A030',
+                      background: '#FDF7E2', padding: '2px 8px', borderRadius: 99,
+                    }}>TODAY</span>
+                  )}
+                </div>
+                {items.map(entry => {
+                  const live = isLive(entry)
+                  const past = isPastToday(entry)
+                  const col = colourFor(entry.subject)
+                  return (
+                    <div key={entry._id} onClick={() => setTeacherModal(entry.teacherId)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 14,
+                        padding: '12px 14px', marginBottom: 6,
+                        background: '#fff',
+                        border: '1px solid #E8E2D6',
+                        borderLeft: '4px solid ' + col,
+                        borderRadius: 7, cursor: 'pointer',
+                        opacity: past ? 0.6 : 1,
+                        transition: 'background .12s',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#FBFAF5'}
+                      onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                    >
+                      <div style={{
+                        width: 60, flexShrink: 0,
+                        fontSize: 11, fontWeight: 700, color: '#857973',
+                      }}>
+                        {fmt(entry.startTime)}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: '#1A0F0E', marginBottom: 2 }}>
+                          {entry.subject}
+                          {live && (
+                            <span style={{
+                              marginLeft: 8,
+                              fontSize: 9, fontWeight: 800, letterSpacing: '.1em',
+                              textTransform: 'uppercase', color: '#fff',
+                              background: '#B91C1C', padding: '2px 7px', borderRadius: 99,
+                            }}>Live</span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 12, color: '#857973' }}>
+                          {entry.teacherId && `${entry.teacherId.firstName} ${entry.teacherId.lastName || ''}`.trim()}
+                          {entry.location && ' · ' + entry.location}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 11, color: '#857973', textAlign: 'right' }}>
+                        {entry.endTime && fmt(entry.endTime)}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Teacher profile preview modal */}
+      {teacherModal && (
+        <TeacherProfilePreview teacher={teacherModal} onClose={() => setTeacherModal(null)} />
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// TeacherProfilePreview
+// ═══════════════════════════════════════════════════════════
+// Click-to-view card showing the teacher's display picture and
+// basic info. Deliberately omits phone and email — students must
+// route their communication through the Communication module
+// (which goes through the school's email channel and is logged).
+// ═══════════════════════════════════════════════════════════
+function TeacherProfilePreview({ teacher, onClose }) {
+  if (!teacher) return null
+
+  const fullName = `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim()
+  const initials = ((teacher.firstName?.[0] || '') + (teacher.lastName?.[0] || '')).toUpperCase()
+
+  return (
+    <div onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0,
+        background: 'rgba(20,15,10,0.65)', zIndex: 99999,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 20,
+      }}>
+      <div onClick={e => e.stopPropagation()}
+        style={{
+          background: '#fff',
+          borderRadius: 14,
+          maxWidth: 440, width: '100%',
+          boxShadow: '0 20px 60px rgba(0,0,0,.35)',
+          overflow: 'hidden',
+        }}>
+        {/* Crimson hero */}
+        <div style={{
+          background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+          padding: '26px 28px',
+          color: '#fff',
+          display: 'flex', alignItems: 'center', gap: 18,
+        }}>
+          <div style={{
+            width: 84, height: 84, borderRadius: '50%',
+            background: teacher.avatar ? 'transparent' : 'rgba(240,204,90,.18)',
+            border: '3px solid #F0CC5A',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#F0CC5A',
+            fontSize: 30, fontWeight: 700,
+            fontFamily: "'Instrument Serif', serif",
+            flexShrink: 0, overflow: 'hidden',
+          }}>
+            {teacher.avatar
+              ? <img src={teacher.avatar} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+              : (initials || 'T')}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontSize: 22, fontWeight: 400, lineHeight: 1.15,
+            }}>{fullName || 'Teacher'}</div>
+            {teacher.jobTitle && (
+              <div style={{
+                fontSize: 11.5, fontWeight: 700,
+                letterSpacing: '.08em', textTransform: 'uppercase',
+                color: '#F0CC5A', marginTop: 4,
+              }}>{teacher.jobTitle}</div>
+            )}
+            {!teacher.jobTitle && teacher.role && (
+              <div style={{
+                fontSize: 11.5, fontWeight: 700,
+                letterSpacing: '.08em', textTransform: 'uppercase',
+                color: '#F0CC5A', marginTop: 4,
+                opacity: .85,
+              }}>{teacher.role}</div>
+            )}
+          </div>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '20px 28px' }}>
+          {teacher.bio && (
+            <div style={{ marginBottom: 16 }}>
+              <div style={{
+                fontSize: 10, fontWeight: 800, color: '#7D1025',
+                letterSpacing: '.12em', textTransform: 'uppercase',
+                marginBottom: 6,
+              }}>About</div>
+              <div style={{ fontSize: 13.5, color: '#564844', lineHeight: 1.55 }}>
+                {teacher.bio}
+              </div>
+            </div>
+          )}
+
+          {Array.isArray(teacher.qualifications) && teacher.qualifications.length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{
+                fontSize: 10, fontWeight: 800, color: '#7D1025',
+                letterSpacing: '.12em', textTransform: 'uppercase',
+                marginBottom: 6,
+              }}>Qualifications</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {teacher.qualifications.map((q, i) => (
+                  <span key={i} style={{
+                    fontSize: 11, fontWeight: 600,
+                    color: '#7D5A0F',
+                    background: '#FDF7E2',
+                    border: '1px solid #E8D58F',
+                    padding: '4px 10px', borderRadius: 99,
+                  }}>{q}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {Array.isArray(teacher.specializations) && teacher.specializations.length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{
+                fontSize: 10, fontWeight: 800, color: '#7D1025',
+                letterSpacing: '.12em', textTransform: 'uppercase',
+                marginBottom: 6,
+              }}>Specialisations</div>
+              <div style={{ fontSize: 12.5, color: '#564844' }}>
+                {teacher.specializations.join(' · ')}
+              </div>
+            </div>
+          )}
+
+          {typeof teacher.yearsOfExperience === 'number' && teacher.yearsOfExperience > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <div style={{
+                fontSize: 10, fontWeight: 800, color: '#7D1025',
+                letterSpacing: '.12em', textTransform: 'uppercase',
+                marginBottom: 6,
+              }}>Experience</div>
+              <div style={{ fontSize: 12.5, color: '#564844' }}>
+                {teacher.yearsOfExperience} {teacher.yearsOfExperience === 1 ? 'year' : 'years'} of teaching
+              </div>
+            </div>
+          )}
+
+          {/* Contact note — explicitly tells the student where to send messages */}
+          <div style={{
+            background: '#FBFAF5',
+            border: '1px solid #E8E2D6',
+            borderRadius: 7,
+            padding: '10px 12px',
+            fontSize: 11.5, color: '#857973', lineHeight: 1.5,
+            marginBottom: 14,
+          }}>
+            To message {teacher.firstName || 'this teacher'}, use the
+            <strong style={{ color: '#1A0F0E' }}> Communication </strong>
+            module from the sidebar. All messages go through the school's
+            email channel.
+          </div>
+
+          <button onClick={onClose}
+            style={{
+              background: '#7D1025', color: '#fff', border: 'none',
+              padding: '9px 20px', borderRadius: 7,
+              fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              width: '100%',
+            }}>
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
