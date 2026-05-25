@@ -44,6 +44,7 @@ export default function App() {
               <Route path="/pricing"        element={<LandingPage />} />
               <Route path="/programs"       element={<LandingPage />} />
               <Route path="/activities"     element={<LandingPage />} />
+              <Route path="/online-school/:slug" element={<LandingPage />} />
               <Route path="/faq"            element={<LandingPage />} />
               <Route path="/blog"           element={<LandingPage />} />
               <Route path="/blog/:slug"     element={<LandingPage />} />
