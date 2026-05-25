@@ -558,7 +558,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1169,6 +1169,10 @@ const PAGE_META = {
   programs: {
     title: 'Programmes | Homeschool, Tuition, IUFP & Study Abroad — Smartious',
     desc: 'Smartious programmes — full homeschooling, private tuition, the International University Foundation Programme (IUFP) and study-abroad placement support.',
+  },
+  activities: {
+    title: 'Student Activities, Sports & Enrichment — Smartious Homeschool',
+    desc: 'Beyond academics — Smartious students join weekly Wednesday activities including swimming, basketball, football, badminton, tennis, archery, coding, robotics, debate, music, art and leadership clubs. Premium enrichment for global learners.',
   },
   global: {
     title: 'Global Online School for Diaspora Families — Smartious',
@@ -3186,7 +3190,7 @@ export default function LandingPage() {
             <SmartiousLogo size={36} withText={true} tone="light"/>
           </div>
           <div className="nav-links">
-            {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Global','global'],['Pricing','pricing'],['Programs','programs'],['Teachers','teachers'],['FAQ','faq'],['Blog','blog']].map(([l,id]) => (
+            {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Global','global'],['Pricing','pricing'],['Programs','programs'],['Activities','activities'],['Teachers','teachers'],['FAQ','faq'],['Blog','blog']].map(([l,id]) => (
               <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
             ))}
           </div>
@@ -3212,7 +3216,7 @@ export default function LandingPage() {
       {mobileMenuOpen && (
         <div style={{position:'fixed',top:64,left:0,right:0,background:'#0F172A',zIndex:9998,padding:'16px 20px',borderBottom:'1px solid rgba(255,255,255,.1)',boxShadow:'0 8px 32px rgba(0,0,0,.4)'}}>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
-            {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Global','global'],['Pricing','pricing'],['Programs','programs'],['FAQ','faq'],['Blog','blog'],['Enroll','enroll']].map(([l,id]) => (
+            {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Global','global'],['Pricing','pricing'],['Programs','programs'],['Activities','activities'],['FAQ','faq'],['Blog','blog'],['Enroll','enroll']].map(([l,id]) => (
               <button key={id} onClick={()=>{P(id);setMobileMenuOpen(false)}} style={{background:page===id?'rgba(96,165,250,.15)':'transparent',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,padding:'10px 14px',color:page===id?'#60A5FA':'rgba(255,255,255,.8)',fontWeight:page===id?700:400,fontSize:14,textAlign:'left',cursor:'pointer'}}>
                 {l}
               </button>
@@ -4134,7 +4138,303 @@ export default function LandingPage() {
       )}
 
       {/* ══════════════════════════════════════════
-          FAQ
+          ACTIVITIES — Sports, Clubs & Student Life
+          Premium enrichment page. Hero + Wednesday timetable +
+          sports showcase + clubs + parent trust + gallery + CTAs.
+          FAQ schema embedded for Google AI Overviews.
+      ══════════════════════════════════════════ */}
+      {page === 'activities' && (
+        <>
+          {/* FAQ schema — picked up by Google's structured-data parser
+              for rich snippets and AI Overview answers. */}
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            'mainEntity': [
+              { '@type': 'Question', 'name': 'Do online homeschool students at Smartious get extracurricular activities?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes. Every Wednesday from 2:00 PM to 4:00 PM, Smartious students participate in a structured enrichment programme covering sports, clubs, leadership, music, art and wellness. Activities are supervised, age-appropriate and run alongside the academic timetable.' } },
+              { '@type': 'Question', 'name': 'What sports are available to homeschool students?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Swimming, football, basketball, badminton, tennis, table tennis, pickleball, archery, volleyball, athletics, squash, and dedicated fitness training. Sports take place at our Parklands learning centre and partner facilities, with qualified coaches.' } },
+              { '@type': 'Question', 'name': 'Can my child join the coding or robotics club without a tech background?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Absolutely. Our coding, AI and robotics clubs are designed for beginners and accelerate to advanced level. Students progress at their own pace under guidance from STEM-qualified instructors.' } },
+              { '@type': 'Question', 'name': 'How do online and diaspora students join activities?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Many clubs run virtually — debate, public speaking, coding, AI, entrepreneurship, book club, journalism and Model United Nations are fully online. Diaspora students join live sessions over video. In-person sports are available to students physically in Nairobi.' } },
+              { '@type': 'Question', 'name': 'Are activities included in the tuition fee?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Most enrichment clubs are included for full-time homeschool students at no additional cost. Sports requiring specialised facilities (swimming, tennis, squash, archery) carry a modest activity fee to cover venue and coaching. Contact admissions for a full breakdown.' } },
+              { '@type': 'Question', 'name': 'How does Smartious ensure student safety during activities?',
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'All in-person activities are supervised by vetted Smartious staff and qualified coaches. Venues are inspected, parental consent is required, and we maintain a strict 1:8 supervisor-to-student ratio for sports. Online clubs are moderated by teachers throughout.' } },
+            ],
+          })}}/>
+
+          <div className="pg-hero"><div className="wrap">
+            <div className="eyebrow">Student Life</div>
+            <h1 className="pg-h">Beyond Academics: Sports, Leadership &amp; <em>Student Enrichment</em></h1>
+            <p className="pg-sub" style={{marginTop:12}}>Smartious students participate in engaging weekly activities designed to build confidence, teamwork, creativity, wellness and global exposure. A world-class enrichment ecosystem alongside an internationally recognised academic programme.</p>
+            <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
+              <button className="btn-p" onClick={() => P('enroll')}>Join Activities <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <button className="btn-s" onClick={() => P('consult')}>Book Consultation</button>
+              <button className="btn-s" onClick={() => { const el = document.getElementById('student-life'); if (el) el.scrollIntoView({behavior:'smooth'}); }}>Explore Student Life</button>
+            </div>
+          </div></div>
+
+          {/* WEEKLY ACTIVITIES — WEDNESDAY 2–4 PM */}
+          <section className="sec" style={{background:V.bone}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:36}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Weekly Enrichment Programme</div>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Every Wednesday <em style={{color:V.cr}}>2:00 PM – 4:00 PM</em></h2>
+              <p style={{fontSize:14,color:V.sl,maxWidth:640,margin:'0 auto',lineHeight:1.7}}>A protected two-hour window every week reserved for activities. No homework, no exams — just discovery, skill-building and friendship.</p>
+            </div>
+
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:14}}>
+              {[
+                {n:'Swimming',         c:'#0EA5E9', d:'Stroke technique, water safety, fitness.'},
+                {n:'Basketball',       c:'#F97316', d:'Team play, ball handling, fundamentals.'},
+                {n:'Football',         c:'#15803D', d:'Skills, tactics, matches, league play.'},
+                {n:'Badminton',        c:'#A21CAF', d:'Footwork, technique, doubles play.'},
+                {n:'Tennis',           c:'#CA8A04', d:'Strokes, rallies, match practice.'},
+                {n:'Table Tennis',     c:'#1E40AF', d:'Spin, speed, tournament play.'},
+                {n:'Pickleball',       c:'#0F766E', d:'Fast-growing racquet sport, beginner-friendly.'},
+                {n:'Archery',          c:'#7E22CE', d:'Focus, form, target shooting.'},
+                {n:'Volleyball',       c:'#BE123C', d:'Team play, serves, blocks, rallies.'},
+                {n:'Chess Club',       c:'#1F2937', d:'Strategy, tactics, tournaments.'},
+                {n:'Coding Club',      c:'#0369A1', d:'Python, web, games, real projects.'},
+                {n:'Robotics',         c:'#92400E', d:'Build, code, control real robots.'},
+                {n:'Debate Club',      c:'#7D1025', d:'Argument, research, public speaking.'},
+                {n:'Public Speaking',  c:'#9F1239', d:'Confidence, presentation, voice.'},
+                {n:'STEM Lab',         c:'#166534', d:'Hands-on science experiments.'},
+                {n:'Music & Piano',    c:'#7C2D12', d:'Theory, performance, ensembles.'},
+                {n:'Art & Design',     c:'#A21CAF', d:'Drawing, painting, digital design.'},
+                {n:'Dance',            c:'#DB2777', d:'Choreography, expression, fitness.'},
+                {n:'Yoga & Wellness',  c:'#0F766E', d:'Mindfulness, flexibility, balance.'},
+                {n:'Fitness Training', c:'#DC2626', d:'Strength, cardio, conditioning.'},
+                {n:'Leadership & Entrepreneurship', c:'#1E3A8A', d:'Real projects, pitches, business plans.'},
+              ].map(a => (
+                <div key={a.n} style={{
+                  background:'#fff', borderRadius:12, padding:'18px 16px',
+                  border:'1px solid '+V.line, position:'relative',
+                  transition:'transform .2s, box-shadow .2s, border-color .2s',
+                  cursor:'pointer',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 12px 28px '+a.c+'25'; e.currentTarget.style.borderColor=a.c+'60' }}
+                onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderColor=V.line }}>
+                  <div style={{
+                    width:36, height:36, borderRadius:9,
+                    background:a.c+'18', display:'flex', alignItems:'center', justifyContent:'center',
+                    marginBottom:12,
+                  }}>
+                    <div style={{width:18, height:18, borderRadius:'50%', background:a.c}}/>
+                  </div>
+                  <div style={{fontSize:14, fontWeight:700, color:V.ink, marginBottom:4}}>{a.n}</div>
+                  <div style={{fontSize:11.5, color:V.sl, lineHeight:1.55}}>{a.d}</div>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* SPORTS SHOWCASE */}
+          <section id="student-life" className="sec" style={{background:V.ink, color:'#fff'}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:36}}>
+              <div className="eyebrow" style={{justifyContent:'center', color:V.gold2}}>Premium Sports</div>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:8}}>Sport at the <em style={{color:V.gold2}}>Heart of Student Life</em></h2>
+              <p style={{fontSize:14,color:'rgba(255,255,255,.7)',maxWidth:640,margin:'0 auto',lineHeight:1.7}}>Coached by qualified instructors at our Parklands centre and partner facilities. Every term ends with inter-house competitions, friendly matches and skills assessments.</p>
+            </div>
+
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:18,marginBottom:32}}>
+              {[
+                ['Swimming',       '4', 'lanes weekly'],
+                ['Football',       '2', 'leagues termly'],
+                ['Tennis',         '8', 'court hours weekly'],
+                ['Badminton',      '6', 'courts available'],
+                ['Athletics',      '12','events tracked'],
+                ['Squash',         '3', 'courts available'],
+                ['Volleyball',     '2', 'teams per grade'],
+                ['Table Tennis',   '10','tables available'],
+                ['Fitness',        '5', 'sessions weekly'],
+              ].map(([sport, stat, label]) => (
+                <div key={sport} style={{
+                  background:'rgba(255,255,255,.04)', borderRadius:12, padding:'20px 18px',
+                  border:'1px solid rgba(255,255,255,.08)',
+                  transition:'background .2s, border-color .2s, transform .2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background='rgba(201,160,48,.08)'; e.currentTarget.style.borderColor='rgba(201,160,48,.3)'; e.currentTarget.style.transform='translateY(-3px)' }}
+                onMouseLeave={e => { e.currentTarget.style.background='rgba(255,255,255,.04)'; e.currentTarget.style.borderColor='rgba(255,255,255,.08)'; e.currentTarget.style.transform='translateY(0)' }}>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:'2.4rem',fontWeight:700,color:V.gold2,lineHeight:1,marginBottom:4}}>{stat}</div>
+                  <div style={{fontSize:11,color:'rgba(255,255,255,.55)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:10}}>{label}</div>
+                  <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>{sport}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{textAlign:'center',padding:'24px 16px',background:'rgba(201,160,48,.08)',border:'1px solid rgba(201,160,48,.2)',borderRadius:12}}>
+              <div style={{fontSize:13,color:V.gold2,fontWeight:700,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:6}}>Inter-house competitions every term</div>
+              <div style={{fontSize:14,color:'rgba(255,255,255,.75)',maxWidth:580,margin:'0 auto',lineHeight:1.7}}>Students compete across athletic, intellectual and creative disciplines. Awards, trophies and a healthy sense of belonging.</div>
+            </div>
+          </div></section>
+
+          {/* CLUBS & ENRICHMENT */}
+          <section className="sec" style={{background:V.bone}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:36}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Clubs &amp; Enrichment</div>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Build <em style={{color:V.cr}}>Skills That Matter</em></h2>
+              <p style={{fontSize:14,color:V.sl,maxWidth:640,margin:'0 auto',lineHeight:1.7}}>Clubs run weekly online and in person. Many produce real outputs — published articles, working code, environmental campaigns, business plans.</p>
+            </div>
+
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:14}}>
+              {[
+                {n:'Coding Club',        sub:'Beginner → Advanced', d:'Build websites, games, and apps in Python and JavaScript. Quarterly hackathons.'},
+                {n:'AI Club',            sub:'Future-ready skills', d:'Learn machine learning, prompt engineering, ethical AI. Build small AI projects.'},
+                {n:'Robotics',           sub:'Hands-on engineering', d:'Design, build and code real robots. Compete in regional competitions.'},
+                {n:'Entrepreneurship',   sub:'Real business plans', d:'Pitch real ideas. Term ends with a Shark-Tank-style pitch night.'},
+                {n:'Debate Club',        sub:'Critical thinking',   d:'Weekly debates on world affairs. Inter-school debate tournaments.'},
+                {n:'Model United Nations', sub:'Diplomacy & policy', d:'Represent countries, draft resolutions, negotiate solutions to global issues.'},
+                {n:'Journalism',         sub:'Smartious newsletter', d:'Write, edit, publish. Real articles published in the student magazine.'},
+                {n:'Environmental Club', sub:'Real impact',         d:'Tree-planting drives, climate campaigns, sustainability projects.'},
+                {n:'Public Speaking',    sub:'Confidence on stage', d:'Speech writing, presentation skills, weekly practice sessions.'},
+                {n:'Book Club',          sub:'Read, discuss, grow', d:'Monthly book picks across genres. Author Q&A sessions over Zoom.'},
+              ].map(c => (
+                <div key={c.n} style={{
+                  background:'#fff', borderRadius:12, padding:'22px 20px',
+                  border:'1px solid '+V.line,
+                  borderLeft:'4px solid '+V.cr,
+                  transition:'transform .2s, box-shadow .2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform='translateY(-3px)'; e.currentTarget.style.boxShadow='0 10px 24px rgba(125,16,37,.12)' }}
+                onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none' }}>
+                  <div style={{fontSize:15,fontWeight:700,color:V.ink,marginBottom:3}}>{c.n}</div>
+                  <div style={{fontSize:11,color:V.cr,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:10}}>{c.sub}</div>
+                  <div style={{fontSize:12.5,color:V.sl,lineHeight:1.6}}>{c.d}</div>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* PARENT TRUST SECTION */}
+          <section className="sec" style={{background:'#fff'}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:36}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Parent Trust</div>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Holistic Growth in a <em style={{color:V.cr}}>Safe, Supervised Environment</em></h2>
+              <p style={{fontSize:14,color:V.sl,maxWidth:640,margin:'0 auto',lineHeight:1.7}}>Every activity is designed with safety, age-appropriateness, and meaningful development at its core.</p>
+            </div>
+
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:16}}>
+              {[
+                ['Vetted Supervision',   'All in-person activities are run by trained Smartious staff and qualified coaches. 1:8 supervisor ratio for sports.'],
+                ['Holistic Development', 'Academic, physical, social, emotional and creative growth — woven into the weekly rhythm.'],
+                ['Confidence Building',  'Public speaking, performance, leadership roles. Students gradually take on more visible challenges.'],
+                ['Teamwork',             'Team sports, group projects, debate teams. Real collaboration with real outcomes.'],
+                ['Leadership Growth',    'Club officer roles, peer mentoring, captain positions. Students learn to lead each other.'],
+                ['International Exposure','Mixed cohorts of local and diaspora students. Real cross-cultural friendships form naturally.'],
+              ].map(([h, p]) => (
+                <div key={h} style={{
+                  padding:'20px 18px', borderRadius:11,
+                  background:V.bone, border:'1px solid '+V.line,
+                }}>
+                  <div style={{
+                    width:36, height:36, borderRadius:9,
+                    background:V.cr+'12', display:'flex', alignItems:'center', justifyContent:'center',
+                    marginBottom:12,
+                  }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                  </div>
+                  <div style={{fontSize:15,fontWeight:700,color:V.ink,marginBottom:6}}>{h}</div>
+                  <div style={{fontSize:13,color:V.sl,lineHeight:1.6}}>{p}</div>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* GALLERY — VISUAL ATMOSPHERE */}
+          <section className="sec" style={{background:V.bone}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:32}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Student Life Gallery</div>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Moments from <em style={{color:V.cr}}>Wednesdays at Smartious</em></h2>
+            </div>
+
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
+              {[
+                {label:'Swimming',     img:'https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=800&q=70', alt:'Smartious homeschool students swimming during weekly enrichment'},
+                {label:'Football',     img:'https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=800&q=70', alt:'Smartious students playing football during student life activities'},
+                {label:'Tennis',       img:'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=800&q=70', alt:'Smartious online school students learning tennis at Parklands centre'},
+                {label:'Robotics Lab', img:'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=800&q=70', alt:'Smartious homeschool students building robots in STEM enrichment club'},
+                {label:'Debate',       img:'https://images.unsplash.com/photo-1591115765373-5207764f72e7?auto=format&fit=crop&w=800&q=70', alt:'Smartious students competing in debate club'},
+                {label:'Music',        img:'https://images.unsplash.com/photo-1466428996289-fb355538da1b?auto=format&fit=crop&w=800&q=70', alt:'Smartious students learning piano during music enrichment'},
+                {label:'Art Studio',   img:'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=70', alt:'Smartious homeschool art and design studio'},
+                {label:'Coding Club',  img:'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=70', alt:'Smartious students learning to code during enrichment'},
+              ].map(g => (
+                <div key={g.label} style={{
+                  position:'relative', borderRadius:12, overflow:'hidden',
+                  aspectRatio:'4/3', cursor:'pointer',
+                  transition:'transform .2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.transform='scale(1.02)' }}
+                onMouseLeave={e => { e.currentTarget.style.transform='scale(1)' }}>
+                  <img src={g.img} alt={g.alt}
+                    loading="lazy"
+                    style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
+                  <div style={{
+                    position:'absolute', inset:0,
+                    background:'linear-gradient(to top, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0) 50%)',
+                    display:'flex', alignItems:'flex-end', padding:'14px 16px',
+                  }}>
+                    <div style={{fontSize:14, fontWeight:700, color:'#fff', textShadow:'0 1px 3px rgba(0,0,0,.5)'}}>{g.label}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* CALL TO ACTION */}
+          <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`, color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
+            <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
+              Give Your Child More Than <em style={{color:V.gold2}}>Just Academics</em>
+            </h2>
+            <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:28,lineHeight:1.7}}>
+              Sports. Music. Code. Leadership. Friendship. Every Wednesday, 2–4 PM, your child is somewhere they want to be — building skills no exam paper can measure.
+            </p>
+            <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+              <button onClick={() => P('enroll')}
+                style={{
+                  background:V.gold2, color:V.ink, border:'none',
+                  padding:'13px 28px', borderRadius:8,
+                  fontSize:14, fontWeight:800, cursor:'pointer',
+                  display:'inline-flex', alignItems:'center', gap:8,
+                }}>
+                Enroll Now
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+              <button onClick={() => P('consult')}
+                style={{
+                  background:'transparent', color:'#fff',
+                  border:'2px solid rgba(255,255,255,.4)',
+                  padding:'11px 26px', borderRadius:8,
+                  fontSize:14, fontWeight:700, cursor:'pointer',
+                }}>
+                Book Free Consultation
+              </button>
+              <a href="https://wa.me/254700000000?text=Hi%20Smartious%2C%20I%27d%20like%20to%20know%20more%20about%20the%20Wednesday%20activities%20programme."
+                target="_blank" rel="noopener noreferrer"
+                style={{
+                  background:'#25D366', color:'#fff', textDecoration:'none',
+                  padding:'13px 26px', borderRadius:8,
+                  fontSize:14, fontWeight:700,
+                  display:'inline-flex', alignItems:'center', gap:8,
+                }}>
+                WhatsApp
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
+              </a>
+            </div>
+
+            <div style={{marginTop:32,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
+              Trial activity sessions available · Sibling discount · Diaspora and local families welcome
+            </div>
+          </div></section>
+        </>
+      )}
+
+      {/* ══════════════════════════════════════════
+          TEACHERS
       ══════════════════════════════════════════ */}
       {page === 'teachers' && (
         <>
