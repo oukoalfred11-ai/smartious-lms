@@ -79,6 +79,62 @@ function usePageMeta(title, description) {
   }, [title, description])
 }
 
+/* ── useHeroPreload — LCP optimization ─────────────────────
+ * The hero background image is the Largest Contentful Paint
+ * element. It's loaded via CSS background-image which means
+ * the browser can't preload it via the parser. We inject a
+ * <link rel="preload" as="image" fetchpriority="high"> for
+ * just the home page so the browser starts downloading the
+ * hero image immediately, in parallel with CSS.
+ *
+ * Saves ~1-2 seconds of LCP on mobile.
+ */
+function useHeroPreload(active) {
+  useEffect(() => {
+    if (!active) return
+    const linkId = 'sm-hero-preload'
+    if (document.getElementById(linkId)) return
+    const link = document.createElement('link')
+    link.id = linkId
+    link.rel = 'preload'
+    link.as = 'image'
+    link.href = '/hero-learning-centre.jpg'
+    link.setAttribute('fetchpriority', 'high')
+    document.head.appendChild(link)
+    return () => {
+      const el = document.getElementById(linkId)
+      if (el) el.remove()
+    }
+  }, [active])
+}
+
+/* ── useFontPreconnect — font loading optimization ────────
+ * Tells the browser to establish a connection to Google Fonts
+ * servers in advance, so when the fonts actually load they
+ * don't pay the DNS + TLS handshake cost. Saves ~200-400ms
+ * of FCP on cold-cache visits.
+ *
+ * Should ideally be in index.html for maximum benefit, but
+ * doing it here works for client-side navigation too.
+ */
+function useFontPreconnect() {
+  useEffect(() => {
+    const hosts = [
+      { id: 'sm-pc-fontg',   href: 'https://fonts.googleapis.com', crossOrigin: false },
+      { id: 'sm-pc-fontg2',  href: 'https://fonts.gstatic.com',    crossOrigin: true  },
+    ]
+    for (const h of hosts) {
+      if (document.getElementById(h.id)) continue
+      const link = document.createElement('link')
+      link.id = h.id
+      link.rel = 'preconnect'
+      link.href = h.href
+      if (h.crossOrigin) link.setAttribute('crossorigin', '')
+      document.head.appendChild(link)
+    }
+  }, [])
+}
+
 /* ── useSiteSchema — site-wide structured data ─────────────
  * Injects Organization + EducationalOrganization JSON-LD into
  * the document head exactly once per page load. This is the
@@ -3533,6 +3589,8 @@ export default function LandingPage() {
   }
   usePageMeta(metaTitle, metaDesc)
   useSiteSchema()
+  useHeroPreload(page === 'home')
+  useFontPreconnect()
 
   // Load public teacher profiles when the Teachers page is opened.
   // Fetched once, from the public (no-auth) endpoint.
@@ -3676,7 +3734,10 @@ export default function LandingPage() {
             ))}
           </div>
           {/* Mobile hamburger */}
-          <button onClick={() => setMobileMenuOpen(m => !m)} style={{display:'none',background:'transparent',border:'1px solid rgba(255,255,255,.2)',borderRadius:8,padding:'7px 10px',cursor:'pointer',color:'#fff'}} className="mob-burger">
+          <button onClick={() => setMobileMenuOpen(m => !m)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+            style={{display:'none',background:'transparent',border:'1px solid rgba(255,255,255,.2)',borderRadius:8,padding:'7px 10px',cursor:'pointer',color:'#fff'}} className="mob-burger">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
           <div className="nav-actions">
@@ -3844,32 +3905,40 @@ export default function LandingPage() {
               marginTop:36,
             }}>
               {[
-                {country:'UAE', slug:'uae', sub:'Dubai · Abu Dhabi'},
-                {country:'Qatar', slug:'qatar', sub:'Doha'},
-                {country:'United Kingdom', slug:'uk', sub:'London · Manchester'},
-                {country:'United States', slug:'usa', sub:'Coast to coast'},
-                {country:'Canada', slug:'canada', sub:'Toronto · Vancouver'},
-                {country:'Australia', slug:'australia', sub:'Sydney · Melbourne'},
-                {country:'Nigeria', slug:'nigeria', sub:'Lagos · Abuja'},
-                {country:'South Africa', slug:'south-africa', sub:'Johannesburg · Cape Town'},
-                {country:'Egypt', slug:'egypt', sub:'Cairo · Alexandria'},
-                {country:'Kenya', slug:null, sub:'Nairobi HQ · Diamond Plaza'},
+                {country:'UAE', slug:'uae', href:'/online-school/uae', sub:'Dubai · Abu Dhabi'},
+                {country:'Qatar', slug:'qatar', href:'/online-school/qatar', sub:'Doha'},
+                {country:'United Kingdom', slug:'uk', href:'/online-school/uk', sub:'London · Manchester'},
+                {country:'United States', slug:'usa', href:'/online-school/usa', sub:'Coast to coast'},
+                {country:'Canada', slug:'canada', href:'/online-school/canada', sub:'Toronto · Vancouver'},
+                {country:'Australia', slug:'australia', href:'/online-school/australia', sub:'Sydney · Melbourne'},
+                {country:'Nigeria', slug:'nigeria', href:'/online-school/nigeria', sub:'Lagos · Abuja'},
+                {country:'South Africa', slug:'south-africa', href:'/online-school/south-africa', sub:'Johannesburg · Cape Town'},
+                {country:'Egypt', slug:'egypt', href:'/online-school/egypt', sub:'Cairo · Alexandria'},
+                {country:'Kenya', slug:null, href:'/global', sub:'Nairobi HQ · Diamond Plaza'},
               ].map(c => (
-                <div key={c.country}
-                  onClick={() => c.slug ? openCountry(c.slug) : P('global')}
+                <a key={c.country}
+                  href={c.href}
+                  onClick={e => {
+                    e.preventDefault()
+                    if (c.slug) openCountry(c.slug)
+                    else P('global')
+                  }}
                   style={{
+                    display:'block',
                     padding:'14px 16px',
                     background:V.bone,
                     border:'1px solid '+V.line,
                     borderRadius:8,
                     cursor:'pointer',
+                    textDecoration:'none',
+                    color:'inherit',
                     transition:'transform .15s, border-color .15s, box-shadow .15s',
                   }}
                   onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.borderColor=V.cr+'60'; e.currentTarget.style.boxShadow='0 6px 18px rgba(139,26,46,.10)' }}
                   onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.borderColor=V.line; e.currentTarget.style.boxShadow='none' }}>
                   <div style={{fontSize:13.5,fontWeight:700,color:V.ink,marginBottom:2}}>{c.country}</div>
                   <div style={{fontSize:11,color:V.sl}}>{c.sub}</div>
-                </div>
+                </a>
               ))}
             </div>
           </div></section>
@@ -4057,14 +4126,18 @@ export default function LandingPage() {
                   {n:'10',h:'FAQ',p:'Enrolment, exams, pricing & Mshauri AI answered',pg:'faq',svg:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
                   {n:'9',h:'Blog',p:'IGCSE guides · IB tips · Study abroad · AI learning',pg:'blog',svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'},
                 ].map(({n,h,p,pg,svg}) => (
-                  <div key={h} className="hl reveal" onClick={() => P(pg)}>
+                  <a key={h}
+                    href={'/' + pg}
+                    onClick={e => { e.preventDefault(); P(pg) }}
+                    className="hl reveal"
+                    style={{textDecoration:'none', color:'inherit', display:'block'}}>
                     <div className="hl-ico">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={`${V.cr}`} strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:svg}}/>
                     </div>
                     <div className="hl-n">{n}</div>
                     <div className="hl-h">{h}</div>
                     <div className="hl-p">{p}</div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -5417,7 +5490,7 @@ export default function LandingPage() {
                       {/* Portrait */}
                       <div className="tm-photo">
                         {t.avatar
-                          ? <img src={t.avatar} alt={t.name} className="tm-img"/>
+                          ? <img src={t.avatar} alt={t.name} className="tm-img" loading="lazy"/>
                           : <div className="tm-initials">{initials || 'S'}</div>}
                         <div className="tm-scrim"/>
                       </div>
