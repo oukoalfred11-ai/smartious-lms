@@ -465,6 +465,16 @@ export default function StudentPortal() {
   const [page,        setPage]        = useState('dashboard')
   const [collapsed,   setCollapsed]   = useState(false)
 
+  // ── Notifications dropdown (header bell) ─────────────
+  const [notifsOpen, setNotifsOpen] = useState(false)
+  const [notifsList, setNotifsList] = useState([])
+  const [notifsLastSeen, setNotifsLastSeen] = useState(() => {
+    try {
+      const v = parseInt(localStorage.getItem('sm_notifs_last_seen') || '0', 10)
+      return Number.isFinite(v) ? v : 0
+    } catch { return 0 }
+  })
+
   // Advisory students may only visit dashboard / profile / subscription.
   // If they somehow land elsewhere, send them back to the dashboard.
   useEffect(() => {
@@ -550,6 +560,10 @@ export default function StudentPortal() {
   useEffect(() => {
     loadMastery()
     loadMasteryContext()
+    loadNotifications()
+    // refresh notifications every 90s
+    const id = setInterval(loadNotifications, 90000)
+    return () => clearInterval(id)
   }, [])
 
   const loadMastery = async () => {
@@ -572,6 +586,92 @@ export default function StudentPortal() {
       const { data } = await api.get('/adaptive/mshauri-context')
       if (data.success) setMasteryCtx(data.context)
     } catch {}
+  }
+
+  // Aggregate notifications from existing data sources. There's no
+  // dedicated /notifications endpoint, so we synthesize the bell's
+  // feed from upcoming live classes, pending homework, recent results
+  // and recent communication. Frontend-only — no backend changes.
+  const loadNotifications = async () => {
+    const items = []
+    const now = Date.now()
+    const dayMs = 86400000
+
+    // 1) Upcoming live classes (next 24h)
+    try {
+      const { data } = await api.get('/liveclasses/student/upcoming')
+      const upcoming = data?.classes || data?.data?.classes || []
+      for (const c of upcoming.slice(0, 5)) {
+        const when = new Date(c.scheduledAt || c.startTime).getTime()
+        if (!Number.isFinite(when)) continue
+        if (when - now > dayMs) continue
+        items.push({
+          id: 'live:' + c._id,
+          ts: when,
+          icon: 'live',
+          title: c.title || 'Live class',
+          subtitle: c.subjectName
+            ? c.subjectName + ' · ' + timeUntil(when)
+            : timeUntil(when),
+          page: 'live',
+        })
+      }
+    } catch {}
+
+    // 2) Active homework with deadlines (next 7 days)
+    try {
+      const { data } = await api.get('/homework/student/me')
+      const hws = data?.homework || data?.data?.homework || []
+      for (const h of hws.slice(0, 6)) {
+        if (h.status !== 'published') continue
+        const due = h.dueDate ? new Date(h.dueDate).getTime() : null
+        if (due && due < now) continue           // skip overdue (separate concern)
+        if (due && due - now > 7 * dayMs) continue
+        items.push({
+          id: 'hw:' + h._id,
+          ts: due || (now + dayMs),               // sort by due date
+          icon: 'homework',
+          title: h.title || 'Homework',
+          subtitle: h.subjectName
+            ? h.subjectName + (due ? ' · due ' + timeUntil(due) : '')
+            : (due ? 'Due ' + timeUntil(due) : ''),
+          page: 'homework',
+        })
+      }
+    } catch {}
+
+    // 3) Recently released results (last 7 days)
+    try {
+      const { data } = await api.get('/results/student/me')
+      const results = data?.results || data?.data?.results || []
+      for (const r of results.slice(0, 5)) {
+        const when = new Date(r.releasedAt || r.gradedAt || r.createdAt || 0).getTime()
+        if (!Number.isFinite(when) || when === 0) continue
+        if (now - when > 7 * dayMs) continue
+        items.push({
+          id: 'res:' + (r._id || r.homeworkId || r.examId),
+          ts: when,
+          icon: 'results',
+          title: r.title || (r.subjectName ? r.subjectName + ' result' : 'New result'),
+          subtitle: (r.score !== undefined && r.outOf !== undefined)
+            ? r.score + ' / ' + r.outOf + ' · ' + timeAgo(when)
+            : timeAgo(when),
+          page: 'results',
+        })
+      }
+    } catch {}
+
+    // Sort: most recent / soonest first
+    items.sort((a, b) => {
+      // Future events (live, homework due) ascending by ts
+      // Past events (results) descending by ts
+      const aFut = a.ts >= now
+      const bFut = b.ts >= now
+      if (aFut !== bFut) return aFut ? -1 : 1
+      return aFut ? a.ts - b.ts : b.ts - a.ts
+    })
+
+    setNotifsList(items.slice(0, 8))
   }
 
   // ── LOAD ADAPTIVE PRACTICE ───────────────────────────
@@ -1133,26 +1233,166 @@ export default function StudentPortal() {
                 <span>{nextRec.topic}</span>
               </div>
             )}
+            {/* Notification bell — aggregates upcoming live classes,
+                homework deadlines, and recent results. Frontend-only
+                aggregation from existing endpoints. */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => {
+                  setNotifsOpen(v => !v)
+                  // Mark as seen when opened
+                  if (!notifsOpen) {
+                    const stamp = Date.now()
+                    setNotifsLastSeen(stamp)
+                    try { localStorage.setItem('sm_notifs_last_seen', String(stamp)) } catch {}
+                  }
+                }}
+                title="Notifications"
+                style={{
+                  position: 'relative',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  width: 38, height: 38,
+                  background: TOKENS.cream,
+                  border: `1px solid ${TOKENS.line}`,
+                  borderRadius: '50%',
+                  cursor: 'pointer',
+                  transition: 'background .15s, border-color .15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = TOKENS.goldPale; e.currentTarget.style.borderColor = TOKENS.gold + '60' }}
+                onMouseLeave={e => { e.currentTarget.style.background = TOKENS.cream; e.currentTarget.style.borderColor = TOKENS.line }}
+              >
+                <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke={TOKENS.crimsonDeep} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                {/* Unread badge — counts items with ts > last-seen */}
+                {(() => {
+                  const unread = notifsList.filter(n => n.ts > notifsLastSeen).length
+                  if (unread === 0) return null
+                  return (
+                    <span style={{
+                      position: 'absolute', top: -2, right: -2,
+                      minWidth: 17, height: 17, padding: '0 4px',
+                      background: TOKENS.crimson, color: '#fff',
+                      borderRadius: 99,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 9, fontWeight: 800,
+                      border: '2px solid #fff',
+                      boxSizing: 'content-box',
+                    }}>{unread > 9 ? '9+' : unread}</span>
+                  )
+                })()}
+              </button>
+              {notifsOpen && (
+                <>
+                  {/* Click-outside catcher */}
+                  <div onClick={() => setNotifsOpen(false)}
+                    style={{ position: 'fixed', inset: 0, zIndex: 99 }}/>
+                  {/* Dropdown panel */}
+                  <div style={{
+                    position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                    width: 320, maxWidth: 'calc(100vw - 32px)',
+                    background: '#fff',
+                    border: `1px solid ${TOKENS.line}`,
+                    borderRadius: 10,
+                    boxShadow: '0 10px 30px rgba(0,0,0,.12)',
+                    zIndex: 100, overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      padding: '12px 16px',
+                      borderBottom: `1px solid ${TOKENS.line}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    }}>
+                      <div style={{
+                        fontSize: 11, fontWeight: 800,
+                        letterSpacing: '.1em', textTransform: 'uppercase',
+                        color: TOKENS.crimsonDeep,
+                      }}>Notifications</div>
+                      {notifsList.length > 0 && (
+                        <div style={{ fontSize: 11, color: TOKENS.inkMute }}>
+                          {notifsList.length} item{notifsList.length === 1 ? '' : 's'}
+                        </div>
+                      )}
+                    </div>
+                    {notifsList.length === 0 ? (
+                      <div style={{ padding: '24px 16px', textAlign: 'center', color: TOKENS.inkMute, fontSize: 12.5 }}>
+                        Nothing new right now. Check back later for class reminders, homework deadlines, and new results.
+                      </div>
+                    ) : (
+                      <div style={{ maxHeight: 380, overflowY: 'auto' }}>
+                        {notifsList.map(n => (
+                          <div key={n.id}
+                            onClick={() => {
+                              setNotifsOpen(false)
+                              if (n.page) goTo(n.page)
+                            }}
+                            style={{
+                              padding: '11px 16px',
+                              borderBottom: `1px solid ${TOKENS.line}`,
+                              cursor: 'pointer',
+                              display: 'flex', alignItems: 'flex-start', gap: 10,
+                              transition: 'background .12s',
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = TOKENS.goldPale}
+                            onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                          >
+                            {/* Type dot */}
+                            <div style={{
+                              width: 8, height: 8, borderRadius: '50%',
+                              marginTop: 6, flexShrink: 0,
+                              background: n.icon === 'live' ? '#B91C1C'
+                                : n.icon === 'homework' ? TOKENS.gold
+                                : n.icon === 'results' ? '#15803D'
+                                : TOKENS.inkMute,
+                            }}/>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{
+                                fontSize: 13, fontWeight: 600, color: TOKENS.ink,
+                                lineHeight: 1.3, marginBottom: 2,
+                                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                              }}>{n.title}</div>
+                              <div style={{ fontSize: 11.5, color: TOKENS.inkMute, lineHeight: 1.4 }}>
+                                {n.subtitle}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Student avatar (display picture) — opens profile when clicked */}
             <button
-              onClick={() => { goTo('practice'); loadPractice(nextRec?.subject, nextRec?.topic) }}
+              onClick={() => goTo('profile')}
+              title="My profile"
               style={{
-                display:'inline-flex', alignItems:'center', gap:7,
-                padding:'9px 16px',
-                background:`linear-gradient(135deg, ${TOKENS.crimson}, ${TOKENS.crimsonDeep})`,
-                color:TOKENS.goldLight,
-                border:'none', borderRadius:8,
-                fontSize:12.5, fontWeight:600,
-                cursor:'pointer',
-                boxShadow:`0 2px 6px ${TOKENS.crimson}40, inset 0 1px 0 rgba(255,255,255,.1)`,
-                transition:'transform .15s, box-shadow .15s',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                width: 38, height: 38, borderRadius: '50%',
+                background: user?.avatar
+                  ? 'transparent'
+                  : `linear-gradient(135deg, ${TOKENS.crimson}, ${TOKENS.crimsonDeep})`,
+                color: TOKENS.goldLight,
+                border: `2px solid ${TOKENS.gold}`,
+                cursor: 'pointer',
+                fontSize: 13, fontWeight: 800,
+                fontFamily: 'Instrument Serif,Georgia,serif',
+                overflow: 'hidden', flexShrink: 0,
+                padding: 0,
+                boxShadow: `0 2px 6px ${TOKENS.crimson}30`,
+                transition: 'transform .15s, box-shadow .15s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = `0 4px 12px ${TOKENS.crimson}50, inset 0 1px 0 rgba(255,255,255,.15)` }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 2px 6px ${TOKENS.crimson}40, inset 0 1px 0 rgba(255,255,255,.1)` }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = `0 4px 10px ${TOKENS.crimson}45` }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = `0 2px 6px ${TOKENS.crimson}30` }}
             >
-              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/>
-              </svg>
-              Practice Now
+              {user?.avatar ? (
+                <img src={user.avatar} alt={user.firstName || 'Profile'}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+              ) : (
+                initials
+              )}
             </button>
           </div>
         </div>
@@ -11064,6 +11304,20 @@ const timeAgo = (iso) => {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 
+// For a future-dated value, returns "in 3h", "tomorrow", "in 5d", etc.
+const timeUntil = (iso) => {
+  const diff = new Date(iso).getTime() - Date.now()
+  if (diff <= 0) return 'now'
+  const mins = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 60) return `in ${mins}m`
+  if (hours < 24) return `in ${hours}h`
+  if (days === 1) return 'tomorrow'
+  if (days < 7) return `in ${days}d`
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
 function DashboardTab({ user, store, setPage, toast }) {
   // Tick to refresh live status every 30s
   const [tick, setTick] = useState(0)
@@ -11254,7 +11508,30 @@ function DashboardTab({ user, store, setPage, toast }) {
   })()
 
   const greeting = greetingFor()
-  const affirmation = "Welcome back! Ready to learn today?"
+
+  // Rotating motivational quote — same daily pool everyone sees, but
+  // rotates every 20 seconds within the student's session to keep the
+  // dashboard feeling alive. Starts from today's daily affirmation
+  // (consistent first quote across the day) then walks the array.
+  const [quoteIdx, setQuoteIdx] = useState(() => {
+    const today = new Date()
+    const start = new Date(today.getFullYear(), 0, 0)
+    const dayOfYear = Math.floor((today - start) / 86400000)
+    return dayOfYear % DAILY_AFFIRMATIONS.length
+  })
+  const [quoteFading, setQuoteFading] = useState(false)
+  useEffect(() => {
+    // Cycle every 20 seconds, with a quick 300ms fade transition.
+    const id = setInterval(() => {
+      setQuoteFading(true)
+      setTimeout(() => {
+        setQuoteIdx(i => (i + 1) % DAILY_AFFIRMATIONS.length)
+        setQuoteFading(false)
+      }, 300)
+    }, 20000)
+    return () => clearInterval(id)
+  }, [])
+  const affirmation = DAILY_AFFIRMATIONS[quoteIdx]
 
   return (
     <div>
@@ -11353,12 +11630,20 @@ function DashboardTab({ user, store, setPage, toast }) {
             color: 'var(--s700)',
             lineHeight: 1.45,
             marginBottom: 2,
+            opacity: quoteFading ? 0 : 1,
+            transition: 'opacity 300ms ease',
           }}>
-            {affirmation.text}
+            {'\u201C'}{affirmation.text}{'\u201D'}
           </div>
-          <div style={{ fontSize: 11.5, color: 'var(--s400)', fontWeight: 600 }}>
-            {'\u2014'} {affirmation.attribution}
-          </div>
+          {affirmation.author && (
+            <div style={{
+              fontSize: 11.5, color: 'var(--s400)', fontWeight: 600,
+              opacity: quoteFading ? 0 : 1,
+              transition: 'opacity 300ms ease',
+            }}>
+              {'\u2014'} {affirmation.author}
+            </div>
+          )}
         </div>
       </div>
 
