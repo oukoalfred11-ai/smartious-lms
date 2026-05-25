@@ -65,6 +65,7 @@ app.use('/api/lesson-progress', require('./routes/lesson-progress'));
 app.use('/api/curriculum',     require('./routes/curriculum'));
 app.use('/api/timetables', require('./routes/timetables'));
 app.use('/api/syllabus', require('./routes/syllabus'));
+app.use('/api/timetable', require('./routes/timetable'));
 app.use('/api/student-profile', require('./routes/student-profile'));
 app.use('/api/students',       require('./routes/students'));
 app.use('/api/parents', require('./routes/parents'));
