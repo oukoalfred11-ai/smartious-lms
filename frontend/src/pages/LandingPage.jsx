@@ -615,7 +615,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -916,6 +916,99 @@ function buildAssessment(level) {
  *   faqs         — country-specific FAQs (used by FAQ schema)
  *   cities       — top cities (helps with local SEO)
  */
+/* ── COMPARES — head-to-head comparison pages ──────────────
+ * Pages structured to capture "Smartious vs <competitor>"
+ * search intent. URL pattern: /compare/<slug>.
+ *
+ * Each entry contains factual, sourced information about the
+ * competitor (drawn from their own public website + verified
+ * third-party listings). Comparison is honest — acknowledges
+ * competitor strengths before differentiating Smartious.
+ *
+ * Data shape:
+ *   slug          — URL segment
+ *   competitor    — competitor name (used in headlines)
+ *   seoTitle      — <title> tag
+ *   seoDesc       — meta description
+ *   intro         — hero subtitle paragraph
+ *   competitorSummary — neutral factual paragraph about the competitor
+ *   table         — feature-by-feature comparison rows
+ *   keyDifference — the "main thing" sentence
+ *   competitorStrengths — what the competitor genuinely does well
+ *   smartiousAdvantages — what we offer differently (with reasons)
+ *   testimonial   — { videoId, title, summary }  YouTube short id
+ *   faqs          — comparison-specific FAQs
+ *
+ * Data sources logged in /competitor-analysis.md notes.
+ */
+const COMPARES = [
+  {
+    slug: 'wolsey-hall',
+    competitor: 'Wolsey Hall Oxford',
+    seoTitle: 'Smartious vs Wolsey Hall Oxford | Live vs Self-Paced Online School',
+    seoDesc: 'Honest comparison: Smartious Homeschool vs Wolsey Hall Oxford. Live classes versus self-paced courseware, curricula offered, fees, accreditations and student support — for families choosing an online school.',
+    intro: 'A factual comparison of two respected online schools — what each offers, what each does well, and which model suits which family.',
+    competitorSummary: 'Wolsey Hall Oxford is a UK-based distance learning school founded in 1894. They are Cambridge-approved and serve students worldwide with self-paced courseware, tutor feedback by email, and a 1:1 assigned-tutor model. Their alumni include Nelson Mandela. They state on their own website that they have no live lessons, no set timetables, and no fixed classroom sessions — their pupil-led approach is designed around complete student-set scheduling.',
+    keyDifference: 'Wolsey Hall is self-paced. Smartious is live. Both models work — for different children, different family situations, and different learning styles.',
+    table: [
+      { feature: 'Founded',           wolsey: '1894',                                        smartious: '2018' },
+      { feature: 'Headquarters',      wolsey: 'Oxford, UK',                                  smartious: 'Nairobi, Kenya' },
+      { feature: 'Learning model',    wolsey: 'Self-paced courseware',                       smartious: 'Live daily classes' },
+      { feature: 'Live lessons',      wolsey: 'No',                                          smartious: 'Yes — every school day' },
+      { feature: 'Teacher access',    wolsey: 'Assigned tutor, email feedback',              smartious: 'Live teachers + real-time chat' },
+      { feature: 'Class rhythm',      wolsey: 'Student sets own schedule',                   smartious: 'Structured weekly timetable' },
+      { feature: 'Peer interaction',  wolsey: 'Community areas, virtual library',            smartious: 'Live classmates, group activities' },
+      { feature: 'Curricula',         wolsey: 'Cambridge IGCSE, A-Level, Primary',           smartious: 'Cambridge, Edexcel, IB Diploma, American, BNC' },
+      { feature: 'Annual tuition',    wolsey: 'From ~USD 1,300 to USD 2,700',                smartious: 'USD 4,000 to USD 6,000 full programme' },
+      { feature: 'Sibling discount',  wolsey: 'Yes — 10%',                                   smartious: 'Yes' },
+      { feature: 'Enrichment activities', wolsey: 'Clubs, virtual library',                  smartious: 'Wednesday programme (2–4 PM) — sports, clubs, arts' },
+      { feature: 'Physical centre',   wolsey: 'No',                                          smartious: 'Yes — Parklands, Nairobi' },
+      { feature: 'University support',wolsey: 'A-Level tutor feedback',                      smartious: 'IUFP + Study Abroad + UCAS/Common App' },
+      { feature: 'Africa diaspora focus', wolsey: 'No specific focus',                       smartious: 'Yes — built in Nairobi for global African families' },
+      { feature: 'Course books included', wolsey: 'Yes',                                     smartious: 'Digital + recommended texts' },
+    ],
+    competitorStrengths: [
+      ['130 years of heritage',     'One of the longest-established distance learning schools in the world. Cambridge-approved status carries weight.'],
+      ['1:1 assigned tutor model',  'A dedicated tutor reviews and feeds back on every assignment. Strong for self-directed learners.'],
+      ['Course books included',     'Physical textbooks shipped to UK students (other destinations quoted) — a unique inclusion.'],
+      ['Special educational needs', 'Their Learning Support Manager is qualified to write exam-board SEN reports.'],
+      ['Notable alumni',            'Nelson Mandela and 750,000+ enrolled students across their history.'],
+    ],
+    smartiousAdvantages: [
+      ['Live, every school day',    'Children join real classes with real teachers and real classmates — not pre-recorded videos. The rhythm of live teaching is how most children actually learn best.'],
+      ['Wider curriculum range',    'Cambridge IGCSE and A-Level, plus IB Diploma, Pearson Edexcel, American High School Diploma, BNC and KE CBC. Wolsey Hall is Cambridge-only.'],
+      ['Same-day teacher access',   'Smartious teachers are available during live lessons and through the platform every day — not just by email with 24-72 hour turnaround.'],
+      ['Wednesday enrichment',      'Two protected hours every week for sports, music, coding, debate, leadership. The kind of holistic education premium private schools charge a fortune to provide.'],
+      ['African diaspora identity', 'Built in Nairobi for families across Kenya, the UAE, UK, Canada, Australia, Nigeria, South Africa and beyond. Cultural relevance the heritage British options can\'t match.'],
+      ['Physical learning centre',  'Hybrid option for Nairobi-based families: our Parklands centre offers supervised study with on-site teachers, in addition to the online programme.'],
+      ['Real-time progress reports','Weekly written parent reports plus a live dashboard. You see what your child is doing, when they do it.'],
+    ],
+    whichForWho: [
+      { who: 'Wolsey Hall suits',     reasons: ['Older, naturally self-motivated learners who thrive working independently', 'Families wanting the heritage prestige and Cambridge-approved status', 'Adult learners returning to qualifications', 'Children with very specific scheduling constraints (elite athletes, travelling families) who need full flexibility'] },
+      { who: 'Smartious suits',       reasons: ['Children who learn best with the rhythm of live classes and peers', 'Families who want enrichment activities included (sports, clubs, leadership)', 'African and diaspora families wanting an internationally recognised online school with cultural relevance', 'Families seeking IGCSE through to university admissions, not just Cambridge', 'Parents who want real-time visibility on what their child is studying and how'] },
+    ],
+    testimonial: {
+      videoId: 'sBOgk274_eQ',
+      title: 'A Smartious family story',
+      summary: 'Hear directly from a Smartious family about their experience with live online learning. Tap to watch.',
+    },
+    faqs: [
+      { q: 'Is Smartious accredited like Wolsey Hall?',
+        a: 'Yes. Smartious students sit Cambridge International, Pearson Edexcel, IB Diploma and American High School Diploma examinations at registered British Council and Cambridge International centres worldwide. The qualifications earned are identical to those from any other school using the same exam boards.' },
+      { q: 'How can Smartious offer live classes at this price?',
+        a: 'Our model is built for global delivery from day one — qualified specialists teaching live across multiple time zones with shared cohorts. We don\'t pay for physical buildings (beyond our Parklands centre), uniforms, transport or admin overhead that traditional schools carry. That efficiency is passed to families through lower fees.' },
+      { q: 'Can my child join Smartious if they\'re used to Wolsey Hall\'s self-paced model?',
+        a: 'Yes. Many of our students have transferred from self-paced online schools. Our admissions team assesses where your child is in their curriculum and places them at the right point. The shift from solo self-paced to live cohort learning takes most students a week or two to adjust, and outcomes typically improve.' },
+      { q: 'Does Smartious work for families with travelling schedules like Wolsey Hall does?',
+        a: 'Yes. Live classes are recorded for asynchronous catch-up when family schedules don\'t allow attendance. Most live classes are scheduled at times that suit students across our main regions (East Africa, Middle East, UK, Canada, Australia). Travelling families maintain continuity by joining live where possible and reviewing recordings otherwise.' },
+      { q: 'Which is better for IGCSE — Smartious or Wolsey Hall?',
+        a: 'Both deliver Cambridge IGCSE qualifications. Wolsey Hall is better if you have a highly self-motivated child who learns well alone and you value the heritage brand. Smartious is better if you want live classes, peer interaction, a wider curriculum range (IB, American, Edexcel beyond Cambridge), and a structured weekly rhythm. Many families choose by curriculum + learning style fit rather than brand alone.' },
+      { q: 'What about Wolsey Hall\'s 130-year history?',
+        a: 'It\'s real and impressive. We don\'t compete on heritage — we compete on the live-class model, the breadth of curricula, the Wednesday enrichment programme, and our African diaspora positioning. If 130 years of brand matters most to your family, Wolsey Hall has that. If live teaching and a vibrant student community matter more, Smartious is the better fit.' },
+    ],
+  },
+]
+
 const COUNTRIES = [
   {
     slug: 'uae',
@@ -3055,6 +3148,7 @@ export default function LandingPage() {
   const [currentCurriculum, setCurrentCurriculum] = useState(null)
   const [currentService, setCurrentService] = useState(null)
   const [currentCountry, setCurrentCountry] = useState(null)
+  const [currentCompare, setCurrentCompare] = useState(null)
   const [publicTeachers, setPublicTeachers] = useState([])
   const [teachersLoading, setTeachersLoading] = useState(false)
   const [teachersLoaded, setTeachersLoaded] = useState(false)
@@ -3395,6 +3489,18 @@ export default function LandingPage() {
       }
       return
     }
+    if (path.startsWith('/compare/')) {
+      const slug = decodeURIComponent(path.slice('/compare/'.length))
+      const cmp = COMPARES.find(c => c.slug === slug)
+      if (cmp) {
+        setCurrentCompare(slug)
+        setPage('compare-detail')
+      } else {
+        // Unknown comparison slug — fall back to home
+        setPage('home')
+      }
+      return
+    }
     const id = path === '/' ? 'home' : path.slice(1)
     if (PAGES.includes(id) && id !== 'article') {
       setPage(id)
@@ -3426,6 +3532,12 @@ export default function LandingPage() {
     if (ctry) {
       metaTitle = ctry.seoTitle
       metaDesc  = ctry.seoDesc
+    }
+  } else if (page === 'compare-detail' && currentCompare) {
+    const cmp = COMPARES.find(x => x.slug === currentCompare)
+    if (cmp) {
+      metaTitle = cmp.seoTitle
+      metaDesc  = cmp.seoDesc
     }
   } else if (page === 'article' && currentArticle && FULL_ARTICLES[currentArticle]) {
     const a = FULL_ARTICLES[currentArticle]
@@ -3500,6 +3612,14 @@ export default function LandingPage() {
   const openCountry = (slug) => {
     if (!slug) return
     nav('/online-school/' + encodeURIComponent(slug))
+    window.scrollTo(0, 0)
+    topRef.current?.scrollIntoView()
+  }
+
+  // openCompare(slug) — navigate to a competitor-comparison page URL
+  const openCompare = (slug) => {
+    if (!slug) return
+    nav('/compare/' + encodeURIComponent(slug))
     window.scrollTo(0, 0)
     topRef.current?.scrollIntoView()
   }
@@ -4506,6 +4626,248 @@ export default function LandingPage() {
                   Book Free Consultation
                 </button>
                 <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from ' + ctry.country + '.')}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'13px 26px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+                  WhatsApp
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
+                </a>
+              </div>
+            </div></section>
+
+            <Footer P={P}/>
+          </>
+        )
+      })()}
+
+
+      {/* ══════════════════════════════════════════
+          COMPARE-DETAIL — Smartious vs <competitor>
+          One template renders all comparison pages from
+          the COMPARES data array. URL pattern: /compare/<slug>.
+          FAQ schema injected per-page for AI Overviews.
+      ══════════════════════════════════════════ */}
+      {page === 'compare-detail' && (() => {
+        const cmp = COMPARES.find(c => c.slug === currentCompare)
+        if (!cmp) return null
+        return (
+          <>
+            {/* FAQ schema for this comparison */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              'mainEntity': cmp.faqs.map(f => ({
+                '@type': 'Question',
+                'name': f.q,
+                'acceptedAnswer': { '@type': 'Answer', 'text': f.a },
+              })),
+            })}}/>
+
+            {/* HERO */}
+            <div className="pg-hero"><div className="wrap">
+              <div className="eyebrow">Honest comparison</div>
+              <h1 className="pg-h">Smartious vs <em>{cmp.competitor}</em></h1>
+              <p className="pg-sub" style={{marginTop:12}}>{cmp.intro}</p>
+              <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
+                <button className="btn-p" onClick={() => P('enroll')}>Enroll with Smartious <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <button className="btn-o lt" onClick={() => P('consult')}>Book Free Consultation</button>
+              </div>
+            </div></div>
+
+            {/* KEY DIFFERENCE */}
+            <section className="sec" style={{background:V.bone}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>The key difference</div>
+                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
+                  {cmp.keyDifference.split('.')[0]}.
+                  {cmp.keyDifference.includes('.') && (
+                    <em style={{color:V.cr,display:'block',marginTop:6}}>{cmp.keyDifference.split('.').slice(1).join('.').trim()}</em>
+                  )}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,marginTop:16}}>{cmp.competitorSummary}</p>
+              </div>
+            </div></section>
+
+            {/* VIDEO TESTIMONIAL */}
+            {cmp.testimonial && cmp.testimonial.videoId && (
+              <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                <div style={{textAlign:'center',marginBottom:24}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>From our community</div>
+                  <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>
+                    {cmp.testimonial.title}
+                  </h2>
+                  <p style={{fontSize:13.5,color:V.sl,maxWidth:540,margin:'10px auto 0',lineHeight:1.7}}>
+                    {cmp.testimonial.summary}
+                  </p>
+                </div>
+                {/* Vertical YouTube Short embed — facade pattern: thumbnail + click-to-load iframe */}
+                <CompareVideoEmbed videoId={cmp.testimonial.videoId}/>
+              </div></section>
+            )}
+
+            {/* FEATURE TABLE */}
+            <section className="sec" style={{background:V.bone}}><div className="wrap">
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Side by side</div>
+                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  Feature <em style={{color:V.cr}}>comparison</em>
+                </h2>
+              </div>
+              <div style={{maxWidth:920,margin:'0 auto',overflowX:'auto'}}>
+                <table style={{width:'100%',borderCollapse:'collapse',background:'#fff',border:'1px solid '+V.line,borderRadius:8,overflow:'hidden'}}>
+                  <thead>
+                    <tr style={{background:V.ink,color:'#fff'}}>
+                      <th style={{padding:'14px 16px',textAlign:'left',fontSize:12,fontWeight:700,letterSpacing:'.06em',textTransform:'uppercase'}}>Feature</th>
+                      <th style={{padding:'14px 16px',textAlign:'left',fontSize:12,fontWeight:700,letterSpacing:'.06em',textTransform:'uppercase'}}>{cmp.competitor}</th>
+                      <th style={{padding:'14px 16px',textAlign:'left',fontSize:12,fontWeight:700,letterSpacing:'.06em',textTransform:'uppercase',color:V.gold3}}>Smartious</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cmp.table.map((row, i) => (
+                      <tr key={i} style={{borderTop:'1px solid '+V.line, background: i%2===0?'#fff':'#FBFAF5'}}>
+                        <td style={{padding:'12px 16px',fontSize:13,fontWeight:700,color:V.ink,verticalAlign:'top'}}>{row.feature}</td>
+                        <td style={{padding:'12px 16px',fontSize:13,color:V.sl,verticalAlign:'top'}}>{row.wolsey}</td>
+                        <td style={{padding:'12px 16px',fontSize:13,color:V.ink,verticalAlign:'top',fontWeight:600,background:'rgba(212,175,55,.08)'}}>{row.smartious}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p style={{fontSize:11,color:V.sl2,textAlign:'center',marginTop:14,fontStyle:'italic'}}>
+                  Comparison based on public information from each provider's website (May 2026). Fees and offerings may change — verify directly before final decision.
+                </p>
+              </div>
+            </div></section>
+
+            {/* COMPETITOR STRENGTHS — acknowledge what they do well */}
+            <section className="sec" style={{background:'#fff'}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto'}}>
+                <div className="eyebrow">What {cmp.competitor} does well</div>
+                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:24}}>
+                  Genuine strengths to consider
+                </h2>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:14}}>
+                  {cmp.competitorStrengths.map(([h, p], i) => (
+                    <div key={i} style={{padding:'16px 18px',background:V.bone,border:'1px solid '+V.line,borderRadius:7}}>
+                      <div style={{fontSize:14,fontWeight:700,color:V.ink,marginBottom:6}}>{h}</div>
+                      <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65}}>{p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* SMARTIOUS ADVANTAGES */}
+            <section className="sec" style={{background:V.ink,color:'#fff'}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto'}}>
+                <div className="eyebrow" style={{color:V.gold2}}>Where Smartious differs</div>
+                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:24}}>
+                  What you get with <em style={{color:V.gold3}}>Smartious</em>
+                </h2>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:14}}>
+                  {cmp.smartiousAdvantages.map(([h, p], i) => (
+                    <div key={i} style={{padding:'16px 18px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:8}}>
+                      <div style={{
+                        width:24,height:24,borderRadius:5,
+                        background:'rgba(212,175,55,.15)',
+                        border:'1px solid rgba(212,175,55,.35)',
+                        display:'flex',alignItems:'center',justifyContent:'center',
+                        marginBottom:10,
+                      }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={V.gold2} strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <div style={{fontSize:14,fontWeight:700,color:'#fff',marginBottom:6,lineHeight:1.3}}>{h}</div>
+                      <p style={{fontSize:12.5,color:'rgba(255,255,255,.7)',lineHeight:1.65}}>{p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* WHICH FOR WHO */}
+            <section className="sec" style={{background:V.bone}}><div className="wrap">
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Which is right for you</div>
+                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  Honest <em style={{color:V.cr}}>recommendations</em>
+                </h2>
+                <p style={{fontSize:13.5,color:V.sl,maxWidth:580,margin:'10px auto 0',lineHeight:1.7}}>
+                  Both schools serve real families well. The question is fit.
+                </p>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))',gap:18,maxWidth:920,margin:'0 auto'}}>
+                {cmp.whichForWho.map((b, i) => (
+                  <div key={i} style={{
+                    padding:'22px 24px',background:'#fff',border:'1px solid '+V.line,
+                    borderTop:'4px solid '+(i===0?V.sl2:V.cr),
+                    borderRadius:8,
+                  }}>
+                    <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>
+                      {b.who}
+                    </h3>
+                    <ul style={{listStyle:'none',padding:0,margin:0}}>
+                      {b.reasons.map((r, j) => (
+                        <li key={j} style={{
+                          fontSize:13,color:V.sl,lineHeight:1.65,
+                          paddingLeft:22,marginBottom:8,position:'relative',
+                        }}>
+                          <span style={{
+                            position:'absolute',left:0,top:6,
+                            width:6,height:6,borderRadius:'50%',
+                            background:i===0?V.sl2:V.cr,
+                          }}/>
+                          {r}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div></section>
+
+            {/* FAQs */}
+            <section className="sec" style={{background:'#fff'}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:32}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Common questions</div>
+                  <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                    Smartious vs {cmp.competitor} <em style={{color:V.cr}}>FAQs</em>
+                  </h2>
+                </div>
+                {cmp.faqs.map((f, i) => (
+                  <details key={i} style={{
+                    padding:'18px 22px',marginBottom:10,
+                    background:V.bone,border:'1px solid '+V.line,
+                    borderRadius:8,cursor:'pointer',
+                  }}>
+                    <summary style={{fontSize:15,fontWeight:700,color:V.ink,listStyle:'none',outline:'none'}}>
+                      {f.q}
+                    </summary>
+                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.75,marginTop:12}}>
+                      {f.a}
+                    </p>
+                  </details>
+                ))}
+              </div>
+            </div></section>
+
+            {/* CTA */}
+            <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
+                Ready to see Smartious in <em style={{color:V.gold2}}>action?</em>
+              </h2>
+              <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:28,lineHeight:1.7}}>
+                Book a free consultation. We'll walk you through a live class, review your child's current level, and help you decide whether Smartious fits.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                  Book Free Consultation
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <button onClick={() => P('enroll')}
+                  style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'11px 26px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                  Begin Enrollment
+                </button>
+                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I was comparing you against ' + cmp.competitor + ' and have some questions.')}
                   target="_blank" rel="noopener noreferrer"
                   style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'13px 26px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
                   WhatsApp
@@ -6646,5 +7008,91 @@ function Footer({ P }) {
         </div>
       </div>
     </footer>
+  )
+}
+
+/* ── CompareVideoEmbed — YouTube facade ────────────────────
+ * Loads only a thumbnail by default. The YouTube iframe (~500
+ * KB of JS + cookies) loads only after the user clicks Play.
+ *
+ * Designed for vertical YouTube Shorts (9:16 aspect ratio).
+ * The container is capped at a phone-sized width so the video
+ * doesn't dominate the page on desktop.
+ *
+ * Privacy: uses youtube-nocookie.com domain so no tracking
+ * cookies are set until the user explicitly plays.
+ */
+function CompareVideoEmbed({ videoId }) {
+  const [playing, setPlaying] = useState(false)
+  if (!videoId) return null
+
+  return (
+    <div style={{
+      maxWidth: 360,
+      margin: '0 auto',
+      aspectRatio: '9 / 16',
+      borderRadius: 14,
+      overflow: 'hidden',
+      position: 'relative',
+      background: '#000',
+      boxShadow: '0 12px 32px rgba(0,0,0,.25)',
+    }}>
+      {playing ? (
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
+          title="Smartious student story"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+        />
+      ) : (
+        <button
+          onClick={() => setPlaying(true)}
+          aria-label="Play video testimonial"
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            background: 'transparent', border: 'none',
+            cursor: 'pointer', padding: 0,
+          }}>
+          {/* Thumbnail */}
+          <img
+            src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
+            alt="Smartious student testimonial — tap to play video"
+            loading="lazy"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+          {/* Play overlay */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,.55) 100%)',
+          }}>
+            <div style={{
+              width: 72, height: 72, borderRadius: '50%',
+              background: 'rgba(139,26,46,.92)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 8px 24px rgba(0,0,0,.4)',
+              transition: 'transform .15s',
+            }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+                <polygon points="8,5 19,12 8,19"/>
+              </svg>
+            </div>
+          </div>
+          {/* Caption */}
+          <div style={{
+            position: 'absolute', left: 14, right: 14, bottom: 14,
+            color: '#fff',
+            fontSize: 12, fontWeight: 600,
+            textShadow: '0 1px 4px rgba(0,0,0,.6)',
+            letterSpacing: '.02em',
+          }}>
+            Tap to play · Watch on YouTube
+          </div>
+        </button>
+      )}
+    </div>
   )
 }
