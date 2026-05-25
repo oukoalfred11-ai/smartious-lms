@@ -447,7 +447,7 @@ function AdvisoryDashboard({ programme, deliveryMode, firstName }) {
 }
 
 export default function StudentPortal() {
-  const { user } = useAuth()
+  const { user, logout: ctxLogout } = useAuth()
   const toast    = useToast()
   const store    = useStore()
 
@@ -1411,6 +1411,43 @@ export default function StudentPortal() {
                 </>
               )}
             </div>
+
+            {/* Logout button — calls auth context's logout if available,
+                falls back to clearing local auth state + redirecting. */}
+            <button
+              onClick={() => {
+                if (!window.confirm('Log out of your account?')) return
+                try {
+                  if (typeof ctxLogout === 'function') {
+                    ctxLogout()
+                    return
+                  }
+                } catch {}
+                // Fallback — clear local auth + redirect
+                try {
+                  localStorage.removeItem('sm_token')
+                  localStorage.removeItem('sm_user')
+                } catch {}
+                window.location.href = '/'
+              }}
+              title="Log out"
+              style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                width: 38, height: 38, borderRadius: '50%',
+                background: TOKENS.cream,
+                border: `1px solid ${TOKENS.line}`,
+                cursor: 'pointer',
+                transition: 'background .15s, border-color .15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = TOKENS.goldPale; e.currentTarget.style.borderColor = TOKENS.gold + '60' }}
+              onMouseLeave={e => { e.currentTarget.style.background = TOKENS.cream; e.currentTarget.style.borderColor = TOKENS.line }}
+            >
+              <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke={TOKENS.crimsonDeep} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+            </button>
 
             {/* Student avatar (display picture) — opens profile when clicked */}
             <button
