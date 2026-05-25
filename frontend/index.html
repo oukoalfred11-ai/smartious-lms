@@ -3,6 +3,16 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <!-- Performance: preconnect to font CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Performance: preload the hero image used on homepage -->
+  <link rel="preload" as="image" href="/hero-learning-centre.jpg" fetchpriority="high">
+
+  <!-- Performance: DNS prefetch for third-party origins -->
+  <link rel="dns-prefetch" href="https://smartious-backend.onrender.com">
+  <link rel="dns-prefetch" href="https://formsubmit.co">
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <!-- ═══════════════════════════════════════════════════
