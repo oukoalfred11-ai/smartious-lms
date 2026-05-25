@@ -265,6 +265,14 @@ const NavIcon = ({ name, active }) => {
             <circle cx="12" cy="17.5" r="1" fill="#fff" stroke="none"/>
           </g>
         )
+      case 'attendance': // clipboard with check
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="4" width="14" height="17" rx="2" fill="#fff" fillOpacity=".25"/>
+            <rect x="9" y="2" width="6" height="3" rx="1" fill="#fff" stroke="#fff" strokeWidth="1.6"/>
+            <path d="M8.5 12.5l2 2 4-4.5"/>
+          </g>
+        )
       case 'tutor': // chat bubble with sparkle
         return (
           <g>
@@ -359,6 +367,7 @@ const NAV_SECTIONS = [
     { id:'results',      label:'My Results',      icon:'results',      svg:'<circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>' },
     { id:'live',         label:'Live Classes',    icon:'live',         svg:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>', live:true },
     { id:'timetable',    label:'Timetable',       icon:'timetable',    svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
+    { id:'attendance',   label:'My Attendance',   icon:'attendance',   svg:'<rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 12.5l2 2 4-4.5"/>' },
     { id:'library',      label:'Library',         icon:'library',      svg:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/>' },
   ]},
   { label:'Tools', items:[
@@ -868,6 +877,7 @@ export default function StudentPortal() {
     page === 'results'      ? 'My Results' :
     page === 'live'         ? 'Live Classes' :
     page === 'timetable'    ? 'Timetable' :
+    page === 'attendance'   ? 'My Attendance' :
     page === 'library'      ? 'Library' :
     page === 'resources'    ? 'Resources' :
     page === 'profile'      ? 'My Profile' :
@@ -893,6 +903,7 @@ export default function StudentPortal() {
     page === 'results'      ? 'Grades & feedback' :
     page === 'live'         ? 'Scheduled sessions' :
     page === 'timetable'    ? 'Weekly schedule' :
+    page === 'attendance'   ? 'Daily attendance record' :
     page === 'library'      ? 'Coursebook PDFs' :
     page === 'resources'    ? 'Learning library' :
     page === 'profile'      ? 'Account details' :
@@ -1933,6 +1944,8 @@ export default function StudentPortal() {
               TIMETABLE
           ════════════════════════════════════════════ */}
           {page === 'timetable' && <TimetableTab user={user} store={store} setPage={setPage} toast={toast} />}
+
+          {page === 'attendance' && <StudentAttendancePage user={user} toast={toast} />}
 
           {/* ════════════════════════════════════════════
               MSHAURI AI — mastery-aware
@@ -12622,3 +12635,406 @@ function LessonPracticeTab({ subject, curriculum, topic, user, toast }) {
 
 // Export so LessonPlayerTab can import it
 export { LessonPracticeTab }
+
+// ═══════════════════════════════════════════════════════════
+// StudentAttendancePage
+// ═══════════════════════════════════════════════════════════
+// Read-only view of the student's own daily attendance record,
+// populated by teachers via the Teacher Portal's Attendance tab.
+//
+// Layout:
+//   1. Month navigator (prev / current / next, with this-month default)
+//   2. Summary KPIs — total marked days, present, absent, half-day,
+//      attendance percentage
+//   3. Calendar grid view — every day of the chosen month coloured
+//      by status. Weekends shown but un-coloured.
+//   4. Absence list — chronological list of absent days with reasons
+//
+// Endpoint: GET /api/attendance/student/:studentId?from=&to=
+//   - Backend already permits a student to read their own record
+//     (no role check needed when isOwn is true)
+//   - Returns `items` array sorted by date desc
+// ═══════════════════════════════════════════════════════════
+function StudentAttendancePage({ user, toast }) {
+  // Month state — defaults to current month
+  const today = new Date()
+  const [year, setYear]   = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth()) // 0..11
+  const [records, setRecords] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError]   = useState(null)
+
+  // Compute the from/to bounds for the selected month
+  const firstDay = new Date(year, month, 1)
+  const lastDay  = new Date(year, month + 1, 0)
+  const fromKey  = `${year}-${String(month + 1).padStart(2, '0')}-01`
+  const toKey    = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`
+  const monthLabel = firstDay.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+
+  // Load attendance for the chosen month
+  useEffect(() => {
+    if (!user?._id) return
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    api.get(`/attendance/student/${user._id}`, { params: { from: fromKey, to: toKey } })
+      .then(res => {
+        if (cancelled) return
+        setRecords(res.data?.data?.items || [])
+      })
+      .catch(e => {
+        if (cancelled) return
+        setError(e?.response?.data?.message || e.message || 'Failed to load attendance.')
+        setRecords([])
+      })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?._id, fromKey, toKey])
+
+  // Index records by date key (YYYY-MM-DD) for fast cell lookup
+  const byDateKey = (() => {
+    const map = {}
+    for (const r of records) {
+      // Server returns date as an ISO string; normalise to YYYY-MM-DD
+      const d = new Date(r.date)
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      map[key] = r
+    }
+    return map
+  })()
+
+  // Stats for the month
+  const counts = { present: 0, absent: 0, half_day: 0 }
+  for (const r of records) {
+    if (counts[r.status] !== undefined) counts[r.status]++
+  }
+  const totalMarked = counts.present + counts.absent + counts.half_day
+  // Treat half-day as 0.5 toward "attended"
+  const attendedScore = counts.present + counts.half_day * 0.5
+  const pct = totalMarked > 0 ? Math.round((attendedScore / totalMarked) * 100) : null
+
+  // Navigation
+  const prevMonth = () => {
+    if (month === 0) { setMonth(11); setYear(y => y - 1) }
+    else setMonth(m => m - 1)
+  }
+  const nextMonth = () => {
+    if (month === 11) { setMonth(0); setYear(y => y + 1) }
+    else setMonth(m => m + 1)
+  }
+  const goToday = () => { setYear(today.getFullYear()); setMonth(today.getMonth()) }
+
+  // Build a 6-week grid (always 42 cells) — pad with blanks before
+  // and after the actual month so the calendar always lays out clean.
+  const buildGrid = () => {
+    const cells = []
+    // Day-of-week for the 1st (0=Sun..6=Sat). Convert to Mon-first index.
+    const firstDow = firstDay.getDay()       // 0..6 Sun-first
+    const padFront = (firstDow + 6) % 7       // Convert to Mon-first padding
+    for (let i = 0; i < padFront; i++) cells.push({ blank: true, key: 'b' + i })
+
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+      const dt = new Date(year, month, d)
+      const dow = dt.getDay() // 0..6
+      cells.push({
+        blank: false,
+        day: d,
+        dateKey: key,
+        record: byDateKey[key] || null,
+        isWeekend: dow === 0 || dow === 6,
+        isToday: dt.toDateString() === today.toDateString(),
+        isFuture: dt.getTime() > today.setHours(23, 59, 59, 999),
+      })
+      // Reset today's clock since we mutated it above
+      today.setHours(0, 0, 0, 0)
+    }
+    // Pad end to nearest week boundary
+    while (cells.length % 7 !== 0) cells.push({ blank: true, key: 'be' + cells.length })
+    // Pad to 6 weeks if needed (some months only need 5)
+    while (cells.length < 42) cells.push({ blank: true, key: 'be' + cells.length })
+    return cells
+  }
+  const grid = buildGrid()
+
+  // Status -> colour
+  const statusColour = (st) => {
+    if (st === 'present')  return { bg: '#DCFCE7', border: '#15803D', text: '#15803D', label: 'Present' }
+    if (st === 'half_day') return { bg: '#FDF7E2', border: '#C9A030', text: '#7D5A0F', label: 'Half day' }
+    if (st === 'absent')   return { bg: '#FDE7EC', border: '#7D1025', text: '#7D1025', label: 'Absent' }
+    return { bg: '#F4EFEB', border: '#CFC7C2', text: '#857973', label: '—' }
+  }
+
+  // List of absent days (with reasons) — useful for parent conversations
+  const absentDays = records
+    .filter(r => r.status === 'absent')
+    .map(r => {
+      const d = new Date(r.date)
+      return {
+        date: d,
+        reason: r.reason || '',
+        markedBy: r.markedBy
+          ? `${r.markedBy.firstName || ''} ${r.markedBy.lastName || ''}`.trim()
+          : '',
+      }
+    })
+    .sort((a, b) => b.date - a.date)
+
+  return (
+    <div>
+      {/* Hero header */}
+      <div style={{
+        padding: 0, marginBottom: 18, overflow: 'hidden',
+        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
+        color: '#fff', borderRadius: 'var(--rxl, 14px)',
+      }}>
+        <div style={{ padding: '22px 30px' }}>
+          <div style={{
+            fontSize: 11, fontWeight: 700,
+            letterSpacing: '.12em', textTransform: 'uppercase',
+            opacity: .75, marginBottom: 6,
+          }}>My attendance</div>
+          <h2 style={{
+            fontFamily: "'Instrument Serif', serif", fontSize: 26,
+            fontWeight: 400, margin: 0, lineHeight: 1.2,
+          }}>
+            {monthLabel}
+          </h2>
+          <div style={{ fontSize: 13.5, opacity: .85, marginTop: 6 }}>
+            Your daily attendance, recorded by your teachers.
+          </div>
+        </div>
+
+        {/* Month nav */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '10px 24px',
+          background: 'rgba(0,0,0,.18)',
+        }}>
+          <button onClick={prevMonth}
+            style={{
+              background: 'rgba(255,255,255,.12)', color: '#fff',
+              border: '1px solid rgba(255,255,255,.18)',
+              padding: '6px 14px', borderRadius: 6,
+              fontSize: 12, fontWeight: 700, cursor: 'pointer',
+            }}>‹ Previous</button>
+          <button onClick={goToday}
+            style={{
+              background: '#C9A030', color: '#5A0B1B',
+              border: 'none',
+              padding: '6px 14px', borderRadius: 6,
+              fontSize: 12, fontWeight: 800, cursor: 'pointer',
+            }}>This month</button>
+          <button onClick={nextMonth}
+            style={{
+              background: 'rgba(255,255,255,.12)', color: '#fff',
+              border: '1px solid rgba(255,255,255,.18)',
+              padding: '6px 14px', borderRadius: 6,
+              fontSize: 12, fontWeight: 700, cursor: 'pointer',
+            }}>Next ›</button>
+        </div>
+
+        {/* KPI strip */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+          background: 'rgba(0,0,0,.18)',
+          borderTop: '1px solid rgba(255,255,255,.08)',
+        }}>
+          {[
+            ['Attendance', pct === null ? '—' : pct + '%'],
+            ['Present',    counts.present],
+            ['Half days',  counts.half_day],
+            ['Absent',     counts.absent],
+            ['Days marked', totalMarked],
+          ].map(([l, v]) => (
+            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
+                {l}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {loading && (
+        <div style={{ padding: '40px 20px', textAlign: 'center', color: '#9A9A9A', fontSize: 13 }}>
+          Loading attendance...
+        </div>
+      )}
+
+      {error && !loading && (
+        <div style={{
+          background: '#FDE7EC',
+          border: '1px solid #F8B4C0',
+          borderRadius: 8, padding: '14px 18px', marginBottom: 16,
+          fontSize: 13, color: '#7D1025',
+        }}>
+          Could not load attendance: {error}
+        </div>
+      )}
+
+      {!loading && !error && (
+        <>
+          {/* Calendar grid */}
+          <div style={{
+            background: '#fff',
+            border: '1px solid #E8E2D6',
+            borderRadius: 10,
+            padding: 18, marginBottom: 18,
+          }}>
+            {/* Day-of-week header (Mon-first) */}
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
+              gap: 6, marginBottom: 8,
+            }}>
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
+                <div key={d} style={{
+                  fontSize: 10, fontWeight: 700,
+                  letterSpacing: '.1em', textTransform: 'uppercase',
+                  color: '#857973', textAlign: 'center',
+                  paddingBottom: 6,
+                }}>{d}</div>
+              ))}
+            </div>
+
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
+              gap: 6,
+            }}>
+              {grid.map((c, i) => {
+                if (c.blank) {
+                  return <div key={c.key} style={{ aspectRatio: '1', minHeight: 56 }}/>
+                }
+                const colour = c.record ? statusColour(c.record.status) : null
+                return (
+                  <div key={c.dateKey}
+                    title={c.record
+                      ? `${c.dateKey} — ${statusColour(c.record.status).label}${c.record.reason ? ': ' + c.record.reason : ''}`
+                      : c.isFuture ? `${c.dateKey} — Future date` : `${c.dateKey} — Not marked`}
+                    style={{
+                      aspectRatio: '1', minHeight: 56,
+                      borderRadius: 7,
+                      background: colour ? colour.bg
+                        : c.isFuture ? '#FAF7F4'
+                        : c.isWeekend ? '#FAF7F4' : '#FFF',
+                      border: '1.5px solid ' + (colour ? colour.border
+                        : c.isToday ? '#C9A030' : '#E8E2D6'),
+                      padding: 6,
+                      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                      transition: 'transform .12s, box-shadow .12s',
+                      cursor: c.record ? 'help' : 'default',
+                    }}
+                  >
+                    <div style={{
+                      fontSize: 13, fontWeight: c.isToday ? 800 : 600,
+                      color: c.isFuture ? '#CFC7C2'
+                        : colour ? colour.text
+                        : c.isWeekend ? '#A89E99' : '#1A0F0E',
+                      fontFamily: c.isToday ? "'Instrument Serif', serif" : 'inherit',
+                    }}>{c.day}</div>
+                    {colour && (
+                      <div style={{
+                        fontSize: 9, fontWeight: 700,
+                        color: colour.text,
+                        textTransform: 'uppercase',
+                        letterSpacing: '.05em',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>{colour.label}</div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Legend */}
+            <div style={{
+              display: 'flex', flexWrap: 'wrap', gap: 14,
+              marginTop: 14, paddingTop: 14,
+              borderTop: '1px solid #F4EFEB',
+              fontSize: 11, color: '#857973',
+            }}>
+              {[
+                { label: 'Present',  bg: '#DCFCE7', border: '#15803D' },
+                { label: 'Half day', bg: '#FDF7E2', border: '#C9A030' },
+                { label: 'Absent',   bg: '#FDE7EC', border: '#7D1025' },
+                { label: 'Not marked', bg: '#FFF', border: '#E8E2D6' },
+                { label: 'Weekend',  bg: '#FAF7F4', border: '#E8E2D6' },
+              ].map(item => (
+                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{
+                    width: 14, height: 14, borderRadius: 3,
+                    background: item.bg,
+                    border: '1.5px solid ' + item.border,
+                  }}/>
+                  <span>{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Absence detail list */}
+          {absentDays.length > 0 && (
+            <div style={{
+              background: '#fff',
+              border: '1px solid #E8E2D6',
+              borderRadius: 10,
+              padding: 18, marginBottom: 18,
+            }}>
+              <div style={{
+                fontSize: 11, fontWeight: 800, color: '#7D1025',
+                letterSpacing: '.12em', textTransform: 'uppercase',
+                marginBottom: 12,
+              }}>
+                Absences this month
+              </div>
+              {absentDays.map((a, i) => (
+                <div key={i} style={{
+                  padding: '10px 0',
+                  borderBottom: i < absentDays.length - 1 ? '1px solid #F4EFEB' : 'none',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1A0F0E' }}>
+                      {a.date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </div>
+                    {a.markedBy && (
+                      <div style={{ fontSize: 11, color: '#857973' }}>
+                        Marked by {a.markedBy}
+                      </div>
+                    )}
+                  </div>
+                  {a.reason && (
+                    <div style={{ fontSize: 12.5, color: '#564844', marginTop: 4, lineHeight: 1.5 }}>
+                      {a.reason}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {totalMarked === 0 && (
+            <div style={{
+              padding: 28, background: '#FBFAF5',
+              border: '1px solid #E8E2D6', borderRadius: 10,
+              textAlign: 'center',
+            }}>
+              <div style={{
+                fontFamily: "'Instrument Serif', serif",
+                fontSize: 20, color: '#1A0F0E', marginBottom: 6,
+              }}>
+                No attendance marked yet
+              </div>
+              <div style={{ fontSize: 13, color: '#857973', lineHeight: 1.6, maxWidth: 460, margin: '0 auto' }}>
+                Your teachers haven't marked any attendance for {monthLabel} yet.
+                Check back after your next class.
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
