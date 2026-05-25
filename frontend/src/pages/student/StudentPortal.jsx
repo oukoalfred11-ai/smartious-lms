@@ -475,6 +475,54 @@ export default function StudentPortal() {
     } catch { return 0 }
   })
 
+  // ── Header avatar (display picture) ──────────────────
+  // Sources, in order: user.avatar from the DB; localStorage avatar
+  // (set by ProfileTab when the student uploads an image — currently
+  // a base64 data-url, kept locally because there's no Cloudinary
+  // pipeline for avatars yet). We watch localStorage so the header
+  // updates instantly when the student saves a new avatar in their
+  // profile, without needing a page reload.
+  const [headerAvatar, setHeaderAvatar] = useState(() => {
+    try {
+      return user?.avatar || localStorage.getItem('sm_profile_avatar') || null
+    } catch {
+      return user?.avatar || null
+    }
+  })
+  useEffect(() => {
+    // If the user prop updates (e.g. /auth/me responds with avatar),
+    // prefer that, falling back to localStorage.
+    try {
+      setHeaderAvatar(user?.avatar || localStorage.getItem('sm_profile_avatar') || null)
+    } catch {
+      setHeaderAvatar(user?.avatar || null)
+    }
+  }, [user?.avatar])
+  useEffect(() => {
+    // React to ProfileTab saves within the same tab. The 'storage'
+    // event only fires across tabs, so we also poll briefly when
+    // the student visits the profile page or returns from it.
+    const onStorage = (e) => {
+      if (e.key === 'sm_profile_avatar') {
+        setHeaderAvatar(e.newValue || user?.avatar || null)
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [user?.avatar])
+  useEffect(() => {
+    // When the student leaves the profile page, refresh from local
+    // storage in case they just uploaded a new avatar (same-tab
+    // localStorage writes don't fire the 'storage' event above).
+    if (page !== 'profile') {
+      try {
+        const fresh = user?.avatar || localStorage.getItem('sm_profile_avatar') || null
+        if (fresh !== headerAvatar) setHeaderAvatar(fresh)
+      } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page])
+
   // Advisory students may only visit dashboard / profile / subscription.
   // If they somehow land elsewhere, send them back to the dashboard.
   useEffect(() => {
@@ -1371,7 +1419,7 @@ export default function StudentPortal() {
               style={{
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 width: 38, height: 38, borderRadius: '50%',
-                background: user?.avatar
+                background: headerAvatar
                   ? 'transparent'
                   : `linear-gradient(135deg, ${TOKENS.crimson}, ${TOKENS.crimsonDeep})`,
                 color: TOKENS.goldLight,
@@ -1387,8 +1435,8 @@ export default function StudentPortal() {
               onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = `0 4px 10px ${TOKENS.crimson}45` }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = `0 2px 6px ${TOKENS.crimson}30` }}
             >
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user.firstName || 'Profile'}
+              {headerAvatar ? (
+                <img src={headerAvatar} alt={user?.firstName || 'Profile'}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
               ) : (
                 initials
