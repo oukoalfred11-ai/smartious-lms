@@ -10,7 +10,6 @@ import TeacherPortal     from './pages/teacher/TeacherPortal.jsx'
 import StudentPortal     from './pages/student/StudentPortal.jsx'
 import ParentPortal      from './pages/parent/ParentPortal.jsx'
 import DemoPortal        from './pages/demo/DemoPortal.jsx'
-
 function Guard({ children, roles }) {
   const { user, loading } = useAuth()
   if (loading) return (
@@ -22,13 +21,11 @@ function Guard({ children, roles }) {
   if (roles && !roles.includes(user.role)) return <Navigate to={`/${user.role}`} replace />
   return children
 }
-
 function RoleRedirect() {
   const { user } = useAuth()
   if (!user) return <Navigate to="/login" replace />
   return <Navigate to={`/${user.role}`} replace />
 }
-
 export default function App() {
   return (
     <StoreProvider>
@@ -46,6 +43,7 @@ export default function App() {
               <Route path="/global"         element={<LandingPage />} />
               <Route path="/pricing"        element={<LandingPage />} />
               <Route path="/programs"       element={<LandingPage />} />
+              <Route path="/activities"     element={<LandingPage />} />
               <Route path="/faq"            element={<LandingPage />} />
               <Route path="/blog"           element={<LandingPage />} />
               <Route path="/blog/:slug"     element={<LandingPage />} />
