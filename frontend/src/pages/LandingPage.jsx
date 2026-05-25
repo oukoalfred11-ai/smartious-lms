@@ -87,7 +87,9 @@ function usePageMeta(title, description) {
  * just the home page so the browser starts downloading the
  * hero image immediately, in parallel with CSS.
  *
- * Saves ~1-2 seconds of LCP on mobile.
+ * Note: This only helps for SPA navigation back to the home
+ * page. For the initial page load, the preload must be in
+ * the raw HTML head (index.html) to make any real difference.
  */
 function useHeroPreload(active) {
   useEffect(() => {
@@ -106,33 +108,6 @@ function useHeroPreload(active) {
       if (el) el.remove()
     }
   }, [active])
-}
-
-/* ── useFontPreconnect — font loading optimization ────────
- * Tells the browser to establish a connection to Google Fonts
- * servers in advance, so when the fonts actually load they
- * don't pay the DNS + TLS handshake cost. Saves ~200-400ms
- * of FCP on cold-cache visits.
- *
- * Should ideally be in index.html for maximum benefit, but
- * doing it here works for client-side navigation too.
- */
-function useFontPreconnect() {
-  useEffect(() => {
-    const hosts = [
-      { id: 'sm-pc-fontg',   href: 'https://fonts.googleapis.com', crossOrigin: false },
-      { id: 'sm-pc-fontg2',  href: 'https://fonts.gstatic.com',    crossOrigin: true  },
-    ]
-    for (const h of hosts) {
-      if (document.getElementById(h.id)) continue
-      const link = document.createElement('link')
-      link.id = h.id
-      link.rel = 'preconnect'
-      link.href = h.href
-      if (h.crossOrigin) link.setAttribute('crossorigin', '')
-      document.head.appendChild(link)
-    }
-  }, [])
 }
 
 /* ── useSiteSchema — site-wide structured data ─────────────
@@ -3590,7 +3565,6 @@ export default function LandingPage() {
   usePageMeta(metaTitle, metaDesc)
   useSiteSchema()
   useHeroPreload(page === 'home')
-  useFontPreconnect()
 
   // Load public teacher profiles when the Teachers page is opened.
   // Fetched once, from the public (no-auth) endpoint.
