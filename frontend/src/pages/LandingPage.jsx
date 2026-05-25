@@ -558,7 +558,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -835,6 +835,295 @@ function buildAssessment(level) {
 // Each entry: slug, badge, h (name), desc (card teaser), tags,
 // meta, gold (Smartious flag), and a `detail` block.
 // ════════════════════════════════════════════════════════════
+/* ── COUNTRIES — country-specific landing pages ─────────────
+ * Each country has a dedicated SEO-optimized page targeting
+ * search intent for that market. URL pattern: /online-school/<slug>.
+ * Pages are designed to rank for queries like
+ * "online school UAE", "homeschooling in Canada", etc.
+ *
+ * Data shape:
+ *   slug         — URL segment (matches search keyword)
+ *   country      — full country name
+ *   flag         — emoji flag (used only for visual chip, decorative)
+ *   h            — H1 headline
+ *   tagline      — short subtitle for hero
+ *   seoTitle     — <title> tag (≤60 chars ideal)
+ *   seoDesc      — meta description (≤158 chars ideal)
+ *   localFacts   — array of trust/local facts shown as chips
+ *   pains        — pain points the page addresses
+ *   curricula    — recommended curricula for that market
+ *   regulation   — local homeschooling legality / authority info
+ *   examCentres  — where students sit their exams locally
+ *   testimonial  — local testimonial quote
+ *   testimonialAuthor — author + city
+ *   faqs         — country-specific FAQs (used by FAQ schema)
+ *   cities       — top cities (helps with local SEO)
+ */
+const COUNTRIES = [
+  {
+    slug: 'uae',
+    country: 'United Arab Emirates',
+    h: 'Online School for Families in the UAE',
+    tagline: 'Internationally recognised IGCSE, A-Level, IB and American curricula — taught live, fully online, accessible across Dubai, Abu Dhabi, Sharjah and the wider Emirates.',
+    seoTitle: 'Online School UAE | Homeschooling for Dubai & Abu Dhabi — Smartious',
+    seoDesc: 'Accredited online school for families in the UAE. Cambridge IGCSE, A-Level, IB Diploma and American curricula. Live classes, expert teachers, KHDA-aware programmes for Dubai, Abu Dhabi and Sharjah.',
+    localFacts: ['Dubai · Abu Dhabi · Sharjah', 'British Council exam centres', 'Live virtual classes (GST friendly)'],
+    pains: 'UAE families face rising private school fees, limited spaces at top international schools, and curricula that don\'t always match a child\'s next move. Smartious gives expat and Emirati families an internationally recognised education without those barriers.',
+    curricula: ['Cambridge IGCSE', 'Cambridge A-Level', 'IB Diploma', 'American High School Diploma', 'Pearson Edexcel'],
+    regulation: 'Homeschooling is legal in the UAE for both Emirati and expat families. Non-Emirati residents may homeschool with an accredited international online school like Smartious without KHDA, ADEK or Ministry of Education approval. In Dubai, families can optionally register through the KHDA Rahhal programme for added local recognition. We guide families through the right pathway during admissions.',
+    examCentres: 'Cambridge IGCSE, A-Level and Pearson Edexcel examinations are sat through British Council centres in Dubai and Abu Dhabi. Smartious handles exam registration and provides full revision support.',
+    testimonial: 'Moving from Nairobi to Dubai mid-year would have meant disruption at any school. With Smartious, our daughter just kept going — same teachers, same curriculum, taking her IGCSEs through the British Council in Dubai. Saved us almost AED 80,000 a year.',
+    testimonialAuthor: 'Amina O. · Dubai Marina',
+    cities: ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Fujairah'],
+    faqs: [
+      { q: 'Is homeschooling legal in the UAE?',
+        a: 'Yes. Homeschooling is recognised by the UAE Ministry of Education for both Emirati and expatriate families. Expat residents do not need KHDA, ADEK or Ministry approval to enrol their children with an accredited international online school like Smartious. The Rahhal programme in Dubai offers an optional formal registration pathway for families who want local school recognition.' },
+      { q: 'Where do Smartious students in the UAE sit their exams?',
+        a: 'IGCSE, A-Level and Pearson Edexcel examinations are sat at British Council centres in Dubai and Abu Dhabi. Smartious handles registration, provides past papers and runs full mock exam programmes before the May/June and October/November series.' },
+      { q: 'What does Smartious cost compared to a private school in Dubai?',
+        a: 'Smartious fees are a fraction of typical Dubai private school fees. Annual tuition for a full IGCSE programme is around USD 4,000–6,000, compared to AED 50,000–120,000 at premium Dubai international schools. Single-subject and tuition-only options start lower.' },
+      { q: 'Will my child still socialise if they study online?',
+        a: 'Yes. Smartious students join live virtual classes daily with classmates across the UAE, Kenya, the UK and beyond. Our Wednesday enrichment programme runs online clubs (debate, coding, MUN, journalism) so students build real friendships and develop social confidence.' },
+      { q: 'Can my child join Smartious mid-year if we relocate to the UAE?',
+        a: 'Yes. We accept enrolments year-round. Mid-year transfers are common — students continue with the same curriculum and exam board without losing progress, even if they were previously at a British or American international school.' },
+    ],
+  },
+  {
+    slug: 'dubai',
+    country: 'Dubai',
+    h: 'Online School & Homeschooling in Dubai',
+    tagline: 'A premium British and American curriculum online school built for Dubai expat families — fully accredited, fully live, and a fraction of private school fees.',
+    seoTitle: 'Online School Dubai | Homeschooling for Expats — Smartious',
+    seoDesc: 'Online homeschooling for families in Dubai. Cambridge IGCSE, A-Level, IB and American curricula delivered live. KHDA Rahhal-aware, British Council exam centres, AED-friendly fees.',
+    localFacts: ['Dubai Marina · JLT · Downtown · Arabian Ranches', 'British Council Dubai exam centre', 'AED-friendly USD pricing'],
+    pains: 'Dubai\'s top international schools regularly cost AED 80,000–150,000 per year and have multi-year waitlists. Families relocating mid-year face limited options. Smartious gives Dubai families an accredited online school with the same exam boards at a fraction of the cost.',
+    curricula: ['Cambridge IGCSE', 'Cambridge A-Level', 'IB Diploma', 'American High School Diploma', 'Pearson Edexcel'],
+    regulation: 'In Dubai, the Knowledge and Human Development Authority (KHDA) oversees private education. Expat families do not need KHDA approval to enrol with an accredited international online school. The Rahhal programme offers optional formal registration via a participating private school for families who want extra local recognition.',
+    examCentres: 'British Council Dubai is the primary exam centre for Cambridge International, Pearson Edexcel and AQA exams. Smartious handles full registration and revision support.',
+    testimonial: 'We were on a 3-year waitlist for a top Dubai British school. With Smartious our son did his entire IGCSE programme online, sat his exams at the British Council in Dubai, and got into Heriot-Watt Dubai a year early.',
+    testimonialAuthor: 'Faisal A. · Arabian Ranches',
+    cities: ['Dubai Marina', 'Downtown Dubai', 'JLT', 'Arabian Ranches', 'Mirdif', 'Al Barsha'],
+    faqs: [
+      { q: 'Is online homeschooling legal in Dubai?',
+        a: 'Yes. Expat families in Dubai can enrol with an accredited international online school like Smartious without KHDA approval. KHDA regulates private schools physically operating in Dubai but does not require approval for families using online providers based abroad. The Rahhal programme offers an optional pathway for families wanting formal local registration.' },
+      { q: 'How much does Smartious cost compared to a Dubai private school?',
+        a: 'A full IGCSE year at Smartious is around USD 4,000–6,000 (approximately AED 15,000–22,000). Top Dubai private schools charge AED 80,000–150,000 for the same age group. Many Dubai families enrol multiple children with Smartious for less than the cost of one private school place.' },
+      { q: 'Will my child be ready for a UK or UAE university after Smartious?',
+        a: 'Yes. Smartious students complete the same Cambridge IGCSE, A-Level or IB Diploma qualifications accepted by universities worldwide — including Heriot-Watt Dubai, University of Birmingham Dubai, the American University in Dubai, plus UK, US, Canadian and Australian universities.' },
+      { q: 'When can my child start?',
+        a: 'Year-round. There are no fixed term-start dates. Whether you\'ve just relocated to Dubai or need a mid-year switch from a private school, your child can begin within days of admissions assessment.' },
+    ],
+  },
+  {
+    slug: 'qatar',
+    country: 'Qatar',
+    h: 'Online School & Homeschooling in Qatar',
+    tagline: 'A globally recognised online school for families in Doha and across Qatar — IGCSE, A-Level, IB and Pearson Edexcel, taught live by qualified specialists.',
+    seoTitle: 'Online School Qatar | Homeschool Doha — Smartious',
+    seoDesc: 'Online homeschool for families in Qatar and Doha. Live Cambridge IGCSE, A-Level, IB and Edexcel classes. British Council Qatar exam centre, expat-friendly fees, flexible schedule.',
+    localFacts: ['Doha · Al Rayyan · Al Wakrah', 'British Council Qatar exam centre', 'Live online · Flexible scheduling'],
+    pains: 'Qatar\'s private school waitlists are long, and many internationally mobile families struggle with curriculum continuity between postings. Smartious offers a single school that travels with the family — same teachers, same curriculum, no matter where you live in the Gulf or beyond.',
+    curricula: ['Cambridge IGCSE', 'Cambridge A-Level', 'IB Diploma', 'Pearson Edexcel', 'American High School Diploma'],
+    regulation: 'Homeschooling is permitted in Qatar for expatriate families. The Ministry of Education and Higher Education (MOEHR) regulates private education but does not require expat families to register online learners with an international provider. Smartious advises families on local pathways during admissions.',
+    examCentres: 'Examinations are sat at the British Council Qatar exam centre in Doha. Smartious manages registration and provides full revision and mock-exam programmes.',
+    testimonial: 'Doha postings can come at short notice. Smartious gave our two boys complete continuity — the same teachers and curriculum we had in Lagos, now serving them in Qatar. They sit their A-Levels at the British Council in Doha next May.',
+    testimonialAuthor: 'Bola E. · West Bay, Doha',
+    cities: ['Doha', 'Al Rayyan', 'Al Wakrah', 'Al Khor', 'Lusail', 'The Pearl'],
+    faqs: [
+      { q: 'Is homeschooling legal in Qatar for expat families?',
+        a: 'Yes. Expat families in Qatar are permitted to enrol their children with an accredited international online school. The Ministry of Education does not require expats to register their online learners locally, though families should confirm the latest local rules during admissions.' },
+      { q: 'Where do students sit their exams in Qatar?',
+        a: 'Cambridge International, Pearson Edexcel and AQA exams are sat at the British Council Qatar in Doha. Smartious handles all registration and runs full mock exam programmes.' },
+      { q: 'How does Smartious compare to private schools in Doha?',
+        a: 'Premium Doha private schools charge QAR 65,000–110,000 per year. Smartious annual tuition is approximately USD 4,000–6,000 (around QAR 15,000–22,000) — comparable academic outcomes at a fraction of the cost.' },
+      { q: 'Can my child join clubs and activities even though they\'re online?',
+        a: 'Yes. Smartious runs a weekly Wednesday enrichment programme with online clubs in coding, debate, Model UN, public speaking, journalism, AI and entrepreneurship. Students in Qatar join the same sessions as students in the UAE, UK and Kenya.' },
+    ],
+  },
+  {
+    slug: 'canada',
+    country: 'Canada',
+    h: 'Online School & Homeschooling for Families in Canada',
+    tagline: 'An internationally recognised online school for Canadian families — British and Cambridge curricula, IB Diploma, and an American High School Diploma pathway.',
+    seoTitle: 'Online School Canada | Homeschooling — Smartious',
+    seoDesc: 'Accredited online school for Canadian families and Canadian expats abroad. Cambridge IGCSE, A-Level, IB Diploma and American curricula, taught live. Flexible schedule for Canadian time zones.',
+    localFacts: ['Toronto · Vancouver · Calgary · Ottawa', 'Live classes (EST/PST friendly)', 'Accepted by Canadian universities'],
+    pains: 'Canadian families seeking international curricula, expat Canadians abroad needing continuity, or families dissatisfied with their provincial board\'s pace — Smartious offers a globally recognised alternative with the academic depth Canadian universities reward.',
+    curricula: ['Cambridge IGCSE', 'Cambridge A-Level', 'IB Diploma', 'American High School Diploma', 'Pearson Edexcel'],
+    regulation: 'Homeschooling is legal in every Canadian province, though regulations vary. Ontario, BC, Alberta, Quebec and the other provinces each have their own homeschool notification process. Smartious operates as an internationally accredited online school recognised globally — families typically use us alongside or instead of their provincial homeschool registration.',
+    examCentres: 'Smartious students in Canada sit Cambridge IGCSE and A-Level examinations through Cambridge International\'s network of authorised Canadian centres, including major cities in Ontario, BC, Alberta and Quebec. Edexcel exams are arranged through Pearson\'s Canadian centres.',
+    testimonial: 'Our daughter wanted A-Levels for UK university applications, but no school near us in Calgary offered them. Smartious delivered the full programme live, on Calgary time, and supported her UCAS application. She\'s now at Edinburgh.',
+    testimonialAuthor: 'Daniel M. · Calgary, Alberta',
+    cities: ['Toronto', 'Vancouver', 'Calgary', 'Ottawa', 'Edmonton', 'Montreal'],
+    faqs: [
+      { q: 'Is online homeschooling legal in Canada?',
+        a: 'Yes. Homeschooling is legal across all Canadian provinces. Each province has its own notification process — Ontario, BC, Alberta and Quebec all have established homeschool registration pathways. Smartious operates as an internationally accredited online provider; many Canadian families use us alongside their provincial registration for international curriculum access.' },
+      { q: 'Will Canadian universities accept Smartious qualifications?',
+        a: 'Yes. Cambridge IGCSE, A-Level, IB Diploma and Pearson Edexcel qualifications are accepted by all Canadian universities including the University of Toronto, McGill, UBC and Waterloo. A-Level students often receive advanced credit toward Canadian university degrees.' },
+      { q: 'Do live classes happen at a Canadian-friendly time?',
+        a: 'Yes. Smartious operates classes across multiple time zones. Canadian students can join afternoon or evening live sessions adapted to EST or PST, with all classes recorded for review.' },
+      { q: 'Can my child do A-Levels in Canada through Smartious?',
+        a: 'Yes. We offer the full Cambridge A-Level programme online. Canadian students sit exams at authorised Cambridge International centres in Toronto, Vancouver, Calgary, Montreal and Ottawa.' },
+    ],
+  },
+  {
+    slug: 'australia',
+    country: 'Australia',
+    h: 'Online School & Homeschooling in Australia',
+    tagline: 'A globally recognised online school for Australian families and expats — British, IB and American curricula with full Australian time-zone support.',
+    seoTitle: 'Online School Australia | Homeschooling — Smartious',
+    seoDesc: 'Accredited online school for Australian families. Cambridge IGCSE, A-Level, IB and American curricula delivered live with AEST/AWST-friendly scheduling. Year-round enrolment.',
+    localFacts: ['Sydney · Melbourne · Brisbane · Perth', 'AEST/AWST live classes', 'Accepted by Australian Group of Eight'],
+    pains: 'Australian families seeking British or international curricula, expat Australians abroad needing continuity, or families in rural areas without access to top private schools — Smartious offers an internationally recognised education with full Australian time-zone support.',
+    curricula: ['Cambridge IGCSE', 'Cambridge A-Level', 'IB Diploma', 'American High School Diploma', 'Pearson Edexcel'],
+    regulation: 'Homeschooling is legal in every Australian state and territory, with each state having its own registration process — NSW, Victoria, Queensland, WA, SA, Tasmania, ACT and NT. Smartious is an internationally accredited online school; Australian families typically register with us for international curriculum access alongside their state registration.',
+    examCentres: 'Cambridge International, Pearson Edexcel and AQA exams are sat at authorised centres across Sydney, Melbourne, Brisbane, Perth and Adelaide. Smartious manages registration and revision support.',
+    testimonial: 'We moved from Singapore to Brisbane and didn\'t want our daughter to lose her IB pathway. Smartious continued her IB Diploma seamlessly — she sat exams at the British Council Brisbane and got into Melbourne Uni.',
+    testimonialAuthor: 'Sarah K. · Brisbane',
+    cities: ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Canberra'],
+    faqs: [
+      { q: 'Is homeschooling legal in Australia?',
+        a: 'Yes. Homeschooling is legal across all Australian states and territories. Each state has its own registration process — NSW BoSTES, Victorian VRQA, Queensland HEU, and the equivalent authorities in WA, SA, Tasmania, ACT and NT. Families typically register locally and use Smartious as their international curriculum provider.' },
+      { q: 'Will Australian universities accept Smartious qualifications?',
+        a: 'Yes. Cambridge IGCSE, A-Level and IB Diploma are recognised by all Australian universities including the Group of Eight (Melbourne, Sydney, ANU, UNSW, Queensland, Monash, Adelaide, WA). A-Level results convert directly to ATAR equivalents.' },
+      { q: 'Are live classes scheduled for Australian time zones?',
+        a: 'Yes. Smartious runs morning sessions adapted to AEST and AWST so Australian students join live without late-night classes. All sessions are also recorded for asynchronous review.' },
+      { q: 'Can rural Australian families access Smartious?',
+        a: 'Yes. All you need is a reliable internet connection. Many of our Australian students live in regional areas where international curricula are unavailable locally.' },
+    ],
+  },
+  {
+    slug: 'nigeria',
+    country: 'Nigeria',
+    h: 'Online School & Homeschooling in Nigeria',
+    tagline: 'A premium international online school for families in Lagos, Abuja and across Nigeria — Cambridge IGCSE, A-Level, IB and American curricula, delivered live in your time zone.',
+    seoTitle: 'Online School Nigeria | Homeschool Lagos Abuja — Smartious',
+    seoDesc: 'Accredited international online school for Nigerian families. Live Cambridge IGCSE, A-Level, IB and American curricula. Premium quality at a fraction of Lagos international school fees.',
+    localFacts: ['Lagos · Abuja · Port Harcourt · Ibadan', 'WAT live classes', 'Cambridge & British Council exam centres'],
+    pains: 'Lagos and Abuja international school fees can exceed ₦15 million per year. Families seeking British or American curricula often face years-long waitlists. Smartious gives Nigerian families a globally recognised online school at premium Nigerian secondary school fee levels.',
+    curricula: ['Cambridge IGCSE', 'Cambridge A-Level', 'IB Diploma', 'American High School Diploma', 'Pearson Edexcel'],
+    regulation: 'Homeschooling is permitted in Nigeria. The Federal Ministry of Education recognises home-based and online education, though the regulatory framework is light-touch for international curricula. Smartious operates as an internationally accredited online provider — families typically enrol directly without local registration steps.',
+    examCentres: 'Cambridge IGCSE, A-Level and Pearson Edexcel exams are sat at British Council centres in Lagos, Abuja and Port Harcourt. Smartious handles registration and provides full revision support.',
+    testimonial: 'My twins were on a 4-year waitlist for a top Lagos international school. With Smartious they both did IGCSE entirely online, sat exams at the British Council Lagos, and got into the University of Lagos and Covenant respectively.',
+    testimonialAuthor: 'Chidinma A. · Lekki, Lagos',
+    cities: ['Lagos', 'Abuja', 'Port Harcourt', 'Ibadan', 'Kano', 'Benin City'],
+    faqs: [
+      { q: 'Is homeschooling legal in Nigeria?',
+        a: 'Yes. The Federal Ministry of Education recognises homeschooling and online learning, with light-touch regulation for families using accredited international providers like Smartious. Most Nigerian families enrol directly without additional local registration.' },
+      { q: 'How does Smartious compare to top Lagos international schools?',
+        a: 'Top Lagos and Abuja international schools charge ₦8–18 million per year. Smartious annual tuition is approximately USD 4,000–6,000 (around ₦6–9 million using a working rate) — same Cambridge curriculum, same exam boards, often delivered by teachers with the same qualifications.' },
+      { q: 'Where do Nigerian students sit their exams?',
+        a: 'Cambridge International and Pearson Edexcel examinations are sat at British Council centres in Lagos, Abuja and Port Harcourt. Smartious handles registration and provides mock exam programmes.' },
+      { q: 'Will Smartious help with university admissions to Nigerian and international universities?',
+        a: 'Yes. We support applications to Nigerian universities (UNILAG, Covenant, Babcock, etc.) as well as UK UCAS, US Common App, Canadian and Australian applications.' },
+    ],
+  },
+  {
+    slug: 'south-africa',
+    country: 'South Africa',
+    h: 'Online School & Homeschooling in South Africa',
+    tagline: 'An internationally recognised online school for South African families — Cambridge IGCSE, A-Level, IB and Pearson Edexcel curricula delivered live in SAST.',
+    seoTitle: 'Online School South Africa | Homeschool — Smartious',
+    seoDesc: 'Accredited online homeschool for South African families. Cambridge IGCSE, A-Level, IB and Pearson Edexcel delivered live in SAST. Cambridge centres in Johannesburg, Cape Town and Pretoria.',
+    localFacts: ['Johannesburg · Cape Town · Pretoria · Durban', 'SAST live classes', 'Cambridge & Pearson exam centres in SA'],
+    pains: 'Many South African families want an alternative to the local CAPS curriculum for international university admissions. Top private schools charge R150,000–R350,000 per year. Smartious offers Cambridge International qualifications at a fraction of the cost.',
+    curricula: ['Cambridge IGCSE', 'Cambridge A-Level', 'IB Diploma', 'Pearson Edexcel', 'American High School Diploma'],
+    regulation: 'Homeschooling is legal in South Africa and increasingly popular. Families register with their provincial Department of Basic Education (currently 60-day notification in most provinces). Smartious operates as an international online provider — families typically use us for the academic programme alongside their provincial registration.',
+    examCentres: 'Cambridge International, Pearson Edexcel and AQA examinations are sat at authorised centres in Johannesburg, Cape Town, Pretoria, Durban and Port Elizabeth.',
+    testimonial: 'Our son wanted to study Medicine at UCT but needed strong A-Level results. Smartious delivered the full Cambridge A-Level Sciences programme online. He scored 3 A* grades and is now at UCT Medical School.',
+    testimonialAuthor: 'Lerato N. · Sandton, Johannesburg',
+    cities: ['Johannesburg', 'Cape Town', 'Pretoria', 'Durban', 'Port Elizabeth', 'Stellenbosch'],
+    faqs: [
+      { q: 'Is homeschooling legal in South Africa?',
+        a: 'Yes. South African families may homeschool legally by registering with their provincial Department of Basic Education. Smartious operates as an internationally accredited online school — most SA families use us as their academic programme alongside provincial registration.' },
+      { q: 'Will South African universities accept Smartious qualifications?',
+        a: 'Yes. UCT, Wits, Stellenbosch, UJ, Pretoria and all major SA universities accept Cambridge IGCSE, A-Level, IB Diploma and Pearson Edexcel for direct admission. A-Level subjects often grant exemption credit toward first-year courses.' },
+      { q: 'How does Smartious compare to top SA private schools?',
+        a: 'Top SA private schools charge R150,000–R350,000 per year. Smartious annual tuition is around USD 4,000–6,000 (approximately R75,000–R110,000) — Cambridge curriculum, live classes, at well below half the private school fee.' },
+      { q: 'Can my child sit Cambridge exams in South Africa?',
+        a: 'Yes. Cambridge International exam centres operate in Johannesburg, Cape Town, Pretoria, Durban and Port Elizabeth. Smartious handles registration and provides full revision and mock-exam programmes.' },
+    ],
+  },
+  {
+    slug: 'egypt',
+    country: 'Egypt',
+    h: 'Online School & Homeschooling in Egypt',
+    tagline: 'A premium international online school for families in Cairo, Alexandria and across Egypt — IGCSE, A-Level, IB and American curricula taught live in your time zone.',
+    seoTitle: 'Online School Egypt | Homeschool Cairo — Smartious',
+    seoDesc: 'Accredited online school for Egyptian families. Cambridge IGCSE, A-Level, IB and American High School Diploma. Live classes, British Council Cairo exam centre, affordable expat-quality fees.',
+    localFacts: ['Cairo · Alexandria · New Capital · Sharm El Sheikh', 'British Council Egypt exam centre', 'EET live classes'],
+    pains: 'Top Cairo international schools charge USD 15,000–35,000 per year. Many families want British or American qualifications for university admissions without that cost. Smartious gives Egyptian families globally recognised curricula at significantly lower fees.',
+    curricula: ['Cambridge IGCSE', 'Cambridge A-Level', 'IB Diploma', 'American High School Diploma', 'Pearson Edexcel'],
+    regulation: 'Homeschooling and online learning are legal in Egypt for families using internationally accredited providers. The Ministry of Education recognises foreign curricula sat at British Council and accredited centres. Families enrol with Smartious directly without local school registration.',
+    examCentres: 'Cambridge International, Pearson Edexcel and AQA examinations are sat at British Council centres in Cairo and Alexandria.',
+    testimonial: 'My daughter wanted A-Levels for Cambridge admissions, but her IB-only school in Cairo couldn\'t offer them. Smartious delivered Maths, Further Maths and Physics A-Level online over two years. She received an offer from Cambridge for Engineering.',
+    testimonialAuthor: 'Hassan M. · Maadi, Cairo',
+    cities: ['Cairo', 'Alexandria', 'New Capital', 'Giza', 'Sharm El Sheikh', 'Hurghada'],
+    faqs: [
+      { q: 'Is homeschooling legal in Egypt?',
+        a: 'Online learning with accredited international providers is legal in Egypt. The Ministry of Education recognises foreign curricula sat at British Council and accredited international centres. Most Egyptian families enrol with Smartious directly without additional local registration.' },
+      { q: 'Where do Egyptian students sit Cambridge or Edexcel exams?',
+        a: 'Examinations are sat at British Council Cairo and British Council Alexandria. Smartious handles full exam registration, mock exams and revision support.' },
+      { q: 'How does Smartious compare to top Cairo international schools?',
+        a: 'Top Cairo international schools charge USD 15,000–35,000 per year. Smartious annual tuition is around USD 4,000–6,000 — same Cambridge or American curriculum, often delivered by teachers with similar qualifications, at a fraction of the cost.' },
+      { q: 'Will Egyptian universities recognise Smartious qualifications?',
+        a: 'Yes. The American University in Cairo, German University in Cairo, British University and Egyptian public universities all accept Cambridge IGCSE/A-Level, IB Diploma and American High School Diploma for admission. We also support international university applications.' },
+    ],
+  },
+  {
+    slug: 'usa',
+    country: 'United States',
+    h: 'Online School & Homeschooling for Families in the USA',
+    tagline: 'An internationally recognised online school for American families and US expats abroad — Cambridge, IB and American High School Diploma pathways with full college-counselling.',
+    seoTitle: 'Online School USA | Homeschooling for Expats — Smartious',
+    seoDesc: 'Accredited international online school for American families and US expats. Cambridge IGCSE, A-Level, IB Diploma and American High School Diploma. Live classes, college counselling.',
+    localFacts: ['Coast-to-coast time zone support', 'College Board AP-compatible', 'US homeschool law compliant'],
+    pains: 'American families seeking British or IB curricula often can\'t find local options. US expats abroad face curriculum disruption with every relocation. Homeschoolers needing accredited transcripts and college counselling find Smartious closes those gaps.',
+    curricula: ['Cambridge IGCSE', 'Cambridge A-Level', 'IB Diploma', 'American High School Diploma', 'Pearson Edexcel'],
+    regulation: 'Homeschooling is legal in all 50 US states. Each state has its own notification and assessment requirements, ranging from minimal (Texas, Idaho) to detailed (New York, Pennsylvania). Smartious operates as an internationally accredited online school — families combine us with their state\'s homeschool registration.',
+    examCentres: 'Cambridge International and Pearson Edexcel examinations are sat at authorised centres across major US cities. American High School Diploma transcripts are issued directly by Smartious.',
+    testimonial: 'Our work moved us from Boston to Singapore to Dubai. With three schools in four years, my son was falling behind. Smartious gave us one school that travelled with us — same teachers, same friends, all the way through to his IB Diploma.',
+    testimonialAuthor: 'Michael R. · Houston (formerly Singapore)',
+    cities: ['New York', 'Los Angeles', 'Houston', 'Boston', 'Miami', 'San Francisco'],
+    faqs: [
+      { q: 'Is online homeschooling legal in the USA?',
+        a: 'Yes. Homeschooling is legal in all 50 states, though notification and assessment requirements vary. Smartious operates as an internationally accredited online school — most US families register with their state and use Smartious as their academic programme.' },
+      { q: 'Will US universities accept Smartious qualifications?',
+        a: 'Yes. Cambridge IGCSE, A-Level and IB Diploma are widely recognised by US universities including Ivy League and Top 100 institutions. A-Levels often earn advanced placement credit. Our American High School Diploma is accepted for US college admissions, and we support Common App applications.' },
+      { q: 'Does Smartious offer AP courses?',
+        a: 'Smartious offers Cambridge A-Levels and IB Higher Levels, both of which carry the same or stronger weight than AP at competitive US universities. Students preparing specifically for AP exams can take supplementary AP-tutored sessions through our private tuition service.' },
+      { q: 'Can my US expat family continue Smartious from anywhere?',
+        a: 'Yes. Our students stay enrolled regardless of relocation. Whether you move from Houston to Dubai to London, the same school, teachers, and curriculum follow.' },
+    ],
+  },
+  {
+    slug: 'uk',
+    country: 'United Kingdom',
+    h: 'Online School & Homeschooling in the United Kingdom',
+    tagline: 'A flexible online school for UK families — Cambridge IGCSE, A-Level, IB and Pearson Edexcel, taught live by qualified specialists with full UCAS application support.',
+    seoTitle: 'Online School UK | Homeschooling & Online Tuition — Smartious',
+    seoDesc: 'Accredited online school for UK families. Cambridge IGCSE, A-Level, IB Diploma and Pearson Edexcel delivered live. GMT scheduling, UCAS support, flexible mid-year enrolment.',
+    localFacts: ['London · Manchester · Birmingham · Edinburgh', 'GMT/BST live classes', 'UCAS application support'],
+    pains: 'UK families struggling with school place shortages, families looking for flexibility around traditional school, or UK expats needing curriculum continuity abroad — Smartious delivers a globally recognised online school with full UK academic standards.',
+    curricula: ['Cambridge IGCSE', 'Cambridge A-Level', 'IB Diploma', 'Pearson Edexcel', 'AQA GCSE'],
+    regulation: 'Home education is legal in the United Kingdom under Section 7 of the Education Act 1996. Parents are not required to follow the National Curriculum but must provide a suitable, efficient education. Local authorities may make informal enquiries. Smartious meets and exceeds these standards as an internationally accredited online school.',
+    examCentres: 'Examinations are sat at Cambridge International and Pearson Edexcel centres across the UK, including major cities. Smartious handles full exam entry and provides comprehensive revision programmes.',
+    testimonial: 'After two years on a state school waitlist, we tried Smartious and never looked back. The quality of teaching is better than the local independent we considered, at a quarter of the cost. My daughter\'s now at Bristol studying Medicine.',
+    testimonialAuthor: 'Olivia S. · Reading',
+    cities: ['London', 'Manchester', 'Birmingham', 'Edinburgh', 'Bristol', 'Leeds'],
+    faqs: [
+      { q: 'Is home education legal in the UK?',
+        a: 'Yes. Home education is legal in England, Scotland, Wales and Northern Ireland. Parents are not required to follow the National Curriculum or use specific assessments. Most local authorities make informal enquiries about the education being provided; Smartious provides documentation as needed.' },
+      { q: 'How does Smartious compare to UK private schools?',
+        a: 'UK independent schools charge £15,000–£45,000 per year. Smartious annual tuition is around USD 4,000–6,000 (approximately £3,000–£4,800) — same Cambridge or Edexcel curriculum, delivered live, often by teachers with UK qualifications.' },
+      { q: 'Where do UK students sit Smartious exams?',
+        a: 'At Cambridge International or Pearson Edexcel authorised centres across the UK. We handle registration and provide full mock-exam programmes.' },
+      { q: 'Can Smartious support UCAS applications?',
+        a: 'Yes. Our university counselling team supports UK UCAS applications including personal statement reviews, predicted grades, references, and interview preparation for competitive courses including Medicine, Engineering and Oxbridge applications.' },
+    ],
+  },
+]
+
 const CURRICULA = [
   {
     slug: 'igcse',
@@ -2708,6 +2997,7 @@ export default function LandingPage() {
   const [currentArticle, setCurrentArticle] = useState(null)
   const [currentCurriculum, setCurrentCurriculum] = useState(null)
   const [currentService, setCurrentService] = useState(null)
+  const [currentCountry, setCurrentCountry] = useState(null)
   const [publicTeachers, setPublicTeachers] = useState([])
   const [teachersLoading, setTeachersLoading] = useState(false)
   const [teachersLoaded, setTeachersLoaded] = useState(false)
@@ -3025,6 +3315,18 @@ export default function LandingPage() {
       }
       return
     }
+    if (path.startsWith('/online-school/')) {
+      const slug = decodeURIComponent(path.slice('/online-school/'.length))
+      const country = COUNTRIES.find(c => c.slug === slug)
+      if (country) {
+        setCurrentCountry(slug)
+        setPage('country-detail')
+      } else {
+        // Unknown country slug — fall back to the global page
+        setPage('global')
+      }
+      return
+    }
     const id = path === '/' ? 'home' : path.slice(1)
     if (PAGES.includes(id) && id !== 'article') {
       setPage(id)
@@ -3050,6 +3352,12 @@ export default function LandingPage() {
     if (s) {
       metaTitle = s.seoTitle || (s.h + ' — ' + SITE)
       metaDesc  = s.seoDesc || s.desc.slice(0, 158)
+    }
+  } else if (page === 'country-detail' && currentCountry) {
+    const ctry = COUNTRIES.find(x => x.slug === currentCountry)
+    if (ctry) {
+      metaTitle = ctry.seoTitle
+      metaDesc  = ctry.seoDesc
     }
   } else if (page === 'article' && currentArticle && FULL_ARTICLES[currentArticle]) {
     const a = FULL_ARTICLES[currentArticle]
@@ -3115,6 +3423,14 @@ export default function LandingPage() {
   const openService = (slug) => {
     if (!slug) return
     nav('/services/' + encodeURIComponent(slug))
+    window.scrollTo(0, 0)
+    topRef.current?.scrollIntoView()
+  }
+
+  // openCountry(slug) — navigate to a country detail page URL
+  const openCountry = (slug) => {
+    if (!slug) return
+    nav('/online-school/' + encodeURIComponent(slug))
     window.scrollTo(0, 0)
     topRef.current?.scrollIntoView()
   }
@@ -3663,6 +3979,199 @@ export default function LandingPage() {
 
 
       {/* ══════════════════════════════════════════
+          COUNTRY-DETAIL — Country-specific landing pages
+          One template renders all 10 countries from the COUNTRIES
+          data array. URL pattern: /online-school/<slug>.
+          FAQ schema injected per-page for Google AI Overviews.
+      ══════════════════════════════════════════ */}
+      {page === 'country-detail' && (() => {
+        const ctry = COUNTRIES.find(c => c.slug === currentCountry)
+        if (!ctry) return null
+        return (
+          <>
+            {/* FAQ schema for this country */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              'mainEntity': ctry.faqs.map(f => ({
+                '@type': 'Question',
+                'name': f.q,
+                'acceptedAnswer': { '@type': 'Answer', 'text': f.a },
+              })),
+            })}}/>
+
+            {/* HERO */}
+            <div className="pg-hero"><div className="wrap">
+              <div className="eyebrow">{ctry.country}</div>
+              <h1 className="pg-h">{ctry.h.split(' ').slice(0, -2).join(' ')} <em>{ctry.h.split(' ').slice(-2).join(' ')}</em></h1>
+              <p className="pg-sub" style={{marginTop:12}}>{ctry.tagline}</p>
+              <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:18}}>
+                {ctry.localFacts.map(f => (
+                  <span key={f} style={{
+                    fontSize:11.5, fontWeight:600,
+                    color:V.gold3,
+                    background:'rgba(240,204,90,.1)',
+                    border:'1px solid rgba(240,204,90,.25)',
+                    padding:'5px 12px', borderRadius:99,
+                  }}>{f}</span>
+                ))}
+              </div>
+              <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
+                <button className="btn-p" onClick={() => P('enroll')}>Enroll Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <button className="btn-o lt" onClick={() => P('consult')}>Book Consultation</button>
+                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like more information about online school for families in ' + ctry.country + '.')}
+                  target="_blank" rel="noopener noreferrer"
+                  className="btn-o lt" style={{textDecoration:'none'}}>
+                  WhatsApp Us
+                </a>
+              </div>
+            </div></div>
+
+            {/* WHY SMARTIOUS — PAIN POINTS */}
+            <section className="sec" style={{background:V.bone}}><div className="wrap">
+              <div style={{maxWidth:780}}>
+                <div className="eyebrow">Why families in {ctry.country} choose Smartious</div>
+                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  Real curriculum continuity. <em style={{color:V.cr}}>Real exam credentials.</em>
+                </h2>
+                <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.pains}</p>
+              </div>
+            </div></section>
+
+            {/* CURRICULA OFFERED */}
+            <section className="sec" style={{background:'#fff'}}><div className="wrap">
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Curricula in {ctry.country}</div>
+                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>
+                  Globally recognised, <em style={{color:V.cr}}>locally available</em>
+                </h2>
+              </div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:10,justifyContent:'center'}}>
+                {ctry.curricula.map(c => (
+                  <div key={c} style={{
+                    background:V.bone, border:'1px solid '+V.line,
+                    borderRadius:99, padding:'10px 22px',
+                    fontSize:14, fontWeight:600, color:V.ink,
+                  }}>{c}</div>
+                ))}
+              </div>
+              <p style={{textAlign:'center',marginTop:24,fontSize:13.5,color:V.sl,maxWidth:580,margin:'24px auto 0',lineHeight:1.7}}>
+                All curricula are taught live by degree-qualified subject specialists, with full past paper access, mock exam programmes and university application support.
+              </p>
+            </div></section>
+
+            {/* REGULATION / LEGAL */}
+            <section className="sec" style={{background:V.bone}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto'}}>
+                <div className="eyebrow">Legal &amp; Regulatory</div>
+                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
+                  Homeschooling in {ctry.country}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,marginBottom:24}}>{ctry.regulation}</p>
+
+                <div className="eyebrow">Examination centres</div>
+                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.4rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14}}>
+                  Where students sit their exams
+                </h3>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8}}>{ctry.examCentres}</p>
+              </div>
+            </div></section>
+
+            {/* TESTIMONIAL */}
+            <section className="sec" style={{background:V.ink,color:'#fff'}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill={V.gold2} style={{opacity:.7,marginBottom:18}}>
+                  <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
+                </svg>
+                <p style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontStyle:'italic',lineHeight:1.5,color:'#fff',marginBottom:20}}>
+                  "{ctry.testimonial}"
+                </p>
+                <div style={{fontSize:12,color:V.gold3,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase'}}>
+                  {ctry.testimonialAuthor}
+                </div>
+              </div>
+            </div></section>
+
+            {/* FAQ */}
+            <section className="sec" style={{background:'#fff'}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:32}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Frequently asked</div>
+                  <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                    Questions from {ctry.country} <em style={{color:V.cr}}>families</em>
+                  </h2>
+                </div>
+                {ctry.faqs.map((f, i) => (
+                  <details key={i} style={{
+                    padding:'18px 20px', marginBottom:10,
+                    background:V.bone,
+                    border:'1px solid '+V.line,
+                    borderRadius:8, cursor:'pointer',
+                  }}>
+                    <summary style={{fontSize:15,fontWeight:700,color:V.ink,listStyle:'none',outline:'none'}}>
+                      {f.q}
+                    </summary>
+                    <p style={{fontSize:14,color:V.sl,lineHeight:1.75,marginTop:12}}>
+                      {f.a}
+                    </p>
+                  </details>
+                ))}
+              </div>
+            </div></section>
+
+            {/* CITIES (local SEO) */}
+            <section className="sec" style={{background:V.bone}}><div className="wrap">
+              <div style={{textAlign:'center',marginBottom:24}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve in {ctry.country}</div>
+                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  Online learning, available <em style={{color:V.cr}}>everywhere</em>
+                </h2>
+              </div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'center',maxWidth:680,margin:'0 auto'}}>
+                {ctry.cities.map(city => (
+                  <div key={city} style={{
+                    background:'#fff', border:'1px solid '+V.line,
+                    padding:'8px 16px', borderRadius:99,
+                    fontSize:13, fontWeight:600, color:V.sl,
+                  }}>{city}</div>
+                ))}
+              </div>
+            </div></section>
+
+            {/* CTA */}
+            <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
+                Ready to enrol your child in <em style={{color:V.gold2}}>{ctry.country}?</em>
+              </h2>
+              <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:28,lineHeight:1.7}}>
+                Speak with our admissions team. We'll guide you through the right curriculum, exam pathway and enrolment process for your family.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+                <button onClick={() => P('enroll')}
+                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                  Enroll Now
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <button onClick={() => P('consult')}
+                  style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'11px 26px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                  Book Free Consultation
+                </button>
+                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from ' + ctry.country + '.')}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'13px 26px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+                  WhatsApp
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
+                </a>
+              </div>
+            </div></section>
+
+            <Footer P={P}/>
+          </>
+        )
+      })()}
+
+
+      {/* ══════════════════════════════════════════
           GLOBAL
       ══════════════════════════════════════════ */}
       {page === 'global' && (
@@ -3879,8 +4388,25 @@ export default function LandingPage() {
             </div>
 
             <div className="cp-row" style={{marginTop:40,justifyContent:'center'}}>
-              {['Kenya HQ','Uganda','Tanzania','Botswana','Nigeria','South Africa','Egypt','UAE','Qatar','United Kingdom','United States','Canada','Australia'].map(c => (
-                <div key={c} className="cp" onClick={() => showToast(`${c} — Smartious virtual school & online tuition available.`)} style={{background:'rgba(247,243,237,.06)',borderColor:'rgba(184,150,12,.15)',color:V.white}}>{c}</div>
+              {[
+                ['Kenya HQ', null],
+                ['Uganda', null],
+                ['Tanzania', null],
+                ['Botswana', null],
+                ['Nigeria', 'nigeria'],
+                ['South Africa', 'south-africa'],
+                ['Egypt', 'egypt'],
+                ['UAE', 'uae'],
+                ['Dubai', 'dubai'],
+                ['Qatar', 'qatar'],
+                ['United Kingdom', 'uk'],
+                ['United States', 'usa'],
+                ['Canada', 'canada'],
+                ['Australia', 'australia'],
+              ].map(([label, slug]) => (
+                <div key={label} className="cp"
+                  onClick={() => slug ? openCountry(slug) : showToast(`${label} — Smartious virtual school & online tuition available.`)}
+                  style={{background:'rgba(247,243,237,.06)',borderColor:'rgba(184,150,12,.15)',color:V.white,cursor:'pointer'}}>{label}</div>
               ))}
             </div>
           </div></section>
@@ -4413,7 +4939,7 @@ export default function LandingPage() {
                 }}>
                 Book Free Consultation
               </button>
-              <a href="https://wa.me/254700000000?text=Hi%20Smartious%2C%20I%27d%20like%20to%20know%20more%20about%20the%20Wednesday%20activities%20programme."
+              <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20to%20know%20more%20about%20the%20Wednesday%20activities%20programme."
                 target="_blank" rel="noopener noreferrer"
                 style={{
                   background:'#25D366', color:'#fff', textDecoration:'none',
