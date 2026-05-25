@@ -41,6 +41,20 @@ function setMetaTag(key, content, attr) {
   }
   el.setAttribute('content', content)
 }
+
+// setCanonical — writes/updates the <link rel="canonical"> tag.
+// One per document. SPA-safe: updates on navigation.
+function setCanonical(url) {
+  if (!url) return
+  let el = document.head.querySelector('link[rel="canonical"]')
+  if (!el) {
+    el = document.createElement('link')
+    el.setAttribute('rel', 'canonical')
+    document.head.appendChild(el)
+  }
+  el.setAttribute('href', url)
+}
+
 function usePageMeta(title, description) {
   useEffect(() => {
     if (title) document.title = title
@@ -51,7 +65,146 @@ function usePageMeta(title, description) {
       setMetaTag('twitter:title', title, 'name')
       setMetaTag('twitter:description', description, 'name')
     }
+    // Canonical + og:url — strip query string and trailing slash
+    // so URL variants don't fragment SEO authority.
+    try {
+      const origin = window.location.origin
+      let path = window.location.pathname || '/'
+      // Normalise trailing slash (keep root '/')
+      if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1)
+      const canonical = origin + path
+      setCanonical(canonical)
+      setMetaTag('og:url', canonical, 'property')
+    } catch {}
   }, [title, description])
+}
+
+/* ── useSiteSchema — site-wide structured data ─────────────
+ * Injects Organization + EducationalOrganization JSON-LD into
+ * the document head exactly once per page load. This is the
+ * primary signal Google's Knowledge Graph and AI Overviews
+ * (Gemini, ChatGPT search, Perplexity) use to identify and
+ * describe the business.
+ *
+ * Why EducationalOrganization (not just Organization):
+ *   It's a subtype of Organization that adds education-specific
+ *   semantics — areaServed, hasCredential, alumni, etc. Google
+ *   rewards specific schema types over generic ones.
+ *
+ * Why one block (not per-page):
+ *   The Organization identity is constant; only page-specific
+ *   schemas (FAQPage, Article) should be re-injected per page.
+ */
+function useSiteSchema() {
+  useEffect(() => {
+    const schemaId = 'sm-org-schema'
+    // Avoid duplicate injection on SPA navigation
+    if (document.getElementById(schemaId)) return
+
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'EducationalOrganization',
+      '@id': 'https://smartioushomeschool.com/#organization',
+      'name': 'Smartious Homeschool & eSchool',
+      'alternateName': ['Smartious', 'Smartious Homeschool', 'Smartious eSchool'],
+      'url': 'https://smartioushomeschool.com/',
+      'logo': 'https://smartioushomeschool.com/logo.png',
+      'image': 'https://smartioushomeschool.com/og-image.png',
+      'description': 'Smartious Homeschool & eSchool is an accredited international online and home-based school. We deliver Cambridge IGCSE, Cambridge A-Level, IB Diploma, Pearson Edexcel and the British and American curricula to students across Kenya, the diaspora and worldwide. Live classes, qualified specialists, and full university-application support.',
+      'foundingDate': '2018',
+      'foundingLocation': {
+        '@type': 'Place',
+        'name': 'Nairobi, Kenya',
+      },
+      'address': {
+        '@type': 'PostalAddress',
+        'streetAddress': 'Diamond Plaza I, 4th Parklands Avenue',
+        'addressLocality': 'Nairobi',
+        'addressRegion': 'Parklands',
+        'postalCode': '00100',
+        'addressCountry': 'KE',
+      },
+      'geo': {
+        '@type': 'GeoCoordinates',
+        'latitude': -1.2606,
+        'longitude': 36.8186,
+      },
+      'contactPoint': [{
+        '@type': 'ContactPoint',
+        'telephone': '+254-745-021212',
+        'contactType': 'admissions',
+        'areaServed': ['KE', 'AE', 'GB', 'US', 'CA', 'AU', 'NG', 'ZA', 'QA', 'EG'],
+        'availableLanguage': ['English'],
+      }],
+      'areaServed': [
+        { '@type': 'Country', 'name': 'Kenya' },
+        { '@type': 'Country', 'name': 'United Arab Emirates' },
+        { '@type': 'Country', 'name': 'United Kingdom' },
+        { '@type': 'Country', 'name': 'United States' },
+        { '@type': 'Country', 'name': 'Canada' },
+        { '@type': 'Country', 'name': 'Australia' },
+        { '@type': 'Country', 'name': 'Nigeria' },
+        { '@type': 'Country', 'name': 'South Africa' },
+        { '@type': 'Country', 'name': 'Qatar' },
+        { '@type': 'Country', 'name': 'Egypt' },
+      ],
+      'sameAs': [
+        // Update these to your actual social profile URLs
+        'https://www.facebook.com/smartioushomeschool',
+        'https://www.instagram.com/smartioushomeschool',
+        'https://www.linkedin.com/company/smartious-homeschool',
+        'https://www.tiktok.com/@smartioushomeschool',
+        'https://wa.me/254745021212',
+      ],
+      'hasCredential': [
+        {
+          '@type': 'EducationalOccupationalCredential',
+          'credentialCategory': 'certification',
+          'name': 'Cambridge International Examinations (IGCSE & A-Level)',
+        },
+        {
+          '@type': 'EducationalOccupationalCredential',
+          'credentialCategory': 'certification',
+          'name': 'International Baccalaureate (IB) Diploma Programme',
+        },
+        {
+          '@type': 'EducationalOccupationalCredential',
+          'credentialCategory': 'certification',
+          'name': 'Pearson Edexcel International',
+        },
+      ],
+      'department': [
+        {
+          '@type': 'EducationalOrganization',
+          'name': 'Smartious Virtual School',
+          'description': 'Live online classes delivered worldwide via the Smartious Virtual School platform.',
+        },
+        {
+          '@type': 'EducationalOrganization',
+          'name': 'Smartious Learning Centre',
+          'description': 'In-person learning centre at Diamond Plaza I, Parklands, Nairobi.',
+          'address': {
+            '@type': 'PostalAddress',
+            'streetAddress': 'Diamond Plaza I',
+            'addressLocality': 'Parklands, Nairobi',
+            'addressCountry': 'KE',
+          },
+        },
+      ],
+    }
+
+    const el = document.createElement('script')
+    el.id = schemaId
+    el.type = 'application/ld+json'
+    el.text = JSON.stringify(schema)
+    document.head.appendChild(el)
+
+    return () => {
+      // Clean up on unmount (in practice only matters for HMR)
+      const existing = document.getElementById(schemaId)
+      if (existing) existing.remove()
+    }
+  }, [])
 }
 
 /* ── CSS variables matching smartious-global.html exactly ── */
@@ -3260,6 +3413,17 @@ export default function LandingPage() {
 
     if (frontDeskOk || emailOk) {
       setWizStep(3); setWizDone(true)
+      // Google Ads conversion event — fires only on real lead
+      // submission so the campaign attribution is accurate. Safe
+      // no-op if gtag.js hasn't loaded.
+      try {
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+          window.gtag('event', 'ads_conversion_Submit_lead_form_1', {})
+        }
+      } catch (e) {
+        // Never let analytics break the user flow
+        console.error('[gtag] conversion event failed:', e?.message)
+      }
     } else {
       setEnrollError('Submission failed. Please check your connection and try again, or WhatsApp us at +254 745 021 212.')
     }
@@ -3368,6 +3532,7 @@ export default function LandingPage() {
     metaDesc  = PAGE_META[page].desc
   }
   usePageMeta(metaTitle, metaDesc)
+  useSiteSchema()
 
   // Load public teacher profiles when the Teachers page is opened.
   // Fetched once, from the public (no-auth) endpoint.
@@ -5970,6 +6135,13 @@ function ConsultForm({ P }) {
     }
     if (fdOk || emailOk) {
       setSent(true)
+      try {
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+          window.gtag('event', 'ads_conversion_Submit_lead_form_1', {})
+        }
+      } catch (e) {
+        console.error('[gtag] conversion event failed:', e?.message)
+      }
     } else {
       setErr('Could not send your request. Please check your connection and try again, or WhatsApp us at +254 745 021 212.')
     }
@@ -6159,6 +6331,13 @@ function ContactForm() {
     }
     if (fdOk || emailOk) {
       setSent(true)
+      try {
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+          window.gtag('event', 'ads_conversion_Submit_lead_form_1', {})
+        }
+      } catch (e) {
+        console.error('[gtag] conversion event failed:', e?.message)
+      }
     } else {
       setErr('Could not send your message. Please check your connection and try again, or email hellosmartious@gmail.com directly.')
     }
