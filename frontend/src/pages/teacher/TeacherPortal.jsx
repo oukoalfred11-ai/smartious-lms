@@ -391,6 +391,23 @@ const NavIcon = ({ name, active }) => {
             <path d="M17.5 13.5 L17.5 16 L19.5 17" stroke="#fff" strokeWidth="1.4" strokeLinecap="round"/>
           </g>
         )
+      case 'timetable': // calendar with weekly grid pattern — recurring slots
+        return (
+          <g fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="5" width="18" height="16" rx="2" fill="#fff" fillOpacity=".25"/>
+            <line x1="8" y1="3" x2="8" y2="6"/>
+            <line x1="16" y1="3" x2="16" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10" strokeWidth="1.4"/>
+            {/* Vertical grid lines for weekly columns */}
+            <line x1="9" y1="10" x2="9" y2="21" strokeWidth="1.1" opacity=".7"/>
+            <line x1="15" y1="10" x2="15" y2="21" strokeWidth="1.1" opacity=".7"/>
+            {/* Filled slot blocks showing recurrence */}
+            <rect x="4" y="12" width="4" height="2.5" rx=".4" fill="#fff" stroke="none"/>
+            <rect x="10" y="12" width="4" height="2.5" rx=".4" fill="#fff" stroke="none"/>
+            <rect x="4" y="17" width="4" height="2.5" rx=".4" fill="#fff" stroke="none"/>
+            <rect x="16" y="14.5" width="4" height="2.5" rx=".4" fill="#fff" stroke="none"/>
+          </g>
+        )
       default:
         return <circle cx="12" cy="12" r="4" fill="#fff"/>
     }
@@ -769,6 +786,7 @@ export default function TeacherPortal() {
       {id:'attendance',    label:'Attendance',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
       {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
       {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
+      {id:'timetable',     label:'Timetable',        iconName:'timetable',     icon:'rect:3:4:18:18:2|line:8:2:8:6|line:16:2:16:6|line:3:10:21:10'},
       {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
     ]},
     { section:'Assessment', items:[
@@ -917,6 +935,8 @@ export default function TeacherPortal() {
           {page === 'attendance' && <AttendanceTab user={currentUser} toast={toast} />}
 
           {page === 'library' && <TeacherLibraryTab user={currentUser} toast={toast} />}
+
+          {page === 'timetable' && <TeacherTimetableTab user={currentUser} toast={toast} />}
 
 
           {/* ── QUESTION BANK ── */}
@@ -14139,6 +14159,624 @@ function BookCard({ book, onView, onDelete, canDelete }) {
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// TeacherTimetableTab
+// ═══════════════════════════════════════════════════════════
+// Recurring weekly timetable management for teachers.
+//
+// Flow:
+//   - Loads the teacher's existing slots via GET /timetable/me
+//   - "Add slot" expands an inline form
+//   - Form supports either explicit student picker OR broadcast
+//     by curriculum + grade (radio toggle)
+//   - Existing slots can be edited (inline) or deleted
+//
+// Slots are stored as recurring weekly templates — one document
+// represents "Maths every Monday 09:00–10:00 for these students."
+// The Student Portal reads from the same source.
+// ═══════════════════════════════════════════════════════════
+function TeacherTimetableTab({ user, toast }) {
+  const [entries, setEntries] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState(null)   // null = create mode
+  const [saving, setSaving] = useState(false)
+
+  // Form state
+  const [fTitle, setFTitle]               = useState('')
+  const [fSubject, setFSubject]           = useState('')
+  const [fSubjectId, setFSubjectId]       = useState('')
+  const [fCurriculum, setFCurriculum]     = useState('')
+  const [fGrade, setFGrade]               = useState('')
+  const [fDay, setFDay]                   = useState('Mon')
+  const [fStart, setFStart]               = useState('09:00')
+  const [fEnd, setFEnd]                   = useState('10:00')
+  const [fMode, setFMode]                 = useState('virtual')
+  const [fMeetingLink, setFMeetingLink]   = useState('')
+  const [fLocation, setFLocation]         = useState('')
+  const [fAudienceType, setFAudienceType] = useState('students')  // 'students' | 'broadcast'
+  const [fPickedStudents, setFPickedStudents] = useState([])      // array of {_id, name}
+  const [fAudienceCurriculum, setFAudienceCurriculum] = useState('')
+  const [fAudienceGrade, setFAudienceGrade]           = useState('')
+
+  // Subject catalog for the form
+  const [subjects, setSubjects] = useState([])
+  const [students, setStudents] = useState([])   // teacher's allocated students
+
+  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const DAYS_LONG = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' }
+
+  // Canonical curricula — mirrors SCHOOL_CURRICULA used in admin portal
+  const CURRICULA = [
+    { id: 'CambridgePrimary',   name: 'Cambridge Primary' },
+    { id: 'CambridgeLowerSec',  name: 'Cambridge Lower Secondary' },
+    { id: 'CambridgeIGCSE',     name: 'Cambridge IGCSE' },
+    { id: 'CambridgeALevel',    name: 'Cambridge A-Level' },
+    { id: 'EdexcelLowerSec',    name: 'Edexcel Lower Secondary' },
+    { id: 'EdexcelIGCSE',       name: 'Edexcel IGCSE' },
+    { id: 'EdexcelALevel',      name: 'Edexcel A-Level' },
+    { id: 'AQALowerSec',        name: 'AQA Lower Secondary' },
+    { id: 'AQAGCSE',            name: 'AQA GCSE' },
+    { id: 'AQAALevel',          name: 'AQA A-Level' },
+    { id: 'IB',                 name: 'International Baccalaureate (IB)' },
+    { id: 'BNC',                name: 'British National Curriculum' },
+    { id: 'American',           name: 'American Curriculum' },
+    { id: 'Canadian',           name: 'Canadian Curriculum' },
+    { id: 'KenyaCBC',           name: 'Kenya CBC' },
+  ]
+
+  // ── Loaders ──
+  const loadEntries = async () => {
+    setLoading(true)
+    try {
+      const { data } = await api.get('/timetable/me')
+      setEntries(data?.data?.entries || [])
+    } catch (e) {
+      toast?.error?.('Failed to load timetable: ' + (e?.response?.data?.message || e.message))
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => { loadEntries() // eslint-disable-next-line
+  }, [])
+
+  // Subjects (full catalog — admins may have allocated subjects outside teachingSpecialties)
+  useEffect(() => {
+    let cancelled = false
+    api.get('/subjects')
+      .then(res => {
+        if (cancelled) return
+        const list = (res.data?.subjects || []).filter(s => s.isActive !== false)
+        list.sort((a, b) => {
+          const c = String(a.curriculum || '').localeCompare(String(b.curriculum || ''))
+          if (c !== 0) return c
+          return String(a.subjectName || '').localeCompare(String(b.subjectName || ''))
+        })
+        setSubjects(list)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+
+  // Students this teacher can pick from — pull from allocations
+  useEffect(() => {
+    let cancelled = false
+    api.get('/allocations/teacher')
+      .then(res => {
+        if (cancelled) return
+        const allocs = res.data?.allocations || res.data?.data?.allocations || []
+        // De-dupe by student
+        const map = {}
+        for (const a of allocs) {
+          if (!a.studentId) continue
+          const id = a.studentId._id || a.studentId
+          if (!map[id]) {
+            const s = a.studentId
+            const name = typeof s === 'object'
+              ? `${s.firstName || ''} ${s.lastName || ''}`.trim() || s.email
+              : 'Student ' + String(id).slice(-4)
+            map[id] = { _id: id, name }
+          }
+        }
+        setStudents(Object.values(map).sort((a, b) => a.name.localeCompare(b.name)))
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+
+  // ── Form helpers ──
+  const resetForm = () => {
+    setEditingId(null)
+    setFTitle(''); setFSubject(''); setFSubjectId(''); setFCurriculum('')
+    setFGrade(''); setFDay('Mon'); setFStart('09:00'); setFEnd('10:00')
+    setFMode('virtual'); setFMeetingLink(''); setFLocation('')
+    setFAudienceType('students')
+    setFPickedStudents([])
+    setFAudienceCurriculum(''); setFAudienceGrade('')
+  }
+
+  const beginEdit = (entry) => {
+    setEditingId(entry._id)
+    setFTitle(entry.title || '')
+    setFSubject(entry.subject || '')
+    setFSubjectId(entry.subjectId || '')
+    setFCurriculum(entry.curriculum || '')
+    setFGrade(entry.grade || '')
+    setFDay(entry.dayOfWeek || 'Mon')
+    setFStart(entry.startTime || '09:00')
+    setFEnd(entry.endTime || '10:00')
+    setFMode(entry.deliveryMode || 'virtual')
+    setFMeetingLink(entry.meetingLink || '')
+    setFLocation(entry.location || '')
+    // Audience: was it broadcast or explicit?
+    const hasBroadcast = !!(entry.audienceCurriculum && entry.audienceGrade)
+    const hasStudents = Array.isArray(entry.assignedStudents) && entry.assignedStudents.length > 0
+    setFAudienceType(hasBroadcast && !hasStudents ? 'broadcast' : 'students')
+    setFAudienceCurriculum(entry.audienceCurriculum || '')
+    setFAudienceGrade(entry.audienceGrade || '')
+    // Map the assignedStudents to {_id, name} (will refresh after students load)
+    setFPickedStudents(
+      (entry.assignedStudents || []).map(id => {
+        const found = students.find(s => s._id === id || s._id === String(id))
+        return found || { _id: id, name: 'Student ' + String(id).slice(-4) }
+      })
+    )
+    setShowForm(true)
+    // Scroll the form into view
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, 50)
+  }
+
+  const cancelForm = () => {
+    resetForm()
+    setShowForm(false)
+  }
+
+  // When subject is picked from the dropdown, auto-fill curriculum
+  const onSubjectChange = (subjectId) => {
+    const s = subjects.find(x => x._id === subjectId)
+    setFSubjectId(subjectId)
+    if (s) {
+      setFSubject(s.subjectName || '')
+      setFCurriculum(s.curriculum || '')
+    } else {
+      setFSubject('')
+    }
+  }
+
+  const togglePickedStudent = (s) => {
+    if (fPickedStudents.some(p => p._id === s._id)) {
+      setFPickedStudents(fPickedStudents.filter(p => p._id !== s._id))
+    } else {
+      setFPickedStudents([...fPickedStudents, s])
+    }
+  }
+
+  // ── Save (create or update) ──
+  const save = async () => {
+    if (!fTitle.trim())      { toast?.error?.('Title is required.'); return }
+    if (!fSubject.trim())    { toast?.error?.('Pick a subject.'); return }
+    if (!fCurriculum)        { toast?.error?.('Curriculum is required.'); return }
+    if (!fDay)               { toast?.error?.('Pick a day.'); return }
+    if (!fStart || !fEnd)    { toast?.error?.('Start and end time are required.'); return }
+    if (fStart >= fEnd)      { toast?.error?.('End time must be after start time.'); return }
+
+    // Audience validation
+    if (fAudienceType === 'students' && fPickedStudents.length === 0) {
+      toast?.error?.('Pick at least one student, or switch to broadcast mode.')
+      return
+    }
+    if (fAudienceType === 'broadcast' && (!fAudienceCurriculum || !fAudienceGrade)) {
+      toast?.error?.('Broadcast mode needs both a curriculum and a grade.')
+      return
+    }
+
+    const payload = {
+      title: fTitle.trim(),
+      subject: fSubject.trim(),
+      subjectId: fSubjectId || null,
+      curriculum: fCurriculum,
+      grade: fGrade.trim(),
+      dayOfWeek: fDay,
+      startTime: fStart,
+      endTime: fEnd,
+      deliveryMode: fMode,
+      meetingLink: fMode === 'virtual' ? fMeetingLink.trim() : '',
+      location:    fMode === 'physical' ? fLocation.trim()   : '',
+      assignedStudents: fAudienceType === 'students' ? fPickedStudents.map(s => s._id) : [],
+      audienceCurriculum: fAudienceType === 'broadcast' ? fAudienceCurriculum : '',
+      audienceGrade:      fAudienceType === 'broadcast' ? fAudienceGrade      : '',
+    }
+
+    setSaving(true)
+    try {
+      if (editingId) {
+        const { data } = await api.patch('/timetable/' + editingId, payload)
+        if (data?.success) {
+          toast?.ok?.('Slot updated.')
+          resetForm()
+          setShowForm(false)
+          loadEntries()
+        } else {
+          toast?.error?.(data?.message || 'Update failed.')
+        }
+      } else {
+        const { data } = await api.post('/timetable', payload)
+        if (data?.success) {
+          toast?.ok?.('Slot created.')
+          resetForm()
+          setShowForm(false)
+          loadEntries()
+        } else {
+          toast?.error?.(data?.message || 'Create failed.')
+        }
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Save failed.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const remove = async (entry) => {
+    if (!window.confirm(`Delete the slot "${entry.title}"? This affects all students assigned to it.`)) return
+    try {
+      const { data } = await api.delete('/timetable/' + entry._id)
+      if (data?.success) {
+        toast?.ok?.('Slot deleted.')
+        loadEntries()
+      } else {
+        toast?.error?.(data?.message || 'Delete failed.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Delete failed.')
+    }
+  }
+
+  // ── Display helpers ──
+  const fmt = (hhmm) => {
+    if (!hhmm) return ''
+    const [h, m] = hhmm.split(':').map(Number)
+    const mer = h >= 12 ? 'PM' : 'AM'
+    let hr = h % 12
+    if (hr === 0) hr = 12
+    return `${hr}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
+  }
+
+  // Group entries by day for the grid view
+  const byDay = {}
+  for (const d of DAYS) byDay[d] = []
+  for (const e of entries) {
+    if (byDay[e.dayOfWeek]) byDay[e.dayOfWeek].push(e)
+  }
+  for (const d of DAYS) {
+    byDay[d].sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)))
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 14, flexWrap: 'wrap' }}>
+        <div>
+          <div className="sec-tag">Recurring weekly slots</div>
+          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
+            Timetable
+          </h2>
+          <div style={{ fontSize: 13, color: '#6B6B6B', maxWidth: 560 }}>
+            Build a weekly schedule for your classes. Each slot repeats every week —
+            students see it automatically. Use Schedule Classes for one-off sessions instead.
+          </div>
+        </div>
+        {!showForm && (
+          <button onClick={() => { resetForm(); setShowForm(true) }}
+            style={{
+              background: '#7D1025', color: '#fff', border: 'none',
+              padding: '10px 18px', borderRadius: 8,
+              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+              flexShrink: 0,
+            }}>
+            + Add slot
+          </button>
+        )}
+      </div>
+
+      {/* ── FORM (create / edit) ── */}
+      {showForm && (
+        <div className="card" style={{ padding: 22, marginBottom: 22, border: '1.5px solid #C9A030' }}>
+          <div style={{
+            fontSize: 11, fontWeight: 700, color: '#7D5A0F',
+            letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 16,
+          }}>
+            {editingId ? 'Edit slot' : 'New slot'}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+            <div>
+              <label className="fl">Title *</label>
+              <input className="finput" value={fTitle}
+                onChange={e => setFTitle(e.target.value)}
+                placeholder="e.g. IGCSE Maths — Year 11"
+                disabled={saving}/>
+            </div>
+            <div>
+              <label className="fl">Subject *</label>
+              <select className="fsel" value={fSubjectId}
+                onChange={e => onSubjectChange(e.target.value)}
+                disabled={saving}>
+                <option value="">Select subject...</option>
+                {subjects.map(s => (
+                  <option key={s._id} value={s._id}>
+                    {s.subjectName} · {s.curriculum}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 14 }}>
+            <div>
+              <label className="fl">Curriculum *</label>
+              <select className="fsel" value={fCurriculum}
+                onChange={e => setFCurriculum(e.target.value)}
+                disabled={saving}>
+                <option value="">Select...</option>
+                {CURRICULA.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="fl">Grade (optional)</label>
+              <input className="finput" value={fGrade}
+                onChange={e => setFGrade(e.target.value)}
+                placeholder="e.g. Year 11"
+                disabled={saving}/>
+            </div>
+            <div>
+              <label className="fl">Day of week *</label>
+              <select className="fsel" value={fDay}
+                onChange={e => setFDay(e.target.value)}
+                disabled={saving}>
+                {DAYS.map(d => <option key={d} value={d}>{DAYS_LONG[d]}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 14 }}>
+            <div>
+              <label className="fl">Start time *</label>
+              <input className="finput" type="time" value={fStart}
+                onChange={e => setFStart(e.target.value)}
+                disabled={saving}/>
+            </div>
+            <div>
+              <label className="fl">End time *</label>
+              <input className="finput" type="time" value={fEnd}
+                onChange={e => setFEnd(e.target.value)}
+                disabled={saving}/>
+            </div>
+            <div>
+              <label className="fl">Delivery</label>
+              <select className="fsel" value={fMode}
+                onChange={e => setFMode(e.target.value)}
+                disabled={saving}>
+                <option value="virtual">Virtual (online)</option>
+                <option value="physical">Physical (in person)</option>
+              </select>
+            </div>
+          </div>
+
+          {fMode === 'virtual' ? (
+            <div style={{ marginBottom: 14 }}>
+              <label className="fl">Meeting link (optional)</label>
+              <input className="finput" value={fMeetingLink}
+                onChange={e => setFMeetingLink(e.target.value)}
+                placeholder="https://meet.google.com/..."
+                disabled={saving}/>
+            </div>
+          ) : (
+            <div style={{ marginBottom: 14 }}>
+              <label className="fl">Location (optional)</label>
+              <input className="finput" value={fLocation}
+                onChange={e => setFLocation(e.target.value)}
+                placeholder="e.g. Room 12B"
+                disabled={saving}/>
+            </div>
+          )}
+
+          {/* Audience: students OR broadcast */}
+          <div style={{ marginBottom: 14 }}>
+            <label className="fl">Audience *</label>
+            <div style={{ display: 'flex', gap: 16, marginTop: 4, marginBottom: 10 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13 }}>
+                <input type="radio" name="audtype" value="students"
+                  checked={fAudienceType === 'students'}
+                  onChange={() => setFAudienceType('students')}
+                  disabled={saving}/>
+                Pick specific students
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13 }}>
+                <input type="radio" name="audtype" value="broadcast"
+                  checked={fAudienceType === 'broadcast'}
+                  onChange={() => setFAudienceType('broadcast')}
+                  disabled={saving}/>
+                Broadcast to a whole grade
+              </label>
+            </div>
+
+            {fAudienceType === 'students' && (
+              <div>
+                {students.length === 0 ? (
+                  <div style={{ fontSize: 12, color: '#9A9A9A', fontStyle: 'italic', padding: 10 }}>
+                    No students are allocated to you yet. Ask your admin to allocate students,
+                    or use broadcast mode below.
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'flex', flexWrap: 'wrap', gap: 6,
+                    padding: 10, background: '#FBFAF5',
+                    border: '1px solid #E8E2D6', borderRadius: 7,
+                    maxHeight: 200, overflowY: 'auto',
+                  }}>
+                    {students.map(s => {
+                      const on = fPickedStudents.some(p => p._id === s._id)
+                      return (
+                        <button key={s._id} onClick={() => togglePickedStudent(s)} type="button"
+                          disabled={saving}
+                          style={{
+                            background: on ? '#7D1025' : '#fff',
+                            color: on ? '#fff' : '#564844',
+                            border: '1.5px solid ' + (on ? '#7D1025' : '#E8E2D6'),
+                            padding: '5px 12px', borderRadius: 99,
+                            fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                          }}>
+                          {on ? 'on · ' : ''}{s.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+                {fPickedStudents.length > 0 && (
+                  <div style={{ fontSize: 11.5, color: '#7D5A0F', marginTop: 6 }}>
+                    {fPickedStudents.length} student{fPickedStudents.length === 1 ? '' : 's'} selected
+                  </div>
+                )}
+              </div>
+            )}
+
+            {fAudienceType === 'broadcast' && (
+              <div style={{
+                display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,
+                padding: 12, background: '#FDF7E2',
+                border: '1px solid #E8D58F', borderRadius: 7,
+              }}>
+                <div>
+                  <label className="fl">Audience curriculum *</label>
+                  <select className="fsel" value={fAudienceCurriculum}
+                    onChange={e => setFAudienceCurriculum(e.target.value)}
+                    disabled={saving}>
+                    <option value="">Select...</option>
+                    {CURRICULA.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="fl">Audience grade *</label>
+                  <input className="finput" value={fAudienceGrade}
+                    onChange={e => setFAudienceGrade(e.target.value)}
+                    placeholder="e.g. Year 11"
+                    disabled={saving}/>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+            <button onClick={save} disabled={saving}
+              style={{
+                background: '#7D1025', color: '#fff', border: 'none',
+                padding: '10px 22px', borderRadius: 7,
+                fontSize: 13, fontWeight: 700,
+                cursor: saving ? 'not-allowed' : 'pointer',
+                opacity: saving ? 0.5 : 1,
+              }}>
+              {saving ? 'Saving...' : editingId ? 'Save changes' : 'Create slot'}
+            </button>
+            <button onClick={cancelForm} disabled={saving}
+              style={{
+                background: 'transparent', color: '#564844',
+                border: '1.5px solid #E8E2D6',
+                padding: '10px 20px', borderRadius: 7,
+                fontSize: 13, fontWeight: 700,
+                cursor: saving ? 'not-allowed' : 'pointer',
+              }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── EXISTING SLOTS ── */}
+      {loading ? (
+        <div style={{ padding: '40px 20px', textAlign: 'center', color: '#9A9A9A', fontSize: 13 }}>
+          Loading timetable...
+        </div>
+      ) : entries.length === 0 ? (
+        <div className="card" style={{ padding: 30, textAlign: 'center' }}>
+          <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 20, color: '#1A0F0E', marginBottom: 6 }}>
+            No slots yet
+          </div>
+          <div style={{ fontSize: 13, color: '#857973', maxWidth: 460, margin: '0 auto' }}>
+            Add your first recurring weekly class slot. Once you do, every student assigned
+            (or matching the broadcast grade) will see it in their timetable automatically.
+          </div>
+        </div>
+      ) : (
+        <div>
+          {DAYS.map(d => {
+            const items = byDay[d]
+            if (items.length === 0) return null
+            return (
+              <div key={'day-' + d} style={{ marginBottom: 18 }}>
+                <div style={{
+                  fontSize: 11, fontWeight: 800, color: '#7D1025',
+                  letterSpacing: '.1em', textTransform: 'uppercase',
+                  marginBottom: 8, paddingBottom: 6,
+                  borderBottom: '1px solid #F4EFEB',
+                }}>
+                  {DAYS_LONG[d]}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
+                  {items.map(entry => (
+                    <div key={entry._id} style={{
+                      background: '#fff',
+                      border: '1px solid #E8E2D6',
+                      borderLeft: '4px solid #7D1025',
+                      borderRadius: 8, padding: 14,
+                    }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#1A0F0E', marginBottom: 4 }}>
+                        {entry.title}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#857973', marginBottom: 6 }}>
+                        {entry.subject} · {entry.curriculum}
+                        {entry.grade ? ' · ' + entry.grade : ''}
+                      </div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#7D5A0F', marginBottom: 8 }}>
+                        {fmt(entry.startTime)} – {fmt(entry.endTime)}
+                      </div>
+                      <div style={{ fontSize: 11, color: '#857973', marginBottom: 10 }}>
+                        {entry.assignedStudents?.length > 0
+                          ? `${entry.assignedStudents.length} student${entry.assignedStudents.length === 1 ? '' : 's'}`
+                          : entry.audienceCurriculum && entry.audienceGrade
+                          ? `Broadcast: ${entry.audienceGrade}`
+                          : 'No audience'}
+                        {entry.deliveryMode && ' · ' + entry.deliveryMode}
+                      </div>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button onClick={() => beginEdit(entry)}
+                          style={{
+                            background: 'transparent', color: '#7D1025',
+                            border: '1px solid #E8E2D6',
+                            padding: '6px 12px', borderRadius: 6,
+                            fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+                          }}>Edit</button>
+                        <button onClick={() => remove(entry)}
+                          style={{
+                            background: 'transparent', color: '#9A2434',
+                            border: '1px solid #E8E2D6',
+                            padding: '6px 12px', borderRadius: 6,
+                            fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+                          }}>Delete</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
