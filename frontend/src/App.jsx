@@ -34,40 +34,41 @@ export default function App() {
         <ToastProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/"               element={<LandingPage />} />
+              <Route path="/"                element={<LandingPage />} />
               {/* Landing-page sections — each its own URL */}
-              <Route path="/about"          element={<LandingPage />} />
-              <Route path="/curricula"      element={<LandingPage />} />
+              <Route path="/about"           element={<LandingPage />} />
+              <Route path="/curricula"       element={<LandingPage />} />
               <Route path="/curricula/:slug" element={<LandingPage />} />
-              <Route path="/services"       element={<LandingPage />} />
-              <Route path="/services/:slug" element={<LandingPage />} />
-              <Route path="/global"         element={<LandingPage />} />
-              <Route path="/pricing"        element={<LandingPage />} />
-              <Route path="/programs"       element={<LandingPage />} />
-              <Route path="/activities"     element={<LandingPage />} />
+              <Route path="/services"        element={<LandingPage />} />
+              <Route path="/services/:slug"  element={<LandingPage />} />
+              <Route path="/global"          element={<LandingPage />} />
+              <Route path="/pricing"         element={<LandingPage />} />
+              <Route path="/programs"        element={<LandingPage />} />
+              <Route path="/activities"      element={<LandingPage />} />
               <Route path="/online-school/:slug" element={<LandingPage />} />
-              <Route path="/faq"            element={<LandingPage />} />
-              <Route path="/blog"           element={<LandingPage />} />
-              <Route path="/blog/:slug"     element={<LandingPage />} />
-              <Route path="/teachers"       element={<LandingPage />} />
-              <Route path="/enroll"         element={<LandingPage />} />
-              <Route path="/consult"        element={<LandingPage />} />
-              <Route path="/contact"        element={<LandingPage />} />
-              <Route path="/privacy"        element={<LandingPage />} />
-              <Route path="/terms"          element={<LandingPage />} />
-              <Route path="/cookies"        element={<LandingPage />} />
-              <Route path="/gdpr"           element={<LandingPage />} />
-              <Route path="/login"          element={<LoginPage />} />
-              <Route path="/admin-login"    element={<AdminLoginPage />} />
-              <Route path="/verify-email"   element={<VerifyEmailPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/portal"         element={<RoleRedirect />} />
-              <Route path="/admin/*"        element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
-              <Route path="/teacher/*"      element={<Guard roles={['teacher','admin']}><TeacherPortal /></Guard>} />
-              <Route path="/student/*"      element={<Guard roles={['student']}><StudentPortal /></Guard>} />
-              <Route path="/parent/*"       element={<Guard roles={['parent']}><ParentPortal /></Guard>} />
-              <Route path="/demo/*"         element={<Guard roles={['demo']}><DemoPortal /></Guard>} />
-              <Route path="*"               element={<Navigate to="/" replace />} />
+              <Route path="/compare/:slug"   element={<LandingPage />} />
+              <Route path="/faq"             element={<LandingPage />} />
+              <Route path="/blog"            element={<LandingPage />} />
+              <Route path="/blog/:slug"      element={<LandingPage />} />
+              <Route path="/teachers"        element={<LandingPage />} />
+              <Route path="/enroll"          element={<LandingPage />} />
+              <Route path="/consult"         element={<LandingPage />} />
+              <Route path="/contact"         element={<LandingPage />} />
+              <Route path="/privacy"         element={<LandingPage />} />
+              <Route path="/terms"           element={<LandingPage />} />
+              <Route path="/cookies"         element={<LandingPage />} />
+              <Route path="/gdpr"            element={<LandingPage />} />
+              <Route path="/login"           element={<LoginPage />} />
+              <Route path="/admin-login"     element={<AdminLoginPage />} />
+              <Route path="/verify-email"    element={<VerifyEmailPage />} />
+              <Route path="/reset-password"  element={<ResetPasswordPage />} />
+              <Route path="/portal"          element={<RoleRedirect />} />
+              <Route path="/admin/*"         element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
+              <Route path="/teacher/*"       element={<Guard roles={['teacher','admin']}><TeacherPortal /></Guard>} />
+              <Route path="/student/*"       element={<Guard roles={['student']}><StudentPortal /></Guard>} />
+              <Route path="/parent/*"        element={<Guard roles={['parent']}><ParentPortal /></Guard>} />
+              <Route path="/demo/*"          element={<Guard roles={['demo']}><DemoPortal /></Guard>} />
+              <Route path="*"                element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
         </ToastProvider>
