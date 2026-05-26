@@ -1,0 +1,8 @@
+# ─────────────────────────────────────────────────────────
+# Netlify SPA fallback
+# All paths not matching a static file return index.html.
+# This lets React Router handle /compare/wolsey-hall,
+# /online-school/uae, /curricula/igcse, etc.
+# Without this, direct URL visits to those paths 404.
+# ─────────────────────────────────────────────────────────
+/*    /index.html   200
