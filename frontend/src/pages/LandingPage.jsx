@@ -613,6 +613,59 @@ const styles = `
     .lp .wiz-body{padding:20px 14px}
     .lp .fab-panel{right:12px;left:12px;width:auto;max-width:none}
   }
+
+  /* ═══════════════════════════════════════════════════════
+     COMPREHENSIVE MOBILE FIXES — applied to all newer sections
+     (country pages, comparison pages, homepage extras, forms)
+     Two breakpoints: ≤768px (tablet+phone), ≤480px (phone).
+     ═══════════════════════════════════════════════════════ */
+  @media(max-width:768px){
+    /* — display heading ('Playfair Display' large headings) — */
+    .lp .display{font-size:clamp(1.7rem,7vw,2.4rem) !important;line-height:1.15 !important}
+
+    /* — wizard form scaling — */
+    .lp .wiz-h{font-size:1.3rem;line-height:1.3}
+    .lp .wiz-sub{font-size:13.5px;margin-bottom:20px}
+    .lp .fi-i{font-size:16px;padding:12px 14px}
+    /* Important: input font-size MUST be ≥16px on iOS to
+       prevent Safari from auto-zooming on focus. */
+
+    /* — consult / contact form inputs — */
+    .lp .consult-input{font-size:16px;padding:13px 14px}
+
+    /* — section paddings reduced — */
+    .lp .sec{padding:48px 0}
+
+    /* — explicit 16px font reset for all native inputs as a safety net — */
+    .lp input,.lp select,.lp textarea{font-size:16px}
+  }
+
+  @media(max-width:480px){
+    /* — Hero subtitle on country/compare pages — */
+    .lp .pg-sub{font-size:13.5px;line-height:1.7}
+    .lp .pg-h{font-size:clamp(1.9rem,8vw,2.6rem) !important}
+
+    /* — display heading further reduction on phones — */
+    .lp .display{font-size:clamp(1.5rem,8vw,2rem) !important}
+
+    /* — wizard tighter on small phones — */
+    .lp .wiz-h{font-size:1.15rem}
+    .lp .wiz-sub{font-size:12.5px;margin-bottom:16px}
+    .lp .wiz-shell{margin-top:32px;border-radius:16px}
+
+    /* — make sure touch targets are at least 44px tall — */
+    .lp .btn-p,.lp .btn-o,.lp button.btn-p,.lp button.btn-o{min-height:44px;font-size:13.5px;padding:11px 20px}
+
+    /* — comparison table allows horizontal scroll on tiny screens — */
+    .lp table{font-size:12.5px}
+    .lp table th,.lp table td{padding:10px 12px !important;white-space:normal;word-break:break-word}
+
+    /* — section header (eyebrow + subheading) tighter — */
+    .lp .eyebrow{font-size:9.5px;margin-bottom:10px}
+    .lp .lead{font-size:13.5px;line-height:1.7}
+    .lp .sec{padding:40px 0}
+    .lp .sec-hd{margin-bottom:24px}
+  }
 `
 
 const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
