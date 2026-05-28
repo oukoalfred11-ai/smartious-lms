@@ -80,14 +80,11 @@ function usePageMeta(title, description) {
 }
 
 /* ── useHeroPreload — LCP optimization ─────────────────────
- * Preloads the Cloudinary-hosted hero video. f_auto, q_auto,
- * vc_auto let each browser pick its best codec automatically;
- * we send the mobile-sized encode to small screens to save
- * bandwidth.
- *
- * Note: This only helps for SPA navigation back to the home
- * page. For the initial page load, the preload must be in
- * the raw HTML head (index.html) to make any real difference.
+ * Hero video on the home page is the LCP element. Inject a
+ * <link rel="preload" as="video" fetchpriority="high"> so
+ * the browser starts fetching it in parallel with CSS / JS.
+ * We pick the mobile-sized Cloudinary encode for narrow
+ * viewports and the full-size one elsewhere.
  */
 function useHeroPreload(active) {
   useEffect(() => {
@@ -575,53 +572,85 @@ const styles = `
     .lp .h-stats{display:none}
     .lp .h-mob-stats{display:none!important}
     .lp .h-stats-strip{display:block}
-    .lp #hero{min-height:0;height:auto;max-height:760px}
+    .lp #hero{min-height:0;height:auto;max-height:720px}
     .lp .h-bg{object-position:center center}
     .lp .h-vig{height:140px}
-    .lp .h-body{min-height:62vh;max-height:680px;padding-top:48px;padding-bottom:56px}
+    .lp .h-body{min-height:60vh;max-height:640px;padding-top:48px;padding-bottom:56px}
     .lp .mob-burger{display:flex!important}
     .lp .mob-page-strip{display:block!important}
     .lp .wrap,.lp .nav-wrap,.lp .h-body,.lp .cta-in{padding-left:20px;padding-right:20px}
     .lp .sec{padding:64px 0}
-    .lp .h1{font-size:clamp(2.8rem,12vw,4rem)}
+    .lp .h1{font-size:clamp(2.4rem,10vw,3.4rem)}
     .lp .hl-grid,.lp .stat-grid,.lp .proc-grid,.lp .cur-grid,.lp .svc-grid,.lp .tgrid,.lp .blog-grid,.lp .price-grid,.lp .prog-info-grid,.lp .prog-path-grid,.lp .sa-grid,.lp .team-grid{grid-template-columns:1fr}
     .lp .fg,.lp .pay-o{grid-template-columns:1fr 1fr}
     .lp .ft-grid{grid-template-columns:1fr}
-    .lp .wiz-steps{flex-wrap:wrap}.lp .wst{min-width:50%}
-    .lp .wiz-body{padding:24px 18px}
+    /* WIZARD / ENROLMENT FORM — slim down on mobile */
+    .lp .wiz-shell{margin-top:36px;border-radius:18px}
+    .lp .wiz-steps{flex-wrap:wrap}
+    .lp .wst{min-width:50%;padding:12px 10px;gap:7px}
+    .lp .ws-n{width:22px;height:22px;font-size:10px}
+    .lp .ws-l{font-size:10.5px}
+    .lp .wiz-body{padding:22px 16px}
+    .lp .wiz-h{font-size:1.25rem;margin-bottom:4px}
+    .lp .wiz-sub{font-size:12.5px;margin-bottom:20px;line-height:1.55}
+    .lp .fl{font-size:10px;margin-bottom:4px}
+    .lp .fi-i{padding:10px 12px;font-size:16px;border-radius:6px}
+    .lp .fg{gap:12px}
+    .lp .wiz-nav{margin-top:22px;padding-top:18px}
+    .lp .wb{padding:11px 20px;font-size:12.5px}
+    /* CONSULT FORM — same slim treatment */
+    .lp .consult-label{font-size:10px;margin-bottom:5px}
+    .lp .consult-input{padding:10px 12px;font-size:16px}
     .lp .bfc{grid-template-columns:1fr}.lp .bfc-l{min-height:180px}
     .lp .lpfs{grid-template-columns:repeat(3,1fr)}
-    /* — added: tighter section + heading sizing on tablets/phones — */
-    .lp .sec-hd{margin-bottom:40px}
+    /* tighter section + heading sizing on tablets/phones */
+    .lp .sec-hd{margin-bottom:36px}
+    .lp .display{font-size:clamp(1.9rem,7.5vw,2.8rem)}
     .lp .pg-hero{padding-top:90px;padding-bottom:48px}
-    .lp .lead,.lp .h-sub{font-size:15.5px}
+    .lp .pg-h{font-size:clamp(2rem,8.5vw,2.8rem)}
+    .lp .pg-sub{font-size:14.5px}
+    .lp .lead,.lp .h-sub{font-size:14.5px;line-height:1.65}
     .lp .h-act{flex-direction:column;align-items:stretch;width:100%}
-    .lp .h-act .btn-p,.lp .h-act .btn-o{justify-content:center;width:100%}
+    .lp .h-act .btn-p,.lp .h-act .btn-o{justify-content:center;width:100%;padding:12px 22px;font-size:13px}
     .lp .p-tabs{width:100%}
     .lp .ptab{flex:1;text-align:center;padding:9px 12px;font-size:12px}
-    .lp .pc{padding:24px}
-    .lp .p-am{font-size:2.6rem}
+    .lp .pc{padding:22px}
+    .lp .p-am{font-size:2.4rem}
   }
   @media(max-width:480px){
     .lp .fg{grid-template-columns:1fr}.lp .pay-o{grid-template-columns:1fr 1fr}.lp .wst{min-width:100%}.lp .hl-grid{grid-template-columns:1fr 1fr}
-    /* — added: small-phone refinements — */
+    /* small-phone refinements */
     .lp .wrap,.lp .nav-wrap,.lp .h-body,.lp .cta-in{padding-left:16px;padding-right:16px}
     .lp .sec{padding:48px 0}
     .lp .sec-hd{margin-bottom:32px}
-    .lp .h-body{padding-top:64px;padding-bottom:48px}
-    .lp .h1{font-size:clamp(2.4rem,13vw,3.4rem)}
-    .lp .pg-h{font-size:clamp(2.1rem,9vw,3rem)}
-    .lp .pg-hero{padding-top:80px;padding-bottom:40px}
-    .lp .lead,.lp .h-sub,.lp .pg-sub{font-size:14.5px}
+    .lp .h-body{padding-top:64px;padding-bottom:48px;min-height:55vh}
+    .lp #hero{max-height:680px}
+    .lp .h-body{max-height:600px}
+    .lp .h1{font-size:clamp(2.1rem,11vw,2.9rem);margin-bottom:20px}
+    .lp .pg-h{font-size:clamp(1.85rem,8.5vw,2.5rem)}
+    .lp .pg-hero{padding-top:80px;padding-bottom:36px}
+    .lp .lead,.lp .h-sub,.lp .pg-sub{font-size:14px;line-height:1.6}
+    .lp .display{font-size:clamp(1.75rem,7.5vw,2.4rem)}
     .lp .lpfs{grid-template-columns:repeat(2,1fr)}
-    .lp .pc{padding:20px;border-radius:14px}
-    .lp .p-am{font-size:2.3rem}
+    .lp .pc{padding:18px;border-radius:14px}
+    .lp .p-am{font-size:2.1rem}
     .lp .ptab{font-size:11px;padding:8px 8px}
     .lp .hl-grid{grid-template-columns:1fr}
     .lp .pay-o{grid-template-columns:1fr}
-    .lp .btn-p,.lp .nav-cta{padding:12px 22px}
-    .lp .wiz-body{padding:20px 14px}
+    .lp .btn-p,.lp .nav-cta{padding:12px 22px;font-size:12.5px}
+    /* WIZARD — even tighter on small phones */
+    .lp .wiz-body{padding:18px 14px}
+    .lp .wiz-h{font-size:1.15rem}
+    .lp .wiz-sub{font-size:12px;margin-bottom:18px}
+    .lp .wst{padding:10px 8px}
+    .lp .ws-l{font-size:10px}
+    .lp .ws-n{width:20px;height:20px;font-size:9.5px}
     .lp .fab-panel{right:12px;left:12px;width:auto;max-width:none}
+    /* H-STATS-STRIP smaller numbers on tiny screens */
+    .lp .h-stats-strip{padding:22px 16px 26px}
+    .lp .hms{padding:11px 13px}
+    .lp .hms-n{font-size:1.35rem}
+    .lp .hms-l{font-size:9.5px}
   }
 
   /* ═══════════════════════════════════════════════════════
@@ -3815,12 +3844,10 @@ export default function LandingPage() {
               poster="/hero-learning-centre.jpg"
               aria-hidden="true"
             >
-              {/* Mobile-sized encode — smaller payload for phones */}
               <source
                 src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_768,c_limit/hero_mhhwhf.mp4"
                 media="(max-width: 768px)"
               />
-              {/* Desktop encode — Cloudinary picks codec & quality */}
               <source
                 src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_1920,c_limit/hero_mhhwhf.mp4"
               />
