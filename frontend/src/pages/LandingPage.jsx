@@ -80,12 +80,10 @@ function usePageMeta(title, description) {
 }
 
 /* ── useHeroPreload — LCP optimization ─────────────────────
- * The hero background video is the Largest Contentful Paint
- * element on the home page. We inject a <link rel="preload"
- * as="video" fetchpriority="high"> so the browser begins
- * fetching it in parallel with CSS / JS. The video is served
- * from Cloudinary with f_auto, q_auto, vc_auto so each
- * browser receives its best-supported codec automatically.
+ * Preloads the Cloudinary-hosted hero video. f_auto, q_auto,
+ * vc_auto let each browser pick its best codec automatically;
+ * we send the mobile-sized encode to small screens to save
+ * bandwidth.
  *
  * Note: This only helps for SPA navigation back to the home
  * page. For the initial page load, the preload must be in
@@ -100,8 +98,6 @@ function useHeroPreload(active) {
     link.id = linkId
     link.rel = 'preload'
     link.as = 'video'
-    // Preload the size that matches the current viewport so we don't
-    // waste mobile bandwidth on the 1920px desktop encode.
     const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
     link.href = isMobile
       ? 'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_768,c_limit/hero_mhhwhf.mp4'
@@ -180,8 +176,8 @@ const styles = `
   .lp .nav-cta:hover{background:${V.cr2};transform:translateY(-1px)}
   /* HERO */
   .lp #hero{position:relative;min-height:calc(100vh - 64px);background:${V.ink};display:flex;flex-direction:column;overflow:hidden}
-  .lp .h-bg{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;object-position:center 35%;filter:saturate(1.05) contrast(1.02);pointer-events:none;background:${V.ink}}
-  .lp .h-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(110deg,rgba(10,8,6,.94) 0%,rgba(20,10,8,.8) 38%,rgba(60,14,24,.58) 62%,rgba(10,8,6,.75) 100%)}
+  .lp .h-bg{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;object-position:center 35%;filter:brightness(1.15) saturate(1.1) contrast(1.02);pointer-events:none;background:${V.ink}}
+  .lp .h-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(110deg,rgba(10,8,6,.72) 0%,rgba(20,10,8,.5) 38%,rgba(60,14,24,.32) 62%,rgba(10,8,6,.5) 100%)}
   .lp .h-vig{position:absolute;bottom:0;left:0;right:0;z-index:2;height:280px;background:linear-gradient(to top,${V.bone} 0%,transparent 100%)}
   .lp .h-body{position:relative;z-index:3;flex:1;display:flex;flex-direction:column;justify-content:center;max-width:1440px;margin:0 auto;padding:80px 48px 60px;width:100%}
   .lp .h1{font-family:'Playfair Display',serif;font-size:clamp(3.5rem,7.5vw,7rem);font-weight:900;line-height:.98;letter-spacing:-.04em;color:${V.white};margin-bottom:28px;text-shadow:0 4px 24px rgba(10,8,6,.4)}
@@ -202,6 +198,9 @@ const styles = `
   .lp .hms-n{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1}
   .lp .hms-n em{color:${V.gold3};font-style:normal}
   .lp .hms-l{font-size:10px;color:rgba(247,243,237,.68);margin-top:4px;letter-spacing:.04em}
+  /* MOBILE HERO STATS STRIP — sits directly below the hero on phones */
+  .lp .h-stats-strip{display:none;background:${V.ink};padding:20px;border-bottom:1px solid rgba(184,150,12,.18)}
+  .lp .h-stats-strip-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto}
   /* FLOATING ASSISTANCE + WHATSAPP */
   .lp .fab-stack{position:fixed;right:20px;bottom:20px;z-index:9998;display:flex;flex-direction:column;gap:12px;align-items:flex-end;pointer-events:none}
   .lp .fab-stack > *{pointer-events:auto}
@@ -574,7 +573,10 @@ const styles = `
   @media(max-width:768px){
     .lp .nav-links,.lp .nav-actions{display:none}
     .lp .h-stats{display:none}
-    .lp .h-mob-stats{display:grid!important}
+    .lp .h-mob-stats{display:none!important}
+    .lp .h-stats-strip{display:block}
+    .lp #hero{min-height:0;height:auto}
+    .lp .h-body{min-height:64vh;padding-top:48px;padding-bottom:48px}
     .lp .mob-burger{display:flex!important}
     .lp .mob-page-strip{display:block!important}
     .lp .wrap,.lp .nav-wrap,.lp .h-body,.lp .cta-in{padding-left:20px;padding-right:20px}
@@ -3811,12 +3813,12 @@ export default function LandingPage() {
               poster="/hero-learning-centre.jpg"
               aria-hidden="true"
             >
-              {/* Mobile-sized encode: ~768px wide, much smaller payload */}
+              {/* Mobile-sized encode — smaller payload for phones */}
               <source
                 src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_768,c_limit/hero_mhhwhf.mp4"
                 media="(max-width: 768px)"
               />
-              {/* Desktop encode: capped at 1920px, Cloudinary picks codec & quality */}
+              {/* Desktop encode — Cloudinary picks codec & quality */}
               <source
                 src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_1920,c_limit/hero_mhhwhf.mp4"
               />
@@ -3839,15 +3841,6 @@ export default function LandingPage() {
                 <button className="btn-o lt" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.85)'}} onClick={() => P('curricula')}>Explore Curricula</button>
                 <button className="btn-o lt" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.85)'}} onClick={() => P('pricing')}>View Pricing</button>
               </div>
-              {/* Mobile 2×2 stat grid */}
-              <div className="h-mob-stats">
-                {[[cfg.stat1||'2,418+','Students'],[cfg.stat2||'127','Teachers'],[cfg.stat3||'6','Curricula'],['12+','Countries']].map(([n,l]) => (
-                  <div key={l} className="hms">
-                    <div className="hms-n">{n.includes('+')?<>{n.replace('+','')}<em>+</em></>:n}</div>
-                    <div className="hms-l">{l}</div>
-                  </div>
-                ))}
-              </div>
             </div>
             <div className="h-stats">
               {[[cfg.stat1||'2,418+','Students Worldwide'],[cfg.stat2||'127','Teachers'],[cfg.stat3||'6','Curricula'],[cfg.stat4||'Kenya · UAE · UK','Served']].map(([n,l]) => (
@@ -3858,6 +3851,18 @@ export default function LandingPage() {
               ))}
             </div>
           </section>
+
+          {/* Mobile-only stats strip — sits below the hero so it doesn't block the video */}
+          <div className="h-stats-strip">
+            <div className="h-stats-strip-grid">
+              {[[cfg.stat1||'2,418+','Students'],[cfg.stat2||'127','Teachers'],[cfg.stat3||'6','Curricula'],['12+','Countries']].map(([n,l]) => (
+                <div key={l} className="hms">
+                  <div className="hms-n">{n.includes('+')?<>{n.replace('+','')}<em>+</em></>:n}</div>
+                  <div className="hms-l">{l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* Mobile page summary strip */}
           <div style={{display:'none'}} className="mob-page-strip">
