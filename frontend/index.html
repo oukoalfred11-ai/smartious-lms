@@ -6,6 +6,13 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <!-- ═══════════════════════════════════════════════════
+       GOOGLE SEARCH CONSOLE OWNERSHIP VERIFICATION
+       Do not remove. Lets Google Search Console see indexing,
+       sitemap and Core Web Vitals data for this domain.
+       ═══════════════════════════════════════════════════ -->
+  <meta name="google-site-verification" content="eiGdv2Lik2kFbA9m2DXHDBdfbI6WYQzWtBQXOPZU5TY"/>
+
+  <!-- ═══════════════════════════════════════════════════
        PERFORMANCE — preconnect + preload (order matters)
        Place these FIRST so the browser starts resolving DNS
        and fetching critical resources before parsing the rest.
@@ -15,7 +22,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 
-  <!-- Preload the hero image (LCP element on homepage) -->
+  <!-- Preconnect to Cloudinary (hero video is the LCP on homepage) -->
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin/>
+
+  <!-- Preload the hero video (LCP element on homepage). Mobile and
+       desktop browsers will fetch the version sized for their viewport
+       once the actual <video> tag is parsed; the preload primes the
+       connection. The poster image is also preloaded so the first
+       paint isn't black while the video buffers. -->
   <link rel="preload" as="image" href="/hero-learning-centre.jpg" fetchpriority="high"/>
 
   <!-- Preload the single most-visible web font weight so the H1 doesn't FOUT -->
@@ -126,16 +140,16 @@
     "telephone": "+254745021212",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Diamond Plaza I, 4th Parklands Avenue",
-      "addressLocality": "Nairobi",
-      "addressRegion": "Parklands",
+      "streetAddress": "Diamond Plaza I Annex, 3rd Floor, Office 20, Fourth Parklands Avenue",
+      "addressLocality": "Parklands",
+      "addressRegion": "Nairobi County",
       "postalCode": "00100",
       "addressCountry": "KE"
     },
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": -1.2606,
-      "longitude": 36.8186
+      "latitude": -1.2573424,
+      "longitude": 36.8182174
     },
     "contactPoint": [{
       "@type": "ContactPoint",
