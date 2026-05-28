@@ -41,29 +41,34 @@ api.interceptors.request.use(cfg => {
 })
 
 api.interceptors.response.use(r => r, err => {
-  if (err.response?.status === 401) {
-    const url = err.config?.url || ''
+  const status = err.response?.status
+  const url = err.config?.url || ''
+  if (status === 401 || status === 403) {
     // Only auto-logout for genuine auth endpoint failures.
     // Random endpoints (e.g. /users/stats, /allocations/pending-count) returning
-    // 401 should NOT kick the user out — they may be permission issues, stale
+    // 401/403 should NOT kick the user out — they may be permission issues, stale
     // backend state, or transient hiccups. Components handle their own errors.
     const isAuthEndpoint =
       url.includes('/auth/me') ||
       url.includes('/auth/refresh') ||
       url.includes('/auth/verify') ||
       url.endsWith('/auth/login')
-    // Also: ignore 401s that happen in the first 3 seconds after app mount.
+    // Also: ignore 401/403s that happen in the first 3 seconds after app mount.
     // These are usually race conditions where API calls fire before the token
     // is ready in the request interceptor.
     const elapsed = Date.now() - APP_START_TIME
     const isStartupRace = elapsed < 3000
     if (isAuthEndpoint && !isStartupRace) {
+      const serverMsg = err.response?.data?.message
+      if (status === 403 && serverMsg) {
+        try { sessionStorage.setItem('sm_logout_reason', serverMsg) } catch {}
+      }
       localStorage.removeItem('sm_token')
       localStorage.removeItem('sm_user')
       window.location.href = '/login'
     } else {
       // Log for debugging but don't logout
-      console.warn('[api] Suppressed auto-logout on 401:', url, 'elapsed:', elapsed + 'ms')
+      console.warn('[api] Suppressed auto-logout on ' + status + ':', url, 'elapsed:', elapsed + 'ms')
     }
   }
   return Promise.reject(err)
@@ -116,18 +121,26 @@ export function AuthProvider({ children }) {
         }
       } catch (e) {
         const status = e?.response?.status
-        // 401 → token genuinely rejected, clear and require re-login
+        const serverMsg = e?.response?.data?.message
+        // 401 → token genuinely rejected (expired, signature mismatch, etc.)
+        // 403 → token valid but user account deactivated
+        // Either way: clear local session and require re-login.
         if (status === 401 || status === 403) {
           localStorage.removeItem('sm_token')
           localStorage.removeItem('sm_user')
           setUser(null)
-          console.warn('[auth] Token rejected by backend, cleared session')
+          // Persist the reason so the login page can show a clear message.
+          // Cleared after the login page reads it.
+          if (status === 403) {
+            try { sessionStorage.setItem('sm_logout_reason', serverMsg || 'Your account has been deactivated. Please contact support.') } catch {}
+          }
+          console.warn('[auth] Session cleared. status=' + status + ' msg=' + (serverMsg || 'n/a'))
         } else {
           // Network error, 404 (endpoint missing), 500 — DON'T clear the token.
           // The user may have a perfectly valid session and the backend is
           // just temporarily unreachable. Better to leave them logged in than
           // to forcibly log out a real user because Render is cold-starting.
-          console.warn('[auth] Token verification failed but not 401:', status || e.message)
+          console.warn('[auth] Token verification failed but not 401/403:', status || e.message)
         }
       } finally {
         setLoading(false)
