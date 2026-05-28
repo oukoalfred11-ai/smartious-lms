@@ -1,0 +1,180 @@
+/* eslint-disable */
+/**
+ * curricula.js — extracted from LandingPage.jsx for maintainability.
+ * Edit this file when adding/updating data; it's the canonical source.
+ */
+
+export const CURRICULA = [
+  {
+    slug: 'igcse',
+    badge: 'Cambridge International',
+    h: 'IGCSE',
+    desc: 'The world\'s most recognised qualification for ages 14–16. Our students consistently achieve above-average pass rates across 40+ subjects with full past paper libraries, marking schemes and mock exams.',
+    tags: ['Mathematics', 'Sciences', 'English', 'History', '+35 subjects'],
+    meta: ['Year 9–11', 'Globally Recognised', 'CIE'],
+    detail: {
+      tagline: 'The International General Certificate of Secondary Education',
+      ageRange: 'Ages 14–16 · Typically Year 10–11',
+      overview: 'The Cambridge IGCSE is the world\'s most popular international qualification for 14 to 16 year olds. Developed by Cambridge Assessment International Education, it is recognised by universities and employers worldwide as evidence of academic ability. The programme is built around clear subject syllabuses, balanced assessment, and a strong emphasis on developing both knowledge and practical skills. At Smartious, IGCSE is delivered by degree-qualified subject specialists with full access to past papers, examiner reports and mark schemes.',
+      sections: [
+        { h: 'Subjects offered', p: 'Students typically take 6–9 subjects. Core subjects include English (First or Second Language), Mathematics, and the Sciences (Biology, Chemistry, Physics, or Combined Science). A wide range of options follows: Business Studies, Economics, Accounting, Computer Science, ICT, Geography, History, Global Perspectives, and modern languages. Smartious supports more than 40 IGCSE subjects across the CIE and Edexcel boards.' },
+        { h: 'How it is assessed', p: 'Most subjects are assessed through written examinations at the end of the two-year programme, with some subjects including coursework or practical components. Grades are awarded from A* down to G. Examinations are sat in the May/June or October/November series at registered exam centres. Smartious prepares students with regular mock examinations marked to official standards.' },
+        { h: 'Progression and pathways', p: 'IGCSE is the standard foundation for advanced study. Students typically progress to Cambridge A-Level, the IB Diploma, or equivalent Year 12–13 programmes. Strong IGCSE results are also accepted directly by foundation programmes and some universities for early entry. The qualification is recognised in the UK, across Africa and the Middle East, and by universities in North America.' },
+      ],
+      whyChoose: 'IGCSE offers an exceptional balance of academic rigour and flexibility. Its global recognition means a student\'s results travel with them anywhere in the world — particularly valuable for internationally mobile families. The subject range allows students to build a profile suited to their strengths and intended degree path.',
+    },
+  },
+  {
+    slug: 'a-level',
+    badge: 'Cambridge International',
+    h: 'Cambridge A-Level',
+    desc: 'Accepted by Oxford, Cambridge, Ivy League and universities across Africa and the Middle East. Includes university counselling, UCAS/Common App support and intensive revision programmes.',
+    tags: ['Mathematics', 'Further Maths', 'Sciences', 'Economics', '+22 subjects'],
+    meta: ['Year 12–13', 'University Entry', 'CIE'],
+    detail: {
+      tagline: 'The Cambridge International Advanced Level',
+      ageRange: 'Ages 16–19 · Typically Year 12–13',
+      overview: 'Cambridge A-Level is a two-year advanced qualification taken after IGCSE, designed to prepare students for university study. It is known for its academic depth — students study a small number of subjects in considerable detail, developing the independent thinking and subject mastery that universities look for. A-Level is accepted for entry by leading universities worldwide, including Oxford, Cambridge and Ivy League institutions. Smartious delivers A-Level with specialist teachers and full university-application support.',
+      sections: [
+        { h: 'Subjects offered', p: 'Students usually take 3–4 subjects. Smartious offers Mathematics, Further Mathematics, Physics, Chemistry, Biology, Economics, Business, Accounting, Computer Science, English, Geography, History and Psychology, among others. The first year (AS Level) can stand alone or build toward the full A-Level in the second year.' },
+        { h: 'How it is assessed', p: 'Assessment is primarily by written examination, with practical assessments in the sciences. Grades range from A* to E. The structure allows AS Level results in the first year and full A-Level completion in the second. Smartious runs intensive revision programmes and full mock examinations marked to examiner standard.' },
+        { h: 'Progression and pathways', p: 'A-Level is a direct university entry qualification. Smartious includes UCAS support for UK applications and Common Application guidance for the United States, along with counselling on universities across Africa, the Middle East, Canada and Australia. Subject choices are guided by intended degree — for example, Mathematics and Physics for engineering, or Biology and Chemistry for medicine.' },
+      ],
+      whyChoose: 'A-Level suits students who know their academic strengths and want to study them in depth. Its focused structure and worldwide university recognition make it one of the strongest routes to competitive degree courses. The university-application support built into the Smartious programme means families are guided through every step.',
+    },
+  },
+  {
+    slug: 'ib-diploma',
+    badge: 'International Baccalaureate',
+    h: 'IB Diploma (DP)',
+    desc: 'Accepted by 2,000+ universities across 90 countries. Full guidance through all 6 subject groups, Theory of Knowledge, Extended Essay and CAS.',
+    tags: ['6 Subject Groups', 'Theory of Knowledge', 'Extended Essay', 'CAS'],
+    meta: ['Year 12–13', '2,000+ Universities', 'IBO'],
+    detail: {
+      tagline: 'The International Baccalaureate Diploma Programme',
+      ageRange: 'Ages 16–19 · Typically Year 12–13',
+      overview: 'The IB Diploma Programme is a rigorous, balanced two-year course recognised by over 2,000 universities in more than 90 countries. Unlike specialised qualifications, the IB requires breadth — students study six subjects across all major disciplines, alongside three core components that develop critical thinking, research skill and personal growth. It is widely regarded as excellent preparation for university and is highly valued by admissions tutors worldwide.',
+      sections: [
+        { h: 'Structure — six subject groups', p: 'Students choose one subject from each of six groups: Studies in Language and Literature; Language Acquisition; Individuals and Societies; Sciences; Mathematics; and the Arts (or a second subject from another group). Three subjects are taken at Higher Level and three at Standard Level, giving both depth and breadth.' },
+        { h: 'The three core elements', p: 'Beyond the six subjects, every IB student completes Theory of Knowledge (TOK), an enquiry into the nature of knowledge itself; the Extended Essay, an independent 4,000-word research project; and CAS — Creativity, Activity, Service — a programme of personal and community engagement. Smartious supervises all three with dedicated support.' },
+        { h: 'Assessment and pathways', p: 'Assessment combines external examinations with internally-assessed coursework. The Diploma is scored out of 45 points. The IB is accepted for direct university entry worldwide and is particularly well regarded by universities in North America and Europe for the breadth and independence it demonstrates.' },
+      ],
+      whyChoose: 'The IB Diploma suits well-rounded students who do not want to narrow their studies too early and who value independent research and critical thinking. Its global recognition and reputation for academic depth make it a powerful qualification for ambitious students applying to universities internationally.',
+    },
+  },
+  {
+    slug: 'ib-pyp-myp',
+    badge: 'International Baccalaureate',
+    h: 'IB PYP & MYP',
+    desc: 'The IB Primary Years (ages 3–12) and Middle Years (ages 11–16) programmes. Inquiry-based education developing critical thinking from early childhood.',
+    tags: ['PYP Ages 3–12', 'MYP Ages 11–16', 'Inquiry-Based'],
+    meta: ['Ages 3–16', 'Global Framework', 'IBO'],
+    detail: {
+      tagline: 'IB Primary Years & Middle Years Programmes',
+      ageRange: 'Ages 3–16 · From early years through to pre-Diploma',
+      overview: 'The Primary Years Programme (PYP) and Middle Years Programme (MYP) form the foundation of the IB continuum, leading toward the IB Diploma. Both are built on inquiry-based learning — students learn by asking questions, investigating, and making connections across subjects rather than memorising in isolation. The approach develops curiosity, independence and conceptual understanding from an early age.',
+      sections: [
+        { h: 'Primary Years Programme (Ages 3–12)', p: 'The PYP frames learning around transdisciplinary themes — who we are, how the world works, how we organise ourselves — so children explore literacy, numeracy, science and social studies as connected ideas. It emphasises the development of the whole child: academic, social and emotional.' },
+        { h: 'Middle Years Programme (Ages 11–16)', p: 'The MYP bridges primary education and the Diploma. Students study eight subject groups while developing the skills of independent learning, and complete a personal project in their final year. The MYP builds the research, organisation and analytical habits the Diploma later demands.' },
+        { h: 'Progression', p: 'PYP and MYP lead naturally into the IB Diploma Programme, but the skills they develop — inquiry, communication, self-management — transfer well to any senior pathway, including IGCSE and A-Level.' },
+      ],
+      whyChoose: 'PYP and MYP suit families who want a coherent, skills-focused education from the early years onward, and who value curiosity and conceptual understanding over rote learning. They are an ideal foundation for students intending to continue to the IB Diploma.',
+    },
+  },
+  {
+    slug: 'edexcel',
+    badge: 'Pearson',
+    h: 'Pearson Edexcel',
+    desc: 'Fully equivalent to the English national standard — flexible, modern and globally portable. Popular with UK-based families and expats. BTEC also available.',
+    tags: ['GCSE', 'A-Level', 'BTEC', 'All Core Subjects'],
+    meta: ['Year 7–13', 'UK Recognised', 'Pearson'],
+    detail: {
+      tagline: 'Pearson Edexcel International GCSE & A-Level',
+      ageRange: 'Ages 11–19 · Year 7 through to Year 13',
+      overview: 'Pearson Edexcel is a major UK examination board offering International GCSE and International A-Level qualifications, alongside vocational BTEC awards. Edexcel qualifications are fully equivalent to the English national standard and are recognised by universities worldwide. The board is known for clear, well-structured syllabuses and a flexible modular assessment model in many subjects.',
+      sections: [
+        { h: 'Subjects and qualifications', p: 'Smartious offers Edexcel International GCSE and International A-Level across the core subjects — English, Mathematics, the Sciences — and a broad range of options including Business, Economics, Accounting and ICT. BTEC vocational qualifications are also available for students seeking a more applied, coursework-based route.' },
+        { h: 'How it is assessed', p: 'Edexcel assessment is by written examination, with some subjects offering modular assessment that allows units to be taken and, where permitted, retaken across exam series. This flexibility can suit students who perform best with assessment spread over time. Grading mirrors the standard GCSE and A-Level scales.' },
+        { h: 'Progression and pathways', p: 'Edexcel International GCSE leads to International A-Level or other Year 12–13 programmes. Edexcel A-Levels are accepted for university entry in the UK and internationally. The qualifications are especially popular with UK-connected and expatriate families because they map directly onto the English education system.' },
+      ],
+      whyChoose: 'Edexcel suits families who want a qualification closely aligned with the English national standard and a flexible assessment structure. For students who may move between Smartious and a UK school, the alignment makes transitions straightforward.',
+    },
+  },
+  {
+    slug: 'british-national-curriculum',
+    badge: 'England & Wales',
+    h: 'British National Curriculum',
+    desc: 'Full English National Curriculum from Key Stage 1 through Sixth Form. SATs preparation, GCSE coursework support and A-Level.',
+    tags: ['KS1 & KS2', 'KS3 & KS4', 'SATs Prep', 'Sixth Form'],
+    meta: ['Ages 5–18', 'UK Standard', 'DfE'],
+    detail: {
+      tagline: 'The English National Curriculum',
+      ageRange: 'Ages 5–18 · Key Stage 1 through Sixth Form',
+      overview: 'The British National Curriculum is the framework followed by state schools in England, organised into Key Stages from age 5 to 16, followed by Sixth Form study. It provides a structured, well-sequenced progression through every subject and is familiar to families connected to the UK education system. Smartious delivers the full curriculum from early primary through to A-Level.',
+      sections: [
+        { h: 'The Key Stages', p: 'Key Stage 1 (ages 5–7) and Key Stage 2 (ages 7–11) cover primary education, ending with national assessments (SATs). Key Stage 3 (ages 11–14) broadens subject study, and Key Stage 4 (ages 14–16) leads to GCSE qualifications. Sixth Form (ages 16–18) covers A-Level study.' },
+        { h: 'Assessment milestones', p: 'Progress is marked by clear milestones: SATs at the end of primary, GCSEs at 16, and A-Levels at 18. Smartious prepares students thoroughly for each, with coursework support, past paper practice and mock examinations.' },
+        { h: 'Progression and pathways', p: 'The curriculum provides a continuous, well-mapped path from age 5 to university entry. It is ideal for families who want their child\'s education to align precisely with the English school system, whether for a future move to the UK or for consistency with a UK-based education.' },
+      ],
+      whyChoose: 'The British National Curriculum suits families who want a structured, internationally familiar progression closely matched to the English school system — particularly those who anticipate moving to or from a UK school and value continuity.',
+    },
+  },
+  {
+    slug: 'american-curriculum',
+    badge: 'United States',
+    h: 'American Curriculum',
+    desc: 'US Common Core K–12 with Advanced Placement (AP) courses, SAT and ACT preparation, and full Common App college counselling.',
+    tags: ['K–12 Common Core', 'AP Courses', 'SAT Prep', 'ACT Prep'],
+    meta: ['K–12', 'US College Entry', 'College Board'],
+    detail: {
+      tagline: 'The American K–12 Curriculum',
+      ageRange: 'Ages 5–18 · Kindergarten through Grade 12',
+      overview: 'The American Curriculum follows the K–12 structure used across the United States, built around Common Core standards for English and Mathematics and a broad, flexible subject offering. It is distinguished by continuous assessment, a credit-based high school system, and the option of Advanced Placement (AP) courses for college-level study. Smartious delivers the curriculum with full college-application support.',
+      sections: [
+        { h: 'Structure — the K–12 system', p: 'Education runs from Kindergarten through Grade 12. Elementary and middle school build core skills broadly; high school (Grades 9–12) works on a credit system, where students accumulate credits across required and elective courses toward a high school diploma.' },
+        { h: 'Advanced Placement & college testing', p: 'Capable high school students can take Advanced Placement (AP) courses — college-level subjects that can earn university credit. Smartious also prepares students for the SAT and ACT, the standardised tests used in US college admissions.' },
+        { h: 'Progression and pathways', p: 'The American Curriculum leads to a high school diploma and is the natural route for students applying to universities in the United States. Smartious provides full Common Application counselling, essay guidance, and support with the transcript and recommendation process that US admissions require.' },
+      ],
+      whyChoose: 'The American Curriculum suits families aiming for US universities, or who value its continuous-assessment model and the breadth of its credit-based system. The flexibility of electives and AP courses lets students shape a profile around their strengths and college ambitions.',
+    },
+  },
+  {
+    slug: 'cbc-kcse',
+    badge: 'Republic of Kenya',
+    h: 'CBC & KCSE',
+    desc: 'Kenya\'s Competency-Based Curriculum (Grades 1–9) and KCSE through Form 6. Taught by Kenyan-certified tutors with full KNEC-aligned marking.',
+    tags: ['CBC Grades 1–9', 'Form 1–6', 'KCSE Prep', 'All Subjects'],
+    meta: ['Ages 6–18', 'East Africa', 'KICD/KNEC'],
+    detail: {
+      tagline: 'Kenya\'s Competency-Based Curriculum & KCSE',
+      ageRange: 'Ages 6–18 · Grade 1 through senior secondary',
+      overview: 'Smartious delivers Kenya\'s national curriculum in full — the Competency-Based Curriculum (CBC) developed by KICD, and preparation for national examinations. The CBC marks a shift from content memorisation toward demonstrated competencies and practical skills. Smartious teaches it with Kenyan-certified tutors and assessment aligned to KNEC standards.',
+      sections: [
+        { h: 'The Competency-Based Curriculum', p: 'The CBC emphasises competencies — communication, critical thinking, creativity, citizenship and digital literacy — developed through practical, learner-centred activity. It spans early years, primary and junior secondary, with continuous school-based assessment alongside national milestones.' },
+        { h: 'Senior secondary & national examinations', p: 'Smartious supports students through senior secondary study and preparation for national examinations, with past paper practice, KNEC-aligned marking and structured revision. Tutors are Kenyan-certified and familiar with the national assessment framework.' },
+        { h: 'Progression and pathways', p: 'The curriculum is the standard route into Kenyan universities and colleges, and is well understood across East Africa. It suits families based in Kenya, or those who want their children to remain aligned with the national system while benefiting from the structure and support of the Smartious programme.' },
+      ],
+      whyChoose: 'CBC & KCSE suits families who want their children educated within Kenya\'s national system — for university entry in Kenya, for consistency with local schools, or for the practical, competency-focused approach the CBC is built around.',
+    },
+  },
+  {
+    slug: 'smartious-blended',
+    badge: 'Smartious Exclusive',
+    h: 'Smartious Blended',
+    desc: 'Our signature in-house curriculum — designed in Nairobi over 7 years. Blends IGCSE academic rigour with CBC relevance, plus AI literacy and digital entrepreneurship.',
+    tags: ['IGCSE + CBC', 'STEM Focus', 'AI Literacy', 'Digital Skills', 'Global Citizenship'],
+    meta: ['All Ages', 'Designed in Nairobi', 'Smartious HQ'],
+    gold: true,
+    detail: {
+      tagline: 'The Smartious Blended Curriculum',
+      ageRange: 'All ages · A flexible programme adapted to each learner',
+      overview: 'Smartious Blended is our signature curriculum, developed in Nairobi over more than seven years of teaching practice. It combines the academic rigour and global recognition of Cambridge IGCSE with the practical, competency-focused relevance of Kenya\'s CBC — and adds what we believe a modern education needs: AI literacy, digital skills and entrepreneurial thinking. It is designed for families who want the best of an international curriculum without losing local relevance.',
+      sections: [
+        { h: 'What it blends', p: 'The programme draws IGCSE\'s structured subject rigour and internationally-recognised assessment together with the CBC\'s emphasis on demonstrated competency and practical application. Students gain the academic foundation for global progression while staying grounded in skills that matter locally.' },
+        { h: 'Modern skills built in', p: 'Alongside the core academic subjects, Smartious Blended embeds AI literacy — including guided use of our Mshauri AI tutor — digital skills, and an introduction to entrepreneurship and global citizenship. These are taught as integral parts of the curriculum, not optional extras.' },
+        { h: 'Flexibility and pathways', p: 'The programme is adapted to each learner\'s age, level and goals. Because it is built on IGCSE foundations, students can transition to formal IGCSE, A-Level or IB pathways when ready, while those who remain gain a distinctive, future-focused education.' },
+      ],
+      whyChoose: 'Smartious Blended suits families who want a genuinely modern education — internationally rigorous, locally relevant, and built for a world where digital and AI literacy matter. It is the curriculum we designed because we believed something better was possible.',
+    },
+  },
+]
