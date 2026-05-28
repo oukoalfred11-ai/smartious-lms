@@ -176,8 +176,8 @@ const styles = `
   .lp .nav-cta:hover{background:${V.cr2};transform:translateY(-1px)}
   /* HERO */
   .lp #hero{position:relative;min-height:calc(100vh - 64px);background:${V.ink};display:flex;flex-direction:column;overflow:hidden}
-  .lp .h-bg{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;object-position:center 35%;filter:brightness(1.15) saturate(1.1) contrast(1.02);pointer-events:none;background:${V.ink}}
-  .lp .h-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(110deg,rgba(10,8,6,.72) 0%,rgba(20,10,8,.5) 38%,rgba(60,14,24,.32) 62%,rgba(10,8,6,.5) 100%)}
+  .lp .h-bg{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;object-position:center 35%;filter:brightness(1.32) saturate(1.15) contrast(1.04);pointer-events:none;background:${V.ink}}
+  .lp .h-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(110deg,rgba(10,8,6,.55) 0%,rgba(20,10,8,.35) 38%,rgba(60,14,24,.22) 62%,rgba(10,8,6,.4) 100%)}
   .lp .h-vig{position:absolute;bottom:0;left:0;right:0;z-index:2;height:280px;background:linear-gradient(to top,${V.bone} 0%,transparent 100%)}
   .lp .h-body{position:relative;z-index:3;flex:1;display:flex;flex-direction:column;justify-content:center;max-width:1440px;margin:0 auto;padding:80px 48px 60px;width:100%}
   .lp .h1{font-family:'Playfair Display',serif;font-size:clamp(3.5rem,7.5vw,7rem);font-weight:900;line-height:.98;letter-spacing:-.04em;color:${V.white};margin-bottom:28px;text-shadow:0 4px 24px rgba(10,8,6,.4)}
@@ -199,7 +199,7 @@ const styles = `
   .lp .hms-n em{color:${V.gold3};font-style:normal}
   .lp .hms-l{font-size:10px;color:rgba(247,243,237,.68);margin-top:4px;letter-spacing:.04em}
   /* MOBILE HERO STATS STRIP — sits directly below the hero on phones */
-  .lp .h-stats-strip{display:none;background:${V.ink};padding:20px;border-bottom:1px solid rgba(184,150,12,.18)}
+  .lp .h-stats-strip{display:none;background:${V.ink};padding:28px 20px 32px;border-bottom:1px solid rgba(184,150,12,.18);border-top:1px solid rgba(184,150,12,.12)}
   .lp .h-stats-strip-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto}
   /* FLOATING ASSISTANCE + WHATSAPP */
   .lp .fab-stack{position:fixed;right:20px;bottom:20px;z-index:9998;display:flex;flex-direction:column;gap:12px;align-items:flex-end;pointer-events:none}
@@ -575,8 +575,10 @@ const styles = `
     .lp .h-stats{display:none}
     .lp .h-mob-stats{display:none!important}
     .lp .h-stats-strip{display:block}
-    .lp #hero{min-height:0;height:auto}
-    .lp .h-body{min-height:64vh;padding-top:48px;padding-bottom:48px}
+    .lp #hero{min-height:0;height:auto;max-height:760px}
+    .lp .h-bg{object-position:center center}
+    .lp .h-vig{height:140px}
+    .lp .h-body{min-height:62vh;max-height:680px;padding-top:48px;padding-bottom:56px}
     .lp .mob-burger{display:flex!important}
     .lp .mob-page-strip{display:block!important}
     .lp .wrap,.lp .nav-wrap,.lp .h-body,.lp .cta-in{padding-left:20px;padding-right:20px}
