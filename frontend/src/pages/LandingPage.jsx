@@ -80,12 +80,12 @@ function usePageMeta(title, description) {
 }
 
 /* ── useHeroPreload — LCP optimization ─────────────────────
- * The hero background image is the Largest Contentful Paint
- * element. It's loaded via CSS background-image which means
- * the browser can't preload it via the parser. We inject a
- * <link rel="preload" as="image" fetchpriority="high"> for
- * just the home page so the browser starts downloading the
- * hero image immediately, in parallel with CSS.
+ * The hero background video is the Largest Contentful Paint
+ * element on the home page. We inject a <link rel="preload"
+ * as="video" fetchpriority="high"> so the browser begins
+ * fetching it in parallel with CSS / JS. The video is served
+ * from Cloudinary with f_auto, q_auto, vc_auto so each
+ * browser receives its best-supported codec automatically.
  *
  * Note: This only helps for SPA navigation back to the home
  * page. For the initial page load, the preload must be in
@@ -99,8 +99,14 @@ function useHeroPreload(active) {
     const link = document.createElement('link')
     link.id = linkId
     link.rel = 'preload'
-    link.as = 'image'
-    link.href = '/hero-learning-centre.jpg'
+    link.as = 'video'
+    // Preload the size that matches the current viewport so we don't
+    // waste mobile bandwidth on the 1920px desktop encode.
+    const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+    link.href = isMobile
+      ? 'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_768,c_limit/hero_mhhwhf.mp4'
+      : 'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_1920,c_limit/hero_mhhwhf.mp4'
+    link.setAttribute('type', 'video/mp4')
     link.setAttribute('fetchpriority', 'high')
     document.head.appendChild(link)
     return () => {
@@ -174,7 +180,7 @@ const styles = `
   .lp .nav-cta:hover{background:${V.cr2};transform:translateY(-1px)}
   /* HERO */
   .lp #hero{position:relative;min-height:calc(100vh - 64px);background:${V.ink};display:flex;flex-direction:column;overflow:hidden}
-  .lp .h-bg{position:absolute;inset:0;z-index:1;background-image:url('/hero-learning-centre.jpg');background-size:cover;background-position:center 35%;background-repeat:no-repeat;filter:saturate(1.05) contrast(1.02)}
+  .lp .h-bg{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;object-position:center 35%;filter:saturate(1.05) contrast(1.02);pointer-events:none;background:${V.ink}}
   .lp .h-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(110deg,rgba(10,8,6,.94) 0%,rgba(20,10,8,.8) 38%,rgba(60,14,24,.58) 62%,rgba(10,8,6,.75) 100%)}
   .lp .h-vig{position:absolute;bottom:0;left:0;right:0;z-index:2;height:280px;background:linear-gradient(to top,${V.bone} 0%,transparent 100%)}
   .lp .h-body{position:relative;z-index:3;flex:1;display:flex;flex-direction:column;justify-content:center;max-width:1440px;margin:0 auto;padding:80px 48px 60px;width:100%}
@@ -3795,7 +3801,26 @@ export default function LandingPage() {
       {page === 'home' && (
         <>
           <section id="hero">
-            <div className="h-bg"/>
+            <video
+              className="h-bg"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              poster="/hero-learning-centre.jpg"
+              aria-hidden="true"
+            >
+              {/* Mobile-sized encode: ~768px wide, much smaller payload */}
+              <source
+                src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_768,c_limit/hero_mhhwhf.mp4"
+                media="(max-width: 768px)"
+              />
+              {/* Desktop encode: capped at 1920px, Cloudinary picks codec & quality */}
+              <source
+                src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_1920,c_limit/hero_mhhwhf.mp4"
+              />
+            </video>
             <div className="h-ov"/>
             <div className="h-vig"/>
             <div className="h-body">
