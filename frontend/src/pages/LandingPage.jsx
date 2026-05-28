@@ -1422,11 +1422,13 @@ const COUNTRIES = [
     address: {
       building: 'Diamond Plaza I Annex',
       floor: '3rd Floor, Office 20',
+      street: 'Fourth Parklands Avenue',
       area: 'Parklands',
       city: 'Nairobi',
       country: 'Kenya',
-      lat: -1.2607,
-      lng: 36.8197,
+      lat: -1.2573424,
+      lng: 36.8182174,
+      placeId: 'ChIJM5_xkrsXLxgRNJotpps29l8',
     },
     whyKenyans: {
       heading: 'Why Kenyan families are switching',
@@ -1442,8 +1444,8 @@ const COUNTRIES = [
     },
     learningCentre: {
       heading: 'The Nairobi Learning Centre',
-      intro: 'For families in Nairobi who prefer in-person learning, our centre at Diamond Plaza I Annex, Parklands offers small-group homeschool classes with the same teachers and curriculum as our online programme. Six students per class, dedicated subject specialists, full materials provided. Open Monday to Friday, 8:30 AM to 3:30 PM, with Wednesday afternoons reserved for the enrichment programme.',
-      mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.5!2d36.8197!3d-1.2607!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMcKwMTUnMzguNSJTIDM2wrA0OScxMC45IkU!5e0!3m2!1sen!2ske!4v1700000000000!5m2!1sen!2ske',
+      intro: 'For families in Nairobi who prefer in-person learning, our centre at Diamond Plaza I Annex, Fourth Parklands Avenue offers small-group homeschool classes with the same teachers and curriculum as our online programme. Six students per class, dedicated subject specialists, full materials provided. Open Monday to Friday, 8:30 AM to 3:30 PM, with Wednesday afternoons reserved for the enrichment programme.',
+      mapEmbed: 'https://maps.google.com/maps?q=Smartious%20Homeschool%20Diamond%20Plaza%20Fourth%20Parklands%20Avenue%20Nairobi&t=&z=16&ie=UTF8&iwloc=&output=embed',
     },
     universities: {
       heading: 'University pathways for Kenyan students',
@@ -4781,7 +4783,7 @@ export default function LandingPage() {
                   'email': 'hellosmartious@gmail.com',
                   'address': {
                     '@type': 'PostalAddress',
-                    'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20',
+                    'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20, Fourth Parklands Avenue',
                     'addressLocality': 'Parklands, Nairobi',
                     'addressRegion': 'Nairobi County',
                     'addressCountry': 'KE',
@@ -5037,11 +5039,12 @@ export default function LandingPage() {
                         <div style={{fontSize:14.5,color:V.ink,fontWeight:600,lineHeight:1.6}}>
                           {ctry.address.building}<br/>
                           {ctry.address.floor}<br/>
+                          {ctry.address.street}<br/>
                           {ctry.address.area}, {ctry.address.city}<br/>
                           {ctry.address.country}
                         </div>
                       </div>
-                      <a href={'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Diamond Plaza I Annex Parklands Nairobi')}
+                      <a href="https://www.google.com/maps/place/Smartious+Homeschool+and+Tuition,+Diamond+Plaza,+Fourth+Parklands+Ave,+Nairobi/@-1.2573424,36.8182174,17z"
                          target="_blank" rel="noopener noreferrer"
                          style={{display:'inline-flex',alignItems:'center',gap:8,padding:'11px 22px',borderRadius:8,background:V.cr,color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
                         Open in Google Maps
