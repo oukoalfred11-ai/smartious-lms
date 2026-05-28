@@ -198,6 +198,18 @@ const styles = `
   /* MOBILE HERO STATS STRIP — sits directly below the hero on phones */
   .lp .h-stats-strip{display:none;background:${V.ink};padding:28px 20px 32px;border-bottom:1px solid rgba(184,150,12,.18);border-top:1px solid rgba(184,150,12,.12)}
   .lp .h-stats-strip-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto}
+  /* KENYA COUNTRY PAGE — responsive rules for new rich sections */
+  @media(max-width:900px){
+    .lp .kenya-centre-grid{grid-template-columns:1fr!important;gap:28px!important}
+    .lp .kenya-uni-grid{grid-template-columns:1fr!important}
+    .lp .kenya-cmp-head{display:none!important}
+    .lp .kenya-cmp-row{grid-template-columns:1fr!important;padding:8px 0!important}
+    .lp .kenya-cmp-row > div:nth-child(1){background:${V.ink}!important;color:#fff!important;padding:8px 14px!important;font-size:12px!important}
+    .lp .kenya-cmp-row > div:nth-child(2){padding:10px 14px 4px!important}
+    .lp .kenya-cmp-row > div:nth-child(2)::before{content:'Traditional school: ';font-weight:700;color:${V.sl3};font-size:11px;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:3px}
+    .lp .kenya-cmp-row > div:nth-child(3){padding:6px 14px 14px!important}
+    .lp .kenya-cmp-row > div:nth-child(3)::before{content:'Smartious: ';font-weight:700;color:${V.cr};font-size:11px;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:3px}
+  }
   /* FLOATING ASSISTANCE + WHATSAPP */
   .lp .fab-stack{position:fixed;right:20px;bottom:20px;z-index:9998;display:flex;flex-direction:column;gap:12px;align-items:flex-end;pointer-events:none}
   .lp .fab-stack > *{pointer-events:auto}
@@ -1363,6 +1375,176 @@ const COUNTRIES = [
       { q: 'Can Smartious support UCAS applications?',
         a: 'Yes. Our university counselling team supports UK UCAS applications including personal statement reviews, predicted grades, references, and interview preparation for competitive courses including Medicine, Engineering and Oxbridge applications.' },
     ],
+  },
+  {
+    slug: 'kenya',
+    country: 'Kenya',
+    h: 'Leading Homeschool & Online School in Kenya',
+    tagline: 'Nairobi-based international online school for Kenyan families — CBC, KCSE, Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula, taught live by degree-qualified specialists. From USD 180/month.',
+    seoTitle: 'Premium Homeschool & Online School in Kenya for CBC, IGCSE & IB Students — Smartious',
+    seoDesc: 'Accredited homeschool and online school for Kenyan families. CBC, KCSE, Cambridge IGCSE, A-Level, IB Diploma and American curricula. Live classes from Nairobi. From USD 180/month (KES 23,400).',
+    localFacts: ['Nairobi HQ · Diamond Plaza I Annex', '2,400+ students since 2018', 'Live classes · EAT timezone'],
+    pains: 'Kenyan families are facing a perfect storm: school fees rising 12-18% per year at top private schools, Nairobi traffic adding 2-3 hours to every school day, and the CBC transition leaving parents uncertain about their child\'s university pathway. Smartious gives families in Nairobi, Mombasa, Kisumu and across all 47 counties a serious alternative — an accredited international online school built in Nairobi since 2018, with live classes, dedicated teachers and a path to UoN, Strathmore, USIU, JKUAT or any global university.',
+    curricula: ['Kenya CBC (Grades 1-12)', 'KCSE Preparation', 'Cambridge IGCSE', 'Cambridge A-Level', 'IB MYP & Diploma', 'Pearson Edexcel', 'American High School Diploma', 'Smartious Blended'],
+    regulation: 'Homeschooling is fully legal in Kenya under the Basic Education Act, 2013, which recognises alternative forms of basic education provided the learner accesses quality education equivalent to that of a registered school. There is no requirement to register your homeschool with the Ministry of Education, though many families choose to register their home-based learning with an accredited provider for record-keeping, exam eligibility and university applications. Smartious acts as that registered provider — we issue enrolment certificates, termly progress reports and predicted grades that are accepted by Kenyan universities (UoN, Strathmore, USIU, JKUAT, Kenyatta) and by universities worldwide. Students remain free to sit KCSE through KNEC, or to follow international examinations through Cambridge International and Pearson Edexcel.',
+    examCentres: 'Smartious students in Kenya have full access to both national and international examination pathways. CBC and KCSE examinations are administered by the Kenya National Examinations Council (KNEC). Cambridge IGCSE, A-Level and IB Diploma examinations are sat at British Council Nairobi, the Cambridge International authorised centre in Westlands, and selected international school exam centres. Smartious handles all registration, runs full mock exam programmes before May/June and October/November series, and provides the past papers, marking schemes and predicted-grade documentation that exam boards and universities require.',
+    testimonial: 'Smartious Homeschooling delivers genuinely effective one-on-one instruction. The teachers are patient, consistent, and skilled at identifying and addressing each learner\'s specific academic gaps. Since enrolling, our child has become more confident, enjoys lessons, and is now performing above grade level. For families in Nairobi seeking a dependable, academically rigorous homeschooling programme with personalised support, Smartious is a standout choice.',
+    testimonialAuthor: 'Allan H. · Nairobi parent · Google review',
+    cities: ['Nairobi', 'Westlands', 'Parklands', 'Karen', 'Lavington', 'Runda', 'Kilimani', 'Kileleshwa', 'Lang\'ata', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Nyeri', 'Thika', 'Naivasha'],
+    faqs: [
+      { q: 'Is homeschooling legal in Kenya?',
+        a: 'Yes. Homeschooling is legal in Kenya under the Basic Education Act, 2013, which recognises alternative forms of basic education. There is no requirement to register your homeschool separately with the Ministry of Education, though many families choose to register their child with an accredited provider like Smartious for record-keeping, exam eligibility and university applications. We issue enrolment certificates, termly progress reports and predicted grades that are accepted by Kenyan and international universities.' },
+      { q: 'Can my child still sit KCSE through Smartious?',
+        a: 'Yes. Students following the CBC pathway through Smartious are prepared for KCSE in the standard way. We deliver the full CBC curriculum as designed by KICD, with Kenyan-certified tutors and KNEC-aligned assessment. Students sit KCSE through the Kenya National Examinations Council on the standard timeline. Families can also choose to add or switch to Cambridge IGCSE or A-Level if they prefer the international pathway — many Kenyan families do both.' },
+      { q: 'Will my child socialise and make friends learning online?',
+        a: 'Yes. Smartious is not isolated self-study. Students join live virtual classes daily with classmates from across Kenya and from Dubai, Toronto, Doha, Lagos and London. Our Wednesday enrichment programme (2:00 PM to 4:00 PM, EAT) runs online clubs in coding, robotics, debate, Model UN, chess, journalism and leadership. Students build real friendships and develop genuine social confidence — many describe their Smartious classmates as their closest peers.' },
+      { q: 'Will Kenyan universities like UoN, Strathmore and USIU accept Smartious qualifications?',
+        a: 'Yes. Cambridge IGCSE, A-Level, IB Diploma and Pearson Edexcel are all accepted by every Kenyan university — University of Nairobi, Strathmore, United States International University-Africa (USIU), JKUAT, Kenyatta University, Daystar and others. A-Level students often receive direct entry to second year at certain Kenyan universities. Students following CBC sit KCSE in the standard way and apply through KUCCPS. We support both pathways and guide your university application either way.' },
+      { q: 'What happens if it doesn\'t work and we want to return to a traditional school?',
+        a: 'You can transfer back at any time. Smartious issues full transcripts, termly progress reports and predicted grades that are recognised by Kenyan schools (including Brookhouse, Braeburn, Crawford, Hillcrest, Aga Khan Academy and many others) and by schools internationally. Most schools place returning students based on those records combined with their own placement assessment. We have never had a family unable to transfer their child back where they wanted.' },
+      { q: 'How much does Smartious cost?',
+        a: 'Online / Virtual School starts at USD 180/month (≈ KES 23,400) for the Basic Online plan, USD 260/month (≈ KES 33,800) for Premium Online with live small-group classes, and USD 360/month (≈ KES 46,800) for the IGCSE Full Pack. In-person homeschooling at our Nairobi centre runs from USD 400/month (Primary) to USD 515/month (A-Level / IB). Private one-to-one tuition is USD 8/hour online or USD 15/hour at-home in the Nairobi area. We offer 5% off for termly billing and 12% off for annual billing.' },
+      { q: 'Why do you price in USD instead of KES?',
+        a: 'Because Smartious operates to international standards. Our students sit the same Cambridge International, Pearson Edexcel, IB and American exams as students in London, Dubai and Toronto, and our teachers serve students across multiple currencies and countries. USD pricing reflects that. We always show the KES equivalent alongside, and we accept payment in KES via Paystack, M-Pesa, bank transfer or card.' },
+      { q: 'Can my child join Smartious mid-term?',
+        a: 'Yes. We accept enrolments year-round. There are no fixed term-start dates. Whether your child is currently at a Kenyan school, moving from abroad, or just starting their education journey, our admissions team will assess where they are in their curriculum and place them at the right point. Most students begin within one week of admissions assessment.' },
+      { q: 'Do you offer in-person classes in Nairobi?',
+        a: 'Yes. Our Nairobi learning centre at Diamond Plaza I Annex, 3rd Floor, Office 20, Parklands offers in-person homeschooling for families in the city. Students attend our centre for live small-group classes with dedicated subject specialists, with the same curriculum as our online programme. We also offer at-home private tuition across Nairobi at USD 15/hour, with the tutor coming to your home.' },
+      { q: 'What curricula do you offer Kenyan families?',
+        a: 'Eight pathways: (1) Kenya\'s Competency-Based Curriculum (CBC) Grades 1-12 with KCSE preparation, (2) Cambridge IGCSE, (3) Cambridge A-Level, (4) IB Middle Years Programme, (5) IB Diploma Programme, (6) Pearson Edexcel, (7) American High School Diploma, and (8) Smartious Blended — our signature programme combining Cambridge academic rigour with CBC\'s competency focus and added AI literacy and digital skills. Most Kenyan families choose CBC for local continuity, IGCSE or A-Level for international university access, or Smartious Blended for the best of both.' },
+      { q: 'Who are the teachers? Are they qualified?',
+        a: 'All Smartious teachers hold degrees in the subjects they teach, typically from the University of Nairobi, Kenyatta University, JKUAT, or international universities. Our subject specialists include qualified secondary teachers in Mathematics, Physics, Chemistry, Biology, English Language and Literature, History, Geography, Business Studies, Computer Science, French and Kiswahili. We screen every candidate through a written subject assessment, a teaching demonstration and a safeguarding check before any contact with students.' },
+      { q: 'How are classes delivered? Live or recorded?',
+        a: 'Live, with full recording access. All scheduled classes are taught live by your child\'s dedicated subject teacher via Zoom, with cameras on and active participation. Every session is recorded and available to rewatch for revision or for catching up if a student misses a class. Students also have direct teacher messaging for between-class questions, and access to our Mshauri AI tutor 24/7 for homework support.' },
+    ],
+    // RICH KENYA-SPECIFIC FIELDS (kenya-only)
+    isKenya: true,
+    address: {
+      building: 'Diamond Plaza I Annex',
+      floor: '3rd Floor, Office 20',
+      area: 'Parklands',
+      city: 'Nairobi',
+      country: 'Kenya',
+      lat: -1.2607,
+      lng: 36.8197,
+    },
+    whyKenyans: {
+      heading: 'Why Kenyan families are switching',
+      intro: 'Across Nairobi and beyond, more families are reaching the same conclusion: the traditional school model is no longer the only credible path. Here is what we hear most often from the parents who enrol with us.',
+      points: [
+        { h: 'Nairobi traffic is unsustainable', p: 'Parents in Karen, Runda, Lavington and Westlands tell us their child spends 2-3 hours a day in school traffic. That is 600+ hours a year — almost three months of waking life — spent in a car. Online and in-centre learning recovers all of it.' },
+        { h: 'Class sizes have crept too high', p: 'Many Nairobi schools now have 45-60 students per class. Whatever the prospectus says, that is not personalised learning. Smartious online classes cap at 12 students; in-person at our Nairobi centre cap at 6. Every child gets called on, every week.' },
+        { h: 'School fees keep rising', p: 'Top private schools in Nairobi have raised fees 12-18% per year for the last three years. A full IGCSE programme at Smartious costs roughly a quarter of what those schools charge — same exam boards, same university outcomes, no compromise on quality.' },
+        { h: 'The CBC transition has parents worried', p: 'The shift from 8-4-4 to CBC has left many families uncertain about what their child\'s pathway actually looks like. Smartious teachers are KICD-trained and KNEC-aligned, and we also offer IGCSE and A-Level as parallel pathways so families have options either way.' },
+        { h: 'Mobility — Kenya, the Gulf, beyond', p: 'Many Kenyan families now have postings in Dubai, Doha, Lagos or London for two or three years at a time. Switching schools every time disrupts learning. With Smartious, the school travels with the family — same teachers, same curriculum, no break.' },
+        { h: 'Athletes, performers, special schedules', p: 'Children training in tennis, swimming, athletics, music or chess need a school flexible enough to work around competition schedules. Live class recordings, asynchronous catch-up and one-on-one tutoring make that possible without falling behind.' },
+      ],
+    },
+    learningCentre: {
+      heading: 'The Nairobi Learning Centre',
+      intro: 'For families in Nairobi who prefer in-person learning, our centre at Diamond Plaza I Annex, Parklands offers small-group homeschool classes with the same teachers and curriculum as our online programme. Six students per class, dedicated subject specialists, full materials provided. Open Monday to Friday, 8:30 AM to 3:30 PM, with Wednesday afternoons reserved for the enrichment programme.',
+      mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.5!2d36.8197!3d-1.2607!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMcKwMTUnMzguNSJTIDM2wrA0OScxMC45IkU!5e0!3m2!1sen!2ske!4v1700000000000!5m2!1sen!2ske',
+    },
+    universities: {
+      heading: 'University pathways for Kenyan students',
+      intro: 'Smartious qualifications open the same university doors as the best schools in Kenya — both locally and internationally. Where our students go depends on their curriculum choice and ambitions.',
+      local: [
+        'University of Nairobi (UoN)',
+        'Strathmore University',
+        'United States International University-Africa (USIU)',
+        'Jomo Kenyatta University (JKUAT)',
+        'Kenyatta University',
+        'Daystar University',
+        'Aga Khan University',
+        'Riara University',
+      ],
+      international: [
+        'UK Russell Group (Oxford, Cambridge, Imperial, LSE, UCL, Edinburgh)',
+        'US universities including Ivy League and top liberal arts colleges',
+        'Canadian U15 (Toronto, McGill, UBC, Waterloo)',
+        'Australian Group of Eight (Melbourne, Sydney, ANU)',
+        'European universities (Bocconi, Sciences Po, IE Madrid)',
+        'South African universities (UCT, Wits, Stellenbosch)',
+      ],
+    },
+    pricingTable: {
+      heading: 'Transparent fees, priced in USD',
+      intro: 'Smartious is priced in USD because we operate to international standards — our students sit the same Cambridge, Edexcel, IB and American exams as students in London, Dubai and Toronto. We always show the KES equivalent alongside, and we accept payment in KES via Paystack, M-Pesa, bank transfer or card.',
+      modes: [
+        {
+          mode: 'Online / Virtual School',
+          plans: [
+            { name: 'Basic Online', who: 'All ages · self-paced', usd: '180/month', kes: '≈ KES 23,400' },
+            { name: 'Premium Online · Best Value', who: 'All ages · live classes', usd: '260/month', kes: '≈ KES 33,800' },
+            { name: 'IGCSE Full Pack', who: 'Year 9-11 · exam prep', usd: '360/month', kes: '≈ KES 46,800' },
+          ],
+        },
+        {
+          mode: 'Homeschool · In-Person · Nairobi',
+          plans: [
+            { name: 'Primary', who: 'Grades 1-6 · CBC/British/American', usd: '400/month', kes: '≈ KES 52,000' },
+            { name: 'High School', who: 'Year 7-11 · IGCSE/Edexcel', usd: '423/month', kes: '≈ KES 54,990' },
+            { name: 'A-Level / IB Diploma', who: 'Year 12-13', usd: '515/month', kes: '≈ KES 66,950' },
+          ],
+        },
+        {
+          mode: 'Private Tuition',
+          plans: [
+            { name: 'Online Session', who: 'One-on-one · any subject', usd: '8/hour', kes: '' },
+            { name: 'Home Visit · Nairobi', who: 'Tutor comes to your home', usd: '15/hour', kes: '' },
+          ],
+        },
+      ],
+      note: 'Termly billing saves 5%. Annual billing saves 12%. One-time registration fee USD 38 applies on enrolment. 10% sibling discount on every additional child.',
+    },
+    comparison: {
+      heading: 'Smartious vs the traditional Nairobi school',
+      intro: 'How we compare to a typical Nairobi private school — not because they\'re bad, but because they\'re built for a different problem than the one many families now face.',
+      rows: [
+        { feature: 'Class size', traditional: '45-60 students per class', smartious: '12 online · 6 in-person' },
+        { feature: 'Daily commute', traditional: '2-3 hours of Nairobi traffic', smartious: 'Zero (online) · Walkable (Parklands centre)' },
+        { feature: 'Curriculum options', traditional: 'One curriculum, no flexibility', smartious: 'CBC, IGCSE, A-Level, IB, Edexcel, American, Blended' },
+        { feature: 'Annual fees (Secondary)', traditional: 'KES 700,000-1,800,000', smartious: 'KES 280,000-660,000' },
+        { feature: 'Schedule flexibility', traditional: 'Fixed timetable, fixed terms', smartious: 'Flexible · Year-round enrolment · Recordings' },
+        { feature: 'Exam pathways', traditional: 'Usually one (KCSE or IGCSE)', smartious: 'Both — KNEC and Cambridge / Edexcel in parallel' },
+        { feature: 'AI tutor support', traditional: 'None', smartious: 'Mshauri AI · 24/7 homework help' },
+        { feature: 'Mid-year transfers', traditional: 'Difficult or refused', smartious: 'Routine · Place within a week' },
+      ],
+    },
+    activitiesTeaser: {
+      heading: 'Beyond academics',
+      body: 'Every Wednesday afternoon (2:00 PM to 4:00 PM, EAT), Smartious students join our enrichment programme — coding, robotics, debate, Model UN, chess, journalism, AI and leadership. Students in Nairobi connect with classmates in Dubai, Toronto, Doha and Lagos, building global friendships alongside academic progress.',
+      linkLabel: 'Explore Wednesday Activities',
+      linkHref: '/activities',
+    },
+    googleReviews: {
+      heading: 'What Kenyan parents are saying',
+      intro: 'Verified reviews from Google. All reviews carry the reviewer\'s real name and Google profile.',
+      profileLink: 'https://www.google.com/maps',
+      reviews: [
+        {
+          name: 'Allan H.',
+          context: 'Nairobi parent',
+          rating: 5,
+          date: '4 months ago',
+          text: 'Smartious Homeschooling delivers genuinely effective one-on-one instruction. The teachers are patient, consistent, and skilled at identifying and addressing each learner\'s specific academic gaps. Since enrolling, our child has become more confident, enjoys lessons, and is now performing above grade level. For families in Nairobi seeking a dependable, academically rigorous homeschooling programme with personalised support, Smartious is a standout choice.',
+        },
+        {
+          name: 'Valentine M.',
+          context: 'Nairobi',
+          rating: 5,
+          date: '5 months ago',
+          text: 'I\'m very much pleased by the teaching methods at Smartious eschool, the tutors are caring, they never fail to reach out to their students in any need. Highly recommend!',
+        },
+        {
+          name: 'Derrick A.',
+          context: 'Nairobi parent',
+          rating: 5,
+          date: '4 months ago',
+          text: 'Smartious eSchool is exceptional. Professional, caring tutors who truly understand their students and deliver results. Lessons are engaging, personalized, and well-structured, creating a supportive environment where learners thrive. If you want quality education and real academic progress, this is the place to go.',
+        },
+      ],
+    },
   },
 ]
 
@@ -3992,7 +4174,7 @@ export default function LandingPage() {
                 {country:'Nigeria', slug:'nigeria', href:'/online-school/nigeria', sub:'Lagos · Abuja'},
                 {country:'South Africa', slug:'south-africa', href:'/online-school/south-africa', sub:'Johannesburg · Cape Town'},
                 {country:'Egypt', slug:'egypt', href:'/online-school/egypt', sub:'Cairo · Alexandria'},
-                {country:'Kenya', slug:null, href:'/global', sub:'Nairobi HQ · Diamond Plaza'},
+                {country:'Kenya', slug:'kenya', href:'/online-school/kenya', sub:'Nairobi HQ · Diamond Plaza'},
               ].map(c => (
                 <a key={c.country}
                   href={c.href}
@@ -4581,6 +4763,103 @@ export default function LandingPage() {
               })),
             })}}/>
 
+            {/* Kenya-only structured data: LocalBusiness, Breadcrumb, Course */}
+            {ctry.isKenya && (
+              <>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': ['EducationalOrganization', 'LocalBusiness'],
+                  '@id': 'https://smartioushomeschool.com/online-school/kenya#org',
+                  'name': 'Smartious Homeschool & eSchool',
+                  'alternateName': 'Smartious eSchool',
+                  'url': 'https://smartioushomeschool.com/online-school/kenya',
+                  'logo': 'https://smartioushomeschool.com/logo.png',
+                  'image': 'https://smartioushomeschool.com/og-kenya.jpg',
+                  'description': 'Accredited international homeschool and online school based in Nairobi, Kenya. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, American curriculum and Kenya CBC. Founded 2018. 2,400+ students across 13 countries.',
+                  'foundingDate': '2018',
+                  'telephone': '+254745021212',
+                  'email': 'hellosmartious@gmail.com',
+                  'address': {
+                    '@type': 'PostalAddress',
+                    'streetAddress': 'Diamond Plaza I Annex, 3rd Floor, Office 20',
+                    'addressLocality': 'Parklands, Nairobi',
+                    'addressRegion': 'Nairobi County',
+                    'addressCountry': 'KE',
+                  },
+                  'geo': {
+                    '@type': 'GeoCoordinates',
+                    'latitude': ctry.address.lat,
+                    'longitude': ctry.address.lng,
+                  },
+                  'areaServed': [
+                    { '@type': 'Country', 'name': 'Kenya' },
+                    { '@type': 'City', 'name': 'Nairobi' },
+                    { '@type': 'City', 'name': 'Mombasa' },
+                    { '@type': 'City', 'name': 'Kisumu' },
+                    { '@type': 'City', 'name': 'Nakuru' },
+                    { '@type': 'City', 'name': 'Eldoret' },
+                  ],
+                  'sameAs': [
+                    'https://www.facebook.com/smartioushomeschool',
+                    'https://www.instagram.com/smartioushomeschool',
+                    'https://www.tiktok.com/@smartioushomeschool',
+                  ],
+                  'aggregateRating': {
+                    '@type': 'AggregateRating',
+                    'ratingValue': '5',
+                    'reviewCount': '4',
+                    'bestRating': '5',
+                    'worstRating': '1',
+                  },
+                  'review': ctry.googleReviews.reviews.map(r => ({
+                    '@type': 'Review',
+                    'author': { '@type': 'Person', 'name': r.name },
+                    'reviewRating': { '@type': 'Rating', 'ratingValue': r.rating, 'bestRating': '5' },
+                    'reviewBody': r.text,
+                  })),
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'BreadcrumbList',
+                  'itemListElement': [
+                    { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
+                    { '@type': 'ListItem', 'position': 3, 'name': 'Kenya', 'item': 'https://smartioushomeschool.com/online-school/kenya' },
+                  ],
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Course',
+                  'name': 'Cambridge IGCSE Online — Kenya',
+                  'description': 'Live, online Cambridge IGCSE programme delivered to students in Kenya by degree-qualified specialists. Mathematics, Sciences, English, Business Studies and more. Exams sat at British Council Nairobi.',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'educationalLevel': 'Secondary',
+                  'inLanguage': 'en',
+                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Course',
+                  'name': 'Cambridge A-Level & IB Diploma Online — Kenya',
+                  'description': 'Sixth-form online programme for Kenyan students preparing for UK, US, Canadian and Kenyan universities. Cambridge A-Level and IB Diploma pathways available.',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'educationalLevel': 'Pre-University',
+                  'inLanguage': 'en',
+                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Course',
+                  'name': 'Kenya CBC & KCSE Homeschool',
+                  'description': 'Kenya\'s Competency-Based Curriculum (Grades 1-12) and KCSE preparation, taught by KICD/KNEC-aligned specialists. For families remaining in the Kenyan national pathway.',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'educationalLevel': 'Primary & Secondary',
+                  'inLanguage': 'en',
+                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '180', 'category': 'Monthly tuition' },
+                })}}/>
+              </>
+            )}
+
             {/* HERO */}
             <div className="pg-hero"><div className="wrap">
               <div className="eyebrow">{ctry.country}</div>
@@ -4718,6 +4997,214 @@ export default function LandingPage() {
                 ))}
               </div>
             </div></section>
+
+
+            {/* KENYA-ONLY RICH SECTIONS — only render when ctry.isKenya is true */}
+            {ctry.isKenya && (
+              <>
+                {/* WHY KENYANS SWITCH */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from parents</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.whyKenyans.heading}
+                    </h2>
+                    <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyKenyans.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
+                    {ctry.whyKenyans.points.map((pt,i) => (
+                      <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
+                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                          {pt.h}
+                        </h3>
+                        <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div></section>
+
+                {/* NAIROBI LEARNING CENTRE */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:40,alignItems:'center',maxWidth:1100,margin:'0 auto'}} className="kenya-centre-grid">
+                    <div>
+                      <div className="eyebrow">Nairobi · Parklands</div>
+                      <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
+                        {ctry.learningCentre.heading}
+                      </h2>
+                      <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,marginBottom:18}}>{ctry.learningCentre.intro}</p>
+                      <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:10,padding:'16px 18px',marginBottom:18}}>
+                        <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:8}}>Visit us</div>
+                        <div style={{fontSize:14.5,color:V.ink,fontWeight:600,lineHeight:1.6}}>
+                          {ctry.address.building}<br/>
+                          {ctry.address.floor}<br/>
+                          {ctry.address.area}, {ctry.address.city}<br/>
+                          {ctry.address.country}
+                        </div>
+                      </div>
+                      <a href={'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Diamond Plaza I Annex Parklands Nairobi')}
+                         target="_blank" rel="noopener noreferrer"
+                         style={{display:'inline-flex',alignItems:'center',gap:8,padding:'11px 22px',borderRadius:8,background:V.cr,color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
+                        Open in Google Maps
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M7 17l10-10M17 17V7H7"/></svg>
+                      </a>
+                    </div>
+                    <div style={{borderRadius:14,overflow:'hidden',border:'1px solid '+V.line,boxShadow:'0 12px 40px rgba(10,8,6,.10)',minHeight:340}}>
+                      <iframe
+                        src={ctry.learningCentre.mapEmbed}
+                        width="100%" height="380"
+                        style={{border:0,display:'block'}}
+                        allowFullScreen=""
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Smartious Nairobi Learning Centre — Diamond Plaza I Annex, Parklands"
+                      />
+                    </div>
+                  </div>
+                </div></section>
+
+                {/* ACTIVITIES TEASER */}
+                <section className="sec" style={{background:'#fff',padding:'56px 0'}}><div className="wrap">
+                  <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                      {ctry.activitiesTeaser.heading}
+                    </h2>
+                    <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
+                    <a href={ctry.activitiesTeaser.linkHref}
+                       onClick={(e) => { e.preventDefault(); P('activities') }}
+                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'11px 24px',borderRadius:8,background:'transparent',color:V.cr,border:'1.5px solid '+V.cr,textDecoration:'none',fontSize:13.5,fontWeight:700,cursor:'pointer'}}>
+                      {ctry.activitiesTeaser.linkLabel}
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                  </div>
+                </div></section>
+
+                {/* COMPARISON TABLE */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.comparison.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.comparison.intro}</p>
+                  </div>
+                  <div style={{maxWidth:1000,margin:'0 auto',background:'#fff',border:'1px solid '+V.line,borderRadius:14,overflow:'hidden'}}>
+                    <div style={{display:'grid',gridTemplateColumns:'1.2fr 1.4fr 1.4fr',background:V.ink,color:'#fff'}} className="kenya-cmp-head">
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.gold3}}>&nbsp;</div>
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:'rgba(255,255,255,.7)'}}>Traditional Nairobi school</div>
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.gold3}}>Smartious</div>
+                    </div>
+                    {ctry.comparison.rows.map((r,i) => (
+                      <div key={i} style={{display:'grid',gridTemplateColumns:'1.2fr 1.4fr 1.4fr',borderTop:i===0?'none':'1px solid '+V.line}} className="kenya-cmp-row">
+                        <div style={{padding:'14px 18px',fontSize:13.5,fontWeight:700,color:V.ink,background:V.bone}}>{r.feature}</div>
+                        <div style={{padding:'14px 18px',fontSize:13.5,color:V.sl,lineHeight:1.5}}>{r.traditional}</div>
+                        <div style={{padding:'14px 18px',fontSize:13.5,color:V.ink,lineHeight:1.5,fontWeight:600}}>{r.smartious}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div></section>
+
+                {/* UNIVERSITY PATHWAYS */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.universities.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.universities.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
+                    <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Kenya</div>
+                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Local universities</h3>
+                      <ul style={{listStyle:'none',padding:0,margin:0}}>
+                        {ctry.universities.local.map((u,i) => (
+                          <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
+                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <ul style={{listStyle:'none',padding:0,margin:0}}>
+                        {ctry.universities.international.map((u,i) => (
+                          <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div></section>
+
+                {/* PRICING TABLE */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Kenya</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.pricingTable.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.pricingTable.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))',gap:18,maxWidth:1100,margin:'0 auto'}}>
+                    {ctry.pricingTable.modes.map((m,i) => (
+                      <div key={i} style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px 24px'}}>
+                        <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
+                        {m.plans.map((p,j) => (
+                          <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
+                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
+                            <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
+                            {p.kes && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.kes}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.pricingTable.note}</p>
+                  <div style={{textAlign:'center',marginTop:24}}>
+                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                  </div>
+                </div></section>
+
+                {/* GOOGLE REVIEWS */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Verified Google reviews</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.googleReviews.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.googleReviews.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))',gap:18,maxWidth:1100,margin:'0 auto'}}>
+                    {ctry.googleReviews.reviews.map((r,i) => (
+                      <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px 24px',display:'flex',flexDirection:'column'}}>
+                        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+                          <div style={{width:38,height:38,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:15}}>{r.name.charAt(0)}</div>
+                          <div>
+                            <div style={{fontSize:14,fontWeight:700,color:V.ink}}>{r.name}</div>
+                            <div style={{fontSize:11.5,color:V.sl3}}>{r.context}</div>
+                          </div>
+                        </div>
+                        <div style={{display:'flex',gap:2,marginBottom:10}}>
+                          {Array.from({length:r.rating}).map((_,j) => (
+                            <svg key={j} width="14" height="14" viewBox="0 0 24 24" fill={V.gold2}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                          ))}
+                          <span style={{fontSize:11.5,color:V.sl3,marginLeft:6}}>{r.date}</span>
+                        </div>
+                        <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,flex:1}}>&ldquo;{r.text}&rdquo;</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{textAlign:'center',marginTop:24}}>
+                    <a href={ctry.googleReviews.profileLink} target="_blank" rel="noopener noreferrer"
+                       style={{fontSize:13,color:V.sl,textDecoration:'underline'}}>See all reviews on Google →</a>
+                  </div>
+                </div></section>
+              </>
+            )}
+
+            {/* /KENYA-ONLY RICH SECTIONS */}
 
             {/* CTA */}
             <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
