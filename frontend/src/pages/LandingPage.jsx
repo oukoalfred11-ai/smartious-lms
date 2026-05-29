@@ -2993,6 +2993,57 @@ export default function LandingPage() {
               </>
             )}
 
+            {/* UAE-only structured data: Breadcrumb, Course, Service */}
+            {ctry.isUae && (
+              <>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'BreadcrumbList',
+                  'itemListElement': [
+                    { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
+                    { '@type': 'ListItem', 'position': 3, 'name': 'United Arab Emirates', 'item': 'https://smartioushomeschool.com/online-school/uae' },
+                  ],
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Service',
+                  'serviceType': 'Online International Homeschool & Virtual School',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'areaServed': [
+                    { '@type': 'Country', 'name': 'United Arab Emirates', '@id': 'https://www.wikidata.org/wiki/Q878' },
+                    { '@type': 'City', 'name': 'Dubai' },
+                    { '@type': 'City', 'name': 'Abu Dhabi' },
+                    { '@type': 'City', 'name': 'Sharjah' },
+                    { '@type': 'City', 'name': 'Ajman' },
+                    { '@type': 'City', 'name': 'Ras Al Khaimah' },
+                  ],
+                  'description': 'Live online international homeschool serving expat and Emirati families across the UAE. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American curricula on GST timezone.',
+                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Course',
+                  'name': 'Cambridge IGCSE Online — UAE',
+                  'description': 'Live, online Cambridge IGCSE programme for UAE-based students, taught on GST timezone by degree-qualified specialists. Exams sat at British Council Dubai and Abu Dhabi.',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'educationalLevel': 'Secondary',
+                  'inLanguage': 'en',
+                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Course',
+                  'name': 'IB Diploma & A-Level Online — UAE',
+                  'description': 'Sixth-form online programme for UAE students preparing for UAE private universities, UK, US, Canadian and Australian universities. Cambridge A-Level and IB Diploma pathways available, both delivered live on GST timezone.',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'educationalLevel': 'Pre-University',
+                  'inLanguage': 'en',
+                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                })}}/>
+              </>
+            )}
+
             {/* HERO */}
             <div className="pg-hero"><div className="wrap">
               <div className="eyebrow">{ctry.country}</div>
@@ -3070,20 +3121,22 @@ export default function LandingPage() {
               </div>
             </div></section>
 
-            {/* TESTIMONIAL */}
-            <section className="sec" style={{background:V.ink,color:'#fff'}}><div className="wrap">
-              <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
-                <svg width="48" height="48" viewBox="0 0 24 24" fill={V.gold2} style={{opacity:.7,marginBottom:18}}>
-                  <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
-                </svg>
-                <p style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontStyle:'italic',lineHeight:1.5,color:'#fff',marginBottom:20}}>
-                  "{ctry.testimonial}"
-                </p>
-                <div style={{fontSize:12,color:V.gold3,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase'}}>
-                  {ctry.testimonialAuthor}
+            {/* TESTIMONIAL — only show if a testimonial is supplied */}
+            {ctry.testimonial && (
+              <section className="sec" style={{background:V.ink,color:'#fff'}}><div className="wrap">
+                <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill={V.gold2} style={{opacity:.7,marginBottom:18}}>
+                    <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
+                  </svg>
+                  <p style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontStyle:'italic',lineHeight:1.5,color:'#fff',marginBottom:20}}>
+                    "{ctry.testimonial}"
+                  </p>
+                  <div style={{fontSize:12,color:V.gold3,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase'}}>
+                    {ctry.testimonialAuthor}
+                  </div>
                 </div>
-              </div>
-            </div></section>
+              </div></section>
+            )}
 
             {/* FAQ */}
             <section className="sec" style={{background:'#fff'}}><div className="wrap">
@@ -3367,6 +3420,145 @@ export default function LandingPage() {
             )}
 
             {/* /KENYA-ONLY RICH SECTIONS */}
+
+            {/* UAE-ONLY RICH SECTIONS — only render when ctry.isUae is true */}
+            {ctry.isUae && (
+              <>
+                {/* WHY UAE FAMILIES SWITCH */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from UAE parents</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.whyExpats.heading}
+                    </h2>
+                    <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyExpats.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
+                    {ctry.whyExpats.points.map((pt,i) => (
+                      <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
+                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                          {pt.h}
+                        </h3>
+                        <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div></section>
+
+                {/* ACTIVITIES TEASER */}
+                <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
+                  <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                      {ctry.activitiesTeaser.heading}
+                    </h2>
+                    <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
+                    <a href={ctry.activitiesTeaser.linkHref}
+                       onClick={(e) => { e.preventDefault(); P('activities') }}
+                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'11px 24px',borderRadius:8,background:'transparent',color:V.cr,border:'1.5px solid '+V.cr,textDecoration:'none',fontSize:13.5,fontWeight:700,cursor:'pointer'}}>
+                      {ctry.activitiesTeaser.linkLabel}
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                  </div>
+                </div></section>
+
+                {/* COMPARISON TABLE */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.uaeComparison.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.uaeComparison.intro}</p>
+                  </div>
+                  <div style={{maxWidth:1000,margin:'0 auto',background:V.bone,border:'1px solid '+V.line,borderRadius:14,overflow:'hidden'}}>
+                    <div style={{display:'grid',gridTemplateColumns:'1.2fr 1.4fr 1.4fr',background:V.ink,color:'#fff'}} className="kenya-cmp-head">
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.gold3}}>&nbsp;</div>
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:'rgba(255,255,255,.7)'}}>Typical Dubai school</div>
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.gold3}}>Smartious</div>
+                    </div>
+                    {ctry.uaeComparison.rows.map((r,i) => (
+                      <div key={i} style={{display:'grid',gridTemplateColumns:'1.2fr 1.4fr 1.4fr',borderTop:i===0?'none':'1px solid '+V.line}} className="kenya-cmp-row">
+                        <div style={{padding:'14px 18px',fontSize:13.5,fontWeight:700,color:V.ink,background:'#fff'}}>{r.feature}</div>
+                        <div style={{padding:'14px 18px',fontSize:13.5,color:V.sl,lineHeight:1.5}}>{r.traditional}</div>
+                        <div style={{padding:'14px 18px',fontSize:13.5,color:V.ink,lineHeight:1.5,fontWeight:600}}>{r.smartious}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div></section>
+
+                {/* UNIVERSITY PATHWAYS */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.uaeUniversities.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.uaeUniversities.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
+                    <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>UAE & Region</div>
+                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Regional universities</h3>
+                      <ul style={{listStyle:'none',padding:0,margin:0}}>
+                        {ctry.uaeUniversities.regional.map((u,i) => (
+                          <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
+                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <ul style={{listStyle:'none',padding:0,margin:0}}>
+                        {ctry.uaeUniversities.international.map((u,i) => (
+                          <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl3,maxWidth:780,margin:'24px auto 0',lineHeight:1.6,fontStyle:'italic'}}>{ctry.uaeUniversities.caveat}</p>
+                </div></section>
+
+                {/* PRICING TABLE — UAE */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Fees in the UAE</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.uaePricing.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.uaePricing.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))',gap:18,maxWidth:1100,margin:'0 auto'}}>
+                    {ctry.uaePricing.modes.map((m,i) => (
+                      <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px 24px'}}>
+                        <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
+                        {m.plans.map((p,j) => (
+                          <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
+                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
+                            <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
+                            {p.aed && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.aed}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.uaePricing.note}</p>
+                  <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
+                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from the UAE.')}
+                       target="_blank" rel="noopener noreferrer"
+                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'13px 26px',borderRadius:8,background:'#25D366',color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
+                      WhatsApp Inquiry
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
+                    </a>
+                  </div>
+                </div></section>
+              </>
+            )}
+            {/* /UAE-ONLY RICH SECTIONS */}
 
             {/* CTA */}
             <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
