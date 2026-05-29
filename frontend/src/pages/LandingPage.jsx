@@ -3044,6 +3044,60 @@ export default function LandingPage() {
               </>
             )}
 
+            {/* UK-only structured data: Breadcrumb, Course, Service */}
+            {ctry.isUk && (
+              <>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'BreadcrumbList',
+                  'itemListElement': [
+                    { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
+                    { '@type': 'ListItem', 'position': 3, 'name': 'United Kingdom', 'item': 'https://smartioushomeschool.com/online-school/uk' },
+                  ],
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Service',
+                  'serviceType': 'Online Home Education & International Online School',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'areaServed': [
+                    { '@type': 'Country', 'name': 'United Kingdom' },
+                    { '@type': 'AdministrativeArea', 'name': 'England' },
+                    { '@type': 'AdministrativeArea', 'name': 'Scotland' },
+                    { '@type': 'AdministrativeArea', 'name': 'Wales' },
+                    { '@type': 'AdministrativeArea', 'name': 'Northern Ireland' },
+                    { '@type': 'City', 'name': 'London' },
+                    { '@type': 'City', 'name': 'Manchester' },
+                    { '@type': 'City', 'name': 'Birmingham' },
+                    { '@type': 'City', 'name': 'Edinburgh' },
+                  ],
+                  'description': 'Live online international school accepting home education students from across the United Kingdom. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and AQA GCSE pathways. GMT/BST scheduling. Full UCAS application support.',
+                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Course',
+                  'name': 'Cambridge IGCSE & GCSE Online — UK',
+                  'description': 'Live, online IGCSE and AQA GCSE programmes for UK home-educating families. Taught on GMT/BST timezone by degree-qualified specialists. Examinations sat at Cambridge International, Pearson Edexcel and AQA private-candidate centres across the UK.',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'educationalLevel': 'Secondary',
+                  'inLanguage': 'en-GB',
+                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Course',
+                  'name': 'A-Level & IB Diploma Online — UK with UCAS Support',
+                  'description': 'A-Level and IB Diploma online programme for UK Year 12 and 13 students preparing for UCAS applications to Oxford, Cambridge, Russell Group and international universities. Full personal statement support, predicted grades, admissions test preparation (BMAT, UCAT, LNAT, TSA, TMUA).',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'educationalLevel': 'Pre-University',
+                  'inLanguage': 'en-GB',
+                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                })}}/>
+              </>
+            )}
+
             {/* HERO */}
             <div className="pg-hero"><div className="wrap">
               <div className="eyebrow">{ctry.country}</div>
@@ -3559,6 +3613,139 @@ export default function LandingPage() {
               </>
             )}
             {/* /UAE-ONLY RICH SECTIONS */}
+
+            {/* UK-ONLY RICH SECTIONS — only render when ctry.isUk is true */}
+            {ctry.isUk && (
+              <>
+                {/* WHY UK FAMILIES SWITCH */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from UK parents</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.whyUk.heading}
+                    </h2>
+                    <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyUk.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
+                    {ctry.whyUk.points.map((pt,i) => (
+                      <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
+                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                          {pt.h}
+                        </h3>
+                        <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div></section>
+
+                {/* ACTIVITIES TEASER */}
+                <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
+                  <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                      {ctry.activitiesTeaser.heading}
+                    </h2>
+                    <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
+                    <a href={ctry.activitiesTeaser.linkHref}
+                       onClick={(e) => { e.preventDefault(); P('activities') }}
+                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'11px 24px',borderRadius:8,background:'transparent',color:V.cr,border:'1.5px solid '+V.cr,textDecoration:'none',fontSize:13.5,fontWeight:700,cursor:'pointer'}}>
+                      {ctry.activitiesTeaser.linkLabel}
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                  </div>
+                </div></section>
+
+                {/* COMPARISON TABLE */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.ukComparison.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ukComparison.intro}</p>
+                  </div>
+                  <div style={{maxWidth:1000,margin:'0 auto',background:V.bone,border:'1px solid '+V.line,borderRadius:14,overflow:'hidden'}}>
+                    <div style={{display:'grid',gridTemplateColumns:'1.2fr 1.4fr 1.4fr',background:V.ink,color:'#fff'}} className="kenya-cmp-head">
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.gold3}}>&nbsp;</div>
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:'rgba(255,255,255,.7)'}}>UK independent school</div>
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.gold3}}>Smartious</div>
+                    </div>
+                    {ctry.ukComparison.rows.map((r,i) => (
+                      <div key={i} style={{display:'grid',gridTemplateColumns:'1.2fr 1.4fr 1.4fr',borderTop:i===0?'none':'1px solid '+V.line}} className="kenya-cmp-row">
+                        <div style={{padding:'14px 18px',fontSize:13.5,fontWeight:700,color:V.ink,background:'#fff'}}>{r.feature}</div>
+                        <div style={{padding:'14px 18px',fontSize:13.5,color:V.sl,lineHeight:1.5}}>{r.traditional}</div>
+                        <div style={{padding:'14px 18px',fontSize:13.5,color:V.ink,lineHeight:1.5,fontWeight:600}}>{r.smartious}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div></section>
+
+                {/* UNIVERSITY PATHWAYS */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.ukUniversities.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ukUniversities.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
+                    <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>United Kingdom</div>
+                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>UK universities (UCAS)</h3>
+                      <ul style={{listStyle:'none',padding:0,margin:0}}>
+                        {ctry.ukUniversities.domestic.map((u,i) => (
+                          <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>International</div>
+                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <ul style={{listStyle:'none',padding:0,margin:0}}>
+                        {ctry.ukUniversities.international.map((u,i) => (
+                          <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div></section>
+
+                {/* PRICING TABLE — UK */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Fees in the UK</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.ukPricing.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ukPricing.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))',gap:18,maxWidth:1100,margin:'0 auto'}}>
+                    {ctry.ukPricing.modes.map((m,i) => (
+                      <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px 24px'}}>
+                        <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
+                        {m.plans.map((p,j) => (
+                          <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
+                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
+                            <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
+                            {p.gbp && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.gbp}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.ukPricing.note}</p>
+                  <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
+                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    <button className="btn-o" style={{borderColor:V.cr,color:V.cr}} onClick={() => P('consult')}>Book Free Consultation</button>
+                  </div>
+                </div></section>
+              </>
+            )}
+            {/* /UK-ONLY RICH SECTIONS */}
 
             {/* CTA */}
             <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
