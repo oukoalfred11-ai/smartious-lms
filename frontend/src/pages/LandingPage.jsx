@@ -3447,6 +3447,60 @@ export default function LandingPage() {
               </>
             )}
 
+            {/* South Africa-only structured data: Breadcrumb, Service, Course */}
+            {ctry.isSouthAfrica && (
+              <>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'BreadcrumbList',
+                  'itemListElement': [
+                    { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
+                    { '@type': 'ListItem', 'position': 2, 'name': 'Online School', 'item': 'https://smartioushomeschool.com/global' },
+                    { '@type': 'ListItem', 'position': 3, 'name': 'South Africa', 'item': 'https://smartioushomeschool.com/online-school/south-africa' },
+                  ],
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Service',
+                  'serviceType': 'Online International Homeschool & Virtual School',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'areaServed': [
+                    { '@type': 'Country', 'name': 'South Africa' },
+                    { '@type': 'AdministrativeArea', 'name': 'Gauteng' },
+                    { '@type': 'AdministrativeArea', 'name': 'Western Cape' },
+                    { '@type': 'AdministrativeArea', 'name': 'KwaZulu-Natal' },
+                    { '@type': 'City', 'name': 'Johannesburg' },
+                    { '@type': 'City', 'name': 'Sandton' },
+                    { '@type': 'City', 'name': 'Cape Town' },
+                    { '@type': 'City', 'name': 'Pretoria' },
+                    { '@type': 'City', 'name': 'Durban' },
+                  ],
+                  'description': 'Live online international school serving South African families. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and British curriculum pathways. Exams sat at British Council South Africa centres in Johannesburg, Cape Town, Pretoria, Durban. Live UK & Africa-band classes during SA school hours. Compliant with the BELA Act 2024 framework for online schooling.',
+                  'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '180', 'highPrice': '515', 'priceSpecification': { '@type': 'UnitPriceSpecification', 'unitText': 'MONTH' } },
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Course',
+                  'name': 'Cambridge IGCSE Online — South Africa',
+                  'description': 'Live online Cambridge IGCSE programme for South African students, taught in the UK & Africa time-zone band during SA school hours. Examinations sat at British Council South Africa centres and Cambridge-authorised centres across Johannesburg, Cape Town, Pretoria, Durban and Stellenbosch.',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'educationalLevel': 'Secondary',
+                  'inLanguage': 'en',
+                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '360', 'category': 'Monthly tuition' },
+                })}}/>
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'Course',
+                  'name': 'A-Level & IB Diploma Online — South Africa',
+                  'description': 'Sixth-form online programme for South African students preparing for UCT, Wits, Stellenbosch, UP, UJ and other SA universities, plus UK Russell Group, US Ivy League, Canadian U15 and Australian Group of Eight universities. Cambridge A-Level often grants first-year credit at SA universities.',
+                  'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'sameAs': 'https://smartioushomeschool.com/' },
+                  'educationalLevel': 'Pre-University',
+                  'inLanguage': 'en',
+                  'offers': { '@type': 'Offer', 'priceCurrency': 'USD', 'price': '515', 'category': 'Monthly tuition' },
+                })}}/>
+              </>
+            )}
+
             {/* HERO */}
             <div className="pg-hero"><div className="wrap">
               <div className="eyebrow">{ctry.country}</div>
@@ -4991,6 +5045,171 @@ export default function LandingPage() {
               </>
             )}
             {/* /PAKISTAN-ONLY RICH SECTIONS */}
+
+            {/* SOUTH AFRICA-ONLY RICH SECTIONS — only render when ctry.isSouthAfrica is true */}
+            {ctry.isSouthAfrica && (
+              <>
+                {/* WHY SA FAMILIES LOOK BEYOND */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from SA parents</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.whySouthAfrica.heading}
+                    </h2>
+                    <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whySouthAfrica.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
+                    {ctry.whySouthAfrica.points.map((pt,i) => (
+                      <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
+                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                          {pt.h}
+                        </h3>
+                        <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div></section>
+
+                {/* MATRIC PATHWAY TABLE — UNIQUE TO SA */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Matric pathways</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.saMatricTable.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saMatricTable.intro}</p>
+                  </div>
+                  <div style={{maxWidth:1100,margin:'0 auto',background:'#fff',border:'1px solid '+V.line,borderRadius:14,overflow:'hidden'}}>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1.4fr 1.3fr 1.3fr',background:V.ink,color:'#fff'}} className="kenya-cmp-head">
+                      <div style={{padding:'14px 16px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.gold3}}>Pathway</div>
+                      <div style={{padding:'14px 16px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:'rgba(255,255,255,.7)'}}>Who delivers</div>
+                      <div style={{padding:'14px 16px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:'rgba(255,255,255,.7)'}}>SA Universities</div>
+                      <div style={{padding:'14px 16px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.gold3}}>Global recognition</div>
+                    </div>
+                    {ctry.saMatricTable.rows.map((r,i) => (
+                      <div key={i} style={{display:'grid',gridTemplateColumns:'1fr 1.4fr 1.3fr 1.3fr',borderTop:i===0?'none':'1px solid '+V.line}} className="kenya-cmp-row">
+                        <div style={{padding:'14px 16px',fontSize:13.5,fontWeight:700,color:V.ink,background:V.bone}}>{r.pathway}</div>
+                        <div style={{padding:'14px 16px',fontSize:13,color:V.sl,lineHeight:1.5}}>{r.delivers}</div>
+                        <div style={{padding:'14px 16px',fontSize:13,color:V.sl,lineHeight:1.5}}>{r.sa}</div>
+                        <div style={{padding:'14px 16px',fontSize:13,color:V.ink,lineHeight:1.5,fontWeight:500}}>{r.global}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div></section>
+
+                {/* ACTIVITIES TEASER */}
+                <section className="sec" style={{background:'#fff',padding:'56px 0'}}><div className="wrap">
+                  <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                      {ctry.activitiesTeaser.heading}
+                    </h2>
+                    <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
+                    <a href={ctry.activitiesTeaser.linkHref}
+                       onClick={(e) => { e.preventDefault(); P('activities') }}
+                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'11px 24px',borderRadius:8,background:'transparent',color:V.cr,border:'1.5px solid '+V.cr,textDecoration:'none',fontSize:13.5,fontWeight:700,cursor:'pointer'}}>
+                      {ctry.activitiesTeaser.linkLabel}
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                  </div>
+                </div></section>
+
+                {/* COMPARISON TABLE */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.saComparison.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saComparison.intro}</p>
+                  </div>
+                  <div style={{maxWidth:1000,margin:'0 auto',background:'#fff',border:'1px solid '+V.line,borderRadius:14,overflow:'hidden'}}>
+                    <div style={{display:'grid',gridTemplateColumns:'1.2fr 1.4fr 1.4fr',background:V.ink,color:'#fff'}} className="kenya-cmp-head">
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.gold3}}>&nbsp;</div>
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:'rgba(255,255,255,.7)'}}>SA private school</div>
+                      <div style={{padding:'14px 18px',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.gold3}}>Smartious</div>
+                    </div>
+                    {ctry.saComparison.rows.map((r,i) => (
+                      <div key={i} style={{display:'grid',gridTemplateColumns:'1.2fr 1.4fr 1.4fr',borderTop:i===0?'none':'1px solid '+V.line}} className="kenya-cmp-row">
+                        <div style={{padding:'14px 18px',fontSize:13.5,fontWeight:700,color:V.ink,background:V.bone}}>{r.feature}</div>
+                        <div style={{padding:'14px 18px',fontSize:13.5,color:V.sl,lineHeight:1.5}}>{r.traditional}</div>
+                        <div style={{padding:'14px 18px',fontSize:13.5,color:V.ink,lineHeight:1.5,fontWeight:600}}>{r.smartious}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div></section>
+
+                {/* UNIVERSITY PATHWAYS */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.saUniversities.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saUniversities.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
+                    <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>South Africa</div>
+                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>SA universities</h3>
+                      <ul style={{listStyle:'none',padding:0,margin:0}}>
+                        {ctry.saUniversities.domestic.map((u,i) => (
+                          <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
+                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <ul style={{listStyle:'none',padding:0,margin:0}}>
+                        {ctry.saUniversities.international.map((u,i) => (
+                          <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div></section>
+
+                {/* PRICING TABLE — SA */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Fees in South Africa</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.saPricing.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saPricing.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))',gap:18,maxWidth:1100,margin:'0 auto'}}>
+                    {ctry.saPricing.modes.map((m,i) => (
+                      <div key={i} style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px 24px'}}>
+                        <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
+                        {m.plans.map((p,j) => (
+                          <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
+                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
+                            <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
+                            {p.zar && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.zar}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.saPricing.note}</p>
+                  <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
+                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from South Africa.')}
+                       target="_blank" rel="noopener noreferrer"
+                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'13px 26px',borderRadius:8,background:'#25D366',color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
+                      WhatsApp Inquiry
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
+                    </a>
+                  </div>
+                </div></section>
+              </>
+            )}
+            {/* /SOUTH AFRICA-ONLY RICH SECTIONS */}
 
             {/* CTA */}
             <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
