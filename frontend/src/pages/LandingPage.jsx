@@ -6796,6 +6796,8 @@ export default function LandingPage() {
                   title:'STEM & University Experience',
                   theme:'university',
                   gradient:'linear-gradient(135deg, #0F766E 0%, #1E3A8A 100%)',
+                  videoMp4:'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_700/0528_2_welzb9.mp4',
+                  videoPoster:'https://res.cloudinary.com/dae99gz1m/video/upload/so_0/0528_2_welzb9.jpg',
                   items:[
                     'Visit to a top Malaysian university',
                     'Campus tour & student interaction',
