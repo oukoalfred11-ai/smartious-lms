@@ -8094,46 +8094,6 @@ export default function LandingPage() {
             </div>
           </div></section>
 
-          {/* GALLERY — VISUAL ATMOSPHERE */}
-          <section className="sec" style={{background:V.bone}}><div className="wrap">
-            <div style={{textAlign:'center',marginBottom:32}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>Student Life Gallery</div>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Moments from <em style={{color:V.cr}}>Wednesdays at Smartious</em></h2>
-            </div>
-
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
-              {[
-                {label:'Swimming',     img:'https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=800&q=70', alt:'Smartious homeschool students swimming during weekly enrichment'},
-                {label:'Football',     img:'https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&w=800&q=70', alt:'Smartious students playing football during student life activities'},
-                {label:'Tennis',       img:'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?auto=format&fit=crop&w=800&q=70', alt:'Smartious online school students learning tennis at Parklands centre'},
-                {label:'Robotics Lab', img:'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=800&q=70', alt:'Smartious homeschool students building robots in STEM enrichment club'},
-                {label:'Debate',       img:'https://images.unsplash.com/photo-1591115765373-5207764f72e7?auto=format&fit=crop&w=800&q=70', alt:'Smartious students competing in debate club'},
-                {label:'Music',        img:'https://images.unsplash.com/photo-1466428996289-fb355538da1b?auto=format&fit=crop&w=800&q=70', alt:'Smartious students learning piano during music enrichment'},
-                {label:'Art Studio',   img:'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=70', alt:'Smartious homeschool art and design studio'},
-                {label:'Coding Club',  img:'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=70', alt:'Smartious students learning to code during enrichment'},
-              ].map(g => (
-                <div key={g.label} style={{
-                  position:'relative', borderRadius:12, overflow:'hidden',
-                  aspectRatio:'4/3', cursor:'pointer',
-                  transition:'transform .2s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.transform='scale(1.02)' }}
-                onMouseLeave={e => { e.currentTarget.style.transform='scale(1)' }}>
-                  <img src={g.img} alt={g.alt}
-                    loading="lazy"
-                    style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
-                  <div style={{
-                    position:'absolute', inset:0,
-                    background:'linear-gradient(to top, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0) 50%)',
-                    display:'flex', alignItems:'flex-end', padding:'14px 16px',
-                  }}>
-                    <div style={{fontSize:14, fontWeight:700, color:'#fff', textShadow:'0 1px 3px rgba(0,0,0,.5)'}}>{g.label}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div></section>
-
           {/* CALL TO ACTION */}
           <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`, color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
             <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
