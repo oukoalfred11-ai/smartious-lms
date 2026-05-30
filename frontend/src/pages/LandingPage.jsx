@@ -8018,17 +8018,38 @@ export default function LandingPage() {
                       background:'linear-gradient(to bottom, transparent 50%, '+a.c+'22 100%)',
                       pointerEvents:'none',
                     }}/>
+                    {/* Uniform price badge — top right of splash */}
+                    <div style={{
+                      position:'absolute', top:10, right:10,
+                      background: V.gold3,
+                      color: V.ink,
+                      padding:'5px 11px', borderRadius:6,
+                      fontSize:11, fontWeight:800, letterSpacing:'.04em',
+                      boxShadow:'0 4px 10px rgba(0,0,0,.18)',
+                      lineHeight:1.2,
+                    }}>KSh 25,000<span style={{fontSize:9,fontWeight:700,marginLeft:3,opacity:.75}}>/TERM</span></div>
                   </div>
                   {/* Card body */}
                   <div style={{padding:'14px 16px 18px'}}>
                     <div style={{fontSize:14.5, fontWeight:700, color:V.ink, marginBottom:4}}>{a.n}</div>
-                    <div style={{fontSize:12, color:V.sl, lineHeight:1.55, marginBottom:10}}>{a.d}</div>
+                    <div style={{fontSize:12, color:V.sl, lineHeight:1.55, marginBottom:12}}>{a.d}</div>
+                    {/* Learn more row */}
                     <div style={{
-                      display:'inline-flex',alignItems:'center',gap:6,
-                      fontSize:11,fontWeight:700,color:a.c,letterSpacing:'.02em',
+                      display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,
+                      paddingTop:10, borderTop:'1px dashed '+V.line,
                     }}>
-                      Learn more
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      <div style={{
+                        fontSize:11, fontWeight:600, color:V.sl3, letterSpacing:'.02em',
+                      }}>
+                        All activities included
+                      </div>
+                      <div style={{
+                        display:'inline-flex',alignItems:'center',gap:5,
+                        fontSize:11,fontWeight:700,color:a.c,letterSpacing:'.02em',
+                      }}>
+                        Learn more
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -8036,85 +8057,8 @@ export default function LandingPage() {
             </div>
           </div></section>
 
-          {/* SPORTS SHOWCASE */}
-          <section id="student-life" className="sec" style={{background:V.ink, color:'#fff'}}><div className="wrap">
-            <div style={{textAlign:'center',marginBottom:36}}>
-              <div className="eyebrow" style={{justifyContent:'center', color:V.gold2}}>Premium Sports</div>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:8}}>Sport at the <em style={{color:V.gold2}}>Heart of Student Life</em></h2>
-              <p style={{fontSize:14,color:'rgba(255,255,255,.7)',maxWidth:640,margin:'0 auto',lineHeight:1.7}}>Coached by qualified instructors at our Parklands centre and partner facilities. Every term ends with inter-house competitions, friendly matches and skills assessments.</p>
-            </div>
-
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:18,marginBottom:32}}>
-              {[
-                ['Swimming',       '4', 'lanes weekly'],
-                ['Football',       '2', 'leagues termly'],
-                ['Tennis',         '8', 'court hours weekly'],
-                ['Badminton',      '6', 'courts available'],
-                ['Athletics',      '12','events tracked'],
-                ['Squash',         '3', 'courts available'],
-                ['Volleyball',     '2', 'teams per grade'],
-                ['Table Tennis',   '10','tables available'],
-                ['Fitness',        '5', 'sessions weekly'],
-              ].map(([sport, stat, label]) => (
-                <div key={sport} style={{
-                  background:'rgba(255,255,255,.04)', borderRadius:12, padding:'20px 18px',
-                  border:'1px solid rgba(255,255,255,.08)',
-                  transition:'background .2s, border-color .2s, transform .2s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background='rgba(201,160,48,.08)'; e.currentTarget.style.borderColor='rgba(201,160,48,.3)'; e.currentTarget.style.transform='translateY(-3px)' }}
-                onMouseLeave={e => { e.currentTarget.style.background='rgba(255,255,255,.04)'; e.currentTarget.style.borderColor='rgba(255,255,255,.08)'; e.currentTarget.style.transform='translateY(0)' }}>
-                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:'2.4rem',fontWeight:700,color:V.gold2,lineHeight:1,marginBottom:4}}>{stat}</div>
-                  <div style={{fontSize:11,color:'rgba(255,255,255,.55)',textTransform:'uppercase',letterSpacing:'.08em',marginBottom:10}}>{label}</div>
-                  <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>{sport}</div>
-                </div>
-              ))}
-            </div>
-
-            <div style={{textAlign:'center',padding:'24px 16px',background:'rgba(201,160,48,.08)',border:'1px solid rgba(201,160,48,.2)',borderRadius:12}}>
-              <div style={{fontSize:13,color:V.gold2,fontWeight:700,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:6}}>Inter-house competitions every term</div>
-              <div style={{fontSize:14,color:'rgba(255,255,255,.75)',maxWidth:580,margin:'0 auto',lineHeight:1.7}}>Students compete across athletic, intellectual and creative disciplines. Awards, trophies and a healthy sense of belonging.</div>
-            </div>
-          </div></section>
-
-          {/* CLUBS & ENRICHMENT */}
-          <section className="sec" style={{background:V.bone}}><div className="wrap">
-            <div style={{textAlign:'center',marginBottom:36}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>Clubs &amp; Enrichment</div>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Build <em style={{color:V.cr}}>Skills That Matter</em></h2>
-              <p style={{fontSize:14,color:V.sl,maxWidth:640,margin:'0 auto',lineHeight:1.7}}>Clubs run weekly online and in person. Many produce real outputs — published articles, working code, environmental campaigns, business plans.</p>
-            </div>
-
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:14}}>
-              {[
-                {n:'Coding Club',        sub:'Beginner → Advanced', d:'Build websites, games, and apps in Python and JavaScript. Quarterly hackathons.'},
-                {n:'AI Club',            sub:'Future-ready skills', d:'Learn machine learning, prompt engineering, ethical AI. Build small AI projects.'},
-                {n:'Robotics',           sub:'Hands-on engineering', d:'Design, build and code real robots. Compete in regional competitions.'},
-                {n:'Entrepreneurship',   sub:'Real business plans', d:'Pitch real ideas. Term ends with a Shark-Tank-style pitch night.'},
-                {n:'Debate Club',        sub:'Critical thinking',   d:'Weekly debates on world affairs. Inter-school debate tournaments.'},
-                {n:'Model United Nations', sub:'Diplomacy & policy', d:'Represent countries, draft resolutions, negotiate solutions to global issues.'},
-                {n:'Journalism',         sub:'Smartious newsletter', d:'Write, edit, publish. Real articles published in the student magazine.'},
-                {n:'Environmental Club', sub:'Real impact',         d:'Tree-planting drives, climate campaigns, sustainability projects.'},
-                {n:'Public Speaking',    sub:'Confidence on stage', d:'Speech writing, presentation skills, weekly practice sessions.'},
-                {n:'Book Club',          sub:'Read, discuss, grow', d:'Monthly book picks across genres. Author Q&A sessions over Zoom.'},
-              ].map(c => (
-                <div key={c.n} style={{
-                  background:'#fff', borderRadius:12, padding:'22px 20px',
-                  border:'1px solid '+V.line,
-                  borderLeft:'4px solid '+V.cr,
-                  transition:'transform .2s, box-shadow .2s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.transform='translateY(-3px)'; e.currentTarget.style.boxShadow='0 10px 24px rgba(125,16,37,.12)' }}
-                onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none' }}>
-                  <div style={{fontSize:15,fontWeight:700,color:V.ink,marginBottom:3}}>{c.n}</div>
-                  <div style={{fontSize:11,color:V.cr,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:10}}>{c.sub}</div>
-                  <div style={{fontSize:12.5,color:V.sl,lineHeight:1.6}}>{c.d}</div>
-                </div>
-              ))}
-            </div>
-          </div></section>
-
           {/* PARENT TRUST SECTION */}
-          <section className="sec" style={{background:'#fff'}}><div className="wrap">
+          <section id="student-life" className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Parent Trust</div>
               <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Holistic Growth in a <em style={{color:V.cr}}>Safe, Supervised Environment</em></h2>
@@ -8315,6 +8259,33 @@ export default function LandingPage() {
 
                 {/* Modal body */}
                 <div style={{padding:'24px 28px 28px'}}>
+                  {/* Flat-fee banner — same fee covers every activity */}
+                  <div style={{
+                    display:'flex',alignItems:'center',justifyContent:'space-between',gap:14,
+                    padding:'16px 18px',marginBottom:20,
+                    background: V.gold3+'1F',
+                    border:'1px solid '+V.gold3,
+                    borderRadius:10,
+                    flexWrap:'wrap',
+                  }}>
+                    <div>
+                      <div style={{
+                        fontSize:10,fontWeight:800,letterSpacing:'.12em',textTransform:'uppercase',
+                        color: V.gold2, marginBottom:5,
+                      }}>One Fee · All Activities</div>
+                      <div style={{fontSize:13,color:V.sl,lineHeight:1.45,maxWidth:340}}>
+                        A single premium termly fee unlocks every Wednesday activity — students can take this and any other activity at no extra cost.
+                      </div>
+                    </div>
+                    <div style={{textAlign:'right'}}>
+                      <div style={{
+                        fontFamily:"'Playfair Display',serif",
+                        fontSize:'1.7rem',fontWeight:800,color:V.ink,lineHeight:1,
+                      }}>KSh 25,000</div>
+                      <div style={{fontSize:11,color:V.sl3,marginTop:4,letterSpacing:'.04em'}}>per student · per term</div>
+                    </div>
+                  </div>
+
                   <p style={{fontSize:14.5,color:V.ink2,lineHeight:1.7,marginBottom:20}}>
                     {openActivity.full}
                   </p>
