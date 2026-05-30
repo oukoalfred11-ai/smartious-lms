@@ -1512,6 +1512,23 @@ export default function LandingPage() {
   const [malaysiaTripSubmitted, setMalaysiaTripSubmitted] = useState(false)
   const [malaysiaTripSubmitting, setMalaysiaTripSubmitting] = useState(false)
 
+  // Malaysia Trip — Paystack instalment payment state (reuses existing PAYSTACK_PUBLIC_KEY + loadPaystack)
+  const [paystackInstalment, setPaystackInstalment] = useState('registration')
+  const [paystackEmail, setPaystackEmail] = useState('')
+  const [paystackStudentName, setPaystackStudentName] = useState('')
+  const [paystackProcessing, setPaystackProcessing] = useState(false)
+
+  // Pre-fill Paystack form from main application form if parent has filled it
+  useEffect(() => {
+    if (malaysiaTripForm.parentEmail && !paystackEmail) {
+      setPaystackEmail(malaysiaTripForm.parentEmail)
+    }
+    if (malaysiaTripForm.studentName && !paystackStudentName) {
+      setPaystackStudentName(malaysiaTripForm.studentName)
+    }
+  }, [malaysiaTripForm.parentEmail, malaysiaTripForm.studentName])
+
+
   // Enrollment wizard form data — collected across steps 1, 2, 4
   const [enrollForm, setEnrollForm] = useState({
     // Step 1 — Programme
@@ -7242,7 +7259,7 @@ export default function LandingPage() {
                     </div>
                   </div>
 
-                  {/* PAYSTACK ONLINE */}
+                  {/* PAYSTACK ONLINE — Paystack Inline with instalment dropdown */}
                   <div style={{
                     background:'#fff',
                     border:'1px solid '+V.line,
@@ -7265,28 +7282,151 @@ export default function LandingPage() {
                       }}>PAY</div>
                       <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink}}>Pay online</div>
                     </div>
-                    <div style={{fontSize:13,color:V.sl,lineHeight:1.6,marginBottom:14}}>
-                      Pay by card, bank transfer or Apple Pay through our secure Paystack gateway. Works internationally for diaspora and expat families.
+                    <div style={{fontSize:12,color:V.sl,lineHeight:1.55,marginBottom:14}}>
+                      Pay by card, bank transfer, Apple Pay or M-Pesa STK push via secure Paystack. Choose which instalment to pay below.
                     </div>
-                    <a
-                      href="https://paystack.com/pay/smartious-malaysia-trip"
-                      target="_blank"
-                      rel="noopener noreferrer"
+
+                    {/* Instalment dropdown */}
+                    <label style={{display:'block',fontSize:11,fontWeight:600,color:V.ink,marginBottom:5,letterSpacing:'.04em'}}>Pay which instalment?</label>
+                    <select
+                      value={paystackInstalment}
+                      onChange={e => setPaystackInstalment(e.target.value)}
                       style={{
+                        width:'100%',
+                        padding:'9px 12px',
+                        fontSize:13.5,
+                        border:'1px solid '+V.line,
+                        borderRadius:8,
+                        background:'#fff',
+                        color:V.ink,
+                        marginBottom:10,
+                        cursor:'pointer',
+                      }}>
+                      <option value="registration">Registration · KSh 3,000</option>
+                      <option value="first">1st instalment · KSh 90,000</option>
+                      <option value="second">2nd instalment · KSh 90,000</option>
+                      <option value="third">3rd instalment · KSh 97,000</option>
+                      <option value="full">Full balance · KSh 280,000</option>
+                    </select>
+
+                    {/* Student name */}
+                    <label style={{display:'block',fontSize:11,fontWeight:600,color:V.ink,marginBottom:5,letterSpacing:'.04em'}}>Student name</label>
+                    <input
+                      type="text"
+                      placeholder="For payment reference"
+                      value={paystackStudentName}
+                      onChange={e => setPaystackStudentName(e.target.value)}
+                      style={{
+                        width:'100%',
+                        padding:'9px 12px',
+                        fontSize:13.5,
+                        border:'1px solid '+V.line,
+                        borderRadius:8,
+                        marginBottom:10,
+                      }}
+                    />
+
+                    {/* Email */}
+                    <label style={{display:'block',fontSize:11,fontWeight:600,color:V.ink,marginBottom:5,letterSpacing:'.04em'}}>Parent email</label>
+                    <input
+                      type="email"
+                      placeholder="For receipt"
+                      value={paystackEmail}
+                      onChange={e => setPaystackEmail(e.target.value)}
+                      style={{
+                        width:'100%',
+                        padding:'9px 12px',
+                        fontSize:13.5,
+                        border:'1px solid '+V.line,
+                        borderRadius:8,
+                        marginBottom:14,
+                      }}
+                    />
+
+                    <button
+                      onClick={async () => {
+                        // Validate
+                        if (!paystackEmail || !paystackEmail.includes('@')) {
+                          setToast('Please enter a valid email for your receipt.')
+                          setTimeout(() => setToast(null), 3200)
+                          return
+                        }
+                        if (!paystackStudentName.trim()) {
+                          setToast('Please enter the student\'s name for the payment reference.')
+                          setTimeout(() => setToast(null), 3200)
+                          return
+                        }
+                        if (paystackProcessing) return
+
+                        // Resolve amount + label from selection
+                        const instalmentMap = {
+                          'registration': {amount:    3000, label: 'Registration'},
+                          'first':        {amount:   90000, label: '1st Instalment'},
+                          'second':       {amount:   90000, label: '2nd Instalment'},
+                          'third':        {amount:   97000, label: '3rd Instalment'},
+                          'full':         {amount:  280000, label: 'Full Balance'},
+                        }
+                        const sel = instalmentMap[paystackInstalment] || instalmentMap.registration
+
+                        // Build reference: malaysia-{instalment}-{slugged-student}-{timestamp}
+                        const slug = paystackStudentName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30)
+                        const ref = `malaysia-${paystackInstalment}-${slug}-${Date.now()}`
+
+                        setPaystackProcessing(true)
+                        try {
+                          const PaystackPop = await loadPaystack()
+                          const handler = PaystackPop.setup({
+                            key: PAYSTACK_PUBLIC_KEY,
+                            email: paystackEmail.trim(),
+                            amount: sel.amount * 100, // Paystack expects amount in kobo/cents
+                            currency: 'KES',
+                            ref: ref,
+                            metadata: {
+                              custom_fields: [
+                                { display_name: 'Trip',         variable_name: 'trip',          value: 'Malaysia 2026' },
+                                { display_name: 'Instalment',   variable_name: 'instalment',    value: sel.label },
+                                { display_name: 'Student Name', variable_name: 'student_name',  value: paystackStudentName.trim() },
+                              ],
+                            },
+                            callback: function(response) {
+                              setPaystackProcessing(false)
+                              setToast(`Payment received. Reference: ${response.reference}`)
+                              setTimeout(() => setToast(null), 5000)
+                            },
+                            onClose: function() {
+                              setPaystackProcessing(false)
+                            },
+                          })
+                          handler.openIframe()
+                        } catch (err) {
+                          setPaystackProcessing(false)
+                          setToast('Payment could not be started. Try again or use M-Pesa.')
+                          setTimeout(() => setToast(null), 4000)
+                        }
+                      }}
+                      disabled={paystackProcessing}
+                      style={{
+                        width:'100%',
                         display:'inline-flex',
                         alignItems:'center',
+                        justifyContent:'center',
                         gap:8,
-                        padding:'10px 18px',
+                        padding:'11px 18px',
                         borderRadius:8,
-                        background:V.cr,
+                        background: paystackProcessing ? V.sl3 : V.cr,
                         color:'#fff',
-                        textDecoration:'none',
-                        fontSize:13,
-                        fontWeight:700,
+                        border:'none',
+                        fontSize:13.5,
+                        fontWeight:800,
+                        letterSpacing:'.02em',
+                        cursor: paystackProcessing ? 'wait' : 'pointer',
+                        transition:'background .2s',
                       }}>
-                      Pay with Paystack
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </a>
+                      {paystackProcessing ? 'Opening Paystack…' : 'Pay with Paystack'}
+                      {!paystackProcessing && (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      )}
+                    </button>
                   </div>
                 </div>
                 <p style={{fontSize:12,color:V.sl3,lineHeight:1.6,marginTop:14,textAlign:'center'}}>
