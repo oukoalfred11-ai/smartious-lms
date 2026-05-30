@@ -1510,6 +1510,7 @@ export default function LandingPage() {
     notes: '',
   })
   const [malaysiaTripSubmitted, setMalaysiaTripSubmitted] = useState(false)
+  const [malaysiaTripSubmitting, setMalaysiaTripSubmitting] = useState(false)
 
   // Enrollment wizard form data — collected across steps 1, 2, 4
   const [enrollForm, setEnrollForm] = useState({
@@ -6708,384 +6709,47 @@ export default function LandingPage() {
           {/* ====================================================== */}
           {/* MALAYSIA ACADEMIC TRIP 2026 — FEATURED TRIP             */}
           {/* ====================================================== */}
-          <section className="sec" style={{
-            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-            color:'#fff',
-            padding:'0',
-            position:'relative',
-            overflow:'hidden',
-          }}>
-            <div className="wrap" style={{position:'relative',zIndex:2,paddingTop:64,paddingBottom:64}}>
-              {/* HEADER ROW WITH IMAGE */}
-              <div style={{
-                display:'grid',
-                gridTemplateColumns:'1.1fr 1fr',
-                gap:48,
-                alignItems:'center',
-              }} className="malaysia-hero-grid">
-                {/* LEFT — copy */}
-                <div>
-                  <div className="eyebrow" style={{color:V.gold3,marginBottom:14}}>
-                    Featured Trip · 27–30 July 2026
-                  </div>
-                  <h2 style={{
-                    fontFamily:"'Playfair Display',serif",
-                    fontSize:'clamp(2.4rem,5vw,3.6rem)',
-                    fontWeight:700,
-                    color:'#fff',
-                    lineHeight:1.05,
-                    marginBottom:16,
-                    letterSpacing:'-.01em',
-                  }}>
-                    Academic Trip to <em style={{color:V.gold3,fontStyle:'italic'}}>Malaysia</em>
-                  </h2>
-                  <p style={{
-                    fontSize:17,
-                    color:'rgba(255,255,255,.85)',
-                    lineHeight:1.6,
-                    marginBottom:24,
-                    maxWidth:540,
-                  }}>
-                    Four unforgettable days of <strong style={{color:V.gold3}}>Learn · Explore · Experience</strong> across Kuala Lumpur — designed to inspire young minds, broaden horizons and build global citizens.
-                  </p>
-                  
-                  {/* TRIP META */}
-                  <div style={{
-                    display:'grid',
-                    gridTemplateColumns:'1fr 1fr',
-                    gap:14,
-                    marginBottom:28,
-                    maxWidth:480,
-                  }}>
-                    <div style={{
-                      background:'rgba(255,255,255,.08)',
-                      border:'1px solid rgba(240,204,90,.25)',
-                      borderRadius:10,
-                      padding:'12px 14px',
-                    }}>
-                      <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Dates</div>
-                      <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>27–30 July 2026</div>
-                    </div>
-                    <div style={{
-                      background:'rgba(255,255,255,.08)',
-                      border:'1px solid rgba(240,204,90,.25)',
-                      borderRadius:10,
-                      padding:'12px 14px',
-                    }}>
-                      <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Ages</div>
-                      <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>10 – 18 Years</div>
-                    </div>
-                    <div style={{
-                      background:'rgba(255,255,255,.08)',
-                      border:'1px solid rgba(240,204,90,.25)',
-                      borderRadius:10,
-                      padding:'12px 14px',
-                    }}>
-                      <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Duration</div>
-                      <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>4 Days · 3 Nights</div>
-                    </div>
-                    <div style={{
-                      background:'rgba(255,255,255,.08)',
-                      border:'1px solid rgba(240,204,90,.25)',
-                      borderRadius:10,
-                      padding:'12px 14px',
-                    }}>
-                      <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Ratio</div>
-                      <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>1 : 10 Teacher</div>
-                    </div>
-                  </div>
-
-                  {/* PRICE CARD */}
-                  <div style={{
-                    background:'rgba(255,255,255,.08)',
-                    border:'1.5px solid '+V.gold3,
-                    borderRadius:14,
-                    padding:'20px 24px',
-                    display:'inline-block',
-                    marginBottom:28,
-                  }}>
-                    <div style={{fontSize:11,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>Per Student</div>
-                    <div style={{display:'flex',alignItems:'baseline',gap:14,flexWrap:'wrap'}}>
-                      <div style={{
-                        fontFamily:"'Playfair Display',serif",
-                        fontSize:'2.4rem',
-                        fontWeight:800,
-                        color:'#fff',
-                        lineHeight:1,
-                      }}>KSh 280,000</div>
-                      <div style={{
-                        fontSize:16,
-                        color:'rgba(255,255,255,.7)',
-                        fontWeight:600,
-                      }}>≈ USD 1,950</div>
-                    </div>
-                    <div style={{fontSize:12,color:'rgba(255,255,255,.6)',marginTop:6}}>Twin-share accommodation · Payment plan available</div>
-                  </div>
-
-                  {/* CTAs */}
-                  <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                    <button
-                      onClick={() => {
-                        const el = document.getElementById('malaysia-application')
-                        if (el) el.scrollIntoView({behavior:'smooth',block:'start'})
-                      }}
-                      style={{
-                        padding:'14px 28px',
-                        borderRadius:10,
-                        background:V.gold3,
-                        color:V.ink,
-                        border:'none',
-                        fontSize:14,
-                        fontWeight:800,
-                        letterSpacing:'.02em',
-                        cursor:'pointer',
-                        display:'inline-flex',
-                        alignItems:'center',
-                        gap:8,
-                      }}>
-                      Apply for Malaysia Trip
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <button
-                      onClick={() => {
-                        const el = document.getElementById('malaysia-itinerary')
-                        if (el) el.scrollIntoView({behavior:'smooth',block:'start'})
-                      }}
-                      style={{
-                        padding:'14px 28px',
-                        borderRadius:10,
-                        background:'transparent',
-                        color:'#fff',
-                        border:'1.5px solid rgba(255,255,255,.4)',
-                        fontSize:14,
-                        fontWeight:700,
-                        cursor:'pointer',
-                      }}>
-                      View Full Itinerary
-                    </button>
-                  </div>
-                </div>
-
-                {/* RIGHT — illustrated collage with city silhouette + iconic landmarks */}
-                <div style={{position:'relative',minHeight:480}} className="malaysia-collage">
-                  {/* Large card — Petronas Twin Towers illustrated */}
-                  <div style={{
-                    position:'absolute',
-                    top:0,
-                    right:0,
-                    width:'82%',
-                    height:'72%',
-                    borderRadius:16,
-                    overflow:'hidden',
-                    border:'3px solid '+V.gold3,
-                    boxShadow:'0 30px 60px rgba(0,0,0,.4)',
-                    background:`linear-gradient(165deg, #1a1a2e 0%, #16213e 45%, ${V.cr} 100%)`,
-                  }}>
-                    <svg viewBox="0 0 600 432" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%',display:'block'}} preserveAspectRatio="xMidYMid slice" role="img" aria-label="Petronas Twin Towers, Kuala Lumpur — Smartious Malaysia academic trip">
-                      {/* Sky gradient stars */}
-                      <defs>
-                        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#0f1729"/>
-                          <stop offset="55%" stopColor="#1a2849"/>
-                          <stop offset="100%" stopColor="#8B1A2E" stopOpacity="0.85"/>
-                        </linearGradient>
-                        <linearGradient id="towerGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#F0CC5A" stopOpacity="0.95"/>
-                          <stop offset="100%" stopColor="#B8960C" stopOpacity="0.85"/>
-                        </linearGradient>
-                      </defs>
-                      <rect width="600" height="432" fill="url(#skyGrad)"/>
-                      
-                      {/* Stars */}
-                      {[
-                        [40,30],[110,55],[180,28],[260,48],[340,35],[420,60],[500,32],[560,52],
-                        [70,90],[150,82],[230,105],[310,88],[390,95],[470,82],[550,98],
-                        [50,150],[220,140],[400,155],[530,138],
-                      ].map(([x,y],i) => (
-                        <circle key={i} cx={x} cy={y} r={i%3===0?1.5:1} fill="#fff" opacity={0.4+(i%5)*0.12}/>
-                      ))}
-                      
-                      {/* Moon */}
-                      <circle cx="490" cy="80" r="22" fill="#F0CC5A" opacity="0.75"/>
-                      <circle cx="498" cy="76" r="18" fill="url(#skyGrad)" opacity="0.6"/>
-                      
-                      {/* Distant city silhouette */}
-                      <g opacity="0.35">
-                        <rect x="0" y="290" width="40" height="70" fill="#000"/>
-                        <rect x="40" y="270" width="35" height="90" fill="#000"/>
-                        <rect x="75" y="300" width="25" height="60" fill="#000"/>
-                        <rect x="100" y="280" width="30" height="80" fill="#000"/>
-                        <rect x="450" y="285" width="30" height="75" fill="#000"/>
-                        <rect x="480" y="265" width="40" height="95" fill="#000"/>
-                        <rect x="520" y="295" width="28" height="65" fill="#000"/>
-                        <rect x="548" y="275" width="35" height="85" fill="#000"/>
-                        <rect x="583" y="290" width="17" height="70" fill="#000"/>
-                      </g>
-                      
-                      {/* Twin Towers — main feature */}
-                      {/* Left tower */}
-                      <g>
-                        {/* Spire */}
-                        <polygon points="218,40 222,40 220,12" fill="#F0CC5A"/>
-                        <rect x="219" y="40" width="2" height="12" fill="#F0CC5A"/>
-                        {/* Top crown */}
-                        <ellipse cx="220" cy="58" rx="20" ry="6" fill="url(#towerGrad)"/>
-                        <ellipse cx="220" cy="62" rx="22" ry="5" fill="#B8960C" opacity="0.9"/>
-                        {/* Upper segment */}
-                        <rect x="200" y="65" width="40" height="40" fill="url(#towerGrad)" opacity="0.92"/>
-                        <ellipse cx="220" cy="105" rx="22" ry="4" fill="#8B6A0A"/>
-                        {/* Mid segment narrowing */}
-                        <polygon points="200,105 240,105 235,135 205,135" fill="url(#towerGrad)" opacity="0.9"/>
-                        <ellipse cx="220" cy="135" rx="17" ry="3" fill="#8B6A0A"/>
-                        {/* Mid wide */}
-                        <rect x="194" y="135" width="52" height="55" fill="url(#towerGrad)" opacity="0.88"/>
-                        <ellipse cx="220" cy="190" rx="26" ry="4" fill="#8B6A0A"/>
-                        {/* Lower wide */}
-                        <rect x="188" y="190" width="64" height="100" fill="url(#towerGrad)" opacity="0.85"/>
-                        <ellipse cx="220" cy="290" rx="32" ry="5" fill="#8B6A0A"/>
-                        {/* Base */}
-                        <rect x="182" y="290" width="76" height="80" fill="url(#towerGrad)" opacity="0.8"/>
-                        {/* Window grid suggestion */}
-                        {[80,95,150,170,210,230,250,270,310,330,350].map((y,i) => (
-                          <line key={i} x1={194+(i%3)*2} y1={y} x2={246-(i%3)*2} y2={y} stroke="#0f1729" strokeWidth="0.6" opacity="0.4"/>
-                        ))}
-                      </g>
-                      
-                      {/* Sky bridge between towers */}
-                      <rect x="245" y="138" width="50" height="14" fill="url(#towerGrad)" opacity="0.7"/>
-                      <line x1="248" y1="141" x2="292" y2="141" stroke="#0f1729" strokeWidth="0.6" opacity="0.5"/>
-                      <line x1="248" y1="148" x2="292" y2="148" stroke="#0f1729" strokeWidth="0.6" opacity="0.5"/>
-                      
-                      {/* Right tower (same as left, mirrored at x=300) */}
-                      <g>
-                        <polygon points="298,40 302,40 300,12" fill="#F0CC5A"/>
-                        <rect x="299" y="40" width="2" height="12" fill="#F0CC5A"/>
-                        <ellipse cx="300" cy="58" rx="20" ry="6" fill="url(#towerGrad)"/>
-                        <ellipse cx="300" cy="62" rx="22" ry="5" fill="#B8960C" opacity="0.9"/>
-                        <rect x="280" y="65" width="40" height="40" fill="url(#towerGrad)" opacity="0.92"/>
-                        <ellipse cx="300" cy="105" rx="22" ry="4" fill="#8B6A0A"/>
-                        <polygon points="280,105 320,105 315,135 285,135" fill="url(#towerGrad)" opacity="0.9"/>
-                        <ellipse cx="300" cy="135" rx="17" ry="3" fill="#8B6A0A"/>
-                        <rect x="274" y="135" width="52" height="55" fill="url(#towerGrad)" opacity="0.88"/>
-                        <ellipse cx="300" cy="190" rx="26" ry="4" fill="#8B6A0A"/>
-                        <rect x="268" y="190" width="64" height="100" fill="url(#towerGrad)" opacity="0.85"/>
-                        <ellipse cx="300" cy="290" rx="32" ry="5" fill="#8B6A0A"/>
-                        <rect x="262" y="290" width="76" height="80" fill="url(#towerGrad)" opacity="0.8"/>
-                        {[80,95,150,170,210,230,250,270,310,330,350].map((y,i) => (
-                          <line key={i} x1={274+(i%3)*2} y1={y} x2={326-(i%3)*2} y2={y} stroke="#0f1729" strokeWidth="0.6" opacity="0.4"/>
-                        ))}
-                      </g>
-                      
-                      {/* Reflection in foreground */}
-                      <rect x="0" y="370" width="600" height="62" fill="#000" opacity="0.4"/>
-                      <g opacity="0.18" transform="translate(0, 740) scale(1, -1)">
-                        <rect x="188" y="190" width="64" height="100" fill="#F0CC5A"/>
-                        <rect x="268" y="190" width="64" height="100" fill="#F0CC5A"/>
-                      </g>
-                      
-                      {/* Caption */}
-                      <text x="300" y="412" textAnchor="middle" fill="#F0CC5A" fontSize="13" fontFamily="serif" fontStyle="italic" opacity="0.85">Petronas Twin Towers · Kuala Lumpur</text>
-                    </svg>
-                  </div>
-                  
-                  {/* Small overlapping card — Batu Caves illustrated */}
-                  <div style={{
-                    position:'absolute',
-                    bottom:0,
-                    left:0,
-                    width:'58%',
-                    height:'46%',
-                    borderRadius:14,
-                    overflow:'hidden',
-                    border:'3px solid '+V.gold3,
-                    boxShadow:'0 20px 40px rgba(0,0,0,.5)',
-                    background:`linear-gradient(180deg, #FFE4B5 0%, #FF6B9D 30%, #C44569 60%, #6C2A6A 100%)`,
-                  }}>
-                    <svg viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%',display:'block'}} preserveAspectRatio="xMidYMid slice" role="img" aria-label="Batu Caves rainbow steps — cultural visit on the Smartious Malaysia trip">
-                      <defs>
-                        <linearGradient id="caveGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#FFD89B"/>
-                          <stop offset="100%" stopColor="#C9A227"/>
-                        </linearGradient>
-                      </defs>
-                      
-                      {/* Sky/limestone cliff backdrop */}
-                      <rect width="400" height="250" fill="#FFE4B5"/>
-                      
-                      {/* Limestone cliff silhouette */}
-                      <path d="M 0,80 Q 50,40 100,55 Q 160,30 220,50 Q 280,35 340,60 Q 380,45 400,55 L 400,180 L 0,180 Z" fill="#8B6F47" opacity="0.7"/>
-                      <path d="M 0,100 Q 70,75 140,85 Q 210,70 280,90 Q 340,80 400,95 L 400,180 L 0,180 Z" fill="#6B5435" opacity="0.6"/>
-                      
-                      {/* Cave entrance — dark arch */}
-                      <ellipse cx="200" cy="100" rx="42" ry="30" fill="#1a0e0a" opacity="0.85"/>
-                      
-                      {/* Golden Murugan statue suggestion */}
-                      <ellipse cx="80" cy="135" rx="14" ry="42" fill="url(#caveGrad)"/>
-                      <circle cx="80" cy="95" r="11" fill="url(#caveGrad)"/>
-                      
-                      {/* RAINBOW STAIRCASE — the iconic element */}
-                      {[
-                        ['#FF4757', 0],
-                        ['#FF6348', 1],
-                        ['#FFA502', 2],
-                        ['#FFDD59', 3],
-                        ['#2ED573', 4],
-                        ['#1E90FF', 5],
-                        ['#5352ED', 6],
-                        ['#A55EEA', 7],
-                        ['#FF4757', 8],
-                        ['#FF6348', 9],
-                        ['#FFA502', 10],
-                        ['#FFDD59', 11],
-                        ['#2ED573', 12],
-                        ['#1E90FF', 13],
-                        ['#5352ED', 14],
-                        ['#A55EEA', 15],
-                      ].map(([color, i]) => {
-                        const y = 132 + i * 7
-                        const widthFromTop = 50 + i * 12
-                        return (
-                          <rect
-                            key={i}
-                            x={200 - widthFromTop/2}
-                            y={y}
-                            width={widthFromTop}
-                            height="6"
-                            fill={color}
-                            opacity="0.95"
-                          />
-                        )
-                      })}
-                      
-                      {/* Step shadows */}
-                      {[...Array(16)].map((_,i) => (
-                        <rect
-                          key={i}
-                          x={200 - (50 + i * 12)/2}
-                          y={138 + i * 7}
-                          width={50 + i * 12}
-                          height="1"
-                          fill="#000"
-                          opacity="0.18"
-                        />
-                      ))}
-                      
-                      {/* Caption */}
-                      <text x="200" y="240" textAnchor="middle" fill="#fff" fontSize="11" fontFamily="serif" fontStyle="italic" opacity="0.95" style={{textShadow:'0 1px 3px rgba(0,0,0,.5)'}}>Batu Caves · Rainbow Steps</text>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <style>{`
-              @media (max-width: 900px) {
-                .malaysia-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
-                .malaysia-collage { min-height: 320px !important; }
-              }
-            `}</style>
+          <section
+            aria-label="Smartious Academic Trip to Malaysia 2026"
+            style={{
+              position:'relative',
+              width:'100%',
+              background:V.ink,
+              overflow:'hidden',
+              lineHeight:0,
+            }}>
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster="https://res.cloudinary.com/dae99gz1m/video/upload/so_0/0528_1_fb8yz8.jpg"
+              aria-label="Smartious Malaysia academic trip — promotional video"
+              style={{
+                width:'100%',
+                height:'auto',
+                display:'block',
+                aspectRatio:'16 / 9',
+                objectFit:'cover',
+                background:V.ink,
+              }}>
+              <source src="https://res.cloudinary.com/dae99gz1m/video/upload/0528_1_fb8yz8.mp4" type="video/mp4" />
+              {/* Fallback for browsers without video support */}
+              Your browser does not support embedded video.
+              View the Smartious Malaysia Trip 2026 details below.
+            </video>
+            {/* Soft bottom fade so the video transitions cleanly into the itinerary section */}
+            <div style={{
+              position:'absolute',
+              left:0,
+              right:0,
+              bottom:0,
+              height:80,
+              pointerEvents:'none',
+              background:'linear-gradient(to bottom, rgba(10,8,6,0) 0%, #fff 100%)',
+            }}/>
           </section>
-
           {/* 4-DAY ITINERARY */}
           <section id="malaysia-itinerary" className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:44,maxWidth:760,margin:'0 auto 44px'}}>
@@ -7751,7 +7415,7 @@ export default function LandingPage() {
                   </div>
 
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       // Basic validation
                       if (!malaysiaTripForm.studentName || !malaysiaTripForm.studentAge ||
                           !malaysiaTripForm.parentName || !malaysiaTripForm.parentEmail ||
@@ -7760,44 +7424,98 @@ export default function LandingPage() {
                         setTimeout(() => setToast(null), 3200)
                         return
                       }
-                      // Build WhatsApp message and open
-                      const msg = `Malaysia Trip 2026 — application from ${malaysiaTripForm.parentName}.
+                      if (malaysiaTripSubmitting) return
+                      setMalaysiaTripSubmitting(true)
 
-Student: ${malaysiaTripForm.studentName}, age ${malaysiaTripForm.studentAge}
-Parent: ${malaysiaTripForm.parentName}
-Email: ${malaysiaTripForm.parentEmail}
-WhatsApp: ${malaysiaTripForm.parentPhone}
-City: ${malaysiaTripForm.city || '—'}
-Notes: ${malaysiaTripForm.notes || '—'}`
-                      const url = 'https://wa.me/254745021212?text=' + encodeURIComponent(msg)
-                      window.open(url, '_blank', 'noopener,noreferrer')
-                      setMalaysiaTripSubmitted(true)
-                      setToast('Application sent. We will contact you within one working day.')
-                      setTimeout(() => setToast(null), 3200)
+                      // POST to FormSubmit — delivers email to hellosmartious@gmail.com
+                      // First-ever submission triggers a one-time confirmation email
+                      // from FormSubmit to hellosmartious@gmail.com. Click the link
+                      // in that email once to activate. Every submission after that
+                      // arrives directly in your inbox.
+                      try {
+                        const payload = new FormData()
+                        payload.append('_subject', `Malaysia Trip 2026 — Application from ${malaysiaTripForm.parentName}`)
+                        payload.append('_template', 'table')
+                        payload.append('_captcha', 'false')
+                        payload.append('_replyto', malaysiaTripForm.parentEmail)
+                        payload.append('Student Name', malaysiaTripForm.studentName)
+                        payload.append('Student Age', malaysiaTripForm.studentAge)
+                        payload.append('Parent / Guardian Name', malaysiaTripForm.parentName)
+                        payload.append('Parent Email', malaysiaTripForm.parentEmail)
+                        payload.append('Parent WhatsApp', malaysiaTripForm.parentPhone)
+                        payload.append('City / Country', malaysiaTripForm.city || '—')
+                        payload.append('Notes', malaysiaTripForm.notes || '—')
+                        payload.append('Submitted from', 'smartioushomeschool.com/activities')
+
+                        const resp = await fetch('https://formsubmit.co/ajax/hellosmartious@gmail.com', {
+                          method: 'POST',
+                          headers: { 'Accept': 'application/json' },
+                          body: payload,
+                        })
+
+                        if (resp.ok) {
+                          setMalaysiaTripSubmitted(true)
+                          setToast('Application sent. We will contact you within one working day.')
+                          setTimeout(() => setToast(null), 3500)
+                        } else {
+                          throw new Error('Form submission failed')
+                        }
+                      } catch (err) {
+                        setToast('Submission failed. Please WhatsApp us at +254 745 021 212 instead.')
+                        setTimeout(() => setToast(null), 4500)
+                      } finally {
+                        setMalaysiaTripSubmitting(false)
+                      }
                     }}
+                    disabled={malaysiaTripSubmitting}
                     style={{
                       marginTop:24,
                       width:'100%',
                       padding:'15px 28px',
                       borderRadius:10,
-                      background:V.cr,
+                      background: malaysiaTripSubmitting ? V.sl3 : V.cr,
                       color:'#fff',
                       border:'none',
                       fontSize:15,
                       fontWeight:800,
                       letterSpacing:'.02em',
-                      cursor:'pointer',
+                      cursor: malaysiaTripSubmitting ? 'wait' : 'pointer',
                       display:'inline-flex',
                       alignItems:'center',
                       justifyContent:'center',
                       gap:10,
+                      transition:'background .2s',
                     }}>
-                    Submit Application
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    {malaysiaTripSubmitting ? 'Sending application…' : 'Submit Application'}
+                    {!malaysiaTripSubmitting && (
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    )}
                   </button>
                   <p style={{textAlign:'center',marginTop:14,fontSize:12,color:V.sl3,lineHeight:1.6}}>
-                    By submitting you consent to Smartious contacting you about this trip. We never share your details. KSh 3,000 registration is paid only after we confirm availability.
+                    By submitting you consent to Smartious contacting you about this trip on the details you provide. Your application is emailed directly to <strong style={{color:V.cr}}>hellosmartious@gmail.com</strong>. We never share your details. KSh 3,000 registration is paid only after we confirm availability.
                   </p>
+                  <div style={{textAlign:'center',marginTop:18,paddingTop:18,borderTop:'1px solid '+V.line}}>
+                    <p style={{fontSize:12,color:V.sl3,marginBottom:10}}>Prefer to message us directly?</p>
+                    <a
+                      href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enquire about the Malaysia Trip 2026.')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display:'inline-flex',
+                        alignItems:'center',
+                        gap:8,
+                        padding:'10px 18px',
+                        borderRadius:8,
+                        background:'#25D366',
+                        color:'#fff',
+                        textDecoration:'none',
+                        fontSize:13,
+                        fontWeight:700,
+                      }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
+                      WhatsApp: +254 745 021 212
+                    </a>
+                  </div>
                 </>
               ) : (
                 <div style={{textAlign:'center',padding:'20px 0'}}>
