@@ -6810,6 +6810,8 @@ export default function LandingPage() {
                   title:'Theme Park Adventure',
                   theme:'theme-park',
                   gradient:'linear-gradient(135deg, #F97316 0%, #DC2626 100%)',
+                  videoMp4:'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_700/0530_qboxw3.mp4',
+                  videoPoster:'https://res.cloudinary.com/dae99gz1m/video/upload/so_0/0530_qboxw3.jpg',
                   items:[
                     'Full day at Sunway Lagoon or Genting SkyWorlds',
                     'Rides, attractions & water park',
