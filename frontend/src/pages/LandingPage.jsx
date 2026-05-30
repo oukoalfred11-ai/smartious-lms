@@ -1518,6 +1518,22 @@ export default function LandingPage() {
   const [paystackStudentName, setPaystackStudentName] = useState('')
   const [paystackProcessing, setPaystackProcessing] = useState(false)
 
+  // Wednesday activity modal — null when closed, else holds the selected activity object
+  const [openActivity, setOpenActivity] = useState(null)
+
+  // Lock body scroll while modal is open + close on Escape key
+  useEffect(() => {
+    if (!openActivity) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const handleEsc = (e) => { if (e.key === 'Escape') setOpenActivity(null) }
+    window.addEventListener('keydown', handleEsc)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', handleEsc)
+    }
+  }, [openActivity])
+
   // Pre-fill Paystack form from main application form if parent has filled it
   useEffect(() => {
     if (malaysiaTripForm.parentEmail && !paystackEmail) {
@@ -7827,47 +7843,194 @@ export default function LandingPage() {
               <p style={{fontSize:14,color:V.sl,maxWidth:640,margin:'0 auto',lineHeight:1.7}}>A protected two-hour window every week reserved for activities. No homework, no exams — just discovery, skill-building and friendship.</p>
             </div>
 
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:14}}>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:18}}>
               {[
-                {n:'Swimming',         c:'#0EA5E9', d:'Stroke technique, water safety, fitness.'},
-                {n:'Basketball',       c:'#F97316', d:'Team play, ball handling, fundamentals.'},
-                {n:'Football',         c:'#15803D', d:'Skills, tactics, matches, league play.'},
-                {n:'Badminton',        c:'#A21CAF', d:'Footwork, technique, doubles play.'},
-                {n:'Tennis',           c:'#CA8A04', d:'Strokes, rallies, match practice.'},
-                {n:'Table Tennis',     c:'#1E40AF', d:'Spin, speed, tournament play.'},
-                {n:'Pickleball',       c:'#0F766E', d:'Fast-growing racquet sport, beginner-friendly.'},
-                {n:'Archery',          c:'#7E22CE', d:'Focus, form, target shooting.'},
-                {n:'Volleyball',       c:'#BE123C', d:'Team play, serves, blocks, rallies.'},
-                {n:'Chess Club',       c:'#1F2937', d:'Strategy, tactics, tournaments.'},
-                {n:'Coding Club',      c:'#0369A1', d:'Python, web, games, real projects.'},
-                {n:'Robotics',         c:'#92400E', d:'Build, code, control real robots.'},
-                {n:'Debate Club',      c:'#7D1025', d:'Argument, research, public speaking.'},
-                {n:'Public Speaking',  c:'#9F1239', d:'Confidence, presentation, voice.'},
-                {n:'STEM Lab',         c:'#166534', d:'Hands-on science experiments.'},
-                {n:'Music & Piano',    c:'#7C2D12', d:'Theory, performance, ensembles.'},
-                {n:'Art & Design',     c:'#A21CAF', d:'Drawing, painting, digital design.'},
-                {n:'Dance',            c:'#DB2777', d:'Choreography, expression, fitness.'},
-                {n:'Yoga & Wellness',  c:'#0F766E', d:'Mindfulness, flexibility, balance.'},
-                {n:'Fitness Training', c:'#DC2626', d:'Strength, cardio, conditioning.'},
-                {n:'Leadership & Entrepreneurship', c:'#1E3A8A', d:'Real projects, pitches, business plans.'},
+                {
+                  n:'Swimming', c:'#0EA5E9', d:'Stroke technique, water safety, fitness.',
+                  img:'https://images.unsplash.com/photo-1530549387789-4c1017266635?w=600&q=80&auto=format&fit=crop',
+                  full:'Smartious swimming is structured around stroke development, water safety and overall fitness. Beginners learn breathing, float and basic strokes; intermediates refine freestyle, backstroke, breaststroke and butterfly; advanced swimmers prepare for inter-house gala competitions. Sessions are held at our Parklands partner facility under qualified swim coaches with lifeguard certification. We follow a 12-week progression model with technique assessments each term.',
+                  coach:'Qualified swim coaches with lifeguard certification',
+                  for:'All ages, all levels — beginner to competition',
+                },
+                {
+                  n:'Basketball', c:'#F97316', d:'Team play, ball handling, fundamentals.',
+                  img:'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&q=80&auto=format&fit=crop',
+                  full:'Basketball at Smartious focuses on fundamentals: dribbling, passing, shooting form, defensive positioning and team play. Younger students develop coordination and confidence; older students work toward inter-house tournament play with refereed matches. Drills are mixed with scrimmages so students see immediate application of skills learned. Termly skills assessments measure progress on shooting accuracy, ball-handling speed and defensive mobility.',
+                  coach:'Trained basketball instructors with playing-level experience',
+                  for:'Ages 8+, all skill levels welcome',
+                },
+                {
+                  n:'Football', c:'#15803D', d:'Skills, tactics, matches, league play.',
+                  img:'https://images.unsplash.com/photo-1517747614396-d21a78b850e8?w=600&q=80&auto=format&fit=crop',
+                  full:'Football (soccer) is one of our most popular activities. Sessions balance skill development — first touch, passing, dribbling, shooting — with tactical understanding of positions and team systems. Students compete in two termly leagues with refereed matches, weekly training sessions, and end-of-term tournaments. Coaches use FIFA/CAF coaching frameworks adapted for ages 8-18.',
+                  coach:'Licensed football coaches with CAF or FA qualifications',
+                  for:'Ages 8+, separate sessions for primary and secondary',
+                },
+                {
+                  n:'Badminton', c:'#A21CAF', d:'Footwork, technique, doubles play.',
+                  img:'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=600&q=80&auto=format&fit=crop',
+                  full:'Badminton sessions emphasise footwork, grip technique, smash and drop-shot precision, and doubles strategy. Students play singles, doubles and mixed-doubles formats with proper umpired matches at end-of-term. The fast-paced nature builds reaction time and cardiovascular fitness while remaining accessible to beginners.',
+                  coach:'Qualified badminton instructors',
+                  for:'Ages 8+, popular across all year groups',
+                },
+                {
+                  n:'Tennis', c:'#CA8A04', d:'Strokes, rallies, match practice.',
+                  img:'https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&q=80&auto=format&fit=crop',
+                  full:'Tennis at Smartious is delivered through partner courts in Westlands and Parklands. Sessions cover forehand, backhand, serve and volley fundamentals, progressing to baseline rally consistency and tactical match play. Equipment can be provided. Suitable for complete beginners through to students preparing for school or club-level competition.',
+                  coach:'LTA-qualified or equivalent tennis instructors',
+                  for:'Ages 8+, beginner-to-intermediate focused',
+                },
+                {
+                  n:'Table Tennis', c:'#1E40AF', d:'Spin, speed, tournament play.',
+                  img:'https://images.unsplash.com/photo-1534158914592-062992fbe900?w=600&q=80&auto=format&fit=crop',
+                  full:'Table tennis builds remarkable hand-eye coordination, reaction time and tactical thinking. Sessions cover grip and stance, forehand and backhand drives, topspin and backspin, service variation, and competitive match play. Inter-house tournaments held each term with singles and doubles brackets.',
+                  coach:'Experienced table tennis players, some former club-level',
+                  for:'Ages 8+, particularly popular with secondary students',
+                },
+                {
+                  n:'Pickleball', c:'#0F766E', d:'Fast-growing racquet sport, beginner-friendly.',
+                  img:'https://images.unsplash.com/photo-1591491653056-4e0d4f54ed09?w=600&q=80&auto=format&fit=crop',
+                  full:'Pickleball is the fastest-growing racquet sport globally. Combining elements of tennis, badminton and table tennis, it is exceptionally beginner-friendly while still offering tactical depth for advanced players. Sessions cover the basics — paddle grip, serve, dink shot, volley — and progress to doubles tactics and tournament play.',
+                  coach:'Qualified racquet-sport instructors trained in pickleball methodology',
+                  for:'Ages 10+, all skill levels',
+                },
+                {
+                  n:'Archery', c:'#7E22CE', d:'Focus, form, target shooting.',
+                  img:'https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=600&q=80&auto=format&fit=crop',
+                  full:'Archery is one of the most focus-developing activities we offer. Students learn safe equipment handling, proper stance, anchor points, release technique and scoring. All equipment is provided. Sessions are progressive — beginners start at short range with light bows, advanced students work toward Olympic recurve form and competitive scoring. Strict safety protocols and qualified instructors throughout.',
+                  coach:'Certified archery instructors with safety certification',
+                  for:'Ages 10+, max 8 students per session for safety',
+                },
+                {
+                  n:'Volleyball', c:'#BE123C', d:'Team play, serves, blocks, rallies.',
+                  img:'https://images.unsplash.com/photo-1592656094267-764a45160876?w=600&q=80&auto=format&fit=crop',
+                  full:'Volleyball is a high-energy team sport that builds spatial awareness, team communication and explosive athleticism. Sessions cover serving (underhand, overhand, jump serve), passing, setting, attacking, blocking and digging. Six-a-side matches with rotating positions teach students every role. Two teams per grade compete in inter-house play.',
+                  coach:'Trained volleyball coaches',
+                  for:'Ages 10+, separate sessions for primary and secondary',
+                },
+                {
+                  n:'Chess Club', c:'#1F2937', d:'Strategy, tactics, tournaments.',
+                  img:'https://images.unsplash.com/photo-1528819622765-d6bcf132f793?w=600&q=80&auto=format&fit=crop',
+                  full:'Chess Club is an institution at Smartious. Members learn openings, middlegame strategy, endgame technique and tactical pattern recognition. We run a termly Swiss-system tournament with FIDE rules, plus blitz tournaments and team matches against other schools. Strong players are encouraged toward rated competition through the Kenya Chess Federation.',
+                  coach:'Experienced chess players including some with FIDE ratings',
+                  for:'All ages, complete beginners welcome',
+                },
+                {
+                  n:'Coding Club', c:'#0369A1', d:'Python, web, games, real projects.',
+                  img:'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&q=80&auto=format&fit=crop',
+                  full:'Coding Club takes students from first lines of code to building real applications. Beginners start with Scratch and visual programming; intermediates move to Python with games and small web apps; advanced students build full-stack web applications, Discord bots and AI integrations. Termly showcase day where students present their projects to parents.',
+                  coach:'Computer science teachers + working developers',
+                  for:'Ages 8+, separate tracks for beginner / intermediate / advanced',
+                },
+                {
+                  n:'Robotics', c:'#92400E', d:'Build, code, control real robots.',
+                  img:'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&q=80&auto=format&fit=crop',
+                  full:'Robotics Club uses LEGO Mindstorms and Arduino-based kits for younger students, progressing to VEX Robotics for advanced builders. Students design, build and program robots to complete challenges — line-following, obstacle avoidance, object manipulation. Top teams enter the FIRST LEGO League and similar regional competitions.',
+                  coach:'STEM teachers with robotics-competition coaching experience',
+                  for:'Ages 10+, team-based, max 4 per robot',
+                },
+                {
+                  n:'Debate Club', c:'#7D1025', d:'Argument, research, public speaking.',
+                  img:'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&q=80&auto=format&fit=crop',
+                  full:'Debate Club develops the most transferable skill set in education — structured argument, evidence research, rebuttal, persuasive delivery. We use World Schools Debating format and British Parliamentary format. Termly intra-school debates and selected students compete in regional inter-school tournaments. Strong overlap with our Model UN programme.',
+                  coach:'Debate coaches with university-level competitive experience',
+                  for:'Ages 12+, particularly strong for secondary students',
+                },
+                {
+                  n:'Public Speaking', c:'#9F1239', d:'Confidence, presentation, voice.',
+                  img:'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&q=80&auto=format&fit=crop',
+                  full:'Public Speaking sessions build confidence on stage and in life. Students prepare and deliver speeches across genres — informative, persuasive, ceremonial, impromptu. We cover voice projection, body language, pacing, audience engagement and managing nerves. Termly speech showcase where every student presents to a friendly audience.',
+                  coach:'Communications professionals + drama-trained instructors',
+                  for:'All ages, particularly valuable for shy students',
+                },
+                {
+                  n:'STEM Lab', c:'#166534', d:'Hands-on science experiments.',
+                  img:'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&q=80&auto=format&fit=crop',
+                  full:'STEM Lab is where curriculum science becomes hands-on. Students design and run experiments across physics, chemistry, biology and earth sciences. Topics rotate termly — electronics one term, chemical reactions another, biology dissections, astronomy. Beyond the curriculum, students explore engineering challenges (build a bridge, design a water filter) and the scientific method itself.',
+                  coach:'Subject specialist teachers — physics, chemistry, biology',
+                  for:'Ages 10+, lab safety briefing mandatory before first session',
+                },
+                {
+                  n:'Music & Piano', c:'#7C2D12', d:'Theory, performance, ensembles.',
+                  img:'https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=600&q=80&auto=format&fit=crop',
+                  full:'Music instruction follows the ABRSM (Associated Board of the Royal Schools of Music) framework. Students can pursue piano, guitar, voice or other instruments. Beginners cover theory fundamentals, sight-reading and basic technique; advanced students work toward graded ABRSM examinations and ensemble performance. End-of-term recitals where families are invited.',
+                  coach:'Music teachers with classical training, some ABRSM-examiner qualified',
+                  for:'All ages, instrument rental can be arranged',
+                },
+                {
+                  n:'Art & Design', c:'#A21CAF', d:'Drawing, painting, digital design.',
+                  img:'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600&q=80&auto=format&fit=crop',
+                  full:'Art & Design covers traditional media (drawing, painting, sculpture) and digital design (Adobe Creative Suite, Procreate, Figma). Students develop a portfolio across mediums and explore art history alongside practical work. Termly student exhibition where families view work. Advanced students preparing for IGCSE/A-Level Art are mentored through portfolio development.',
+                  coach:'Practising artists + qualified art teachers',
+                  for:'All ages, materials provided',
+                },
+                {
+                  n:'Dance', c:'#DB2777', d:'Choreography, expression, fitness.',
+                  img:'https://images.unsplash.com/photo-1547153760-18fc86324498?w=600&q=80&auto=format&fit=crop',
+                  full:'Dance sessions rotate across genres — contemporary, hip-hop, jazz, Afrobeats and traditional Kenyan dance. Students develop technique, choreographic creativity and performance confidence. Termly showcase performances. Strong fitness benefit alongside the artistic development.',
+                  coach:'Trained dancers + choreographers',
+                  for:'Ages 6+, all dance backgrounds welcome',
+                },
+                {
+                  n:'Yoga & Wellness', c:'#0F766E', d:'Mindfulness, flexibility, balance.',
+                  img:'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=600&q=80&auto=format&fit=crop',
+                  full:'Yoga sessions teach asanas (postures), pranayama (breathing), and basic mindfulness — building flexibility, balance, focus and emotional regulation. Particularly valuable for students dealing with exam stress or anxiety. Sessions accessible to complete beginners. Mats provided.',
+                  coach:'Certified yoga instructors (RYT-200 minimum)',
+                  for:'All ages, no prior experience needed',
+                },
+                {
+                  n:'Fitness Training', c:'#DC2626', d:'Strength, cardio, conditioning.',
+                  img:'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80&auto=format&fit=crop',
+                  full:'Fitness Training is age-appropriate strength and conditioning. Younger students focus on bodyweight movements, coordination and play-based fitness; secondary students learn proper form for strength training (bodyweight + light resistance), HIIT, and cardiovascular conditioning. Strong overlap with our sports programme — many sport-focused students take this alongside their primary sport.',
+                  coach:'Certified personal trainers',
+                  for:'Ages 12+ for strength training, ages 8+ for play-based fitness',
+                },
+                {
+                  n:'Leadership & Entrepreneurship', c:'#1E3A8A', d:'Real projects, pitches, business plans.',
+                  img:'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&q=80&auto=format&fit=crop',
+                  full:'Leadership & Entrepreneurship is one of our most distinctive programmes. Students design real businesses, run pitch competitions, manage budgets and execute small ventures (school market days, fundraisers, social impact projects). Curriculum covers business planning, marketing, finance basics, public speaking and ethical leadership. The end-of-year pitch competition has judges from Nairobi business community.',
+                  coach:'Founders + business school graduates',
+                  for:'Ages 12+, ideal for secondary students',
+                },
               ].map(a => (
-                <div key={a.n} style={{
-                  background:'#fff', borderRadius:12, padding:'18px 16px',
-                  border:'1px solid '+V.line, position:'relative',
-                  transition:'transform .2s, box-shadow .2s, border-color .2s',
-                  cursor:'pointer',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 12px 28px '+a.c+'25'; e.currentTarget.style.borderColor=a.c+'60' }}
-                onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderColor=V.line }}>
-                  <div style={{
-                    width:36, height:36, borderRadius:9,
-                    background:a.c+'18', display:'flex', alignItems:'center', justifyContent:'center',
-                    marginBottom:12,
-                  }}>
-                    <div style={{width:18, height:18, borderRadius:'50%', background:a.c}}/>
+                <div key={a.n}
+                  onClick={() => setOpenActivity(a)}
+                  style={{
+                    background:'#fff', borderRadius:14, overflow:'hidden',
+                    border:'1px solid '+V.line, position:'relative',
+                    transition:'transform .2s, box-shadow .2s, border-color .2s',
+                    cursor:'pointer',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 12px 28px '+a.c+'30'; e.currentTarget.style.borderColor=a.c+'80' }}
+                  onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderColor=V.line }}>
+                  {/* Splash image */}
+                  <div style={{position:'relative',height:140,overflow:'hidden',background:a.c+'18'}}>
+                    <img
+                      src={a.img}
+                      alt={a.n + ' — Smartious Wednesday enrichment'}
+                      loading="lazy"
+                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}
+                      onError={e => { e.currentTarget.style.display='none' }}
+                    />
+                    {/* Subtle gradient overlay so text label below pops if image is light */}
+                    <div style={{
+                      position:'absolute',inset:0,
+                      background:'linear-gradient(to bottom, transparent 50%, '+a.c+'22 100%)',
+                      pointerEvents:'none',
+                    }}/>
                   </div>
-                  <div style={{fontSize:14, fontWeight:700, color:V.ink, marginBottom:4}}>{a.n}</div>
-                  <div style={{fontSize:11.5, color:V.sl, lineHeight:1.55}}>{a.d}</div>
+                  {/* Card body */}
+                  <div style={{padding:'14px 16px 18px'}}>
+                    <div style={{fontSize:14.5, fontWeight:700, color:V.ink, marginBottom:4}}>{a.n}</div>
+                    <div style={{fontSize:12, color:V.sl, lineHeight:1.55, marginBottom:10}}>{a.d}</div>
+                    <div style={{
+                      display:'inline-flex',alignItems:'center',gap:6,
+                      fontSize:11,fontWeight:700,color:a.c,letterSpacing:'.02em',
+                    }}>
+                      Learn more
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -8072,6 +8235,154 @@ export default function LandingPage() {
               Trial activity sessions available · Sibling discount · Diaspora and local families welcome
             </div>
           </div></section>
+
+          {/* ACTIVITY MODAL — opens when card clicked */}
+          {openActivity && (
+            <div
+              onClick={() => setOpenActivity(null)}
+              style={{
+                position:'fixed',inset:0,zIndex:9998,
+                background:'rgba(10,8,6,.78)',
+                display:'flex',alignItems:'center',justifyContent:'center',
+                padding:'24px',
+                animation:'fadeIn .18s ease',
+                overflowY:'auto',
+              }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="activity-modal-title">
+              <div
+                onClick={e => e.stopPropagation()}
+                style={{
+                  background:'#fff',
+                  borderRadius:16,
+                  maxWidth:680,
+                  width:'100%',
+                  maxHeight:'90vh',
+                  overflowY:'auto',
+                  position:'relative',
+                  boxShadow:'0 30px 80px rgba(0,0,0,.5)',
+                  animation:'slideUp .25s ease',
+                }}>
+                {/* Close button */}
+                <button
+                  onClick={() => setOpenActivity(null)}
+                  aria-label="Close activity details"
+                  style={{
+                    position:'absolute',top:14,right:14,zIndex:2,
+                    width:36,height:36,borderRadius:'50%',
+                    background:'rgba(255,255,255,.92)',
+                    border:'1px solid '+V.line,
+                    display:'flex',alignItems:'center',justifyContent:'center',
+                    cursor:'pointer',
+                    boxShadow:'0 4px 12px rgba(0,0,0,.12)',
+                  }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={V.ink} strokeWidth="2.5" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+
+                {/* Hero image */}
+                <div style={{position:'relative',height:240,overflow:'hidden',background:openActivity.c+'18'}}>
+                  <img
+                    src={openActivity.img}
+                    alt={openActivity.n}
+                    style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}
+                    onError={e => { e.currentTarget.style.display='none' }}
+                  />
+                  <div style={{
+                    position:'absolute',inset:0,
+                    background:'linear-gradient(to bottom, transparent 60%, rgba(10,8,6,.55) 100%)',
+                    pointerEvents:'none',
+                  }}/>
+                  <div style={{
+                    position:'absolute',bottom:18,left:24,
+                    color:'#fff',
+                  }}>
+                    <div style={{
+                      display:'inline-block',
+                      background:openActivity.c,
+                      padding:'4px 12px',borderRadius:6,
+                      fontSize:10,fontWeight:800,letterSpacing:'.14em',textTransform:'uppercase',
+                      marginBottom:10,
+                    }}>Wednesday Enrichment</div>
+                    <h3 id="activity-modal-title" style={{
+                      fontFamily:"'Playfair Display',serif",
+                      fontSize:'1.9rem',fontWeight:700,
+                      color:'#fff',margin:0,lineHeight:1.15,
+                      textShadow:'0 2px 8px rgba(0,0,0,.4)',
+                    }}>{openActivity.n}</h3>
+                  </div>
+                </div>
+
+                {/* Modal body */}
+                <div style={{padding:'24px 28px 28px'}}>
+                  <p style={{fontSize:14.5,color:V.ink2,lineHeight:1.7,marginBottom:20}}>
+                    {openActivity.full}
+                  </p>
+
+                  {/* Meta rows */}
+                  <div style={{
+                    display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,
+                    paddingTop:18,borderTop:'1px solid '+V.line,
+                  }} className="activity-meta-grid">
+                    <div>
+                      <div style={{fontSize:10,fontWeight:700,color:openActivity.c,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:6}}>Coaches</div>
+                      <div style={{fontSize:13,color:V.sl,lineHeight:1.55}}>{openActivity.coach}</div>
+                    </div>
+                    <div>
+                      <div style={{fontSize:10,fontWeight:700,color:openActivity.c,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:6}}>Open to</div>
+                      <div style={{fontSize:13,color:V.sl,lineHeight:1.55}}>{openActivity.for}</div>
+                    </div>
+                  </div>
+
+                  {/* CTAs */}
+                  <div style={{
+                    display:'flex',gap:10,flexWrap:'wrap',
+                    marginTop:22,paddingTop:20,borderTop:'1px solid '+V.line,
+                  }}>
+                    <button
+                      onClick={() => { setOpenActivity(null); P('enroll') }}
+                      style={{
+                        padding:'11px 22px',borderRadius:8,
+                        background:openActivity.c,color:'#fff',border:'none',
+                        fontSize:13,fontWeight:800,letterSpacing:'.02em',
+                        cursor:'pointer',display:'inline-flex',alignItems:'center',gap:6,
+                      }}>
+                      Enrol now
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    <a
+                      href={`https://wa.me/254745021212?text=${encodeURIComponent('Hi Smartious, I would like to know more about the ' + openActivity.n + ' Wednesday activity.')}`}
+                      target="_blank" rel="noopener noreferrer"
+                      style={{
+                        padding:'11px 22px',borderRadius:8,
+                        background:'#25D366',color:'#fff',textDecoration:'none',
+                        fontSize:13,fontWeight:700,
+                        display:'inline-flex',alignItems:'center',gap:6,
+                      }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
+                      Ask on WhatsApp
+                    </a>
+                    <button
+                      onClick={() => setOpenActivity(null)}
+                      style={{
+                        padding:'11px 22px',borderRadius:8,
+                        background:'transparent',color:V.sl,border:'1px solid '+V.line,
+                        fontSize:13,fontWeight:600,cursor:'pointer',
+                      }}>
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <style>{`
+                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+                @media (max-width: 560px) {
+                  .activity-meta-grid { grid-template-columns: 1fr !important; }
+                }
+              `}</style>
+            </div>
+          )}
         </>
       )}
 
