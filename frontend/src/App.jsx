@@ -46,6 +46,8 @@ export default function App() {
               <Route path="/programs"        element={<LandingPage />} />
               <Route path="/activities"      element={<LandingPage />} />
               <Route path="/online-school/:slug" element={<LandingPage />} />
+              <Route path="/tuition-nairobi"     element={<LandingPage />} />
+              <Route path="/tuition/:slug"       element={<LandingPage />} />
               <Route path="/compare/:slug"   element={<LandingPage />} />
               <Route path="/faq"             element={<LandingPage />} />
               <Route path="/blog"            element={<LandingPage />} />
