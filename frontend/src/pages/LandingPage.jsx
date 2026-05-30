@@ -6782,6 +6782,8 @@ export default function LandingPage() {
                   title:'Arrival & Kuala Lumpur City Tour',
                   theme:'twin-towers',
                   gradient:'linear-gradient(135deg, #1a2849 0%, #8B1A2E 100%)',
+                  videoMp4:'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_700/5.4-invideo-seedance_2_0_2_dvswlp.mp4',
+                  videoPoster:'https://res.cloudinary.com/dae99gz1m/video/upload/so_0/5.4-invideo-seedance_2_0_2_dvswlp.jpg',
                   items:[
                     'Arrival in Kuala Lumpur',
                     'Petronas Twin Towers (photo stop)',
@@ -6842,10 +6844,30 @@ export default function LandingPage() {
                   e.currentTarget.style.transform='translateY(0)'
                   e.currentTarget.style.boxShadow='none'
                 }}>
-                  {/* day header — themed gradient with iconic illustration */}
+                  {/* day header — themed gradient with iconic illustration OR video */}
                   <div style={{position:'relative',height:170,overflow:'hidden',background:d.gradient}}>
-                    {/* themed SVG icon overlay */}
-                    <svg viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%',display:'block',opacity:0.85}} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    {d.videoMp4 ? (
+                      /* Real footage — Day 1 arrival video */
+                      <video
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        poster={d.videoPoster}
+                        aria-label={`Day ${d.day}: ${d.title} — preview video`}
+                        style={{
+                          width:'100%',
+                          height:'100%',
+                          objectFit:'cover',
+                          display:'block',
+                          background:V.ink,
+                        }}>
+                        <source src={d.videoMp4} type="video/mp4" />
+                      </video>
+                    ) : (
+                      /* themed SVG icon overlay */
+                      <svg viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%',display:'block',opacity:0.85}} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                       {d.theme === 'twin-towers' && (
                         <g>
                           {/* Stars */}
@@ -6947,6 +6969,7 @@ export default function LandingPage() {
                         </g>
                       )}
                     </svg>
+                    )}
                     <div style={{
                       position:'absolute',
                       top:14,
