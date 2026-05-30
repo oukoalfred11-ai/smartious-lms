@@ -1499,6 +1499,18 @@ export default function LandingPage() {
   const [toast, setToast] = useState(null)
   const [wizDone, setWizDone] = useState(false)
 
+  // Malaysia Trip 2026 — application form state
+  const [malaysiaTripForm, setMalaysiaTripForm] = useState({
+    studentName: '',
+    studentAge: '',
+    parentName: '',
+    parentEmail: '',
+    parentPhone: '+254 ',
+    city: '',
+    notes: '',
+  })
+  const [malaysiaTripSubmitted, setMalaysiaTripSubmitted] = useState(false)
+
   // Enrollment wizard form data — collected across steps 1, 2, 4
   const [enrollForm, setEnrollForm] = useState({
     // Step 1 — Programme
@@ -6637,6 +6649,33 @@ export default function LandingPage() {
               for rich snippets and AI Overview answers. */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
             '@context': 'https://schema.org',
+            '@type': 'Event',
+            'name': 'Smartious Academic Trip to Malaysia 2026',
+            'description': 'Four-day academic trip to Kuala Lumpur, Malaysia for Smartious students aged 10–18. Includes Petronas Twin Towers visit, top Malaysian university campus tour, STEM workshop, Sunway Lagoon theme park, Batu Caves cultural visit. Fully supervised by Smartious teachers (1:10 ratio). Departing from Nairobi.',
+            'startDate': '2026-07-27',
+            'endDate': '2026-07-30',
+            'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
+            'eventStatus': 'https://schema.org/EventScheduled',
+            'location': [
+              { '@type': 'Place', 'name': 'Kuala Lumpur', 'address': { '@type': 'PostalAddress', 'addressCountry': 'MY', 'addressLocality': 'Kuala Lumpur' } },
+              { '@type': 'Place', 'name': 'Petronas Twin Towers', 'address': { '@type': 'PostalAddress', 'addressCountry': 'MY', 'addressLocality': 'Kuala Lumpur' } },
+              { '@type': 'Place', 'name': 'Batu Caves', 'address': { '@type': 'PostalAddress', 'addressCountry': 'MY', 'addressLocality': 'Selangor' } },
+            ],
+            'organizer': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool', 'url': 'https://smartioushomeschool.com/' },
+            'offers': {
+              '@type': 'Offer',
+              'price': '1950',
+              'priceCurrency': 'USD',
+              'priceValidUntil': '2026-06-30',
+              'availability': 'https://schema.org/LimitedAvailability',
+              'url': 'https://smartioushomeschool.com/activities',
+              'validFrom': '2026-04-01',
+            },
+            'audience': { '@type': 'EducationalAudience', 'audienceType': 'Students aged 10-18' },
+            'image': 'https://smartioushomeschool.com/smartious-logo.png',
+          })}}/>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context': 'https://schema.org',
             '@type': 'FAQPage',
             'mainEntity': [
               { '@type': 'Question', 'name': 'Do online homeschool students at Smartious get extracurricular activities?',
@@ -6659,11 +6698,877 @@ export default function LandingPage() {
             <h1 className="pg-h">Beyond Academics: Sports, Leadership &amp; <em>Student Enrichment</em></h1>
             <p className="pg-sub" style={{marginTop:12}}>Smartious students participate in engaging weekly activities designed to build confidence, teamwork, creativity, wellness and global exposure. A world-class enrichment ecosystem alongside an internationally recognised academic programme.</p>
             <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
-              <button className="btn-p" onClick={() => P('enroll')}>Join Activities <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-              <button className="btn-o lt" onClick={() => P('consult')}>Book Consultation</button>
+              <button className="btn-p" onClick={() => { const el = document.getElementById('malaysia-application'); if (el) el.scrollIntoView({behavior:'smooth'}); }}>Apply: Malaysia Trip 2026 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <button className="btn-o lt" onClick={() => P('enroll')}>Join Smartious</button>
               <button className="btn-o lt" onClick={() => { const el = document.getElementById('student-life'); if (el) el.scrollIntoView({behavior:'smooth'}); }}>Explore Student Life</button>
             </div>
           </div></div>
+
+
+          {/* ====================================================== */}
+          {/* MALAYSIA ACADEMIC TRIP 2026 — FEATURED TRIP             */}
+          {/* ====================================================== */}
+          <section className="sec" style={{
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',
+            padding:'0',
+            position:'relative',
+            overflow:'hidden',
+          }}>
+            <div className="wrap" style={{position:'relative',zIndex:2,paddingTop:64,paddingBottom:64}}>
+              {/* HEADER ROW WITH IMAGE */}
+              <div style={{
+                display:'grid',
+                gridTemplateColumns:'1.1fr 1fr',
+                gap:48,
+                alignItems:'center',
+              }} className="malaysia-hero-grid">
+                {/* LEFT — copy */}
+                <div>
+                  <div className="eyebrow" style={{color:V.gold3,marginBottom:14}}>
+                    Featured Trip · 27–30 July 2026
+                  </div>
+                  <h2 style={{
+                    fontFamily:"'Playfair Display',serif",
+                    fontSize:'clamp(2.4rem,5vw,3.6rem)',
+                    fontWeight:700,
+                    color:'#fff',
+                    lineHeight:1.05,
+                    marginBottom:16,
+                    letterSpacing:'-.01em',
+                  }}>
+                    Academic Trip to <em style={{color:V.gold3,fontStyle:'italic'}}>Malaysia</em>
+                  </h2>
+                  <p style={{
+                    fontSize:17,
+                    color:'rgba(255,255,255,.85)',
+                    lineHeight:1.6,
+                    marginBottom:24,
+                    maxWidth:540,
+                  }}>
+                    Four unforgettable days of <strong style={{color:V.gold3}}>Learn · Explore · Experience</strong> across Kuala Lumpur — designed to inspire young minds, broaden horizons and build global citizens.
+                  </p>
+                  
+                  {/* TRIP META */}
+                  <div style={{
+                    display:'grid',
+                    gridTemplateColumns:'1fr 1fr',
+                    gap:14,
+                    marginBottom:28,
+                    maxWidth:480,
+                  }}>
+                    <div style={{
+                      background:'rgba(255,255,255,.08)',
+                      border:'1px solid rgba(240,204,90,.25)',
+                      borderRadius:10,
+                      padding:'12px 14px',
+                    }}>
+                      <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Dates</div>
+                      <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>27–30 July 2026</div>
+                    </div>
+                    <div style={{
+                      background:'rgba(255,255,255,.08)',
+                      border:'1px solid rgba(240,204,90,.25)',
+                      borderRadius:10,
+                      padding:'12px 14px',
+                    }}>
+                      <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Ages</div>
+                      <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>10 – 18 Years</div>
+                    </div>
+                    <div style={{
+                      background:'rgba(255,255,255,.08)',
+                      border:'1px solid rgba(240,204,90,.25)',
+                      borderRadius:10,
+                      padding:'12px 14px',
+                    }}>
+                      <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Duration</div>
+                      <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>4 Days · 3 Nights</div>
+                    </div>
+                    <div style={{
+                      background:'rgba(255,255,255,.08)',
+                      border:'1px solid rgba(240,204,90,.25)',
+                      borderRadius:10,
+                      padding:'12px 14px',
+                    }}>
+                      <div style={{fontSize:10,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Ratio</div>
+                      <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>1 : 10 Teacher</div>
+                    </div>
+                  </div>
+
+                  {/* PRICE CARD */}
+                  <div style={{
+                    background:'rgba(255,255,255,.08)',
+                    border:'1.5px solid '+V.gold3,
+                    borderRadius:14,
+                    padding:'20px 24px',
+                    display:'inline-block',
+                    marginBottom:28,
+                  }}>
+                    <div style={{fontSize:11,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>Per Student</div>
+                    <div style={{display:'flex',alignItems:'baseline',gap:14,flexWrap:'wrap'}}>
+                      <div style={{
+                        fontFamily:"'Playfair Display',serif",
+                        fontSize:'2.4rem',
+                        fontWeight:800,
+                        color:'#fff',
+                        lineHeight:1,
+                      }}>KSh 280,000</div>
+                      <div style={{
+                        fontSize:16,
+                        color:'rgba(255,255,255,.7)',
+                        fontWeight:600,
+                      }}>≈ USD 1,950</div>
+                    </div>
+                    <div style={{fontSize:12,color:'rgba(255,255,255,.6)',marginTop:6}}>Twin-share accommodation · Payment plan available</div>
+                  </div>
+
+                  {/* CTAs */}
+                  <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById('malaysia-application')
+                        if (el) el.scrollIntoView({behavior:'smooth',block:'start'})
+                      }}
+                      style={{
+                        padding:'14px 28px',
+                        borderRadius:10,
+                        background:V.gold3,
+                        color:V.ink,
+                        border:'none',
+                        fontSize:14,
+                        fontWeight:800,
+                        letterSpacing:'.02em',
+                        cursor:'pointer',
+                        display:'inline-flex',
+                        alignItems:'center',
+                        gap:8,
+                      }}>
+                      Apply for Malaysia Trip
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById('malaysia-itinerary')
+                        if (el) el.scrollIntoView({behavior:'smooth',block:'start'})
+                      }}
+                      style={{
+                        padding:'14px 28px',
+                        borderRadius:10,
+                        background:'transparent',
+                        color:'#fff',
+                        border:'1.5px solid rgba(255,255,255,.4)',
+                        fontSize:14,
+                        fontWeight:700,
+                        cursor:'pointer',
+                      }}>
+                      View Full Itinerary
+                    </button>
+                  </div>
+                </div>
+
+                {/* RIGHT — image collage */}
+                <div style={{position:'relative',minHeight:480}} className="malaysia-collage">
+                  <div style={{
+                    position:'absolute',
+                    top:0,
+                    right:0,
+                    width:'82%',
+                    height:'72%',
+                    borderRadius:16,
+                    overflow:'hidden',
+                    border:'3px solid '+V.gold3,
+                    boxShadow:'0 30px 60px rgba(0,0,0,.4)',
+                  }}>
+                    <img
+                      src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=900&q=80&auto=format&fit=crop"
+                      alt="Petronas Twin Towers, Kuala Lumpur — iconic landmark on the Smartious Malaysia academic trip"
+                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}
+                      loading="lazy"
+                    />
+                  </div>
+                  <div style={{
+                    position:'absolute',
+                    bottom:0,
+                    left:0,
+                    width:'58%',
+                    height:'46%',
+                    borderRadius:14,
+                    overflow:'hidden',
+                    border:'3px solid '+V.gold3,
+                    boxShadow:'0 20px 40px rgba(0,0,0,.5)',
+                  }}>
+                    <img
+                      src="https://images.unsplash.com/photo-1597531072931-8cabba8f6b5d?w=700&q=80&auto=format&fit=crop"
+                      alt="Batu Caves rainbow steps, Kuala Lumpur — cultural visit on the Malaysia trip"
+                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <style>{`
+              @media (max-width: 900px) {
+                .malaysia-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+                .malaysia-collage { min-height: 320px !important; }
+              }
+            `}</style>
+          </section>
+
+          {/* 4-DAY ITINERARY */}
+          <section id="malaysia-itinerary" className="sec" style={{background:'#fff'}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:44,maxWidth:760,margin:'0 auto 44px'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Day by day</div>
+              <h2 style={{
+                fontFamily:"'Playfair Display',serif",
+                fontSize:'2rem',
+                fontWeight:700,
+                color:V.ink,
+                marginTop:8,
+                marginBottom:12,
+              }}>
+                4 Days of <em style={{color:V.cr}}>Learning, Discovery & Fun</em>
+              </h2>
+              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
+                Every day balances academic discovery, cultural immersion and shared experience — purposefully sequenced to take students from arrival excitement through campus visits, cultural depth and a final adventure together.
+              </p>
+            </div>
+
+            <div style={{
+              display:'grid',
+              gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',
+              gap:20,
+              maxWidth:1180,
+              margin:'0 auto',
+            }}>
+              {[
+                {
+                  day:'01',
+                  title:'Arrival & Kuala Lumpur City Tour',
+                  img:'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=700&q=80&auto=format&fit=crop',
+                  items:[
+                    'Arrival in Kuala Lumpur',
+                    'Petronas Twin Towers (photo stop)',
+                    'KLCC Park & Suria KLCC',
+                    'Welcome dinner with the group',
+                  ],
+                },
+                {
+                  day:'02',
+                  title:'STEM & University Experience',
+                  img:'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=700&q=80&auto=format&fit=crop',
+                  items:[
+                    'Visit to a top Malaysian university',
+                    'Campus tour & student interaction',
+                    'STEM workshop / Science Centre visit',
+                    'Evening at Pavilion Bukit Bintang',
+                  ],
+                },
+                {
+                  day:'03',
+                  title:'Theme Park Adventure',
+                  img:'https://images.unsplash.com/photo-1583407723467-9b2d22504831?w=700&q=80&auto=format&fit=crop',
+                  items:[
+                    'Full day at Sunway Lagoon or Genting SkyWorlds',
+                    'Rides, attractions & water park',
+                    'Fun, games & team bonding',
+                    'Group dinner',
+                  ],
+                },
+                {
+                  day:'04',
+                  title:'Cultural Experience & Departure',
+                  img:'https://images.unsplash.com/photo-1597531072931-8cabba8f6b5d?w=700&q=80&auto=format&fit=crop',
+                  items:[
+                    'Cultural visit — Batu Caves',
+                    'Central Market & local handicrafts',
+                    'Souvenir shopping',
+                    'Group departure',
+                  ],
+                },
+              ].map(d => (
+                <div key={d.day} style={{
+                  background:'#fff',
+                  border:'1px solid '+V.line,
+                  borderRadius:16,
+                  overflow:'hidden',
+                  transition:'transform .25s, box-shadow .25s',
+                  cursor:'default',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform='translateY(-6px)'
+                  e.currentTarget.style.boxShadow='0 24px 50px rgba(139,26,46,.15)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform='translateY(0)'
+                  e.currentTarget.style.boxShadow='none'
+                }}>
+                  {/* day image */}
+                  <div style={{position:'relative',height:170,overflow:'hidden'}}>
+                    <img
+                      src={d.img}
+                      alt={`Day ${d.day}: ${d.title}`}
+                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}
+                      loading="lazy"
+                    />
+                    <div style={{
+                      position:'absolute',
+                      top:14,
+                      left:14,
+                      background:V.cr,
+                      color:'#fff',
+                      borderRadius:8,
+                      padding:'4px 12px',
+                      fontSize:10,
+                      fontWeight:800,
+                      letterSpacing:'.14em',
+                      textTransform:'uppercase',
+                    }}>Day {d.day}</div>
+                  </div>
+                  
+                  {/* day content */}
+                  <div style={{padding:'22px 22px 24px'}}>
+                    <h3 style={{
+                      fontFamily:"'Playfair Display',serif",
+                      fontSize:'1.15rem',
+                      fontWeight:700,
+                      color:V.ink,
+                      marginBottom:14,
+                      lineHeight:1.3,
+                    }}>{d.title}</h3>
+                    <ul style={{listStyle:'none',padding:0,margin:0}}>
+                      {d.items.map((it,i) => (
+                        <li key={i} style={{
+                          fontSize:13.5,
+                          color:V.sl,
+                          padding:'6px 0',
+                          lineHeight:1.5,
+                          display:'flex',
+                          gap:10,
+                          alignItems:'flex-start',
+                        }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={V.gold2} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:4}}><path d="M5 12l5 5L20 7"/></svg>
+                          <span>{it}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* TRIP HIGHLIGHTS + WHAT'S INCLUDED */}
+          <section className="sec" style={{background:V.bone}}><div className="wrap">
+            <div style={{
+              display:'grid',
+              gridTemplateColumns:'1fr 1fr',
+              gap:32,
+              maxWidth:1100,
+              margin:'0 auto',
+            }} className="malaysia-incl-grid">
+              {/* Highlights */}
+              <div>
+                <div className="eyebrow" style={{marginBottom:10}}>Trip Highlights</div>
+                <h3 style={{
+                  fontFamily:"'Playfair Display',serif",
+                  fontSize:'1.5rem',
+                  fontWeight:700,
+                  color:V.ink,
+                  marginBottom:22,
+                }}>What students experience</h3>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+                  {[
+                    'University Visits',
+                    'STEM Workshops',
+                    'Science Centre',
+                    'Theme Park Adventure',
+                    'Cultural Exploration',
+                    'Global Friendships',
+                  ].map(h => (
+                    <div key={h} style={{
+                      background:'#fff',
+                      border:'1px solid '+V.line,
+                      borderRadius:10,
+                      padding:'14px 16px',
+                      fontSize:13.5,
+                      fontWeight:600,
+                      color:V.ink,
+                      display:'flex',
+                      alignItems:'center',
+                      gap:10,
+                    }}>
+                      <div style={{
+                        width:8,
+                        height:8,
+                        borderRadius:'50%',
+                        background:V.cr,
+                        flexShrink:0,
+                      }}/>
+                      {h}
+                    </div>
+                  ))}
+                </div>
+                <div style={{
+                  marginTop:24,
+                  padding:'16px 18px',
+                  background:V.gold3+'18',
+                  border:'1px solid '+V.gold3,
+                  borderRadius:10,
+                  fontSize:13,
+                  color:V.ink,
+                  lineHeight:1.6,
+                }}>
+                  <strong style={{color:V.cr}}>Safety · Learning · Fun</strong> — our promise to every family. Every student is supervised by Smartious teachers throughout, with a 1:10 staff ratio and 24-hour adult presence.
+                </div>
+              </div>
+
+              {/* What's included */}
+              <div>
+                <div className="eyebrow" style={{marginBottom:10}}>Package Includes</div>
+                <h3 style={{
+                  fontFamily:"'Playfair Display',serif",
+                  fontSize:'1.5rem',
+                  fontWeight:700,
+                  color:V.ink,
+                  marginBottom:22,
+                }}>Everything is taken care of</h3>
+                <ul style={{listStyle:'none',padding:0,margin:0}}>
+                  {[
+                    'Return air tickets (Nairobi ↔ Kuala Lumpur)',
+                    'Accommodation (twin-share)',
+                    'All meals (breakfast, lunch, dinner)',
+                    'Airport transfers & local transport',
+                    'University & industry visits',
+                    'Entrance fees & all activities',
+                    'STEM workshops & Science Centre visit',
+                    'Travel insurance',
+                    'Smartious trip T-shirt',
+                    'Professional tour guide',
+                    'Smartious teachers (1:10 ratio)',
+                  ].map(item => (
+                    <li key={item} style={{
+                      padding:'8px 0',
+                      fontSize:13.5,
+                      color:V.sl,
+                      lineHeight:1.5,
+                      display:'flex',
+                      gap:10,
+                      alignItems:'flex-start',
+                      borderBottom:'1px solid '+V.line,
+                    }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:4}}><path d="M5 12l5 5L20 7"/></svg>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <style>{`
+              @media (max-width: 800px) {
+                .malaysia-incl-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+              }
+            `}</style>
+          </div></section>
+
+          {/* INVESTMENT & PAYMENT SCHEDULE */}
+          <section className="sec" style={{background:'#fff'}}><div className="wrap">
+            <div style={{
+              maxWidth:920,
+              margin:'0 auto',
+              background:V.bone,
+              border:'1px solid '+V.line,
+              borderRadius:18,
+              overflow:'hidden',
+            }}>
+              <div style={{
+                background:V.ink,
+                padding:'28px 32px',
+                color:'#fff',
+                display:'grid',
+                gridTemplateColumns:'1fr auto',
+                gap:24,
+                alignItems:'center',
+              }} className="malaysia-pay-head">
+                <div>
+                  <div className="eyebrow" style={{color:V.gold3,marginBottom:6}}>Investment</div>
+                  <h3 style={{
+                    fontFamily:"'Playfair Display',serif",
+                    fontSize:'1.6rem',
+                    fontWeight:700,
+                    color:'#fff',
+                    margin:0,
+                    lineHeight:1.3,
+                  }}>Transparent pricing & flexible payment</h3>
+                </div>
+                <div style={{textAlign:'right'}}>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Per Student</div>
+                  <div style={{
+                    fontFamily:"'Playfair Display',serif",
+                    fontSize:'2.2rem',
+                    fontWeight:800,
+                    color:'#fff',
+                    lineHeight:1,
+                  }}>KSh 280,000</div>
+                  <div style={{fontSize:13,color:'rgba(255,255,255,.7)',marginTop:4}}>≈ USD 1,950</div>
+                </div>
+              </div>
+
+              {/* Payment schedule rows */}
+              <div style={{padding:'8px 32px 28px'}}>
+                <div style={{fontSize:13,color:V.sl,fontWeight:600,marginTop:18,marginBottom:14,textTransform:'uppercase',letterSpacing:'.06em'}}>Payment schedule · Twin room</div>
+                {[
+                  {label:'Registration (non-refundable)',  amt:'KSh 3,000',   date:'On application'},
+                  {label:'1st instalment',                  amt:'KSh 80,000',  date:'30 April 2026'},
+                  {label:'2nd instalment',                  amt:'KSh 100,000', date:'31 May 2026'},
+                  {label:'3rd instalment',                  amt:'KSh 100,000', date:'30 June 2026'},
+                ].map((p,i) => (
+                  <div key={i} style={{
+                    display:'grid',
+                    gridTemplateColumns:'1.5fr 1fr 1fr',
+                    gap:14,
+                    padding:'14px 0',
+                    borderTop:i===0?'1px solid '+V.line:'1px solid '+V.line,
+                    borderBottom:i===3?'1px solid '+V.line:'none',
+                    fontSize:13.5,
+                    alignItems:'center',
+                  }}>
+                    <div style={{color:V.ink,fontWeight:600}}>{p.label}</div>
+                    <div style={{color:V.cr,fontWeight:700}}>{p.amt}</div>
+                    <div style={{color:V.sl3,fontSize:12.5}}>{p.date}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Requirements footer */}
+              <div style={{padding:'20px 32px 28px',borderTop:'1px solid '+V.line,background:'#fff'}}>
+                <div style={{fontSize:13,color:V.sl,fontWeight:600,marginBottom:14,textTransform:'uppercase',letterSpacing:'.06em'}}>Requirements</div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:12}}>
+                  {[
+                    'Valid passport (apply early if needed)',
+                    'COVID-19 vaccine certificate',
+                    'Yellow Fever certificate',
+                    'Visa (we assist with the process)',
+                  ].map(r => (
+                    <div key={r} style={{
+                      display:'flex',
+                      gap:10,
+                      alignItems:'flex-start',
+                      fontSize:13,
+                      color:V.sl,
+                      lineHeight:1.5,
+                    }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={V.gold2} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:3}}><path d="M5 12l5 5L20 7"/></svg>
+                      <span>{r}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <style>{`
+              @media (max-width: 700px) {
+                .malaysia-pay-head { grid-template-columns: 1fr !important; text-align: left !important; }
+                .malaysia-pay-head > div:last-child { text-align: left !important; }
+              }
+            `}</style>
+          </div></section>
+
+          {/* APPLICATION FORM */}
+          <section id="malaysia-application" className="sec" style={{background:V.bone}}><div className="wrap">
+            <div style={{
+              maxWidth:680,
+              margin:'0 auto',
+              background:'#fff',
+              border:'1px solid '+V.line,
+              borderRadius:18,
+              padding:'36px 38px 40px',
+            }} className="malaysia-form-card">
+              {!malaysiaTripSubmitted ? (
+                <>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Apply now · Limited spaces</div>
+                    <h3 style={{
+                      fontFamily:"'Playfair Display',serif",
+                      fontSize:'1.7rem',
+                      fontWeight:700,
+                      color:V.ink,
+                      marginTop:8,
+                      marginBottom:10,
+                      lineHeight:1.2,
+                    }}>
+                      Reserve your child's place
+                    </h3>
+                    <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>
+                      Complete this short application and our team will contact you within one working day to confirm details and arrange the KSh 3,000 registration payment.
+                    </p>
+                  </div>
+
+                  <div style={{display:'grid',gap:16}}>
+                    {/* Student name + age */}
+                    <div style={{display:'grid',gridTemplateColumns:'1.4fr 1fr',gap:12}} className="malaysia-form-row">
+                      <div>
+                        <label style={{display:'block',fontSize:12,fontWeight:600,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Student name *</label>
+                        <input
+                          type="text"
+                          placeholder="Full name"
+                          value={malaysiaTripForm.studentName}
+                          onChange={e => setMalaysiaTripForm({...malaysiaTripForm, studentName: e.target.value})}
+                          style={{
+                            width:'100%',
+                            padding:'12px 14px',
+                            fontSize:14,
+                            border:'1px solid '+V.line,
+                            borderRadius:9,
+                            background:'#fff',
+                            color:V.ink,
+                            outline:'none',
+                            transition:'border-color .15s',
+                          }}
+                          onFocus={e => e.target.style.borderColor=V.cr}
+                          onBlur={e => e.target.style.borderColor=V.line}
+                        />
+                      </div>
+                      <div>
+                        <label style={{display:'block',fontSize:12,fontWeight:600,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Age *</label>
+                        <input
+                          type="number"
+                          placeholder="10–18"
+                          min="10"
+                          max="18"
+                          value={malaysiaTripForm.studentAge}
+                          onChange={e => setMalaysiaTripForm({...malaysiaTripForm, studentAge: e.target.value})}
+                          style={{
+                            width:'100%',
+                            padding:'12px 14px',
+                            fontSize:14,
+                            border:'1px solid '+V.line,
+                            borderRadius:9,
+                            background:'#fff',
+                            color:V.ink,
+                            outline:'none',
+                            transition:'border-color .15s',
+                          }}
+                          onFocus={e => e.target.style.borderColor=V.cr}
+                          onBlur={e => e.target.style.borderColor=V.line}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Parent name */}
+                    <div>
+                      <label style={{display:'block',fontSize:12,fontWeight:600,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Parent / Guardian name *</label>
+                      <input
+                        type="text"
+                        placeholder="Full name"
+                        value={malaysiaTripForm.parentName}
+                        onChange={e => setMalaysiaTripForm({...malaysiaTripForm, parentName: e.target.value})}
+                        style={{
+                          width:'100%',
+                          padding:'12px 14px',
+                          fontSize:14,
+                          border:'1px solid '+V.line,
+                          borderRadius:9,
+                          background:'#fff',
+                          color:V.ink,
+                          outline:'none',
+                          transition:'border-color .15s',
+                        }}
+                        onFocus={e => e.target.style.borderColor=V.cr}
+                        onBlur={e => e.target.style.borderColor=V.line}
+                      />
+                    </div>
+
+                    {/* Parent email + phone */}
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}} className="malaysia-form-row">
+                      <div>
+                        <label style={{display:'block',fontSize:12,fontWeight:600,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Parent email *</label>
+                        <input
+                          type="email"
+                          placeholder="you@example.com"
+                          value={malaysiaTripForm.parentEmail}
+                          onChange={e => setMalaysiaTripForm({...malaysiaTripForm, parentEmail: e.target.value})}
+                          style={{
+                            width:'100%',
+                            padding:'12px 14px',
+                            fontSize:14,
+                            border:'1px solid '+V.line,
+                            borderRadius:9,
+                            background:'#fff',
+                            color:V.ink,
+                            outline:'none',
+                            transition:'border-color .15s',
+                          }}
+                          onFocus={e => e.target.style.borderColor=V.cr}
+                          onBlur={e => e.target.style.borderColor=V.line}
+                        />
+                      </div>
+                      <div>
+                        <label style={{display:'block',fontSize:12,fontWeight:600,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Parent WhatsApp *</label>
+                        <input
+                          type="tel"
+                          placeholder="+254 700 000 000"
+                          value={malaysiaTripForm.parentPhone}
+                          onChange={e => setMalaysiaTripForm({...malaysiaTripForm, parentPhone: e.target.value})}
+                          style={{
+                            width:'100%',
+                            padding:'12px 14px',
+                            fontSize:14,
+                            border:'1px solid '+V.line,
+                            borderRadius:9,
+                            background:'#fff',
+                            color:V.ink,
+                            outline:'none',
+                            transition:'border-color .15s',
+                          }}
+                          onFocus={e => e.target.style.borderColor=V.cr}
+                          onBlur={e => e.target.style.borderColor=V.line}
+                        />
+                      </div>
+                    </div>
+
+                    {/* City */}
+                    <div>
+                      <label style={{display:'block',fontSize:12,fontWeight:600,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>City / Country</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Nairobi · Mombasa · Kampala · Dar es Salaam"
+                        value={malaysiaTripForm.city}
+                        onChange={e => setMalaysiaTripForm({...malaysiaTripForm, city: e.target.value})}
+                        style={{
+                          width:'100%',
+                          padding:'12px 14px',
+                          fontSize:14,
+                          border:'1px solid '+V.line,
+                          borderRadius:9,
+                          background:'#fff',
+                          color:V.ink,
+                          outline:'none',
+                          transition:'border-color .15s',
+                        }}
+                        onFocus={e => e.target.style.borderColor=V.cr}
+                        onBlur={e => e.target.style.borderColor=V.line}
+                      />
+                    </div>
+
+                    {/* Notes */}
+                    <div>
+                      <label style={{display:'block',fontSize:12,fontWeight:600,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Notes (allergies, dietary, anything else)</label>
+                      <textarea
+                        rows="3"
+                        placeholder="Optional"
+                        value={malaysiaTripForm.notes}
+                        onChange={e => setMalaysiaTripForm({...malaysiaTripForm, notes: e.target.value})}
+                        style={{
+                          width:'100%',
+                          padding:'12px 14px',
+                          fontSize:14,
+                          border:'1px solid '+V.line,
+                          borderRadius:9,
+                          background:'#fff',
+                          color:V.ink,
+                          outline:'none',
+                          transition:'border-color .15s',
+                          resize:'vertical',
+                          fontFamily:'inherit',
+                        }}
+                        onFocus={e => e.target.style.borderColor=V.cr}
+                        onBlur={e => e.target.style.borderColor=V.line}
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      // Basic validation
+                      if (!malaysiaTripForm.studentName || !malaysiaTripForm.studentAge ||
+                          !malaysiaTripForm.parentName || !malaysiaTripForm.parentEmail ||
+                          !malaysiaTripForm.parentPhone) {
+                        setToast({type:'error', msg:'Please complete all required fields (marked *).'})
+                        return
+                      }
+                      // Build WhatsApp message and open
+                      const msg = `Malaysia Trip 2026 — application from ${malaysiaTripForm.parentName}.
+
+Student: ${malaysiaTripForm.studentName}, age ${malaysiaTripForm.studentAge}
+Parent: ${malaysiaTripForm.parentName}
+Email: ${malaysiaTripForm.parentEmail}
+WhatsApp: ${malaysiaTripForm.parentPhone}
+City: ${malaysiaTripForm.city || '—'}
+Notes: ${malaysiaTripForm.notes || '—'}`
+                      const url = 'https://wa.me/254745021212?text=' + encodeURIComponent(msg)
+                      window.open(url, '_blank', 'noopener,noreferrer')
+                      setMalaysiaTripSubmitted(true)
+                      setToast({type:'success', msg:'Application sent. We will contact you within one working day.'})
+                    }}
+                    style={{
+                      marginTop:24,
+                      width:'100%',
+                      padding:'15px 28px',
+                      borderRadius:10,
+                      background:V.cr,
+                      color:'#fff',
+                      border:'none',
+                      fontSize:15,
+                      fontWeight:800,
+                      letterSpacing:'.02em',
+                      cursor:'pointer',
+                      display:'inline-flex',
+                      alignItems:'center',
+                      justifyContent:'center',
+                      gap:10,
+                    }}>
+                    Submit Application
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <p style={{textAlign:'center',marginTop:14,fontSize:12,color:V.sl3,lineHeight:1.6}}>
+                    By submitting you consent to Smartious contacting you about this trip. We never share your details. KSh 3,000 registration is paid only after we confirm availability.
+                  </p>
+                </>
+              ) : (
+                <div style={{textAlign:'center',padding:'20px 0'}}>
+                  <div style={{
+                    width:64,
+                    height:64,
+                    borderRadius:'50%',
+                    background:V.cr+'15',
+                    margin:'0 auto 18px',
+                    display:'flex',
+                    alignItems:'center',
+                    justifyContent:'center',
+                  }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+                  </div>
+                  <h3 style={{
+                    fontFamily:"'Playfair Display',serif",
+                    fontSize:'1.5rem',
+                    fontWeight:700,
+                    color:V.ink,
+                    marginBottom:12,
+                  }}>Application received</h3>
+                  <p style={{fontSize:14,color:V.sl,lineHeight:1.7,maxWidth:420,margin:'0 auto'}}>
+                    Thank you, {malaysiaTripForm.parentName}. Our trips team will contact you on {malaysiaTripForm.parentPhone} within one working day to confirm availability and walk you through the next steps.
+                  </p>
+                  <p style={{fontSize:13,color:V.sl3,marginTop:16}}>
+                    Any urgent questions? WhatsApp us at <a href="https://wa.me/254745021212" target="_blank" rel="noopener noreferrer" style={{color:V.cr,fontWeight:700}}>+254 745 021 212</a> or email <a href="mailto:hellosmartious@gmail.com" style={{color:V.cr,fontWeight:700}}>hellosmartious@gmail.com</a>.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <style>{`
+              @media (max-width: 560px) {
+                .malaysia-form-row { grid-template-columns: 1fr !important; }
+                .malaysia-form-card { padding: 28px 24px 32px !important; }
+              }
+            `}</style>
+          </div></section>
+
+          {/* ====================================================== */}
+          {/* END MALAYSIA TRIP                                       */}
+          {/* ====================================================== */}
+
 
           {/* WEEKLY ACTIVITIES — WEDNESDAY 2–4 PM */}
           <section className="sec" style={{background:V.bone}}><div className="wrap">
