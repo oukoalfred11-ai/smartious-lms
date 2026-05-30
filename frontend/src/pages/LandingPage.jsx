@@ -6866,8 +6866,9 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* RIGHT — image collage */}
+                {/* RIGHT — illustrated collage with city silhouette + iconic landmarks */}
                 <div style={{position:'relative',minHeight:480}} className="malaysia-collage">
+                  {/* Large card — Petronas Twin Towers illustrated */}
                   <div style={{
                     position:'absolute',
                     top:0,
@@ -6878,14 +6879,116 @@ export default function LandingPage() {
                     overflow:'hidden',
                     border:'3px solid '+V.gold3,
                     boxShadow:'0 30px 60px rgba(0,0,0,.4)',
+                    background:`linear-gradient(165deg, #1a1a2e 0%, #16213e 45%, ${V.cr} 100%)`,
                   }}>
-                    <img
-                      src="https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=900&q=80&auto=format&fit=crop"
-                      alt="Petronas Twin Towers, Kuala Lumpur — iconic landmark on the Smartious Malaysia academic trip"
-                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}
-                      loading="lazy"
-                    />
+                    <svg viewBox="0 0 600 432" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%',display:'block'}} preserveAspectRatio="xMidYMid slice" role="img" aria-label="Petronas Twin Towers, Kuala Lumpur — Smartious Malaysia academic trip">
+                      {/* Sky gradient stars */}
+                      <defs>
+                        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#0f1729"/>
+                          <stop offset="55%" stopColor="#1a2849"/>
+                          <stop offset="100%" stopColor="#8B1A2E" stopOpacity="0.85"/>
+                        </linearGradient>
+                        <linearGradient id="towerGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#F0CC5A" stopOpacity="0.95"/>
+                          <stop offset="100%" stopColor="#B8960C" stopOpacity="0.85"/>
+                        </linearGradient>
+                      </defs>
+                      <rect width="600" height="432" fill="url(#skyGrad)"/>
+                      
+                      {/* Stars */}
+                      {[
+                        [40,30],[110,55],[180,28],[260,48],[340,35],[420,60],[500,32],[560,52],
+                        [70,90],[150,82],[230,105],[310,88],[390,95],[470,82],[550,98],
+                        [50,150],[220,140],[400,155],[530,138],
+                      ].map(([x,y],i) => (
+                        <circle key={i} cx={x} cy={y} r={i%3===0?1.5:1} fill="#fff" opacity={0.4+(i%5)*0.12}/>
+                      ))}
+                      
+                      {/* Moon */}
+                      <circle cx="490" cy="80" r="22" fill="#F0CC5A" opacity="0.75"/>
+                      <circle cx="498" cy="76" r="18" fill="url(#skyGrad)" opacity="0.6"/>
+                      
+                      {/* Distant city silhouette */}
+                      <g opacity="0.35">
+                        <rect x="0" y="290" width="40" height="70" fill="#000"/>
+                        <rect x="40" y="270" width="35" height="90" fill="#000"/>
+                        <rect x="75" y="300" width="25" height="60" fill="#000"/>
+                        <rect x="100" y="280" width="30" height="80" fill="#000"/>
+                        <rect x="450" y="285" width="30" height="75" fill="#000"/>
+                        <rect x="480" y="265" width="40" height="95" fill="#000"/>
+                        <rect x="520" y="295" width="28" height="65" fill="#000"/>
+                        <rect x="548" y="275" width="35" height="85" fill="#000"/>
+                        <rect x="583" y="290" width="17" height="70" fill="#000"/>
+                      </g>
+                      
+                      {/* Twin Towers — main feature */}
+                      {/* Left tower */}
+                      <g>
+                        {/* Spire */}
+                        <polygon points="218,40 222,40 220,12" fill="#F0CC5A"/>
+                        <rect x="219" y="40" width="2" height="12" fill="#F0CC5A"/>
+                        {/* Top crown */}
+                        <ellipse cx="220" cy="58" rx="20" ry="6" fill="url(#towerGrad)"/>
+                        <ellipse cx="220" cy="62" rx="22" ry="5" fill="#B8960C" opacity="0.9"/>
+                        {/* Upper segment */}
+                        <rect x="200" y="65" width="40" height="40" fill="url(#towerGrad)" opacity="0.92"/>
+                        <ellipse cx="220" cy="105" rx="22" ry="4" fill="#8B6A0A"/>
+                        {/* Mid segment narrowing */}
+                        <polygon points="200,105 240,105 235,135 205,135" fill="url(#towerGrad)" opacity="0.9"/>
+                        <ellipse cx="220" cy="135" rx="17" ry="3" fill="#8B6A0A"/>
+                        {/* Mid wide */}
+                        <rect x="194" y="135" width="52" height="55" fill="url(#towerGrad)" opacity="0.88"/>
+                        <ellipse cx="220" cy="190" rx="26" ry="4" fill="#8B6A0A"/>
+                        {/* Lower wide */}
+                        <rect x="188" y="190" width="64" height="100" fill="url(#towerGrad)" opacity="0.85"/>
+                        <ellipse cx="220" cy="290" rx="32" ry="5" fill="#8B6A0A"/>
+                        {/* Base */}
+                        <rect x="182" y="290" width="76" height="80" fill="url(#towerGrad)" opacity="0.8"/>
+                        {/* Window grid suggestion */}
+                        {[80,95,150,170,210,230,250,270,310,330,350].map((y,i) => (
+                          <line key={i} x1={194+(i%3)*2} y1={y} x2={246-(i%3)*2} y2={y} stroke="#0f1729" strokeWidth="0.6" opacity="0.4"/>
+                        ))}
+                      </g>
+                      
+                      {/* Sky bridge between towers */}
+                      <rect x="245" y="138" width="50" height="14" fill="url(#towerGrad)" opacity="0.7"/>
+                      <line x1="248" y1="141" x2="292" y2="141" stroke="#0f1729" strokeWidth="0.6" opacity="0.5"/>
+                      <line x1="248" y1="148" x2="292" y2="148" stroke="#0f1729" strokeWidth="0.6" opacity="0.5"/>
+                      
+                      {/* Right tower (same as left, mirrored at x=300) */}
+                      <g>
+                        <polygon points="298,40 302,40 300,12" fill="#F0CC5A"/>
+                        <rect x="299" y="40" width="2" height="12" fill="#F0CC5A"/>
+                        <ellipse cx="300" cy="58" rx="20" ry="6" fill="url(#towerGrad)"/>
+                        <ellipse cx="300" cy="62" rx="22" ry="5" fill="#B8960C" opacity="0.9"/>
+                        <rect x="280" y="65" width="40" height="40" fill="url(#towerGrad)" opacity="0.92"/>
+                        <ellipse cx="300" cy="105" rx="22" ry="4" fill="#8B6A0A"/>
+                        <polygon points="280,105 320,105 315,135 285,135" fill="url(#towerGrad)" opacity="0.9"/>
+                        <ellipse cx="300" cy="135" rx="17" ry="3" fill="#8B6A0A"/>
+                        <rect x="274" y="135" width="52" height="55" fill="url(#towerGrad)" opacity="0.88"/>
+                        <ellipse cx="300" cy="190" rx="26" ry="4" fill="#8B6A0A"/>
+                        <rect x="268" y="190" width="64" height="100" fill="url(#towerGrad)" opacity="0.85"/>
+                        <ellipse cx="300" cy="290" rx="32" ry="5" fill="#8B6A0A"/>
+                        <rect x="262" y="290" width="76" height="80" fill="url(#towerGrad)" opacity="0.8"/>
+                        {[80,95,150,170,210,230,250,270,310,330,350].map((y,i) => (
+                          <line key={i} x1={274+(i%3)*2} y1={y} x2={326-(i%3)*2} y2={y} stroke="#0f1729" strokeWidth="0.6" opacity="0.4"/>
+                        ))}
+                      </g>
+                      
+                      {/* Reflection in foreground */}
+                      <rect x="0" y="370" width="600" height="62" fill="#000" opacity="0.4"/>
+                      <g opacity="0.18" transform="translate(0, 740) scale(1, -1)">
+                        <rect x="188" y="190" width="64" height="100" fill="#F0CC5A"/>
+                        <rect x="268" y="190" width="64" height="100" fill="#F0CC5A"/>
+                      </g>
+                      
+                      {/* Caption */}
+                      <text x="300" y="412" textAnchor="middle" fill="#F0CC5A" fontSize="13" fontFamily="serif" fontStyle="italic" opacity="0.85">Petronas Twin Towers · Kuala Lumpur</text>
+                    </svg>
                   </div>
+                  
+                  {/* Small overlapping card — Batu Caves illustrated */}
                   <div style={{
                     position:'absolute',
                     bottom:0,
@@ -6896,13 +6999,80 @@ export default function LandingPage() {
                     overflow:'hidden',
                     border:'3px solid '+V.gold3,
                     boxShadow:'0 20px 40px rgba(0,0,0,.5)',
+                    background:`linear-gradient(180deg, #FFE4B5 0%, #FF6B9D 30%, #C44569 60%, #6C2A6A 100%)`,
                   }}>
-                    <img
-                      src="https://images.unsplash.com/photo-1597531072931-8cabba8f6b5d?w=700&q=80&auto=format&fit=crop"
-                      alt="Batu Caves rainbow steps, Kuala Lumpur — cultural visit on the Malaysia trip"
-                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}
-                      loading="lazy"
-                    />
+                    <svg viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%',display:'block'}} preserveAspectRatio="xMidYMid slice" role="img" aria-label="Batu Caves rainbow steps — cultural visit on the Smartious Malaysia trip">
+                      <defs>
+                        <linearGradient id="caveGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#FFD89B"/>
+                          <stop offset="100%" stopColor="#C9A227"/>
+                        </linearGradient>
+                      </defs>
+                      
+                      {/* Sky/limestone cliff backdrop */}
+                      <rect width="400" height="250" fill="#FFE4B5"/>
+                      
+                      {/* Limestone cliff silhouette */}
+                      <path d="M 0,80 Q 50,40 100,55 Q 160,30 220,50 Q 280,35 340,60 Q 380,45 400,55 L 400,180 L 0,180 Z" fill="#8B6F47" opacity="0.7"/>
+                      <path d="M 0,100 Q 70,75 140,85 Q 210,70 280,90 Q 340,80 400,95 L 400,180 L 0,180 Z" fill="#6B5435" opacity="0.6"/>
+                      
+                      {/* Cave entrance — dark arch */}
+                      <ellipse cx="200" cy="100" rx="42" ry="30" fill="#1a0e0a" opacity="0.85"/>
+                      
+                      {/* Golden Murugan statue suggestion */}
+                      <ellipse cx="80" cy="135" rx="14" ry="42" fill="url(#caveGrad)"/>
+                      <circle cx="80" cy="95" r="11" fill="url(#caveGrad)"/>
+                      
+                      {/* RAINBOW STAIRCASE — the iconic element */}
+                      {[
+                        ['#FF4757', 0],
+                        ['#FF6348', 1],
+                        ['#FFA502', 2],
+                        ['#FFDD59', 3],
+                        ['#2ED573', 4],
+                        ['#1E90FF', 5],
+                        ['#5352ED', 6],
+                        ['#A55EEA', 7],
+                        ['#FF4757', 8],
+                        ['#FF6348', 9],
+                        ['#FFA502', 10],
+                        ['#FFDD59', 11],
+                        ['#2ED573', 12],
+                        ['#1E90FF', 13],
+                        ['#5352ED', 14],
+                        ['#A55EEA', 15],
+                      ].map(([color, i]) => {
+                        const y = 132 + i * 7
+                        const widthFromTop = 50 + i * 12
+                        return (
+                          <rect
+                            key={i}
+                            x={200 - widthFromTop/2}
+                            y={y}
+                            width={widthFromTop}
+                            height="6"
+                            fill={color}
+                            opacity="0.95"
+                          />
+                        )
+                      })}
+                      
+                      {/* Step shadows */}
+                      {[...Array(16)].map((_,i) => (
+                        <rect
+                          key={i}
+                          x={200 - (50 + i * 12)/2}
+                          y={138 + i * 7}
+                          width={50 + i * 12}
+                          height="1"
+                          fill="#000"
+                          opacity="0.18"
+                        />
+                      ))}
+                      
+                      {/* Caption */}
+                      <text x="200" y="240" textAnchor="middle" fill="#fff" fontSize="11" fontFamily="serif" fontStyle="italic" opacity="0.95" style={{textShadow:'0 1px 3px rgba(0,0,0,.5)'}}>Batu Caves · Rainbow Steps</text>
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -6946,7 +7116,8 @@ export default function LandingPage() {
                 {
                   day:'01',
                   title:'Arrival & Kuala Lumpur City Tour',
-                  img:'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=700&q=80&auto=format&fit=crop',
+                  theme:'twin-towers',
+                  gradient:'linear-gradient(135deg, #1a2849 0%, #8B1A2E 100%)',
                   items:[
                     'Arrival in Kuala Lumpur',
                     'Petronas Twin Towers (photo stop)',
@@ -6957,7 +7128,8 @@ export default function LandingPage() {
                 {
                   day:'02',
                   title:'STEM & University Experience',
-                  img:'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=700&q=80&auto=format&fit=crop',
+                  theme:'university',
+                  gradient:'linear-gradient(135deg, #0F766E 0%, #1E3A8A 100%)',
                   items:[
                     'Visit to a top Malaysian university',
                     'Campus tour & student interaction',
@@ -6968,7 +7140,8 @@ export default function LandingPage() {
                 {
                   day:'03',
                   title:'Theme Park Adventure',
-                  img:'https://images.unsplash.com/photo-1583407723467-9b2d22504831?w=700&q=80&auto=format&fit=crop',
+                  theme:'theme-park',
+                  gradient:'linear-gradient(135deg, #F97316 0%, #DC2626 100%)',
                   items:[
                     'Full day at Sunway Lagoon or Genting SkyWorlds',
                     'Rides, attractions & water park',
@@ -6979,7 +7152,8 @@ export default function LandingPage() {
                 {
                   day:'04',
                   title:'Cultural Experience & Departure',
-                  img:'https://images.unsplash.com/photo-1597531072931-8cabba8f6b5d?w=700&q=80&auto=format&fit=crop',
+                  theme:'batu-caves',
+                  gradient:'linear-gradient(135deg, #FFA502 0%, #5352ED 50%, #A55EEA 100%)',
                   items:[
                     'Cultural visit — Batu Caves',
                     'Central Market & local handicrafts',
@@ -7004,20 +7178,117 @@ export default function LandingPage() {
                   e.currentTarget.style.transform='translateY(0)'
                   e.currentTarget.style.boxShadow='none'
                 }}>
-                  {/* day image */}
-                  <div style={{position:'relative',height:170,overflow:'hidden'}}>
-                    <img
-                      src={d.img}
-                      alt={`Day ${d.day}: ${d.title}`}
-                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}
-                      loading="lazy"
-                    />
+                  {/* day header — themed gradient with iconic illustration */}
+                  <div style={{position:'relative',height:170,overflow:'hidden',background:d.gradient}}>
+                    {/* themed SVG icon overlay */}
+                    <svg viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%',display:'block',opacity:0.85}} preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                      {d.theme === 'twin-towers' && (
+                        <g>
+                          {/* Stars */}
+                          {[[30,25],[80,15],[140,30],[200,18],[260,28]].map(([x,y],i) => (
+                            <circle key={i} cx={x} cy={y} r="1" fill="#F0CC5A" opacity="0.7"/>
+                          ))}
+                          {/* Twin towers silhouette */}
+                          <g fill="#F0CC5A" opacity="0.95">
+                            <polygon points="128,35 132,35 130,18"/>
+                            <rect x="129" y="35" width="2" height="8"/>
+                            <ellipse cx="130" cy="48" rx="12" ry="3"/>
+                            <rect x="118" y="51" width="24" height="24"/>
+                            <rect x="115" y="75" width="30" height="32"/>
+                            <rect x="111" y="107" width="38" height="55"/>
+                            
+                            <polygon points="168,35 172,35 170,18"/>
+                            <rect x="169" y="35" width="2" height="8"/>
+                            <ellipse cx="170" cy="48" rx="12" ry="3"/>
+                            <rect x="158" y="51" width="24" height="24"/>
+                            <rect x="155" y="75" width="30" height="32"/>
+                            <rect x="151" y="107" width="38" height="55"/>
+                          </g>
+                          {/* Sky bridge */}
+                          <rect x="142" y="77" width="16" height="6" fill="#F0CC5A" opacity="0.85"/>
+                        </g>
+                      )}
+                      {d.theme === 'university' && (
+                        <g fill="#F0CC5A" opacity="0.92">
+                          {/* University building — neoclassical */}
+                          {/* Steps */}
+                          <rect x="60" y="135" width="180" height="6"/>
+                          <rect x="70" y="128" width="160" height="7"/>
+                          {/* Columns */}
+                          {[85,110,135,160,185,210].map((x,i) => (
+                            <g key={i}>
+                              <rect x={x-3} y="75" width="6" height="53"/>
+                              <rect x={x-5} y="70" width="10" height="6"/>
+                              <rect x={x-5} y="125" width="10" height="4"/>
+                            </g>
+                          ))}
+                          {/* Pediment (triangle roof) */}
+                          <polygon points="55,70 245,70 150,30"/>
+                          {/* Star/symbol on pediment */}
+                          <polygon points="150,42 153,50 161,50 154,55 157,63 150,58 143,63 146,55 139,50 147,50" fill="#fff" opacity="0.9"/>
+                        </g>
+                      )}
+                      {d.theme === 'theme-park' && (
+                        <g>
+                          {/* Ferris wheel */}
+                          <g fill="#fff" opacity="0.92">
+                            <circle cx="150" cy="80" r="45" fill="none" stroke="#fff" strokeWidth="3"/>
+                            <circle cx="150" cy="80" r="5"/>
+                            {/* Spokes */}
+                            {[0,45,90,135,180,225,270,315].map((deg,i) => {
+                              const rad = deg * Math.PI / 180
+                              const x2 = 150 + Math.cos(rad) * 45
+                              const y2 = 80 + Math.sin(rad) * 45
+                              return <line key={i} x1="150" y1="80" x2={x2} y2={y2} stroke="#fff" strokeWidth="2" opacity="0.7"/>
+                            })}
+                            {/* Cabins */}
+                            {[0,45,90,135,180,225,270,315].map((deg,i) => {
+                              const rad = deg * Math.PI / 180
+                              const cx = 150 + Math.cos(rad) * 45
+                              const cy = 80 + Math.sin(rad) * 45
+                              return <circle key={i} cx={cx} cy={cy} r="6" fill="#F0CC5A"/>
+                            })}
+                          </g>
+                          {/* Base */}
+                          <rect x="145" y="125" width="10" height="35" fill="#fff" opacity="0.92"/>
+                          <polygon points="120,160 180,160 175,150 125,150" fill="#fff" opacity="0.92"/>
+                        </g>
+                      )}
+                      {d.theme === 'batu-caves' && (
+                        <g>
+                          {/* Cave entrance arch */}
+                          <ellipse cx="150" cy="60" rx="40" ry="28" fill="#1a0e0a" opacity="0.65"/>
+                          {/* Murugan statue */}
+                          <ellipse cx="80" cy="90" rx="9" ry="28" fill="#F0CC5A" opacity="0.95"/>
+                          <circle cx="80" cy="63" r="7" fill="#F0CC5A" opacity="0.95"/>
+                          {/* Rainbow stairs */}
+                          {[
+                            ['#FF4757', 0],
+                            ['#FFA502', 1],
+                            ['#FFDD59', 2],
+                            ['#2ED573', 3],
+                            ['#1E90FF', 4],
+                            ['#5352ED', 5],
+                            ['#A55EEA', 6],
+                            ['#FF4757', 7],
+                            ['#FFA502', 8],
+                            ['#FFDD59', 9],
+                            ['#2ED573', 10],
+                            ['#1E90FF', 11],
+                          ].map(([color, i]) => {
+                            const y = 88 + i * 6
+                            const w = 38 + i * 10
+                            return <rect key={i} x={150 - w/2} y={y} width={w} height="5" fill={color} opacity="0.95"/>
+                          })}
+                        </g>
+                      )}
+                    </svg>
                     <div style={{
                       position:'absolute',
                       top:14,
                       left:14,
-                      background:V.cr,
-                      color:'#fff',
+                      background:V.gold3,
+                      color:V.ink,
                       borderRadius:8,
                       padding:'4px 12px',
                       fontSize:10,
@@ -7485,7 +7756,8 @@ export default function LandingPage() {
                       if (!malaysiaTripForm.studentName || !malaysiaTripForm.studentAge ||
                           !malaysiaTripForm.parentName || !malaysiaTripForm.parentEmail ||
                           !malaysiaTripForm.parentPhone) {
-                        setToast({type:'error', msg:'Please complete all required fields (marked *).'})
+                        setToast('Please complete all required fields (marked *).')
+                        setTimeout(() => setToast(null), 3200)
                         return
                       }
                       // Build WhatsApp message and open
@@ -7500,7 +7772,8 @@ Notes: ${malaysiaTripForm.notes || '—'}`
                       const url = 'https://wa.me/254745021212?text=' + encodeURIComponent(msg)
                       window.open(url, '_blank', 'noopener,noreferrer')
                       setMalaysiaTripSubmitted(true)
-                      setToast({type:'success', msg:'Application sent. We will contact you within one working day.'})
+                      setToast('Application sent. We will contact you within one working day.')
+                      setTimeout(() => setToast(null), 3200)
                     }}
                     style={{
                       marginTop:24,
