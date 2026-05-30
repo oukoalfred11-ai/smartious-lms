@@ -104,7 +104,7 @@ function useHeroPreload(active) {
     link.as = 'video'
     const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
     link.href = isMobile
-      ? 'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_768,c_limit/hero_mhhwhf.mp4'
+      ? 'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_1080,h_1920,c_fill,g_auto/hero_mhhwhf.mp4'
       : 'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_1920,c_limit/hero_mhhwhf.mp4'
     link.setAttribute('type', 'video/mp4')
     link.setAttribute('fetchpriority', 'high')
@@ -594,7 +594,7 @@ const styles = `
     .lp .h-mob-stats{display:none!important}
     .lp .h-stats-strip{display:block}
     .lp #hero{min-height:0;height:auto;max-height:720px}
-    .lp .h-bg{object-position:center center}
+    .lp .h-bg{object-position:center center;filter:brightness(1.08) saturate(1.05) contrast(1.02)}
     .lp .h-vig{height:140px}
     .lp .h-body{min-height:60vh;max-height:640px;padding-top:48px;padding-bottom:56px}
     .lp .mob-burger{display:flex!important}
@@ -2106,7 +2106,7 @@ export default function LandingPage() {
               aria-hidden="true"
             >
               <source
-                src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_768,c_limit/hero_mhhwhf.mp4"
+                src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_1080,h_1920,c_fill,g_auto/hero_mhhwhf.mp4"
                 media="(max-width: 768px)"
               />
               <source
