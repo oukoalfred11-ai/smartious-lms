@@ -6824,6 +6824,8 @@ export default function LandingPage() {
                   title:'Cultural Experience & Departure',
                   theme:'batu-caves',
                   gradient:'linear-gradient(135deg, #FFA502 0%, #5352ED 50%, #A55EEA 100%)',
+                  videoMp4:'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_700/0530_1_fmf0lw.mp4',
+                  videoPoster:'https://res.cloudinary.com/dae99gz1m/video/upload/so_0/0530_1_fmf0lw.jpg',
                   items:[
                     'Cultural visit — Batu Caves',
                     'Central Market & local handicrafts',
