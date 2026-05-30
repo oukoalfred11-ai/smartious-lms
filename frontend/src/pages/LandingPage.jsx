@@ -6652,9 +6652,9 @@ export default function LandingPage() {
             '@context': 'https://schema.org',
             '@type': 'Event',
             'name': 'Smartious Academic Trip to Malaysia 2026',
-            'description': 'Four-day academic trip to Kuala Lumpur, Malaysia for Smartious students aged 10–18. Includes Petronas Twin Towers visit, top Malaysian university campus tour, STEM workshop, Sunway Lagoon theme park, Batu Caves cultural visit. Fully supervised by Smartious teachers (1:10 ratio). Departing from Nairobi.',
-            'startDate': '2026-07-27',
-            'endDate': '2026-07-30',
+            'description': 'Five-day academic trip to Kuala Lumpur, Malaysia for Smartious students aged 10–18. Includes Petronas Twin Towers visit, top Malaysian university campus tour, STEM workshop, Sunway Lagoon theme park, Batu Caves cultural visit. Fully supervised by Smartious teachers (1:10 ratio). Departing from Nairobi.',
+            'startDate': '2026-08-10',
+            'endDate': '2026-08-14',
             'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
             'eventStatus': 'https://schema.org/EventScheduled',
             'location': [
@@ -6667,10 +6667,10 @@ export default function LandingPage() {
               '@type': 'Offer',
               'price': '1950',
               'priceCurrency': 'USD',
-              'priceValidUntil': '2026-06-30',
+              'priceValidUntil': '2026-08-05',
               'availability': 'https://schema.org/LimitedAvailability',
               'url': 'https://smartioushomeschool.com/activities',
-              'validFrom': '2026-04-01',
+              'validFrom': '2026-06-01',
             },
             'audience': { '@type': 'EducationalAudience', 'audienceType': 'Students aged 10-18' },
             'image': 'https://smartioushomeschool.com/smartious-logo.png',
@@ -7185,9 +7185,9 @@ export default function LandingPage() {
                 <div style={{fontSize:13,color:V.sl,fontWeight:600,marginTop:18,marginBottom:14,textTransform:'uppercase',letterSpacing:'.06em'}}>Payment schedule · Twin room</div>
                 {[
                   {label:'Registration (non-refundable)',  amt:'KSh 3,000',   date:'On application'},
-                  {label:'1st instalment',                  amt:'KSh 80,000',  date:'30 April 2026'},
-                  {label:'2nd instalment',                  amt:'KSh 100,000', date:'31 May 2026'},
-                  {label:'3rd instalment',                  amt:'KSh 100,000', date:'30 June 2026'},
+                  {label:'1st instalment',                  amt:'KSh 90,000',  date:'30 June 2026'},
+                  {label:'2nd instalment',                  amt:'KSh 90,000',  date:'31 July 2026'},
+                  {label:'3rd instalment',                  amt:'KSh 97,000',  date:'5 August 2026'},
                 ].map((p,i) => (
                   <div key={i} style={{
                     display:'grid',
@@ -7204,6 +7204,94 @@ export default function LandingPage() {
                     <div style={{color:V.sl3,fontSize:12.5}}>{p.date}</div>
                   </div>
                 ))}
+              </div>
+
+              {/* PAYMENT METHODS — M-PESA + ONLINE */}
+              <div style={{padding:'24px 32px 8px',borderTop:'1px solid '+V.line,background:V.bone}}>
+                <div style={{fontSize:13,color:V.sl,fontWeight:600,marginBottom:18,textTransform:'uppercase',letterSpacing:'.06em'}}>How to pay</div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}} className="malaysia-pay-methods">
+                  {/* M-PESA */}
+                  <div style={{
+                    background:'#fff',
+                    border:'1px solid '+V.line,
+                    borderRadius:12,
+                    padding:'18px 18px 20px',
+                  }}>
+                    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+                      <div style={{
+                        width:34,
+                        height:34,
+                        borderRadius:8,
+                        background:'#43B02A',
+                        display:'flex',
+                        alignItems:'center',
+                        justifyContent:'center',
+                        color:'#fff',
+                        fontWeight:800,
+                        fontSize:10,
+                        letterSpacing:'.04em',
+                      }}>M-PESA</div>
+                      <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink}}>Pay via M-Pesa</div>
+                    </div>
+                    <div style={{fontSize:12,color:V.sl3,marginBottom:6,letterSpacing:'.04em'}}>Paybill Number</div>
+                    <div style={{fontSize:20,fontWeight:800,color:V.cr,letterSpacing:'.02em',marginBottom:14,fontFamily:"'Playfair Display',serif"}}>247 247</div>
+                    <div style={{fontSize:12,color:V.sl3,marginBottom:4,letterSpacing:'.04em'}}>Account Number</div>
+                    <div style={{fontSize:16,fontWeight:700,color:V.ink,marginBottom:10}}>745021</div>
+                    <div style={{fontSize:11,color:V.sl,lineHeight:1.5}}>
+                      Account Name: <strong style={{color:V.ink}}>Smartious Edtech</strong>
+                    </div>
+                  </div>
+
+                  {/* PAYSTACK ONLINE */}
+                  <div style={{
+                    background:'#fff',
+                    border:'1px solid '+V.line,
+                    borderRadius:12,
+                    padding:'18px 18px 20px',
+                  }}>
+                    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+                      <div style={{
+                        width:34,
+                        height:34,
+                        borderRadius:8,
+                        background:'#011B33',
+                        display:'flex',
+                        alignItems:'center',
+                        justifyContent:'center',
+                        color:'#00C3F7',
+                        fontWeight:800,
+                        fontSize:10,
+                        letterSpacing:'.04em',
+                      }}>PAY</div>
+                      <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink}}>Pay online</div>
+                    </div>
+                    <div style={{fontSize:13,color:V.sl,lineHeight:1.6,marginBottom:14}}>
+                      Pay by card, bank transfer or Apple Pay through our secure Paystack gateway. Works internationally for diaspora and expat families.
+                    </div>
+                    <a
+                      href="https://paystack.com/pay/smartious-malaysia-trip"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display:'inline-flex',
+                        alignItems:'center',
+                        gap:8,
+                        padding:'10px 18px',
+                        borderRadius:8,
+                        background:V.cr,
+                        color:'#fff',
+                        textDecoration:'none',
+                        fontSize:13,
+                        fontWeight:700,
+                      }}>
+                      Pay with Paystack
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                  </div>
+                </div>
+                <p style={{fontSize:12,color:V.sl3,lineHeight:1.6,marginTop:14,textAlign:'center'}}>
+                  Please reference the student's full name on every payment. WhatsApp us a screenshot of the M-Pesa confirmation message and we will email you a receipt within 24 hours.
+                </p>
               </div>
 
               {/* Requirements footer */}
@@ -7235,6 +7323,7 @@ export default function LandingPage() {
               @media (max-width: 700px) {
                 .malaysia-pay-head { grid-template-columns: 1fr !important; text-align: left !important; }
                 .malaysia-pay-head > div:last-child { text-align: left !important; }
+                .malaysia-pay-methods { grid-template-columns: 1fr !important; }
               }
             `}</style>
           </div></section>
@@ -7521,7 +7610,7 @@ export default function LandingPage() {
                     )}
                   </button>
                   <p style={{textAlign:'center',marginTop:14,fontSize:12,color:V.sl3,lineHeight:1.6}}>
-                    By submitting you consent to Smartious contacting you about this trip on the details you provide. Your application is emailed directly to <strong style={{color:V.cr}}>hellosmartious@gmail.com</strong>. We never share your details. KSh 3,000 registration is paid only after we confirm availability.
+                    By submitting you consent to Smartious contacting you about this trip on the details you provide. We never share your details. KSh 3,000 registration is paid only after we confirm availability.
                   </p>
                   <div style={{textAlign:'center',marginTop:18,paddingTop:18,borderTop:'1px solid '+V.line}}>
                     <p style={{fontSize:12,color:V.sl3,marginBottom:10}}>Prefer to message us directly?</p>
