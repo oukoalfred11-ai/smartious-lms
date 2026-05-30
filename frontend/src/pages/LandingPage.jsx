@@ -7,6 +7,7 @@ import { COUNTRIES } from '../data/countries.js'
 import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
 import { FULL_ARTICLES } from '../data/fullArticles.js'
+import { NAIROBI_AREAS } from '../data/nairobiAreas.js'
 
 
 /* ── Front Desk capture ───────────────────────────────────
@@ -728,7 +729,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1488,6 +1489,7 @@ export default function LandingPage() {
   const [currentCurriculum, setCurrentCurriculum] = useState(null)
   const [currentService, setCurrentService] = useState(null)
   const [currentCountry, setCurrentCountry] = useState(null)
+  const [currentTuitionArea, setCurrentTuitionArea] = useState(null)
   const [currentCompare, setCurrentCompare] = useState(null)
   const [publicTeachers, setPublicTeachers] = useState([])
   const [teachersLoading, setTeachersLoading] = useState(false)
@@ -1875,6 +1877,22 @@ export default function LandingPage() {
       }
       return
     }
+    if (path === '/tuition-nairobi') {
+      setPage('tuition-nairobi')
+      return
+    }
+    if (path.startsWith('/tuition/')) {
+      const slug = decodeURIComponent(path.slice('/tuition/'.length))
+      const area = NAIROBI_AREAS.find(a => a.slug === slug)
+      if (area) {
+        setCurrentTuitionArea(slug)
+        setPage('tuition-area')
+      } else {
+        // Unknown tuition area — fall back to the main tuition page
+        setPage('tuition-nairobi')
+      }
+      return
+    }
     if (path.startsWith('/compare/')) {
       const slug = decodeURIComponent(path.slice('/compare/'.length))
       const cmp = COMPARES.find(c => c.slug === slug)
@@ -1998,6 +2016,14 @@ export default function LandingPage() {
   const openCountry = (slug) => {
     if (!slug) return
     nav('/online-school/' + encodeURIComponent(slug))
+    window.scrollTo(0, 0)
+    topRef.current?.scrollIntoView()
+  }
+
+  // openTuitionArea(slug) — navigate to a Nairobi tuition neighbourhood page
+  const openTuitionArea = (slug) => {
+    if (!slug) return
+    nav('/tuition/' + encodeURIComponent(slug))
     window.scrollTo(0, 0)
     topRef.current?.scrollIntoView()
   }
@@ -6672,6 +6698,543 @@ export default function LandingPage() {
       )}
 
       {/* ══════════════════════════════════════════
+          TUITION NAIROBI — Hub page at /tuition-nairobi
+          Targets Nairobi-wide tuition keywords. Links to
+          20 neighbourhood child pages at /tuition/{slug}.
+      ══════════════════════════════════════════ */}
+      {page === 'tuition-nairobi' && (
+        <>
+          {/* Schema — LocalBusiness, Service, BreadcrumbList, FAQPage */}
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'LocalBusiness',
+            '@id': 'https://smartioushomeschool.com/tuition-nairobi#business',
+            'name': 'Smartious Tuition Nairobi',
+            'description': 'Home tuition and online tutoring across Nairobi. Qualified teachers for CBC, IGCSE, A-Level, IB Diploma and American curricula.',
+            'url': 'https://smartioushomeschool.com/tuition-nairobi',
+            'telephone': '+254745021212',
+            'email': 'hellosmartious@gmail.com',
+            'address': { '@type': 'PostalAddress', 'streetAddress': 'Diamond Plaza, Parklands', 'addressLocality': 'Nairobi', 'addressRegion': 'Nairobi', 'addressCountry': 'KE' },
+            'areaServed': NAIROBI_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', Nairobi' })),
+            'priceRange': 'USD 8/hour online · From KSh 1,500/hour home tuition',
+          })}}/>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            'itemListElement': [
+              { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
+              { '@type': 'ListItem', 'position': 2, 'name': 'Tuition Nairobi', 'item': 'https://smartioushomeschool.com/tuition-nairobi' },
+            ],
+          })}}/>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Service',
+            'serviceType': 'Private Home Tuition & Online Tutoring',
+            'provider': { '@type': 'EducationalOrganization', 'name': 'Smartious Homeschool & eSchool' },
+            'areaServed': { '@type': 'City', 'name': 'Nairobi' },
+            'offers': { '@type': 'AggregateOffer', 'priceCurrency': 'USD', 'lowPrice': '8', 'highPrice': '15' },
+            'description': 'Qualified home tutors visit students across Nairobi. Online tuition delivered live by subject specialists in CBC, IGCSE, Cambridge A-Level, IB Diploma, Pearson Edexcel and American curricula.',
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',
+            padding:'72px 0 56px',
+          }}>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:14}}>Tuition Services · Nairobi</div>
+              <h1 style={{
+                fontFamily:"'Playfair Display',serif",
+                fontSize:'clamp(2.2rem,5vw,3.4rem)',
+                fontWeight:700,
+                color:'#fff',
+                lineHeight:1.05,
+                marginBottom:18,
+              }}>
+                Premium Tuition Across <em style={{color:V.gold3,fontStyle:'italic'}}>Nairobi</em> — Home & Online
+              </h1>
+              <p style={{
+                fontSize:17,
+                color:'rgba(255,255,255,.86)',
+                lineHeight:1.65,
+                marginBottom:24,
+                maxWidth:760,
+              }}>
+                Qualified subject specialists for <strong style={{color:V.gold3}}>CBC, Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American curricula</strong>. Home tuition across 20 Nairobi neighbourhoods. Online tuition from USD 8/hour anywhere in the world.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:32}}>
+                <button onClick={() => P('consult')}
+                  style={{
+                    background:V.gold3,color:V.ink,border:'none',
+                    padding:'13px 26px',borderRadius:8,
+                    fontSize:14,fontWeight:800,letterSpacing:'.02em',
+                    cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,
+                  }}>
+                  Book Free Consultation
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <a
+                  href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20to%20discuss%20tuition%20in%20Nairobi."
+                  target="_blank" rel="noopener noreferrer"
+                  style={{
+                    background:'#25D366',color:'#fff',textDecoration:'none',
+                    padding:'13px 26px',borderRadius:8,
+                    fontSize:14,fontWeight:700,
+                    display:'inline-flex',alignItems:'center',gap:8,
+                  }}>
+                  WhatsApp +254 745 021 212
+                </a>
+              </div>
+
+              {/* Quick stats */}
+              <div style={{
+                display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:14,
+              }}>
+                {[
+                  ['20', 'Nairobi neighbourhoods'],
+                  ['USD 8', 'per online hour'],
+                  ['7', 'curricula covered'],
+                  ['1:1', 'personal attention'],
+                ].map(([n,l]) => (
+                  <div key={l} style={{
+                    background:'rgba(255,255,255,.08)',
+                    border:'1px solid rgba(240,204,90,.25)',
+                    borderRadius:10,padding:'14px 16px',
+                  }}>
+                    <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:800,color:V.gold3,lineHeight:1}}>{n}</div>
+                    <div style={{fontSize:11,color:'rgba(255,255,255,.7)',marginTop:6,letterSpacing:'.04em',textTransform:'uppercase'}}>{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* WHY SMARTIOUS TUITION */}
+          <section className="sec" style={{background:'#fff'}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>What sets us apart</div>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                Why Nairobi parents <em style={{color:V.cr}}>choose Smartious</em>
+              </h2>
+              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
+                We are not a freelance tutor marketplace. Smartious is an established international online school with a Nairobi-based teaching team — every tutor is on our staff, safeguarding-checked, and accountable to consistent quality standards.
+              </p>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1100,margin:'0 auto'}}>
+              {[
+                {h:'Same teachers as our full school', p:'Our tutors are the same subject specialists who teach our full online programme. Not random freelancers — qualified, vetted, accountable people you\'d trust with your child long-term.'},
+                {h:'Subject specialists, not generalists', p:'A Maths tutor with a Maths degree. A Physics tutor with a Physics degree. A Chemistry tutor with a Chemistry degree. We match each student to a tutor with genuine subject expertise.'},
+                {h:'Home visits across Nairobi', p:'Our tutors travel to families in 20 Nairobi neighbourhoods — Karen, Lavington, Kilimani, Westlands, Parklands, Runda, Muthaiga and beyond. Transport contribution applies for more distant estates.'},
+                {h:'Online tuition for everyone', p:'Live, interactive online tuition delivered via our learning platform. The same 1-on-1 attention as a home visit, with no commute risk and faster scheduling. Recommended for distant estates and diaspora families.'},
+                {h:'Transparent USD pricing', p:'USD 8 per hour for online tuition. KSh 1,500–2,500 per session for home tuition depending on location. No hidden fees. No long contracts. Pay per session or in 10-hour blocks.'},
+                {h:'7 curricula covered', p:'CBC (Kenyan), Cambridge IGCSE, Cambridge A-Level, IB MYP, IB Diploma, Pearson Edexcel International and American Curriculum (including AP). KCSE revision and university admissions (UCAS, Common App, SAT) also available.'},
+              ].map(item => (
+                <div key={item.h} style={{
+                  background:V.bone,border:'1px solid '+V.line,borderRadius:14,
+                  padding:'22px 22px',
+                }}>
+                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.1rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>{item.h}</h3>
+                  <p style={{fontSize:14,color:V.sl,lineHeight:1.65}}>{item.p}</p>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* SUBJECTS WE TEACH */}
+          <section className="sec" style={{background:V.bone}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Subjects we teach</div>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                Every subject, every level
+              </h2>
+              <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
+                We have qualified specialists across the full primary and secondary syllabus, plus pre-university examinations.
+              </p>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:18,maxWidth:1100,margin:'0 auto'}} className="subjects-grid">
+              {[
+                { tier:'Primary',  list:['Mathematics','English','Kiswahili','Science & Technology','Social Studies','Creative Arts','Religious Education'] },
+                { tier:'Secondary', list:['Mathematics','Physics','Chemistry','Biology','English Language & Literature','Geography','History','Business Studies','Computer Science','French','Arabic'] },
+                { tier:'Pre-University', list:['Cambridge IGCSE','Cambridge A-Level','IB Diploma (HL & SL)','Pearson Edexcel International','AP courses','SAT preparation','IELTS preparation','UCAS / Common App support'] },
+              ].map(g => (
+                <div key={g.tier} style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 24px'}}>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:14,paddingBottom:10,borderBottom:'1px solid '+V.line}}>{g.tier}</div>
+                  <ul style={{listStyle:'none',padding:0,margin:0}}>
+                    {g.list.map(s => (
+                      <li key={s} style={{padding:'7px 0',fontSize:13.5,color:V.sl,borderBottom:'1px dashed '+V.line,display:'flex',alignItems:'center',gap:8}}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={V.gold2} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0}}><path d="M5 12l5 5L20 7"/></svg>
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            <style>{`@media (max-width: 800px) { .subjects-grid { grid-template-columns: 1fr !important; } }`}</style>
+          </div></section>
+
+          {/* SERVICE TYPES */}
+          <section className="sec" style={{background:'#fff'}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>How tuition works</div>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                Four ways to learn with Smartious
+              </h2>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1100,margin:'0 auto'}}>
+              {[
+                {h:'Home Tuition', d:'A qualified tutor visits your home on a schedule that suits your family. Available across 20 Nairobi neighbourhoods. Transport contribution applies for distant areas.', price:'From KSh 1,500/session'},
+                {h:'Online Tuition', d:'Interactive 1-on-1 sessions live with your tutor via our online platform. Same attention, no commute. Available globally.', price:'USD 8/hour (≈ KSh 1,040)'},
+                {h:'Exam Preparation', d:'Targeted revision for KCSE, IGCSE, Cambridge Checkpoint, A-Level, IB Diploma and SAT. Past-paper drilling, technique coaching, full mock examination programmes.', price:'USD 8–15/hour'},
+                {h:'Holiday Intensive', d:'Concentrated tuition during April, August and December school breaks. Daily sessions for 2–4 weeks. Catch up or accelerate ahead.', price:'Block bookings available'},
+              ].map(s => (
+                <div key={s.h} style={{
+                  background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px',
+                }}>
+                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:10,lineHeight:1.3}}>{s.h}</h3>
+                  <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,marginBottom:12}}>{s.d}</p>
+                  <div style={{
+                    paddingTop:10,borderTop:'1px dashed '+V.line,
+                    fontSize:13,fontWeight:700,color:V.cr,
+                  }}>{s.price}</div>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* AREAS WE SERVE — 20 NEIGHBOURHOOD GRID */}
+          <section className="sec" style={{background:V.bone}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Areas we serve</div>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                Home tuition across <em style={{color:V.cr}}>20 Nairobi neighbourhoods</em>
+              </h2>
+              <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
+                Click any neighbourhood for specific information about local schools, commute timings, and tutor availability in your area.
+              </p>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:12,maxWidth:1100,margin:'0 auto'}}>
+              {NAIROBI_AREAS.map(area => (
+                <a
+                  key={area.slug}
+                  href={'/tuition/' + area.slug}
+                  onClick={(e) => { e.preventDefault(); openTuitionArea(area.slug) }}
+                  style={{
+                    background:'#fff',border:'1px solid '+V.line,borderRadius:12,
+                    padding:'16px 16px',textDecoration:'none',color:V.ink,
+                    transition:'border-color .2s, transform .2s, box-shadow .2s',
+                    display:'block',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor=V.cr; e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 10px 20px rgba(125,16,37,.1)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor=V.line; e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none' }}>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:4}}>{area.name}</div>
+                  <div style={{fontSize:11,color:V.sl3,lineHeight:1.4}}>{area.region}</div>
+                  <div style={{marginTop:10,fontSize:11,fontWeight:700,color:V.cr,letterSpacing:'.02em',display:'inline-flex',alignItems:'center',gap:4}}>
+                    Tuition details
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div></section>
+
+          {/* FAQ */}
+          <section className="sec" style={{background:'#fff'}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                Frequently asked questions
+              </h2>
+            </div>
+            <div style={{maxWidth:780,margin:'0 auto'}}>
+              {[
+                {q:'How much does tuition cost in Nairobi?', a:'Online tuition is USD 8 per hour (≈ KSh 1,040 at current rates). Home tuition starts from KSh 1,500 per 1-hour session including tutor transport for closer areas, increasing for more distant estates (Runda, Karen, Kitengela). Exam-prep intensive packages and SAT preparation are USD 8–15/hour depending on the specialism required. 10-hour blocks attract a 5% discount.'},
+                {q:'How quickly can a tutor start?', a:'For online tuition, typically within 24–48 hours of confirming the subject, level and schedule. For home tuition, 48–72 hours to match a tutor with the right subject and location. Specialist subjects (IB Diploma, A-Level Further Maths) may take 3–5 days to match optimally.'},
+                {q:'Do you offer KCSE revision tutoring?', a:'Yes — KCSE revision is one of our most-requested services. We cover Mathematics, English, Kiswahili, Sciences and Humanities for Form 3 and Form 4 students. Sustained weekly tuition over 6–9 months typically produces the strongest grade improvements.'},
+                {q:'Do you offer IGCSE tutors in Nairobi?', a:'Yes — Cambridge IGCSE and Pearson Edexcel International are core specialisms. Our IGCSE tutors hold subject degrees and have prepared students for both exam boards. Mathematics, Sciences (Physics, Chemistry, Biology), English, Business Studies and Economics are the most-requested IGCSE subjects.'},
+                {q:'Do you offer A-Level and IB Diploma tutoring?', a:'Yes — including A-Level Mathematics, Further Mathematics, Physics, Chemistry, Biology, Economics, Business Studies, and IB Diploma equivalents (Maths AA, Maths AI, Sciences, Economics, Business Management). We also support IB internal assessments (IAs), the extended essay (EE) and theory of knowledge (TOK).'},
+                {q:'Can you help with university applications?', a:'Yes — we support UCAS (UK), Common App (USA), and direct applications to universities in Canada, Australia, South Africa and the Gulf. This includes personal statement coaching, essay editing, interview preparation and standardised test prep (SAT, ACT). USD 15/hour for one-on-one admissions counselling.'},
+                {q:'Are your tutors safeguarding-checked?', a:'Yes — every Smartious tutor undergoes our internal safeguarding review including reference checks, identity verification and a teaching demonstration before any contact with a student. We follow safeguarding protocols modelled on UK and international standards.'},
+                {q:'Can a tutor visit a home anywhere in Nairobi?', a:'We send tutors to 20 specific neighbourhoods across Nairobi (see the area grid above). For each neighbourhood, the transport contribution is set based on distance. For estates outside our standard service area, online tuition is the practical option — the quality is identical and there\'s no scheduling risk from traffic.'},
+                {q:'What happens in a free consultation?', a:'A 20-minute call with our admissions team to understand your child\'s level, the subject(s) needed, your preferred schedule, and your specific goals (catch-up vs exam prep vs acceleration vs admissions). We then match a tutor and propose a session schedule. No payment required until you\'ve approved the match.'},
+              ].map((f, i) => (
+                <details key={i} style={{
+                  background:V.bone,border:'1px solid '+V.line,borderRadius:10,
+                  marginBottom:10,overflow:'hidden',
+                }}>
+                  <summary style={{
+                    cursor:'pointer',padding:'16px 18px',fontWeight:600,
+                    color:V.ink,fontSize:14.5,
+                    listStyle:'none',
+                  }}>{f.q}</summary>
+                  <div style={{padding:'0 18px 16px',fontSize:14,color:V.sl,lineHeight:1.7,borderTop:'1px solid '+V.line,paddingTop:14}}>
+                    {f.a}
+                  </div>
+                </details>
+              ))}
+            </div>
+            {/* FAQPage schema */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'FAQPage',
+              'mainEntity':[
+                'How much does tuition cost in Nairobi?',
+                'How quickly can a tutor start?',
+                'Do you offer KCSE revision tutoring?',
+                'Do you offer IGCSE tutors in Nairobi?',
+                'Do you offer A-Level and IB Diploma tutoring?',
+                'Can you help with university applications?',
+                'Are your tutors safeguarding-checked?',
+                'Can a tutor visit a home anywhere in Nairobi?',
+                'What happens in a free consultation?',
+              ].map(q => ({ '@type':'Question', 'name': q, 'acceptedAnswer': { '@type':'Answer', 'text': 'See full answer at https://smartioushomeschool.com/tuition-nairobi' } })),
+            })}}/>
+          </div></section>
+
+          {/* FINAL CTA */}
+          <section className="sec" style={{
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',
+          }}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
+            <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.1rem',fontWeight:700,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+              Book a <em style={{color:V.gold3}}>Free Consultation</em>
+            </h2>
+            <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.7}}>
+              20 minutes with our admissions team to understand your child's needs, match a tutor, and agree a schedule. No payment until you've approved the match.
+            </p>
+            <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+              <button onClick={() => P('consult')}
+                style={{background:V.gold3,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,letterSpacing:'.02em',cursor:'pointer'}}>
+                Book Consultation →
+              </button>
+              <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20a%20tuition%20consultation."
+                target="_blank" rel="noopener noreferrer"
+                style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+                WhatsApp +254 745 021 212
+              </a>
+            </div>
+            <div style={{marginTop:30,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
+              📞 +254 745 021 212 · 📧 hellosmartious@gmail.com · 📍 Diamond Plaza, Parklands, Nairobi
+            </div>
+          </div></section>
+        </>
+      )}
+
+      {/* ══════════════════════════════════════════
+          TUITION AREA — Neighbourhood-specific page at /tuition/{slug}
+          One renderer, data-driven from NAIROBI_AREAS.
+      ══════════════════════════════════════════ */}
+      {page === 'tuition-area' && currentTuitionArea && (() => {
+        const area = NAIROBI_AREAS.find(a => a.slug === currentTuitionArea)
+        if (!area) return null
+        return (
+          <>
+            {/* Schema */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Tuition Nairobi','item':'https://smartioushomeschool.com/tuition-nairobi'},
+                {'@type':'ListItem','position':3,'name':'Tuition in ' + area.name,'item':'https://smartioushomeschool.com/tuition/' + area.slug},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'LocalBusiness',
+              'name':'Smartious Tuition — ' + area.name,
+              'description': area.seoDesc,
+              'url':'https://smartioushomeschool.com/tuition/' + area.slug,
+              'telephone':'+254745021212',
+              'email':'hellosmartious@gmail.com',
+              'areaServed':{'@type':'Place','name': area.name + ', Nairobi'},
+              'address':{'@type':'PostalAddress','addressLocality': area.name,'addressRegion':'Nairobi','addressCountry':'KE'},
+              'priceRange':'From USD 8/hour',
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'Service',
+              'serviceType':'Private Home & Online Tuition in ' + area.name,
+              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool & eSchool'},
+              'areaServed':{'@type':'Place','name': area.name + ', Nairobi'},
+              'description': area.intro,
+            })}}/>
+
+            {/* HERO */}
+            <section className="sec" style={{
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff',
+              padding:'60px 0 48px',
+            }}>
+              <div className="wrap">
+                <a
+                  href="/tuition-nairobi"
+                  onClick={(e)=>{e.preventDefault(); P('tuition-nairobi')}}
+                  style={{color:'rgba(255,255,255,.65)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  Tuition Nairobi
+                </a>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{area.region}</div>
+                <h1 style={{
+                  fontFamily:"'Playfair Display',serif",
+                  fontSize:'clamp(2rem,4.5vw,3rem)',
+                  fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:16,
+                }}>Tuition in <em style={{color:V.gold3,fontStyle:'italic'}}>{area.name}</em></h1>
+                <p style={{fontSize:16,color:'rgba(255,255,255,.86)',lineHeight:1.65,marginBottom:22,maxWidth:720}}>
+                  {area.intro}
+                </p>
+                <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>
+                    Book a Tutor →
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like tuition in ' + area.name + '.')}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
+                    WhatsApp Us
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            {/* LOCAL CONTEXT */}
+            <section className="sec" style={{background:'#fff'}}><div className="wrap">
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="tuition-area-grid">
+                <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
+                  <div className="eyebrow" style={{marginBottom:8}}>The {area.name} parent</div>
+                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>What we hear from families here</h3>
+                  <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7}}>{area.parentProfile}</p>
+                </div>
+                <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
+                  <div className="eyebrow" style={{marginBottom:8}}>Local schools we work with</div>
+                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>Schools nearby</h3>
+                  <ul style={{listStyle:'none',padding:0,margin:0}}>
+                    {area.localSchools.map((s,i) => (
+                      <li key={i} style={{padding:'6px 0',fontSize:13.5,color:V.sl,borderTop: i===0?'none':'1px dashed '+V.line}}>
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <style>{`@media (max-width: 800px) { .tuition-area-grid { grid-template-columns: 1fr !important; } }`}</style>
+            </div></section>
+
+            {/* COMMUTE + PRICING */}
+            <section className="sec" style={{background:V.bone}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto',display:'grid',gridTemplateColumns:'1fr 1fr',gap:24}} className="tuition-area-grid">
+                <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px'}}>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:8}}>Commute & timing</div>
+                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>Reaching {area.name}</h3>
+                  <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65}}>{area.commuteNote}</p>
+                </div>
+                <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px'}}>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:8}}>Pricing for {area.name}</div>
+                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>How fees work here</h3>
+                  <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65}}>{area.pricingNote}</p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* LOCAL FAQ */}
+            <section className="sec" style={{background:'#fff'}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto'}}>
+                <div className="eyebrow" style={{justifyContent:'center',marginBottom:14}}>Quick answers for {area.name}</div>
+                <details style={{background:V.bone,border:'1px solid '+V.line,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                  <summary style={{cursor:'pointer',padding:'16px 18px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>{area.localFaq.q}</summary>
+                  <div style={{padding:'0 18px 16px',fontSize:14,color:V.sl,lineHeight:1.7,borderTop:'1px solid '+V.line,paddingTop:14}}>
+                    {area.localFaq.a}
+                  </div>
+                </details>
+                <details style={{background:V.bone,border:'1px solid '+V.line,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                  <summary style={{cursor:'pointer',padding:'16px 18px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>How quickly can a tutor reach {area.name}?</summary>
+                  <div style={{padding:'0 18px 16px',fontSize:14,color:V.sl,lineHeight:1.7,borderTop:'1px solid '+V.line,paddingTop:14}}>
+                    Outside rush hour, tutors typically reach {area.name} addresses within the timing window described above. We schedule first sessions during off-peak hours where possible (morning or post-7pm). For families in {area.name} who want guaranteed scheduling with no traffic risk, we recommend online tuition.
+                  </div>
+                </details>
+                <details style={{background:V.bone,border:'1px solid '+V.line,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                  <summary style={{cursor:'pointer',padding:'16px 18px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>What subjects can my child learn?</summary>
+                  <div style={{padding:'0 18px 16px',fontSize:14,color:V.sl,lineHeight:1.7,borderTop:'1px solid '+V.line,paddingTop:14}}>
+                    All primary subjects (CBC and British primary), full IGCSE / Edexcel / A-Level subjects (Maths, Sciences, English, Humanities, Languages, Business, Computer Science), full IB Diploma subjects, KCSE revision for Form 3 and Form 4 students, and university admissions support (UCAS, Common App, SAT). See the main Tuition Nairobi page for the complete subject list.
+                  </div>
+                </details>
+              </div>
+              {/* FAQ schema */}
+              <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                '@context':'https://schema.org','@type':'FAQPage',
+                'mainEntity':[
+                  { '@type':'Question','name': area.localFaq.q, 'acceptedAnswer':{ '@type':'Answer','text': area.localFaq.a }},
+                  { '@type':'Question','name': 'How quickly can a tutor reach ' + area.name + '?','acceptedAnswer':{ '@type':'Answer','text': 'Off-peak timing window per the commute note. Online tuition has no scheduling risk.' }},
+                ],
+              })}}/>
+            </div></section>
+
+            {/* KEYWORDS / SEO PARAGRAPH — for relevance signals */}
+            <section className="sec" style={{background:V.bone, padding:'40px 0'}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
+                <p style={{fontSize:13,color:V.sl3,lineHeight:1.7,fontStyle:'italic'}}>
+                  Smartious provides {area.keywords.slice(0,3).join(', ')} and related services — home tuition, online tutoring, exam preparation, KCSE revision, IGCSE coaching, A-Level subject specialism and university admissions counselling — to families across {area.name} and surrounding {area.region.toLowerCase()} neighbourhoods.
+                </p>
+              </div>
+            </div></section>
+
+            {/* NEARBY AREAS */}
+            {area.nearbyAreas && area.nearbyAreas.length > 0 && (
+              <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                <div style={{textAlign:'center',marginBottom:24}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Nearby</div>
+                  <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                    Tuition in nearby areas
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:12,maxWidth:800,margin:'0 auto'}}>
+                  {area.nearbyAreas.map(s => {
+                    const near = NAIROBI_AREAS.find(a2 => a2.slug === s)
+                    if (!near) return null
+                    return (
+                      <a key={s} href={'/tuition/'+s} onClick={e => { e.preventDefault(); openTuitionArea(s) }}
+                        style={{background:V.bone,border:'1px solid '+V.line,borderRadius:10,padding:'14px 16px',textDecoration:'none',color:V.ink,transition:'border-color .2s, transform .2s'}}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor=V.cr; e.currentTarget.style.transform='translateY(-2px)' }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor=V.line; e.currentTarget.style.transform='translateY(0)' }}>
+                        <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1rem',fontWeight:700,color:V.ink}}>{near.name}</div>
+                        <div style={{fontSize:11,color:V.sl3,marginTop:4}}>{near.region}</div>
+                      </a>
+                    )
+                  })}
+                </div>
+                <div style={{textAlign:'center',marginTop:24}}>
+                  <a href="/tuition-nairobi" onClick={e => { e.preventDefault(); P('tuition-nairobi') }}
+                    style={{fontSize:13,fontWeight:700,color:V.cr,textDecoration:'none',display:'inline-flex',alignItems:'center',gap:6}}>
+                    View all 20 areas
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </a>
+                </div>
+              </div></section>
+            )}
+
+            {/* FINAL CTA */}
+            <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:680,margin:'0 auto'}}>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+                Ready to start in <em style={{color:V.gold3}}>{area.name}</em>?
+              </h2>
+              <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:22,lineHeight:1.7}}>
+                Book a free 20-minute consultation. We'll match a tutor to your child's subject, level and schedule — and you only pay once you've approved the match.
+              </p>
+              <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>
+                  Book Consultation →
+                </button>
+                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like tuition in ' + area.name + '.')}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
+                  WhatsApp +254 745 021 212
+                </a>
+              </div>
+            </div></section>
+          </>
+        )
+      })()}
+
+
+      {/* ══════════════════════════════════════════
           ACTIVITIES — Sports, Clubs & Student Life
           Premium enrichment page. Hero + Wednesday timetable +
           sports showcase + clubs + parent trust + gallery + CTAs.
@@ -9631,7 +10194,9 @@ function Footer({ P }) {
           </div>
           <div>
             <div className="ft-ch">Services</div>
-            <ul className="ft-lk">{['Homeschool at Home','Learning Centre Nairobi','Virtual School','Private Tuition','Mshauri AI Tutor','IUFP Programme','Study Abroad'].map(l => <li key={l}><a onClick={() => P('services')}>{l}</a></li>)}</ul>
+            <ul className="ft-lk">
+              {[['services','Homeschool at Home'],['services','Learning Centre Nairobi'],['services','Virtual School'],['tuition-nairobi','Tuition Nairobi'],['services','Mshauri AI Tutor'],['services','IUFP Programme'],['services','Study Abroad']].map(([pg, l]) => <li key={l}><a onClick={() => P(pg)}>{l}</a></li>)}
+            </ul>
           </div>
           <div>
             <div className="ft-ch">Contact</div>
