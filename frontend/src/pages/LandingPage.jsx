@@ -2103,6 +2103,37 @@ export default function LandingPage() {
         </div>
         <nav>
         <div className="nav-wrap">
+          {/* Mobile hamburger — sits BEFORE the logo on mobile */}
+          <button onClick={() => setMobileMenuOpen(m => !m)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+            style={{
+              display:'none',
+              background:'transparent',
+              border:'1px solid rgba(240,204,90,.35)',
+              borderRadius:8,
+              padding:'8px 10px',
+              cursor:'pointer',
+              color:'#F0CC5A',
+              marginRight:12,
+              order:-1,
+              transition:'background .2s, border-color .2s',
+            }} className="mob-burger">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              {mobileMenuOpen ? (
+                <>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                </>
+              ) : (
+                <>
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <line x1="3" y1="12" x2="21" y2="12"/>
+                  <line x1="3" y1="18" x2="21" y2="18"/>
+                </>
+              )}
+            </svg>
+          </button>
           <div className="logo-lockup" onClick={() => P('home')}>
             <SmartiousLogo size={36} withText={true} tone="light"/>
           </div>
@@ -2111,13 +2142,6 @@ export default function LandingPage() {
               <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
             ))}
           </div>
-          {/* Mobile hamburger */}
-          <button onClick={() => setMobileMenuOpen(m => !m)}
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={mobileMenuOpen}
-            style={{display:'none',background:'transparent',border:'1px solid rgba(255,255,255,.2)',borderRadius:8,padding:'7px 10px',cursor:'pointer',color:'#fff'}} className="mob-burger">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
           <div className="nav-actions">
             <button className="nav-login" onClick={goPortal}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
@@ -2132,19 +2156,161 @@ export default function LandingPage() {
         </nav>
       </div>{/* /lp-header */}
 
-      {/* Mobile slide-down menu */}
+      {/* DEPLOYMENT MARKER — tiny visible badge proving this build reached production.
+          Remove once we've confirmed the deploy pipeline works correctly. */}
+      <div style={{
+        position:'fixed',
+        bottom:8,
+        right:8,
+        zIndex:9999,
+        background:'rgba(10,8,6,.85)',
+        color:'#F0CC5A',
+        padding:'4px 9px',
+        borderRadius:6,
+        fontSize:10,
+        fontWeight:700,
+        letterSpacing:'.04em',
+        fontFamily:"'Syne Mono', monospace",
+        border:'1px solid rgba(240,204,90,.35)',
+        boxShadow:'0 2px 8px rgba(0,0,0,.3)',
+        pointerEvents:'none',
+        userSelect:'none',
+      }} aria-hidden="true">
+        BUILD 2026-05-31-A · v1080-h1920
+      </div>
+
+      {/* Mobile slide-down menu — categorised, premium look */}
       {mobileMenuOpen && (
-        <div style={{position:'fixed',top:64,left:0,right:0,background:'#0F172A',zIndex:9998,padding:'16px 20px',borderBottom:'1px solid rgba(255,255,255,.1)',boxShadow:'0 8px 32px rgba(0,0,0,.4)'}}>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
-            {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Global','global'],['Pricing','pricing'],['Programs','programs'],['Activities','activities'],['FAQ','faq'],['Blog','blog'],['Enroll','enroll']].map(([l,id]) => (
-              <button key={id} onClick={()=>{P(id);setMobileMenuOpen(false)}} style={{background:page===id?'rgba(96,165,250,.15)':'transparent',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,padding:'10px 14px',color:page===id?'#60A5FA':'rgba(255,255,255,.8)',fontWeight:page===id?700:400,fontSize:14,textAlign:'left',cursor:'pointer'}}>
-                {l}
-              </button>
+        <div style={{
+          position:'fixed',
+          top:64,left:0,right:0,bottom:0,
+          background:'linear-gradient(180deg, #0A0806 0%, #1a0e12 100%)',
+          zIndex:9998,
+          overflowY:'auto',
+          borderTop:'1px solid rgba(240,204,90,.15)',
+        }}>
+          <div style={{padding:'24px 22px 40px',maxWidth:520,margin:'0 auto'}}>
+            {[
+              { cat:'About', items:[
+                ['Our Story','about'],
+                ['Teachers','teachers'],
+                ['Contact','contact'],
+              ]},
+              { cat:'Curricula', items:[
+                ['All Curricula','curricula'],
+                ['Pricing','pricing'],
+              ]},
+              { cat:'Where We Teach', items:[
+                ['Global Reach','global'],
+                ['Tuition Nairobi','tuition-nairobi'],
+              ]},
+              { cat:'Activities', items:[
+                ['Activities & Sports','activities'],
+                ['Programs','programs'],
+              ]},
+              { cat:'Resources', items:[
+                ['Blog','blog'],
+                ['FAQ','faq'],
+                ['Services','services'],
+              ]},
+              { cat:'Get Started', items:[
+                ['Enroll Now','enroll'],
+                ['Free Consultation','consult'],
+              ]},
+            ].map((group, gi) => (
+              <div key={group.cat} style={{
+                marginBottom: 22,
+                paddingBottom: gi < 5 ? 18 : 0,
+                borderBottom: gi < 5 ? '1px solid rgba(255,255,255,.06)' : 'none',
+              }}>
+                <div style={{
+                  fontSize:10.5,
+                  fontWeight:700,
+                  letterSpacing:'.16em',
+                  textTransform:'uppercase',
+                  color:'#F0CC5A',
+                  marginBottom:12,
+                }}>{group.cat}</div>
+                <div style={{display:'flex',flexDirection:'column',gap:2}}>
+                  {group.items.map(([label, id]) => (
+                    <button
+                      key={id}
+                      onClick={() => { P(id); setMobileMenuOpen(false) }}
+                      style={{
+                        textAlign:'left',
+                        background: page === id ? 'rgba(139,26,46,.18)' : 'transparent',
+                        border:'none',
+                        borderLeft: page === id ? '3px solid #F0CC5A' : '3px solid transparent',
+                        padding:'12px 14px',
+                        color: page === id ? '#FEFDFB' : 'rgba(247,243,237,.78)',
+                        fontWeight: page === id ? 700 : 500,
+                        fontSize:15,
+                        fontFamily:"'Syne',sans-serif",
+                        cursor:'pointer',
+                        transition:'background .15s, border-color .15s, color .15s',
+                        borderRadius:6,
+                      }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
+
+            {/* Bottom CTAs */}
+            <div style={{
+              marginTop:16,
+              display:'flex',
+              flexDirection:'column',
+              gap:10,
+            }}>
+              <button
+                onClick={() => { goPortal(); setMobileMenuOpen(false) }}
+                style={{
+                  width:'100%',
+                  background:'transparent',
+                  color:'#FEFDFB',
+                  border:'1px solid rgba(247,243,237,.25)',
+                  borderRadius:8,
+                  padding:'13px',
+                  fontWeight:700,
+                  fontSize:14,
+                  fontFamily:"'Syne',sans-serif",
+                  cursor:'pointer',
+                  display:'inline-flex',
+                  alignItems:'center',
+                  justifyContent:'center',
+                  gap:8,
+                  letterSpacing:'.04em',
+                }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                Portal Login
+              </button>
+              <button
+                onClick={() => { P('enroll'); setMobileMenuOpen(false) }}
+                style={{
+                  width:'100%',
+                  background:'#8B1A2E',
+                  color:'#fff',
+                  border:'none',
+                  borderRadius:8,
+                  padding:'14px',
+                  fontWeight:800,
+                  fontSize:14,
+                  fontFamily:"'Syne',sans-serif",
+                  cursor:'pointer',
+                  display:'inline-flex',
+                  alignItems:'center',
+                  justifyContent:'center',
+                  gap:8,
+                  letterSpacing:'.04em',
+                  boxShadow:'0 6px 18px rgba(139,26,46,.4)',
+                }}>
+                Enroll Now
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
           </div>
-          <button onClick={()=>{goPortal();setMobileMenuOpen(false)}} style={{width:'100%',background:'#60A5FA',border:'none',borderRadius:10,padding:'12px',color:'#fff',fontWeight:700,fontSize:15,cursor:'pointer'}}>
-            Portal Login
-          </button>
         </div>
       )}
 
@@ -2175,9 +2341,6 @@ export default function LandingPage() {
             <div className="h-ov"/>
             <div className="h-vig"/>
             <div className="h-body">
-              <div style={{marginBottom:34}}>
-                <SmartiousLogo size={56} withText={true} tone="light"/>
-              </div>
               <h1 className="h1">
                 <span>The Online</span>
                 <span>Homeschool That</span>
