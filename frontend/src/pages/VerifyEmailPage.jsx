@@ -16,15 +16,15 @@ const SmartiousLogo = ({ size = 42 }) => (
         </linearGradient>
       </defs>
       <path d="M40 6 L68 14 Q70 14 70 17 L70 44 Q70 60 40 74 Q10 60 10 44 L10 17 Q10 14 12 14 Z" fill="url(#ve-grad)" stroke="#6A0E20" strokeWidth="0.6"/>
-      <polygon points="40,19 42.2,26 49.5,26 43.7,30.4 45.9,37.5 40,33 34.1,37.5 36.3,30.4 30.5,26 37.8,26" fill="#F0CC5A" stroke="#C89A28" strokeWidth="0.4"/>
+      <polygon points="40,19 42.2,26 49.5,26 43.7,30.4 45.9,37.5 40,33 34.1,37.5 36.3,30.4 30.5,26 37.8,26" fill="#C9973A" stroke="#C89A28" strokeWidth="0.4"/>
       <g transform="translate(40 52)">
-        <path d="M-14 -4 L-14 8 L-1 9 L-1 -3 Q-8 -5 -14 -4 Z" fill="#FEFDFB"/>
-        <path d="M14 -4 L14 8 L1 9 L1 -3 Q8 -5 14 -4 Z" fill="#FEFDFB"/>
+        <path d="M-14 -4 L-14 8 L-1 9 L-1 -3 Q-8 -5 -14 -4 Z" fill="#FFFFFF"/>
+        <path d="M14 -4 L14 8 L1 9 L1 -3 Q8 -5 14 -4 Z" fill="#FFFFFF"/>
       </g>
     </svg>
     <div style={{display:'flex',flexDirection:'column',lineHeight:1.1}}>
-      <div style={{fontFamily:"'Playfair Display',serif",fontSize: size*0.55, fontWeight:700, color:'#FEFDFB'}}>
-        Smart<em style={{fontStyle:'italic',color:'#F0CC5A',fontWeight:500}}>ious</em>
+      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize: size*0.55, fontWeight:700, color:'#FFFFFF'}}>
+        Smart<em style={{fontStyle:'italic',color:'#C9973A',fontWeight:500}}>ious</em>
       </div>
       <div style={{fontSize: size*0.2, fontWeight:600, letterSpacing:'.16em', color:'rgba(247,243,237,.5)', textTransform:'uppercase', marginTop:2}}>
         Homeschool · Global
@@ -83,11 +83,11 @@ export default function VerifyEmailPage() {
   }, [status])
 
   return (
-    <div style={{minHeight:'100vh',display:'flex',background:'#0A0806',fontFamily:"'Syne',sans-serif",overflow:'hidden'}}>
+    <div style={{minHeight:'100vh',display:'flex',background:'#080C14',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",overflow:'hidden'}}>
       {/* LEFT — content */}
       <div style={{
         flex:'0 0 460px',
-        background:'linear-gradient(135deg, #8B1A2E 0%, #0A0806 100%)',
+        background:'linear-gradient(135deg, #8B1A2E 0%, #080C14 100%)',
         position:'relative',
         display:'flex',
         flexDirection:'column',
@@ -108,18 +108,18 @@ export default function VerifyEmailPage() {
             <div style={{marginBottom:36}}>
               <div style={{
                 width:60,height:60,borderRadius:'50%',
-                background:'rgba(240,204,90,.18)',
-                border:'2px solid rgba(240,204,90,.5)',
+                background:'rgba(201,151,58,.18)',
+                border:'2px solid rgba(201,151,58,.5)',
                 display:'flex',alignItems:'center',justifyContent:'center',
                 marginBottom:24,
                 animation:'ve-pulse 1.4s ease-in-out infinite',
               }}>
-                <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round">
+                <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10"/>
                   <polyline points="12 6 12 12 16 14"/>
                 </svg>
               </div>
-              <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.2rem',fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:8}}>Verifying your email</h1>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:8}}>Verifying your email</h1>
               <p style={{fontSize:14,color:'rgba(247,243,237,.6)',lineHeight:1.6}}>This usually takes just a moment. Please wait while we confirm your email address.</p>
             </div>
             <div style={{marginBottom:'auto'}}/>
@@ -139,10 +139,10 @@ export default function VerifyEmailPage() {
               }}>
                 <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
-              <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.2rem',fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:8}}>Email verified</h1>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:8}}>Email verified</h1>
               <p style={{fontSize:14,color:'rgba(247,243,237,.65)',lineHeight:1.6,marginBottom:20}}>{message}</p>
               <p style={{fontSize:12.5,color:'rgba(247,243,237,.45)',letterSpacing:'.04em'}}>
-                Redirecting in <strong style={{color:'#F0CC5A'}}>{countdown}</strong> seconds…
+                Redirecting in <strong style={{color:'#C9973A'}}>{countdown}</strong> seconds…
               </p>
             </div>
 
@@ -154,7 +154,7 @@ export default function VerifyEmailPage() {
                 border:'none',borderRadius:30,
                 fontWeight:800,fontSize:13,letterSpacing:'.16em',textTransform:'uppercase',
                 cursor:'pointer',
-                fontFamily:"'Syne',sans-serif",
+                fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
                 boxShadow:'0 10px 30px rgba(255,255,255,.18)',
                 marginBottom:'auto',
               }}>
@@ -180,7 +180,7 @@ export default function VerifyEmailPage() {
                   <line x1="9" y1="9" x2="15" y2="15"/>
                 </svg>
               </div>
-              <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.2rem',fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:8}}>Verification failed</h1>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:8}}>Verification failed</h1>
               <p style={{fontSize:14,color:'rgba(247,243,237,.65)',lineHeight:1.6}}>{message}</p>
             </div>
 
@@ -192,7 +192,7 @@ export default function VerifyEmailPage() {
                 border:'none',borderRadius:30,
                 fontWeight:800,fontSize:13,letterSpacing:'.16em',textTransform:'uppercase',
                 cursor:'pointer',
-                fontFamily:"'Syne',sans-serif",
+                fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
                 boxShadow:'0 10px 30px rgba(255,255,255,.18)',
                 marginBottom:'auto',
               }}>
@@ -220,7 +220,7 @@ export default function VerifyEmailPage() {
           <img src={BG_PHOTO_DESKTOP} alt="" aria-hidden="true" onError={e=>{e.currentTarget.style.display='none'}}
             style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',objectPosition:'center'}}/>
         </picture>
-        <div style={{position:'absolute',inset:0,background:'linear-gradient(to right, rgba(10,8,6,.45) 0%, rgba(10,8,6,.15) 40%, rgba(10,8,6,.25) 100%)'}}/>
+        <div style={{position:'absolute',inset:0,background:'linear-gradient(to right, rgba(8,12,20,.45) 0%, rgba(8,12,20,.15) 40%, rgba(8,12,20,.25) 100%)'}}/>
       </div>
 
       <style>{`
@@ -234,7 +234,7 @@ export default function VerifyEmailPage() {
             flex: 1 !important;
             padding: 40px 28px !important;
             min-height: 100vh;
-            background: linear-gradient(160deg, rgba(139,26,46,.72) 0%, rgba(10,8,6,.55) 100%) !important;
+            background: linear-gradient(160deg, rgba(139,26,46,.72) 0%, rgba(8,12,20,.55) 100%) !important;
             z-index: 2 !important;
             box-shadow: none !important;
           }
