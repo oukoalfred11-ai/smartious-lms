@@ -33,7 +33,7 @@ const axios   = require('axios')
 const crypto  = require('crypto')
 const router  = express.Router()
 
-const { protect, restrictTo } = require('../middleware/authMiddleware')
+const { auth, requireRole } = require('../middleware/auth')
 const Payment = require('../models/Payment')
 const User    = require('../models/User')
 
@@ -54,7 +54,7 @@ const psHeaders = () => ({
  * Creates a pending Payment record, returns publicKey + reference
  * so the frontend can open Paystack popup without the secret key.
  */
-router.post('/paystack/initiate', protect, async (req, res) => {
+router.post('/paystack/initiate', auth, async (req, res) => {
   try {
     const { amount, email, description, childId } = req.body
 
@@ -92,7 +92,7 @@ router.post('/paystack/initiate', protect, async (req, res) => {
  *
  * Verifies with Paystack API, marks Payment success or failed.
  */
-router.post('/paystack/verify', protect, async (req, res) => {
+router.post('/paystack/verify', auth, async (req, res) => {
   try {
     const { reference } = req.body
     if (!reference)
@@ -148,7 +148,7 @@ router.post('/paystack/verify', protect, async (req, res) => {
  *
  * Logged-in parent's own payment history.
  */
-router.get('/my-payments', protect, async (req, res) => {
+router.get('/my-payments', auth, async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 20, 100)
     const page  = Math.max(parseInt(req.query.page)  || 1,  1)
@@ -193,7 +193,7 @@ router.get('/my-payments', protect, async (req, res) => {
  * Returns outstandingBalance, nextDueDate, monthlyRate, quickAmounts.
  * Adapt the billing calculation to your school's fee schedule.
  */
-router.get('/my-fee-summary', protect, async (req, res) => {
+router.get('/my-fee-summary', auth, async (req, res) => {
   try {
     const parentId = req.user._id
 
@@ -292,7 +292,7 @@ router.post(
  * GET /api/payments/admin/all
  * Query: ?status=success|pending|failed  ?page=N  ?limit=N  ?search=<string>
  */
-router.get('/admin/all', protect, restrictTo('admin'), async (req, res) => {
+router.get('/admin/all', auth, requireRole('admin'), async (req, res) => {
   try {
     const limit  = Math.min(parseInt(req.query.limit) || 30, 200)
     const page   = Math.max(parseInt(req.query.page)  || 1,  1)
@@ -343,7 +343,7 @@ router.get('/admin/all', protect, restrictTo('admin'), async (req, res) => {
  * GET /api/payments/admin/:id
  * Full detail including raw Paystack data.
  */
-router.get('/admin/:id', protect, restrictTo('admin'), async (req, res) => {
+router.get('/admin/:id', auth, requireRole('admin'), async (req, res) => {
   try {
     const payment = await Payment.findById(req.params.id)
       .populate('parentId',  'firstName lastName email phone')
@@ -363,7 +363,7 @@ router.get('/admin/:id', protect, restrictTo('admin'), async (req, res) => {
  *
  * Manual override — use to confirm bank/M-Pesa transfers.
  */
-router.patch('/admin/:id/status', protect, restrictTo('admin'), async (req, res) => {
+router.patch('/admin/:id/status', auth, requireRole('admin'), async (req, res) => {
   try {
     const { status, note } = req.body
     if (!['success', 'pending', 'failed'].includes(status))
@@ -392,7 +392,7 @@ router.patch('/admin/:id/status', protect, restrictTo('admin'), async (req, res)
  * Returns month-by-month confirmed revenue for the admin dashboard chart.
  * Query: ?months=12 (default)
  */
-router.get('/admin/revenue/monthly', protect, restrictTo('admin'), async (req, res) => {
+router.get('/admin/revenue/monthly', auth, requireRole('admin'), async (req, res) => {
   try {
     const months = Math.min(parseInt(req.query.months) || 12, 36)
     const since  = new Date()
