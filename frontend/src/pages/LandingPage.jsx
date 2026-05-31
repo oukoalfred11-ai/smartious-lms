@@ -118,19 +118,27 @@ function useHeroPreload(active) {
 }
 
 
-/* ── CSS variables matching smartious-global.html exactly ── */
+/* ── V tokens — Premium LMS palette (DM Serif + Plus Jakarta + warm gold) ── */
 const V = {
-  cr:'#8B1A2E', cr2:'#A8203A', gold:'#B8960C', gold2:'#D4AF37', gold3:'#F0CC5A',
-  bone:'#F7F3ED', bone2:'#EDE7DC', bone3:'#DDD5C6',
-  ink:'#0A0806', ink2:'#1A1510', ink3:'#2D261E',
-  sl:'#6B5E52', sl2:'#8A7B6E', sl3:'#ADA094', white:'#FEFDFB',
+  // Crimson (kept — already aligned with LMS)
+  cr:'#8B1A2E', cr2:'#A8203A',
+  // Gold — bronzed/muted (Harvard / MasterClass authority feel)
+  gold:'#7A5416', gold2:'#A67828', gold3:'#C9973A',
+  // Parchment — warm cream backgrounds
+  bone:'#FDFAF4', bone2:'#F8F2E6', bone3:'#F0E8D4',
+  // Ink — cool deep navy-black (more editorial, less brown)
+  ink:'#080C14', ink2:'#0D1220', ink3:'#121928',
+  // Slate — cool blue-grey for body text
+  sl:'#2E3D55', sl2:'#3D5066', sl3:'#B0A490',
+  // Surface
+  white:'#FFFFFF',
 }
 
 const styles = `
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  .lp{font-family:'Syne',sans-serif;background:${V.bone};color:${V.ink};overflow-x:hidden;line-height:1.6}
+  .lp{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:${V.bone};color:${V.ink};overflow-x:hidden;line-height:1.65}
   .lp a{color:inherit;text-decoration:none}
-  .lp button{font-family:'Syne',sans-serif;cursor:pointer;border:none;background:none;outline:none}
+  .lp button{font-family:'Plus Jakarta Sans',system-ui,sans-serif;cursor:pointer;border:none;background:none;outline:none}
   .lp ::-webkit-scrollbar{width:4px}
   .lp ::-webkit-scrollbar-thumb{background:${V.cr};border-radius:2px}
   /* SCROLL REVEAL ANIMATIONS */
@@ -144,29 +152,29 @@ const styles = `
   /* SHARED */
   .lp .sec{padding:96px 0}
   .lp .wrap{max-width:1440px;margin:0 auto;padding:0 48px}
-  .lp .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'Syne Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:${V.gold2};margin-bottom:14px}
-  .lp .eyebrow::before{content:'';width:24px;height:1px;background:${V.gold2};flex-shrink:0}
-  .lp .display{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,4vw,4rem);font-weight:700;line-height:1.08;letter-spacing:-.03em;color:${V.ink}}
+  .lp .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'Fira Code',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:${V.gold3};margin-bottom:14px;font-weight:600}
+  .lp .eyebrow::before{content:'';width:24px;height:1px;background:${V.gold3};flex-shrink:0}
+  .lp .display{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.4rem,4vw,4rem);font-weight:400;line-height:1.08;letter-spacing:-.02em;color:${V.ink}}
   .lp .display em{color:${V.cr};font-style:italic}
   .lp .lead{font-size:17px;color:${V.sl};line-height:1.8;max-width:520px}
   .lp .sec-hd{margin-bottom:60px}
-  .lp .btn-p{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:6px;font-size:13.5px;font-weight:700;background:${V.cr};color:${V.white};box-shadow:0 4px 14px rgba(139,26,46,.3);transition:all .2s;cursor:pointer;border:none;font-family:'Syne',sans-serif}
-  .lp .btn-p:hover{background:${V.cr2};transform:translateY(-2px)}
-  .lp .btn-o{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:6px;font-size:13.5px;font-weight:700;background:transparent;color:${V.ink};border:1.5px solid ${V.bone3};transition:all .2s;cursor:pointer;font-family:'Syne',sans-serif}
+  .lp .btn-p{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:6px;font-size:13.5px;font-weight:700;background:linear-gradient(135deg,${V.cr2},${V.cr});color:${V.white};box-shadow:0 4px 14px rgba(139,26,46,.3);transition:all .2s;cursor:pointer;border:none;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .btn-p:hover{background:linear-gradient(135deg,${V.cr},${V.cr2});transform:translateY(-2px);box-shadow:0 6px 20px rgba(139,26,46,.4)}
+  .lp .btn-o{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:6px;font-size:13.5px;font-weight:700;background:transparent;color:${V.ink};border:1.5px solid ${V.bone3};transition:all .2s;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .btn-o:hover{border-color:${V.cr};color:${V.cr}}
   .lp .btn-o.lt{color:${V.white};border-color:rgba(255,255,255,.22)}
   .lp .btn-o.lt:hover{border-color:${V.gold3};color:${V.gold3}}
   .lp .chip{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.06em;background:rgba(139,26,46,.08);color:${V.cr};border:1px solid rgba(139,26,46,.15)}
   /* NAV */
   .lp .lp-header{position:fixed;top:0;left:0;right:0;z-index:800;transition:box-shadow .3s}
-  .lp nav{background:rgba(10,8,6,.96);border-bottom:1px solid rgba(184,150,12,.12);backdrop-filter:blur(24px)}
+  .lp nav{background:rgba(8,12,20,.96);border-bottom:1px solid rgba(184,150,12,.12);backdrop-filter:blur(24px)}
   .lp .lp-header.scrolled{box-shadow:0 4px 30px rgba(0,0,0,.5)}
   .lp .lp-header.scrolled #topbar{display:none}
   .lp #hero{padding-top:36px}
   .lp .nav-wrap{max-width:1440px;margin:0 auto;padding:0 48px;height:64px;display:flex;align-items:center;gap:0}
   .lp .logo-lockup{display:flex;align-items:center;gap:13px;cursor:pointer;flex-shrink:0}
   .lp .logo-emblem{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,${V.cr},${V.cr2});display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(139,26,46,.4)}
-  .lp .logo-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:${V.white}}
+  .lp .logo-name{font-family:'DM Serif Display',Georgia,serif;font-size:20px;font-weight:700;color:${V.white}}
   .lp .logo-name em{color:${V.gold3};font-style:italic}
   .lp .logo-tag{font-size:8px;font-weight:600;letter-spacing:.14em;color:rgba(247,243,237,.28);text-transform:uppercase;margin-top:-2px}
   .lp .nav-links{display:flex;align-items:center;margin-left:40px;gap:0;flex:1}
@@ -175,32 +183,32 @@ const styles = `
   .lp .nl.on::after{content:'';position:absolute;bottom:-1px;left:12px;right:12px;height:1.5px;background:${V.gold3};border-radius:2px}
   .lp .nav-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
 
-  .lp .nav-login{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:6px;font-size:12.5px;font-weight:600;color:rgba(247,243,237,.55);border:1px solid rgba(247,243,237,.12);transition:all .2s;cursor:pointer;background:none;font-family:'Syne',sans-serif}
+  .lp .nav-login{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:6px;font-size:12.5px;font-weight:600;color:rgba(247,243,237,.55);border:1px solid rgba(247,243,237,.12);transition:all .2s;cursor:pointer;background:none;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .nav-login:hover{color:${V.white};border-color:rgba(247,243,237,.28)}
-  .lp .nav-cta{display:flex;align-items:center;gap:7px;padding:9px 20px;border-radius:6px;font-size:12.5px;font-weight:700;background:${V.cr};color:${V.white};box-shadow:0 4px 14px rgba(139,26,46,.35);transition:all .2s;cursor:pointer;font-family:'Syne',sans-serif}
+  .lp .nav-cta{display:flex;align-items:center;gap:7px;padding:9px 20px;border-radius:6px;font-size:12.5px;font-weight:700;background:${V.cr};color:${V.white};box-shadow:0 4px 14px rgba(139,26,46,.35);transition:all .2s;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .nav-cta:hover{background:${V.cr2};transform:translateY(-1px)}
   /* HERO */
   .lp #hero{position:relative;min-height:calc(100vh - 64px);background:${V.ink};display:flex;flex-direction:column;overflow:hidden}
   .lp .h-bg{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover;object-position:center 35%;filter:brightness(1.32) saturate(1.15) contrast(1.04);pointer-events:none;background:${V.ink}}
-  .lp .h-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(110deg,rgba(10,8,6,.55) 0%,rgba(20,10,8,.35) 38%,rgba(60,14,24,.22) 62%,rgba(10,8,6,.4) 100%)}
+  .lp .h-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(110deg,rgba(8,12,20,.55) 0%,rgba(20,10,8,.35) 38%,rgba(60,14,24,.22) 62%,rgba(8,12,20,.4) 100%)}
   .lp .h-vig{position:absolute;bottom:0;left:0;right:0;z-index:2;height:280px;background:linear-gradient(to top,${V.bone} 0%,transparent 100%)}
   .lp .h-body{position:relative;z-index:3;flex:1;display:flex;flex-direction:column;justify-content:center;max-width:1440px;margin:0 auto;padding:80px 48px 60px;width:100%}
-  .lp .h1{font-family:'Playfair Display',serif;font-size:clamp(3.5rem,7.5vw,7rem);font-weight:900;line-height:.98;letter-spacing:-.04em;color:${V.white};margin-bottom:28px;text-shadow:0 4px 24px rgba(10,8,6,.4)}
+  .lp .h1{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(3.5rem,7.5vw,7rem);font-weight:900;line-height:.98;letter-spacing:-.04em;color:${V.white};margin-bottom:28px;text-shadow:0 4px 24px rgba(8,12,20,.4)}
   .lp .h1 em{color:transparent;-webkit-text-stroke:1.5px ${V.gold3};font-style:italic}
   .lp .h1 span{display:block}
-  .lp .h-sub{font-size:17px;color:rgba(247,243,237,.85);max-width:520px;line-height:1.8;margin-bottom:44px;text-shadow:0 2px 12px rgba(10,8,6,.5)}
+  .lp .h-sub{font-size:17px;color:rgba(247,243,237,.85);max-width:520px;line-height:1.8;margin-bottom:44px;text-shadow:0 2px 12px rgba(8,12,20,.5)}
   .lp .h-act{display:flex;gap:12px;flex-wrap:wrap}
   .lp .h-stats{position:absolute;right:48px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:12px}
-  .lp .hs{background:rgba(10,8,6,.55);border:1px solid rgba(184,150,12,.22);border-radius:10px;padding:14px 16px;backdrop-filter:blur(16px);min-width:140px;max-width:210px;position:relative;overflow:hidden}
+  .lp .hs{background:rgba(8,12,20,.55);border:1px solid rgba(184,150,12,.22);border-radius:10px;padding:14px 16px;backdrop-filter:blur(16px);min-width:140px;max-width:210px;position:relative;overflow:hidden}
   .lp .hs::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,${V.gold3},transparent)}
-  .lp .hs-n{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:${V.white};line-height:1.2;word-break:break-word;white-space:normal}
+  .lp .hs-n{font-family:'DM Serif Display',Georgia,serif;font-size:1.25rem;font-weight:700;color:${V.white};line-height:1.2;word-break:break-word;white-space:normal}
   .lp .hs-n em{color:${V.gold3};font-style:normal}
   .lp .hs-l{font-size:10.5px;color:rgba(247,243,237,.65);margin-top:5px;letter-spacing:.04em;line-height:1.4}
   /* MOBILE HERO STATS — hidden by default, shown on mobile */
   .lp .h-mob-stats{display:none;grid-template-columns:1fr 1fr;gap:10px;margin-top:36px;max-width:340px}
-  .lp .hms{background:rgba(10,8,6,.55);border:1px solid rgba(184,150,12,.22);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;backdrop-filter:blur(10px)}
+  .lp .hms{background:rgba(8,12,20,.55);border:1px solid rgba(184,150,12,.22);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;backdrop-filter:blur(10px)}
   .lp .hms::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,${V.gold3},transparent)}
-  .lp .hms-n{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1}
+  .lp .hms-n{font-family:'DM Serif Display',Georgia,serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1}
   .lp .hms-n em{color:${V.gold3};font-style:normal}
   .lp .hms-l{font-size:10px;color:rgba(247,243,237,.68);margin-top:4px;letter-spacing:.04em}
   /* MOBILE HERO STATS STRIP — sits directly below the hero on phones */
@@ -223,20 +231,20 @@ const styles = `
   /* FLOATING ASSISTANCE + WHATSAPP */
   .lp .fab-stack{position:fixed;right:20px;bottom:20px;z-index:9998;display:flex;flex-direction:column;gap:12px;align-items:flex-end;pointer-events:none}
   .lp .fab-stack > *{pointer-events:auto}
-  .lp .fab-wa{display:flex;align-items:center;gap:10px;background:#25D366;color:#fff;border:none;border-radius:50px;padding:13px 18px 13px 15px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(37,211,102,.45),0 4px 10px rgba(37,211,102,.35);transition:all .25s;font-family:'Syne',sans-serif;text-decoration:none}
+  .lp .fab-wa{display:flex;align-items:center;gap:10px;background:#25D366;color:#fff;border:none;border-radius:50px;padding:13px 18px 13px 15px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(37,211,102,.45),0 4px 10px rgba(37,211,102,.35);transition:all .25s;font-family:'Plus Jakarta Sans',system-ui,sans-serif;text-decoration:none}
   .lp .fab-wa:hover{background:#1FB855;transform:translateY(-2px) scale(1.02);box-shadow:0 14px 40px rgba(37,211,102,.55),0 6px 14px rgba(37,211,102,.4)}
   .lp .fab-wa-ic{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:lp-pulse 2.4s ease-in-out infinite}
-  .lp .fab-help{display:flex;align-items:center;gap:10px;background:${V.cr};color:#fff;border:none;border-radius:50px;padding:13px 18px 13px 15px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(139,26,46,.45),0 4px 10px rgba(139,26,46,.35);transition:all .25s;font-family:'Syne',sans-serif}
+  .lp .fab-help{display:flex;align-items:center;gap:10px;background:${V.cr};color:#fff;border:none;border-radius:50px;padding:13px 18px 13px 15px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(139,26,46,.45),0 4px 10px rgba(139,26,46,.35);transition:all .25s;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .fab-help:hover{background:${V.cr2};transform:translateY(-2px) scale(1.02);box-shadow:0 14px 40px rgba(139,26,46,.55),0 6px 14px rgba(139,26,46,.4)}
   .lp .fab-help-ic{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .lp .fab-help-ic::after{content:'';position:absolute;width:10px;height:10px;border-radius:50%;background:#F0CC5A;top:8px;right:8px;box-shadow:0 0 0 2px ${V.cr};animation:lp-pulse 1.8s ease-in-out infinite}
+  .lp .fab-help-ic::after{content:'';position:absolute;width:10px;height:10px;border-radius:50%;background:#C9973A;top:8px;right:8px;box-shadow:0 0 0 2px ${V.cr};animation:lp-pulse 1.8s ease-in-out infinite}
   .lp .fab-help{position:relative}
   /* Assistance popup panel */
-  .lp .fab-panel{position:fixed;right:20px;bottom:92px;width:340px;max-width:calc(100vw - 40px);background:${V.white};border-radius:18px;box-shadow:0 24px 60px rgba(10,8,6,.28),0 6px 18px rgba(10,8,6,.12);z-index:9999;overflow:hidden;border:1px solid ${V.bone3};animation:lp-fadeUp .25s cubic-bezier(.23,1,.32,1);font-family:'Syne',sans-serif}
+  .lp .fab-panel{position:fixed;right:20px;bottom:92px;width:340px;max-width:calc(100vw - 40px);background:${V.white};border-radius:18px;box-shadow:0 24px 60px rgba(8,12,20,.28),0 6px 18px rgba(8,12,20,.12);z-index:9999;overflow:hidden;border:1px solid ${V.bone3};animation:lp-fadeUp .25s cubic-bezier(.23,1,.32,1);font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .fab-panel-hd{background:linear-gradient(135deg,${V.cr},${V.cr2});padding:20px 22px;color:#fff;position:relative}
   .lp .fab-panel-hd-row{display:flex;align-items:center;gap:12px}
-  .lp .fab-panel-av{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(240,204,90,.6);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;color:${V.gold3}}
-  .lp .fab-panel-ti{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;line-height:1.2}
+  .lp .fab-panel-av{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(201,151,58,.6);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'DM Serif Display',Georgia,serif;font-weight:700;font-size:17px;color:${V.gold3}}
+  .lp .fab-panel-ti{font-family:'DM Serif Display',Georgia,serif;font-size:17px;font-weight:700;line-height:1.2}
   .lp .fab-panel-sb{font-size:11.5px;color:rgba(255,255,255,.75);margin-top:2px;display:flex;align-items:center;gap:5px}
   .lp .fab-panel-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 2px rgba(74,222,128,.3)}
   .lp .fab-panel-cl{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;transition:background .2s}
@@ -245,7 +253,7 @@ const styles = `
   .lp .fab-panel-msg{background:${V.bone};border:1px solid ${V.bone3};border-radius:12px;padding:14px 16px;font-size:13.5px;color:${V.ink2};line-height:1.6;margin-bottom:16px}
   .lp .fab-panel-msg strong{color:${V.cr}}
   .lp .fab-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
-  .lp .fab-opt{display:flex;align-items:center;gap:11px;width:100%;padding:11px 14px;background:${V.white};border:1px solid ${V.bone3};border-radius:10px;cursor:pointer;transition:all .2s;text-align:left;font-family:'Syne',sans-serif;color:${V.ink2};font-size:13px;font-weight:600}
+  .lp .fab-opt{display:flex;align-items:center;gap:11px;width:100%;padding:11px 14px;background:${V.white};border:1px solid ${V.bone3};border-radius:10px;cursor:pointer;transition:all .2s;text-align:left;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:${V.ink2};font-size:13px;font-weight:600}
   .lp .fab-opt:hover{border-color:${V.cr};background:rgba(139,26,46,.04);transform:translateX(2px)}
   .lp .fab-opt-ic{width:30px;height:30px;border-radius:8px;background:rgba(139,26,46,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:${V.cr}}
   .lp .fab-panel-ft{padding:12px 22px 16px;background:${V.bone};border-top:1px solid ${V.bone3};font-size:11px;color:${V.sl2};text-align:center;line-height:1.6}
@@ -274,16 +282,16 @@ const styles = `
   .lp .hl:hover .hl-ico{border-color:rgba(184,150,12,.3);background:rgba(139,26,46,.18)}
   .lp .hl:hover .hl-ico svg{stroke:${V.gold3}}
   .lp .hl-ico{width:44px;height:44px;border-radius:6px;background:rgba(139,26,46,.07);border:1px solid rgba(139,26,46,.1);display:flex;align-items:center;justify-content:center;margin-bottom:22px;transition:all .25s}
-  .lp .hl-n{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;color:${V.ink};line-height:1;transition:color .25s}
+  .lp .hl-n{font-family:'DM Serif Display',Georgia,serif;font-size:2.4rem;font-weight:700;color:${V.ink};line-height:1;transition:color .25s}
   .lp .hl-h{font-size:12px;font-weight:700;color:${V.ink};margin-top:6px;letter-spacing:.03em;transition:color .25s}
   .lp .hl-p{font-size:12px;color:${V.sl2};line-height:1.6;margin-top:4px;transition:color .25s}
   /* TESTIMONIALS */
   .lp .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
   .lp .tc{background:${V.bone};border-radius:24px;padding:32px;border:1px solid ${V.bone3};transition:all .28s;display:flex;flex-direction:column}
-  .lp .tc:hover{background:${V.white};box-shadow:0 12px 40px rgba(10,8,6,.14);border-color:transparent;transform:translateY(-4px)}
+  .lp .tc:hover{background:${V.white};box-shadow:0 12px 40px rgba(8,12,20,.14);border-color:transparent;transform:translateY(-4px)}
   .lp .t-stars{display:flex;gap:2px;margin-bottom:16px}
   .lp .t-s{width:13px;height:13px;fill:${V.gold2}}
-  .lp .t-q{font-family:'Playfair Display',serif;font-style:italic;font-size:1.05rem;color:${V.ink2};line-height:1.75;flex:1;margin-bottom:24px}
+  .lp .t-q{font-family:'DM Serif Display',Georgia,serif;font-style:italic;font-size:1.05rem;color:${V.ink2};line-height:1.75;flex:1;margin-bottom:24px}
   .lp .t-au{display:flex;align-items:center;gap:12px;margin-top:auto}
   .lp .t-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:${V.white};flex-shrink:0}
   .lp .t-nm{font-size:13.5px;font-weight:700;color:${V.ink}}
@@ -292,13 +300,13 @@ const styles = `
   .lp .cta-band{background:${V.ink};padding:96px 0;position:relative;overflow:hidden;text-align:center}
   .lp .cta-band::before{content:'';position:absolute;top:-40%;left:-10%;width:60%;height:200%;border-radius:50%;background:radial-gradient(ellipse,rgba(139,26,46,.18) 0%,transparent 70%)}
   .lp .cta-in{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 48px}
-  .lp .cta-h{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,5vw,4rem);font-weight:700;color:${V.white};line-height:1.1;letter-spacing:-.02em;margin-bottom:18px}
+  .lp .cta-h{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.4rem,5vw,4rem);font-weight:700;color:${V.white};line-height:1.1;letter-spacing:-.02em;margin-bottom:18px}
   .lp .cta-h em{color:${V.gold3};font-style:italic}
   .lp .cta-sub{font-size:17px;color:rgba(247,243,237,.48);line-height:1.75;margin-bottom:40px}
   .lp .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
   /* PAGE HERO */
   .lp .pg-hero{background:${V.ink};padding:80px 0 60px;border-bottom:1px solid rgba(255,255,255,.06)}
-  .lp .pg-h{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,5vw,4.5rem);font-weight:700;color:${V.white};line-height:1.05;letter-spacing:-.03em;margin-bottom:14px}
+  .lp .pg-h{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.8rem,5vw,4.5rem);font-weight:700;color:${V.white};line-height:1.05;letter-spacing:-.03em;margin-bottom:14px}
   .lp .pg-h em{color:${V.gold3};font-style:italic}
   .lp .pg-sub{font-size:17px;color:rgba(247,243,237,.5);max-width:560px;line-height:1.75}
   /* STATS */
@@ -306,16 +314,16 @@ const styles = `
   .lp .sg{background:${V.white};padding:36px 28px;text-align:center;position:relative;transition:background .25s}
   .lp .sg::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,${V.cr},${V.gold2});opacity:0;transition:.3s}
   .lp .sg:hover::before{opacity:1}.lp .sg:hover{background:${V.bone}}
-  .lp .sg-n{font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;color:${V.ink};line-height:1}
+  .lp .sg-n{font-family:'DM Serif Display',Georgia,serif;font-size:3rem;font-weight:700;color:${V.ink};line-height:1}
   .lp .sg-n em{color:${V.cr};font-style:normal}
   .lp .sg-l{font-size:12px;color:${V.sl2};margin-top:8px;font-weight:500;letter-spacing:.05em;line-height:1.5}
   /* PROCESS */
   .lp .proc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:${V.bone3};border-radius:16px;overflow:hidden;margin-top:60px}
   .lp .ps{background:${V.white};padding:36px 26px;position:relative;transition:background .25s}
   .lp .ps:hover{background:${V.bone}}
-  .lp .ps-n{font-family:'Syne Mono',monospace;font-size:10.5px;color:${V.sl3};letter-spacing:.12em;margin-bottom:14px}
+  .lp .ps-n{font-family:'Fira Code',monospace;font-size:10.5px;color:${V.sl3};letter-spacing:.12em;margin-bottom:14px}
   .lp .ps-ico{width:40px;height:40px;border-radius:6px;background:rgba(139,26,46,.07);border:1px solid rgba(139,26,46,.1);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
-  .lp .ps-h{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:${V.ink};margin-bottom:8px}
+  .lp .ps-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.15rem;font-weight:700;color:${V.ink};margin-bottom:8px}
   .lp .ps-p{font-size:13px;color:${V.sl};line-height:1.72}
   .lp .ps-arr{position:absolute;top:36px;right:-11px;width:22px;height:22px;background:${V.cr};border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2}
   .lp .ps:last-child .ps-arr{display:none}
@@ -324,15 +332,15 @@ const styles = `
   /* ── Meet Our Team grid ── */
   .lp .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px}
   .lp .tm-card{background:${V.white};border:1px solid ${V.bone3};border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s,border-color .25s;display:flex;flex-direction:column;position:relative}
-  .lp .tm-card:hover{transform:translateY(-4px);box-shadow:0 14px 38px rgba(10,8,6,.14);border-color:transparent}
+  .lp .tm-card:hover{transform:translateY(-4px);box-shadow:0 14px 38px rgba(8,12,20,.14);border-color:transparent}
   .lp .tm-open{grid-column:1/-1}
   .lp .tm-photo{position:relative;width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,${V.cr},${V.cr2});overflow:hidden;flex-shrink:0}
   .lp .tm-open .tm-photo{aspect-ratio:auto;height:240px;max-width:240px}
   .lp .tm-img{width:100%;height:100%;object-fit:cover;display:block}
-  .lp .tm-initials{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:3.4rem;font-weight:700;color:${V.gold3}}
-  .lp .tm-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,rgba(10,8,6,.55));pointer-events:none}
+  .lp .tm-initials{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',Georgia,serif;font-size:3.4rem;font-weight:700;color:${V.gold3}}
+  .lp .tm-scrim{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 55%,rgba(8,12,20,.55));pointer-events:none}
   .lp .tm-plate{padding:14px 16px 8px;text-align:center}
-  .lp .tm-name{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:${V.ink};line-height:1.25}
+  .lp .tm-name{font-family:'DM Serif Display',Georgia,serif;font-size:1.05rem;font-weight:700;color:${V.ink};line-height:1.25}
   .lp .tm-role{font-size:11.5px;color:${V.gold};font-weight:700;letter-spacing:.04em;margin-top:3px}
   .lp .tm-hint{padding:0 16px 14px;text-align:center;font-size:10.5px;color:${V.sl3};font-weight:600;letter-spacing:.05em;text-transform:uppercase}
   .lp .tm-detail{padding:4px 22px 18px;text-align:left}
@@ -350,11 +358,11 @@ const styles = `
   .lp .tm-list{margin:0;padding-left:18px}
   .lp .tm-list li{font-size:12.5px;color:${V.sl};line-height:1.7}
   .lp .cc{background:${V.white};border:1px solid ${V.bone3};border-radius:24px;overflow:hidden;transition:all .3s;display:flex;flex-direction:column}
-  .lp .cc:hover{transform:translateY(-5px);box-shadow:0 12px 40px rgba(10,8,6,.14);border-color:transparent}
+  .lp .cc:hover{transform:translateY(-5px);box-shadow:0 12px 40px rgba(8,12,20,.14);border-color:transparent}
   .lp .cc-top{padding:24px 24px 0}
   .lp .cc-bar{height:3px;background:linear-gradient(90deg,${V.cr},${V.gold2});border-radius:2px;margin-bottom:18px}
   .lp .cc-badge{display:inline-flex;align-items:center;padding:3px 11px;border-radius:99px;font-size:10.5px;font-weight:700;color:${V.cr};margin-bottom:11px;background:rgba(139,26,46,.07);border:1px solid rgba(139,26,46,.12)}
-  .lp .cc-h{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:${V.ink};margin-bottom:9px}
+  .lp .cc-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:${V.ink};margin-bottom:9px}
   .lp .cc-desc{font-size:13px;color:${V.sl};line-height:1.72;margin-bottom:14px}
   .lp .cc-body{padding:0 24px 22px;flex:1;display:flex;flex-direction:column;justify-content:flex-end}
   .lp .cc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
@@ -366,7 +374,7 @@ const styles = `
   .lp .sc{background:${V.ink2};padding:42px 30px;transition:background .25s;display:flex;flex-direction:column}
   .lp .sc:hover{background:rgba(139,26,46,.065)}
   .lp .sc-ico{width:50px;height:50px;border-radius:10px;background:rgba(139,26,46,.13);border:1px solid rgba(139,26,46,.2);display:flex;align-items:center;justify-content:center;margin-bottom:20px}
-  .lp .sc-h{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:${V.white};margin-bottom:10px}
+  .lp .sc-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.25rem;font-weight:700;color:${V.white};margin-bottom:10px}
   .lp .sc-p{font-size:13px;color:rgba(247,243,237,.44);line-height:1.78;flex:1;margin-bottom:16px}
   .lp .sc-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px}
   .lp .sc-tag{background:rgba(255,255,255,.05);border-radius:4px;padding:2px 8px;font-size:10.5px;font-weight:600;color:rgba(247,243,237,.38)}
@@ -374,19 +382,19 @@ const styles = `
   .lp .sc:hover .sc-lnk{gap:10px}
   /* PRICING */
   .lp .p-tabs{display:flex;background:${V.bone2};border:1px solid ${V.bone3};border-radius:6px;padding:4px;width:fit-content;margin-bottom:44px;flex-wrap:wrap}
-  .lp .ptab{padding:9px 22px;border-radius:7px;font-size:13px;font-weight:700;color:${V.sl};cursor:pointer;transition:all .2s;border:none;background:transparent;font-family:'Syne',sans-serif}
-  .lp .ptab.on{background:${V.white};color:${V.cr};box-shadow:0 4px 16px rgba(10,8,6,.10)}
+  .lp .ptab{padding:9px 22px;border-radius:7px;font-size:13px;font-weight:700;color:${V.sl};cursor:pointer;transition:all .2s;border:none;background:transparent;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .ptab.on{background:${V.white};color:${V.cr};box-shadow:0 4px 16px rgba(8,12,20,.10)}
   .lp .ppanel{display:none}.lp .ppanel.on{display:block}
   .lp .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   .lp .pc{background:${V.white};border:1px solid ${V.bone3};border-radius:20px;padding:32px;position:relative;transition:all .28s}
-  .lp .pc:hover{box-shadow:0 12px 40px rgba(10,8,6,.14);transform:translateY(-3px)}
+  .lp .pc:hover{box-shadow:0 12px 40px rgba(8,12,20,.14);transform:translateY(-3px)}
   .lp .pc.ft{border-color:${V.gold2};background:linear-gradient(135deg,${V.ink} 0%,${V.ink2} 100%)}
   .lp .pbadge{background:linear-gradient(90deg,${V.gold},${V.gold2});color:${V.ink};font-size:10px;font-weight:700;padding:3px 12px;border-radius:99px;letter-spacing:.06em;display:inline-block;margin-bottom:14px}
   .lp .p-lbl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${V.sl3};margin-bottom:6px}
   .lp .pc.ft .p-lbl{color:rgba(247,243,237,.35)}
-  .lp .p-ti{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:${V.ink};margin-bottom:10px}
+  .lp .p-ti{font-family:'DM Serif Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:${V.ink};margin-bottom:10px}
   .lp .pc.ft .p-ti{color:${V.white}}
-  .lp .p-am{font-family:'Playfair Display',serif;font-size:3.2rem;font-weight:700;color:${V.cr};line-height:1}
+  .lp .p-am{font-family:'DM Serif Display',Georgia,serif;font-size:3.2rem;font-weight:700;color:${V.cr};line-height:1}
   .lp .pc.ft .p-am{color:${V.gold3}}
   .lp .p-am sup{font-size:1.4rem;vertical-align:super}
   .lp .p-pr{font-size:12.5px;color:${V.sl2};margin-bottom:22px}
@@ -396,7 +404,7 @@ const styles = `
   .lp .pc.ft .p-f{color:rgba(247,243,237,.6)}
   .lp .p-ck{width:18px;height:18px;border-radius:50%;background:rgba(139,26,46,.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
   .lp .pc.ft .p-ck{background:rgba(184,150,12,.15)}
-  .lp .p-btn{display:block;width:100%;padding:13px;border-radius:6px;font-weight:700;font-size:13.5px;cursor:pointer;text-align:center;font-family:'Syne',sans-serif;transition:all .2s;border:none}
+  .lp .p-btn{display:block;width:100%;padding:13px;border-radius:6px;font-weight:700;font-size:13.5px;cursor:pointer;text-align:center;font-family:'Plus Jakarta Sans',system-ui,sans-serif;transition:all .2s;border:none}
   .lp .p-ol{background:transparent;color:${V.cr};border:1.5px solid ${V.cr}}
   .lp .p-ol:hover{background:${V.cr};color:${V.white}}
   .lp .p-gd{background:linear-gradient(90deg,${V.gold},${V.gold2});color:${V.ink}}
@@ -404,12 +412,12 @@ const styles = `
   /* GLOBAL */
   .lp .map-c{position:relative}
   .lp .cp-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
-  .lp .cp{background:${V.white};border:1px solid ${V.bone3};border-radius:6px;padding:6px 16px;font-size:12px;font-weight:700;color:${V.sl};cursor:pointer;transition:all .2s;font-family:'Syne',sans-serif}
+  .lp .cp{background:${V.white};border:1px solid ${V.bone3};border-radius:6px;padding:6px 16px;font-size:12px;font-weight:700;color:${V.sl};cursor:pointer;transition:all .2s;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .cp:hover{background:${V.cr};color:${V.white};border-color:${V.cr}}
   /* FAQ */
   .lp .faq-list{display:flex;flex-direction:column;gap:8px;margin-top:60px}
   .lp .fqi{background:${V.white};border:1px solid ${V.bone3};border-radius:16px;overflow:hidden}
-  .lp .fqq{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;font-weight:700;font-size:14.5px;color:${V.ink};transition:background .2s;border:none;background:transparent;width:100%;text-align:left;font-family:'Syne',sans-serif}
+  .lp .fqq{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;font-weight:700;font-size:14.5px;color:${V.ink};transition:background .2s;border:none;background:transparent;width:100%;text-align:left;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .fqq:hover{background:${V.bone}}
   .lp .fqi-ico{width:24px;height:24px;border-radius:50%;background:rgba(139,26,46,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;color:${V.cr};transition:transform .3s,background .3s;line-height:1}
   .lp .fqi.open .fqi-ico{transform:rotate(45deg);background:${V.cr};color:${V.white}}
@@ -418,15 +426,15 @@ const styles = `
   .lp .fqi.open .fqa{max-height:400px}
   /* BLOG */
   .lp .bf-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:36px}
-  .lp .bf{padding:7px 18px;border-radius:99px;font-size:12.5px;font-weight:700;color:${V.sl};cursor:pointer;border:1.5px solid ${V.bone3};background:${V.white};transition:all .2s;font-family:'Syne',sans-serif}
+  .lp .bf{padding:7px 18px;border-radius:99px;font-size:12.5px;font-weight:700;color:${V.sl};cursor:pointer;border:1.5px solid ${V.bone3};background:${V.white};transition:all .2s;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .bf:hover{border-color:${V.cr};color:${V.cr}}.lp .bf.on{background:${V.cr};color:${V.white};border-color:${V.cr}}
   .lp .bfc{background:${V.ink2};border-radius:24px;overflow:hidden;margin-bottom:24px;cursor:pointer;display:grid;grid-template-columns:1fr 1.3fr;transition:all .3s;border:1px solid rgba(255,255,255,.05)}
-  .lp .bfc:hover{box-shadow:0 32px 80px rgba(10,8,6,.20);transform:translateY(-4px)}
+  .lp .bfc:hover{box-shadow:0 32px 80px rgba(8,12,20,.20);transform:translateY(-4px)}
   .lp .bfc-l{background:linear-gradient(135deg,#1A0509,#4A1020);min-height:280px;display:flex;align-items:center;justify-content:center;position:relative;padding:28px;overflow:hidden}
   .lp .bfc-badge{position:absolute;top:18px;left:18px;background:${V.cr};color:${V.white};font-size:10px;font-weight:700;padding:4px 12px;border-radius:99px;letter-spacing:.07em;text-transform:uppercase}
   .lp .bfc-r{padding:40px;display:flex;flex-direction:column;justify-content:center}
   .lp .bfc-date{font-size:11px;color:rgba(247,243,237,.35);margin-bottom:12px;font-weight:500;letter-spacing:.05em}
-  .lp .bfc-h{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1.25;margin-bottom:14px}
+  .lp .bfc-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1.25;margin-bottom:14px}
   .lp .bfc-p{font-size:14px;color:rgba(247,243,237,.5);line-height:1.75;margin-bottom:24px}
   .lp .bfc-au{display:flex;align-items:center;gap:12px}
   .lp .bfc-av{width:36px;height:36px;border-radius:50%;background:${V.cr};display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:${V.white}}
@@ -434,13 +442,13 @@ const styles = `
   .lp .bfc-ar{font-size:11px;color:rgba(247,243,237,.4)}
   .lp .blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   .lp .bc{background:${V.white};border-radius:24px;overflow:hidden;border:1px solid ${V.bone3};transition:all .28s;display:flex;flex-direction:column;cursor:pointer}
-  .lp .bc:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(10,8,6,.14);border-color:transparent}
+  .lp .bc:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(8,12,20,.14);border-color:transparent}
   .lp .bc-img{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;flex-shrink:0}
   /* Premium splash image — the photo itself */
   .lp .bc-splash{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.6,.3,1),filter .4s ease}
   .lp .bc:hover .bc-splash{transform:scale(1.06);filter:saturate(1.15) brightness(1.03)}
   /* Gradient scrim that guarantees category pill readability on any image */
-  .lp .bc-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,6,.15) 0%,rgba(10,8,6,.0) 40%,rgba(10,8,6,.55) 100%);pointer-events:none;transition:opacity .3s ease}
+  .lp .bc-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,12,20,.15) 0%,rgba(8,12,20,.0) 40%,rgba(8,12,20,.55) 100%);pointer-events:none;transition:opacity .3s ease}
   .lp .bc:hover .bc-scrim{opacity:.85}
   /* Crimson accent wash on hover for premium feel */
   .lp .bc-wash{position:absolute;inset:0;background:linear-gradient(135deg,rgba(139,26,46,.0) 0%,rgba(139,26,46,.25) 100%);opacity:0;transition:opacity .3s ease;pointer-events:none;mix-blend-mode:multiply}
@@ -448,18 +456,18 @@ const styles = `
   /* Featured card splash rules */
   .lp .bfc-splash{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85;transition:transform .6s cubic-bezier(.2,.6,.3,1),opacity .4s ease}
   .lp .bfc:hover .bfc-splash{transform:scale(1.04);opacity:.95}
-  .lp .bfc-scrim{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,8,6,.35) 0%,rgba(139,26,46,.45) 60%,rgba(10,8,6,.7) 100%);pointer-events:none}
+  .lp .bfc-scrim{position:absolute;inset:0;background:linear-gradient(135deg,rgba(8,12,20,.35) 0%,rgba(139,26,46,.45) 60%,rgba(8,12,20,.7) 100%);pointer-events:none}
   .lp .bc-cat{position:absolute;bottom:11px;left:13px;background:${V.cr};color:${V.white};font-size:9px;font-weight:700;padding:3px 10px;border-radius:99px;letter-spacing:.07em;text-transform:uppercase}
   .lp .bc-body{padding:22px;flex:1;display:flex;flex-direction:column}
   .lp .bc-date{font-size:11px;color:${V.sl3};margin-bottom:7px;font-weight:500;letter-spacing:.04em}
-  .lp .bc-h{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:${V.ink};margin-bottom:8px;line-height:1.35}
+  .lp .bc-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.1rem;font-weight:700;color:${V.ink};margin-bottom:8px;line-height:1.35}
   .lp .bc-ex{font-size:13px;color:${V.sl};line-height:1.65;flex:1}
   .lp .bc-rd{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:${V.cr};margin-top:13px;transition:gap .2s}
   .lp .bc:hover .bc-rd{gap:9px}
   .lp .bc.hidden{display:none}
   .lp .nl-strip{background:${V.bone2};border:1px solid ${V.bone3};border-radius:24px;padding:40px;margin-top:40px;text-align:center}
   /* WIZARD */
-  .lp .wiz-shell{background:${V.white};border-radius:24px;box-shadow:0 32px 80px rgba(10,8,6,.20);overflow:hidden;margin-top:60px}
+  .lp .wiz-shell{background:${V.white};border-radius:24px;box-shadow:0 32px 80px rgba(8,12,20,.20);overflow:hidden;margin-top:60px}
   .lp .wiz-steps{display:flex;background:${V.ink}}
   .lp .wst{flex:1;padding:18px 14px;display:flex;align-items:center;gap:9px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;min-width:0}
   .lp .wst.on{background:rgba(139,26,46,.12);border-color:${V.cr}}
@@ -468,16 +476,16 @@ const styles = `
   .lp .ws-l{font-size:11.5px;font-weight:700;color:rgba(247,243,237,.33);transition:color .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .lp .wst.on .ws-l{color:${V.white}}
   .lp .wiz-body{padding:48px}
-  .lp .wiz-h{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:${V.ink};margin-bottom:5px}
+  .lp .wiz-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.7rem;font-weight:700;color:${V.ink};margin-bottom:5px}
   .lp .wiz-sub{font-size:14px;color:${V.sl};margin-bottom:28px;line-height:1.65}
   .lp .fg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .lp .fgg{grid-column:1/-1}
   .lp .fl{font-size:11px;font-weight:700;color:${V.sl};letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;display:block}
-  .lp .fi-i{padding:11px 14px;border:1.5px solid ${V.bone3};border-radius:6px;font-size:14px;color:${V.ink};outline:none;transition:all .2s;background:${V.bone};width:100%;font-family:'Syne',sans-serif}
+  .lp .fi-i{padding:11px 14px;border:1.5px solid ${V.bone3};border-radius:6px;font-size:14px;color:${V.ink};outline:none;transition:all .2s;background:${V.bone};width:100%;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .lp .fi-i:focus{border-color:${V.cr};background:${V.white}}
   .lp select.fi-i{appearance:none;padding-right:32px}
   .lp .wiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid ${V.bone3}}
-  .lp .wb{padding:13px 26px;border-radius:6px;font-weight:700;font-size:13.5px;cursor:pointer;border:none;transition:all .2s;font-family:'Syne',sans-serif;display:inline-flex;align-items:center;gap:7px}
+  .lp .wb{padding:13px 26px;border-radius:6px;font-weight:700;font-size:13.5px;cursor:pointer;border:none;transition:all .2s;font-family:'Plus Jakarta Sans',system-ui,sans-serif;display:inline-flex;align-items:center;gap:7px}
   .lp .wb-nx{background:${V.cr};color:${V.white}}.lp .wb-nx:hover{background:${V.cr2}}
   .lp .wb-bk{background:transparent;color:${V.sl};border:1px solid ${V.bone3}}.lp .wb-bk:hover{border-color:${V.sl}}
   .lp .pay-o{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
@@ -486,17 +494,17 @@ const styles = `
   .lp .po-l{font-size:11px;font-weight:700;color:${V.sl};margin-top:6px}
   /* LOGIN */
   .lp .login-bg{min-height:100vh;background:${V.ink};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;position:relative;overflow:hidden}
-  .lp .login-card{background:rgba(26,21,16,.96);border:1px solid rgba(184,150,12,.12);border-radius:24px;padding:44px;width:100%;max-width:440px;box-shadow:0 60px 120px rgba(10,8,6,.28);position:relative;z-index:1;backdrop-filter:blur(20px)}
+  .lp .login-card{background:rgba(26,21,16,.96);border:1px solid rgba(184,150,12,.12);border-radius:24px;padding:44px;width:100%;max-width:440px;box-shadow:0 60px 120px rgba(8,12,20,.28);position:relative;z-index:1;backdrop-filter:blur(20px)}
   .lp .lrt-wrap{display:flex;background:rgba(255,255,255,.05);border-radius:6px;padding:3px;margin-bottom:26px}
-  .lp .lrt{flex:1;padding:8px;border-radius:7px;font-size:12.5px;font-weight:700;cursor:pointer;border:none;transition:all .2s;font-family:'Syne',sans-serif;color:rgba(247,243,237,.4);background:transparent;display:flex;align-items:center;justify-content:center;gap:6px}
+  .lp .lrt{flex:1;padding:8px;border-radius:7px;font-size:12.5px;font-weight:700;cursor:pointer;border:none;transition:all .2s;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:rgba(247,243,237,.4);background:transparent;display:flex;align-items:center;justify-content:center;gap:6px}
   .lp .lrt.on{background:${V.cr};color:${V.white};box-shadow:0 2px 8px rgba(139,26,46,.4)}
-  .lp .login-h{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:${V.white};margin-bottom:4px}
+  .lp .login-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.5rem;font-weight:700;color:${V.white};margin-bottom:4px}
   .lp .login-sub{font-size:13px;color:rgba(247,243,237,.38);margin-bottom:24px;line-height:1.6}
   .lp .login-fl{font-size:11px;font-weight:700;color:rgba(247,243,237,.32);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;display:block}
-  .lp .login-inp{padding:12px 14px;border:1.5px solid rgba(255,255,255,.1);border-radius:6px;font-size:14px;color:${V.white};outline:none;transition:all .2s;background:rgba(255,255,255,.05);width:100%;font-family:'Syne',sans-serif;margin-bottom:14px}
+  .lp .login-inp{padding:12px 14px;border:1.5px solid rgba(255,255,255,.1);border-radius:6px;font-size:14px;color:${V.white};outline:none;transition:all .2s;background:rgba(255,255,255,.05);width:100%;font-family:'Plus Jakarta Sans',system-ui,sans-serif;margin-bottom:14px}
   .lp .login-inp:focus{border-color:${V.gold3};background:rgba(255,255,255,.08)}
   .lp .login-inp::placeholder{color:rgba(247,243,237,.2)}
-  .lp .login-btn{width:100%;padding:14px;background:${V.cr};color:${V.white};border:none;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;font-family:'Syne',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+  .lp .login-btn{width:100%;padding:14px;background:${V.cr};color:${V.white};border:none;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;font-family:'Plus Jakarta Sans',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
   .lp .login-btn:hover{background:${V.cr2}}
   .lp .lpfs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:440px;margin-top:20px;position:relative;z-index:1}
   .lp .lpf{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;text-align:center}
@@ -504,14 +512,14 @@ const styles = `
   .lp .lpf-s{font-size:10.5px;color:rgba(247,243,237,.28);margin-top:2px}
   /* CONSULTATION PAGE */
   .lp .consult-wrap{max-width:760px;margin:0 auto}
-  .lp .consult-card{background:${V.white};border:1px solid ${V.bone3};border-radius:24px;padding:48px;box-shadow:0 8px 40px rgba(10,8,6,.08)}
+  .lp .consult-card{background:${V.white};border:1px solid ${V.bone3};border-radius:24px;padding:48px;box-shadow:0 8px 40px rgba(8,12,20,.08)}
   .lp .consult-field{margin-bottom:20px}
   .lp .consult-label{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${V.sl};margin-bottom:7px}
-  .lp .consult-input{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Syne',sans-serif;outline:none;transition:border-color .2s}
+  .lp .consult-input{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Plus Jakarta Sans',system-ui,sans-serif;outline:none;transition:border-color .2s}
   .lp .consult-input:focus{border-color:${V.cr};background:${V.white}}
-  .lp .consult-select{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Syne',sans-serif;outline:none;appearance:none;cursor:pointer;transition:border-color .2s}
+  .lp .consult-select{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Plus Jakarta Sans',system-ui,sans-serif;outline:none;appearance:none;cursor:pointer;transition:border-color .2s}
   .lp .consult-select:focus{border-color:${V.cr}}
-  .lp .consult-textarea{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Syne',sans-serif;outline:none;resize:vertical;min-height:120px;line-height:1.65;transition:border-color .2s}
+  .lp .consult-textarea{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Plus Jakarta Sans',system-ui,sans-serif;outline:none;resize:vertical;min-height:120px;line-height:1.65;transition:border-color .2s}
   .lp .consult-textarea:focus{border-color:${V.cr};background:${V.white}}
   .lp .consult-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .lp .consult-success{text-align:center;padding:48px 32px}
@@ -528,7 +536,7 @@ const styles = `
   /* FOOTER */
   .lp footer{background:${V.ink2};padding:72px 0 28px;border-top:1px solid rgba(184,150,12,.08)}
   .lp .ft-grid{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:52px;margin-bottom:52px}
-  .lp .ft-h{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:#FEFDFB}
+  .lp .ft-h{font-family:'DM Serif Display',Georgia,serif;font-size:21px;font-weight:700;color:#FFFFFF}
   .lp .ft-h em{color:${V.gold3};font-style:italic}
   .lp .ft-tag{font-size:8.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#A89F94;margin-top:2px;margin-bottom:14px}
   .lp .ft-d{font-size:13px;color:#C0B5A8;line-height:1.78;margin-bottom:20px;max-width:270px}
@@ -558,23 +566,23 @@ const styles = `
   .lp .sa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
   .lp .sa-d{border:1px solid ${V.bone3};border-radius:16px;overflow:hidden}
   .lp .sa-dt{padding:20px;text-align:center}
-  .lp .sa-dn{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:${V.white};margin-top:8px}
+  .lp .sa-dn{font-family:'DM Serif Display',Georgia,serif;font-size:1.05rem;font-weight:700;color:${V.white};margin-top:8px}
   .lp .sa-db{padding:16px}
   .lp .sa-dp{font-size:12.5px;color:${V.sl};line-height:1.65;margin-bottom:8px}
   .lp .sa-dm{font-size:11.5px;color:${V.sl2}}
   /* PROG SELECTION */
   .lp .prog-sel-card{border:2px solid ${V.bone3};border-radius:16px;padding:24px 20px;cursor:pointer;transition:all .25s;background:${V.white};display:flex;flex-direction:column;gap:0;position:relative;overflow:hidden}
   .lp .prog-sel-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,${V.cr},${V.gold2});transform:scaleX(0);transform-origin:left;transition:transform .3s}
-  .lp .prog-sel-card:hover{box-shadow:0 12px 40px rgba(10,8,6,.14);transform:translateY(-3px)}
+  .lp .prog-sel-card:hover{box-shadow:0 12px 40px rgba(8,12,20,.14);transform:translateY(-3px)}
   .lp .prog-sel-card.on{border-color:${V.cr};background:rgba(139,26,46,.03)}
   .lp .prog-sel-card.on::before{transform:scaleX(1)}
   .lp .psc-ico{width:52px;height:52px;border-radius:10px;background:rgba(139,26,46,.07);border:1px solid rgba(139,26,46,.1);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
-  .lp .psc-h{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:${V.ink};margin-bottom:8px;line-height:1.2}
+  .lp .psc-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.1rem;font-weight:700;color:${V.ink};margin-bottom:8px;line-height:1.2}
   .lp .psc-p{font-size:12.5px;color:${V.sl};line-height:1.68;font-weight:400;flex:1;margin-bottom:14px}
   .lp .psc-from{font-size:12px;font-weight:700;color:${V.cr};letter-spacing:.02em}
   .lp .prog-sub-panel{background:${V.bone};border-radius:10px;border:1px solid ${V.bone3};padding:22px;margin-bottom:4px;transition:all .3s;animation:lp-fadeUp .3s ease}
   /* TOAST */
-  #lp-toast{position:fixed;bottom:22px;right:22px;background:${V.ink2};color:${V.white};padding:14px 18px;border-radius:10px;font-size:13.5px;font-weight:500;box-shadow:0 20px 50px rgba(10,8,6,.28);z-index:9999;border-left:3px solid ${V.cr};display:none;max-width:340px;line-height:1.5;font-family:'Syne',sans-serif}
+  #lp-toast{position:fixed;bottom:22px;right:22px;background:${V.ink2};color:${V.white};padding:14px 18px;border-radius:10px;font-size:13.5px;font-weight:500;box-shadow:0 20px 50px rgba(8,12,20,.28);z-index:9999;border-left:3px solid ${V.cr};display:none;max-width:340px;line-height:1.5;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   #lp-toast.show{display:block;animation:lp-fadeUp .3s ease}
   /* ANIMATIONS */
   @keyframes lp-marq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
@@ -681,7 +689,7 @@ const styles = `
      Two breakpoints: ≤768px (tablet+phone), ≤480px (phone).
      ═══════════════════════════════════════════════════════ */
   @media(max-width:768px){
-    /* — display heading ('Playfair Display' large headings) — */
+    /* — display heading ('DM Serif Display' large headings) — */
     .lp .display{font-size:clamp(1.7rem,7vw,2.4rem) !important;line-height:1.15 !important}
 
     /* — wizard form scaling — */
@@ -740,8 +748,8 @@ const Stars = () => (
 // ─── Smartious Logo (redrawn in SVG so no white background, scales perfectly) ───
 // Crimson shield · gold star · white open-book device
 const SmartiousLogo = ({ size = 40, withText = false, tone = 'light' }) => {
-  const textColor = tone === 'light' ? '#FEFDFB' : '#0A0806'
-  const iousColor = tone === 'light' ? '#F0CC5A' : '#8B1A2E'
+  const textColor = tone === 'light' ? '#FFFFFF' : '#080C14'
+  const iousColor = tone === 'light' ? '#C9973A' : '#8B1A2E'
   return (
     <div style={{display:'inline-flex',alignItems:'center',gap:12}}>
       <svg width={size} height={size} viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Smartious Homeschool">
@@ -756,11 +764,11 @@ const SmartiousLogo = ({ size = 40, withText = false, tone = 'light' }) => {
         {/* Inner frame */}
         <path d="M40 10 L64 17 Q65.5 17 65.5 19 L65.5 44 Q65.5 57 40 69 Q14.5 57 14.5 44 L14.5 19 Q14.5 17 16 17 Z" fill="none" stroke="rgba(255,255,255,.14)" strokeWidth="0.8"/>
         {/* Gold star top */}
-        <polygon points="40,19 42.2,26 49.5,26 43.7,30.4 45.9,37.5 40,33 34.1,37.5 36.3,30.4 30.5,26 37.8,26" fill="#F0CC5A" stroke="#C89A28" strokeWidth="0.4"/>
+        <polygon points="40,19 42.2,26 49.5,26 43.7,30.4 45.9,37.5 40,33 34.1,37.5 36.3,30.4 30.5,26 37.8,26" fill="#C9973A" stroke="#C89A28" strokeWidth="0.4"/>
         {/* Open book */}
         <g transform="translate(40 52)">
-          <path d="M-14 -4 L-14 8 L-1 9 L-1 -3 Q-8 -5 -14 -4 Z" fill="#FEFDFB" stroke="#F7F3ED" strokeWidth=".4"/>
-          <path d="M14 -4 L14 8 L1 9 L1 -3 Q8 -5 14 -4 Z" fill="#FEFDFB" stroke="#F7F3ED" strokeWidth=".4"/>
+          <path d="M-14 -4 L-14 8 L-1 9 L-1 -3 Q-8 -5 -14 -4 Z" fill="#FFFFFF" stroke="#FDFAF4" strokeWidth=".4"/>
+          <path d="M14 -4 L14 8 L1 9 L1 -3 Q8 -5 14 -4 Z" fill="#FFFFFF" stroke="#FDFAF4" strokeWidth=".4"/>
           <line x1="-10" y1="-0.5" x2="-4" y2="-0.5" stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
           <line x1="-10" y1="2" x2="-4" y2="2" stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
           <line x1="-10" y1="4.5" x2="-4" y2="4.5" stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
@@ -771,10 +779,10 @@ const SmartiousLogo = ({ size = 40, withText = false, tone = 'light' }) => {
       </svg>
       {withText && (
         <div style={{display:'flex',flexDirection:'column',lineHeight:1.1}}>
-          <div style={{fontFamily:"'Playfair Display',serif",fontSize: size*0.55, fontWeight:700, color:textColor}}>
+          <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize: size*0.55, fontWeight:700, color:textColor}}>
             Smart<em style={{fontStyle:'italic', color:iousColor, fontWeight:500}}>ious</em>
           </div>
-          <div style={{fontSize: size*0.2, fontWeight:600, letterSpacing:'.16em', color:tone==='light'?'rgba(247,243,237,.45)':'rgba(10,8,6,.42)', textTransform:'uppercase', marginTop:2}}>
+          <div style={{fontSize: size*0.2, fontWeight:600, letterSpacing:'.16em', color:tone==='light'?'rgba(247,243,237,.45)':'rgba(8,12,20,.42)', textTransform:'uppercase', marginTop:2}}>
             Homeschool · Global
           </div>
         </div>
@@ -1329,21 +1337,21 @@ function PhoneInput({ value, onChange, placeholder = '7XX XXX XXX', tone = 'ligh
   }
 
   const isLight = tone === 'light'
-  const baseBg      = isLight ? '#FEFDFB' : 'rgba(255,255,255,.05)'
-  const baseBorder  = isLight ? '#DDD5C6' : 'rgba(255,255,255,.1)'
-  const textColor   = isLight ? '#0A0806' : '#FFFFFF'
-  const placeColor  = isLight ? '#8A7B6E' : 'rgba(255,255,255,.4)'
-  const baseSepBg   = isLight ? '#F7F3ED' : 'rgba(10,8,6,.3)'
+  const baseBg      = isLight ? '#FFFFFF' : 'rgba(255,255,255,.05)'
+  const baseBorder  = isLight ? '#F0E8D4' : 'rgba(255,255,255,.1)'
+  const textColor   = isLight ? '#080C14' : '#FFFFFF'
+  const placeColor  = isLight ? '#3D5066' : 'rgba(255,255,255,.4)'
+  const baseSepBg   = isLight ? '#FDFAF4' : 'rgba(8,12,20,.3)'
 
   return (
-    <div style={{display:'flex',border:`1.5px solid ${baseBorder}`,borderRadius:8,overflow:'hidden',background:baseBg,fontFamily:"'Syne',sans-serif"}}>
+    <div style={{display:'flex',border:`1.5px solid ${baseBorder}`,borderRadius:8,overflow:'hidden',background:baseBg,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
       <select
         value={code}
         onChange={e => emit(e.target.value, local)}
-        style={{padding:'11px 10px',border:'none',background:baseSepBg,color:textColor,fontSize:13.5,fontWeight:600,cursor:'pointer',outline:'none',borderRight:`1px solid ${baseBorder}`,minWidth:110,fontFamily:"'Syne',sans-serif"}}
+        style={{padding:'11px 10px',border:'none',background:baseSepBg,color:textColor,fontSize:13.5,fontWeight:600,cursor:'pointer',outline:'none',borderRight:`1px solid ${baseBorder}`,minWidth:110,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}
       >
         {COUNTRY_CODES.map(c => (
-          <option key={c.code + c.name} value={c.code} style={{background:'#FEFDFB',color:'#0A0806'}}>
+          <option key={c.code + c.name} value={c.code} style={{background:'#FFFFFF',color:'#080C14'}}>
             {c.flag} {c.code} {c.name}
           </option>
         ))}
@@ -1355,7 +1363,7 @@ function PhoneInput({ value, onChange, placeholder = '7XX XXX XXX', tone = 'ligh
         value={local}
         onChange={e => emit(code, e.target.value)}
         placeholder={placeholder}
-        style={{flex:1,padding:'11px 14px',border:'none',background:'transparent',color:textColor,caretColor:textColor,fontSize:14,outline:'none',fontFamily:"'Syne',sans-serif",minWidth:0,WebkitTextFillColor:textColor}}
+        style={{flex:1,padding:'11px 14px',border:'none',background:'transparent',color:textColor,caretColor:textColor,fontSize:14,outline:'none',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",minWidth:0,WebkitTextFillColor:textColor}}
       />
     </div>
   )
@@ -1369,22 +1377,22 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
           <div className="eyebrow">Legal</div>
           <h1 className="pg-h">{title} <em>{em}</em></h1>
           <p className="pg-sub" style={{marginTop:12}}>{subtitle}</p>
-          <div style={{marginTop:18,fontSize:12,color:'rgba(247,243,237,.45)',fontFamily:"'Syne Mono',monospace",letterSpacing:'.08em'}}>
+          <div style={{marginTop:18,fontSize:12,color:'rgba(247,243,237,.45)',fontFamily:"'Fira Code',monospace",letterSpacing:'.08em'}}>
             Effective: {effective} &nbsp;·&nbsp; Smartious E-School Ltd &nbsp;·&nbsp; Diamond Plaza I, Parklands, Nairobi
           </div>
         </div>
       </div>
-      <section className="sec" style={{background:'#F7F3ED',padding:'72px 20px'}}>
-        <div style={{maxWidth:820,margin:'0 auto',background:'#FEFDFB',border:'1px solid #DDD5C6',borderRadius:16,padding:'48px 44px',boxShadow:'0 4px 24px rgba(10,8,6,.04)'}}>
+      <section className="sec" style={{background:'#FDFAF4',padding:'72px 20px'}}>
+        <div style={{maxWidth:820,margin:'0 auto',background:'#FFFFFF',border:'1px solid #F0E8D4',borderRadius:16,padding:'48px 44px',boxShadow:'0 4px 24px rgba(8,12,20,.04)'}}>
           {/* Quick-jump TOC */}
-          <div style={{background:'#F7F3ED',border:'1px solid #DDD5C6',borderRadius:10,padding:'18px 20px',marginBottom:36}}>
+          <div style={{background:'#FDFAF4',border:'1px solid #F0E8D4',borderRadius:10,padding:'18px 20px',marginBottom:36}}>
             <div style={{fontSize:11,fontWeight:700,color:'#8B1A2E',letterSpacing:'.14em',textTransform:'uppercase',marginBottom:10}}>On this page</div>
-            <ol style={{margin:0,paddingLeft:18,columns:2,columnGap:24,fontSize:13,lineHeight:1.9,color:'#2D261E',fontFamily:"'Syne',sans-serif"}}>
+            <ol style={{margin:0,paddingLeft:18,columns:2,columnGap:24,fontSize:13,lineHeight:1.9,color:'#121928',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
               {sections.map((s, i) => (
                 <li key={i} style={{breakInside:'avoid',listStyleType:'decimal'}}>
-                  <a href={`#sec-${i}`} style={{color:'#2D261E',textDecoration:'none',transition:'color .15s'}}
+                  <a href={`#sec-${i}`} style={{color:'#121928',textDecoration:'none',transition:'color .15s'}}
                     onMouseEnter={e=>e.currentTarget.style.color='#8B1A2E'}
-                    onMouseLeave={e=>e.currentTarget.style.color='#2D261E'}>
+                    onMouseLeave={e=>e.currentTarget.style.color='#121928'}>
                     {s.h.replace(/^\d+\.\s*/, '')}
                   </a>
                 </li>
@@ -1394,17 +1402,17 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
 
           {sections.map((s, i) => (
             <section key={i} id={`sec-${i}`} style={{marginBottom:32,scrollMarginTop:96}}>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.3rem',fontWeight:700,color:'#0A0806',marginBottom:12,letterSpacing:'-.005em'}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:'#080C14',marginBottom:12,letterSpacing:'-.005em'}}>
                 {s.h}
               </h2>
-              <p style={{fontSize:14.5,color:'#2D261E',lineHeight:1.85,fontFamily:"'Syne',sans-serif",margin:0}}>
+              <p style={{fontSize:14.5,color:'#121928',lineHeight:1.85,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",margin:0}}>
                 {s.p}
               </p>
             </section>
           ))}
 
-          <div style={{marginTop:48,paddingTop:24,borderTop:'1px solid #DDD5C6',textAlign:'center'}}>
-            <div style={{fontSize:12,color:'#8A7B6E',marginBottom:14}}>
+          <div style={{marginTop:48,paddingTop:24,borderTop:'1px solid #F0E8D4',textAlign:'center'}}>
+            <div style={{fontSize:12,color:'#3D5066',marginBottom:14}}>
               Have a question about this policy? We'd rather hear from you than have you worry.
             </div>
             <div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
@@ -1417,9 +1425,9 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
         {/* Other legal pages navigation */}
         <div style={{maxWidth:820,margin:'32px auto 0',display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
           {[['privacy','Privacy Policy'],['terms','Terms of Service'],['cookies','Cookie Policy'],['gdpr','GDPR']].map(([id,lbl]) => (
-            <button key={id} onClick={() => P(id)} style={{padding:'8px 16px',border:'1px solid #DDD5C6',background:'#FEFDFB',color:'#2D261E',fontSize:12.5,fontWeight:600,borderRadius:20,cursor:'pointer',fontFamily:"'Syne',sans-serif",transition:'all .2s'}}
+            <button key={id} onClick={() => P(id)} style={{padding:'8px 16px',border:'1px solid #F0E8D4',background:'#FFFFFF',color:'#121928',fontSize:12.5,fontWeight:600,borderRadius:20,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",transition:'all .2s'}}
               onMouseEnter={e=>{e.currentTarget.style.borderColor='#8B1A2E';e.currentTarget.style.color='#8B1A2E'}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor='#DDD5C6';e.currentTarget.style.color='#2D261E'}}>
+              onMouseLeave={e=>{e.currentTarget.style.borderColor='#F0E8D4';e.currentTarget.style.color='#121928'}}>
               {lbl}
             </button>
           ))}
@@ -2111,11 +2119,11 @@ export default function LandingPage() {
             style={{
               display:'none',
               background:'transparent',
-              border:'1px solid rgba(240,204,90,.35)',
+              border:'1px solid rgba(201,151,58,.35)',
               borderRadius:8,
               padding:'8px 10px',
               cursor:'pointer',
-              color:'#F0CC5A',
+              color:'#C9973A',
               marginRight:12,
               order:-1,
               transition:'background .2s, border-color .2s',
@@ -2164,20 +2172,20 @@ export default function LandingPage() {
         bottom:8,
         right:8,
         zIndex:9999,
-        background:'rgba(10,8,6,.85)',
-        color:'#F0CC5A',
+        background:'rgba(8,12,20,.85)',
+        color:'#C9973A',
         padding:'4px 9px',
         borderRadius:6,
         fontSize:10,
         fontWeight:700,
         letterSpacing:'.04em',
-        fontFamily:"'Syne Mono', monospace",
-        border:'1px solid rgba(240,204,90,.35)',
+        fontFamily:"'Fira Code', monospace",
+        border:'1px solid rgba(201,151,58,.35)',
         boxShadow:'0 2px 8px rgba(0,0,0,.3)',
         pointerEvents:'none',
         userSelect:'none',
       }} aria-hidden="true">
-        BUILD 2026-05-31-B · menu-accordion
+        BUILD 2026-05-31-C · premium-aesthetic
       </div>
 
       {/* Mobile slide-down menu — categorised, premium look */}
@@ -2185,10 +2193,10 @@ export default function LandingPage() {
         <div style={{
           position:'fixed',
           top:64,left:0,right:0,bottom:0,
-          background:'linear-gradient(180deg, #0A0806 0%, #1a0e12 100%)',
+          background:'linear-gradient(180deg, #080C14 0%, #1a0e12 100%)',
           zIndex:9998,
           overflowY:'auto',
-          borderTop:'1px solid rgba(240,204,90,.15)',
+          borderTop:'1px solid rgba(201,151,58,.15)',
         }}>
           <div style={{padding:'24px 22px 40px',maxWidth:520,margin:'0 auto'}}>
             {[
@@ -2237,10 +2245,10 @@ export default function LandingPage() {
                     border:'none',
                     padding:'14px 4px',
                     cursor:'pointer',
-                    color: openCategory === group.cat ? '#F0CC5A' : 'rgba(247,243,237,.92)',
+                    color: openCategory === group.cat ? '#C9973A' : 'rgba(247,243,237,.92)',
                     fontWeight: openCategory === group.cat ? 700 : 600,
                     fontSize: 15,
-                    fontFamily:"'Syne',sans-serif",
+                    fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
                     letterSpacing:'.02em',
                     transition:'color .15s',
                   }}>
@@ -2268,12 +2276,12 @@ export default function LandingPage() {
                           textAlign:'left',
                           background: page === id ? 'rgba(139,26,46,.18)' : 'transparent',
                           border:'none',
-                          borderLeft: page === id ? '3px solid #F0CC5A' : '3px solid transparent',
+                          borderLeft: page === id ? '3px solid #C9973A' : '3px solid transparent',
                           padding:'11px 14px',
-                          color: page === id ? '#FEFDFB' : 'rgba(247,243,237,.72)',
+                          color: page === id ? '#FFFFFF' : 'rgba(247,243,237,.72)',
                           fontWeight: page === id ? 700 : 500,
                           fontSize: 14.5,
-                          fontFamily:"'Syne',sans-serif",
+                          fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
                           cursor:'pointer',
                           transition:'background .15s, border-color .15s, color .15s',
                           borderRadius:6,
@@ -2298,13 +2306,13 @@ export default function LandingPage() {
                 style={{
                   width:'100%',
                   background:'transparent',
-                  color:'#FEFDFB',
+                  color:'#FFFFFF',
                   border:'1px solid rgba(247,243,237,.25)',
                   borderRadius:8,
                   padding:'13px',
                   fontWeight:700,
                   fontSize:14,
-                  fontFamily:"'Syne',sans-serif",
+                  fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
                   cursor:'pointer',
                   display:'inline-flex',
                   alignItems:'center',
@@ -2326,7 +2334,7 @@ export default function LandingPage() {
                   padding:'14px',
                   fontWeight:800,
                   fontSize:14,
-                  fontFamily:"'Syne',sans-serif",
+                  fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
                   cursor:'pointer',
                   display:'inline-flex',
                   alignItems:'center',
@@ -2469,7 +2477,7 @@ export default function LandingPage() {
                   ['98% pass rate', '2024 IGCSE & A-Level cohort'],
                 ].map(([h, sub]) => (
                   <div key={h}>
-                    <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,lineHeight:1.25}}>{h}</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,lineHeight:1.25}}>{h}</div>
                     <div style={{fontSize:11.5,color:V.sl,marginTop:4,letterSpacing:'.02em'}}>{sub}</div>
                   </div>
                 ))}
@@ -2570,7 +2578,7 @@ export default function LandingPage() {
                   position:'relative',
                 }}>
                   <div style={{
-                    fontFamily:"'Playfair Display',serif",
+                    fontFamily:"'DM Serif Display',Georgia,serif",
                     fontSize:'2.2rem',
                     fontWeight:400,
                     color:V.gold2,
@@ -2858,7 +2866,7 @@ export default function LandingPage() {
                   <div className="cc-body">
                     <div className="cc-tags">{c.tags.map(t => <span key={t} className="cc-tag">{t}</span>)}</div>
                     <div className="cc-meta">{c.meta.map(m => <span key={m}>{m}</span>)}</div>
-                    <div style={{marginTop:14,display:'flex',alignItems:'center',gap:6,color:c.gold?V.gold:V.cr,fontWeight:700,fontSize:13,fontFamily:"'Syne',sans-serif"}}>
+                    <div style={{marginTop:14,display:'flex',alignItems:'center',gap:6,color:c.gold?V.gold:V.cr,fontWeight:700,fontSize:13,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
                       View full details
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </div>
@@ -2880,7 +2888,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',maxWidth:780,margin:'0 auto 40px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>How the curricula map together</div>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                 Your child's pathway, <em style={{color:V.cr}}>from age 6 to university</em>
               </h2>
               <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Every curriculum we offer fits into a recognised global pathway. Here is how the eight pathways line up against your child's age, and which qualifications they earn at each stage.</p>
@@ -2893,43 +2901,43 @@ export default function LandingPage() {
                     <stop offset="100%" stopColor="#B8960C"/>
                   </linearGradient>
                 </defs>
-                <line x1="60" y1="56" x2="900" y2="56" stroke="#0A0806" strokeWidth="1.5" opacity="0.4"/>
+                <line x1="60" y1="56" x2="900" y2="56" stroke="#080C14" strokeWidth="1.5" opacity="0.4"/>
                 {[6,8,10,12,14,16,18].map((age,i) => {
                   const x = 60 + (i * 140)
                   return (
                     <g key={age}>
-                      <line x1={x} y1="52" x2={x} y2="60" stroke="#0A0806" strokeWidth="1.5" opacity="0.5"/>
-                      <text x={x} y="40" textAnchor="middle" fontFamily="'Syne', sans-serif" fontWeight="700" fontSize="13" fill="#0A0806">Age {age}</text>
+                      <line x1={x} y1="52" x2={x} y2="60" stroke="#080C14" strokeWidth="1.5" opacity="0.5"/>
+                      <text x={x} y="40" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontWeight="700" fontSize="13" fill="#080C14">Age {age}</text>
                     </g>
                   )
                 })}
                 <rect x="60" y="78" width="840" height="42" rx="6" fill="#8B1A2E" opacity="0.92"/>
-                <text x="78" y="105" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="14" fill="#FEFDFB">Kenya CBC · KCSE</text>
-                <text x="78" y="118" fontFamily="'Syne Mono', monospace" fontSize="10" letterSpacing="0.06em" fill="#F0CC5A" opacity="0.9">PRIMARY → JUNIOR → SENIOR SECONDARY</text>
-                <rect x="60" y="130" width="560" height="42" rx="6" fill="#6B5E52" opacity="0.85"/>
-                <text x="78" y="157" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="14" fill="#FEFDFB">British National Curriculum</text>
-                <text x="78" y="170" fontFamily="'Syne Mono', monospace" fontSize="10" letterSpacing="0.06em" fill="#FEFDFB" opacity="0.75">YEAR 1 → YEAR 9</text>
+                <text x="78" y="105" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#FFFFFF">Kenya CBC · KCSE</text>
+                <text x="78" y="118" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#C9973A" opacity="0.9">PRIMARY → JUNIOR → SENIOR SECONDARY</text>
+                <rect x="60" y="130" width="560" height="42" rx="6" fill="#2E3D55" opacity="0.85"/>
+                <text x="78" y="157" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#FFFFFF">British National Curriculum</text>
+                <text x="78" y="170" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#FFFFFF" opacity="0.75">YEAR 1 → YEAR 9</text>
                 <rect x="620" y="130" width="140" height="42" rx="6" fill="#B8960C" opacity="0.95"/>
-                <text x="638" y="157" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="13" fill="#0A0806">IGCSE / Edexcel</text>
-                <text x="638" y="170" fontFamily="'Syne Mono', monospace" fontSize="10" letterSpacing="0.06em" fill="#0A0806" opacity="0.65">YEAR 10–11</text>
+                <text x="638" y="157" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="13" fill="#080C14">IGCSE / Edexcel</text>
+                <text x="638" y="170" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#080C14" opacity="0.65">YEAR 10–11</text>
                 <rect x="760" y="130" width="140" height="42" rx="6" fill="#8B1A2E"/>
-                <text x="778" y="157" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="13" fill="#FEFDFB">A-Level</text>
-                <text x="778" y="170" fontFamily="'Syne Mono', monospace" fontSize="10" letterSpacing="0.06em" fill="#F0CC5A">YEAR 12–13</text>
-                <rect x="410" y="182" width="350" height="42" rx="6" fill="#2D261E" opacity="0.92"/>
-                <text x="428" y="209" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="14" fill="#FEFDFB">IB Middle Years Programme</text>
-                <text x="428" y="222" fontFamily="'Syne Mono', monospace" fontSize="10" letterSpacing="0.06em" fill="#F0CC5A" opacity="0.85">AGES 11–16</text>
+                <text x="778" y="157" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="13" fill="#FFFFFF">A-Level</text>
+                <text x="778" y="170" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#C9973A">YEAR 12–13</text>
+                <rect x="410" y="182" width="350" height="42" rx="6" fill="#121928" opacity="0.92"/>
+                <text x="428" y="209" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#FFFFFF">IB Middle Years Programme</text>
+                <text x="428" y="222" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#C9973A" opacity="0.85">AGES 11–16</text>
                 <rect x="760" y="182" width="140" height="42" rx="6" fill="#8B1A2E"/>
-                <text x="778" y="209" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="13" fill="#FEFDFB">IB Diploma</text>
-                <text x="778" y="222" fontFamily="'Syne Mono', monospace" fontSize="10" letterSpacing="0.06em" fill="#F0CC5A">AGES 16–19</text>
-                <rect x="60" y="234" width="840" height="42" rx="6" fill="#1A1510" opacity="0.85"/>
-                <text x="78" y="261" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="14" fill="#FEFDFB">American Curriculum</text>
-                <text x="78" y="274" fontFamily="'Syne Mono', monospace" fontSize="10" letterSpacing="0.06em" fill="#F0CC5A" opacity="0.85">K → GRADE 12 · HIGH SCHOOL DIPLOMA</text>
+                <text x="778" y="209" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="13" fill="#FFFFFF">IB Diploma</text>
+                <text x="778" y="222" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#C9973A">AGES 16–19</text>
+                <rect x="60" y="234" width="840" height="42" rx="6" fill="#0D1220" opacity="0.85"/>
+                <text x="78" y="261" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#FFFFFF">American Curriculum</text>
+                <text x="78" y="274" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#C9973A" opacity="0.85">K → GRADE 12 · HIGH SCHOOL DIPLOMA</text>
                 <rect x="410" y="286" width="490" height="42" rx="6" fill="url(#blendedGrad)"/>
-                <text x="428" y="313" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="14" fill="#FEFDFB">Smartious Blended <tspan fontFamily="'Syne Mono', monospace" fontSize="9" letterSpacing="0.08em" fill="#F0CC5A" opacity="0.9">  ★ OUR SIGNATURE</tspan></text>
-                <text x="428" y="326" fontFamily="'Syne Mono', monospace" fontSize="10" letterSpacing="0.06em" fill="#FEFDFB" opacity="0.8">CAMBRIDGE + CBC + AI LITERACY · AGES 11–18</text>
+                <text x="428" y="313" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#FFFFFF">Smartious Blended <tspan fontFamily="'Fira Code', monospace" fontSize="9" letterSpacing="0.08em" fill="#C9973A" opacity="0.9">  ★ OUR SIGNATURE</tspan></text>
+                <text x="428" y="326" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#FFFFFF" opacity="0.8">CAMBRIDGE + CBC + AI LITERACY · AGES 11–18</text>
                 <path d="M 900 348 L 920 348 M 916 344 L 920 348 L 916 352" stroke="#8B1A2E" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-                <text x="850" y="370" textAnchor="end" fontFamily="'Playfair Display', serif" fontStyle="italic" fontWeight="700" fontSize="15" fill="#8B1A2E">University worldwide →</text>
-                <text x="850" y="388" textAnchor="end" fontFamily="'Syne Mono', monospace" fontSize="9.5" letterSpacing="0.08em" fill="#6B5E52">UoN · STRATHMORE · USIU · OXFORD · MIT · TORONTO</text>
+                <text x="850" y="370" textAnchor="end" fontFamily="'DM Serif Display', serif" fontStyle="italic" fontWeight="700" fontSize="15" fill="#8B1A2E">University worldwide →</text>
+                <text x="850" y="388" textAnchor="end" fontFamily="'Fira Code', monospace" fontSize="9.5" letterSpacing="0.08em" fill="#2E3D55">UoN · STRATHMORE · USIU · OXFORD · MIT · TORONTO</text>
               </svg>
             </div>
             <p style={{textAlign:'center',marginTop:20,fontSize:13,color:V.sl3,maxWidth:680,margin:'20px auto 0',lineHeight:1.6}}>
@@ -2964,7 +2972,7 @@ export default function LandingPage() {
             <div className="pg-hero" style={c.gold?{background:V.ink}:{}}>
               <div className="wrap">
                 <button onClick={() => P('curricula')}
-                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Syne',sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All Curricula
                 </button>
@@ -2981,21 +2989,21 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap" style={{maxWidth:860}}>
               {/* Overview */}
               <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'30px 32px',marginBottom:20}}>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:12}}>Overview</h2>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:12}}>Overview</h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.85,margin:0}}>{d.overview}</p>
               </div>
 
               {/* Detail sections */}
               {d.sections.map((s,i) => (
                 <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'26px 32px',marginBottom:16}}>
-                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:10}}>{s.h}</h3>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:10}}>{s.h}</h3>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.85,margin:0}}>{s.p}</p>
                 </div>
               ))}
 
               {/* Subjects / tags */}
               <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'26px 32px',marginBottom:16}}>
-                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:14}}>At a glance</h3>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:14}}>At a glance</h3>
                 <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
                   {c.tags.map(t => (
                     <span key={t} style={{padding:'6px 13px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:20,fontSize:12.5,fontWeight:600,color:V.ink2}}>{t}</span>
@@ -3012,14 +3020,14 @@ export default function LandingPage() {
               </div>
 
               {/* Why choose this curriculum */}
-              <div style={{background:c.gold?'linear-gradient(135deg,#2D261E,#1A1510)':V.cr,borderRadius:16,padding:'30px 32px',marginBottom:16}}>
-                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.3rem',fontWeight:700,color:c.gold?V.gold3:V.white,marginBottom:10}}>Why choose {c.h}?</h3>
+              <div style={{background:c.gold?'linear-gradient(135deg,#121928,#0D1220)':V.cr,borderRadius:16,padding:'30px 32px',marginBottom:16}}>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:c.gold?V.gold3:V.white,marginBottom:10}}>Why choose {c.h}?</h3>
                 <p style={{fontSize:14.5,color:'rgba(255,255,255,.85)',lineHeight:1.85,margin:0}}>{d.whyChoose}</p>
               </div>
 
               {/* Why Smartious for this curriculum */}
               <div style={{background:V.white,border:`2px solid ${V.gold}`,borderRadius:16,padding:'30px 32px',marginBottom:24}}>
-                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.3rem',fontWeight:700,color:V.cr,marginBottom:10}}>Why Smartious is a top {c.h} provider</h3>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.cr,marginBottom:10}}>Why Smartious is a top {c.h} provider</h3>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.85,margin:0}}>
                   {d.whySmartious || `Smartious has taught the ${c.h} curriculum since 2018, with degree-qualified subject specialists, a full library of past papers and marking schemes, and a structured system of lesson planning, assessment and parent reporting. Families across Kenya and the diaspora choose Smartious for ${c.h} because it is delivered as a genuine, accredited school programme — online or at our Parklands, Nairobi centre — not informal tutoring. Every student is supported by the Mshauri AI tutor and a dedicated teacher, and prepared thoroughly for ${c.h} examinations.`}
                 </p>
@@ -3088,7 +3096,7 @@ export default function LandingPage() {
             <div className="pg-hero" style={{background:V.ink}}>
               <div className="wrap">
                 <button onClick={() => P('services')}
-                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Syne',sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All Services
                 </button>
@@ -3103,21 +3111,21 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap" style={{maxWidth:860}}>
               {/* Overview */}
               <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'30px 32px',marginBottom:20}}>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:12}}>Overview</h2>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:12}}>Overview</h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.85,margin:0}}>{d.overview}</p>
               </div>
 
               {/* Detail sections */}
               {d.sections.map((sec,i) => (
                 <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'26px 32px',marginBottom:16}}>
-                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:10}}>{sec.h}</h3>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:10}}>{sec.h}</h3>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.85,margin:0}}>{sec.p}</p>
                 </div>
               ))}
 
               {/* At a glance */}
               <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'26px 32px',marginBottom:16}}>
-                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:14}}>At a glance</h3>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:14}}>At a glance</h3>
                 <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
                   {s.tags.map(t => (
                     <span key={t} style={{padding:'6px 13px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:20,fontSize:12.5,fontWeight:600,color:V.ink2}}>{t}</span>
@@ -3127,7 +3135,7 @@ export default function LandingPage() {
 
               {/* Why Smartious */}
               <div style={{background:V.cr,borderRadius:16,padding:'30px 32px',marginBottom:24}}>
-                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.3rem',fontWeight:700,color:V.white,marginBottom:10}}>Why choose Smartious?</h3>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.white,marginBottom:10}}>Why choose Smartious?</h3>
                 <p style={{fontSize:14.5,color:'rgba(255,255,255,.85)',lineHeight:1.85,margin:0}}>{d.whySmartious}</p>
               </div>
 
@@ -3933,8 +3941,8 @@ export default function LandingPage() {
                   <span key={f} style={{
                     fontSize:11.5, fontWeight:600,
                     color:V.gold3,
-                    background:'rgba(240,204,90,.1)',
-                    border:'1px solid rgba(240,204,90,.25)',
+                    background:'rgba(201,151,58,.1)',
+                    border:'1px solid rgba(201,151,58,.25)',
                     padding:'5px 12px', borderRadius:99,
                   }}>{f}</span>
                 ))}
@@ -3954,7 +3962,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{maxWidth:780}}>
                 <div className="eyebrow">Why families in {ctry.country} choose Smartious</div>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
                   Real curriculum continuity. <em style={{color:V.cr}}>Real exam credentials.</em>
                 </h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.pains}</p>
@@ -3965,7 +3973,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:'#fff'}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Curricula in {ctry.country}</div>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>
                   Globally recognised, <em style={{color:V.cr}}>locally available</em>
                 </h2>
               </div>
@@ -3987,13 +3995,13 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div className="eyebrow">Legal &amp; Regulatory</div>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
                   Homeschooling in {ctry.country}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,marginBottom:24}}>{ctry.regulation}</p>
 
                 <div className="eyebrow">Examination centres</div>
-                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.4rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14}}>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14}}>
                   Where students sit their exams
                 </h3>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8}}>{ctry.examCentres}</p>
@@ -4007,7 +4015,7 @@ export default function LandingPage() {
                   <svg width="48" height="48" viewBox="0 0 24 24" fill={V.gold2} style={{opacity:.7,marginBottom:18}}>
                     <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
                   </svg>
-                  <p style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontStyle:'italic',lineHeight:1.5,color:'#fff',marginBottom:20}}>
+                  <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontStyle:'italic',lineHeight:1.5,color:'#fff',marginBottom:20}}>
                     "{ctry.testimonial}"
                   </p>
                   <div style={{fontSize:12,color:V.gold3,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase'}}>
@@ -4022,7 +4030,7 @@ export default function LandingPage() {
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:32}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Frequently asked</div>
-                  <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
                     Questions from {ctry.country} <em style={{color:V.cr}}>families</em>
                   </h2>
                 </div>
@@ -4048,7 +4056,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:24}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve in {ctry.country}</div>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8}}>
                   Online learning, available <em style={{color:V.cr}}>everywhere</em>
                 </h2>
               </div>
@@ -4071,7 +4079,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from parents</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyKenyans.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyKenyans.intro}</p>
@@ -4079,7 +4087,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyKenyans.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -4093,7 +4101,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:40,alignItems:'center',maxWidth:1100,margin:'0 auto'}} className="kenya-centre-grid">
                     <div>
                       <div className="eyebrow">Nairobi · Parklands</div>
-                      <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
+                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
                         {ctry.learningCentre.heading}
                       </h2>
                       <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,marginBottom:18}}>{ctry.learningCentre.intro}</p>
@@ -4114,7 +4122,7 @@ export default function LandingPage() {
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M7 17l10-10M17 17V7H7"/></svg>
                       </a>
                     </div>
-                    <div style={{borderRadius:14,overflow:'hidden',border:'1px solid '+V.line,boxShadow:'0 12px 40px rgba(10,8,6,.10)',minHeight:340}}>
+                    <div style={{borderRadius:14,overflow:'hidden',border:'1px solid '+V.line,boxShadow:'0 12px 40px rgba(8,12,20,.10)',minHeight:340}}>
                       <iframe
                         src={ctry.learningCentre.mapEmbed}
                         width="100%" height="380"
@@ -4132,7 +4140,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff',padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -4149,7 +4157,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.comparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.comparison.intro}</p>
@@ -4174,7 +4182,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.universities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.universities.intro}</p>
@@ -4182,7 +4190,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Kenya</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Local universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Local universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.universities.local.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -4191,7 +4199,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.universities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -4205,7 +4213,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Kenya</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.pricingTable.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.pricingTable.intro}</p>
@@ -4216,7 +4224,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.kes && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.kes}</div>}
@@ -4238,7 +4246,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:48,alignItems:'center',maxWidth:1000,margin:'0 auto'}} className="kenya-video-grid">
                     <div>
                       <div className="eyebrow" style={{color:V.gold3}}>Student voice</div>
-                      <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,marginTop:8,marginBottom:14,lineHeight:1.25,color:'#fff'}}>
+                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,marginTop:8,marginBottom:14,lineHeight:1.25,color:'#fff'}}>
                         Hear from a <em style={{color:V.gold3}}>Smartious student</em>
                       </h2>
                       <p style={{fontSize:14.5,color:'rgba(255,255,255,.78)',lineHeight:1.75,marginBottom:18}}>
@@ -4265,7 +4273,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Verified Google reviews</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.googleReviews.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.googleReviews.intro}</p>
@@ -4307,7 +4315,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from UAE parents</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyExpats.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyExpats.intro}</p>
@@ -4315,7 +4323,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyExpats.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -4328,7 +4336,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -4345,7 +4353,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.uaeComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.uaeComparison.intro}</p>
@@ -4370,7 +4378,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.uaeUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.uaeUniversities.intro}</p>
@@ -4378,7 +4386,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>UAE & Region</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Regional universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Regional universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.uaeUniversities.regional.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -4387,7 +4395,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.uaeUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -4402,7 +4410,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in the UAE</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.uaePricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.uaePricing.intro}</p>
@@ -4413,7 +4421,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.aed && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.aed}</div>}
@@ -4446,7 +4454,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from UK parents</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyUk.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyUk.intro}</p>
@@ -4454,7 +4462,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyUk.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -4467,7 +4475,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -4484,7 +4492,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ukComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ukComparison.intro}</p>
@@ -4509,7 +4517,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ukUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ukUniversities.intro}</p>
@@ -4517,7 +4525,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>United Kingdom</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>UK universities (UCAS)</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>UK universities (UCAS)</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.ukUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -4526,7 +4534,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>International</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.ukUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -4540,7 +4548,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in the UK</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ukPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ukPricing.intro}</p>
@@ -4551,7 +4559,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.gbp && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.gbp}</div>}
@@ -4579,7 +4587,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Nigerian parents</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyNigerians.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyNigerians.intro}</p>
@@ -4587,7 +4595,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyNigerians.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -4600,7 +4608,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -4617,7 +4625,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.nigeriaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.nigeriaComparison.intro}</p>
@@ -4642,7 +4650,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.nigeriaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.nigeriaUniversities.intro}</p>
@@ -4650,7 +4658,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Nigeria</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Nigerian universities (JAMB)</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Nigerian universities (JAMB)</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.nigeriaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -4659,7 +4667,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.nigeriaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -4674,7 +4682,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Nigeria</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.nigeriaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.nigeriaPricing.intro}</p>
@@ -4685,7 +4693,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                           </div>
@@ -4717,7 +4725,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Who Smartious is for in the USA</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyUs.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyUs.intro}</p>
@@ -4725,7 +4733,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyUs.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -4738,15 +4746,15 @@ export default function LandingPage() {
                 <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center',color:V.gold3}}>African diaspora · The bridge between two worlds</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.diasporaSection.heading}
                     </h2>
                     <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.8}}>{ctry.diasporaSection.intro}</p>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                     {ctry.diasporaSection.points.map((pt,i) => (
-                      <div key={i} style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(240,204,90,.25)',borderRadius:14,padding:'22px 20px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
+                      <div key={i} style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(201,151,58,.25)',borderRadius:14,padding:'22px 20px'}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:13.5,color:'rgba(255,255,255,.82)',lineHeight:1.7}}>{pt.p}</p>
@@ -4759,7 +4767,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -4776,7 +4784,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.usaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.usaComparison.intro}</p>
@@ -4801,7 +4809,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in the USA</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.usaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.usaPricing.intro}</p>
@@ -4812,7 +4820,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                           </div>
@@ -4839,7 +4847,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Who Smartious is for in Canada</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyCanada.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyCanada.intro}</p>
@@ -4847,7 +4855,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyCanada.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -4860,15 +4868,15 @@ export default function LandingPage() {
                 <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:820,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center',color:V.gold3}}>African & Caribbean diaspora · The bridge between two worlds</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.diasporaSection.heading}
                     </h2>
                     <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.8}}>{ctry.diasporaSection.intro}</p>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                     {ctry.diasporaSection.points.map((pt,i) => (
-                      <div key={i} style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(240,204,90,.25)',borderRadius:14,padding:'22px 20px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
+                      <div key={i} style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(201,151,58,.25)',borderRadius:14,padding:'22px 20px'}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:13.5,color:'rgba(255,255,255,.82)',lineHeight:1.7}}>{pt.p}</p>
@@ -4881,7 +4889,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Provincial homeschool guide</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.provinceTable.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.provinceTable.intro}</p>
@@ -4906,7 +4914,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -4923,7 +4931,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.canadaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.canadaComparison.intro}</p>
@@ -4948,7 +4956,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.canadaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.canadaUniversities.intro}</p>
@@ -4956,7 +4964,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Canada</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Canadian universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Canadian universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.canadaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -4965,7 +4973,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.canadaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -4979,7 +4987,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Canada</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.canadaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.canadaPricing.intro}</p>
@@ -4990,7 +4998,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.cad && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.cad}</div>}
@@ -5018,7 +5026,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Who Smartious is for in Australia</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyAustralia.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyAustralia.intro}</p>
@@ -5026,7 +5034,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyAustralia.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -5039,15 +5047,15 @@ export default function LandingPage() {
                 <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:820,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center',color:V.gold3}}>South Asian & African diaspora · The bridge between two worlds</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.diasporaSection.heading}
                     </h2>
                     <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.8}}>{ctry.diasporaSection.intro}</p>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                     {ctry.diasporaSection.points.map((pt,i) => (
-                      <div key={i} style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(240,204,90,.25)',borderRadius:14,padding:'22px 20px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
+                      <div key={i} style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(201,151,58,.25)',borderRadius:14,padding:'22px 20px'}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:13.5,color:'rgba(255,255,255,.82)',lineHeight:1.7}}>{pt.p}</p>
@@ -5060,7 +5068,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>State homeschool guide</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.stateTable.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.stateTable.intro}</p>
@@ -5087,7 +5095,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -5104,7 +5112,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.australiaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.australiaComparison.intro}</p>
@@ -5129,7 +5137,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.australiaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.australiaUniversities.intro}</p>
@@ -5137,7 +5145,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Australia · Group of Eight</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Australian universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Australian universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.australiaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -5146,7 +5154,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.australiaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -5160,7 +5168,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Australia</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.australiaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.australiaPricing.intro}</p>
@@ -5171,7 +5179,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.aud && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.aud}</div>}
@@ -5199,7 +5207,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Bahrain parents</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyBahrain.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyBahrain.intro}</p>
@@ -5207,7 +5215,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyBahrain.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -5220,7 +5228,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -5237,7 +5245,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.bahrainComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.bahrainComparison.intro}</p>
@@ -5262,7 +5270,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.bahrainUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.bahrainUniversities.intro}</p>
@@ -5270,7 +5278,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Bahrain & Gulf</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Regional universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Regional universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.bahrainUniversities.regional.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -5279,7 +5287,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.bahrainUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -5293,7 +5301,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Bahrain</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.bahrainPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.bahrainPricing.intro}</p>
@@ -5304,7 +5312,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.bhd && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.bhd}</div>}
@@ -5337,7 +5345,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Doha parents</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyQatar.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{ctry.whyQatar.intro}</p>
@@ -5348,7 +5356,7 @@ export default function LandingPage() {
                         background:V.bone,border:'1px solid '+V.line,borderRadius:14,
                         padding:'22px 22px',
                       }}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.1rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>{p.h}</h3>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>{p.h}</h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.65}}>{p.p}</p>
                       </div>
                     ))}
@@ -5359,7 +5367,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                       {ctry.qatarUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.qatarUniversities.intro}</p>
@@ -5381,7 +5389,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Pricing for Qatar</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                       {ctry.qatarPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.qatarPricing.intro}</p>
@@ -5396,7 +5404,7 @@ export default function LandingPage() {
                         borderTop:i===0?'none':'1px solid '+V.line,
                         alignItems:'center',
                       }} className="qatar-pricing-row">
-                        <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1rem',fontWeight:700,color:V.ink}}>{r.tier}</div>
+                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',fontWeight:700,color:V.ink}}>{r.tier}</div>
                         <div style={{fontSize:13,color:V.sl,lineHeight:1.55}}>{r.detail}</div>
                         <div style={{fontSize:14,fontWeight:800,color:V.cr,textAlign:'right'}}>{r.priceUSD}</div>
                         <div style={{fontSize:12,color:V.sl3,textAlign:'right'}}>{r.priceLocal}</div>
@@ -5413,7 +5421,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Comparison</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                       {ctry.qatarComparison.heading}
                     </h2>
                     <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{ctry.qatarComparison.intro}</p>
@@ -5445,7 +5453,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:28,maxWidth:760,margin:'0 auto 28px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Beyond academics</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{ctry.activitiesTeaser.intro}</p>
@@ -5477,7 +5485,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Pakistani parents</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyPakistan.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyPakistan.intro}</p>
@@ -5485,7 +5493,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyPakistan.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -5498,7 +5506,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -5515,7 +5523,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.pakistanComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.pakistanComparison.intro}</p>
@@ -5540,7 +5548,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.pakistanUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.pakistanUniversities.intro}</p>
@@ -5548,7 +5556,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Pakistan</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Pakistani universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Pakistani universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.pakistanUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -5557,7 +5565,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.pakistanUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -5571,7 +5579,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Pakistan</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.pakistanPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.pakistanPricing.intro}</p>
@@ -5582,7 +5590,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.pkr && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.pkr}</div>}
@@ -5615,7 +5623,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from SA parents</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whySouthAfrica.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whySouthAfrica.intro}</p>
@@ -5623,7 +5631,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whySouthAfrica.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -5636,7 +5644,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Matric pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.saMatricTable.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saMatricTable.intro}</p>
@@ -5663,7 +5671,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff',padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -5680,7 +5688,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.saComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saComparison.intro}</p>
@@ -5705,7 +5713,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.saUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saUniversities.intro}</p>
@@ -5713,7 +5721,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>South Africa</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>SA universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>SA universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.saUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -5722,7 +5730,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.saUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -5736,7 +5744,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in South Africa</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.saPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saPricing.intro}</p>
@@ -5747,7 +5755,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.zar && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.zar}</div>}
@@ -5780,7 +5788,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Kampala parents</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyUganda.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyUganda.intro}</p>
@@ -5788,7 +5796,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyUganda.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -5801,7 +5809,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:820,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Honest regulatory framing</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       Two setups for Ugandan families
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
@@ -5811,7 +5819,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Setup 1 · Ugandan citizen families</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Dual enrolment</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Dual enrolment</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0,fontSize:14,color:V.sl,lineHeight:1.7}}>
                         <li style={{paddingBottom:10}}>Child enrolled at a local Ugandan or international school for formal registration with the Ministry of Education</li>
                         <li style={{paddingBottom:10}}>Local school handles UNEB or international exam pathway compliance</li>
@@ -5821,7 +5829,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Setup 2 · Expat & globally mobile families</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Primary online enrolment</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Primary online enrolment</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0,fontSize:14,color:V.sl,lineHeight:1.7}}>
                         <li style={{paddingBottom:10}}>Expat children resident in Uganda or Ugandan families with international plans</li>
                         <li style={{paddingBottom:10}}>Smartious is the primary school — Cambridge, A-Level, IB or Edexcel pathway</li>
@@ -5839,7 +5847,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff',padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -5856,7 +5864,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ugandaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ugandaComparison.intro}</p>
@@ -5881,7 +5889,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ugandaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ugandaUniversities.intro}</p>
@@ -5889,7 +5897,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Uganda</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Ugandan universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Ugandan universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.ugandaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -5898,7 +5906,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.ugandaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -5912,7 +5920,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Uganda</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ugandaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ugandaPricing.intro}</p>
@@ -5923,7 +5931,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.ugx && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.ugx}</div>}
@@ -5956,7 +5964,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Mogadishu parents</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whySomalia.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whySomalia.intro}</p>
@@ -5964,7 +5972,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whySomalia.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -5977,7 +5985,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -5994,7 +6002,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.somaliaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.somaliaComparison.intro}</p>
@@ -6019,7 +6027,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.somaliaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.somaliaUniversities.intro}</p>
@@ -6027,7 +6035,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Somalia</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Somali universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Somali universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.somaliaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -6036,7 +6044,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.somaliaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -6050,7 +6058,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Somalia</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.somaliaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.somaliaPricing.intro}</p>
@@ -6061,7 +6069,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                           </div>
@@ -6093,7 +6101,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Dar es Salaam parents</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyTanzania.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyTanzania.intro}</p>
@@ -6101,7 +6109,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyTanzania.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -6114,7 +6122,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:820,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Honest pathway framing</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       NECTA, Cambridge and the Tanzanian pathway choice
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
@@ -6124,7 +6132,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>NECTA pathway · Not Smartious</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Tanzanian national examinations</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Tanzanian national examinations</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0,fontSize:14,color:V.sl,lineHeight:1.7}}>
                         <li style={{paddingBottom:10}}>PSLE (Primary), CSEE (O-Level), ACSEE (A-Level)</li>
                         <li style={{paddingBottom:10}}>Delivered only at NECTA-registered Tanzanian schools</li>
@@ -6134,7 +6142,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Cambridge pathway · Smartious delivers</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International qualifications</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International qualifications</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0,fontSize:14,color:V.sl,lineHeight:1.7}}>
                         <li style={{paddingBottom:10}}>Cambridge IGCSE (O-Level equivalent) and Cambridge A-Level</li>
                         <li style={{paddingBottom:10}}>Or Pearson Edexcel International or IB Diploma</li>
@@ -6152,7 +6160,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff',padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -6169,7 +6177,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.tanzaniaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.tanzaniaComparison.intro}</p>
@@ -6194,7 +6202,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.tanzaniaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.tanzaniaUniversities.intro}</p>
@@ -6202,7 +6210,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Tanzania</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Tanzanian universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Tanzanian universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.tanzaniaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -6211,7 +6219,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.tanzaniaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -6225,7 +6233,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Tanzania</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.tanzaniaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.tanzaniaPricing.intro}</p>
@@ -6236,7 +6244,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.tzs && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.tzs}</div>}
@@ -6264,7 +6272,7 @@ export default function LandingPage() {
 
             {/* CTA */}
             <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
                 Ready to enrol your child in <em style={{color:V.gold2}}>{ctry.country}?</em>
               </h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:28,lineHeight:1.7}}>
@@ -6332,7 +6340,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>The key difference</div>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
                   {cmp.keyDifference.split('.')[0]}.
                   {cmp.keyDifference.includes('.') && (
                     <em style={{color:V.cr,display:'block',marginTop:6}}>{cmp.keyDifference.split('.').slice(1).join('.').trim()}</em>
@@ -6347,7 +6355,7 @@ export default function LandingPage() {
               <section className="sec" style={{background:'#fff'}}><div className="wrap">
                 <div style={{textAlign:'center',marginBottom:24}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>From our community</div>
-                  <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>
                     {cmp.testimonial.title}
                   </h2>
                   <p style={{fontSize:13.5,color:V.sl,maxWidth:540,margin:'10px auto 0',lineHeight:1.7}}>
@@ -6363,7 +6371,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Side by side</div>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
                   Feature <em style={{color:V.cr}}>comparison</em>
                 </h2>
               </div>
@@ -6396,7 +6404,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:'#fff'}}><div className="wrap">
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div className="eyebrow">What {cmp.competitor} does well</div>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:24}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:24}}>
                   Genuine strengths to consider
                 </h2>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:14}}>
@@ -6414,7 +6422,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.ink,color:'#fff'}}><div className="wrap">
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div className="eyebrow" style={{color:V.gold2}}>Where Smartious differs</div>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:24}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:24}}>
                   What you get with <em style={{color:V.gold3}}>Smartious</em>
                 </h2>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:14}}>
@@ -6441,7 +6449,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Which is right for you</div>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
                   Honest <em style={{color:V.cr}}>recommendations</em>
                 </h2>
                 <p style={{fontSize:13.5,color:V.sl,maxWidth:580,margin:'10px auto 0',lineHeight:1.7}}>
@@ -6455,7 +6463,7 @@ export default function LandingPage() {
                     borderTop:'4px solid '+(i===0?V.sl2:V.cr),
                     borderRadius:8,
                   }}>
-                    <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>
                       {b.who}
                     </h3>
                     <ul style={{listStyle:'none',padding:0,margin:0}}>
@@ -6483,7 +6491,7 @@ export default function LandingPage() {
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:32}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Common questions</div>
-                  <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
                     Smartious vs {cmp.competitor} <em style={{color:V.cr}}>FAQs</em>
                   </h2>
                 </div>
@@ -6506,7 +6514,7 @@ export default function LandingPage() {
 
             {/* CTA */}
             <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
                 Ready to see Smartious in <em style={{color:V.gold2}}>action?</em>
               </h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:28,lineHeight:1.7}}>
@@ -6556,7 +6564,7 @@ export default function LandingPage() {
                     <stop offset="100%" stopColor="#8B1A2E" stopOpacity="0"/>
                   </radialGradient>
                   <radialGradient id="glow-gd" cx="50%" cy="50%">
-                    <stop offset="0%"  stopColor="#F0CC5A" stopOpacity="1"/>
+                    <stop offset="0%"  stopColor="#C9973A" stopOpacity="1"/>
                     <stop offset="40%" stopColor="#B8960C" stopOpacity=".55"/>
                     <stop offset="100%" stopColor="#B8960C" stopOpacity="0"/>
                   </radialGradient>
@@ -6671,8 +6679,8 @@ export default function LandingPage() {
                   const d = `M${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`
                   return (
                     <g key={'arc'+i}>
-                      <path d={d} stroke="rgba(240,204,90,.15)" strokeWidth="0.8" fill="none" strokeDasharray="4,5"/>
-                      <circle r="2.2" fill="#F0CC5A">
+                      <path d={d} stroke="rgba(201,151,58,.15)" strokeWidth="0.8" fill="none" strokeDasharray="4,5"/>
+                      <circle r="2.2" fill="#C9973A">
                         <animateMotion dur={`${6+i*0.4}s`} repeatCount="indefinite" path={d}/>
                         <animate attributeName="opacity" values="0;1;1;0" dur={`${6+i*0.4}s`} repeatCount="indefinite"/>
                       </circle>
@@ -6700,12 +6708,12 @@ export default function LandingPage() {
                       <animate attributeName="opacity" values=".7;.15;.7" dur={`${2.6+i*.15}s`} repeatCount="indefinite"/>
                     </circle>
                     {/* Pulse ring */}
-                    <circle cx={p.cx} cy={p.cy} r="4" fill="none" stroke={p.tone==='cr'?'#E8354A':'#F0CC5A'} strokeWidth="1" opacity=".8">
+                    <circle cx={p.cx} cy={p.cy} r="4" fill="none" stroke={p.tone==='cr'?'#E8354A':'#C9973A'} strokeWidth="1" opacity=".8">
                       <animate attributeName="r"       values="4;14;4"     dur={`${2.4+i*.18}s`} repeatCount="indefinite"/>
                       <animate attributeName="opacity" values="0.9;0;0.9"  dur={`${2.4+i*.18}s`} repeatCount="indefinite"/>
                     </circle>
                     {/* Dot core */}
-                    <circle cx={p.cx} cy={p.cy} r="3" fill={p.tone==='cr'?'#E8354A':'#F0CC5A'} stroke="#fff" strokeWidth=".6"/>
+                    <circle cx={p.cx} cy={p.cy} r="3" fill={p.tone==='cr'?'#E8354A':'#C9973A'} stroke="#fff" strokeWidth=".6"/>
                   </g>
                 ))}
 
@@ -6715,9 +6723,9 @@ export default function LandingPage() {
                     <animate attributeName="r" values="16;28;16" dur="2.4s" repeatCount="indefinite"/>
                   </circle>
                   <circle cx="522" cy="282" r="9" fill="#8B1A2E" stroke="#E8354A" strokeWidth="1.2"/>
-                  <polygon points="522,276 524,281 529,281 525,285 527,290 522,287 517,290 519,285 515,281 520,281" fill="#F0CC5A" stroke="#C89A28" strokeWidth=".3"/>
-                  <text x="522" y="262" textAnchor="middle" fill="#F0CC5A" fontSize="10" fontFamily="Syne,sans-serif" fontWeight="700" letterSpacing=".1em">NAIROBI · HQ</text>
-                  <text x="522" y="305" textAnchor="middle" fill="rgba(240,204,90,.7)" fontSize="7" fontFamily="Syne,sans-serif" fontWeight="600">Diamond Plaza · Parklands</text>
+                  <polygon points="522,276 524,281 529,281 525,285 527,290 522,287 517,290 519,285 515,281 520,281" fill="#C9973A" stroke="#C89A28" strokeWidth=".3"/>
+                  <text x="522" y="262" textAnchor="middle" fill="#C9973A" fontSize="10" fontFamily="Syne,sans-serif" fontWeight="700" letterSpacing=".1em">NAIROBI · HQ</text>
+                  <text x="522" y="305" textAnchor="middle" fill="rgba(201,151,58,.7)" fontSize="7" fontFamily="Syne,sans-serif" fontWeight="600">Diamond Plaza · Parklands</text>
                 </g>
 
                 {/* Country labels */}
@@ -6744,7 +6752,7 @@ export default function LandingPage() {
                   ['127','Expert Tutors'],
                 ].map(([n,l]) => (
                   <div key={l} style={{textAlign:'center'}}>
-                    <div style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.white,lineHeight:1}}>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.white,lineHeight:1}}>
                       {n.includes('+')?<>{n.replace('+','')}<em style={{color:V.gold3,fontStyle:'normal'}}>+</em></>:n}
                     </div>
                     <div style={{fontSize:11,color:'rgba(247,243,237,.5)',marginTop:6,letterSpacing:'.08em',textTransform:'uppercase'}}>{l}</div>
@@ -6797,13 +6805,13 @@ export default function LandingPage() {
             {priceTabs !== 'tuition' && (
               <>
                 <div style={{display:'flex',justifyContent:'center',marginTop:24,marginBottom:8}}>
-                  <div style={{display:'inline-flex',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:4,gap:2,boxShadow:'0 2px 10px rgba(10,8,6,.05)'}}>
+                  <div style={{display:'inline-flex',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:4,gap:2,boxShadow:'0 2px 10px rgba(8,12,20,.05)'}}>
                     {[
                       ['monthly','Monthly'],
                       ['termly','Termly'],
                       ['annually','Annually'],
                     ].map(([id,lbl]) => (
-                      <button key={id} onClick={() => setBillingCycle(id)} style={{padding:'10px 18px',border:'none',borderRadius:7,background:billingCycle===id?V.cr:'transparent',color:billingCycle===id?V.white:V.ink2,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:"'Syne',sans-serif",transition:'all .2s'}}>
+                      <button key={id} onClick={() => setBillingCycle(id)} style={{padding:'10px 18px',border:'none',borderRadius:7,background:billingCycle===id?V.cr:'transparent',color:billingCycle===id?V.white:V.ink2,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",transition:'all .2s'}}>
                         {lbl}
                       </button>
                     ))}
@@ -6864,7 +6872,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Supplementary services */}
-                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,margin:'44px 0 18px',textAlign:'center'}}>Supplementary &amp; Specialist Services</h3>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,margin:'44px 0 18px',textAlign:'center'}}>Supplementary &amp; Specialist Services</h3>
                 <div style={{maxWidth:760,margin:'0 auto',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
                   {[
                     ['Computer Packages & ICT','MS Office · Basic Computing · Digital Literacy · 2 hrs/session','$15 / session'],
@@ -6878,7 +6886,7 @@ export default function LandingPage() {
                         <div style={{fontWeight:700,fontSize:14,color:V.ink}}>{s}</div>
                         <div style={{fontSize:12,color:V.sl2,marginTop:2}}>{d}</div>
                       </div>
-                      <div style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,color:V.cr,whiteSpace:'nowrap'}}>{r}</div>
+                      <div style={{fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",fontWeight:700,fontSize:14,color:V.cr,whiteSpace:'nowrap'}}>{r}</div>
                     </div>
                   ))}
                 </div>
@@ -6886,7 +6894,7 @@ export default function LandingPage() {
             )}
 
             {/* Registration & one-off fees */}
-            <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,margin:'48px 0 18px',textAlign:'center'}}>Registration &amp; One-Off Fees</h3>
+            <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,margin:'48px 0 18px',textAlign:'center'}}>Registration &amp; One-Off Fees</h3>
             <div style={{maxWidth:760,margin:'0 auto',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
               {[
                 ['Enrolment / Registration Fee','One-time per student · non-refundable','$38'],
@@ -6899,13 +6907,13 @@ export default function LandingPage() {
                     <div style={{fontWeight:700,fontSize:14,color:V.ink}}>{s}</div>
                     <div style={{fontSize:12,color:V.sl2,marginTop:2}}>{d}</div>
                   </div>
-                  <div style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,color:V.cr,whiteSpace:'nowrap'}}>{r}</div>
+                  <div style={{fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",fontWeight:700,fontSize:14,color:V.cr,whiteSpace:'nowrap'}}>{r}</div>
                 </div>
               ))}
             </div>
 
             {/* Payment terms */}
-            <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,margin:'48px 0 18px',textAlign:'center'}}>Payment Terms</h3>
+            <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,margin:'48px 0 18px',textAlign:'center'}}>Payment Terms</h3>
             <div className="price-grid" style={{maxWidth:920,margin:'0 auto'}}>
               {[
                 ['Monthly Payment','Fee due on or before the 5th of each month. A 3-day grace period applies. Sessions may be suspended after 8 days of non-payment without prior arrangement.'],
@@ -6948,7 +6956,7 @@ export default function LandingPage() {
               <div className="prog-bar"/>
               <div className="prog-body">
                 <span className="chip" style={{marginBottom:16}}>University Pathway</span>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginBottom:14}}>International University Foundation Programme (IUFP)</h2>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginBottom:14}}>International University Foundation Programme (IUFP)</h2>
                 <p style={{fontSize:14,color:V.sl,lineHeight:1.8,marginBottom:14}}>The IUFP is a one-year intensive programme for students who have completed secondary school and want direct entry into Year 1 of a UK, US, Australian or European university. Accepted by 200+ partner universities worldwide.</p>
                 <p style={{fontSize:14,color:V.sl,lineHeight:1.8,marginBottom:28}}>Students study 4 core academic modules alongside Academic English, Critical Thinking, Research Methods and Digital Literacy, concluding with a Capstone Project and full university application support.</p>
                 <div className="prog-info-grid">
@@ -6959,13 +6967,13 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.3rem',fontWeight:700,color:V.ink,marginBottom:14}}>Four Academic Pathways</h3>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.ink,marginBottom:14}}>Four Academic Pathways</h3>
                 <div className="prog-path-grid">
                   {[['Sciences Pathway','For Medicine, Pharmacy, Biology, Chemistry, Environmental Science. Includes lab report writing and scientific methodology.'],['Business & Economics Pathway','For Finance, Accounting, Management, Economics. Includes financial modelling and business case analysis.'],['Engineering & Technology Pathway','For Engineering, Computer Science, Architecture. Includes mathematics, physics and technical drawing fundamentals.'],['Arts & Humanities Pathway','For Law, Politics, Literature, Psychology, Media. Includes essay structure, argumentation and academic citation.']].map(([h,p]) => (
                     <div key={h} className="prog-path"><div className="prog-path-h">{h}</div><div className="prog-path-p">{p}</div></div>
                   ))}
                 </div>
-                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.3rem',fontWeight:700,color:V.ink,marginBottom:14}}>Sample Partner Universities</h3>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.ink,marginBottom:14}}>Sample Partner Universities</h3>
                 <div className="prog-unis">
                   {['University of Birmingham','Coventry University','University of Manchester','Purdue Global','Northeastern University','Deakin University','Griffith University','RWTH Aachen','Maastricht University','+ 190 more'].map(u => <span key={u} className="prog-uni">{u}</span>)}
                 </div>
@@ -6978,7 +6986,7 @@ export default function LandingPage() {
               <div className="prog-bar" style={{background:`linear-gradient(90deg,${V.gold2},${V.cr})`}}/>
               <div className="prog-body">
                 <span className="chip" style={{marginBottom:16}}>International Experience</span>
-                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginBottom:14}}>Study Abroad Programme</h2>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginBottom:14}}>Study Abroad Programme</h2>
                 <p style={{fontSize:14,color:V.sl,lineHeight:1.8,marginBottom:28}}>Placements at partner schools in 6 countries — UK, USA, Australia, Germany, UAE and Canada. We handle school placement, visa guidance, accommodation, airport transfers and 24/7 pastoral support throughout.</p>
                 <div className="sa-grid">
                   {[
@@ -7003,13 +7011,13 @@ export default function LandingPage() {
                   ].map(({country,meta,desc,img,fallback}) => (
                     <div key={country} className="sa-d">
                       <div className="sa-dt" style={{
-                        backgroundImage:`linear-gradient(180deg, rgba(10,8,6,0) 0%, rgba(10,8,6,0) 40%, rgba(10,8,6,.65) 100%), url('${img}'), ${fallback}`,
+                        backgroundImage:`linear-gradient(180deg, rgba(8,12,20,0) 0%, rgba(8,12,20,0) 40%, rgba(8,12,20,.65) 100%), url('${img}'), ${fallback}`,
                         backgroundSize:'cover',
                         backgroundPosition:'center',
                         backgroundRepeat:'no-repeat',
                         position:'relative',height:150,padding:0,overflow:'hidden'
                       }}>
-                        <div style={{position:'absolute',bottom:10,left:0,right:0,textAlign:'center',color:V.white,fontFamily:"'Playfair Display',serif",fontSize:'1.1rem',fontWeight:700,textShadow:'0 2px 10px rgba(10,8,6,.85)'}}>{country}</div>
+                        <div style={{position:'absolute',bottom:10,left:0,right:0,textAlign:'center',color:V.white,fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,textShadow:'0 2px 10px rgba(8,12,20,.85)'}}>{country}</div>
                       </div>
                       <div className="sa-db">
                         <div className="sa-dp">{desc}</div>
@@ -7097,7 +7105,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:14}}>Tuition Services · Nairobi</div>
               <h1 style={{
-                fontFamily:"'Playfair Display',serif",
+                fontFamily:"'DM Serif Display',Georgia,serif",
                 fontSize:'clamp(2.2rem,5vw,3.4rem)',
                 fontWeight:700,
                 color:'#fff',
@@ -7151,10 +7159,10 @@ export default function LandingPage() {
                 ].map(([n,l]) => (
                   <div key={l} style={{
                     background:'rgba(255,255,255,.08)',
-                    border:'1px solid rgba(240,204,90,.25)',
+                    border:'1px solid rgba(201,151,58,.25)',
                     borderRadius:10,padding:'14px 16px',
                   }}>
-                    <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:800,color:V.gold3,lineHeight:1}}>{n}</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:800,color:V.gold3,lineHeight:1}}>{n}</div>
                     <div style={{fontSize:11,color:'rgba(255,255,255,.7)',marginTop:6,letterSpacing:'.04em',textTransform:'uppercase'}}>{l}</div>
                   </div>
                 ))}
@@ -7166,7 +7174,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>What sets us apart</div>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                 Why Nairobi parents <em style={{color:V.cr}}>choose Smartious</em>
               </h2>
               <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
@@ -7186,7 +7194,7 @@ export default function LandingPage() {
                   background:V.bone,border:'1px solid '+V.line,borderRadius:14,
                   padding:'22px 22px',
                 }}>
-                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.1rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>{item.h}</h3>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>{item.h}</h3>
                   <p style={{fontSize:14,color:V.sl,lineHeight:1.65}}>{item.p}</p>
                 </div>
               ))}
@@ -7197,7 +7205,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Subjects we teach</div>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                 Every subject, every level
               </h2>
               <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
@@ -7230,7 +7238,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>How tuition works</div>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                 Four ways to learn with Smartious
               </h2>
             </div>
@@ -7244,7 +7252,7 @@ export default function LandingPage() {
                 <div key={s.h} style={{
                   background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px',
                 }}>
-                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:10,lineHeight:1.3}}>{s.h}</h3>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:10,lineHeight:1.3}}>{s.h}</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,marginBottom:12}}>{s.d}</p>
                   <div style={{
                     paddingTop:10,borderTop:'1px dashed '+V.line,
@@ -7259,7 +7267,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Areas we serve</div>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                 Home tuition across <em style={{color:V.cr}}>20 Nairobi neighbourhoods</em>
               </h2>
               <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
@@ -7280,7 +7288,7 @@ export default function LandingPage() {
                   }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor=V.cr; e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 10px 20px rgba(125,16,37,.1)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor=V.line; e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none' }}>
-                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:4}}>{area.name}</div>
+                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:4}}>{area.name}</div>
                   <div style={{fontSize:11,color:V.sl3,lineHeight:1.4}}>{area.region}</div>
                   <div style={{marginTop:10,fontSize:11,fontWeight:700,color:V.cr,letterSpacing:'.02em',display:'inline-flex',alignItems:'center',gap:4}}>
                     Tuition details
@@ -7295,7 +7303,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                 Frequently asked questions
               </h2>
             </div>
@@ -7348,7 +7356,7 @@ export default function LandingPage() {
             background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
             color:'#fff',
           }}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
-            <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.1rem',fontWeight:700,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.1rem',fontWeight:700,color:'#fff',marginBottom:14,lineHeight:1.2}}>
               Book a <em style={{color:V.gold3}}>Free Consultation</em>
             </h2>
             <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.7}}>
@@ -7449,7 +7457,7 @@ export default function LandingPage() {
                 </a>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{area.region}</div>
                 <h1 style={{
-                  fontFamily:"'Playfair Display',serif",
+                  fontFamily:"'DM Serif Display',Georgia,serif",
                   fontSize:'clamp(2rem,4.5vw,3rem)',
                   fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:16,
                 }}>Tuition in <em style={{color:V.gold3,fontStyle:'italic'}}>{area.name}</em></h1>
@@ -7485,12 +7493,12 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="tuition-area-grid">
                 <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
                   <div className="eyebrow" style={{marginBottom:8}}>The {area.name} parent</div>
-                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>What we hear from families here</h3>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>What we hear from families here</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7}}>{area.parentProfile}</p>
                 </div>
                 <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
                   <div className="eyebrow" style={{marginBottom:8}}>Local schools we work with</div>
-                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>Schools nearby</h3>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>Schools nearby</h3>
                   <ul style={{listStyle:'none',padding:0,margin:0}}>
                     {area.localSchools.map((s,i) => (
                       <li key={i} style={{padding:'6px 0',fontSize:13.5,color:V.sl,borderTop: i===0?'none':'1px dashed '+V.line}}>
@@ -7508,12 +7516,12 @@ export default function LandingPage() {
               <div style={{maxWidth:880,margin:'0 auto',display:'grid',gridTemplateColumns:'1fr 1fr',gap:24}} className="tuition-area-grid">
                 <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px'}}>
                   <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:8}}>Commute & timing</div>
-                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>Reaching {area.name}</h3>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>Reaching {area.name}</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65}}>{area.commuteNote}</p>
                 </div>
                 <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px'}}>
                   <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:8}}>Pricing for {area.name}</div>
-                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>How fees work here</h3>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>How fees work here</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65}}>{area.pricingNote}</p>
                 </div>
               </div>
@@ -7525,7 +7533,7 @@ export default function LandingPage() {
                 <div style={{maxWidth:880,margin:'0 auto'}}>
                   <div style={{textAlign:'center',marginBottom:28}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we tutor in {area.name}</div>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginTop:8}}>
                       Most-requested subjects
                     </h2>
                     <p style={{fontSize:13.5,color:V.sl3,marginTop:10,lineHeight:1.6,maxWidth:560,margin:'10px auto 0'}}>
@@ -7554,7 +7562,7 @@ export default function LandingPage() {
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:24}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Quick answers for {area.name}</div>
-                  <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
                     Frequently asked
                   </h2>
                 </div>
@@ -7596,7 +7604,7 @@ export default function LandingPage() {
               <section className="sec" style={{background:'#fff'}}><div className="wrap">
                 <div style={{textAlign:'center',marginBottom:24}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Nearby</div>
-                  <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
                     Tuition in nearby areas
                   </h2>
                 </div>
@@ -7609,7 +7617,7 @@ export default function LandingPage() {
                         style={{background:V.bone,border:'1px solid '+V.line,borderRadius:10,padding:'14px 16px',textDecoration:'none',color:V.ink,transition:'border-color .2s, transform .2s'}}
                         onMouseEnter={e => { e.currentTarget.style.borderColor=V.cr; e.currentTarget.style.transform='translateY(-2px)' }}
                         onMouseLeave={e => { e.currentTarget.style.borderColor=V.line; e.currentTarget.style.transform='translateY(0)' }}>
-                        <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1rem',fontWeight:700,color:V.ink}}>{near.name}</div>
+                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',fontWeight:700,color:V.ink}}>{near.name}</div>
                         <div style={{fontSize:11,color:V.sl3,marginTop:4}}>{near.region}</div>
                       </a>
                     )
@@ -7627,7 +7635,7 @@ export default function LandingPage() {
 
             {/* FINAL CTA */}
             <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:680,margin:'0 auto'}}>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.9rem',fontWeight:700,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:'#fff',marginBottom:14,lineHeight:1.2}}>
                 Ready to start in <em style={{color:V.gold3}}>{area.name}</em>?
               </h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:22,lineHeight:1.7}}>
@@ -7759,7 +7767,7 @@ export default function LandingPage() {
               bottom:0,
               height:80,
               pointerEvents:'none',
-              background:'linear-gradient(to bottom, rgba(10,8,6,0) 0%, #fff 100%)',
+              background:'linear-gradient(to bottom, rgba(8,12,20,0) 0%, #fff 100%)',
             }}/>
           </section>
           {/* 4-DAY ITINERARY */}
@@ -7767,7 +7775,7 @@ export default function LandingPage() {
             <div style={{textAlign:'center',marginBottom:44,maxWidth:760,margin:'0 auto 44px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Day by day</div>
               <h2 style={{
-                fontFamily:"'Playfair Display',serif",
+                fontFamily:"'DM Serif Display',Georgia,serif",
                 fontSize:'2rem',
                 fontWeight:700,
                 color:V.ink,
@@ -7890,10 +7898,10 @@ export default function LandingPage() {
                         <g>
                           {/* Stars */}
                           {[[30,25],[80,15],[140,30],[200,18],[260,28]].map(([x,y],i) => (
-                            <circle key={i} cx={x} cy={y} r="1" fill="#F0CC5A" opacity="0.7"/>
+                            <circle key={i} cx={x} cy={y} r="1" fill="#C9973A" opacity="0.7"/>
                           ))}
                           {/* Twin towers silhouette */}
-                          <g fill="#F0CC5A" opacity="0.95">
+                          <g fill="#C9973A" opacity="0.95">
                             <polygon points="128,35 132,35 130,18"/>
                             <rect x="129" y="35" width="2" height="8"/>
                             <ellipse cx="130" cy="48" rx="12" ry="3"/>
@@ -7909,11 +7917,11 @@ export default function LandingPage() {
                             <rect x="151" y="107" width="38" height="55"/>
                           </g>
                           {/* Sky bridge */}
-                          <rect x="142" y="77" width="16" height="6" fill="#F0CC5A" opacity="0.85"/>
+                          <rect x="142" y="77" width="16" height="6" fill="#C9973A" opacity="0.85"/>
                         </g>
                       )}
                       {d.theme === 'university' && (
-                        <g fill="#F0CC5A" opacity="0.92">
+                        <g fill="#C9973A" opacity="0.92">
                           {/* University building — neoclassical */}
                           {/* Steps */}
                           <rect x="60" y="135" width="180" height="6"/>
@@ -7950,7 +7958,7 @@ export default function LandingPage() {
                               const rad = deg * Math.PI / 180
                               const cx = 150 + Math.cos(rad) * 45
                               const cy = 80 + Math.sin(rad) * 45
-                              return <circle key={i} cx={cx} cy={cy} r="6" fill="#F0CC5A"/>
+                              return <circle key={i} cx={cx} cy={cy} r="6" fill="#C9973A"/>
                             })}
                           </g>
                           {/* Base */}
@@ -7963,8 +7971,8 @@ export default function LandingPage() {
                           {/* Cave entrance arch */}
                           <ellipse cx="150" cy="60" rx="40" ry="28" fill="#1a0e0a" opacity="0.65"/>
                           {/* Murugan statue */}
-                          <ellipse cx="80" cy="90" rx="9" ry="28" fill="#F0CC5A" opacity="0.95"/>
-                          <circle cx="80" cy="63" r="7" fill="#F0CC5A" opacity="0.95"/>
+                          <ellipse cx="80" cy="90" rx="9" ry="28" fill="#C9973A" opacity="0.95"/>
+                          <circle cx="80" cy="63" r="7" fill="#C9973A" opacity="0.95"/>
                           {/* Rainbow stairs */}
                           {[
                             ['#FF4757', 0],
@@ -8006,7 +8014,7 @@ export default function LandingPage() {
                   {/* day content */}
                   <div style={{padding:'22px 22px 24px'}}>
                     <h3 style={{
-                      fontFamily:"'Playfair Display',serif",
+                      fontFamily:"'DM Serif Display',Georgia,serif",
                       fontSize:'1.15rem',
                       fontWeight:700,
                       color:V.ink,
@@ -8048,7 +8056,7 @@ export default function LandingPage() {
               <div>
                 <div className="eyebrow" style={{marginBottom:10}}>Trip Highlights</div>
                 <h3 style={{
-                  fontFamily:"'Playfair Display',serif",
+                  fontFamily:"'DM Serif Display',Georgia,serif",
                   fontSize:'1.5rem',
                   fontWeight:700,
                   color:V.ink,
@@ -8104,7 +8112,7 @@ export default function LandingPage() {
               <div>
                 <div className="eyebrow" style={{marginBottom:10}}>Package Includes</div>
                 <h3 style={{
-                  fontFamily:"'Playfair Display',serif",
+                  fontFamily:"'DM Serif Display',Georgia,serif",
                   fontSize:'1.5rem',
                   fontWeight:700,
                   color:V.ink,
@@ -8171,7 +8179,7 @@ export default function LandingPage() {
                 <div>
                   <div className="eyebrow" style={{color:V.gold3,marginBottom:6}}>Investment</div>
                   <h3 style={{
-                    fontFamily:"'Playfair Display',serif",
+                    fontFamily:"'DM Serif Display',Georgia,serif",
                     fontSize:'1.6rem',
                     fontWeight:700,
                     color:'#fff',
@@ -8182,7 +8190,7 @@ export default function LandingPage() {
                 <div style={{textAlign:'right'}}>
                   <div style={{fontSize:11,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Per Student</div>
                   <div style={{
-                    fontFamily:"'Playfair Display',serif",
+                    fontFamily:"'DM Serif Display',Georgia,serif",
                     fontSize:'2.2rem',
                     fontWeight:800,
                     color:'#fff',
@@ -8243,10 +8251,10 @@ export default function LandingPage() {
                         fontSize:10,
                         letterSpacing:'.04em',
                       }}>M-PESA</div>
-                      <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink}}>Pay via M-Pesa</div>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink}}>Pay via M-Pesa</div>
                     </div>
                     <div style={{fontSize:12,color:V.sl3,marginBottom:6,letterSpacing:'.04em'}}>Paybill Number</div>
-                    <div style={{fontSize:20,fontWeight:800,color:V.cr,letterSpacing:'.02em',marginBottom:14,fontFamily:"'Playfair Display',serif"}}>247 247</div>
+                    <div style={{fontSize:20,fontWeight:800,color:V.cr,letterSpacing:'.02em',marginBottom:14,fontFamily:"'DM Serif Display',Georgia,serif"}}>247 247</div>
                     <div style={{fontSize:12,color:V.sl3,marginBottom:4,letterSpacing:'.04em'}}>Account Number</div>
                     <div style={{fontSize:16,fontWeight:700,color:V.ink,marginBottom:10}}>745021</div>
                     <div style={{fontSize:11,color:V.sl,lineHeight:1.5}}>
@@ -8275,7 +8283,7 @@ export default function LandingPage() {
                         fontSize:10,
                         letterSpacing:'.04em',
                       }}>PAY</div>
-                      <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.05rem',fontWeight:700,color:V.ink}}>Pay online</div>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink}}>Pay online</div>
                     </div>
                     <div style={{fontSize:12,color:V.sl,lineHeight:1.55,marginBottom:14}}>
                       Pay by card, bank transfer, Apple Pay or M-Pesa STK push via secure Paystack. Choose which instalment to pay below.
@@ -8478,7 +8486,7 @@ export default function LandingPage() {
                   <div style={{textAlign:'center',marginBottom:28}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Apply now · Limited spaces</div>
                     <h3 style={{
-                      fontFamily:"'Playfair Display',serif",
+                      fontFamily:"'DM Serif Display',Georgia,serif",
                       fontSize:'1.7rem',
                       fontWeight:700,
                       color:V.ink,
@@ -8785,7 +8793,7 @@ export default function LandingPage() {
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 7"/></svg>
                   </div>
                   <h3 style={{
-                    fontFamily:"'Playfair Display',serif",
+                    fontFamily:"'DM Serif Display',Georgia,serif",
                     fontSize:'1.5rem',
                     fontWeight:700,
                     color:V.ink,
@@ -8818,7 +8826,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Weekly Enrichment Programme</div>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Every Wednesday <em style={{color:V.cr}}>2:00 PM – 4:00 PM</em></h2>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Every Wednesday <em style={{color:V.cr}}>2:00 PM – 4:00 PM</em></h2>
               <p style={{fontSize:14,color:V.sl,maxWidth:640,margin:'0 auto',lineHeight:1.7}}>A protected two-hour window every week reserved for activities. No homework, no exams — just discovery, skill-building and friendship.</p>
             </div>
 
@@ -9040,7 +9048,7 @@ export default function LandingPage() {
           <section id="student-life" className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Parent Trust</div>
-              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Holistic Growth in a <em style={{color:V.cr}}>Safe, Supervised Environment</em></h2>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Holistic Growth in a <em style={{color:V.cr}}>Safe, Supervised Environment</em></h2>
               <p style={{fontSize:14,color:V.sl,maxWidth:640,margin:'0 auto',lineHeight:1.7}}>Every activity is designed with safety, age-appropriateness, and meaningful development at its core.</p>
             </div>
 
@@ -9075,7 +9083,7 @@ export default function LandingPage() {
 
           {/* CALL TO ACTION */}
           <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`, color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
-            <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
               Give Your Child More Than <em style={{color:V.gold2}}>Just Academics</em>
             </h2>
             <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:28,lineHeight:1.7}}>
@@ -9125,7 +9133,7 @@ export default function LandingPage() {
               onClick={() => setOpenActivity(null)}
               style={{
                 position:'fixed',inset:0,zIndex:9998,
-                background:'rgba(10,8,6,.78)',
+                background:'rgba(8,12,20,.78)',
                 display:'flex',alignItems:'center',justifyContent:'center',
                 padding:'24px',
                 animation:'fadeIn .18s ease',
@@ -9173,7 +9181,7 @@ export default function LandingPage() {
                   />
                   <div style={{
                     position:'absolute',inset:0,
-                    background:'linear-gradient(to bottom, transparent 60%, rgba(10,8,6,.55) 100%)',
+                    background:'linear-gradient(to bottom, transparent 60%, rgba(8,12,20,.55) 100%)',
                     pointerEvents:'none',
                   }}/>
                   <div style={{
@@ -9188,7 +9196,7 @@ export default function LandingPage() {
                       marginBottom:10,
                     }}>Wednesday Enrichment</div>
                     <h3 id="activity-modal-title" style={{
-                      fontFamily:"'Playfair Display',serif",
+                      fontFamily:"'DM Serif Display',Georgia,serif",
                       fontSize:'1.9rem',fontWeight:700,
                       color:'#fff',margin:0,lineHeight:1.15,
                       textShadow:'0 2px 8px rgba(0,0,0,.4)',
@@ -9218,7 +9226,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{textAlign:'right'}}>
                       <div style={{
-                        fontFamily:"'Playfair Display',serif",
+                        fontFamily:"'DM Serif Display',Georgia,serif",
                         fontSize:'1.7rem',fontWeight:800,color:V.ink,lineHeight:1,
                       }}>KSh 25,000</div>
                       <div style={{fontSize:11,color:V.sl3,marginTop:4,letterSpacing:'.04em'}}>per student · per term</div>
@@ -9444,7 +9452,7 @@ export default function LandingPage() {
 
             {/* Country filter — second row, lighter visual weight */}
             <div style={{display:'flex',gap:7,flexWrap:'wrap',justifyContent:'center',marginTop:14,marginBottom:28}}>
-              <div style={{fontSize:11,color:V.sl2,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:700,marginRight:6,padding:'8px 0',fontFamily:"'Syne',sans-serif"}}>Country:</div>
+              <div style={{fontSize:11,color:V.sl2,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:700,marginRight:6,padding:'8px 0',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>Country:</div>
               {[
                 ['all','🌍 All'],
                 ['global','🌐 Global'],
@@ -9459,7 +9467,7 @@ export default function LandingPage() {
                 const on = blogCountry === id
                 return (
                   <button key={id} onClick={() => setBlogCountry(id)}
-                    style={{padding:'6px 13px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',border:`1px solid ${on?V.cr:V.bone3}`,background:on?V.cr:V.white,color:on?V.white:V.sl,transition:'all .2s',fontFamily:"'Syne',sans-serif"}}>
+                    style={{padding:'6px 13px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',border:`1px solid ${on?V.cr:V.bone3}`,background:on?V.cr:V.white,color:on?V.white:V.sl,transition:'all .2s',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
                     {l}
                   </button>
                 )
@@ -9496,7 +9504,7 @@ export default function LandingPage() {
             {/* Teacher-published articles appear here automatically */}
             {store.articles.filter(a => a.status === 'Published').length > 0 && (
               <div style={{marginBottom:28}}>
-                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.15rem',fontWeight:700,color:'#fff',opacity:.6,marginBottom:14,letterSpacing:'.05em',textTransform:'uppercase'}}>From Our Teachers</h3>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:'#fff',opacity:.6,marginBottom:14,letterSpacing:'.05em',textTransform:'uppercase'}}>From Our Teachers</h3>
                 <div className="blog-grid">
                   {store.articles.filter(a => a.status === 'Published').map((a) => (
                     <div key={a.id} className="bc reveal" onClick={() => showToast('Article: ' + a.title)}>
@@ -9541,10 +9549,10 @@ export default function LandingPage() {
             </div>
             <div className="nl-strip">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="1.5" strokeLinecap="round" style={{margin:'0 auto 12px',display:'block'}}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:8}}>Get New Articles in Your Inbox</h3>
+              <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:8}}>Get New Articles in Your Inbox</h3>
               <p style={{fontSize:14,color:V.sl,marginBottom:20}}>Join 4,000+ parents and students who receive our weekly education insights.</p>
               <div style={{display:'flex',gap:10,maxWidth:440,margin:'0 auto',flexWrap:'wrap'}}>
-                <input style={{flex:1,minWidth:200,padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:6,fontSize:14,color:V.ink,background:V.white,fontFamily:"'Syne',sans-serif",outline:'none'}} placeholder="your@email.com" type="email"/>
+                <input style={{flex:1,minWidth:200,padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:6,fontSize:14,color:V.ink,background:V.white,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",outline:'none'}} placeholder="your@email.com" type="email"/>
                 <button className="btn-p" onClick={() => showToast('Subscribed! Check your inbox.')}>Subscribe <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
               </div>
             </div>
@@ -9586,30 +9594,30 @@ export default function LandingPage() {
                 />
               )}
               {/* Double-gradient scrim: crimson wash + readability fade */}
-              <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,rgba(10,8,6,.55) 0%,rgba(139,26,46,.35) 60%,rgba(10,8,6,.75) 100%)',zIndex:1}}/>
-              <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(10,8,6,.15) 0%,rgba(10,8,6,.5) 100%)',zIndex:1}}/>
+              <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,rgba(8,12,20,.55) 0%,rgba(139,26,46,.35) 60%,rgba(8,12,20,.75) 100%)',zIndex:1}}/>
+              <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,rgba(8,12,20,.15) 0%,rgba(8,12,20,.5) 100%)',zIndex:1}}/>
               {/* Gold accent bar at the very top */}
               <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,transparent 0%,${V.gold3} 50%,transparent 100%)`,zIndex:3}}/>
               <div style={{maxWidth:860,margin:'0 auto',position:'relative',zIndex:2}}>
-                <button onClick={() => P('blog')} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Syne',sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6,transition:'all .2s',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}
+                <button onClick={() => P('blog')} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6,transition:'all .2s',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}
                   onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,.14)';e.currentTarget.style.borderColor='rgba(255,255,255,.28)'}}
                   onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,.08)';e.currentTarget.style.borderColor='rgba(255,255,255,.15)'}}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   Back to Blog
                 </button>
-                <div style={{display:'inline-block',padding:'4px 12px',background:'rgba(240,204,90,.15)',border:'1px solid rgba(240,204,90,.3)',color:V.gold3,fontSize:10.5,fontWeight:700,letterSpacing:'.1em',borderRadius:20,marginBottom:18,textTransform:'uppercase',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}>
+                <div style={{display:'inline-block',padding:'4px 12px',background:'rgba(201,151,58,.15)',border:'1px solid rgba(201,151,58,.3)',color:V.gold3,fontSize:10.5,fontWeight:700,letterSpacing:'.1em',borderRadius:20,marginBottom:18,textTransform:'uppercase',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}>
                   {a.cat === 'study-abroad' ? 'Study Abroad' : a.cat}
                 </div>
-                <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:'clamp(2rem,4.2vw,3.2rem)',fontWeight:800,color:V.white,lineHeight:1.15,letterSpacing:'-.02em',marginBottom:20,textShadow:'0 2px 24px rgba(10,8,6,.7)'}}>{a.t}</h1>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,4.2vw,3.2rem)',fontWeight:800,color:V.white,lineHeight:1.15,letterSpacing:'-.02em',marginBottom:20,textShadow:'0 2px 24px rgba(8,12,20,.7)'}}>{a.t}</h1>
                 <div style={{display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}>
-                  <div style={{width:44,height:44,borderRadius:'50%',background:`linear-gradient(135deg,${V.cr},${V.gold2})`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontWeight:700,fontSize:14,fontFamily:"'Playfair Display',serif",boxShadow:'0 4px 12px rgba(10,8,6,.4)'}}>
+                  <div style={{width:44,height:44,borderRadius:'50%',background:`linear-gradient(135deg,${V.cr},${V.gold2})`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontWeight:700,fontSize:14,fontFamily:"'DM Serif Display',Georgia,serif",boxShadow:'0 4px 12px rgba(8,12,20,.4)'}}>
                     {(a.author||'SM').split(' ').map(n=>n[0]).join('').slice(0,2)}
                   </div>
                   <div>
                     <div style={{color:V.white,fontSize:14,fontWeight:600}}>{a.author}</div>
                     <div style={{color:'rgba(255,255,255,.65)',fontSize:12}}>{a.role}</div>
                   </div>
-                  <div style={{color:'rgba(255,255,255,.55)',fontSize:12,marginLeft:'auto',fontFamily:"'Syne Mono',monospace",letterSpacing:'.05em'}}>{a.date}</div>
+                  <div style={{color:'rgba(255,255,255,.55)',fontSize:12,marginLeft:'auto',fontFamily:"'Fira Code',monospace",letterSpacing:'.05em'}}>{a.date}</div>
                 </div>
               </div>
             </div>
@@ -9618,18 +9626,18 @@ export default function LandingPage() {
             <article style={{background:V.bone,padding:'72px 20px'}}>
               <div style={{maxWidth:760,margin:'0 auto'}}>
                 {/* Intro */}
-                <p style={{fontFamily:"'Playfair Display',serif",fontSize:'1.35rem',fontStyle:'italic',color:V.ink2,lineHeight:1.7,marginBottom:48,paddingLeft:20,borderLeft:`3px solid ${V.cr}`,fontWeight:400}}>
+                <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',fontStyle:'italic',color:V.ink2,lineHeight:1.7,marginBottom:48,paddingLeft:20,borderLeft:`3px solid ${V.cr}`,fontWeight:400}}>
                   {a.intro}
                 </p>
 
                 {/* Sections */}
                 {a.sections.map((s, i) => (
                   <section key={i} style={{marginBottom:44}}>
-                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:16,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:16,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
                       <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
                       {s.h}
                     </h2>
-                    <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,fontFamily:"'Syne',sans-serif"}}>{s.p}</p>
+                    <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{s.p}</p>
                   </section>
                 ))}
 
@@ -9637,23 +9645,23 @@ export default function LandingPage() {
                 <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 32px',marginTop:48,position:'relative',overflow:'hidden'}}>
                   <div style={{position:'absolute',top:0,left:0,width:6,height:'100%',background:`linear-gradient(180deg,${V.cr},${V.gold2})`}}/>
                   <div style={{fontSize:11,fontWeight:700,color:V.cr,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:10}}>Conclusion</div>
-                  <p style={{fontSize:16,color:V.ink2,lineHeight:1.8,margin:0,fontFamily:"'Syne',sans-serif"}}>{a.conclusion}</p>
+                  <p style={{fontSize:16,color:V.ink2,lineHeight:1.8,margin:0,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{a.conclusion}</p>
                 </div>
 
                 {/* FAQs — only rendered if the article has them */}
                 {a.faqs && a.faqs.length > 0 && (
                   <div style={{marginTop:48}}>
-                    <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginBottom:18,letterSpacing:'-.01em'}}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginBottom:18,letterSpacing:'-.01em'}}>
                       Frequently Asked <em style={{color:V.cr,fontStyle:'italic'}}>Questions</em>
                     </h3>
                     <div style={{display:'flex',flexDirection:'column',gap:12}}>
                       {a.faqs.map((f, i) => (
                         <details key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'16px 20px',cursor:'pointer',transition:'border-color .2s'}}>
-                          <summary style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:15,color:V.ink,listStyle:'none',position:'relative',paddingRight:28,cursor:'pointer'}}>
+                          <summary style={{fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",fontWeight:700,fontSize:15,color:V.ink,listStyle:'none',position:'relative',paddingRight:28,cursor:'pointer'}}>
                             {f.q}
                             <span style={{position:'absolute',right:0,top:2,color:V.cr,fontSize:18,fontWeight:400,transition:'transform .2s'}}>+</span>
                           </summary>
-                          <p style={{fontSize:14.5,color:V.ink2,lineHeight:1.75,marginTop:12,marginBottom:0,fontFamily:"'Syne',sans-serif"}}>{f.a}</p>
+                          <p style={{fontSize:14.5,color:V.ink2,lineHeight:1.75,marginTop:12,marginBottom:0,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{f.a}</p>
                         </details>
                       ))}
                     </div>
@@ -9663,7 +9671,7 @@ export default function LandingPage() {
                 {/* CTA strip */}
                 <div style={{background:V.ink,borderRadius:16,padding:'36px 32px',marginTop:48,textAlign:'center',position:'relative',overflow:'hidden'}}>
                   <div style={{position:'absolute',top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${V.gold3},transparent)`}}/>
-                  <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.55rem',color:V.white,marginBottom:10,fontWeight:700}}>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.55rem',color:V.white,marginBottom:10,fontWeight:700}}>
                     Ready to put this into practice?
                   </h3>
                   <p style={{fontSize:14,color:'rgba(247,243,237,.55)',marginBottom:22,maxWidth:440,margin:'0 auto 22px',lineHeight:1.6}}>
@@ -9677,12 +9685,12 @@ export default function LandingPage() {
 
                 {/* Author card */}
                 <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'24px',marginTop:32,display:'flex',alignItems:'center',gap:18,flexWrap:'wrap'}}>
-                  <div style={{width:64,height:64,borderRadius:'50%',background:`linear-gradient(135deg,${V.cr},${V.gold2})`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontWeight:700,fontSize:20,fontFamily:"'Playfair Display',serif",flexShrink:0}}>
+                  <div style={{width:64,height:64,borderRadius:'50%',background:`linear-gradient(135deg,${V.cr},${V.gold2})`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontWeight:700,fontSize:20,fontFamily:"'DM Serif Display',Georgia,serif",flexShrink:0}}>
                     {(a.author||'SM').split(' ').map(n=>n[0]).join('').slice(0,2)}
                   </div>
                   <div style={{flex:1,minWidth:200}}>
                     <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',color:V.sl2,fontWeight:700,marginBottom:4}}>Written by</div>
-                    <div style={{fontSize:17,fontWeight:700,color:V.ink,fontFamily:"'Playfair Display',serif"}}>{a.author}</div>
+                    <div style={{fontSize:17,fontWeight:700,color:V.ink,fontFamily:"'DM Serif Display',Georgia,serif"}}>{a.author}</div>
                     <div style={{fontSize:13,color:V.sl,marginTop:2}}>{a.role} · Smartious Homeschool</div>
                   </div>
                 </div>
@@ -9749,33 +9757,33 @@ export default function LandingPage() {
             <div style={{maxWidth:1000,margin:'0 auto 24px',padding:'0 20px'}}>
               <div style={{textAlign:'center',marginBottom:16}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>How enrolment works</div>
-                <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.3rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:6,lineHeight:1.3}}>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:6,lineHeight:1.3}}>
                   Four steps. Most families <em style={{color:V.cr}}>start within a week.</em>
                 </h3>
               </div>
               <svg viewBox="0 0 920 180" style={{width:'100%',maxWidth:920,height:'auto',display:'block',margin:'0 auto'}} xmlns="http://www.w3.org/2000/svg" aria-label="Four-step enrollment process">
-                <line x1="100" y1="56" x2="820" y2="56" stroke="#DDD5C6" strokeWidth="3"/>
+                <line x1="100" y1="56" x2="820" y2="56" stroke="#F0E8D4" strokeWidth="3"/>
                 <line x1="100" y1="56" x2="640" y2="56" stroke="#8B1A2E" strokeWidth="3" opacity="0.85"/>
                 <circle cx="100" cy="56" r="22" fill="#8B1A2E"/>
-                <text x="100" y="62" textAnchor="middle" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="16" fill="#FEFDFB">1</text>
-                <text x="100" y="100" textAnchor="middle" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="14" fill="#0A0806">Free consult</text>
-                <text x="100" y="118" textAnchor="middle" fontFamily="'Syne', sans-serif" fontSize="11" fill="#6B5E52">15 minutes</text>
-                <text x="100" y="132" textAnchor="middle" fontFamily="'Syne', sans-serif" fontSize="11" fill="#6B5E52">WhatsApp or Zoom</text>
+                <text x="100" y="62" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="16" fill="#FFFFFF">1</text>
+                <text x="100" y="100" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#080C14">Free consult</text>
+                <text x="100" y="118" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">15 minutes</text>
+                <text x="100" y="132" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">WhatsApp or Zoom</text>
                 <circle cx="370" cy="56" r="22" fill="#8B1A2E"/>
-                <text x="370" y="62" textAnchor="middle" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="16" fill="#FEFDFB">2</text>
-                <text x="370" y="100" textAnchor="middle" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="14" fill="#0A0806">Placement</text>
-                <text x="370" y="118" textAnchor="middle" fontFamily="'Syne', sans-serif" fontSize="11" fill="#6B5E52">Short assessment</text>
-                <text x="370" y="132" textAnchor="middle" fontFamily="'Syne', sans-serif" fontSize="11" fill="#6B5E52">to set the right level</text>
+                <text x="370" y="62" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="16" fill="#FFFFFF">2</text>
+                <text x="370" y="100" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#080C14">Placement</text>
+                <text x="370" y="118" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">Short assessment</text>
+                <text x="370" y="132" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">to set the right level</text>
                 <circle cx="640" cy="56" r="22" fill="#8B1A2E"/>
-                <text x="640" y="62" textAnchor="middle" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="16" fill="#FEFDFB">3</text>
-                <text x="640" y="100" textAnchor="middle" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="14" fill="#0A0806">Class &amp; teacher</text>
-                <text x="640" y="118" textAnchor="middle" fontFamily="'Syne', sans-serif" fontSize="11" fill="#6B5E52">Curriculum chosen</text>
-                <text x="640" y="132" textAnchor="middle" fontFamily="'Syne', sans-serif" fontSize="11" fill="#6B5E52">Timetable set</text>
+                <text x="640" y="62" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="16" fill="#FFFFFF">3</text>
+                <text x="640" y="100" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#080C14">Class &amp; teacher</text>
+                <text x="640" y="118" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">Curriculum chosen</text>
+                <text x="640" y="132" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">Timetable set</text>
                 <circle cx="820" cy="56" r="22" fill="#B8960C"/>
-                <text x="820" y="62" textAnchor="middle" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="16" fill="#0A0806">4</text>
-                <text x="820" y="100" textAnchor="middle" fontFamily="'Playfair Display', serif" fontWeight="700" fontSize="14" fill="#0A0806">First class</text>
-                <text x="820" y="118" textAnchor="middle" fontFamily="'Syne', sans-serif" fontSize="11" fill="#6B5E52">Live with</text>
-                <text x="820" y="132" textAnchor="middle" fontFamily="'Syne', sans-serif" fontSize="11" fill="#6B5E52">your teacher</text>
+                <text x="820" y="62" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="16" fill="#080C14">4</text>
+                <text x="820" y="100" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#080C14">First class</text>
+                <text x="820" y="118" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">Live with</text>
+                <text x="820" y="132" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">your teacher</text>
               </svg>
             </div>
           </div></section>
@@ -9931,14 +9939,14 @@ export default function LandingPage() {
                     <div style={{width:76,height:76,borderRadius:'50%',background:`linear-gradient(135deg,${V.cr},${V.cr2})`,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px',animation:'lp-float 3s ease-in-out infinite'}}>
                       <svg width="34" height="34" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
-                    <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginBottom:8}}>Enrollment Submitted!</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginBottom:8}}>Enrollment Submitted!</div>
                     <p style={{fontSize:14.5,color:V.sl,marginBottom:14,lineHeight:1.8,maxWidth:520,margin:'0 auto 14px'}}>
                       Thank you, {enrollForm.firstName || 'there'}! We have received your enrollment application. Our admissions team will contact you at <strong>{enrollForm.parentEmail}</strong> within 48 hours to guide you through the next steps, including your child&rsquo;s placement assessment in the student portal.
                     </p>
 
                     {/* Assessment mode summary */}
                     {enrollForm.assessmentMode && (
-                      <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'8px 14px',background:'rgba(139,26,46,.06)',border:'1px solid rgba(139,26,46,.18)',borderRadius:20,fontSize:12,color:V.cr,marginBottom:14,fontFamily:"'Syne',sans-serif",fontWeight:600}}>
+                      <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'8px 14px',background:'rgba(139,26,46,.06)',border:'1px solid rgba(139,26,46,.18)',borderRadius:20,fontSize:12,color:V.cr,marginBottom:14,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",fontWeight:600}}>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                           {enrollForm.assessmentMode === 'online'
                             ? <><rect x="2" y="4" width="20" height="14" rx="2"/><polyline points="7 22 12 18 17 22"/></>
@@ -9953,7 +9961,7 @@ export default function LandingPage() {
                       </div>
                     )}
                     <div style={{height:6}}/>
-                    {paySuccess && <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'8px 14px',background:'rgba(10,125,50,.08)',border:'1px solid rgba(10,125,50,.2)',borderRadius:20,fontSize:12,color:'#0A7D32',marginBottom:28,fontFamily:"'Syne Mono',monospace"}}>
+                    {paySuccess && <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'8px 14px',background:'rgba(10,125,50,.08)',border:'1px solid rgba(10,125,50,.2)',borderRadius:20,fontSize:12,color:'#0A7D32',marginBottom:28,fontFamily:"'Fira Code',monospace"}}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0A7D32" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                       Paystack Ref: {paySuccess}
                     </div>}
@@ -10000,12 +10008,12 @@ export default function LandingPage() {
             <div className="contact-grid">
               {/* Left — contact info */}
               <div className="contact-info-card">
-                <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',color:'#FEFDFB',marginBottom:8}}>Our <em style={{color:'#F0CC5A',fontStyle:'italic'}}>Details</em></div>
+                <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color:'#FFFFFF',marginBottom:8}}>Our <em style={{color:'#C9973A',fontStyle:'italic'}}>Details</em></div>
                 {[
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Email', value:'hellosmartious@gmail.com', sub:'Response within 2 hours', href:'mailto:hellosmartious@gmail.com'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Phone', value:'+254 745 021 212', sub:'Mon–Fri, 8am–6pm EAT', href:'tel:+254745021212'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>, label:'WhatsApp', value:'+254 745 021 212', sub:'Quick responses · Tap to chat', href:'https://wa.me/254745021212'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#F0CC5A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I, Parklands', sub:'Nairobi, Kenya · 4th Avenue', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Email', value:'hellosmartious@gmail.com', sub:'Response within 2 hours', href:'mailto:hellosmartious@gmail.com'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Phone', value:'+254 745 021 212', sub:'Mon–Fri, 8am–6pm EAT', href:'tel:+254745021212'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>, label:'WhatsApp', value:'+254 745 021 212', sub:'Quick responses · Tap to chat', href:'https://wa.me/254745021212'},
+                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I, Parklands', sub:'Nairobi, Kenya · 4th Avenue', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
                 ].map(({icon,label,value,sub,href}) => (
                   <a key={label} href={href} target="_blank" rel="noreferrer" style={{textDecoration:'none'}} className="contact-method">
                     <div className="contact-icon">{icon}</div>
@@ -10019,8 +10027,8 @@ export default function LandingPage() {
               </div>
               {/* Right — email form */}
               <div className="contact-email-card">
-                <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.4rem',color:'#0A0806',marginBottom:6}}>Send us a <em style={{color:'#8B1A2E',fontStyle:'italic'}}>Message</em></div>
-                <p style={{fontSize:13.5,color:'#6B5E52',marginBottom:28,lineHeight:1.7}}>Fill in the form below and we will respond within 2 working hours.</p>
+                <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#080C14',marginBottom:6}}>Send us a <em style={{color:'#8B1A2E',fontStyle:'italic'}}>Message</em></div>
+                <p style={{fontSize:13.5,color:'#2E3D55',marginBottom:28,lineHeight:1.7}}>Fill in the form below and we will respond within 2 working hours.</p>
                 <ContactForm />
               </div>
             </div>
@@ -10039,7 +10047,7 @@ export default function LandingPage() {
               <div style={{width:52,height:52,borderRadius:14,background:V.cr,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 12px'}}>
                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" strokeLinecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               </div>
-              <div style={{fontFamily:"'Playfair Display',serif",fontSize:22,fontWeight:700,color:V.white}}>Smart<em style={{color:V.gold3,fontStyle:'italic'}}>ious</em></div>
+              <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:22,fontWeight:700,color:V.white}}>Smart<em style={{color:V.gold3,fontStyle:'italic'}}>ious</em></div>
               <div style={{fontSize:'8.5px',fontWeight:600,letterSpacing:'.12em',textTransform:'uppercase',color:'rgba(247,243,237,.2)',marginTop:2}}>HOMESCHOOL · GLOBAL</div>
             </div>
 
@@ -10059,7 +10067,7 @@ export default function LandingPage() {
               <span style={{fontSize:12,color:'rgba(247,243,237,.2)',whiteSpace:'nowrap'}}>Or use demo access</span>
               <div style={{flex:1,height:1,background:'rgba(255,255,255,.07)'}}/>
             </div>
-            <button style={{width:'100%',padding:12,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,color:V.white,fontWeight:700,fontSize:13.5,cursor:'pointer',fontFamily:"'Syne',sans-serif",display:'flex',alignItems:'center',justifyContent:'center',gap:8}} onClick={goPortal}>
+            <button style={{width:'100%',padding:12,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,color:V.white,fontWeight:700,fontSize:13.5,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",display:'flex',alignItems:'center',justifyContent:'center',gap:8}} onClick={goPortal}>
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Go to Full Login Page
             </button>
@@ -10248,12 +10256,12 @@ function PriceCard({ lbl, ti, base, am, pr, fs, gold, badge, cta = 'Enroll Now',
       <div className="p-am"><sup>$</sup>{amt.toLocaleString()}</div>
       <div className="p-pr">{periodLabel}</div>
       {kesShown && !hourly && (
-        <div style={{fontSize:'11.5px',color:gold?'rgba(247,243,237,.6)':'#8A7B6E',marginTop:2,marginBottom:6,fontStyle:'italic'}}>
+        <div style={{fontSize:'11.5px',color:gold?'rgba(247,243,237,.6)':'#3D5066',marginTop:2,marginBottom:6,fontStyle:'italic'}}>
           ≈ KES {kesShown.toLocaleString()}
         </div>
       )}
       {savings > 0 && (
-        <div style={{display:'inline-block',padding:'3px 9px',background:gold?'rgba(240,204,90,.18)':'rgba(139,26,46,.08)',color:gold?'#F0CC5A':'#8B1A2E',fontSize:10.5,fontWeight:700,letterSpacing:'.04em',borderRadius:20,marginTop:4,marginBottom:6}}>
+        <div style={{display:'inline-block',padding:'3px 9px',background:gold?'rgba(201,151,58,.18)':'rgba(139,26,46,.08)',color:gold?'#C9973A':'#8B1A2E',fontSize:10.5,fontWeight:700,letterSpacing:'.04em',borderRadius:20,marginTop:4,marginBottom:6}}>
           You save ${savings.toLocaleString()}
         </div>
       )}
@@ -10262,7 +10270,7 @@ function PriceCard({ lbl, ti, base, am, pr, fs, gold, badge, cta = 'Enroll Now',
           <li key={i} className="p-f">
             <div className="p-ck">
               <svg viewBox="0 0 12 12" fill="none">
-                <path d="M2 6l3 3 5-5" stroke={gold ? '#F0CC5A' : '#8B1A2E'} strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M2 6l3 3 5-5" stroke={gold ? '#C9973A' : '#8B1A2E'} strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             </div>
             {f}
@@ -10360,9 +10368,9 @@ function ConsultForm({ P }) {
       <div className="consult-success-icon">
         <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#8B1A2E" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.8rem',color:'#0A0806',marginBottom:12}}>Request <em style={{color:'#8B1A2E',fontStyle:'italic'}}>Received!</em></div>
-      <p style={{fontSize:15,color:'#6B5E52',lineHeight:1.8,marginBottom:12,maxWidth:440,margin:'0 auto 12px'}}>Thank you {form.name}. Our admissions team will reach you at <strong>{form.email}</strong> within 2 working hours to schedule your free consultation.</p>
-      <p style={{fontSize:13,color:'#8A7B6E',marginBottom:32,maxWidth:440,margin:'0 auto 32px'}}>
+      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',color:'#080C14',marginBottom:12}}>Request <em style={{color:'#8B1A2E',fontStyle:'italic'}}>Received!</em></div>
+      <p style={{fontSize:15,color:'#2E3D55',lineHeight:1.8,marginBottom:12,maxWidth:440,margin:'0 auto 12px'}}>Thank you {form.name}. Our admissions team will reach you at <strong>{form.email}</strong> within 2 working hours to schedule your free consultation.</p>
+      <p style={{fontSize:13,color:'#3D5066',marginBottom:32,maxWidth:440,margin:'0 auto 32px'}}>
         <strong>Preferred format:</strong>{' '}
         {form.mode === 'online'
           ? 'Online via Google Meet'
@@ -10377,8 +10385,8 @@ function ConsultForm({ P }) {
   return (
     <div className="consult-card">
       <div style={{marginBottom:32}}>
-        <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.6rem',color:'#0A0806',marginBottom:8}}>Tell us about <em style={{color:'#8B1A2E',fontStyle:'italic'}}>your child</em></div>
-        <p style={{fontSize:14,color:'#6B5E52',lineHeight:1.7}}>Fill in the form below. Our team will contact you within 2 working hours to schedule a free 30-minute consultation call.</p>
+        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:'#080C14',marginBottom:8}}>Tell us about <em style={{color:'#8B1A2E',fontStyle:'italic'}}>your child</em></div>
+        <p style={{fontSize:14,color:'#2E3D55',lineHeight:1.7}}>Fill in the form below. Our team will contact you within 2 working hours to schedule a free 30-minute consultation call.</p>
       </div>
       <div className="consult-grid">
         <div className="consult-field">
@@ -10413,13 +10421,13 @@ function ConsultForm({ P }) {
             const on = form.mode === o.id
             return (
               <button key={o.id} type="button" onClick={() => set('mode', o.id)}
-                style={{textAlign:'left',padding:'14px 14px',border:`1.5px solid ${on?'#8B1A2E':'#DDD5C6'}`,borderRadius:10,background:on?'rgba(139,26,46,.04)':'#FEFDFB',cursor:'pointer',fontFamily:"'Syne',sans-serif",transition:'all .2s',display:'flex',alignItems:'flex-start',gap:11}}>
-                <div style={{width:32,height:32,borderRadius:8,background:on?'#8B1A2E':'#F7F3ED',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                style={{textAlign:'left',padding:'14px 14px',border:`1.5px solid ${on?'#8B1A2E':'#F0E8D4'}`,borderRadius:10,background:on?'rgba(139,26,46,.04)':'#FFFFFF',cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",transition:'all .2s',display:'flex',alignItems:'flex-start',gap:11}}>
+                <div style={{width:32,height:32,borderRadius:8,background:on?'#8B1A2E':'#FDFAF4',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={on?'#fff':'#8B1A2E'} strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:o.icon}}/>
                 </div>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontWeight:700,fontSize:13.5,color:'#0A0806',marginBottom:2}}>{o.title}</div>
-                  <div style={{fontSize:11.5,color:'#8A7B6E',lineHeight:1.4}}>{o.sub}</div>
+                  <div style={{fontWeight:700,fontSize:13.5,color:'#080C14',marginBottom:2}}>{o.title}</div>
+                  <div style={{fontSize:11.5,color:'#3D5066',lineHeight:1.4}}>{o.sub}</div>
                 </div>
                 {on && <div style={{width:16,height:16,borderRadius:'50%',background:'#8B1A2E',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,marginTop:4}}>
                   <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="#fff" strokeWidth="2.3" strokeLinecap="round"><path d="M2 6l3 3 5-5"/></svg>
@@ -10442,13 +10450,13 @@ function ConsultForm({ P }) {
               const on = form.venue === v.id
               return (
                 <button key={v.id} type="button" onClick={() => set('venue', v.id)}
-                  style={{textAlign:'left',padding:'12px 14px',border:`1.5px solid ${on?'#8B1A2E':'#DDD5C6'}`,borderRadius:8,background:on?'#fff':'#FEFDFB',cursor:'pointer',fontFamily:"'Syne',sans-serif",display:'flex',alignItems:'flex-start',gap:10,transition:'all .2s'}}>
-                  <div style={{width:28,height:28,borderRadius:6,background:on?'#8B1A2E':'#F7F3ED',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                  style={{textAlign:'left',padding:'12px 14px',border:`1.5px solid ${on?'#8B1A2E':'#F0E8D4'}`,borderRadius:8,background:on?'#fff':'#FFFFFF',cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",display:'flex',alignItems:'flex-start',gap:10,transition:'all .2s'}}>
+                  <div style={{width:28,height:28,borderRadius:6,background:on?'#8B1A2E':'#FDFAF4',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={on?'#fff':'#8B1A2E'} strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:v.icon}}/>
                   </div>
                   <div>
-                    <div style={{fontWeight:700,fontSize:13,color:'#0A0806',marginBottom:2}}>{v.title}</div>
-                    <div style={{fontSize:11,color:'#8A7B6E',lineHeight:1.4}}>{v.sub}</div>
+                    <div style={{fontWeight:700,fontSize:13,color:'#080C14',marginBottom:2}}>{v.title}</div>
+                    <div style={{fontSize:11,color:'#3D5066',lineHeight:1.4}}>{v.sub}</div>
                   </div>
                 </button>
               )
@@ -10458,7 +10466,7 @@ function ConsultForm({ P }) {
             <div style={{marginTop:14}}>
               <label className="consult-label">Home visit address *</label>
               <input className="consult-input" placeholder="Estate, street, house number, nearest landmark…" value={form.address} onChange={e=>set('address',e.target.value)}/>
-              <div style={{fontSize:11.5,color:'#8A7B6E',marginTop:6,lineHeight:1.5}}>
+              <div style={{fontSize:11.5,color:'#3D5066',marginTop:6,lineHeight:1.5}}>
                 Home visits are available within the Nairobi metro area. We'll confirm feasibility when we call you back.
               </div>
             </div>
@@ -10484,7 +10492,7 @@ function ConsultForm({ P }) {
           Book Free Consultation
         </>}
       </button>
-      <p style={{fontSize:12,color:'#ADA094',textAlign:'center',marginTop:14}}>No commitment · Our team contacts you within 2 hours · 100% free</p>
+      <p style={{fontSize:12,color:'#B0A490',textAlign:'center',marginTop:14}}>No commitment · Our team contacts you within 2 hours · 100% free</p>
     </div>
   )
 }
@@ -10556,8 +10564,8 @@ function ContactForm() {
       <div style={{width:56,height:56,borderRadius:'50%',background:'rgba(139,26,46,.08)',border:'2px solid rgba(139,26,46,.2)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px'}}>
         <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#8B1A2E" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1.4rem',color:'#0A0806',marginBottom:8}}>Message Sent!</div>
-      <p style={{fontSize:14,color:'#6B5E52',lineHeight:1.7}}>We will reply to <strong>{form.email}</strong> within 2 working hours.</p>
+      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#080C14',marginBottom:8}}>Message Sent!</div>
+      <p style={{fontSize:14,color:'#2E3D55',lineHeight:1.7}}>We will reply to <strong>{form.email}</strong> within 2 working hours.</p>
     </div>
   )
 
@@ -10617,11 +10625,11 @@ function Footer({ P }) {
           <div>
             <div className="ft-ch">Contact</div>
             <div className="ft-ct">
-              <a href="mailto:hellosmartious@gmail.com" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+              <a href="mailto:hellosmartious@gmail.com" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#C9973A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                 hellosmartious@gmail.com
               </a>
-              <a href="tel:+254745021212" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#F0CC5A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
+              <a href="tel:+254745021212" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#C9973A'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 +254 745 021 212
               </a>
