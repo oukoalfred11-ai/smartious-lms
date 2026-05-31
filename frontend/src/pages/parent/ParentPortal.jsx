@@ -7,52 +7,93 @@ const I = (d) => <svg width="18" height="18" fill="none" viewBox="0 0 24 24" str
 const PAGES = {
   dashboard:'Dashboard', progress:'Academic Progress', lessons:'Live Lessons',
   programme:'Programme Details', messages:'Messages', tutor:'Tutor & Advisor',
-  payments:'Fees & Payments', learning:'Resources & Articles', documents:'Documents', mshauri:'Mshauri AI',
+  payments:'Fees & Payments', mshauri:'Mshauri AI',
 }
-
 const mCol = (pct) => pct >= 70 ? 'var(--g600)' : pct >= 50 ? 'var(--a600)' : 'var(--r500)'
 
 // ── PROGRESS RING — bright golden-yellow donut ─────────────
-// A small SVG ring showing a single percentage. Used per-subject
-// on the parent portal. Gold arc on a soft track, % in the centre.
 function ProgressRing({ pct = 0, size = 92, stroke = 9, label, sublabel }) {
   const r = (size - stroke) / 2
   const circ = 2 * Math.PI * r
   const clamped = Math.max(0, Math.min(100, pct))
   const dash = (clamped / 100) * circ
-
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, width:size+24 }}>
       <div style={{ position:'relative', width:size, height:size }}>
         <svg width={size} height={size} style={{ transform:'rotate(-90deg)' }}>
-          {/* track */}
-          <circle cx={size/2} cy={size/2} r={r}
-            fill="none" stroke="#F1ECDD" strokeWidth={stroke} />
-          {/* gold progress arc */}
-          <circle cx={size/2} cy={size/2} r={r}
-            fill="none" stroke="#F5C518" strokeWidth={stroke}
-            strokeLinecap="round"
-            strokeDasharray={`${dash} ${circ - dash}`}
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#F1ECDD" strokeWidth={stroke} />
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#F5C518" strokeWidth={stroke}
+            strokeLinecap="round" strokeDasharray={`${dash} ${circ - dash}`}
             style={{ transition:'stroke-dasharray 1s ease' }} />
         </svg>
-        <div style={{
-          position:'absolute', inset:0,
-          display:'flex', alignItems:'center', justifyContent:'center',
-          flexDirection:'column',
-        }}>
-          <span className="mono" style={{ fontSize:size*0.26, fontWeight:700, color:'var(--s900)', lineHeight:1 }}>
-            {clamped}%
-          </span>
-          {sublabel && (
-            <span style={{ fontSize:9.5, color:'var(--s400)', marginTop:2 }}>{sublabel}</span>
-          )}
+        <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column'}}>
+          <span className="mono" style={{ fontSize:size*0.26, fontWeight:700, color:'var(--s900)', lineHeight:1 }}>{clamped}%</span>
+          {sublabel && <span style={{ fontSize:9.5, color:'var(--s400)', marginTop:2 }}>{sublabel}</span>}
         </div>
       </div>
-      {label && (
-        <div style={{ fontSize:12, fontWeight:600, color:'var(--s700)', textAlign:'center', lineHeight:1.3, maxWidth:size+20 }}>
-          {label}
+      {label && <div style={{ fontSize:12, fontWeight:600, color:'var(--s700)', textAlign:'center', lineHeight:1.3, maxWidth:size+20 }}>{label}</div>}
+    </div>
+  )
+}
+
+// ── Initials helper ──
+const initials = (name) => (name || '').split(/\s+/).filter(Boolean).slice(0,2).map(w => w[0]?.toUpperCase()).join('') || '?'
+
+// ── TeacherCard — renders teacher profile like the landing page ──
+// Used by Programme Details and Tutor & Advisor. Shows avatar / name /
+// title / specialisations / years / quals / bio, plus a button that
+// opens the Compose page pre-filled to that teacher.
+function TeacherCard({ teacher, onEmail }) {
+  if (!teacher) return null
+  const name = teacher.name || `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim() || 'Teacher'
+  const quals = Array.isArray(teacher.qualifications) ? teacher.qualifications : []
+  const specs = Array.isArray(teacher.specializations) ? teacher.specializations : []
+  return (
+    <div className="card" style={{display:'flex',gap:14,alignItems:'flex-start',flexWrap:'wrap'}}>
+      {teacher.avatar ? (
+        <img src={teacher.avatar} alt={name}
+          style={{width:72,height:72,borderRadius:'50%',objectFit:'cover',flexShrink:0,border:'2px solid var(--border)'}}/>
+      ) : (
+        <div style={{width:72,height:72,borderRadius:'50%',background:'#3B82F620',color:'#3B82F6',
+          display:'flex',alignItems:'center',justifyContent:'center',
+          fontSize:22,fontWeight:700,fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>
+          {initials(name)}
         </div>
       )}
+      <div style={{flex:1,minWidth:200}}>
+        <div className="serif" style={{fontSize:18,color:'var(--s900)',marginBottom:2}}>{name}</div>
+        {teacher.jobTitle && (
+          <div style={{fontSize:13,color:'var(--s500)',marginBottom:6}}>
+            {teacher.jobTitle}
+            {teacher.yearsOfExperience > 0 && ` · ${teacher.yearsOfExperience} years experience`}
+          </div>
+        )}
+        {(specs.length > 0 || teacher.subjectName) && (
+          <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:teacher.bio?8:0}}>
+            {teacher.subjectName && (
+              <span style={{background:'var(--b50)',color:'var(--b700)',fontSize:11,fontWeight:700,padding:'3px 9px',borderRadius:99}}>
+                {teacher.subjectName}{teacher.curriculum ? ` · ${teacher.curriculum}` : ''}
+              </span>
+            )}
+            {specs.slice(0,4).map((s,i) => (
+              <span key={i} style={{background:'var(--bg)',color:'var(--s700)',fontSize:11,fontWeight:600,padding:'3px 9px',borderRadius:99,border:'1px solid var(--border)'}}>{s}</span>
+            ))}
+          </div>
+        )}
+        {teacher.bio && (
+          <div style={{fontSize:12.5,color:'var(--s600)',lineHeight:1.6,marginBottom:8}}>{teacher.bio}</div>
+        )}
+        {quals.length > 0 && (
+          <div style={{fontSize:11.5,color:'var(--s400)',marginBottom:10}}>
+            <strong style={{color:'var(--s600)'}}>Qualifications:</strong> {quals.join(' · ')}
+          </div>
+        )}
+        {teacher.email && (
+          <button className="btn btn-p btn-sm" onClick={() => onEmail(teacher)}>
+            Email {name.split(' ')[0]}
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -62,28 +103,46 @@ export default function ParentPortal() {
   const store = useStore()
   const { user } = useAuth()
   const [page, setPage] = useState('dashboard')
-  const [msgInput, setMsgInput] = useState('')
-  const [activeThread, setActiveThread] = useState(null)
+
   const [aiMsgs, setAiMsgs] = useState([
     {role:'ai', text:"Habari! I am Mshauri. Ask me anything about your child's progress, the curriculum, or how to support their learning at home."}
   ])
   const [aiInp, setAiInp] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
-  const [payModal, setPayModal] = useState(false)
-  const [payMethod, setPayMethod] = useState('M-Pesa')
-  const [payRef, setPayRef] = useState('')
 
   const parentName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Parent'
 
   // ── Children + selected child ──────────────────────────
-  const [children, setChildren]       = useState([])
+  const [children, setChildren] = useState([])
   const [childrenLoading, setChildrenLoading] = useState(true)
   const [selectedChildId, setSelectedChildId] = useState(null)
 
   // Per-child real data
-  const [overview, setOverview]       = useState(null)
-  const [progress, setProgress]       = useState(null)
+  const [overview, setOverview] = useState(null)
+  const [progress, setProgress] = useState(null)
   const [childLoading, setChildLoading] = useState(false)
+
+  // Live classes for selected child
+  const [liveClasses, setLiveClasses] = useState([])
+  const [liveLoading, setLiveLoading] = useState(false)
+
+  // Teachers (resolved profile data for the child's allocated teachers)
+  const [teachers, setTeachers] = useState([])
+  const [teachersLoading, setTeachersLoading] = useState(false)
+
+  // ── Compose-message state ──────────────────────────────
+  const [composeOpen, setComposeOpen] = useState(false)
+  const [composeRecipients, setComposeRecipients] = useState([]) // [{email, name}]
+  const [composeSubject, setComposeSubject] = useState('')
+  const [composeBody, setComposeBody] = useState('')
+  const [composeSending, setComposeSending] = useState(false)
+  const [messageHistory, setMessageHistory] = useState([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+
+  // ── Payment state ──────────────────────────────────────
+  const [payAmount, setPayAmount] = useState('')
+  const [payDescription, setPayDescription] = useState('')
+  const [payLoading, setPayLoading] = useState(false)
 
   // Load the parent's children once
   useEffect(() => {
@@ -101,7 +160,7 @@ export default function ParentPortal() {
 
   // Load overview + progress whenever the selected child changes
   useEffect(() => {
-    if (!selectedChildId) { setOverview(null); setProgress(null); return }
+    if (!selectedChildId) { setOverview(null); setProgress(null); setLiveClasses([]); setTeachers([]); return }
     setChildLoading(true)
     Promise.all([
       api.get('/parents/child/' + selectedChildId + '/overview'),
@@ -115,6 +174,101 @@ export default function ParentPortal() {
       .finally(() => setChildLoading(false))
   }, [selectedChildId])
 
+  // Load live classes for selected child
+  useEffect(() => {
+    if (!selectedChildId) return
+    if (page !== 'lessons' && page !== 'dashboard') return
+    setLiveLoading(true)
+    // Try parent-scoped endpoint first, then fall back to a generic filter.
+    // We use a defensive try-chain so a missing endpoint doesn't crash the page.
+    api.get('/parents/child/' + selectedChildId + '/live-classes')
+      .then(({data}) => {
+        if (data?.success) {
+          setLiveClasses(data.data?.classes || data.data || [])
+        } else {
+          setLiveClasses([])
+        }
+      })
+      .catch(() => {
+        // Endpoint may not exist yet — try the timetable endpoint as fallback
+        api.get('/timetable/student/' + selectedChildId)
+          .then(({data}) => setLiveClasses(data?.data?.entries || data?.entries || []))
+          .catch(() => setLiveClasses([]))
+      })
+      .finally(() => setLiveLoading(false))
+  }, [selectedChildId, page])
+
+  // Load teacher profiles for the allocated teachers (Programme + Tutor pages)
+  useEffect(() => {
+    if (!overview || !Array.isArray(overview.allocations) || overview.allocations.length === 0) {
+      setTeachers([]); return
+    }
+    setTeachersLoading(true)
+    // Each allocation should have a teacherId. Fetch profiles in one call if
+    // a bulk endpoint exists, else fall back to allocations data shape.
+    const teacherIds = [...new Set(overview.allocations.map(a => a.teacherId).filter(Boolean))]
+    if (teacherIds.length === 0) {
+      // No teacher IDs — use whatever profile data is already on the allocation
+      const fromAlloc = overview.allocations.map(a => ({
+        _id: a.teacherId,
+        name: a.teacher,
+        subjectName: a.subjectName,
+        curriculum: a.curriculum,
+        email: a.teacherEmail,
+        avatar: a.teacherAvatar,
+        jobTitle: a.teacherJobTitle,
+        bio: a.teacherBio,
+        qualifications: a.teacherQualifications,
+        specializations: a.teacherSpecializations,
+        yearsOfExperience: a.teacherYearsOfExperience,
+      }))
+      setTeachers(fromAlloc)
+      setTeachersLoading(false)
+      return
+    }
+    api.post('/parents/teachers/by-ids', { ids: teacherIds })
+      .then(({data}) => {
+        if (data?.success) {
+          // Merge with allocation data so we keep subject/curriculum context
+          const profiles = data.data?.teachers || []
+          const merged = overview.allocations.map(a => {
+            const p = profiles.find(t => String(t._id) === String(a.teacherId)) || {}
+            return {
+              ...p,
+              _id: a.teacherId,
+              name: p.firstName ? `${p.firstName} ${p.lastName || ''}`.trim() : (a.teacher || 'Teacher'),
+              subjectName: a.subjectName,
+              curriculum: a.curriculum,
+            }
+          })
+          setTeachers(merged)
+        }
+      })
+      .catch(() => {
+        // Bulk endpoint not available — use the allocation data only
+        const fromAlloc = overview.allocations.map(a => ({
+          _id: a.teacherId,
+          name: a.teacher,
+          subjectName: a.subjectName,
+          curriculum: a.curriculum,
+        }))
+        setTeachers(fromAlloc)
+      })
+      .finally(() => setTeachersLoading(false))
+  }, [overview])
+
+  // Load message history when Messages page opens
+  useEffect(() => {
+    if (page !== 'messages') return
+    setHistoryLoading(true)
+    api.get('/communication/parent/history')
+      .then(({data}) => {
+        if (data?.success) setMessageHistory(data.data?.history || [])
+      })
+      .catch(() => setMessageHistory([]))
+      .finally(() => setHistoryLoading(false))
+  }, [page])
+
   const selectedChild = children.find(c => c._id === selectedChildId) || null
 
   // Subjects from real progress data
@@ -124,13 +278,7 @@ export default function ParentPortal() {
   }))
   const avgScore = progress?.overallPct || 0
 
-  const mCol2 = (pct) => pct >= 80 ? 'var(--g600)' : pct >= 60 ? 'var(--b600)' : pct >= 40 ? 'var(--a600)' : 'var(--r500)'
-
-  // ── Store-derived data (messages/announcements — not yet real) ──
-  const myThreads = store.getThreads('parent', parentName)
-  const unread    = myThreads.reduce((s,t) => s+t.unread, 0)
   const announcements = store.getAnnouncements('parent')
-  const publishedArticles = store.articles.filter(a => a.status === 'Published').slice(0, 6)
 
   // ── Mshauri ───────────────────────────────────────────
   const sendAi = async () => {
@@ -141,44 +289,176 @@ export default function ParentPortal() {
       const {data} = await api.post('/auth/mshauri', { message: q })
       setAiMsgs(m => [...m, {role:'ai', text: data.reply || 'Let me look into that for you.'}])
     } catch {
-      const m2 = q.toLowerCase().includes('chemistry')
-        ? "Amara's Chemistry score of 41% needs attention. Recommend 20-min daily revision sessions and using the periodic table flashcards in Resources."
-        : "Overall Amara is progressing well. English is her strongest subject (79%). Mathematics is on track. Chemistry and Physics need extra support. Would you like a weekly study plan?"
-      setAiMsgs(m => [...m, {role:'ai', text:m2}])
+      setAiMsgs(m => [...m, {role:'ai', text:"Sorry, I couldn't reach the tutoring service just now. Please try again in a moment."}])
     }
     setAiLoading(false)
   }
 
-  // ── Reply to teacher ──────────────────────────────────
-  const sendReply = (thread) => {
-    if (!msgInput.trim()) return
-    const last = thread.messages[thread.messages.length - 1]
-    store.sendMessage({
-      from:     'Janet Osei',
-      fromRole: 'parent',
-      to:       last.from === 'Janet Osei' ? last.to : last.from,
-      toRole:   last.from === 'Janet Osei' ? last.toRole : last.fromRole,
-      avatar:   'JO',
-      avatarCol:'#8B5CF6',
-      subject:  'Re: ' + (last.subject || '').replace(/^Re: /, ''),
-      body:     msgInput,
-      thread:   thread.id,
-    })
-    setMsgInput('')
-    toast.ok('Reply sent')
+  // ── Open Compose with a pre-filled teacher recipient ──
+  const emailTeacher = (teacher) => {
+    if (!teacher || !teacher.email) {
+      toast.error('No email on file for this teacher.')
+      return
+    }
+    const tName = teacher.name || `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim()
+    setComposeRecipients([{email: teacher.email, name: tName}])
+    setComposeSubject(selectedChild ? `Re: ${selectedChild.name}` : '')
+    setComposeBody(`Dear ${tName.split(' ')[0] || 'Teacher'},\n\n`)
+    setComposeOpen(true)
+    setPage('messages')
   }
 
-  // ── Payment ───────────────────────────────────────────
-  const handlePayment = () => {
-    if (!payRef.trim()) { toast.error('Enter your payment reference'); return }
-    store.addPayment({
-      desc:   'Premium Plan — April 2026',
-      amount: 'KES 1,499',
-      method: payMethod,
-      ref:    payRef,
-    })
-    toast.ok('Payment confirmed! Reference: ' + payRef)
-    setPayModal(false); setPayRef('')
+  // ── Send message ──────────────────────────────────────
+  const sendMessage = async () => {
+    if (!composeSubject.trim()) { toast.error('Subject is required'); return }
+    if (!composeBody.trim())    { toast.error('Message body is required'); return }
+    if (composeRecipients.length === 0) { toast.error('Pick at least one recipient'); return }
+    setComposeSending(true)
+    try {
+      const {data} = await api.post('/communication/parent/send', {
+        subject: composeSubject.trim(),
+        body: composeBody,
+        recipientEmails: composeRecipients,
+        childId: selectedChildId,
+      })
+      if (data?.success) {
+        toast.ok(data.message || 'Message sent.')
+        setComposeOpen(false); setComposeRecipients([]); setComposeSubject(''); setComposeBody('')
+        // Refresh history
+        api.get('/communication/parent/history')
+          .then(({data}) => { if (data?.success) setMessageHistory(data.data?.history || []) })
+          .catch(() => {})
+      } else {
+        toast.error(data?.message || 'Could not send message.')
+      }
+    } catch (e) {
+      const msg = e?.response?.data?.message || 'Could not send message. Please try again.'
+      toast.error(msg)
+    }
+    setComposeSending(false)
+  }
+
+  // ── Paystack inline payment ───────────────────────────
+  // Uses the Paystack popup that's already on the landing page.
+  // We load it lazily if not already loaded.
+  const loadPaystackScript = () => new Promise((resolve, reject) => {
+    if (window.PaystackPop) return resolve(true)
+    const existing = document.querySelector('script[src*="paystack"]')
+    if (existing) {
+      existing.addEventListener('load', () => resolve(true))
+      existing.addEventListener('error', () => reject(new Error('Paystack failed to load')))
+      return
+    }
+    const s = document.createElement('script')
+    s.src = 'https://js.paystack.co/v1/inline.js'
+    s.async = true
+    s.onload = () => resolve(true)
+    s.onerror = () => reject(new Error('Paystack failed to load'))
+    document.head.appendChild(s)
+  })
+
+  const startPaystack = async () => {
+    const amt = parseInt(payAmount, 10)
+    if (!amt || amt < 1) { toast.error('Enter an amount'); return }
+    if (!user?.email) { toast.error('Your account has no email on file. Contact admin.'); return }
+    setPayLoading(true)
+    try {
+      // Ask the backend to initialise the transaction (gets a reference + verifies amount).
+      // If your backend doesn't have this endpoint yet, the catch falls back to client-side inline.
+      let paystackKey = ''
+      let reference = ''
+      try {
+        const {data} = await api.post('/payments/paystack/initiate', {
+          amount: amt,
+          email: user.email,
+          description: payDescription || 'Fee payment',
+          childId: selectedChildId,
+        })
+        if (data?.success) {
+          paystackKey = data.publicKey || ''
+          reference = data.reference || ''
+        }
+      } catch {
+        // Backend endpoint missing — fall back to client-only inline (less secure
+        // but works while the backend route is being built).
+        paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || ''
+      }
+
+      if (!paystackKey) {
+        toast.error('Payment is not yet configured. Please contact admin to enable Paystack.')
+        setPayLoading(false)
+        return
+      }
+
+      await loadPaystackScript()
+
+      const handler = window.PaystackPop.setup({
+        key: paystackKey,
+        email: user.email,
+        amount: amt * 100, // Paystack uses smallest currency unit
+        currency: 'KES',
+        ref: reference || ('SM-' + Date.now()),
+        metadata: {
+          custom_fields: [
+            { display_name: 'Parent', variable_name: 'parent_name', value: parentName },
+            { display_name: 'Child', variable_name: 'child', value: selectedChild?.name || '' },
+            { display_name: 'Description', variable_name: 'description', value: payDescription || '' },
+          ],
+        },
+        callback: function(response) {
+          // Verify server-side
+          api.post('/payments/paystack/verify', { reference: response.reference })
+            .then(({data}) => {
+              if (data?.success) {
+                toast.ok('Payment confirmed! Reference: ' + response.reference)
+                store.addPayment({
+                  desc: payDescription || 'Fee payment',
+                  amount: 'KES ' + amt.toLocaleString(),
+                  method: 'Paystack',
+                  ref: response.reference,
+                })
+                setPayAmount(''); setPayDescription('')
+              } else {
+                toast.error('Payment received but verification failed. Contact admin with reference: ' + response.reference)
+              }
+            })
+            .catch(() => {
+              // Verification endpoint missing — still record locally so the user has the ref
+              toast.ok('Payment ref: ' + response.reference + ' — verification pending.')
+              store.addPayment({
+                desc: payDescription || 'Fee payment',
+                amount: 'KES ' + amt.toLocaleString(),
+                method: 'Paystack',
+                ref: response.reference,
+              })
+              setPayAmount(''); setPayDescription('')
+            })
+        },
+        onClose: function() {
+          toast.info('Payment cancelled.')
+        },
+      })
+      handler.openIframe()
+    } catch (e) {
+      toast.error(e?.message || 'Could not start payment.')
+    }
+    setPayLoading(false)
+  }
+
+  // ── Format a live-class entry into a consistent shape ──
+  const formatLiveClass = (c) => {
+    // The backend may return different shapes from /live-classes vs /timetable
+    return {
+      id: c._id || c.id,
+      title: c.title || c.subject || c.subjectName || 'Lesson',
+      teacher: c.teacherName || c.teacher || (c.teacherId && c.teacherId.firstName ? `${c.teacherId.firstName} ${c.teacherId.lastName}` : ''),
+      startTime: c.startTime || c.startsAt || c.start || '',
+      endTime: c.endTime || c.endsAt || c.end || '',
+      dayOfWeek: c.dayOfWeek || '',
+      meetingLink: c.meetingLink || c.zoomUrl || c.joinUrl || '',
+      status: c.status || (c.isLive ? 'live' : 'scheduled'),
+      isLive: c.isLive || c.status === 'live',
+    }
   }
 
   const NAV = [
@@ -186,11 +466,9 @@ export default function ParentPortal() {
     {id:'progress',   label:'Academic Progress',  svg:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'},
     {id:'lessons',    label:'Live Lessons',        svg:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>', live:true},
     {id:'programme',  label:'Programme Details',   svg:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>'},
-    {id:'messages',   label:'Messages',            svg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>', badge: unread > 0 ? String(unread) : null},
+    {id:'messages',   label:'Messages',            svg:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'},
     {id:'tutor',      label:'Tutor & Advisor',     svg:'<circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/>'},
     {id:'payments',   label:'Fees & Payments',     svg:'<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>'},
-    {id:'learning',   label:'Articles & Resources',svg:'<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>'},
-    {id:'documents',  label:'Documents',           svg:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>'},
     {id:'mshauri',    label:'Mshauri AI',          svg:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>'},
   ]
 
@@ -207,11 +485,10 @@ export default function ParentPortal() {
             <div key={item.id} className={`nav-item${page===item.id?' active':''}`} onClick={()=>setPage(item.id)}>
               <div className="nav-icon">{I(item.svg)}</div>
               <span className="sb-lbl">{item.label}</span>
-              {item.badge && <span className="sb-badge">{item.badge}</span>}
               {item.live && <div className="sb-live-dot"/>}
             </div>
           ))}
-          <div className="sb-sec">Finance & Learning</div>
+          <div className="sb-sec">Finance & AI</div>
           {NAV.slice(6).map(item => (
             <div key={item.id} className={`nav-item${page===item.id?' active':''}`} onClick={()=>setPage(item.id)}>
               <div className="nav-icon">{I(item.svg)}</div>
@@ -253,18 +530,16 @@ export default function ParentPortal() {
         <div className="topbar">
           <div className="tb-title">{PAGES[page]}</div>
           <div className="tb-right">
-            <button className="btn btn-s btn-sm" onClick={()=>setPage('messages')}>
-              Messages {unread > 0 && <span className="sb-badge" style={{background:'var(--b700)',marginLeft:4}}>{unread}</span>}
-            </button>
+            <button className="btn btn-s btn-sm" onClick={()=>setPage('messages')}>Messages</button>
           </div>
         </div>
+
         <div className="content" style={{animation:'fadeIn .25s ease'}}>
 
           {/* ── DASHBOARD ── */}
           {page==='dashboard' && (
             <div>
               <div style={{marginBottom:20}}><div className="sec-tag">Welcome back</div><h1 className="serif" style={{fontSize:28,color:'var(--s900)'}}>Hello, <em style={{color:'var(--b700)'}}>{user?.firstName || parentName}</em></h1></div>
-
               {childrenLoading ? (
                 <div className="card" style={{padding:40,textAlign:'center',color:'var(--s400)'}}>Loading…</div>
               ) : children.length === 0 ? (
@@ -276,10 +551,9 @@ export default function ParentPortal() {
                 </div>
               ) : (
                 <>
-                  {/* Child profile banner */}
                   <div style={{background:'linear-gradient(135deg,#7D1025,#5A0B1B)',borderRadius:'var(--rxl)',padding:'24px 28px',marginBottom:24,display:'flex',gap:20,flexWrap:'wrap',alignItems:'center'}}>
                     <div style={{width:72,height:72,borderRadius:'50%',background:'rgba(255,255,255,.15)',border:'3px solid rgba(255,255,255,.3)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,fontWeight:700,color:'#fff',fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>
-                      {(selectedChild?.name||'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]?.toUpperCase()).join('') || 'S'}
+                      {initials(selectedChild?.name)}
                     </div>
                     <div style={{flex:1}}>
                       <div style={{fontSize:22,fontWeight:700,color:'#fff',marginBottom:4}}>{selectedChild?.name}</div>
@@ -300,33 +574,24 @@ export default function ParentPortal() {
                       <button className="btn" style={{background:'rgba(255,255,255,.9)',color:'#7D1025',fontWeight:700,borderColor:'transparent'}} onClick={()=>setPage('progress')}>Full Progress →</button>
                     </div>
                   </div>
-
                   {childLoading ? (
                     <div className="card" style={{padding:30,textAlign:'center',color:'var(--s400)'}}>Loading progress…</div>
                   ) : (
                     <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:20,marginTop:8}}>
                       <div className="card">
-                        <div className="chdr">
-                          <div className="ctitle">Subject Progress</div>
-                          <button className="btn btn-g btn-sm" onClick={()=>setPage('progress')}>Full Report</button>
-                        </div>
+                        <div className="chdr"><div className="ctitle">Subject Progress</div><button className="btn btn-g btn-sm" onClick={()=>setPage('progress')}>Full Report</button></div>
                         {subjects.length === 0 ? (
-                          <div style={{ padding:'20px 0', color:'var(--s400)', fontSize:13, textAlign:'center' }}>
-                            No subjects with progress yet. Progress appears as teachers mark lessons mastered.
-                          </div>
+                          <div style={{ padding:'20px 0', color:'var(--s400)', fontSize:13, textAlign:'center' }}>No subjects with progress yet.</div>
                         ) : (
                           <div style={{ display:'flex', flexWrap:'wrap', gap:14, justifyContent:'center', paddingTop:6 }}>
-                            {subjects.map(s => (
-                              <ProgressRing key={s.name} pct={s.score} label={s.name}
-                                sublabel={`${s.mastered}/${s.total}`} />
-                            ))}
+                            {subjects.map(s => <ProgressRing key={s.name} pct={s.score} label={s.name} sublabel={`${s.mastered}/${s.total}`} />)}
                           </div>
                         )}
                       </div>
                       <div style={{display:'flex',flexDirection:'column',gap:14}}>
                         <div className="card">
                           <div className="ctitle" style={{marginBottom:12}}>Quick Actions</div>
-                          {[['View Progress Report','progress'],['Programme Details','programme'],['Ask Mshauri AI','mshauri']].map(([l,p]) => (
+                          {[['Live Lessons','lessons'],['Programme & Teachers','programme'],['Ask Mshauri AI','mshauri'],['Pay Fees','payments']].map(([l,p]) => (
                             <button key={l} className="btn btn-s btn-sm" style={{width:'100%',justifyContent:'flex-start',marginBottom:6}} onClick={()=>setPage(p)}>{l}</button>
                           ))}
                         </div>
@@ -338,20 +603,17 @@ export default function ParentPortal() {
             </div>
           )}
 
-          {/* ── PROGRESS ── */}
+          {/* ── PROGRESS ── (unchanged from existing) ── */}
           {page==='progress' && (
             <div>
               <div style={{marginBottom:20}}>
                 <div className="sec-tag">{selectedChild ? selectedChild.name + (overview?.child?.curriculum ? ' · ' + overview.child.curriculum : '') : 'Academic Progress'}</div>
                 <h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Academic <em style={{color:'var(--b700)'}}>Progress</em></h2>
               </div>
-
               {childrenLoading || childLoading ? (
                 <div className="card" style={{padding:40,textAlign:'center',color:'var(--s400)'}}>Loading…</div>
               ) : !selectedChild ? (
-                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s500)'}}>
-                  No child linked to your account yet.
-                </div>
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s500)'}}>No child linked to your account yet.</div>
               ) : (
                 <>
                   <div className="kpi-grid" style={{marginBottom:24}}>
@@ -364,21 +626,14 @@ export default function ParentPortal() {
                       <div key={i} className="kpi"><div className="kpi-v">{k.v}</div><div className="kpi-l">{k.l}</div><div className="kpi-d" style={{color:k.dc}}>{k.d}</div></div>
                     ))}
                   </div>
-
                   <div className="card">
                     <div className="ctitle" style={{marginBottom:14}}>Subject Breakdown</div>
                     {(progress?.subjects || []).length === 0 ? (
-                      <div style={{padding:'20px 0',color:'var(--s400)',fontSize:13,textAlign:'center'}}>
-                        No subject progress yet. As teachers mark lessons mastered, your child's progress will appear here.
-                      </div>
+                      <div style={{padding:'20px 0',color:'var(--s400)',fontSize:13,textAlign:'center'}}>No subject progress yet.</div>
                     ) : (
                       <>
-                        {/* Ring grid — visual summary */}
                         <div style={{ display:'flex', flexWrap:'wrap', gap:16, justifyContent:'center', paddingBottom:18, marginBottom:8, borderBottom:'1px solid var(--border)' }}>
-                          {(progress?.subjects || []).map((s,i) => (
-                            <ProgressRing key={i} pct={s.progressPct} label={s.name}
-                              sublabel={`${s.masteredLessons}/${s.totalLessons}`} />
-                          ))}
+                          {(progress?.subjects || []).map((s,i) => <ProgressRing key={i} pct={s.progressPct} label={s.name} sublabel={`${s.masteredLessons}/${s.totalLessons}`} />)}
                         </div>
                         <table className="tbl">
                           <thead><tr><th>Subject</th><th>Curriculum</th><th>Lessons Mastered</th><th>Progress</th><th>Status</th></tr></thead>
@@ -402,260 +657,305 @@ export default function ParentPortal() {
             </div>
           )}
 
-          {/* ── MESSAGES ── */}
-          {page==='messages' && (
+          {/* ── LIVE LESSONS — real data with join buttons ── */}
+          {page==='lessons' && (
             <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Communication</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Messages</h2></div>
-              <div style={{display:'grid',gridTemplateColumns:'240px 1fr',gap:20,height:560}}>
-                <div className="card" style={{padding:0,overflow:'hidden'}}>
-                  <div style={{padding:'12px 14px',borderBottom:'1px solid var(--border)',fontWeight:700,fontSize:13.5}}>Conversations</div>
-                  {myThreads.length === 0 ? (
-                    <div style={{padding:20,color:'var(--s400)',fontSize:13}}>No messages yet.</div>
-                  ) : myThreads.map((thread,i) => {
-                    const last = thread.messages[thread.messages.length-1]
-                    const other = last.from === 'Janet Osei' ? last.to : last.from
-                    const isActive = activeThread?.id === thread.id
+              <div style={{marginBottom:20}}><div className="sec-tag">Live Classes</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Live Lessons</h2></div>
+              {!selectedChild ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s500)'}}>No child linked yet.</div>
+              ) : liveLoading ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s400)'}}>Loading classes…</div>
+              ) : liveClasses.length === 0 ? (
+                <div className="card" style={{padding:'48px 32px',textAlign:'center'}}>
+                  <div className="serif" style={{fontSize:18,color:'var(--s900)',marginBottom:8}}>No live classes scheduled yet</div>
+                  <div style={{fontSize:13.5,color:'var(--s500)',maxWidth:420,margin:'0 auto',lineHeight:1.6}}>
+                    Your child's teachers haven't published a live class schedule yet. Once they do, classes will appear here and you'll be able to join as a silent monitor.
+                  </div>
+                </div>
+              ) : (
+                <div className="card">
+                  <div className="ctitle" style={{marginBottom:14}}>{selectedChild.name}'s Schedule</div>
+                  {liveClasses.map(formatLiveClass).map((c,i) => {
+                    const live = c.isLive || c.status === 'live'
+                    const done = c.status === 'completed' || c.status === 'done'
                     return (
-                      <div key={i} onClick={() => { setActiveThread(thread); thread.messages.forEach(m => store.markRead(m.id)) }}
-                        style={{padding:'12px 14px',borderBottom:'1px solid var(--border)',cursor:'pointer',background:isActive?'var(--b50)':'transparent',borderLeft:isActive?'3px solid var(--b600)':'3px solid transparent'}}>
-                        <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                          <div style={{width:32,height:32,borderRadius:'50%',background:last.avatarCol+'20',color:last.avatarCol,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'JetBrains Mono,monospace',fontSize:11,fontWeight:700,flexShrink:0}}>{last.avatar}</div>
-                          <div style={{flex:1}}>
-                            <div style={{display:'flex',justifyContent:'space-between'}}><span style={{fontWeight:700,fontSize:13}}>{other}</span>{thread.unread>0&&<span className="sb-badge">{thread.unread}</span>}</div>
-                            <div style={{fontSize:11,color:'var(--s400)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{last.subject}</div>
+                      <div key={c.id || i} style={{display:'flex',gap:14,padding:'12px 0',borderBottom:'1px solid var(--border)',flexWrap:'wrap',alignItems:'center'}}>
+                        {c.dayOfWeek && <span className="mono" style={{fontWeight:700,color:'var(--b700)',width:42,flexShrink:0}}>{c.dayOfWeek.slice(0,3)}</span>}
+                        <div style={{flex:1,minWidth:200}}>
+                          <div style={{fontWeight:700,fontSize:14}}>{c.title}</div>
+                          <div style={{fontSize:12,color:'var(--s500)'}}>
+                            {c.teacher && <>{c.teacher} · </>}
+                            {c.startTime}{c.endTime ? ` – ${c.endTime}` : ''}
                           </div>
                         </div>
+                        <span className={`badge ${live?'badge-red':done?'badge-green':'badge-blue'}`}>
+                          {live?'● Live':done?'Done':'Upcoming'}
+                        </span>
+                        {live && c.meetingLink && (
+                          <a href={c.meetingLink} target="_blank" rel="noopener noreferrer"
+                            className="btn btn-p btn-sm" style={{textDecoration:'none'}}>
+                            Join to Monitor
+                          </a>
+                        )}
+                        {!live && c.meetingLink && (
+                          <button className="btn btn-s btn-sm" onClick={()=>window.open(c.meetingLink, '_blank')}>Link</button>
+                        )}
                       </div>
                     )
                   })}
+                  <div style={{marginTop:14,padding:'10px 14px',background:'var(--bg)',borderRadius:'var(--rmd)',fontSize:11.5,color:'var(--s500)',lineHeight:1.6}}>
+                    <strong style={{color:'var(--s700)'}}>Parent monitoring:</strong> when you click "Join to Monitor" on a live class, you join the same session your child is in. You can observe quietly to see how the class runs. Please don't unmute unless invited.
+                  </div>
                 </div>
-                <div className="card" style={{padding:0,display:'flex',flexDirection:'column'}}>
-                  {activeThread ? (
-                    <>
-                      <div style={{padding:'13px 18px',borderBottom:'1px solid var(--border)',fontWeight:700,fontSize:14}}>{activeThread.messages[activeThread.messages.length-1].subject}</div>
-                      <div style={{flex:1,overflowY:'auto',padding:16,display:'flex',flexDirection:'column',gap:12}}>
-                        {[...activeThread.messages].reverse().map((m,i) => (
-                          <div key={i} style={{display:'flex',gap:8,flexDirection:m.from==='Janet Osei'?'row-reverse':'row',alignItems:'flex-end'}}>
-                            {m.from!=='Janet Osei'&&<div style={{width:26,height:26,borderRadius:'50%',background:m.avatarCol+'20',color:m.avatarCol,display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,fontWeight:700,flexShrink:0}}>{m.avatar}</div>}
-                            <div style={{background:m.from==='Janet Osei'?'var(--b700)':'var(--white)',color:m.from==='Janet Osei'?'#fff':'var(--s800)',border:m.from!=='Janet Osei'?'1px solid var(--border)':'none',borderRadius:m.from==='Janet Osei'?'14px 14px 4px 14px':'4px 14px 14px 14px',padding:'9px 13px',maxWidth:'72%',fontSize:13.5,lineHeight:1.65}}>
-                              {m.body}<div style={{fontSize:10,marginTop:4,opacity:.5,textAlign:m.from==='Janet Osei'?'right':'left'}}>{m.time}</div>
-                            </div>
+              )}
+            </div>
+          )}
+
+          {/* ── PROGRAMME DETAILS with TEACHER PROFILES ── */}
+          {page==='programme' && (
+            <div>
+              <div style={{marginBottom:20}}><div className="sec-tag">Enrolment</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Programme Details</h2></div>
+              {childrenLoading || childLoading ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s400)'}}>Loading…</div>
+              ) : !selectedChild ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s500)'}}>No child linked to your account yet.</div>
+              ) : (
+                <>
+                  <div className="card" style={{marginBottom:20}}>
+                    <div className="ctitle" style={{marginBottom:14}}>{selectedChild.name.split(' ')[0]}'s Programme</div>
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
+                      {[
+                        ['Programme', overview?.child?.programme || '—'],
+                        ['Delivery Mode', overview?.child?.deliveryMode || '—'],
+                        ['Curriculum', overview?.child?.curriculum || '—'],
+                        ['Year / Grade', overview?.child?.grade || '—'],
+                        ['Admission Number', overview?.child?.admissionNumber || '—'],
+                        ['Enrolled Subjects', String(overview?.stats?.enrolledSubjects ?? 0)],
+                      ].map(([l,v]) => (
+                        <div key={l} style={{padding:'12px 14px',background:'var(--bg)',borderRadius:'var(--rmd)'}}>
+                          <div style={{fontSize:10,fontWeight:700,color:'var(--s400)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:4}}>{l}</div>
+                          <div style={{fontSize:14,fontWeight:700,color:'var(--s800)'}}>{v}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{marginBottom:14}}>
+                    <h3 className="serif" style={{fontSize:20,color:'var(--s900)',marginBottom:6}}>Your child's teachers</h3>
+                    <div style={{fontSize:13,color:'var(--s500)'}}>Each subject has an allocated teacher. Tap "Email" to send them a message.</div>
+                  </div>
+                  {teachersLoading ? (
+                    <div className="card" style={{padding:30,textAlign:'center',color:'var(--s400)'}}>Loading teacher profiles…</div>
+                  ) : teachers.length === 0 ? (
+                    <div className="card" style={{padding:30,textAlign:'center',color:'var(--s500)'}}>
+                      No teachers allocated yet. The administration assigns teachers per subject.
+                    </div>
+                  ) : (
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(420px,1fr))',gap:14}}>
+                      {teachers.map((t, i) => (
+                        <TeacherCard key={`${t._id||i}-${t.subjectName||i}`} teacher={t} onEmail={emailTeacher}/>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ── TUTOR & ADVISOR — child's actual teachers ── */}
+          {page==='tutor' && (
+            <div>
+              <div style={{marginBottom:20}}><div className="sec-tag">Support Team</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Tutor &amp; Advisor</h2></div>
+              {teachersLoading || childLoading ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s400)'}}>Loading…</div>
+              ) : !selectedChild ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s500)'}}>No child linked yet.</div>
+              ) : teachers.length === 0 ? (
+                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s500)'}}>
+                  No tutors assigned to {selectedChild.name} yet. The administration assigns subject teachers — they will appear here.
+                </div>
+              ) : (
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(420px,1fr))',gap:14}}>
+                  {teachers.map((t, i) => (
+                    <TeacherCard key={`tutor-${t._id||i}-${i}`} teacher={t} onEmail={emailTeacher}/>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── MESSAGES — email-style compose & history ── */}
+          {page==='messages' && (
+            <div>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:10,marginBottom:20}}>
+                <div><div className="sec-tag">Communication</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Messages</h2></div>
+                {!composeOpen && (
+                  <button className="btn btn-p btn-sm" onClick={() => { setComposeOpen(true); setComposeRecipients([]); setComposeSubject(''); setComposeBody('') }}>
+                    + New Message
+                  </button>
+                )}
+              </div>
+
+              {composeOpen && (
+                <div className="card" style={{marginBottom:20}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+                    <div className="ctitle">New Message</div>
+                    <button className="btn btn-s btn-sm" onClick={() => setComposeOpen(false)}>Cancel</button>
+                  </div>
+
+                  <div style={{marginBottom:12}}>
+                    <label className="fl">To (Teachers & Admin)</label>
+                    {composeRecipients.length === 0 ? (
+                      <div style={{padding:'12px 14px',background:'var(--bg)',borderRadius:'var(--rmd)',fontSize:13,color:'var(--s500)'}}>
+                        Pick a teacher below to email, or click "Email" on any teacher card in Programme Details.
+                      </div>
+                    ) : (
+                      <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                        {composeRecipients.map((r,i) => (
+                          <div key={i} style={{display:'inline-flex',alignItems:'center',gap:8,background:'var(--b50)',color:'var(--b700)',padding:'5px 10px',borderRadius:99,fontSize:12,fontWeight:600}}>
+                            {r.name || r.email}
+                            <button onClick={() => setComposeRecipients(rs => rs.filter((_,j) => j!==i))} style={{background:'transparent',border:'none',color:'inherit',cursor:'pointer',fontSize:14,lineHeight:1,padding:0}}>×</button>
                           </div>
                         ))}
                       </div>
-                      <div style={{padding:'10px 14px',borderTop:'1px solid var(--border)',display:'flex',gap:8}}>
-                        <textarea className="chat-input" value={msgInput} onChange={e=>setMsgInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendReply(activeThread)}}} rows={1} placeholder="Type a reply…" style={{flex:1}}/>
-                        <button className="btn btn-p btn-sm" onClick={() => sendReply(activeThread)} style={{padding:'7px 10px'}}>
-                          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                        </button>
+                    )}
+
+                    {teachers.length > 0 && (
+                      <div style={{marginTop:10}}>
+                        <div style={{fontSize:11,color:'var(--s400)',marginBottom:6}}>Or pick from your child's teachers:</div>
+                        <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                          {teachers.filter(t => t.email).map((t,i) => {
+                            const tName = t.name || `${t.firstName||''} ${t.lastName||''}`.trim()
+                            const already = composeRecipients.some(r => r.email === t.email)
+                            return (
+                              <button key={i} className="btn btn-s btn-sm" style={{fontSize:11.5}}
+                                disabled={already}
+                                onClick={() => setComposeRecipients(rs => [...rs, {email: t.email, name: tName}])}>
+                                {already ? 'Added: ' : '+ '}{tName}{t.subjectName ? ` (${t.subjectName})` : ''}
+                              </button>
+                            )
+                          })}
+                        </div>
                       </div>
-                    </>
-                  ) : (
-                    <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',color:'var(--s400)',fontSize:14,flexDirection:'column',gap:8}}>
-                      <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" style={{opacity:.3}}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                      Select a conversation
-                    </div>
-                  )}
+                    )}
+                  </div>
+
+                  <div style={{marginBottom:12}}>
+                    <label className="fl">Subject</label>
+                    <input className="fi" value={composeSubject} onChange={e => setComposeSubject(e.target.value)} placeholder="E.g. Question about Mathematics progress"/>
+                  </div>
+
+                  <div style={{marginBottom:14}}>
+                    <label className="fl">Message</label>
+                    <textarea className="fi" rows={8} value={composeBody} onChange={e => setComposeBody(e.target.value)} placeholder="Type your message…" style={{resize:'vertical',fontFamily:'inherit'}}/>
+                  </div>
+
+                  <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
+                    <button className="btn btn-s btn-sm" onClick={() => setComposeOpen(false)}>Cancel</button>
+                    <button className="btn btn-p" onClick={sendMessage} disabled={composeSending}>
+                      {composeSending ? 'Sending…' : 'Send Message'}
+                    </button>
+                  </div>
                 </div>
+              )}
+
+              <div className="card">
+                <div className="ctitle" style={{marginBottom:14}}>Message History</div>
+                {historyLoading ? (
+                  <div style={{padding:20,color:'var(--s400)',fontSize:13,textAlign:'center'}}>Loading…</div>
+                ) : messageHistory.length === 0 ? (
+                  <div style={{padding:20,color:'var(--s400)',fontSize:13,textAlign:'center'}}>
+                    No messages sent yet. Click "+ New Message" to email your child's teachers.
+                  </div>
+                ) : messageHistory.map((m,i) => (
+                  <div key={m._id || i} style={{padding:'12px 0',borderBottom:'1px solid var(--border)'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:4,flexWrap:'wrap',gap:6}}>
+                      <span style={{fontWeight:700,fontSize:13.5}}>{m.subject}</span>
+                      <span style={{fontSize:11,color:'var(--s400)'}}>{m.createdAt ? new Date(m.createdAt).toLocaleString() : ''}</span>
+                    </div>
+                    <div style={{fontSize:12,color:'var(--s500)',marginBottom:6}}>
+                      To: {m.recipientCount || (m.recipients?.length || 0)} recipient{(m.recipientCount||1) === 1 ? '' : 's'}
+                      {m.sentCount !== undefined && <> · Delivered: {m.sentCount}</>}
+                    </div>
+                    <div style={{fontSize:12.5,color:'var(--s600)',lineHeight:1.5,whiteSpace:'pre-wrap',maxHeight:60,overflow:'hidden',position:'relative'}}>
+                      {m.body}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {/* ── PAYMENTS ── */}
+          {/* ── PAYMENTS — Paystack with custom amount ── */}
           {page==='payments' && (
             <div>
               <div style={{marginBottom:20}}><div className="sec-tag">Finance</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Fees &amp; Payments</h2></div>
+
               <div className="kpi-grid" style={{marginBottom:24}}>
-                {[{v:'KES '+(store.fees?.individual_premium||2999).toLocaleString(),l:'Monthly Plan',d:'Individual Premium',dc:'var(--b700)'},{v:'Paid',l:'March 2026',d:'Paid on Mar 15',dc:'var(--g600)'},{v:'Apr 15',l:'Next Payment',d:'KES 1,499 due',dc:'var(--a600)'},{v:'OSEI-2027',l:'Referral Code',d:'1 month free per referral',dc:'var(--g600)'}].map((k,i) => (
-                  <div key={i} className="kpi"><div className="kpi-v" style={{fontSize:i===0||i===3?15:undefined}}>{k.v}</div><div className="kpi-l">{k.l}</div><div className="kpi-d" style={{color:k.dc}}>{k.d}</div></div>
+                {[
+                  {v:'KES ' + (store.fees?.individual_premium || 2999).toLocaleString(), l:'Monthly Plan', d:'Individual Premium', dc:'var(--b700)'},
+                  {v:'Paystack', l:'Payment Method', d:'Card · M-Pesa · Bank', dc:'var(--g600)'},
+                  {v:`${store.payments?.length || 0}`, l:'Payments Made', d:'All-time', dc:'var(--a600)'},
+                ].map((k,i) => (
+                  <div key={i} className="kpi"><div className="kpi-v" style={{fontSize:i===0?15:undefined}}>{k.v}</div><div className="kpi-l">{k.l}</div><div className="kpi-d" style={{color:k.dc}}>{k.d}</div></div>
                 ))}
               </div>
+
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
                 <div className="card">
-                  <div className="ctitle" style={{marginBottom:14}}>Pay April Fees</div>
-                  <div style={{background:'var(--bg)',borderRadius:'var(--rmd)',padding:14,marginBottom:16}}>
-                    <div style={{display:'flex',justifyContent:'space-between',fontSize:14,marginBottom:6}}><span style={{color:'var(--s500)'}}>Individual Premium — April 2026</span><span className="mono" style={{fontWeight:700}}>KES {(store.fees?.individual_premium||2999).toLocaleString()}</span></div>
-                    <div style={{fontSize:12,color:'var(--a600)'}}>Due April 15, 2026</div>
+                  <div className="ctitle" style={{marginBottom:6}}>Pay Fees</div>
+                  <div style={{fontSize:12.5,color:'var(--s500)',marginBottom:16,lineHeight:1.6}}>
+                    Pay any amount via Paystack (Card, M-Pesa, Bank Transfer). Enter the amount you want to pay below — useful for partial payments, registration fees, or one-off charges.
                   </div>
-                  <div className="fg" style={{marginBottom:12}}>
-                    <label className="fl">Payment Method</label>
-                    <select className="fsel" value={payMethod} onChange={e=>setPayMethod(e.target.value)}>
-                      <option>M-Pesa</option><option>Card</option><option>Bank Transfer</option>
-                    </select>
+
+                  <div style={{marginBottom:12}}>
+                    <label className="fl">Amount (KES) *</label>
+                    <input className="fi" type="number" min="1" step="1" value={payAmount}
+                      onChange={e => setPayAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                      placeholder="E.g. 5000"/>
                   </div>
-                  <div className="fg" style={{marginBottom:14}}>
-                    <label className="fl">Transaction Reference *</label>
-                    <input className="fi" value={payRef} onChange={e=>setPayRef(e.target.value)} placeholder={payMethod==='M-Pesa'?'e.g. QGL4XRZ91':'e.g. TXN-20260415-001'}/>
+
+                  <div style={{marginBottom:12}}>
+                    <label className="fl">What is this payment for?</label>
+                    <input className="fi" value={payDescription} onChange={e => setPayDescription(e.target.value)}
+                      placeholder="E.g. April fees, Registration, Exam fees"/>
                   </div>
-                  <button className="btn btn-ok" style={{width:'100%',justifyContent:'center'}} onClick={handlePayment}>Confirm Payment — KES 1,499</button>
+
+                  <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:14}}>
+                    {[2999, 4999, 9999, 14999].map(q => (
+                      <button key={q} className="btn btn-s btn-sm" onClick={() => setPayAmount(String(q))}
+                        style={{justifyContent:'space-between'}}>
+                        <span>Quick fill</span><span className="mono" style={{fontWeight:700}}>KES {q.toLocaleString()}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <button className="btn btn-ok" style={{width:'100%',justifyContent:'center'}}
+                    onClick={startPaystack} disabled={payLoading || !payAmount}>
+                    {payLoading ? 'Starting…' : `Pay KES ${parseInt(payAmount || '0', 10).toLocaleString()} with Paystack`}
+                  </button>
+                  <div style={{fontSize:11,color:'var(--s400)',marginTop:8,textAlign:'center'}}>
+                    Secured by Paystack. We don't store your card or M-Pesa details.
+                  </div>
                 </div>
+
                 <div className="card">
                   <div className="ctitle" style={{marginBottom:14}}>Payment History</div>
-                  {store.payments.slice(0,5).map((p,i) => (
+                  {(store.payments || []).length === 0 ? (
+                    <div style={{padding:20,color:'var(--s400)',fontSize:13,textAlign:'center'}}>No payments yet.</div>
+                  ) : store.payments.slice(0,8).map((p,i) => (
                     <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--border)',fontSize:13,flexWrap:'wrap',gap:4}}>
-                      <span style={{color:'var(--s500)'}}>{p.date}</span><span>{p.desc.split('—')[0].trim()}</span><span className="mono" style={{fontWeight:700}}>{p.amount}</span><span className="badge badge-green">{p.status}</span>
+                      <span style={{color:'var(--s500)',minWidth:90}}>{p.date}</span>
+                      <span style={{flex:1,minWidth:120}}>{(p.desc || '').split('—')[0].trim() || 'Payment'}</span>
+                      <span className="mono" style={{fontWeight:700}}>{p.amount}</span>
+                      <span className="badge badge-green">{p.status}</span>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="card" style={{marginTop:20,background:'linear-gradient(135deg,#14532D,#15803D)',borderColor:'transparent',color:'#fff'}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12}}>
-                  <div><div className="serif" style={{fontSize:18,marginBottom:4}}>Refer a family, get 1 month free!</div><div style={{fontSize:13.5,color:'rgba(255,255,255,.7)'}}>Your code: <span className="mono" style={{fontWeight:700,fontSize:18,color:'#FCD34D'}}>OSEI-2027</span></div></div>
-                  <button className="btn" style={{background:'rgba(255,255,255,.15)',color:'#fff',borderColor:'rgba(255,255,255,.3)'}} onClick={()=>{navigator.clipboard?.writeText('OSEI-2027');toast.ok('Code copied!')}}>Copy Code</button>
-                </div>
-              </div>
             </div>
           )}
 
-          {/* ── PROGRAMME ── */}
-          {page==='programme' && (
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Enrolment</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Programme Details</h2></div>
-
-              {childrenLoading || childLoading ? (
-                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s400)'}}>Loading…</div>
-              ) : !selectedChild ? (
-                <div className="card" style={{padding:40,textAlign:'center',color:'var(--s500)'}}>
-                  No child linked to your account yet.
-                </div>
-              ) : (
-                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
-                  <div className="card">
-                    <div className="ctitle" style={{marginBottom:14}}>{selectedChild.name.split(' ')[0]}'s Programme</div>
-                    {[
-                      ['Programme', overview?.child?.programme || '—'],
-                      ['Delivery Mode', overview?.child?.deliveryMode || '—'],
-                      ['Curriculum', overview?.child?.curriculum || '—'],
-                      ['Year / Grade', overview?.child?.grade || '—'],
-                      ['Admission Number', overview?.child?.admissionNumber || '—'],
-                      ['Enrolled Subjects', String(overview?.stats?.enrolledSubjects ?? 0)],
-                    ].map(([l,v]) => (
-                      <div key={l} style={{display:'flex',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--border)',fontSize:13.5}}>
-                        <span style={{color:'var(--s500)'}}>{l}</span><span style={{fontWeight:600,color:'var(--s800)',textAlign:'right'}}>{v}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="card">
-                    <div className="ctitle" style={{marginBottom:14}}>Subject Teachers</div>
-                    {(overview?.allocations || []).length === 0 ? (
-                      <div style={{padding:'16px 0',color:'var(--s400)',fontSize:13}}>
-                        No subject teachers allocated yet. The administration assigns teachers per subject.
-                      </div>
-                    ) : (overview?.allocations || []).map((a,i) => (
-                      <div key={i} style={{padding:'10px 0',borderBottom:'1px solid var(--border)'}}>
-                        <div style={{fontWeight:700,fontSize:14}}>{a.subjectName}</div>
-                        <div style={{fontSize:12.5,color:'var(--s500)'}}>{a.teacher}{a.curriculum ? ' · ' + a.curriculum : ''}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── LESSONS (timetable view) ── */}
-          {page==='lessons' && (
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Live Classes</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Live Lessons</h2></div>
-              <div style={{background:'linear-gradient(135deg,#1E3A8A,var(--b700))',borderRadius:'var(--rxl)',padding:'20px 24px',marginBottom:20,display:'flex',gap:14,alignItems:'center',flexWrap:'wrap'}}>
-                <div style={{width:8,height:8,borderRadius:'50%',background:'#4ADE80',animation:'pulse 1.5s infinite'}}/>
-                <div style={{flex:1}}><div style={{fontSize:11,fontWeight:700,color:'rgba(255,255,255,.5)',textTransform:'uppercase',letterSpacing:'.1em',marginBottom:4}}>Amara is live now</div><div style={{fontSize:16,fontWeight:700,color:'#fff'}}>Mathematics — Pythagoras Theorem</div><div style={{fontSize:12.5,color:'rgba(255,255,255,.65)'}}>Mr. Muthomi · 38 min in · 6 students</div></div>
-                <button className="btn" style={{background:'rgba(255,255,255,.15)',color:'#fff',borderColor:'rgba(255,255,255,.25)'}} onClick={()=>toast.info('Opening read-only monitor…')}>Monitor</button>
-              </div>
-              <div className="card">
-                <div className="ctitle" style={{marginBottom:14}}>Weekly Schedule</div>
-                {[{d:'Mon',s:'Mathematics',t:'Mr. Muthomi',time:'9–10 AM',st:'done'},{d:'Mon',s:'Biology',t:'Dr. Ouma',time:'2–3 PM',st:'done'},{d:'Tue',s:'English',t:'Ms. Wambua',time:'10–11 AM',st:'done'},{d:'Wed',s:'Mathematics',t:'Mr. Muthomi',time:'9–10 AM',st:'live'},{d:'Wed',s:'Chemistry',t:'Dr. Ouma',time:'1–2 PM',st:'upcoming'},{d:'Thu',s:'Physics',t:'Mr. Njoroge',time:'11 AM–12 PM',st:'upcoming'},{d:'Fri',s:'English',t:'Ms. Wambua',time:'9–10 AM',st:'upcoming'}].map((c,i) => (
-                  <div key={i} style={{display:'flex',gap:14,padding:'11px 0',borderBottom:'1px solid var(--border)',flexWrap:'wrap',alignItems:'center'}}>
-                    <span className="mono" style={{fontWeight:700,color:'var(--b700)',width:28,flexShrink:0}}>{c.d}</span>
-                    <div style={{flex:1}}><div style={{fontWeight:700,fontSize:14}}>{c.s}</div><div style={{fontSize:12,color:'var(--s500)'}}>{c.t} · {c.time}</div></div>
-                    <span className={`badge ${c.st==='live'?'badge-red':c.st==='done'?'badge-green':'badge-blue'}`}>{c.st==='live'?'● Live':c.st==='done'?'Done':'Upcoming'}</span>
-                    {c.st==='done'&&<button className="btn btn-g btn-sm" onClick={()=>toast.info('Loading recording…')}>Recording</button>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── TUTOR ── */}
-          {page==='tutor' && (
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Support Team</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Tutor &amp; Advisor</h2></div>
-              <div className="card" style={{display:'flex',gap:20,alignItems:'flex-start',flexWrap:'wrap',marginBottom:20}}>
-                <div style={{width:80,height:80,borderRadius:'50%',background:'#3B82F620',color:'#3B82F6',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,fontWeight:700,fontFamily:'JetBrains Mono,monospace',flexShrink:0}}>SK</div>
-                <div style={{flex:1}}>
-                  <div className="serif" style={{fontSize:22,color:'var(--s900)',marginBottom:4}}>Dr. Sarah Kimani</div>
-                  <div style={{fontSize:14,color:'var(--s500)',marginBottom:12}}>Lead Tutor & Academic Advisor · 12 years experience · Mathematics, Sciences</div>
-                  <div style={{display:'flex',gap:10}}>
-                    <button className="btn btn-p btn-sm" onClick={()=>setPage('messages')}>Send Message</button>
-                    <button className="btn btn-s btn-sm" onClick={()=>toast.info('Opening consultation booking…')}>Book Consultation</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── DOCUMENTS ── */}
-          {page==='documents' && (
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Files</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Documents</h2></div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:14}}>
-                {[{t:'Term 1 Report Card',col:'var(--b50)',sc:'var(--b700)'},{t:'Chemistry Study Plan',col:'var(--r50)',sc:'var(--r600)'},{t:'Enrolment Agreement',col:'var(--g50)',sc:'var(--g600)'},{t:'Fee Schedule 2026',col:'var(--a50)',sc:'var(--a600)'},{t:'IGCSE Subject Registration',col:'var(--p50)',sc:'var(--p600)'},{t:'Safeguarding Policy',col:'var(--s100)',sc:'var(--s600)'}].map((d,i) => (
-                  <div key={i} className="card" style={{display:'flex',gap:12,alignItems:'center'}}>
-                    <div style={{width:40,height:40,borderRadius:'var(--rmd)',background:d.col,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={d.sc} strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    </div>
-                    <div style={{flex:1}}><div style={{fontWeight:700,fontSize:13.5,color:'var(--s800)'}}>{d.t}</div><div style={{fontSize:11.5,color:'var(--s400)'}}>PDF</div></div>
-                    <button className="btn btn-s btn-sm" onClick={()=>store.downloadResource({title:d.t, type:'PDF', subject:'General', grade:'All', addedBy:'Smartious Admin', date:'2026'})}>
-                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── ARTICLES & RESOURCES (from store — wired to teacher portal) ── */}
-          {page==='learning' && (
-            <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Published by Smartious Teachers</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Articles &amp; Resources</h2></div>
-              {publishedArticles.length > 0 && (
-                <>
-                  <h3 className="serif" style={{fontSize:18,color:'var(--s900)',marginBottom:14}}>Latest Articles from Teachers</h3>
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:14,marginBottom:28}}>
-                    {publishedArticles.map((a) => (
-                      <div key={a.id} className="card" style={{cursor:'pointer',borderTop:`3px solid var(--b600)`}} onClick={()=>toast.info('Opening: ' + a.title)}>
-                        <div style={{height:80,borderRadius:'var(--rmd)',background:a.img,marginBottom:12}}/>
-                        <div style={{fontWeight:700,fontSize:14,color:'var(--s900)',marginBottom:6,lineHeight:1.4}}>{a.title}</div>
-                        <div style={{display:'flex',justifyContent:'space-between',fontSize:12,color:'var(--s400)'}}>
-                          <span>{a.author}</span><span>{a.date}</span>
-                        </div>
-                        {a.reads > 0 && <div style={{fontSize:12,color:'var(--b600)',marginTop:4}}>{a.reads.toLocaleString()} reads</div>}
-                        <div style={{fontSize:11,color:'var(--b600)',marginTop:6,fontFamily:'monospace'}}>{a.url}</div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-              <h3 className="serif" style={{fontSize:18,color:'var(--s900)',marginBottom:14}}>Resources from Teachers</h3>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:14}}>
-                {store.resources.map((r) => (
-                  <div key={r.id} className="card" style={{display:'flex',gap:12,alignItems:'flex-start'}}>
-                    <div style={{width:44,height:44,borderRadius:'var(--rmd)',background:'var(--b50)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="var(--b700)" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    </div>
-                    <div style={{flex:1}}>
-                      <div style={{fontWeight:700,fontSize:13.5,color:'var(--s800)',marginBottom:3}}>{r.title}</div>
-                      <div style={{fontSize:11.5,color:'var(--s400)',marginBottom:6}}>{r.type} · {r.subject} · {r.grade} · Added by {r.addedBy}</div>
-                      <div style={{fontSize:11.5,color:'var(--s400)',marginBottom:8}}>{r.date} · {r.downloads} downloads</div>
-                      <button className="btn btn-s btn-sm" onClick={()=>store.downloadResource(r)}>Download</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── MSHAURI ── */}
+          {/* ── MSHAURI AI ── */}
           {page==='mshauri' && (
             <div>
               <div style={{marginBottom:20}}><div className="sec-tag">AI Assistant</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Mshauri AI</h2></div>
@@ -675,12 +975,12 @@ export default function ParentPortal() {
                 </div>
                 <div style={{padding:'10px 14px',borderTop:'1px solid var(--border)'}}>
                   <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:8}}>
-                    {["How is Amara doing?","Help with Chemistry","Explain IGCSE"].map(s => (
+                    {["How is my child doing?","Help with study plan","Explain IGCSE"].map(s => (
                       <button key={s} className="btn btn-s btn-sm" style={{fontSize:11.5,padding:'4px 10px'}} onClick={()=>{setAiInp(s);setTimeout(()=>sendAi(),50)}}>{s}</button>
                     ))}
                   </div>
                   <div style={{display:'flex',gap:8}}>
-                    <textarea className="chat-input" value={aiInp} onChange={e=>setAiInp(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAi()}}} rows={1} placeholder="Ask Mshauri about Amara's education…" style={{flex:1}}/>
+                    <textarea className="chat-input" value={aiInp} onChange={e=>setAiInp(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAi()}}} rows={1} placeholder="Ask Mshauri about your child's education…" style={{flex:1}}/>
                     <button className="btn btn-p btn-sm" onClick={sendAi} disabled={aiLoading} style={{padding:'7px 10px'}}><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
                   </div>
                 </div>
