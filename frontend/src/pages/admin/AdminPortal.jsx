@@ -4,24 +4,22 @@ import { api } from '../../context/ctx.jsx'
 
 /**
  * AdminPortal
- * ============================================================
+ * ─────────────────────────────────────────────────────────────
  * Thin wrapper around AdminDashboard.
  *
- * NOTE: AdminDashboard (pages/Dashboard.jsx) renders its OWN
- * complete navigation — a top bar plus a collapsible left rail
- * via its internal PNavigation component. We previously also
- * wrapped it in <PortalLayout>, which rendered a SECOND sidebar.
- * That produced the "double sidebar" bug. PortalLayout has been
- * removed; Dashboard's own navigation is the single source.
+ * AdminDashboard renders its own complete navigation (top bar +
+ * collapsible left rail via PNavigation) and owns ALL page routing
+ * including billing/payments — which now lives as BillingModule
+ * inside Dashboard.jsx, accessible via the nav's System section.
  *
- * We KEEP the .sm-admin-theme style block and wrapper div —
- * Dashboard's shared classes (.fi, .btn-p, .card, .tbl, .serif,
- * .sec-tag) are styled by it. Removing it would break inputs,
- * buttons, and tables.
+ * This file only:
+ *   1. Applies the Smartious brand theme CSS variables
+ *   2. Fetches top-level stats (userStats, pendingAllocations)
+ *      and passes them down
+ * ─────────────────────────────────────────────────────────────
  */
 
-// ─── SMARTIOUS BRAND THEME ──────────────────────────────
-// Crimson #7D1025 + Gold #C9A030 + Cream #FBFAF5
+// ─── SMARTIOUS BRAND THEME ───────────────────────────────────
 const SMARTIOUS_THEME = `
   .sm-admin-theme {
     --crimson: #7D1025;
@@ -116,36 +114,28 @@ const SMARTIOUS_THEME = `
 `
 
 export default function AdminPortal() {
-  const [page, setPage] = useState('dashboard')
-  const [userStats, setUserStats] = useState(0)
+  const [page, setPage]                           = useState('dashboard')
+  const [userStats, setUserStats]                 = useState(0)
   const [pendingAllocations, setPendingAllocations] = useState(0)
-  const [refreshKey, setRefreshKey] = useState(0)
+  const [refreshKey, setRefreshKey]               = useState(0)
 
   useEffect(() => {
-    const fetchUserStats = async () => {
-      try {
-        const res = await api.get('/users/stats')
-        setUserStats(res.data.totalUsers || 0)
-      } catch (e) { /* silent */ }
-    }
-    fetchUserStats()
+    api.get('/users/stats')
+      .then(res => setUserStats(res.data.totalUsers || 0))
+      .catch(() => {})
   }, [refreshKey])
 
   useEffect(() => {
-    const fetchPendingAllocations = async () => {
-      try {
-        const res = await api.get('/allocations/pending-count')
-        setPendingAllocations(res.data.pendingCount || 0)
-      } catch (e) { /* silent */ }
-    }
-    fetchPendingAllocations()
-    const interval = setInterval(fetchPendingAllocations, 5000)
+    const fetchPending = () =>
+      api.get('/allocations/pending-count')
+        .then(res => setPendingAllocations(res.data.pendingCount || 0))
+        .catch(() => {})
+    fetchPending()
+    const interval = setInterval(fetchPending, 5000)
     return () => clearInterval(interval)
   }, [page, refreshKey])
 
-  const handleUserSaved = () => {
-    setRefreshKey(prev => prev + 1)
-  }
+  const handleUserSaved = () => setRefreshKey(k => k + 1)
 
   return (
     <>
