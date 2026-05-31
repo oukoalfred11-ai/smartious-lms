@@ -8802,23 +8802,252 @@ function CurriculumModule({ refreshKey, toast }) {
 // ═══════════════════════════════════════════════════════════
 function BillingModule({ refreshKey, toast }) {
   const store = useStore()
-  const [students, setStudents] = useState([])
-  useEffect(() => { api.get('/users/students/list').then(r => setStudents(r.data.students || [])).catch(() => {}) }, [refreshKey])
-  const monthlyRevenue = students.length * 18000
+
+  // ── Real payment data from backend ───────────────────
+  const [payments,       setPayments]       = useState([])
+  const [paymentsLoading, setPaymentsLoading] = useState(true)
+  const [revSummary,     setRevSummary]     = useState(null)   // { totalRevenue, totalConfirmed, total }
+  const [monthlyRev,     setMonthlyRev]     = useState([])     // [{ _id:{year,month}, total, count }]
+  const [students,       setStudents]       = useState([])
+
+  // Filters
+  const [statusFilter,  setStatusFilter]  = useState('')
+  const [searchInput,   setSearchInput]   = useState('')
+  const [search,        setSearch]        = useState('')
+  const [listPage,      setListPage]      = useState(1)
+  const [totalPages,    setTotalPages]    = useState(1)
+  const [totalCount,    setTotalCount]    = useState(0)
+
+  // Detail modal
+  const [selected,       setSelected]       = useState(null)
+  const [detailLoading,  setDetailLoading]  = useState(false)
+  const [overrideStatus, setOverrideStatus] = useState('')
+  const [overrideNote,   setOverrideNote]   = useState('')
+  const [overrideSaving, setOverrideSaving] = useState(false)
+
+  const fetchPayments = useCallback(async (pg = 1) => {
+    setPaymentsLoading(true)
+    try {
+      const params = new URLSearchParams({ page: pg, limit: 25 })
+      if (statusFilter) params.append('status', statusFilter)
+      if (search)       params.append('search', search)
+      const { data } = await api.get('/payments/admin/all?' + params)
+      if (data?.success) {
+        setPayments(data.data.payments || [])
+        setTotalCount(data.data.total || 0)
+        setTotalPages(data.data.totalPages || 1)
+        setRevSummary({ totalRevenue: data.data.totalRevenue, totalConfirmed: data.data.totalConfirmed })
+        setListPage(pg)
+      }
+    } catch { toast.error('Could not load payments') }
+    setPaymentsLoading(false)
+  }, [statusFilter, search])
+
+  useEffect(() => { fetchPayments(1) }, [fetchPayments, refreshKey])
+
+  useEffect(() => {
+    api.get('/payments/admin/revenue/monthly?months=6')
+      .then(r => { if (r.data?.success) setMonthlyRev(r.data.data || []) })
+      .catch(() => {})
+    api.get('/users/students/list')
+      .then(r => setStudents(r.data.students || []))
+      .catch(() => {})
+  }, [refreshKey])
+
+  // Open detail
+  const openDetail = async (p) => {
+    setSelected({ ...p, _loading: true })
+    setOverrideStatus(p.status || 'pending')
+    setOverrideNote('')
+    setDetailLoading(true)
+    try {
+      const { data } = await api.get('/payments/admin/' + p._id)
+      if (data?.success) { setSelected(data.data); setOverrideStatus(data.data.status || 'pending') }
+    } catch { setSelected(p) }
+    setDetailLoading(false)
+  }
+
+  const saveOverride = async () => {
+    if (!selected) return
+    setOverrideSaving(true)
+    try {
+      const { data } = await api.patch('/payments/admin/' + selected._id + '/status', { status: overrideStatus, note: overrideNote })
+      if (data?.success) {
+        toast.ok('Status updated')
+        setSelected(data.data)
+        setPayments(ps => ps.map(p => String(p._id) === String(selected._id) ? { ...p, status: overrideStatus } : p))
+      } else { toast.error(data?.message || 'Update failed') }
+    } catch { toast.error('Could not update status') }
+    setOverrideSaving(false)
+  }
+
+  // Helpers
+  const parentName = (p) => {
+    const u = p.parentId
+    if (!u) return '—'
+    return typeof u === 'object' ? `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email || '—' : '—'
+  }
+  const studentName = (p) => {
+    const s = p.studentId
+    if (!s || typeof s !== 'object') return '—'
+    return `${s.firstName || ''} ${s.lastName || ''}`.trim() || '—'
+  }
+  const StatusBadge = ({ status }) => {
+    const cfg = { success: ['#DCFCE7','#15803D'], pending: ['#FEF9C3','#854D0E'], failed: ['#FEE2E2','#DC2626'] }[status] || ['#EFF6FF','#1D4ED8']
+    const label = { success:'Paid', pending:'Pending', failed:'Failed' }[status] || status
+    return <span style={{ background: cfg[0], color: cfg[1], fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 99, border: '1px solid ' + cfg[1] + '30' }}>{label}</span>
+  }
+
+  // Revenue derived values
+  const totalRevenue   = revSummary?.totalRevenue ?? 0
+  const totalConfirmed = revSummary?.totalConfirmed ?? 0
+  const monthlyAvg     = monthlyRev.length > 0 ? Math.round(monthlyRev.reduce((s, m) => s + m.total, 0) / monthlyRev.length) : 0
+  const lastMonthRev   = monthlyRev.length > 0 ? monthlyRev[monthlyRev.length - 1]?.total ?? 0 : 0
+
+  const monthLabel = (m) => {
+    const d = new Date(m._id.year, m._id.month - 1)
+    return d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })
+  }
+  const maxBar = Math.max(...monthlyRev.map(m => m.total), 1)
 
   return (
     <>
-      <PSection tag="Finance" title="Billing &" em="Payments" sub="Revenue, fee structure and collection rates"/>
+      <PSection tag="Finance" title="Billing &" em="Payments" sub="All student payments, Paystack transactions and revenue analytics"/>
+
+      {/* ── KPI row ── */}
       <div style={{ display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap' }}>
-        <PKpi label="Monthly Revenue" value={fmtKsh(monthlyRevenue)}/>
-        <PKpi label="Paying Students" value={students.length}/>
-        <PKpi label="Annualised" value={fmtKsh(monthlyRevenue * 12)}/>
-        <PKpi label="Collection Rate" value="94%"/>
+        <PKpi label="Total Revenue" value={fmtKsh(totalRevenue)} delta={totalConfirmed + ' confirmed payments'} accent={TOKENS.accentEmerald}/>
+        <PKpi label="Last Month" value={fmtKsh(lastMonthRev)} delta="Confirmed only" accent={TOKENS.crimson}/>
+        <PKpi label="Monthly Avg" value={fmtKsh(monthlyAvg)} delta="6-month average" accent={TOKENS.accentNavy}/>
+        <PKpi label="All Transactions" value={totalCount} delta={statusFilter || 'Any status'} accent={TOKENS.s500}/>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+
+      {/* ── Monthly bar chart ── */}
+      {monthlyRev.length > 0 && (
+        <PCard accent={TOKENS.accentEmerald} style={{ marginBottom: 20 }}>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: TOKENS.s900, marginBottom: 18, fontWeight: 600 }}>Monthly Revenue</h3>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 100 }}>
+            {monthlyRev.map((m, i) => (
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                <div style={{ fontSize: 10, fontFamily: 'JetBrains Mono, monospace', color: TOKENS.s500, fontWeight: 700 }}>
+                  {fmtKsh(m.total).replace('KSh ', '')}
+                </div>
+                <div style={{ width: '100%', background: TOKENS.accentEmerald, borderRadius: '4px 4px 0 0', height: Math.max(4, Math.round((m.total / maxBar) * 72)) + 'px', opacity: i === monthlyRev.length - 1 ? 1 : 0.55 }}/>
+                <div style={{ fontSize: 10, color: TOKENS.s500, whiteSpace: 'nowrap' }}>{monthLabel(m)}</div>
+              </div>
+            ))}
+          </div>
+        </PCard>
+      )}
+
+      {/* ── Filters ── */}
+      <PCard style={{ marginBottom: 16, padding: 16 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <label className="fl">Search reference or description</label>
+            <input className="fi" value={searchInput} onChange={e => setSearchInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') setSearch(searchInput) }}
+              placeholder="E.g. SM-1234, April fees…"/>
+          </div>
+          <div style={{ minWidth: 160 }}>
+            <label className="fl">Status</label>
+            <select className="fsel" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+              <option value="">All statuses</option>
+              <option value="success">Paid</option>
+              <option value="pending">Pending</option>
+              <option value="failed">Failed</option>
+            </select>
+          </div>
+          <button className="btn btn-p btn-sm" onClick={() => { setSearch(searchInput); fetchPayments(1) }}>Search</button>
+          <button className="btn btn-s btn-sm" onClick={() => { setSearch(''); setSearchInput(''); setStatusFilter('') }}>Clear</button>
+        </div>
+      </PCard>
+
+      {/* ── Payments table ── */}
+      <PCard>
+        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: TOKENS.s900, marginBottom: 16, fontWeight: 600 }}>
+          Transactions
+          {totalCount > 0 && <span style={{ fontSize: 13, fontWeight: 500, color: TOKENS.s500, marginLeft: 10 }}>{totalCount} total</span>}
+        </h3>
+
+        {paymentsLoading ? (
+          <div style={{ padding: 40, textAlign: 'center', color: TOKENS.s400 }}>Loading…</div>
+        ) : payments.length === 0 ? (
+          <div style={{ padding: 40, textAlign: 'center', color: TOKENS.s500 }}>
+            No payments found{statusFilter ? ` with status "${statusFilter}"` : ''}.
+          </div>
+        ) : (
+          <>
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Parent</th>
+                  <th>Student</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Reference</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.map((p, i) => (
+                  <tr key={p._id || i} style={{ cursor: 'pointer' }} onClick={() => openDetail(p)}>
+                    <td style={{ whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: 12.5 }}>{fmtDate(p.createdAt)}</div>
+                      <div style={{ fontSize: 11, color: TOKENS.s400 }}>
+                        {p.createdAt ? new Date(p.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''}
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>{parentName(p)}</div>
+                      {typeof p.parentId === 'object' && p.parentId?.email && (
+                        <div style={{ fontSize: 11, color: TOKENS.s400 }}>{p.parentId.email}</div>
+                      )}
+                    </td>
+                    <td style={{ fontSize: 13, color: TOKENS.s600 }}>{studentName(p)}</td>
+                    <td style={{ fontSize: 13 }}>{p.description || '—'}</td>
+                    <td>
+                      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: TOKENS.accentEmerald }}>
+                        {fmtKsh(p.amount)}
+                      </span>
+                    </td>
+                    <td>
+                      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: TOKENS.s500 }}>
+                        {p.reference || '—'}
+                      </span>
+                    </td>
+                    <td><StatusBadge status={p.status}/></td>
+                    <td>
+                      <button className="btn btn-s btn-sm" onClick={e => { e.stopPropagation(); openDetail(p) }}>View</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', paddingTop: 16, flexWrap: 'wrap' }}>
+                <button className="btn btn-s btn-sm" disabled={listPage <= 1} onClick={() => fetchPayments(listPage - 1)}>← Prev</button>
+                <span style={{ fontSize: 13, color: TOKENS.s500, lineHeight: '30px' }}>Page {listPage} of {totalPages}</span>
+                <button className="btn btn-s btn-sm" disabled={listPage >= totalPages} onClick={() => fetchPayments(listPage + 1)}>Next →</button>
+              </div>
+            )}
+          </>
+        )}
+      </PCard>
+
+      {/* ── Fee structure (store-based, admin-editable in future) ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 20 }}>
         <PCard accent={TOKENS.crimson}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: TOKENS.s900, marginBottom: 14, fontWeight: 600 }}>Standard Fees</h3>
-          {[['Individual Basic', store.fees?.individual_basic || 1499], ['Individual Premium', store.fees?.individual_premium || 2999], ['Family Plan', store.fees?.family_plan || 4999], ['IGCSE Pack', store.fees?.igcse_pack || 18000]].map(([label, val]) => (
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: TOKENS.s900, marginBottom: 14, fontWeight: 600 }}>Standard Fee Schedule</h3>
+          {[
+            ['Individual Basic',   store.fees?.individual_basic   || 1499],
+            ['Individual Premium', store.fees?.individual_premium || 2999],
+            ['Family Plan',        store.fees?.family_plan        || 4999],
+            ['IGCSE Pack',         store.fees?.igcse_pack         || 18000],
+          ].map(([label, val]) => (
             <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid ' + TOKENS.s100 }}>
               <span style={{ fontSize: 13, color: TOKENS.s700 }}>{label}</span>
               <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, color: TOKENS.crimson }}>{fmtKsh(val)}</span>
@@ -8826,8 +9055,8 @@ function BillingModule({ refreshKey, toast }) {
           ))}
         </PCard>
         <PCard accent={TOKENS.accentEmerald}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: TOKENS.s900, marginBottom: 14, fontWeight: 600 }}>Payment Methods</h3>
-          {[['M-Pesa', 67], ['Bank Transfer', 21], ['Card', 9], ['Other', 3]].map(([label, pct]) => (
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: TOKENS.s900, marginBottom: 14, fontWeight: 600 }}>Payment Methods</h3>
+          {[['M-Pesa', 67], ['Bank Transfer', 21], ['Card (Paystack)', 9], ['Other', 3]].map(([label, pct]) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid ' + TOKENS.s100 }}>
               <span style={{ fontSize: 13, color: TOKENS.s700, flex: 1 }}>{label}</span>
               <div style={{ flex: 2, height: 6, background: TOKENS.s100, borderRadius: 99 }}>
@@ -8838,6 +9067,92 @@ function BillingModule({ refreshKey, toast }) {
           ))}
         </PCard>
       </div>
+
+      {/* ══ DETAIL MODAL ══════════════════════════════════════ */}
+      {selected && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+          onClick={() => setSelected(null)}>
+          <div style={{ background: TOKENS.white, borderRadius: 20, padding: 28, maxWidth: 540, width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(0,0,0,.22)' }}
+            onClick={e => e.stopPropagation()}>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: TOKENS.s500, marginBottom: 6 }}>Payment Detail</div>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: TOKENS.s900 }}>{selected.description || 'Payment'}</div>
+              </div>
+              <button className="btn btn-s btn-sm" onClick={() => setSelected(null)}>✕</button>
+            </div>
+
+            {detailLoading ? (
+              <div style={{ padding: 30, textAlign: 'center', color: TOKENS.s400 }}>Loading…</div>
+            ) : (
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18 }}>
+                  {[
+                    ['Amount',    fmtKsh(selected.amount)],
+                    ['Status',    null],
+                    ['Reference', selected.reference || '—'],
+                    ['Method',    selected.method || '—'],
+                    ['Parent',    parentName(selected)],
+                    ['Student',   studentName(selected)],
+                    ['Date',      fmtDate(selected.createdAt)],
+                    ['Paid At',   selected.paidAt ? fmtDate(selected.paidAt) : '—'],
+                  ].map(([l, v]) => (
+                    <div key={l} style={{ padding: '10px 12px', background: TOKENS.s50, borderRadius: 10 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: TOKENS.s400, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 3 }}>{l}</div>
+                      {l === 'Status'
+                        ? <StatusBadge status={selected.status}/>
+                        : <div style={{ fontSize: 13.5, fontWeight: 600, color: TOKENS.s800, wordBreak: 'break-all' }}>{v}</div>
+                      }
+                    </div>
+                  ))}
+                </div>
+
+                {selected.adminNote && (
+                  <div style={{ background: '#FEF9C3', border: '1px solid #FDE047', borderRadius: 10, padding: '10px 12px', marginBottom: 18, fontSize: 12.5, color: '#854D0E' }}>
+                    <strong>Admin note:</strong> {selected.adminNote}
+                  </div>
+                )}
+
+                <div style={{ borderTop: '1px solid ' + TOKENS.s100, paddingTop: 18 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: TOKENS.s900, marginBottom: 6 }}>Override Status</div>
+                  <div style={{ fontSize: 12.5, color: TOKENS.s500, marginBottom: 12, lineHeight: 1.6 }}>
+                    Manually confirm bank transfers or M-Pesa payments received outside Paystack.
+                  </div>
+                  <div style={{ marginBottom: 10 }}>
+                    <label className="fl">Status</label>
+                    <select className="fsel" value={overrideStatus} onChange={e => setOverrideStatus(e.target.value)}>
+                      <option value="success">Paid</option>
+                      <option value="pending">Pending</option>
+                      <option value="failed">Failed</option>
+                    </select>
+                  </div>
+                  <div style={{ marginBottom: 14 }}>
+                    <label className="fl">Admin note (optional)</label>
+                    <input className="fi" value={overrideNote} onChange={e => setOverrideNote(e.target.value)}
+                      placeholder="E.g. Confirmed via M-Pesa screenshot from parent"/>
+                  </div>
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                    <button className="btn btn-s btn-sm" onClick={() => setSelected(null)}>Cancel</button>
+                    <button className="btn btn-p" onClick={saveOverride} disabled={overrideSaving}>
+                      {overrideSaving ? 'Saving…' : 'Save Override'}
+                    </button>
+                  </div>
+                </div>
+
+                {selected.paystackData && (
+                  <details style={{ marginTop: 16 }}>
+                    <summary style={{ fontSize: 12, color: TOKENS.s400, cursor: 'pointer', userSelect: 'none' }}>Raw Paystack data</summary>
+                    <pre style={{ marginTop: 8, fontSize: 11, color: TOKENS.s600, background: TOKENS.s50, padding: 12, borderRadius: 10, overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                      {JSON.stringify(selected.paystackData, null, 2)}
+                    </pre>
+                  </details>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </>
   )
 }
