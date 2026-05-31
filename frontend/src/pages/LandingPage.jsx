@@ -1434,6 +1434,7 @@ export default function LandingPage() {
   const store = useStore()
   const cfg   = store.siteConfig  // live site config from admin editor
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [openCategory, setOpenCategory] = useState(null)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -2104,7 +2105,7 @@ export default function LandingPage() {
         <nav>
         <div className="nav-wrap">
           {/* Mobile hamburger — sits BEFORE the logo on mobile */}
-          <button onClick={() => setMobileMenuOpen(m => !m)}
+          <button onClick={() => { setMobileMenuOpen(m => !m); setOpenCategory(null) }}
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileMenuOpen}
             style={{
@@ -2176,7 +2177,7 @@ export default function LandingPage() {
         pointerEvents:'none',
         userSelect:'none',
       }} aria-hidden="true">
-        BUILD 2026-05-31-A · v1080-h1920
+        BUILD 2026-05-31-B · menu-accordion
       </div>
 
       {/* Mobile slide-down menu — categorised, premium look */}
@@ -2219,41 +2220,69 @@ export default function LandingPage() {
               ]},
             ].map((group, gi) => (
               <div key={group.cat} style={{
-                marginBottom: 22,
-                paddingBottom: gi < 5 ? 18 : 0,
+                marginBottom: 6,
                 borderBottom: gi < 5 ? '1px solid rgba(255,255,255,.06)' : 'none',
+                paddingBottom: gi < 5 ? 4 : 0,
               }}>
-                <div style={{
-                  fontSize:10.5,
-                  fontWeight:700,
-                  letterSpacing:'.16em',
-                  textTransform:'uppercase',
-                  color:'#F0CC5A',
-                  marginBottom:12,
-                }}>{group.cat}</div>
-                <div style={{display:'flex',flexDirection:'column',gap:2}}>
-                  {group.items.map(([label, id]) => (
-                    <button
-                      key={id}
-                      onClick={() => { P(id); setMobileMenuOpen(false) }}
-                      style={{
-                        textAlign:'left',
-                        background: page === id ? 'rgba(139,26,46,.18)' : 'transparent',
-                        border:'none',
-                        borderLeft: page === id ? '3px solid #F0CC5A' : '3px solid transparent',
-                        padding:'12px 14px',
-                        color: page === id ? '#FEFDFB' : 'rgba(247,243,237,.78)',
-                        fontWeight: page === id ? 700 : 500,
-                        fontSize:15,
-                        fontFamily:"'Syne',sans-serif",
-                        cursor:'pointer',
-                        transition:'background .15s, border-color .15s, color .15s',
-                        borderRadius:6,
-                      }}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
+                {/* Category header — tap to toggle */}
+                <button
+                  onClick={() => setOpenCategory(c => c === group.cat ? null : group.cat)}
+                  aria-expanded={openCategory === group.cat}
+                  style={{
+                    width:'100%',
+                    display:'flex',
+                    alignItems:'center',
+                    justifyContent:'space-between',
+                    background:'transparent',
+                    border:'none',
+                    padding:'14px 4px',
+                    cursor:'pointer',
+                    color: openCategory === group.cat ? '#F0CC5A' : 'rgba(247,243,237,.92)',
+                    fontWeight: openCategory === group.cat ? 700 : 600,
+                    fontSize: 15,
+                    fontFamily:"'Syne',sans-serif",
+                    letterSpacing:'.02em',
+                    transition:'color .15s',
+                  }}>
+                  <span>{group.cat}</span>
+                  <svg
+                    width="14" height="14" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor"
+                    strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                    style={{
+                      transform: openCategory === group.cat ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition:'transform .2s',
+                    }}>
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+
+                {/* Items — only rendered when category is open */}
+                {openCategory === group.cat && (
+                  <div style={{display:'flex',flexDirection:'column',gap:2,paddingLeft:8,paddingBottom:10,paddingTop:2}}>
+                    {group.items.map(([label, id]) => (
+                      <button
+                        key={id}
+                        onClick={() => { P(id); setMobileMenuOpen(false); setOpenCategory(null) }}
+                        style={{
+                          textAlign:'left',
+                          background: page === id ? 'rgba(139,26,46,.18)' : 'transparent',
+                          border:'none',
+                          borderLeft: page === id ? '3px solid #F0CC5A' : '3px solid transparent',
+                          padding:'11px 14px',
+                          color: page === id ? '#FEFDFB' : 'rgba(247,243,237,.72)',
+                          fontWeight: page === id ? 700 : 500,
+                          fontSize: 14.5,
+                          fontFamily:"'Syne',sans-serif",
+                          cursor:'pointer',
+                          transition:'background .15s, border-color .15s, color .15s',
+                          borderRadius:6,
+                        }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
 
