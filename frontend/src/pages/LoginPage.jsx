@@ -4,7 +4,8 @@ import { useAuth, useToast } from '../context/ctx.jsx'
 
 // Background photo for the right-side panel — Unsplash students/campus.
 // Swap with a real Smartious photo when available.
-const BG_PHOTO = 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1600&q=80&auto=format&fit=crop'
+const BG_PHOTO_DESKTOP = 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1600&q=80&auto=format&fit=crop'
+const BG_PHOTO_MOBILE  = 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=900&q=75&auto=format&fit=crop'
 
 // Inline Smartious logo — crimson gradient shield, gold star, white open book
 const SmartiousLogo = ({ size = 40, withText = false }) => (
@@ -318,20 +319,23 @@ export default function LoginPage() {
         backgroundColor:'#1a1a1a',
         overflow:'hidden',
       }} className="login-right">
-        <img
-          src={BG_PHOTO}
-          alt=""
-          aria-hidden="true"
-          onError={e => { e.currentTarget.style.display='none' }}
-          style={{
-            position:'absolute',
-            inset:0,
-            width:'100%',
-            height:'100%',
-            objectFit:'cover',
-            objectPosition:'center',
-          }}
-        />
+        <picture>
+          <source media="(max-width: 880px)" srcSet={BG_PHOTO_MOBILE}/>
+          <img
+            src={BG_PHOTO_DESKTOP}
+            alt=""
+            aria-hidden="true"
+            onError={e => { e.currentTarget.style.display='none' }}
+            style={{
+              position:'absolute',
+              inset:0,
+              width:'100%',
+              height:'100%',
+              objectFit:'cover',
+              objectPosition:'center',
+            }}
+          />
+        </picture>
         {/* Subtle overlay so photo has consistent mood */}
         <div style={{
           position:'absolute',
@@ -365,15 +369,25 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Responsive — collapse to single column on small screens */}
+      {/* Responsive — on mobile, photo becomes the background and form sits over it */}
       <style>{`
         @media (max-width: 880px) {
           .login-left {
+            position: relative;
             flex: 1 !important;
             padding: 40px 28px !important;
             min-height: 100vh;
+            background: linear-gradient(160deg, rgba(139,26,46,.92) 0%, rgba(10,8,6,.88) 100%) !important;
+            z-index: 2 !important;
+            box-shadow: none !important;
           }
           .login-right {
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 1 !important;
+            display: block !important;
+          }
+          .login-right > div:last-child {
             display: none !important;
           }
         }
