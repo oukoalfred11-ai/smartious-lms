@@ -6736,13 +6736,33 @@ export default function LandingPage() {
             'description': 'Qualified home tutors visit students across Nairobi. Online tuition delivered live by subject specialists in CBC, IGCSE, Cambridge A-Level, IB Diploma, Pearson Edexcel and American curricula.',
           })}}/>
 
-          {/* HERO */}
+          {/* HERO with splash image background + gradient overlay */}
           <section className="sec" style={{
+            position:'relative',
             background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
             color:'#fff',
             padding:'72px 0 56px',
+            overflow:'hidden',
           }}>
-            <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
+            <img
+              src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1600&q=80&auto=format&fit=crop"
+              alt=""
+              aria-hidden="true"
+              onError={e => { e.currentTarget.style.display='none' }}
+              style={{
+                position:'absolute',inset:0,
+                width:'100%',height:'100%',objectFit:'cover',
+                opacity:0.32,
+                filter:'saturate(.85)',
+                zIndex:0,
+              }}
+            />
+            <div style={{
+              position:'absolute',inset:0,
+              background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,
+              zIndex:1,
+            }}/>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:14}}>Tuition Services · Nairobi</div>
               <h1 style={{
                 fontFamily:"'Playfair Display',serif",
@@ -7014,7 +7034,7 @@ export default function LandingPage() {
               </a>
             </div>
             <div style={{marginTop:30,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
-              📞 +254 745 021 212 · 📧 hellosmartious@gmail.com · 📍 Diamond Plaza, Parklands, Nairobi
+              Phone: +254 745 021 212 · Email: hellosmartious@gmail.com · Office: Diamond Plaza, Parklands, Nairobi
             </div>
           </div></section>
         </>
@@ -7057,17 +7077,41 @@ export default function LandingPage() {
               'description': area.intro,
             })}}/>
 
-            {/* HERO */}
+            {/* HERO with splash image background + gradient overlay */}
             <section className="sec" style={{
+              position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff',
               padding:'60px 0 48px',
+              overflow:'hidden',
             }}>
-              <div className="wrap">
+              {area.heroImg && (
+                <>
+                  <img
+                    src={area.heroImg}
+                    alt=""
+                    aria-hidden="true"
+                    onError={e => { e.currentTarget.style.display='none' }}
+                    style={{
+                      position:'absolute',inset:0,
+                      width:'100%',height:'100%',objectFit:'cover',
+                      opacity:0.32,
+                      filter:'saturate(.85)',
+                      zIndex:0,
+                    }}
+                  />
+                  <div style={{
+                    position:'absolute',inset:0,
+                    background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,
+                    zIndex:1,
+                  }}/>
+                </>
+              )}
+              <div className="wrap" style={{position:'relative',zIndex:2}}>
                 <a
                   href="/tuition-nairobi"
                   onClick={(e)=>{e.preventDefault(); P('tuition-nairobi')}}
-                  style={{color:'rgba(255,255,255,.65)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   Tuition Nairobi
                 </a>
@@ -7077,13 +7121,14 @@ export default function LandingPage() {
                   fontSize:'clamp(2rem,4.5vw,3rem)',
                   fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:16,
                 }}>Tuition in <em style={{color:V.gold3,fontStyle:'italic'}}>{area.name}</em></h1>
-                <p style={{fontSize:16,color:'rgba(255,255,255,.86)',lineHeight:1.65,marginBottom:22,maxWidth:720}}>
+                <p style={{fontSize:16,color:'rgba(255,255,255,.9)',lineHeight:1.65,marginBottom:22,maxWidth:720}}>
                   {area.intro}
                 </p>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
                   <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>
-                    Book a Tutor →
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book a Tutor
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   </button>
                   <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like tuition in ' + area.name + '.')}
                     target="_blank" rel="noopener noreferrer"
@@ -7093,6 +7138,15 @@ export default function LandingPage() {
                 </div>
               </div>
             </section>
+
+            {/* EXTENDED INTRO — additional SEO content */}
+            {area.introExtended && (
+              <section className="sec" style={{background:V.bone,padding:'40px 0'}}><div className="wrap">
+                <div style={{maxWidth:820,margin:'0 auto'}}>
+                  <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{area.introExtended}</p>
+                </div>
+              </div></section>
+            )}
 
             {/* LOCAL CONTEXT */}
             <section className="sec" style={{background:'#fff'}}><div className="wrap">
@@ -7133,36 +7187,66 @@ export default function LandingPage() {
               </div>
             </div></section>
 
-            {/* LOCAL FAQ */}
-            <section className="sec" style={{background:'#fff'}}><div className="wrap">
-              <div style={{maxWidth:780,margin:'0 auto'}}>
-                <div className="eyebrow" style={{justifyContent:'center',marginBottom:14}}>Quick answers for {area.name}</div>
-                <details style={{background:V.bone,border:'1px solid '+V.line,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
-                  <summary style={{cursor:'pointer',padding:'16px 18px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>{area.localFaq.q}</summary>
-                  <div style={{padding:'0 18px 16px',fontSize:14,color:V.sl,lineHeight:1.7,borderTop:'1px solid '+V.line,paddingTop:14}}>
-                    {area.localFaq.a}
+            {/* COMMON SUBJECTS — SEO + parent value */}
+            {area.commonSubjects && area.commonSubjects.length > 0 && (
+              <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                <div style={{maxWidth:880,margin:'0 auto'}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What we tutor in {area.name}</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                      Most-requested subjects
+                    </h2>
+                    <p style={{fontSize:13.5,color:V.sl3,marginTop:10,lineHeight:1.6,maxWidth:560,margin:'10px auto 0'}}>
+                      These are the subjects {area.name} families most commonly ask us about. Your child does not need to pick from this list — we cover every subject in our curriculum range.
+                    </p>
                   </div>
-                </details>
-                <details style={{background:V.bone,border:'1px solid '+V.line,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:10}}>
+                    {area.commonSubjects.map((s, i) => (
+                      <div key={i} style={{
+                        background:V.bone,border:'1px solid '+V.line,borderRadius:8,
+                        padding:'10px 14px',
+                        fontSize:13,color:V.ink,fontWeight:600,
+                        display:'flex',alignItems:'center',gap:8,
+                      }}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={V.gold2} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0}}><path d="M5 12l5 5L20 7"/></svg>
+                        {s}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div></section>
+            )}
+
+            {/* LOCAL FAQ — multiple area-specific Qs */}
+            <section className="sec" style={{background:V.bone}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:24}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Quick answers for {area.name}</div>
+                  <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                    Frequently asked
+                  </h2>
+                </div>
+                {area.localFaqs && area.localFaqs.map((f, i) => (
+                  <details key={i} style={{background:'#fff',border:'1px solid '+V.line,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                    <summary style={{cursor:'pointer',padding:'16px 18px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>{f.q}</summary>
+                    <div style={{padding:'0 18px 16px',fontSize:14,color:V.sl,lineHeight:1.7,borderTop:'1px solid '+V.line,paddingTop:14}}>
+                      {f.a}
+                    </div>
+                  </details>
+                ))}
+                <details style={{background:'#fff',border:'1px solid '+V.line,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
                   <summary style={{cursor:'pointer',padding:'16px 18px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>How quickly can a tutor reach {area.name}?</summary>
                   <div style={{padding:'0 18px 16px',fontSize:14,color:V.sl,lineHeight:1.7,borderTop:'1px solid '+V.line,paddingTop:14}}>
-                    Outside rush hour, tutors typically reach {area.name} addresses within the timing window described above. We schedule first sessions during off-peak hours where possible (morning or post-7pm). For families in {area.name} who want guaranteed scheduling with no traffic risk, we recommend online tuition.
-                  </div>
-                </details>
-                <details style={{background:V.bone,border:'1px solid '+V.line,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
-                  <summary style={{cursor:'pointer',padding:'16px 18px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>What subjects can my child learn?</summary>
-                  <div style={{padding:'0 18px 16px',fontSize:14,color:V.sl,lineHeight:1.7,borderTop:'1px solid '+V.line,paddingTop:14}}>
-                    All primary subjects (CBC and British primary), full IGCSE / Edexcel / A-Level subjects (Maths, Sciences, English, Humanities, Languages, Business, Computer Science), full IB Diploma subjects, KCSE revision for Form 3 and Form 4 students, and university admissions support (UCAS, Common App, SAT). See the main Tuition Nairobi page for the complete subject list.
+                    Outside rush hour, tutors typically reach {area.name} addresses within the timing window described in the commute note above. We schedule first sessions during off-peak hours where possible (morning or post-7pm). For families in {area.name} who want guaranteed scheduling with no traffic risk, online tuition is the reliable alternative.
                   </div>
                 </details>
               </div>
-              {/* FAQ schema */}
+              {/* FAQ schema — uses all FAQs from the area */}
               <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
                 '@context':'https://schema.org','@type':'FAQPage',
-                'mainEntity':[
-                  { '@type':'Question','name': area.localFaq.q, 'acceptedAnswer':{ '@type':'Answer','text': area.localFaq.a }},
-                  { '@type':'Question','name': 'How quickly can a tutor reach ' + area.name + '?','acceptedAnswer':{ '@type':'Answer','text': 'Off-peak timing window per the commute note. Online tuition has no scheduling risk.' }},
-                ],
+                'mainEntity':(area.localFaqs || []).map(f => ({
+                  '@type':'Question','name': f.q, 'acceptedAnswer':{ '@type':'Answer','text': f.a }
+                })),
               })}}/>
             </div></section>
 
