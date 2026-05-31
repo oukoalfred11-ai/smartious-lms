@@ -5138,6 +5138,146 @@ export default function LandingPage() {
             )}
             {/* /BAHRAIN-ONLY RICH SECTIONS */}
 
+            {/* QATAR-ONLY RICH SECTIONS — only render when ctry.isQatar is true */}
+            {ctry.isQatar && (
+              <>
+                {/* WHY DOHA FAMILIES USE SMARTIOUS */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Doha parents</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                      {ctry.whyQatar.heading}
+                    </h2>
+                    <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{ctry.whyQatar.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:18,maxWidth:1100,margin:'0 auto'}}>
+                    {ctry.whyQatar.points.map((p,i) => (
+                      <div key={i} style={{
+                        background:V.bone,border:'1px solid '+V.line,borderRadius:14,
+                        padding:'22px 22px',
+                      }}>
+                        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.1rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>{p.h}</h3>
+                        <p style={{fontSize:14,color:V.sl,lineHeight:1.65}}>{p.p}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div></section>
+
+                {/* UNIVERSITY PATHWAYS FROM DOHA */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                      {ctry.qatarUniversities.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.qatarUniversities.intro}</p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
+                    {ctry.qatarUniversities.pathways.map((pw,i) => (
+                      <div key={i} style={{
+                        background:'#fff',border:'1px solid '+V.line,borderRadius:12,
+                        padding:'22px 22px',borderLeft:'4px solid '+V.cr,
+                      }}>
+                        <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:8}}>{pw.region}</div>
+                        <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65}}>{pw.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div></section>
+
+                {/* QATAR PRICING TABLE */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Pricing for Qatar</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                      {ctry.qatarPricing.heading}
+                    </h2>
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.qatarPricing.intro}</p>
+                  </div>
+                  <div style={{maxWidth:980,margin:'0 auto',background:V.bone,border:'1px solid '+V.line,borderRadius:14,overflow:'hidden'}}>
+                    {ctry.qatarPricing.rows.map((r,i) => (
+                      <div key={i} style={{
+                        display:'grid',
+                        gridTemplateColumns:'1fr 2fr 1fr 1fr',
+                        gap:14,
+                        padding:'18px 20px',
+                        borderTop:i===0?'none':'1px solid '+V.line,
+                        alignItems:'center',
+                      }} className="qatar-pricing-row">
+                        <div style={{fontFamily:"'Playfair Display',serif",fontSize:'1rem',fontWeight:700,color:V.ink}}>{r.tier}</div>
+                        <div style={{fontSize:13,color:V.sl,lineHeight:1.55}}>{r.detail}</div>
+                        <div style={{fontSize:14,fontWeight:800,color:V.cr,textAlign:'right'}}>{r.priceUSD}</div>
+                        <div style={{fontSize:12,color:V.sl3,textAlign:'right'}}>{r.priceLocal}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{maxWidth:780,margin:'24px auto 0',textAlign:'center',fontSize:13.5,color:V.sl,fontStyle:'italic',lineHeight:1.65}}>
+                    {ctry.qatarPricing.compareNote}
+                  </p>
+                  <style>{`@media (max-width: 800px) { .qatar-pricing-row { grid-template-columns: 1fr !important; gap: 4px !important; } .qatar-pricing-row > div { text-align: left !important; } }`}</style>
+                </div></section>
+
+                {/* SMARTIOUS VS DOHA INTERNATIONAL SCHOOLS COMPARISON */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Comparison</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                      {ctry.qatarComparison.heading}
+                    </h2>
+                    <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{ctry.qatarComparison.intro}</p>
+                  </div>
+                  <div style={{maxWidth:980,margin:'0 auto',background:'#fff',border:'1px solid '+V.line,borderRadius:14,overflow:'hidden'}}>
+                    <div style={{display:'grid',gridTemplateColumns:'1.5fr 2fr 2fr',gap:14,padding:'14px 20px',background:V.ink,color:'#fff'}} className="qatar-comparison-header">
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase'}}>Dimension</div>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3}}>Smartious</div>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase'}}>Doha international school</div>
+                    </div>
+                    {ctry.qatarComparison.rows.map((r,i) => (
+                      <div key={i} style={{
+                        display:'grid',
+                        gridTemplateColumns:'1.5fr 2fr 2fr',gap:14,
+                        padding:'14px 20px',
+                        borderTop:'1px solid '+V.line,
+                        alignItems:'center',
+                      }} className="qatar-comparison-row">
+                        <div style={{fontSize:13,fontWeight:600,color:V.ink}}>{r.dim}</div>
+                        <div style={{fontSize:13,color:V.cr,fontWeight:600,lineHeight:1.5}}>{r.smartious}</div>
+                        <div style={{fontSize:13,color:V.sl,lineHeight:1.5}}>{r.alt}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <style>{`@media (max-width: 800px) { .qatar-comparison-header, .qatar-comparison-row { grid-template-columns: 1fr !important; gap: 4px !important; } }`}</style>
+                </div></section>
+
+                {/* WEDNESDAY ACTIVITIES TEASER */}
+                <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                  <div style={{textAlign:'center',marginBottom:28,maxWidth:760,margin:'0 auto 28px'}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Beyond academics</div>
+                    <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                      {ctry.activitiesTeaser.heading}
+                    </h2>
+                    <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{ctry.activitiesTeaser.intro}</p>
+                  </div>
+                  <div style={{display:'flex',flexWrap:'wrap',gap:10,justifyContent:'center',maxWidth:760,margin:'0 auto'}}>
+                    {ctry.activitiesTeaser.items.map((item,i) => (
+                      <div key={i} style={{
+                        background:V.bone,border:'1px solid '+V.line,borderRadius:8,
+                        padding:'8px 14px',
+                        fontSize:13,fontWeight:600,color:V.ink,
+                      }}>{item}</div>
+                    ))}
+                  </div>
+                  <div style={{textAlign:'center',marginTop:24}}>
+                    <button onClick={() => P('activities')}
+                      style={{background:'transparent',color:V.cr,border:'1px solid '+V.cr,padding:'10px 22px',borderRadius:8,fontSize:13,fontWeight:700,cursor:'pointer'}}>
+                      See full Wednesday programme
+                    </button>
+                  </div>
+                </div></section>
+              </>
+            )}
+            {/* /QATAR-ONLY RICH SECTIONS */}
+
             {/* PAKISTAN-ONLY RICH SECTIONS — only render when ctry.isPakistan is true */}
             {ctry.isPakistan && (
               <>
