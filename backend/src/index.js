@@ -54,6 +54,7 @@ app.use(rateLimit({
 app.use('/api/auth',           authLimiter, require('./routes/auth'));
 app.use('/api/users',          require('./routes/users'));
 app.use('/api/communication', require('./routes/communication'));
+app.use('/api/payments', require('./routes/paymentRoutes'))
 app.use('/api/teachers',       require('./routes/teachers'));
 app.use('/api/teacher-profile', require('./routes/teacher-profile'));
 app.use('/api/allocations',    require('./routes/allocations'));
