@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useToast, api, useAuth } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 
@@ -11,7 +11,7 @@ const PAGES = {
 }
 const mCol = (pct) => pct >= 70 ? 'var(--g600)' : pct >= 50 ? 'var(--a600)' : 'var(--r500)'
 
-// ── PROGRESS RING — bright golden-yellow donut ─────────────
+// ── PROGRESS RING ─────────────────────────────────────────
 function ProgressRing({ pct = 0, size = 92, stroke = 9, label, sublabel }) {
   const r = (size - stroke) / 2
   const circ = 2 * Math.PI * r
@@ -36,13 +36,9 @@ function ProgressRing({ pct = 0, size = 92, stroke = 9, label, sublabel }) {
   )
 }
 
-// ── Initials helper ──
 const initials = (name) => (name || '').split(/\s+/).filter(Boolean).slice(0,2).map(w => w[0]?.toUpperCase()).join('') || '?'
 
-// ── TeacherCard — renders teacher profile like the landing page ──
-// Used by Programme Details and Tutor & Advisor. Shows avatar / name /
-// title / specialisations / years / quals / bio, plus a button that
-// opens the Compose page pre-filled to that teacher.
+// ── TEACHER CARD ──────────────────────────────────────────
 function TeacherCard({ teacher, onEmail }) {
   if (!teacher) return null
   const name = teacher.name || `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim() || 'Teacher'
@@ -98,6 +94,19 @@ function TeacherCard({ teacher, onEmail }) {
   )
 }
 
+// ── PAYMENT STATUS BADGE ──────────────────────────────────
+function PayBadge({ status }) {
+  const s = (status || '').toLowerCase()
+  const cfg = s === 'success' || s === 'confirmed' || s === 'paid'
+    ? { cls:'badge-green', label:'Paid' }
+    : s === 'pending'
+    ? { cls:'badge-amber', label:'Pending' }
+    : s === 'failed'
+    ? { cls:'badge-red', label:'Failed' }
+    : { cls:'badge-blue', label: status || 'Recorded' }
+  return <span className={`badge ${cfg.cls}`}>{cfg.label}</span>
+}
+
 export default function ParentPortal() {
   const toast = useToast()
   const store = useStore()
@@ -112,39 +121,47 @@ export default function ParentPortal() {
 
   const parentName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Parent'
 
-  // ── Children + selected child ──────────────────────────
+  // ── Children ──────────────────────────────────────────
   const [children, setChildren] = useState([])
   const [childrenLoading, setChildrenLoading] = useState(true)
   const [selectedChildId, setSelectedChildId] = useState(null)
 
-  // Per-child real data
+  // Per-child data
   const [overview, setOverview] = useState(null)
   const [progress, setProgress] = useState(null)
   const [childLoading, setChildLoading] = useState(false)
 
-  // Live classes for selected child
+  // Live classes
   const [liveClasses, setLiveClasses] = useState([])
   const [liveLoading, setLiveLoading] = useState(false)
 
-  // Teachers (resolved profile data for the child's allocated teachers)
+  // Teachers
   const [teachers, setTeachers] = useState([])
   const [teachersLoading, setTeachersLoading] = useState(false)
 
-  // ── Compose-message state ──────────────────────────────
+  // Compose message
   const [composeOpen, setComposeOpen] = useState(false)
-  const [composeRecipients, setComposeRecipients] = useState([]) // [{email, name}]
+  const [composeRecipients, setComposeRecipients] = useState([])
   const [composeSubject, setComposeSubject] = useState('')
   const [composeBody, setComposeBody] = useState('')
   const [composeSending, setComposeSending] = useState(false)
   const [messageHistory, setMessageHistory] = useState([])
   const [historyLoading, setHistoryLoading] = useState(false)
 
-  // ── Payment state ──────────────────────────────────────
+  // ── Payment state ─────────────────────────────────────
   const [payAmount, setPayAmount] = useState('')
   const [payDescription, setPayDescription] = useState('')
   const [payLoading, setPayLoading] = useState(false)
 
-  // Load the parent's children once
+  // Real payment history from backend
+  const [payHistory, setPayHistory] = useState([])
+  const [payHistoryLoading, setPayHistoryLoading] = useState(false)
+  const payHistoryFetched = useRef(false)
+
+  // Fee summary from backend
+  const [feeSummary, setFeeSummary] = useState(null)
+
+  // ── Fetch children ─────────────────────────────────────
   useEffect(() => {
     api.get('/parents/my-children')
       .then(({data}) => {
@@ -158,7 +175,7 @@ export default function ParentPortal() {
       .finally(() => setChildrenLoading(false))
   }, [])
 
-  // Load overview + progress whenever the selected child changes
+  // ── Fetch overview + progress ──────────────────────────
   useEffect(() => {
     if (!selectedChildId) { setOverview(null); setProgress(null); setLiveClasses([]); setTeachers([]); return }
     setChildLoading(true)
@@ -170,27 +187,21 @@ export default function ParentPortal() {
         if (ov.data?.success) setOverview(ov.data.data)
         if (pr.data?.success) setProgress(pr.data.data)
       })
-      .catch(() => toast.error('Could not load your child\'s data.'))
+      .catch(() => toast.error("Could not load your child's data."))
       .finally(() => setChildLoading(false))
   }, [selectedChildId])
 
-  // Load live classes for selected child
+  // ── Fetch live classes ─────────────────────────────────
   useEffect(() => {
     if (!selectedChildId) return
     if (page !== 'lessons' && page !== 'dashboard') return
     setLiveLoading(true)
-    // Try parent-scoped endpoint first, then fall back to a generic filter.
-    // We use a defensive try-chain so a missing endpoint doesn't crash the page.
     api.get('/parents/child/' + selectedChildId + '/live-classes')
       .then(({data}) => {
-        if (data?.success) {
-          setLiveClasses(data.data?.classes || data.data || [])
-        } else {
-          setLiveClasses([])
-        }
+        if (data?.success) setLiveClasses(data.data?.classes || data.data || [])
+        else setLiveClasses([])
       })
       .catch(() => {
-        // Endpoint may not exist yet — try the timetable endpoint as fallback
         api.get('/timetable/student/' + selectedChildId)
           .then(({data}) => setLiveClasses(data?.data?.entries || data?.entries || []))
           .catch(() => setLiveClasses([]))
@@ -198,86 +209,82 @@ export default function ParentPortal() {
       .finally(() => setLiveLoading(false))
   }, [selectedChildId, page])
 
-  // Load teacher profiles for the allocated teachers (Programme + Tutor pages)
+  // ── Fetch teacher profiles ────────────────────────────
   useEffect(() => {
     if (!overview || !Array.isArray(overview.allocations) || overview.allocations.length === 0) {
       setTeachers([]); return
     }
     setTeachersLoading(true)
-    // Each allocation should have a teacherId. Fetch profiles in one call if
-    // a bulk endpoint exists, else fall back to allocations data shape.
     const teacherIds = [...new Set(overview.allocations.map(a => a.teacherId).filter(Boolean))]
     if (teacherIds.length === 0) {
-      // No teacher IDs — use whatever profile data is already on the allocation
       const fromAlloc = overview.allocations.map(a => ({
-        _id: a.teacherId,
-        name: a.teacher,
-        subjectName: a.subjectName,
-        curriculum: a.curriculum,
-        email: a.teacherEmail,
-        avatar: a.teacherAvatar,
-        jobTitle: a.teacherJobTitle,
-        bio: a.teacherBio,
-        qualifications: a.teacherQualifications,
-        specializations: a.teacherSpecializations,
-        yearsOfExperience: a.teacherYearsOfExperience,
+        _id: a.teacherId, name: a.teacher, subjectName: a.subjectName, curriculum: a.curriculum,
+        email: a.teacherEmail, avatar: a.teacherAvatar, jobTitle: a.teacherJobTitle,
+        bio: a.teacherBio, qualifications: a.teacherQualifications,
+        specializations: a.teacherSpecializations, yearsOfExperience: a.teacherYearsOfExperience,
       }))
-      setTeachers(fromAlloc)
-      setTeachersLoading(false)
-      return
+      setTeachers(fromAlloc); setTeachersLoading(false); return
     }
     api.post('/parents/teachers/by-ids', { ids: teacherIds })
       .then(({data}) => {
         if (data?.success) {
-          // Merge with allocation data so we keep subject/curriculum context
           const profiles = data.data?.teachers || []
           const merged = overview.allocations.map(a => {
             const p = profiles.find(t => String(t._id) === String(a.teacherId)) || {}
-            return {
-              ...p,
-              _id: a.teacherId,
+            return { ...p, _id: a.teacherId,
               name: p.firstName ? `${p.firstName} ${p.lastName || ''}`.trim() : (a.teacher || 'Teacher'),
-              subjectName: a.subjectName,
-              curriculum: a.curriculum,
-            }
+              subjectName: a.subjectName, curriculum: a.curriculum }
           })
           setTeachers(merged)
         }
       })
       .catch(() => {
-        // Bulk endpoint not available — use the allocation data only
-        const fromAlloc = overview.allocations.map(a => ({
-          _id: a.teacherId,
-          name: a.teacher,
-          subjectName: a.subjectName,
-          curriculum: a.curriculum,
-        }))
-        setTeachers(fromAlloc)
+        setTeachers(overview.allocations.map(a => ({
+          _id: a.teacherId, name: a.teacher, subjectName: a.subjectName, curriculum: a.curriculum,
+        })))
       })
       .finally(() => setTeachersLoading(false))
   }, [overview])
 
-  // Load message history when Messages page opens
+  // ── Fetch message history ─────────────────────────────
   useEffect(() => {
     if (page !== 'messages') return
     setHistoryLoading(true)
     api.get('/communication/parent/history')
-      .then(({data}) => {
-        if (data?.success) setMessageHistory(data.data?.history || [])
-      })
+      .then(({data}) => { if (data?.success) setMessageHistory(data.data?.history || []) })
       .catch(() => setMessageHistory([]))
       .finally(() => setHistoryLoading(false))
   }, [page])
 
-  const selectedChild = children.find(c => c._id === selectedChildId) || null
+  // ── Fetch payment history + fee summary (once, on first payments visit) ──
+  useEffect(() => {
+    if (page !== 'payments') return
+    if (!payHistoryFetched.current) {
+      payHistoryFetched.current = true
+      setPayHistoryLoading(true)
+      // Fetch real payment records
+      api.get('/payments/my-payments')
+        .then(({data}) => {
+          if (data?.success) setPayHistory(data.data?.payments || [])
+        })
+        .catch(() => {
+          // Endpoint not built yet — fall back to store cache
+          setPayHistory(store.payments || [])
+        })
+        .finally(() => setPayHistoryLoading(false))
+      // Fetch fee summary (outstanding balance, next due date, etc.)
+      api.get('/payments/my-fee-summary')
+        .then(({data}) => { if (data?.success) setFeeSummary(data.data) })
+        .catch(() => { /* no fee summary endpoint yet — use defaults */ })
+    }
+  }, [page])
 
-  // Subjects from real progress data
+  const selectedChild = children.find(c => c._id === selectedChildId) || null
   const subjects = (progress?.subjects || []).map(s => ({
     name: s.name, score: s.progressPct, col: s.color || '#7D1025',
     total: s.totalLessons, mastered: s.masteredLessons,
   }))
   const avgScore = progress?.overallPct || 0
-
   const announcements = store.getAnnouncements('parent')
 
   // ── Mshauri ───────────────────────────────────────────
@@ -294,12 +301,9 @@ export default function ParentPortal() {
     setAiLoading(false)
   }
 
-  // ── Open Compose with a pre-filled teacher recipient ──
+  // ── Compose helpers ───────────────────────────────────
   const emailTeacher = (teacher) => {
-    if (!teacher || !teacher.email) {
-      toast.error('No email on file for this teacher.')
-      return
-    }
+    if (!teacher || !teacher.email) { toast.error('No email on file for this teacher.'); return }
     const tName = teacher.name || `${teacher.firstName || ''} ${teacher.lastName || ''}`.trim()
     setComposeRecipients([{email: teacher.email, name: tName}])
     setComposeSubject(selectedChild ? `Re: ${selectedChild.name}` : '')
@@ -308,7 +312,6 @@ export default function ParentPortal() {
     setPage('messages')
   }
 
-  // ── Send message ──────────────────────────────────────
   const sendMessage = async () => {
     if (!composeSubject.trim()) { toast.error('Subject is required'); return }
     if (!composeBody.trim())    { toast.error('Message body is required'); return }
@@ -316,15 +319,12 @@ export default function ParentPortal() {
     setComposeSending(true)
     try {
       const {data} = await api.post('/communication/parent/send', {
-        subject: composeSubject.trim(),
-        body: composeBody,
-        recipientEmails: composeRecipients,
-        childId: selectedChildId,
+        subject: composeSubject.trim(), body: composeBody,
+        recipientEmails: composeRecipients, childId: selectedChildId,
       })
       if (data?.success) {
         toast.ok(data.message || 'Message sent.')
         setComposeOpen(false); setComposeRecipients([]); setComposeSubject(''); setComposeBody('')
-        // Refresh history
         api.get('/communication/parent/history')
           .then(({data}) => { if (data?.success) setMessageHistory(data.data?.history || []) })
           .catch(() => {})
@@ -332,15 +332,12 @@ export default function ParentPortal() {
         toast.error(data?.message || 'Could not send message.')
       }
     } catch (e) {
-      const msg = e?.response?.data?.message || 'Could not send message. Please try again.'
-      toast.error(msg)
+      toast.error(e?.response?.data?.message || 'Could not send message. Please try again.')
     }
     setComposeSending(false)
   }
 
-  // ── Paystack inline payment ───────────────────────────
-  // Uses the Paystack popup that's already on the landing page.
-  // We load it lazily if not already loaded.
+  // ── Paystack ──────────────────────────────────────────
   const loadPaystackScript = () => new Promise((resolve, reject) => {
     if (window.PaystackPop) return resolve(true)
     const existing = document.querySelector('script[src*="paystack"]')
@@ -363,8 +360,6 @@ export default function ParentPortal() {
     if (!user?.email) { toast.error('Your account has no email on file. Contact admin.'); return }
     setPayLoading(true)
     try {
-      // Ask the backend to initialise the transaction (gets a reference + verifies amount).
-      // If your backend doesn't have this endpoint yet, the catch falls back to client-side inline.
       let paystackKey = ''
       let reference = ''
       try {
@@ -379,8 +374,7 @@ export default function ParentPortal() {
           reference = data.reference || ''
         }
       } catch {
-        // Backend endpoint missing — fall back to client-only inline (less secure
-        // but works while the backend route is being built).
+        // Backend not built yet — fall back to client-only inline
         paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || ''
       }
 
@@ -395,42 +389,58 @@ export default function ParentPortal() {
       const handler = window.PaystackPop.setup({
         key: paystackKey,
         email: user.email,
-        amount: amt * 100, // Paystack uses smallest currency unit
+        amount: amt * 100,
         currency: 'KES',
         ref: reference || ('SM-' + Date.now()),
         metadata: {
           custom_fields: [
             { display_name: 'Parent', variable_name: 'parent_name', value: parentName },
-            { display_name: 'Child', variable_name: 'child', value: selectedChild?.name || '' },
+            { display_name: 'Child',  variable_name: 'child',       value: selectedChild?.name || '' },
             { display_name: 'Description', variable_name: 'description', value: payDescription || '' },
           ],
         },
         callback: function(response) {
-          // Verify server-side
           api.post('/payments/paystack/verify', { reference: response.reference })
             .then(({data}) => {
               if (data?.success) {
                 toast.ok('Payment confirmed! Reference: ' + response.reference)
-                store.addPayment({
-                  desc: payDescription || 'Fee payment',
-                  amount: 'KES ' + amt.toLocaleString(),
+                const newPay = {
+                  _id: response.reference,
+                  description: payDescription || 'Fee payment',
+                  amount: amt,
+                  amountDisplay: 'KES ' + amt.toLocaleString(),
                   method: 'Paystack',
-                  ref: response.reference,
-                })
+                  reference: response.reference,
+                  status: 'success',
+                  createdAt: new Date().toISOString(),
+                }
+                setPayHistory(h => [newPay, ...h])
+                store.addPayment({ desc: payDescription || 'Fee payment', amount: 'KES ' + amt.toLocaleString(), method: 'Paystack', ref: response.reference })
+                // Update fee summary outstanding balance if present
+                setFeeSummary(s => s && s.outstandingBalance != null
+                  ? { ...s, outstandingBalance: Math.max(0, s.outstandingBalance - amt) }
+                  : s)
                 setPayAmount(''); setPayDescription('')
+                // Reset so next visit to payments page re-fetches
+                payHistoryFetched.current = false
               } else {
                 toast.error('Payment received but verification failed. Contact admin with reference: ' + response.reference)
               }
             })
             .catch(() => {
-              // Verification endpoint missing — still record locally so the user has the ref
               toast.ok('Payment ref: ' + response.reference + ' — verification pending.')
-              store.addPayment({
-                desc: payDescription || 'Fee payment',
-                amount: 'KES ' + amt.toLocaleString(),
+              const newPay = {
+                _id: response.reference,
+                description: payDescription || 'Fee payment',
+                amount: amt,
+                amountDisplay: 'KES ' + amt.toLocaleString(),
                 method: 'Paystack',
-                ref: response.reference,
-              })
+                reference: response.reference,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+              }
+              setPayHistory(h => [newPay, ...h])
+              store.addPayment({ desc: payDescription || 'Fee payment', amount: 'KES ' + amt.toLocaleString(), method: 'Paystack', ref: response.reference })
               setPayAmount(''); setPayDescription('')
             })
         },
@@ -445,21 +455,27 @@ export default function ParentPortal() {
     setPayLoading(false)
   }
 
-  // ── Format a live-class entry into a consistent shape ──
-  const formatLiveClass = (c) => {
-    // The backend may return different shapes from /live-classes vs /timetable
-    return {
-      id: c._id || c.id,
-      title: c.title || c.subject || c.subjectName || 'Lesson',
-      teacher: c.teacherName || c.teacher || (c.teacherId && c.teacherId.firstName ? `${c.teacherId.firstName} ${c.teacherId.lastName}` : ''),
-      startTime: c.startTime || c.startsAt || c.start || '',
-      endTime: c.endTime || c.endsAt || c.end || '',
-      dayOfWeek: c.dayOfWeek || '',
-      meetingLink: c.meetingLink || c.zoomUrl || c.joinUrl || '',
-      status: c.status || (c.isLive ? 'live' : 'scheduled'),
-      isLive: c.isLive || c.status === 'live',
-    }
-  }
+  // ── Format live class ─────────────────────────────────
+  const formatLiveClass = (c) => ({
+    id: c._id || c.id,
+    title: c.title || c.subject || c.subjectName || 'Lesson',
+    teacher: c.teacherName || c.teacher || (c.teacherId?.firstName ? `${c.teacherId.firstName} ${c.teacherId.lastName}` : ''),
+    startTime: c.startTime || c.startsAt || c.start || '',
+    endTime: c.endTime || c.endsAt || c.end || '',
+    dayOfWeek: c.dayOfWeek || '',
+    meetingLink: c.meetingLink || c.zoomUrl || c.joinUrl || '',
+    status: c.status || (c.isLive ? 'live' : 'scheduled'),
+    isLive: c.isLive || c.status === 'live',
+  })
+
+  // ── Fee summary helpers ───────────────────────────────
+  const monthlyRate = feeSummary?.monthlyRate ?? store.fees?.individual_premium ?? 2999
+  const outstanding = feeSummary?.outstandingBalance
+  const nextDueDate = feeSummary?.nextDueDate
+  const nextDueAmount = feeSummary?.nextDueAmount
+
+  // ── Quick-fill amounts driven by fee summary ──────────
+  const quickAmounts = feeSummary?.quickAmounts || [2999, 4999, 9999, 14999]
 
   const NAV = [
     {id:'dashboard',  label:'Dashboard',          svg:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>'},
@@ -581,9 +597,9 @@ export default function ParentPortal() {
                       <div className="card">
                         <div className="chdr"><div className="ctitle">Subject Progress</div><button className="btn btn-g btn-sm" onClick={()=>setPage('progress')}>Full Report</button></div>
                         {subjects.length === 0 ? (
-                          <div style={{ padding:'20px 0', color:'var(--s400)', fontSize:13, textAlign:'center' }}>No subjects with progress yet.</div>
+                          <div style={{padding:'20px 0',color:'var(--s400)',fontSize:13,textAlign:'center'}}>No subjects with progress yet.</div>
                         ) : (
-                          <div style={{ display:'flex', flexWrap:'wrap', gap:14, justifyContent:'center', paddingTop:6 }}>
+                          <div style={{display:'flex',flexWrap:'wrap',gap:14,justifyContent:'center',paddingTop:6}}>
                             {subjects.map(s => <ProgressRing key={s.name} pct={s.score} label={s.name} sublabel={`${s.mastered}/${s.total}`} />)}
                           </div>
                         )}
@@ -603,7 +619,7 @@ export default function ParentPortal() {
             </div>
           )}
 
-          {/* ── PROGRESS ── (unchanged from existing) ── */}
+          {/* ── ACADEMIC PROGRESS ── */}
           {page==='progress' && (
             <div>
               <div style={{marginBottom:20}}>
@@ -632,7 +648,7 @@ export default function ParentPortal() {
                       <div style={{padding:'20px 0',color:'var(--s400)',fontSize:13,textAlign:'center'}}>No subject progress yet.</div>
                     ) : (
                       <>
-                        <div style={{ display:'flex', flexWrap:'wrap', gap:16, justifyContent:'center', paddingBottom:18, marginBottom:8, borderBottom:'1px solid var(--border)' }}>
+                        <div style={{display:'flex',flexWrap:'wrap',gap:16,justifyContent:'center',paddingBottom:18,marginBottom:8,borderBottom:'1px solid var(--border)'}}>
                           {(progress?.subjects || []).map((s,i) => <ProgressRing key={i} pct={s.progressPct} label={s.name} sublabel={`${s.masteredLessons}/${s.totalLessons}`} />)}
                         </div>
                         <table className="tbl">
@@ -657,7 +673,7 @@ export default function ParentPortal() {
             </div>
           )}
 
-          {/* ── LIVE LESSONS — real data with join buttons ── */}
+          {/* ── LIVE LESSONS ── */}
           {page==='lessons' && (
             <div>
               <div style={{marginBottom:20}}><div className="sec-tag">Live Classes</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Live Lessons</h2></div>
@@ -669,7 +685,7 @@ export default function ParentPortal() {
                 <div className="card" style={{padding:'48px 32px',textAlign:'center'}}>
                   <div className="serif" style={{fontSize:18,color:'var(--s900)',marginBottom:8}}>No live classes scheduled yet</div>
                   <div style={{fontSize:13.5,color:'var(--s500)',maxWidth:420,margin:'0 auto',lineHeight:1.6}}>
-                    Your child's teachers haven't published a live class schedule yet. Once they do, classes will appear here and you'll be able to join as a silent monitor.
+                    Your child's teachers haven't published a live class schedule yet.
                   </div>
                 </div>
               ) : (
@@ -703,15 +719,12 @@ export default function ParentPortal() {
                       </div>
                     )
                   })}
-                  <div style={{marginTop:14,padding:'10px 14px',background:'var(--bg)',borderRadius:'var(--rmd)',fontSize:11.5,color:'var(--s500)',lineHeight:1.6}}>
-                    <strong style={{color:'var(--s700)'}}>Parent monitoring:</strong> when you click "Join to Monitor" on a live class, you join the same session your child is in. You can observe quietly to see how the class runs. Please don't unmute unless invited.
-                  </div>
                 </div>
               )}
             </div>
           )}
 
-          {/* ── PROGRAMME DETAILS with TEACHER PROFILES ── */}
+          {/* ── PROGRAMME DETAILS ── */}
           {page==='programme' && (
             <div>
               <div style={{marginBottom:20}}><div className="sec-tag">Enrolment</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Programme Details</h2></div>
@@ -739,21 +752,15 @@ export default function ParentPortal() {
                       ))}
                     </div>
                   </div>
-                  <div style={{marginBottom:14}}>
-                    <h3 className="serif" style={{fontSize:20,color:'var(--s900)',marginBottom:6}}>Your child's teachers</h3>
-                    <div style={{fontSize:13,color:'var(--s500)'}}>Each subject has an allocated teacher. Tap "Email" to send them a message.</div>
-                  </div>
+                  <h3 className="serif" style={{fontSize:20,color:'var(--s900)',marginBottom:6}}>Your child's teachers</h3>
+                  <div style={{fontSize:13,color:'var(--s500)',marginBottom:14}}>Each subject has an allocated teacher. Tap "Email" to send them a message.</div>
                   {teachersLoading ? (
                     <div className="card" style={{padding:30,textAlign:'center',color:'var(--s400)'}}>Loading teacher profiles…</div>
                   ) : teachers.length === 0 ? (
-                    <div className="card" style={{padding:30,textAlign:'center',color:'var(--s500)'}}>
-                      No teachers allocated yet. The administration assigns teachers per subject.
-                    </div>
+                    <div className="card" style={{padding:30,textAlign:'center',color:'var(--s500)'}}>No teachers allocated yet.</div>
                   ) : (
                     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(420px,1fr))',gap:14}}>
-                      {teachers.map((t, i) => (
-                        <TeacherCard key={`${t._id||i}-${t.subjectName||i}`} teacher={t} onEmail={emailTeacher}/>
-                      ))}
+                      {teachers.map((t,i) => <TeacherCard key={`${t._id||i}-${t.subjectName||i}`} teacher={t} onEmail={emailTeacher}/>)}
                     </div>
                   )}
                 </>
@@ -761,7 +768,7 @@ export default function ParentPortal() {
             </div>
           )}
 
-          {/* ── TUTOR & ADVISOR — child's actual teachers ── */}
+          {/* ── TUTOR & ADVISOR ── */}
           {page==='tutor' && (
             <div>
               <div style={{marginBottom:20}}><div className="sec-tag">Support Team</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Tutor &amp; Advisor</h2></div>
@@ -771,19 +778,17 @@ export default function ParentPortal() {
                 <div className="card" style={{padding:40,textAlign:'center',color:'var(--s500)'}}>No child linked yet.</div>
               ) : teachers.length === 0 ? (
                 <div className="card" style={{padding:40,textAlign:'center',color:'var(--s500)'}}>
-                  No tutors assigned to {selectedChild.name} yet. The administration assigns subject teachers — they will appear here.
+                  No tutors assigned to {selectedChild.name} yet.
                 </div>
               ) : (
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(420px,1fr))',gap:14}}>
-                  {teachers.map((t, i) => (
-                    <TeacherCard key={`tutor-${t._id||i}-${i}`} teacher={t} onEmail={emailTeacher}/>
-                  ))}
+                  {teachers.map((t,i) => <TeacherCard key={`tutor-${t._id||i}-${i}`} teacher={t} onEmail={emailTeacher}/>)}
                 </div>
               )}
             </div>
           )}
 
-          {/* ── MESSAGES — email-style compose & history ── */}
+          {/* ── MESSAGES ── */}
           {page==='messages' && (
             <div>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:10,marginBottom:20}}>
@@ -801,12 +806,11 @@ export default function ParentPortal() {
                     <div className="ctitle">New Message</div>
                     <button className="btn btn-s btn-sm" onClick={() => setComposeOpen(false)}>Cancel</button>
                   </div>
-
                   <div style={{marginBottom:12}}>
                     <label className="fl">To (Teachers & Admin)</label>
                     {composeRecipients.length === 0 ? (
                       <div style={{padding:'12px 14px',background:'var(--bg)',borderRadius:'var(--rmd)',fontSize:13,color:'var(--s500)'}}>
-                        Pick a teacher below to email, or click "Email" on any teacher card in Programme Details.
+                        Pick a teacher below or click "Email" on any teacher card in Programme Details.
                       </div>
                     ) : (
                       <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
@@ -818,17 +822,15 @@ export default function ParentPortal() {
                         ))}
                       </div>
                     )}
-
                     {teachers.length > 0 && (
                       <div style={{marginTop:10}}>
-                        <div style={{fontSize:11,color:'var(--s400)',marginBottom:6}}>Or pick from your child's teachers:</div>
+                        <div style={{fontSize:11,color:'var(--s400)',marginBottom:6}}>Pick from your child's teachers:</div>
                         <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
                           {teachers.filter(t => t.email).map((t,i) => {
                             const tName = t.name || `${t.firstName||''} ${t.lastName||''}`.trim()
                             const already = composeRecipients.some(r => r.email === t.email)
                             return (
-                              <button key={i} className="btn btn-s btn-sm" style={{fontSize:11.5}}
-                                disabled={already}
+                              <button key={i} className="btn btn-s btn-sm" style={{fontSize:11.5}} disabled={already}
                                 onClick={() => setComposeRecipients(rs => [...rs, {email: t.email, name: tName}])}>
                                 {already ? 'Added: ' : '+ '}{tName}{t.subjectName ? ` (${t.subjectName})` : ''}
                               </button>
@@ -838,17 +840,14 @@ export default function ParentPortal() {
                       </div>
                     )}
                   </div>
-
                   <div style={{marginBottom:12}}>
                     <label className="fl">Subject</label>
                     <input className="fi" value={composeSubject} onChange={e => setComposeSubject(e.target.value)} placeholder="E.g. Question about Mathematics progress"/>
                   </div>
-
                   <div style={{marginBottom:14}}>
                     <label className="fl">Message</label>
                     <textarea className="fi" rows={8} value={composeBody} onChange={e => setComposeBody(e.target.value)} placeholder="Type your message…" style={{resize:'vertical',fontFamily:'inherit'}}/>
                   </div>
-
                   <div style={{display:'flex',gap:10,justifyContent:'flex-end'}}>
                     <button className="btn btn-s btn-sm" onClick={() => setComposeOpen(false)}>Cancel</button>
                     <button className="btn btn-p" onClick={sendMessage} disabled={composeSending}>
@@ -876,7 +875,7 @@ export default function ParentPortal() {
                       To: {m.recipientCount || (m.recipients?.length || 0)} recipient{(m.recipientCount||1) === 1 ? '' : 's'}
                       {m.sentCount !== undefined && <> · Delivered: {m.sentCount}</>}
                     </div>
-                    <div style={{fontSize:12.5,color:'var(--s600)',lineHeight:1.5,whiteSpace:'pre-wrap',maxHeight:60,overflow:'hidden',position:'relative'}}>
+                    <div style={{fontSize:12.5,color:'var(--s600)',lineHeight:1.5,whiteSpace:'pre-wrap',maxHeight:60,overflow:'hidden'}}>
                       {m.body}
                     </div>
                   </div>
@@ -885,26 +884,74 @@ export default function ParentPortal() {
             </div>
           )}
 
-          {/* ── PAYMENTS — Paystack with custom amount ── */}
+          {/* ══════════════════════════════════════════════
+              FEES & PAYMENTS — connected to real backend
+              ══════════════════════════════════════════════ */}
           {page==='payments' && (
             <div>
-              <div style={{marginBottom:20}}><div className="sec-tag">Finance</div><h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Fees &amp; Payments</h2></div>
+              <div style={{marginBottom:20}}>
+                <div className="sec-tag">Finance</div>
+                <h2 className="serif" style={{fontSize:26,color:'var(--s900)'}}>Fees &amp; Payments</h2>
+              </div>
 
+              {/* ── KPI row ── */}
               <div className="kpi-grid" style={{marginBottom:24}}>
                 {[
-                  {v:'KES ' + (store.fees?.individual_premium || 2999).toLocaleString(), l:'Monthly Plan', d:'Individual Premium', dc:'var(--b700)'},
-                  {v:'Paystack', l:'Payment Method', d:'Card · M-Pesa · Bank', dc:'var(--g600)'},
-                  {v:`${store.payments?.length || 0}`, l:'Payments Made', d:'All-time', dc:'var(--a600)'},
+                  {
+                    v: 'KES ' + monthlyRate.toLocaleString(),
+                    l: 'Monthly Plan',
+                    d: 'Individual Premium',
+                    dc: 'var(--b700)',
+                  },
+                  {
+                    v: outstanding != null ? 'KES ' + outstanding.toLocaleString() : '—',
+                    l: 'Outstanding Balance',
+                    d: outstanding > 0 ? 'Due now' : outstanding === 0 ? 'All clear ✓' : 'Loading…',
+                    dc: outstanding > 0 ? 'var(--r500)' : 'var(--g600)',
+                  },
+                  {
+                    v: nextDueDate ? new Date(nextDueDate).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '—',
+                    l: 'Next Due Date',
+                    d: nextDueAmount ? 'KES ' + nextDueAmount.toLocaleString() : 'Contact admin',
+                    dc: 'var(--a600)',
+                  },
+                  {
+                    v: String(payHistory.length || store.payments?.length || 0),
+                    l: 'Payments Made',
+                    d: 'All-time',
+                    dc: 'var(--s500)',
+                  },
                 ].map((k,i) => (
-                  <div key={i} className="kpi"><div className="kpi-v" style={{fontSize:i===0?15:undefined}}>{k.v}</div><div className="kpi-l">{k.l}</div><div className="kpi-d" style={{color:k.dc}}>{k.d}</div></div>
+                  <div key={i} className="kpi">
+                    <div className="kpi-v" style={{fontSize:i===0||i===1?14:undefined}}>{k.v}</div>
+                    <div className="kpi-l">{k.l}</div>
+                    <div className="kpi-d" style={{color:k.dc}}>{k.d}</div>
+                  </div>
                 ))}
               </div>
 
+              {/* Outstanding balance alert */}
+              {outstanding > 0 && (
+                <div style={{background:'#FEF2F2',border:'1px solid #FECACA',borderRadius:'var(--rmd)',padding:'12px 16px',marginBottom:20,display:'flex',gap:12,alignItems:'center'}}>
+                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#DC2626" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:13,fontWeight:700,color:'#DC2626'}}>Outstanding balance: KES {outstanding.toLocaleString()}</div>
+                    {nextDueDate && <div style={{fontSize:12,color:'#991B1B',marginTop:2}}>Due by {new Date(nextDueDate).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</div>}
+                  </div>
+                  <button className="btn btn-sm" style={{background:'#DC2626',color:'#fff',borderColor:'#DC2626',fontWeight:700,flexShrink:0}}
+                    onClick={() => { setPayAmount(String(outstanding)); setPayDescription('Outstanding balance'); }}>
+                    Pay Now
+                  </button>
+                </div>
+              )}
+
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}}>
+
+                {/* ── Pay Now card ── */}
                 <div className="card">
                   <div className="ctitle" style={{marginBottom:6}}>Pay Fees</div>
                   <div style={{fontSize:12.5,color:'var(--s500)',marginBottom:16,lineHeight:1.6}}>
-                    Pay any amount via Paystack (Card, M-Pesa, Bank Transfer). Enter the amount you want to pay below — useful for partial payments, registration fees, or one-off charges.
+                    Pay via Paystack — Card, M-Pesa, or Bank Transfer. Enter any amount below; useful for partial payments, registration fees, or one-off charges.
                   </div>
 
                   <div style={{marginBottom:12}}>
@@ -917,39 +964,80 @@ export default function ParentPortal() {
                   <div style={{marginBottom:12}}>
                     <label className="fl">What is this payment for?</label>
                     <input className="fi" value={payDescription} onChange={e => setPayDescription(e.target.value)}
-                      placeholder="E.g. April fees, Registration, Exam fees"/>
+                      placeholder="E.g. May fees, Registration, Exam fees"/>
                   </div>
 
-                  <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:14}}>
-                    {[2999, 4999, 9999, 14999].map(q => (
+                  {/* Quick-fill buttons — driven by feeSummary if available */}
+                  <div style={{marginBottom:6,fontSize:11,color:'var(--s400)',fontWeight:600}}>Quick fill</div>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:14}}>
+                    {quickAmounts.map(q => (
                       <button key={q} className="btn btn-s btn-sm" onClick={() => setPayAmount(String(q))}
                         style={{justifyContent:'space-between'}}>
-                        <span>Quick fill</span><span className="mono" style={{fontWeight:700}}>KES {q.toLocaleString()}</span>
+                        <span className="mono" style={{fontWeight:700}}>KES {q.toLocaleString()}</span>
                       </button>
                     ))}
+                    {/* Outstanding shortcut */}
+                    {outstanding > 0 && !quickAmounts.includes(outstanding) && (
+                      <button className="btn btn-sm" onClick={() => { setPayAmount(String(outstanding)); setPayDescription('Outstanding balance') }}
+                        style={{gridColumn:'span 2',justifyContent:'space-between',background:'var(--r50)',borderColor:'#FECACA',color:'#DC2626'}}>
+                        <span>Pay outstanding</span>
+                        <span className="mono" style={{fontWeight:700}}>KES {outstanding.toLocaleString()}</span>
+                      </button>
+                    )}
+                    {/* Next due shortcut */}
+                    {nextDueAmount > 0 && !quickAmounts.includes(nextDueAmount) && nextDueAmount !== outstanding && (
+                      <button className="btn btn-sm" onClick={() => { setPayAmount(String(nextDueAmount)); setPayDescription('Monthly fees') }}
+                        style={{gridColumn:'span 2',justifyContent:'space-between',background:'var(--a50)',borderColor:'var(--a200)',color:'var(--a700)'}}>
+                        <span>Pay next due</span>
+                        <span className="mono" style={{fontWeight:700}}>KES {nextDueAmount.toLocaleString()}</span>
+                      </button>
+                    )}
                   </div>
 
                   <button className="btn btn-ok" style={{width:'100%',justifyContent:'center'}}
                     onClick={startPaystack} disabled={payLoading || !payAmount}>
-                    {payLoading ? 'Starting…' : `Pay KES ${parseInt(payAmount || '0', 10).toLocaleString()} with Paystack`}
+                    {payLoading ? 'Starting…' : `Pay KES ${parseInt(payAmount || '0', 10).toLocaleString()} via Paystack`}
                   </button>
                   <div style={{fontSize:11,color:'var(--s400)',marginTop:8,textAlign:'center'}}>
-                    Secured by Paystack. We don't store your card or M-Pesa details.
+                    Secured by Paystack · Card, M-Pesa, and Bank Transfer accepted
                   </div>
                 </div>
 
+                {/* ── Payment history card ── */}
                 <div className="card">
                   <div className="ctitle" style={{marginBottom:14}}>Payment History</div>
-                  {(store.payments || []).length === 0 ? (
+                  {payHistoryLoading ? (
+                    <div style={{padding:20,color:'var(--s400)',fontSize:13,textAlign:'center'}}>Loading…</div>
+                  ) : (payHistory.length === 0 && (store.payments||[]).length === 0) ? (
                     <div style={{padding:20,color:'var(--s400)',fontSize:13,textAlign:'center'}}>No payments yet.</div>
-                  ) : store.payments.slice(0,8).map((p,i) => (
-                    <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'9px 0',borderBottom:'1px solid var(--border)',fontSize:13,flexWrap:'wrap',gap:4}}>
-                      <span style={{color:'var(--s500)',minWidth:90}}>{p.date}</span>
-                      <span style={{flex:1,minWidth:120}}>{(p.desc || '').split('—')[0].trim() || 'Payment'}</span>
-                      <span className="mono" style={{fontWeight:700}}>{p.amount}</span>
-                      <span className="badge badge-green">{p.status}</span>
-                    </div>
-                  ))}
+                  ) : (
+                    [...payHistory, ...(store.payments||[]).filter(sp =>
+                      !payHistory.some(rp => rp.reference === sp.ref)
+                    )]
+                    .slice(0, 10)
+                    .map((p, i) => {
+                      // Normalise — backend records vs store records have different shapes
+                      const date = p.createdAt
+                        ? new Date(p.createdAt).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})
+                        : (p.date || '—')
+                      const desc = p.description || (p.desc||'').split('—')[0].trim() || 'Payment'
+                      const amtDisplay = p.amountDisplay || p.amount || (p.amount ? 'KES ' + Number(p.amount).toLocaleString() : '—')
+                      const status = p.status || 'success'
+                      const ref = p.reference || p.ref || ''
+                      return (
+                        <div key={p._id || p.ref || i} style={{padding:'10px 0',borderBottom:'1px solid var(--border)'}}>
+                          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:8,marginBottom:3}}>
+                            <span style={{fontWeight:700,fontSize:13.5,flex:1}}>{desc}</span>
+                            <span className="mono" style={{fontWeight:700,fontSize:13,flexShrink:0}}>{amtDisplay}</span>
+                          </div>
+                          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+                            <span style={{fontSize:11,color:'var(--s400)'}}>{date}{ref ? ` · ${ref.slice(0,14)}…` : ''}</span>
+                            <PayBadge status={status}/>
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
                 </div>
               </div>
             </div>
