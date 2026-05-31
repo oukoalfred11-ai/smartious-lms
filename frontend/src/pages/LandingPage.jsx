@@ -134,6 +134,73 @@ const V = {
   white:'#FFFFFF',
 }
 
+/* ── ENROLMENT DATA — curriculum × year levels for adaptive enrolment page ──
+   Single source of truth for what each curriculum/year combination requires.
+   Fees here are summaries — the full pricing page (/pricing) has all details.
+   When parents pick curriculum + year, this drives the displayed content.
+   The application fee (USD 38 / KES 5,000) is uniform across all combinations. */
+const ENROLMENT_DATA = {
+  cambridge: {
+    label: 'Cambridge International',
+    description: 'Cambridge IGCSE, Cambridge International AS & A-Levels, and Cambridge Primary / Lower Secondary. Globally recognised by universities worldwide.',
+    examBoard: 'Cambridge International Examinations (CIE)',
+    levels: [
+      { id:'primary',     label:'Cambridge Primary',         years:'Year 1–6',   ages:'Ages 5–11',   feeFrom:'USD 423/mo', feeRef:'Primary Homeschool tier' },
+      { id:'lowersec',    label:'Cambridge Lower Secondary', years:'Year 7–9',   ages:'Ages 11–14',  feeFrom:'USD 538/mo', feeRef:'Junior Secondary tier' },
+      { id:'igcse',       label:'Cambridge IGCSE',           years:'Year 10–11', ages:'Ages 14–16',  feeFrom:'USD 654/mo', feeRef:'IGCSE tier · Most Popular' },
+      { id:'alevel',      label:'Cambridge A-Level',         years:'Year 12–13', ages:'Ages 16–19',  feeFrom:'USD 769/mo', feeRef:'A-Level tier · up to 4 subjects' },
+    ],
+    subjects: 'English Language & Literature, Mathematics, Sciences (Biology, Chemistry, Physics), Humanities (History, Geography), Languages (French, Kiswahili), Business Studies, Economics, ICT, Computer Science.',
+  },
+  edexcel: {
+    label: 'Pearson Edexcel International',
+    description: 'Pearson Edexcel International GCSE, IAL and IAL Further Maths. Widely accepted alternative to Cambridge.',
+    examBoard: 'Pearson Edexcel International',
+    levels: [
+      { id:'igcse',     label:'Edexcel International GCSE',   years:'Year 10–11', ages:'Ages 14–16', feeFrom:'USD 654/mo', feeRef:'IGCSE tier' },
+      { id:'ial',       label:'Edexcel IAL (A-Level)',         years:'Year 12–13', ages:'Ages 16–19', feeFrom:'USD 769/mo', feeRef:'A-Level tier' },
+    ],
+    subjects: 'English Language A & B, Mathematics, Further Mathematics, Sciences, Humanities, Business, Economics, Computer Science.',
+  },
+  ib: {
+    label: 'International Baccalaureate (IB)',
+    description: 'IB Middle Years Programme (MYP) and IB Diploma Programme (DP). The most rigorous internationally recognised pathway.',
+    examBoard: 'International Baccalaureate Organization (IBO)',
+    levels: [
+      { id:'pyp',     label:'IB Primary Years (PYP)',  years:'Year 1–6',     ages:'Ages 5–11',   feeFrom:'USD 423/mo', feeRef:'Primary Homeschool tier' },
+      { id:'myp_1_3', label:'IB MYP Years 1–3',         years:'Grade 6–8',    ages:'Ages 11–14',  feeFrom:'USD 538/mo', feeRef:'Junior Secondary tier' },
+      { id:'myp_4_5', label:'IB MYP Years 4–5',         years:'Grade 9–10',   ages:'Ages 14–16',  feeFrom:'USD 654/mo', feeRef:'IGCSE-equivalent tier' },
+      { id:'dp',      label:'IB Diploma Programme',     years:'Grade 11–12',  ages:'Ages 16–19',  feeFrom:'USD 923/mo', feeRef:'IB Diploma tier · 6 subjects + TOK / EE / CAS' },
+    ],
+    subjects: 'Language & Literature, Language Acquisition, Individuals & Societies, Sciences, Mathematics, Arts, Physical & Health Education, Design. Plus IDU (Interdisciplinary Unit) and Service & Action.',
+  },
+  cbc: {
+    label: 'Kenya CBC (Competency-Based Curriculum)',
+    description: 'Kenyan national curriculum following KICD standards. Pre-Primary through Senior School.',
+    examBoard: 'Kenya National Examinations Council (KNEC)',
+    levels: [
+      { id:'pp',          label:'Pre-Primary',            years:'PP1–PP2',         ages:'Ages 4–6',   feeFrom:'USD 423/mo', feeRef:'Primary tier' },
+      { id:'lower',       label:'Lower Primary',          years:'Grade 1–3',       ages:'Ages 6–9',   feeFrom:'USD 423/mo', feeRef:'Primary tier' },
+      { id:'upper',       label:'Upper Primary',          years:'Grade 4–6',       ages:'Ages 9–12',  feeFrom:'USD 423/mo', feeRef:'Primary tier' },
+      { id:'jss',         label:'Junior Secondary',       years:'Grade 7–9',       ages:'Ages 12–14', feeFrom:'USD 538/mo', feeRef:'Junior Secondary tier' },
+      { id:'sss',         label:'Senior Secondary',       years:'Grade 10–12',     ages:'Ages 14–17', feeFrom:'USD 654/mo', feeRef:'Senior tier' },
+    ],
+    subjects: 'Mathematics, English, Kiswahili, Science & Technology, Social Studies, Religious Education, Creative Arts, Physical Education, plus pathway choices at Senior School.',
+  },
+  american: {
+    label: 'American (K-12 with AP)',
+    description: 'American High School Diploma with Advanced Placement (AP) courses. Recognised by US universities and increasingly internationally.',
+    examBoard: 'College Board (AP) and Smartious-issued transcripts',
+    levels: [
+      { id:'elem',  label:'Elementary',     years:'K–5',     ages:'Ages 5–11',   feeFrom:'USD 423/mo', feeRef:'Primary tier' },
+      { id:'mid',   label:'Middle School',  years:'Grade 6–8',  ages:'Ages 11–14',  feeFrom:'USD 538/mo', feeRef:'Junior Secondary tier' },
+      { id:'hs',    label:'High School',    years:'Grade 9–12', ages:'Ages 14–18',  feeFrom:'USD 654/mo', feeRef:'High School tier' },
+      { id:'ap',    label:'AP Courses',     years:'Grade 11–12', ages:'Ages 16–18', feeFrom:'USD 154/mo per AP subject', feeRef:'AP Subject add-on' },
+    ],
+    subjects: 'English, Mathematics, Sciences, Social Studies, Foreign Language, Arts/Health/PE. AP: Calculus AB/BC, Sciences, English Literature, US/World History, Economics, Computer Science.',
+  },
+}
+
 const styles = `
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   .lp{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:${V.bone};color:${V.ink};overflow-x:hidden;line-height:1.65}
@@ -1149,7 +1216,7 @@ const SITE = 'Smartious Homeschool & eSchool'
 const PAGE_META = {
   home: {
     title: 'Online Homeschool | IGCSE, A-Level, IB & American — Smartious',
-    desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 85/month.',
+    desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 8/hour for 1-on-1 tuition · from USD 423/month for full homeschool programmes.',
   },
   about: {
     title: 'About Smartious | Homeschooling & eSchool in Nairobi, Kenya',
@@ -1529,6 +1596,14 @@ export default function LandingPage() {
   const [paystackStudentName, setPaystackStudentName] = useState('')
   const [paystackProcessing, setPaystackProcessing] = useState(false)
 
+  // Enrolment page — adaptive curriculum/year picker + application fee payment
+  const [enrolCurriculum, setEnrolCurriculum] = useState('cambridge')   // default to most common
+  const [enrolLevel, setEnrolLevel] = useState(null)                     // selected level id, null until chosen
+  const [enrolParentName, setEnrolParentName] = useState('')
+  const [enrolStudentName, setEnrolStudentName] = useState('')
+  const [enrolEmail, setEnrolEmail] = useState('')
+  const [enrolAppFeeProcessing, setEnrolAppFeeProcessing] = useState(false)
+
   // Wednesday activity modal — null when closed, else holds the selected activity object
   const [openActivity, setOpenActivity] = useState(null)
 
@@ -1685,6 +1760,70 @@ export default function LandingPage() {
     } catch (e) {
       setPayError('Could not open Paystack. Please check your internet connection and try again.')
       setPayProcessing(false)
+    }
+  }
+
+  // Application Fee — single Paystack inline payment of USD 38 (KES 5,000).
+  // Pattern mirrors the Malaysia trip handler but with a fixed amount and
+  // metadata pointing to the chosen curriculum + level instead of instalment.
+  const handlePayApplicationFee = async () => {
+    setEnrolAppFeeProcessing(true)
+    if (!enrolEmail || !enrolParentName || !enrolStudentName) {
+      alert('Please fill in your name, your child\'s name, and email before paying the application fee.')
+      setEnrolAppFeeProcessing(false)
+      return
+    }
+    if (!enrolLevel) {
+      alert('Please select a year / grade level before paying the application fee.')
+      setEnrolAppFeeProcessing(false)
+      return
+    }
+
+    const APP_FEE_KES = 5000  // KES 5,000 = USD ~38 at current rate
+    const ref = `applicationfee-${enrolCurriculum}-${enrolLevel}-${Date.now()}`
+    const curriculumLabel = (ENROLMENT_DATA[enrolCurriculum] || {}).label || enrolCurriculum
+    const levelObj = (ENROLMENT_DATA[enrolCurriculum]?.levels || []).find(l => l.id === enrolLevel)
+    const levelLabel = levelObj ? levelObj.label : enrolLevel
+
+    let paid = false
+
+    try {
+      const PaystackPop = await loadPaystack()
+      const handler = PaystackPop.setup({
+        key: PAYSTACK_PUBLIC_KEY,
+        email: enrolEmail,
+        amount: APP_FEE_KES * 100,    // amount in kobo (KES * 100)
+        currency: 'KES',
+        ref,
+        metadata: {
+          custom_fields: [
+            { display_name:'Type',         variable_name:'type',         value:'Application Fee' },
+            { display_name:'Curriculum',   variable_name:'curriculum',   value:curriculumLabel },
+            { display_name:'Year / Grade', variable_name:'level',        value:levelLabel },
+            { display_name:'Parent',       variable_name:'parent_name',  value:enrolParentName },
+            { display_name:'Student',      variable_name:'student_name', value:enrolStudentName },
+          ],
+        },
+        callback: (response) => {
+          paid = true
+          setTimeout(() => {
+            setEnrolAppFeeProcessing(false)
+            alert(`Application fee received. Reference: ${response.reference}\n\nOur admissions team will email you within 1 working day with the next steps.`)
+          }, 0)
+        },
+        onClose: () => {
+          setTimeout(() => {
+            setEnrolAppFeeProcessing(false)
+            if (!paid) {
+              alert('Payment window was closed before completing payment. Please try again when you\'re ready.')
+            }
+          }, 0)
+        },
+      })
+      handler.openIframe()
+    } catch (e) {
+      alert('Could not open Paystack. Please check your internet connection and try again.')
+      setEnrolAppFeeProcessing(false)
     }
   }
 
@@ -2090,7 +2229,7 @@ export default function LandingPage() {
                 ['◆','Serving 2,000+ Students across 12+ Countries'],
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
-                ['◆','From $85/month — $15 placement assessment · First lesson within 48 hours'],
+                ['◆','From $8/hour tuition · $38 application fee · First lesson within 48 hours'],
                 ['★','Proven Results — 94% A*/A pass rate at IGCSE and A-Level'],
               ].concat([
                 ['★','Internationally Accredited — IGCSE · Cambridge · IB · Edexcel · CBC'],
@@ -2099,7 +2238,7 @@ export default function LandingPage() {
                 ['◆','Serving 2,000+ Students across 12+ Countries'],
                 ['★','Flexible Learning — Home visits, learning centre, or 100% online'],
                 ['●','University Placement — 200+ partner universities worldwide'],
-                ['◆','From $85/month — $15 placement assessment · First lesson within 48 hours'],
+                ['◆','From $8/hour tuition · $38 application fee · First lesson within 48 hours'],
                 ['★','Proven Results — 94% A*/A pass rate at IGCSE and A-Level'],
               ]).map(([ico,t],i) => (
                 <div key={i} className="topbar-mi">
@@ -2360,7 +2499,7 @@ export default function LandingPage() {
                 <span>Homeschool That</span>
                 <span>Travels with <em>You</em></span>
               </h1>
-              <p className="h-sub">Accredited Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula — taught live, online, by qualified specialists. Serving 2,000+ students across the UAE, UK, Canada, Australia, Nigeria and Kenya. From USD 85/month.</p>
+              <p className="h-sub">Accredited Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula — taught live, online, by qualified specialists. Serving 2,000+ students across the UAE, UK, Canada, Australia, Nigeria and Kenya. From USD 8/hour for 1-on-1 tuition · from USD 423/month for full homeschool programmes.</p>
               <div className="h-act">
                 <button className="btn-p" onClick={() => P('enroll')}>Begin Enrollment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 <button className="btn-o lt" style={{borderColor:'rgba(139,26,46,.45)',color:V.cr}} onClick={() => P('consult')}>Free Consultation</button>
@@ -2422,7 +2561,7 @@ export default function LandingPage() {
               { '@type': 'Question', 'name': 'What is Smartious Homeschool?',
                 'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious Homeschool & eSchool is an accredited international online school founded in Nairobi in 2018. We deliver Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American High School curricula to over 2,000 students across Kenya, the UAE, UK, USA, Canada, Australia, Nigeria, South Africa, Qatar and Egypt. All classes are taught live by degree-qualified specialists.' } },
               { '@type': 'Question', 'name': 'How much does Smartious cost?',
-                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious tuition starts from USD 85 per month for single subjects and ranges from USD 4,000 to USD 6,000 per year for full homeschool programmes. This is a fraction of private international school fees (typically USD 15,000 to USD 45,000 per year). Payment plans, sibling discounts and termly billing are available.' } },
+                'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious 1-on-1 tuition starts from USD 8 per hour (primary level), up to USD 15 per hour for A-Level and IB Diploma. Full homeschool programmes range from USD 423 per month (Primary) to USD 923 per month (IB Diploma). Annual plans save approximately 20 percent versus monthly billing. A non-refundable USD 38 application fee covers the placement test and is deducted from your first tuition invoice. 10 percent sibling discount on every additional child.' } },
               { '@type': 'Question', 'name': 'Which countries does Smartious serve?',
                 'acceptedAnswer': { '@type': 'Answer', 'text': 'Smartious serves students worldwide with dedicated country support for the United Arab Emirates (Dubai, Abu Dhabi, Sharjah), United Kingdom, United States, Canada, Australia, Nigeria, South Africa, Qatar, Egypt, and Kenya. Live classes are scheduled to suit multiple time zones with full recording access for asynchronous review.' } },
               { '@type': 'Question', 'name': 'Will my child get a real qualification through Smartious?',
@@ -2656,7 +2795,7 @@ export default function LandingPage() {
             <div style={{maxWidth:780, margin:'36px auto 0'}}>
               {[
                 ['What is Smartious Homeschool?', 'Smartious Homeschool & eSchool is an accredited international online school founded in Nairobi in 2018. We deliver Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula to over 2,000 students worldwide. All classes are live, taught by degree-qualified specialists.'],
-                ['How much does Smartious cost?', 'From USD 85 per month for single subjects. Full-year programmes are USD 4,000–6,000 — a fraction of private international school fees. Payment plans and sibling discounts available.'],
+                ['How much does Smartious cost?', '1-on-1 tuition from USD 8/hour. Full homeschool programmes from USD 423/month (Primary) to USD 923/month (IB Diploma). Annual plans save ~20%. USD 38 application fee. 10% sibling discount.'],
                 ['Will my child get a real qualification?', 'Yes. Students sit official Cambridge International, Pearson Edexcel, IB Diploma or American High School Diploma exams at British Council and Cambridge centres worldwide. Qualifications are identical to those from any other school.'],
                 ['Which countries do you serve?', 'Dedicated country pages and support for the UAE, UK, USA, Canada, Australia, Nigeria, South Africa, Qatar, Egypt and Kenya. Live classes scheduled across time zones with recordings for asynchronous catch-up.'],
                 ['How do online students socialise?', 'Daily live classes with international classmates. Wednesday enrichment programme (2–4 PM) with sports, clubs, leadership and arts. Active online clubs in debate, coding, AI, Model UN and journalism.'],
@@ -2701,7 +2840,7 @@ export default function LandingPage() {
                   {n:'9',h:'Curricula',p:'IGCSE · Cambridge · IB · British · American · CBC · Blended',pg:'curricula',svg:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>'},
                   {n:'6',h:'Services',p:'Homeschool · Virtual · Centre · Tuition · Mshauri AI',pg:'services',svg:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>'},
                   {n:'12+',h:'Global Presence',p:'Kenya · UAE · UK · USA · Canada · Australia · +7 more',pg:'global',svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
-                  {n:'$85',h:'Pricing',p:'Transparent USD pricing · No contracts · Cancel anytime',pg:'pricing',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
+                  {n:'$8/hr',h:'Pricing',p:'Transparent USD pricing · From $8 hourly tuition · No contracts',pg:'pricing',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
                   {n:'2',h:'IUFP & Study Abroad',p:'University foundation · Placements in UK · USA · AU · DE · UAE',pg:'programs',svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'},
                   {n:'10',h:'FAQ',p:'Enrolment, exams, pricing & Mshauri AI answered',pg:'faq',svg:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
                   {n:'9',h:'Blog',p:'IGCSE guides · IB tips · Study abroad · AI learning',pg:'blog',svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'},
@@ -2761,7 +2900,7 @@ export default function LandingPage() {
             <div className="wrap"><div className="cta-in">
               <div className="eyebrow" style={{color:V.gold3,justifyContent:'center',marginBottom:18}}>Start Today</div>
               <h2 className="cta-h">Your Child's Best Education <em>Starts Here</em></h2>
-              <p className="cta-sub">Join 2,000+ students across 12 countries. Flexible. International. Proven. From $85/month USD.</p>
+              <p className="cta-sub">Join 2,000+ students across 12 countries. Flexible. International. Proven. From $8/hour tuition · From $423/month full homeschool.</p>
               <div className="cta-btns">
                 <button className="btn-p" onClick={() => P('enroll')}>Begin Enrollment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 <button className="btn-o lt" onClick={() => P('pricing')}>View Pricing</button>
@@ -9722,239 +9861,306 @@ export default function LandingPage() {
       {/* ══════════════════════════════════════════
           ENROLL
       ══════════════════════════════════════════ */}
-      {page === 'enroll' && (
+      {page === 'enroll' && (() => {
+        const cur = ENROLMENT_DATA[enrolCurriculum]
+        const selectedLevel = cur && cur.levels.find(l => l.id === enrolLevel)
+        return (
         <>
+          {/* HERO */}
           <div className="pg-hero"><div className="wrap">
-            <div className="eyebrow">Join Smartious</div>
-            <h1 className="pg-h">Start Your <em>Journey Today</em></h1>
-            <p className="pg-sub" style={{marginTop:12}}>Enrollment takes less than 5 minutes. Our team contacts you within 48 hours.</p>
+            <div className="eyebrow">Begin Your Enrolment</div>
+            <h1 className="pg-h">Apply to <em>Smartious</em></h1>
+            <p className="pg-sub" style={{marginTop:12}}>Select your curriculum and year level. Pay the application fee online. Our admissions team responds within 1 working day with the next steps.</p>
           </div></div>
-          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:0}}><div className="wrap">
-            {/* Enrolment timeline SVG */}
-            <div style={{maxWidth:1000,margin:'0 auto 24px',padding:'0 20px'}}>
-              <div style={{textAlign:'center',marginBottom:16}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>How enrolment works</div>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:6,lineHeight:1.3}}>
-                  Four steps. Most families <em style={{color:V.cr}}>start within a week.</em>
-                </h3>
+
+          {/* STEP 1 — CURRICULUM PICKER */}
+          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:28}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Step 1</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
+                  Which curriculum?
+                </h2>
+                <p style={{fontSize:14,color:V.sl,maxWidth:580,margin:'0 auto',lineHeight:1.6}}>
+                  We offer five accredited international curricula. Pick the one your child will follow.
+                </p>
               </div>
-              <svg viewBox="0 0 920 180" style={{width:'100%',maxWidth:920,height:'auto',display:'block',margin:'0 auto'}} xmlns="http://www.w3.org/2000/svg" aria-label="Four-step enrollment process">
-                <line x1="100" y1="56" x2="820" y2="56" stroke="#F0E8D4" strokeWidth="3"/>
-                <line x1="100" y1="56" x2="640" y2="56" stroke="#8B1A2E" strokeWidth="3" opacity="0.85"/>
-                <circle cx="100" cy="56" r="22" fill="#8B1A2E"/>
-                <text x="100" y="62" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="16" fill="#FFFFFF">1</text>
-                <text x="100" y="100" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#080C14">Free consult</text>
-                <text x="100" y="118" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">15 minutes</text>
-                <text x="100" y="132" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">WhatsApp or Zoom</text>
-                <circle cx="370" cy="56" r="22" fill="#8B1A2E"/>
-                <text x="370" y="62" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="16" fill="#FFFFFF">2</text>
-                <text x="370" y="100" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#080C14">Placement</text>
-                <text x="370" y="118" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">Short assessment</text>
-                <text x="370" y="132" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">to set the right level</text>
-                <circle cx="640" cy="56" r="22" fill="#8B1A2E"/>
-                <text x="640" y="62" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="16" fill="#FFFFFF">3</text>
-                <text x="640" y="100" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#080C14">Class &amp; teacher</text>
-                <text x="640" y="118" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">Curriculum chosen</text>
-                <text x="640" y="132" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">Timetable set</text>
-                <circle cx="820" cy="56" r="22" fill="#B8960C"/>
-                <text x="820" y="62" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="16" fill="#080C14">4</text>
-                <text x="820" y="100" textAnchor="middle" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#080C14">First class</text>
-                <text x="820" y="118" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">Live with</text>
-                <text x="820" y="132" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontSize="11" fill="#2E3D55">your teacher</text>
-              </svg>
-            </div>
-          </div></section>
-          <section className="sec" style={{background:V.bone,paddingTop:24}}><div className="wrap">
-            <div className="wiz-shell">
-              {/* Steps */}
-              <div className="wiz-steps">
-                {[['Programme'],['Your Details'],['All Done!']].map(([l],i) => (
-                  <div key={i} className={`wst${wizStep===i+1?' on':''}`} id={`wst${i+1}`} onClick={() => i < wizStep - 1 && setWizStep(i+1)}>
-                    <div className="ws-n">{wizStep > i+1 ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg> : i+1}</div>
-                    <div className="ws-l">{l}</div>
-                  </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:12}}>
+                {Object.entries(ENROLMENT_DATA).map(([key, c]) => (
+                  <button
+                    key={key}
+                    onClick={() => { setEnrolCurriculum(key); setEnrolLevel(null) }}
+                    style={{
+                      background: enrolCurriculum === key ? V.cr : V.white,
+                      color: enrolCurriculum === key ? V.white : V.ink,
+                      border: `1.5px solid ${enrolCurriculum === key ? V.cr : V.bone3}`,
+                      borderRadius:10,
+                      padding:'14px 16px',
+                      fontWeight:700,
+                      fontSize:13.5,
+                      cursor:'pointer',
+                      transition:'all .2s',
+                      textAlign:'left',
+                      fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+                      lineHeight:1.3,
+                      boxShadow: enrolCurriculum === key ? '0 4px 14px rgba(139,26,46,.25)' : 'none',
+                    }}>
+                    {c.label}
+                  </button>
                 ))}
               </div>
-
-              <div className="wiz-body">
-                {/* STEP 1 */}
-                {wizStep === 1 && (
-                  <div>
-                    <div className="wiz-h">Choose Your Programme</div>
-                    <div className="wiz-sub">Select the programme that best fits your goals.</div>
-                    <div id="progCards" style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14,marginBottom:28}}>
-                      {[
-                        {id:'homeschool',svg:'<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',h:'Homeschool & Tutoring',p:'IGCSE · Cambridge A-Level · IB · British · American · CBC · Smartious Blended. Home visits, learning centre or virtual school.',from:'$85'},
-                        {id:'iufp',svg:'<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',h:'IUFP — University Foundation',p:'International University Foundation Programme. Direct entry to UK, US, Australian & European universities. 200+ partner universities.',from:'$5,480'},
-                        {id:'studyabroad',svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',h:'Study Abroad Placement',p:'School & university placements in UK, USA, Australia, Germany, UAE & Canada. Includes visa guidance & pastoral support.',from:'$5,200'},
-                      ].map(c => (
-                        <div key={c.id} className={`prog-sel-card${currentProg===c.id?' on':''}`} onClick={() => setCurrentProg(c.id)}>
-                          <div className="psc-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:c.svg}}/></div>
-                          <div className="psc-h">{c.h}</div>
-                          <div className="psc-p">{c.p}</div>
-                          <div className="psc-from">From <strong>{c.from}</strong>{c.id==='iufp'?'/year':c.id==='studyabroad'?'/term':'/month'}</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="prog-sub-panel">
-                      {currentProg === 'homeschool' && (
-                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
-                          <div><label className="fl">Preferred Curriculum *</label>
-                            <select className="fi-i" value={enrollForm.curriculum} onChange={e=>setEF('curriculum',e.target.value)}><option value="">Select curriculum...</option>{['IGCSE (Cambridge)','Cambridge A-Level','IB Diploma (DP)','IB PYP / MYP','Pearson Edexcel','British National Curriculum','American Curriculum','CBC / KCSE (Kenya)','Smartious Blended'].map(o => <option key={o}>{o}</option>)}</select>
-                          </div>
-                          <div><label className="fl">Learning Mode *</label>
-                            <select className="fi-i" value={enrollForm.learningMode} onChange={e=>setEF('learningMode',e.target.value)}><option value="">Select mode...</option>{['Homeschool — Tutor Visits Home (Nairobi)','Homeschool — Online Video Sessions','Smartious Learning Centre — Parklands, Nairobi','Virtual School — 100% Online','Private Tuition — Online','Private Tuition — Home Visit (Nairobi)'].map(o => <option key={o}>{o}</option>)}</select>
-                          </div>
-                        </div>
-                      )}
-                      {currentProg === 'iufp' && (
-                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
-                          <div><label className="fl">Academic Pathway *</label>
-                            <select className="fi-i" value={enrollForm.pathway} onChange={e=>setEF('pathway',e.target.value)}><option value="">Select pathway...</option>{['Sciences — Medicine, Pharmacy, Biology, Chemistry','Business & Economics — Finance, Accounting, Management','Engineering & Technology — Engineering, Computer Science','Arts & Humanities — Law, Politics, Literature, Psychology'].map(o => <option key={o}>{o}</option>)}</select>
-                          </div>
-                          <div><label className="fl">Target Country *</label>
-                            <select className="fi-i" value={enrollForm.targetCountry} onChange={e=>setEF('targetCountry',e.target.value)}><option value="">Select destination...</option>{['United Kingdom','United States','Australia','Germany','Canada','Other'].map(o => <option key={o}>{o}</option>)}</select>
-                          </div>
-                        </div>
-                      )}
-                      {currentProg === 'studyabroad' && (
-                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
-                          <div><label className="fl">Destination *</label>
-                            <select className="fi-i" value={enrollForm.destination} onChange={e=>setEF('destination',e.target.value)}><option value="">Select destination...</option>{['United Kingdom — from $8,500/term','United States — from $9,200/semester','Australia — from $7,800/term','Germany — from $5,200/term','UAE — from $6,500/term','Canada — from $7,200/semester'].map(o => <option key={o}>{o}</option>)}</select>
-                          </div>
-                          <div><label className="fl">Duration *</label>
-                            <select className="fi-i" value={enrollForm.duration} onChange={e=>setEF('duration',e.target.value)}><option value="">Select duration...</option>{['1 Term / Semester (3–4 months)','1 Academic Year (9–10 months)','2 Academic Years'].map(o => <option key={o}>{o}</option>)}</select>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="wiz-nav">
-                      <span/>
-                      <button className="wb wb-nx" onClick={() => setWizStep(2)}>Continue to Your Details <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                    </div>
-                  </div>
-                )}
-
-                {/* STEP 2 */}
-                {wizStep === 2 && (
-                  <div>
-                    <div className="wiz-h">Your Details</div>
-                    <div className="wiz-sub">Tell us about the student and parent / guardian.</div>
-                    <div className="fg" style={{marginBottom:16}}>
-                      <div>
-                        <label className="fl">Student's First Name *</label>
-                        <input className="fi-i" type="text" value={enrollForm.firstName} onChange={e=>setEF('firstName',e.target.value)}/>
-                      </div>
-                      <div>
-                        <label className="fl">Student's Last Name *</label>
-                        <input className="fi-i" type="text" value={enrollForm.lastName} onChange={e=>setEF('lastName',e.target.value)}/>
-                      </div>
-                      <div>
-                        <label className="fl">Parent / Guardian Email *</label>
-                        <input className="fi-i" type="email" value={enrollForm.parentEmail} onChange={e=>setEF('parentEmail',e.target.value)}/>
-                      </div>
-                      <div>
-                        <label className="fl">WhatsApp Number *</label>
-                        <PhoneInput value={enrollForm.whatsapp} onChange={v => setEF('whatsapp', v)} placeholder="7XX XXX XXX" />
-                      </div>
-                      <div>
-                        <label className="fl">Student's Date of Birth *</label>
-                        <input className="fi-i" type="date" value={enrollForm.dob} onChange={e=>setEF('dob',e.target.value)}/>
-                      </div>
-                      <div>
-                        <label className="fl">Country of Residence *</label>
-                        <select className="fi-i" value={enrollForm.country} onChange={e=>setEF('country',e.target.value)}>
-                          <option value="">Select country...</option>
-                          {['Kenya','Nigeria','South Africa','Uganda','Tanzania','UAE','United Kingdom','United States','Canada','Australia','Other'].map(o => <option key={o}>{o}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="fl">Current School (Optional)</label>
-                        <input className="fi-i" type="text" placeholder="e.g. Brookhouse School" value={enrollForm.currentSchool} onChange={e=>setEF('currentSchool',e.target.value)}/>
-                      </div>
-                      <div>
-                        <label className="fl">Current Academic Level (for placement test)</label>
-                        <select className="fi-i" value={enrollForm.gradeLevel} onChange={e=>setEF('gradeLevel',e.target.value)}>
-                          <option value="">Auto-detect from curriculum</option>
-                          {LEVELS.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
-                        </select>
-                      </div>
-                    </div>
-                    <div style={{gridColumn:'1/-1'}}>
-                      <label className="fl">How did you hear about Smartious?</label>
-                      <select className="fi-i" style={{width:'100%'}} value={enrollForm.heardFrom} onChange={e=>setEF('heardFrom',e.target.value)}>
-                        <option value="">Select...</option>
-                        {['Google Search','WhatsApp','Facebook / Instagram','Friend / Family Referral','LinkedIn','TikTok','School Recommendation','Other'].map(o => <option key={o}>{o}</option>)}
-                      </select>
-                    </div>
-                    {enrollError && <div style={{marginTop:14,color:'#8B1A2E',fontSize:13,padding:'10px 14px',background:'rgba(139,26,46,.06)',borderRadius:6,border:'1px solid rgba(139,26,46,.15)'}}>{enrollError}</div>}
-                    <div className="wiz-nav">
-                      <button className="wb wb-bk" onClick={() => setWizStep(1)}>&larr; Back</button>
-                      <button className="wb wb-nx" disabled={enrollSending} onClick={() => {
-                        const phoneDigits = (enrollForm.whatsapp || '').replace(/\D/g,'')
-                        if (!enrollForm.firstName || !enrollForm.lastName || !enrollForm.parentEmail || !enrollForm.dob || !enrollForm.country) {
-                          setEnrollError('Please fill in all required fields marked with *'); return
-                        }
-                        if (phoneDigits.length < 9) {
-                          setEnrollError('Please enter your full WhatsApp number, including area code.'); return
-                        }
-                        if (!/^\S+@\S+\.\S+$/.test(enrollForm.parentEmail)) {
-                          setEnrollError('Please enter a valid email address'); return
-                        }
-                        setEnrollError('')
-                        submitEnrollment()
-                      }}>
-                        {enrollSending ? 'Submitting…' : <>Submit Enrollment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></>}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* STEP 3 — CONFIRMATION */}
-                {wizStep === 3 && (
-                  <div style={{textAlign:'center',padding:'20px 0'}}>
-                    <div style={{width:76,height:76,borderRadius:'50%',background:`linear-gradient(135deg,${V.cr},${V.cr2})`,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px',animation:'lp-float 3s ease-in-out infinite'}}>
-                      <svg width="34" height="34" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    </div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginBottom:8}}>Enrollment Submitted!</div>
-                    <p style={{fontSize:14.5,color:V.sl,marginBottom:14,lineHeight:1.8,maxWidth:520,margin:'0 auto 14px'}}>
-                      Thank you, {enrollForm.firstName || 'there'}! We have received your enrollment application. Our admissions team will contact you at <strong>{enrollForm.parentEmail}</strong> within 48 hours to guide you through the next steps, including your child&rsquo;s placement assessment in the student portal.
-                    </p>
-
-                    {/* Assessment mode summary */}
-                    {enrollForm.assessmentMode && (
-                      <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'8px 14px',background:'rgba(139,26,46,.06)',border:'1px solid rgba(139,26,46,.18)',borderRadius:20,fontSize:12,color:V.cr,marginBottom:14,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",fontWeight:600}}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                          {enrollForm.assessmentMode === 'online'
-                            ? <><rect x="2" y="4" width="20" height="14" rx="2"/><polyline points="7 22 12 18 17 22"/></>
-                            : enrollForm.assessmentMode === 'centre'
-                              ? <><path d="M3 21h18M5 21V7l7-5 7 5v14"/><rect x="9" y="10" width="6" height="11"/></>
-                              : <><path d="M3 10l9-7 9 7M5 10v10h14V10"/></>}
-                        </svg>
-                        Assessment:&nbsp;
-                        {enrollForm.assessmentMode === 'online' && 'Completed online'}
-                        {enrollForm.assessmentMode === 'centre' && 'In-person at centre'}
-                        {enrollForm.assessmentMode === 'home'   && 'In-person home visit'}
-                      </div>
-                    )}
-                    <div style={{height:6}}/>
-                    {paySuccess && <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'8px 14px',background:'rgba(10,125,50,.08)',border:'1px solid rgba(10,125,50,.2)',borderRadius:20,fontSize:12,color:'#0A7D32',marginBottom:28,fontFamily:"'Fira Code',monospace"}}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0A7D32" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      Paystack Ref: {paySuccess}
-                    </div>}
-                    <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                      <button className="btn-p" onClick={goPortal}>Go to Your Portal <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                      <button className="btn-o" onClick={() => { setWizStep(1); P('home') }}>Back to Home</button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              {cur && (
+                <div style={{marginTop:20,padding:'14px 18px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,fontSize:13.5,color:V.sl,lineHeight:1.6}}>
+                  <strong style={{color:V.ink}}>{cur.label}:</strong> {cur.description} <span style={{color:V.sl2,fontStyle:'italic'}}>Exam board: {cur.examBoard}.</span>
+                </div>
+              )}
             </div>
           </div></section>
-          <Footer P={P}/>
-        </>
-      )}
 
+          {/* STEP 2 — YEAR / GRADE PICKER */}
+          {cur && (
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Step 2</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
+                    Which year / grade?
+                  </h2>
+                  <p style={{fontSize:14,color:V.sl,maxWidth:580,margin:'0 auto',lineHeight:1.6}}>
+                    Select your child's year level within {cur.label}. We'll show you the matching subjects and fees.
+                  </p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:10}}>
+                  {cur.levels.map(lv => (
+                    <button
+                      key={lv.id}
+                      onClick={() => setEnrolLevel(lv.id)}
+                      style={{
+                        background: enrolLevel === lv.id ? V.bone : V.white,
+                        border: `1.5px solid ${enrolLevel === lv.id ? V.cr : V.bone3}`,
+                        borderRadius:10,
+                        padding:'14px 16px',
+                        cursor:'pointer',
+                        transition:'all .2s',
+                        textAlign:'left',
+                        fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+                      }}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,fontWeight:400,marginBottom:3}}>{lv.label}</div>
+                      <div style={{fontSize:12,color:V.sl2}}>{lv.years} · {lv.ages}</div>
+                      <div style={{fontSize:12,color:V.cr,fontWeight:700,marginTop:5}}>{lv.feeFrom}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+          )}
+
+          {/* STEP 3 — REQUIREMENTS + PROCESS (only shown after level chosen) */}
+          {selectedLevel && (
+            <>
+              <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+                <div style={{maxWidth:1100,margin:'0 auto'}}>
+                  <div style={{textAlign:'center',marginBottom:32}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Step 3 · What we need</div>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
+                      Enrolment requirements
+                    </h2>
+                    <p style={{fontSize:14,color:V.sl,maxWidth:620,margin:'0 auto',lineHeight:1.6}}>
+                      For {selectedLevel.label} · {selectedLevel.years} ({selectedLevel.ages})
+                    </p>
+                  </div>
+
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
+                    {[
+                      { tag:'Mandatory', title:'Academic documents', items:[
+                        'Most recent school report (within past 12 months)',
+                        'Transcripts / result slips — last two academic years',
+                        'Reference letter from current teacher or school',
+                        'Previous portfolio (if transferring from IB World School)',
+                        'English proficiency evidence (if not primary language)',
+                      ]},
+                      { tag:'Mandatory', title:'Identity & legal documents', items:[
+                        'Birth certificate — certified copy',
+                        'Valid passport — photo page (international students)',
+                        'Parent National ID / Alien Card (Kenya-based)',
+                        'Recent passport-size photo of student',
+                        'Homeschool Declaration Form — signed by parent / guardian',
+                      ]},
+                      { tag:'Required', title:'Technology', items:[
+                        'Personal laptop or desktop (tablet as secondary only)',
+                        'Reliable internet — minimum 5 Mbps stable broadband',
+                        'Webcam and microphone',
+                        'Google Workspace or Microsoft 365 account',
+                        'Dedicated, quiet home study space',
+                      ]},
+                      { tag:'Placement', title:'Assessment & placement', items:[
+                        'Smartious Placement Test — Maths & English, 60 mins online',
+                        'Learner Profile Questionnaire',
+                        'Parent statement of learning goals',
+                        'Prior knowledge checklist — subject by subject',
+                        'Learning support disclosure (if applicable)',
+                      ]},
+                    ].map((box, i) => (
+                      <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 20px'}}>
+                        <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:10}}>{box.tag}</div>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:400,color:V.ink,marginBottom:12,lineHeight:1.3}}>{box.title}</h3>
+                        <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:8}}>
+                          {box.items.map((it, j) => (
+                            <li key={j} style={{fontSize:13,color:V.sl,lineHeight:1.55,paddingLeft:16,position:'relative'}}>
+                              <span style={{position:'absolute',left:0,top:7,width:6,height:6,borderRadius:'50%',background:V.gold3}}/>
+                              {it}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Subjects offered for this level */}
+                  <div style={{marginTop:24,background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 24px'}}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>Subjects covered</div>
+                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{cur.subjects}</p>
+                  </div>
+                </div>
+              </div></section>
+
+              {/* STEP 4 — 8-STEP PROCESS */}
+              <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+                <div style={{maxWidth:980,margin:'0 auto'}}>
+                  <div style={{textAlign:'center',marginBottom:32}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Step 4 · The process</div>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
+                      Eight steps from enquiry to first class
+                    </h2>
+                    <p style={{fontSize:14,color:V.sl,maxWidth:620,margin:'0 auto',lineHeight:1.6}}>
+                      Most families complete the full process within 7–10 working days.
+                    </p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
+                    {[
+                      ['01','Submit an enquiry','Contact us via WhatsApp, email or website. Admissions responds within 1 working day with a Welcome Pack.'],
+                      ['02','Complete the application','Application fee of USD 38 / KES 5,000 (non-refundable, covers placement test). Form takes 20–30 minutes.'],
+                      ['03','Submit required documents','Upload all academic and identity documents. Reviewed within 3 working days.'],
+                      ['04','Sit the placement test','60-minute online Mathematics & English assessment. Results within 5 working days.'],
+                      ['05','Admissions interview','20-minute virtual meeting between the curriculum coordinator, student and parent.'],
+                      ['06','Offer of admission','Receive formal Letter of Offer. Sign Acceptance Form. Pay registration deposit (deducted from first tuition invoice).'],
+                      ['07','Enrolment confirmation','Receive LMS credentials, timetable, subject guides, and onboarding materials.'],
+                      ['08','Induction week & start','Mandatory online Induction Week. Mentor and tutor sessions for first two weeks. Programme begins.'],
+                    ].map(([num, title, desc]) => (
+                      <div key={num} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
+                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:V.cr,marginBottom:6}}>{num}</div>
+                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{title}</div>
+                        <p style={{fontSize:13,color:V.sl,lineHeight:1.6,margin:0}}>{desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div></section>
+
+              {/* STEP 5 — APPLICATION FEE PAYMENT */}
+              <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:64}}><div className="wrap">
+                <div style={{maxWidth:780,margin:'0 auto'}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Step 5 · Pay the application fee</div>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
+                      Application fee · USD 38 / KES 5,000
+                    </h2>
+                    <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto',lineHeight:1.6}}>
+                      One-time, non-refundable. Covers your child's placement test and admissions review. Deducted from first tuition invoice on enrolment.
+                    </p>
+                  </div>
+
+                  <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 28px'}}>
+                    {/* Summary chip */}
+                    <div style={{display:'flex',gap:10,flexWrap:'wrap',padding:'12px 14px',background:V.bone,borderRadius:8,marginBottom:20,fontSize:13}}>
+                      <div><strong style={{color:V.ink}}>Applying for:</strong> <span style={{color:V.sl}}>{selectedLevel.label} · {selectedLevel.years}</span></div>
+                      <div style={{color:V.sl2}}>·</div>
+                      <div><strong style={{color:V.ink}}>Curriculum:</strong> <span style={{color:V.sl}}>{cur.label}</span></div>
+                    </div>
+
+                    {/* Form fields */}
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:14}}>
+                      <div>
+                        <label style={{display:'block',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.sl,marginBottom:6}}>Parent / Guardian Name</label>
+                        <input value={enrolParentName} onChange={e=>setEnrolParentName(e.target.value)} placeholder="Your full name"
+                          style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",outline:'none',background:V.bone,color:V.ink,boxSizing:'border-box'}}/>
+                      </div>
+                      <div>
+                        <label style={{display:'block',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.sl,marginBottom:6}}>Student Name</label>
+                        <input value={enrolStudentName} onChange={e=>setEnrolStudentName(e.target.value)} placeholder="Your child's full name"
+                          style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",outline:'none',background:V.bone,color:V.ink,boxSizing:'border-box'}}/>
+                      </div>
+                    </div>
+                    <div style={{marginBottom:20}}>
+                      <label style={{display:'block',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',color:V.sl,marginBottom:6}}>Email</label>
+                      <input value={enrolEmail} onChange={e=>setEnrolEmail(e.target.value)} type="email" placeholder="your.email@example.com"
+                        style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",outline:'none',background:V.bone,color:V.ink,boxSizing:'border-box'}}/>
+                    </div>
+
+                    {/* Pay button */}
+                    <button
+                      onClick={handlePayApplicationFee}
+                      disabled={enrolAppFeeProcessing}
+                      style={{
+                        width:'100%',
+                        background:enrolAppFeeProcessing ? V.sl2 : `linear-gradient(135deg, ${V.cr2}, ${V.cr})`,
+                        color:V.white,
+                        border:'none',
+                        borderRadius:8,
+                        padding:'15px 20px',
+                        fontSize:14,
+                        fontWeight:700,
+                        cursor:enrolAppFeeProcessing ? 'not-allowed' : 'pointer',
+                        fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+                        letterSpacing:'.04em',
+                        boxShadow:'0 6px 18px rgba(139,26,46,.3)',
+                        transition:'all .2s',
+                        display:'inline-flex',
+                        alignItems:'center',
+                        justifyContent:'center',
+                        gap:8,
+                      }}>
+                      {enrolAppFeeProcessing ? 'Opening Paystack…' : <>Pay USD 38 / KES 5,000 via Paystack
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      </>}
+                    </button>
+                    <p style={{fontSize:11.5,color:V.sl2,marginTop:14,textAlign:'center',lineHeight:1.6}}>
+                      Secure payment via Paystack. Cards (Visa, Mastercard) and M-Pesa accepted. You'll receive a receipt by email.
+                    </p>
+                  </div>
+
+                  {/* Alternative — manual payment */}
+                  <div style={{marginTop:24,padding:'18px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,fontSize:13,color:V.sl,lineHeight:1.7}}>
+                    <strong style={{color:V.ink,fontSize:13.5,display:'block',marginBottom:8}}>Prefer to pay manually?</strong>
+                    M-Pesa Paybill <strong style={{color:V.ink}}>247247</strong>, Account No. <strong style={{color:V.ink}}>745021</strong>, Account name <strong style={{color:V.ink}}>Smartious Edtech</strong>. After paying, email the M-Pesa confirmation to <strong style={{color:V.cr}}>hellosmartious@gmail.com</strong> with your child's name and chosen curriculum.
+                  </div>
+
+                  {/* Declaration form download */}
+                  <div style={{marginTop:14,padding:'18px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,fontSize:13,color:V.sl,lineHeight:1.7}}>
+                    <strong style={{color:V.ink,fontSize:13.5,display:'block',marginBottom:8}}>Declaration Form</strong>
+                    Once we receive your application fee, we'll email you the Homeschool Declaration Form for your signature. You can also request it ahead of time by contacting <strong style={{color:V.cr}}>hellosmartious@gmail.com</strong> or WhatsApp <strong style={{color:V.cr}}>+254 745 021 212</strong>.
+                  </div>
+                </div>
+              </div></section>
+            </>
+          )}
+
+          {/* PRE-SELECTION HINT — shown when no level chosen yet */}
+          {!selectedLevel && cur && (
+            <section className="sec" style={{background:V.bone,paddingTop:24,paddingBottom:64}}><div className="wrap">
+              <div style={{maxWidth:600,margin:'0 auto',textAlign:'center',padding:'32px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12}}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="2" strokeLinecap="round" style={{margin:'0 auto 12px',display:'block'}}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+                <p style={{fontSize:14,color:V.sl,margin:0,lineHeight:1.6}}>
+                  Select a year / grade above to see the full enrolment pack — requirements, subjects, process, and application fee payment.
+                </p>
+              </div>
+            </div></section>
+          )}
+        </>
+        )
+      })()}
       {/* ══════════════════════════════════════════
           LOGIN
       ══════════════════════════════════════════ */}
