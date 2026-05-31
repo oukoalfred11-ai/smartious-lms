@@ -2165,29 +2165,6 @@ export default function LandingPage() {
         </nav>
       </div>{/* /lp-header */}
 
-      {/* DEPLOYMENT MARKER — tiny visible badge proving this build reached production.
-          Remove once we've confirmed the deploy pipeline works correctly. */}
-      <div style={{
-        position:'fixed',
-        bottom:8,
-        right:8,
-        zIndex:9999,
-        background:'rgba(8,12,20,.85)',
-        color:'#C9973A',
-        padding:'4px 9px',
-        borderRadius:6,
-        fontSize:10,
-        fontWeight:700,
-        letterSpacing:'.04em',
-        fontFamily:"'Fira Code', monospace",
-        border:'1px solid rgba(201,151,58,.35)',
-        boxShadow:'0 2px 8px rgba(0,0,0,.3)',
-        pointerEvents:'none',
-        userSelect:'none',
-      }} aria-hidden="true">
-        BUILD 2026-05-31-C · premium-aesthetic
-      </div>
-
       {/* Mobile slide-down menu — categorised, premium look */}
       {mobileMenuOpen && (
         <div style={{
