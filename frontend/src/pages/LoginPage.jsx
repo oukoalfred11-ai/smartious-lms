@@ -2,15 +2,9 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth, useToast } from '../context/ctx.jsx'
 
-// Demo credentials — public portal only serves parents and students
-const DEMO = [
-  {role:'student', label:'Student', email:'amara.osei@student.smartious.ac.ke', pw:'Student@2024', col:'#3B82F6',
-   svg:'<path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/>'},
-  {role:'parent',  label:'Parent',  email:'janet.osei@gmail.com',              pw:'Parent@2024',  col:'#8B5CF6',
-   svg:'<circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/>'},
-  {role:'demo',    label:'Demo',    email:'demo@smartious.ac.ke',              pw:'Demo@2024',    col:'#8B1A2E',
-   svg:'<polygon points="5 3 19 12 5 21 5 3"/>'},
-]
+// Background photo for the right-side panel — Unsplash students/campus.
+// Swap with a real Smartious photo when available.
+const BG_PHOTO = 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1600&q=80&auto=format&fit=crop'
 
 // Inline Smartious logo — crimson gradient shield, gold star, white open book
 const SmartiousLogo = ({ size = 40, withText = false }) => (
@@ -44,7 +38,7 @@ const SmartiousLogo = ({ size = 40, withText = false }) => (
         <div style={{fontFamily:"'Playfair Display',serif",fontSize: size*0.55, fontWeight:700, color:'#FEFDFB'}}>
           Smart<em style={{fontStyle:'italic',color:'#F0CC5A',fontWeight:500}}>ious</em>
         </div>
-        <div style={{fontSize: size*0.2, fontWeight:600, letterSpacing:'.16em', color:'rgba(247,243,237,.45)', textTransform:'uppercase', marginTop:2}}>
+        <div style={{fontSize: size*0.2, fontWeight:600, letterSpacing:'.16em', color:'rgba(247,243,237,.5)', textTransform:'uppercase', marginTop:2}}>
           Homeschool · Global
         </div>
       </div>
@@ -56,43 +50,27 @@ export default function LoginPage() {
   const { login } = useAuth()
   const toast = useToast()
   const nav = useNavigate()
-  const [tab, setTab] = useState('student')
   const [email, setEmail] = useState('')
   const [pw, setPw] = useState('')
   const [loading, setLoading] = useState(false)
   const [err, setErr] = useState('')
   const [showPw, setShowPw] = useState(false)
-
-  // Only Student + Parent tabs on the public portal — staff log in elsewhere
-  const TABS = [
-    {id:'student', label:'Student', svg:'<path d="M12 3L1 9l11 6 11-6-11-6z"/><path d="M5 11.5v4.5a7 7 0 0 0 14 0v-4.5"/>'},
-    {id:'parent',  label:'Parent',  svg:'<circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/>'},
-  ]
+  const [emailFocused, setEmailFocused] = useState(false)
+  const [pwFocused, setPwFocused] = useState(false)
 
   const submit = async (e) => {
     e?.preventDefault()
     setErr('')
-    if (!email || !pw) { setErr('Enter your email and password.'); return }
+    if (!email || !pw) {
+      setErr('Enter your email and password.')
+      return
+    }
     setLoading(true)
     try {
-      let user
-      try {
-        user = await login(email, pw)
-      } catch {
-        // Offline / demo fallback
-        const found = DEMO.find(d => d.email === email && d.pw === pw)
-        if (!found) throw new Error('Invalid credentials')
-        const nameMap = { student:'Amara', parent:'Janet', demo:'Demo' }
-        const lastMap = { student:'Osei',  parent:'Osei',  demo:'Student' }
-        const fakeUser = { firstName: nameMap[found.role]||'User', lastName: lastMap[found.role]||'', role: found.role, email }
-        localStorage.setItem('sm_token', 'demo-token-' + found.role)
-        localStorage.setItem('sm_user', JSON.stringify(fakeUser))
-        window.location.href = '/' + found.role
-        return
-      }
-      // Block staff roles that accidentally hit this portal
+      const user = await login(email, pw)
+      // Block staff roles that hit the public portal by mistake
       if (user.role === 'teacher' || user.role === 'admin') {
-        setErr('Staff accounts must use the Admin Login link in the footer.')
+        setErr('Staff accounts must sign in via the Admin Login link.')
         setLoading(false)
         return
       }
@@ -104,100 +82,302 @@ export default function LoginPage() {
     setLoading(false)
   }
 
-  const quickLogin = async (d) => {
-    setEmail(d.email); setPw(d.pw); setTab(d.role === 'demo' ? 'student' : d.role)
-    setErr(''); setLoading(true)
-    try {
-      try { const user = await login(d.email, d.pw); nav('/' + user.role); return } catch {}
-      const nameMap = { student:'Amara', parent:'Janet', demo:'Demo' }
-      const lastMap = { student:'Osei',  parent:'Osei',  demo:'Student' }
-      const fake = { firstName: nameMap[d.role]||d.label, lastName: lastMap[d.role]||'', role: d.role, email: d.email }
-      localStorage.setItem('sm_token', 'demo-token-' + d.role)
-      localStorage.setItem('sm_user', JSON.stringify(fake))
-      window.location.href = '/' + d.role
-    } catch { setErr('Login failed.') }
-    setLoading(false)
-  }
+  // Reusable underline-input style. Tied to focus state via inline checks.
+  const inputBaseStyle = (focused) => ({
+    width:'100%',
+    background:'transparent',
+    border:'none',
+    borderBottom: focused
+      ? '2px solid #F0CC5A'
+      : '1.5px solid rgba(255,255,255,.25)',
+    padding:'12px 0 12px 30px',
+    fontSize:15,
+    color:'#fff',
+    outline:'none',
+    fontFamily:"'Syne',sans-serif",
+    transition:'border-color .2s',
+    boxSizing:'border-box',
+  })
 
   return (
-    <div style={{ minHeight:'100vh', background:'#0A0806', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'60px 20px', position:'relative', overflow:'hidden', fontFamily:"'Syne',sans-serif" }}>
-      <div style={{ position:'absolute', top:'-20%', left:'-10%', width:'60%', height:'120%', borderRadius:'50%', background:'radial-gradient(ellipse,rgba(139,26,46,.14) 0%,transparent 70%)', pointerEvents:'none' }} />
-      <div style={{ position:'absolute', bottom:'-20%', right:'-10%', width:'50%', height:'100%', borderRadius:'50%', background:'radial-gradient(ellipse,rgba(184,150,12,.05) 0%,transparent 70%)', pointerEvents:'none' }} />
+    <div style={{
+      minHeight:'100vh',
+      display:'flex',
+      background:'#0A0806',
+      fontFamily:"'Syne',sans-serif",
+      overflow:'hidden',
+    }}>
+      {/* LEFT PANEL — Form */}
+      <div style={{
+        flex:'0 0 460px',
+        background:'linear-gradient(135deg, #8B1A2E 0%, #0A0806 100%)',
+        position:'relative',
+        display:'flex',
+        flexDirection:'column',
+        padding:'56px 56px 40px',
+        zIndex:2,
+        boxShadow:'10px 0 40px rgba(0,0,0,.4)',
+      }} className="login-left">
 
-      <div style={{ textAlign:'center', marginBottom:32, position:'relative', zIndex:1 }}>
-        <SmartiousLogo size={48} withText={true}/>
-      </div>
-
-      <div style={{ background:'rgba(26,21,16,.96)', border:'1px solid rgba(184,150,12,.12)', borderRadius:24, padding:44, width:'100%', maxWidth:440, boxShadow:'0 60px 120px rgba(10,8,6,.28)', position:'relative', zIndex:1, backdropFilter:'blur(20px)' }}>
-        <div style={{ display:'flex', background:'rgba(255,255,255,.05)', borderRadius:8, padding:3, marginBottom:26 }}>
-          {TABS.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              style={{ flex:1, padding:'10px 8px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer', border:'none', transition:'all .2s', fontFamily:"'Syne',sans-serif", color: tab===t.id ? '#fff' : 'rgba(247,243,237,.4)', background: tab===t.id ? '#8B1A2E' : 'transparent', display:'flex', alignItems:'center', justifyContent:'center', gap:6, boxShadow: tab===t.id ? '0 2px 8px rgba(139,26,46,.4)' : 'none' }}>
-              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:t.svg}} />
-              {t.label}
-            </button>
-          ))}
+        {/* Logo */}
+        <div style={{marginBottom:'auto'}}>
+          <Link to="/" style={{textDecoration:'none',display:'inline-block'}}>
+            <SmartiousLogo size={42} withText={true}/>
+          </Link>
         </div>
 
-        <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.5rem', fontWeight:700, color:'#fff', marginBottom:4 }}>Sign in to Smartious</div>
-        <div style={{ fontSize:13, color:'rgba(247,243,237,.38)', marginBottom:24 }}>{tab.charAt(0).toUpperCase()+tab.slice(1)} portal · Enter your credentials below</div>
+        {/* Welcome heading */}
+        <div style={{marginBottom:36}}>
+          <h1 style={{
+            fontFamily:"'Playfair Display',serif",
+            fontSize:'2.8rem',
+            fontWeight:700,
+            color:'#fff',
+            lineHeight:1.05,
+            marginBottom:8,
+            letterSpacing:'-.01em',
+          }}>Welcome</h1>
+          <p style={{
+            fontSize:14,
+            color:'rgba(247,243,237,.6)',
+            fontWeight:400,
+            letterSpacing:'.02em',
+          }}>Sign in to continue your learning journey</p>
+        </div>
 
+        {/* Error banner */}
         {err && (
-          <div style={{ display:'flex', alignItems:'flex-start', gap:8, background:'rgba(220,38,38,.12)', border:'1px solid rgba(220,38,38,.25)', borderRadius:8, padding:'10px 14px', fontSize:13, color:'#F87171', marginBottom:14, lineHeight:1.45 }}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0,marginTop:2}}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div style={{
+            display:'flex',
+            alignItems:'flex-start',
+            gap:8,
+            background:'rgba(220,38,38,.12)',
+            border:'1px solid rgba(220,38,38,.3)',
+            borderRadius:8,
+            padding:'10px 14px',
+            fontSize:13,
+            color:'#FCA5A5',
+            marginBottom:20,
+            lineHeight:1.45,
+          }}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0,marginTop:2}}>
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
             <span>{err}</span>
           </div>
         )}
 
-        <div style={{ marginBottom:14 }}>
-          <label style={{ fontSize:11, fontWeight:700, color:'rgba(247,243,237,.32)', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:6, display:'block' }}>Email Address</label>
-          <input value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder={tab === 'student' ? 'student@email.com' : 'parent@email.com'} onKeyDown={e=>e.key==='Enter'&&submit()}
-            style={{ padding:'12px 14px', border:'1.5px solid rgba(255,255,255,.1)', borderRadius:8, fontSize:14, color:'#fff', outline:'none', background:'rgba(255,255,255,.05)', width:'100%', fontFamily:"'Syne',sans-serif", boxSizing:'border-box' }} />
+        {/* Email input */}
+        <div style={{position:'relative',marginBottom:24}}>
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={emailFocused ? '#F0CC5A' : 'rgba(255,255,255,.5)'} strokeWidth="1.8" strokeLinecap="round"
+            style={{position:'absolute',left:0,top:14,transition:'stroke .2s'}}>
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <input
+            value={email}
+            onChange={e=>setEmail(e.target.value)}
+            onFocus={() => setEmailFocused(true)}
+            onBlur={() => setEmailFocused(false)}
+            type="email"
+            placeholder="Email address"
+            onKeyDown={e=>e.key==='Enter' && submit()}
+            autoComplete="email"
+            style={inputBaseStyle(emailFocused)}
+          />
         </div>
 
-        <div style={{ marginBottom:20, position:'relative' }}>
-          <label style={{ fontSize:11, fontWeight:700, color:'rgba(247,243,237,.32)', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:6, display:'block' }}>Password</label>
-          <input value={pw} onChange={e=>setPw(e.target.value)} type={showPw?'text':'password'} placeholder="••••••••" onKeyDown={e=>e.key==='Enter'&&submit()}
-            style={{ padding:'12px 14px', paddingRight:44, border:'1.5px solid rgba(255,255,255,.1)', borderRadius:8, fontSize:14, color:'#fff', outline:'none', background:'rgba(255,255,255,.05)', width:'100%', fontFamily:"'Syne',sans-serif", boxSizing:'border-box' }} />
-          <button onClick={()=>setShowPw(v=>!v)} style={{ position:'absolute', right:12, top:34, background:'none', border:'none', cursor:'pointer', color:'rgba(247,243,237,.35)' }}>
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        {/* Password input */}
+        <div style={{position:'relative',marginBottom:32}}>
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={pwFocused ? '#F0CC5A' : 'rgba(255,255,255,.5)'} strokeWidth="1.8" strokeLinecap="round"
+            style={{position:'absolute',left:0,top:14,transition:'stroke .2s'}}>
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <input
+            value={pw}
+            onChange={e=>setPw(e.target.value)}
+            onFocus={() => setPwFocused(true)}
+            onBlur={() => setPwFocused(false)}
+            type={showPw ? 'text' : 'password'}
+            placeholder="Password"
+            onKeyDown={e=>e.key==='Enter' && submit()}
+            autoComplete="current-password"
+            style={{...inputBaseStyle(pwFocused), paddingRight:36}}
+          />
+          <button
+            type="button"
+            onClick={()=>setShowPw(v=>!v)}
+            aria-label={showPw ? 'Hide password' : 'Show password'}
+            style={{
+              position:'absolute',
+              right:0,
+              top:12,
+              background:'none',
+              border:'none',
+              cursor:'pointer',
+              color:'rgba(247,243,237,.5)',
+              padding:4,
+            }}>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              {showPw ? (
+                <>
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </>
+              ) : (
+                <>
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </>
+              )}
+            </svg>
           </button>
         </div>
 
-        <button onClick={submit} disabled={loading}
-          style={{ width:'100%', padding:14, background:'#8B1A2E', color:'#fff', border:'none', borderRadius:8, fontWeight:700, fontSize:14, cursor:loading?'not-allowed':'pointer', transition:'all .2s', fontFamily:"'Syne',sans-serif", display:'flex', alignItems:'center', justifyContent:'center', gap:8, boxShadow:'0 4px 14px rgba(139,26,46,.4)', opacity:loading?.7:1 }}>
-          {loading ? 'Signing in…' : <>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-            Sign In to {tab.charAt(0).toUpperCase()+tab.slice(1)} Portal
-          </>}
+        {/* Sign-in button */}
+        <button
+          onClick={submit}
+          disabled={loading}
+          style={{
+            width:'100%',
+            padding:'14px',
+            background:'#fff',
+            color:'#8B1A2E',
+            border:'none',
+            borderRadius:30,
+            fontWeight:800,
+            fontSize:13,
+            letterSpacing:'.16em',
+            textTransform:'uppercase',
+            cursor:loading ? 'not-allowed' : 'pointer',
+            transition:'transform .15s, box-shadow .15s, opacity .15s',
+            fontFamily:"'Syne',sans-serif",
+            boxShadow:'0 10px 30px rgba(255,255,255,.18)',
+            opacity:loading ? .65 : 1,
+            marginBottom:18,
+          }}
+          onMouseEnter={e => !loading && (e.currentTarget.style.transform = 'translateY(-1px)')}
+          onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}>
+          {loading ? 'Signing in…' : 'Login'}
         </button>
 
-        <div style={{ display:'flex', alignItems:'center', gap:12, margin:'20px 0' }}>
-          <div style={{ flex:1, height:1, background:'rgba(255,255,255,.07)' }} />
-          <span style={{ fontSize:12, color:'rgba(247,243,237,.2)', whiteSpace:'nowrap' }}>Quick Access — Demo</span>
-          <div style={{ flex:1, height:1, background:'rgba(255,255,255,.07)' }} />
+        {/* Forgot password */}
+        <div style={{textAlign:'left',marginBottom:'auto'}}>
+          <Link to="/reset-password" style={{
+            fontSize:13,
+            color:'rgba(247,243,237,.6)',
+            textDecoration:'none',
+            borderBottom:'1px solid transparent',
+            transition:'color .2s, border-color .2s',
+          }}
+          onMouseEnter={e=>{e.currentTarget.style.color='#F0CC5A';e.currentTarget.style.borderColor='rgba(240,204,90,.4)'}}
+          onMouseLeave={e=>{e.currentTarget.style.color='rgba(247,243,237,.6)';e.currentTarget.style.borderColor='transparent'}}>
+            Forgot Password?
+          </Link>
         </div>
 
-        {(() => {
-          const demo = DEMO.find(d => d.role === 'demo')
-          return (
-            <button onClick={() => quickLogin(demo)}
-              style={{ width:'100%', padding:'14px 8px', background:'rgba(139,26,46,.08)', border:'1px solid rgba(139,26,46,.25)', borderRadius:10, cursor:'pointer', textAlign:'center', transition:'all .2s', fontFamily:"'Syne',sans-serif" }}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor='#8B1A2E';e.currentTarget.style.background='rgba(139,26,46,.18)'}}
-              onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(139,26,46,.25)';e.currentTarget.style.background='rgba(139,26,46,.08)'}}>
-              <div style={{ width:36, height:36, borderRadius:'50%', background:'rgba(139,26,46,.25)', border:'1.5px solid rgba(139,26,46,.5)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 8px' }}>
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="#8B1A2E" strokeWidth="2" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              </div>
-              <div style={{ fontSize:13, fontWeight:700, color:'rgba(247,243,237,.8)', marginBottom:3 }}>Try Demo</div>
-              <div style={{ fontSize:11, color:'rgba(247,243,237,.35)' }}>One-click access · No sign-up needed</div>
-            </button>
-          )
-        })()}
+        {/* Footer links */}
+        <div style={{
+          paddingTop:24,
+          borderTop:'1px solid rgba(255,255,255,.08)',
+          display:'flex',
+          justifyContent:'space-between',
+          alignItems:'center',
+          gap:12,
+          flexWrap:'wrap',
+        }}>
+          <Link to="/" style={{
+            fontSize:12,
+            color:'rgba(247,243,237,.45)',
+            textDecoration:'none',
+            display:'inline-flex',
+            alignItems:'center',
+            gap:6,
+          }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Website
+          </Link>
+          <Link to="/enroll" style={{
+            fontSize:12,
+            color:'rgba(247,243,237,.65)',
+            textDecoration:'none',
+            fontWeight:600,
+          }}>
+            New here? <span style={{color:'#F0CC5A',borderBottom:'1px solid rgba(240,204,90,.4)'}}>Enroll →</span>
+          </Link>
+        </div>
       </div>
 
-      <div style={{ marginTop:20, textAlign:'center', position:'relative', zIndex:1, display:'flex', flexDirection:'column', gap:10, alignItems:'center' }}>
-        <Link to="/" style={{ fontSize:12.5, color:'rgba(247,243,237,.25)', textDecoration:'none' }}>← Back to Smartious Website</Link>
+      {/* RIGHT PANEL — Photo */}
+      <div style={{
+        flex:1,
+        position:'relative',
+        backgroundColor:'#1a1a1a',
+        overflow:'hidden',
+      }} className="login-right">
+        <img
+          src={BG_PHOTO}
+          alt=""
+          aria-hidden="true"
+          onError={e => { e.currentTarget.style.display='none' }}
+          style={{
+            position:'absolute',
+            inset:0,
+            width:'100%',
+            height:'100%',
+            objectFit:'cover',
+            objectPosition:'center',
+          }}
+        />
+        {/* Subtle overlay so photo has consistent mood */}
+        <div style={{
+          position:'absolute',
+          inset:0,
+          background:'linear-gradient(to right, rgba(10,8,6,.45) 0%, rgba(10,8,6,.15) 40%, rgba(10,8,6,.25) 100%)',
+        }}/>
+        {/* Optional tagline overlay at bottom */}
+        <div style={{
+          position:'absolute',
+          bottom:36,
+          right:36,
+          maxWidth:340,
+          textAlign:'right',
+          color:'rgba(255,255,255,.85)',
+        }}>
+          <div style={{
+            fontFamily:"'Playfair Display',serif",
+            fontSize:'1.4rem',
+            fontWeight:700,
+            lineHeight:1.25,
+            textShadow:'0 2px 12px rgba(0,0,0,.5)',
+            marginBottom:6,
+          }}>Learn from anywhere. <em style={{color:'#F0CC5A'}}>Grow with us.</em></div>
+          <div style={{
+            fontSize:11.5,
+            color:'rgba(255,255,255,.65)',
+            letterSpacing:'.06em',
+            textTransform:'uppercase',
+            textShadow:'0 2px 8px rgba(0,0,0,.5)',
+          }}>Smartious · 12+ countries · IGCSE · IB · A-Level</div>
+        </div>
       </div>
+
+      {/* Responsive — collapse to single column on small screens */}
+      <style>{`
+        @media (max-width: 880px) {
+          .login-left {
+            flex: 1 !important;
+            padding: 40px 28px !important;
+            min-height: 100vh;
+          }
+          .login-right {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
