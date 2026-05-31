@@ -22,10 +22,10 @@ const SmartiousLogo = ({ size = 40, withText = false }) => (
       <path d="M40 10 L64 17 Q65.5 17 65.5 19 L65.5 44 Q65.5 57 40 69 Q14.5 57 14.5 44 L14.5 19 Q14.5 17 16 17 Z"
             fill="none" stroke="rgba(255,255,255,.14)" strokeWidth="0.8"/>
       <polygon points="40,19 42.2,26 49.5,26 43.7,30.4 45.9,37.5 40,33 34.1,37.5 36.3,30.4 30.5,26 37.8,26"
-               fill="#F0CC5A" stroke="#C89A28" strokeWidth="0.4"/>
+               fill="#C9973A" stroke="#C89A28" strokeWidth="0.4"/>
       <g transform="translate(40 52)">
-        <path d="M-14 -4 L-14 8 L-1 9 L-1 -3 Q-8 -5 -14 -4 Z" fill="#FEFDFB" stroke="#F7F3ED" strokeWidth=".4"/>
-        <path d="M14 -4 L14 8 L1 9 L1 -3 Q8 -5 14 -4 Z"       fill="#FEFDFB" stroke="#F7F3ED" strokeWidth=".4"/>
+        <path d="M-14 -4 L-14 8 L-1 9 L-1 -3 Q-8 -5 -14 -4 Z" fill="#FFFFFF" stroke="#FDFAF4" strokeWidth=".4"/>
+        <path d="M14 -4 L14 8 L1 9 L1 -3 Q8 -5 14 -4 Z"       fill="#FFFFFF" stroke="#FDFAF4" strokeWidth=".4"/>
         <line x1="-10" y1="-0.5" x2="-4" y2="-0.5" stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
         <line x1="-10" y1="2"    x2="-4" y2="2"    stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
         <line x1="-10" y1="4.5"  x2="-4" y2="4.5"  stroke="#A8203A" strokeWidth=".5" strokeLinecap="round"/>
@@ -36,8 +36,8 @@ const SmartiousLogo = ({ size = 40, withText = false }) => (
     </svg>
     {withText && (
       <div style={{display:'flex',flexDirection:'column',lineHeight:1.1}}>
-        <div style={{fontFamily:"'Playfair Display',serif",fontSize: size*0.55, fontWeight:700, color:'#FEFDFB'}}>
-          Smart<em style={{fontStyle:'italic',color:'#F0CC5A',fontWeight:500}}>ious</em>
+        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize: size*0.55, fontWeight:700, color:'#FFFFFF'}}>
+          Smart<em style={{fontStyle:'italic',color:'#C9973A',fontWeight:500}}>ious</em>
         </div>
         <div style={{fontSize: size*0.2, fontWeight:600, letterSpacing:'.16em', color:'rgba(247,243,237,.5)', textTransform:'uppercase', marginTop:2}}>
           Homeschool · Global
@@ -89,13 +89,13 @@ export default function LoginPage() {
     background:'transparent',
     border:'none',
     borderBottom: focused
-      ? '2px solid #F0CC5A'
+      ? '2px solid #C9973A'
       : '1.5px solid rgba(255,255,255,.25)',
     padding:'12px 0 12px 30px',
     fontSize:15,
     color:'#fff',
     outline:'none',
-    fontFamily:"'Syne',sans-serif",
+    fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
     transition:'border-color .2s',
     boxSizing:'border-box',
   })
@@ -104,14 +104,14 @@ export default function LoginPage() {
     <div style={{
       minHeight:'100vh',
       display:'flex',
-      background:'#0A0806',
-      fontFamily:"'Syne',sans-serif",
+      background:'#080C14',
+      fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
       overflow:'hidden',
     }}>
       {/* LEFT PANEL — Form */}
       <div style={{
         flex:'0 0 460px',
-        background:'linear-gradient(135deg, #8B1A2E 0%, #0A0806 100%)',
+        background:'linear-gradient(135deg, #8B1A2E 0%, #080C14 100%)',
         position:'relative',
         display:'flex',
         flexDirection:'column',
@@ -130,7 +130,7 @@ export default function LoginPage() {
         {/* Welcome heading */}
         <div style={{marginBottom:36}}>
           <h1 style={{
-            fontFamily:"'Playfair Display',serif",
+            fontFamily:"'DM Serif Display',Georgia,serif",
             fontSize:'2.8rem',
             fontWeight:700,
             color:'#fff',
@@ -172,7 +172,7 @@ export default function LoginPage() {
 
         {/* Email input */}
         <div style={{position:'relative',marginBottom:24}}>
-          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={emailFocused ? '#F0CC5A' : 'rgba(255,255,255,.5)'} strokeWidth="1.8" strokeLinecap="round"
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={emailFocused ? '#C9973A' : 'rgba(255,255,255,.5)'} strokeWidth="1.8" strokeLinecap="round"
             style={{position:'absolute',left:0,top:14,transition:'stroke .2s'}}>
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
             <polyline points="22,6 12,13 2,6"/>
@@ -192,7 +192,7 @@ export default function LoginPage() {
 
         {/* Password input */}
         <div style={{position:'relative',marginBottom:32}}>
-          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={pwFocused ? '#F0CC5A' : 'rgba(255,255,255,.5)'} strokeWidth="1.8" strokeLinecap="round"
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke={pwFocused ? '#C9973A' : 'rgba(255,255,255,.5)'} strokeWidth="1.8" strokeLinecap="round"
             style={{position:'absolute',left:0,top:14,transition:'stroke .2s'}}>
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
@@ -255,7 +255,7 @@ export default function LoginPage() {
             textTransform:'uppercase',
             cursor:loading ? 'not-allowed' : 'pointer',
             transition:'transform .15s, box-shadow .15s, opacity .15s',
-            fontFamily:"'Syne',sans-serif",
+            fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
             boxShadow:'0 10px 30px rgba(255,255,255,.18)',
             opacity:loading ? .65 : 1,
             marginBottom:18,
@@ -274,7 +274,7 @@ export default function LoginPage() {
             borderBottom:'1px solid transparent',
             transition:'color .2s, border-color .2s',
           }}
-          onMouseEnter={e=>{e.currentTarget.style.color='#F0CC5A';e.currentTarget.style.borderColor='rgba(240,204,90,.4)'}}
+          onMouseEnter={e=>{e.currentTarget.style.color='#C9973A';e.currentTarget.style.borderColor='rgba(201,151,58,.4)'}}
           onMouseLeave={e=>{e.currentTarget.style.color='rgba(247,243,237,.6)';e.currentTarget.style.borderColor='transparent'}}>
             Forgot Password?
           </Link>
@@ -307,7 +307,7 @@ export default function LoginPage() {
             textDecoration:'none',
             fontWeight:600,
           }}>
-            New here? <span style={{color:'#F0CC5A',borderBottom:'1px solid rgba(240,204,90,.4)'}}>Enroll →</span>
+            New here? <span style={{color:'#C9973A',borderBottom:'1px solid rgba(201,151,58,.4)'}}>Enroll →</span>
           </Link>
         </div>
       </div>
@@ -340,7 +340,7 @@ export default function LoginPage() {
         <div style={{
           position:'absolute',
           inset:0,
-          background:'linear-gradient(to right, rgba(10,8,6,.45) 0%, rgba(10,8,6,.15) 40%, rgba(10,8,6,.25) 100%)',
+          background:'linear-gradient(to right, rgba(8,12,20,.45) 0%, rgba(8,12,20,.15) 40%, rgba(8,12,20,.25) 100%)',
         }}/>
         {/* Optional tagline overlay at bottom */}
         <div style={{
@@ -352,13 +352,13 @@ export default function LoginPage() {
           color:'rgba(255,255,255,.85)',
         }}>
           <div style={{
-            fontFamily:"'Playfair Display',serif",
+            fontFamily:"'DM Serif Display',Georgia,serif",
             fontSize:'1.4rem',
             fontWeight:700,
             lineHeight:1.25,
             textShadow:'0 2px 12px rgba(0,0,0,.5)',
             marginBottom:6,
-          }}>Learn from anywhere. <em style={{color:'#F0CC5A'}}>Grow with us.</em></div>
+          }}>Learn from anywhere. <em style={{color:'#C9973A'}}>Grow with us.</em></div>
           <div style={{
             fontSize:11.5,
             color:'rgba(255,255,255,.65)',
@@ -377,7 +377,7 @@ export default function LoginPage() {
             flex: 1 !important;
             padding: 40px 28px !important;
             min-height: 100vh;
-            background: linear-gradient(160deg, rgba(139,26,46,.72) 0%, rgba(10,8,6,.55) 100%) !important;
+            background: linear-gradient(160deg, rgba(139,26,46,.72) 0%, rgba(8,12,20,.55) 100%) !important;
             z-index: 2 !important;
             box-shadow: none !important;
           }
