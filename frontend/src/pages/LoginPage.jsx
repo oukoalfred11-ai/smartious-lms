@@ -377,7 +377,7 @@ export default function LoginPage() {
             flex: 1 !important;
             padding: 40px 28px !important;
             min-height: 100vh;
-            background: linear-gradient(160deg, rgba(139,26,46,.92) 0%, rgba(10,8,6,.88) 100%) !important;
+            background: linear-gradient(160deg, rgba(139,26,46,.72) 0%, rgba(10,8,6,.55) 100%) !important;
             z-index: 2 !important;
             box-shadow: none !important;
           }
