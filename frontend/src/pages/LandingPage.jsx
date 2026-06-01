@@ -8,6 +8,7 @@ import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
 import { FULL_ARTICLES } from '../data/fullArticles.js'
 import { NAIROBI_AREAS } from '../data/nairobiAreas.js'
+import { UAE_AREAS } from '../data/uaeAreas.js'
 
 
 /* ── Front Desk capture ───────────────────────────────────
@@ -804,7 +805,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1566,6 +1567,7 @@ export default function LandingPage() {
   const [currentService, setCurrentService] = useState(null)
   const [currentCountry, setCurrentCountry] = useState(null)
   const [currentTuitionArea, setCurrentTuitionArea] = useState(null)
+  const [currentUaeArea, setCurrentUaeArea] = useState(null)
   const [currentCompare, setCurrentCompare] = useState(null)
   const [publicTeachers, setPublicTeachers] = useState([])
   const [teachersLoading, setTeachersLoading] = useState(false)
@@ -2041,6 +2043,21 @@ export default function LandingPage() {
       }
       return
     }
+    if (path === '/tuition-uae') {
+      setPage('tuition-uae')
+      return
+    }
+    if (path.startsWith('/tuition-uae/')) {
+      const slug = decodeURIComponent(path.slice('/tuition-uae/'.length))
+      const area = UAE_AREAS.find(a => a.slug === slug)
+      if (area) {
+        setCurrentUaeArea(slug)
+        setPage('uae-area')
+      } else {
+        setPage('tuition-uae')
+      }
+      return
+    }
     if (path.startsWith('/compare/')) {
       const slug = decodeURIComponent(path.slice('/compare/'.length))
       const cmp = COMPARES.find(c => c.slug === slug)
@@ -2172,6 +2189,14 @@ export default function LandingPage() {
   const openTuitionArea = (slug) => {
     if (!slug) return
     nav('/tuition/' + encodeURIComponent(slug))
+    window.scrollTo(0, 0)
+    topRef.current?.scrollIntoView()
+  }
+
+  // openUaeArea(slug) — navigate to a UAE emirate-area tuition page
+  const openUaeArea = (slug) => {
+    if (!slug) return
+    nav('/tuition-uae/' + encodeURIComponent(slug))
     window.scrollTo(0, 0)
     topRef.current?.scrollIntoView()
   }
@@ -7772,6 +7797,442 @@ export default function LandingPage() {
           </>
         )
       })()}
+
+
+      {/* ══════════════════════════════════════════
+          TUITION UAE — Hub page at /tuition-uae
+          Online-only tuition across all UAE emirates.
+          Mirrors Nairobi hub structure but adapted for UAE positioning.
+      ══════════════════════════════════════════ */}
+      {page === 'tuition-uae' && (
+        <>
+          {/* LocalBusiness schema — UAE-wide */}
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'EducationalOrganization',
+            '@id': 'https://smartioushomeschool.com/tuition-uae#org',
+            'name': 'Smartious — Online Tuition UAE',
+            'url': 'https://smartioushomeschool.com/tuition-uae',
+            'description': 'Premium online tuition for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, RAK, Fujairah and Al Ain. Cambridge IGCSE, A-Level, IB Diploma, CBSE, American AP. From USD 15/hour.',
+            'areaServed': UAE_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', ' + a.emirate })),
+            'sameAs': ['https://smartioushomeschool.com'],
+          }) }}/>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+            'itemListElement': [
+              { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
+              { '@type': 'ListItem', 'position': 2, 'name': 'Tuition UAE', 'item': 'https://smartioushomeschool.com/tuition-uae' },
+            ],
+          }) }}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',
+            padding:'72px 0 56px',
+            overflow:'hidden',
+          }}>
+            <img
+              src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=80&auto=format&fit=crop"
+              alt=""
+              aria-hidden="true"
+              onError={e => { e.currentTarget.style.display='none' }}
+              style={{
+                position:'absolute',inset:0,
+                width:'100%',height:'100%',objectFit:'cover',
+                opacity:0.28,
+                filter:'saturate(.85)',
+                zIndex:0,
+              }}
+            />
+            <div style={{
+              position:'absolute',inset:0,
+              background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,
+              zIndex:1,
+            }}/>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Premium online tuition · United Arab Emirates</div>
+              <h1 style={{
+                fontFamily:"'DM Serif Display',Georgia,serif",
+                fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',
+                fontWeight:400,color:'#fff',lineHeight:1.05,
+                marginBottom:18,letterSpacing:'-.01em',
+              }}>Online tuition for <em style={{color:V.gold3,fontStyle:'italic'}}>UAE families</em></h1>
+              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
+                Live online 1-on-1 tuition for students across all seven emirates — Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah, Fujairah and Al Ain. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, CBSE and American AP. From <strong style={{color:V.gold3}}>USD 15/hour</strong> (≈ AED 55/hr) — meaningfully below typical UAE tutor rates (AED 150-400/hour).
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,letterSpacing:'.02em'}}>
+                  Book a Free Consultation
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online tuition for my child in the UAE.')}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp Us
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* ONLINE-ONLY DISCLOSURE — set expectations honestly upfront */}
+          <section className="sec" style={{background:V.bone,padding:'40px 0'}}><div className="wrap">
+            <div style={{maxWidth:900,margin:'0 auto',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 32px',boxShadow:'0 4px 14px rgba(8,12,20,.04)'}}>
+              <div style={{display:'flex',alignItems:'flex-start',gap:16,flexWrap:'wrap'}}>
+                <div style={{flexShrink:0,width:48,height:48,borderRadius:'50%',background:`rgba(201,151,58,.12)`,border:`2px solid ${V.gold3}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="2" strokeLinecap="round">
+                    <rect x="3" y="3" width="18" height="14" rx="2" ry="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                  </svg>
+                </div>
+                <div style={{flex:1,minWidth:280}}>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,marginBottom:8,lineHeight:1.3}}>Smartious in UAE is online-only</h3>
+                  <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>
+                    We do not send tutors to your villa or apartment, and we do not operate a physical centre in the Emirates. UAE private tutoring is regulated by <strong style={{color:V.ink}}>KHDA</strong> (Dubai), <strong style={{color:V.ink}}>ADEK</strong> (Abu Dhabi) and <strong style={{color:V.ink}}>SPEA</strong> (Sharjah), which license in-person tutoring within the emirates. Smartious operates as an internationally accredited online school based in <strong style={{color:V.ink}}>Nairobi, Kenya</strong> — our online sessions are delivered remotely from outside the country and are therefore not subject to in-person tutoring licensing requirements. <strong style={{color:V.ink}}>The educational quality is the same as in-person tutoring</strong> — shared whiteboards, screen sharing, real-time video — only the delivery method differs.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div></section>
+
+          {/* AREAS GRID */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Areas we serve</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                Online tuition across the <em style={{color:V.cr,fontStyle:'italic'}}>UAE</em>
+              </h2>
+              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
+                Click any emirate area below for school references, curricula, subjects, pricing and FAQs specific to that community.
+              </p>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
+              {UAE_AREAS.map(area => (
+                <a key={area.slug}
+                  href={'/tuition-uae/' + area.slug}
+                  onClick={(e) => { e.preventDefault(); openUaeArea(area.slug) }}
+                  style={{
+                    display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,
+                    padding:'20px 22px',textDecoration:'none',color:'inherit',
+                    transition:'all .2s',cursor:'pointer',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{area.emirate}</div>
+                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{area.name}</div>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{area.region}</p>
+                  <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
+                    View area details
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div></section>
+
+          {/* WHY ONLINE TUITION FROM SMARTIOUS */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36,maxWidth:720,margin:'0 auto 36px'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Why Smartious for UAE families</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  Internationally qualified tutors at UAE-tier pricing
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                {[
+                  ['Subject specialists, not generalists','Every Smartious tutor holds a subject-specific university degree. We do not assign generalist tutors to specialist subjects.'],
+                  ['Meaningful cost savings','UAE-licensed private tutors typically charge AED 150-400/hour (USD 40-110). Smartious online tuition is USD 15-25/hour (≈ AED 55-92). Savings reflect delivery model, not tutor quality.'],
+                  ['One-hour time-zone offset','UAE is GMT+4, our Nairobi-based teachers are GMT+3. Far easier scheduling than UK-based tutors (4-hour offset).'],
+                  ['Curriculum continuity if you relocate','If your family relocates from UAE to UK, Singapore, US, Australia or back home, Smartious follows you — same teachers, same curriculum, same examination board.'],
+                  ['All major UAE curricula','Cambridge IGCSE, Pearson Edexcel IGCSE, A-Level (CIE and Edexcel), IB Diploma, American AP, CBSE — we cover what your child\'s school teaches.'],
+                  ['University admissions support','UCAS for UK, Common App for US, plus Canadian, Australian and UAE branch-campus (NYU Abu Dhabi, Sorbonne Abu Dhabi) admissions support.'],
+                ].map(([h, p], i) => (
+                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
+                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* FAQ */}
+          <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:64}}><div className="wrap">
+            <div style={{maxWidth:820,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Frequently asked</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Common questions from UAE families
+                </h2>
+              </div>
+              {[
+                ['Do you offer home tuition in the UAE?', 'No — Smartious in UAE is online-only. We do not visit your villa or apartment, and we do not operate a physical centre in the Emirates. UAE private tutoring is regulated by KHDA (Dubai), ADEK (Abu Dhabi) and SPEA (Sharjah). Smartious operates as an internationally accredited online school based outside the UAE — our online sessions delivered remotely are outside in-person tutoring licensing scope. The educational quality is identical to in-person tutoring.'],
+                ['What is the time difference between UAE and Smartious?', 'UAE is GMT+4. Our Nairobi-based teachers are GMT+3 — one hour behind. A 5pm UAE session is 4pm Kenya time. This is a much smaller offset than UAE families face when using UK-based tutors (4-hour difference) and works especially well for after-school timing.'],
+                ['What curricula do you support for UAE students?', 'Cambridge IGCSE, Pearson Edexcel International, Cambridge A-Level, Edexcel IAL, IB Diploma, American (with AP), CBSE (Indian Curriculum), and Kenyan CBC. We do not currently support French Baccalaureate, German Abitur or Russian curriculum.'],
+                ['How does pricing compare to UAE tutors?', 'Typical UAE-licensed private tutors charge AED 150-400/hour (USD 40-110). Smartious online tuition is USD 15-25/hour (≈ AED 55-92). The cost difference reflects our online-delivery model and Nairobi cost base — not any compromise in tutor qualification. Every Smartious tutor holds a subject-specific university degree.'],
+                ['Can you support UAE university applications?', 'Yes — we support applications to UAE branch campuses (NYU Abu Dhabi, Sorbonne Abu Dhabi, University of Birmingham Dubai, Heriot-Watt Dubai, Middlesex University Dubai), plus US (Common App), UK (UCAS), Canadian, Australian and other international universities.'],
+                ['Do you offer full online homeschooling in addition to subject tutoring?', 'Yes — full online homeschool programmes (Cambridge IGCSE, A-Level, IB Diploma, American, CBSE) are available from USD 423/month (≈ AED 1,553/month) for Primary up to USD 923/month (≈ AED 3,387/month) for IB Diploma. Many UAE families use Smartious as supplementary 1-on-1 tutoring alongside their child\'s current school.'],
+              ].map(([q, a], i) => (
+                <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                  <summary style={{cursor:'pointer',padding:'16px 20px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>{q}</summary>
+                  <div style={{padding:'0 20px 16px',fontSize:14,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:14}}>{a}</div>
+                </details>
+              ))}
+              <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                '@context':'https://schema.org','@type':'FAQPage',
+                'mainEntity': [
+                  'Do you offer home tuition in the UAE?',
+                  'What is the time difference between UAE and Smartious?',
+                  'What curricula do you support for UAE students?',
+                  'How does pricing compare to UAE tutors?',
+                  'Can you support UAE university applications?',
+                  'Do you offer full online homeschooling in addition to subject tutoring?',
+                ].map(q => ({ '@type':'Question', 'name': q, 'acceptedAnswer': { '@type':'Answer', 'text': 'See full answer at https://smartioushomeschool.com/tuition-uae' } })),
+              })}}/>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /tuition-uae hub */}
+
+      {/* ══════════════════════════════════════════
+          UAE AREA — Individual emirate-area pages
+          One renderer, data-driven from UAE_AREAS.
+      ══════════════════════════════════════════ */}
+      {page === 'uae-area' && currentUaeArea && (() => {
+        const area = UAE_AREAS.find(a => a.slug === currentUaeArea)
+        if (!area) return null
+        return (
+          <>
+            {/* LocalBusiness + Service schema */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Tuition UAE','item':'https://smartioushomeschool.com/tuition-uae'},
+                {'@type':'ListItem','position':3,'name':area.name + ', ' + area.emirate,'item':'https://smartioushomeschool.com/tuition-uae/' + area.slug},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'Service',
+              'name':'Online Tuition · ' + area.name + ', ' + area.emirate,
+              'description': area.intro,
+              'provider': {
+                '@type':'EducationalOrganization',
+                'name':'Smartious Homeschool Global',
+                'url':'https://smartioushomeschool.com',
+              },
+              'areaServed':{ '@type':'Place', 'name': area.name + ', ' + area.emirate + ', UAE' },
+              'serviceType':'Online tuition',
+            })}}/>
+
+            {/* HERO */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff',
+              padding:'60px 0 48px',
+              overflow:'hidden',
+            }}>
+              {area.heroImg && (
+                <>
+                  <img src={area.heroImg} alt="" aria-hidden="true"
+                    onError={e => { e.currentTarget.style.display='none' }}
+                    style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.32,filter:'saturate(.85)',zIndex:0}}/>
+                  <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,zIndex:1}}/>
+                </>
+              )}
+              <div className="wrap" style={{position:'relative',zIndex:2}}>
+                <a href="/tuition-uae"
+                  onClick={(e)=>{e.preventDefault(); P('tuition-uae')}}
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  Tuition UAE
+                </a>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{area.emirate} · {area.region}</div>
+                <h1 style={{
+                  fontFamily:"'DM Serif Display',Georgia,serif",
+                  fontSize:'clamp(2rem,4.5vw,3rem)',
+                  fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:16,letterSpacing:'-.01em',
+                }}>Online tuition for <em style={{color:V.gold3,fontStyle:'italic'}}>{area.name}</em></h1>
+                <p style={{fontSize:16,color:'rgba(255,255,255,.9)',lineHeight:1.65,marginBottom:22,maxWidth:720}}>
+                  {area.intro}
+                </p>
+                <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book a Free Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online tuition for my child in ' + area.name + ', ' + area.emirate + '.')}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
+                    WhatsApp Us
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            {/* EXTENDED INTRO */}
+            {area.introExtended && (
+              <section className="sec" style={{background:V.bone,padding:'40px 0'}}><div className="wrap">
+                <div style={{maxWidth:820,margin:'0 auto'}}>
+                  <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{area.introExtended}</p>
+                </div>
+              </div></section>
+            )}
+
+            {/* ONLINE-ONLY BANNER per area page (reassurance) */}
+            <section className="sec" style={{background:V.white,padding:'24px 0'}}><div className="wrap">
+              <div style={{maxWidth:820,margin:'0 auto',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'16px 20px',display:'flex',gap:14,alignItems:'flex-start'}}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="2" strokeLinecap="round" style={{flexShrink:0,marginTop:1}}>
+                  <rect x="3" y="3" width="18" height="14" rx="2" ry="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>
+                  <strong style={{color:V.ink}}>Online sessions only.</strong> {area.onlineNote}
+                </p>
+              </div>
+            </div></section>
+
+            {/* COMMON SUBJECTS */}
+            {area.commonSubjects && area.commonSubjects.length > 0 && (
+              <section className="sec" style={{background:V.bone}}><div className="wrap">
+                <div style={{maxWidth:880,margin:'0 auto'}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What we tutor in {area.name}</div>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                      Most-requested subjects
+                    </h2>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:10}}>
+                    {area.commonSubjects.map((s, i) => (
+                      <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:8,padding:'10px 14px',fontSize:13,color:V.ink,fontWeight:600,display:'flex',alignItems:'center',gap:8}}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0}}><path d="M5 12l5 5L20 7"/></svg>
+                        {s}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div></section>
+            )}
+
+            {/* SCHOOLS & PARENT PROFILE */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:20}}>
+                {area.localSchools && (
+                  <div style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:10}}>Schools we work with</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>Local schools in {area.name}</h3>
+                    <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:6}}>
+                      {area.localSchools.map((s, i) => (
+                        <li key={i} style={{fontSize:13,color:V.sl,lineHeight:1.5,paddingLeft:14,position:'relative'}}>
+                          <span style={{position:'absolute',left:0,top:8,width:5,height:5,borderRadius:'50%',background:V.gold3}}/>
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {area.parentProfile && (
+                  <div style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:10}}>Family profile</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>{area.name} families typically</h3>
+                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{area.parentProfile}</p>
+                  </div>
+                )}
+              </div>
+            </div></section>
+
+            {/* PRICING & PRACTICAL */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Practical details</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    Pricing, scheduling, licensing
+                  </h2>
+                </div>
+                <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'24px 28px',display:'flex',flexDirection:'column',gap:18}}>
+                  {[
+                    { eyebrow:'Pricing', text: area.pricingNote },
+                    { eyebrow:'Time-zone scheduling', text: area.timezoneNote },
+                    { eyebrow:'Regulatory note', text: area.licensingNote },
+                  ].map((row, i) => (
+                    <div key={i} style={{borderTop: i > 0 ? `1px solid ${V.bone3}` : 'none', paddingTop: i > 0 ? 18 : 0}}>
+                      <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.cr,marginBottom:6}}>{row.eyebrow}</div>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{row.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* LOCAL FAQ */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:24}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Quick answers for {area.name}</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    Frequently asked
+                  </h2>
+                </div>
+                {area.localFaqs && area.localFaqs.map((f, i) => (
+                  <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                    <summary style={{cursor:'pointer',padding:'16px 18px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>{f.q}</summary>
+                    <div style={{padding:'0 18px 16px',fontSize:14,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:14}}>{f.a}</div>
+                  </details>
+                ))}
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context':'https://schema.org','@type':'FAQPage',
+                  'mainEntity':(area.localFaqs || []).map(f => ({
+                    '@type':'Question','name': f.q, 'acceptedAnswer':{ '@type':'Answer','text': f.a }
+                  })),
+                })}}/>
+              </div>
+            </div></section>
+
+            {/* NEARBY AREAS */}
+            {area.nearbyAreas && area.nearbyAreas.length > 0 && (
+              <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:56}}><div className="wrap">
+                <div style={{maxWidth:880,margin:'0 auto'}}>
+                  <div style={{textAlign:'center',marginBottom:24}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Nearby</div>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                      Other UAE areas we serve
+                    </h2>
+                  </div>
+                  <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
+                    {area.nearbyAreas.map(s => {
+                      const a2 = UAE_AREAS.find(x => x.slug === s)
+                      if (!a2) return null
+                      return (
+                        <a key={s} href={'/tuition-uae/' + s} onClick={e => { e.preventDefault(); openUaeArea(s) }}
+                          style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:8,padding:'10px 16px',color:V.ink,textDecoration:'none',fontWeight:600,fontSize:13,transition:'all .2s'}}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.color = V.cr }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.color = V.ink }}>
+                          {a2.name}
+                        </a>
+                      )
+                    })}
+                  </div>
+                  <div style={{textAlign:'center',marginTop:20}}>
+                    <a href="/tuition-uae" onClick={e => { e.preventDefault(); P('tuition-uae') }}
+                      style={{color:V.cr,fontSize:13,fontWeight:700,textDecoration:'none',display:'inline-flex',alignItems:'center',gap:6}}>
+                      View all UAE areas
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                  </div>
+                </div>
+              </div></section>
+            )}
+          </>
+        )
+      })()}
+      {/* /uae-area */}
 
 
       {/* ══════════════════════════════════════════
