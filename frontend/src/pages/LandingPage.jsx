@@ -9,6 +9,7 @@ import { SERVICES } from '../data/services.js'
 import { FULL_ARTICLES } from '../data/fullArticles.js'
 import { NAIROBI_AREAS } from '../data/nairobiAreas.js'
 import { UAE_AREAS } from '../data/uaeAreas.js'
+import { KENYA_CITIES } from '../data/kenyaCities.js'
 
 
 /* ── Front Desk capture ───────────────────────────────────
@@ -805,7 +806,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1568,6 +1569,7 @@ export default function LandingPage() {
   const [currentCountry, setCurrentCountry] = useState(null)
   const [currentTuitionArea, setCurrentTuitionArea] = useState(null)
   const [currentUaeArea, setCurrentUaeArea] = useState(null)
+  const [currentKenyaCity, setCurrentKenyaCity] = useState(null)
   const [currentCompare, setCurrentCompare] = useState(null)
   const [publicTeachers, setPublicTeachers] = useState([])
   const [teachersLoading, setTeachersLoading] = useState(false)
@@ -2058,6 +2060,21 @@ export default function LandingPage() {
       }
       return
     }
+    if (path === '/homeschooling-kenya') {
+      setPage('homeschooling-kenya')
+      return
+    }
+    if (path.startsWith('/homeschooling/')) {
+      const slug = decodeURIComponent(path.slice('/homeschooling/'.length))
+      const city = KENYA_CITIES.find(c => c.slug === slug)
+      if (city) {
+        setCurrentKenyaCity(slug)
+        setPage('kenya-city')
+      } else {
+        setPage('homeschooling-kenya')
+      }
+      return
+    }
     if (path.startsWith('/compare/')) {
       const slug = decodeURIComponent(path.slice('/compare/'.length))
       const cmp = COMPARES.find(c => c.slug === slug)
@@ -2197,6 +2214,14 @@ export default function LandingPage() {
   const openUaeArea = (slug) => {
     if (!slug) return
     nav('/tuition-uae/' + encodeURIComponent(slug))
+    window.scrollTo(0, 0)
+    topRef.current?.scrollIntoView()
+  }
+
+  // openKenyaCity(slug) — navigate to a Kenya city homeschooling page
+  const openKenyaCity = (slug) => {
+    if (!slug) return
+    nav('/homeschooling/' + encodeURIComponent(slug))
     window.scrollTo(0, 0)
     topRef.current?.scrollIntoView()
   }
@@ -8233,6 +8258,418 @@ export default function LandingPage() {
         )
       })()}
       {/* /uae-area */}
+      {/* ══════════════════════════════════════════
+          HOMESCHOOLING KENYA — Hub page at /homeschooling-kenya
+          6 city pages: Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu
+      ══════════════════════════════════════════ */}
+      {page === 'homeschooling-kenya' && (
+        <>
+          {/* Schema */}
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context':'https://schema.org','@type':'EducationalOrganization',
+            '@id':'https://smartioushomeschool.com/homeschooling-kenya#org',
+            'name':'Smartious — Online Homeschooling Across Kenya',
+            'url':'https://smartioushomeschool.com/homeschooling-kenya',
+            'description':'Online homeschooling and 1-on-1 tuition for Kenyan families across Mombasa, Kisumu, Nakuru, Eldoret, Thika and Kiambu. Cambridge IGCSE, A-Level, IB, CBC, American Curriculum. From KSh 1,300/hour.',
+            'areaServed': KENYA_CITIES.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
+          })}}/>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context':'https://schema.org','@type':'BreadcrumbList',
+            'itemListElement':[
+              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+              {'@type':'ListItem','position':2,'name':'Homeschooling Kenya','item':'https://smartioushomeschool.com/homeschooling-kenya'},
+            ],
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff', padding:'72px 0 56px', overflow:'hidden',
+          }}>
+            <img src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1600&q=80&auto=format&fit=crop" alt="" aria-hidden="true"
+              onError={e => { e.currentTarget.style.display='none' }}
+              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.28,zIndex:0}}/>
+            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,zIndex:1}}/>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online homeschooling · Across Kenya</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>Kenya</em>
+              </h1>
+              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
+                Live online homeschool and 1-on-1 tuition for families in Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and other Kenyan cities beyond Nairobi. Cambridge IGCSE, A-Level, IB Diploma, CBC, American AP. From <strong style={{color:V.gold3}}>KSh 1,300/hour</strong> (USD 10/hr) or <strong style={{color:V.gold3}}>USD 423/month</strong> for full programmes.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                  Book a Free Consultation
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child.')}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp Us
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* CITIES GRID */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                Online homeschooling across <em style={{color:V.cr,fontStyle:'italic'}}>Kenya</em>
+              </h2>
+              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
+                Six major Kenyan cities outside Nairobi. Each page covers the local schools, education challenges, family situations and answers specific to your city.
+              </p>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
+              {KENYA_CITIES.map(c => (
+                <a key={c.slug} href={'/homeschooling/' + c.slug}
+                  onClick={(e) => { e.preventDefault(); openKenyaCity(c.slug) }}
+                  style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
+                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
+                  <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
+                    View {c.name} details
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div></section>
+
+          {/* WHY ONLINE HOMESCHOOLING WORKS FOR KENYAN FAMILIES */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36,maxWidth:720,margin:'0 auto 36px'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Why families across Kenya choose Smartious</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  Internationally qualified teaching, accessible from anywhere in Kenya
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                {[
+                  ['Access specialists not available locally','For A-Level Further Mathematics, IB HL Sciences, SAT/UCAS preparation, Smartious connects your child with Nairobi-based internationally qualified teachers without family relocation.'],
+                  ['Eliminate Nairobi commutes','For Thika, Kiambu and Kenyan-city families currently commuting to Nairobi international schools, online homeschool reclaims 3-4 hours daily for deeper learning and rest.'],
+                  ['All major curricula','Cambridge IGCSE, A-Level, Pearson Edexcel, IB (PYP, MYP, Diploma), Kenya CBC (KICD-aligned, KCSE-eligible), American Curriculum with AP.'],
+                  ['University admissions support','UCAS for UK, Common App for US, plus African universities (KUCCPS, direct), Canadian, Australian, UAE branch campus pathways.'],
+                  ['Quality at accessible pricing','1-on-1 sessions from KSh 1,300/hour, full programmes from USD 423/month — meaningfully below international school total cost.'],
+                  ['Recorded sessions for review','Every session is recorded automatically — your child rewatches difficult explanations, parents review the week\'s coverage.'],
+                ].map(([h, p], i) => (
+                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
+                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /homeschooling-kenya hub */}
+
+      {/* ══════════════════════════════════════════
+          KENYA CITY — Individual city homeschooling pages
+          One renderer, data-driven from KENYA_CITIES.
+      ══════════════════════════════════════════ */}
+      {page === 'kenya-city' && currentKenyaCity && (() => {
+        const city = KENYA_CITIES.find(c => c.slug === currentKenyaCity)
+        if (!city) return null
+        return (
+          <>
+            {/* Schemas */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Homeschooling Kenya','item':'https://smartioushomeschool.com/homeschooling-kenya'},
+                {'@type':'ListItem','position':3,'name': city.name,'item':'https://smartioushomeschool.com/homeschooling/' + city.slug},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'Service',
+              'name': city.primaryKeyword,
+              'description': city.seoDesc,
+              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool Global','url':'https://smartioushomeschool.com'},
+              'areaServed':{'@type':'Place','name': city.name + ', ' + city.county + ', Kenya'},
+              'serviceType':'Online homeschooling and 1-on-1 tuition',
+            })}}/>
+
+            {/* HERO */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff', padding:'60px 0 48px', overflow:'hidden',
+            }}>
+              {city.heroImg && (
+                <>
+                  <img src={city.heroImg} alt={city.altTexts?.hero || ''} aria-hidden="true"
+                    onError={e => { e.currentTarget.style.display='none' }}
+                    style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.32,zIndex:0}}/>
+                  <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,zIndex:1}}/>
+                </>
+              )}
+              <div className="wrap" style={{position:'relative',zIndex:2}}>
+                <a href="/homeschooling-kenya"
+                  onClick={(e)=>{e.preventDefault(); P('homeschooling-kenya')}}
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  Homeschooling Kenya
+                </a>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{city.county} · {city.region}</div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:14,letterSpacing:'-.01em'}}>
+                  {city.primaryKeyword}
+                </h1>
+                <p style={{fontSize:14,color:V.gold3,fontStyle:'italic',marginBottom:18,maxWidth:720,lineHeight:1.5}}>{city.heroTagline}</p>
+                <p style={{fontSize:16,color:'rgba(255,255,255,.9)',lineHeight:1.65,marginBottom:22,maxWidth:760}}>
+                  {city.intro}
+                </p>
+                <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book a Free Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child in ' + city.name + '.')}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
+                    WhatsApp Us
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            {/* EDUCATION CHALLENGES IN THIS CITY */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Education in {city.name}</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
+                  Challenges {city.name} families face
+                </h2>
+                <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:12}}>
+                  {city.challenges.map((ch, i) => (
+                    <li key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px',fontSize:14,color:V.sl,lineHeight:1.7,display:'flex',gap:12}}>
+                      <span style={{flexShrink:0,width:24,height:24,borderRadius:'50%',background:`rgba(139,26,46,.1)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:12}}>{i+1}</span>
+                      <span>{ch}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div></section>
+
+            {/* WHY CHOOSE SMARTIOUS */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Why {city.name} families choose Smartious</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    What we offer that's genuinely different
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
+                  {city.whyChoose.map((w, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{w.h}</h3>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{w.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* HOMESCHOOLING SERVICES */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Service detail</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
+                  Homeschooling services in {city.name}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,margin:0}}>{city.homeschoolDetail}</p>
+              </div>
+            </div></section>
+
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Service detail</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
+                  Home tuition services in {city.name}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,margin:0}}>{city.homeTuitionDetail}</p>
+              </div>
+            </div></section>
+
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Service detail</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
+                  Online learning for {city.name} students
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,margin:0}}>{city.onlineLearningDetail}</p>
+              </div>
+            </div></section>
+
+            {/* CURRICULA */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Curricula offered</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    All major curricula supported
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                  {[
+                    { label:'Cambridge International', text: city.curricula.cambridge },
+                    { label:'International Baccalaureate (IB)', text: city.curricula.ib },
+                    { label:'Kenya CBC', text: city.curricula.cbc },
+                    { label:'American Curriculum', text: city.curricula.american },
+                  ].map((cur, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                      <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>Curriculum</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>{cur.label}</h3>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{cur.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* SUBJECTS */}
+            <section className="sec" style={{background:V.bone,paddingTop:40,paddingBottom:40}}><div className="wrap">
+              <div style={{maxWidth:900,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:24}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Subjects available</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    Core subjects we cover for {city.name} students
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:10}}>
+                  {city.subjects.map((s, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:8,padding:'10px 14px',fontSize:13,color:V.ink,fontWeight:600,display:'flex',alignItems:'center',gap:8}}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0}}><path d="M5 12l5 5L20 7"/></svg>
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* NEARBY AREAS */}
+            {city.nearbyAreas && (
+              <section className="sec" style={{background:V.white,paddingTop:40,paddingBottom:40}}><div className="wrap">
+                <div style={{maxWidth:880,margin:'0 auto'}}>
+                  <div style={{textAlign:'center',marginBottom:20}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>Areas near {city.name} we serve</div>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                      Communities across the {city.county}
+                    </h2>
+                  </div>
+                  <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center'}}>
+                    {city.nearbyAreas.map((a, i) => (
+                      <span key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:99,padding:'7px 14px',fontSize:12.5,color:V.ink,fontWeight:600}}>{a}</span>
+                    ))}
+                  </div>
+                </div>
+              </div></section>
+            )}
+
+            {/* WHY GROWING */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Local insight</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
+                  Why homeschooling is growing in {city.name}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,margin:0}}>{city.growingReason}</p>
+              </div>
+            </div></section>
+
+            {/* FAMILY SITUATIONS (REPLACES FABRICATED TESTIMONIALS) */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>How we help</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.3}}>
+                    {city.name} family situations we typically help with
+                  </h2>
+                  <p style={{fontSize:13,color:V.sl2,fontStyle:'italic',maxWidth:580,margin:'0 auto'}}>Illustrative scenarios — not specific named families. We protect privacy by describing the kinds of situations we typically support.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                  {city.familySituations.map((s, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
+                      <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>{s.context}</div>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>{s.scenario}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* SHARE YOUR STORY CTA */}
+            <section className="sec" style={{background:V.bone,paddingTop:32,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:720,margin:'0 auto',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 32px',textAlign:'center'}}>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>Share your Smartious story</h3>
+                <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginBottom:16}}>
+                  If your {city.name} family has used Smartious, we'd love to feature your story (with your permission). Email us at <a href="mailto:hellosmartious@gmail.com" style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>hellosmartious@gmail.com</a> or WhatsApp us at <a href="https://wa.me/254745021212" style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>+254 745 021 212</a>.
+                </p>
+              </div>
+            </div></section>
+
+            {/* FAQ */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:820,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Common questions from {city.name} families</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    Frequently asked questions
+                  </h2>
+                </div>
+                {city.faqs.map((f, i) => (
+                  <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                    <summary style={{cursor:'pointer',padding:'14px 18px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
+                    <div style={{padding:'0 18px 14px',fontSize:13.5,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:12}}>{f.a}</div>
+                  </details>
+                ))}
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context':'https://schema.org','@type':'FAQPage',
+                  'mainEntity': city.faqs.map(f => ({'@type':'Question','name': f.q,'acceptedAnswer':{'@type':'Answer','text': f.a}})),
+                })}}/>
+              </div>
+            </div></section>
+
+            {/* ENROL CTA */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
+                <div className="eyebrow" style={{color:V.gold3,justifyContent:'center'}}>Ready to enrol</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  Start your {city.name} child's Smartious journey
+                </h2>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:24,maxWidth:560,margin:'0 auto 24px'}}>
+                  The enrolment process takes most {city.name} families 7-10 working days from first enquiry to LMS access. Book a free consultation to discuss your child's situation.
+                </p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+                  <button onClick={() => P('enroll')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                    Start Application
+                  </button>
+                  <button onClick={() => P('consult')}
+                    style={{background:'transparent',color:'#fff',border:`1.5px solid rgba(255,255,255,.3)`,padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                    Free Consultation
+                  </button>
+                </div>
+              </div>
+            </div></section>
+          </>
+        )
+      })()}
+      {/* /kenya-city */}
+
 
 
       {/* ══════════════════════════════════════════
