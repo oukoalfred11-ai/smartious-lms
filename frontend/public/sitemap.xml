@@ -279,6 +279,18 @@
   <url><loc>https://smartioushomeschool.com/blog/germany-study-abroad</loc><lastmod>2026-05-29</lastmod><priority>0.7</priority></url>
 
   <!-- ──────────────────────────────────────────
+       HOMESCHOOLING KENYA — 6 city pages outside Nairobi.
+       Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu.
+       ────────────────────────────────────────── -->
+  <url><loc>https://smartioushomeschool.com/homeschooling-kenya</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.92</priority></url>
+  <url><loc>https://smartioushomeschool.com/homeschooling/mombasa</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://smartioushomeschool.com/homeschooling/kisumu</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://smartioushomeschool.com/homeschooling/nakuru</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://smartioushomeschool.com/homeschooling/eldoret</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://smartioushomeschool.com/homeschooling/thika</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://smartioushomeschool.com/homeschooling/kiambu</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+
+  <!-- ──────────────────────────────────────────
        LEGAL & POLICY PAGES — low priority but
        Google likes complete coverage.
        ────────────────────────────────────────── -->
