@@ -7258,14 +7258,14 @@ export default function LandingPage() {
               style={{
                 position:'absolute',inset:0,
                 width:'100%',height:'100%',objectFit:'cover',
-                opacity:0.32,
+                opacity:0.55,
                 filter:'saturate(.85)',
                 zIndex:0,
               }}
             />
             <div style={{
               position:'absolute',inset:0,
-              background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,
+              background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,
               zIndex:1,
             }}/>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
@@ -7601,14 +7601,14 @@ export default function LandingPage() {
                     style={{
                       position:'absolute',inset:0,
                       width:'100%',height:'100%',objectFit:'cover',
-                      opacity:0.32,
+                      opacity:0.55,
                       filter:'saturate(.85)',
                       zIndex:0,
                     }}
                   />
                   <div style={{
                     position:'absolute',inset:0,
-                    background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,
+                    background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,
                     zIndex:1,
                   }}/>
                 </>
@@ -7866,14 +7866,14 @@ export default function LandingPage() {
               style={{
                 position:'absolute',inset:0,
                 width:'100%',height:'100%',objectFit:'cover',
-                opacity:0.28,
+                opacity:0.55,
                 filter:'saturate(.85)',
                 zIndex:0,
               }}
             />
             <div style={{
               position:'absolute',inset:0,
-              background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,
+              background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,
               zIndex:1,
             }}/>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
@@ -8066,8 +8066,8 @@ export default function LandingPage() {
                 <>
                   <img src={area.heroImg} alt="" aria-hidden="true"
                     onError={e => { e.currentTarget.style.display='none' }}
-                    style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.32,filter:'saturate(.85)',zIndex:0}}/>
-                  <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,zIndex:1}}/>
+                    style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,filter:'saturate(.85)',zIndex:0}}/>
+                  <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
                 </>
               )}
               <div className="wrap" style={{position:'relative',zIndex:2}}>
@@ -8289,8 +8289,8 @@ export default function LandingPage() {
           }}>
             <img src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1600&q=80&auto=format&fit=crop" alt="" aria-hidden="true"
               onError={e => { e.currentTarget.style.display='none' }}
-              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.28,zIndex:0}}/>
-            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,zIndex:1}}/>
+              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online homeschooling · Across Kenya</div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
@@ -8411,8 +8411,8 @@ export default function LandingPage() {
                 <>
                   <img src={city.heroImg} alt={city.altTexts?.hero || ''} aria-hidden="true"
                     onError={e => { e.currentTarget.style.display='none' }}
-                    style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.32,zIndex:0}}/>
-                  <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}E0 0%, ${V.cr}D0 100%)`,zIndex:1}}/>
+                    style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+                  <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
                 </>
               )}
               <div className="wrap" style={{position:'relative',zIndex:2}}>
