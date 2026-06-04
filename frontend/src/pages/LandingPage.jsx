@@ -2937,6 +2937,84 @@ export default function LandingPage() {
           </div></section>
 
           {/* ═══════════════════════════════════════════
+              MOMENTS THAT DEFINE SMARTIOUS — photo marquee
+              Right-to-left infinite scroll of real photos
+              from Smartious teaching, centres and sessions.
+              Pauses on hover. Edge fade for cinematic feel.
+          ═══════════════════════════════════════════ */}
+          <section style={{background:V.ink,color:'#fff',padding:'72px 0 80px',position:'relative',overflow:'hidden'}}>
+            <style>{`
+              .moments-rail{overflow:hidden;position:relative;
+                -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);
+                        mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%)}
+              .moments-track{display:flex;gap:18px;width:max-content;animation:lp-marq 70s linear infinite}
+              .moments-rail:hover .moments-track{animation-play-state:paused}
+              .moments-card{flex-shrink:0;width:340px;height:240px;border-radius:14px;overflow:hidden;background:${V.ink3};position:relative;box-shadow:0 12px 32px rgba(0,0,0,.35)}
+              .moments-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease}
+              .moments-card:hover img{transform:scale(1.04)}
+              .moments-card::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.5) 100%);pointer-events:none}
+              @media (max-width:768px){.moments-card{width:240px;height:180px;border-radius:10px}.moments-track{gap:12px;animation-duration:55s}}
+            `}</style>
+            <div className="wrap" style={{textAlign:'center',marginBottom:44}}>
+              <div className="eyebrow" style={{justifyContent:'center',color:V.gold3}}>Inside Smartious</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,4vw,2.4rem)',fontWeight:400,color:'#fff',marginTop:10,marginBottom:14,lineHeight:1.2,letterSpacing:'-.01em'}}>
+                The Moments That <em style={{color:V.gold3,fontStyle:'italic'}}>Define Smartious</em>
+              </h2>
+              <p style={{fontSize:14.5,color:'rgba(247,243,237,.7)',lineHeight:1.65,maxWidth:640,margin:'0 auto'}}>
+                Real teaching. Real students. Real learning happening every day across our Nairobi centres, in homes across the city, and online from anywhere in the world.
+              </p>
+            </div>
+            <div className="moments-rail">
+              <div className="moments-track">
+                {(() => {
+                  const MOMENTS = [
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596097/photo_2026-06-04_20-59-42_z3n3qr.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596093/photo_2026-06-04_20-59-55_uei3qk.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596092/photo_2026-06-04_20-59-53_ruus3o.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596092/photo_2026-06-04_20-59-48_fjks6e.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596091/photo_2026-06-04_20-59-58_ukv2bv.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-09-48_fzwdge.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596091/photo_2026-06-04_20-59-51_ye5hlt.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596091/photo_2026-06-04_20-59-49_kkzbqw.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596091/photo_2026-06-04_20-59-52_qnq80k.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596090/photo_2026-06-04_20-59-56_rss8tt.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596088/photo_2026-06-04_21-00-04_iyzdg3.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596088/photo_2026-06-04_20-59-59_qs1gjt.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596087/photo_2026-06-04_21-00-15_grruwb.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596088/photo_2026-06-04_21-00-01_nzvr0n.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596087/photo_2026-06-04_21-00-09_zfhl1w.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596086/photo_2026-06-04_21-00-06_ziggs4.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596087/photo_2026-06-04_21-00-02_u232sd.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596086/photo_2026-06-04_21-00-10_jhwgsd.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596086/photo_2026-06-04_21-00-11_yu1ree.jpg',
+                    'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596086/photo_2026-06-04_21-00-07_cw87qj.jpg',
+                  ]
+                  // Duplicate the array so the loop is seamless when the track translates -50%
+                  return [...MOMENTS, ...MOMENTS].map((url, i) => (
+                    <div key={i} className="moments-card">
+                      <img src={url} alt={`Smartious teaching moment ${(i % MOMENTS.length) + 1}`} loading="lazy"
+                        onError={e => { e.currentTarget.parentElement.style.display = 'none' }}/>
+                    </div>
+                  ))
+                })()}
+              </div>
+            </div>
+            <div className="wrap" style={{textAlign:'center',marginTop:36}}>
+              <button onClick={() => P('about')} style={{
+                background:'transparent',color:V.gold3,
+                border:`1.5px solid ${V.gold3}`,
+                padding:'11px 26px',borderRadius:6,
+                fontSize:13,fontWeight:700,cursor:'pointer',
+                fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+                display:'inline-flex',alignItems:'center',gap:8,
+              }}>
+                Read our story
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </section>
+
+          {/* ═══════════════════════════════════════════
               COUNTRY ROUTER — links to the 10 country pages
               Big SEO win: surfaces all country pages from
               homepage so they get internal-link authority.
