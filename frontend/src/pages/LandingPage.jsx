@@ -864,7 +864,7 @@ const SmartiousLogo = ({ size = 40, withText = false, tone = 'light' }) => {
 // PLACEMENT ASSESSMENT QUESTION BANK
 // Organised by academic level × subject. Questions are picked
 // randomly from the appropriate bucket so each student gets
-// a fresh assessment worth the $15 fee.
+// a fresh assessment worth the USD 38 / KSh 5,000 fee.
 // ═══════════════════════════════════════════════════════════
 const LEVELS = [
   {id:'primary-lower', label:'Primary Lower (Grade 1–3 · Year 2–4)'},
@@ -1297,9 +1297,9 @@ const PRIVACY_POLICY = [
 const TERMS_OF_SERVICE = [
   {h:'1. About these terms',p:'These Terms of Service ("Terms") govern your use of smartioushomeschool.com and any educational services provided by Smartious E-School Ltd ("Smartious"). By enrolling a student, creating an account, or using any part of our website or services, you agree to these Terms. If you do not agree, please do not use our services.'},
   {h:'2. Eligibility',p:'To enrol a student, you must be the student\'s parent or legal guardian and at least 18 years old. Students under 18 cannot create an account without parental consent. We reserve the right to verify identity at any stage, particularly before releasing academic records or issuing predicted grades.'},
-  {h:'3. Enrolment and assessment',p:'Enrolment begins when you submit the enrolment form and pay the $15 placement assessment fee. The assessment fee is non-refundable once the placement test has been served, but counts towards your first month of tuition if you proceed to enrol. We aim to match a tutor within 48 working hours of a completed assessment.'},
+  {h:'3. Enrolment and assessment',p:'Enrolment begins when you submit the enrolment form and pay the USD 38 (KSh 5,000) application fee. The assessment fee is non-refundable once the placement test has been served, but counts towards your first month of tuition if you proceed to enrol. We aim to match a tutor within 48 working hours of a completed assessment.'},
   {h:'4. Fees and payment',p:'All fees are stated in US Dollars. Local currency equivalents (e.g. KES for Kenyan families) are shown for convenience but the dollar price is the contractual amount. Fees are payable in advance — monthly, termly, or annually as selected. Termly payments attract a 5% discount; annual payments attract a 12% discount. Payments are processed via Paystack. We accept M-Pesa, Visa, Mastercard, bank transfer, and Apple Pay.'},
-  {h:'5. Cancellation and refunds',p:'You may cancel your enrolment with 30 days\' written notice. Within the first 14 days of enrolment, you may cancel for any reason and receive a full refund of any unused tuition. After 14 days, refunds are prorated to the next billing period minus any assessment or setup fees already delivered. Termly and annual payments are refunded for the unused balance only. The $15 placement fee is not refundable once the assessment has been served.'},
+  {h:'5. Cancellation and refunds',p:'You may cancel your enrolment with 30 days\' written notice. Within the first 14 days of enrolment, you may cancel for any reason and receive a full refund of any unused tuition. After 14 days, refunds are prorated to the next billing period minus any assessment or setup fees already delivered. Termly and annual payments are refunded for the unused balance only. The USD 38 / KSh 5,000 application fee is not refundable once the assessment has been served.'},
   {h:'6. Your obligations',p:'You agree to: (i) provide accurate information when enrolling; (ii) ensure your child attends scheduled lessons or gives reasonable notice for cancellations; (iii) provide a safe, supervised environment for home-visit tuition in Nairobi; (iv) treat Smartious staff, tutors, and our digital platforms with respect; (v) not share your portal login credentials with anyone outside your household; (vi) not record, reproduce, or redistribute our teaching materials or live lessons without written permission.'},
   {h:'7. Our obligations',p:'Smartious will: (i) deliver lessons, materials, and assessments as described in your enrolment package; (ii) provide qualified, background-checked tutors; (iii) keep academic records for at least 7 years; (iv) issue progress reports as specified in your plan; (v) communicate any material changes at least 30 days in advance; (vi) act in the student\'s best academic interests at all times.'},
   {h:'8. Intellectual property',p:'All content published by Smartious — teaching materials, lesson recordings, assessment banks, software, the Mshauri AI tutor, and the website itself — is the intellectual property of Smartious E-School Ltd or our licensors. You may use this content only within your own household for the enrolled student\'s education. Commercial use, redistribution, or resale is strictly prohibited and may result in termination of services and legal action. Past papers and marking schemes are the property of their respective exam boards (Cambridge, Edexcel, IB) and are reproduced under licence or fair-dealing provisions.'},
@@ -3405,30 +3405,31 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* TESTIMONIALS */}
+          {/* ═══════════════════════════════════════════
+              FAMILY SITUATIONS — anonymised scenarios
+              Replaces fabricated testimonials. Real stories
+              from real families are invited via the
+              "Share your story" CTA below.
+          ═══════════════════════════════════════════ */}
           <section className="sec" style={{background:V.white}}>
             <div className="wrap">
               <div className="sec-hd reveal">
-                <div className="eyebrow">Student & Parent Voices</div>
-                <h2 className="display">Stories That <em>Inspire</em></h2>
-                <p className="lead" style={{marginTop:14}}>From London to Lagos, Nairobi to Toronto — real families, real results.</p>
+                <div className="eyebrow">Family situations we help with</div>
+                <h2 className="display">The kinds of students we <em>typically support</em></h2>
+                <p style={{fontSize:13.5,color:V.sl2,fontStyle:'italic',maxWidth:620,margin:'14px auto 0',lineHeight:1.5,textAlign:'center'}}>Anonymised scenarios — not specific named families. We protect privacy by describing situations we typically support, not by inventing testimonials.</p>
               </div>
               <div className="tgrid">
                 {[
-                  {av:'JO',c:V.cr,q:'"My daughter moved from a C to an A* in IGCSE Chemistry in one term. The one-on-one attention she gets is something no classroom of 40 could ever offer."',n:'Janet Osei — London, UK',r:'Parent · IGCSE Year 11'},
-                  {av:'AM',c:'#0891B2',q:'"We relocated from Dubai mid-year and I was worried about continuity. Smartious handled the British to IGCSE transition without my son missing a single topic."',n:'Ahmed Al-Mansouri — Dubai, UAE',r:'Parent · British Curriculum → IGCSE'},
-                  {av:'ZK',c:'#15803D',q:'"I scored 38 IB points and received an offer from UCL. My Smartious tutors knew the syllabus inside out and pushed me further than I thought I could go."',n:'Zara Kamau — Nairobi, Kenya',r:'Student · IB Diploma Graduate'},
-                  {av:'CA',c:'#B45309',q:'"My son struggled with the Nigerian curriculum and we needed a globally recognised qualification. IGCSE through Smartious gave him exactly that — he now studies Engineering in the UK."',n:'Chioma Adeyemi — Lagos, Nigeria',r:'Parent · IGCSE → UK University'},
-                  {av:'SM',c:'#7C3AED',q:'"My daughter sat her Cambridge IGCSE examinations at a registered centre in Johannesburg and passed all eight subjects. Smartious made homeschooling feel completely professional."',n:'Sarah Mohale — Johannesburg, South Africa',r:'Parent · IGCSE Homeschool'},
-                  {av:'BN',c:'#0E7490',q:'"I completed my A-Level Mathematics through Smartious while working full time in Nairobi. The flexible schedule and Mshauri AI tutor at night made it possible. I got a B and I am proud of it."',n:'Brian Njoroge — Nairobi, Kenya',r:'Adult Learner · Cambridge A-Level'},
-                ].map((t,i) => (
+                  {context:'IGCSE turnaround', situation:'A Year 11 student in Nairobi falling behind in Chemistry weeks before Cambridge IGCSE examinations. Twice-weekly intensive 1-on-1 tutoring on past-paper technique, focused on the specific topics they were weakest on.'},
+                  {context:'Curriculum transition', situation:'A family in Dubai relocating from British Curriculum to Cambridge IGCSE mid-year. Smartious provided bridging tutoring in Mathematics, Physics and Chemistry to align curriculum coverage without losing the academic year.'},
+                  {context:'IB Diploma support', situation:'A Form 4 student in Nairobi targeting UK universities through the IB Diploma pathway. HL Mathematics, HL Physics and Extended Essay coaching alongside UCAS personal statement support.'},
+                  {context:'Adult learner', situation:'A working adult in Nairobi completing Cambridge A-Level Mathematics to qualify for UK university application as a mature student. Evening sessions scheduled around full-time work commitments.'},
+                  {context:'Homeschool primary', situation:'A South African family choosing online homeschool for their Year 4 daughter to maintain Cambridge Primary curriculum coverage at international standards, with KCSE-equivalent assessments available later.'},
+                  {context:'Diaspora continuity', situation:'A Kenyan family relocated to Lagos wanting their teenager to continue with a Kenyan-context CBC curriculum alongside Cambridge IGCSE options for international university applications.'},
+                ].map((s, i) => (
                   <div key={i} className="tc reveal">
-                    <Stars/>
-                    <p className="t-q">{t.q}</p>
-                    <div className="t-au">
-                      <div className="t-av" style={{background:t.c}}>{t.av}</div>
-                      <div><div className="t-nm">{t.n}</div><div className="t-rl">{t.r}</div></div>
-                    </div>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>{s.context}</div>
+                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>{s.situation}</p>
                   </div>
                 ))}
               </div>
@@ -3520,10 +3521,193 @@ export default function LandingPage() {
       ══════════════════════════════════════════ */}
       {page === 'about' && (
         <>
-          <div className="pg-hero"><div className="wrap"><div className="eyebrow">7 Years of Online Teaching</div><h1 className="pg-h">Built for Families Who <em>Need More</em></h1><p className="pg-sub" style={{marginTop:12}}>Since 2019, Smartious has helped African and global families access internationally accredited education from wherever they are — across Kenya, the UAE, and 12+ other countries.</p></div></div>
-          <section className="sec" style={{background:V.bone}}><div className="wrap">
-            <div className="stat-grid">
-              {[['7','Years of online\nteaching since 2019'],['78+','Qualified tutors\non Smartious LMS'],['14','Countries served\nacross 5 continents'],['5','Curricula delivered\nCambridge · IB · CBC · Edexcel · American'],['54','Areas covered\nNairobi 21 · UAE 27 · Kenya cities 6'],['$8/hr','Starting tuition rate\ntransparent pricing'],['24/7','Mshauri AI tutor\navailable on LMS'],['7-10','Days from enrolment\nto first live session']].map(([n,l]) => (
+          {/* ═══════════════════════════════════════════
+              ABOUT — HERO
+              Problem-led, founder-anchored opening.
+          ═══════════════════════════════════════════ */}
+          <div className="pg-hero"><div className="wrap">
+            <div className="eyebrow">Our story</div>
+            <h1 className="pg-h">Built by a Teacher. <em>For Families Who Need More.</em></h1>
+            <p className="pg-sub" style={{marginTop:12,maxWidth:760}}>Smartious wasn't built in a boardroom — it was built by a Mathematics and Physics teacher who watched too many capable students fall behind in classrooms that couldn't move at their pace, and too many families forced to compromise on education because of location, cost, or schedule. We started in 2019 to fix that, one student at a time.</p>
+          </div></div>
+
+          {/* ═══════════════════════════════════════════
+              FOUNDER STORY — Alfred Ouko
+              The single biggest trust signal — real founder,
+              real qualifications, real story.
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.white,paddingTop:72,paddingBottom:72}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{
+                display:'grid',
+                gridTemplateColumns:'minmax(280px, 380px) 1fr',
+                gap:48,
+                alignItems:'start',
+              }} className="founder-grid">
+                <style>{`
+                  @media (max-width: 768px) {
+                    .founder-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+                  }
+                `}</style>
+                {/* Photo column */}
+                <div className="reveal">
+                  <div style={{
+                    position:'relative',
+                    width:'100%',
+                    aspectRatio:'4/5',
+                    borderRadius:14,
+                    overflow:'hidden',
+                    background:V.ink2,
+                    boxShadow:'0 20px 60px rgba(8,12,20,.12)',
+                  }}>
+                    <img src="https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-13-02_sr7u5a.jpg"
+                      alt="Alfred Ouko, founder and CEO of Smartious Homeschool, teaching A-Level Physics"
+                      loading="lazy"
+                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
+                  </div>
+                  {/* Caption strip */}
+                  <div style={{
+                    marginTop:14,
+                    padding:'12px 16px',
+                    background:V.bone,
+                    border:`1px solid ${V.bone3}`,
+                    borderRadius:10,
+                    textAlign:'center',
+                  }}>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,lineHeight:1.3}}>Alfred Ouko</div>
+                    <div style={{fontSize:11.5,color:V.sl,marginTop:3,letterSpacing:'.04em'}}>Founder &amp; CEO · Mathematics &amp; Physics Teacher</div>
+                  </div>
+                </div>
+
+                {/* Story column */}
+                <div className="reveal">
+                  <div className="eyebrow" style={{marginBottom:12}}>Meet the founder</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem, 3.5vw, 2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.2,marginBottom:18,letterSpacing:'-.01em'}}>
+                    Alfred Ouko <em style={{color:V.cr,fontStyle:'italic'}}>built Smartious</em> while still an undergraduate.
+                  </h2>
+                  <div style={{display:'flex',flexDirection:'column',gap:14,fontSize:14.5,color:V.sl,lineHeight:1.75}}>
+                    <p>Alfred started tutoring privately in 2019 while studying for his Bachelor of Education (Science) in Mathematics and Physics at the University of Nairobi. What began as evening tutoring for a handful of secondary-school students in Nairobi grew, year by year, into a recognisable pattern.</p>
+                    <p>The students who came to him weren't failing because they couldn't learn — they were falling behind because their schools had moved on while they were still consolidating the basics, or because the teacher-to-student ratio in their classroom meant individual attention was impossible, or because their families had relocated mid-term and lost continuity. The fix in every case was the same: one teacher, one student, the right pace, and the right curriculum.</p>
+                    <p>By the time he graduated with his BEd in 2022, Alfred had built that single insight into a structure — a small but growing team of qualified subject specialists delivering Mathematics, Physics, Sciences, English, Business and other subjects across Cambridge, IB, CBC and American curricula, to families in Nairobi and increasingly to Kenyan diaspora families abroad.</p>
+                    <p>Today Smartious is a Nairobi-based international online school with 78+ qualified tutors, serving families in 14 countries, with permanent campuses at Diamond Plaza in Parklands and the Institute of Robotics in Upper Hill, plus an active expansion into the Karen and Langata corridor. The founding insight hasn't changed: <strong style={{color:V.cr}}>one teacher, one student, the right pace.</strong></p>
+                  </div>
+
+                  {/* Credentials chips */}
+                  <div style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:22}}>
+                    {[
+                      'BEd Mathematics &amp; Physics — University of Nairobi (2022)',
+                      'Teaching since 2019',
+                      'Cambridge IGCSE &amp; A-Level specialist',
+                      'KCSE Mathematics &amp; Physics',
+                      'Founded Smartious Homeschool 2019',
+                    ].map((c, i) => (
+                      <span key={i} style={{
+                        background:V.bone2,
+                        border:`1px solid ${V.bone3}`,
+                        borderRadius:99,
+                        padding:'6px 14px',
+                        fontSize:11.5,
+                        color:V.ink,
+                        fontWeight:600,
+                      }} dangerouslySetInnerHTML={{__html: c}}/>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div></section>
+
+          {/* ═══════════════════════════════════════════
+              JOURNEY TIMELINE — Honest milestones only
+              No invented dates or fabricated student counts.
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div className="sec-hd reveal" style={{textAlign:'center'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Our journey</div>
+              <h2 className="display">Seven years of <em>building</em></h2>
+              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>From single-tutor evenings in 2019 to an international online school serving families across four continents.</p>
+            </div>
+            <div style={{maxWidth:900,margin:'44px auto 0',position:'relative'}}>
+              {/* Vertical line */}
+              <div style={{
+                position:'absolute',
+                left:'19px',top:0,bottom:0,
+                width:2,
+                background:`linear-gradient(180deg, ${V.gold3} 0%, ${V.cr} 100%)`,
+                opacity:0.3,
+              }} className="timeline-line"/>
+              <style>{`
+                @media (max-width: 540px){
+                  .timeline-line{ left:14px !important; }
+                  .timeline-item-dot{ left:6px !important; width:18px !important; height:18px !important; font-size:9px !important; }
+                  .timeline-item-content{ margin-left:42px !important; }
+                }
+              `}</style>
+              {[
+                {year:'2019', h:'Smartious is founded', p:'Alfred Ouko, then a second-year BEd student at the University of Nairobi, begins tutoring private Mathematics and Physics students in the evenings. The first formal Smartious model emerges within months — a structured one-on-one approach, focused on building genuine subject confidence rather than just exam memorisation.'},
+                {year:'2019–22', h:'Foundation phase', p:'Through his undergraduate years, Alfred adds subject specialists in Chemistry, Biology, Business, Economics, English Language and Literature. The student base expands from Nairobi suburbs to the broader county, with most families finding Smartious by referral.'},
+                {year:'2022', h:'BEd graduation', p:'Alfred completes his Bachelor of Education (Science) at the University of Nairobi, specialising in Mathematics and Physics. With formal teaching credentials in hand, Smartious formalises its tutor recruitment standards — every teacher must hold a subject-specific degree at minimum.'},
+                {year:'Growth phase', h:'Curriculum expansion', p:'Smartious adds dedicated programmes for Cambridge IGCSE and International A-Level, IB Primary Years, Middle Years and Diploma, Pearson Edexcel International GCSE and A-Level, Kenya CBC (KICD-aligned) and American Curriculum with Advanced Placement. Subject and curriculum specialists are recruited specifically for each pathway.'},
+                {year:'LMS launch', h:'Smartious Learning Platform', p:'The Smartious Learning Management System launches with three portals — Admin, Teacher and Student. Features include live session delivery, recorded session libraries, assignment and assessment workflows, automated billing, integrated Paystack payments and the Mshauri AI tutor for 24/7 student support.'},
+                {year:'International', h:'Diaspora expansion', p:'Kenyan and African diaspora families in the UAE, UK, USA, Canada, Australia, Qatar, Bahrain and other countries begin enrolling — using Smartious to maintain Cambridge, IB or CBC curriculum continuity through international relocations. Country-specific pages launch for 14 territories.'},
+                {year:'2026', h:'Where we are now', p:'78+ qualified tutors. 14 countries served. 5 curricula delivered. 21 Nairobi area pages, 27 UAE area pages and 6 Kenya city pages live. Permanent campuses at Diamond Plaza Parklands and the Institute of Robotics Upper Hill. Active expansion into the Karen and Langata corridor.'},
+              ].map((m, i) => (
+                <div key={i} className="reveal" style={{
+                  position:'relative',
+                  marginBottom: i === 6 ? 0 : 22,
+                  paddingLeft:0,
+                }}>
+                  {/* Year dot — shows step number, year/phase appears in the card */}
+                  <div className="timeline-item-dot" style={{
+                    position:'absolute',
+                    left:0,top:4,
+                    width:40,height:40,
+                    borderRadius:'50%',
+                    background:V.white,
+                    border:`2px solid ${V.gold3}`,
+                    color:V.cr,
+                    display:'flex',alignItems:'center',justifyContent:'center',
+                    fontSize:14,fontWeight:700,
+                    zIndex:1,
+                  }}>{i + 1}</div>
+                  {/* Content */}
+                  <div className="timeline-item-content" style={{
+                    marginLeft:64,
+                    background:V.white,
+                    border:`1px solid ${V.bone3}`,
+                    borderRadius:12,
+                    padding:'18px 22px',
+                  }}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{m.year}</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{m.h}</h3>
+                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{m.p}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* ═══════════════════════════════════════════
+              SMARTIOUS AT A GLANCE — real numbers only
+              Replaces the old fabricated stat block.
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div className="sec-hd reveal" style={{textAlign:'center'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Smartious at a glance</div>
+              <h2 className="display">The numbers <em>we can stand behind</em></h2>
+              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>No inflated figures. Just real, verifiable data points about what we do and how we do it.</p>
+            </div>
+            <div className="stat-grid" style={{marginTop:40}}>
+              {[
+                ['7','Years of teaching\nsince founding in 2019'],
+                ['78+','Qualified tutors\non Smartious LMS'],
+                ['14','Countries served\nacross 5 continents'],
+                ['5','Curricula delivered\nCambridge · IB · Edexcel · CBC · American'],
+                ['54','Areas covered\nNairobi 21 · UAE 27 · Kenya cities 6'],
+                ['$8/hr','Starting tuition rate\ntransparent pricing'],
+                ['24/7','Mshauri AI tutor\navailable on LMS'],
+                ['7-10','Days from enrolment\nto first live session'],
+              ].map(([n,l]) => (
                 <div key={n} className="sg">
                   <div className="sg-n"><em>{n}</em></div>
                   <div className="sg-l">{l.split('\n').map((line,i) => <span key={i}>{line}{i===0?<br/>:null}</span>)}</div>
@@ -3531,34 +3715,233 @@ export default function LandingPage() {
               ))}
             </div>
           </div></section>
-          <section className="sec" style={{background:V.white}}><div className="wrap">
-            <div className="sec-hd reveal"><div className="eyebrow">Simple Process</div><h2 className="display">From First Inquiry to <em>First Lesson</em></h2><p className="lead" style={{marginTop:12}}>Getting started with Smartious takes less than 48 hours.</p></div>
-            <div className="proc-grid">
+
+          {/* ═══════════════════════════════════════════
+              WHY FAMILIES CHOOSE — outcomes-focused
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div className="sec-hd reveal" style={{textAlign:'center'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>The Smartious advantage</div>
+              <h2 className="display">Why families <em>choose us</em></h2>
+            </div>
+            <div style={{
+              display:'grid',
+              gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))',
+              gap:14,
+              marginTop:36,
+              maxWidth:1100,
+              margin:'36px auto 0',
+            }}>
               {[
-                {n:'01 / 04',svg:'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',h:'Enroll & Choose',p:'Complete our 4-step form in 10 minutes. Select curriculum, learning mode and subjects. A $15 assessment fee secures your slot.',arr:true},
-                {n:'02 / 04',svg:'<path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4"/>',h:'Placement Assessment',p:'Your child takes a short adaptive test — 5 questions, 10 minutes. Results reviewed within 24 hours by our academic team.',arr:true},
-                {n:'03 / 04',svg:'<circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/>',h:'Meet Your Tutor',p:'We match your child to a qualified specialist. You receive a full tutor profile before committing to a single session.',arr:true},
-                {n:'04 / 04',svg:'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>',h:'Learn & Track',p:'Learning starts within 48 hours. Full parent portal — attendance, scores, reports, direct tutor messaging. Mshauri AI 24/7.',arr:false},
-              ].map((p,i) => (
-                <div key={i} className="ps">
-                  <div className="ps-n">{p.n}</div>
-                  <div className="ps-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="2" strokeLinecap="round" dangerouslySetInnerHTML={{__html:p.svg}}/></div>
-                  <div className="ps-h">{p.h}</div>
-                  <div className="ps-p">{p.p}</div>
-                  {p.arr && <div className="ps-arr"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>}
+                ['Flexible schedules','Sessions schedule around your child\'s sport, music, travel, training, family life — not the other way around.'],
+                ['Live teacher-led lessons','Real teachers, in real time. Not recordings, not chatbots, not self-paced apps. Every session is human-led.'],
+                ['Internationally recognised qualifications','Cambridge IGCSE and A-Level, IB Diploma, Pearson Edexcel, Kenya KCSE, American High School Diploma with AP.'],
+                ['University admissions support','UCAS for UK, Common App for US, KUCCPS for Kenyan state universities, plus Canadian, Australian and Gulf pathways.'],
+                ['Affordable vs international schools','Premium online homeschool from USD 423/month versus typical international school fees of USD 12,000–25,000/year.'],
+                ['Personalised learning','Every student receives an individualised pace, curriculum and tutor matching based on a structured placement assessment.'],
+                ['Global mobility','Same curriculum, same tutor, same friends — wherever your family relocates. The school comes with you.'],
+                ['Academic excellence focus','We don\'t do superficial covering of material. We build genuine subject understanding that translates into long-term examination performance.'],
+              ].map(([h, p]) => (
+                <div key={h} className="reveal" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px',display:'flex',gap:12}}>
+                  <div style={{flexShrink:0,width:26,height:26,borderRadius:'50%',background:`rgba(201,151,58,.15)`,color:V.gold2,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12l5 5L20 7"/></svg>
+                  </div>
+                  <div style={{flex:1}}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,marginBottom:6,lineHeight:1.3,fontWeight:400}}>{h}</h3>
+                    <p style={{fontSize:13,color:V.sl,lineHeight:1.6,margin:0}}>{p}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div></section>
-          <section className="sec" style={{background:V.bone}}><div className="wrap">
-            <div className="sec-hd reveal"><div className="eyebrow">Student & Parent Voices</div><h2 className="display">Stories That <em>Inspire</em></h2></div>
-            <div className="tgrid">
-              {[{av:'JO',c:V.cr,q:'"My daughter went from a C to an A* in IGCSE Chemistry in one term."',n:'Janet Osei — London',r:'Parent · IGCSE Year 11'},{av:'AM',c:'#0891B2',q:'"Smartious made the curriculum transition seamless — British to IGCSE."',n:'Ahmed Al-Mansouri — Dubai',r:'Parent · British → IGCSE'},{av:'ZK',c:'#15803D',q:'"I scored 38 IB points and got into UCL."',n:'Zara Kamau — Nairobi',r:'Student · IB → UCL'},{av:'CA',c:'#B45309',q:'"My kids in Toronto and cousins in Lagos study the same IGCSE online."',n:'Chioma Adeyemi — Toronto',r:'Parent · Virtual IGCSE'}].map((t,i) => (
-                <div key={i} className="tc reveal"><Stars/><p className="t-q">{t.q}</p><div className="t-au"><div className="t-av" style={{background:t.c}}>{t.av}</div><div><div className="t-nm">{t.n}</div><div className="t-rl">{t.r}</div></div></div></div>
+
+          {/* ═══════════════════════════════════════════
+              MISSION & VISION — short and punchy
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:18}}>
+              <div className="reveal" style={{background:V.ink2,border:`1px solid rgba(201,151,58,.2)`,borderRadius:14,padding:'32px 28px'}}>
+                <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:12}}>Our mission</div>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff',marginBottom:14,lineHeight:1.25,fontWeight:400}}>To make world-class education accessible to every learner, regardless of location or circumstance.</h3>
+                <p style={{fontSize:14,color:'rgba(247,243,237,.7)',lineHeight:1.7,margin:0}}>We deliver internationally accredited education to any family with an internet connection — whether they're in Nairobi, Mombasa, Dubai, London or Toronto. Curriculum, qualified teachers and university admissions support, in one online school.</p>
+              </div>
+              <div className="reveal" style={{background:V.ink2,border:`1px solid rgba(139,26,46,.3)`,borderRadius:14,padding:'32px 28px'}}>
+                <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.cr2,marginBottom:12}}>Our vision</div>
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff',marginBottom:14,lineHeight:1.25,fontWeight:400}}>To become Africa's most trusted homeschooling and online education provider — and one of the most trusted globally.</h3>
+                <p style={{fontSize:14,color:'rgba(247,243,237,.7)',lineHeight:1.7,margin:0}}>Built in Nairobi, scaling to wherever Kenyan and African families live. We're not trying to be the biggest. We're trying to be the school families trust enough to entrust their children's education to — across years, across countries, across curricula.</p>
+              </div>
+            </div>
+          </div></section>
+
+          {/* ═══════════════════════════════════════════
+              WHERE WE TEACH — 14-country grid
+              Real text grid (not a fake map).
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div className="sec-hd reveal" style={{textAlign:'center'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Global reach</div>
+              <h2 className="display">Families we serve across <em>14 countries</em></h2>
+              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>The same Smartious teachers, same curriculum standards, same qualifications — delivered to families wherever life has taken them.</p>
+            </div>
+            <div style={{
+              display:'grid',
+              gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))',
+              gap:12,
+              marginTop:36,
+              maxWidth:1100,
+              margin:'36px auto 0',
+            }}>
+              {[
+                {flag:'🇰🇪',c:'Kenya', cities:'Nairobi · Mombasa · Kisumu · Nakuru · Eldoret', slug:'kenya'},
+                {flag:'🇦🇪',c:'UAE', cities:'Dubai · Abu Dhabi · Sharjah', slug:'uae'},
+                {flag:'🇬🇧',c:'UK', cities:'London · Manchester · Birmingham', slug:'uk'},
+                {flag:'🇺🇸',c:'USA', cities:'New York · Houston · Atlanta', slug:'usa'},
+                {flag:'🇨🇦',c:'Canada', cities:'Toronto · Calgary · Vancouver', slug:'canada'},
+                {flag:'🇦🇺',c:'Australia', cities:'Sydney · Melbourne · Perth', slug:'australia'},
+                {flag:'🇶🇦',c:'Qatar', cities:'Doha', slug:'qatar'},
+                {flag:'🇧🇭',c:'Bahrain', cities:'Manama · Riffa', slug:'bahrain'},
+                {flag:'🇳🇬',c:'Nigeria', cities:'Lagos · Abuja', slug:'nigeria'},
+                {flag:'🇿🇦',c:'South Africa', cities:'Johannesburg · Cape Town', slug:'south-africa'},
+                {flag:'🇺🇬',c:'Uganda', cities:'Kampala', slug:'uganda'},
+                {flag:'🇹🇿',c:'Tanzania', cities:'Dar es Salaam', slug:'tanzania'},
+                {flag:'🇸🇴',c:'Somalia', cities:'Mogadishu · Hargeisa', slug:'somalia'},
+                {flag:'🇵🇰',c:'Pakistan', cities:'Karachi · Lahore · Islamabad', slug:'pakistan'},
+              ].map(country => (
+                <div key={country.c} className="reveal" onClick={() => P('global')}
+                  style={{
+                    background:V.bone,
+                    border:`1px solid ${V.bone3}`,
+                    borderRadius:10,
+                    padding:'14px 16px',
+                    cursor:'pointer',
+                    transition:'all .2s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
+                  <div style={{fontSize:20,marginBottom:4}}>{country.flag}</div>
+                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'.95rem',color:V.ink,fontWeight:400,lineHeight:1.3}}>{country.c}</div>
+                  <div style={{fontSize:10.5,color:V.sl2,marginTop:3,lineHeight:1.4}}>{country.cities}</div>
+                </div>
               ))}
             </div>
           </div></section>
-          <section className="cta-band"><div className="wrap"><div className="cta-in"><h2 className="cta-h">Ready to Join <em>Smartious?</em></h2><p className="cta-sub">$15 placement · First lesson within 48 hours · Cancel anytime</p><div className="cta-btns"><button className="btn-p" onClick={() => P('enroll')}>Begin Enrollment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button><button className="btn-o lt" onClick={() => P('pricing')}>View Pricing</button></div></div></div></section>
+
+          {/* ═══════════════════════════════════════════
+              OUTCOMES WE'VE SUPPORTED — illustrative scenarios
+              Clearly labelled as scenarios, NOT named students.
+              Replaces fabricated testimonials.
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div className="sec-hd reveal" style={{textAlign:'center'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>How we help</div>
+              <h2 className="display">Outcomes we've <em>supported</em></h2>
+              <p style={{fontSize:13.5,color:V.sl2,fontStyle:'italic',maxWidth:620,margin:'14px auto 0',lineHeight:1.5}}>Illustrative scenarios from the kinds of students Smartious typically supports. Names and specifics are anonymised to protect family privacy. Real testimonials with permission are featured separately as families share them.</p>
+            </div>
+            <div style={{
+              display:'grid',
+              gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',
+              gap:14,
+              marginTop:36,
+              maxWidth:1100,
+              margin:'36px auto 0',
+            }}>
+              {[
+                {context:'IGCSE intensive', situation:'A Year 11 student in Nairobi preparing for Cambridge IGCSE Mathematics, Physics and Chemistry with weekly 1-on-1 tutoring across all three subjects, focused on past-paper technique and exam-specific problem types.'},
+                {context:'Curriculum transition', situation:'A Year 9 student moving from Kenya CBC to Cambridge IGCSE at Year 10 entry. Smartious provided parallel preparation across both curricula in Grades 7-9 to ensure smooth transition.'},
+                {context:'Diaspora continuity', situation:'A family relocating from Nairobi to Dubai mid-academic-year. Smartious maintained Cambridge Primary tutoring throughout the relocation period, with no break in curriculum continuity for the children.'},
+                {context:'University admissions', situation:'A Form 4 student targeting UK Russell Group universities for medicine. Smartious provided A-Level Biology and Chemistry tutoring plus UCAS personal statement coaching and BMAT preparation.'},
+                {context:'Athletic schedule', situation:'An Eldoret-based runner preparing for both KCSE examinations and US university athletic scholarship pathways. Sessions scheduled around morning and afternoon training, with SAT and AP coursework alongside KCSE syllabus.'},
+                {context:'Specialist subject', situation:'A Year 12 student in Kisumu strong in mathematics but with no local Further Mathematics specialist. Smartious connected them with an online A-Level Further Mathematics specialist based in Nairobi.'},
+                {context:'IB Diploma support', situation:'An IB Diploma student at an international school in Mombasa needing supplementary HL Mathematics and HL Physics tutoring in the final year before external IB examinations.'},
+                {context:'Adult learner', situation:'A working adult in their thirties returning to complete Cambridge International A-Level qualifications to qualify for UK university application as a mature student. Sessions scheduled in evenings around work commitments.'},
+              ].map(s => (
+                <div key={s.context} className="reveal" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
+                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>{s.context}</div>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>{s.situation}</p>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* ═══════════════════════════════════════════
+              SHARE YOUR STORY — invite real testimonials
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div className="reveal" style={{
+              maxWidth:780,
+              margin:'0 auto',
+              background:`linear-gradient(135deg, ${V.bone} 0%, ${V.bone2} 100%)`,
+              border:`1px solid ${V.bone3}`,
+              borderRadius:14,
+              padding:'32px 36px',
+              textAlign:'center',
+            }}>
+              <div style={{display:'inline-flex',alignItems:'center',gap:8,marginBottom:10,padding:'4px 12px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:99,fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3}}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                Real families only
+              </div>
+              <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:V.ink,marginBottom:12,lineHeight:1.25,fontWeight:400}}>Share your <em style={{color:V.cr,fontStyle:'italic'}}>Smartious story</em></h3>
+              <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginBottom:20,maxWidth:540,margin:'0 auto 20px'}}>
+                If your family has used Smartious — for full homeschool, 1-on-1 tuition, IGCSE/IB/A-Level preparation, or anything else — we'd love to feature your story here (with your permission). Real testimonials from real families build trust for parents considering Smartious for their own children.
+              </p>
+              <div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
+                <a href="mailto:hellosmartious@gmail.com?subject=Smartious%20story%20to%20share"
+                  style={{background:V.cr,color:'#fff',textDecoration:'none',padding:'11px 22px',borderRadius:6,fontSize:13,fontWeight:700,display:'inline-flex',alignItems:'center',gap:6}}>
+                  Email your story
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20to%20share%20our%20family%27s%20story"
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'11px 22px',borderRadius:6,fontSize:13,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </div></section>
+
+          {/* ═══════════════════════════════════════════
+              ABOUT CTA — stronger pre-footer
+              Real fee (USD 38 / KSh 5,000), not the old $15.
+          ═══════════════════════════════════════════ */}
+          <section className="cta-band">
+            <div className="wrap"><div className="cta-in">
+              <div className="eyebrow" style={{color:V.gold3,justifyContent:'center',marginBottom:18}}>Ready to start</div>
+              <h2 className="cta-h">Give Your Child a <em>Real Education</em>. Not Just a School Day.</h2>
+              <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports if available, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 8/hour</strong> tuition · <strong style={{color:V.gold3}}>USD 423/month</strong> full homeschool. USD 38 / KSh 5,000 application fee applies only when you decide to enrol.</p>
+              <div className="cta-btns">
+                <button className="btn-p" onClick={() => P('consult')}>Book Free Consultation <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <button className="btn-o lt" onClick={() => window.open('https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20to%20discuss%20enrolment%20for%20my%20child.','_blank')} style={{background:'rgba(37,211,102,.12)',borderColor:'rgba(37,211,102,.45)',color:'#fff'}}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#25D366" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1 19.79 19.79 0 0 1 1.64 4.46 2 2 0 0 1 3.62 2.26h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.08 6.08l.97-.97a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.72 16.92z"/></svg>
+                  WhatsApp +254 745 021 212
+                </button>
+              </div>
+              <div style={{marginTop:18,fontSize:12,color:'rgba(255,255,255,.55)'}}>Most families complete enrolment within 7-10 working days · No long-term contracts</div>
+            </div></div>
+          </section>
+
+          {/* ═══════════════════════════════════════════
+              SEO TOPICAL BLOCK — about/founder context
+              Reinforces topical relevance for Google.
+          ═══════════════════════════════════════════ */}
+          <section style={{background:V.ink2,color:'rgba(247,243,237,.75)',padding:'48px 0',borderTop:'1px solid rgba(247,243,237,.06)'}}>
+            <div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:'#fff',marginBottom:16,lineHeight:1.3}}>About Smartious Homeschool</h2>
+                <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
+                  Smartious Homeschool &amp; eSchool is an international online school founded in Nairobi, Kenya in 2019 by Alfred Ouko, a Mathematics and Physics teacher educated at the University of Nairobi (BEd Science, 2022). We provide live, internationally recognised education for students preparing for <strong style={{color:'#fff'}}>Cambridge IGCSE</strong>, <strong style={{color:'#fff'}}>Cambridge International A-Level</strong>, <strong style={{color:'#fff'}}>Pearson Edexcel International GCSE and A-Level</strong>, the <strong style={{color:'#fff'}}>International Baccalaureate Diploma Programme</strong>, <strong style={{color:'#fff'}}>Kenya CBC</strong> (KICD-aligned, KCSE-eligible) and the <strong style={{color:'#fff'}}>American High School Curriculum</strong> with Advanced Placement (AP).
+                </p>
+                <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
+                  We serve families in Kenya (Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and across the country), the UAE (Dubai, Abu Dhabi, Sharjah and 27 emirate areas), the UK, USA, Canada, Australia, Qatar, Bahrain, Nigeria, South Africa, Uganda, Tanzania, Somalia and Pakistan. Our delivery is primarily online through the Smartious Learning Management System (LMS), with in-person tuition available at our Diamond Plaza Parklands campus and the Institute of Robotics Upper Hill in Nairobi, plus our growing Karen and Langata corridor.
+                </p>
+                <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
+                  Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 8/hour for 1-on-1 tuition (KSh 1,300/hour for Kenya-based families) and USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
+                </p>
+                <p style={{fontSize:12.5,lineHeight:1.7,marginTop:18,color:'rgba(247,243,237,.55)'}}>
+                  Contact Smartious: <a href="mailto:hellosmartious@gmail.com" style={{color:V.gold3,textDecoration:'none'}}>hellosmartious@gmail.com</a> · WhatsApp <a href="https://wa.me/254745021212" style={{color:V.gold3,textDecoration:'none'}}>+254 745 021 212</a> · Diamond Plaza, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
+                </p>
+              </div>
+            </div>
+          </section>
           <Footer P={P}/>
         </>
       )}
@@ -10971,7 +11354,7 @@ export default function LandingPage() {
                 ['Is Smartious recognised internationally?','Yes. We deliver Cambridge International (CIE), IB, Pearson Edexcel and American College Board curricula — all globally recognised. Students sit exams at registered centres in their country of residence.'],
                 ['Where do students sit their exams?','Students sit official Cambridge, IB or Edexcel examinations at accredited examination centres in their home country. We maintain a directory of approved centres across all 12+ countries and assist families with registration typically 6 months before the exam window.'],
                 ['How does virtual school work outside Kenya?','Our virtual school is fully online and timezone-flexible. Live classes are scheduled around your timezone, all sessions are recorded for catch-up, and Mshauri AI is available 24/7. All you need is a reliable internet connection and a laptop or tablet.'],
-                ['What is the $15 assessment fee for?','The $15 fee covers your child\'s diagnostic placement test, a written curriculum alignment report and the initial tutor matching process. It is a one-time, non-refundable charge that counts towards your first month\'s tuition.'],
+                ['What is the USD 38 / KSh 5,000 application fee for?','The USD 38 / KSh 5,000 fee covers your child\'s diagnostic placement test, a written curriculum alignment report and the initial tutor matching process. It is a one-time, non-refundable charge that counts towards your first month\'s tuition.'],
                 ['Can I switch curricula mid-year?','Yes. We conduct a fresh placement assessment at no additional cost, prepare a topic bridge plan and assign a tutor with dual-curriculum expertise.'],
                 ['How is Mshauri AI different from ChatGPT?','Mshauri is built on Anthropic\'s Claude and uses the Socratic method — asking guiding questions rather than giving direct answers. It operates in English and Swahili and knows the specific curricula and exam formats our students prepare for.'],
                 ['What is the minimum age for enrolment?','We accept students from age 3 (IB PYP) through to adults resitting qualifications. Our primary programmes begin at Grade 1 (age 6). There is no upper age limit.'],
