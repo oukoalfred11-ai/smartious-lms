@@ -2845,8 +2845,8 @@ export default function LandingPage() {
                 {
                   tag:'In-Home · Nairobi',
                   title:'Home Tutoring',
-                  img:'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=900&q=80&auto=format&fit=crop',
-                  alt:'Smartious home tutor working 1-on-1 with student at home in Nairobi',
+                  img:'https://res.cloudinary.com/dae99gz1m/image/upload/v1780594208/photo_2026-06-04_20-29-50_mxbh0c.jpg',
+                  alt:'Smartious home tutor delivering 1-on-1 in-person tuition in Nairobi',
                   desc:'A vetted Smartious tutor visits your Nairobi home or estate. Across 21 areas — Karen, Kilimani, Lavington, Westlands, Runda and more.',
                   bullets:[
                     'Tutor comes to your home',
