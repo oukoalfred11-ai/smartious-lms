@@ -1512,6 +1512,8 @@ export default function LandingPage() {
   const cfg   = store.siteConfig  // live site config from admin editor
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openCategory, setOpenCategory] = useState(null)
+  const [tuitionMenuOpen, setTuitionMenuOpen] = useState(false)
+  const tuitionRef = useRef(null)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -1519,6 +1521,18 @@ export default function LandingPage() {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Close tuition dropdown when clicking outside it
+  useEffect(() => {
+    if (!tuitionMenuOpen) return
+    const handleClickOutside = (e) => {
+      if (tuitionRef.current && !tuitionRef.current.contains(e.target)) {
+        setTuitionMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [tuitionMenuOpen])
 
   // Preload Paystack inline.js so the payment modal opens instantly when user reaches Step 3
   useEffect(() => {
@@ -2336,7 +2350,47 @@ export default function LandingPage() {
             <SmartiousLogo size={36} withText={true} tone="light"/>
           </div>
           <div className="nav-links">
-            {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Global','global'],['Pricing','pricing'],['Programs','programs'],['Activities','activities'],['Teachers','teachers'],['FAQ','faq'],['Blog','blog']].map(([l,id]) => (
+            {[['Home','home'],['About','about'],['Curricula','curricula']].map(([l,id]) => (
+              <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
+            ))}
+            {/* Tuition dropdown — covers Nairobi, UAE, Kenya cities, Global */}
+            <div ref={tuitionRef} style={{position:'relative'}}>
+              <div
+                className={`nl${['tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','global','country-detail'].includes(page) ? ' on' : ''}`}
+                onClick={() => setTuitionMenuOpen(o => !o)}
+                style={{display:'inline-flex',alignItems:'center',gap:5}}
+                aria-expanded={tuitionMenuOpen}
+                aria-haspopup="true">
+                Tuition
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{transform:tuitionMenuOpen?'rotate(180deg)':'rotate(0)',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              {tuitionMenuOpen && (
+                <div style={{
+                  position:'absolute',top:'calc(100% + 6px)',left:0,
+                  background:'#0d1220',border:'1px solid rgba(201,151,58,.2)',
+                  borderRadius:8,minWidth:240,padding:'8px 0',zIndex:10000,
+                  boxShadow:'0 12px 40px rgba(0,0,0,.5)',
+                }}>
+                  {[
+                    ['Tuition Nairobi','tuition-nairobi','In-person home tuition across 21 areas'],
+                    ['Tuition UAE','tuition-uae','Online tuition across 27 emirate areas'],
+                    ['Homeschooling Kenya','homeschooling-kenya','6 Kenyan cities outside Nairobi'],
+                    ['All Countries','global','Global reach — 14 country pages'],
+                  ].map(([label, id, sub]) => (
+                    <div
+                      key={id}
+                      onClick={() => { setTuitionMenuOpen(false); P(id) }}
+                      style={{padding:'10px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s'}}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)'; e.currentTarget.style.borderLeftColor = V.gold3 }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent' }}>
+                      <div style={{fontSize:13,fontWeight:700,color:'#fff',marginBottom:2}}>{label}</div>
+                      <div style={{fontSize:11,color:'rgba(247,243,237,.5)'}}>{sub}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {[['Pricing','pricing'],['Programs','programs'],['Activities','activities'],['Teachers','teachers'],['FAQ','faq'],['Blog','blog']].map(([l,id]) => (
               <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
             ))}
           </div>
@@ -2376,8 +2430,10 @@ export default function LandingPage() {
                 ['Pricing','pricing'],
               ]},
               { cat:'Where We Teach', items:[
-                ['Global Reach','global'],
                 ['Tuition Nairobi','tuition-nairobi'],
+                ['Tuition UAE','tuition-uae'],
+                ['Homeschooling Kenya','homeschooling-kenya'],
+                ['All Countries','global'],
               ]},
               { cat:'Activities', items:[
                 ['Activities & Sports','activities'],
