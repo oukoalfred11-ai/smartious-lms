@@ -2790,6 +2790,153 @@ export default function LandingPage() {
           </div></section>
 
           {/* ═══════════════════════════════════════════
+              THREE WAYS TO LEARN — service modes
+              Online / In-Centre / Home tutoring with real
+              Smartious photography. After pain points,
+              before location coverage.
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.white}}><div className="wrap">
+            <div className="sec-hd reveal" style={{textAlign:'center'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>How we teach</div>
+              <h2 className="display">Three Ways to Learn. <em>One Standard</em> of Quality.</h2>
+              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>Same qualified teachers. Same curriculum standards. Same internationally recognised qualifications — delivered the way that fits your family.</p>
+            </div>
+            <div style={{
+              display:'grid',
+              gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))',
+              gap:18,
+              marginTop:40,
+              maxWidth:1100,
+              margin:'40px auto 0',
+            }}>
+              {[
+                {
+                  tag:'Online · Live',
+                  title:'Online / Virtual',
+                  img:'https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-13-02_sr7u5a.jpg',
+                  alt:'Smartious founder Alfred teaching A-Level Physics magnetic force online',
+                  desc:'Live 1-on-1 or small-group classes via Smartious LMS. Same qualified teachers, taught in real time, from anywhere in the world.',
+                  bullets:[
+                    'Live sessions with shared whiteboard',
+                    'Every session recorded for review',
+                    'Mshauri AI tutor on-demand 24/7',
+                    'Works on any laptop, tablet or phone',
+                  ],
+                  cta:'View online programmes',
+                  ctaPage:'programs',
+                  pricing:'From USD 8/hour',
+                },
+                {
+                  tag:'In-Centre',
+                  title:'In-Centre',
+                  img:'https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-09-57_ujfvdf.jpg',
+                  alt:'Smartious Institute of Robotics Upper Hill Nairobi learning centre',
+                  desc:'In-person learning at our Diamond Plaza Parklands campus and Upper Hill Institute of Robotics — premium tutoring halls and STEM lab access.',
+                  bullets:[
+                    'Diamond Plaza Parklands campus',
+                    'Upper Hill Robotics Institute',
+                    'Group classes &amp; small cohorts',
+                    'Quiet study areas, supervised',
+                  ],
+                  cta:'Visit a Smartious centre',
+                  ctaPage:'contact',
+                  pricing:'From KSh 1,500/hour',
+                },
+                {
+                  tag:'In-Home · Nairobi',
+                  title:'Home Tutoring',
+                  img:'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=900&q=80&auto=format&fit=crop',
+                  alt:'Smartious home tutor working 1-on-1 with student at home in Nairobi',
+                  desc:'A vetted Smartious tutor visits your Nairobi home or estate. Across 21 areas — Karen, Kilimani, Lavington, Westlands, Runda and more.',
+                  bullets:[
+                    'Tutor comes to your home',
+                    'Across 21 Nairobi areas',
+                    'Scheduled around your family',
+                    'Same-day matching available',
+                  ],
+                  cta:'Find tutors in your area',
+                  ctaPage:'tuition-nairobi',
+                  pricing:'From KSh 1,300/hour',
+                },
+              ].map(card => (
+                <div key={card.title} className="reveal" style={{
+                  background:V.white,
+                  border:`1px solid ${V.bone3}`,
+                  borderRadius:14,
+                  overflow:'hidden',
+                  display:'flex',
+                  flexDirection:'column',
+                  transition:'all .25s',
+                  cursor:'pointer',
+                }}
+                  onClick={() => P(card.ctaPage)}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(8,12,20,.10)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                  {/* Image */}
+                  <div style={{position:'relative',width:'100%',height:220,overflow:'hidden',background:V.bone2}}>
+                    <img src={card.img} alt={card.alt} loading="lazy"
+                      onError={e => { e.currentTarget.style.display = 'none' }}
+                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
+                    {/* Tag overlay */}
+                    <div style={{
+                      position:'absolute',top:14,left:14,
+                      background:'rgba(8,12,20,.78)',color:V.gold3,
+                      padding:'5px 12px',borderRadius:6,
+                      fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',
+                      backdropFilter:'blur(8px)',
+                    }}>{card.tag}</div>
+                  </div>
+                  {/* Body */}
+                  <div style={{padding:'22px 24px',display:'flex',flexDirection:'column',flex:1}}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',color:V.ink,marginBottom:10,lineHeight:1.25,fontWeight:400}}>{card.title}</h3>
+                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,marginBottom:14}}>{card.desc}</p>
+                    <ul style={{listStyle:'none',padding:0,margin:'0 0 16px',display:'flex',flexDirection:'column',gap:6}}>
+                      {card.bullets.map((b, i) => (
+                        <li key={i} style={{display:'flex',alignItems:'flex-start',gap:8,fontSize:12.5,color:V.ink,lineHeight:1.55}}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:3}}><path d="M5 12l5 5L20 7"/></svg>
+                          <span dangerouslySetInnerHTML={{__html:b}}/>
+                        </li>
+                      ))}
+                    </ul>
+                    <div style={{
+                      marginTop:'auto',
+                      paddingTop:14,
+                      borderTop:`1px solid ${V.bone3}`,
+                      display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,
+                    }}>
+                      <div style={{fontSize:12.5,fontWeight:700,color:V.cr}}>{card.pricing}</div>
+                      <div style={{fontSize:12,fontWeight:700,color:V.gold2,display:'inline-flex',alignItems:'center',gap:4}}>
+                        {card.cta}
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Quality assurance strip */}
+            <div className="reveal" style={{
+              maxWidth:900,
+              margin:'28px auto 0',
+              background:V.bone,
+              border:`1px solid ${V.bone3}`,
+              borderRadius:10,
+              padding:'18px 24px',
+              display:'flex',
+              alignItems:'center',
+              justifyContent:'center',
+              gap:14,
+              flexWrap:'wrap',
+              textAlign:'center',
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="2" strokeLinecap="round" style={{flexShrink:0}}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <div style={{fontSize:13,color:V.ink,lineHeight:1.55}}>
+                <strong style={{color:V.cr}}>One quality standard across all three.</strong> Every Smartious teacher holds at least a subject-specific degree. Many are TSC-registered. Switch between modes anytime without changing curriculum or losing progress.
+              </div>
+            </div>
+          </div></section>
+
+          {/* ═══════════════════════════════════════════
               COUNTRY ROUTER — links to the 10 country pages
               Big SEO win: surfaces all country pages from
               homepage so they get internal-link authority.
