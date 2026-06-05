@@ -11,6 +11,7 @@ import { NAIROBI_AREAS } from '../data/nairobiAreas.js'
 import { UAE_AREAS } from '../data/uaeAreas.js'
 import { KENYA_CITIES } from '../data/kenyaCities.js'
 import { TEST_PREP } from '../data/testPrep.js'
+import { STUDY_ABROAD } from '../data/studyAbroad.js'
 
 
 /* ── Front Desk capture ───────────────────────────────────
@@ -807,7 +808,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1600,6 +1601,7 @@ export default function LandingPage() {
   const [currentUaeArea, setCurrentUaeArea] = useState(null)
   const [currentKenyaCity, setCurrentKenyaCity] = useState(null)
   const [currentTestPrep, setCurrentTestPrep] = useState(null)
+  const [currentStudyAbroad, setCurrentStudyAbroad] = useState(null)
   const [currentCompare, setCurrentCompare] = useState(null)
   const [publicTeachers, setPublicTeachers] = useState([])
   const [teachersLoading, setTeachersLoading] = useState(false)
@@ -2013,6 +2015,10 @@ export default function LandingPage() {
       const slug = id.slice('test-prep-'.length)
       return '/test-prep/' + slug
     }
+    if (id.startsWith('study-abroad-') && id !== 'study-abroad-detail') {
+      const slug = id.slice('study-abroad-'.length)
+      return '/study-abroad/' + slug
+    }
     return '/' + id
   }
 
@@ -2130,6 +2136,37 @@ export default function LandingPage() {
     }
     if (path === '/languages') {
       setPage('languages')
+      return
+    }
+    if (path === '/study-abroad') {
+      setPage('study-abroad')
+      return
+    }
+    if (path.startsWith('/study-abroad/')) {
+      const slug = decodeURIComponent(path.slice('/study-abroad/'.length))
+      const dest = STUDY_ABROAD.find(d => d.slug === slug)
+      if (dest) {
+        setCurrentStudyAbroad(slug)
+        setPage('study-abroad-detail')
+      } else {
+        setPage('study-abroad')
+      }
+      return
+    }
+    if (path === '/homeschool') {
+      setPage('homeschool')
+      return
+    }
+    if (path === '/tuition') {
+      setPage('tuition')
+      return
+    }
+    if (path === '/iufp') {
+      setPage('iufp')
+      return
+    }
+    if (path === '/pre-university') {
+      setPage('pre-university')
       return
     }
     if (path.startsWith('/compare/')) {
@@ -2439,7 +2476,7 @@ export default function LandingPage() {
             {/* Programmes dropdown — grouped categories with chips */}
             <div ref={programmesRef} style={{position:'relative'}}>
               <div
-                className={`nl${['programs','test-prep','test-prep-detail','languages'].includes(page) ? ' on' : ''}`}
+                className={`nl${['programs','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','languages','study-abroad','study-abroad-detail'].includes(page) ? ' on' : ''}`}
                 onClick={() => setProgrammesMenuOpen(o => !o)}
                 style={{display:'inline-flex',alignItems:'center',gap:5}}
                 aria-expanded={programmesMenuOpen}
@@ -2451,57 +2488,39 @@ export default function LandingPage() {
                 <div style={{
                   position:'absolute',top:'calc(100% + 6px)',left:0,
                   background:'#0d1220',border:'1px solid rgba(201,151,58,.2)',
-                  borderRadius:8,minWidth:340,padding:'12px 0 8px',zIndex:10000,
+                  borderRadius:8,minWidth:320,padding:'12px 0 8px',zIndex:10000,
                   boxShadow:'0 12px 40px rgba(0,0,0,.5)',
                 }}>
                   {[
                     {
-                      cat:'Core Programmes',
+                      cat:'Learning Programmes',
                       items:[
-                        {l:'Homeschool', id:'curricula', sub:'Full curriculum delivery, K-12'},
-                        {l:'Tuition', id:'services', sub:'1-on-1 specialist tuition'},
+                        {l:'Homeschool Global', id:'homeschool', sub:'Premium homeschooling worldwide'},
+                        {l:'Tuition Global', id:'tuition', sub:'1-on-1 specialist tuition'},
                         {l:'Languages', id:'languages', sub:'Foreign language coaching'},
                       ],
                     },
                     {
-                      cat:'Study Pathways',
+                      cat:'Pathways & Prep',
                       items:[
-                        {l:'Study Abroad', id:'programs', sub:'University placement guidance'},
-                        {l:'IUFP', id:'programs', sub:'International University Foundation'},
-                        {l:'Pre-University', id:'programs', sub:'Gap-year academic prep'},
-                      ],
-                    },
-                    {
-                      cat:'Global Test Preparation',
-                      items:[
-                        {l:'IELTS', id:'test-prep-ielts', chip:'KSh 29,000', subchip:'20 sessions'},
-                        {l:'TOEFL', id:'test-prep-toefl', chip:'KSh 29,000', subchip:'20 sessions'},
-                        {l:'PTE', id:'test-prep-pte', chip:'KSh 29,000', subchip:'20 sessions'},
-                        {l:'GRE', id:'test-prep-gre', chip:'KSh 59,000', subchip:'40 sessions'},
-                        {l:'GMAT', id:'test-prep-gmat', chip:'KSh 59,000', subchip:'40 sessions'},
-                        {l:'SAT', id:'test-prep-sat', chip:'KSh 59,000', subchip:'40 sessions'},
+                        {l:'Study Abroad', id:'study-abroad', sub:'10 destinations · 100% free'},
+                        {l:'IUFP', id:'iufp', sub:'International University Foundation'},
+                        {l:'Pre-University', id:'pre-university', sub:'Gap-year academic preparation'},
+                        {l:'Test Prep', id:'test-prep', sub:'IELTS · TOEFL · GRE · GMAT · SAT · PTE'},
                       ],
                     },
                   ].map((group, gi) => (
-                    <div key={group.cat} style={{marginBottom: gi < 2 ? 6 : 0, paddingBottom: gi < 2 ? 6 : 0, borderBottom: gi < 2 ? '1px solid rgba(255,255,255,.06)' : 'none'}}>
+                    <div key={group.cat} style={{marginBottom: gi < 1 ? 6 : 0, paddingBottom: gi < 1 ? 6 : 0, borderBottom: gi < 1 ? '1px solid rgba(255,255,255,.06)' : 'none'}}>
                       <div style={{padding:'6px 16px 4px',fontSize:9.5,fontWeight:700,letterSpacing:'.16em',textTransform:'uppercase',color:'rgba(201,151,58,.7)'}}>{group.cat}</div>
                       {group.items.map(item => (
                         <div
                           key={item.l + item.id}
                           onClick={() => { setProgrammesMenuOpen(false); P(item.id) }}
-                          style={{padding:'9px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s',display:'flex',alignItems:'center',justifyContent:'space-between',gap:10}}
+                          style={{padding:'10px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s'}}
                           onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)'; e.currentTarget.style.borderLeftColor = V.gold3 }}
                           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent' }}>
-                          <div style={{flex:1,minWidth:0}}>
-                            <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>{item.l}</div>
-                            {item.sub && <div style={{fontSize:11,color:'rgba(247,243,237,.5)',marginTop:2}}>{item.sub}</div>}
-                          </div>
-                          {item.chip && (
-                            <div style={{textAlign:'right',flexShrink:0}}>
-                              <div style={{fontSize:10.5,fontWeight:700,color:V.gold3,background:'rgba(201,151,58,.12)',padding:'2px 8px',borderRadius:99,whiteSpace:'nowrap'}}>{item.chip}</div>
-                              {item.subchip && <div style={{fontSize:9,color:'rgba(247,243,237,.4)',marginTop:3}}>{item.subchip}</div>}
-                            </div>
-                          )}
+                          <div style={{fontSize:13.5,fontWeight:700,color:'#fff'}}>{item.l}</div>
+                          {item.sub && <div style={{fontSize:11,color:'rgba(247,243,237,.5)',marginTop:2}}>{item.sub}</div>}
                         </div>
                       ))}
                     </div>
@@ -2549,17 +2568,13 @@ export default function LandingPage() {
                 ['Pricing','pricing'],
               ]},
               { cat:'Programmes', items:[
-                ['Homeschool','curricula'],
-                ['Tuition','services'],
+                ['Homeschool Global','homeschool'],
+                ['Tuition Global','tuition'],
                 ['Languages','languages'],
-                ['Study Abroad','programs'],
-                ['Test Prep · IELTS','test-prep-ielts'],
-                ['Test Prep · TOEFL','test-prep-toefl'],
-                ['Test Prep · PTE','test-prep-pte'],
-                ['Test Prep · GRE','test-prep-gre'],
-                ['Test Prep · GMAT','test-prep-gmat'],
-                ['Test Prep · SAT','test-prep-sat'],
-                ['All Test Prep','test-prep'],
+                ['Study Abroad','study-abroad'],
+                ['IUFP','iufp'],
+                ['Pre-University','pre-university'],
+                ['Test Prep','test-prep'],
               ]},
               { cat:'Where We Teach', items:[
                 ['Tuition Nairobi','tuition-nairobi'],
@@ -10174,6 +10189,1299 @@ export default function LandingPage() {
         </>
       )}
       {/* /languages */}
+
+      {/* ══════════════════════════════════════════
+          HOMESCHOOL GLOBAL HUB — /homeschool
+          Comprehensive homeschool landing page that
+          aggregates all homeschool sub-pages.
+          Targets "homeschool", "homeschooling kenya", "homeschool nairobi"
+      ══════════════════════════════════════════ */}
+      {page === 'homeschool' && (
+        <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'EducationalOrganization',
+            'name':'Smartious Homeschool Global',
+            'url':'https://smartioushomeschool.com/homeschool',
+            'description':'Premium homeschooling worldwide. Cambridge IGCSE, A-Level, IB, American, Kenya CBC curricula. Online, in-centre and home tutoring delivery across Kenya, UAE and 14 countries.',
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',padding:'80px 0 60px',overflow:'hidden',
+          }}>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Homeschool global</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5.2vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                Premium <em style={{color:V.gold3,fontStyle:'italic'}}>homeschooling</em> worldwide
+              </h1>
+              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:780}}>
+                Full curriculum delivery for K-12 students across 5 curricula and 14 countries. Live 1-on-1 lessons with qualified teachers, structured progress tracking and university-pathway planning — built for families serious about their child's academic future.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                  Book free assessment
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20to%20discuss%20homeschooling."
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* CURRICULA WE TEACH */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>What we teach</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Five curricula. <em style={{color:V.cr,fontStyle:'italic'}}>One trusted partner.</em>
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:14}}>
+                {[
+                  { code:'IGCSE', name:'Cambridge IGCSE & Edexcel', desc:'Year 7-11. Global gold-standard secondary curriculum.', flag:'🇬🇧' },
+                  { code:'A-LEVEL', name:'Cambridge A-Level', desc:'Year 12-13. Top UK university entry preparation.', flag:'🇬🇧' },
+                  { code:'IB', name:'International Baccalaureate', desc:'PYP, MYP, DP. Globally recognised diploma.', flag:'🌍' },
+                  { code:'US', name:'American Curriculum', desc:'Elementary through high school. SAT/AP integration.', flag:'🇺🇸' },
+                  { code:'CBC', name:'Kenya CBC', desc:'Grade 1-12. Aligned with KICD and KCSE pathways.', flag:'🇰🇪' },
+                ].map(c => (
+                  <div key={c.code}
+                    onClick={() => P('curricula')}
+                    style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px',cursor:'pointer',transition:'all .2s'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
+                    <div style={{fontSize:'1.4rem',marginBottom:6}}>{c.flag}</div>
+                    <div style={{fontSize:10.5,fontWeight:700,color:V.gold3,letterSpacing:'.14em',marginBottom:4}}>{c.code}</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{c.name}</h3>
+                    <div style={{fontSize:11.5,color:V.sl,lineHeight:1.55}}>{c.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* THREE WAYS TO LEARN */}
+          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>How we deliver</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Three ways to <em style={{color:V.cr,fontStyle:'italic'}}>learn with us</em>
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                {[
+                  { h:'Online Live', p:'Live 1-on-1 lessons via Smartious LMS — anywhere in the world, on your schedule. Best for families seeking flexibility.' },
+                  { h:'In-Centre', p:'Lessons at our Parklands centre (Diamond Plaza) or Upper Hill location. Best for Nairobi families wanting structured environment.' },
+                  { h:'Home Tutoring', p:'Our qualified teachers come to your home — Nairobi, UAE areas, select Kenya cities. Best for families wanting in-person at home.' },
+                ].map(m => (
+                  <div key={m.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                    <h3 style={{fontSize:14,fontWeight:700,color:V.ink,marginBottom:10}}>{m.h}</h3>
+                    <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{m.p}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* WHERE WE SERVE — Aggregation hub */}
+          <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Where we serve</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Homeschool <em style={{color:V.cr,fontStyle:'italic'}}>anywhere</em> your family is
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14,marginBottom:24}}>
+                {[
+                  { h:'Nairobi (21 areas)', d:'Karen, Westlands, Lavington, Kileleshwa, Runda, Muthaiga, Parklands and more', id:'tuition-nairobi', cta:'View Nairobi areas →' },
+                  { h:'UAE (27 areas)', d:'Downtown Dubai, Business Bay, JBR, Abu Dhabi, Sharjah and more', id:'tuition-uae', cta:'View UAE areas →' },
+                  { h:'Kenya cities (6)', d:'Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu', id:'homeschooling-kenya', cta:'View Kenya cities →' },
+                  { h:'14 countries', d:'UK, USA, Canada, UAE, Qatar, Saudi Arabia, Australia, South Africa, Nigeria and more', id:'global', cta:'View all countries →' },
+                ].map(r => (
+                  <div key={r.h}
+                    onClick={() => P(r.id)}
+                    style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                    <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>{r.d}</p>
+                    <div style={{fontSize:12,fontWeight:700,color:V.cr}}>{r.cta}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* WHO WE HELP */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Who we help</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Built for families with <em style={{color:V.cr,fontStyle:'italic'}}>specific needs</em>
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
+                {[
+                  'Diaspora families maintaining curriculum continuity',
+                  'Families travelling, relocating or moving between countries',
+                  'Students recovering from school disruption (illness, gap year, school issues)',
+                  'High-performing students wanting accelerated pace',
+                  'Students with learning differences needing 1-on-1 attention',
+                  'Families dissatisfied with local school options',
+                  'Working from home parents wanting present-with-child schooling',
+                  'Sports athletes, performers, child actors needing flexible schedule',
+                ].map((item, i) => (
+                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px',display:'flex',gap:10,alignItems:'flex-start'}}>
+                    <div style={{width:24,height:24,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,flexShrink:0,marginTop:2}}>{i + 1}</div>
+                    <div style={{fontSize:12.5,color:V.sl,lineHeight:1.55}}>{item}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* FAQ */}
+          <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:820,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:28}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Homeschool questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
+                </h2>
+              </div>
+              {(() => {
+                const hsFaqs = [
+                  { q:'What curricula do you offer?', a:'Five core curricula: Cambridge IGCSE (and Edexcel), Cambridge A-Level, International Baccalaureate (IB), American Curriculum (with SAT/AP integration), and Kenya CBC. All are delivered by qualified teachers with curriculum-specific experience.' },
+                  { q:'Where can we homeschool with Smartious?', a:'Online globally (anywhere with internet), in-centre at our Nairobi Parklands or Upper Hill locations, or home tutoring in 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. We serve diaspora families in 14 countries primarily online.' },
+                  { q:'How much does homeschooling with Smartious cost?', a:'Pricing depends on curriculum, year level and delivery mode. We work with families across multiple budgets — premium full-day programmes at one end and focused subject-only support at the other. Book a free consultation for personalised pricing.' },
+                  { q:'Are your teachers qualified?', a:'Yes — all Smartious teachers hold relevant academic qualifications (Bachelor\'s or higher in their teaching subject area), with verified teaching experience. Many hold curriculum-specific certifications from Cambridge, IB or local boards.' },
+                  { q:'How do we track our child\'s progress?', a:'Through the Smartious LMS — parents see live attendance, assignment submissions, grades, teacher feedback and progress reports. Weekly summaries and monthly progress reports keep families fully informed.' },
+                  { q:'Can my child sit official examinations through Smartious?', a:'Yes — we coordinate examination registration with Cambridge International, Edexcel, IB and KNEC for Smartious students. Examinations are sat at registered examination centres in your country.' },
+                  { q:'Is online homeschooling effective?', a:'Yes — when delivered with structured live 1-on-1 sessions, regular progress tracking, and active parent engagement. Smartious students consistently achieve their academic targets. The 1-on-1 format is more focused than typical classroom learning.' },
+                  { q:'How do I start?', a:'Book a free assessment via the consultation button. We assess your child\'s academic level, discuss curriculum preferences and family schedule, then propose a personalised programme. No commitment until you\'re ready.' },
+                ]
+                return (
+                  <>
+                    {hsFaqs.map((f, i) => (
+                      <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                        <summary style={{cursor:'pointer',padding:'14px 18px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
+                        <div style={{padding:'0 18px 14px',fontSize:13.5,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:12}}>{f.a}</div>
+                      </details>
+                    ))}
+                    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                      '@context':'https://schema.org','@type':'FAQPage',
+                      'mainEntity': hsFaqs.map(f => ({'@type':'Question','name': f.q,'acceptedAnswer':{'@type':'Answer','text': f.a}})),
+                    })}}/>
+                  </>
+                )
+              })()}
+            </div>
+          </div></section>
+
+          {/* CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+                Start your child's <em style={{color:V.gold3,fontStyle:'italic'}}>Smartious</em> journey
+              </h2>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                  Book free assessment
+                </button>
+                <a href="https://wa.me/254745021212"
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /homeschool */}
+
+      {/* ══════════════════════════════════════════
+          TUITION GLOBAL HUB — /tuition
+          Comprehensive tuition landing page aggregating
+          all tuition delivery locations and modes.
+          Targets "tuition", "tuition nairobi", "tuition uae"
+      ══════════════════════════════════════════ */}
+      {page === 'tuition' && (
+        <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'EducationalOrganization',
+            'name':'Smartious Tuition Global',
+            'url':'https://smartioushomeschool.com/tuition',
+            'description':'Premium 1-on-1 tuition worldwide. Mathematics, Sciences, English, Languages and exam preparation. Online, in-centre, and home tutoring across Kenya, UAE and 14 countries.',
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',padding:'80px 0 60px',overflow:'hidden',
+          }}>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Tuition global</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5.2vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                Premium <em style={{color:V.gold3,fontStyle:'italic'}}>1-on-1 tuition</em> worldwide
+              </h1>
+              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:780}}>
+                Specialist subject tuition delivered by qualified teachers. Mathematics, Sciences, English, Foreign Languages, IGCSE, A-Level, IB and exam preparation. Online live, in-centre at our Nairobi locations, or home tutoring across 21 Nairobi areas and 27 UAE areas.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                  Book free trial session
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20to%20discuss%20tuition."
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* SUBJECTS WE TUTOR */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Subjects we tutor</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Specialist tuition across <em style={{color:V.cr,fontStyle:'italic'}}>every major subject</em>
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:12}}>
+                {[
+                  'Mathematics', 'Physics', 'Chemistry', 'Biology',
+                  'English Language', 'English Literature', 'Computer Science', 'Business Studies',
+                  'Economics', 'Geography', 'History', 'Accounting',
+                  'French', 'Spanish', 'Mandarin', 'Arabic',
+                ].map(s => (
+                  <div key={s} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:8,padding:'10px 14px',fontSize:12.5,color:V.ink,fontWeight:600,textAlign:'center'}}>
+                    {s}
+                  </div>
+                ))}
+              </div>
+              <div style={{marginTop:18,textAlign:'center',fontSize:13,color:V.sl}}>
+                Plus all curricula-specific subjects across IGCSE, A-Level, IB, American and CBC. <span style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={()=>P('consult')}>Don't see your subject? Ask us.</span>
+              </div>
+            </div>
+          </div></section>
+
+          {/* DELIVERY MODES */}
+          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>How we deliver</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Three ways to <em style={{color:V.cr,fontStyle:'italic'}}>receive tuition</em>
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                {[
+                  { h:'Online Live', p:'Live 1-on-1 video sessions via Smartious LMS. Anywhere with internet. Most flexible for working parents and diaspora families.', best:'Best for international families and busy schedules' },
+                  { h:'In-Centre', p:'At our Nairobi Parklands (Diamond Plaza) or Upper Hill centres. Quiet study environment, peer cohort, structured setting.', best:'Best for focused students in Nairobi' },
+                  { h:'Home Tutoring', p:'Qualified teachers visit your home — 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. Personal attention in familiar setting.', best:'Best for younger learners and families seeking in-person' },
+                ].map(m => (
+                  <div key={m.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:10,fontWeight:400}}>{m.h}</h3>
+                    <p style={{fontSize:13,color:V.sl,lineHeight:1.65,marginBottom:12}}>{m.p}</p>
+                    <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.04em'}}>{m.best}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* WHERE WE TUTOR — Aggregation hub */}
+          <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Where we tutor</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Tuition <em style={{color:V.cr,fontStyle:'italic'}}>anywhere</em> your family is
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
+                {[
+                  { h:'Nairobi (21 areas)', d:'Karen, Westlands, Lavington, Kileleshwa, Runda, Muthaiga, Parklands and more', id:'tuition-nairobi', cta:'View Nairobi tuition →' },
+                  { h:'UAE (27 areas)', d:'Downtown Dubai, Business Bay, JBR, Abu Dhabi, Sharjah, Al Ain and more', id:'tuition-uae', cta:'View UAE tuition →' },
+                  { h:'Kenya cities (6)', d:'Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu', id:'homeschooling-kenya', cta:'View Kenya cities →' },
+                  { h:'14 countries', d:'UK, USA, Canada, UAE, Qatar, Saudi Arabia, Australia, Nigeria, South Africa and more', id:'global', cta:'View all countries →' },
+                ].map(r => (
+                  <div key={r.h}
+                    onClick={() => P(r.id)}
+                    style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                    <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>{r.d}</p>
+                    <div style={{fontSize:12,fontWeight:700,color:V.cr}}>{r.cta}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* FAQ */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:820,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:28}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Tuition questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
+                </h2>
+              </div>
+              {(() => {
+                const tFaqs = [
+                  { q:'What subjects do you tutor?', a:'All major academic subjects across IGCSE, A-Level, IB, American and CBC curricula. Core subjects include Mathematics, Physics, Chemistry, Biology, English (Language and Literature), Computer Science, Business Studies, Economics, Accounting, Geography and History. Foreign languages: French, Spanish, German, Mandarin, Arabic, Kiswahili. Specialised subjects (Music, Art, Design) available on request.' },
+                  { q:'How much does Smartious tuition cost?', a:'Tuition rates vary by curriculum level, subject specialism, and delivery mode (online, in-centre, home tutoring). We have flexible packages — single-subject focused support through to full-curriculum tutoring. Book a free consultation for personalised pricing.' },
+                  { q:'Can I have a trial session before committing?', a:'Yes — we offer free trial sessions so you can experience the teacher and teaching style before signing up for a full programme. This is the easiest way to assess fit.' },
+                  { q:'How are tutors selected?', a:'All Smartious tutors are screened for qualifications, subject expertise and teaching experience. Many hold curriculum-specific certifications (Cambridge, IB) or are practicing professionals (engineers tutoring Mathematics, scientists tutoring sciences, lawyers tutoring Law). We match tutors to students based on subject, curriculum, level and personality.' },
+                  { q:'Can I change tutors if needed?', a:'Yes — fit matters. If a tutor isn\'t the right match, we can reassign at no penalty. We aim to find the right teacher for your child, not lock you into one assignment.' },
+                  { q:'How are sessions scheduled?', a:'Flexibly — based on your schedule and the tutor\'s availability. We can do early mornings, after-school, evenings, weekends. Online tuition is most flexible; in-centre uses our centre schedule; home tutoring is mutually agreed with the tutor.' },
+                  { q:'Do you provide progress reports?', a:'Yes — through the Smartious LMS. Parents see attendance, session notes, assignments, grades and progress trends. Monthly summary reports provide a high-level view. Regular parent-tutor check-ins are available on request.' },
+                  { q:'Can you help with exam preparation?', a:'Yes — exam preparation is one of our specialisms. We provide focused preparation for KCSE, IGCSE, A-Level, IB and university entrance examinations (SAT, GRE, GMAT, IELTS, TOEFL — see Test Prep page).' },
+                ]
+                return (
+                  <>
+                    {tFaqs.map((f, i) => (
+                      <details key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                        <summary style={{cursor:'pointer',padding:'14px 18px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
+                        <div style={{padding:'0 18px 14px',fontSize:13.5,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:12}}>{f.a}</div>
+                      </details>
+                    ))}
+                    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                      '@context':'https://schema.org','@type':'FAQPage',
+                      'mainEntity': tFaqs.map(f => ({'@type':'Question','name': f.q,'acceptedAnswer':{'@type':'Answer','text': f.a}})),
+                    })}}/>
+                  </>
+                )
+              })()}
+            </div>
+          </div></section>
+
+          {/* CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+                Find the right <em style={{color:V.gold3,fontStyle:'italic'}}>tutor</em> for your child
+              </h2>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                  Book free trial session
+                </button>
+                <a href="https://wa.me/254745021212"
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /tuition */}
+
+      {/* ══════════════════════════════════════════
+          IUFP — /iufp
+          International University Foundation Programme
+      ══════════════════════════════════════════ */}
+      {page === 'iufp' && (
+        <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'Course',
+            'name': 'International University Foundation Programme (IUFP)',
+            'description': 'One-year foundation programme bridging Kenyan and African secondary school graduates to top international universities. Academic preparation in Business, Science, Engineering, and Humanities streams.',
+            'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',padding:'72px 0 56px',
+          }}>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>International University Foundation Programme</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <em style={{color:V.gold3,fontStyle:'italic'}}>IUFP</em> — your bridge to international universities
+              </h1>
+              <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
+                A one-year academic foundation programme designed to prepare Kenyan and African secondary school graduates for direct entry to top universities in the UK, Australia, Canada and the US. IUFP bridges the gap between KCSE/national qualifications and international university entry requirements.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                  Book free consultation
+                </button>
+                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20to%20discuss%20IUFP."
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* WHAT IS IUFP */}
+          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:860,margin:'0 auto'}}>
+              <div className="eyebrow">About IUFP</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+                What is the International University Foundation Programme?
+              </h2>
+              <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,marginBottom:14}}>
+                The International University Foundation Programme (IUFP) is a structured one-year academic pathway that bridges the gap between Kenyan/African secondary school qualifications (KCSE, WASSCE) and direct entry requirements for international universities. It builds the academic skills, subject knowledge and English proficiency required for degree-level study abroad.
+              </p>
+              <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8}}>
+                IUFP is particularly valuable for students whose KCSE grades don't quite meet direct international university entry requirements, students switching from a non-standard curriculum to UK/US/Australian university systems, or students wanting an additional year of academic maturity before starting their degree.
+              </p>
+            </div>
+          </div></section>
+
+          {/* STREAMS */}
+          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Programme streams</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Choose your <em style={{color:V.cr,fontStyle:'italic'}}>foundation stream</em>
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14}}>
+                {[
+                  { h:'Business & Economics', subjects:'Mathematics, Economics, Business Studies, Accounting, Academic English', leads:'Business, Finance, Economics, Accounting, Management degrees' },
+                  { h:'Science & Engineering', subjects:'Advanced Mathematics, Physics, Chemistry, Computer Science, Academic English', leads:'Engineering, Computer Science, Sciences, Architecture degrees' },
+                  { h:'Health Sciences', subjects:'Biology, Chemistry, Mathematics, Physics, Academic English', leads:'Pre-med, Pharmacy, Biomedical Sciences, Nursing degrees' },
+                  { h:'Humanities & Social Sciences', subjects:'English, History, Geography, Psychology, Academic Writing', leads:'Law, International Relations, Psychology, Liberal Arts degrees' },
+                ].map(s => (
+                  <div key={s.h} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                    <h3 style={{fontSize:14,fontWeight:700,color:V.ink,marginBottom:10}}>{s.h}</h3>
+                    <div style={{fontSize:11.5,color:V.sl2,marginBottom:10}}><strong style={{color:V.ink}}>Subjects:</strong> {s.subjects}</div>
+                    <div style={{fontSize:11.5,color:V.sl,lineHeight:1.6}}><strong style={{color:V.cr}}>Leads to:</strong> {s.leads}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* WHO IT'S FOR */}
+          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:28}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Who IUFP is for</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Is IUFP <em style={{color:V.cr,fontStyle:'italic'}}>right for you?</em>
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:12}}>
+                {[
+                  'KCSE C+ to B grade students seeking pathway to top international universities',
+                  'Students whose grades don\'t quite meet direct UK/Australia/Canada entry',
+                  'Gap year students wanting structured academic preparation before university',
+                  'Students switching from CBC/8-4-4 to international university systems',
+                  'Students needing IELTS/TOEFL preparation alongside academic upgrading',
+                  'Younger students (16-17) wanting an additional year of maturity before degree start',
+                ].map((item, i) => (
+                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px',display:'flex',gap:10,alignItems:'flex-start'}}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:3}}><path d="M5 12l5 5L20 7"/></svg>
+                    <div style={{fontSize:13,color:V.sl,lineHeight:1.55}}>{item}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* FAQ */}
+          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:820,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:28}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  IUFP questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
+                </h2>
+              </div>
+              {(() => {
+                const iFaqs = [
+                  { q:'What is IUFP exactly?', a:'IUFP (International University Foundation Programme) is a one-year academic preparation programme designed to bridge the gap between secondary school qualifications and international university entry requirements. Students study a stream-specific subject mix plus Academic English and study skills.' },
+                  { q:'How is IUFP different from A-Level or IB?', a:'A-Level and IB are full 2-year secondary school qualifications. IUFP is a focused 1-year university-preparation programme — typically taken after KCSE or equivalent national qualification, before starting university. IUFP is faster and university-targeted; A-Level/IB are broader secondary qualifications.' },
+                  { q:'Which universities accept IUFP?', a:'IUFP completion typically supports applications to UK universities (mid-tier to upper-mid-tier), Australian universities, Canadian universities and some US universities. Top universities (Russell Group, Ivy League) typically still prefer A-Level or IB. IUFP\'s strength is broadening access for students whose secondary grades don\'t meet direct entry.' },
+                  { q:'What\'s the IUFP duration and schedule?', a:'IUFP is typically 9-12 months of intensive academic study. Full-time, structured timetable similar to university. Delivered online live or in-centre depending on student location and preference.' },
+                  { q:'How much does IUFP cost?', a:'Programme costs vary based on stream, delivery mode and intensity. Book a free consultation for personalised pricing and timeline planning. Smartious offers competitive rates compared to in-country foundation programmes at international universities.' },
+                  { q:'Can I combine IUFP with IELTS/TOEFL preparation?', a:'Yes — Academic English is built into all IUFP streams. Students typically reach IELTS 6.5+ level by programme end. Additional dedicated IELTS preparation is available via our Test Prep programme if needed.' },
+                  { q:'What happens after IUFP?', a:'After successful IUFP completion, students apply directly to international universities for degree entry. Smartious Study Abroad team provides full university application support — free of charge — including university selection, application essays, scholarship applications and visa guidance.' },
+                  { q:'Is IUFP suitable for medicine pathway?', a:'For top-tier medicine programmes (UK, Ireland, Australia), A-Level or IB Diploma is typically preferred. IUFP can support medicine pathway for mid-tier programmes in countries like Hungary, Bulgaria, or some Caribbean schools. We advise based on your specific medicine destination preferences.' },
+                ]
+                return (
+                  <>
+                    {iFaqs.map((f, i) => (
+                      <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                        <summary style={{cursor:'pointer',padding:'14px 18px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
+                        <div style={{padding:'0 18px 14px',fontSize:13.5,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:12}}>{f.a}</div>
+                      </details>
+                    ))}
+                    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                      '@context':'https://schema.org','@type':'FAQPage',
+                      'mainEntity': iFaqs.map(f => ({'@type':'Question','name': f.q,'acceptedAnswer':{'@type':'Answer','text': f.a}})),
+                    })}}/>
+                  </>
+                )
+              })()}
+            </div>
+          </div></section>
+
+          {/* CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+                Start your <em style={{color:V.gold3,fontStyle:'italic'}}>IUFP</em> pathway
+              </h2>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                  Book free consultation
+                </button>
+                <a href="https://wa.me/254745021212"
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /iufp */}
+
+      {/* ══════════════════════════════════════════
+          PRE-UNIVERSITY — /pre-university
+      ══════════════════════════════════════════ */}
+      {page === 'pre-university' && (
+        <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'Course',
+            'name': 'Pre-University Academic Preparation',
+            'description': 'Intensive gap-year and pre-university academic preparation programme. A-Level intensive, IB Diploma preparation, AP coursework, and university entrance examination preparation.',
+            'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',padding:'72px 0 56px',
+          }}>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Pre-University programme</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                Bridge the gap from <em style={{color:V.gold3,fontStyle:'italic'}}>school to university</em>
+              </h1>
+              <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
+                A structured gap-year academic programme for students who have completed secondary school and want focused preparation before starting university. Subject-specific intensive coursework, university entrance examination preparation and academic skills development.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                  Book free consultation
+                </button>
+                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20to%20discuss%20Pre-University."
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* WHAT IS PRE-U */}
+          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:860,margin:'0 auto'}}>
+              <div className="eyebrow">About Pre-University</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+                What is the Pre-University Programme?
+              </h2>
+              <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,marginBottom:14}}>
+                Pre-University is a structured gap-year academic programme designed for students who have completed secondary school (KCSE, IGCSE, IB Diploma, A-Level) and want a focused academic preparation year before starting their university degree. Unlike IUFP (which bridges to university entry), Pre-University assumes you already meet university entry requirements — and focuses on strengthening foundational knowledge in your chosen degree subject.
+              </p>
+              <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8}}>
+                Pre-University combines subject-specific intensive coursework with academic skills development (research methods, academic writing, presentation skills, exam techniques) so students arrive at university confident, prepared and ahead of their peers.
+              </p>
+            </div>
+          </div></section>
+
+          {/* PATHWAYS */}
+          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Pre-University pathways</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Choose your <em style={{color:V.cr,fontStyle:'italic'}}>pre-university path</em>
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14}}>
+                {[
+                  { h:'A-Level Intensive', p:'Accelerated 1-year Cambridge or Edexcel A-Level programme. For students wanting recognised pre-university qualifications to strengthen university applications.' },
+                  { h:'IB Diploma Preparation', p:'Preparation for IB Diploma examinations or strengthening of IB skills before university start. CAS, Extended Essay and TOK support included.' },
+                  { h:'AP Coursework', p:'Advanced Placement subject preparation for US-bound students. AP exams strengthen university applications and earn college credit. 3-5 AP subjects typical.' },
+                  { h:'Entrance Exam Preparation', p:'Focused preparation for SAT, ACT, GRE, GMAT, IELTS, TOEFL alongside subject knowledge consolidation. Combines with Smartious Test Prep programme.' },
+                ].map(s => (
+                  <div key={s.h} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                    <h3 style={{fontSize:14,fontWeight:700,color:V.ink,marginBottom:10}}>{s.h}</h3>
+                    <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{s.p}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* WHO IT'S FOR */}
+          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:28}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Who Pre-University is for</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Is a gap year with <em style={{color:V.cr,fontStyle:'italic'}}>Smartious</em> right for you?
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:12}}>
+                {[
+                  'Students taking a gap year before university and wanting structured academic preparation',
+                  'Students wanting to strengthen specific subjects before degree-level study',
+                  'Students switching from KCSE/8-4-4 to UK/US/Australian university systems',
+                  'High-performing students wanting acceleration through AP or A-Level',
+                  'Students who deferred university entry and want to stay academically sharp',
+                  'Students combining gap-year activities (work, travel, volunteering) with structured academic study',
+                ].map((item, i) => (
+                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px',display:'flex',gap:10,alignItems:'flex-start'}}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:3}}><path d="M5 12l5 5L20 7"/></svg>
+                    <div style={{fontSize:13,color:V.sl,lineHeight:1.55}}>{item}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* FAQ */}
+          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:820,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:28}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Pre-University questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
+                </h2>
+              </div>
+              {(() => {
+                const puFaqs = [
+                  { q:'How is Pre-University different from IUFP?', a:'IUFP is for students whose secondary qualifications don\'t directly meet international university entry — it bridges that gap to gain entry. Pre-University assumes you already meet entry requirements and focuses on strengthening your knowledge and skills for degree-level success. IUFP gets you in; Pre-University gets you ready.' },
+                  { q:'What\'s the duration?', a:'Typically 9-12 months of structured academic study. Flexible delivery — full-time intensive, part-time alongside other gap-year activities, or specific subject blocks. We tailor based on student goals and university start date.' },
+                  { q:'Which pathway should I choose?', a:'Depends on your university destination and degree subject. UK-bound? A-Level Intensive strengthens UCAS applications. US-bound? AP Coursework + SAT preparation. IB students? IB Preparation. Multiple destinations? Entrance Exam Preparation with broader subject coverage. We help you decide based on your goals.' },
+                  { q:'How much does Pre-University cost?', a:'Pricing varies by pathway, intensity and delivery mode. Book a free consultation for personalised pricing and timeline planning.' },
+                  { q:'Will my A-Level/AP/IB results count?', a:'Yes — A-Level and IB qualifications earned through Smartious Pre-University are officially recognised through registered examination centres (Cambridge International, Edexcel, IB). AP exams are externally sat via College Board. These results strengthen your university application.' },
+                  { q:'Can I take this alongside other gap year activities?', a:'Yes — Pre-University is designed to be flexible enough to combine with work, internships, travel or volunteering. Many students do mornings on academic study, afternoons on other gap year commitments. We tailor schedule to your overall plan.' },
+                  { q:'Do you support university applications during Pre-University?', a:'Yes — students enrolled in Smartious Pre-University receive integrated Smartious Study Abroad support: university selection, UCAS/Common App support, personal statement coaching, scholarship applications. All free of charge.' },
+                ]
+                return (
+                  <>
+                    {puFaqs.map((f, i) => (
+                      <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                        <summary style={{cursor:'pointer',padding:'14px 18px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
+                        <div style={{padding:'0 18px 14px',fontSize:13.5,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:12}}>{f.a}</div>
+                      </details>
+                    ))}
+                    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                      '@context':'https://schema.org','@type':'FAQPage',
+                      'mainEntity': puFaqs.map(f => ({'@type':'Question','name': f.q,'acceptedAnswer':{'@type':'Answer','text': f.a}})),
+                    })}}/>
+                  </>
+                )
+              })()}
+            </div>
+          </div></section>
+
+          {/* CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+                Build your <em style={{color:V.gold3,fontStyle:'italic'}}>pre-university</em> pathway
+              </h2>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                  Book free consultation
+                </button>
+                <a href="https://wa.me/254745021212"
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /pre-university */}
+
+      {/* ══════════════════════════════════════════
+          STUDY ABROAD HUB — /study-abroad
+          Lists all 10 destinations + how it works (FREE) + scholarships overview.
+      ══════════════════════════════════════════ */}
+      {page === 'study-abroad' && (
+        <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'EducationalOrganization',
+            '@id':'https://smartioushomeschool.com/study-abroad#org',
+            'name':'Smartious Study Abroad',
+            'url':'https://smartioushomeschool.com/study-abroad',
+            'description':'Free university application support for Kenyan and African students. UK, USA, Canada, Australia, Germany, Netherlands, Ireland, China, Turkey, UAE.',
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',padding:'80px 0 60px',overflow:'hidden',
+          }}>
+            <div className="wrap" style={{position:'relative',zIndex:2}}>
+              <div style={{maxWidth:920,margin:'0 auto'}}>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Study abroad with Smartious</div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                  Your free path to <em style={{color:V.gold3,fontStyle:'italic'}}>top universities</em> worldwide
+                </h1>
+                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:780}}>
+                  From application to acceptance — university selection, personal statement coaching, scholarship hunting, and visa support. Delivered by experienced counsellors who know what international universities look for in Kenyan and African applicants.
+                </p>
+                {/* FREE banner */}
+                <div style={{
+                  display:'inline-flex',alignItems:'center',gap:10,
+                  background:'rgba(201,151,58,.18)',
+                  border:`1px solid rgba(201,151,58,.4)`,
+                  borderRadius:99,padding:'8px 18px',marginBottom:24,
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                  <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>100% free for students · No consultation fees · No application processing fees</div>
+                </div>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book free consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to discuss study abroad options.')}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp us
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* HOW IT WORKS — The free programme */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:40}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>How it works</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Five steps. <em style={{color:V.cr,fontStyle:'italic'}}>Zero cost</em> to you.
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:14}}>
+                {[
+                  { n:'01', h:'Free consultation', p:'A 1-on-1 conversation to understand your academic profile, career goals, family situation and target destinations.' },
+                  { n:'02', h:'University shortlist', p:'We build a personalised list of 5-12 universities matching your profile, budget and ambitions across reach, match and safety options.' },
+                  { n:'03', h:'Application support', p:'Personal statement coaching, application form completion, recommendation letter strategy, document handling — all of it, free.' },
+                  { n:'04', h:'Scholarship hunt', p:'We identify and prepare scholarship applications (Chevening, Mastercard Foundation, CSC, Türkiye Bursları, university-specific) — all coached, free.' },
+                  { n:'05', h:'Visa & departure', p:'Visa documentation, financial proof, interview preparation, pre-departure briefing on accommodation, banking, weather, culture.' },
+                ].map(s => (
+                  <div key={s.n} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 20px'}}>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.gold3,lineHeight:1,marginBottom:8}}>{s.n}</div>
+                    <h3 style={{fontSize:14,fontWeight:700,color:V.ink,marginBottom:8}}>{s.h}</h3>
+                    <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,margin:0}}>{s.p}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* DESTINATIONS GRID */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1200,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>10 destinations</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Where will <em style={{color:V.cr,fontStyle:'italic'}}>your studies</em> take you?
+                </h2>
+                <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.6}}>
+                  Pick your destination to see top universities, tuition ranges, scholarships and what we'll do to get you there.
+                </p>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
+                {STUDY_ABROAD.map(dest => (
+                  <div key={dest.slug}
+                    onClick={() => { setCurrentStudyAbroad(dest.slug); nav('/study-abroad/' + dest.slug); window.scrollTo(0,0) }}
+                    style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',cursor:'pointer',transition:'all .2s'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.08)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+                      <div style={{fontSize:'2rem',lineHeight:1}}>{dest.flag}</div>
+                      <div style={{fontSize:10.5,fontWeight:700,color:V.gold3,background:'rgba(201,151,58,.12)',padding:'3px 10px',borderRadius:99,letterSpacing:'.06em',textTransform:'uppercase'}}>FREE</div>
+                    </div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:V.ink,marginBottom:6,lineHeight:1.1,fontWeight:400}}>Study in {dest.name}</h3>
+                    <div style={{fontSize:11.5,color:V.sl2,marginBottom:14,letterSpacing:'.02em'}}>{dest.fullName}</div>
+                    <div style={{fontSize:12,color:V.sl,lineHeight:1.6,marginBottom:14}}>
+                      <div style={{marginBottom:4}}><strong style={{color:V.ink}}>{dest.quickFacts.universities}</strong></div>
+                      <div style={{marginBottom:4}}>Tuition: {dest.quickFacts.tuition.split('·')[0].trim()}</div>
+                      <div>Post-study: {dest.quickFacts.postStudy.split('·')[0].trim()}</div>
+                    </div>
+                    <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
+                      Explore {dest.name} →
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* SCHOLARSHIPS OVERVIEW */}
+          <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Major scholarships we support</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Fully funded pathways for <em style={{color:V.cr,fontStyle:'italic'}}>Kenyan and African</em> students
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:12}}>
+                {[
+                  { n:'Chevening Scholarships', c:'UK', who:'Postgraduate', v:'Fully funded — tuition, stipend, flights' },
+                  { n:'Mastercard Foundation Scholars', c:'Canada, USA, multiple', who:'Undergrad & postgrad', v:'Fully funded comprehensive support' },
+                  { n:'Türkiye Bursları', c:'Turkey', who:'All levels', v:'Tuition + stipend + accommodation + flights' },
+                  { n:'Chinese Government Scholarship (CSC)', c:'China', who:'All levels', v:'Tuition + stipend + accommodation' },
+                  { n:'DAAD Scholarships', c:'Germany', who:'Postgraduate & research', v:'€850-1,200/month + tuition + insurance' },
+                  { n:'Holland Scholarship', c:'Netherlands', who:'Undergraduate', v:'€5,000 first year' },
+                  { n:'Australia Awards', c:'Australia', who:'Undergrad & postgrad', v:'Fully funded — tuition + flights + stipend' },
+                  { n:'Need-Based Aid (Ivy League)', c:'USA', who:'Undergraduate', v:'Up to 100% need at Harvard, Yale, Princeton, MIT, Stanford' },
+                ].map(s => (
+                  <div key={s.n} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6,gap:8}}>
+                      <h3 style={{fontSize:13.5,fontWeight:700,color:V.ink,lineHeight:1.3,margin:0,flex:1}}>{s.n}</h3>
+                      <div style={{fontSize:10,fontWeight:700,color:V.cr,letterSpacing:'.06em',whiteSpace:'nowrap'}}>{s.c}</div>
+                    </div>
+                    <div style={{fontSize:11.5,color:V.sl2,marginBottom:4}}>{s.who}</div>
+                    <div style={{fontSize:12,color:V.sl,lineHeight:1.5}}>{s.v}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{marginTop:24,padding:'16px 20px',background:'rgba(8,12,20,.04)',borderRadius:10,fontSize:13,color:V.sl,lineHeight:1.6,textAlign:'center'}}>
+                Smartious provides hands-on scholarship application support — motivation letters, study plans, recommendation strategy and timing. This is one of the highest-value parts of what we do.
+              </div>
+            </div>
+          </div></section>
+
+          {/* WHY SMARTIOUS */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Why Smartious</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  The team that <em style={{color:V.cr,fontStyle:'italic'}}>actually answers</em>
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14}}>
+                {[
+                  { h:'Truly free', p:'No consultation fees, no application processing fees, no document handling charges. From first call to airport pickup briefing — zero cost.' },
+                  { h:'Kenyan-context expertise', p:'We understand KCSE grading, Nairobi school transcripts, family financial realities, common visa interview misconceptions. We translate Kenyan profiles into what universities want to see.' },
+                  { h:'End-to-end support', p:'Most agencies hand you off after admission. We stay with you from first consultation through visa interview through pre-departure briefing.' },
+                  { h:'Realistic shortlists', p:'We won\'t encourage applications to universities where you\'ll waste application time. Reach/match/safety strategy is honest and tailored.' },
+                  { h:'Scholarship-first thinking', p:'Many study-abroad pathways become affordable through scholarships. We hunt them proactively and coach applications carefully.' },
+                  { h:'Direct response on WhatsApp', p:'Real humans on WhatsApp during Kenya business hours. Most questions answered within hours, not days.' },
+                ].map(b => (
+                  <div key={b.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                    <h3 style={{fontSize:14,fontWeight:700,color:V.ink,marginBottom:8}}>{b.h}</h3>
+                    <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{b.p}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* FAQ */}
+          <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:820,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:28}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Common questions</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Study abroad questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
+                </h2>
+              </div>
+              {(() => {
+                const hubFaqs = [
+                  { q:'Is Smartious Study Abroad really free?', a:'Yes — completely free for students. There are no consultation fees, no application processing fees, no document handling fees and no hidden charges at any stage. From your first consultation through to your destination country arrival, Smartious provides full study abroad support at zero cost to you or your family.' },
+                  { q:'Which destinations do you support?', a:'Currently 10 destinations: United Kingdom, USA, Canada, Australia, Germany, Netherlands, Ireland, China, Turkey and UAE. These cover the highest-demand destinations for Kenyan and African students seeking quality higher education with clear post-study pathways. We can also advise on additional destinations on a case-by-case basis (Hungary, India, South Africa, Malaysia, others).' },
+                  { q:'How do I start?', a:'Book a free consultation via the button on this page, WhatsApp us on +254 745 021 212, or email hellosmartious@gmail.com. Initial consultation is a 30-60 minute conversation to understand your goals, profile and constraints, after which we propose a personalised plan.' },
+                  { q:'How long does the study abroad process take?', a:'Typical timeline is 12-18 months from first consultation to destination arrival. For students with English tests done and clear university preferences, 6-9 months. Compressed timelines work for some destinations and intake windows. Specific timelines depend on destination, programme level and scholarship strategy.' },
+                  { q:'What costs are involved?', a:'Smartious services are free. Costs paid directly by students/families: university application fees (varies $50-150 per university), English tests (IELTS ~$220, TOEFL ~$220, SAT ~$93), visa fees (varies), tuition and living costs after admission. Scholarships can cover much or all of tuition and living costs.' },
+                  { q:'What if I don\'t have strong KCSE grades?', a:'Different destinations have different entry thresholds, and many pathways exist for students with KCSE B (Plain) or lower — foundation years, pathway programmes, applied universities, community college transfer routes. We work with realistic profiles, not just the top tier. Honest assessment in the first consultation is the starting point.' },
+                  { q:'Can my family come with me?', a:'Depends on destination and visa type. Generally: Canada and Australia offer the most family-friendly student visa rules (spouse work rights, children in public schools). UK allows family for postgraduate students only. USA F-1 visa allows family but spouses don\'t get work rights. We advise on family accommodation pathway for each destination.' },
+                  { q:'Do you help with English test preparation?', a:'Yes — Smartious Test Prep is our dedicated English and admissions test preparation programme. IELTS, TOEFL, PTE at KSh 29,000 for 20 sessions. GRE, GMAT, SAT at KSh 59,000 for 40 sessions. This is a paid service separate from the free study abroad consulting.' },
+                  { q:'When should I start preparing for study abroad?', a:'Ideally 18-24 months before intended start date. This timeline allows for: English test preparation, university research and shortlisting, application preparation and submission, scholarship applications (often have early deadlines), visa application and pre-departure preparation. Starting earlier than 24 months can be premature; starting later than 12 months limits options.' },
+                  { q:'How do you choose universities for me?', a:'We build personalised shortlists based on: your academic profile (KCSE grades, subject grades, achievements), career goals, programme preferences, geographic preferences, family budget and scholarship needs, post-study residence ambitions. Most students end up with 5-12 university applications strategically balanced across reach/match/safety options.' },
+                ]
+                return (
+                  <>
+                    {hubFaqs.map((f, i) => (
+                      <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                        <summary style={{cursor:'pointer',padding:'14px 18px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
+                        <div style={{padding:'0 18px 14px',fontSize:13.5,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:12}}>{f.a}</div>
+                      </details>
+                    ))}
+                    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                      '@context':'https://schema.org','@type':'FAQPage',
+                      'mainEntity': hubFaqs.map(f => ({'@type':'Question','name': f.q,'acceptedAnswer':{'@type':'Answer','text': f.a}})),
+                    })}}/>
+                  </>
+                )
+              })()}
+            </div>
+          </div></section>
+
+          {/* CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:740,margin:'0 auto',textAlign:'center'}}>
+              <div className="eyebrow" style={{color:V.gold3,justifyContent:'center'}}>Ready to start</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                Your <em style={{color:V.gold3,fontStyle:'italic'}}>free</em> study abroad journey starts with one conversation
+              </h2>
+              <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:24,maxWidth:580,margin:'0 auto 24px'}}>
+                Book a free consultation and we'll map out your most realistic path to your top university destinations.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                  Book free consultation
+                </button>
+                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20to%20discuss%20study%20abroad."
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /study-abroad */}
+
+      {/* ══════════════════════════════════════════
+          STUDY ABROAD DETAIL — /study-abroad/{slug}
+          Individual destination page, data-driven.
+      ══════════════════════════════════════════ */}
+      {page === 'study-abroad-detail' && currentStudyAbroad && (() => {
+        const dest = STUDY_ABROAD.find(d => d.slug === currentStudyAbroad)
+        if (!dest) return null
+        return (
+          <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'Service',
+              'name': 'Study in ' + dest.fullName + ' — Free Application Support',
+              'description': dest.seoDesc,
+              'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+              'areaServed': dest.fullName,
+              'offers':{'@type':'Offer','price':'0','priceCurrency':'KES','description':'Free university application support'},
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Study Abroad','item':'https://smartioushomeschool.com/study-abroad'},
+                {'@type':'ListItem','position':3,'name': 'Study in ' + dest.name,'item':'https://smartioushomeschool.com/study-abroad/' + dest.slug},
+              ],
+            })}}/>
+
+            {/* HERO */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff',padding:'72px 0 56px',overflow:'hidden',
+            }}>
+              <div className="wrap" style={{position:'relative',zIndex:2}}>
+                <a href="/study-abroad" onClick={(e)=>{e.preventDefault(); P('study-abroad')}}
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:18,display:'inline-flex',alignItems:'center',gap:6}}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  All destinations
+                </a>
+                <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:14}}>
+                  <div style={{fontSize:'3.2rem',lineHeight:1}}>{dest.flag}</div>
+                  <div className="eyebrow" style={{color:V.gold3,margin:0}}>Study in {dest.fullName}</div>
+                </div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5.4vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                  Study in <em style={{color:V.gold3,fontStyle:'italic'}}>{dest.name}</em>
+                </h1>
+                <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:780}}>{dest.heroTagline}</p>
+                {/* FREE banner */}
+                <div style={{
+                  display:'inline-flex',alignItems:'center',gap:10,
+                  background:'rgba(201,151,58,.18)',border:`1px solid rgba(201,151,58,.4)`,
+                  borderRadius:99,padding:'8px 18px',marginBottom:24,
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                  <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>Smartious Study in {dest.name} — 100% free for students</div>
+                </div>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book free consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to discuss study in ' + dest.name + '.')}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp us
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            {/* QUICK FACTS STRIP */}
+            <section className="sec" style={{background:V.bone,paddingTop:32,paddingBottom:32,borderBottom:`1px solid ${V.bone3}`}}>
+              <div className="wrap">
+                <div style={{maxWidth:1100,margin:'0 auto',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:14}}>
+                  {Object.entries(dest.quickFacts).map(([k, v]) => (
+                    <div key={k} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'12px 16px'}}>
+                      <div style={{fontSize:10,fontWeight:700,color:V.gold3,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:5}}>{k.replace(/([A-Z])/g,' $1').replace(/^./, s=>s.toUpperCase())}</div>
+                      <div style={{fontSize:12.5,color:V.ink,lineHeight:1.5,fontWeight:600}}>{v}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* INTRO */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:32}}><div className="wrap">
+              <div style={{maxWidth:860,margin:'0 auto'}}>
+                <div className="eyebrow">Overview</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+                  Why students choose {dest.name}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8}}>{dest.intro}</p>
+              </div>
+            </div></section>
+
+            {/* WHY STUDY */}
+            <section className="sec" style={{background:V.white,paddingTop:32,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                  {dest.whyStudy.map((w, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
+                      <div style={{display:'flex',alignItems:'baseline',gap:10,marginBottom:8}}>
+                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.gold3,lineHeight:1}}>{String(i + 1).padStart(2, '0')}</div>
+                        <h3 style={{fontSize:14,fontWeight:700,color:V.ink,lineHeight:1.3,margin:0}}>{w.h}</h3>
+                      </div>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{w.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* TOP UNIVERSITIES */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:32}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Top universities</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                    Universities we help <em style={{color:V.cr,fontStyle:'italic'}}>Kenyan students</em> apply to
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:12}}>
+                  {dest.topUniversities.map((u, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px'}}>
+                      <h3 style={{fontSize:13.5,fontWeight:700,color:V.ink,marginBottom:4,lineHeight:1.3}}>{u.name}</h3>
+                      <div style={{fontSize:11,color:V.sl2,marginBottom:6,display:'flex',gap:8,flexWrap:'wrap'}}>
+                        <span>{u.city}</span><span>·</span><span style={{color:V.gold3,fontWeight:600}}>{u.rank}</span>
+                      </div>
+                      <div style={{fontSize:11.5,color:V.sl,lineHeight:1.5}}>{u.specialty}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{marginTop:24,padding:'14px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,fontSize:13,color:V.sl,lineHeight:1.6,textAlign:'center'}}>
+                  This is a representative selection. We help students apply to additional universities based on individual profile, programme preferences and scholarship targeting.
+                </div>
+              </div>
+            </div></section>
+
+            {/* REQUIREMENTS */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:32}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>What you'll need</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                    Requirements for <em style={{color:V.cr,fontStyle:'italic'}}>{dest.name}</em> applications
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                  {dest.requirements.map((r, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
+                      <h3 style={{fontSize:13.5,fontWeight:700,color:V.ink,marginBottom:10,letterSpacing:'.02em'}}>{r.h}</h3>
+                      <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:7}}>
+                        {r.items.map((item, j) => (
+                          <li key={j} style={{fontSize:12.5,color:V.sl,lineHeight:1.55,display:'flex',gap:8,alignItems:'flex-start'}}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:5}}><path d="M5 12l5 5L20 7"/></svg>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* SCHOLARSHIPS */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:32}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Funding pathways</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                    Scholarships for studying in <em style={{color:V.cr,fontStyle:'italic'}}>{dest.name}</em>
+                  </h2>
+                </div>
+                <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                  {dest.scholarships.map((s, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px',display:'grid',gridTemplateColumns:'1fr',gap:6}}>
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,flexWrap:'wrap'}}>
+                        <h3 style={{fontSize:14,fontWeight:700,color:V.ink,lineHeight:1.3,margin:0}}>{s.name}</h3>
+                        <div style={{fontSize:10.5,fontWeight:700,color:V.gold3,letterSpacing:'.06em',textTransform:'uppercase',background:'rgba(201,151,58,.12)',padding:'2px 9px',borderRadius:99,whiteSpace:'nowrap'}}>Deadline: {s.deadline}</div>
+                      </div>
+                      <div style={{fontSize:11.5,color:V.sl2,marginBottom:3}}><strong style={{color:V.ink}}>Who:</strong> {s.who}</div>
+                      <div style={{fontSize:12.5,color:V.sl,lineHeight:1.5}}><strong style={{color:V.ink}}>Value:</strong> {s.value}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{marginTop:20,padding:'14px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,fontSize:13,color:V.sl,lineHeight:1.6,textAlign:'center'}}>
+                  Smartious provides hands-on coaching for these scholarship applications — motivation letters, study plans, reference strategy and timing. <strong>Free.</strong>
+                </div>
+              </div>
+            </div></section>
+
+            {/* TIMELINE */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:900,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:32}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Application journey</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                    Your typical <em style={{color:V.cr,fontStyle:'italic'}}>{dest.name}</em> application timeline
+                  </h2>
+                </div>
+                <div style={{position:'relative'}}>
+                  {dest.timeline.map((t, i) => (
+                    <div key={i} style={{display:'flex',gap:14,marginBottom:14,alignItems:'flex-start'}}>
+                      <div style={{flexShrink:0,width:36,height:36,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700,fontFamily:"'DM Serif Display',Georgia,serif"}}>{i + 1}</div>
+                      <div style={{flex:1,background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'12px 18px'}}>
+                        <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:5}}>{t.month}</div>
+                        <div style={{fontSize:13,color:V.sl,lineHeight:1.6}}>{t.task}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* POST STUDY */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">After graduation</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+                  Life after your <em style={{color:V.cr,fontStyle:'italic'}}>{dest.name}</em> degree
+                </h2>
+                <p style={{fontSize:14,color:V.sl,lineHeight:1.8}}>{dest.postStudy}</p>
+              </div>
+            </div></section>
+
+            {/* WHAT SMARTIOUS DOES (FREE) */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:32}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>What we do for you</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                    Your free <em style={{color:V.cr,fontStyle:'italic'}}>Smartious {dest.name}</em> support package
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:10}}>
+                  {dest.smartiousHelp.map((item, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:8,padding:'12px 16px',display:'flex',gap:10,alignItems:'flex-start'}}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:4}}><path d="M5 12l5 5L20 7"/></svg>
+                      <div style={{fontSize:12.5,color:V.ink,lineHeight:1.55}}>{item}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* FAQ */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:820,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                    Study in {dest.name} — <em style={{color:V.cr,fontStyle:'italic'}}>common questions</em>
+                  </h2>
+                </div>
+                {dest.faqs.map((f, i) => (
+                  <details key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                    <summary style={{cursor:'pointer',padding:'14px 18px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
+                    <div style={{padding:'0 18px 14px',fontSize:13.5,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:12}}>{f.a}</div>
+                  </details>
+                ))}
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context':'https://schema.org','@type':'FAQPage',
+                  'mainEntity': dest.faqs.map(f => ({'@type':'Question','name': f.q,'acceptedAnswer':{'@type':'Answer','text': f.a}})),
+                })}}/>
+              </div>
+            </div></section>
+
+            {/* CTA */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
+                <div className="eyebrow" style={{color:V.gold3,justifyContent:'center'}}>Ready for {dest.name}?</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  Start your <em style={{color:V.gold3,fontStyle:'italic'}}>{dest.name}</em> journey — free
+                </h2>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:24,maxWidth:560,margin:'0 auto 24px'}}>
+                  Book a free consultation and we'll build a personalised application strategy for {dest.fullName}.
+                </p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                    Book free consultation
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to study in ' + dest.name + '.')}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp us
+                  </a>
+                </div>
+              </div>
+            </div></section>
+          </>
+        )
+      })()}
+      {/* /study-abroad-detail */}
 
 
 
