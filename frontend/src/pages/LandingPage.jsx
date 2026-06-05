@@ -10594,32 +10594,82 @@ export default function LandingPage() {
             </div>
           </div></section>
 
-          {/* WHERE WE SERVE — Aggregation hub */}
+          {/* COUNTRIES WE SERVE — Homeschool pages per country */}
           <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
-            <div style={{maxWidth:1100,margin:'0 auto'}}>
+            <div style={{maxWidth:1200,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Where we serve</div>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Countries we serve</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Homeschool <em style={{color:V.cr,fontStyle:'italic'}}>anywhere</em> your family is
+                  Dedicated homeschool pages for <em style={{color:V.cr,fontStyle:'italic'}}>16 countries</em>
                 </h2>
+                <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.6}}>
+                  Each country has its own dedicated homeschool page — local context, country-specific curricula advice, exam pathways and pricing in local currency where relevant.
+                </p>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14,marginBottom:24}}>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:12}}>
                 {[
-                  { h:'Nairobi (21 areas)', d:'Karen, Westlands, Lavington, Kileleshwa, Runda, Muthaiga, Parklands and more', id:'tuition-nairobi', cta:'View Nairobi areas →' },
-                  { h:'UAE (27 areas)', d:'Downtown Dubai, Business Bay, JBR, Abu Dhabi, Sharjah and more', id:'tuition-uae', cta:'View UAE areas →' },
-                  { h:'Kenya cities (6)', d:'Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu', id:'homeschooling-kenya', cta:'View Kenya cities →' },
-                  { h:'14 countries', d:'UK, USA, Canada, UAE, Qatar, Saudi Arabia, Australia, South Africa, Nigeria and more', id:'global', cta:'View all countries →' },
-                ].map(r => (
-                  <div key={r.h}
-                    onClick={() => P(r.id)}
-                    style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                  { name:'Kenya',         slug:'kenya',        flag:'🇰🇪', sub:'Nairobi HQ · Diamond Plaza' },
+                  { name:'UAE',           slug:'uae',          flag:'🇦🇪', sub:'Dubai · Abu Dhabi · Sharjah' },
+                  { name:'Dubai',         slug:'dubai',        flag:'🇦🇪', sub:'Dedicated Dubai page' },
+                  { name:'United Kingdom',slug:'uk',           flag:'🇬🇧', sub:'London · Manchester · diaspora' },
+                  { name:'United States', slug:'usa',          flag:'🇺🇸', sub:'Coast to coast diaspora' },
+                  { name:'Canada',        slug:'canada',       flag:'🇨🇦', sub:'Toronto · Vancouver · Calgary' },
+                  { name:'Australia',     slug:'australia',    flag:'🇦🇺', sub:'Sydney · Melbourne · Perth' },
+                  { name:'Qatar',         slug:'qatar',        flag:'🇶🇦', sub:'Doha · expat families' },
+                  { name:'Bahrain',       slug:'bahrain',      flag:'🇧🇭', sub:'Manama · Riffa' },
+                  { name:'South Africa',  slug:'south-africa', flag:'🇿🇦', sub:'Johannesburg · Cape Town' },
+                  { name:'Nigeria',       slug:'nigeria',      flag:'🇳🇬', sub:'Lagos · Abuja · Port Harcourt' },
+                  { name:'Egypt',         slug:'egypt',        flag:'🇪🇬', sub:'Cairo · Alexandria' },
+                  { name:'Uganda',        slug:'uganda',       flag:'🇺🇬', sub:'Kampala · diaspora' },
+                  { name:'Tanzania',      slug:'tanzania',     flag:'🇹🇿', sub:'Dar es Salaam · Arusha' },
+                  { name:'Somalia',       slug:'somalia',      flag:'🇸🇴', sub:'Mogadishu · diaspora families' },
+                  { name:'Pakistan',      slug:'pakistan',     flag:'🇵🇰', sub:'Karachi · Lahore · Islamabad' },
+                ].map(c => (
+                  <div key={c.slug}
+                    onClick={() => openCountry(c.slug)}
+                    style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 16px',cursor:'pointer',transition:'all .2s'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 18px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
-                    <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>{r.d}</p>
-                    <div style={{fontSize:12,fontWeight:700,color:V.cr}}>{r.cta}</div>
+                    <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+                      <div style={{fontSize:'1.4rem',lineHeight:1}}>{c.flag}</div>
+                      <h3 style={{fontSize:13.5,fontWeight:700,color:V.ink,margin:0,lineHeight:1.2}}>{c.name}</h3>
+                    </div>
+                    <div style={{fontSize:11,color:V.sl,lineHeight:1.5,marginBottom:8}}>{c.sub}</div>
+                    <div style={{fontSize:11,fontWeight:700,color:V.cr}}>Homeschool {c.name} →</div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* DEEPER: Kenya cities + all-countries hub */}
+          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Go deeper</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  City-level &amp; <em style={{color:V.cr,fontStyle:'italic'}}>all-countries</em> entry points
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                <div
+                  onClick={() => P('homeschooling-kenya')}
+                  style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>Kenya cities (6)</h3>
+                  <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>City-specific homeschool pages: Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu — each with KCSE alignment and Cambridge curriculum pathways.</p>
+                  <div style={{fontSize:12,fontWeight:700,color:V.cr}}>View Kenya cities homeschool →</div>
+                </div>
+                <div
+                  onClick={() => P('global')}
+                  style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>All countries overview</h3>
+                  <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>Comprehensive global view across all 16 countries — useful for diaspora families wanting to compare contexts and pathways.</p>
+                  <div style={{fontSize:12,fontWeight:700,color:V.cr}}>View all countries →</div>
+                </div>
               </div>
             </div>
           </div></section>
@@ -10810,21 +10860,23 @@ export default function LandingPage() {
             </div>
           </div></section>
 
-          {/* WHERE WE TUTOR — Aggregation hub */}
+          {/* WHERE WE TUTOR — Tuition delivery locations */}
           <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Where we tutor</div>
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Tuition <em style={{color:V.cr,fontStyle:'italic'}}>anywhere</em> your family is
+                  In-person &amp; online — <em style={{color:V.cr,fontStyle:'italic'}}>anywhere</em>
                 </h2>
+                <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.6}}>
+                  Home tutoring in 21 Nairobi areas and 27 UAE areas. Online tutoring worldwide.
+                </p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
                 {[
-                  { h:'Nairobi (21 areas)', d:'Karen, Westlands, Lavington, Kileleshwa, Runda, Muthaiga, Parklands and more', id:'tuition-nairobi', cta:'View Nairobi tuition →' },
-                  { h:'UAE (27 areas)', d:'Downtown Dubai, Business Bay, JBR, Abu Dhabi, Sharjah, Al Ain and more', id:'tuition-uae', cta:'View UAE tuition →' },
-                  { h:'Kenya cities (6)', d:'Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu', id:'homeschooling-kenya', cta:'View Kenya cities →' },
-                  { h:'14 countries', d:'UK, USA, Canada, UAE, Qatar, Saudi Arabia, Australia, Nigeria, South Africa and more', id:'global', cta:'View all countries →' },
+                  { h:'Nairobi (21 areas)', d:'Karen, Westlands, Lavington, Kileleshwa, Runda, Muthaiga, Parklands and more — home tutoring delivered to your door', id:'tuition-nairobi', cta:'View Nairobi tuition →' },
+                  { h:'UAE (27 areas)', d:'Downtown Dubai, Business Bay, JBR, Palm Jumeirah, Abu Dhabi, Sharjah, Al Ain and more', id:'tuition-uae', cta:'View UAE tuition →' },
+                  { h:'Online — 14 countries', d:'Live 1-on-1 sessions to any timezone. UK, USA, Canada, Qatar, South Africa, Nigeria and more', id:'global', cta:'View all countries →' },
                 ].map(r => (
                   <div key={r.h}
                     onClick={() => P(r.id)}
