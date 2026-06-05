@@ -55,6 +55,12 @@ export default function App() {
               <Route path="/test-prep"                element={<LandingPage />} />
               <Route path="/test-prep/:slug"          element={<LandingPage />} />
               <Route path="/languages"                element={<LandingPage />} />
+              <Route path="/study-abroad"             element={<LandingPage />} />
+              <Route path="/study-abroad/:slug"       element={<LandingPage />} />
+              <Route path="/homeschool"               element={<LandingPage />} />
+              <Route path="/tuition"                  element={<LandingPage />} />
+              <Route path="/iufp"                     element={<LandingPage />} />
+              <Route path="/pre-university"           element={<LandingPage />} />
               <Route path="/compare/:slug"   element={<LandingPage />} />
               <Route path="/faq"             element={<LandingPage />} />
               <Route path="/blog"            element={<LandingPage />} />
