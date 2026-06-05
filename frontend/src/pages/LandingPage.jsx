@@ -809,7 +809,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1519,6 +1519,10 @@ export default function LandingPage() {
   const tuitionRef = useRef(null)
   const [programmesMenuOpen, setProgrammesMenuOpen] = useState(false)
   const programmesRef = useRef(null)
+  const [curriculaMenuOpen, setCurriculaMenuOpen] = useState(false)
+  const curriculaRef = useRef(null)
+  const [schoolLifeMenuOpen, setSchoolLifeMenuOpen] = useState(false)
+  const schoolLifeRef = useRef(null)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -1550,6 +1554,30 @@ export default function LandingPage() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [programmesMenuOpen])
+
+  // Close curricula dropdown when clicking outside it
+  useEffect(() => {
+    if (!curriculaMenuOpen) return
+    const handleClickOutside = (e) => {
+      if (curriculaRef.current && !curriculaRef.current.contains(e.target)) {
+        setCurriculaMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [curriculaMenuOpen])
+
+  // Close school life dropdown when clicking outside it
+  useEffect(() => {
+    if (!schoolLifeMenuOpen) return
+    const handleClickOutside = (e) => {
+      if (schoolLifeRef.current && !schoolLifeRef.current.contains(e.target)) {
+        setSchoolLifeMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [schoolLifeMenuOpen])
 
   // Preload Paystack inline.js so the payment modal opens instantly when user reaches Step 3
   useEffect(() => {
@@ -2443,9 +2471,78 @@ export default function LandingPage() {
             <SmartiousLogo size={36} withText={true} tone="light"/>
           </div>
           <div className="nav-links">
-            {[['Home','home'],['About','about'],['Curricula','curricula']].map(([l,id]) => (
+            {[['Home','home'],['About','about']].map(([l,id]) => (
               <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
             ))}
+            {/* Curricula dropdown — INTERNATIONAL, LOCAL, SMARTIOUS CUSTOM */}
+            <div ref={curriculaRef} style={{position:'relative'}}>
+              <div
+                className={`nl${['curricula','curriculum-detail'].includes(page) ? ' on' : ''}`}
+                onClick={() => setCurriculaMenuOpen(o => !o)}
+                style={{display:'inline-flex',alignItems:'center',gap:5}}
+                aria-expanded={curriculaMenuOpen}
+                aria-haspopup="true">
+                Curricula
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{transform:curriculaMenuOpen?'rotate(180deg)':'rotate(0)',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              {curriculaMenuOpen && (
+                <div style={{
+                  position:'absolute',top:'calc(100% + 6px)',left:0,
+                  background:'#0d1220',border:'1px solid rgba(201,151,58,.2)',
+                  borderRadius:8,minWidth:320,padding:'12px 0 8px',zIndex:10000,
+                  boxShadow:'0 12px 40px rgba(0,0,0,.5)',
+                }}>
+                  {[
+                    {
+                      cat:'International Curricula',
+                      items:[
+                        {l:'Cambridge IGCSE', slug:'igcse', badge:'🇬🇧'},
+                        {l:'Pearson Edexcel', slug:'edexcel', badge:'🇬🇧'},
+                        {l:'Cambridge A-Level', slug:'a-level', badge:'🇬🇧'},
+                        {l:'IB Diploma (DP)', slug:'ib-diploma', badge:'🌍'},
+                        {l:'IB PYP & MYP', slug:'ib-pyp-myp', badge:'🌍'},
+                        {l:'American Curriculum', slug:'american-curriculum', badge:'🇺🇸'},
+                        {l:'British National Curriculum', slug:'british-national-curriculum', badge:'🇬🇧'},
+                      ],
+                    },
+                    {
+                      cat:'Local Curriculum',
+                      items:[
+                        {l:'CBC & KCSE', slug:'cbc-kcse', badge:'🇰🇪'},
+                      ],
+                    },
+                    {
+                      cat:'Smartious Custom',
+                      items:[
+                        {l:'Smartious Blended', slug:'smartious-blended', badge:'✦'},
+                      ],
+                    },
+                  ].map((group, gi, arr) => (
+                    <div key={group.cat} style={{marginBottom: gi < arr.length - 1 ? 6 : 0, paddingBottom: gi < arr.length - 1 ? 6 : 0, borderBottom: gi < arr.length - 1 ? '1px solid rgba(255,255,255,.06)' : 'none'}}>
+                      <div style={{padding:'6px 16px 4px',fontSize:9.5,fontWeight:700,letterSpacing:'.16em',textTransform:'uppercase',color:'rgba(201,151,58,.7)'}}>{group.cat}</div>
+                      {group.items.map(item => (
+                        <div
+                          key={item.slug}
+                          onClick={() => { setCurriculaMenuOpen(false); openCurriculum(item.slug) }}
+                          style={{padding:'9px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s',display:'flex',alignItems:'center',gap:10}}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)'; e.currentTarget.style.borderLeftColor = V.gold3 }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent' }}>
+                          <div style={{fontSize:14,minWidth:20,textAlign:'center'}}>{item.badge}</div>
+                          <div style={{fontSize:13.5,fontWeight:700,color:'#fff'}}>{item.l}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                  <div
+                    onClick={() => { setCurriculaMenuOpen(false); P('curricula') }}
+                    style={{padding:'10px 16px',cursor:'pointer',borderTop:'1px solid rgba(255,255,255,.08)',marginTop:6,fontSize:11.5,fontWeight:700,color:V.gold3,letterSpacing:'.04em'}}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
+                    View all curricula →
+                  </div>
+                </div>
+              )}
+            </div>
             {/* Tuition dropdown — covers Nairobi, UAE, Kenya cities, Global */}
             <div ref={tuitionRef} style={{position:'relative'}}>
               <div
@@ -2541,7 +2638,45 @@ export default function LandingPage() {
                 </div>
               )}
             </div>
-            {[['Activities','activities'],['Teachers','teachers'],['FAQ','faq'],['Blog','blog']].map(([l,id]) => (
+            {/* School Life dropdown — Activities, Events, Calendar, Blog, Gallery */}
+            <div ref={schoolLifeRef} style={{position:'relative'}}>
+              <div
+                className={`nl${['activities','events','calendar','blog','gallery','article'].includes(page) ? ' on' : ''}`}
+                onClick={() => setSchoolLifeMenuOpen(o => !o)}
+                style={{display:'inline-flex',alignItems:'center',gap:5}}
+                aria-expanded={schoolLifeMenuOpen}
+                aria-haspopup="true">
+                School Life
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{transform:schoolLifeMenuOpen?'rotate(180deg)':'rotate(0)',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              {schoolLifeMenuOpen && (
+                <div style={{
+                  position:'absolute',top:'calc(100% + 6px)',left:0,
+                  background:'#0d1220',border:'1px solid rgba(201,151,58,.2)',
+                  borderRadius:8,minWidth:280,padding:'8px 0',zIndex:10000,
+                  boxShadow:'0 12px 40px rgba(0,0,0,.5)',
+                }}>
+                  {[
+                    {l:'Co-Curricular Activities', id:'activities', sub:'Sports, clubs, music, drama'},
+                    {l:'Events &amp; Highlights', id:'events', sub:'Showcases, conferences, achievements'},
+                    {l:'School Calendar', id:'calendar', sub:'Term dates &amp; key dates'},
+                    {l:'Blog &amp; News', id:'blog', sub:'Articles, updates, insights'},
+                    {l:'Photo Gallery', id:'gallery', sub:'Moments from across Smartious'},
+                  ].map(item => (
+                    <div
+                      key={item.id}
+                      onClick={() => { setSchoolLifeMenuOpen(false); P(item.id) }}
+                      style={{padding:'10px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s'}}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)'; e.currentTarget.style.borderLeftColor = V.gold3 }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent' }}>
+                      <div style={{fontSize:13.5,fontWeight:700,color:'#fff'}} dangerouslySetInnerHTML={{__html: item.l}}/>
+                      {item.sub && <div style={{fontSize:11,color:'rgba(247,243,237,.5)',marginTop:2}} dangerouslySetInnerHTML={{__html: item.sub}}/>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {[['Teachers','teachers'],['FAQ','faq']].map(([l,id]) => (
               <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
             ))}
           </div>
@@ -2577,8 +2712,16 @@ export default function LandingPage() {
                 ['Contact','contact'],
               ]},
               { cat:'Curricula', items:[
+                ['Cambridge IGCSE','curr:igcse'],
+                ['Pearson Edexcel','curr:edexcel'],
+                ['Cambridge A-Level','curr:a-level'],
+                ['IB Diploma','curr:ib-diploma'],
+                ['IB PYP & MYP','curr:ib-pyp-myp'],
+                ['American Curriculum','curr:american-curriculum'],
+                ['British National Curriculum','curr:british-national-curriculum'],
+                ['CBC & KCSE (Kenya)','curr:cbc-kcse'],
+                ['Smartious Blended','curr:smartious-blended'],
                 ['All Curricula','curricula'],
-                ['Pricing','pricing'],
               ]},
               { cat:'Programmes', items:[
                 ['Homeschool Global','homeschool'],
@@ -2589,20 +2732,23 @@ export default function LandingPage() {
                 ['Pre-University','pre-university'],
                 ['Test Prep','test-prep'],
               ]},
+              { cat:'School Life', items:[
+                ['Co-Curricular Activities','activities'],
+                ['Events & Highlights','events'],
+                ['School Calendar','calendar'],
+                ['Blog & News','blog'],
+                ['Photo Gallery','gallery'],
+              ]},
               { cat:'Where We Teach', items:[
                 ['Tuition Nairobi','tuition-nairobi'],
                 ['Tuition UAE','tuition-uae'],
                 ['Homeschooling Kenya','homeschooling-kenya'],
                 ['All Countries','global'],
               ]},
-              { cat:'Activities', items:[
-                ['Activities & Sports','activities'],
-                ['Programs Overview','programs'],
-              ]},
               { cat:'Resources', items:[
-                ['Blog','blog'],
                 ['FAQ','faq'],
                 ['Services','services'],
+                ['Pricing','pricing'],
               ]},
               { cat:'Get Started', items:[
                 ['Enroll Now','enroll'],
@@ -2653,7 +2799,15 @@ export default function LandingPage() {
                     {group.items.map(([label, id]) => (
                       <button
                         key={id}
-                        onClick={() => { P(id); setMobileMenuOpen(false); setOpenCategory(null) }}
+                        onClick={() => {
+                          // Handle curriculum shorthand: curr:slug → openCurriculum(slug)
+                          if (typeof id === 'string' && id.startsWith('curr:')) {
+                            openCurriculum(id.slice(5))
+                          } else {
+                            P(id)
+                          }
+                          setMobileMenuOpen(false); setOpenCategory(null)
+                        }}
                         style={{
                           textAlign:'left',
                           background: page === id ? 'rgba(139,26,46,.18)' : 'transparent',
@@ -12054,6 +12208,333 @@ export default function LandingPage() {
 
 
 
+
+      {/* ══════════════════════════════════════════
+          EVENTS & HIGHLIGHTS — /events
+      ══════════════════════════════════════════ */}
+      {page === 'events' && (
+        <>
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',padding:'72px 0 56px',
+          }}>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>School life · Events</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                Events &amp; <em style={{color:V.gold3,fontStyle:'italic'}}>highlights</em>
+              </h1>
+              <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720}}>
+                Showcases, conferences, achievements and moments that define Smartious. From inter-school sports days to university acceptance celebrations.
+              </p>
+            </div>
+          </section>
+
+          {/* RECURRING EVENTS */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Annual calendar</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Recurring <em style={{color:V.cr,fontStyle:'italic'}}>school events</em>
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
+                {[
+                  { season:'Term 1 · September', h:'Welcome & Orientation', p:'New parent meet-and-greet, student orientation day, and team-building activities. Setting the tone for the academic year.' },
+                  { season:'Term 1 · October', h:'Parent-Teacher Conferences', p:'Individual progress reviews with each subject teacher. Online and in-person options available for diaspora families.' },
+                  { season:'Term 1 · December', h:'End-of-Year Showcase', p:'Student presentations, music performances, art exhibitions, and academic awards. Family attendance encouraged.' },
+                  { season:'Term 2 · February', h:'Cambridge Mock Exams', p:'Mock examinations for IGCSE, A-Level and IB candidates. Detailed feedback and targeted revision plans.' },
+                  { season:'Term 2 · March', h:'University Application Workshop', p:'Final-year students workshop on UCAS, Common App, scholarship applications. Open to all Year 13 / Grade 12 students.' },
+                  { season:'Term 3 · April', h:'Inter-Centre Sports Day', p:'Sports competitions between Parklands and Upper Hill centres. Track, ball games, swimming, eSports.' },
+                  { season:'Term 3 · May', h:'IGCSE & A-Level Examinations', p:'Cambridge and Edexcel main examination series. Students sit at British Council and authorised centres.' },
+                  { season:'Term 3 · July', h:'Annual Speech & Prize Day', p:'Celebration of academic achievement, scholarship recipients, and graduating cohort. The flagship Smartious event of the year.' },
+                ].map(e => (
+                  <div key={e.season} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>{e.season}</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{e.h}</h3>
+                    <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,margin:0}}>{e.p}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* RECENT HIGHLIGHTS */}
+          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Recent highlights</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Moments from <em style={{color:V.cr,fontStyle:'italic'}}>this academic year</em>
+                </h2>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                {[
+                  { date:'April 2026', h:'KCSE 2025 Results — Strong Pass Rates Across the Board', p:'Our Form 4 cohort achieved consistent A and B grades. Particular strength in Mathematics, Sciences and Languages.' },
+                  { date:'March 2026', h:'Upper Hill Centre Robotics Launch', p:'New robotics programme launched at our Upper Hill campus. Students working with Arduino, Python and competitive robotics pathways.' },
+                  { date:'February 2026', h:'Diamond Plaza Parklands — Open House for New Families', p:'Welcomed prospective families for centre tour, meeting teachers, and trial classes. Strong interest from new Form 1 and IGCSE Year 9 enrolment.' },
+                  { date:'January 2026', h:'University Offers — Cohort 2026', p:'Students receiving offers from universities in UK (Bath, Sussex), Australia (Sydney), Canada (Toronto, Waterloo), and US universities.' },
+                ].map(h => (
+                  <div key={h.date} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'16px 20px',display:'flex',gap:16,alignItems:'flex-start'}}>
+                    <div style={{flexShrink:0,minWidth:90,fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.06em',textTransform:'uppercase'}}>{h.date}</div>
+                    <div>
+                      <h3 style={{fontSize:14,fontWeight:700,color:V.ink,marginBottom:6,lineHeight:1.3}}>{h.h}</h3>
+                      <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{h.p}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+                Stay <em style={{color:V.gold3,fontStyle:'italic'}}>up to date</em>
+              </h2>
+              <p style={{fontSize:14,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:18}}>
+                Follow announcements on WhatsApp or browse the blog for event recaps and academic insights.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+                <button onClick={() => P('blog')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 28px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>
+                  View blog
+                </button>
+                <a href="https://wa.me/254745021212"
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 28px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /events */}
+
+      {/* ══════════════════════════════════════════
+          SCHOOL CALENDAR — /calendar
+      ══════════════════════════════════════════ */}
+      {page === 'calendar' && (
+        <>
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',padding:'72px 0 56px',
+          }}>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>School life · Calendar</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                School <em style={{color:V.gold3,fontStyle:'italic'}}>calendar</em>
+              </h1>
+              <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720}}>
+                Term dates, examination periods, holidays and key academic milestones for the 2025-2026 academic year.
+              </p>
+            </div>
+          </section>
+
+          {/* TERMS */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>2025-2026 academic year</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Three <em style={{color:V.cr,fontStyle:'italic'}}>terms</em>, three breaks
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                {[
+                  { term:'Term 1', dates:'1 September 2025 — 12 December 2025', weeks:'15 weeks', focus:'Onboarding, curriculum foundation, mid-term checkpoints, end-of-term assessments' },
+                  { term:'Term 2', dates:'5 January 2026 — 27 March 2026', weeks:'12 weeks', focus:'Deep curriculum delivery, mock examinations, university application support (Year 12-13)' },
+                  { term:'Term 3', dates:'13 April 2026 — 31 July 2026', weeks:'16 weeks', focus:'Cambridge & Edexcel examinations (May-June), revision, year-end celebrations, prize-giving' },
+                ].map(t => (
+                  <div key={t.term} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.cr,marginBottom:6,fontWeight:400}}>{t.term}</div>
+                    <div style={{fontSize:13.5,color:V.ink,fontWeight:700,marginBottom:6}}>{t.dates}</div>
+                    <div style={{fontSize:11.5,color:V.gold3,fontWeight:700,letterSpacing:'.06em',marginBottom:12}}>{t.weeks}</div>
+                    <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{t.focus}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* BREAKS */}
+          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:900,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Holiday breaks</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Term <em style={{color:V.cr,fontStyle:'italic'}}>breaks</em>
+                </h2>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                {[
+                  { break_:'Christmas Break', dates:'15 December 2025 — 2 January 2026', notes:'3-week break. Term 1 reports issued. Pre-term communications for Term 2 sent late December.' },
+                  { break_:'Easter Break', dates:'30 March 2026 — 10 April 2026', notes:'2-week break. Mock examination results discussed. Final UCAS confirmation deadline approaches.' },
+                  { break_:'Summer Break', dates:'1 August 2026 — 28 August 2026', notes:'4-week break. KCSE preparation programmes optional. New academic year preparation begins.' },
+                ].map(b => (
+                  <div key={b.break_} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,flexWrap:'wrap',marginBottom:6}}>
+                      <h3 style={{fontSize:14,fontWeight:700,color:V.ink,margin:0}}>{b.break_}</h3>
+                      <div style={{fontSize:12,fontWeight:700,color:V.gold3,whiteSpace:'nowrap'}}>{b.dates}</div>
+                    </div>
+                    <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{b.notes}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* EXAMINATION CALENDAR */}
+          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:900,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Key examination dates</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  External <em style={{color:V.cr,fontStyle:'italic'}}>examination</em> series
+                </h2>
+                <p style={{fontSize:13,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
+                  Examination registration is coordinated by Smartious. Students sit at British Council Nairobi, KNEC centres, and authorised IB/Cambridge venues.
+                </p>
+              </div>
+              <div style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,overflow:'hidden'}}>
+                <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+                  <thead style={{background:V.ink,color:'#fff'}}>
+                    <tr>
+                      <th style={{padding:'12px 16px',textAlign:'left',fontSize:11,letterSpacing:'.04em',textTransform:'uppercase'}}>Examination</th>
+                      <th style={{padding:'12px 16px',textAlign:'left',fontSize:11,letterSpacing:'.04em',textTransform:'uppercase'}}>Period</th>
+                      <th style={{padding:'12px 16px',textAlign:'left',fontSize:11,letterSpacing:'.04em',textTransform:'uppercase'}}>Results</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      ['Cambridge IGCSE (Main series)', 'May - June 2026', 'August 2026'],
+                      ['Cambridge A-Level (Main series)', 'May - June 2026', 'August 2026'],
+                      ['Pearson Edexcel IGCSE', 'May - June 2026', 'August 2026'],
+                      ['IB Diploma Examinations', 'May 2026', 'July 2026'],
+                      ['SAT International', 'Mar, May, June, Aug 2026', '2-4 weeks after test'],
+                      ['IELTS / TOEFL', 'Monthly (multiple dates)', '5-13 days after test'],
+                      ['KCSE (Form 4 candidates)', 'October - November 2026', 'January 2027'],
+                    ].map(([e, p, r], i) => (
+                      <tr key={e} style={{background: i % 2 ? V.white : V.bone, borderTop:`1px solid ${V.bone3}`}}>
+                        <td style={{padding:'12px 16px',fontWeight:700,color:V.ink}}>{e}</td>
+                        <td style={{padding:'12px 16px',color:V.cr,fontWeight:600}}>{p}</td>
+                        <td style={{padding:'12px 16px',color:V.sl}}>{r}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div></section>
+
+          {/* CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+                Need a <em style={{color:V.gold3,fontStyle:'italic'}}>printable copy?</em>
+              </h2>
+              <p style={{fontSize:14,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:18}}>
+                WhatsApp our admissions team for a PDF copy of the academic calendar with specific examination registration deadlines for your child.
+              </p>
+              <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20please%20send%20the%20academic%20calendar."
+                target="_blank" rel="noopener noreferrer"
+                style={{display:'inline-block',background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 28px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
+                Request calendar PDF
+              </a>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /calendar */}
+
+      {/* ══════════════════════════════════════════
+          PHOTO GALLERY — /gallery
+          Uses Cloudinary photos from the Moments collection.
+      ══════════════════════════════════════════ */}
+      {page === 'gallery' && (
+        <>
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',padding:'72px 0 56px',
+          }}>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>School life · Gallery</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                Photo <em style={{color:V.gold3,fontStyle:'italic'}}>gallery</em>
+              </h1>
+              <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720}}>
+                Real moments from Smartious — lessons in progress, robotics workshops, student-teacher collaboration, and the everyday work of building a school.
+              </p>
+            </div>
+          </section>
+
+          {/* GALLERY GRID */}
+          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:64}}><div className="wrap">
+            <div style={{maxWidth:1300,margin:'0 auto'}}>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:10}}>
+                {[
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-13-02_sr7u5a.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-09-57_ujfvdf.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-09-48_fzwdge.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780594208/photo_2026-06-04_20-29-50_mxbh0c.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596097/photo_2026-06-04_20-59-42_z3n3qr.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596093/photo_2026-06-04_20-59-55_uei3qk.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596092/photo_2026-06-04_20-59-53_ruus3o.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596092/photo_2026-06-04_20-59-48_fjks6e.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596091/photo_2026-06-04_20-59-58_ukv2bv.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596091/photo_2026-06-04_20-59-51_ye5hlt.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596091/photo_2026-06-04_20-59-49_kkzbqw.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596091/photo_2026-06-04_20-59-52_qnq80k.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596090/photo_2026-06-04_20-59-56_rss8tt.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596088/photo_2026-06-04_21-00-04_iyzdg3.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596088/photo_2026-06-04_20-59-59_qs1gjt.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596087/photo_2026-06-04_21-00-15_grruwb.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596088/photo_2026-06-04_21-00-01_nzvr0n.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596087/photo_2026-06-04_21-00-09_zfhl1w.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596086/photo_2026-06-04_21-00-06_ziggs4.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596087/photo_2026-06-04_21-00-02_u232sd.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596086/photo_2026-06-04_21-00-10_jhwgsd.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596086/photo_2026-06-04_21-00-11_yu1ree.jpg',
+                  'https://res.cloudinary.com/dae99gz1m/image/upload/v1780596086/photo_2026-06-04_21-00-07_cw87qj.jpg',
+                ].map((src, i) => (
+                  <div key={i} style={{aspectRatio:'1/1',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:8,overflow:'hidden',cursor:'pointer'}}
+                    onClick={() => window.open(src, '_blank')}>
+                    <img src={src} alt={`Smartious moment ${i + 1}`}
+                      style={{width:'100%',height:'100%',objectFit:'cover',transition:'transform .3s'}}
+                      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                      loading="lazy"/>
+                  </div>
+                ))}
+              </div>
+              <div style={{marginTop:32,padding:'20px 24px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,textAlign:'center'}}>
+                <div style={{fontSize:13,color:V.sl,lineHeight:1.7,marginBottom:14}}>
+                  More photos are added throughout the academic year. Follow us on Instagram and Facebook for the latest moments from across Smartious centres.
+                </div>
+                <div style={{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
+                  <a href="https://www.instagram.com/smartioushomeschool"
+                    target="_blank" rel="noopener noreferrer"
+                    style={{display:'inline-flex',alignItems:'center',gap:8,padding:'10px 22px',borderRadius:8,background:V.cr,color:'#fff',textDecoration:'none',fontSize:13,fontWeight:700}}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.7 0 3 0 4.1.1 1 0 1.7.2 2.3.4.6.3 1.2.6 1.7 1.1.5.5.8 1 1.1 1.7.2.6.4 1.3.4 2.3 0 1-.1 1.4-.1 4.1 0 2.7 0 3-.1 4.1 0 1-.2 1.7-.4 2.3-.3.6-.6 1.2-1.1 1.7-.5.5-1 .8-1.7 1.1-.6.2-1.3.4-2.3.4-1 0-1.4.1-4.1.1-2.7 0-3 0-4.1-.1-1 0-1.7-.2-2.3-.4-.6-.3-1.2-.6-1.7-1.1-.5-.5-.8-1-1.1-1.7-.2-.6-.4-1.3-.4-2.3 0-1-.1-1.4-.1-4.1 0-2.7 0-3 .1-4.1 0-1 .2-1.7.4-2.3.3-.6.6-1.2 1.1-1.7.5-.5 1-.8 1.7-1.1.6-.2 1.3-.4 2.3-.4C9 2 9.3 2 12 2zm0 5a5 5 0 100 10 5 5 0 000-10zm6.5-.5a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4zM12 9a3 3 0 110 6 3 3 0 010-6z"/></svg>
+                    Instagram
+                  </a>
+                  <a href="https://www.facebook.com/smartioushomeschool"
+                    target="_blank" rel="noopener noreferrer"
+                    style={{display:'inline-flex',alignItems:'center',gap:8,padding:'10px 22px',borderRadius:8,background:'#1877F2',color:'#fff',textDecoration:'none',fontSize:13,fontWeight:700}}>
+                    Facebook
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /gallery */}
 
       {/* ══════════════════════════════════════════
           ACTIVITIES — Sports, Clubs & Student Life
