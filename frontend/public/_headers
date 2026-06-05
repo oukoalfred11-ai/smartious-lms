@@ -1,0 +1,59 @@
+# Smartious Homeschool — Netlify Headers
+# Cache control + security headers for production performance.
+
+# HTML — never cache (so SPA updates reach users immediately)
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Hashed Vite assets — cache for 1 year (filenames change on rebuild)
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Static images — cache for 1 week
+/*.jpg
+  Cache-Control: public, max-age=604800
+
+/*.jpeg
+  Cache-Control: public, max-age=604800
+
+/*.png
+  Cache-Control: public, max-age=604800
+
+/*.webp
+  Cache-Control: public, max-age=604800
+
+/*.svg
+  Cache-Control: public, max-age=604800
+
+/*.ico
+  Cache-Control: public, max-age=604800
+
+# Fonts — cache for 1 week
+/*.woff2
+  Cache-Control: public, max-age=604800
+
+/*.woff
+  Cache-Control: public, max-age=604800
+
+# PWA + SEO files — cache for 1 hour
+/manifest.json
+  Cache-Control: public, max-age=3600
+
+/site.webmanifest
+  Cache-Control: public, max-age=3600
+
+/robots.txt
+  Cache-Control: public, max-age=3600
+
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+
+# Security headers — apply to all routes
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
