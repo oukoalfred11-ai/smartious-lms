@@ -12,6 +12,7 @@ import { UAE_AREAS } from '../data/uaeAreas.js'
 import { KENYA_CITIES } from '../data/kenyaCities.js'
 import { TEST_PREP } from '../data/testPrep.js'
 import { STUDY_ABROAD } from '../data/studyAbroad.js'
+import { LANGUAGES } from '../data/languages.js'
 
 
 /* ── Front Desk capture ───────────────────────────────────
@@ -808,7 +809,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1602,6 +1603,7 @@ export default function LandingPage() {
   const [currentKenyaCity, setCurrentKenyaCity] = useState(null)
   const [currentTestPrep, setCurrentTestPrep] = useState(null)
   const [currentStudyAbroad, setCurrentStudyAbroad] = useState(null)
+  const [currentLanguage, setCurrentLanguage] = useState(null)
   const [currentCompare, setCurrentCompare] = useState(null)
   const [publicTeachers, setPublicTeachers] = useState([])
   const [teachersLoading, setTeachersLoading] = useState(false)
@@ -2138,6 +2140,17 @@ export default function LandingPage() {
       setPage('languages')
       return
     }
+    if (path.startsWith('/languages/')) {
+      const slug = decodeURIComponent(path.slice('/languages/'.length))
+      const lang = LANGUAGES.find(l => l.slug === slug)
+      if (lang) {
+        setCurrentLanguage(slug)
+        setPage('language-detail')
+      } else {
+        setPage('languages')
+      }
+      return
+    }
     if (path === '/study-abroad') {
       setPage('study-abroad')
       return
@@ -2476,7 +2489,7 @@ export default function LandingPage() {
             {/* Programmes dropdown — grouped categories with chips */}
             <div ref={programmesRef} style={{position:'relative'}}>
               <div
-                className={`nl${['programs','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','languages','study-abroad','study-abroad-detail'].includes(page) ? ' on' : ''}`}
+                className={`nl${['programs','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','languages','language-detail','study-abroad','study-abroad-detail'].includes(page) ? ' on' : ''}`}
                 onClick={() => setProgrammesMenuOpen(o => !o)}
                 style={{display:'inline-flex',alignItems:'center',gap:5}}
                 aria-expanded={programmesMenuOpen}
@@ -10118,23 +10131,31 @@ export default function LandingPage() {
       {/* /test-prep-detail */}
 
       {/* ══════════════════════════════════════════
-          LANGUAGES — /languages
-          Foreign language coaching landing page.
+          LANGUAGES HUB — /languages
+          Lists all 8 languages with pricing summary.
       ══════════════════════════════════════════ */}
       {page === 'languages' && (
         <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'EducationalOrganization',
+            'name':'Smartious Languages',
+            'url':'https://smartioushomeschool.com/languages',
+            'description':'Premium foreign language tuition. French, Spanish, German, Mandarin Chinese, Arabic, Kiswahili, Italian, Portuguese. CEFR A1-C2 plus examination preparation.',
+          })}}/>
+
+          {/* HERO */}
           <section className="sec" style={{
             position:'relative',
             background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-            color:'#fff',padding:'72px 0 56px',
+            color:'#fff',padding:'80px 0 60px',
           }}>
-            <div className="wrap" style={{maxWidth:880,margin:'0 auto'}}>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Foreign languages</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,4.8vw,3.2rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5.2vw,3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 Language coaching that <em style={{color:V.gold3,fontStyle:'italic'}}>opens worlds</em>
               </h1>
-              <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:720}}>
-                One-on-one foreign language tuition with qualified tutors. French, Spanish, German, Mandarin, Arabic, Kiswahili and more — for school examinations, university applications, professional fluency or personal interest.
+              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
+                One-on-one foreign language tuition with qualified specialists. 8 languages, CEFR A1 through C2, plus examination preparation for DELF, DELE, Goethe-Zertifikat, HSK, CILS and more. From KSh 1,500/hour.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                 <button onClick={() => P('consult')}
@@ -10150,45 +10171,328 @@ export default function LandingPage() {
             </div>
           </section>
 
-          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
+          {/* LANGUAGES GRID */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1200,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Languages we offer</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  From <em style={{color:V.cr,fontStyle:'italic'}}>beginner to fluent</em>
+                <div className="eyebrow" style={{justifyContent:'center'}}>8 languages</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Which language <em style={{color:V.cr,fontStyle:'italic'}}>opens your future?</em>
                 </h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:640,margin:'14px auto 0',lineHeight:1.6}}>
-                  Personalised 1-on-1 coaching across major world languages, levels CEFR A1 (beginner) through C2 (fluent).
-                </p>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:14}}>
-                {[
-                  { name:'French', use:'IGCSE · IB · DELF · DALF · Travel · Career' },
-                  { name:'Spanish', use:'IGCSE · IB · DELE · Travel · Career' },
-                  { name:'German', use:'IGCSE · IB · TestDaF · Goethe-Zertifikat · Career' },
-                  { name:'Mandarin Chinese', use:'IGCSE · HSK levels 1-6 · Business · Travel' },
-                  { name:'Arabic', use:'IGCSE · Modern Standard · Egyptian · Gulf · Quranic' },
-                  { name:'Kiswahili', use:'CBC · KCSE · Communication · Cultural · Travel' },
-                  { name:'Italian', use:'Tourism · Cultural studies · Music · Travel' },
-                  { name:'Portuguese', use:'Business · Brazilian variant · European variant' },
-                ].map(lang => (
-                  <div key={lang.name} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:6,lineHeight:1.3,fontWeight:400}}>{lang.name}</h3>
-                    <div style={{fontSize:11.5,color:V.sl,lineHeight:1.6}}>{lang.use}</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
+                {LANGUAGES.map(lang => (
+                  <div key={lang.slug}
+                    onClick={() => { setCurrentLanguage(lang.slug); nav('/languages/' + lang.slug); window.scrollTo(0,0) }}
+                    style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
+                      <div style={{fontSize:'2rem',lineHeight:1}}>{lang.flag}</div>
+                      <div style={{fontSize:10.5,fontWeight:700,color:V.gold3,background:'rgba(201,151,58,.12)',padding:'3px 10px',borderRadius:99,letterSpacing:'.04em'}}>{lang.pricing.hourly[0].rate.split('/')[0]}+</div>
+                    </div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:V.ink,marginBottom:4,lineHeight:1.1,fontWeight:400}}>{lang.name}</h3>
+                    <div style={{fontSize:13,color:V.sl2,marginBottom:12,fontStyle:'italic'}}>{lang.nativeName}</div>
+                    <div style={{fontSize:12,color:V.sl,lineHeight:1.55,marginBottom:14}}>
+                      <div style={{marginBottom:3}}><strong style={{color:V.ink}}>{lang.speakers}</strong></div>
+                      <div>{lang.examPrep.length} exam preparations available</div>
+                    </div>
+                    <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
+                      Learn {lang.name} →
+                    </div>
                   </div>
                 ))}
               </div>
-              <div style={{marginTop:32,padding:'20px 24px',background:V.bone2,border:`1px solid ${V.bone3}`,borderRadius:10,textAlign:'center'}}>
-                <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>Pricing</div>
-                <div style={{fontSize:14,color:V.ink,lineHeight:1.6}}>
-                  Foreign language tuition from <strong style={{color:V.cr}}>KSh 1,500/hour</strong> for primary level up to <strong style={{color:V.cr}}>KSh 2,500/hour</strong> for advanced (CEFR B2-C2). Custom programmes for examination preparation (DELF, DELE, Goethe-Zertifikat, HSK) priced individually based on examination level and timeline.
-                </div>
+            </div>
+          </div></section>
+
+          {/* PRICING SUMMARY */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Standard pricing</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  Transparent <em style={{color:V.cr,fontStyle:'italic'}}>language tuition</em> pricing
+                </h2>
+                <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.6}}>
+                  Per-hour rates and structured bundles. Pricing applies across all 8 languages, with custom packages for specific examination preparation.
+                </p>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12,marginBottom:24}}>
+                {[
+                  { tier:'Beginner', cefr:'A1-A2', rate:'KSh 1,800/hr', bundle:'20 sessions · KSh 32,000', desc:'Foundation. Build vocabulary, pronunciation, basic grammar.' },
+                  { tier:'Intermediate', cefr:'B1-B2', rate:'KSh 2,200/hr', bundle:'30 sessions · KSh 60,000', desc:'Independent communication. University-prep level.' },
+                  { tier:'Advanced', cefr:'C1-C2', rate:'KSh 2,500/hr', bundle:'40 sessions · KSh 95,000', desc:'Fluent academic and professional use.' },
+                ].map(p => (
+                  <div key={p.tier} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                    <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:5}}>{p.cefr}</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,marginBottom:8,lineHeight:1.2,fontWeight:400}}>{p.tier}</h3>
+                    <div style={{fontSize:16,fontWeight:700,color:V.cr,marginBottom:4}}>{p.rate}</div>
+                    <div style={{fontSize:12,color:V.sl2,marginBottom:10}}>or {p.bundle}</div>
+                    <div style={{fontSize:12.5,color:V.sl,lineHeight:1.6}}>{p.desc}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{padding:'14px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,fontSize:13,color:V.sl,lineHeight:1.6,textAlign:'center'}}>
+                <strong style={{color:V.ink}}>Note:</strong> Kiswahili pricing starts lower (from KSh 1,500/hr). Exam preparation packages (DELF, DELE, Goethe, HSK, CILS) priced individually — see specific language pages.
+              </div>
+            </div>
+          </div></section>
+
+          {/* CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+                Start your <em style={{color:V.gold3,fontStyle:'italic'}}>language journey</em>
+              </h2>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                  Book free consultation
+                </button>
+                <a href="https://wa.me/254745021212"
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
               </div>
             </div>
           </div></section>
         </>
       )}
       {/* /languages */}
+
+      {/* ══════════════════════════════════════════
+          LANGUAGE DETAIL — /languages/{slug}
+          Individual language page, data-driven.
+      ══════════════════════════════════════════ */}
+      {page === 'language-detail' && currentLanguage && (() => {
+        const lang = LANGUAGES.find(l => l.slug === currentLanguage)
+        if (!lang) return null
+        return (
+          <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'Course',
+              'name': 'Learn ' + lang.name + ' with Smartious',
+              'description': lang.seoDesc,
+              'provider':{'@type':'EducationalOrganization','name':'Smartious','url':'https://smartioushomeschool.com'},
+              'inLanguage': lang.slug,
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Languages','item':'https://smartioushomeschool.com/languages'},
+                {'@type':'ListItem','position':3,'name': lang.name,'item':'https://smartioushomeschool.com/languages/' + lang.slug},
+              ],
+            })}}/>
+
+            {/* HERO */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff',padding:'72px 0 56px',
+            }}>
+              <div className="wrap">
+                <a href="/languages" onClick={(e)=>{e.preventDefault(); P('languages')}}
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:18,display:'inline-flex',alignItems:'center',gap:6}}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  All languages
+                </a>
+                <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:14}}>
+                  <div style={{fontSize:'3rem',lineHeight:1}}>{lang.flag}</div>
+                  <div>
+                    <div className="eyebrow" style={{color:V.gold3,margin:0,marginBottom:4}}>Learn {lang.name}</div>
+                    <div style={{fontSize:13,color:'rgba(255,255,255,.6)',fontStyle:'italic'}}>{lang.nativeName}</div>
+                  </div>
+                </div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                  <em style={{color:V.gold3,fontStyle:'italic'}}>{lang.name}</em> with Smartious
+                </h1>
+                <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{lang.heroTagline}</p>
+                {/* Quick facts strip */}
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:10,marginBottom:24,maxWidth:760}}>
+                  <div style={{background:'rgba(0,0,0,.3)',border:'1px solid rgba(201,151,58,.3)',borderRadius:8,padding:'10px 14px'}}>
+                    <div style={{fontSize:9.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Speakers</div>
+                    <div style={{fontSize:12.5,color:'#fff',fontWeight:600,lineHeight:1.3}}>{lang.speakers}</div>
+                  </div>
+                  <div style={{background:'rgba(0,0,0,.3)',border:'1px solid rgba(201,151,58,.3)',borderRadius:8,padding:'10px 14px'}}>
+                    <div style={{fontSize:9.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Family</div>
+                    <div style={{fontSize:12.5,color:'#fff',fontWeight:600,lineHeight:1.3}}>{lang.family}</div>
+                  </div>
+                  <div style={{background:'rgba(0,0,0,.3)',border:'1px solid rgba(201,151,58,.3)',borderRadius:8,padding:'10px 14px'}}>
+                    <div style={{fontSize:9.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Starts at</div>
+                    <div style={{fontSize:12.5,color:'#fff',fontWeight:600,lineHeight:1.3}}>{lang.pricing.hourly[0].rate}</div>
+                  </div>
+                </div>
+                <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>
+                    Book free consultation
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to learn ' + lang.name + '.')}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
+                    WhatsApp us
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            {/* INTRO */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:32}}><div className="wrap">
+              <div style={{maxWidth:860,margin:'0 auto'}}>
+                <div className="eyebrow">About {lang.name}</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+                  Why learn {lang.name}?
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8}}>{lang.intro}</p>
+              </div>
+            </div></section>
+
+            {/* WHY LEARN */}
+            <section className="sec" style={{background:V.white,paddingTop:32,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                  {lang.whyLearn.map((w, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
+                      <div style={{display:'flex',alignItems:'baseline',gap:10,marginBottom:8}}>
+                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.gold3,lineHeight:1}}>{String(i + 1).padStart(2, '0')}</div>
+                        <h3 style={{fontSize:14,fontWeight:700,color:V.ink,lineHeight:1.3,margin:0}}>{w.h}</h3>
+                      </div>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{w.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* PRICING — Hourly */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:32}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>{lang.name} pricing</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                    Transparent pricing for <em style={{color:V.cr,fontStyle:'italic'}}>{lang.name} coaching</em>
+                  </h2>
+                </div>
+                {/* Hourly rates */}
+                <h3 style={{fontSize:13,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold3,marginBottom:14,textAlign:'center'}}>Per-hour rates</h3>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:12,marginBottom:32}}>
+                  {lang.pricing.hourly.map((h, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'18px 20px'}}>
+                      <div style={{fontSize:12,fontWeight:700,color:V.sl2,marginBottom:6}}>{h.level}</div>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.cr,marginBottom:4}}>{h.rate}</div>
+                      <div style={{fontSize:11.5,color:V.sl}}>Session length: {h.sessionLength}</div>
+                    </div>
+                  ))}
+                </div>
+                {/* Packages */}
+                <h3 style={{fontSize:13,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold3,marginBottom:14,textAlign:'center'}}>Bundled packages</h3>
+                <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                  {lang.pricing.packages.map((pkg, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px',display:'grid',gridTemplateColumns:'1fr auto',gap:14,alignItems:'center'}}>
+                      <div>
+                        <div style={{fontSize:14,fontWeight:700,color:V.ink,marginBottom:4}}>{pkg.name}</div>
+                        <div style={{fontSize:12,color:V.sl2,marginBottom:3}}>{pkg.sessions}</div>
+                        <div style={{fontSize:11.5,color:V.sl}}>{pkg.timeline}</div>
+                      </div>
+                      <div style={{textAlign:'right'}}>
+                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.cr,fontWeight:400,whiteSpace:'nowrap'}}>{pkg.price}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* CEFR LEVELS */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Levels we teach</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                    From <em style={{color:V.cr,fontStyle:'italic'}}>beginner to mastery</em>
+                  </h2>
+                </div>
+                <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                  {lang.cefrLevels.map((c, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px',display:'flex',gap:16,alignItems:'flex-start'}}>
+                      <div style={{flexShrink:0,minWidth:130,fontSize:13,fontWeight:700,color:V.cr}}>{c.level}</div>
+                      <div style={{fontSize:12.5,color:V.sl,lineHeight:1.6}}>{c.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* EXAM PREP */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Examination preparation</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                    Certifications we <em style={{color:V.cr,fontStyle:'italic'}}>prepare students for</em>
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
+                  {lang.examPrep.map((e, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px'}}>
+                      <h3 style={{fontSize:13.5,fontWeight:700,color:V.ink,marginBottom:4,lineHeight:1.3}}>{e.name}</h3>
+                      <div style={{fontSize:11.5,color:V.sl2,marginBottom:6}}>{e.who}</div>
+                      <div style={{fontSize:12,color:V.sl,lineHeight:1.5}}>{e.notes}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* FAQ */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:820,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                    {lang.name} questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
+                  </h2>
+                </div>
+                {lang.faqs.map((f, i) => (
+                  <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                    <summary style={{cursor:'pointer',padding:'14px 18px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
+                    <div style={{padding:'0 18px 14px',fontSize:13.5,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:12}}>{f.a}</div>
+                  </details>
+                ))}
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context':'https://schema.org','@type':'FAQPage',
+                  'mainEntity': lang.faqs.map(f => ({'@type':'Question','name': f.q,'acceptedAnswer':{'@type':'Answer','text': f.a}})),
+                })}}/>
+              </div>
+            </div></section>
+
+            {/* CTA */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+                  Start learning <em style={{color:V.gold3,fontStyle:'italic'}}>{lang.name}</em> today
+                </h2>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                    Book free consultation
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to learn ' + lang.name + '.')}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp us
+                  </a>
+                </div>
+              </div>
+            </div></section>
+          </>
+        )
+      })()}
+      {/* /language-detail */}
+
 
       {/* ══════════════════════════════════════════
           HOMESCHOOL GLOBAL HUB — /homeschool
