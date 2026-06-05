@@ -1,50 +1,6 @@
-# ─────────────────────────────────────────────────────────
-# Netlify cache control headers
-#
-# Strategy:
-#   - HTML files: NEVER cached (always fetch fresh).
-#     This ensures returning visitors always get the latest
-#     index.html, which references the latest hashed bundle.
-#   - Hashed JS/CSS/image assets: cached for 1 year (safe
-#     because each new build generates a new hash).
-#   - Service worker (if added later): never cached.
-#
-# Without this file, stale bundles persist in browser caches
-# for hours/days. This is the #1 cause of "I deployed a fix
-# but some users still see the old bug" reports.
-# ─────────────────────────────────────────────────────────
+# Smartious Homeschool — Netlify Redirects
+# This file ONLY handles redirects. Cache headers go in _headers.
 
-# index.html and root path — never cache
-/
-  Cache-Control: public, max-age=0, must-revalidate
-
-/index.html
-  Cache-Control: public, max-age=0, must-revalidate
-
-# Hashed assets (Vite output) — cache forever
-# Vite produces files like /assets/index-A7Fz9.js with content hashes
-# Safe to cache aggressively because filename changes when content changes
-/assets/*
-  Cache-Control: public, max-age=31536000, immutable
-
-# Static images / fonts in /public — cache for a week
-/*.jpg
-  Cache-Control: public, max-age=604800
-/*.png
-  Cache-Control: public, max-age=604800
-/*.webp
-  Cache-Control: public, max-age=604800
-/*.svg
-  Cache-Control: public, max-age=604800
-/*.woff2
-  Cache-Control: public, max-age=604800
-
-# Manifest / robots / sitemap — short cache
-/manifest.json
-  Cache-Control: public, max-age=3600
-/site.webmanifest
-  Cache-Control: public, max-age=3600
-/robots.txt
-  Cache-Control: public, max-age=3600
-/sitemap.xml
-  Cache-Control: public, max-age=3600
+# Single Page Application fallback — must be last
+# All unmatched routes serve the React app
+/*  /index.html  200
