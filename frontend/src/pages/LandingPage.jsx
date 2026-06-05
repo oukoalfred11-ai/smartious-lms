@@ -12346,14 +12346,15 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {[
-                  { term:'Term 1', dates:'1 September 2025 — 12 December 2025', weeks:'15 weeks', focus:'Onboarding, curriculum foundation, mid-term checkpoints, end-of-term assessments' },
-                  { term:'Term 2', dates:'5 January 2026 — 27 March 2026', weeks:'12 weeks', focus:'Deep curriculum delivery, mock examinations, university application support (Year 12-13)' },
-                  { term:'Term 3', dates:'13 April 2026 — 31 July 2026', weeks:'16 weeks', focus:'Cambridge & Edexcel examinations (May-June), revision, year-end celebrations, prize-giving' },
+                  { term:'Term 1', dates:'25 August 2025 — 5 December 2025', weeks:'15 weeks', halfTerm:'Half-term: 9 - 21 October 2025', focus:'Onboarding, curriculum foundation, mid-term checkpoints, end-of-term assessments. Exeat weekend 12-14 September.' },
+                  { term:'Term 2', dates:'5 January 2026 — 27 March 2026', weeks:'12 weeks', halfTerm:'Half-term: 13 - 22 February 2026', focus:'Deep curriculum delivery, mock examinations, university application support (Year 12-13).' },
+                  { term:'Term 3', dates:'21 April 2026 — 3 July 2026', weeks:'10 weeks', halfTerm:'Half-term: 22 May - 2 June 2026', focus:'Cambridge & Edexcel examinations (May-June), revision, year-end celebrations, prize-giving.' },
                 ].map(t => (
                   <div key={t.term} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
                     <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.cr,marginBottom:6,fontWeight:400}}>{t.term}</div>
                     <div style={{fontSize:13.5,color:V.ink,fontWeight:700,marginBottom:6}}>{t.dates}</div>
-                    <div style={{fontSize:11.5,color:V.gold3,fontWeight:700,letterSpacing:'.06em',marginBottom:12}}>{t.weeks}</div>
+                    <div style={{fontSize:11.5,color:V.gold3,fontWeight:700,letterSpacing:'.06em',marginBottom:8}}>{t.weeks}</div>
+                    <div style={{fontSize:11.5,color:V.sl2,fontWeight:600,marginBottom:10,padding:'4px 8px',background:'rgba(201,151,58,.08)',borderRadius:6,display:'inline-block'}}>{t.halfTerm}</div>
                     <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{t.focus}</p>
                   </div>
                 ))}
@@ -12372,9 +12373,9 @@ export default function LandingPage() {
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {[
-                  { break_:'Christmas Break', dates:'15 December 2025 — 2 January 2026', notes:'3-week break. Term 1 reports issued. Pre-term communications for Term 2 sent late December.' },
-                  { break_:'Easter Break', dates:'30 March 2026 — 10 April 2026', notes:'2-week break. Mock examination results discussed. Final UCAS confirmation deadline approaches.' },
-                  { break_:'Summer Break', dates:'1 August 2026 — 28 August 2026', notes:'4-week break. KCSE preparation programmes optional. New academic year preparation begins.' },
+                  { break_:'Christmas Break', dates:'6 December 2025 — 4 January 2026', notes:'4-week break. Term 1 reports issued. Pre-term communications for Term 2 sent late December.' },
+                  { break_:'Easter Break', dates:'28 March 2026 — 20 April 2026', notes:'3-week break. Mock examination results discussed. Final UCAS confirmation deadline approaches.' },
+                  { break_:'Summer Break', dates:'4 July 2026 — 24 August 2026', notes:'7-week break. KCSE preparation programmes optional. New academic year preparation begins.' },
                 ].map(b => (
                   <div key={b.break_} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px'}}>
                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,flexWrap:'wrap',marginBottom:6}}>
@@ -12384,6 +12385,40 @@ export default function LandingPage() {
                     <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{b.notes}</p>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* NEXT ACADEMIC YEAR PREVIEW */}
+          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Looking ahead</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  <em style={{color:V.cr,fontStyle:'italic'}}>2026-2027</em> academic year preview
+                </h2>
+                <p style={{fontSize:13,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
+                  Preliminary term dates for the next academic year. Subject to minor adjustments — final calendar published in May 2026.
+                </p>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
+                {[
+                  { term:'Term 1', dates:'25 August 2026 — 4 December 2026', halfTerm:'Half-term: 12 - 16 October 2026', note:'INSET week 17-21 August (teacher training)' },
+                  { term:'Term 2', dates:'5 January 2027 — 25 March 2027', halfTerm:'Half-term: 15 - 19 February 2027', note:'Mock examination period' },
+                  { term:'Term 3', dates:'13 April 2027 — Early July 2027', halfTerm:'Half-term: Late May 2027', note:'External examinations (provisional)' },
+                ].map(t => (
+                  <div key={t.term} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'16px 18px'}}>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.cr,marginBottom:6,fontWeight:400}}>{t.term}</div>
+                    <div style={{fontSize:13,color:V.ink,fontWeight:700,marginBottom:6}}>{t.dates}</div>
+                    <div style={{fontSize:11.5,color:V.sl2,fontWeight:600,marginBottom:8,padding:'4px 8px',background:'rgba(201,151,58,.08)',borderRadius:6,display:'inline-block'}}>{t.halfTerm}</div>
+                    <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,margin:0,fontStyle:'italic'}}>{t.note}</p>
+                  </div>
+                ))}
+              </div>
+              <div style={{marginTop:18,padding:'14px 18px',background:V.bone2,border:`1px solid ${V.bone3}`,borderRadius:10,textAlign:'center'}}>
+                <p style={{fontSize:12.5,color:V.sl,lineHeight:1.7,margin:0}}>
+                  <strong style={{color:V.ink}}>Calendar alignment:</strong> Our academic calendar aligns with major Nairobi international schools so families with children in different schools can plan family time and travel together.
+                </p>
               </div>
             </div>
           </div></section>
