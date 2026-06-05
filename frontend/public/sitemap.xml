@@ -291,6 +291,20 @@
   <url><loc>https://smartioushomeschool.com/homeschooling/kiambu</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
 
   <!-- ──────────────────────────────────────────
+       GLOBAL TEST PREPARATION — 6 test pages + hub + languages
+       IELTS, TOEFL, PTE (KSh 29,000 / 20 sessions)
+       GRE, GMAT, SAT (KSh 59,000 / 40 sessions)
+       ────────────────────────────────────────── -->
+  <url><loc>https://smartioushomeschool.com/test-prep</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.92</priority></url>
+  <url><loc>https://smartioushomeschool.com/test-prep/ielts</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://smartioushomeschool.com/test-prep/toefl</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://smartioushomeschool.com/test-prep/pte</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.86</priority></url>
+  <url><loc>https://smartioushomeschool.com/test-prep/gre</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://smartioushomeschool.com/test-prep/gmat</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://smartioushomeschool.com/test-prep/sat</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://smartioushomeschool.com/languages</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.82</priority></url>
+
+  <!-- ──────────────────────────────────────────
        LEGAL & POLICY PAGES — low priority but
        Google likes complete coverage.
        ────────────────────────────────────────── -->
