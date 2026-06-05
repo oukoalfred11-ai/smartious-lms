@@ -5703,6 +5703,219 @@ export default function LandingPage() {
                     </a>
                   </div>
                 </div></section>
+
+                {/* ══════════════════════════════════════════
+                    UAE LEGALITY DEEP-DIVE
+                    Targets: "is homeschooling legal in UAE",
+                    "homeschool KHDA", "Rahhal programme", "ADEK homeschool"
+                ══════════════════════════════════════════ */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{maxWidth:980,margin:'0 auto'}}>
+                    <div style={{textAlign:'center',marginBottom:36}}>
+                      <div className="eyebrow" style={{justifyContent:'center'}}>The legal picture</div>
+                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                        Is homeschooling <em style={{color:V.cr,fontStyle:'italic'}}>legal in the UAE?</em>
+                      </h2>
+                      <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
+                        Short answer: <strong style={{color:V.ink}}>yes</strong>. Long answer depends on whether you're Emirati or expatriate, and which Emirate you live in. Here's the full picture.
+                      </p>
+                    </div>
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,marginBottom:24}}>
+                      {[
+                        {
+                          h:'Expatriate families (most readers)',
+                          tag:'Most common pathway',
+                          p:'If you\'re an expatriate resident (the majority of UAE families), you can enrol your child with an accredited international online school like Smartious without requiring KHDA, ADEK or Ministry approval. The school is regulated abroad (Cambridge, Edexcel, IB) and your child sits internationally-recognised examinations.',
+                          ok:true,
+                        },
+                        {
+                          h:'KHDA Rahhal Programme (Dubai)',
+                          tag:'Optional hybrid pathway',
+                          p:'Dubai\'s KHDA offers the Rahhal programme — an optional hybrid registration pathway through participating private schools. Useful for families who want a formal local link alongside their online schooling. Not required for expatriate families but available.',
+                          ok:true,
+                        },
+                        {
+                          h:'ADEK pathway (Abu Dhabi)',
+                          tag:'Abu Dhabi families',
+                          p:'Abu Dhabi\'s ADEK (Department of Education and Knowledge) regulates education in the emirate. ADEK doesn\'t prohibit homeschooling but recommends linkage with accredited institutions. Most expat families use international online schools without separate ADEK enrolment.',
+                          ok:true,
+                        },
+                        {
+                          h:'Emirati families — MOE Home-Schooling Stream',
+                          tag:'For Emirati nationals',
+                          p:'Emirati students can use the Ministry of Education Home-Schooling Stream for Grades 7-12 (or aged 14+) following the MOE curriculum. This is a regulated route with attested certificates for federal UAE universities. We support families navigating this with parallel international qualifications.',
+                          ok:true,
+                        },
+                        {
+                          h:'University entry from UAE homeschool',
+                          tag:'Plan from day one',
+                          p:'Federal UAE universities (UAEU, Zayed, HCT) may require Ministry-attested certificates for private candidates. International qualifications (IGCSE, A-Level, IB, AP) are accepted by all UAE private universities and most federal universities with attestation. We map this out during admissions.',
+                          ok:'note',
+                        },
+                        {
+                          h:'Common myth',
+                          tag:'Worth clearing up',
+                          p:'It is a myth that "homeschooling is illegal in UAE". That\'s never been the case. The confusion comes from the fact that UAE doesn\'t have a single dedicated homeschool law — instead, it has multiple pathways depending on nationality, emirate and curriculum choice.',
+                          ok:false,
+                        },
+                      ].map(b => (
+                        <div key={b.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}>
+                            <div style={{width:24,height:24,borderRadius:'50%',background: b.ok===true ? V.gold3 : (b.ok==='note' ? V.sl : V.cr),color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:800}}>{b.ok===true ? '✓' : (b.ok==='note' ? '?' : '!')}</div>
+                            <div style={{fontSize:10,fontWeight:700,color:V.gold3,letterSpacing:'.12em',textTransform:'uppercase'}}>{b.tag}</div>
+                          </div>
+                          <h3 style={{fontSize:14.5,fontWeight:700,color:V.ink,marginBottom:8,lineHeight:1.3}}>{b.h}</h3>
+                          <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{b.p}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div></section>
+
+                {/* ══════════════════════════════════════════
+                    UAE PROVIDERS COMPARISON
+                    Targets: "best homeschool providers UAE",
+                    "best online school Dubai", "Cambridge Home School vs",
+                    "Wolsey Hall UAE", "King's InterHigh review"
+                ══════════════════════════════════════════ */}
+                <section className="sec" style={{background:V.white}}><div className="wrap">
+                  <div style={{maxWidth:1200,margin:'0 auto'}}>
+                    <div style={{textAlign:'center',marginBottom:36}}>
+                      <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
+                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                        Best <em style={{color:V.cr,fontStyle:'italic'}}>homeschool providers</em> for UAE families
+                      </h2>
+                      <p style={{fontSize:14,color:V.sl,maxWidth:720,margin:'14px auto 0',lineHeight:1.7}}>
+                        Most UAE families considering online schooling shortlist 3-5 providers. Here's how Smartious compares with the other major options — honestly, with strengths and trade-offs for each.
+                      </p>
+                    </div>
+                    <div style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,overflow:'hidden'}}>
+                      <div style={{overflowX:'auto'}}>
+                        <table style={{width:'100%',minWidth:780,borderCollapse:'collapse',fontSize:12.5}}>
+                          <thead style={{background:V.ink,color:'#fff'}}>
+                            <tr>
+                              <th style={{padding:'12px 14px',textAlign:'left',fontSize:11,letterSpacing:'.04em',textTransform:'uppercase'}}>Provider</th>
+                              <th style={{padding:'12px 14px',textAlign:'left',fontSize:11,letterSpacing:'.04em',textTransform:'uppercase'}}>Origin</th>
+                              <th style={{padding:'12px 14px',textAlign:'left',fontSize:11,letterSpacing:'.04em',textTransform:'uppercase'}}>Curricula</th>
+                              <th style={{padding:'12px 14px',textAlign:'left',fontSize:11,letterSpacing:'.04em',textTransform:'uppercase'}}>Annual fees (Secondary)</th>
+                              <th style={{padding:'12px 14px',textAlign:'left',fontSize:11,letterSpacing:'.04em',textTransform:'uppercase'}}>Best for</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {[
+                              { provider:'Smartious', highlight:true, origin:'Kenyan-rooted · Global delivery', curr:'IGCSE, Edexcel, A-Level, IB, American, BNC, CBC', fees:'AED 8,000–22,000', best:'Families wanting personalised live tuition + AI support + flexible curriculum choice' },
+                              { provider:'Cambridge Home School', origin:'UK (Cambridge)', curr:'IGCSE, A-Level (Cambridge-aligned)', fees:'GBP 3,800–8,500 (AED 17,400–39,000)', best:'Families wanting strict Cambridge-aligned UK home schooling brand' },
+                              { provider:'Wolsey Hall Oxford', origin:'UK (Oxford)', curr:'IGCSE, A-Level (Cambridge & Edexcel)', fees:'GBP 1,100–3,500 (AED 5,000–16,000) materials only', best:'Self-paced learners wanting low-cost UK home learning model' },
+                              { provider:'King\'s InterHigh', origin:'UK (Inspired Group)', curr:'IGCSE, A-Level, IB Diploma', fees:'GBP 4,500–10,200 (AED 20,600–46,800)', best:'Premium UK private online school feel with cohort structure' },
+                              { provider:'InterHigh', origin:'UK', curr:'IGCSE, A-Level (Cambridge)', fees:'GBP 5,200–7,800 (AED 23,800–35,800)', best:'Established UK online school with strong cohort community' },
+                              { provider:'Pearson Online Academy', origin:'US / Pearson', curr:'American, Edexcel IGCSE/A-Level', fees:'USD 8,000–14,000 (AED 29,300–51,400)', best:'Families wanting US accredited online K-12' },
+                              { provider:'iCademy Middle East', origin:'UAE-based', curr:'American (K12-based)', fees:'AED 18,000–28,000', best:'Families wanting US accredited K-12 with local UAE support' },
+                              { provider:'Briteschool', origin:'UAE-based', curr:'British (IGCSE, A-Level)', fees:'AED 22,000–34,000', best:'Families wanting UAE-based UK curriculum option' },
+                            ].map((p, i) => (
+                              <tr key={p.provider} style={{background: p.highlight ? 'rgba(139,26,46,.04)' : (i % 2 ? V.bone : V.white), borderTop:`1px solid ${V.bone3}`}}>
+                                <td style={{padding:'14px 14px',fontWeight:p.highlight?800:700,color:p.highlight?V.cr:V.ink}}>
+                                  {p.provider}
+                                  {p.highlight && <span style={{display:'inline-block',marginLeft:8,fontSize:9,fontWeight:700,color:V.gold3,background:'rgba(201,151,58,.15)',padding:'2px 7px',borderRadius:99,letterSpacing:'.06em',textTransform:'uppercase',verticalAlign:'middle'}}>This page</span>}
+                                </td>
+                                <td style={{padding:'14px 14px',color:V.sl}}>{p.origin}</td>
+                                <td style={{padding:'14px 14px',color:V.sl}}>{p.curr}</td>
+                                <td style={{padding:'14px 14px',color:V.sl,fontWeight:600}}>{p.fees}</td>
+                                <td style={{padding:'14px 14px',color:V.sl}}>{p.best}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <p style={{fontSize:12,color:V.sl2,maxWidth:980,margin:'18px auto 0',textAlign:'center',lineHeight:1.6,fontStyle:'italic'}}>
+                      Pricing as of 2026 based on publicly listed annual fees. AED conversions at approximate published rates. Each provider has genuine strengths — the right choice depends on your family\'s specific situation, target university destination, and preferred teaching style. We\'re happy to talk through which provider fits your family even if it isn\'t us.
+                    </p>
+                  </div>
+                </div></section>
+
+                {/* ══════════════════════════════════════════
+                    HOW TO START — Step-by-step
+                    Targets: "how to homeschool in UAE",
+                    "start homeschooling Dubai", "homeschool registration UAE"
+                ══════════════════════════════════════════ */}
+                <section className="sec" style={{background:V.bone}}><div className="wrap">
+                  <div style={{maxWidth:1000,margin:'0 auto'}}>
+                    <div style={{textAlign:'center',marginBottom:36}}>
+                      <div className="eyebrow" style={{justifyContent:'center'}}>Step-by-step</div>
+                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                        How to start <em style={{color:V.cr,fontStyle:'italic'}}>homeschooling</em> in the UAE
+                      </h2>
+                      <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
+                        For expatriate families, the process is simpler than most parents expect — typically 7-14 days from first consultation to first lesson.
+                      </p>
+                    </div>
+                    <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                      {[
+                        { n:'01', h:'Free consultation', p:'Book a 30-60 minute call with our admissions team. We assess your child\'s current academic level (school transcripts, sample work), discuss your family\'s timeline and target university destinations, and recommend a curriculum and pathway.' },
+                        { n:'02', h:'Choose curriculum and pathway', p:'Most UAE families choose Cambridge IGCSE (Year 7-11) progressing to A-Level (Year 12-13) — well-recognised by UAE universities and globally. IB Diploma is also popular for university-bound students. American curriculum suits families targeting US universities. We match curriculum to your university goals.' },
+                        { n:'03', h:'Enrol with Smartious', p:'Pay the USD 38 one-time registration fee, choose your billing plan (monthly, termly with 5% saving, or annual with 12% saving), and receive your child\'s LMS access. No KHDA or ADEK approval required for expatriate families.' },
+                        { n:'04', h:'Set up your learning environment', p:'A quiet space, laptop or tablet, stable internet, and noise-cancelling headphones. We provide a recommended equipment list. No expensive equipment needed.' },
+                        { n:'05', h:'Begin live lessons', p:'Your child starts live online classes on their schedule. Classes run on UAE time (GMT+4) plus recorded sessions for flexibility. Mshauri AI provides 24/7 homework help between live sessions.' },
+                        { n:'06', h:'Plan examination centres', p:'Cambridge, Edexcel and IB examinations are sat at registered centres in UAE — British Council Dubai, British Council Abu Dhabi, KHDA-approved centres, and specific schools that accept external candidates. We coordinate registration timing with your child\'s exam readiness.' },
+                      ].map(s => (
+                        <div key={s.n} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'16px 20px',display:'flex',gap:16,alignItems:'flex-start'}}>
+                          <div style={{flexShrink:0,fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.gold3,lineHeight:1,minWidth:42}}>{s.n}</div>
+                          <div>
+                            <h3 style={{fontSize:14.5,fontWeight:700,color:V.ink,marginBottom:5,lineHeight:1.3}}>{s.h}</h3>
+                            <p style={{fontSize:13,color:V.sl,lineHeight:1.7,margin:0}}>{s.p}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div></section>
+
+                {/* ══════════════════════════════════════════
+                    UNIVERSITY PATHWAYS FROM UAE HOMESCHOOL
+                    Targets: "homeschool UAE university entry",
+                    "UAE homeschool acceptance", "uni from homeschool UAE"
+                ══════════════════════════════════════════ */}
+                <section className="sec" style={{background:V.white}}><div className="wrap">
+                  <div style={{maxWidth:1100,margin:'0 auto'}}>
+                    <div style={{textAlign:'center',marginBottom:36}}>
+                      <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
+                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                        Where <em style={{color:V.cr,fontStyle:'italic'}}>UAE homeschoolers</em> go to university
+                      </h2>
+                      <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
+                        Homeschool isn't a barrier to top universities — international qualifications (IGCSE, A-Level, IB, AP) are recognised globally. Here's what each destination expects.
+                      </p>
+                    </div>
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                      {[
+                        { region:'United Kingdom', icon:'🇬🇧', recognises:'Universal acceptance of A-Level, IGCSE, IB', pathway:'UCAS application with 3 A-Levels typical. Russell Group universities expect AAB-A*AA. Strong pathway from IGCSE → A-Level.' },
+                        { region:'United States', icon:'🇺🇸', recognises:'IGCSE/A-Level, IB, American curriculum, AP exams', pathway:'Common App with SAT/ACT + transcripts. Top universities expect SAT 1400+ and 3-5 AP exams. Need-based aid available for top schools.' },
+                        { region:'Canada', icon:'🇨🇦', recognises:'A-Level, IB, AP, IGCSE for foundation', pathway:'Direct application via OUAC (Ontario) or university websites. WES evaluation of transcripts. Strong PR pathway through Canadian degree.' },
+                        { region:'Australia', icon:'🇦🇺', recognises:'A-Level, IB, IGCSE, ATAR equivalent', pathway:'Direct application to universities. ATAR-equivalent scoring of international qualifications. Group of Eight universities expect 90+ ATAR equivalent.' },
+                        { region:'UAE Federal Universities', icon:'🇦🇪', recognises:'MOE-attested qualifications', pathway:'UAEU, Zayed University, HCT may require MOE attestation of international certificates. We guide families through attestation process where needed.' },
+                        { region:'UAE Private Universities', icon:'🇦🇪', recognises:'IGCSE, A-Level, IB widely accepted', pathway:'University of Sharjah, AUS, Khalifa, Heriot-Watt Dubai, Middlesex Dubai accept international qualifications directly. Branch campuses use home-country admissions.' },
+                        { region:'Europe (Germany, Netherlands)', icon:'🇪🇺', recognises:'A-Level, IB, IGCSE (with foundation year)', pathway:'A-Level passes direct entry to many European universities. German public universities offer free tuition. Netherlands has 1,800+ English-taught programmes.' },
+                        { region:'Africa (Kenya, SA, Nigeria)', icon:'🌍', recognises:'IGCSE, A-Level, IB, KCSE alongside', pathway:'Kenyan universities accept IGCSE/A-Level. South African universities accept all international qualifications. We support African-bound returnees specifically.' },
+                      ].map(r => (
+                        <div key={r.region} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
+                          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                            <div style={{fontSize:'1.6rem',lineHeight:1}}>{r.icon}</div>
+                            <h3 style={{fontSize:14,fontWeight:700,color:V.ink,margin:0,lineHeight:1.3}}>{r.region}</h3>
+                          </div>
+                          <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.06em',textTransform:'uppercase',marginBottom:8}}>Recognises</div>
+                          <div style={{fontSize:12.5,color:V.sl,lineHeight:1.5,marginBottom:10}}>{r.recognises}</div>
+                          <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.06em',textTransform:'uppercase',marginBottom:8}}>Pathway</div>
+                          <div style={{fontSize:12.5,color:V.sl,lineHeight:1.5}}>{r.pathway}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{marginTop:24,padding:'16px 20px',background:V.bone2,border:`1px solid ${V.bone3}`,borderRadius:10,textAlign:'center'}}>
+                      <div style={{fontSize:13,color:V.sl,lineHeight:1.6}}>
+                        <strong style={{color:V.ink}}>Combined with Smartious Study Abroad:</strong> students enrolled in Smartious receive free university application support during their final year — university selection, applications, scholarship applications, and visa guidance. <span style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={()=>P('study-abroad')}>Learn more →</span>
+                      </div>
+                    </div>
+                  </div>
+                </div></section>
               </>
             )}
             {/* /UAE-ONLY RICH SECTIONS */}
