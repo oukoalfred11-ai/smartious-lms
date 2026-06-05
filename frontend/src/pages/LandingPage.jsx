@@ -10,6 +10,7 @@ import { FULL_ARTICLES } from '../data/fullArticles.js'
 import { NAIROBI_AREAS } from '../data/nairobiAreas.js'
 import { UAE_AREAS } from '../data/uaeAreas.js'
 import { KENYA_CITIES } from '../data/kenyaCities.js'
+import { TEST_PREP } from '../data/testPrep.js'
 
 
 /* ── Front Desk capture ───────────────────────────────────
@@ -806,7 +807,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1514,6 +1515,8 @@ export default function LandingPage() {
   const [openCategory, setOpenCategory] = useState(null)
   const [tuitionMenuOpen, setTuitionMenuOpen] = useState(false)
   const tuitionRef = useRef(null)
+  const [programmesMenuOpen, setProgrammesMenuOpen] = useState(false)
+  const programmesRef = useRef(null)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -1533,6 +1536,18 @@ export default function LandingPage() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [tuitionMenuOpen])
+
+  // Close programmes dropdown when clicking outside it
+  useEffect(() => {
+    if (!programmesMenuOpen) return
+    const handleClickOutside = (e) => {
+      if (programmesRef.current && !programmesRef.current.contains(e.target)) {
+        setProgrammesMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [programmesMenuOpen])
 
   // Preload Paystack inline.js so the payment modal opens instantly when user reaches Step 3
   useEffect(() => {
@@ -1584,6 +1599,7 @@ export default function LandingPage() {
   const [currentTuitionArea, setCurrentTuitionArea] = useState(null)
   const [currentUaeArea, setCurrentUaeArea] = useState(null)
   const [currentKenyaCity, setCurrentKenyaCity] = useState(null)
+  const [currentTestPrep, setCurrentTestPrep] = useState(null)
   const [currentCompare, setCurrentCompare] = useState(null)
   const [publicTeachers, setPublicTeachers] = useState([])
   const [teachersLoading, setTeachersLoading] = useState(false)
@@ -1990,7 +2006,15 @@ export default function LandingPage() {
   // ── URL ⇄ page-state sync ──────────────────────────────
   // Map a URL pathname to a landing-page id. '/' → 'home',
   // '/curricula' → 'curricula', '/blog/:slug' → 'article'.
-  const pageToPath = (id) => (id === 'home' ? '/' : '/' + id)
+  const pageToPath = (id) => {
+    if (id === 'home') return '/'
+    // Translate dropdown shorthand IDs into proper slug-based URLs
+    if (id.startsWith('test-prep-') && id !== 'test-prep-detail') {
+      const slug = id.slice('test-prep-'.length)
+      return '/test-prep/' + slug
+    }
+    return '/' + id
+  }
 
   // Apply the URL to internal page state. Driven by a useEffect
   // so browser back/forward and direct links all work.
@@ -2087,6 +2111,25 @@ export default function LandingPage() {
       } else {
         setPage('homeschooling-kenya')
       }
+      return
+    }
+    if (path === '/test-prep') {
+      setPage('test-prep')
+      return
+    }
+    if (path.startsWith('/test-prep/')) {
+      const slug = decodeURIComponent(path.slice('/test-prep/'.length))
+      const test = TEST_PREP.find(t => t.slug === slug)
+      if (test) {
+        setCurrentTestPrep(slug)
+        setPage('test-prep-detail')
+      } else {
+        setPage('test-prep')
+      }
+      return
+    }
+    if (path === '/languages') {
+      setPage('languages')
       return
     }
     if (path.startsWith('/compare/')) {
@@ -2390,7 +2433,83 @@ export default function LandingPage() {
                 </div>
               )}
             </div>
-            {[['Pricing','pricing'],['Programs','programs'],['Activities','activities'],['Teachers','teachers'],['FAQ','faq'],['Blog','blog']].map(([l,id]) => (
+            {[['Pricing','pricing']].map(([l,id]) => (
+              <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
+            ))}
+            {/* Programmes dropdown — grouped categories with chips */}
+            <div ref={programmesRef} style={{position:'relative'}}>
+              <div
+                className={`nl${['programs','test-prep','test-prep-detail','languages'].includes(page) ? ' on' : ''}`}
+                onClick={() => setProgrammesMenuOpen(o => !o)}
+                style={{display:'inline-flex',alignItems:'center',gap:5}}
+                aria-expanded={programmesMenuOpen}
+                aria-haspopup="true">
+                Programmes
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{transform:programmesMenuOpen?'rotate(180deg)':'rotate(0)',transition:'transform .2s'}}><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              {programmesMenuOpen && (
+                <div style={{
+                  position:'absolute',top:'calc(100% + 6px)',left:0,
+                  background:'#0d1220',border:'1px solid rgba(201,151,58,.2)',
+                  borderRadius:8,minWidth:340,padding:'12px 0 8px',zIndex:10000,
+                  boxShadow:'0 12px 40px rgba(0,0,0,.5)',
+                }}>
+                  {[
+                    {
+                      cat:'Core Programmes',
+                      items:[
+                        {l:'Homeschool', id:'curricula', sub:'Full curriculum delivery, K-12'},
+                        {l:'Tuition', id:'services', sub:'1-on-1 specialist tuition'},
+                        {l:'Languages', id:'languages', sub:'Foreign language coaching'},
+                      ],
+                    },
+                    {
+                      cat:'Study Pathways',
+                      items:[
+                        {l:'Study Abroad', id:'programs', sub:'University placement guidance'},
+                        {l:'IUFP', id:'programs', sub:'International University Foundation'},
+                        {l:'Pre-University', id:'programs', sub:'Gap-year academic prep'},
+                      ],
+                    },
+                    {
+                      cat:'Global Test Preparation',
+                      items:[
+                        {l:'IELTS', id:'test-prep-ielts', chip:'KSh 29,000', subchip:'20 sessions'},
+                        {l:'TOEFL', id:'test-prep-toefl', chip:'KSh 29,000', subchip:'20 sessions'},
+                        {l:'PTE', id:'test-prep-pte', chip:'KSh 29,000', subchip:'20 sessions'},
+                        {l:'GRE', id:'test-prep-gre', chip:'KSh 59,000', subchip:'40 sessions'},
+                        {l:'GMAT', id:'test-prep-gmat', chip:'KSh 59,000', subchip:'40 sessions'},
+                        {l:'SAT', id:'test-prep-sat', chip:'KSh 59,000', subchip:'40 sessions'},
+                      ],
+                    },
+                  ].map((group, gi) => (
+                    <div key={group.cat} style={{marginBottom: gi < 2 ? 6 : 0, paddingBottom: gi < 2 ? 6 : 0, borderBottom: gi < 2 ? '1px solid rgba(255,255,255,.06)' : 'none'}}>
+                      <div style={{padding:'6px 16px 4px',fontSize:9.5,fontWeight:700,letterSpacing:'.16em',textTransform:'uppercase',color:'rgba(201,151,58,.7)'}}>{group.cat}</div>
+                      {group.items.map(item => (
+                        <div
+                          key={item.l + item.id}
+                          onClick={() => { setProgrammesMenuOpen(false); P(item.id) }}
+                          style={{padding:'9px 16px',cursor:'pointer',borderLeft:'2px solid transparent',transition:'all .15s',display:'flex',alignItems:'center',justifyContent:'space-between',gap:10}}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,151,58,.08)'; e.currentTarget.style.borderLeftColor = V.gold3 }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent' }}>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>{item.l}</div>
+                            {item.sub && <div style={{fontSize:11,color:'rgba(247,243,237,.5)',marginTop:2}}>{item.sub}</div>}
+                          </div>
+                          {item.chip && (
+                            <div style={{textAlign:'right',flexShrink:0}}>
+                              <div style={{fontSize:10.5,fontWeight:700,color:V.gold3,background:'rgba(201,151,58,.12)',padding:'2px 8px',borderRadius:99,whiteSpace:'nowrap'}}>{item.chip}</div>
+                              {item.subchip && <div style={{fontSize:9,color:'rgba(247,243,237,.4)',marginTop:3}}>{item.subchip}</div>}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {[['Activities','activities'],['Teachers','teachers'],['FAQ','faq'],['Blog','blog']].map(([l,id]) => (
               <div key={id} className={`nl${page===id?' on':''}`} onClick={() => P(id)}>{l}</div>
             ))}
           </div>
@@ -2429,6 +2548,19 @@ export default function LandingPage() {
                 ['All Curricula','curricula'],
                 ['Pricing','pricing'],
               ]},
+              { cat:'Programmes', items:[
+                ['Homeschool','curricula'],
+                ['Tuition','services'],
+                ['Languages','languages'],
+                ['Study Abroad','programs'],
+                ['Test Prep · IELTS','test-prep-ielts'],
+                ['Test Prep · TOEFL','test-prep-toefl'],
+                ['Test Prep · PTE','test-prep-pte'],
+                ['Test Prep · GRE','test-prep-gre'],
+                ['Test Prep · GMAT','test-prep-gmat'],
+                ['Test Prep · SAT','test-prep-sat'],
+                ['All Test Prep','test-prep'],
+              ]},
               { cat:'Where We Teach', items:[
                 ['Tuition Nairobi','tuition-nairobi'],
                 ['Tuition UAE','tuition-uae'],
@@ -2437,7 +2569,7 @@ export default function LandingPage() {
               ]},
               { cat:'Activities', items:[
                 ['Activities & Sports','activities'],
-                ['Programs','programs'],
+                ['Programs Overview','programs'],
               ]},
               { cat:'Resources', items:[
                 ['Blog','blog'],
@@ -9603,6 +9735,446 @@ export default function LandingPage() {
         )
       })()}
       {/* /kenya-city */}
+      {/* ══════════════════════════════════════════
+          TEST PREP HUB — /test-prep
+          Shows all 6 test prep programmes.
+      ══════════════════════════════════════════ */}
+      {page === 'test-prep' && (
+        <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'EducationalOrganization',
+            '@id':'https://smartioushomeschool.com/test-prep#org',
+            'name':'Smartious Global Test Preparation',
+            'url':'https://smartioushomeschool.com/test-prep',
+            'description':'Premium IELTS, TOEFL, PTE, GRE, GMAT and SAT test preparation in Nairobi. Live 1-on-1 sessions with qualified specialists. From KSh 29,000.',
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',padding:'72px 0 56px',overflow:'hidden',
+          }}>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Global test preparation</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                Master the tests that <em style={{color:V.gold3,fontStyle:'italic'}}>open universities</em>
+              </h1>
+              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
+                Live 1-on-1 preparation for the world's most important standardised tests. IELTS, TOEFL, PTE for English proficiency. GRE, GMAT, SAT for graduate and undergraduate admissions. Delivered online by qualified specialists, with mock tests, detailed feedback and a clear path to your target score.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                  Book free consultation
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to discuss test preparation.')}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* TIER 1: English Proficiency */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:32}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div className="eyebrow">Tier 1 · English Proficiency</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
+                English language tests for <em style={{color:V.cr,fontStyle:'italic'}}>university and migration</em>
+              </h2>
+              <p style={{fontSize:14,color:V.sl,maxWidth:680,marginBottom:32}}>
+                Required for university applications and migration to English-speaking countries. All three are widely accepted; choose based on your target institutions and personal preferences.
+              </p>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                {TEST_PREP.filter(t => t.tier === 'English Proficiency').map(test => (
+                  <div key={test.slug}
+                    onClick={() => { setCurrentTestPrep(test.slug); nav('/test-prep/' + test.slug); window.scrollTo(0,0) }}
+                    style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{display:'flex',alignItems:'baseline',justifyContent:'space-between',marginBottom:6}}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.ink,lineHeight:1.1}}>{test.code}</div>
+                      <div style={{fontSize:11,fontWeight:700,color:V.gold3,background:'rgba(201,151,58,.12)',padding:'3px 10px',borderRadius:99}}>{test.fee}</div>
+                    </div>
+                    <div style={{fontSize:11.5,color:V.sl2,marginBottom:14,letterSpacing:'.02em'}}>{test.fullName}</div>
+                    <div style={{fontSize:13,color:V.sl,lineHeight:1.6,marginBottom:14}}>
+                      {test.sessions} live sessions · {test.duration}
+                    </div>
+                    <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
+                      View {test.code} prep →
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* TIER 2: Graduate & Undergraduate Admissions */}
+          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:64}}><div className="wrap">
+            <div style={{maxWidth:1100,margin:'0 auto'}}>
+              <div className="eyebrow">Tier 2 · Graduate &amp; Undergraduate Admissions</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
+                Standardised admissions tests for <em style={{color:V.cr,fontStyle:'italic'}}>graduate &amp; undergraduate</em> programmes
+              </h2>
+              <p style={{fontSize:14,color:V.sl,maxWidth:680,marginBottom:32}}>
+                Required for competitive admissions to top US, UK, Canadian and global universities. 40-session intensive programmes with full mock tests, detailed analytics and admissions strategy support.
+              </p>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                {TEST_PREP.filter(t => t.tier !== 'English Proficiency').map(test => (
+                  <div key={test.slug}
+                    onClick={() => { setCurrentTestPrep(test.slug); nav('/test-prep/' + test.slug); window.scrollTo(0,0) }}
+                    style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{display:'flex',alignItems:'baseline',justifyContent:'space-between',marginBottom:6}}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.ink,lineHeight:1.1}}>{test.code}</div>
+                      <div style={{fontSize:11,fontWeight:700,color:V.gold3,background:'rgba(201,151,58,.12)',padding:'3px 10px',borderRadius:99}}>{test.fee}</div>
+                    </div>
+                    <div style={{fontSize:11.5,color:V.sl2,marginBottom:14,letterSpacing:'.02em'}}>{test.fullName}</div>
+                    <div style={{fontSize:13,color:V.sl,lineHeight:1.6,marginBottom:14}}>
+                      {test.sessions} live sessions · {test.duration}
+                    </div>
+                    <div style={{fontSize:12,fontWeight:700,color:V.cr,display:'inline-flex',alignItems:'center',gap:5}}>
+                      View {test.code} prep →
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /test-prep */}
+
+      {/* ══════════════════════════════════════════
+          TEST PREP DETAIL — /test-prep/{slug}
+          Individual page for each test, data-driven.
+      ══════════════════════════════════════════ */}
+      {page === 'test-prep-detail' && currentTestPrep && (() => {
+        const test = TEST_PREP.find(t => t.slug === currentTestPrep)
+        if (!test) return null
+        return (
+          <>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'Course',
+              'name': test.code + ' Preparation',
+              'description': test.seoDesc,
+              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool','url':'https://smartioushomeschool.com'},
+              'offers':{'@type':'Offer','price':test.fee.replace(/[^\d]/g,''),'priceCurrency':'KES'},
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Test Preparation','item':'https://smartioushomeschool.com/test-prep'},
+                {'@type':'ListItem','position':3,'name': test.code,'item':'https://smartioushomeschool.com/test-prep/' + test.slug},
+              ],
+            })}}/>
+
+            {/* HERO */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff', padding:'60px 0 48px', overflow:'hidden',
+            }}>
+              <div className="wrap">
+                <a href="/test-prep" onClick={(e)=>{e.preventDefault(); P('test-prep')}}
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  All test preparation
+                </a>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{test.tier}</div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.2rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:8,letterSpacing:'-.01em'}}>
+                  {test.code} <em style={{color:V.gold3,fontStyle:'italic'}}>Preparation</em>
+                </h1>
+                <div style={{fontSize:14,color:'rgba(255,255,255,.6)',marginBottom:18,letterSpacing:'.02em'}}>{test.fullName}</div>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.92)',lineHeight:1.65,marginBottom:24,maxWidth:760}}>{test.heroTagline}</p>
+                {/* Price strip */}
+                <div style={{
+                  display:'flex',gap:18,flexWrap:'wrap',
+                  background:'rgba(0,0,0,.3)',
+                  border:`1px solid rgba(201,151,58,.3)`,
+                  borderRadius:10,padding:'14px 18px',marginBottom:24,maxWidth:640,
+                }}>
+                  <div>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Tuition</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff'}}>{test.fee}</div>
+                    <div style={{fontSize:11,color:'rgba(255,255,255,.55)'}}>{test.feeUsd}</div>
+                  </div>
+                  <div style={{borderLeft:'1px solid rgba(255,255,255,.1)'}}/>
+                  <div>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Sessions</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff'}}>{test.sessions}</div>
+                    <div style={{fontSize:11,color:'rgba(255,255,255,.55)'}}>{test.sessionLength} each</div>
+                  </div>
+                  <div style={{borderLeft:'1px solid rgba(255,255,255,.1)'}}/>
+                  <div>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Duration</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff'}}>{test.duration.split('(')[0].trim()}</div>
+                    <div style={{fontSize:11,color:'rgba(255,255,255,.55)'}}>{test.duration.match(/\((.*?)\)/)?.[1] || ''}</div>
+                  </div>
+                </div>
+                <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book free consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to book ' + test.code + ' preparation.')}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
+                    WhatsApp us
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            {/* About the test */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">About {test.code}</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+                  What is {test.code}?
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8}}>{test.intro}</p>
+              </div>
+            </div></section>
+
+            {/* Who it's for */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Who this is for</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
+                  {test.code} is right for you if you're
+                </h2>
+                <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:12}}>
+                  {test.whoFor.map((w, i) => (
+                    <li key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px',fontSize:13.5,color:V.sl,lineHeight:1.65,display:'flex',gap:12}}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:3}}><path d="M5 12l5 5L20 7"/></svg>
+                      <span>{w}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div></section>
+
+            {/* Test structure */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Test format</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    {test.code} structure &amp; sections
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                  {test.sections.map((s, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
+                      <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>Section {i + 1}</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>{s.h}</h3>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{s.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* What's included */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>What's included</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    Your {test.fee} {test.code} preparation package
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:10,maxWidth:900,margin:'0 auto'}}>
+                  {test.whatsIncluded.map((item, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:8,padding:'12px 16px',display:'flex',gap:10,alignItems:'flex-start'}}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:4}}><path d="M5 12l5 5L20 7"/></svg>
+                      <div style={{fontSize:12.5,color:V.ink,lineHeight:1.55}}>{item}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* Score / Band targets */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>What scores mean</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    {test.code} score &amp; what it unlocks
+                  </h2>
+                </div>
+                <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,overflow:'hidden'}}>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:13.5}}>
+                    <thead style={{background:V.ink,color:'#fff'}}>
+                      <tr>
+                        <th style={{padding:'12px 16px',textAlign:'left',fontWeight:700,fontSize:11.5,letterSpacing:'.04em',textTransform:'uppercase'}}>Score range</th>
+                        <th style={{padding:'12px 16px',textAlign:'left',fontWeight:700,fontSize:11.5,letterSpacing:'.04em',textTransform:'uppercase'}}>Typical doors it opens</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {test.bandTargets.map((b, i) => (
+                        <tr key={i} style={{background: i % 2 === 0 ? V.bone : V.white, borderTop:`1px solid ${V.bone3}`}}>
+                          <td style={{padding:'12px 16px',fontWeight:700,color:V.cr,fontSize:14}}>{b.range}</td>
+                          <td style={{padding:'12px 16px',color:V.sl,fontSize:13}}>{b.target}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div></section>
+
+            {/* Key facts */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Key facts</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    Everything you need to know about {test.code}
+                  </h2>
+                </div>
+                <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                  {test.keyFacts.map(([k, v], i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:8,padding:'12px 18px',display:'flex',gap:16,flexWrap:'wrap',alignItems:'baseline'}}>
+                      <div style={{fontSize:11.5,fontWeight:700,color:V.gold3,letterSpacing:'.06em',textTransform:'uppercase',minWidth:180}}>{k}</div>
+                      <div style={{fontSize:13,color:V.ink,flex:1}}>{v}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* FAQ */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:820,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Frequently asked</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    {test.code} preparation questions
+                  </h2>
+                </div>
+                {test.faqs.map((f, i) => (
+                  <details key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                    <summary style={{cursor:'pointer',padding:'14px 18px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
+                    <div style={{padding:'0 18px 14px',fontSize:13.5,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:12}}>{f.a}</div>
+                  </details>
+                ))}
+                <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                  '@context':'https://schema.org','@type':'FAQPage',
+                  'mainEntity': test.faqs.map(f => ({'@type':'Question','name': f.q,'acceptedAnswer':{'@type':'Answer','text': f.a}})),
+                })}}/>
+              </div>
+            </div></section>
+
+            {/* Enrol CTA */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
+                <div className="eyebrow" style={{color:V.gold3,justifyContent:'center'}}>Ready to start</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  Start your <em style={{color:V.gold3,fontStyle:'italic'}}>{test.code}</em> journey today
+                </h2>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:24,maxWidth:560,margin:'0 auto 24px'}}>
+                  {test.fee} · {test.sessions} live sessions · {test.duration}. Most students see meaningful improvement within the first 4 sessions.
+                </p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                    Book free consultation
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol in ' + test.code + ' preparation.')}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp us
+                  </a>
+                </div>
+              </div>
+            </div></section>
+          </>
+        )
+      })()}
+      {/* /test-prep-detail */}
+
+      {/* ══════════════════════════════════════════
+          LANGUAGES — /languages
+          Foreign language coaching landing page.
+      ══════════════════════════════════════════ */}
+      {page === 'languages' && (
+        <>
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',padding:'72px 0 56px',
+          }}>
+            <div className="wrap" style={{maxWidth:880,margin:'0 auto'}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Foreign languages</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,4.8vw,3.2rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                Language coaching that <em style={{color:V.gold3,fontStyle:'italic'}}>opens worlds</em>
+              </h1>
+              <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:720}}>
+                One-on-one foreign language tuition with qualified tutors. French, Spanish, German, Mandarin, Arabic, Kiswahili and more — for school examinations, university applications, professional fluency or personal interest.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                  Book free consultation
+                </button>
+                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20foreign%20language%20coaching."
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </section>
+
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Languages we offer</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  From <em style={{color:V.cr,fontStyle:'italic'}}>beginner to fluent</em>
+                </h2>
+                <p style={{fontSize:14,color:V.sl,maxWidth:640,margin:'14px auto 0',lineHeight:1.6}}>
+                  Personalised 1-on-1 coaching across major world languages, levels CEFR A1 (beginner) through C2 (fluent).
+                </p>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:14}}>
+                {[
+                  { name:'French', use:'IGCSE · IB · DELF · DALF · Travel · Career' },
+                  { name:'Spanish', use:'IGCSE · IB · DELE · Travel · Career' },
+                  { name:'German', use:'IGCSE · IB · TestDaF · Goethe-Zertifikat · Career' },
+                  { name:'Mandarin Chinese', use:'IGCSE · HSK levels 1-6 · Business · Travel' },
+                  { name:'Arabic', use:'IGCSE · Modern Standard · Egyptian · Gulf · Quranic' },
+                  { name:'Kiswahili', use:'CBC · KCSE · Communication · Cultural · Travel' },
+                  { name:'Italian', use:'Tourism · Cultural studies · Music · Travel' },
+                  { name:'Portuguese', use:'Business · Brazilian variant · European variant' },
+                ].map(lang => (
+                  <div key={lang.name} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:6,lineHeight:1.3,fontWeight:400}}>{lang.name}</h3>
+                    <div style={{fontSize:11.5,color:V.sl,lineHeight:1.6}}>{lang.use}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{marginTop:32,padding:'20px 24px',background:V.bone2,border:`1px solid ${V.bone3}`,borderRadius:10,textAlign:'center'}}>
+                <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>Pricing</div>
+                <div style={{fontSize:14,color:V.ink,lineHeight:1.6}}>
+                  Foreign language tuition from <strong style={{color:V.cr}}>KSh 1,500/hour</strong> for primary level up to <strong style={{color:V.cr}}>KSh 2,500/hour</strong> for advanced (CEFR B2-C2). Custom programmes for examination preparation (DELF, DELE, Goethe-Zertifikat, HSK) priced individually based on examination level and timeline.
+                </div>
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /languages */}
+
 
 
 
