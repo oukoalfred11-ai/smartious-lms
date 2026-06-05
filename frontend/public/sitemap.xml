@@ -340,6 +340,14 @@
   <url><loc>https://smartioushomeschool.com/pre-university</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.86</priority></url>
 
   <!-- ──────────────────────────────────────────
+       SCHOOL LIFE — Events, Calendar, Gallery
+       Activities + Blog already in sitemap.
+       ────────────────────────────────────────── -->
+  <url><loc>https://smartioushomeschool.com/events</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://smartioushomeschool.com/calendar</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.78</priority></url>
+  <url><loc>https://smartioushomeschool.com/gallery</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+
+  <!-- ──────────────────────────────────────────
        LEGAL & POLICY PAGES — low priority but
        Google likes complete coverage.
        ────────────────────────────────────────── -->
