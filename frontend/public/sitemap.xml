@@ -305,6 +305,33 @@
   <url><loc>https://smartioushomeschool.com/languages</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.82</priority></url>
 
   <!-- ──────────────────────────────────────────
+       STUDY ABROAD — 10 destinations + hub
+       Free university application support for
+       Kenyan students. Hub + dedicated destination pages
+       targeting "study in [country]" search queries.
+       ────────────────────────────────────────── -->
+  <url><loc>https://smartioushomeschool.com/study-abroad</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.94</priority></url>
+  <url><loc>https://smartioushomeschool.com/study-abroad/uk</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.90</priority></url>
+  <url><loc>https://smartioushomeschool.com/study-abroad/usa</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.90</priority></url>
+  <url><loc>https://smartioushomeschool.com/study-abroad/canada</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.90</priority></url>
+  <url><loc>https://smartioushomeschool.com/study-abroad/australia</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://smartioushomeschool.com/study-abroad/germany</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://smartioushomeschool.com/study-abroad/netherlands</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.86</priority></url>
+  <url><loc>https://smartioushomeschool.com/study-abroad/ireland</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.86</priority></url>
+  <url><loc>https://smartioushomeschool.com/study-abroad/china</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://smartioushomeschool.com/study-abroad/turkey</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.88</priority></url>
+  <url><loc>https://smartioushomeschool.com/study-abroad/uae</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.86</priority></url>
+
+  <!-- ──────────────────────────────────────────
+       PROGRAMMES HUBS — Homeschool Global,
+       Tuition Global, IUFP, Pre-University
+       ────────────────────────────────────────── -->
+  <url><loc>https://smartioushomeschool.com/homeschool</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://smartioushomeschool.com/tuition</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://smartioushomeschool.com/iufp</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.86</priority></url>
+  <url><loc>https://smartioushomeschool.com/pre-university</loc><lastmod>2026-06-04</lastmod><changefreq>monthly</changefreq><priority>0.86</priority></url>
+
+  <!-- ──────────────────────────────────────────
        LEGAL & POLICY PAGES — low priority but
        Google likes complete coverage.
        ────────────────────────────────────────── -->
