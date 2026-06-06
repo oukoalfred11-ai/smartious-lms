@@ -3874,8 +3874,8 @@ export default function LandingPage() {
                       <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:'#fff',lineHeight:1.2}}>Smartious Company Portfolio <em style={{color:V.gold3,fontStyle:'italic'}}>2026</em></div>
                       <div style={{fontSize:11.5,color:'rgba(255,255,255,.6)',marginTop:4}}>21 pages · PDF · 94 KB · The full picture of Smartious</div>
                     </div>
-                    <a href="https://collection.cloudinary.com/dae99gz1m/25c32bf1f625acd30baedf2f77e6d2b8"
-                      target="_blank" rel="noopener noreferrer"
+                    <a href="/Smartious_Company_Portfolio_2026%20(2).pdf"
+                      download
                       style={{
                         background:V.gold3,color:V.ink,
                         padding:'12px 22px',borderRadius:8,
@@ -4120,8 +4120,8 @@ export default function LandingPage() {
                   <p style={{fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:18}}>
                     These vision, mission and values are reflected in our full Company Portfolio.
                   </p>
-                  <a href="https://collection.cloudinary.com/dae99gz1m/25c32bf1f625acd30baedf2f77e6d2b8"
-                    target="_blank" rel="noopener noreferrer"
+                  <a href="/Smartious_Company_Portfolio_2026%20(2).pdf"
+                    download
                     style={{
                       display:'inline-flex',alignItems:'center',gap:8,
                       background:'transparent',color:V.gold3,
@@ -8490,6 +8490,25 @@ export default function LandingPage() {
               <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:18}}>
                 Per student. All fees displayed in USD. Pay monthly, termly (save 5%), or annually (save 12%). External examination fees are pass-through to Cambridge, Edexcel and IBO with no markup. Sibling discounts available.
               </p>
+
+              {/* Download PDF button */}
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',alignItems:'center',marginBottom:6}}>
+                <a href="/Smartious_Fee_Structure_2026%20(2).pdf"
+                  download
+                  style={{
+                    display:'inline-flex',alignItems:'center',gap:10,
+                    background:V.gold3,color:V.ink,
+                    padding:'13px 22px',borderRadius:8,
+                    textDecoration:'none',fontWeight:800,fontSize:13.5,
+                    letterSpacing:'.02em',
+                    boxShadow:'0 4px 14px rgba(201,151,58,.25)',
+                  }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Download full fee structure (PDF)
+                </a>
+                <span style={{fontSize:11.5,color:'rgba(255,255,255,.55)'}}>22 pages · ~100 KB</span>
+              </div>
+
               <div style={{display:'flex',gap:24,flexWrap:'wrap',marginTop:24}}>
                 {[
                   {h:'Application',v:'$30',sub:'Refundable if not enrolled'},
@@ -9156,6 +9175,78 @@ export default function LandingPage() {
               ))}
             </div>
           </div></section>
+
+          {/* ═══════════════════════════════════════════
+              DOWNLOAD CARD — Full fee structure PDF
+          ═══════════════════════════════════════════ */}
+          <section className="sec" style={{background:V.bone2,paddingTop:56,paddingBottom:56}}>
+            <div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div style={{
+                  background:V.white,
+                  border:`1px solid ${V.bone3}`,
+                  borderRadius:16,
+                  padding:'40px 44px',
+                  display:'flex',gap:32,flexWrap:'wrap',alignItems:'center',
+                  boxShadow:'0 4px 24px rgba(8,12,20,.04)',
+                }}>
+                  {/* Document icon mock */}
+                  <div style={{
+                    flex:'0 0 auto',
+                    width:108,height:140,
+                    background:V.ink,
+                    borderRadius:6,
+                    position:'relative',
+                    display:'flex',flexDirection:'column',justifyContent:'space-between',
+                    padding:'14px 12px',
+                    boxShadow:'0 8px 22px rgba(8,12,20,.18)',
+                  }}>
+                    <div style={{fontSize:8.5,fontWeight:700,letterSpacing:'.14em',color:V.gold3,lineHeight:1.3}}>
+                      SMARTIOUS
+                    </div>
+                    <div>
+                      <div style={{width:30,height:2,background:V.cr,marginBottom:8}}/>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:10,color:'#fff',lineHeight:1.2,fontStyle:'italic'}}>
+                        Fee<br/>Structure<br/><span style={{color:V.gold3}}>2026</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Text + CTA */}
+                  <div style={{flex:'1 1 280px'}}>
+                    <div className="eyebrow" style={{color:V.gold3,marginBottom:8}}>Take it with you</div>
+                    <h2 style={{
+                      fontFamily:"'DM Serif Display',Georgia,serif",
+                      fontSize:'clamp(1.5rem, 3vw, 2rem)',
+                      fontWeight:400,color:V.ink,lineHeight:1.15,marginBottom:12,
+                    }}>
+                      Download the full <em style={{color:V.cr,fontStyle:'italic'}}>Fee Structure 2026</em>
+                    </h2>
+                    <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginBottom:18}}>
+                      The complete 22-page document. Everything you need to plan your child's education with Smartious — every fee explained, every discount listed, every common pathway costed out from Year 1 to Year 13.
+                    </p>
+                    <div style={{display:'flex',gap:14,flexWrap:'wrap',alignItems:'center'}}>
+                      <a href="/Smartious_Fee_Structure_2026%20(2).pdf"
+                        download
+                        style={{
+                          display:'inline-flex',alignItems:'center',gap:10,
+                          background:V.cr,color:'#fff',
+                          padding:'13px 24px',borderRadius:8,
+                          textDecoration:'none',fontWeight:800,fontSize:13.5,
+                          boxShadow:'0 4px 14px rgba(139,26,46,.25)',
+                        }}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Download PDF
+                      </a>
+                      <div style={{fontSize:11.5,color:V.sl2,fontWeight:600}}>
+                        22 pages · ~100 KB · A4 · No email required
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
 
           {/* CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
