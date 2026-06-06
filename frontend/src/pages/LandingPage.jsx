@@ -809,7 +809,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -3291,7 +3291,7 @@ export default function LandingPage() {
                 {country:'Bahrain', slug:'bahrain', href:'/online-school/bahrain', sub:'Manama · Riffa'},
                 {country:'Pakistan', slug:'pakistan', href:'/online-school/pakistan', sub:'Karachi · Lahore · Islamabad'},
                 {country:'United Kingdom', slug:'uk', href:'/online-school/uk', sub:'London · Manchester'},
-                {country:'United States', slug:'usa', href:'/online-school/usa', sub:'Coast to coast'},
+                {country:'United States', slug:'usa', href:'/us-families', sub:'Coast to coast · Live · IGCSE/A-Level', usFamiliesRedirect:true},
                 {country:'Canada', slug:'canada', href:'/online-school/canada', sub:'Toronto · Vancouver'},
                 {country:'Australia', slug:'australia', href:'/online-school/australia', sub:'Sydney · Melbourne'},
                 {country:'Nigeria', slug:'nigeria', href:'/online-school/nigeria', sub:'Lagos · Abuja'},
@@ -3306,7 +3306,8 @@ export default function LandingPage() {
                   href={c.href}
                   onClick={e => {
                     e.preventDefault()
-                    if (c.slug) openCountry(c.slug)
+                    if (c.usFamiliesRedirect) P('us-families')
+                    else if (c.slug) openCountry(c.slug)
                     else P('global')
                   }}
                   style={{
@@ -9277,6 +9278,402 @@ export default function LandingPage() {
               </p>
             </div>
           </div></section>
+          <Footer P={P}/>
+        </>
+      )}
+
+      {/* ══════════════════════════════════════════
+          US FAMILIES — Dedicated landing page
+          Targets: Acellus alternative, BJU Press alternative,
+          live online homeschool, IGCSE for US college admissions
+      ══════════════════════════════════════════ */}
+      {page === 'us-families' && (
+        <>
+          {/* HERO — direct US positioning */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.ink2} 50%, ${V.cr} 100%)`,
+            color:'#fff',
+            padding:'80px 0 60px',
+            overflow:'hidden',
+          }}>
+            <div className="wrap">
+              <div style={{maxWidth:920,margin:'0 auto'}}>
+                <div style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(201,151,58,.15)',color:V.gold3,padding:'7px 14px',borderRadius:99,fontSize:11.5,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:20}}>
+                  <span>🇺🇸</span> For American homeschool families
+                </div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginBottom:22,letterSpacing:'-.015em'}}>
+                  Real teachers. <em style={{color:V.gold3,fontStyle:'italic'}}>Real rigour.</em><br/>
+                  Real college pathways.
+                </h1>
+                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:30}}>
+                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to American homeschool families from $180/month.
+                </p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
+                    Book a free 30-min consultation
+                  </button>
+                  <a href="#compare"
+                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none'}}>
+                    Compare us with Acellus →
+                  </a>
+                </div>
+
+                {/* Trust signals */}
+                <div style={{display:'flex',gap:32,flexWrap:'wrap',marginTop:40,paddingTop:30,borderTop:'1px solid rgba(255,255,255,.1)'}}>
+                  {[
+                    ['78+','Qualified teachers'],
+                    ['14','Countries served'],
+                    ['8 yrs','Of teaching'],
+                    ['$180/mo','Starting price'],
+                  ].map(([n,l]) => (
+                    <div key={l}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1}}>{n}</div>
+                      <div style={{fontSize:11.5,color:'rgba(255,255,255,.65)',marginTop:6,letterSpacing:'.04em'}}>{l}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* THE PROBLEM — name what families know is wrong */}
+          <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}>
+            <div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto',textAlign:'center'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>The current options</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:18}}>
+                  Most American homeschool platforms <em style={{color:V.cr,fontStyle:'italic'}}>aren't actually schools.</em>
+                </h2>
+                <p style={{fontSize:16,color:V.sl,lineHeight:1.75,maxWidth:720,margin:'0 auto'}}>
+                  They're video libraries. Pre-recorded lessons your child watches alone. Auto-graded quizzes. No teacher to ask when something doesn't make sense. No peers to learn alongside. And too often — content that feels three years behind what international curricula actually require.
+                </p>
+              </div>
+
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14,marginTop:40,maxWidth:1000,margin:'40px auto 0'}}>
+                {[
+                  {h:'"It feels too easy"', p:'Parents repeatedly report that mainstream US homeschool curricula (Acellus, Time4Learning, even BJU) pace below international standards. Students who later attempt SAT/ACT or IGCSE feel under-prepared.'},
+                  {h:'"My kid is alone all day"', p:'Pre-recorded videos. Auto-graded quizzes. No live teacher. No classmates. Particularly hard on younger students and students who learn through discussion.'},
+                  {h:'"No real college support"', p:'Most US homeschool platforms hand off transcripts and walk away. UCAS, Common App, SAT prep, university interviews — figure it out yourself.'},
+                  {h:'"Customer service nightmares"', p:'BBB complaints about deleted records, altered grades, refusal to refund, and frequent unannounced price hikes plague the largest US providers.'},
+                  {h:'"Religious worldview baked in"', p:'BJU, Abeka, Veritas — all explicitly Christian. Wonderful for families who want that. A non-starter for families who don\'t.'},
+                  {h:'"Where are the international options?"', p:'Globally-mobile American families need credentials that travel. IGCSE and A-Level are recognised by every major university worldwide. Most US providers don\'t offer them.'},
+                ].map(c => (
+                  <div key={c.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,fontStyle:'italic',marginBottom:10,fontWeight:400}}>{c.h}</h3>
+                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{c.p}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* COMPARISON TABLE — the heart of the page */}
+          <section id="compare" className="sec" style={{background:V.white,paddingTop:72,paddingBottom:72}}>
+            <div className="wrap">
+              <div style={{maxWidth:1200,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:42}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Side-by-side</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
+                    Smartious vs. the <em style={{color:V.cr,fontStyle:'italic'}}>biggest US providers</em>
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,maxWidth:680,margin:'0 auto',lineHeight:1.7}}>
+                    Information sourced from each provider's public website and the BBB. Pricing as of June 2026. All providers offer K-12 unless noted.
+                  </p>
+                </div>
+
+                <div style={{overflowX:'auto',background:V.bone,borderRadius:16,border:`1px solid ${V.bone3}`}}>
+                  <table style={{width:'100%',minWidth:780,borderCollapse:'collapse',fontSize:13}}>
+                    <thead>
+                      <tr style={{background:V.ink}}>
+                        <th style={{padding:'18px 16px',textAlign:'left',color:'#fff',fontSize:11.5,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Feature</th>
+                        <th style={{padding:'18px 16px',textAlign:'center',color:V.gold3,fontSize:13,fontWeight:800,background:V.cr}}>
+                          Smartious<br/><span style={{fontSize:10,fontWeight:700,color:'rgba(255,255,255,.7)',letterSpacing:'.06em'}}>★ THIS PAGE</span>
+                        </th>
+                        <th style={{padding:'18px 16px',textAlign:'center',color:'#fff',fontSize:12,fontWeight:700}}>Acellus<br/><span style={{fontSize:10,color:'rgba(255,255,255,.6)'}}>Academy</span></th>
+                        <th style={{padding:'18px 16px',textAlign:'center',color:'#fff',fontSize:12,fontWeight:700}}>BJU<br/><span style={{fontSize:10,color:'rgba(255,255,255,.6)'}}>Press DLO</span></th>
+                        <th style={{padding:'18px 16px',textAlign:'center',color:'#fff',fontSize:12,fontWeight:700}}>K12<br/><span style={{fontSize:10,color:'rgba(255,255,255,.6)'}}>Stride</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        ['Live teachers (1-on-1 + group)','✓ Every student','✗ Pre-recorded only','✗ Pre-recorded only','◐ Mixed'],
+                        ['International curriculum (IGCSE/A-Level/IB)','✓ All three','✗ US Common Core','✗ US Christian','✗ US state-aligned'],
+                        ['Cambridge / Edexcel prepared','✓ Specialist tutors','✗','✗','✗'],
+                        ['Religious neutrality','✓ Secular default','◐ Some objections','✗ Explicitly Christian','✓ Secular'],
+                        ['College application support included','✓ UCAS + Common App','✗ Not included','◐ Transcript only','◐ Limited'],
+                        ['AI tutor 24/7','✓ Mshauri AI Pro','✗','✗','✗'],
+                        ['Starting price (per month)','$180 (Basic Online)','$99-249','$150-300','Free (state-funded) - $300'],
+                        ['Sibling discount','✓ 15-25% off','✗','◐ Curriculum sharing','✗'],
+                        ['Need-based bursary','✓ Up to 50% off','◐ Roger Billings only','✗','State-dependent'],
+                        ['Customer service track record','Direct founder access','BBB complaints filed','Established 50+ years','Mixed state-by-state'],
+                        ['Time-zone friendly for US East/Central/Mountain/Pacific','✓ Afternoon Nairobi = morning Eastern','N/A (self-paced)','N/A (self-paced)','✓ US-based'],
+                        ['Free trial / consultation','✓ 30-min free call','✗','✓ Sample lessons','✓ State assessments'],
+                      ].map(([feat, smartious, acellus, bju, k12], i) => (
+                        <tr key={feat} style={{borderBottom:`1px solid ${V.bone3}`, background: i % 2 === 0 ? V.white : 'transparent'}}>
+                          <td style={{padding:'13px 16px',fontWeight:700,color:V.ink,fontSize:12.5}}>{feat}</td>
+                          <td style={{padding:'13px 16px',textAlign:'center',background:'rgba(139,26,46,.05)',color:V.cr,fontWeight:700}}>{smartious}</td>
+                          <td style={{padding:'13px 16px',textAlign:'center',color:V.sl,fontSize:12}}>{acellus}</td>
+                          <td style={{padding:'13px 16px',textAlign:'center',color:V.sl,fontSize:12}}>{bju}</td>
+                          <td style={{padding:'13px 16px',textAlign:'center',color:V.sl,fontSize:12}}>{k12}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{fontSize:11.5,color:V.sl2,marginTop:14,fontStyle:'italic',textAlign:'center'}}>
+                  ✓ = fully delivered  ·  ◐ = partial / limited  ·  ✗ = not offered
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* SIX DIFFERENTIATORS — visual cards */}
+          <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}>
+            <div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:42}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Why Smartious</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
+                    Built for families who <em style={{color:V.cr,fontStyle:'italic'}}>refuse to compromise.</em>
+                  </h2>
+                </div>
+
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:16}}>
+                  {[
+                    {n:'01',h:'Live teachers, not videos',p:'Every Smartious lesson has a real human teacher on the other end of the camera. 1-on-1 or small-group (3-6 students). Lessons are recorded for review, but the teaching itself is live, interactive, in real time.'},
+                    {n:'02',h:'Cambridge & IB rigour',p:'IGCSE, A-Level, IB Diploma. The qualifications top US universities (Harvard, MIT, Stanford, Yale) recognise as evidence of internationally-elite preparation. Often weighted as advanced beyond AP.'},
+                    {n:'03',h:'Free college application support',p:'Free for every enrolled family. UCAS for UK universities. Common App for US universities. OUAC for Canada. We help with personal statements, recommendation coordination, interview prep. No extra invoice.'},
+                    {n:'04',h:'Mshauri AI tutor — 24/7',p:'The first AI homework helper trained on Cambridge, Edexcel, IB and American curricula. Voice, text, image — your child can photo a math problem and get guidance. Free in Premium Online tier.'},
+                    {n:'05',h:'Transparent pricing — in USD',p:'Every fee published. No surprise increases. External examination fees are pass-through at the published Cambridge/Edexcel rate — Smartious adds only a $25 admin fee. 12% discount for annual payment. 15-25% sibling discount.'},
+                    {n:'06',h:'Real founder access',p:'Smartious is founder-led. Alfred Ouko personally interviews every family who joins. If something breaks, you can WhatsApp the founder. No call centres. No outsourced support.'},
+                  ].map(c => (
+                    <div key={c.n} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'26px 28px'}}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.8rem',color:V.gold3,lineHeight:1,marginBottom:8,fontWeight:400}}>{c.n}</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,fontWeight:400,marginBottom:12,lineHeight:1.25}}>{c.h}</h3>
+                      <div style={{width:32,height:2,background:V.cr,marginBottom:14}}/>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{c.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* TIME ZONE SCHEDULE */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}>
+            <div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Live classes across US time zones</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
+                    Our schedule fits <em style={{color:V.cr,fontStyle:'italic'}}>your morning.</em>
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,maxWidth:680,margin:'0 auto',lineHeight:1.7}}>
+                    Most American families start school between 8am and noon local time. That maps perfectly to Smartious afternoon classes in Nairobi (EAT). We run dedicated US-family sessions Monday-Friday.
+                  </p>
+                </div>
+
+                <div style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
+                    <thead>
+                      <tr style={{background:V.ink,color:'#fff'}}>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,letterSpacing:'.08em',textTransform:'uppercase'}}>Smartious class time (Nairobi · EAT)</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,letterSpacing:'.08em',textTransform:'uppercase'}}>Eastern (EST)</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,letterSpacing:'.08em',textTransform:'uppercase'}}>Central (CST)</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,letterSpacing:'.08em',textTransform:'uppercase'}}>Mountain (MST)</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,letterSpacing:'.08em',textTransform:'uppercase'}}>Pacific (PST)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        ['3:00 PM','7:00 AM','6:00 AM','5:00 AM','4:00 AM'],
+                        ['4:00 PM','8:00 AM','7:00 AM','6:00 AM','5:00 AM'],
+                        ['5:00 PM','9:00 AM','8:00 AM','7:00 AM','6:00 AM'],
+                        ['6:00 PM','10:00 AM','9:00 AM','8:00 AM','7:00 AM'],
+                        ['7:00 PM','11:00 AM','10:00 AM','9:00 AM','8:00 AM'],
+                        ['8:00 PM','12:00 PM','11:00 AM','10:00 AM','9:00 AM'],
+                        ['9:00 PM','1:00 PM','12:00 PM','11:00 AM','10:00 AM'],
+                        ['10:00 PM','2:00 PM','1:00 PM','12:00 PM','11:00 AM'],
+                      ].map((row, i) => (
+                        <tr key={i} style={{borderBottom: i<7?`1px solid ${V.bone3}`:'none', background: i%2 ? V.bone2 : V.white}}>
+                          <td style={{padding:'11px 16px',fontWeight:700,color:V.cr}}>{row[0]}</td>
+                          <td style={{padding:'11px 16px',color:V.ink,fontWeight:600}}>{row[1]}</td>
+                          <td style={{padding:'11px 16px',color:V.ink,fontWeight:600}}>{row[2]}</td>
+                          <td style={{padding:'11px 16px',color:V.ink,fontWeight:600}}>{row[3]}</td>
+                          <td style={{padding:'11px 16px',color:V.ink,fontWeight:600}}>{row[4]}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{fontSize:12,color:V.sl2,marginTop:14,textAlign:'center',fontStyle:'italic'}}>
+                  Sweet spot for most US families: Smartious 5pm-9pm EAT = 9am-1pm Eastern / 6am-10am Pacific. Perfect for morning school sessions. 1-on-1 tutoring can be scheduled anytime by mutual agreement.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* PRICING FOR US FAMILIES */}
+          <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}>
+            <div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:42}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Pricing · In USD</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
+                    Less than half of <em style={{color:V.cr,fontStyle:'italic'}}>premium US alternatives.</em>
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,maxWidth:680,margin:'0 auto',lineHeight:1.7}}>
+                    The Online tier is fully accessible to American families. All fees in USD. Pay monthly, termly (save 5%) or annually (save 12%).
+                  </p>
+                </div>
+
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:16}}>
+                  {[
+                    {tier:'Basic Online',price:'$180',sub:'per month',desc:'Self-paced curriculum + Mshauri AI Pro + digital library. Best for older self-driven students.',cta:'enroll'},
+                    {tier:'Premium Online',price:'$260',sub:'per month',desc:'Everything in Basic + weekly live group classes + bi-weekly 1-on-1 tutor consultations. Best for most families.',cta:'enroll',popular:true},
+                    {tier:'IGCSE Full Pack',price:'$360',sub:'per month',desc:'Daily live classes + dedicated IGCSE exam preparation. Year 9-11 students aiming for top universities.',cta:'enroll'},
+                  ].map(t => (
+                    <div key={t.tier} style={{
+                      background: t.popular ? V.ink : V.white,
+                      border: t.popular ? `1.5px solid ${V.gold3}` : `1px solid ${V.bone3}`,
+                      borderRadius:14,
+                      padding:'28px 26px',
+                      position:'relative',
+                    }}>
+                      {t.popular && (
+                        <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',padding:'5px 12px',borderRadius:99}}>★ Most popular</div>
+                      )}
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color: t.popular ? V.gold3 : V.sl2, marginBottom:12, marginTop: t.popular ? 8 : 0}}>Online / Virtual</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.55rem',fontWeight:400,color: t.popular ? '#fff' : V.ink, marginBottom:16}}>{t.tier}</h3>
+                      <div style={{display:'flex',alignItems:'baseline',gap:6,marginBottom:8}}>
+                        <span style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.8rem',color: t.popular ? V.gold3 : V.cr, lineHeight:1, fontWeight:400}}>{t.price}</span>
+                        <span style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.6)' : V.sl}}>{t.sub}</span>
+                      </div>
+                      <p style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.75)' : V.sl, lineHeight:1.6, marginBottom:22}}>{t.desc}</p>
+                      <button onClick={() => P('enroll')} style={{
+                        width:'100%',padding:'12px 16px',
+                        background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
+                        border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
+                      }}>
+                        Begin Enrolment →
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Payment methods */}
+                <div style={{marginTop:36,padding:'20px 24px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12}}>
+                  <div style={{display:'flex',alignItems:'center',gap:14,flexWrap:'wrap',justifyContent:'space-between'}}>
+                    <div style={{flex:'1 1 240px'}}>
+                      <div style={{fontWeight:700,color:V.ink,fontSize:13,marginBottom:4}}>Payment methods for US families</div>
+                      <div style={{fontSize:12,color:V.sl,lineHeight:1.6}}>Visa &amp; Mastercard via Stripe · ACH bank transfer · PayPal · Wire transfer · Apple Pay · Google Pay · Crypto (USDC/USDT)</div>
+                    </div>
+                    <button onClick={() => P('pricing')} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 20px',borderRadius:8,fontSize:12.5,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
+                      See full fee structure →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* HOW IT WORKS */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}>
+            <div className="wrap">
+              <div style={{maxWidth:960,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:42}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>How enrolment works</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
+                    Four <em style={{color:V.cr,fontStyle:'italic'}}>simple steps.</em>
+                  </h2>
+                </div>
+
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:16}}>
+                  {[
+                    {n:'1',h:'Book free consultation',p:'30-minute video call with our admissions team. We discuss your child, their level, your goals, and whether Smartious is the right fit. No pressure.'},
+                    {n:'2',h:'Placement assessment',p:'A 60-minute diagnostic to determine the right grade, curriculum and tutor match. $40 (waived if you have recent transcripts).'},
+                    {n:'3',h:'Enrolment & onboarding',p:'$120 one-time registration. We set up the LMS account, student ID, family portal, initial materials. You meet your child\'s teacher.'},
+                    {n:'4',h:'First live class',p:'Within 7-14 days. Your child joins their first live class. We check in after week 1, week 4, and monthly thereafter.'},
+                  ].map(s => (
+                    <div key={s.n} style={{textAlign:'center',padding:'8px 16px'}}>
+                      <div style={{width:54,height:54,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',margin:'0 auto 16px'}}>{s.n}</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:10,fontWeight:400,lineHeight:1.3}}>{s.h}</h3>
+                      <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65}}>{s.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* US FAMILIES FAQ */}
+          <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}>
+            <div className="wrap">
+              <div style={{maxWidth:820,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Questions American families ask</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
+                    Frequently <em style={{color:V.cr,fontStyle:'italic'}}>asked.</em>
+                  </h2>
+                </div>
+                {[
+                  {q:'Will US universities accept IGCSE and A-Level grades?',a:'Yes — and they often weight them favourably. Cambridge IGCSE and A-Level are recognised by Harvard, MIT, Stanford, Yale, every Ivy League school, and the entire UC and Cal State systems. A-Levels are commonly compared to AP, and top universities increasingly view them as more rigorous than US high school + AP combinations.'},
+                  {q:'Is Smartious accredited in the United States?',a:'Smartious is not currently US-accredited (we are pursuing Cognia accreditation, which typically takes 12-18 months). However, our students sit external Cambridge or Pearson Edexcel examinations — and Cambridge International Education and Pearson Edexcel are accredited examination boards recognised globally, including by every US university. Your child\'s qualification comes from Cambridge/Pearson, not from Smartious.'},
+                  {q:'Can my child still take the SAT or ACT?',a:'Absolutely. SAT and ACT are independent of curriculum — your child can sit them at any US testing centre. We offer SAT and ACT preparation as part of our test prep programme (separate from the homeschool curriculum, $450 for full prep package).'},
+                  {q:'What about state homeschool reporting requirements?',a:'Each US state has different homeschool laws. Some states (like Idaho, Texas, Alaska) have minimal requirements. Others (like New York, Pennsylvania) require formal notification and annual reporting. Smartious provides everything you need: official letterhead, transcripts, progress reports, and standardised assessment results. We do not file paperwork on your behalf — but we provide everything you need to file.'},
+                  {q:'How do US time zones work with classes in Nairobi?',a:'Smartious afternoon and evening classes (3pm-10pm EAT) map to morning hours across all four US time zones — see the schedule table above. Most US families do Smartious classes between 9am-1pm Eastern, which is the natural morning school window. 1-on-1 tutoring is scheduled by mutual agreement and can flex to any time.'},
+                  {q:'Do you offer AP courses?',a:'AP courses are on our curriculum roadmap for the 2026-2027 academic year (launching August 2026). We currently focus on Cambridge IGCSE, A-Level, and IB Diploma as our core international qualifications. American students interested in AP can complement Smartious with US-based AP self-study (College Board, Khan Academy AP, etc.) and we will help coordinate AP exam registration.'},
+                  {q:'How does pricing compare to mainstream US homeschool options?',a:'Smartious Premium Online ($260/month, $2,746/year with annual discount) sits between Acellus Basic ($249/month, $2,400/year) and the premium live-class providers like Veritas Press Scholars Academy ($400+/month). For genuine live teaching with international rigour, Smartious is 30-60% less than direct competitors like Cambridge Home School ($4,500+/year) or InterHigh ($5,200+/year).'},
+                  {q:'Can I just enrol my child in one or two subjects?',a:'Yes. Through Private Tuition you can purchase 1-on-1 tutoring in any single subject from $15/hour (Primary) to $28/hour (A-Level / IB). Useful for families who like their current curriculum but want supplementary support in maths, sciences, or specific subjects.'},
+                  {q:'What happens if my child needs to return to a regular US school?',a:'Smartious provides full transcripts in US-standard GPA format on request. Students moving from IGCSE to a US high school typically slot in at grade 10 or 11 with credit equivalency. We help families coordinate transcripts with receiving schools.'},
+                  {q:'Do you offer a free trial?',a:'We offer a free 30-minute consultation with our admissions team to determine fit. We also offer the placement assessment ($40) which includes one sample 60-minute lesson. We don\'t offer a longer free trial because our delivery model is intensive — committing a teacher\'s time to a student needs proper enrolment.'},
+                  {q:'My child has dyslexia / ADHD / autism. Can Smartious help?',a:'Yes. We offer Special Educational Needs (SEN) support at $50 per session with SEN-trained tutors. Initial $80 assessment determines the right pathway. We have experience with dyslexia, ADHD, autism spectrum, dyscalculia, and processing differences. Many SEN students struggle with the self-paced video model of mainstream US homeschool platforms — they often thrive with our 1-on-1 live model.'},
+                  {q:'What if it doesn\'t work out?',a:'Monthly billing requires no commitment beyond the current month — cancel anytime with 14 days\' notice. Tuition for unused weeks is refundable pro-rata. Registration fees are non-refundable. We\'d prefer to discuss any issues before you withdraw — we have a strong record of finding solutions when families raise concerns.'},
+                ].map((f, i) => (
+                  <details key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                    <summary style={{cursor:'pointer',padding:'15px 20px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
+                    <div style={{padding:'0 20px 16px',fontSize:13.5,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:14}}>{f.a}</div>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* FINAL CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:72,paddingBottom:72,position:'relative',overflow:'hidden'}}>
+            <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg, transparent 0%, ${V.gold3} 50%, transparent 100%)`}}/>
+            <div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
+                <div style={{fontSize:11,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.gold3,marginBottom:18}}>Ready to begin?</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:18}}>
+                  Talk to us. <em style={{color:V.gold3,fontStyle:'italic'}}>It's free.</em>
+                </h2>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.75,marginBottom:30,maxWidth:600,margin:'0 auto 30px'}}>
+                  Book a 30-minute consultation with our admissions team. We'll discuss your child, your goals, and whether Smartious is the right fit. No high-pressure sales. No commitment. Just a conversation.
+                </p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                    Book free consultation
+                  </button>
+                  <button onClick={() => P('enroll')}
+                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                    Begin Enrolment →
+                  </button>
+                  <a href="https://wa.me/254745021212"
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp us
+                  </a>
+                </div>
+                <p style={{fontSize:11.5,color:'rgba(255,255,255,.5)',marginTop:24,lineHeight:1.7}}>
+                  Smartious responds to all enquiries within one US business day. WhatsApp messages typically answered within 2-4 hours.
+                </p>
+              </div>
+            </div>
+          </section>
           <Footer P={P}/>
         </>
       )}
