@@ -3067,11 +3067,11 @@ export default function LandingPage() {
                 {
                   tag:'Online · Live',
                   title:'Online / Virtual',
-                  img:'https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-13-02_sr7u5a.jpg',
-                  alt:'Smartious founder Alfred teaching A-Level Physics magnetic force online',
-                  desc:'Live 1-on-1 or small-group classes via Smartious LMS. Same qualified teachers, taught in real time, from anywhere in the world.',
+                  img:'/online-virtual-school.png',
+                  alt:'Smartious online virtual school — live interactive whiteboard teaching Differentiation by First Principle (A-Level Mathematics)',
+                  desc:'Live 1-on-1 or small-group classes via the Smartious LMS interactive whiteboard. Same qualified teachers, real-time delivery, from anywhere in the world.',
                   bullets:[
-                    'Live sessions with shared whiteboard',
+                    'Interactive whiteboard with multi-colour annotation',
                     'Every session recorded for review',
                     'Mshauri AI tutor on-demand 24/7',
                     'Works on any laptop, tablet or phone',
@@ -3084,11 +3084,11 @@ export default function LandingPage() {
                   tag:'In-Centre',
                   title:'In-Centre',
                   img:'https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-09-57_ujfvdf.jpg',
-                  alt:'Smartious Institute of Robotics Upper Hill Nairobi learning centre',
-                  desc:'In-person learning at our Diamond Plaza Parklands campus and Upper Hill Institute of Robotics — premium tutoring halls and STEM lab access.',
+                  alt:'Smartious learning centre Nairobi — Diamond Plaza Parklands and Karen Hardy',
+                  desc:'In-person learning at our Diamond Plaza Parklands HQ and Karen Hardy Centre — premium tutoring halls, IGCSE/A-Level intensive prep, supervised study.',
                   bullets:[
-                    'Diamond Plaza Parklands campus',
-                    'Upper Hill Robotics Institute',
+                    'Diamond Plaza Parklands (HQ)',
+                    'Karen Hardy Centre',
                     'Group classes &amp; small cohorts',
                     'Quiet study areas, supervised',
                   ],
@@ -4295,7 +4295,7 @@ export default function LandingPage() {
                   Smartious Homeschool &amp; eSchool is an international online school founded in Nairobi, Kenya in 2019 by Alfred Ouko, a Mathematics and Physics teacher educated at the University of Nairobi (BEd Science, 2022). We provide live, internationally recognised education for students preparing for <strong style={{color:'#fff'}}>Cambridge IGCSE</strong>, <strong style={{color:'#fff'}}>Cambridge International A-Level</strong>, <strong style={{color:'#fff'}}>Pearson Edexcel International GCSE and A-Level</strong>, the <strong style={{color:'#fff'}}>International Baccalaureate Diploma Programme</strong>, <strong style={{color:'#fff'}}>Kenya CBC</strong> (KICD-aligned, KCSE-eligible) and the <strong style={{color:'#fff'}}>American High School Curriculum</strong> with Advanced Placement (AP).
                 </p>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
-                  We serve families in Kenya (Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and across the country), the UAE (Dubai, Abu Dhabi, Sharjah and 27 emirate areas), the UK, USA, Canada, Australia, Qatar, Bahrain, Nigeria, South Africa, Uganda, Tanzania, Somalia and Pakistan. Our delivery is primarily online through the Smartious Learning Management System (LMS), with in-person tuition available at our Diamond Plaza Parklands campus and the Institute of Robotics Upper Hill in Nairobi, plus our growing Karen and Langata corridor.
+                  We serve families in Kenya (Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and across the country), the UAE (Dubai, Abu Dhabi, Sharjah and 27 emirate areas), the UK, USA, Canada, Australia, Qatar, Bahrain, Nigeria, South Africa, Uganda, Tanzania, Somalia and Pakistan. Our delivery is primarily online through the Smartious Learning Management System (LMS), with in-person tuition available at our Diamond Plaza Parklands HQ and our Karen Hardy Centre in Nairobi.
                 </p>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
                   Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 8/hour for 1-on-1 tuition (KSh 1,300/hour for Kenya-based families) and USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
@@ -11659,7 +11659,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {[
                   { h:'Online Live', p:'Live 1-on-1 lessons via Smartious LMS — anywhere in the world, on your schedule. Best for families seeking flexibility.' },
-                  { h:'In-Centre', p:'Lessons at our Parklands centre (Diamond Plaza) or Upper Hill location. Best for Nairobi families wanting structured environment.' },
+                  { h:'In-Centre', p:'Lessons at our Parklands centre (Diamond Plaza) or Karen Hardy location. Best for Nairobi families wanting structured environment.' },
                   { h:'Home Tutoring', p:'Our qualified teachers come to your home — Nairobi, UAE areas, select Kenya cities. Best for families wanting in-person at home.' },
                 ].map(m => (
                   <div key={m.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
@@ -11792,7 +11792,7 @@ export default function LandingPage() {
               {(() => {
                 const hsFaqs = [
                   { q:'What curricula do you offer?', a:'Five core curricula: Cambridge IGCSE (and Edexcel), Cambridge A-Level, International Baccalaureate (IB), American Curriculum (with SAT/AP integration), and Kenya CBC. All are delivered by qualified teachers with curriculum-specific experience.' },
-                  { q:'Where can we homeschool with Smartious?', a:'Online globally (anywhere with internet), in-centre at our Nairobi Parklands or Upper Hill locations, or home tutoring in 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. We serve diaspora families in 14 countries primarily online.' },
+                  { q:'Where can we homeschool with Smartious?', a:'Online globally (anywhere with internet), in-centre at our Nairobi Parklands or Karen Hardy locations, or home tutoring in 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. We serve diaspora families in 14 countries primarily online.' },
                   { q:'How much does homeschooling with Smartious cost?', a:'Pricing depends on curriculum, year level and delivery mode. We work with families across multiple budgets — premium full-day programmes at one end and focused subject-only support at the other. Book a free consultation for personalised pricing.' },
                   { q:'Are your teachers qualified?', a:'Yes — all Smartious teachers hold relevant academic qualifications (Bachelor\'s or higher in their teaching subject area), with verified teaching experience. Many hold curriculum-specific certifications from Cambridge, IB or local boards.' },
                   { q:'How do we track our child\'s progress?', a:'Through the Smartious LMS — parents see live attendance, assignment submissions, grades, teacher feedback and progress reports. Weekly summaries and monthly progress reports keep families fully informed.' },
@@ -11924,7 +11924,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
                 {[
                   { h:'Online Live', p:'Live 1-on-1 video sessions via Smartious LMS. Anywhere with internet. Most flexible for working parents and diaspora families.', best:'Best for international families and busy schedules' },
-                  { h:'In-Centre', p:'At our Nairobi Parklands (Diamond Plaza) or Upper Hill centres. Quiet study environment, peer cohort, structured setting.', best:'Best for focused students in Nairobi' },
+                  { h:'In-Centre', p:'At our Nairobi Parklands (Diamond Plaza) or Karen Hardy centres. Quiet study environment, peer cohort, structured setting.', best:'Best for focused students in Nairobi' },
                   { h:'Home Tutoring', p:'Qualified teachers visit your home — 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. Personal attention in familiar setting.', best:'Best for younger learners and families seeking in-person' },
                 ].map(m => (
                   <div key={m.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
@@ -12956,7 +12956,7 @@ export default function LandingPage() {
                   { season:'Term 1 · December', h:'End-of-Year Showcase', p:'Student presentations, music performances, art exhibitions, and academic awards. Family attendance encouraged.' },
                   { season:'Term 2 · February', h:'Cambridge Mock Exams', p:'Mock examinations for IGCSE, A-Level and IB candidates. Detailed feedback and targeted revision plans.' },
                   { season:'Term 2 · March', h:'University Application Workshop', p:'Final-year students workshop on UCAS, Common App, scholarship applications. Open to all Year 13 / Grade 12 students.' },
-                  { season:'Term 3 · April', h:'Inter-Centre Sports Day', p:'Sports competitions between Parklands and Upper Hill centres. Track, ball games, swimming, eSports.' },
+                  { season:'Term 3 · April', h:'Inter-Centre Sports Day', p:'Sports competitions between Parklands and Karen Hardy centres. Track, ball games, swimming, eSports.' },
                   { season:'Term 3 · May', h:'IGCSE & A-Level Examinations', p:'Cambridge and Edexcel main examination series. Students sit at British Council and authorised centres.' },
                   { season:'Term 3 · July', h:'Annual Speech & Prize Day', p:'Celebration of academic achievement, scholarship recipients, and graduating cohort. The flagship Smartious event of the year.' },
                 ].map(e => (
@@ -12982,7 +12982,7 @@ export default function LandingPage() {
               <div style={{display:'flex',flexDirection:'column',gap:12}}>
                 {[
                   { date:'April 2026', h:'KCSE 2025 Results — Strong Pass Rates Across the Board', p:'Our Form 4 cohort achieved consistent A and B grades. Particular strength in Mathematics, Sciences and Languages.' },
-                  { date:'March 2026', h:'Upper Hill Centre Robotics Launch', p:'New robotics programme launched at our Upper Hill campus. Students working with Arduino, Python and competitive robotics pathways.' },
+                  { date:'March 2026', h:'Karen Hardy Centre Robotics Launch', p:'New robotics programme launched at our Karen Hardy campus. Students working with Arduino, Python and competitive robotics pathways.' },
                   { date:'February 2026', h:'Diamond Plaza Parklands — Open House for New Families', p:'Welcomed prospective families for centre tour, meeting teachers, and trial classes. Strong interest from new Form 1 and IGCSE Year 9 enrolment.' },
                   { date:'January 2026', h:'University Offers — Cohort 2026', p:'Students receiving offers from universities in UK (Bath, Sussex), Australia (Sydney), Canada (Toronto, Waterloo), and US universities.' },
                 ].map(h => (
