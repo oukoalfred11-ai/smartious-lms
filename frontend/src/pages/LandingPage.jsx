@@ -3874,8 +3874,8 @@ export default function LandingPage() {
                       <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:'#fff',lineHeight:1.2}}>Smartious Company Portfolio <em style={{color:V.gold3,fontStyle:'italic'}}>2026</em></div>
                       <div style={{fontSize:11.5,color:'rgba(255,255,255,.6)',marginTop:4}}>21 pages · PDF · 94 KB · The full picture of Smartious</div>
                     </div>
-                    <a href="/Smartious_Company_Portfolio_2026.pdf"
-                      download
+                    <a href="https://res.cloudinary.com/dae99gz1m/image/upload/fl_attachment:Smartious_Company_Portfolio_2026/Smartious_Company_Portfolio_2026_1_ua34sv.pdf"
+                      target="_blank" rel="noopener noreferrer"
                       style={{
                         background:V.gold3,color:V.ink,
                         padding:'12px 22px',borderRadius:8,
@@ -4030,22 +4030,112 @@ export default function LandingPage() {
           </div></section>
 
           {/* ═══════════════════════════════════════════
-              MISSION & VISION — short and punchy
+              VISION · MISSION · VALUES — Aligned with portfolio PDF
           ═══════════════════════════════════════════ */}
-          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:64,paddingBottom:64}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:18}}>
-              <div className="reveal" style={{background:V.ink2,border:`1px solid rgba(201,151,58,.2)`,borderRadius:14,padding:'32px 28px'}}>
-                <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:12}}>Our mission</div>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff',marginBottom:14,lineHeight:1.25,fontWeight:400}}>To make world-class education accessible to every learner, regardless of location or circumstance.</h3>
-                <p style={{fontSize:14,color:'rgba(247,243,237,.7)',lineHeight:1.7,margin:0}}>We deliver internationally accredited education to any family with an internet connection — whether they're in Nairobi, Mombasa, Dubai, London or Toronto. Curriculum, qualified teachers and university admissions support, in one online school.</p>
-              </div>
-              <div className="reveal" style={{background:V.ink2,border:`1px solid rgba(139,26,46,.3)`,borderRadius:14,padding:'32px 28px'}}>
-                <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.cr2,marginBottom:12}}>Our vision</div>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff',marginBottom:14,lineHeight:1.25,fontWeight:400}}>To become Africa's most trusted homeschooling and online education provider — and one of the most trusted globally.</h3>
-                <p style={{fontSize:14,color:'rgba(247,243,237,.7)',lineHeight:1.7,margin:0}}>Built in Nairobi, scaling to wherever Kenyan and African families live. We're not trying to be the biggest. We're trying to be the school families trust enough to entrust their children's education to — across years, across countries, across curricula.</p>
+          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:80,paddingBottom:80,position:'relative',overflow:'hidden'}}>
+            {/* Subtle gold accent strip top */}
+            <div style={{position:'absolute',top:0,left:0,right:0,height:2,background:`linear-gradient(90deg, transparent 0%, ${V.gold3} 50%, transparent 100%)`,opacity:0.5}}/>
+            <div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div className="reveal" style={{textAlign:'center',marginBottom:48}}>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.gold3,marginBottom:14}}>What we stand for</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem, 4.5vw, 3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,letterSpacing:'-.01em'}}>
+                    Vision, mission <em style={{color:V.gold3,fontStyle:'italic'}}>&amp; values</em>
+                  </h2>
+                </div>
+
+                {/* VISION - large italic crimson statement */}
+                <div className="reveal" style={{
+                  background:'rgba(139,26,46,.12)',
+                  border:`1px solid rgba(168,32,58,.25)`,
+                  borderLeft:`3px solid ${V.cr2}`,
+                  borderRadius:14,
+                  padding:'36px 40px',
+                  marginBottom:18,
+                }}>
+                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.gold3,marginBottom:14}}>Our vision</div>
+                  <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.5rem, 3vw, 2.1rem)',color:'#fff',lineHeight:1.3,margin:0,fontWeight:400,fontStyle:'italic'}}>
+                    &ldquo;<span style={{color:V.gold3}}>A world where every learner, anywhere,</span> can access an education that meets them as an individual.&rdquo;
+                  </p>
+                </div>
+
+                {/* MISSION */}
+                <div className="reveal" style={{
+                  background:V.ink2,
+                  border:`1px solid rgba(201,151,58,.18)`,
+                  borderLeft:`3px solid ${V.gold3}`,
+                  borderRadius:14,
+                  padding:'30px 40px',
+                  marginBottom:36,
+                }}>
+                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.gold3,marginBottom:12}}>Our mission</div>
+                  <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.15rem, 2vw, 1.45rem)',color:'#fff',lineHeight:1.45,margin:0,fontWeight:400}}>
+                    To deliver premium homeschooling, online schooling and tuition that combines <em style={{color:V.gold3,fontStyle:'italic'}}>academic rigour</em> with <em style={{color:V.gold3,fontStyle:'italic'}}>deep personalisation</em> — built on the foundation of qualified, caring teachers, robust technology, and lasting relationships with the families we serve.
+                  </p>
+                </div>
+
+                {/* VALUES — 6 numbered items in a 2×3 grid */}
+                <div className="reveal" style={{marginTop:20}}>
+                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.gold3,marginBottom:8,textAlign:'center'}}>Our values</div>
+                  <p style={{fontSize:13,color:'rgba(255,255,255,.6)',textAlign:'center',marginBottom:32,maxWidth:600,margin:'0 auto 32px',lineHeight:1.6}}>
+                    Six principles that govern every decision we make, from how we hire to how we communicate with families.
+                  </p>
+
+                  <div style={{
+                    display:'grid',
+                    gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap:14,
+                  }}>
+                    {[
+                      ['01','Excellence',      "We do not believe in 'good enough'. Every lesson, every report, every email is delivered to the highest standard we can manage."],
+                      ['02','Personalisation', "Every child is different. Our programmes, pace and pedagogy bend to fit the learner — not the other way around."],
+                      ['03','Honesty',         "We tell families the truth — about their child's progress, about our limits, about our fees. No hidden charges. No spin."],
+                      ['04','Care',            "We see each student as a whole person, not a customer. We are in this for the long arc of a young life."],
+                      ['05','Innovation',      "We build the tools we need. From the Smartious LMS to Mshauri AI, we engineer better ways to teach and to learn."],
+                      ['06','Accessibility',   "Through bursaries, sibling discounts and a 50% need-based scholarship programme, we work to keep excellence within reach."],
+                    ].map(([num, name, desc]) => (
+                      <div key={num} style={{
+                        background:V.ink2,
+                        border:`1px solid rgba(255,255,255,.08)`,
+                        borderRadius:12,
+                        padding:'24px 22px',
+                        transition:'all .3s',
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(201,151,58,.35)'; e.currentTarget.style.background = V.ink3; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.08)'; e.currentTarget.style.background = V.ink2; }}>
+                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.6rem',color:V.gold3,lineHeight:1,marginBottom:8,fontWeight:400}}>{num}</div>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff',marginBottom:12,fontWeight:400,lineHeight:1.2}}>{name}</h3>
+                        <div style={{width:32,height:2,background:V.cr2,marginBottom:14}}/>
+                        <p style={{fontSize:13,color:'rgba(255,255,255,.7)',lineHeight:1.7,margin:0}}>{desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Closing line + portfolio link */}
+                <div className="reveal" style={{textAlign:'center',marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}>
+                  <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontStyle:'italic',fontSize:'1.15rem',color:V.gold3,marginBottom:14}}>
+                    Education is the most consequential thing one generation passes to the next.
+                  </p>
+                  <p style={{fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:18}}>
+                    These vision, mission and values are reflected in our full Company Portfolio.
+                  </p>
+                  <a href="https://res.cloudinary.com/dae99gz1m/image/upload/fl_attachment:Smartious_Company_Portfolio_2026/Smartious_Company_Portfolio_2026_1_ua34sv.pdf"
+                    target="_blank" rel="noopener noreferrer"
+                    style={{
+                      display:'inline-flex',alignItems:'center',gap:8,
+                      background:'transparent',color:V.gold3,
+                      border:`1.5px solid ${V.gold3}`,
+                      padding:'10px 22px',borderRadius:8,
+                      textDecoration:'none',fontWeight:700,fontSize:12.5,
+                    }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download Company Portfolio 2026
+                  </a>
+                </div>
               </div>
             </div>
-          </div></section>
+          </section>
 
           {/* ═══════════════════════════════════════════
               WHERE WE TEACH — 14-country grid
