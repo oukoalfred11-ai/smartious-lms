@@ -3874,7 +3874,7 @@ export default function LandingPage() {
                       <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:'#fff',lineHeight:1.2}}>Smartious Company Portfolio <em style={{color:V.gold3,fontStyle:'italic'}}>2026</em></div>
                       <div style={{fontSize:11.5,color:'rgba(255,255,255,.6)',marginTop:4}}>21 pages · PDF · 94 KB · The full picture of Smartious</div>
                     </div>
-                    <a href="https://res.cloudinary.com/dae99gz1m/image/upload/fl_attachment:Smartious_Company_Portfolio_2026/Smartious_Company_Portfolio_2026_1_ua34sv.pdf"
+                    <a href="https://collection.cloudinary.com/dae99gz1m/25c32bf1f625acd30baedf2f77e6d2b8"
                       target="_blank" rel="noopener noreferrer"
                       style={{
                         background:V.gold3,color:V.ink,
@@ -4120,7 +4120,7 @@ export default function LandingPage() {
                   <p style={{fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:18}}>
                     These vision, mission and values are reflected in our full Company Portfolio.
                   </p>
-                  <a href="https://res.cloudinary.com/dae99gz1m/image/upload/fl_attachment:Smartious_Company_Portfolio_2026/Smartious_Company_Portfolio_2026_1_ua34sv.pdf"
+                  <a href="https://collection.cloudinary.com/dae99gz1m/25c32bf1f625acd30baedf2f77e6d2b8"
                     target="_blank" rel="noopener noreferrer"
                     style={{
                       display:'inline-flex',alignItems:'center',gap:8,
