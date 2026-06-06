@@ -3782,7 +3782,7 @@ export default function LandingPage() {
           <div className="pg-hero"><div className="wrap">
             <div className="eyebrow">Our story</div>
             <h1 className="pg-h">Built by a Teacher. <em>For Families Who Need More.</em></h1>
-            <p className="pg-sub" style={{marginTop:12,maxWidth:760}}>Smartious wasn't built in a boardroom — it was built by a Mathematics and Physics teacher who watched too many capable students fall behind in classrooms that couldn't move at their pace, and too many families forced to compromise on education because of location, cost, or schedule. We started in 2019 to fix that, one student at a time.</p>
+            <p className="pg-sub" style={{marginTop:12,maxWidth:760}}>Smartious wasn't built in a boardroom — it was built by a Mathematics and Physics teacher who watched too many capable students fall behind in classrooms that couldn't move at their pace, and too many families forced to compromise on education because of location, cost, or schedule. I started Smartious in 2018 to fix that, one student at a time.</p>
           </div></div>
 
           {/* ═══════════════════════════════════════════
@@ -3833,38 +3833,58 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* Story column */}
+                {/* Story column — A LETTER FROM THE FOUNDER (first person) */}
                 <div className="reveal">
-                  <div className="eyebrow" style={{marginBottom:12}}>Meet the founder</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem, 3.5vw, 2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.2,marginBottom:18,letterSpacing:'-.01em'}}>
-                    Alfred Ouko <em style={{color:V.cr,fontStyle:'italic'}}>built Smartious</em> while still an undergraduate.
+                  <div className="eyebrow" style={{marginBottom:12}}>A letter from our founder</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem, 3.5vw, 2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.2,marginBottom:8,letterSpacing:'-.01em'}}>
+                    From <em style={{color:V.cr,fontStyle:'italic'}}>Alfred Ouko,</em>
                   </h2>
+                  <div style={{fontSize:13,color:V.sl2,marginBottom:24,letterSpacing:'.06em',textTransform:'uppercase',fontWeight:700}}>
+                    Founder &amp; Chief Executive
+                  </div>
+                  <div style={{width:60,height:2,background:V.cr,marginBottom:24}}/>
+
                   <div style={{display:'flex',flexDirection:'column',gap:14,fontSize:14.5,color:V.sl,lineHeight:1.75}}>
-                    <p>Alfred started tutoring privately in 2019 while studying for his Bachelor of Education (Science) in Mathematics and Physics at the University of Nairobi. What began as evening tutoring for a handful of secondary-school students in Nairobi grew, year by year, into a recognisable pattern.</p>
-                    <p>The students who came to him weren't failing because they couldn't learn — they were falling behind because their schools had moved on while they were still consolidating the basics, or because the teacher-to-student ratio in their classroom meant individual attention was impossible, or because their families had relocated mid-term and lost continuity. The fix in every case was the same: one teacher, one student, the right pace, and the right curriculum.</p>
-                    <p>By the time he graduated with his BEd in 2022, Alfred had built that single insight into a structure — a small but growing team of qualified subject specialists delivering Mathematics, Physics, Sciences, English, Business and other subjects across Cambridge, IB, CBC and American curricula, to families in Nairobi and increasingly to Kenyan diaspora families abroad.</p>
-                    <p>Today Smartious is a Nairobi-based international online school with 78+ qualified tutors, serving families in 14 countries, with permanent campuses at Diamond Plaza in Parklands and the Institute of Robotics in Upper Hill, plus an active expansion into the Karen and Langata corridor. The founding insight hasn't changed: <strong style={{color:V.cr}}>one teacher, one student, the right pace.</strong></p>
+                    <p style={{fontStyle:'italic',color:V.ink,fontSize:15}}>Dear reader,</p>
+
+                    <p>When I started Smartious in 2018, I was a young mathematics and physics teacher visiting Nairobi homes one at a time. The families I met all wanted the same thing: an excellent education for their child, delivered with care, on their own terms.</p>
+
+                    <p>What began as one tutor in Parklands has grown into a network of <strong style={{color:V.ink}}>78 qualified teachers across 14 countries</strong>. We deliver five international curricula — Cambridge IGCSE, Pearson Edexcel, Cambridge A-Level, IB Diploma and the American curriculum — alongside our own Smartious Blended programme. We have two physical centres in Nairobi (Diamond Plaza Parklands and Karen Hardy) and serve families online from London, Dubai, Toronto, Riyadh and everywhere in between.</p>
+
+                    <p>But the heart of Smartious has never been the curricula or the technology, important as both are. The heart of Smartious is a simple promise: <strong style={{color:V.cr}}>your child will be known.</strong> Known by name. Known for what excites them. Known for what they struggle with. Known well enough that we can meet them where they are and walk with them to where they want to go.</p>
+
+                    <p>If you are a parent considering Smartious for your child, an investor wanting to understand our business, or a partner exploring collaboration, I hope you find here — and in our full company portfolio — a clear, honest picture of Smartious in 2026.</p>
+
+                    <p>Education is the most consequential thing one generation passes to the next. We take that responsibility seriously. Thank you for the time you'll spend on this page.</p>
                   </div>
 
-                  {/* Credentials chips */}
-                  <div style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:22}}>
-                    {[
-                      'BEd Mathematics &amp; Physics — University of Nairobi (2022)',
-                      'Teaching since 2019',
-                      'Cambridge IGCSE &amp; A-Level specialist',
-                      'KCSE Mathematics &amp; Physics',
-                      'Founded Smartious Homeschool 2019',
-                    ].map((c, i) => (
-                      <span key={i} style={{
-                        background:V.bone2,
-                        border:`1px solid ${V.bone3}`,
-                        borderRadius:99,
-                        padding:'6px 14px',
-                        fontSize:11.5,
-                        color:V.ink,
-                        fontWeight:600,
-                      }} dangerouslySetInnerHTML={{__html: c}}/>
-                    ))}
+                  {/* Signature */}
+                  <div style={{marginTop:28,paddingTop:20,borderTop:`1px solid ${V.bone3}`}}>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color:V.cr,fontStyle:'italic',lineHeight:1}}>Alfred Ouko</div>
+                    <div style={{fontSize:12,color:V.sl2,marginTop:6,fontWeight:600}}>Founder &amp; Chief Executive · Smartious Homeschool &amp; eSchool</div>
+                    <div style={{fontSize:11.5,color:V.sl2,marginTop:10,fontStyle:'italic',lineHeight:1.6}}>
+                      BEd Mathematics &amp; Physics — University of Nairobi (2022). Founded Smartious in 2018 while still an undergraduate, having begun private tutoring earlier that year. Lives and works in Nairobi.
+                    </div>
+                  </div>
+
+                  {/* Download Company Portfolio button */}
+                  <div style={{marginTop:24,padding:'18px 22px',background:V.ink,borderRadius:12,display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap'}}>
+                    <div style={{flex:'1 1 220px'}}>
+                      <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.12em',textTransform:'uppercase',marginBottom:4}}>Download</div>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:'#fff',lineHeight:1.2}}>Smartious Company Portfolio <em style={{color:V.gold3,fontStyle:'italic'}}>2026</em></div>
+                      <div style={{fontSize:11.5,color:'rgba(255,255,255,.6)',marginTop:4}}>21 pages · PDF · 94 KB · The full picture of Smartious</div>
+                    </div>
+                    <a href="/Smartious_Company_Portfolio_2026.pdf"
+                      download
+                      style={{
+                        background:V.gold3,color:V.ink,
+                        padding:'12px 22px',borderRadius:8,
+                        textDecoration:'none',fontWeight:800,fontSize:13,
+                        whiteSpace:'nowrap',display:'inline-flex',alignItems:'center',gap:8,
+                      }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      Download PDF
+                    </a>
                   </div>
                 </div>
               </div>
@@ -3878,8 +3898,8 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}><div className="wrap">
             <div className="sec-hd reveal" style={{textAlign:'center'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Our journey</div>
-              <h2 className="display">Seven years of <em>building</em></h2>
-              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>From single-tutor evenings in 2019 to an international online school serving families across four continents.</p>
+              <h2 className="display">Eight years of <em>building</em></h2>
+              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>From single-tutor home visits in 2018 to an international online school serving families across four continents.</p>
             </div>
             <div style={{maxWidth:900,margin:'44px auto 0',position:'relative'}}>
               {/* Vertical line */}
@@ -3898,13 +3918,13 @@ export default function LandingPage() {
                 }
               `}</style>
               {[
-                {year:'2019', h:'Smartious is founded', p:'Alfred Ouko, then a second-year BEd student at the University of Nairobi, begins tutoring private Mathematics and Physics students in the evenings. The first formal Smartious model emerges within months — a structured one-on-one approach, focused on building genuine subject confidence rather than just exam memorisation.'},
-                {year:'2019–22', h:'Foundation phase', p:'Through his undergraduate years, Alfred adds subject specialists in Chemistry, Biology, Business, Economics, English Language and Literature. The student base expands from Nairobi suburbs to the broader county, with most families finding Smartious by referral.'},
+                {year:'2018', h:'Smartious is founded', p:'Alfred Ouko, then a BEd student at the University of Nairobi, begins tutoring private Mathematics and Physics students one home at a time. The first formal Smartious model emerges within months — a structured one-on-one approach, focused on building genuine subject confidence rather than just exam memorisation.'},
+                {year:'2018–22', h:'Foundation phase', p:'Through his undergraduate years, Alfred adds subject specialists in Chemistry, Biology, Business, Economics, English Language and Literature. The student base expands from Nairobi suburbs to the broader county, with most families finding Smartious by referral.'},
                 {year:'2022', h:'BEd graduation', p:'Alfred completes his Bachelor of Education (Science) at the University of Nairobi, specialising in Mathematics and Physics. With formal teaching credentials in hand, Smartious formalises its tutor recruitment standards — every teacher must hold a subject-specific degree at minimum.'},
                 {year:'Growth phase', h:'Curriculum expansion', p:'Smartious adds dedicated programmes for Cambridge IGCSE and International A-Level, IB Primary Years, Middle Years and Diploma, Pearson Edexcel International GCSE and A-Level, Kenya CBC (KICD-aligned) and American Curriculum with Advanced Placement. Subject and curriculum specialists are recruited specifically for each pathway.'},
                 {year:'LMS launch', h:'Smartious Learning Platform', p:'The Smartious Learning Management System launches with three portals — Admin, Teacher and Student. Features include live session delivery, recorded session libraries, assignment and assessment workflows, automated billing, integrated Paystack payments and the Mshauri AI tutor for 24/7 student support.'},
                 {year:'International', h:'Diaspora expansion', p:'Kenyan and African diaspora families in the UAE, UK, USA, Canada, Australia, Qatar, Bahrain and other countries begin enrolling — using Smartious to maintain Cambridge, IB or CBC curriculum continuity through international relocations. Country-specific pages launch for 14 territories.'},
-                {year:'2026', h:'Where we are now', p:'78+ qualified tutors. 14 countries served. 5 curricula delivered. 21 Nairobi area pages, 27 UAE area pages and 6 Kenya city pages live. Permanent campuses at Diamond Plaza Parklands and the Institute of Robotics Upper Hill. Active expansion into the Karen and Langata corridor.'},
+                {year:'2026', h:'Where we are now', p:'78+ qualified tutors. 14 countries served. 5 curricula delivered. 21 Nairobi area pages, 27 UAE area pages and 6 Kenya city pages live. Two permanent centres: Diamond Plaza Parklands (HQ) and Karen Hardy.'},
               ].map((m, i) => (
                 <div key={i} className="reveal" style={{
                   position:'relative',
@@ -3953,7 +3973,7 @@ export default function LandingPage() {
             </div>
             <div className="stat-grid" style={{marginTop:40}}>
               {[
-                ['7','Years of teaching\nsince founding in 2019'],
+                ['8','Years of teaching\nsince founding in 2018'],
                 ['78+','Qualified tutors\non Smartious LMS'],
                 ['14','Countries served\nacross 5 continents'],
                 ['5','Curricula delivered\nCambridge · IB · Edexcel · CBC · American'],
