@@ -1,6 +1,4 @@
-# Smartious Homeschool — Netlify Redirects
-# This file ONLY handles redirects. Cache headers go in _headers.
-
-# Single Page Application fallback — must be last
-# All unmatched routes serve the React app
-/*  /index.html  200
+# Netlify SPA fallback
+# Every URL that doesn't match a real static file gets served index.html
+# so React Router can handle the routing client-side.
+/*    /index.html   200
