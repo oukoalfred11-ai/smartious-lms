@@ -1,27 +1,31 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { StoreProvider } from './context/ctx.jsx'
 import LandingPage from './pages/LandingPage'
 
 /**
  * App router.
  *
- * Wraps everything in <BrowserRouter> so the React Router hooks
- * (useNavigate, useLocation, useParams) inside LandingPage work.
+ * Provider order (outer to inner):
+ *   1. StoreProvider — global app state (user, auth, cart, etc.)
+ *                      LandingPage reads this via useStore()
+ *   2. BrowserRouter — React Router context
+ *                      LandingPage uses useNavigate / useLocation / useParams
+ *   3. Routes        — single wildcard route mounting LandingPage
  *
- * Uses a single wildcard route ("/*") that mounts LandingPage for every
- * path. LandingPage reads location.pathname internally (see its useEffect
- * around lines ~2042-2217) and renders the correct page based on its own
- * PAGES array.
+ * LandingPage reads location.pathname internally (see its useEffect around
+ * lines ~2042-2217) and renders the correct page based on its own PAGES array.
  *
- * This means adding new pages requires NO changes to App.jsx — just add
- * the new page id to the PAGES array in LandingPage.jsx and add a matching
- * `{page === 'your-new-page' && ( ... )}` block.
+ * Adding new pages requires NO changes here — just add the page id to PAGES
+ * in LandingPage.jsx and a matching `{page === 'your-page' && (...)}` block.
  */
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/*" element={<LandingPage />} />
-      </Routes>
-    </BrowserRouter>
+    <StoreProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/*" element={<LandingPage />} />
+        </Routes>
+      </BrowserRouter>
+    </StoreProvider>
   )
 }
