@@ -1,97 +1,23 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, ToastProvider, StoreProvider, useAuth } from './context/ctx.jsx'
-import LandingPage       from './pages/LandingPage.jsx'
-import LoginPage         from './pages/LoginPage.jsx'
-import AdminLoginPage    from './pages/AdminLoginPage.jsx'
-import VerifyEmailPage   from './pages/VerifyEmailPage.jsx'
-import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
-import AdminPortal       from './pages/admin/AdminPortal.jsx'
-import TeacherPortal     from './pages/teacher/TeacherPortal.jsx'
-import StudentPortal     from './pages/student/StudentPortal.jsx'
-import ParentPortal      from './pages/parent/ParentPortal.jsx'
-import DemoPortal        from './pages/demo/DemoPortal.jsx'
+import { Routes, Route } from 'react-router-dom'
+import LandingPage from './pages/LandingPage'
 
-function Guard({ children, roles }) {
-  const { user, loading } = useAuth()
-  if (loading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'var(--bg)' }}>
-      <div className="spinner" />
-    </div>
-  )
-  if (!user) return <Navigate to="/login" replace />
-  if (roles && !roles.includes(user.role)) return <Navigate to={`/${user.role}`} replace />
-  return children
-}
-function RoleRedirect() {
-  const { user } = useAuth()
-  if (!user) return <Navigate to="/login" replace />
-  return <Navigate to={`/${user.role}`} replace />
-}
+/**
+ * App router.
+ *
+ * Uses a single wildcard route ("/*") that mounts LandingPage for every path.
+ * LandingPage reads location.pathname internally (see its useEffect on lines
+ * ~2042-2217) and renders the correct page based on its own PAGES array.
+ *
+ * This means adding new pages requires NO changes to App.jsx — just add the
+ * new page id to the PAGES array in LandingPage.jsx and add a corresponding
+ * `{page === 'your-new-page' && ( ... )}` block.
+ *
+ * BrowserRouter is expected to be in main.jsx wrapping <App/>.
+ */
 export default function App() {
   return (
-    <StoreProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/"                element={<LandingPage />} />
-              {/* Landing-page sections — each its own URL */}
-              <Route path="/about"           element={<LandingPage />} />
-              <Route path="/curricula"       element={<LandingPage />} />
-              <Route path="/curricula/:slug" element={<LandingPage />} />
-              <Route path="/services"        element={<LandingPage />} />
-              <Route path="/services/:slug"  element={<LandingPage />} />
-              <Route path="/global"          element={<LandingPage />} />
-              <Route path="/pricing"         element={<LandingPage />} />
-              <Route path="/programs"        element={<LandingPage />} />
-              <Route path="/activities"      element={<LandingPage />} />
-              <Route path="/online-school/:slug" element={<LandingPage />} />
-              <Route path="/tuition-nairobi"     element={<LandingPage />} />
-              <Route path="/tuition/:slug"       element={<LandingPage />} />
-              <Route path="/tuition-uae"         element={<LandingPage />} />
-              <Route path="/tuition-uae/:slug"   element={<LandingPage />} />
-              <Route path="/homeschooling-kenya"      element={<LandingPage />} />
-              <Route path="/homeschooling/:slug"      element={<LandingPage />} />
-              <Route path="/test-prep"                element={<LandingPage />} />
-              <Route path="/test-prep/:slug"          element={<LandingPage />} />
-              <Route path="/languages"                element={<LandingPage />} />
-              <Route path="/languages/:slug"          element={<LandingPage />} />
-              <Route path="/events"                   element={<LandingPage />} />
-              <Route path="/calendar"                 element={<LandingPage />} />
-              <Route path="/gallery"                  element={<LandingPage />} />
-              <Route path="/study-abroad"             element={<LandingPage />} />
-              <Route path="/study-abroad/:slug"       element={<LandingPage />} />
-              <Route path="/homeschool"               element={<LandingPage />} />
-              <Route path="/tuition"                  element={<LandingPage />} />
-              <Route path="/iufp"                     element={<LandingPage />} />
-              <Route path="/pre-university"           element={<LandingPage />} />
-              <Route path="/compare/:slug"   element={<LandingPage />} />
-              <Route path="/faq"             element={<LandingPage />} />
-              <Route path="/blog"            element={<LandingPage />} />
-              <Route path="/blog/:slug"      element={<LandingPage />} />
-              <Route path="/teachers"        element={<LandingPage />} />
-              <Route path="/enroll"          element={<LandingPage />} />
-              <Route path="/consult"         element={<LandingPage />} />
-              <Route path="/contact"         element={<LandingPage />} />
-              <Route path="/privacy"         element={<LandingPage />} />
-              <Route path="/terms"           element={<LandingPage />} />
-              <Route path="/cookies"         element={<LandingPage />} />
-              <Route path="/gdpr"            element={<LandingPage />} />
-              <Route path="/login"           element={<LoginPage />} />
-              <Route path="/admin-login"     element={<AdminLoginPage />} />
-              <Route path="/verify-email"    element={<VerifyEmailPage />} />
-              <Route path="/reset-password"  element={<ResetPasswordPage />} />
-              <Route path="/portal"          element={<RoleRedirect />} />
-              <Route path="/admin/*"         element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
-              <Route path="/teacher/*"       element={<Guard roles={['teacher','admin']}><TeacherPortal /></Guard>} />
-              <Route path="/student/*"       element={<Guard roles={['student']}><StudentPortal /></Guard>} />
-              <Route path="/parent/*"        element={<Guard roles={['parent']}><ParentPortal /></Guard>} />
-              <Route path="/demo/*"          element={<Guard roles={['demo']}><DemoPortal /></Guard>} />
-              <Route path="*"                element={<Navigate to="/" replace />} />
-            </Routes>
-          </BrowserRouter>
-        </ToastProvider>
-      </AuthProvider>
-    </StoreProvider>
+    <Routes>
+      <Route path="/*" element={<LandingPage />} />
+    </Routes>
   )
 }
