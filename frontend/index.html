@@ -6,61 +6,60 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <!-- ═══════════════════════════════════════════════════
+       GOOGLE TAG MANAGER (GTM-55SRQS2G)
+       Google's recommendation: place as high in <head> as
+       possible. GTM is the master tag controller for all
+       analytics, ads pixels, and future tracking tags.
+       Companion <noscript> iframe sits right after <body>.
+       ═══════════════════════════════════════════════════ -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-55SRQS2G');</script>
+  <!-- End Google Tag Manager -->
+
+  <!-- ═══════════════════════════════════════════════════
        GOOGLE SEARCH CONSOLE OWNERSHIP VERIFICATION
-       Do not remove. Lets Google Search Console see indexing,
-       sitemap and Core Web Vitals data for this domain.
        ═══════════════════════════════════════════════════ -->
   <meta name="google-site-verification" content="eiGdv2Lik2kFbA9m2DXHDBdfbI6WYQzWtBQXOPZU5TY"/>
 
   <!-- ═══════════════════════════════════════════════════
        BING WEBMASTER TOOLS OWNERSHIP VERIFICATION
-       Do not remove. Bing's index powers ChatGPT search,
-       Copilot, DuckDuckGo, Yahoo and Ecosia — meaningful
-       AI-answer-ecosystem coverage beyond Bing alone.
        ═══════════════════════════════════════════════════ -->
   <meta name="msvalidate.01" content="C0FEDFD7BDC2F88456F9DED6DFC17126"/>
 
   <!-- ═══════════════════════════════════════════════════
-       PERFORMANCE — preconnect + preload (order matters)
-       Place these FIRST so the browser starts resolving DNS
-       and fetching critical resources before parsing the rest.
+       PERFORMANCE — preconnect + preload
        ═══════════════════════════════════════════════════ -->
-
-  <!-- Preconnect to font hosts (DNS + TLS handshake in parallel with HTML parse) -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-
-  <!-- Preconnect to Cloudinary (hero video is the LCP on homepage) -->
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin/>
-
-  <!-- Preconnect to Google Tag Manager for the Ads conversion script below -->
   <link rel="preconnect" href="https://www.googletagmanager.com"/>
 
-  <!-- Preload the hero video (LCP element on homepage). Mobile and
-       desktop browsers will fetch the version sized for their viewport
-       once the actual <video> tag is parsed; the preload primes the
-       connection. The poster image is also preloaded so the first
-       paint isn't black while the video buffers. -->
   <link rel="preload" as="image" href="/hero-learning-centre.jpg" fetchpriority="high"/>
-
-  <!-- Preload the single most-visible web font weight so the H1 doesn't FOUT -->
   <link rel="preload" as="font" type="font/woff2"
         href="https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.woff2"
         crossorigin/>
 
-  <!-- DNS prefetch for third-party origins -->
   <link rel="dns-prefetch" href="https://smartious-backend.onrender.com"/>
   <link rel="dns-prefetch" href="https://formsubmit.co"/>
 
   <!-- ═══════════════════════════════════════════════════
        GOOGLE ADS CONVERSION TRACKING (gtag.js)
        Account: AW-17733479094 (Smartious Homeschool)
-       Conversion actions configured in Google Ads UI:
+
+       This sits alongside GTM and is the direct path used by
+       trackConversion() in LandingPage.jsx for the 4 wired
+       conversion events on /us-families:
          · US Consult Booked   ($50)
          · US Enrol Started    ($200)
          · US WhatsApp Click   ($20)
          · US Phone Click      ($20)
-       Fired from LandingPage.jsx via the trackConversion() helper.
+
+       IMPORTANT: do NOT also configure these same conversion
+       actions inside GTM, or events will be counted twice.
+       GTM is reserved for future tags (GA4, Meta Pixel, etc.)
        ═══════════════════════════════════════════════════ -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17733479094"></script>
   <script>
@@ -71,18 +70,14 @@
   </script>
 
   <!-- ═══════════════════════════════════════════════════
-       Permissions Policy — explicitly ALLOW camera, microphone,
-       and display-capture (screen-share) for our own origin.
-       Required for Live Classes to work.
+       Permissions Policy — allow camera, microphone,
+       and screen-share for our own origin (Live Classes).
        ═══════════════════════════════════════════════════ -->
   <meta http-equiv="Permissions-Policy" content="camera=(self), microphone=(self), display-capture=(self), autoplay=(self)"/>
   <meta http-equiv="Feature-Policy" content="camera 'self'; microphone 'self'; display-capture 'self'"/>
 
   <!-- ═══════════════════════════════════════════════════
-       Primary page title & description (used by search engines)
-       LandingPage.jsx will override these on client-side
-       navigation, but these are the defaults for the first paint
-       and for non-JS crawlers.
+       Primary page title & description
        ═══════════════════════════════════════════════════ -->
   <title>Online Homeschool | IGCSE, A-Level, IB & American — Smartious</title>
   <meta name="description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 85/month."/>
@@ -92,7 +87,7 @@
   <link rel="canonical" href="https://smartioushomeschool.com/"/>
 
   <!-- ═══════════════════════════════════════════════════
-       Favicons — proper multi-format package
+       Favicons
        ═══════════════════════════════════════════════════ -->
   <link rel="icon"           type="image/x-icon"  href="/favicon.ico"/>
   <link rel="icon"           type="image/svg+xml" href="/favicon.svg"/>
@@ -106,7 +101,7 @@
   <meta name="msapplication-TileImage" content="/favicon-192x192.png"/>
 
   <!-- ═══════════════════════════════════════════════════
-       Open Graph (Facebook, LinkedIn, WhatsApp link previews)
+       Open Graph (Facebook, LinkedIn, WhatsApp previews)
        ═══════════════════════════════════════════════════ -->
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://smartioushomeschool.com/"/>
@@ -126,12 +121,7 @@
   <meta name="twitter:image" content="https://smartioushomeschool.com/favicon-512x512.png"/>
 
   <!-- ═══════════════════════════════════════════════════
-       Fonts (non-blocking load technique)
-       Loaded with media="print" then swapped to "all" once
-       loaded. This stops the stylesheet from blocking render.
-       Saves ~700ms-1200ms of FCP on mobile.
-       The <noscript> fallback ensures fonts still load if JS
-       is disabled.
+       Fonts (non-blocking load)
        ═══════════════════════════════════════════════════ -->
   <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&family=Syne+Mono&display=swap"
@@ -144,10 +134,6 @@
 
   <!-- ═══════════════════════════════════════════════════
        Structured data — EducationalOrganization
-       This is the canonical Organization schema for the site.
-       LandingPage.jsx should NOT inject another one (would
-       conflict with this). FAQ + page-specific schemas are
-       still safe to add per-page from React.
        ═══════════════════════════════════════════════════ -->
   <script type="application/ld+json">
   {
@@ -227,6 +213,11 @@
   </script>
 </head>
 <body>
+  <!-- Google Tag Manager (noscript) — runs for users with JS disabled -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-55SRQS2G"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
