@@ -38,6 +38,50 @@ async function captureFrontDesk(payload) {
   }
 }
 
+/* ── Google Ads conversion tracking ─────────────────────────
+ * Fires conversion events for the /us-families paid traffic test.
+ * Conversion ID: AW-17733479094 (Smartious Homeschool)
+ *
+ * Each action below needs a matching Conversion Action created in
+ * Google Ads → Tools → Conversions. The "label" string after the slash
+ * is unique per action — get it from Google Ads after creating each
+ * action and paste it into the table below.
+ *
+ * Until labels are filled in, events fire to the account ID only and
+ * are recorded as generic conversions rather than tied to a specific
+ * action. The account-level tracking still works for retargeting.
+ */
+const GOOGLE_ADS_ID = 'AW-17733479094'
+const CONVERSION_LABELS = {
+  // Paste the label from Google Ads after creating each conversion action.
+  // Format: 'AW-17733479094/abc123XYZ' (the part after the slash is the label)
+  consult_booked:  GOOGLE_ADS_ID + '/PASTE_CONSULT_LABEL_HERE',
+  enrol_started:   GOOGLE_ADS_ID + '/PASTE_ENROL_LABEL_HERE',
+  whatsapp_click:  GOOGLE_ADS_ID + '/PASTE_WHATSAPP_LABEL_HERE',
+  phone_click:     GOOGLE_ADS_ID + '/PASTE_PHONE_LABEL_HERE',
+}
+const CONVERSION_VALUES = {
+  consult_booked: 50,
+  enrol_started: 200,
+  whatsapp_click: 20,
+  phone_click: 20,
+}
+function trackConversion(action) {
+  try {
+    if (typeof window === 'undefined' || !window.gtag) return
+    const sendTo = CONVERSION_LABELS[action]
+    const value = CONVERSION_VALUES[action] || 0
+    if (!sendTo) return
+    window.gtag('event', 'conversion', {
+      send_to: sendTo,
+      value,
+      currency: 'USD',
+    })
+  } catch (e) {
+    console.error('[gtag conversion] failed:', e?.message)
+  }
+}
+
 /* ── usePageMeta — per-page SEO ────────────────────────────
  * Sets document.title and meta description / OG tags for the
  * current page, so each landing page, curriculum and service
@@ -9310,7 +9354,7 @@ export default function LandingPage() {
                   Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to American homeschool families from $180/month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
+                  <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                     Book a free 30-min consultation
                   </button>
@@ -9552,7 +9596,7 @@ export default function LandingPage() {
                         <span style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.6)' : V.sl}}>{t.sub}</span>
                       </div>
                       <p style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.75)' : V.sl, lineHeight:1.6, marginBottom:22}}>{t.desc}</p>
-                      <button onClick={() => P('enroll')} style={{
+                      <button onClick={() => { trackConversion('enrol_started'); P('enroll') }} style={{
                         width:'100%',padding:'12px 16px',
                         background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                         border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
@@ -9654,16 +9698,17 @@ export default function LandingPage() {
                   Book a 30-minute consultation with our admissions team. We'll discuss your child, your goals, and whether Smartious is the right fit. No high-pressure sales. No commitment. Just a conversation.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => P('consult')}
+                  <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                     Book free consultation
                   </button>
-                  <button onClick={() => P('enroll')}
+                  <button onClick={() => { trackConversion('enrol_started'); P('enroll') }}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
                     Begin Enrolment →
                   </button>
                   <a href="https://wa.me/254745021212"
                     target="_blank" rel="noopener noreferrer"
+                    onClick={() => trackConversion('whatsapp_click')}
                     style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700}}>
                     WhatsApp us
                   </a>
