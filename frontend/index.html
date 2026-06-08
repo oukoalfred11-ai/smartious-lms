@@ -33,6 +33,9 @@
   <!-- Preconnect to Cloudinary (hero video is the LCP on homepage) -->
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin/>
 
+  <!-- Preconnect to Google Tag Manager for the Ads conversion script below -->
+  <link rel="preconnect" href="https://www.googletagmanager.com"/>
+
   <!-- Preload the hero video (LCP element on homepage). Mobile and
        desktop browsers will fetch the version sized for their viewport
        once the actual <video> tag is parsed; the preload primes the
@@ -48,6 +51,24 @@
   <!-- DNS prefetch for third-party origins -->
   <link rel="dns-prefetch" href="https://smartious-backend.onrender.com"/>
   <link rel="dns-prefetch" href="https://formsubmit.co"/>
+
+  <!-- ═══════════════════════════════════════════════════
+       GOOGLE ADS CONVERSION TRACKING (gtag.js)
+       Account: AW-17733479094 (Smartious Homeschool)
+       Conversion actions configured in Google Ads UI:
+         · US Consult Booked   ($50)
+         · US Enrol Started    ($200)
+         · US WhatsApp Click   ($20)
+         · US Phone Click      ($20)
+       Fired from LandingPage.jsx via the trackConversion() helper.
+       ═══════════════════════════════════════════════════ -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17733479094"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-17733479094');
+  </script>
 
   <!-- ═══════════════════════════════════════════════════
        Permissions Policy — explicitly ALLOW camera, microphone,
