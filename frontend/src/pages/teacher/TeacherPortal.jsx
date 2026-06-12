@@ -13800,15 +13800,8 @@ function TeacherLibraryTab({ user, toast }) {
       toast?.error?.('Only PDF files are accepted.')
       return
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast?.error?.(
-        'File exceeds 10 MB limit. Please compress the PDF first ' +
-        '(most coursebooks compress to under 10 MB with no visible loss).'
-      )
-      return
-    }
     setUpFile(file)
-    if (!upTitle) setUpTitle(file.name.replace(/\.pdf$/i, ''))
+    if (!upTitle) setUpTitle(file.name.replace(/\.pdf$/i, '').replace(/[_-]/g, ' '))
   }
 
   const resetForm = () => {
@@ -13822,41 +13815,65 @@ function TeacherLibraryTab({ user, toast }) {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
+  // Two-step R2 upload:
+  // 1. POST /library/presign  → get a presigned PUT URL (backend generates it)
+  // 2. PUT file directly to R2 from the browser (no file size limit, no server bandwidth)
+  // 3. POST /library/confirm  → backend saves metadata to MongoDB
   const submitUpload = async () => {
-    if (!upSubjectId)         { toast?.error?.('Pick a subject.'); return }
-    if (!upTitle.trim())      { toast?.error?.('Title is required.'); return }
-    if (!upFile)              { toast?.error?.('Choose a PDF file.'); return }
+    if (!upSubjectId)    { toast?.error?.('Pick a subject.'); return }
+    if (!upTitle.trim()) { toast?.error?.('Title is required.'); return }
+    if (!upFile)         { toast?.error?.('Choose a PDF file.'); return }
 
     setUploading(true)
     setUploadProgress(0)
     try {
-      const fd = new FormData()
-      fd.append('file', upFile)
-      fd.append('subjectId', upSubjectId)
-      fd.append('title', upTitle.trim())
-      fd.append('description', upDescription.trim())
-      fd.append('author', upAuthor.trim())
-      fd.append('grades', upGrades.trim())
-
-      const { data } = await api.post('/library/upload', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        onUploadProgress: (evt) => {
-          if (evt.total) {
-            const pct = Math.round((evt.loaded / evt.total) * 100)
-            setUploadProgress(pct)
-          }
-        },
+      // Step 1 — get presigned URL
+      const presignRes = await api.post('/library/presign', {
+        subjectId: upSubjectId,
+        fileName:  upFile.name,
+        fileSize:  upFile.size,
+        mimeType:  upFile.type || 'application/pdf',
       })
-      if (data?.success) {
+      const { uploadUrl, r2Key, publicUrl } = presignRes.data.data
+
+      // Step 2 — PUT directly to R2 (plain fetch/axios, no auth header to R2)
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('PUT', uploadUrl)
+        xhr.setRequestHeader('Content-Type', upFile.type || 'application/pdf')
+        xhr.upload.onprogress = (e) => {
+          if (e.total) setUploadProgress(Math.round((e.loaded / e.total) * 100))
+        }
+        xhr.onload = () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error('R2 upload failed: ' + xhr.status))
+        xhr.onerror = () => reject(new Error('Network error during upload.'))
+        xhr.send(upFile)
+      })
+
+      setUploadProgress(100)
+
+      // Step 3 — confirm: save metadata to MongoDB
+      const confirmRes = await api.post('/library/confirm', {
+        r2Key,
+        publicUrl,
+        subjectId:   upSubjectId,
+        title:       upTitle.trim(),
+        description: upDescription.trim(),
+        author:      upAuthor.trim(),
+        grades:      upGrades.trim(),
+        fileName:    upFile.name,
+        fileSize:    upFile.size,
+        mimeType:    upFile.type || 'application/pdf',
+      })
+      if (confirmRes.data?.success) {
         toast?.ok?.('Book uploaded.')
         resetForm()
         setShowUploadForm(false)
         loadBooks()
       } else {
-        toast?.error?.(data?.message || 'Upload failed.')
+        toast?.error?.(confirmRes.data?.message || 'Upload failed.')
       }
     } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Upload failed: ' + e.message)
+      toast?.error?.(e?.response?.data?.message || e.message || 'Upload failed.')
     } finally {
       setUploading(false)
     }
