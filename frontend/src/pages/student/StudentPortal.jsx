@@ -12167,8 +12167,8 @@ function StudentLibraryPage({ user, toast }) {
                 gap: 12,
               }}>
                 {grouped[subj].map(book => (
-                  <StudentBookCard key={book._id} book={book}
-                    onOpen={() => setViewerBook(book)}/>
+                  <LibraryBookCard key={book._id} book={book}
+                    onView={() => setViewerBook(book)}/>
                 ))}
               </div>
             </div>
@@ -12177,7 +12177,7 @@ function StudentLibraryPage({ user, toast }) {
       )}
 
       {viewerBook && (
-        <LibraryViewer book={viewerBook} api={api} onClose={() => setViewerBook(null)}/>
+        <LibraryViewer book={viewerBook} onClose={() => setViewerBook(null)}/>
       )}
     </div>
   )
@@ -12192,54 +12192,59 @@ function StudentBookCard({ book, onOpen }) {
   const sizeMB = book.sizeBytes ? (book.sizeBytes / (1024 * 1024)).toFixed(1) + ' MB' : ''
   return (
     <div style={{
-      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 10,
-      padding: 14, display: 'flex', flexDirection: 'column',
+      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12,
+      overflow: 'hidden', display: 'flex', flexDirection: 'column',
+      boxShadow: '0 1px 4px rgba(0,0,0,.05)',
     }}>
-      <div style={{ display:'flex', gap: 10, marginBottom: 10 }}>
-        <div style={{
-          width: 42, height: 52, borderRadius: 4,
-          background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
-          flexShrink: 0,
-          display:'flex', alignItems:'center', justifyContent:'center',
-          color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
-        }}>PDF</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Cover */}
+      <div style={{
+        height: 140, background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
+        position: 'relative', flexShrink: 0, overflow: 'hidden',
+      }}>
+        {book.coverImage ? (
+          <img src={book.coverImage} alt={book.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+        ) : (
           <div style={{
-            fontWeight: 700, fontSize: 13.5, color: '#1A1A1A',
-            lineHeight: 1.3,
-            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}>{book.title}</div>
-          {book.author && (
-            <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 3 }}>{book.author}</div>
-          )}
-        </div>
-      </div>
-
-      {book.description && (
+            width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: 6, padding: 12,
+          }}>
+            <div style={{ color: '#C9A030', fontSize: 10, fontWeight: 800, letterSpacing: '.12em' }}>PDF</div>
+            <div style={{
+              color: '#fff', fontSize: 12, fontWeight: 700, textAlign: 'center',
+              lineHeight: 1.3, maxWidth: 140,
+              display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+            }}>{book.title}</div>
+          </div>
+        )}
         <div style={{
-          fontSize: 11.5, color: '#6B6B6B', marginBottom: 8,
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-          overflow: 'hidden', lineHeight: 1.4,
-        }}>
-          {book.description}
-        </div>
-      )}
-
-      <div style={{ fontSize: 10.5, color: '#9A9A9A', marginBottom: 10 }}>
-        {sizeMB}
-        {book.grades?.length ? ' · ' + book.grades.join(', ') : ''}
+          position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,.55)',
+          color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.06em',
+          padding: '3px 7px', borderRadius: 4,
+        }}>{book.curriculum}</div>
       </div>
 
-      <button onClick={onOpen}
-        style={{
-          background: '#7D1025', color: '#fff', border: 'none',
-          padding: '8px 14px', borderRadius: 6,
-          fontSize: 12, fontWeight: 700, cursor: 'pointer',
-          marginTop: 'auto',
-        }}>
-        Open book
-      </button>
+      {/* Info */}
+      <div style={{ padding: '12px 12px 10px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{
+          fontWeight: 700, fontSize: 13, color: '#1A1A1A', lineHeight: 1.3, marginBottom: 4,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+        }}>{book.title}</div>
+        {book.author && <div style={{ fontSize: 11, color: '#6B6B6B', marginBottom: 4 }}>{book.author}</div>}
+        {book.description && (
+          <div style={{
+            fontSize: 11, color: '#9A9A9A', lineHeight: 1.4, marginBottom: 6,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          }}>{book.description}</div>
+        )}
+        <div style={{ fontSize: 10.5, color: '#9A9A9A', marginTop: 'auto', paddingTop: 6 }}>
+          {[sizeMB, book.grades?.length ? book.grades.join(', ') : ''].filter(Boolean).join(' · ')}
+        </div>
+        <button onClick={onOpen} style={{
+          marginTop: 10, background: '#7D1025', color: '#fff', border: 'none',
+          padding: '8px 0', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+        }}>Open book</button>
+      </div>
     </div>
   )
 }
