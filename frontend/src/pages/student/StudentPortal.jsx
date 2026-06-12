@@ -12167,8 +12167,8 @@ function StudentLibraryPage({ user, toast }) {
                 gap: 12,
               }}>
                 {grouped[subj].map(book => (
-                  <LibraryBookCard key={book._id} book={book}
-                    onView={() => setViewerBook(book)}/>
+                  <StudentBookCard key={book._id} book={book}
+                    onOpen={() => setViewerBook(book)}/>
                 ))}
               </div>
             </div>
