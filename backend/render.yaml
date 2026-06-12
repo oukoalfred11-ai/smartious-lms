@@ -4,8 +4,8 @@ services:
     env: node
     region: frankfurt
     plan: free
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
     healthCheckPath: /api/health
     
     # WebSocket support for Socket.io
