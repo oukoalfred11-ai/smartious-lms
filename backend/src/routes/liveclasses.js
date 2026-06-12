@@ -15,6 +15,11 @@
  *   POST   /:id/start                flip to live (teacher)
  *   POST   /:id/end                  flip to ended  (teacher)
  *   POST   /:id/cancel               cancel with reason (teacher)
+ *
+ * Email notifications (non-blocking, never fail the API response):
+ *   CREATE → email every assigned student with class details + link
+ *   PATCH  → if meetingLink changed, re-email every assigned student
+ *            with the updated link and a clear "link changed" warning
  */
 
 const express = require('express');
@@ -23,6 +28,26 @@ const mongoose = require('mongoose');
 const LiveClass = require('../models/LiveClass');
 const User = require('../models/User');
 const { auth, requireRole } = require('../middleware/auth');
+const { sendLiveClassEmailBatch } = require('../lib/email');
+
+// ─────────────────────────────────────────────────────────
+// Helper: fetch students for a list of IDs and fire emails.
+// Pure side-effect — never throws, never blocks the response.
+// ─────────────────────────────────────────────────────────
+async function notifyStudents(studentIds, classParams, isUpdate = false) {
+  try {
+    if (!studentIds || studentIds.length === 0) return;
+    const students = await User.find({
+      _id: { $in: studentIds },
+      role: 'student',
+    }).select('firstName email').lean();
+    if (students.length === 0) return;
+    await sendLiveClassEmailBatch(students, { ...classParams, isUpdate });
+  } catch (err) {
+    // Log but never propagate — email failure must not affect the API response
+    console.error('[liveclasses] notifyStudents error:', err.message);
+  }
+}
 
 // ─────────────────────────────────────────────────────────
 // Helper: compute status fresh on a plain doc (lean queries
@@ -102,12 +127,26 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       preparationLessonId: mongoose.isValidObjectId(preparationLessonId) ? preparationLessonId : null,
       notes: notes.trim(),
       status: 'scheduled',
-      // Spine linkage — nullable; only set if teacher picked them
       syllabusTopicName:    syllabusTopicName    ? String(syllabusTopicName).trim()    || null : null,
       syllabusSubtopicName: syllabusSubtopicName ? String(syllabusSubtopicName).trim() || null : null,
     });
 
+    // ── Respond immediately, then email in the background ──
     res.status(201).json({ success:true, message:'Live class scheduled.', data: { liveClass } });
+
+    // Gather teacher name for the email
+    const teacherName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Your Teacher';
+
+    notifyStudents(validStudentIds, {
+      teacherName,
+      title:       liveClass.title,
+      subject:     liveClass.subject,
+      grade:       liveClass.grade,
+      scheduledAt: liveClass.scheduledAt,
+      durationMins: liveClass.durationMins,
+      meetingLink: liveClass.meetingLink,
+    }, false);
+
   } catch (e) {
     console.error('[liveclasses create]', e.message);
     res.status(500).json({ success:false, message: 'Failed to create live class: ' + e.message });
@@ -179,6 +218,7 @@ router.get('/:id', auth, async (req, res) => {
 
 // ═══════════════════════════════════════════════════════════
 // EDIT
+// Re-emails students if meetingLink changed.
 // ═══════════════════════════════════════════════════════════
 router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
@@ -191,7 +231,15 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
     if (req.user.role !== 'admin' && String(lc.teacherId) !== String(req.user._id))
       return res.status(403).json({ success:false, message:'Not your class.' });
 
-    const allowed = ['title','description','subject','curriculum','grade','scheduledAt','durationMins','meetingLink','assignedStudents','notes','preparationLessonId','syllabusTopicName','syllabusSubtopicName'];
+    // Capture old link before any updates so we can detect a change
+    const oldMeetingLink = lc.meetingLink;
+
+    const allowed = [
+      'title','description','subject','curriculum','grade',
+      'scheduledAt','durationMins','meetingLink',
+      'assignedStudents','notes','preparationLessonId',
+      'syllabusTopicName','syllabusSubtopicName',
+    ];
     for (const k of allowed) {
       if (k in req.body) {
         if (k === 'scheduledAt') {
@@ -211,7 +259,27 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
     }
 
     await lc.save();
+
     res.json({ success:true, message:'Class updated.', data: { liveClass: lc } });
+
+    // ── Re-notify students only if the meeting link actually changed ──
+    const newMeetingLink = lc.meetingLink;
+    const linkChanged = newMeetingLink &&
+      newMeetingLink.trim() !== (oldMeetingLink || '').trim();
+
+    if (linkChanged && lc.assignedStudents && lc.assignedStudents.length > 0) {
+      const teacherName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Your Teacher';
+      notifyStudents(lc.assignedStudents, {
+        teacherName,
+        title:        lc.title,
+        subject:      lc.subject,
+        grade:        lc.grade,
+        scheduledAt:  lc.scheduledAt,
+        durationMins: lc.durationMins,
+        meetingLink:  newMeetingLink,
+      }, true); // isUpdate = true → shows "link changed" warning
+    }
+
   } catch (e) {
     console.error('[liveclasses patch]', e.message);
     res.status(500).json({ success:false, message:'Failed to update class.' });
