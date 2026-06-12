@@ -106,11 +106,19 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
       });
     }
 
-    const validCurriculums = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American'];
+    // Full 15-curriculum catalog — matches SCHOOL_CURRICULA in Dashboard.jsx
+    const validCurriculums = [
+      'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
+      'EdexcelLowerSec',  'EdexcelIGCSE',      'EdexcelALevel',
+      'AQALowerSec',      'AQAGCSE',           'AQAALevel',
+      'IB', 'BNC', 'American', 'Canadian', 'KenyaCBC',
+      // Legacy strings — kept so existing teacher data is not broken
+      'IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC',
+    ];
     if (!req.body.curriculum || !validCurriculums.includes(req.body.curriculum)) {
       return res.status(400).json({
         success: false,
-        message: `Curriculum is required and must be one of: ${validCurriculums.join(', ')}`
+        message: `Curriculum is required and must be one of the supported curricula.`
       });
     }
 
