@@ -263,6 +263,7 @@ router.post('/:id/avatar', auth, requireRole('admin'), (req, res) => {
 router.get('/teachers/qualified', auth, requireRole('admin'), async (req, res) => {
   try {
     const mongoose = require('mongoose');
+    const Subject = require('../models/Subject');
     const { subjectId, curriculum } = req.query;
 
     if (!subjectId || !mongoose.isValidObjectId(subjectId))
@@ -270,17 +271,41 @@ router.get('/teachers/qualified', auth, requireRole('admin'), async (req, res) =
     if (!curriculum)
       return res.status(400).json({ success: false, message: 'curriculum is required.' });
 
+    // Primary query — exact match on teachingSpecialties
     const teachers = await User.find({
       role: 'teacher',
       isActive: true,
       isOnLeave: { $ne: true },
       teachingSpecialties: {
-        $elemMatch: { subjectId, curriculum }
+        $elemMatch: {
+          subjectId: new mongoose.Types.ObjectId(subjectId),
+          curriculum,
+        }
       }
     })
       .select('_id firstName lastName email phone teachingSpecialties')
       .sort('firstName')
       .lean();
+
+    console.log(
+      '[qualified] subjectId=' + subjectId + ' curriculum=' + curriculum +
+      ' → ' + teachers.length + ' teacher(s) found'
+    );
+
+    // Debug: if none found, log what specialties ARE stored for active teachers
+    // so we can diagnose mismatches from Render logs without needing DB access.
+    if (teachers.length === 0) {
+      const sample = await User.find({ role: 'teacher', isActive: true })
+        .select('firstName lastName teachingSpecialties')
+        .limit(5)
+        .lean();
+      sample.forEach(t => {
+        console.log(
+          '[qualified] teacher ' + t.firstName + ' ' + t.lastName +
+          ' specialties: ' + JSON.stringify(t.teachingSpecialties)
+        );
+      });
+    }
 
     res.json({ success: true, teachers });
   } catch (e) {
@@ -308,24 +333,29 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin'), async (req
     if (!Array.isArray(curricula) || !Array.isArray(subjectIds))
       return res.status(400).json({ success: false, message: 'curricula and subjectIds must be arrays.' });
 
-    // Full catalog — must match SCHOOL_CURRICULA in Dashboard.jsx and
-    // the curriculum ids stored on Subject documents and User records.
-    const VALID = [
+    // Full 15-curriculum catalog — must match SCHOOL_CURRICULA in Dashboard.jsx
+    const VALID_CURRICULA = [
       'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
       'EdexcelLowerSec',  'EdexcelIGCSE',      'EdexcelALevel',
       'AQALowerSec',      'AQAGCSE',           'AQAALevel',
       'IB', 'BNC', 'American', 'Canadian', 'KenyaCBC',
-      // Legacy strings kept so existing teacher records are not broken
+      // Legacy — kept so old records are not broken
       'IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC',
     ];
-    const cleanCurricula = curricula.filter(c => VALID.includes(c));
+    const cleanCurricula = curricula.filter(c => VALID_CURRICULA.includes(c));
     const cleanIds = subjectIds.filter(id => mongoose.isValidObjectId(id));
 
-    // Empty is allowed — admin may want to clear specialties
-    if (cleanIds.length > 0) {
-      const found = await Subject.countDocuments({ _id: { $in: cleanIds } });
-      if (found !== cleanIds.length)
-        return res.status(400).json({ success: false, message: 'One or more subjectIds do not exist.' });
+    console.log('[specialties] received curricula:', JSON.stringify(curricula));
+    console.log('[specialties] cleanCurricula:', JSON.stringify(cleanCurricula));
+    console.log('[specialties] cleanIds count:', cleanIds.length);
+
+    // Guard: if curricula were sent but ALL got filtered out, the sent values
+    // are not in the catalog. Return a clear error rather than silently saving [].
+    if (curricula.length > 0 && cleanCurricula.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'None of the provided curricula are recognised. Received: ' + curricula.join(', '),
+      });
     }
 
     const pairs = [];
@@ -334,6 +364,8 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin'), async (req
         pairs.push({ subjectId: sid, curriculum: curr });
       }
     }
+
+    console.log('[specialties] saving', pairs.length, 'pairs for teacher', teacher._id);
 
     teacher.teachingSpecialties = pairs;
     await teacher.save();
