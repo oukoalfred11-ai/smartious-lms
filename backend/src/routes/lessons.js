@@ -22,8 +22,8 @@
 const express  = require('express');
 const mongoose = require('mongoose');
 const multer   = require('multer');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { v4: uuidv4 } = require('uuid');
 
 const Lesson  = require('../models/Lesson');
 const Subject = require('../models/Subject');
@@ -35,26 +35,25 @@ const { syncTimetablesForSubject } = require('../services/timetableSync');
 const router = express.Router();
 
 // ─────────────────────────────────────────────────────────
-// Cloudinary PDF storage — separate folder so notes are easy
-// to find in the dashboard and easy to bulk-clean if needed.
+// R2 client for lesson note PDFs
 // ─────────────────────────────────────────────────────────
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const pdfStorage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'smartious/lesson-notes',
-    resource_type: 'raw',          // treat as raw asset; PDFs aren't images
-    allowed_formats: ['pdf'],
+const r2 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId:     process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
   },
 });
+
+// Memory storage — we read the buffer then push to R2
 const uploadPdf = multer({
-  storage: pdfStorage,
-  limits: { fileSize: 20 * 1024 * 1024 },  // 20 MB cap per PDF
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 },  // 50 MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') cb(null, true);
+    else cb(new Error('Only PDF files accepted.'), false);
+  },
 });
 
 // ─────────────────────────────────────────────────────────
@@ -294,25 +293,35 @@ router.post('/bulk', auth, requireRole('teacher', 'admin'), async (req, res) => 
 // ─────────────────────────────────────────────────────────
 // POST /api/lessons/upload-pdf — upload notes PDF
 // ─────────────────────────────────────────────────────────
-router.post('/upload-pdf', auth, requireRole('teacher', 'admin'), (req, res) => {
-  uploadPdf.single('file')(req, res, (err) => {
-    if (err) {
-      console.error('[lessons upload-pdf]', err.message);
-      return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
-    }
+router.post('/upload-pdf', auth, requireRole('teacher', 'admin'), uploadPdf.single('file'), async (req, res) => {
+  try {
     if (!req.file)
       return res.status(400).json({ success: false, message: 'No file uploaded.' });
+
+    const key = `lessons/notes/${uuidv4()}_${req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+    await r2.send(new PutObjectCommand({
+      Bucket:      process.env.R2_BUCKET_NAME,
+      Key:         key,
+      Body:        req.file.buffer,
+      ContentType: 'application/pdf',
+    }));
+
+    const url = `${(process.env.R2_PUBLIC_URL || '').replace(/\/$/, '')}/${key}`;
+    console.log('[lessons upload-pdf] uploaded to R2:', key);
 
     res.json({
       success: true,
       data: {
-        url:       req.file.path,
-        publicId:  req.file.filename,
+        url,
+        publicId:  key,
         filename:  req.file.originalname,
         sizeBytes: req.file.size,
       },
     });
-  });
+  } catch (err) {
+    console.error('[lessons upload-pdf]', err.message);
+    res.status(500).json({ success: false, message: err.message || 'Upload failed.' });
+  }
 });
 
 // ─────────────────────────────────────────────────────────
@@ -429,8 +438,14 @@ router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
 
     // Best-effort cleanup of Cloudinary PDF (don't fail the delete if it errors)
     if (lesson.notesPdfPublicId) {
-      try { await cloudinary.uploader.destroy(lesson.notesPdfPublicId, { resource_type: 'raw' }); }
-      catch (e) { console.error('[lessons delete] cloudinary cleanup failed:', e.message); }
+      // R2 cleanup on delete — non-fatal
+      try {
+        const { DeleteObjectCommand } = require('@aws-sdk/client-s3');
+        await r2.send(new DeleteObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME,
+          Key:    lesson.notesPdfPublicId,
+        }));
+      } catch (e) { console.error('[lessons delete] R2 cleanup failed:', e.message); }
     }
 
     const deletedSubjectId = lesson.subjectId;
