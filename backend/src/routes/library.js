@@ -134,6 +134,32 @@ router.post('/presign', auth, requireRole('teacher', 'admin'), async (req, res) 
 });
 
 // ═══════════════════════════════════════════════════════════
+// POST /presign-cover
+// Get a presigned URL to upload a cover image to R2.
+// Same flow as /presign but for images (jpg/png/webp).
+// ═══════════════════════════════════════════════════════════
+router.post('/presign-cover', auth, requireRole('teacher', 'admin'), async (req, res) => {
+  try {
+    const { fileName, mimeType } = req.body || {};
+    if (!fileName) return fail(res, 400, 'fileName is required.');
+    const allowed = ['image/jpeg','image/png','image/webp','image/jpg'];
+    const ct = mimeType || 'image/jpeg';
+    if (!allowed.includes(ct)) return fail(res, 400, 'Cover must be JPG, PNG or WebP.');
+
+    const safe = safeFileName(fileName);
+    const r2Key = `covers/${uuidv4()}_${safe}`;
+    const command = new PutObjectCommand({ Bucket: BUCKET, Key: r2Key, ContentType: ct });
+    const uploadUrl = await getSignedUrl(r2, command, { expiresIn: PRESIGN_EXPIRES });
+    const publicUrl = `${PUBLIC_URL}/${r2Key}`;
+
+    return ok(res, { uploadUrl, r2Key, publicUrl }, 'Cover presigned URL ready.');
+  } catch (err) {
+    console.error('[library presign-cover]', err.message);
+    return fail(res, 500, err.message || 'Could not generate cover upload URL.');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
 // POST /confirm
 // Step 2 of the upload flow — called after the browser PUT succeeds.
 // Body: { r2Key, publicUrl, subjectId, title, fileName,
@@ -145,6 +171,7 @@ router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) 
     const {
       r2Key, publicUrl, subjectId, title, fileName,
       fileSize, description, author, grades, mimeType,
+      coverImage, coverR2Key,
     } = req.body || {};
 
     if (!r2Key)    return fail(res, 400, 'r2Key is required.');
@@ -179,6 +206,8 @@ router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) 
       grades:         gradeArr,
       r2Key,
       url:            publicUrl,
+      coverImage:     coverImage || '',
+      coverR2Key:     coverR2Key || '',
       fileName:       String(fileName || 'book.pdf').trim(),
       sizeBytes:      Number(fileSize) || 0,
       mimeType:       mimeType || 'application/pdf',
@@ -320,13 +349,13 @@ router.delete('/:id', auth, requireRole('teacher', 'admin'), async (req, res) =>
     if (req.user.role !== 'admin' && !isOwner)
       return fail(res, 403, 'You can only delete books you uploaded.');
 
-    // Delete from R2 (non-fatal if it fails — Mongo record is the source of truth)
-    if (book.r2Key) {
+    // Delete PDF and cover from R2 (non-fatal)
+    for (const key of [book.r2Key, book.coverR2Key].filter(Boolean)) {
       try {
-        await r2.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: book.r2Key }));
-        console.log('[library delete] R2 object deleted:', book.r2Key);
+        await r2.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
+        console.log('[library delete] R2 object deleted:', key);
       } catch (e) {
-        console.error('[library delete] R2 cleanup failed:', e.message);
+        console.error('[library delete] R2 cleanup failed for', key, ':', e.message);
       }
     }
 
