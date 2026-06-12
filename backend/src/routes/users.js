@@ -308,7 +308,16 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin'), async (req
     if (!Array.isArray(curricula) || !Array.isArray(subjectIds))
       return res.status(400).json({ success: false, message: 'curricula and subjectIds must be arrays.' });
 
-    const VALID = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American'];
+    // Full catalog — must match SCHOOL_CURRICULA in Dashboard.jsx and
+    // the curriculum ids stored on Subject documents and User records.
+    const VALID = [
+      'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
+      'EdexcelLowerSec',  'EdexcelIGCSE',      'EdexcelALevel',
+      'AQALowerSec',      'AQAGCSE',           'AQAALevel',
+      'IB', 'BNC', 'American', 'Canadian', 'KenyaCBC',
+      // Legacy strings kept so existing teacher records are not broken
+      'IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC',
+    ];
     const cleanCurricula = curricula.filter(c => VALID.includes(c));
     const cleanIds = subjectIds.filter(id => mongoose.isValidObjectId(id));
 
