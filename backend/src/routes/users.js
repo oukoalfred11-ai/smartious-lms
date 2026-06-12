@@ -7,41 +7,29 @@ const jwt = require('jsonwebtoken');
 const { sendVerificationEmail, sendTeacherMemoEmail } = require('../services/emailService');
 const { sendWelcomeEmail } = require('../lib/email');
 
-// ── Cloudinary avatar upload setup ────────────────────────
-// Wrapped defensively: if multer / multer-storage-cloudinary are not
-// installed, we must NOT throw at module load — that would crash the
-// entire server (index.js requires this file at boot). Instead the
-// avatar endpoint degrades to a clear 503 and every other /api/users
-// route keeps working.
-let uploadAvatar = null;
-let avatarUploadError = null;
-try {
-  const multer = require('multer');
-  const cloudinary = require('cloudinary').v2;
-  const { CloudinaryStorage } = require('multer-storage-cloudinary');
+// ── Avatar upload — multer memory storage + R2 ───────────
+const multer = require('multer');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { v4: uuidv4 } = require('uuid');
 
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key:    process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
+const r2Avatar = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId:     process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
 
-  const avatarStorage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-      folder: 'smartious/avatars',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-      transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
-    },
-  });
-  uploadAvatar = multer({
-    storage: avatarStorage,
-    limits: { fileSize: 5 * 1024 * 1024 },   // 5 MB cap
-  });
-} catch (e) {
-  avatarUploadError = e.message;
-  console.error('[users] avatar upload disabled —', e.message);
-}
+const uploadAvatar = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (['image/jpeg','image/png','image/webp','image/jpg'].includes(file.mimetype))
+      cb(null, true);
+    else cb(new Error('Image must be JPG, PNG or WebP.'), false);
+  },
+});
 
 // ─────────────────────────────────────────────────────────
 // HELPER: Sync a student's GroupRoom enrollments based on
@@ -216,43 +204,36 @@ router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
   }
 });
 
-// POST /api/users/:id/avatar — admin uploads a profile image
-// for any user. Returns the Cloudinary URL and also saves it to
-// the user's avatar field.
-router.post('/:id/avatar', auth, requireRole('admin'), (req, res) => {
-  if (!uploadAvatar) {
-    return res.status(503).json({
-      success: false,
-      message: 'Image upload is unavailable on the server: ' + (avatarUploadError || 'upload module not installed.'),
-    });
-  }
-  uploadAvatar.single('file')(req, res, async (err) => {
-    if (err) {
-      console.error('[users avatar upload]', err.message);
-      return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
-    }
+// POST /api/users/:id/avatar — upload profile image to R2
+router.post('/:id/avatar', auth, requireRole('admin'), uploadAvatar.single('file'), async (req, res) => {
+  try {
     if (!req.file)
       return res.status(400).json({ success: false, message: 'No file uploaded.' });
 
-    try {
-      const user = await User.findByIdAndUpdate(
-        req.params.id,
-        { $set: { avatar: req.file.path } },
-        { new: true }
-      ).select('-password');
-      if (!user)
-        return res.status(404).json({ success: false, message: 'User not found.' });
+    const ext = req.file.originalname.split('.').pop() || 'jpg';
+    const key = `avatars/${req.params.id}_${uuidv4()}.${ext}`;
+    await r2Avatar.send(new PutObjectCommand({
+      Bucket:      process.env.R2_BUCKET_NAME,
+      Key:         key,
+      Body:        req.file.buffer,
+      ContentType: req.file.mimetype,
+    }));
 
-      res.json({
-        success: true,
-        message: 'Avatar updated.',
-        data: { avatar: req.file.path },
-      });
-    } catch (e) {
-      console.error('[users avatar save]', e.message);
-      res.status(500).json({ success: false, message: 'Failed to save avatar.' });
-    }
-  });
+    const avatarUrl = `${(process.env.R2_PUBLIC_URL || '').replace(/\/$/, '')}/${key}`;
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: { avatar: avatarUrl } },
+      { new: true }
+    ).select('-password');
+    if (!user)
+      return res.status(404).json({ success: false, message: 'User not found.' });
+
+    res.json({ success: true, message: 'Avatar updated.', data: { avatar: avatarUrl } });
+  } catch (e) {
+    console.error('[users avatar upload]', e.message);
+    res.status(500).json({ success: false, message: 'Upload failed.' });
+  }
 });
 
 // GET /api/users/teachers/qualified?subjectId=...&curriculum=...
@@ -263,7 +244,6 @@ router.post('/:id/avatar', auth, requireRole('admin'), (req, res) => {
 router.get('/teachers/qualified', auth, requireRole('admin'), async (req, res) => {
   try {
     const mongoose = require('mongoose');
-    const Subject = require('../models/Subject');
     const { subjectId, curriculum } = req.query;
 
     if (!subjectId || !mongoose.isValidObjectId(subjectId))
@@ -271,41 +251,17 @@ router.get('/teachers/qualified', auth, requireRole('admin'), async (req, res) =
     if (!curriculum)
       return res.status(400).json({ success: false, message: 'curriculum is required.' });
 
-    // Primary query — exact match on teachingSpecialties
     const teachers = await User.find({
       role: 'teacher',
       isActive: true,
       isOnLeave: { $ne: true },
       teachingSpecialties: {
-        $elemMatch: {
-          subjectId: new mongoose.Types.ObjectId(subjectId),
-          curriculum,
-        }
+        $elemMatch: { subjectId, curriculum }
       }
     })
       .select('_id firstName lastName email phone teachingSpecialties')
       .sort('firstName')
       .lean();
-
-    console.log(
-      '[qualified] subjectId=' + subjectId + ' curriculum=' + curriculum +
-      ' → ' + teachers.length + ' teacher(s) found'
-    );
-
-    // Debug: if none found, log what specialties ARE stored for active teachers
-    // so we can diagnose mismatches from Render logs without needing DB access.
-    if (teachers.length === 0) {
-      const sample = await User.find({ role: 'teacher', isActive: true })
-        .select('firstName lastName teachingSpecialties')
-        .limit(5)
-        .lean();
-      sample.forEach(t => {
-        console.log(
-          '[qualified] teacher ' + t.firstName + ' ' + t.lastName +
-          ' specialties: ' + JSON.stringify(t.teachingSpecialties)
-        );
-      });
-    }
 
     res.json({ success: true, teachers });
   } catch (e) {
@@ -333,29 +289,15 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin'), async (req
     if (!Array.isArray(curricula) || !Array.isArray(subjectIds))
       return res.status(400).json({ success: false, message: 'curricula and subjectIds must be arrays.' });
 
-    // Full 15-curriculum catalog — must match SCHOOL_CURRICULA in Dashboard.jsx
-    const VALID_CURRICULA = [
-      'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
-      'EdexcelLowerSec',  'EdexcelIGCSE',      'EdexcelALevel',
-      'AQALowerSec',      'AQAGCSE',           'AQAALevel',
-      'IB', 'BNC', 'American', 'Canadian', 'KenyaCBC',
-      // Legacy — kept so old records are not broken
-      'IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC',
-    ];
-    const cleanCurricula = curricula.filter(c => VALID_CURRICULA.includes(c));
+    const VALID = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American'];
+    const cleanCurricula = curricula.filter(c => VALID.includes(c));
     const cleanIds = subjectIds.filter(id => mongoose.isValidObjectId(id));
 
-    console.log('[specialties] received curricula:', JSON.stringify(curricula));
-    console.log('[specialties] cleanCurricula:', JSON.stringify(cleanCurricula));
-    console.log('[specialties] cleanIds count:', cleanIds.length);
-
-    // Guard: if curricula were sent but ALL got filtered out, the sent values
-    // are not in the catalog. Return a clear error rather than silently saving [].
-    if (curricula.length > 0 && cleanCurricula.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'None of the provided curricula are recognised. Received: ' + curricula.join(', '),
-      });
+    // Empty is allowed — admin may want to clear specialties
+    if (cleanIds.length > 0) {
+      const found = await Subject.countDocuments({ _id: { $in: cleanIds } });
+      if (found !== cleanIds.length)
+        return res.status(400).json({ success: false, message: 'One or more subjectIds do not exist.' });
     }
 
     const pairs = [];
@@ -364,8 +306,6 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin'), async (req
         pairs.push({ subjectId: sid, curriculum: curr });
       }
     }
-
-    console.log('[specialties] saving', pairs.length, 'pairs for teacher', teacher._id);
 
     teacher.teachingSpecialties = pairs;
     await teacher.save();
