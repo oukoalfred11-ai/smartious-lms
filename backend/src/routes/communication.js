@@ -4,36 +4,31 @@ const Communication = require('../models/Communication');
 const { auth, requireRole } = require('../middleware/auth');
 const { sendBulkEmail } = require('../services/emailService');
 
-// ── Cloudinary attachment upload (defensive — never crash boot) ──
-let uploadAttachment = null;
-let attachmentUploadError = null;
-try {
-  const multer = require('multer');
-  const cloudinary = require('cloudinary').v2;
-  const { CloudinaryStorage } = require('multer-storage-cloudinary');
+// ── Attachment upload — multer memory storage + R2 ──────────
+const multer = require('multer');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { v4: uuidv4 } = require('uuid');
 
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key:    process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
+const r2Comm = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId:     process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
 
-  const attachmentStorage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-      folder: 'smartious/communication',
-      resource_type: 'raw',          // PDFs and docs, not images
-      allowed_formats: ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg'],
-    },
-  });
-  uploadAttachment = multer({
-    storage: attachmentStorage,
-    limits: { fileSize: 10 * 1024 * 1024 },   // 10 MB per file
-  });
-} catch (e) {
-  attachmentUploadError = e.message;
-  console.error('[communication] attachment upload disabled —', e.message);
-}
+const uploadAttachment = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['application/pdf','application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'image/png','image/jpeg'];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('File type not allowed.'), false);
+  },
+});
 
 // ─────────────────────────────────────────────────────────
 // GET /api/communication/recipients
@@ -67,30 +62,31 @@ router.get('/recipients', auth, requireRole('admin'), async (req, res) => {
 
 // ─────────────────────────────────────────────────────────
 // POST /api/communication/upload-attachment
-// Uploads one file to Cloudinary, returns { name, url }.
-// The frontend uploads each attachment, then includes the
-// returned URLs in the /send payload.
+// Uploads one file to R2, returns { name, url }.
 // ─────────────────────────────────────────────────────────
-router.post('/upload-attachment', auth, requireRole('admin', 'teacher', 'student'), (req, res) => {
-  if (!uploadAttachment) {
-    return res.status(503).json({
-      success: false,
-      message: 'Attachment upload unavailable: ' + (attachmentUploadError || 'module not installed.'),
-    });
-  }
-  uploadAttachment.single('file')(req, res, (err) => {
-    if (err) {
-      console.error('[communication upload]', err.message);
-      return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
-    }
-    if (!req.file) {
+router.post('/upload-attachment', auth, requireRole('admin', 'teacher', 'student'), uploadAttachment.single('file'), async (req, res) => {
+  try {
+    if (!req.file)
       return res.status(400).json({ success: false, message: 'No file uploaded.' });
-    }
+
+    const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const key = `communication/${uuidv4()}_${safeName}`;
+    await r2Comm.send(new PutObjectCommand({
+      Bucket:      process.env.R2_BUCKET_NAME,
+      Key:         key,
+      Body:        req.file.buffer,
+      ContentType: req.file.mimetype,
+    }));
+
+    const url = `${(process.env.R2_PUBLIC_URL || '').replace(/\/$/, '')}/${key}`;
     res.json({
       success: true,
-      data: { name: req.file.originalname || 'attachment', url: req.file.path },
+      data: { name: req.file.originalname || 'attachment', url },
     });
-  });
+  } catch (err) {
+    console.error('[communication upload]', err.message);
+    res.status(500).json({ success: false, message: err.message || 'Upload failed.' });
+  }
 });
 
 // ─────────────────────────────────────────────────────────
