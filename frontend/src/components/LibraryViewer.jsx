@@ -1,49 +1,20 @@
 /**
  * LibraryViewer.jsx
- * ============================================================
- * Full-screen PDF viewer for library books. Used by both
- * Teacher Portal (preview an upload) and Student Portal
- * (read a coursebook).
+ * Full-screen PDF viewer. Loads the PDF directly from the R2
+ * public URL stored in book.url — no backend round-trip needed.
  *
  * Props:
- *   book   { _id, title, subjectName, curriculum, author, sizeBytes }
- *          — book metadata for the header
- *   api    — axios instance for fetching the signed view URL
- *   onClose function — invoked when the user closes the viewer
- *
- * Design choices:
- *   - Renders the PDF in a <iframe> with #toolbar=0&navpanes=0&scrollbar=1
- *     URL hash params. These are honoured by Chromium-based browsers
- *     to hide the built-in PDF toolbar (download button, print button,
- *     etc.). Firefox honours them partially.
- *   - The wrapper div intercepts contextmenu (right-click), Ctrl+S,
- *     Ctrl+P, Ctrl+Shift+S, and the F12 inspector key — all common
- *     ways a casual user might try to save the file.
- *   - The signed view URL is fetched fresh each open and is valid
- *     for 1 hour. If the user keeps the viewer open longer, the
- *     URL may go stale; closing+reopening fetches a new one.
- *
- * Honest limitations:
- *   - This is DETERRENCE, not prevention. Any user with browser
- *     dev tools can open the Network tab, find the PDF request,
- *     and save the bytes. Truly preventing PDF capture is not
- *     possible in a web browser.
- *   - In Chrome the toolbar=0 hash hides the toolbar but the
- *     three-dot menu in the URL bar still exposes "Save as".
- *   - Firefox's built-in PDF viewer ignores these hash params
- *     and shows its own download UI.
+ *   book    { _id, title, subjectName, curriculum, author, sizeBytes, url }
+ *   onClose function
  */
 
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 
-const TOKENS = {
+const T = {
   crimson: '#7D1025',
   gold:    '#C9A030',
   cream:   '#FBFAF5',
-  ink:     '#1A1A1A',
   s500:    '#6B6B6B',
-  s300:    '#9A9A9A',
-  s100:    '#E8E2D6',
 }
 
 function fmtBytes(n) {
@@ -52,58 +23,29 @@ function fmtBytes(n) {
   return (n / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
-export default function LibraryViewer({ book, api, onClose }) {
-  const [viewUrl, setViewUrl] = useState(null)
-  const [error, setError] = useState(null)
+export default function LibraryViewer({ book, onClose }) {
   const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState(null)
   const [fullscreen, setFullscreen] = useState(false)
   const containerRef = useRef(null)
-  const iframeRef = useRef(null)
 
-  // Fetch a signed view URL each time the viewer opens
+  // book.url is the direct R2 public URL — use it straight in the iframe.
+  // Append hash params to suppress the browser's PDF toolbar.
+  const viewUrl = book?.url
+    ? book.url + '#toolbar=0&navpanes=0&scrollbar=1&statusbar=0&zoom=page-fit'
+    : null
+
   useEffect(() => {
-    if (!book?._id) return
-    let cancelled = false
-    setLoading(true)
-    setError(null)
-    setViewUrl(null)
-    ;(async () => {
-      try {
-        const { data } = await api.get(`/library/${book._id}/view`)
-        if (cancelled) return
-        const url = data?.data?.url
-        if (!url) {
-          setError('No view URL returned by server.')
-          return
-        }
-        // Append PDF viewer hash params to hide native toolbar
-        const hash = '#toolbar=0&navpanes=0&scrollbar=1&statusbar=0&messages=0&zoom=page-fit'
-        setViewUrl(url + hash)
-      } catch (e) {
-        if (cancelled) return
-        setError(e?.response?.data?.message || e.message || 'Failed to load book.')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
-    return () => { cancelled = true }
-  }, [book?._id, api])
+    if (!viewUrl) setError('No URL available for this book.')
+  }, [viewUrl])
 
-  // Intercept common save/print shortcuts and right-click on the wrapper
+  // Block common save/print shortcuts
   const handleKeyDown = useCallback((e) => {
-    const ctrl = e.ctrlKey || e.metaKey
-    // Ctrl+S, Ctrl+P, Ctrl+Shift+S
-    if (ctrl && (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P')) {
-      e.preventDefault()
-      e.stopPropagation()
-      return false
+    if ((e.ctrlKey || e.metaKey) && ['s','S','p','P'].includes(e.key)) {
+      e.preventDefault(); e.stopPropagation()
     }
   }, [])
-
-  const handleContextMenu = useCallback((e) => {
-    e.preventDefault()
-    return false
-  }, [])
+  const handleContextMenu = useCallback((e) => { e.preventDefault() }, [])
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown, true)
@@ -114,7 +56,13 @@ export default function LibraryViewer({ book, api, onClose }) {
     }
   }, [handleKeyDown, handleContextMenu])
 
-  // Fullscreen API (browser-level)
+  // Prevent page scroll behind modal
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
+
   const toggleFullscreen = async () => {
     try {
       if (!document.fullscreenElement) {
@@ -124,124 +72,110 @@ export default function LibraryViewer({ book, api, onClose }) {
         await document.exitFullscreen?.()
         setFullscreen(false)
       }
-    } catch (e) {
-      // Some browsers/iframes restrict fullscreen
-    }
+    } catch {}
   }
 
-  // Detect when user exits fullscreen via Esc
   useEffect(() => {
-    const onFsChange = () => setFullscreen(!!document.fullscreenElement)
-    document.addEventListener('fullscreenchange', onFsChange)
-    return () => document.removeEventListener('fullscreenchange', onFsChange)
-  }, [])
-
-  // Prevent page scroll behind modal
-  useEffect(() => {
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
+    const onChange = () => setFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onChange)
+    return () => document.removeEventListener('fullscreenchange', onChange)
   }, [])
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        position: 'fixed', inset: 0,
-        background: 'rgba(20,15,10,0.94)',
-        zIndex: 99999,
-        display: 'flex', flexDirection: 'column',
-      }}
-      onContextMenu={handleContextMenu}
-    >
-      {/* Top bar */}
+    <div ref={containerRef} style={{
+      position: 'fixed', inset: 0,
+      background: 'rgba(20,15,10,0.96)',
+      zIndex: 99999,
+      display: 'flex', flexDirection: 'column',
+    }} onContextMenu={handleContextMenu}>
+
+      {/* Header */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '10px 18px',
-        background: TOKENS.crimson, color: '#fff',
-        flexShrink: 0,
+        padding: '10px 18px', background: T.crimson, color: '#fff', flexShrink: 0,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
-          <div style={{ minWidth: 0 }}>
-            <div style={{
-              fontWeight: 700, fontSize: 14,
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-              maxWidth: 600,
-            }}>{book.title}</div>
-            <div style={{ fontSize: 11, opacity: .85, marginTop: 2 }}>
-              {book.subjectName}
-              {book.curriculum ? ' · ' + book.curriculum : ''}
-              {book.author ? ' · ' + book.author : ''}
-              {book.sizeBytes ? ' · ' + fmtBytes(book.sizeBytes) : ''}
-            </div>
+        <div style={{ minWidth: 0 }}>
+          <div style={{
+            fontWeight: 700, fontSize: 14,
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 600,
+          }}>{book.title}</div>
+          <div style={{ fontSize: 11, opacity: .85, marginTop: 2 }}>
+            {[book.subjectName, book.curriculum, book.author, book.sizeBytes ? fmtBytes(book.sizeBytes) : '']
+              .filter(Boolean).join(' · ')}
           </div>
         </div>
-
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          <button onClick={toggleFullscreen}
-            style={{
-              background: 'rgba(255,255,255,0.15)', color: '#fff',
-              border: '1px solid rgba(255,255,255,0.25)',
-              padding: '7px 14px', borderRadius: 6,
-              fontSize: 12, fontWeight: 700, cursor: 'pointer',
-            }}>
+          <button onClick={toggleFullscreen} style={{
+            background: 'rgba(255,255,255,.15)', color: '#fff',
+            border: '1px solid rgba(255,255,255,.25)',
+            padding: '7px 14px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+          }}>
             {fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
           </button>
-          <button onClick={onClose}
-            style={{
-              background: TOKENS.gold, color: TOKENS.crimson,
-              border: 'none', padding: '7px 16px', borderRadius: 6,
-              fontSize: 12, fontWeight: 800, cursor: 'pointer',
-            }}>
+          <button onClick={onClose} style={{
+            background: T.gold, color: T.crimson,
+            border: 'none', padding: '7px 16px', borderRadius: 6,
+            fontSize: 12, fontWeight: 800, cursor: 'pointer',
+          }}>
             Close
           </button>
         </div>
       </div>
 
-      {/* Viewer area */}
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-        {loading && (
+      {/* PDF area */}
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#525659' }}>
+        {loading && !error && (
           <div style={{
-            position: 'absolute', inset: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: TOKENS.cream, fontSize: 14,
+            position: 'absolute', inset: 0, display: 'flex',
+            flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            color: T.cream, gap: 14,
           }}>
-            Loading book...
+            <div style={{
+              width: 36, height: 36, border: '3px solid rgba(255,255,255,.2)',
+              borderTopColor: T.gold, borderRadius: '50%',
+              animation: 'spin 0.8s linear infinite',
+            }}/>
+            <div style={{ fontSize: 13 }}>Loading book...</div>
+            <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
           </div>
         )}
+
         {error && (
           <div style={{
-            position: 'absolute', inset: 0,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            color: TOKENS.cream, gap: 8, padding: 30, textAlign: 'center',
+            position: 'absolute', inset: 0, display: 'flex',
+            flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            color: T.cream, gap: 10, padding: 30, textAlign: 'center',
           }}>
-            <div style={{ fontSize: 14, fontWeight: 700 }}>Could not load this book.</div>
-            <div style={{ fontSize: 12.5, opacity: .8 }}>{error}</div>
+            <div style={{ fontSize: 32 }}>📄</div>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>Could not load this book</div>
+            <div style={{ fontSize: 12.5, opacity: .75 }}>{error}</div>
+            <a href={book.url} target="_blank" rel="noopener noreferrer" style={{
+              marginTop: 8, background: T.gold, color: T.crimson,
+              padding: '9px 20px', borderRadius: 7, fontWeight: 700,
+              fontSize: 12.5, textDecoration: 'none',
+            }}>Open in new tab</a>
           </div>
         )}
+
         {viewUrl && !error && (
           <iframe
-            ref={iframeRef}
             src={viewUrl}
             title={book.title}
+            onLoad={() => setLoading(false)}
+            onError={() => { setLoading(false); setError('Browser could not render the PDF.') }}
             onContextMenu={handleContextMenu}
-            style={{
-              width: '100%', height: '100%',
-              border: 'none', background: '#525659',
-              display: 'block',
-            }}
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
           />
         )}
 
-        {/* Tiny watermark / footer reminder — psychological deterrence */}
+        {/* Watermark */}
         <div style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
-          padding: '5px 14px',
-          background: 'rgba(0,0,0,0.6)', color: '#fff',
-          fontSize: 10, textAlign: 'center', letterSpacing: '.04em',
-          pointerEvents: 'none',
+          padding: '4px 14px', background: 'rgba(0,0,0,.55)',
+          color: '#fff', fontSize: 10, textAlign: 'center',
+          letterSpacing: '.04em', pointerEvents: 'none',
         }}>
-          For personal reading only — please do not download or share.
+          For personal reading only — Smartious Homeschool
         </div>
       </div>
     </div>
