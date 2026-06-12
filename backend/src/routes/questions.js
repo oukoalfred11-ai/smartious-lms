@@ -25,34 +25,33 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { v4: uuidv4 } = require('uuid');
 
 const Question = require('../models/Question');
 const { auth, requireRole } = require('../middleware/auth');
 const { isSubjectValidForCurriculum } = require('../constants/curriculum');
 
 // ─────────────────────────────────────────────────────────
-// CLOUDINARY CONFIG
+// R2 CONFIG — replaces Cloudinary for question attachments
 // ─────────────────────────────────────────────────────────
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'smartious/question-bank',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf'],
-    transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+const r2 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId:     process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
   },
 });
 
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg','image/png','image/gif','image/webp','application/pdf'];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('File type not allowed.'), false);
+  },
 });
 
 // ─────────────────────────────────────────────────────────
@@ -64,27 +63,35 @@ const upload = multer({
 // to questions; students use it to upload drawing answers in homework
 // and any upload-type answers in exams.
 // ─────────────────────────────────────────────────────────
-router.post('/upload', auth, (req, res) => {
-  upload.single('file')(req, res, (err) => {
-    if (err) {
-      console.error('[questions/upload]', err.message);
-      return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
-    }
-    if (!req.file) {
+router.post('/upload', auth, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file)
       return res.status(400).json({ success: false, message: 'No file uploaded.' });
-    }
 
+    const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const key = `questions/${uuidv4()}_${safeName}`;
+    await r2.send(new PutObjectCommand({
+      Bucket:      process.env.R2_BUCKET_NAME,
+      Key:         key,
+      Body:        req.file.buffer,
+      ContentType: req.file.mimetype,
+    }));
+
+    const url = `${(process.env.R2_PUBLIC_URL || '').replace(/\/$/, '')}/${key}`;
     return res.json({
       success: true,
       attachment: {
-        url:       req.file.path,
-        publicId:  req.file.filename,
+        url,
+        publicId:  key,
         filename:  req.file.originalname,
         mimeType:  req.file.mimetype,
         sizeBytes: req.file.size,
       },
     });
-  });
+  } catch (err) {
+    console.error('[questions/upload]', err.message);
+    res.status(500).json({ success: false, message: err.message || 'Upload failed.' });
+  }
 });
 
 // ─────────────────────────────────────────────────────────
@@ -278,11 +285,11 @@ router.delete('/:id', auth, async (req, res) => {
     collectPublicIds(question.attachments, publicIds);
     walkParts(question.parts, publicIds);
 
-    for (const pid of publicIds) {
+    for (const key of publicIds) {
       try {
-        await cloudinary.uploader.destroy(pid);
+        await r2.send(new DeleteObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: key }));
       } catch (err) {
-        console.error('[questions DELETE] Cloudinary destroy failed for', pid, ':', err.message);
+        console.error('[questions DELETE] R2 cleanup failed for', key, ':', err.message);
       }
     }
 
