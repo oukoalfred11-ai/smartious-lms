@@ -6004,7 +6004,7 @@ function SubjectPickerModal({ curriculum, catalog, initial, onClose, onSave }) {
 function AllocateTeacherModal({ studentId, studentName, curriculum, subjectId, subjectName, currentAlloc, onClose, onSaved, toast }) {
   const [qualifiedTeachers, setQualifiedTeachers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [pickedTeacherId, setPickedTeacherId] = useState(currentAlloc?.teacherId?._id || '')
+  const [pickedTeacherId, setPickedTeacherId] = useState(String(currentAlloc?.teacherId?._id || currentAlloc?.teacherId || ''))
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -6028,7 +6028,7 @@ function AllocateTeacherModal({ studentId, studentName, curriculum, subjectId, s
 
   const save = async () => {
     if (!pickedTeacherId) { toast?.error?.('Pick a teacher.'); return }
-    if (currentAlloc && pickedTeacherId === currentAlloc.teacherId?._id) { onClose(); return }
+    if (currentAlloc && pickedTeacherId === String(currentAlloc.teacherId?._id || currentAlloc.teacherId || '')) { onClose(); return }
 
     setSaving(true)
     try {
@@ -6113,8 +6113,8 @@ function AllocateTeacherModal({ studentId, studentName, curriculum, subjectId, s
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {qualifiedTeachers.map(t => {
-                const isPicked = pickedTeacherId === t._id
-                const isCurrent = currentAlloc?.teacherId?._id === t._id
+                const isPicked = pickedTeacherId === String(t._id)
+                const isCurrent = String(currentAlloc?.teacherId?._id || currentAlloc?.teacherId || '') === String(t._id)
                 return (
                   <div key={t._id}
                     onClick={() => setPickedTeacherId(t._id)}
