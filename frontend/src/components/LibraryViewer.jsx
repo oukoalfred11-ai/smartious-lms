@@ -69,7 +69,7 @@ export default function LibraryViewer({ book, api, onClose }) {
     setViewUrl(null)
     ;(async () => {
       try {
-        const { data } = await api.get(`/library/${book._id}/view-url`)
+        const { data } = await api.get(`/library/${book._id}/view`)
         if (cancelled) return
         const url = data?.data?.url
         if (!url) {
