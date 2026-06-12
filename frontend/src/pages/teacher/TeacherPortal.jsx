@@ -13724,32 +13724,36 @@ function ExternalEmailAdder({ onAdd, pickedEmails, toast }) {
 
 // ═══════════════════════════════════════════════════════════
 // TEACHER LIBRARY TAB
-// Upload + manage coursebook PDFs for the teacher's subjects.
-// Files go to Cloudinary (folder smartious/library) via the
-// backend; only metadata flows through React.
+// ═══════════════════════════════════════════════════════════
+// TeacherLibraryTab
+// Upload + browse coursebook PDFs grouped by subject.
+// Teachers can: upload (with optional cover image), browse all
+// books visible to them, open/read any book, delete own books.
 // ═══════════════════════════════════════════════════════════
 function TeacherLibraryTab({ user, toast }) {
-  const [books, setBooks] = useState([])
-  const [loadingBooks, setLoadingBooks] = useState(true)
-  const [subjects, setSubjects] = useState([])
+  const [books, setBooks]                   = useState([])
+  const [loadingBooks, setLoadingBooks]     = useState(true)
+  const [subjects, setSubjects]             = useState([])
   const [loadingSubjects, setLoadingSubjects] = useState(true)
+  const [showUploadForm, setShowUploadForm] = useState(false)
+  const [viewerBook, setViewerBook]         = useState(null)
+  const [search, setSearch]                 = useState('')
 
   // Upload form state
-  const [showUploadForm, setShowUploadForm] = useState(false)
-  const [upSubjectId, setUpSubjectId] = useState('')
-  const [upTitle, setUpTitle] = useState('')
+  const [upSubjectId,   setUpSubjectId]   = useState('')
+  const [upTitle,       setUpTitle]       = useState('')
   const [upDescription, setUpDescription] = useState('')
-  const [upAuthor, setUpAuthor] = useState('')
-  const [upGrades, setUpGrades] = useState('')
-  const [upFile, setUpFile] = useState(null)
-  const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const fileInputRef = useRef(null)
+  const [upAuthor,      setUpAuthor]      = useState('')
+  const [upGrades,      setUpGrades]      = useState('')
+  const [upFile,        setUpFile]        = useState(null)
+  const [upCover,       setUpCover]       = useState(null)
+  const [upCoverPreview,setUpCoverPreview]= useState(null)
+  const [uploading,     setUploading]     = useState(false)
+  const [uploadStage,   setUploadStage]   = useState('') // presigning|uploading|cover|confirming
+  const [uploadProgress,setUploadProgress]= useState(0)
+  const fileInputRef  = useRef(null)
+  const coverInputRef = useRef(null)
 
-  // Viewer state
-  const [viewerBook, setViewerBook] = useState(null)
-
-  // Load books visible to this teacher
   const loadBooks = async () => {
     setLoadingBooks(true)
     try {
@@ -13762,11 +13766,6 @@ function TeacherLibraryTab({ user, toast }) {
     }
   }
 
-  // Load all available subjects for the upload form dropdown.
-  // We deliberately use /subjects (full active list) rather than
-  // /lessons/my-subjects — a teacher should be able to upload a
-  // library book for any subject they think relevant, not be
-  // restricted to subjects they happen to author lessons for.
   useEffect(() => {
     let cancelled = false
     ;(async () => {
@@ -13774,108 +13773,112 @@ function TeacherLibraryTab({ user, toast }) {
         const { data } = await api.get('/subjects')
         if (cancelled) return
         const list = (data?.subjects || []).filter(s => s.isActive !== false)
-        // Sort by curriculum then subject name for easy scanning
         list.sort((a, b) => {
           const c = String(a.curriculum || '').localeCompare(String(b.curriculum || ''))
-          if (c !== 0) return c
-          return String(a.subjectName || '').localeCompare(String(b.subjectName || ''))
+          return c !== 0 ? c : String(a.subjectName || '').localeCompare(String(b.subjectName || ''))
         })
         setSubjects(list)
       } catch (e) {
-        if (!cancelled) toast?.error?.('Failed to load subjects: ' + (e?.response?.data?.message || e.message))
+        if (!cancelled) toast?.error?.('Failed to load subjects.')
       } finally {
         if (!cancelled) setLoadingSubjects(false)
       }
     })()
     return () => { cancelled = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(() => { loadBooks() // eslint-disable-next-line
-  }, [])
+  useEffect(() => { loadBooks() }, [])
 
   const onFilePick = (file) => {
     if (!file) return
-    if (file.type !== 'application/pdf') {
-      toast?.error?.('Only PDF files are accepted.')
-      return
-    }
+    if (file.type !== 'application/pdf') { toast?.error?.('Only PDF files are accepted.'); return }
     setUpFile(file)
     if (!upTitle) setUpTitle(file.name.replace(/\.pdf$/i, '').replace(/[_-]/g, ' '))
   }
 
-  const resetForm = () => {
-    setUpSubjectId('')
-    setUpTitle('')
-    setUpDescription('')
-    setUpAuthor('')
-    setUpGrades('')
-    setUpFile(null)
-    setUploadProgress(0)
-    if (fileInputRef.current) fileInputRef.current.value = ''
+  const onCoverPick = (file) => {
+    if (!file) return
+    const allowed = ['image/jpeg','image/png','image/webp','image/jpg']
+    if (!allowed.includes(file.type)) { toast?.error?.('Cover must be JPG, PNG or WebP.'); return }
+    if (file.size > 3 * 1024 * 1024) { toast?.error?.('Cover image must be under 3 MB.'); return }
+    setUpCover(file)
+    const reader = new FileReader()
+    reader.onload = (e) => setUpCoverPreview(e.target.result)
+    reader.readAsDataURL(file)
   }
 
-  // Two-step R2 upload:
-  // 1. POST /library/presign  → get a presigned PUT URL (backend generates it)
-  // 2. PUT file directly to R2 from the browser (no file size limit, no server bandwidth)
-  // 3. POST /library/confirm  → backend saves metadata to MongoDB
+  const resetForm = () => {
+    setUpSubjectId(''); setUpTitle(''); setUpDescription(''); setUpAuthor('')
+    setUpGrades(''); setUpFile(null); setUpCover(null); setUpCoverPreview(null)
+    setUploadProgress(0); setUploadStage('')
+    if (fileInputRef.current)  fileInputRef.current.value  = ''
+    if (coverInputRef.current) coverInputRef.current.value = ''
+  }
+
+  const uploadViaXHR = (url, file, contentType, onProgress) =>
+    new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('PUT', url)
+      xhr.setRequestHeader('Content-Type', contentType)
+      xhr.upload.onprogress = (e) => { if (e.total) onProgress(Math.round((e.loaded / e.total) * 100)) }
+      xhr.onload  = () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error('Upload failed: ' + xhr.status))
+      xhr.onerror = () => reject(new Error('Network error during upload.'))
+      xhr.send(file)
+    })
+
   const submitUpload = async () => {
     if (!upSubjectId)    { toast?.error?.('Pick a subject.'); return }
     if (!upTitle.trim()) { toast?.error?.('Title is required.'); return }
     if (!upFile)         { toast?.error?.('Choose a PDF file.'); return }
 
-    setUploading(true)
-    setUploadProgress(0)
+    setUploading(true); setUploadProgress(0)
     try {
-      // Step 1 — get presigned URL
+      // Step 1 — presign PDF
+      setUploadStage('presigning')
       const presignRes = await api.post('/library/presign', {
-        subjectId: upSubjectId,
-        fileName:  upFile.name,
-        fileSize:  upFile.size,
-        mimeType:  upFile.type || 'application/pdf',
+        subjectId: upSubjectId, fileName: upFile.name,
+        fileSize: upFile.size, mimeType: upFile.type || 'application/pdf',
       })
       const { uploadUrl, r2Key, publicUrl } = presignRes.data.data
 
-      // Step 2 — PUT directly to R2 (plain fetch/axios, no auth header to R2)
-      await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest()
-        xhr.open('PUT', uploadUrl)
-        xhr.setRequestHeader('Content-Type', upFile.type || 'application/pdf')
-        xhr.upload.onprogress = (e) => {
-          if (e.total) setUploadProgress(Math.round((e.loaded / e.total) * 100))
-        }
-        xhr.onload = () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error('R2 upload failed: ' + xhr.status))
-        xhr.onerror = () => reject(new Error('Network error during upload.'))
-        xhr.send(upFile)
-      })
-
+      // Step 2 — upload PDF to R2
+      setUploadStage('uploading')
+      await uploadViaXHR(uploadUrl, upFile, upFile.type || 'application/pdf',
+        (pct) => setUploadProgress(pct))
       setUploadProgress(100)
 
-      // Step 3 — confirm: save metadata to MongoDB
+      // Step 3 — upload cover image if provided
+      let coverImage = ''; let coverR2Key = ''
+      if (upCover) {
+        setUploadStage('cover')
+        const coverPresign = await api.post('/library/presign-cover', {
+          fileName: upCover.name, mimeType: upCover.type,
+        })
+        const { uploadUrl: coverUrl, r2Key: cKey, publicUrl: cPublic } = coverPresign.data.data
+        await uploadViaXHR(coverUrl, upCover, upCover.type, () => {})
+        coverImage = cPublic; coverR2Key = cKey
+      }
+
+      // Step 4 — confirm: save to MongoDB
+      setUploadStage('confirming')
       const confirmRes = await api.post('/library/confirm', {
-        r2Key,
-        publicUrl,
-        subjectId:   upSubjectId,
-        title:       upTitle.trim(),
-        description: upDescription.trim(),
-        author:      upAuthor.trim(),
-        grades:      upGrades.trim(),
-        fileName:    upFile.name,
-        fileSize:    upFile.size,
-        mimeType:    upFile.type || 'application/pdf',
+        r2Key, publicUrl, subjectId: upSubjectId,
+        title: upTitle.trim(), description: upDescription.trim(),
+        author: upAuthor.trim(), grades: upGrades.trim(),
+        fileName: upFile.name, fileSize: upFile.size,
+        mimeType: upFile.type || 'application/pdf',
+        coverImage, coverR2Key,
       })
       if (confirmRes.data?.success) {
-        toast?.ok?.('Book uploaded.')
-        resetForm()
-        setShowUploadForm(false)
-        loadBooks()
+        toast?.ok?.('Book uploaded successfully.')
+        resetForm(); setShowUploadForm(false); loadBooks()
       } else {
         toast?.error?.(confirmRes.data?.message || 'Upload failed.')
       }
     } catch (e) {
       toast?.error?.(e?.response?.data?.message || e.message || 'Upload failed.')
     } finally {
-      setUploading(false)
+      setUploading(false); setUploadStage('')
     }
   }
 
@@ -13883,150 +13886,193 @@ function TeacherLibraryTab({ user, toast }) {
     if (!window.confirm(`Delete "${book.title}"? This permanently removes the PDF.`)) return
     try {
       const { data } = await api.delete(`/library/${book._id}`)
-      if (data?.success) {
-        toast?.ok?.('Book deleted.')
-        loadBooks()
-      } else {
-        toast?.error?.(data?.message || 'Delete failed.')
-      }
+      if (data?.success) { toast?.ok?.('Book deleted.'); loadBooks() }
+      else toast?.error?.(data?.message || 'Delete failed.')
     } catch (e) {
       toast?.error?.(e?.response?.data?.message || 'Delete failed: ' + e.message)
     }
   }
 
-  // Group books by subject for display
-  const booksBySubject = (() => {
-    const groups = {}
-    for (const b of books) {
-      const k = b.subjectName + ' · ' + b.curriculum
-      if (!groups[k]) groups[k] = []
-      groups[k].push(b)
-    }
-    return groups
+  // Filter + group by subject
+  const filtered = (() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return books
+    return books.filter(b =>
+      (b.title || '').toLowerCase().includes(q) ||
+      (b.author || '').toLowerCase().includes(q) ||
+      (b.subjectName || '').toLowerCase().includes(q)
+    )
   })()
+
+  const booksBySubject = (() => {
+    const g = {}
+    for (const b of filtered) {
+      const k = b.subjectName + ' · ' + b.curriculum
+      if (!g[k]) g[k] = []
+      g[k].push(b)
+    }
+    return g
+  })()
+
+  const stageLabel = {
+    presigning: 'Preparing upload...',
+    uploading:  `Uploading PDF — ${uploadProgress}%`,
+    cover:      'Uploading cover image...',
+    confirming: 'Saving to library...',
+  }[uploadStage] || ''
+
+  const inp = {
+    width: '100%', boxSizing: 'border-box', padding: '8px 11px',
+    borderRadius: 7, border: '1.5px solid #E8E2D6', fontSize: 13, fontFamily: 'inherit',
+  }
 
   return (
     <div>
+      {/* Header row */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom: 20 }}>
         <div>
           <div className="sec-tag">Coursebooks by subject</div>
-          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
-            Library
-          </h2>
+          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>Library</h2>
           <div style={{ fontSize: 13, color: '#6B6B6B' }}>
-            Upload PDF coursebooks. Your students will be able to read them inline (no download).
+            Upload and browse PDF coursebooks. Students read them inline.
           </div>
         </div>
-        {!showUploadForm && (
-          <button onClick={() => setShowUploadForm(true)}
-            style={{
+        <div style={{ display:'flex', gap: 8 }}>
+          {!showUploadForm && (
+            <button onClick={() => setShowUploadForm(true)} style={{
               background: '#7D1025', color: '#fff', border: 'none',
-              padding: '10px 18px', borderRadius: 8,
-              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-            }}>
-            + Upload book
-          </button>
-        )}
+              padding: '10px 18px', borderRadius: 8, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+            }}>+ Upload book</button>
+          )}
+        </div>
       </div>
 
       {/* Upload form */}
       {showUploadForm && (
-        <div className="card" style={{ padding: 20, marginBottom: 22, border: '1.5px solid #C9A030' }}>
-          <div style={{
-            fontSize: 11, fontWeight: 700, color: '#7D5A0F',
-            letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 14,
-          }}>Upload a coursebook</div>
+        <div style={{
+          background: '#fff', border: '1.5px solid #C9A030', borderRadius: 12,
+          padding: 22, marginBottom: 24,
+        }}>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#7D1025', marginBottom: 16 }}>
+            Upload a coursebook
+          </div>
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 14 }}>
             <div>
-              <label className="fl">Subject *</label>
-              <select className="fsel" value={upSubjectId}
-                onChange={e => setUpSubjectId(e.target.value)}
-                disabled={loadingSubjects || uploading}>
-                <option value="">
-                  {loadingSubjects ? 'Loading subjects...' : 'Select subject...'}
-                </option>
+              <label style={{ display:'block', fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 5 }}>Subject *</label>
+              <select value={upSubjectId} onChange={e => setUpSubjectId(e.target.value)}
+                disabled={loadingSubjects || uploading} style={inp}>
+                <option value="">{loadingSubjects ? 'Loading...' : 'Select subject...'}</option>
                 {subjects.map(s => (
-                  <option key={s._id} value={s._id}>
-                    {s.subjectName} · {s.curriculum}
-                  </option>
+                  <option key={s._id} value={s._id}>{s.subjectName} · {s.curriculum}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="fl">Title *</label>
-              <input className="finput" value={upTitle}
-                onChange={e => setUpTitle(e.target.value)}
+              <label style={{ display:'block', fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 5 }}>Book Title *</label>
+              <input value={upTitle} onChange={e => setUpTitle(e.target.value)}
                 placeholder="e.g. Cambridge IGCSE Mathematics Coursebook"
-                disabled={uploading}/>
+                disabled={uploading} style={inp}/>
             </div>
           </div>
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 14 }}>
             <div>
-              <label className="fl">Author (optional)</label>
-              <input className="finput" value={upAuthor}
-                onChange={e => setUpAuthor(e.target.value)}
-                placeholder="e.g. Karen Morrison"
-                disabled={uploading}/>
+              <label style={{ display:'block', fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 5 }}>Author / Publisher</label>
+              <input value={upAuthor} onChange={e => setUpAuthor(e.target.value)}
+                placeholder="e.g. Cambridge University Press" disabled={uploading} style={inp}/>
             </div>
             <div>
-              <label className="fl">Grade(s) (optional, comma-separated)</label>
-              <input className="finput" value={upGrades}
-                onChange={e => setUpGrades(e.target.value)}
-                placeholder="e.g. Year 10, Year 11"
-                disabled={uploading}/>
+              <label style={{ display:'block', fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 5 }}>Grades (comma-separated)</label>
+              <input value={upGrades} onChange={e => setUpGrades(e.target.value)}
+                placeholder="e.g. Year 10, Year 11" disabled={uploading} style={inp}/>
             </div>
           </div>
 
           <div style={{ marginBottom: 14 }}>
-            <label className="fl">Description (optional)</label>
-            <textarea className="finput" value={upDescription}
-              onChange={e => setUpDescription(e.target.value)}
-              placeholder="A short description of the book"
-              rows={2}
-              style={{ resize:'vertical' }}
-              disabled={uploading}/>
+            <label style={{ display:'block', fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 5 }}>Description (optional)</label>
+            <textarea value={upDescription} onChange={e => setUpDescription(e.target.value)}
+              placeholder="Short description of what this book covers..." rows={2}
+              disabled={uploading} style={{ ...inp, resize: 'vertical' }}/>
           </div>
 
-          <div style={{ marginBottom: 16 }}>
-            <label className="fl">PDF file * (max 10 MB)</label>
-            <input ref={fileInputRef} type="file" accept="application/pdf"
-              onChange={e => onFilePick(e.target.files?.[0])}
-              disabled={uploading}
-              style={{ fontSize: 12, marginTop: 4 }}/>
-            {upFile && (
-              <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 6 }}>
-                {upFile.name} ({(upFile.size / (1024*1024)).toFixed(1)} MB)
+          {/* PDF + Cover image side by side */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 16 }}>
+            {/* PDF file picker */}
+            <div>
+              <label style={{ display:'block', fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 5 }}>PDF File *</label>
+              <div style={{
+                border: '2px dashed ' + (upFile ? '#15803D' : '#E8E2D6'),
+                borderRadius: 8, padding: '14px 12px', textAlign: 'center',
+                background: upFile ? '#DCFCE7' : '#FBFAF5', cursor: uploading ? 'not-allowed' : 'pointer',
+              }} onClick={() => !uploading && fileInputRef.current?.click()}>
+                <input ref={fileInputRef} type="file" accept="application/pdf"
+                  style={{ display: 'none' }} onChange={e => onFilePick(e.target.files?.[0])}
+                  disabled={uploading}/>
+                {upFile ? (
+                  <>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#15803D' }}>{upFile.name}</div>
+                    <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 3 }}>
+                      {(upFile.size / (1024*1024)).toFixed(1)} MB ·{' '}
+                      <span onClick={e => { e.stopPropagation(); if (!uploading) { setUpFile(null); fileInputRef.current.value = '' } }}
+                        style={{ color: '#B91C1C', cursor: 'pointer', textDecoration: 'underline' }}>Remove</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 13, color: '#6B6B6B' }}>Click to select PDF</div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3 }}>Any size · uploads directly to cloud</div>
+                  </>
+                )}
               </div>
-            )}
-            <div style={{
-              fontSize: 11, color: '#7D5A0F', marginTop: 8,
-              background: '#FDF7E2', border: '1px solid #E8D58F',
-              borderRadius: 5, padding: '6px 10px', lineHeight: 1.5,
-            }}>
-              <strong>Tip:</strong> If your PDF is larger than 10 MB,
-              compress it first using a free online tool like ilovepdf.com
-              or smallpdf.com. Most coursebooks shrink to under 10 MB
-              with no visible quality loss.
+            </div>
+
+            {/* Cover image picker */}
+            <div>
+              <label style={{ display:'block', fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 5 }}>Cover Image (optional)</label>
+              <div style={{
+                border: '2px dashed ' + (upCover ? '#C9A030' : '#E8E2D6'),
+                borderRadius: 8, overflow: 'hidden', cursor: uploading ? 'not-allowed' : 'pointer',
+                background: '#FBFAF5', height: 100,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'relative',
+              }} onClick={() => !uploading && coverInputRef.current?.click()}>
+                <input ref={coverInputRef} type="file" accept="image/jpeg,image/png,image/webp"
+                  style={{ display: 'none' }} onChange={e => onCoverPick(e.target.files?.[0])}
+                  disabled={uploading}/>
+                {upCoverPreview ? (
+                  <>
+                    <img src={upCoverPreview} alt="Cover preview"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+                    <button onClick={e => { e.stopPropagation(); if (!uploading) { setUpCover(null); setUpCoverPreview(null); coverInputRef.current.value = '' } }}
+                      style={{
+                        position: 'absolute', top: 4, right: 4,
+                        background: 'rgba(0,0,0,.55)', color: '#fff', border: 'none',
+                        borderRadius: '50%', width: 20, height: 20, cursor: 'pointer',
+                        fontSize: 11, fontWeight: 700, lineHeight: 1,
+                      }}>×</button>
+                  </>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: 10 }}>
+                    <div style={{ fontSize: 22, marginBottom: 4 }}>🖼</div>
+                    <div style={{ fontSize: 11, color: '#6B6B6B' }}>JPG, PNG or WebP</div>
+                    <div style={{ fontSize: 10, color: '#9CA3AF' }}>Shown to students before opening</div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
+          {/* Progress bar */}
           {uploading && (
             <div style={{ marginBottom: 14 }}>
-              <div style={{
-                height: 8, borderRadius: 99,
-                background: '#E8E2D6', overflow: 'hidden', marginBottom: 4,
-              }}>
+              <div style={{ height: 7, borderRadius: 99, background: '#E8E2D6', overflow: 'hidden', marginBottom: 5 }}>
                 <div style={{
-                  width: uploadProgress + '%', height: '100%',
-                  background: '#C9A030',
-                  transition: 'width 200ms ease',
+                  width: (uploadStage === 'uploading' ? uploadProgress : uploadStage === 'confirming' ? 100 : 20) + '%',
+                  height: '100%', background: '#C9A030', transition: 'width 200ms ease',
                 }}/>
               </div>
-              <div style={{ fontSize: 11, color: '#7D5A0F' }}>
-                Uploading... {uploadProgress}%
-              </div>
+              <div style={{ fontSize: 11, color: '#7D5A0F' }}>{stageLabel}</div>
             </div>
           )}
 
@@ -14035,19 +14081,16 @@ function TeacherLibraryTab({ user, toast }) {
               disabled={uploading || !upFile || !upTitle.trim() || !upSubjectId}
               style={{
                 background: '#7D1025', color: '#fff', border: 'none',
-                padding: '9px 18px', borderRadius: 7,
-                fontSize: 12.5, fontWeight: 700,
+                padding: '9px 20px', borderRadius: 7, fontSize: 12.5, fontWeight: 700,
                 cursor: (uploading || !upFile || !upTitle.trim() || !upSubjectId) ? 'not-allowed' : 'pointer',
-                opacity: (uploading || !upFile || !upTitle.trim() || !upSubjectId) ? 0.5 : 1,
+                opacity: (uploading || !upFile || !upTitle.trim() || !upSubjectId) ? .5 : 1,
               }}>
-              {uploading ? 'Uploading...' : 'Upload book'}
+              {uploading ? stageLabel || 'Uploading...' : 'Upload book'}
             </button>
-            <button onClick={() => { resetForm(); setShowUploadForm(false) }}
-              disabled={uploading}
+            <button onClick={() => { resetForm(); setShowUploadForm(false) }} disabled={uploading}
               style={{
-                background: 'transparent', color: '#6B6B6B',
-                border: '1px solid #E8E2D6', padding: '9px 18px',
-                borderRadius: 7, fontSize: 12.5, fontWeight: 700,
+                background: 'transparent', color: '#6B6B6B', border: '1px solid #E8E2D6',
+                padding: '9px 18px', borderRadius: 7, fontSize: 12.5, fontWeight: 700,
                 cursor: uploading ? 'not-allowed' : 'pointer',
               }}>
               Cancel
@@ -14056,38 +14099,44 @@ function TeacherLibraryTab({ user, toast }) {
         </div>
       )}
 
-      {/* Books list, grouped by subject */}
-      {loadingBooks ? (
-        <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic', padding: 20 }}>
-          Loading library...
+      {/* Search */}
+      {books.length > 0 && (
+        <div style={{ marginBottom: 16, maxWidth: 380 }}>
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search books by title, author or subject..."
+            style={{
+              width: '100%', boxSizing: 'border-box', padding: '9px 13px',
+              borderRadius: 8, border: '1.5px solid #E8E2D6',
+              fontSize: 13, background: '#FBFAF5',
+            }}/>
         </div>
+      )}
+
+      {/* Books grouped by subject */}
+      {loadingBooks ? (
+        <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic', padding: 20 }}>Loading library...</div>
       ) : books.length === 0 ? (
         <div className="card" style={{ padding: 30, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
-            No books yet
-          </div>
-          <div style={{ fontSize: 12.5, color: '#6B6B6B' }}>
-            Click "Upload book" to add your first coursebook PDF.
-          </div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>No books yet</div>
+          <div style={{ fontSize: 12.5, color: '#6B6B6B' }}>Click "Upload book" to add your first coursebook PDF.</div>
         </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ padding: 20, textAlign: 'center', color: '#9A9A9A', fontSize: 13 }}>No books match your search.</div>
       ) : (
-        <div style={{ display:'flex', flexDirection:'column', gap: 22 }}>
+        <div style={{ display:'flex', flexDirection:'column', gap: 24 }}>
           {Object.keys(booksBySubject).sort().map(groupKey => (
             <div key={groupKey}>
               <div style={{
-                fontSize: 11, fontWeight: 700, color: '#7D1025',
-                letterSpacing: '.08em', textTransform: 'uppercase',
-                marginBottom: 8, paddingBottom: 6, borderBottom: '1px solid #E8E2D6',
+                fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.08em',
+                textTransform: 'uppercase', marginBottom: 10, paddingBottom: 6,
+                borderBottom: '1px solid #E8E2D6', display: 'flex', alignItems: 'center', gap: 8,
               }}>
                 {groupKey}
+                <span style={{ color: '#9A9A9A', fontWeight: 600 }}>({booksBySubject[groupKey].length})</span>
               </div>
-              <div style={{
-                display:'grid',
-                gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: 12,
-              }}>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap: 14 }}>
                 {booksBySubject[groupKey].map(book => (
-                  <BookCard key={book._id} book={book}
+                  <LibraryBookCard key={book._id} book={book}
                     onView={() => setViewerBook(book)}
                     onDelete={() => removeBook(book)}
                     canDelete={String(book.uploadedBy) === String(user?._id) || user?.role === 'admin'}/>
@@ -14098,88 +14147,95 @@ function TeacherLibraryTab({ user, toast }) {
         </div>
       )}
 
-      {/* Viewer modal */}
       {viewerBook && (
-        <LibraryViewer book={viewerBook} api={api} onClose={() => setViewerBook(null)}/>
+        <LibraryViewer book={viewerBook} onClose={() => setViewerBook(null)}/>
       )}
     </div>
   )
 }
 
 // ─────────────────────────────────────────────────────────
-// BookCard
-// Compact card showing one library book with view / delete actions.
-// Used by both teacher and student library lists.
+// LibraryBookCard — shared by teacher and student portals
+// Shows cover image if available, otherwise a styled placeholder.
 // ─────────────────────────────────────────────────────────
-function BookCard({ book, onView, onDelete, canDelete }) {
+function LibraryBookCard({ book, onView, onDelete, canDelete }) {
   const sizeMB = book.sizeBytes ? (book.sizeBytes / (1024 * 1024)).toFixed(1) + ' MB' : ''
   return (
     <div style={{
-      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 10,
-      padding: 14, display: 'flex', flexDirection: 'column',
+      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12,
+      overflow: 'hidden', display: 'flex', flexDirection: 'column',
+      boxShadow: '0 1px 4px rgba(0,0,0,.05)',
+      transition: 'box-shadow .15s',
     }}>
-      <div style={{ display:'flex', gap: 10, marginBottom: 10 }}>
-        <div style={{
-          width: 38, height: 48, borderRadius: 4,
-          background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
-          flexShrink: 0,
-          display:'flex', alignItems:'center', justifyContent:'center',
-          color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
-        }}>PDF</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
+      {/* Cover */}
+      <div style={{
+        height: 140, background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
+        position: 'relative', flexShrink: 0, overflow: 'hidden',
+      }}>
+        {book.coverImage ? (
+          <img src={book.coverImage} alt={book.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+        ) : (
           <div style={{
-            fontWeight: 700, fontSize: 13, color: '#1A1A1A',
-            lineHeight: 1.3,
-            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}>{book.title}</div>
-          {book.author && (
-            <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 3 }}>{book.author}</div>
+            width: '100%', height: '100%',
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: 6, padding: 12,
+          }}>
+            <div style={{ color: '#C9A030', fontSize: 10, fontWeight: 800, letterSpacing: '.12em' }}>PDF</div>
+            <div style={{
+              color: '#fff', fontSize: 12, fontWeight: 700, textAlign: 'center',
+              lineHeight: 1.3, maxWidth: 140,
+              display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+            }}>{book.title}</div>
+          </div>
+        )}
+        {/* Subject badge */}
+        <div style={{
+          position: 'absolute', top: 8, left: 8,
+          background: 'rgba(0,0,0,.55)', color: '#C9A030',
+          fontSize: 9, fontWeight: 800, letterSpacing: '.06em',
+          padding: '3px 7px', borderRadius: 4,
+        }}>{book.curriculum}</div>
+      </div>
+
+      {/* Info */}
+      <div style={{ padding: '12px 12px 10px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{
+          fontWeight: 700, fontSize: 13, color: '#1A1A1A', lineHeight: 1.3, marginBottom: 4,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+        }}>{book.title}</div>
+        {book.author && (
+          <div style={{ fontSize: 11, color: '#6B6B6B', marginBottom: 4 }}>{book.author}</div>
+        )}
+        {book.description && (
+          <div style={{
+            fontSize: 11, color: '#9A9A9A', lineHeight: 1.4, marginBottom: 6,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          }}>{book.description}</div>
+        )}
+        <div style={{ fontSize: 10.5, color: '#9A9A9A', marginTop: 'auto', paddingTop: 6 }}>
+          {[sizeMB, book.grades?.length ? book.grades.join(', ') : ''].filter(Boolean).join(' · ')}
+        </div>
+
+        <div style={{ display:'flex', gap: 6, marginTop: 10 }}>
+          <button onClick={onView} style={{
+            flex: 1, background: '#7D1025', color: '#fff', border: 'none',
+            padding: '8px 0', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+          }}>Open book</button>
+          {canDelete && onDelete && (
+            <button onClick={onDelete} style={{
+              background: 'transparent', color: '#9A2434', border: '1px solid #E8E2D6',
+              padding: '8px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+            }}>Delete</button>
           )}
         </div>
-      </div>
-
-      {book.description && (
-        <div style={{
-          fontSize: 11.5, color: '#6B6B6B', marginBottom: 8,
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-          overflow: 'hidden', lineHeight: 1.4,
-        }}>
-          {book.description}
-        </div>
-      )}
-
-      <div style={{ fontSize: 10.5, color: '#9A9A9A', marginBottom: 10 }}>
-        {sizeMB}
-        {book.grades?.length ? ' · ' + book.grades.join(', ') : ''}
-        {book.uploadedByName ? ' · by ' + book.uploadedByName : ''}
-      </div>
-
-      <div style={{ display:'flex', gap: 6, marginTop: 'auto' }}>
-        <button onClick={onView}
-          style={{
-            flex: 1,
-            background: '#7D1025', color: '#fff', border: 'none',
-            padding: '7px 12px', borderRadius: 6,
-            fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-          }}>
-          Open
-        </button>
-        {canDelete && onDelete && (
-          <button onClick={onDelete}
-            style={{
-              background: 'transparent', color: '#9A2434',
-              border: '1px solid #E8E2D6', padding: '7px 12px',
-              borderRadius: 6, fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
-            }}>
-            Delete
-          </button>
-        )}
       </div>
     </div>
   )
 }
 
+// ═══════════════════════════════════════════════════════════
+// TeacherTimetableTab
 // ═══════════════════════════════════════════════════════════
 // TeacherTimetableTab
 // ═══════════════════════════════════════════════════════════
