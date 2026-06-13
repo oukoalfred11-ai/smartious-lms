@@ -422,6 +422,9 @@ router.get('/:id/stream', auth, async (req, res) => {
     res.set('Content-Disposition', `inline; filename="${fileName}"`);
     res.set('Cache-Control', 'private, max-age=3600');
     res.set('Accept-Ranges', 'bytes');
+    // Allow this endpoint to be loaded in an iframe from the frontend domain
+    res.set('X-Frame-Options', 'ALLOWALL');
+    res.set('Content-Security-Policy', 'frame-ancestors *');
 
     if (r2Res.headers.get('Content-Length'))
       res.set('Content-Length', r2Res.headers.get('Content-Length'));
