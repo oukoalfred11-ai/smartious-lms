@@ -7,15 +7,28 @@
   NODE_VERSION = "18"
 
 # React Router: redirect all routes to index.html
+# Exclude /pdfjs/* so the PDF viewer files are served as static assets
+[[redirects]]
+  from   = "/pdfjs/*"
+  to     = "/pdfjs/:splat"
+  status = 200
+  force  = false
+
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
   status = 200
 
+# Global security headers
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options        = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy        = "strict-origin-when-cross-origin"
     Permissions-Policy     = "camera=(), microphone=(), geolocation=()"
+
+# Allow /pdfjs/index.html to be loaded in an iframe (same origin)
+[[headers]]
+  for = "/pdfjs/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
