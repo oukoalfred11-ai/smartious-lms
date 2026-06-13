@@ -15,8 +15,12 @@ import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
-pdfjs.GlobalWorkerOptions.workerSrc =
-  `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
+// react-pdf v9 + Vite: set workerSrc to the node_modules copy via Vite's ?url import
+// This avoids CDN version mismatches and the sendWithPromise error
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url
+).toString()
 
 const CRIMSON = '#7D1025'
 const GOLD    = '#C9A030'
@@ -185,7 +189,7 @@ export default function LibraryViewer({ book, onClose }) {
           onLoadError={onDocError}
           loading=""
           options={{
-            cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/cmaps/`,
+            cMapUrl: 'https://unpkg.com/pdfjs-dist/cmaps/',
             cMapPacked: true,
           }}
         >
