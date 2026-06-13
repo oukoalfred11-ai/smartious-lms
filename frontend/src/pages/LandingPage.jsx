@@ -9786,8 +9786,14 @@ export default function LandingPage() {
         const s = US_STATES[currentStateSlug]
         return (
         <>
-          {/* Hero */}
-          <section className="sec" style={{position:'relative',background:s.heroGradient,color:'#fff',padding:'72px 0 60px',overflow:'hidden'}}>
+          {/* Hero — photo background with dark gradient overlay for text contrast */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(180deg, rgba(8,12,20,.42) 0%, rgba(8,12,20,.88) 100%), url('${s.heroPhoto}') center/cover no-repeat`,
+            color:'#fff',padding:'88px 0 72px',overflow:'hidden'
+          }}>
+            {/* Subtle state-colored accent stripe at top edge */}
+            <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg, transparent 0%, ${s.accentColor} 50%, transparent 100%)`,zIndex:1}}/>
             <div className="wrap" style={{position:'relative',zIndex:2,maxWidth:1100}}>
               <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'6px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.18)',borderRadius:99,fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',marginBottom:24}}>
                 <span style={{display:'inline-block',width:18,height:12,background:s.accentColor,borderRadius:2}}/>
