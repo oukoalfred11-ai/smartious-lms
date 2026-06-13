@@ -1,15 +1,8 @@
 /**
  * LibraryViewer.jsx
- * ============================================================
- * Full-screen PDF viewer using the browser's native PDF engine.
- * The PDF is proxied through the backend so it's served from
- * the same origin — no CORS, no worker, no pdfjs version issues.
- * Works with any file size. No dependencies beyond React.
- *
- * Props:
- *   book    { _id, title, url, subjectName, curriculum, author, sizeBytes }
- *   onClose function
- *   api     axios instance (from ctx.jsx)
+ * Full-screen PDF viewer. Streams the PDF from R2 via the
+ * backend proxy endpoint — no pdfjs, no worker, no crashes.
+ * The backend adds X-Frame-Options: ALLOWALL so the iframe loads.
  */
 
 import React, { useState, useEffect, useRef } from 'react'
@@ -27,13 +20,13 @@ export default function LibraryViewer({ book, onClose }) {
   const [loading,    setLoading]    = useState(true)
   const [fullscreen, setFullscreen] = useState(false)
   const containerRef = useRef(null)
-  const iframeRef    = useRef(null)
 
-  // Build proxy URL — backend streams the PDF from R2 with
-  // correct Content-Type and no CORS issues, same origin as app.
-  const token    = typeof window !== 'undefined' ? (localStorage.getItem('sm_token') || localStorage.getItem('token') || '') : ''
-  const base     = window.__API_BASE__ || (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
-  const proxyUrl = `${base}/library/${book._id}/stream?token=${encodeURIComponent(token)}`
+  // Build the stream URL from the same base the app uses for API calls.
+  // VITE_API_URL = https://smartious-backend.onrender.com
+  // We need:      https://smartious-backend.onrender.com/api/library/:id/stream
+  const apiBase  = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
+  const token    = localStorage.getItem('sm_token') || localStorage.getItem('token') || ''
+  const streamUrl = `${apiBase}/api/library/${book._id}/stream?token=${encodeURIComponent(token)}`
 
   // Lock body scroll
   useEffect(() => {
@@ -53,11 +46,9 @@ export default function LibraryViewer({ book, onClose }) {
   const toggleFullscreen = async () => {
     try {
       if (!document.fullscreenElement) {
-        await containerRef.current?.requestFullscreen?.()
-        setFullscreen(true)
+        await containerRef.current?.requestFullscreen?.(); setFullscreen(true)
       } else {
-        await document.exitFullscreen?.()
-        setFullscreen(false)
+        await document.exitFullscreen?.(); setFullscreen(false)
       }
     } catch {}
   }
@@ -105,9 +96,9 @@ export default function LibraryViewer({ book, onClose }) {
       <div style={{ flex: 1, position: 'relative', background: '#525659' }}>
         {loading && (
           <div style={{
-            position: 'absolute', inset: 0, display: 'flex',
-            flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16,
-            background: '#525659', zIndex: 2,
+            position: 'absolute', inset: 0, zIndex: 2, background: '#525659',
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: 16,
           }}>
             <div style={{
               width: 44, height: 44,
@@ -125,8 +116,7 @@ export default function LibraryViewer({ book, onClose }) {
           </div>
         )}
         <iframe
-          ref={iframeRef}
-          src={proxyUrl}
+          src={streamUrl}
           title={book.title}
           onLoad={() => setLoading(false)}
           style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
