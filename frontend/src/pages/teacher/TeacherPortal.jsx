@@ -11,7 +11,7 @@ import {
   labelAt,
 } from '../../components/exam/NestedQuestion.jsx'
 import ManageSubjectTab from './ManageSubjectTab.jsx'
-const LibraryViewer = React.lazy(() => import('../../components/LibraryViewer.jsx'))
+import GooglePDFViewer from '../../components/LibraryViewer.jsx'
 
 // ──────────────────────────────────────────────────────
 // DESIGN TOKENS — mirrors the admin Dashboard's TOKENS
@@ -14083,7 +14083,7 @@ function TeacherLibraryTab({ user, toast }) {
 
       {/* Viewer modal */}
       {viewerBook && (
-        <React.Suspense fallback={null}><LibraryViewer book={viewerBook} onClose={() => setViewerBook(null)}/></React.Suspense>
+        {viewerBook && <GooglePDFViewer book={viewerBook} onClose={() => setViewerBook(null)}/>}
       )}
     </div>
   )
