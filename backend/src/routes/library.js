@@ -385,4 +385,64 @@ router.delete('/:id', auth, requireRole('teacher', 'admin'), async (req, res) =>
   }
 });
 
+// ═══════════════════════════════════════════════════════════
+// GET /:id/stream — Proxy-stream the PDF from R2 through the
+// backend. Serves from the same origin as the API so the
+// browser's native PDF viewer loads it without CORS issues.
+// Supports Range requests so browsers can seek large PDFs.
+// Auth via ?token= query param (iframe can't send headers).
+// ═══════════════════════════════════════════════════════════
+router.get('/:id/stream', auth, async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return fail(res, 400, 'Invalid id.');
+
+    const book = await LibraryBook.findById(req.params.id).lean();
+    if (!book || !book.isActive) return fail(res, 404, 'Book not found.');
+
+    const filter = await visibilityFilterFor(req.user);
+    const allowed = await LibraryBook.exists({ _id: book._id, ...filter });
+    if (!allowed) return fail(res, 403, 'Access denied.');
+
+    // Bump view counter (non-blocking)
+    LibraryBook.updateOne({ _id: book._id }, { $inc: { viewCount: 1 } }).catch(() => {});
+
+    // Fetch from R2 and pipe to client, forwarding Range header if present
+    const fetchHeaders = { 'Accept': 'application/pdf' };
+    if (req.headers.range) fetchHeaders['Range'] = req.headers.range;
+
+    const r2Res = await fetch(book.url, { headers: fetchHeaders });
+    if (!r2Res.ok) return fail(res, 502, 'Could not fetch file from storage.');
+
+    const status = req.headers.range && r2Res.status === 206 ? 206 : 200;
+    const fileName = (book.fileName || 'book.pdf').replace(/[^\w.\-]/g, '_');
+
+    res.status(status);
+    res.set('Content-Type', 'application/pdf');
+    res.set('Content-Disposition', `inline; filename="${fileName}"`);
+    res.set('Cache-Control', 'private, max-age=3600');
+    res.set('Accept-Ranges', 'bytes');
+
+    if (r2Res.headers.get('Content-Length'))
+      res.set('Content-Length', r2Res.headers.get('Content-Length'));
+    if (r2Res.headers.get('Content-Range'))
+      res.set('Content-Range', r2Res.headers.get('Content-Range'));
+
+    // Pipe the R2 response body to the client
+    const { Readable } = require('stream');
+    const nodeStream = Readable.fromWeb
+      ? Readable.fromWeb(r2Res.body)
+      : require('stream').Readable.from(r2Res.body);
+    nodeStream.pipe(res);
+
+    nodeStream.on('error', (e) => {
+      console.error('[library stream] pipe error:', e.message);
+      if (!res.headersSent) res.status(502).end();
+    });
+  } catch (err) {
+    console.error('[library stream]', err.message);
+    return fail(res, 500, err.message || 'Stream failed.');
+  }
+});
+
 module.exports = router;
