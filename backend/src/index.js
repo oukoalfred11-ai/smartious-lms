@@ -11,6 +11,9 @@ const app = express();
 // Disable CSP in development — Vite uses inline scripts for HMR
 app.use(helmet({
   contentSecurityPolicy: process.env.NODE_ENV === 'production',
+  // Disable global frameguard — the /library/:id/stream endpoint
+  // sets its own X-Frame-Options to allow PDF iframe embedding.
+  frameguard: false,
 }));
 
 // ── CORS ─────────────────────────────────────────────────
