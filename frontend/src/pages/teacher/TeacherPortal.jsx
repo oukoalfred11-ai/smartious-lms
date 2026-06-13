@@ -14082,9 +14082,7 @@ function TeacherLibraryTab({ user, toast }) {
       )}
 
       {/* Viewer modal */}
-      {viewerBook && (
-        {viewerBook && <GooglePDFViewer book={viewerBook} onClose={() => setViewerBook(null)}/>}
-      )}
+      {viewerBook && <GooglePDFViewer book={viewerBook} onClose={() => setViewerBook(null)}/>}
     </div>
   )
 }
