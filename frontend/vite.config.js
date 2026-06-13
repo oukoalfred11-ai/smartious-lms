@@ -9,16 +9,11 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor:  ['react', 'react-dom', 'react-router-dom'],
-          axios:   ['axios'],
-          pdfjs:   ['pdfjs-dist'],
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          axios:  ['axios'],
         },
       },
     },
-  },
-  optimizeDeps: {
-    // Exclude pdfjs-dist from pre-bundling — it manages its own worker
-    exclude: ['pdfjs-dist'],
   },
   server: {
     port: 5173,
