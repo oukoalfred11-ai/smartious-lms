@@ -23,8 +23,8 @@ import {
   sumLeafMarks,
 } from '../../components/exam/NestedQuestion.jsx'
 import LessonPlayerTab from './LessonPlayerTab.jsx'
+import GooglePDFViewer from '../../components/LibraryViewer.jsx'
 import SubjectProgressCard from '../../components/SubjectProgressCard.jsx'
-const LibraryViewer = React.lazy(() => import('../../components/LibraryViewer.jsx'))
 
 // ── SVG icon helper ───────────────────────────────────────
 const I = (d) => (
@@ -12177,7 +12177,7 @@ function StudentLibraryPage({ user, toast }) {
       )}
 
       {viewerBook && (
-        <React.Suspense fallback={null}><LibraryViewer book={viewerBook} onClose={() => setViewerBook(null)}/></React.Suspense>
+        {viewerBook && <GooglePDFViewer book={viewerBook} onClose={() => setViewerBook(null)}/>}
       )}
     </div>
   )
