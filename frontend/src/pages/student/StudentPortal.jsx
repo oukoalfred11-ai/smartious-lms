@@ -12176,9 +12176,7 @@ function StudentLibraryPage({ user, toast }) {
         </div>
       )}
 
-      {viewerBook && (
-        {viewerBook && <GooglePDFViewer book={viewerBook} onClose={() => setViewerBook(null)}/>}
-      )}
+      {viewerBook && <GooglePDFViewer book={viewerBook} onClose={() => setViewerBook(null)}/>}
     </div>
   )
 }
