@@ -1,9 +1,9 @@
 /**
  * LibraryViewer.jsx
  * ============================================================
- * Full-screen PDF viewer using react-pdf (pdfjs-dist).
- * Renders the PDF directly in the browser — no iframe, no
- * cross-origin issues. Works with R2 public URLs.
+ * Full-screen PDF viewer using react-pdf.
+ * All pages rendered in a continuous scroll (no page-flip wait).
+ * PDF bytes fetched directly from R2 CDN.
  *
  * Props:
  *   book    { _id, title, subjectName, curriculum, author, sizeBytes, url }
@@ -15,65 +15,67 @@ import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
-// Point pdfjs worker at the CDN version matching the installed package
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
+pdfjs.GlobalWorkerOptions.workerSrc =
+  `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`
 
-const T = {
-  crimson: '#7D1025',
-  gold:    '#C9A030',
-  cream:   '#FBFAF5',
-  s500:    '#6B6B6B',
-}
+const CRIMSON = '#7D1025'
+const GOLD    = '#C9A030'
 
 function fmtBytes(n) {
-  if (!n || n < 1024) return n + ' B'
-  if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB'
+  if (!n) return ''
+  if (n < 1024 * 1024) return (n / 1024).toFixed(0) + ' KB'
   return (n / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
 export default function LibraryViewer({ book, onClose }) {
-  const [numPages, setNumPages]   = useState(null)
-  const [pageNum, setPageNum]     = useState(1)
-  const [scale, setScale]         = useState(1.2)
-  const [loading, setLoading]     = useState(true)
-  const [error, setError]         = useState(null)
-  const [fullscreen, setFullscreen] = useState(false)
+  const [numPages, setNumPages] = useState(null)
+  const [scale, setScale]       = useState(1.2)
+  const [error, setError]       = useState(null)
+  const [loading, setLoading]   = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [fullscreen, setFullscreen]   = useState(false)
   const containerRef = useRef(null)
   const scrollRef    = useRef(null)
+  const pageRefs     = useRef({})
 
-  // Prevent body scroll
+  // Lock body scroll
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = prev }
   }, [])
 
-  // Block Ctrl+S / Ctrl+P
-  const handleKeyDown = useCallback((e) => {
-    if ((e.ctrlKey || e.metaKey) && ['s','S','p','P'].includes(e.key)) {
-      e.preventDefault(); e.stopPropagation()
-    }
-  }, [])
+  // Block save/print shortcuts
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown, true)
-    return () => document.removeEventListener('keydown', handleKeyDown, true)
-  }, [handleKeyDown])
+    const fn = (e) => {
+      if ((e.ctrlKey || e.metaKey) && ['s','S','p','P'].includes(e.key)) {
+        e.preventDefault(); e.stopPropagation()
+      }
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', fn, true)
+    return () => document.removeEventListener('keydown', fn, true)
+  }, [onClose])
 
-  const onDocLoaded = ({ numPages }) => {
-    setNumPages(numPages)
-    setLoading(false)
-  }
+  // Track which page is visible using IntersectionObserver
+  useEffect(() => {
+    if (!numPages) return
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const p = Number(e.target.dataset.page)
+          if (p) setCurrentPage(p)
+        }
+      })
+    }, { threshold: 0.4, root: scrollRef.current })
 
-  const onDocError = (err) => {
-    console.error('[LibraryViewer] PDF load error:', err)
-    setError('Could not load this PDF. ' + (err?.message || ''))
-    setLoading(false)
-  }
+    Object.values(pageRefs.current).forEach(el => el && obs.observe(el))
+    return () => obs.disconnect()
+  }, [numPages])
 
-  const goTo = (n) => {
-    const p = Math.max(1, Math.min(n, numPages || 1))
-    setPageNum(p)
-    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  const scrollToPage = (n) => {
+    const el = pageRefs.current[n]
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   const toggleFullscreen = async () => {
@@ -87,127 +89,96 @@ export default function LibraryViewer({ book, onClose }) {
       }
     } catch {}
   }
-
   useEffect(() => {
     const fn = () => setFullscreen(!!document.fullscreenElement)
     document.addEventListener('fullscreenchange', fn)
     return () => document.removeEventListener('fullscreenchange', fn)
   }, [])
 
-  // Keyboard navigation
-  useEffect(() => {
-    const fn = (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(pageNum + 1)
-      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(pageNum - 1)
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', fn)
-    return () => window.removeEventListener('keydown', fn)
-  }, [pageNum, numPages])
+  const onDocLoaded = ({ numPages: n }) => { setNumPages(n); setLoading(false) }
+  const onDocError  = (err) => { setError(err?.message || 'Failed to load PDF.'); setLoading(false) }
+
+  const btn = (onClick, label, extra = {}) => (
+    <button onClick={onClick} style={{
+      border: 'none', borderRadius: 6, padding: '6px 12px',
+      fontSize: 12, fontWeight: 700, cursor: 'pointer',
+      background: 'rgba(255,255,255,.15)', color: '#fff',
+      ...extra,
+    }}>{label}</button>
+  )
 
   return (
     <div ref={containerRef} style={{
       position: 'fixed', inset: 0, zIndex: 99999,
-      background: '#1a1a1a',
-      display: 'flex', flexDirection: 'column',
+      background: '#1a1a1a', display: 'flex', flexDirection: 'column',
     }}>
-      {/* Header */}
+
+      {/* ── Header ── */}
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '10px 16px', background: T.crimson, color: '#fff',
-        flexShrink: 0, gap: 12,
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '10px 16px', background: CRIMSON, flexShrink: 0,
       }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{
-            fontWeight: 700, fontSize: 14,
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 500,
-          }}>{book.title}</div>
-          <div style={{ fontSize: 11, opacity: .8, marginTop: 1 }}>
-            {[book.subjectName, book.curriculum, book.author, book.sizeBytes ? fmtBytes(book.sizeBytes) : '']
-              .filter(Boolean).join(' · ')}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 700, fontSize: 14, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {book.title}
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,.75)', marginTop: 1 }}>
+            {[book.subjectName, book.curriculum, book.author, fmtBytes(book.sizeBytes)].filter(Boolean).join(' · ')}
           </div>
         </div>
 
-        {/* Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          {/* Zoom */}
-          <button onClick={() => setScale(s => Math.max(0.6, +(s - 0.2).toFixed(1)))}
-            title="Zoom out"
-            style={{ ...btnStyle, background: 'rgba(255,255,255,.15)', minWidth: 32 }}>−</button>
-          <span style={{ fontSize: 12, color: '#fff', minWidth: 38, textAlign: 'center' }}>
-            {Math.round(scale * 100)}%
+        {/* Zoom */}
+        {btn(() => setScale(s => Math.max(0.5, +(s - 0.2).toFixed(1))), '−')}
+        <span style={{ color: '#fff', fontSize: 12, minWidth: 42, textAlign: 'center' }}>
+          {Math.round(scale * 100)}%
+        </span>
+        {btn(() => setScale(s => Math.min(3.0, +(s + 0.2).toFixed(1))), '+')}
+
+        {/* Page nav */}
+        {numPages && (<>
+          <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,.25)', margin: '0 4px' }}/>
+          {btn(() => scrollToPage(Math.max(1, currentPage - 1)), '‹', { opacity: currentPage <= 1 ? .4 : 1 })}
+          <span style={{ color: '#fff', fontSize: 12, minWidth: 72, textAlign: 'center' }}>
+            {currentPage} / {numPages}
           </span>
-          <button onClick={() => setScale(s => Math.min(3, +(s + 0.2).toFixed(1)))}
-            title="Zoom in"
-            style={{ ...btnStyle, background: 'rgba(255,255,255,.15)', minWidth: 32 }}>+</button>
+          {btn(() => scrollToPage(Math.min(numPages, currentPage + 1)), '›', { opacity: currentPage >= numPages ? .4 : 1 })}
+        </>)}
 
-          {/* Page nav */}
-          {numPages && (
-            <>
-              <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,.2)', margin: '0 4px' }}/>
-              <button onClick={() => goTo(pageNum - 1)} disabled={pageNum <= 1}
-                style={{ ...btnStyle, background: 'rgba(255,255,255,.15)', opacity: pageNum <= 1 ? .4 : 1 }}>‹</button>
-              <span style={{ fontSize: 12, color: '#fff', minWidth: 70, textAlign: 'center' }}>
-                {pageNum} / {numPages}
-              </span>
-              <button onClick={() => goTo(pageNum + 1)} disabled={pageNum >= numPages}
-                style={{ ...btnStyle, background: 'rgba(255,255,255,.15)', opacity: pageNum >= numPages ? .4 : 1 }}>›</button>
-            </>
-          )}
-
-          <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,.2)', margin: '0 4px' }}/>
-          <button onClick={toggleFullscreen}
-            style={{ ...btnStyle, background: 'rgba(255,255,255,.15)' }}>
-            {fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-          </button>
-          <button onClick={onClose}
-            style={{ ...btnStyle, background: T.gold, color: T.crimson, fontWeight: 800 }}>
-            Close
-          </button>
-        </div>
+        <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,.25)', margin: '0 4px' }}/>
+        {btn(toggleFullscreen, fullscreen ? 'Exit full' : 'Fullscreen')}
+        {btn(onClose, 'Close', { background: GOLD, color: CRIMSON, fontWeight: 800 })}
       </div>
 
-      {/* PDF canvas area */}
+      {/* ── PDF scroll area — all pages rendered continuously ── */}
       <div ref={scrollRef} style={{
         flex: 1, overflowY: 'auto', overflowX: 'auto',
-        display: 'flex', justifyContent: 'center',
-        padding: '24px 16px',
-        background: '#525659',
+        background: '#525659', padding: '20px 0',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
       }}>
-        {loading && !error && (
-          <div style={{
-            position: 'absolute', top: '50%', left: '50%',
-            transform: 'translate(-50%,-50%)',
-            color: '#fff', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: 14,
-          }}>
-            <div style={{
-              width: 40, height: 40, border: '3px solid rgba(255,255,255,.2)',
-              borderTopColor: T.gold, borderRadius: '50%',
-              animation: 'lvspin 0.8s linear infinite',
-            }}/>
-            <div style={{ fontSize: 13 }}>Loading PDF...</div>
+
+        {/* Loading spinner */}
+        {loading && (
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', color: '#fff', textAlign: 'center' }}>
+            <div style={{ width: 40, height: 40, border: '3px solid rgba(255,255,255,.2)', borderTopColor: GOLD, borderRadius: '50%', animation: 'lvspin .8s linear infinite', margin: '0 auto 12px' }}/>
+            <div style={{ fontSize: 13 }}>Loading book...</div>
             <style>{`@keyframes lvspin{to{transform:rotate(360deg)}}`}</style>
           </div>
         )}
 
+        {/* Error */}
         {error && (
-          <div style={{
-            position: 'absolute', top: '50%', left: '50%',
-            transform: 'translate(-50%,-50%)',
-            color: '#fff', textAlign: 'center', padding: 30,
-          }}>
+          <div style={{ color: '#fff', textAlign: 'center', padding: 40 }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>📄</div>
-            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Could not load this book</div>
-            <div style={{ fontSize: 12, opacity: .75, marginBottom: 16 }}>{error}</div>
+            <div style={{ fontWeight: 700, marginBottom: 8 }}>Could not load this PDF</div>
+            <div style={{ fontSize: 12, opacity: .7, marginBottom: 16 }}>{error}</div>
             <a href={book.url} target="_blank" rel="noopener noreferrer" style={{
-              background: T.gold, color: T.crimson, padding: '9px 20px',
+              background: GOLD, color: CRIMSON, padding: '9px 20px',
               borderRadius: 7, fontWeight: 700, fontSize: 12.5, textDecoration: 'none',
-              display: 'inline-block',
-            }}>Open in new tab</a>
+            }}>Open directly in browser</a>
           </div>
         )}
 
+        {/* All pages in one Document — continuous scroll, no page flipping */}
         <Document
           file={book.url}
           onLoadSuccess={onDocLoaded}
@@ -218,56 +189,41 @@ export default function LibraryViewer({ book, onClose }) {
             cMapPacked: true,
           }}
         >
-          <Page
-            pageNumber={pageNum}
-            scale={scale}
-            loading=""
-            renderTextLayer={true}
-            renderAnnotationLayer={true}
-          />
+          {numPages && Array.from({ length: numPages }, (_, i) => i + 1).map(p => (
+            <div
+              key={p}
+              data-page={p}
+              ref={el => { pageRefs.current[p] = el }}
+              style={{ marginBottom: 8, boxShadow: '0 2px 12px rgba(0,0,0,.4)' }}
+            >
+              <Page
+                pageNumber={p}
+                scale={scale}
+                loading={
+                  <div style={{
+                    width: Math.round(595 * scale), height: Math.round(842 * scale),
+                    background: '#fff', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', color: '#9A9A9A', fontSize: 12,
+                  }}>
+                    Loading page {p}...
+                  </div>
+                }
+                renderTextLayer={true}
+                renderAnnotationLayer={false}
+              />
+            </div>
+          ))}
         </Document>
       </div>
 
-      {/* Bottom page nav bar */}
-      {numPages && numPages > 1 && (
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
-          padding: '10px 16px', background: 'rgba(0,0,0,.7)', flexShrink: 0,
-        }}>
-          <button onClick={() => goTo(1)} disabled={pageNum <= 1}
-            style={{ ...btnStyle, background: 'rgba(255,255,255,.12)', color: '#fff', opacity: pageNum <= 1 ? .4 : 1 }}>
-            «
-          </button>
-          <button onClick={() => goTo(pageNum - 1)} disabled={pageNum <= 1}
-            style={{ ...btnStyle, background: 'rgba(255,255,255,.12)', color: '#fff', opacity: pageNum <= 1 ? .4 : 1 }}>
-            ‹ Prev
-          </button>
-          <span style={{ color: '#fff', fontSize: 13 }}>Page {pageNum} of {numPages}</span>
-          <button onClick={() => goTo(pageNum + 1)} disabled={pageNum >= numPages}
-            style={{ ...btnStyle, background: 'rgba(255,255,255,.12)', color: '#fff', opacity: pageNum >= numPages ? .4 : 1 }}>
-            Next ›
-          </button>
-          <button onClick={() => goTo(numPages)} disabled={pageNum >= numPages}
-            style={{ ...btnStyle, background: 'rgba(255,255,255,.12)', color: '#fff', opacity: pageNum >= numPages ? .4 : 1 }}>
-            »
-          </button>
-        </div>
-      )}
-
       {/* Watermark */}
       <div style={{
-        position: 'absolute', bottom: numPages && numPages > 1 ? 52 : 8,
-        left: 0, right: 0, textAlign: 'center',
-        color: 'rgba(255,255,255,.35)', fontSize: 10,
-        letterSpacing: '.06em', pointerEvents: 'none',
+        position: 'absolute', bottom: 8, left: 0, right: 0,
+        textAlign: 'center', color: 'rgba(255,255,255,.3)',
+        fontSize: 10, letterSpacing: '.06em', pointerEvents: 'none',
       }}>
         For personal reading only — Smartious Homeschool
       </div>
     </div>
   )
-}
-
-const btnStyle = {
-  border: 'none', padding: '6px 12px', borderRadius: 6,
-  fontSize: 12, fontWeight: 700, cursor: 'pointer', color: '#fff',
 }
