@@ -12242,6 +12242,7 @@ function StudentBookCard({ book, onOpen }) {
           marginTop: 10, background: '#7D1025', color: '#fff', border: 'none',
           padding: '8px 0', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
         }}>Open book</button>
+      </div>
     </div>
   )
 }
