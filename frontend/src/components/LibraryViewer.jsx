@@ -15,12 +15,8 @@ import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
-// react-pdf v9 + Vite: set workerSrc to the node_modules copy via Vite's ?url import
-// This avoids CDN version mismatches and the sendWithPromise error
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url
-).toString()
+// Pin to the exact pdfjs version that react-pdf@9 ships with
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
 const CRIMSON = '#7D1025'
 const GOLD    = '#C9A030'
