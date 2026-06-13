@@ -7,6 +7,9 @@
  * educate — the full educational content lives in fullArticles.js as
  * /blog/homeschooling-{state}-families-2026.
  *
+ * heroPhoto powers the splash background in the state landing hero
+ * (Unsplash student photos with state-color gradient overlay).
+ *
  * Add Tier 2 states (Indiana, Michigan, NY, etc.) using the same shape.
  */
 
@@ -26,6 +29,7 @@ export const US_STATES = {
     paperworkLevel: 'None',
     blogSlug: 'homeschooling-texas-families-2026',
     heroGradient: 'linear-gradient(135deg,#0A1A2E 0%,#1E3A52 60%,#080C14 100%)',
+    heroPhoto: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1600&q=75',
     accentColor: '#7BA7D9',
     pitch: 'Live Cambridge IGCSE and A-Level teachers for Texas families. Real teachers, not pre-recorded video like Acellus. From $180 / month USD.',
     proof: '750,000+ Texas families homeschool. We serve them with international live classes when local options fall short.',
@@ -46,6 +50,7 @@ export const US_STATES = {
     paperworkLevel: 'Light annual',
     blogSlug: 'homeschooling-california-families-2026',
     heroGradient: 'linear-gradient(135deg,#1A0F08 0%,#3D2814 60%,#080C14 100%)',
+    heroPhoto: 'https://images.unsplash.com/photo-1497486751825-1233686d5d80?w=1600&q=75',
     accentColor: '#E5B772',
     pitch: 'Live Cambridge IGCSE and A-Level teachers for California families. Built for Stanford, UC system, MIT, and Ivy League applications. From $180 / month USD.',
     proof: 'California tech families use Cambridge qualifications to stand out in highly-selective US admissions. Smartious teachers are PGCE-trained UK educators.',
@@ -66,6 +71,7 @@ export const US_STATES = {
     paperworkLevel: 'Moderate',
     blogSlug: 'homeschooling-florida-families-2026',
     heroGradient: 'linear-gradient(135deg,#0A1A1E 0%,#1F3D42 60%,#080C14 100%)',
+    heroPhoto: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1600&q=75',
     accentColor: '#6EC5C2',
     pitch: 'Live Cambridge IGCSE and A-Level for Florida families — fully eligible for the FES-EO voucher of $7,800/year per child via Step Up For Students.',
     proof: 'Florida\'s universal school choice voucher (FES-EO) makes live international education effectively free for thousands of Florida homeschool families.',
@@ -86,6 +92,7 @@ export const US_STATES = {
     paperworkLevel: 'Light ongoing',
     blogSlug: 'homeschooling-north-carolina-families-2026',
     heroGradient: 'linear-gradient(135deg,#0A1A1A 0%,#1A3D3D 60%,#080C14 100%)',
+    heroPhoto: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600&q=75',
     accentColor: '#7DB5A8',
     pitch: 'Live Cambridge IGCSE and A-Level for North Carolina families. Built for UNC, NC State, Duke, Wake Forest applications — and for Research Triangle tech families.',
     proof: 'NC has the strongest UNC + NC Promise tuition pipeline in the southeast. Cambridge qualifications strengthen Duke and Wake Forest applications notably.',
@@ -106,6 +113,7 @@ export const US_STATES = {
     paperworkLevel: 'Light annual',
     blogSlug: 'homeschooling-georgia-families-2026',
     heroGradient: 'linear-gradient(135deg,#1A0A14 0%,#3D1F2D 60%,#080C14 100%)',
+    heroPhoto: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1600&q=75',
     accentColor: '#D69CA8',
     pitch: 'Live Cambridge IGCSE and A-Level for Georgia families. Preserves HOPE Scholarship eligibility while strengthening Georgia Tech, Emory, and Ivy League applications.',
     proof: 'HOPE Scholarship covers up to 100% of tuition at UGA, Georgia Tech and other GA universities — homeschool graduates are fully eligible.',
@@ -126,6 +134,7 @@ export const US_STATES = {
     paperworkLevel: 'One-time only',
     blogSlug: 'homeschooling-arizona-families-2026',
     heroGradient: 'linear-gradient(135deg,#1A0F08 0%,#3D2412 60%,#080C14 100%)',
+    heroPhoto: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=1600&q=75',
     accentColor: '#E5A572',
     pitch: 'Live Cambridge IGCSE and A-Level for Arizona families — fully ESA-eligible. America\'s original universal homeschool voucher makes premium education essentially free.',
     proof: 'Arizona ESA covers approximately $7,000–8,000 per child annually through ClassWallet. Smartious tuition starts at $180/month — well within ESA budget.',
@@ -146,6 +155,7 @@ export const US_STATES = {
     paperworkLevel: 'Light (Church-Related)',
     blogSlug: 'homeschooling-tennessee-families-2026',
     heroGradient: 'linear-gradient(135deg,#1A0A0F 0%,#3D1A22 60%,#080C14 100%)',
+    heroPhoto: 'https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1600&q=75',
     accentColor: '#D688A0',
     pitch: 'Live Cambridge IGCSE and A-Level for Tennessee families. Preserves Tennessee Promise and HOPE Scholarship eligibility. Built for Vanderbilt, Belmont, and Ivy League applications.',
     proof: 'Tennessee Promise gives homeschool graduates free community college tuition. Tennessee HOPE Scholarship covers up to $5,000/year at 4-year universities.',
@@ -166,6 +176,7 @@ export const US_STATES = {
     paperworkLevel: 'Light annual',
     blogSlug: 'homeschooling-virginia-families-2026',
     heroGradient: 'linear-gradient(135deg,#0A1428 0%,#1F2A52 60%,#080C14 100%)',
+    heroPhoto: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&q=75',
     accentColor: '#8DA0D9',
     pitch: 'Live Cambridge IGCSE and A-Level for Virginia families. Built for UVA, William & Mary, Georgetown, Johns Hopkins applications — and for DC metro federal/military families.',
     proof: 'Virginia\'s Religious Exemption is the most permissive homeschool status in America. UVA and William & Mary actively welcome homeschool applicants.',
@@ -186,6 +197,7 @@ export const US_STATES = {
     paperworkLevel: 'Heavy',
     blogSlug: 'homeschooling-pennsylvania-families-2026',
     heroGradient: 'linear-gradient(135deg,#1A0A0A 0%,#3D1818 60%,#080C14 100%)',
+    heroPhoto: 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?w=1600&q=75',
     accentColor: '#D69090',
     pitch: 'Live Cambridge IGCSE and A-Level for Pennsylvania families. The Smartious portfolio simplifies Act 169 documentation for UPenn, Carnegie Mellon, and Penn State applications.',
     proof: 'PA Act 169\'s portfolio requirement produces some of the most documented homeschool applications in America — a competitive advantage in UPenn and CMU admissions.',
@@ -206,6 +218,7 @@ export const US_STATES = {
     paperworkLevel: 'Light annual',
     blogSlug: 'homeschooling-ohio-families-2026',
     heroGradient: 'linear-gradient(135deg,#0A1218 0%,#1F3445 60%,#080C14 100%)',
+    heroPhoto: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1600&q=75',
     accentColor: '#7BA3C2',
     pitch: 'Live Cambridge IGCSE and A-Level for Ohio families. Built for Ohio State, Case Western, and the Big Ten universities — plus stacks beautifully with Ohio\'s College Credit Plus dual-enrollment.',
     proof: 'Ohio\'s College Credit Plus programme gives homeschool students 13+ free dual-enrollment at any Ohio public university — uniquely strong among top-10 states.',
