@@ -70,19 +70,37 @@ function safeFileName(name) {
 
 async function visibilityFilterFor(user) {
   if (user.role === 'admin') return { isActive: true };
+
   if (user.role === 'teacher') {
-    const ids = [...new Set(
+    // Build OR conditions so teacher is never locked out:
+    // 1. Books they uploaded themselves
+    // 2. Books for subjects in their teachingSpecialties
+    // 3. Books matching their curriculum (fallback when specialties not yet populated)
+    const conditions = [{ uploadedBy: user._id }];
+
+    const specIds = [...new Set(
       (user.teachingSpecialties || []).map(s => String(s.subjectId)).filter(Boolean)
     )];
-    if (!ids.length) return { _id: { $exists: false } };
-    return { isActive: true, subjectId: { $in: ids } };
+    if (specIds.length) conditions.push({ subjectId: { $in: specIds } });
+
+    const curricula = Array.isArray(user.curriculum)
+      ? user.curriculum.filter(Boolean)
+      : user.curriculum ? [user.curriculum] : [];
+    if (curricula.length) conditions.push({ curriculum: { $in: curricula } });
+
+    // If no curriculum/specialties at all, show everything so teacher isn't locked out
+    return conditions.length > 1
+      ? { isActive: true, $or: conditions }
+      : { isActive: true };
   }
+
   if (user.role === 'student') {
     const names = Array.isArray(user.subjects) ? user.subjects : [];
     if (!names.length) return { _id: { $exists: false } };
     const curr = typeof user.curriculum === 'string' ? user.curriculum : '';
     return { isActive: true, subjectName: { $in: names }, ...(curr ? { curriculum: curr } : {}) };
   }
+
   return { _id: { $exists: false } };
 }
 
