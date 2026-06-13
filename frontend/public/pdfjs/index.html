@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smartious Library Viewer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #525659; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+    #toolbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 52px;
+      background: linear-gradient(135deg, #7D1025 0%, #5A0B1B 100%);
+      display: flex; align-items: center; gap: 8px; padding: 0 16px;
+      z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,.4);
+    }
+    #title { flex: 1; min-width: 0; }
+    #title h1 { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #title p  { font-size: 10px; color: rgba(255,255,255,.65); margin-top: 1px; }
+
+    .tb-btn {
+      border: none; border-radius: 6px; padding: 6px 12px;
+      font-size: 11px; font-weight: 700; cursor: pointer;
+      background: rgba(255,255,255,.15); color: #fff;
+      white-space: nowrap;
+    }
+    .tb-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .tb-btn.gold { background: #C9A030; color: #7D1025; }
+    .sep { width: 1px; height: 20px; background: rgba(255,255,255,.25); margin: 0 4px; flex-shrink: 0; }
+
+    #page-info { color: #fff; font-size: 11px; min-width: 70px; text-align: center; white-space: nowrap; }
+    #zoom-info { color: #fff; font-size: 11px; min-width: 38px; text-align: center; }
+
+    #viewer-container {
+      position: fixed; top: 52px; left: 0; right: 0; bottom: 0;
+      overflow-y: auto; overflow-x: auto;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 20px 16px; gap: 10px;
+    }
+
+    .page-wrapper {
+      box-shadow: 0 4px 24px rgba(0,0,0,.5);
+      border-radius: 2px; overflow: hidden;
+      background: #fff; position: relative;
+    }
+    .page-wrapper canvas { display: block; }
+
+    #loading {
+      position: fixed; inset: 52px 0 0 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+      background: #525659; z-index: 10;
+    }
+    #loading .spinner {
+      width: 44px; height: 44px;
+      border: 4px solid rgba(255,255,255,.15);
+      border-top-color: #C9A030; border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+    #loading p { color: #fff; font-size: 14px; font-weight: 600; }
+    #loading small { color: rgba(255,255,255,.5); font-size: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #error {
+      display: none; position: fixed; inset: 52px 0 0 0;
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; color: #fff; text-align: center; padding: 30px;
+    }
+    #error h2 { font-size: 18px; }
+    #error p  { font-size: 13px; opacity: .7; max-width: 400px; line-height: 1.6; }
+    #error a  { background: #C9A030; color: #7D1025; padding: 10px 24px; border-radius: 8px; font-weight: 800; font-size: 13px; text-decoration: none; display: inline-block; margin-top: 8px; }
+
+    #watermark {
+      position: fixed; bottom: 8px; left: 0; right: 0;
+      text-align: center; color: rgba(255,255,255,.2);
+      font-size: 10px; letter-spacing: .08em; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="toolbar">
+  <div id="title">
+    <h1 id="book-title">Loading...</h1>
+    <p id="book-meta"></p>
+  </div>
+  <button class="tb-btn" id="btn-zoom-out">−</button>
+  <span id="zoom-info">100%</span>
+  <button class="tb-btn" id="btn-zoom-in">+</button>
+  <div class="sep"></div>
+  <button class="tb-btn" id="btn-prev" disabled>‹</button>
+  <span id="page-info">— / —</span>
+  <button class="tb-btn" id="btn-next" disabled>›</button>
+  <div class="sep"></div>
+  <button class="tb-btn" id="btn-fs">Fullscreen</button>
+</div>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p id="loading-text">Opening book...</p>
+  <small>Large files may take a few seconds</small>
+</div>
+
+<div id="error">
+  <h2>Could not open this book</h2>
+  <p id="error-msg">The PDF could not be loaded.</p>
+  <a id="error-link" href="#" target="_blank" rel="noopener">Open in browser tab</a>
+</div>
+
+<div id="viewer-container"></div>
+<div id="watermark">For personal reading only — Smartious Homeschool</div>
+
+<script type="module">
+  // ── Parse query params ──────────────────────────────────
+  const params   = new URLSearchParams(location.search)
+  const fileUrl  = params.get('file')    // R2 public URL of the PDF
+  const title    = params.get('title')   || 'Coursebook'
+  const meta     = params.get('meta')    || ''
+
+  document.getElementById('book-title').textContent = title
+  document.getElementById('book-meta').textContent  = meta
+  document.getElementById('error-link').href        = fileUrl || '#'
+  document.getElementById('loading-text').textContent =
+    `Opening ${title}...`
+
+  if (!fileUrl) {
+    showError('No file URL provided.')
+    throw new Error('No file URL')
+  }
+
+  // ── Load pdfjs ──────────────────────────────────────────
+  const pdfjsLib = await import('./pdf.min.mjs')
+  pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.min.mjs'
+
+  // ── State ───────────────────────────────────────────────
+  let pdfDoc    = null
+  let currentPage = 1
+  let numPages    = 0
+  let scale       = 1.2
+  let rendering   = false
+  const pageCanvases = {}
+
+  const container  = document.getElementById('viewer-container')
+  const loading    = document.getElementById('loading')
+  const pageInfo   = document.getElementById('page-info')
+  const zoomInfo   = document.getElementById('zoom-info')
+  const btnPrev    = document.getElementById('btn-prev')
+  const btnNext    = document.getElementById('btn-next')
+  const btnZoomIn  = document.getElementById('btn-zoom-in')
+  const btnZoomOut = document.getElementById('btn-zoom-out')
+  const btnFs      = document.getElementById('btn-fs')
+
+  function showError(msg) {
+    loading.style.display = 'none'
+    const el = document.getElementById('error')
+    el.style.display = 'flex'
+    document.getElementById('error-msg').textContent = msg
+  }
+
+  function updateUI() {
+    pageInfo.textContent = `${currentPage} / ${numPages}`
+    zoomInfo.textContent = Math.round(scale * 100) + '%'
+    btnPrev.disabled = currentPage <= 1
+    btnNext.disabled = currentPage >= numPages
+  }
+
+  // Render a single page into its canvas
+  async function renderPage(pageNum) {
+    if (!pdfDoc) return
+    const page      = await pdfDoc.getPage(pageNum)
+    const viewport  = page.getViewport({ scale })
+    const wrapper   = document.getElementById(`page-${pageNum}`)
+    if (!wrapper) return
+
+    const canvas  = wrapper.querySelector('canvas') || document.createElement('canvas')
+    const ctx     = canvas.getContext('2d')
+    canvas.width  = viewport.width
+    canvas.height = viewport.height
+    wrapper.style.width  = viewport.width  + 'px'
+    wrapper.style.height = viewport.height + 'px'
+    if (!wrapper.contains(canvas)) wrapper.appendChild(canvas)
+
+    await page.render({ canvasContext: ctx, viewport }).promise
+  }
+
+  // Build placeholder divs for all pages, render visible ones
+  async function buildViewer() {
+    container.innerHTML = ''
+
+    for (let p = 1; p <= numPages; p++) {
+      const wrapper = document.createElement('div')
+      wrapper.className = 'page-wrapper'
+      wrapper.id = `page-${p}`
+      wrapper.dataset.page = p
+      // Placeholder size before render (A4 ratio)
+      const w = Math.round(595 * scale)
+      const h = Math.round(842 * scale)
+      wrapper.style.width  = w + 'px'
+      wrapper.style.height = h + 'px'
+      container.appendChild(wrapper)
+    }
+
+    // Render first 3 pages immediately
+    for (let p = 1; p <= Math.min(3, numPages); p++) {
+      await renderPage(p)
+    }
+
+    // Lazy-render remaining pages via IntersectionObserver
+    const obs = new IntersectionObserver(async (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          const p = Number(entry.target.dataset.page)
+          if (!entry.target.querySelector('canvas')) {
+            await renderPage(p)
+          }
+          // Track current page
+          currentPage = p
+          updateUI()
+        }
+      }
+    }, { rootMargin: '300px' })
+
+    container.querySelectorAll('.page-wrapper').forEach(el => obs.observe(el))
+
+    loading.style.display = 'none'
+    updateUI()
+  }
+
+  // ── Load PDF ────────────────────────────────────────────
+  try {
+    const loadingTask = pdfjsLib.getDocument({
+      url: fileUrl,
+      cMapUrl: 'https://unpkg.com/pdfjs-dist@4.4.168/cmaps/',
+      cMapPacked: true,
+      disableStream: false,
+      disableAutoFetch: false,
+    })
+
+    loadingTask.onProgress = ({ loaded, total }) => {
+      if (total) {
+        const pct = Math.round((loaded / total) * 100)
+        document.getElementById('loading-text').textContent =
+          `Loading... ${pct}%`
+      }
+    }
+
+    pdfDoc   = await loadingTask.promise
+    numPages = pdfDoc.numPages
+    await buildViewer()
+
+  } catch (err) {
+    console.error('PDF load error:', err)
+    showError(err.message || 'Could not load the PDF. Check that the file is accessible.')
+  }
+
+  // ── Re-render on zoom ───────────────────────────────────
+  async function applyZoom() {
+    // Re-render already-rendered pages at new scale
+    const rendered = container.querySelectorAll('.page-wrapper canvas')
+    for (const canvas of rendered) {
+      const p = Number(canvas.closest('.page-wrapper').dataset.page)
+      await renderPage(p)
+    }
+    // Resize unrendered placeholders
+    container.querySelectorAll('.page-wrapper:not(:has(canvas))').forEach(w => {
+      w.style.width  = Math.round(595 * scale) + 'px'
+      w.style.height = Math.round(842 * scale) + 'px'
+    })
+    zoomInfo.textContent = Math.round(scale * 100) + '%'
+  }
+
+  // ── Controls ────────────────────────────────────────────
+  btnZoomIn.onclick  = () => { scale = Math.min(3.0, +(scale + 0.2).toFixed(1)); applyZoom() }
+  btnZoomOut.onclick = () => { scale = Math.max(0.5, +(scale - 0.2).toFixed(1)); applyZoom() }
+
+  btnPrev.onclick = () => {
+    if (currentPage <= 1) return
+    currentPage--
+    document.getElementById(`page-${currentPage}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    updateUI()
+  }
+  btnNext.onclick = () => {
+    if (currentPage >= numPages) return
+    currentPage++
+    document.getElementById(`page-${currentPage}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    updateUI()
+  }
+
+  btnFs.onclick = async () => {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen?.()
+      btnFs.textContent = 'Exit full'
+    } else {
+      await document.exitFullscreen?.()
+      btnFs.textContent = 'Fullscreen'
+    }
+  }
+
+  // Keyboard nav
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') btnNext.click()
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   btnPrev.click()
+    if ((e.ctrlKey || e.metaKey) && ['s','S','p','P'].includes(e.key)) {
+      e.preventDefault(); e.stopPropagation()
+    }
+  })
+</script>
+</body>
+</html>
