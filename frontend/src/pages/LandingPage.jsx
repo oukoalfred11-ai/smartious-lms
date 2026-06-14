@@ -9722,9 +9722,16 @@ export default function LandingPage() {
                       display:'block',padding:18,background:V.white,border:'1px solid '+V.bone3,borderRadius:10,
                       textDecoration:'none'
                     }}>
-                      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
-                        <span style={{display:'inline-block',width:24,height:16,background:st.accentColor,borderRadius:3}}/>
-                        <span style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',color:V.sl2}}>{st.abbr}</span>
+                      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
+                        <span style={{
+                          display:'inline-flex',alignItems:'center',justifyContent:'center',
+                          width:42,height:42,
+                          background:st.accentColor,
+                          color:'#fff',
+                          borderRadius:8,
+                          fontSize:13,fontWeight:800,letterSpacing:'.05em',
+                          boxShadow:'0 2px 4px rgba(0,0,0,.08)',
+                        }}>{st.abbr}</span>
                       </div>
                       <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:18,fontWeight:400,color:V.ink,marginBottom:6}}>{st.name}</div>
                       <div style={{fontSize:12,color:V.sl,marginBottom:8,lineHeight:1.5}}>{st.pop} families</div>
