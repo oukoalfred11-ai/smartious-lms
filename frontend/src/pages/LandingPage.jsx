@@ -8,6 +8,7 @@ import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
 import { FULL_ARTICLES } from '../data/fullArticles.js'
 import { US_STATES, US_STATES_LIST } from '../data/usStates.js'
+import { US_CITIES, US_CITIES_LIST, US_CITIES_BY_STATE } from '../data/usCities.js'
 import { NAIROBI_AREAS } from '../data/nairobiAreas.js'
 import { UAE_AREAS } from '../data/uaeAreas.js'
 import { KENYA_CITIES } from '../data/kenyaCities.js'
@@ -854,7 +855,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1655,6 +1656,7 @@ export default function LandingPage() {
   const [blogCountry, setBlogCountry] = useState('all')
   const [currentArticle, setCurrentArticle] = useState(null)
   const [currentStateSlug, setCurrentStateSlug] = useState(null)
+  const [currentCitySlug, setCurrentCitySlug] = useState(null)
   const [currentCurriculum, setCurrentCurriculum] = useState(null)
   const [currentService, setCurrentService] = useState(null)
   const [currentCountry, setCurrentCountry] = useState(null)
@@ -2101,11 +2103,18 @@ export default function LandingPage() {
     }
     if (path.startsWith('/homeschool-')) {
       const slug = decodeURIComponent(path.slice('/homeschool-'.length))
+      // Try city first (slug like "houston-tx", "los-angeles-ca") — longer matches take priority
+      if (slug && US_CITIES[slug]) {
+        setCurrentCitySlug(slug)
+        setPage('city-landing')
+        return
+      }
+      // Fall back to state (slug like "texas", "california", "north-carolina")
       if (slug && US_STATES[slug]) {
         setCurrentStateSlug(slug)
         setPage('state-landing')
       } else {
-        // Unknown state slug — fall back to /us-families
+        // Unknown slug — fall back to /us-families
         setPage('us-families')
       }
       return
@@ -2311,6 +2320,10 @@ export default function LandingPage() {
     const s = US_STATES[currentStateSlug]
     metaTitle = s.metaTitle || ('Online Homeschool ' + s.name + ' — Live Cambridge IGCSE & A-Level | ' + SITE)
     metaDesc  = s.metaDesc || (s.pitch || '').slice(0, 158)
+  } else if (page === 'city-landing' && currentCitySlug && US_CITIES[currentCitySlug]) {
+    const c = US_CITIES[currentCitySlug]
+    metaTitle = c.metaTitle || ('Online Homeschool ' + c.name + ' — Live Cambridge IGCSE & A-Level | ' + SITE)
+    metaDesc  = c.metaDesc || (c.pitch || '').slice(0, 158)
   } else if (PAGE_META[page]) {
     metaTitle = PAGE_META[page].title
     metaDesc  = PAGE_META[page].desc
@@ -9956,6 +9969,38 @@ export default function LandingPage() {
             </div>
           </section>
 
+          {/* CITY LANDING GRID — internal links to each city's dedicated page (if cities exist in this state) */}
+          {US_CITIES_BY_STATE[currentStateSlug] && US_CITIES_BY_STATE[currentStateSlug].length > 0 && (
+            <section className="sec" style={{background:V.white,padding:'56px 0'}}>
+              <div className="wrap" style={{maxWidth:1000}}>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                  <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:12}}>Cities we serve</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.5rem,2.6vw,1.9rem)',color:V.ink,fontWeight:400,marginBottom:6}}>
+                    Local guides for major <em style={{color:s.accentColor}}>{s.name}</em> metros
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
+                  {US_CITIES_BY_STATE[currentStateSlug].map(citySlug => {
+                    const ct = US_CITIES[citySlug]
+                    return (
+                      <a key={citySlug} href={`/homeschool-${citySlug}`} style={{
+                        display:'block',padding:18,background:V.bone,border:'1px solid '+V.bone3,borderLeft:'3px solid '+s.accentColor,borderRadius:10,
+                        textDecoration:'none'
+                      }}>
+                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:18,fontWeight:400,color:V.ink,marginBottom:6}}>{ct.name}</div>
+                        <div style={{fontSize:12,color:V.sl,marginBottom:8,lineHeight:1.5}}>{ct.metroPop}</div>
+                        <div style={{fontSize:11,color:s.accentColor,fontWeight:700,letterSpacing:'.04em'}}>View {ct.name} guide →</div>
+                      </a>
+                    )
+                  })}
+                </div>
+                <p style={{textAlign:'center',marginTop:20,fontSize:12,color:V.sl3}}>
+                  More {s.name} cities added quarterly. Need a specific city? <a href="/consult" style={{color:V.cr,textDecoration:'underline'}}>Book a consultation</a>.
+                </p>
+              </div>
+            </section>
+          )}
+
           {/* Universities the state's students target */}
           <section className="sec" style={{background:V.white,padding:'56px 0'}}>
             <div className="wrap" style={{maxWidth:980}}>
@@ -10051,6 +10096,247 @@ export default function LandingPage() {
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
                 <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
+                  Book free consultation
+                </button>
+                <button onClick={() => { trackConversion('enrol_started'); P('enroll') }}
+                  style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                  Begin Enrolment →
+                </button>
+                <a href="https://wa.me/254745021212"
+                  target="_blank" rel="noopener noreferrer"
+                  onClick={() => trackConversion('whatsapp_click')}
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp us
+                </a>
+              </div>
+            </div>
+          </section>
+          <Footer P={P}/>
+        </>
+        )
+      })()}
+
+      {/* ══════════════════════════════════════════
+          US CITY LANDING — /homeschool-{city}-{state-abbr}
+          City-level marketing page. Inherits state data
+          (legal framework, voucher, pricing) and adds
+          city-specific hook, universities, neighborhoods,
+          and hyper-local FAQs.
+          Data lives in src/data/usCities.js.
+      ══════════════════════════════════════════ */}
+      {page === 'city-landing' && currentCitySlug && US_CITIES[currentCitySlug] && (() => {
+        const c = US_CITIES[currentCitySlug]
+        const s = US_STATES[c.state]  // inherited state data
+        if (!s) return null
+        return (
+        <>
+          {/* Hero — photo background + state-color overlay */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(180deg, rgba(8,12,20,.45) 0%, rgba(8,12,20,.88) 100%), url('${c.heroPhoto}') center/cover no-repeat`,
+            color:'#fff',padding:'88px 0 72px',overflow:'hidden'
+          }}>
+            <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg, transparent 0%, ${s.accentColor} 50%, transparent 100%)`,zIndex:1}}/>
+            <div className="wrap" style={{position:'relative',zIndex:2,maxWidth:1100}}>
+              {/* Breadcrumb: state name + city */}
+              <div style={{display:'inline-flex',alignItems:'center',gap:8,marginBottom:18,fontSize:12,color:'rgba(255,255,255,.7)'}}>
+                <a href={`/homeschool-${c.state}`} style={{color:'rgba(255,255,255,.75)',textDecoration:'none',fontWeight:600}}>
+                  {s.name}
+                </a>
+                <span>›</span>
+                <span style={{fontWeight:700,color:'#fff'}}>{c.name}</span>
+              </div>
+              <div style={{display:'inline-flex',alignItems:'center',gap:10,padding:'6px 14px',background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.18)',borderRadius:99,fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',marginBottom:24}}>
+                <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:30,height:18,background:s.accentColor,borderRadius:3,fontSize:9,fontWeight:800,color:'#fff'}}>{s.abbr}</span>
+                <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {c.name}</span>
+              </div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
+                Online Homeschool for <em style={{color:s.accentColor,fontStyle:'normal'}}>{c.name}</em> Families
+              </h1>
+              <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
+                {c.pitch}
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
+                <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                  style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
+                  Book a free 30-min consultation
+                </button>
+                <a href={`/blog/${s.blogSlug}`}
+                  style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none',display:'inline-block'}}>
+                  Read full {s.name} homeschool guide →
+                </a>
+              </div>
+              {/* Fact strip */}
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(170px,1fr))',gap:12,marginTop:36,paddingTop:28,borderTop:'1px solid rgba(255,255,255,.12)'}}>
+                <div>
+                  <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Metro size</div>
+                  <div style={{fontSize:16,fontWeight:800}}>{c.metroPop}</div>
+                </div>
+                <div>
+                  <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>{s.name} paperwork</div>
+                  <div style={{fontSize:16,fontWeight:800,color:s.accentColor}}>{s.difficulty}</div>
+                </div>
+                <div>
+                  <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>Live class hours</div>
+                  <div style={{fontSize:16,fontWeight:800}}>{s.classTime}</div>
+                </div>
+                {s.voucher && (
+                  <div>
+                    <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',opacity:.6,marginBottom:4}}>{s.voucher.name} voucher</div>
+                    <div style={{fontSize:16,fontWeight:800,color:s.accentColor}}>{s.voucher.amount} / child</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* City unique hook + universities */}
+          <section className="sec" style={{background:V.bone,padding:'72px 0'}}>
+            <div className="wrap" style={{maxWidth:1100}}>
+              <div style={{display:'grid',gridTemplateColumns:'minmax(0,1.4fr) minmax(0,1fr)',gap:48,alignItems:'start'}}>
+                <div>
+                  <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:14}}>Why {c.name}</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',lineHeight:1.15,color:V.ink,marginBottom:18,fontWeight:400}}>
+                    What makes <em style={{color:V.cr}}>{c.name}</em> different
+                  </h2>
+                  <p style={{fontSize:15,color:V.sl,lineHeight:1.7,marginBottom:18}}>
+                    {c.uniqueHook}
+                  </p>
+                  <p style={{fontSize:14,color:V.sl2,lineHeight:1.7,marginBottom:0}}>
+                    {c.proof}
+                  </p>
+                </div>
+                <div style={{background:V.white,border:'1px solid '+V.bone3,borderRadius:12,padding:24}}>
+                  <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:12}}>Universities {c.name} students target</div>
+                  <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:10}}>
+                    {c.topUnis.map((u,i)=>(
+                      <li key={i} style={{display:'flex',alignItems:'center',gap:10,fontSize:14,color:V.ink,fontWeight:600}}>
+                        <span style={{width:6,height:6,borderRadius:99,background:s.accentColor,flexShrink:0}}/>
+                        {u}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Pricing + voucher callout — inherited from state */}
+          <section className="sec" style={{background:V.bone3,padding:'72px 0'}}>
+            <div className="wrap" style={{maxWidth:1100}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in USD for {c.name} families</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
+                <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Three tiers. Real teachers in every tier. No surprise fees.</p>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
+                {[
+                  {name:'Online',price:'$180',sub:'/month USD',desc:'Live group classes (4–6 students), recorded for review, Mshauri AI included.',popular:false},
+                  {name:'Online Plus',price:'$295',sub:'/month USD · most popular',desc:'Live group + 1-on-1 tutoring, exam prep, free college application support.',popular:true},
+                  {name:'Premium 1-on-1',price:'$540',sub:'/month USD',desc:'Pure one-on-one with a dedicated PGCE-trained teacher. For Ivy League / Oxbridge tracks.',popular:false},
+                ].map((t,i)=>(
+                  <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
+                    {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:20,color:V.ink,marginBottom:6,fontWeight:400}}>{t.name}</h3>
+                    <div style={{display:'flex',alignItems:'baseline',gap:6,marginBottom:14}}>
+                      <span style={{fontSize:32,fontWeight:800,color:V.ink}}>{t.price}</span>
+                      <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
+                    </div>
+                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
+                    <button onClick={() => { trackConversion('enrol_started'); P('enroll') }} style={{
+                      width:'100%',padding:'12px 16px',
+                      background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
+                      border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
+                    }}>
+                      Begin Enrolment →
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {s.voucher && (
+                <div style={{marginTop:24,padding:14,background:V.bone2,borderRadius:10,textAlign:'center',fontSize:13,color:V.sl2,maxWidth:680,margin:'24px auto 0'}}>
+                  <strong style={{color:V.ink}}>{c.name} families:</strong> The {s.voucher.name} voucher ({s.voucher.amount}/child) covers Online and Online Plus tiers fully.
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Neighborhoods served */}
+          <section className="sec" style={{background:V.white,padding:'56px 0'}}>
+            <div className="wrap" style={{maxWidth:980}}>
+              <div style={{textAlign:'center',marginBottom:24}}>
+                <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:12}}>Neighborhoods served</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.5rem,2.6vw,1.8rem)',color:V.ink,fontWeight:400,marginBottom:6}}>
+                  We serve all of greater {c.name}
+                </h2>
+                <p style={{fontSize:13.5,color:V.sl,maxWidth:520,margin:'0 auto'}}>
+                  Smartious is fully online — your physical neighborhood is not a barrier to enrolment.
+                </p>
+              </div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:8,justifyContent:'center'}}>
+                {c.neighborhoods.map((n,i)=>(
+                  <span key={i} style={{padding:'8px 14px',background:V.bone2,border:'1px solid '+V.bone3,borderRadius:99,fontSize:12.5,color:V.ink,fontWeight:500}}>{n}</span>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* FAQ — visible + JSON-LD schema below */}
+          <section className="sec" style={{background:V.bone2,padding:'72px 0'}}>
+            <div className="wrap" style={{maxWidth:820}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:14}}>{c.name} FAQ</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,lineHeight:1.2,marginBottom:10}}>
+                  Common questions from <em style={{color:V.cr}}>{c.name}</em> families
+                </h2>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                {c.faqs && c.faqs.map((f, i) => (
+                  <details key={i} style={{background:V.white,border:'1px solid '+V.bone3,borderRadius:10,padding:'18px 22px'}} open={i===0}>
+                    <summary style={{fontWeight:700,fontSize:15,color:V.ink,cursor:'pointer',listStyle:'none',position:'relative',paddingRight:30,lineHeight:1.4}}>
+                      {f.q}
+                      <span style={{position:'absolute',right:0,top:2,fontSize:18,color:V.cr,fontWeight:400}}>+</span>
+                    </summary>
+                    <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginTop:14,marginBottom:0,paddingTop:14,borderTop:'1px solid '+V.bone3}}>{f.a}</p>
+                  </details>
+                ))}
+              </div>
+              <div style={{textAlign:'center',marginTop:32}}>
+                <a href={`/homeschool-${c.state}`} style={{color:V.cr,fontWeight:700,fontSize:14,textDecoration:'none',borderBottom:'1px solid '+V.cr}}>
+                  See full {s.name} homeschool details →
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* JSON-LD FAQPage schema for city */}
+          {c.faqs && (
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{__html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'FAQPage',
+                'mainEntity': c.faqs.map(f => ({
+                  '@type': 'Question',
+                  'name': f.q,
+                  'acceptedAnswer': { '@type': 'Answer', 'text': f.a },
+                })),
+              })}}
+            />
+          )}
+
+          {/* Final CTA — uses state color identity */}
+          <section className="sec" style={{background:s.heroGradient,color:'#fff',padding:'72px 0',textAlign:'center'}}>
+            <div className="wrap" style={{maxWidth:760}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.6rem)',color:'#fff',marginBottom:14,fontWeight:400,lineHeight:1.15}}>
+                Ready to start homeschool in {c.name}?
+              </h2>
+              <p style={{fontSize:'clamp(1rem,1.5vw,1.1rem)',color:'rgba(255,255,255,.85)',marginBottom:28,maxWidth:560,margin:'0 auto 28px'}}>
+                Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {c.name}-specific question.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
+                <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                  style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
                   Book free consultation
                 </button>
                 <button onClick={() => { trackConversion('enrol_started'); P('enroll') }}
