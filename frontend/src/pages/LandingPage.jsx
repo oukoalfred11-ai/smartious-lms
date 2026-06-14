@@ -9860,8 +9860,14 @@ export default function LandingPage() {
                   {h:'Cambridge IGCSE & A-Level', p:`International curriculum recognised by ${s.universities.slice(0,3).join(', ')} and every Ivy League university. Stronger than US homeschool transcripts in elite admissions.`},
                   {h:'Free college application support', p:`Common App, UCAS, OUAC support included. We help ${s.name} students target ${s.universities[0]} as confidently as Oxbridge.`},
                 ].map((c,i)=>(
-                  <div key={i} style={{background:V.white,border:'1px solid '+V.bone3,borderRadius:12,padding:22}}>
-                    <div style={{width:34,height:34,borderRadius:8,background:s.heroGradient,marginBottom:14}}/>
+                  <div key={i} style={{background:V.white,border:'1px solid '+V.bone3,borderLeft:'3px solid '+s.accentColor,borderRadius:12,padding:'22px 22px 22px 24px'}}>
+                    <div style={{
+                      display:'inline-flex',alignItems:'center',justifyContent:'center',
+                      width:30,height:30,borderRadius:99,
+                      background:s.accentColor+'22',color:s.accentColor,
+                      fontFamily:"'DM Serif Display',Georgia,serif",fontSize:15,fontWeight:700,
+                      marginBottom:14,
+                    }}>{i+1}</div>
                     <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:17,color:V.ink,marginBottom:8,fontWeight:400}}>{c.h}</h3>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{c.p}</p>
                   </div>
