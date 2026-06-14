@@ -2307,6 +2307,10 @@ export default function LandingPage() {
     const a = FULL_ARTICLES[currentArticle]
     metaTitle = a.metaTitle || ((a.t || 'Article') + ' | ' + SITE)
     metaDesc  = a.metaDesc || (a.intro || '').slice(0, 158)
+  } else if (page === 'state-landing' && currentStateSlug && US_STATES[currentStateSlug]) {
+    const s = US_STATES[currentStateSlug]
+    metaTitle = s.metaTitle || ('Online Homeschool ' + s.name + ' — Live Cambridge IGCSE & A-Level | ' + SITE)
+    metaDesc  = s.metaDesc || (s.pitch || '').slice(0, 158)
   } else if (PAGE_META[page]) {
     metaTitle = PAGE_META[page].title
     metaDesc  = PAGE_META[page].desc
@@ -9956,6 +9960,71 @@ export default function LandingPage() {
               </p>
             </div>
           </section>
+
+          {/* FAQ — visible content for users + matches JSON-LD schema below for Google */}
+          <section className="sec" style={{background:V.bone2,padding:'72px 0'}}>
+            <div className="wrap" style={{maxWidth:820}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:14}}>Frequently asked questions</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,lineHeight:1.2,marginBottom:10}}>
+                  Common questions from <em style={{color:V.cr}}>{s.name}</em> families
+                </h2>
+                <p style={{fontSize:14,color:V.sl,maxWidth:580,margin:'0 auto'}}>
+                  Detailed answers to the questions {s.name} parents ask most often. For broader homeschool law and curriculum questions, see the full {s.name} guide.
+                </p>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                {s.faqs && s.faqs.map((f, i) => (
+                  <details key={i} style={{
+                    background:V.white,
+                    border:'1px solid '+V.bone3,
+                    borderRadius:10,
+                    padding:'18px 22px',
+                  }} open={i===0}>
+                    <summary style={{
+                      fontWeight:700,fontSize:15,color:V.ink,cursor:'pointer',
+                      listStyle:'none',position:'relative',paddingRight:30,
+                      lineHeight:1.4,
+                    }}>
+                      {f.q}
+                      <span style={{position:'absolute',right:0,top:2,fontSize:18,color:V.cr,fontWeight:400}}>+</span>
+                    </summary>
+                    <p style={{
+                      fontSize:14,color:V.sl,lineHeight:1.7,
+                      marginTop:14,marginBottom:0,paddingTop:14,
+                      borderTop:'1px solid '+V.bone3,
+                    }}>
+                      {f.a}
+                    </p>
+                  </details>
+                ))}
+              </div>
+              <div style={{textAlign:'center',marginTop:32}}>
+                <a href={`/blog/${s.blogSlug}`} style={{color:V.cr,fontWeight:700,fontSize:14,textDecoration:'none',borderBottom:'1px solid '+V.cr}}>
+                  Read the complete {s.name} homeschool guide →
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* JSON-LD FAQPage schema — Google indexing for People-Also-Ask & AI Overviews */}
+          {s.faqs && (
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{__html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'FAQPage',
+                'mainEntity': s.faqs.map(f => ({
+                  '@type': 'Question',
+                  'name': f.q,
+                  'acceptedAnswer': {
+                    '@type': 'Answer',
+                    'text': f.a,
+                  },
+                })),
+              })}}
+            />
+          )}
 
           {/* Final CTA */}
           <section className="sec" style={{background:s.heroGradient,color:'#fff',padding:'72px 0',textAlign:'center'}}>
