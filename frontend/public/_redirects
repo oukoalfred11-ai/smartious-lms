@@ -1,4 +1,16 @@
-# Netlify SPA fallback
-# Every URL that doesn't match a real static file gets served index.html
-# so React Router can handle the routing client-side.
-/*    /index.html   200
+# ═══════════════════════════════════════════════════════════════
+# Smartious Homeschool — Netlify _redirects
+# Place this file in the build output (frontend/public/_redirects)
+# so Netlify serves it at the site root.
+#
+# 301 redirects consolidate SEO authority on the canonical URL
+# pattern: /online-school/<country>
+# ═══════════════════════════════════════════════════════════════
+
+# Country hub pages — 301 to canonical /online-school/<country>
+/us-families            /online-school/usa       301
+/ca-families            /online-school/canada    301
+/homeschooling-kenya    /online-school/kenya     301
+
+# SPA fallback — keep this last so it doesn't override the redirects above
+/*                      /index.html              200
