@@ -116,7 +116,7 @@ function setCanonical(url) {
   el.setAttribute('href', url)
 }
 
-function usePageMeta(title, description) {
+function usePageMeta(title, description, canonicalOverride) {
   useEffect(() => {
     if (title) document.title = title
     if (description) {
@@ -128,16 +128,26 @@ function usePageMeta(title, description) {
     }
     // Canonical + og:url — strip query string and trailing slash
     // so URL variants don't fragment SEO authority.
+    // Pages can pass a canonicalOverride to force one canonical URL across
+    // multiple URL aliases (e.g. /us-families and /online-school/usa both
+    // serve the same content but consolidate SEO authority on the latter).
     try {
       const origin = window.location.origin
-      let path = window.location.pathname || '/'
-      // Normalise trailing slash (keep root '/')
-      if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1)
-      const canonical = origin + path
+      let canonical
+      if (canonicalOverride) {
+        // Allow either absolute URLs or paths starting with '/'
+        canonical = canonicalOverride.startsWith('http')
+          ? canonicalOverride
+          : origin + canonicalOverride
+      } else {
+        let path = window.location.pathname || '/'
+        if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1)
+        canonical = origin + path
+      }
       setCanonical(canonical)
       setMetaTag('og:url', canonical, 'property')
     } catch {}
-  }, [title, description])
+  }, [title, description, canonicalOverride])
 }
 
 /* ── useHeroPreload — LCP optimization ─────────────────────
@@ -2087,6 +2097,13 @@ export default function LandingPage() {
       const slug = id.slice('study-abroad-'.length)
       return '/study-abroad/' + slug
     }
+    // Country-families / hub pages share the canonical /online-school/[country]
+    // URL pattern. /us-families, /ca-families, /homeschooling-kenya are kept as
+    // backward-compat aliases (still routable) but internal navigation always
+    // uses the canonical URL.
+    if (id === 'us-families') return '/online-school/usa'
+    if (id === 'ca-families') return '/online-school/canada'
+    if (id === 'homeschooling-kenya') return '/online-school/kenya'
     return '/' + id
   }
 
@@ -2161,6 +2178,22 @@ export default function LandingPage() {
     }
     if (path.startsWith('/online-school/')) {
       const slug = decodeURIComponent(path.slice('/online-school/'.length))
+      // /online-school/usa, /online-school/canada, and /online-school/kenya are
+      // the canonical URLs for the rich families/hub landing pages
+      // (us-families, ca-families, homeschooling-kenya). The country-detail
+      // page is reserved for countries without a dedicated hub page.
+      if (slug === 'usa') {
+        setPage('us-families')
+        return
+      }
+      if (slug === 'canada') {
+        setPage('ca-families')
+        return
+      }
+      if (slug === 'kenya') {
+        setPage('homeschooling-kenya')
+        return
+      }
       const country = COUNTRIES.find(c => c.slug === slug)
       if (country) {
         setCurrentCountry(slug)
@@ -2355,7 +2388,15 @@ export default function LandingPage() {
     metaTitle = PAGE_META[page].title
     metaDesc  = PAGE_META[page].desc
   }
-  usePageMeta(metaTitle, metaDesc)
+  // Force canonical URL to /online-school/[country] for the families/hub pages
+  // so /us-families, /ca-families, /homeschooling-kenya consolidate SEO
+  // authority on the canonical /online-school/[country] URL pattern that's
+  // been promoted historically.
+  let canonicalOverride = null
+  if (page === 'us-families') canonicalOverride = '/online-school/usa'
+  if (page === 'ca-families') canonicalOverride = '/online-school/canada'
+  if (page === 'homeschooling-kenya') canonicalOverride = '/online-school/kenya'
+  usePageMeta(metaTitle, metaDesc, canonicalOverride)
   useHeroPreload(page === 'home')
 
   // Load public teacher profiles when the Teachers page is opened.
@@ -3392,7 +3433,7 @@ export default function LandingPage() {
                 {country:'Bahrain', slug:'bahrain', href:'/online-school/bahrain', sub:'Manama · Riffa'},
                 {country:'Pakistan', slug:'pakistan', href:'/online-school/pakistan', sub:'Karachi · Lahore · Islamabad'},
                 {country:'United Kingdom', slug:'uk', href:'/online-school/uk', sub:'London · Manchester'},
-                {country:'United States', slug:'usa', href:'/us-families', sub:'Coast to coast · Live · IGCSE/A-Level', usFamiliesRedirect:true},
+                {country:'United States', slug:'usa', href:'/online-school/usa', sub:'Coast to coast · Live · IGCSE/A-Level'},
                 {country:'Canada', slug:'canada', href:'/online-school/canada', sub:'Toronto · Vancouver'},
                 {country:'Australia', slug:'australia', href:'/online-school/australia', sub:'Sydney · Melbourne'},
                 {country:'Nigeria', slug:'nigeria', href:'/online-school/nigeria', sub:'Lagos · Abuja'},
@@ -3407,7 +3448,12 @@ export default function LandingPage() {
                   href={c.href}
                   onClick={e => {
                     e.preventDefault()
-                    if (c.usFamiliesRedirect) P('us-families')
+                    // USA, Canada, Kenya have rich dedicated landing pages
+                    // — route to them directly. All other slugs use the
+                    // standard country-detail page.
+                    if (c.slug === 'usa') P('us-families')
+                    else if (c.slug === 'canada') P('ca-families')
+                    else if (c.slug === 'kenya') P('homeschooling-kenya')
                     else if (c.slug) openCountry(c.slug)
                     else P('global')
                   }}
@@ -12543,9 +12589,9 @@ export default function LandingPage() {
           {/* Schema */}
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
             '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/homeschooling-kenya#org',
+            '@id':'https://smartioushomeschool.com/online-school/kenya#org',
             'name':'Smartious — Online Homeschooling Across Kenya',
-            'url':'https://smartioushomeschool.com/homeschooling-kenya',
+            'url':'https://smartioushomeschool.com/online-school/kenya',
             'description':'Online homeschooling and 1-on-1 tuition for Kenyan families across Mombasa, Kisumu, Nakuru, Eldoret, Thika and Kiambu. Cambridge IGCSE, A-Level, IB, CBC, American Curriculum. From KSh 1,300/hour.',
             'areaServed': KENYA_CITIES.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
           })}}/>
@@ -12553,7 +12599,7 @@ export default function LandingPage() {
             '@context':'https://schema.org','@type':'BreadcrumbList',
             'itemListElement':[
               {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-              {'@type':'ListItem','position':2,'name':'Homeschooling Kenya','item':'https://smartioushomeschool.com/homeschooling-kenya'},
+              {'@type':'ListItem','position':2,'name':'Homeschooling Kenya','item':'https://smartioushomeschool.com/online-school/kenya'},
             ],
           })}}/>
 
@@ -12664,7 +12710,7 @@ export default function LandingPage() {
               '@context':'https://schema.org','@type':'BreadcrumbList',
               'itemListElement':[
                 {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-                {'@type':'ListItem','position':2,'name':'Homeschooling Kenya','item':'https://smartioushomeschool.com/homeschooling-kenya'},
+                {'@type':'ListItem','position':2,'name':'Homeschooling Kenya','item':'https://smartioushomeschool.com/online-school/kenya'},
                 {'@type':'ListItem','position':3,'name': city.name,'item':'https://smartioushomeschool.com/homeschooling/' + city.slug},
               ],
             })}}/>
