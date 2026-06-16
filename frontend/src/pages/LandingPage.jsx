@@ -867,7 +867,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -2104,6 +2104,10 @@ export default function LandingPage() {
     if (id === 'us-families') return '/online-school/usa'
     if (id === 'ca-families') return '/online-school/canada'
     if (id === 'homeschooling-kenya') return '/online-school/kenya'
+    // Canadian provincial funding landing pages — high-intent SEO URLs
+    if (id === 'ab-funding') return '/alberta-home-ed-funding'
+    if (id === 'bc-funding') return '/bc-distributed-learning-funding'
+    if (id === 'sk-funding') return '/saskatchewan-homeschool-funding'
     return '/' + id
   }
 
@@ -2202,6 +2206,19 @@ export default function LandingPage() {
         // Unknown country slug — fall back to the global page
         setPage('global')
       }
+      return
+    }
+    // Provincial funding landing pages — high-intent SEO routes
+    if (path === '/alberta-home-ed-funding') {
+      setPage('ab-funding')
+      return
+    }
+    if (path === '/bc-distributed-learning-funding') {
+      setPage('bc-funding')
+      return
+    }
+    if (path === '/saskatchewan-homeschool-funding') {
+      setPage('sk-funding')
       return
     }
     if (path === '/tuition-nairobi') {
@@ -10275,8 +10292,50 @@ export default function LandingPage() {
                 })}
               </div>
               <p style={{textAlign:'center',marginTop:24,fontSize:12,color:V.sl3}}>
-                Showing top 10 US states by homeschool population. More states added quarterly.
+                All 10 provinces and 3 territories — full national coverage. Cities added quarterly.
               </p>
+            </div>
+          </section>
+
+          {/* PROVINCIAL FUNDING DEEP-DIVES */}
+          <section className="sec" style={{background:V.bone2,padding:'64px 0'}}>
+            <div className="wrap" style={{maxWidth:1080}}>
+              <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
+                <div style={{fontSize:11,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.cr,marginBottom:12}}>Provincial funding deep-dives</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',color:V.ink,fontWeight:400,marginBottom:14}}>
+                  Three provinces, three funding models — explained in plain language
+                </h2>
+                <p style={{fontSize:15,color:V.sl,lineHeight:1.65}}>
+                  Alberta, BC, and Saskatchewan each offer homeschool funding that can offset Smartious tuition. The mechanics differ. Each page walks you through how it actually works for your province.
+                </p>
+              </div>
+
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:18}}>
+                {[
+                  {abbr:'AB',name:'Alberta',amount:'$850 CAD/child',model:'Universal — no income test',color:'#B45309',pageId:'ab-funding',href:'/alberta-home-ed-funding'},
+                  {abbr:'BC',name:'British Columbia',amount:'$200–$700 CAD/yr',model:'Via Distributed Learning school',color:'#047857',pageId:'bc-funding',href:'/bc-distributed-learning-funding'},
+                  {abbr:'SK',name:'Saskatchewan',amount:'$500–$1,500 CAD/yr',model:'Division-dependent',color:'#6B21A8',pageId:'sk-funding',href:'/saskatchewan-homeschool-funding'},
+                ].map((f,i) => (
+                  <a key={i}
+                    href={f.href}
+                    onClick={e => { e.preventDefault(); P(f.pageId) }}
+                    style={{display:'block',background:'#fff',border:'1px solid '+V.bone3,borderRadius:12,padding:'24px 26px',textDecoration:'none',cursor:'pointer'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:14}}>
+                      <span style={{
+                        display:'inline-flex',alignItems:'center',justifyContent:'center',
+                        width:42,height:42,background:f.color,color:'#fff',borderRadius:8,
+                        fontSize:13,fontWeight:800,letterSpacing:'.05em',
+                      }}>{f.abbr}</span>
+                      <div>
+                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:18,color:V.ink}}>{f.name}</div>
+                        <div style={{fontSize:11,color:V.sl,marginTop:2}}>{f.model}</div>
+                      </div>
+                    </div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:24,color:f.color,fontWeight:400,marginBottom:8}}>{f.amount}</div>
+                    <div style={{color:V.cr,fontSize:13,fontWeight:600,marginTop:8}}>Read full guide →</div>
+                  </a>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -10760,6 +10819,27 @@ export default function LandingPage() {
                         ✓ Smartious tuition is funding-eligible — your {s.voucher.amount} provincial funding contributes meaningfully to our $245 CAD/month live online programmes.
                       </div>
                     )}
+                    {/* Deep-dive funding pages for provinces with documented programmes */}
+                    {(s.abbr === 'AB' || s.abbr === 'BC' || s.abbr === 'SK') && (
+                      <div style={{marginTop:12}}>
+                        <a
+                          onClick={e => {
+                            e.preventDefault()
+                            if (s.abbr === 'AB') P('ab-funding')
+                            else if (s.abbr === 'BC') P('bc-funding')
+                            else if (s.abbr === 'SK') P('sk-funding')
+                          }}
+                          href={
+                            s.abbr === 'AB' ? '/alberta-home-ed-funding'
+                            : s.abbr === 'BC' ? '/bc-distributed-learning-funding'
+                            : '/saskatchewan-homeschool-funding'
+                          }
+                          style={{display:'inline-block',color:V.cr,fontSize:13,fontWeight:600,textDecoration:'none',cursor:'pointer',borderBottom:'1px solid '+V.cr+'66',paddingBottom:1}}
+                        >
+                          Read full {s.name} funding guide →
+                        </a>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -11194,6 +11274,503 @@ export default function LandingPage() {
         </>
         )
       })()}
+
+      {/* ══════════════════════════════════════════
+          ALBERTA HOME EDUCATION FUNDING — /alberta-home-ed-funding
+          High-intent SEO page for "alberta home education funding"
+      ══════════════════════════════════════════ */}
+      {page === 'ab-funding' && (
+        <>
+          {/* Schema */}
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'EducationalOrganization',
+            '@id':'https://smartioushomeschool.com/alberta-home-ed-funding#org',
+            'name':'Smartious — Alberta Home Education Funding ($850 CAD eligible curriculum)',
+            'url':'https://smartioushomeschool.com/alberta-home-ed-funding',
+            'description':'Use Alberta\'s universal $850 CAD/child Home Education Funding for Smartious live Cambridge IGCSE & A-Level instruction. Curriculum, tutoring, and exam fees all eligible.',
+            'areaServed':{'@type':'AdministrativeArea','name':'Alberta, Canada'},
+          })}}/>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'BreadcrumbList',
+            'itemListElement':[
+              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+              {'@type':'ListItem','position':2,'name':'Online Homeschool Canada','item':'https://smartioushomeschool.com/online-school/canada'},
+              {'@type':'ListItem','position':3,'name':'Alberta Home Education Funding','item':'https://smartioushomeschool.com/alberta-home-ed-funding'},
+            ],
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(180deg, rgba(8,12,20,.55) 0%, rgba(8,12,20,.85) 100%), url('https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1600&q=80&auto=format&fit=crop') center/cover no-repeat`,
+            color:'#fff', padding:'80px 0 64px',
+          }}>
+            <div className="wrap">
+              <div style={{maxWidth:840}}>
+                <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
+                <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>$850 CAD per child · universal · no income test</div>
+                <h1 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
+                  Alberta Home Education Funding — every dollar of your $850 CAD covers Smartious Cambridge instruction
+                </h1>
+                <p style={{fontSize:18,lineHeight:1.6,color:V.bone3,maxWidth:680,margin:'0 0 28px'}}>
+                  Alberta gives every home-educating family roughly $850 CAD per child per year. Curriculum, tutoring, exam fees — all eligible. Smartious live Cambridge IGCSE &amp; A-Level instruction qualifies as eligible curriculum &amp; tutoring under Alberta Education guidelines. Register with a school authority, send us your receipts, get reimbursed.
+                </p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll — use my $850 CAD</button>
+                  <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free 15-min funding chat</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* HOW IT WORKS */}
+          <section className="sec" style={{background:V.bone,padding:'64px 0'}}>
+            <div className="wrap" style={{maxWidth:920}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>How Alberta funding actually flows</h2>
+              <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>The mechanics in three steps — no jargon.</p>
+
+              <div style={{display:'grid',gridTemplateColumns:'1fr',gap:20}}>
+                <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
+                  <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 1</div>
+                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Register with an Alberta school authority</h3>
+                  <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>Pick any school authority that accepts traditional (parent-directed) home education. Popular Alberta choices: Wisdom Home Schooling, Mosaic Home Schooling, Foundations for the Future, Heritage Christian Online School, Argyll Centre (public). Annual registration is free for parents. The school authority becomes your administrative partner with Alberta Education.</p>
+                </div>
+
+                <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
+                  <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 2</div>
+                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Spend on eligible educational expenses — including Smartious tuition</h3>
+                  <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>Alberta Education guidelines specify eligible categories: curriculum and instructional materials, tutoring and lessons, educational supplies, exam fees (including Cambridge IGCSE &amp; A-Level series), and technology with clear educational purpose. Smartious live Cambridge instruction is classed as curriculum + tutoring — every monthly invoice ($245 / $400 / $735 CAD) qualifies.</p>
+                </div>
+
+                <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
+                  <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 3</div>
+                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Submit receipts to your school authority — get reimbursed</h3>
+                  <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>Smartious provides itemised CAD invoices (Cloudinary-hosted PDFs) with the curriculum description Alberta Education needs. Submit them to your school authority through their portal. Reimbursement up to your annual allocation flows back as cash transfer, cheque, or vendor direct-pay depending on the school authority\'s system.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* PRICING WITH FUNDING OFFSET */}
+          <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
+            <div className="wrap" style={{maxWidth:920}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>What your $850 CAD covers at each tier</h2>
+              <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Real numbers — your funding allocation applied to actual Smartious tiers.</p>
+
+              <div style={{overflowX:'auto'}}>
+                <table style={{width:'100%',borderCollapse:'collapse',fontSize:14,minWidth:600}}>
+                  <thead>
+                    <tr style={{background:V.ink,color:'#fff'}}>
+                      <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Tier</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious CAD/yr</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>$850 AB funding</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>You pay (after funding)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Online ($245/mo)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$2,940</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$850</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$2,090 net</td>
+                    </tr>
+                    <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Online Plus ($400/mo)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$4,800</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$850</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$3,950 net</td>
+                    </tr>
+                    <tr>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Premium 1-on-1 ($735/mo)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$8,820</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$850</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$7,970 net</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p style={{fontSize:13,color:V.sl,marginTop:16,fontStyle:'italic'}}>Note: Alberta funding amounts vary slightly by school authority and year (typical range $800–$900 CAD). Multiple children = multiple allocations. "Shared Responsibility" partnerships can unlock higher per-student funding.</p>
+            </div>
+          </section>
+
+          {/* WHAT'S ELIGIBLE */}
+          <section className="sec" style={{background:V.bone2,padding:'64px 0'}}>
+            <div className="wrap" style={{maxWidth:920}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 24px'}}>Smartious products that qualify</h2>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:16}}>
+                {[
+                  {h:'Cambridge IGCSE live tuition', d:'Years 10–11 Mathematics, Sciences, English, Humanities — classed as curriculum + instruction'},
+                  {h:'Cambridge A-Level live tuition', d:'Years 12–13 A-Level subjects — classed as curriculum + instruction'},
+                  {h:'Cambridge exam fees', d:'May/November Cambridge series fees at Calgary, Edmonton British Council centres'},
+                  {h:'Premium 1-on-1 tutoring', d:'Individual tutoring with subject specialists — classed as tutoring'},
+                  {h:'Pearson Edexcel courses', d:'Equivalent international curriculum delivered live online'},
+                  {h:'Educational technology', d:'Smartious LMS access included — qualifying educational technology use'},
+                ].map((it,i) => (
+                  <div key={i} style={{background:'#fff',padding:'20px 22px',borderRadius:10,borderTop:`3px solid ${V.cr}`}}>
+                    <div style={{color:V.cr,fontSize:18,marginBottom:6}}>[+]</div>
+                    <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:18,color:V.ink,margin:'0 0 8px'}}>{it.h}</h3>
+                    <p style={{color:V.sl,fontSize:14,lineHeight:1.55,margin:0}}>{it.d}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* FAQs */}
+          <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
+            <div className="wrap" style={{maxWidth:840}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 32px'}}>Alberta funding FAQs</h2>
+              <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                {[
+                  {q:'Is Alberta Home Education Funding really universal — no income test?', a:'Yes. Every Alberta family with a child being home-educated is eligible regardless of household income. Funding flows through a school authority partner annually — most parents access ~$850 CAD per child after the school authority retains its administrative portion.'},
+                  {q:'Does Cambridge curriculum count as "Aligned" or "Traditional" home education?', a:'Traditional (parent-directed). Cambridge is an international curriculum, not the Alberta Program of Studies, so families typically register as Traditional home educators. Funding allocation is the same for both Traditional and Aligned. You retain full curriculum choice.'},
+                  {q:'Which Alberta school authorities work well for Cambridge homeschoolers?', a:'Wisdom Home Schooling, Mosaic Christian Home Schooling, Foundations for the Future Charter Academy, Heritage Christian Online School, and Argyll Centre are commonly chosen by families using international curricula. Each has a slightly different reimbursement process — ask their administrator whether they routinely process invoices from international curriculum providers (Smartious provides documentation for the conversation).'},
+                  {q:'When does the funding allocation refresh?', a:'Annually, on the Alberta school year (September–August). Most school authorities open their funding portal around September/October and accept receipts throughout the year until the May/June deadline. Plan tuition receipts to fit within one school year for maximum reimbursement.'},
+                  {q:'Can I claim funding for multiple children?', a:'Yes — each home-educated child receives a separate annual allocation. A family with three home-educated children has access to roughly $2,550 CAD per year in combined allocations.'},
+                  {q:'What if I move to Alberta partway through the year?', a:'You can register with an Alberta school authority on arrival and receive a pro-rated allocation for the remainder of the school year. The school authority will confirm the pro-rated amount during registration.'},
+                ].map((it,i) => (
+                  <details key={i} style={{background:V.bone,padding:'14px 20px',borderRadius:8,cursor:'pointer'}}>
+                    <summary style={{fontWeight:600,color:V.ink,fontSize:15,listStyle:'none'}}>{it.q}</summary>
+                    <p style={{color:V.sl,fontSize:14,lineHeight:1.65,margin:'12px 0 0'}}>{it.a}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* FINAL CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',padding:'56px 0 64px'}}>
+            <div className="wrap" style={{maxWidth:760,textAlign:'center'}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Use your $850 CAD allocation on Smartious this year</h2>
+              <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>15-minute call to confirm your school authority partnership and what your specific funding lets you book. No commitment.</p>
+              <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+                <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll now</button>
+                <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free funding chat</button>
+              </div>
+            </div>
+          </section>
+          <Footer P={P}/>
+        </>
+      )}
+
+
+      {/* ══════════════════════════════════════════
+          BC DISTRIBUTED LEARNING FUNDING — /bc-distributed-learning-funding
+          High-intent SEO page for "bc dl funding"
+      ══════════════════════════════════════════ */}
+      {page === 'bc-funding' && (
+        <>
+          {/* Schema */}
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'EducationalOrganization',
+            '@id':'https://smartioushomeschool.com/bc-distributed-learning-funding#org',
+            'name':'Smartious — BC Distributed Learning Funding pathway for Cambridge IGCSE & A-Level',
+            'url':'https://smartioushomeschool.com/bc-distributed-learning-funding',
+            'description':'How BC families use Distributed Learning (DL) school funding alongside Smartious live Cambridge IGCSE & A-Level instruction. Resource allocations typically $200–$700 CAD/year.',
+            'areaServed':{'@type':'AdministrativeArea','name':'British Columbia, Canada'},
+          })}}/>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'BreadcrumbList',
+            'itemListElement':[
+              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+              {'@type':'ListItem','position':2,'name':'Online Homeschool Canada','item':'https://smartioushomeschool.com/online-school/canada'},
+              {'@type':'ListItem','position':3,'name':'BC Distributed Learning Funding','item':'https://smartioushomeschool.com/bc-distributed-learning-funding'},
+            ],
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(180deg, rgba(8,12,20,.55) 0%, rgba(8,12,20,.85) 100%), url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1600&q=80&auto=format&fit=crop') center/cover no-repeat`,
+            color:'#fff', padding:'80px 0 64px',
+          }}>
+            <div className="wrap">
+              <div style={{maxWidth:840}}>
+                <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
+                <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>BC DL · resource allocation $200–$700 CAD/yr</div>
+                <h1 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
+                  BC Distributed Learning funding + Smartious Cambridge — the realistic pathway
+                </h1>
+                <p style={{fontSize:18,lineHeight:1.6,color:V.bone3,maxWidth:680,margin:'0 0 28px'}}>
+                  BC Distributed Learning (DL) schools provide a $200–$700 CAD/yr resource allocation per student. Smartious isn\'t a BC DL school — but families can register with a flexible DL school and use part of that allocation to offset Smartious live Cambridge tuition. Or skip DL entirely and self-register as a homeschooler with your school district. Here\'s how each path works.
+                </p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll Smartious</button>
+                  <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free 15-min BC pathway chat</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* TWO PATHWAYS */}
+          <section className="sec" style={{background:V.bone,padding:'64px 0'}}>
+            <div className="wrap" style={{maxWidth:1080}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Two paths BC families actually use</h2>
+              <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Honest framing — BC funding is genuinely more complex than Alberta\'s universal model.</p>
+
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:20}}>
+                <div style={{background:'#fff',padding:'26px 28px',borderRadius:10,borderTop:`4px solid ${V.cr}`}}>
+                  <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>Path A — Self-registered homeschooler</div>
+                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 12px'}}>Simple. No funding. Full curriculum freedom.</h3>
+                  <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:'0 0 12px'}}>Register annually with your local BC school district as a homeschooler under Section 12 of the BC School Act. No required curriculum, no testing, no portfolio review. Pay Smartious directly. Best for families who want zero administrative overhead and full Cambridge focus.</p>
+                  <ul style={{paddingLeft:18,color:V.sl,fontSize:14,lineHeight:1.8,margin:'12px 0 0'}}>
+                    <li>Annual registration with your school district — free</li>
+                    <li>No funding offset</li>
+                    <li>Total curriculum freedom (Cambridge, IB, American, etc.)</li>
+                    <li>No annual evaluation required</li>
+                  </ul>
+                </div>
+
+                <div style={{background:'#fff',padding:'26px 28px',borderRadius:10,borderTop:`4px solid ${V.gold2}`}}>
+                  <div style={{fontSize:13,color:V.gold,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>Path B — BC DL school + Smartious</div>
+                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 12px'}}>Resource allocation $200–$700 CAD/yr. More structure.</h3>
+                  <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:'0 0 12px'}}>Register with a flexible BC DL school (Heritage Christian Online, EBUS Academy, Self Design Learning Community, Insignis Christian Academy, others). The DL school enrols your child and provides a resource allocation. Many flexible DL schools allow that allocation to be used for outside curriculum and tutoring providers — including Smartious. The DL school remains the primary academic record-keeper.</p>
+                  <ul style={{paddingLeft:18,color:V.sl,fontSize:14,lineHeight:1.8,margin:'12px 0 0'}}>
+                    <li>DL school enrolment — free for parents</li>
+                    <li>$200–$700 CAD resource allocation typical (varies by DL school)</li>
+                    <li>DL school holds the official academic record</li>
+                    <li>Smartious tuition reimbursable if your DL school approves outside vendors</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* PRICING WITH FUNDING OFFSET */}
+          <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
+            <div className="wrap" style={{maxWidth:920}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Path B numbers — DL resource allocation against Smartious tiers</h2>
+              <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Assumes a flexible DL school with mid-range $500 CAD resource allocation usable on outside vendors.</p>
+
+              <div style={{overflowX:'auto'}}>
+                <table style={{width:'100%',borderCollapse:'collapse',fontSize:14,minWidth:600}}>
+                  <thead>
+                    <tr style={{background:V.ink,color:'#fff'}}>
+                      <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Tier</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Smartious CAD/yr</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>DL allocation</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>You pay (after offset)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Online ($245/mo)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$2,940</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$500</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$2,440 net</td>
+                    </tr>
+                    <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Online Plus ($400/mo)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$4,800</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$500</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$4,300 net</td>
+                    </tr>
+                    <tr>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Premium 1-on-1 ($735/mo)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.sl}}>$8,820</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.cr,fontWeight:600}}>−$500</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink,fontWeight:600}}>$8,320 net</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p style={{fontSize:13,color:V.sl,marginTop:16,fontStyle:'italic'}}>Note: Resource allocation varies by DL school. Some independent DL schools offer $200; others up to $700. Verify directly with your chosen DL school before enrolling.</p>
+            </div>
+          </section>
+
+          {/* FAQs */}
+          <section className="sec" style={{background:V.bone2,padding:'64px 0'}}>
+            <div className="wrap" style={{maxWidth:840}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 32px'}}>BC DL funding FAQs</h2>
+              <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                {[
+                  {q:'Is Smartious itself a BC Distributed Learning school?', a:'No. BC DL schools are licensed under the BC Ministry of Education to deliver the BC curriculum to enrolled students. Smartious delivers international curricula (Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American) and isn\'t licensed as a BC DL school. We complement DL schools — we don\'t replace them.'},
+                  {q:'Which BC DL schools are most flexible about outside curriculum providers like Smartious?', a:'Independent DL schools tend to be more flexible than public ones. Heritage Christian Online School, Self Design Learning Community, EBUS Academy, Insignis Christian Academy, and Pacific Christian School are commonly chosen by families who want resource allocation flexibility. Each school has its own policy — confirm with their administrator before enrolling.'},
+                  {q:'Can I do Cambridge IGCSE/A-Level for BC university admissions (UBC, SFU, UVic)?', a:'Yes. UBC, SFU, UVic, UBC Okanagan, and Thompson Rivers University all accept Cambridge IGCSE and A-Level qualifications on equal footing with BC Grade 12 / Dogwood Diploma. Cambridge A-Level Mathematics + Physics or Biology + Chemistry are particularly competitive for UBC Engineering and UBC Medicine direct-admission pathways.'},
+                  {q:'What if I just want to self-register as a homeschooler and skip DL entirely?', a:'That\'s Path A — simplest option. Register annually with your local BC school district under Section 12 of the BC School Act. No funding, but no DL school oversight either. Full curriculum freedom for Cambridge.'},
+                  {q:'Does BC offer per-child funding like Alberta\'s $850 Home Ed Funding?', a:'No. BC\'s funding model is fundamentally different — funding flows through DL schools rather than directly to families. Self-registered homeschoolers receive no provincial funding. This is the main structural difference between BC and Alberta home education systems.'},
+                  {q:'When do BC DL school enrolments and allocations renew?', a:'Annually on the BC school year (September–August). Most DL schools accept enrolment year-round but the resource allocation refreshes each September. Plan tuition receipts to fall within a single school year.'},
+                ].map((it,i) => (
+                  <details key={i} style={{background:'#fff',padding:'14px 20px',borderRadius:8,cursor:'pointer'}}>
+                    <summary style={{fontWeight:600,color:V.ink,fontSize:15,listStyle:'none'}}>{it.q}</summary>
+                    <p style={{color:V.sl,fontSize:14,lineHeight:1.65,margin:'12px 0 0'}}>{it.a}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* FINAL CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',padding:'56px 0 64px'}}>
+            <div className="wrap" style={{maxWidth:760,textAlign:'center'}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>BC families — find your pathway in one 15-minute call</h2>
+              <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>We\'ll help you pick between Path A (self-registered) and Path B (DL + Smartious) based on your specific family situation.</p>
+              <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+                <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll now</button>
+                <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free pathway chat</button>
+              </div>
+            </div>
+          </section>
+          <Footer P={P}/>
+        </>
+      )}
+
+
+      {/* ══════════════════════════════════════════
+          SASKATCHEWAN HOMESCHOOL FUNDING — /saskatchewan-homeschool-funding
+          High-intent SEO page for "saskatchewan homeschool funding"
+      ══════════════════════════════════════════ */}
+      {page === 'sk-funding' && (
+        <>
+          {/* Schema */}
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'EducationalOrganization',
+            '@id':'https://smartioushomeschool.com/saskatchewan-homeschool-funding#org',
+            'name':'Smartious — Saskatchewan homeschool funding pathway for Cambridge IGCSE & A-Level',
+            'url':'https://smartioushomeschool.com/saskatchewan-homeschool-funding',
+            'description':'How Saskatchewan families use division-dependent homeschool funding ($500–$1,500 CAD/year typical) alongside Smartious live Cambridge IGCSE & A-Level instruction.',
+            'areaServed':{'@type':'AdministrativeArea','name':'Saskatchewan, Canada'},
+          })}}/>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+            '@context':'https://schema.org','@type':'BreadcrumbList',
+            'itemListElement':[
+              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+              {'@type':'ListItem','position':2,'name':'Online Homeschool Canada','item':'https://smartioushomeschool.com/online-school/canada'},
+              {'@type':'ListItem','position':3,'name':'Saskatchewan Homeschool Funding','item':'https://smartioushomeschool.com/saskatchewan-homeschool-funding'},
+            ],
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(180deg, rgba(8,12,20,.55) 0%, rgba(8,12,20,.85) 100%), url('https://images.unsplash.com/photo-1602074068265-c14c4a78cd97?w=1600&q=80&auto=format&fit=crop') center/cover no-repeat`,
+            color:'#fff', padding:'80px 0 64px',
+          }}>
+            <div className="wrap">
+              <div style={{maxWidth:840}}>
+                <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
+                <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>SK · $500–$1,500 CAD/yr · division-dependent</div>
+                <h1 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
+                  Saskatchewan homeschool funding — depends entirely on your school division
+                </h1>
+                <p style={{fontSize:18,lineHeight:1.6,color:V.bone3,maxWidth:680,margin:'0 0 28px'}}>
+                  Saskatchewan delegates homeschool funding to its 28 school divisions. The amount varies — Saskatoon Public, Regina Public, Prairie Spirit, Sun West and others each set their own policy. Some divisions offer $1,500 CAD/yr in flexible curriculum spending. Others provide $500 CAD plus library access. Smartious tuition is reimbursable in divisions that allow outside curriculum providers.
+                </p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll Smartious</button>
+                  <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free 15-min SK division chat</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* HOW IT WORKS */}
+          <section className="sec" style={{background:V.bone,padding:'64px 0'}}>
+            <div className="wrap" style={{maxWidth:920}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Step by step — Saskatchewan funding mechanics</h2>
+              <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Your school division is the single most important variable. Check their policy first.</p>
+
+              <div style={{display:'grid',gridTemplateColumns:'1fr',gap:20}}>
+                <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
+                  <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 1</div>
+                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Identify your Saskatchewan school division</h3>
+                  <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>The 28 SK school divisions each set their own homeschool policy. Major divisions: Saskatoon Public, Regina Public, Prairie Spirit, Sun West, Greater Saskatoon Catholic, Regina Catholic, Holy Family, Prairie Valley, Horizon. Their funding amounts and approved-vendor rules vary widely. Confirm policy with your division\'s homeschool coordinator before enrolling with any provider — including Smartious.</p>
+                </div>
+
+                <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
+                  <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 2</div>
+                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Register annually + submit your education plan</h3>
+                  <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>Saskatchewan requires annual registration and an education plan describing what your child will learn. Cambridge IGCSE / A-Level qualifies as a complete plan in most divisions. Smartious provides curriculum documentation matching SK education plan formats — saving you the planning work.</p>
+                </div>
+
+                <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
+                  <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 3</div>
+                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Submit receipts for reimbursement</h3>
+                  <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>If your division allows outside curriculum providers — most flexible ones do — submit Smartious invoices for reimbursement up to your division\'s annual cap. Smartious provides itemised CAD invoices on letterhead matching the documentation SK divisions expect.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* PRICING WITH FUNDING OFFSET */}
+          <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
+            <div className="wrap" style={{maxWidth:920}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Scenarios — three funding levels modelled</h2>
+              <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Use the row that matches your division. Cross-check the exact figure with their homeschool coordinator.</p>
+
+              <div style={{overflowX:'auto'}}>
+                <table style={{width:'100%',borderCollapse:'collapse',fontSize:14,minWidth:600}}>
+                  <thead>
+                    <tr style={{background:V.ink,color:'#fff'}}>
+                      <th style={{padding:'14px 16px',textAlign:'left',fontWeight:600}}>Division funding level</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Online tier net</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Online Plus net</th>
+                      <th style={{padding:'14px 16px',textAlign:'right',fontWeight:600}}>Premium net</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Lower band ($500/yr)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$2,440</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$4,300</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$8,320</td>
+                    </tr>
+                    <tr style={{borderBottom:`1px solid ${V.bone2}`}}>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Mid band ($1,000/yr)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$1,940</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$3,800</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$7,820</td>
+                    </tr>
+                    <tr>
+                      <td style={{padding:'14px 16px',color:V.ink,fontWeight:600}}>Upper band ($1,500/yr)</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$1,440</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$3,300</td>
+                      <td style={{padding:'14px 16px',textAlign:'right',color:V.ink}}>$7,320</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p style={{fontSize:13,color:V.sl,marginTop:16,fontStyle:'italic'}}>Smartious tiers gross-of-funding: Online $2,940 CAD/yr · Online Plus $4,800 CAD/yr · Premium 1-on-1 $8,820 CAD/yr.</p>
+            </div>
+          </section>
+
+          {/* FAQs */}
+          <section className="sec" style={{background:V.bone2,padding:'64px 0'}}>
+            <div className="wrap" style={{maxWidth:840}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 32px'}}>Saskatchewan funding FAQs</h2>
+              <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                {[
+                  {q:'Why does Saskatchewan funding vary so much between divisions?', a:'Saskatchewan delegates homeschool administration to its 28 school divisions. Each division sets its own funding amount, allowable expense categories, and approved-vendor rules. Some prioritise direct cash reimbursement; others provide curriculum materials and library/facility access instead of cash. The Ministry of Education sets the broad framework (Education Act, Home-Based Education Program), but funding mechanics live at division level.'},
+                  {q:'How do I find out exactly what my division offers?', a:'Contact your division\'s homeschool coordinator directly. We can help — book a free 15-minute call and we\'ll walk through the questions to ask, what to expect from the conversation, and how to position Cambridge curriculum so the coordinator accepts it as a complete education plan.'},
+                  {q:'Is Cambridge IGCSE / A-Level accepted by Saskatchewan school divisions as a valid education plan?', a:'Yes in nearly all cases — Saskatchewan\'s home-based education framework is curriculum-agnostic. Education plans must describe learning goals and methods, which Cambridge provides comprehensively through its syllabuses. Smartious supplies the documentation in the format SK divisions expect.'},
+                  {q:'Does U of S or U of R accept Cambridge IGCSE / A-Level?', a:'Yes. University of Saskatchewan (Saskatoon), University of Regina, and Saskatchewan Polytechnic all accept Cambridge IGCSE and A-Level qualifications on equal footing with SK Grade 12. Cambridge A-Level Biology + Chemistry is particularly competitive for U of S College of Medicine direct-admission and U of R Faculty of Science applications.'},
+                  {q:'When does Saskatchewan funding allocation refresh?', a:'Annually on the SK school year (September–June, with some divisions running their fiscal year July–June). Each division has its own enrolment and reimbursement timeline. Most accept receipts through May with deadlines in late spring.'},
+                  {q:'Can I claim funding for multiple children?', a:'In most divisions, yes — each home-educated child receives a separate annual allocation. Some smaller divisions cap total family funding; confirm with your coordinator.'},
+                ].map((it,i) => (
+                  <details key={i} style={{background:'#fff',padding:'14px 20px',borderRadius:8,cursor:'pointer'}}>
+                    <summary style={{fontWeight:600,color:V.ink,fontSize:15,listStyle:'none'}}>{it.q}</summary>
+                    <p style={{color:V.sl,fontSize:14,lineHeight:1.65,margin:'12px 0 0'}}>{it.a}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* FINAL CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',padding:'56px 0 64px'}}>
+            <div className="wrap" style={{maxWidth:760,textAlign:'center'}}>
+              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Get your Saskatchewan division\'s funding answer in one call</h2>
+              <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>15-minute consult — we\'ll help you call your division\'s homeschool coordinator and walk you through the questions that matter. No commitment.</p>
+              <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+                <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll now</button>
+                <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free division chat</button>
+              </div>
+            </div>
+          </section>
+          <Footer P={P}/>
+        </>
+      )}
+
 
       {/* ══════════════════════════════════════════
           PROGRAMS
