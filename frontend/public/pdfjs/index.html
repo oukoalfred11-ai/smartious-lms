@@ -167,20 +167,32 @@
   // Render a single page into its canvas
   async function renderPage(pageNum) {
     if (!pdfDoc) return
-    const page      = await pdfDoc.getPage(pageNum)
-    const viewport  = page.getViewport({ scale })
-    const wrapper   = document.getElementById(`page-${pageNum}`)
-    if (!wrapper) return
+    try {
+      const page      = await pdfDoc.getPage(pageNum)
+      const viewport  = page.getViewport({ scale })
+      const wrapper   = document.getElementById(`page-${pageNum}`)
+      if (!wrapper) return
 
-    const canvas  = wrapper.querySelector('canvas') || document.createElement('canvas')
-    const ctx     = canvas.getContext('2d')
-    canvas.width  = viewport.width
-    canvas.height = viewport.height
-    wrapper.style.width  = viewport.width  + 'px'
-    wrapper.style.height = viewport.height + 'px'
-    if (!wrapper.contains(canvas)) wrapper.appendChild(canvas)
+      let canvas = wrapper.querySelector('canvas')
+      if (!canvas) {
+        canvas = document.createElement('canvas')
+        wrapper.appendChild(canvas)
+      }
 
-    await page.render({ canvasContext: ctx, viewport }).promise
+      wrapper.style.width  = viewport.width  + 'px'
+      wrapper.style.height = viewport.height + 'px'
+      canvas.width  = viewport.width
+      canvas.height = viewport.height
+      canvas.style.width  = viewport.width  + 'px'
+      canvas.style.height = viewport.height + 'px'
+
+      const ctx = canvas.getContext('2d')
+      const renderTask = page.render({ canvasContext: ctx, viewport })
+      await renderTask.promise
+      console.log('[pdfjs] rendered page', pageNum)
+    } catch (err) {
+      console.error('[pdfjs] render error on page', pageNum, err)
+    }
   }
 
   // Build placeholder divs for all pages, render visible ones
@@ -246,7 +258,9 @@
 
     pdfDoc   = await loadingTask.promise
     numPages = pdfDoc.numPages
+    console.log('[pdfjs] PDF loaded, numPages =', numPages)
     await buildViewer()
+    console.log('[pdfjs] buildViewer complete, container children:', document.getElementById('viewer-container').children.length)
 
   } catch (err) {
     console.error('PDF load error:', err)
