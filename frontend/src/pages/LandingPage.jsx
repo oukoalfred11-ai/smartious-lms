@@ -18,6 +18,7 @@ import { ETHIOPIA_CITIES } from '../data/ethiopiaCities.js'
 import { RWANDA_CITIES } from '../data/rwandaCities.js'
 import { SOUTH_AFRICA_CITIES } from '../data/southAfricaCities.js'
 import { QATAR_CITIES } from '../data/qatarCities.js'
+import { SAUDI_ARABIA_CITIES } from '../data/saudiArabiaCities.js'
 import { TEST_PREP } from '../data/testPrep.js'
 import { STUDY_ABROAD } from '../data/studyAbroad.js'
 import { LANGUAGES } from '../data/languages.js'
@@ -170,10 +171,9 @@ function useHeroPreload(active) {
     link.id = linkId
     link.rel = 'preload'
     link.as = 'video'
-    const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
-    link.href = isMobile
-      ? 'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_1080,h_1920,c_fill,g_auto/hero_mhhwhf.mp4'
-      : 'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_1920,c_limit/hero_mhhwhf.mp4'
+    // Hero video is now served from the local public folder (frontend/public/0528.mp4)
+    // — same file for mobile and desktop, single MP4 served by Netlify.
+    link.href = '/0528.mp4'
     link.setAttribute('type', 'video/mp4')
     link.setAttribute('fetchpriority', 'high')
     document.head.appendChild(link)
@@ -871,7 +871,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
@@ -1685,6 +1685,7 @@ export default function LandingPage() {
   const [currentRwandaCity, setCurrentRwandaCity] = useState(null)
   const [currentSaCity, setCurrentSaCity] = useState(null)
   const [currentQatarCity, setCurrentQatarCity] = useState(null)
+  const [currentSaudiCity, setCurrentSaudiCity] = useState(null)
   const [currentTestPrep, setCurrentTestPrep] = useState(null)
   const [currentStudyAbroad, setCurrentStudyAbroad] = useState(null)
   const [currentLanguage, setCurrentLanguage] = useState(null)
@@ -2116,6 +2117,7 @@ export default function LandingPage() {
     if (id === 'homeschooling-rwanda') return '/online-school/rwanda'
     if (id === 'homeschooling-south-africa') return '/online-school/south-africa'
     if (id === 'homeschooling-qatar') return '/online-school/qatar'
+    if (id === 'homeschooling-saudi-arabia') return '/online-school/saudi-arabia'
     // Canadian provincial funding landing pages — high-intent SEO URLs
     if (id === 'ab-funding') return '/alberta-home-ed-funding'
     if (id === 'bc-funding') return '/bc-distributed-learning-funding'
@@ -2185,6 +2187,15 @@ export default function LandingPage() {
         if (qaCity) {
           setCurrentQatarCity(slug)
           setPage('qatar-city')
+          return
+        }
+      }
+      // Try Saudi Arabian city (slug like "riyadh-sa", "jeddah-sa", "dhahran-sa")
+      if (slug) {
+        const saudiCity = SAUDI_ARABIA_CITIES.find(c => c.slug === slug)
+        if (saudiCity) {
+          setCurrentSaudiCity(slug)
+          setPage('saudi-city')
           return
         }
       }
@@ -2260,6 +2271,10 @@ export default function LandingPage() {
       }
       if (slug === 'qatar') {
         setPage('homeschooling-qatar')
+        return
+      }
+      if (slug === 'saudi-arabia') {
+        setPage('homeschooling-saudi-arabia')
         return
       }
       const country = COUNTRIES.find(c => c.slug === slug)
@@ -2501,6 +2516,15 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'homeschooling-saudi-arabia') {
+    metaTitle = 'Online Homeschool for Saudi Arabian Families — Live Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 180/month (~SAR 675).'
+  } else if (page === 'saudi-city' && currentSaudiCity) {
+    const c = SAUDI_ARABIA_CITIES.find(x => x.slug === currentSaudiCity)
+    if (c) {
+      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
+    }
   } else if (PAGE_META[page]) {
     metaTitle = PAGE_META[page].title
     metaDesc  = PAGE_META[page].desc
@@ -2517,6 +2541,7 @@ export default function LandingPage() {
   if (page === 'homeschooling-rwanda') canonicalOverride = '/online-school/rwanda'
   if (page === 'homeschooling-south-africa') canonicalOverride = '/online-school/south-africa'
   if (page === 'homeschooling-qatar') canonicalOverride = '/online-school/qatar'
+  if (page === 'homeschooling-saudi-arabia') canonicalOverride = '/online-school/saudi-arabia'
   usePageMeta(metaTitle, metaDesc, canonicalOverride)
   useHeroPreload(page === 'home')
 
@@ -3106,13 +3131,7 @@ export default function LandingPage() {
               poster="/hero-learning-centre.jpg"
               aria-hidden="true"
             >
-              <source
-                src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_1080,h_1920,c_fill,g_auto/hero_mhhwhf.mp4"
-                media="(max-width: 768px)"
-              />
-              <source
-                src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto,vc_auto,w_1920,c_limit/hero_mhhwhf.mp4"
-              />
+              <source src="/0528.mp4" type="video/mp4" />
             </video>
             <div className="h-ov"/>
             <div className="h-vig"/>
@@ -3551,6 +3570,7 @@ export default function LandingPage() {
               {[
                 {country:'UAE', slug:'uae', href:'/online-school/uae', sub:'Dubai · Abu Dhabi'},
                 {country:'Qatar', slug:'qatar', href:'/online-school/qatar', sub:'Doha'},
+                {country:'Saudi Arabia', slug:'saudi-arabia', href:'/online-school/saudi-arabia', sub:'Riyadh · Jeddah · Dhahran · NEOM'},
                 {country:'Bahrain', slug:'bahrain', href:'/online-school/bahrain', sub:'Manama · Riffa'},
                 {country:'Pakistan', slug:'pakistan', href:'/online-school/pakistan', sub:'Karachi · Lahore · Islamabad'},
                 {country:'United Kingdom', slug:'uk', href:'/online-school/uk', sub:'London · Manchester'},
@@ -3581,6 +3601,7 @@ export default function LandingPage() {
                     else if (c.slug === 'rwanda') P('homeschooling-rwanda')
                     else if (c.slug === 'south-africa') P('homeschooling-south-africa')
                     else if (c.slug === 'qatar') P('homeschooling-qatar')
+                    else if (c.slug === 'saudi-arabia') P('homeschooling-saudi-arabia')
                     else if (c.slug) openCountry(c.slug)
                     else P('global')
                   }}
@@ -13271,6 +13292,299 @@ export default function LandingPage() {
 
 
 
+
+      {/* ══════════════════════════════════════════
+          SAUDI ARABIA HUB — /online-school/saudi-arabia
+          Rich landing page for Saudi Arabian families.
+          5 city pages: Riyadh, Jeddah, Dhahran, Al Khobar, NEOM
+      ══════════════════════════════════════════ */}
+      {page === 'homeschooling-saudi-arabia' && (
+        <>
+          {/* Schema */}
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context':'https://schema.org','@type':'EducationalOrganization',
+            '@id':'https://smartioushomeschool.com/online-school/saudi-arabia#org',
+            'name':'Smartious — Online Homeschooling Across Saudi Arabia',
+            'url':'https://smartioushomeschool.com/online-school/saudi-arabia',
+            'description':'Online homeschooling for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, and NEOM. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month (~SAR 675) — AISR, BISR, Saudi Aramco schools, BISJ, Dhahran British Grammar School alternative. Vision 2030 mega-project family curriculum portability. Immediate enrolment without waiting lists.',
+            'areaServed': SAUDI_ARABIA_CITIES.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
+          })}}/>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context':'https://schema.org','@type':'BreadcrumbList',
+            'itemListElement':[
+              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+              {'@type':'ListItem','position':2,'name':'Homeschooling Saudi Arabia','item':'https://smartioushomeschool.com/online-school/saudi-arabia'},
+            ],
+          })}}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff', padding:'72px 0 56px', overflow:'hidden',
+          }}>
+            <img src="https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?w=1600&q=80&auto=format&fit=crop" alt="" aria-hidden="true"
+              onError={e => { e.currentTarget.style.display='none' }}
+              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online homeschooling · Across Saudi Arabia</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>Saudi Arabia</em>
+              </h1>
+              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
+                Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Saudi families in Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. The <strong style={{color:V.gold3}}>AISR / BISR / Saudi Aramco / Dhahran British Grammar School / BISJ alternative</strong> at <strong style={{color:V.gold3}}>USD 180/month (~SAR 675)</strong>. Built for Vision 2030 mega-project executive families (NEOM, Red Sea, Qiddiya, ROSHN, PIF), Saudi Aramco rotational professionals, diplomatic missions, Bahrain causeway commuters, plus Saudi national families seeking Cambridge curriculum portability. Immediate enrolment — no waiting lists.
+              </p>
+              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                <button onClick={() => P('consult')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                  Book a Free Consultation
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child in Saudi Arabia.')}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                  WhatsApp Us
+                </a>
+              </div>
+            </div>
+          </section>
+
+          {/* CITIES GRID */}
+          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                Online homeschooling across <em style={{color:V.cr,fontStyle:'italic'}}>Saudi Arabia</em>
+              </h2>
+              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
+                Five major Saudi urban areas. Each page covers local international schools, capacity constraints, family situations and answers specific to your city — from Riyadh KAFD financial families to Dhahran Saudi Aramco compound households to NEOM Vision 2030 mega-project executives.
+              </p>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
+              {SAUDI_ARABIA_CITIES.map(c => (
+                <a key={c.slug} href={'/homeschool-' + c.slug}
+                  onClick={(e) => { e.preventDefault(); setCurrentSaudiCity(c.slug); nav('/homeschool-' + c.slug); P('saudi-city') }}
+                  style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
+                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
+                  <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
+                    View {c.name} details
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div></section>
+
+          {/* WHY SAUDI FAMILIES CHOOSE SMARTIOUS */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36,maxWidth:720,margin:'0 auto 36px'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Why Saudi Arabian families choose Smartious</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  Vision 2030 portability. Immediate enrolment. AST live teaching.
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                {[
+                  ['AISR / BISR / Aramco schools alternative pricing','USD 180/month (~SAR 675) Online tier, USD 295/month (~SAR 1,106) Online Plus, USD 540/month (~SAR 2,025) Premium 1-on-1. AISR USD 22,000-30,000+/year, BISR USD 18,000-27,000/year, Dhahran British Grammar School USD 15,000-22,000/year.'],
+                  ['Immediate enrolment — no multi-year waiting lists','AISR, BISR, BISJ all have multi-year waiting lists. Smartious enrolment is immediate — critical for Vision 2030 mega-project families arriving Saudi Arabia mid-year on corporate assignments.'],
+                  ['Vision 2030 mega-project family portability','For NEOM, Red Sea Global, Qiddiya, ROSHN, PIF executive families, Cambridge IGCSE/A-Level transfers seamlessly to next assignments worldwide — UK, USA, Canada, Australia, UAE, anywhere.'],
+                  ['Saudi Aramco rotational curriculum continuity','For Aramco rotational families heading to next petroleum industry postings (Houston, Aberdeen, Calgary, Perth, Stavanger, Singapore, Lagos, anywhere), Cambridge curriculum belongs to your child regardless of Aramco affiliation.'],
+                  ['AST live class scheduling — exact match','Live classes 8 AM – 5 PM Arabia Standard Time (AST, UTC+3) — exactly matching Saudi school hours across all five cities. Same time zone as Nairobi tutor pool.'],
+                  ['Cambridge exam centres at British Council Riyadh, Jeddah, Al Khobar','Three Cambridge International examination centres across Saudi Arabia — Riyadh (Al Olaya), Jeddah (Al Hamra), Al Khobar (serving Eastern Province). Students sit examinations locally.'],
+                ].map(([h, p], i) => (
+                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
+                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+      {/* /online-school/saudi-arabia hub */}
+
+      {/* ══════════════════════════════════════════
+          SAUDI ARABIA CITY — Individual city homeschooling pages
+          One renderer, data-driven from SAUDI_ARABIA_CITIES.
+      ══════════════════════════════════════════ */}
+      {page === 'saudi-city' && currentSaudiCity && (() => {
+        const city = SAUDI_ARABIA_CITIES.find(c => c.slug === currentSaudiCity)
+        if (!city) return null
+        return (
+          <>
+            {/* Schemas */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Homeschooling Saudi Arabia','item':'https://smartioushomeschool.com/online-school/saudi-arabia'},
+                {'@type':'ListItem','position':3,'name': city.name,'item':'https://smartioushomeschool.com/homeschool-' + city.slug},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'Service',
+              'name': city.primaryKeyword,
+              'description': city.seoDesc,
+              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool Global','url':'https://smartioushomeschool.com'},
+              'areaServed':{'@type':'Place','name': city.name + ', ' + city.county + ', Saudi Arabia'},
+              'serviceType':'Online homeschooling and international curriculum delivery',
+            })}}/>
+
+            {/* HERO */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff', padding:'60px 0 48px', overflow:'hidden',
+            }}>
+              {city.heroImg && (
+                <>
+                  <img src={city.heroImg} alt={city.altTexts?.hero || ''} aria-hidden="true"
+                    onError={e => { e.currentTarget.style.display='none' }}
+                    style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+                  <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+                </>
+              )}
+              <div className="wrap" style={{position:'relative',zIndex:2}}>
+                <a href="/online-school/saudi-arabia"
+                  onClick={(e)=>{e.preventDefault(); P('homeschooling-saudi-arabia')}}
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  Homeschooling Saudi Arabia
+                </a>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{city.county} · {city.region}</div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:14,letterSpacing:'-.01em'}}>
+                  {city.primaryKeyword}
+                </h1>
+                <p style={{fontSize:14,color:V.gold3,fontStyle:'italic',marginBottom:18,maxWidth:720,lineHeight:1.5}}>{city.heroTagline}</p>
+                <p style={{fontSize:16,color:'rgba(255,255,255,.9)',lineHeight:1.65,marginBottom:22,maxWidth:760}}>
+                  {city.intro}
+                </p>
+                <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book a Free Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child in ' + city.name + '.')}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
+                    WhatsApp Us
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            {/* CHALLENGES */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Education in {city.name}</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
+                  Challenges {city.name} families face
+                </h2>
+                <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:12}}>
+                  {city.challenges.map((ch, i) => (
+                    <li key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 18px',fontSize:14,color:V.sl,lineHeight:1.7,display:'flex',gap:12}}>
+                      <span style={{flexShrink:0,width:24,height:24,borderRadius:'50%',background:`rgba(139,26,46,.1)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:12}}>{i+1}</span>
+                      <span>{ch}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div></section>
+
+            {/* WHY CHOOSE */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:1000,margin:'0 auto'}}>
+                <div className="eyebrow">Why Smartious for {city.name}</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.25}}>
+                  Six reasons {city.name} families choose Smartious
+                </h2>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
+                  {city.whyChoose.map(([h, p], i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* FAMILY SITUATIONS */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Who we serve in {city.name}</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
+                  Family situations we work with
+                </h2>
+                <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:10}}>
+                  {city.familySituations.map((sit, i) => (
+                    <li key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'12px 18px',fontSize:14,color:V.sl,lineHeight:1.65}}>
+                      <span style={{color:V.cr,fontWeight:700,marginRight:8}}>[+]</span>{sit}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div></section>
+
+            {/* AREAS WE SERVE */}
+            <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Areas served</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
+                  {city.name} districts and nearby areas
+                </h2>
+                <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+                  {city.nearbyAreas.map((area, i) => (
+                    <span key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:99,padding:'6px 14px',fontSize:13,color:V.sl}}>{area}</span>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* FAQs */}
+            <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
+              <div style={{maxWidth:840,margin:'0 auto'}}>
+                <div className="eyebrow">FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.25}}>
+                  Common questions from {city.name} families
+                </h2>
+                <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                  {city.faqs.map((f, i) => (
+                    <details key={i} style={{background:V.white,padding:'14px 20px',borderRadius:8,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
+                      <summary style={{fontWeight:600,color:V.ink,fontSize:15,listStyle:'none'}}>{f.q}</summary>
+                      <p style={{color:V.sl,fontSize:14,lineHeight:1.65,margin:'12px 0 0'}}>{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* FINAL CTA */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:64}}>
+              <div className="wrap" style={{maxWidth:760,textAlign:'center'}}>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.4rem)',margin:'0 0 14px',color:'#fff'}}>Ready to start your child's Cambridge journey from {city.name}?</h2>
+                <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>Free 15-minute consultation. No commitment.</p>
+                <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+                  <button onClick={() => P('enroll')} style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Begin Enrolment</button>
+                  <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>Free Consultation</button>
+                </div>
+              </div>
+            </section>
+            <Footer P={P}/>
+          </>
+        )
+      })()}
+      {/* /homeschool-{city}-sa — Saudi Arabia cities */}
+
+
       {/* ══════════════════════════════════════════
           QATAR HUB — /online-school/qatar
           Rich landing page overriding the country-detail Qatar fallback.
@@ -15709,6 +16023,7 @@ export default function LandingPage() {
                   { name:'Egypt',         slug:'egypt',        flag:'🇪🇬', sub:'Cairo · Alexandria' },
                   { name:'Ethiopia',      slug:'ethiopia',     flag:'🇪🇹', sub:'Addis Ababa · Mekelle · Hawassa' },
                   { name:'Rwanda',        slug:'rwanda',       flag:'🇷🇼', sub:'Kigali · Huye · Musanze · Rubavu' },
+                  { name:'Saudi Arabia',  slug:'saudi-arabia', flag:'🇸🇦', sub:'Riyadh · Jeddah · Dhahran · NEOM' },
                   { name:'Uganda',        slug:'uganda',       flag:'🇺🇬', sub:'Kampala · diaspora' },
                   { name:'Tanzania',      slug:'tanzania',     flag:'🇹🇿', sub:'Dar es Salaam · Arusha' },
                   { name:'Somalia',       slug:'somalia',      flag:'🇸🇴', sub:'Mogadishu · diaspora families' },
@@ -15716,9 +16031,9 @@ export default function LandingPage() {
                 ].map(c => (
                   <div key={c.slug}
                     onClick={() => {
-                      // USA, Canada, Kenya, Ethiopia, Rwanda have rich
-                      // dedicated landing pages — route directly. Others
-                      // use country-detail.
+                      // USA, Canada, Kenya, Ethiopia, Rwanda, South Africa,
+                      // Qatar, Saudi Arabia have rich dedicated landing pages
+                      // — route directly. Others use country-detail.
                       if (c.slug === 'usa') P('us-families')
                       else if (c.slug === 'canada') P('ca-families')
                       else if (c.slug === 'kenya') P('homeschooling-kenya')
@@ -15726,6 +16041,7 @@ export default function LandingPage() {
                       else if (c.slug === 'rwanda') P('homeschooling-rwanda')
                       else if (c.slug === 'south-africa') P('homeschooling-south-africa')
                       else if (c.slug === 'qatar') P('homeschooling-qatar')
+                      else if (c.slug === 'saudi-arabia') P('homeschooling-saudi-arabia')
                       else openCountry(c.slug)
                     }}
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'14px 16px',cursor:'pointer',transition:'all .2s'}}
