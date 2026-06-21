@@ -136,7 +136,7 @@
   let pdfDoc    = null
   let currentPage = 1
   let numPages    = 0
-  let scale       = 1.2
+  let scale       = 0.9
   let rendering   = false
   const pageCanvases = {}
 
@@ -201,7 +201,7 @@
     }
 
     // Render first 3 pages immediately
-    for (let p = 1; p <= Math.min(3, numPages); p++) {
+    for (let p = 1; p <= Math.min(1, numPages); p++) {
       await renderPage(p)
     }
 
