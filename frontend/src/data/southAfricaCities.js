@@ -408,3 +408,243 @@ export const SOUTH_AFRICA_CITIES = [
 ]
 
 export const SOUTH_AFRICA_CITIES_LIST = SOUTH_AFRICA_CITIES.map(c => c.slug)
+
+// ═══════════════════════════════════════════════════════════════════
+// SOUTH_AFRICA_COUNTRY — Comprehensive country-level data for the SA hub
+// ═══════════════════════════════════════════════════════════════════
+export const SOUTH_AFRICA_COUNTRY = {
+  slug: 'south-africa',
+  name: 'South Africa',
+  longName: 'Republic of South Africa',
+  flag: '🇿🇦',
+  hub: '/online-school/south-africa',
+  hubPageId: 'homeschooling-south-africa',
+  cityPageId: 'sa-city',
+  currency: 'ZAR',
+  currencyName: 'South African Rand',
+  currencyPeg: { rate: 18.8, since: null, note: 'Floating, ~ZAR 18-19/USD typical 2026 range' },
+  timezone: { code: 'SAST', name: 'South Africa Standard Time', utcOffset: 2, offsetFromEAT: -1 },
+  examCentres: [
+    'British Council Johannesburg (Parktown)',
+    'British Council Cape Town (City Bowl)',
+    'British Council Durban (Glenwood)',
+    'Cambridge-authorised ISASA schools (Bishops, SACS, Crawford, Reddam House, AISJ)',
+    'Michaelhouse, Hilton College (KZN boarding schools)',
+  ],
+  heroImage: 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=1600&q=80&auto=format&fit=crop',
+  heroEyebrow: 'Online homeschooling · Across South Africa',
+  heroH1Suffix: 'South Africa',
+  heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for South African families across Johannesburg, Cape Town, Pretoria, Durban, Gqeberha, Stellenbosch.',
+  heroValueProp: 'Lower than Cambridge Home School Online (UK). The Bishops / SACS / Herschel / Michaelhouse / Hilton / St Stithians / St John\'s / KES alternative. Built for semigration evaluators (UK, Australia, Canada, Mauritius, UAE), private school capacity-constrained families, plus African families wanting Cambridge curriculum portability. Load-shedding-resilient with recorded sessions.',
+  whatsappTrigger: 'Hi Smartious, I would like online homeschooling for my child in South Africa.',
+  citiesSectionTitle: 'Online homeschooling across South Africa',
+  citiesSectionBody: 'Six major South African urban areas. Each page covers local private school alternatives, BELA Act 2024 compliance, family situations and answers — from Johannesburg Sandton financial families to Cape Town City Bowl households to Stellenbosch Cape Winelands wine estate communities.',
+
+  trustSignals: [
+    { metric: 'Established', value: '2022', sub: 'Nairobi-based' },
+    { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
+    { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
+    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
+    { metric: 'BELA Act ready', value: '2024', sub: 'Curriculum docs for DBE compliance' },
+  ],
+
+  competitorsIntro: 'South Africa has Africa\'s largest formal homeschool sector (100,000+ registered families) and a well-developed private school market. Below are major Cambridge, NSC, and IB curriculum schools plus established online providers South African families compare with Smartious. Fees are 2026 published ranges; ZAR-USD exchange rates fluctuate (~ZAR 18-19/USD typical range).',
+  competitors: [
+    {
+      name: 'Bishops Diocesan College',
+      city: 'Cape Town (Rondebosch)',
+      curriculum: 'IEB / NSC + some Cambridge',
+      feesAed: 'R 190,000+',
+      feesUsd: '10,100+',
+      rating: 'Established Cape Town elite school',
+      capacityNote: 'Highly selective, multi-year waiting lists',
+    },
+    {
+      name: 'St John\'s College',
+      city: 'Johannesburg (Houghton)',
+      curriculum: 'IEB / NSC',
+      feesAed: 'R 230,000+',
+      feesUsd: '12,200+',
+      rating: 'Established Gauteng elite school',
+      capacityNote: 'Selective admissions',
+    },
+    {
+      name: 'Roedean School',
+      city: 'Johannesburg (Parktown)',
+      curriculum: 'IEB / NSC',
+      feesAed: 'R 200,000+',
+      feesUsd: '10,600+',
+      rating: 'Established girls school',
+      capacityNote: 'Waiting list for popular year groups',
+    },
+    {
+      name: 'Michaelhouse',
+      city: 'KwaZulu-Natal (Balgowan)',
+      curriculum: 'IEB / NSC boarding',
+      feesAed: 'R 280,000+',
+      feesUsd: '14,900+',
+      rating: 'Established KZN boarding',
+      capacityNote: 'Boarding school commitment',
+    },
+    {
+      name: 'AISJ (American International School Johannesburg)',
+      city: 'Johannesburg',
+      curriculum: 'American / IB Diploma',
+      feesAed: 'USD 22,000 – 30,000',
+      feesUsd: '22,000 – 30,000',
+      rating: 'US Embassy school',
+      capacityNote: 'International expat curriculum',
+    },
+    {
+      name: 'Brainline',
+      city: 'Online (SA-based)',
+      curriculum: 'NSC / IEB-aligned',
+      feesAed: 'R 42,000 – 60,000',
+      feesUsd: '2,230 – 3,190',
+      rating: 'Established SA online provider',
+      capacityNote: 'Pre-recorded video lessons with tutor support',
+    },
+    {
+      name: 'Impaq',
+      city: 'Online (SA-based)',
+      curriculum: 'NSC / CAPS-aligned',
+      feesAed: 'R 40,000 – 55,000',
+      feesUsd: '2,130 – 2,930',
+      rating: 'Established SA online provider',
+      capacityNote: 'Curriculum kits + assessment support',
+    },
+    {
+      name: 'Cambridge Home School Online (UK)',
+      city: 'Online (UK-based)',
+      curriculum: 'Cambridge IGCSE & A-Level',
+      feesAed: 'R 72,000 – 120,000',
+      feesUsd: '3,830 – 6,380',
+      rating: 'UK-based Cambridge online',
+      capacityNote: 'UK time zone delivery (challenge for SA)',
+    },
+    {
+      name: 'Smartious (live online)',
+      city: 'All six South African cities',
+      curriculum: 'Cambridge IGCSE & A-Level · Edexcel · IB · American AP · CBC',
+      feesAed: 'R 41,000 – 123,000 (~USD 2,160 – 6,480)',
+      feesUsd: '2,160 – 6,480',
+      rating: 'Live online · PGCE specialists · SAST time zone',
+      capacityNote: 'Immediate enrolment — load-shedding-resilient',
+      isUs: true,
+    },
+  ],
+
+  legalFrameworkIntro: 'South Africa has Africa\'s most developed homeschool legal framework, updated by the BELA Act 2024 (Basic Education Laws Amendment Act). Here is what SA families need to know about homeschool registration, curriculum recognition, and university pathway access.',
+  legalFramework: [
+    {
+      h: 'BELA Act 2024 — homeschool registration framework',
+      p: 'The Basic Education Laws Amendment Act 2024 updated South Africa\'s homeschool registration framework. Families register with their provincial Department of Basic Education (DBE) — Western Cape Education Department (WCED), Gauteng DBE, KwaZulu-Natal DBE, Eastern Cape DBE, etc. Registration requires curriculum documentation, learning outcomes, and assessment plans. Smartious provides comprehensive curriculum, scheme of work, learning outcomes, and assessment documentation suitable for all provincial DBE registrations.',
+    },
+    {
+      h: 'Provincial DBE registration requirements',
+      p: 'Each province has slightly different administrative requirements but all align with national BELA Act framework. WCED (Western Cape) and Gauteng DBE are most established with online registration processes. Eastern Cape, KwaZulu-Natal, Free State, Limpopo, Mpumalanga, Northern Cape, North West follow parallel processes. Pestalozzi Trust (the established SA homeschool legal support organisation) provides excellent registration guidance and legal support if needed.',
+    },
+    {
+      h: 'NSC vs Cambridge IGCSE/A-Level',
+      p: 'NSC (National Senior Certificate) is the South African school-leaving qualification administered by Umalusi and IEB. NSC qualifications work for all South African universities (UCT, Wits, Stellenbosch, UJ, UP, etc.) but require credential evaluation for international universities. Cambridge IGCSE and A-Level qualifications are accepted by all major SA universities (often granting first-year credit) AND by international universities worldwide (UK, US, Canadian, Australian) without credential evaluation. For families considering semigration, Cambridge provides immediate international portability.',
+    },
+    {
+      h: 'Cambridge International examination centres',
+      p: 'British Council Johannesburg (Parktown), British Council Cape Town (City Bowl), British Council Durban (Glenwood) host Cambridge IGCSE and A-Level examinations during May/June and October/November series. Cambridge-authorised ISASA schools (Bishops, SACS, Crawford, Reddam House, AISJ, Michaelhouse, Hilton College) also serve as examination centres.',
+    },
+    {
+      h: 'Semigration considerations',
+      p: 'For families considering semigration to UK, Australia, Canada, Mauritius, Portugal, UAE, Cambridge IGCSE and A-Level qualifications provide seamless portability. Children mid-stream through Cambridge transfer to destination-country Cambridge schools or homeschool providers without curriculum bridging or academic year loss. This is the primary value proposition for semigration-evaluating families.',
+    },
+    {
+      h: 'Load shedding and infrastructure realities',
+      p: 'Stage 2-6 load shedding affects in-person school schedules across SA. Smartious live classes are recorded automatically — Stage 4-6 outages don\'t cost lessons. Students review missed content asynchronously via recording, complete associated work, and join the next live session caught up. Most SA homeschool families now use inverter/solar/UPS backup for live class attendance; Smartious works with both live and async patterns.',
+    },
+    {
+      h: 'University acceptance — SA and worldwide',
+      p: 'Cambridge IGCSE and A-Level qualifications are accepted by all SA universities — UCT, Wits, Stellenbosch, UWC, UP, UJ, UNISA, NMU, Rhodes — plus UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight universities. Cambridge A-Level often grants first-year credit at SA universities.',
+    },
+  ],
+
+  whySmartious: [
+    {
+      h: 'Live Cambridge-trained PGCE teachers, not pre-recorded video',
+      p: 'Many local SA online schools (Brainline, Impaq, ADvTech Online) rely heavily on pre-recorded video lessons with tutor support. Smartious is live online — every class is taught real-time by a Cambridge-trained PGCE-qualified subject specialist. Recordings are supplementary for catch-up, not primary instruction.',
+    },
+    {
+      h: 'SAST live class scheduling matching SA school hours',
+      p: 'Live classes run 9 AM – 6 PM SAST (UTC+2) — exactly matching Johannesburg, Cape Town, Pretoria, Durban school hours. Same time zone whether you\'re in Sandton, Constantia, Umhlanga, or Stellenbosch. Unlike UK-based Cambridge Home School Online (delivers in GMT/BST, 1-2 hours offset from SAST).',
+    },
+    {
+      h: 'Load shedding resilience built in',
+      p: 'Stage 2-6 load shedding affects in-person school schedules across SA. Every Smartious live class is recorded automatically. Outages affecting your area don\'t cost lessons — students review missed content async, complete associated work, and join the next live session caught up.',
+    },
+    {
+      h: 'Semigration-ready curriculum portability',
+      p: 'For families considering UK, Australia, Canada, Mauritius, Portugal, UAE moves over 2-5 year horizons, Cambridge IGCSE and A-Level qualifications transfer seamlessly. No transcript reconciliation, no curriculum bridging, no missed academic year. Cambridge is the most portable qualification internationally.',
+    },
+    {
+      h: 'Lower than UK-based Cambridge Home School Online',
+      p: 'Cambridge Home School Online (UK-based) typically charges R 6,000-10,000/month. Smartious is R 3,400-10,260/month — comparable Premium tier, meaningfully lower Online tier — delivered from Africa\'s own time zone, by African teachers serving African families.',
+    },
+    {
+      h: 'BELA Act 2024 documentation ready',
+      p: 'Smartious provides comprehensive curriculum, scheme of work, learning outcomes, and assessment documentation suitable for all provincial DBE compliance under BELA Act 2024. WCED, Gauteng DBE, KZN DBE, Eastern Cape DBE — all covered.',
+    },
+  ],
+
+  faqs: [
+    {
+      q: 'How does Smartious compare to Brainline, Impaq, Cambridge Home School Online (UK), Wingu Academy, ADvTech Online?',
+      a: 'Smartious is distinct from these in three ways. First: live Cambridge-trained PGCE teachers delivering instruction real-time, not pre-recorded video lessons with tutor support (the typical Brainline / Impaq / Wingu model). Second: SAST time zone delivery matching SA school hours (vs UK-based Cambridge Home School Online operating in GMT/BST). Third: 14-country student community providing international peer interaction (vs SA-only student bodies at most local providers). Pricing is competitive with local SA providers and meaningfully below UK-based Cambridge Home School Online.',
+    },
+    {
+      q: 'Will my child miss out on sports, arts, and social development without a physical school?',
+      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, many SA-based families combine Smartious academic instruction with local sports clubs (cricket, rugby, hockey, swimming, equestrian — SA has strong club infrastructure), music academies, scouts, debate, drama, plus the SA outdoor lifestyle (mountain biking, surfing, hiking). Smartious classes themselves provide regular live peer interaction across 14+ countries. Many families find the time freed from school commute and the academic depth from smaller class sizes more than compensates.',
+    },
+    {
+      q: 'What about social interaction and peer relationships?',
+      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 14+ countries. SA families typically supplement with local sports clubs, church/synagogue/mosque communities, neighbourhood friendships. For semigration-evaluating families, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
+    },
+    {
+      q: 'Can my SA child apply to UCT, Wits, Stellenbosch, UJ, UP with Cambridge qualifications?',
+      a: 'Yes. UCT (University of Cape Town), Wits (University of the Witwatersrand), Stellenbosch University, UJ (University of Johannesburg), UP (University of Pretoria), UNISA, NMU, Rhodes, and all SA universities accept Cambridge IGCSE and A-Level qualifications. Cambridge A-Level qualifications often grant first-year credit at SA universities (effectively skipping into second year). The international portability is the additional advantage — same qualifications work for UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, UAE branch campuses simultaneously.',
+    },
+    {
+      q: 'My family is considering semigration to UK / Australia / Canada / Mauritius / UAE. How does Cambridge help?',
+      a: 'Cambridge IGCSE and A-Level qualifications are the most portable internationally — accepted across the UK (Russell Group, all universities), Australia (Group of Eight, all universities), Canada (U15, all provinces), USA (Ivy League, all universities), UAE/Qatar branch campuses, Mauritius universities, Portugal/EU universities. Smartious students mid-stream through Cambridge can relocate to any destination without curriculum interruption, transcript reconciliation, or year-loss. This is particularly valuable for families on 2-5 year semigration evaluation timelines.',
+    },
+    {
+      q: 'How does Smartious work with BELA Act 2024 homeschool registration?',
+      a: 'Smartious provides comprehensive curriculum documentation suitable for all provincial DBE compliance under BELA Act 2024. Families register with their provincial Department of Basic Education (WCED, Gauteng DBE, KZN DBE, Eastern Cape DBE) and submit Smartious-provided curriculum, scheme of work, learning outcomes, and assessment documentation. Pestalozzi Trust (the established SA homeschool legal support organisation) provides additional registration guidance if needed.',
+    },
+    {
+      q: 'How does load shedding affect Smartious classes?',
+      a: 'Every Smartious live class is recorded automatically. Stage 2-6 load shedding outages affecting your area don\'t cost lessons — students review missed content asynchronously via the recording, complete any associated work, and join the next live session caught up. Families with inverter/solar/UPS backup attend live; families relying on Eskom grid use the recording-then-catch-up pattern. Most SA homeschool families now use at least basic inverter backup.',
+    },
+    {
+      q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',
+      a: 'Yes. Smartious teaching staff are PGCE-qualified (Postgraduate Certificate in Education) subject specialists with Cambridge International training. Teachers are based primarily in Nairobi, where Smartious operates two physical centres (Diamond Plaza Parklands HQ and Karen Hardy). PGCE is the standard professional teaching credential used by Cambridge schools globally, including SA ISASA schools.',
+    },
+    {
+      q: 'What technology and internet do we need at home?',
+      a: 'Vodacom, MTN, or Telkom fibre internet (Vumatel, Openserve infrastructure) is more than sufficient. Mobile 4G/5G LTE also works well across major SA cities. For load shedding resilience, an inverter/solar/UPS backup is recommended. Starlink satellite is increasingly used in rural areas. Students need a laptop or desktop with webcam and microphone.',
+    },
+    {
+      q: 'How does payment work in South African Rand (ZAR)?',
+      a: 'Smartious tuition is denominated in USD (USD 180/295/540 per month, ~R 3,400/5,600/10,260 at typical 2026 ZAR-USD ~18-19 range). Payments accepted via international card, PayPal, or EFT for SA residents. USD denomination provides stability against ZAR-USD volatility — particularly important for multi-year planning. Comparable to Brainline (R 3,500-5,000/month), Impaq (similar), well below Cambridge Home School Online UK (R 6,000-10,000/month).',
+    },
+    {
+      q: 'What happens if we semigrate during my child\'s Cambridge programme?',
+      a: 'Cambridge IGCSE and A-Level are designed for international portability. If you semigrate to UK, Australia, Canada, Mauritius, Portugal, UAE during your child\'s programme, they continue Cambridge IGCSE/A-Level either with Smartious (live online works from any reliable internet location worldwide) or transfer credentials to a Cambridge school in the new country. No transcript reconciliation, no curriculum bridging, no academic year loss. This portability is the primary reason semigration-evaluating families choose Cambridge.',
+    },
+    {
+      q: 'How do we know if Smartious is the right fit for our family?',
+      a: 'Book a free 15-minute consultation. We will discuss your child\'s current grade, target university destinations (SA, UK, Australia, Canada, US, anywhere), family situation (which city, semigration consideration timeline, child\'s learning preferences), and curriculum options. The consultation is genuinely no-commitment — we will be straightforward about whether Smartious or a different option (local SA private school, NSC-pathway online provider, hybrid approach) better fits your circumstances.',
+    },
+  ],
+
+  ctaH: 'Ready to start your child\'s Cambridge journey from South Africa?',
+  ctaSubhead: 'Free 15-minute consultation. We\'ll walk through your child\'s grade, target universities, and curriculum fit. No commitment.',
+}
