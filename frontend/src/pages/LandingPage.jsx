@@ -13,13 +13,13 @@ import { CA_PROVINCES, CA_PROVINCES_LIST } from '../data/caProvinces.js'
 import { CA_CITIES, CA_CITIES_LIST, CA_CITIES_BY_PROVINCE } from '../data/caCities.js'
 import { NAIROBI_AREAS } from '../data/nairobiAreas.js'
 import { UAE_AREAS } from '../data/uaeAreas.js'
-import { KENYA_CITIES } from '../data/kenyaCities.js'
-import { ETHIOPIA_CITIES } from '../data/ethiopiaCities.js'
-import { RWANDA_CITIES } from '../data/rwandaCities.js'
-import { SOUTH_AFRICA_CITIES } from '../data/southAfricaCities.js'
-import { QATAR_CITIES } from '../data/qatarCities.js'
-import { SAUDI_ARABIA_CITIES } from '../data/saudiArabiaCities.js'
-import { UAE_CITIES } from '../data/uaeCities.js'
+import { KENYA_CITIES, KENYA_COUNTRY } from '../data/kenyaCities.js'
+import { ETHIOPIA_CITIES, ETHIOPIA_COUNTRY } from '../data/ethiopiaCities.js'
+import { RWANDA_CITIES, RWANDA_COUNTRY } from '../data/rwandaCities.js'
+import { SOUTH_AFRICA_CITIES, SOUTH_AFRICA_COUNTRY } from '../data/southAfricaCities.js'
+import { QATAR_CITIES, QATAR_COUNTRY } from '../data/qatarCities.js'
+import { SAUDI_ARABIA_CITIES, SAUDI_ARABIA_COUNTRY } from '../data/saudiArabiaCities.js'
+import { UAE_CITIES, UAE_COUNTRY } from '../data/uaeCities.js'
 import { TEST_PREP } from '../data/testPrep.js'
 import { STUDY_ABROAD } from '../data/studyAbroad.js'
 import { LANGUAGES } from '../data/languages.js'
@@ -13321,122 +13321,300 @@ export default function LandingPage() {
 
 
 
-      {/* ══════════════════════════════════════════
-          UAE HUB — /online-school/uae
-          Rich landing page intercepting before country-detail UAE fallback.
-          5 city pages: Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah
-      ══════════════════════════════════════════ */}
-      {page === 'homeschooling-uae' && (
-        <>
-          {/* Schema */}
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/online-school/uae#org',
-            'name':'Smartious — Online Homeschooling Across the UAE',
-            'url':'https://smartioushomeschool.com/online-school/uae',
-            'description':'Online homeschooling for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, and Ras Al Khaimah. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month (~AED 660) — Wellington / Dubai College / BSAK / Repton / Brighton College / JESS / DAA / ACS / Cranleigh alternative. Immediate enrolment without KHDA/ADEK waiting lists. GST live classes matching UAE school hours exactly.',
-            'areaServed': UAE_CITIES.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-          })}}/>
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'BreadcrumbList',
-            'itemListElement':[
-              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-              {'@type':'ListItem','position':2,'name':'Homeschooling UAE','item':'https://smartioushomeschool.com/online-school/uae'},
-            ],
-          })}}/>
 
-          {/* HERO */}
-          <section className="sec" style={{
-            position:'relative',
-            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-            color:'#fff', padding:'72px 0 56px', overflow:'hidden',
-          }}>
-            <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=80&auto=format&fit=crop" alt="" aria-hidden="true"
-              onError={e => { e.currentTarget.style.display='none' }}
-              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online homeschooling · Across the UAE</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>UAE</em>
-              </h1>
-              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
-                Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for UAE families in Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. The <strong style={{color:V.gold3}}>Wellington / Dubai College / BSAK / Repton / Brighton College / JESS / DAA / ACS / Cranleigh alternative</strong> at <strong style={{color:V.gold3}}>USD 180/month (~AED 660)</strong>. Built for KHDA/ADEK-rated school waiting list families, multinational corporate transfers, diplomatic missions, plus Emirati and UAE-resident families seeking Cambridge curriculum portability. Immediate enrolment.
-              </p>
-              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Book a Free Consultation
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child in the UAE.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp Us
-                </a>
+      {/* ══════════════════════════════════════════════════════════════════
+          UAE HUB — /online-school/uae (COMPREHENSIVE)
+          Driven by UAE_COUNTRY + UAE_CITIES data.
+          Sections: Hero → Trust Bar → Cities → Competitors → Legal → 
+          Why Smartious → Trust Signals → FAQ → Final CTA
+      ══════════════════════════════════════════════════════════════════ */}
+      {page === 'homeschooling-uae' && (() => {
+        const country = UAE_COUNTRY
+        const cities = UAE_CITIES
+        return (
+          <>
+            {/* Schema */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'EducationalOrganization',
+              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
+              'name':'Smartious — Online Homeschooling Across the UAE',
+              'url':'https://smartioushomeschool.com' + country.hub,
+              'description': country.heroSubhead + ' ' + country.heroValueProp,
+              'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
+              'offers': country.competitors.filter(c => c.isUs).map(c => ({
+                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
+                'description': 'Annual tuition range for ' + c.curriculum,
+              })),
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Homeschooling ' + country.name,'item':'https://smartioushomeschool.com' + country.hub},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'FAQPage',
+              'mainEntity': country.faqs.map(f => ({
+                '@type':'Question','name': f.q,
+                'acceptedAnswer':{'@type':'Answer','text': f.a},
+              })),
+            })}}/>
+
+            {/* ─── HERO ─── */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff', padding:'72px 0 56px', overflow:'hidden',
+            }}>
+              <img src={country.heroImage} alt="" aria-hidden="true"
+                onError={e => { e.currentTarget.style.display='none' }}
+                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                </h1>
+                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp
+                  </a>
+                  <button onClick={() => P('pricing')}
+                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
+                    View Pricing ({country.currency})
+                  </button>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          {/* CITIES GRID */}
-          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
-            <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>Emirates we serve</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                Online homeschooling across the <em style={{color:V.cr,fontStyle:'italic'}}>UAE</em>
-              </h2>
-              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
-                Five UAE emirates. Each page covers local KHDA/ADEK-rated school alternatives, capacity constraints, community-specific family situations and answers — from Dubai Marina financial families to Abu Dhabi diplomatic households to Sharjah commuter families to RAK tourism professionals.
-              </p>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
-              {UAE_CITIES.map(c => (
-                <a key={c.slug} href={'/homeschool-' + c.slug}
-                  onClick={(e) => { e.preventDefault(); setCurrentUaeCity(c.slug); nav('/homeschool-' + c.slug); P('uae-city') }}
-                  style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
-                  <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
-                    View {c.name} details
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div></section>
+            {/* ─── TRUST BAR (immediately under hero) ─── */}
+            <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>
+              <div className="wrap">
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
+                  {country.trustSignals.map((t,i) => (
+                    <div key={i}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
+                      <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-          {/* WHY UAE FAMILIES CHOOSE SMARTIOUS */}
-          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36,maxWidth:720,margin:'0 auto 36px'}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Why UAE families choose Smartious</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                  Immediate enrolment. Cambridge portability. GST live teaching.
+            {/* ─── CITIES GRID ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+              <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Emirates we serve</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  {country.citiesSectionTitle}
                 </h2>
+                <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-                {[
-                  ['Wellington / Dubai College / BSAK / Repton alternative pricing','USD 180/month (~AED 660) Online tier, USD 295/month (~AED 1,083) Online Plus, USD 540/month (~AED 1,982) Premium 1-on-1. Top KHDA/ADEK-rated schools charge AED 60,000-140,000+/year (USD 16,000-38,000+).'],
-                  ['Immediate enrolment — no KHDA/ADEK waiting lists','Outstanding and Very Good rated UAE schools have multi-year waiting lists. Smartious enrolment is immediate — critical for families arriving UAE mid-year on corporate assignments or denied admission at preferred schools.'],
-                  ['Multi-emirate coverage — one curriculum across all five','Children continue identical Cambridge curriculum whether you live in Dubai, Abu Dhabi, Sharjah, Ajman, or RAK — and continue seamlessly through inter-emirate moves.'],
-                  ['Eliminate inter-emirate school commutes','For Sharjah-Dubai, Ajman-Dubai, RAK-Dubai commuter families, Smartious removes the daily 30-90 minute commute entirely. Cambridge curriculum from home residence.'],
-                  ['GST live class scheduling','Live classes 9 AM – 6 PM Gulf Standard Time (GST, UTC+4) exactly matching UAE school hours across all five emirates. Smartious Nairobi-based teachers deliver 1 hour later in EAT day.'],
-                  ['Three Cambridge exam centres in UAE','British Council Dubai (Knowledge Village), British Council Abu Dhabi (Tourist Club Area), plus Cambridge-authorised UAE schools (Wellington, BSAK, JESS, DAA, Repton, Brighton College, Cranleigh, GEMS schools, NLCS) host May/November Cambridge series.'],
-                ].map(([h, p], i) => (
-                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
-                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
-                  </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
+                {cities.map(c => (
+                  <a key={c.slug} href={'/homeschool-' + c.slug}
+                    onClick={(e) => { e.preventDefault(); setCurrentUaeCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
+                    <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
+                      View {c.name} details
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                  </a>
                 ))}
               </div>
-            </div>
-          </div></section>
-        </>
-      )}
-      {/* /online-school/uae hub */}
+            </div></section>
+
+            {/* ─── COMPETITOR ANALYSIS ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                    How Smartious compares to top {country.name} schools
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
+                </div>
+                <div style={{background:V.white,borderRadius:12,border:`1px solid ${V.bone3}`,overflow:'auto'}}>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:13,minWidth:760}}>
+                    <thead>
+                      <tr style={{background:V.ink,color:'#fff'}}>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>School</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Curriculum</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Fees ({country.currency}/year)</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Status / Rating</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Reality check</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {country.competitors.map((c, i) => (
+                        <tr key={i} style={{
+                          background: c.isUs ? `rgba(139,26,46,.06)` : (i % 2 === 0 ? V.white : V.bone),
+                          borderTop: c.isUs ? `2px solid ${V.cr}` : `1px solid ${V.bone3}`,
+                        }}>
+                          <td style={{padding:'14px 16px',verticalAlign:'top'}}>
+                            <div style={{fontWeight:700,color:c.isUs?V.cr:V.ink,marginBottom:2,fontSize:13.5}}>{c.name}{c.isUs && <span style={{marginLeft:8,fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,fontWeight:700}}>← us</span>}</div>
+                            <div style={{fontSize:11.5,color:V.sl}}>{c.city}</div>
+                          </td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12.5}}>{c.curriculum}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.ink,fontSize:12.5,fontWeight:600,whiteSpace:'nowrap'}}>{c.feesAed}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12}}>{c.rating}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12,fontStyle:c.isUs?'normal':'italic'}}>{c.capacityNote}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{fontSize:11.5,color:V.sl,textAlign:'center',marginTop:14,fontStyle:'italic'}}>
+                  Fee ranges reflect published 2026 tuition for Year 7-13 across the school's tier structure. Specific fees vary by year group and additional school charges (registration, capital fee, books, transport, uniforms). Smartious USD pricing translates to fixed {country.currency} via the {country.currencyPeg.rate} peg.
+                </p>
+              </div>
+            </div></section>
+
+            {/* ─── HOMESCHOOL LEGAL FRAMEWORK ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Regulatory framework</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                  Homeschool laws & regulatory framework in the {country.name}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
+                <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                  {country.legalFramework.map((item, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── WHY SMARTIOUS — EXPANDED ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    Why {country.name} families choose Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Ten reasons grounded in the realities of {country.name} education — KHDA/ADEK waiting lists, corporate transfer timing, inter-emirate logistics, and the curriculum portability that mobile expat families need.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(310px,1fr))',gap:14}}>
+                  {country.whySmartious.map((r, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
+                      <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── TRUST / SOCIAL PROOF (factual signals, no fabricated quotes) ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    What you can verify about Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
+                  {[
+                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
+                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
+                    {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
+                  ].map((t, i) => (
+                    <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
+                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                  </p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── COMPREHENSIVE FAQ ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                  Common questions from {country.name} families
+                </h2>
+                <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                  {country.faqs.map((f, i) => (
+                    <details key={i} style={{background:V.white,padding:'16px 22px',borderRadius:10,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
+                      <summary style={{fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none',display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12}}>
+                        <span>{f.q}</span>
+                        <span style={{color:V.cr,fontSize:18,lineHeight:1,flexShrink:0,marginTop:2}}>+</span>
+                      </summary>
+                      <p style={{color:V.sl,fontSize:14,lineHeight:1.75,margin:'14px 0 0'}}>{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── FINAL CTA ─── */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:64,paddingBottom:64,position:'relative',overflow:'hidden'}}>
+              <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
+              <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
+                <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
+                <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
+                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free 15-min Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+                    WhatsApp +254 745 021 212
+                  </a>
+                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                    Begin Enrolment
+                  </button>
+                </div>
+                <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
+                  <span>[+] Immediate enrolment</span>
+                  <span>[+] No KHDA/ADEK waiting lists</span>
+                  <span>[+] AED-USD peg pricing</span>
+                  <span>[+] Multi-emirate coverage</span>
+                </div>
+              </div>
+            </section>
+          </>
+        )
+      })()}
+      {/* /online-school/uae — comprehensive hub */}
+
 
       {/* ══════════════════════════════════════════
           UAE CITY — Individual emirate homeschooling pages
@@ -13610,116 +13788,291 @@ export default function LandingPage() {
           Rich landing page for Saudi Arabian families.
           5 city pages: Riyadh, Jeddah, Dhahran, Al Khobar, NEOM
       ══════════════════════════════════════════ */}
-      {page === 'homeschooling-saudi-arabia' && (
-        <>
-          {/* Schema */}
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/online-school/saudi-arabia#org',
-            'name':'Smartious — Online Homeschooling Across Saudi Arabia',
-            'url':'https://smartioushomeschool.com/online-school/saudi-arabia',
-            'description':'Online homeschooling for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, and NEOM. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month (~SAR 675) — AISR, BISR, Saudi Aramco schools, BISJ, Dhahran British Grammar School alternative. Vision 2030 mega-project family curriculum portability. Immediate enrolment without waiting lists.',
-            'areaServed': SAUDI_ARABIA_CITIES.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-          })}}/>
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'BreadcrumbList',
-            'itemListElement':[
-              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-              {'@type':'ListItem','position':2,'name':'Homeschooling Saudi Arabia','item':'https://smartioushomeschool.com/online-school/saudi-arabia'},
-            ],
-          })}}/>
+      {page === 'homeschooling-saudi-arabia' && (() => {
+        const country = SAUDI_ARABIA_COUNTRY
+        const cities = SAUDI_ARABIA_CITIES
+        return (
+          <>
+            {/* Schema */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'EducationalOrganization',
+              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
+              'name':'Smartious — Online Homeschooling Across ' + country.longName,
+              'url':'https://smartioushomeschool.com' + country.hub,
+              'description': country.heroSubhead + ' ' + country.heroValueProp,
+              'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
+              'offers': country.competitors.filter(c => c.isUs).map(c => ({
+                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
+                'description': 'Annual tuition range for ' + c.curriculum,
+              })),
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Homeschooling ' + country.name,'item':'https://smartioushomeschool.com' + country.hub},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'FAQPage',
+              'mainEntity': country.faqs.map(f => ({
+                '@type':'Question','name': f.q,
+                'acceptedAnswer':{'@type':'Answer','text': f.a},
+              })),
+            })}}/>
 
-          {/* HERO */}
-          <section className="sec" style={{
-            position:'relative',
-            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-            color:'#fff', padding:'72px 0 56px', overflow:'hidden',
-          }}>
-            <img src="https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?w=1600&q=80&auto=format&fit=crop" alt="" aria-hidden="true"
-              onError={e => { e.currentTarget.style.display='none' }}
-              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online homeschooling · Across Saudi Arabia</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>Saudi Arabia</em>
-              </h1>
-              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
-                Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Saudi families in Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. The <strong style={{color:V.gold3}}>AISR / BISR / Saudi Aramco / Dhahran British Grammar School / BISJ alternative</strong> at <strong style={{color:V.gold3}}>USD 180/month (~SAR 675)</strong>. Built for Vision 2030 mega-project executive families (NEOM, Red Sea, Qiddiya, ROSHN, PIF), Saudi Aramco rotational professionals, diplomatic missions, Bahrain causeway commuters, plus Saudi national families seeking Cambridge curriculum portability. Immediate enrolment — no waiting lists.
-              </p>
-              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Book a Free Consultation
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child in Saudi Arabia.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp Us
-                </a>
+            {/* ─── HERO ─── */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff', padding:'72px 0 56px', overflow:'hidden',
+            }}>
+              <img src={country.heroImage} alt="" aria-hidden="true"
+                onError={e => { e.currentTarget.style.display='none' }}
+                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                </h1>
+                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp
+                  </a>
+                  <button onClick={() => P('pricing')}
+                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
+                    View Pricing ({country.currency})
+                  </button>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          {/* CITIES GRID */}
-          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
-            <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                Online homeschooling across <em style={{color:V.cr,fontStyle:'italic'}}>Saudi Arabia</em>
-              </h2>
-              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
-                Five major Saudi urban areas. Each page covers local international schools, capacity constraints, family situations and answers specific to your city — from Riyadh KAFD financial families to Dhahran Saudi Aramco compound households to NEOM Vision 2030 mega-project executives.
-              </p>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
-              {SAUDI_ARABIA_CITIES.map(c => (
-                <a key={c.slug} href={'/homeschool-' + c.slug}
-                  onClick={(e) => { e.preventDefault(); setCurrentSaudiCity(c.slug); nav('/homeschool-' + c.slug); P('saudi-city') }}
-                  style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
-                  <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
-                    View {c.name} details
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div></section>
+            {/* ─── TRUST BAR (immediately under hero) ─── */}
+            <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>
+              <div className="wrap">
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
+                  {country.trustSignals.map((t,i) => (
+                    <div key={i}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
+                      <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-          {/* WHY SAUDI FAMILIES CHOOSE SMARTIOUS */}
-          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36,maxWidth:720,margin:'0 auto 36px'}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Why Saudi Arabian families choose Smartious</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                  Vision 2030 portability. Immediate enrolment. AST live teaching.
+            {/* ─── CITIES GRID ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+              <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Emirates we serve</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  {country.citiesSectionTitle}
                 </h2>
+                <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-                {[
-                  ['AISR / BISR / Aramco schools alternative pricing','USD 180/month (~SAR 675) Online tier, USD 295/month (~SAR 1,106) Online Plus, USD 540/month (~SAR 2,025) Premium 1-on-1. AISR USD 22,000-30,000+/year, BISR USD 18,000-27,000/year, Dhahran British Grammar School USD 15,000-22,000/year.'],
-                  ['Immediate enrolment — no multi-year waiting lists','AISR, BISR, BISJ all have multi-year waiting lists. Smartious enrolment is immediate — critical for Vision 2030 mega-project families arriving Saudi Arabia mid-year on corporate assignments.'],
-                  ['Vision 2030 mega-project family portability','For NEOM, Red Sea Global, Qiddiya, ROSHN, PIF executive families, Cambridge IGCSE/A-Level transfers seamlessly to next assignments worldwide — UK, USA, Canada, Australia, UAE, anywhere.'],
-                  ['Saudi Aramco rotational curriculum continuity','For Aramco rotational families heading to next petroleum industry postings (Houston, Aberdeen, Calgary, Perth, Stavanger, Singapore, Lagos, anywhere), Cambridge curriculum belongs to your child regardless of Aramco affiliation.'],
-                  ['AST live class scheduling — exact match','Live classes 8 AM – 5 PM Arabia Standard Time (AST, UTC+3) — exactly matching Saudi school hours across all five cities. Same time zone as Nairobi tutor pool.'],
-                  ['Cambridge exam centres at British Council Riyadh, Jeddah, Al Khobar','Three Cambridge International examination centres across Saudi Arabia — Riyadh (Al Olaya), Jeddah (Al Hamra), Al Khobar (serving Eastern Province). Students sit examinations locally.'],
-                ].map(([h, p], i) => (
-                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
-                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
-                  </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
+                {cities.map(c => (
+                  <a key={c.slug} href={'/homeschool-' + c.slug}
+                    onClick={(e) => { e.preventDefault(); setCurrentSaudiCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
+                    <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
+                      View {c.name} details
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                  </a>
                 ))}
               </div>
-            </div>
-          </div></section>
-        </>
-      )}
+            </div></section>
+
+            {/* ─── COMPETITOR ANALYSIS ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                    How Smartious compares to top {country.name} schools
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
+                </div>
+                <div style={{background:V.white,borderRadius:12,border:`1px solid ${V.bone3}`,overflow:'auto'}}>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:13,minWidth:760}}>
+                    <thead>
+                      <tr style={{background:V.ink,color:'#fff'}}>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>School</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Curriculum</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Fees ({country.currency}/year)</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Status / Rating</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Reality check</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {country.competitors.map((c, i) => (
+                        <tr key={i} style={{
+                          background: c.isUs ? `rgba(139,26,46,.06)` : (i % 2 === 0 ? V.white : V.bone),
+                          borderTop: c.isUs ? `2px solid ${V.cr}` : `1px solid ${V.bone3}`,
+                        }}>
+                          <td style={{padding:'14px 16px',verticalAlign:'top'}}>
+                            <div style={{fontWeight:700,color:c.isUs?V.cr:V.ink,marginBottom:2,fontSize:13.5}}>{c.name}{c.isUs && <span style={{marginLeft:8,fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,fontWeight:700}}>← us</span>}</div>
+                            <div style={{fontSize:11.5,color:V.sl}}>{c.city}</div>
+                          </td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12.5}}>{c.curriculum}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.ink,fontSize:12.5,fontWeight:600,whiteSpace:'nowrap'}}>{c.feesAed}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12}}>{c.rating}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12,fontStyle:c.isUs?'normal':'italic'}}>{c.capacityNote}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{fontSize:11.5,color:V.sl,textAlign:'center',marginTop:14,fontStyle:'italic'}}>
+                  Fee ranges reflect published 2026 tuition for Year 7-13 across the school's tier structure. Specific fees vary by year group and additional school charges (registration, capital fee, books, transport, uniforms). Smartious USD pricing translates to fixed {country.currency} via the {country.currencyPeg.rate} peg.
+                </p>
+              </div>
+            </div></section>
+
+            {/* ─── HOMESCHOOL LEGAL FRAMEWORK ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Regulatory framework</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                  Homeschool laws & regulatory framework in the {country.name}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
+                <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                  {country.legalFramework.map((item, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── WHY SMARTIOUS — EXPANDED ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    Why {country.name} families choose Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Ten reasons grounded in the realities of {country.name} education — KHDA/ADEK waiting lists, corporate transfer timing, inter-emirate logistics, and the curriculum portability that mobile expat families need.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(310px,1fr))',gap:14}}>
+                  {country.whySmartious.map((r, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
+                      <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── TRUST / SOCIAL PROOF (factual signals, no fabricated quotes) ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    What you can verify about Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
+                  {[
+                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
+                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
+                    {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
+                  ].map((t, i) => (
+                    <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
+                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                  </p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── COMPREHENSIVE FAQ ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                  Common questions from {country.name} families
+                </h2>
+                <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                  {country.faqs.map((f, i) => (
+                    <details key={i} style={{background:V.white,padding:'16px 22px',borderRadius:10,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
+                      <summary style={{fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none',display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12}}>
+                        <span>{f.q}</span>
+                        <span style={{color:V.cr,fontSize:18,lineHeight:1,flexShrink:0,marginTop:2}}>+</span>
+                      </summary>
+                      <p style={{color:V.sl,fontSize:14,lineHeight:1.75,margin:'14px 0 0'}}>{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── FINAL CTA ─── */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:64,paddingBottom:64,position:'relative',overflow:'hidden'}}>
+              <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
+              <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
+                <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
+                <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
+                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free 15-min Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+                    WhatsApp +254 745 021 212
+                  </a>
+                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                    Begin Enrolment
+                  </button>
+                </div>
+                <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
+                  <span>[+] Immediate enrolment</span>
+                  <span>[+] No KHDA/ADEK waiting lists</span>
+                  <span>[+] AED-USD peg pricing</span>
+                  <span>[+] Multi-emirate coverage</span>
+                </div>
+              </div>
+            </section>
+          </>
+        )
+      })()}
       {/* /online-school/saudi-arabia hub */}
 
       {/* ══════════════════════════════════════════
@@ -13902,116 +14255,291 @@ export default function LandingPage() {
           Rich landing page overriding the country-detail Qatar fallback.
           4 city pages: Doha, Al Wakrah, Al Khor, Lusail
       ══════════════════════════════════════════ */}
-      {page === 'homeschooling-qatar' && (
-        <>
-          {/* Schema */}
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/online-school/qatar#org',
-            'name':'Smartious — Online Homeschooling Across Qatar',
-            'url':'https://smartioushomeschool.com/online-school/qatar',
-            'description':'Online homeschooling for Qatari families across Doha, Al Wakrah, Al Khor, and Lusail. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month (~QAR 655) — Doha College, ASD, Sherborne Qatar, Compass International alternative. Immediate enrolment with no waiting lists. AST live classes matching Qatar school hours exactly.',
-            'areaServed': QATAR_CITIES.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-          })}}/>
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'BreadcrumbList',
-            'itemListElement':[
-              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-              {'@type':'ListItem','position':2,'name':'Homeschooling Qatar','item':'https://smartioushomeschool.com/online-school/qatar'},
-            ],
-          })}}/>
+      {page === 'homeschooling-qatar' && (() => {
+        const country = QATAR_COUNTRY
+        const cities = QATAR_CITIES
+        return (
+          <>
+            {/* Schema */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'EducationalOrganization',
+              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
+              'name':'Smartious — Online Homeschooling Across ' + country.longName,
+              'url':'https://smartioushomeschool.com' + country.hub,
+              'description': country.heroSubhead + ' ' + country.heroValueProp,
+              'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
+              'offers': country.competitors.filter(c => c.isUs).map(c => ({
+                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
+                'description': 'Annual tuition range for ' + c.curriculum,
+              })),
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Homeschooling ' + country.name,'item':'https://smartioushomeschool.com' + country.hub},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'FAQPage',
+              'mainEntity': country.faqs.map(f => ({
+                '@type':'Question','name': f.q,
+                'acceptedAnswer':{'@type':'Answer','text': f.a},
+              })),
+            })}}/>
 
-          {/* HERO */}
-          <section className="sec" style={{
-            position:'relative',
-            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-            color:'#fff', padding:'72px 0 56px', overflow:'hidden',
-          }}>
-            <img src="https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1600&q=80&auto=format&fit=crop" alt="" aria-hidden="true"
-              onError={e => { e.currentTarget.style.display='none' }}
-              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online homeschooling · Across Qatar</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>Qatar</em>
-              </h1>
-              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
-                Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Qatari families in Doha, Al Wakrah, Al Khor, Lusail. The <strong style={{color:V.gold3}}>Doha College / ASD / Sherborne Qatar / Compass International alternative</strong> at <strong style={{color:V.gold3}}>USD 180/month (~QAR 655)</strong>. Immediate enrolment — no waiting lists. Built for British, American, Indian, Pakistani, Filipino, Arab expat families plus Qatari national families seeking Cambridge curriculum portability for next postings worldwide.
-              </p>
-              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Book a Free Consultation
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child in Qatar.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp Us
-                </a>
+            {/* ─── HERO ─── */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff', padding:'72px 0 56px', overflow:'hidden',
+            }}>
+              <img src={country.heroImage} alt="" aria-hidden="true"
+                onError={e => { e.currentTarget.style.display='none' }}
+                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                </h1>
+                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp
+                  </a>
+                  <button onClick={() => P('pricing')}
+                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
+                    View Pricing ({country.currency})
+                  </button>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          {/* CITIES GRID */}
-          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
-            <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                Online homeschooling across <em style={{color:V.cr,fontStyle:'italic'}}>Qatar</em>
-              </h2>
-              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
-                Four Qatari urban areas. Each page covers local international schools, capacity constraints, family situations and answers specific to your city — from Doha West Bay financial families to Al Khor QatarEnergy LNG industrial households.
-              </p>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
-              {QATAR_CITIES.map(c => (
-                <a key={c.slug} href={'/homeschool-' + c.slug}
-                  onClick={(e) => { e.preventDefault(); setCurrentQatarCity(c.slug); nav('/homeschool-' + c.slug); P('qatar-city') }}
-                  style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
-                  <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
-                    View {c.name} details
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div></section>
+            {/* ─── TRUST BAR (immediately under hero) ─── */}
+            <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>
+              <div className="wrap">
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
+                  {country.trustSignals.map((t,i) => (
+                    <div key={i}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
+                      <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-          {/* WHY QATAR FAMILIES CHOOSE SMARTIOUS */}
-          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36,maxWidth:720,margin:'0 auto 36px'}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Why Qatari families choose Smartious</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                  Immediate enrolment. Cambridge portability. AST live teaching.
+            {/* ─── CITIES GRID ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+              <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Emirates we serve</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  {country.citiesSectionTitle}
                 </h2>
+                <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-                {[
-                  ['Doha College / ASD / Sherborne alternative pricing','USD 180/month (~QAR 655) Online tier, USD 295/month (~QAR 1,075) Online Plus, USD 540/month (~QAR 1,965) Premium 1-on-1. Doha College QAR 75,000-90,000+/year, ASD USD 25,000-32,000+/year, Sherborne Qatar QAR 65,000-90,000/year.'],
-                  ['Immediate enrolment — no multi-year waiting lists','Top Doha international schools have multi-year waiting lists, particularly for Year 7-10 entry. Smartious enrolment is immediate — students start within days, critical for families arriving Qatar mid-year on corporate assignments.'],
-                  ['AST live class scheduling — exact match','Live classes run 8 AM – 5 PM Arabia Standard Time (AST, UTC+3) — exactly matching Qatar school hours. Same time zone as Nairobi (Smartious tutor pool) — no time zone gymnastics.'],
-                  ['Expat curriculum portability for next posting','Cambridge IGCSE/A-Level transfers seamlessly to UK, USA, Canada, Singapore, Hong Kong, Dubai, Riyadh, anywhere worldwide. No transcript reconciliation, no curriculum bridging.'],
-                  ['Cambridge exam centre at British Council Doha','British Council Doha (Al Sadd) hosts Cambridge IGCSE and A-Level examinations during May/November series. Students sit examinations locally.'],
-                  ['Education City university pathway','Cambridge and IB qualifications work for Education City universities (Georgetown Qatar, Northwestern Qatar, CMU Qatar, Cornell Qatar, Texas A&M Qatar, HEC Paris Qatar, UCL Qatar) plus Qatar University plus international universities worldwide.'],
-                ].map(([h, p], i) => (
-                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
-                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
-                  </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
+                {cities.map(c => (
+                  <a key={c.slug} href={'/homeschool-' + c.slug}
+                    onClick={(e) => { e.preventDefault(); setCurrentQatarCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
+                    <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
+                      View {c.name} details
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                  </a>
                 ))}
               </div>
-            </div>
-          </div></section>
-        </>
-      )}
+            </div></section>
+
+            {/* ─── COMPETITOR ANALYSIS ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                    How Smartious compares to top {country.name} schools
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
+                </div>
+                <div style={{background:V.white,borderRadius:12,border:`1px solid ${V.bone3}`,overflow:'auto'}}>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:13,minWidth:760}}>
+                    <thead>
+                      <tr style={{background:V.ink,color:'#fff'}}>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>School</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Curriculum</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Fees ({country.currency}/year)</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Status / Rating</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Reality check</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {country.competitors.map((c, i) => (
+                        <tr key={i} style={{
+                          background: c.isUs ? `rgba(139,26,46,.06)` : (i % 2 === 0 ? V.white : V.bone),
+                          borderTop: c.isUs ? `2px solid ${V.cr}` : `1px solid ${V.bone3}`,
+                        }}>
+                          <td style={{padding:'14px 16px',verticalAlign:'top'}}>
+                            <div style={{fontWeight:700,color:c.isUs?V.cr:V.ink,marginBottom:2,fontSize:13.5}}>{c.name}{c.isUs && <span style={{marginLeft:8,fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,fontWeight:700}}>← us</span>}</div>
+                            <div style={{fontSize:11.5,color:V.sl}}>{c.city}</div>
+                          </td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12.5}}>{c.curriculum}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.ink,fontSize:12.5,fontWeight:600,whiteSpace:'nowrap'}}>{c.feesAed}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12}}>{c.rating}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12,fontStyle:c.isUs?'normal':'italic'}}>{c.capacityNote}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{fontSize:11.5,color:V.sl,textAlign:'center',marginTop:14,fontStyle:'italic'}}>
+                  Fee ranges reflect published 2026 tuition for Year 7-13 across the school's tier structure. Specific fees vary by year group and additional school charges (registration, capital fee, books, transport, uniforms). Smartious USD pricing translates to fixed {country.currency} via the {country.currencyPeg.rate} peg.
+                </p>
+              </div>
+            </div></section>
+
+            {/* ─── HOMESCHOOL LEGAL FRAMEWORK ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Regulatory framework</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                  Homeschool laws & regulatory framework in the {country.name}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
+                <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                  {country.legalFramework.map((item, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── WHY SMARTIOUS — EXPANDED ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    Why {country.name} families choose Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Ten reasons grounded in the realities of {country.name} education — KHDA/ADEK waiting lists, corporate transfer timing, inter-emirate logistics, and the curriculum portability that mobile expat families need.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(310px,1fr))',gap:14}}>
+                  {country.whySmartious.map((r, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
+                      <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── TRUST / SOCIAL PROOF (factual signals, no fabricated quotes) ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    What you can verify about Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
+                  {[
+                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
+                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
+                    {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
+                  ].map((t, i) => (
+                    <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
+                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                  </p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── COMPREHENSIVE FAQ ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                  Common questions from {country.name} families
+                </h2>
+                <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                  {country.faqs.map((f, i) => (
+                    <details key={i} style={{background:V.white,padding:'16px 22px',borderRadius:10,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
+                      <summary style={{fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none',display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12}}>
+                        <span>{f.q}</span>
+                        <span style={{color:V.cr,fontSize:18,lineHeight:1,flexShrink:0,marginTop:2}}>+</span>
+                      </summary>
+                      <p style={{color:V.sl,fontSize:14,lineHeight:1.75,margin:'14px 0 0'}}>{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── FINAL CTA ─── */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:64,paddingBottom:64,position:'relative',overflow:'hidden'}}>
+              <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
+              <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
+                <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
+                <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
+                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free 15-min Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+                    WhatsApp +254 745 021 212
+                  </a>
+                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                    Begin Enrolment
+                  </button>
+                </div>
+                <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
+                  <span>[+] Immediate enrolment</span>
+                  <span>[+] No KHDA/ADEK waiting lists</span>
+                  <span>[+] AED-USD peg pricing</span>
+                  <span>[+] Multi-emirate coverage</span>
+                </div>
+              </div>
+            </section>
+          </>
+        )
+      })()}
       {/* /online-school/qatar hub */}
 
       {/* ══════════════════════════════════════════
@@ -14194,116 +14722,291 @@ export default function LandingPage() {
           Rich landing page overriding the country-detail SA fallback.
           6 city pages: Johannesburg, Cape Town, Pretoria, Durban, Gqeberha, Stellenbosch
       ══════════════════════════════════════════ */}
-      {page === 'homeschooling-south-africa' && (
-        <>
-          {/* Schema */}
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/online-school/south-africa#org',
-            'name':'Smartious — Online Homeschooling Across South Africa',
-            'url':'https://smartioushomeschool.com/online-school/south-africa',
-            'description':'Online homeschooling for South African families across Johannesburg, Cape Town, Pretoria, Durban, Gqeberha (Port Elizabeth), and Stellenbosch. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month (~ZAR 3,400) — lower than Brainline, Cambridge Home School Online, Wingu Academy. BELA Act 2024 compliant. SAST live classes.',
-            'areaServed': SOUTH_AFRICA_CITIES.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-          })}}/>
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'BreadcrumbList',
-            'itemListElement':[
-              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-              {'@type':'ListItem','position':2,'name':'Homeschooling South Africa','item':'https://smartioushomeschool.com/online-school/south-africa'},
-            ],
-          })}}/>
+      {page === 'homeschooling-south-africa' && (() => {
+        const country = SOUTH_AFRICA_COUNTRY
+        const cities = SOUTH_AFRICA_CITIES
+        return (
+          <>
+            {/* Schema */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'EducationalOrganization',
+              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
+              'name':'Smartious — Online Homeschooling Across ' + country.longName,
+              'url':'https://smartioushomeschool.com' + country.hub,
+              'description': country.heroSubhead + ' ' + country.heroValueProp,
+              'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
+              'offers': country.competitors.filter(c => c.isUs).map(c => ({
+                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
+                'description': 'Annual tuition range for ' + c.curriculum,
+              })),
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Homeschooling ' + country.name,'item':'https://smartioushomeschool.com' + country.hub},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'FAQPage',
+              'mainEntity': country.faqs.map(f => ({
+                '@type':'Question','name': f.q,
+                'acceptedAnswer':{'@type':'Answer','text': f.a},
+              })),
+            })}}/>
 
-          {/* HERO */}
-          <section className="sec" style={{
-            position:'relative',
-            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-            color:'#fff', padding:'72px 0 56px', overflow:'hidden',
-          }}>
-            <img src="https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=1600&q=80&auto=format&fit=crop" alt="" aria-hidden="true"
-              onError={e => { e.currentTarget.style.display='none' }}
-              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online homeschooling · Across South Africa</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>South Africa</em>
-              </h1>
-              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
-                Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for South African families in Johannesburg, Cape Town, Pretoria, Durban, Gqeberha (Port Elizabeth), Stellenbosch. From <strong style={{color:V.gold3}}>USD 180/month (~ZAR 3,400)</strong> — meaningfully below Cambridge Home School Online UK, competitive with Brainline and Wingu Academy. Live Cambridge-trained PGCE teachers, SAST scheduling, load-shedding resilient, BELA Act 2024 compliant, semigration-ready curriculum portability for families considering UK, Australia, Canada, UAE, Mauritius moves.
-              </p>
-              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Book a Free Consultation
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child in South Africa.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp Us
-                </a>
+            {/* ─── HERO ─── */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff', padding:'72px 0 56px', overflow:'hidden',
+            }}>
+              <img src={country.heroImage} alt="" aria-hidden="true"
+                onError={e => { e.currentTarget.style.display='none' }}
+                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                </h1>
+                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp
+                  </a>
+                  <button onClick={() => P('pricing')}
+                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
+                    View Pricing ({country.currency})
+                  </button>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          {/* CITIES GRID */}
-          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
-            <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                Online homeschooling across <em style={{color:V.cr,fontStyle:'italic'}}>South Africa</em>
-              </h2>
-              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
-                Six major South African cities. Each page covers local private school alternatives, education challenges, family situations and answers specific to your city — from Sandton financial families to Cape Winelands wine estate households.
-              </p>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
-              {SOUTH_AFRICA_CITIES.map(c => (
-                <a key={c.slug} href={'/homeschool-' + c.slug}
-                  onClick={(e) => { e.preventDefault(); setCurrentSaCity(c.slug); nav('/homeschool-' + c.slug); P('sa-city') }}
-                  style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
-                  <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
-                    View {c.name} details
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div></section>
+            {/* ─── TRUST BAR (immediately under hero) ─── */}
+            <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>
+              <div className="wrap">
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
+                  {country.trustSignals.map((t,i) => (
+                    <div key={i}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
+                      <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-          {/* WHY SOUTH AFRICAN FAMILIES CHOOSE SMARTIOUS */}
-          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36,maxWidth:720,margin:'0 auto 36px'}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Why South African families choose Smartious</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                  Live Cambridge teaching, SA-time scheduling, semigration-ready
+            {/* ─── CITIES GRID ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+              <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Emirates we serve</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  {country.citiesSectionTitle}
                 </h2>
+                <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-                {[
-                  ['Lower than Cambridge Home School Online UK','USD 180/month (~ZAR 3,400) Online tier, USD 295/month (~ZAR 5,600) Online Plus, USD 540/month (~ZAR 10,260) Premium 1-on-1. Cambridge Home School Online (UK-based) typically charges R6,000-R10,000/month. Competitive with Brainline, Impaq, Wingu Academy at the same Online tier level.'],
-                  ['Live Cambridge-trained PGCE teachers','Not pre-recorded video lessons with light tutor support — every Smartious class is taught live by a Cambridge-trained PGCE teacher with subject specialism. Recordings supplement, not replace, live instruction.'],
-                  ['SAST live class scheduling','Live classes run 9 AM – 6 PM SAST (UTC+2) — exactly matching all major SA school hours. Johannesburg, Cape Town, Pretoria, Durban, Gqeberha, Stellenbosch students access identical instruction.'],
-                  ['Load shedding resilience','Every live class recorded automatically. Stage 4-6 outages don\'t cost lessons — students review missed content asynchronously, join next live session caught up.'],
-                  ['BELA Act 2024 compliant documentation','Comprehensive curriculum, scheme of work, learning outcomes, assessment documentation suitable for provincial DBE compliance (Gauteng, Western Cape, KZN, Eastern Cape).'],
-                  ['Semigration-ready curriculum portability','Cambridge IGCSE/A-Level transfers seamlessly to UK, Australia, Canada, UAE, Mauritius, Portugal — no transcript reconciliation, no curriculum bridging on emigration.'],
-                ].map(([h, p], i) => (
-                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
-                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
-                  </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
+                {cities.map(c => (
+                  <a key={c.slug} href={'/homeschool-' + c.slug}
+                    onClick={(e) => { e.preventDefault(); setCurrentSaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
+                    <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
+                      View {c.name} details
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                  </a>
                 ))}
               </div>
-            </div>
-          </div></section>
-        </>
-      )}
+            </div></section>
+
+            {/* ─── COMPETITOR ANALYSIS ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                    How Smartious compares to top {country.name} schools
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
+                </div>
+                <div style={{background:V.white,borderRadius:12,border:`1px solid ${V.bone3}`,overflow:'auto'}}>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:13,minWidth:760}}>
+                    <thead>
+                      <tr style={{background:V.ink,color:'#fff'}}>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>School</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Curriculum</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Fees ({country.currency}/year)</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Status / Rating</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Reality check</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {country.competitors.map((c, i) => (
+                        <tr key={i} style={{
+                          background: c.isUs ? `rgba(139,26,46,.06)` : (i % 2 === 0 ? V.white : V.bone),
+                          borderTop: c.isUs ? `2px solid ${V.cr}` : `1px solid ${V.bone3}`,
+                        }}>
+                          <td style={{padding:'14px 16px',verticalAlign:'top'}}>
+                            <div style={{fontWeight:700,color:c.isUs?V.cr:V.ink,marginBottom:2,fontSize:13.5}}>{c.name}{c.isUs && <span style={{marginLeft:8,fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,fontWeight:700}}>← us</span>}</div>
+                            <div style={{fontSize:11.5,color:V.sl}}>{c.city}</div>
+                          </td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12.5}}>{c.curriculum}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.ink,fontSize:12.5,fontWeight:600,whiteSpace:'nowrap'}}>{c.feesAed}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12}}>{c.rating}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12,fontStyle:c.isUs?'normal':'italic'}}>{c.capacityNote}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{fontSize:11.5,color:V.sl,textAlign:'center',marginTop:14,fontStyle:'italic'}}>
+                  Fee ranges reflect published 2026 tuition for Year 7-13 across the school's tier structure. Specific fees vary by year group and additional school charges (registration, capital fee, books, transport, uniforms). Smartious USD pricing translates to fixed {country.currency} via the {country.currencyPeg.rate} peg.
+                </p>
+              </div>
+            </div></section>
+
+            {/* ─── HOMESCHOOL LEGAL FRAMEWORK ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Regulatory framework</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                  Homeschool laws & regulatory framework in the {country.name}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
+                <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                  {country.legalFramework.map((item, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── WHY SMARTIOUS — EXPANDED ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    Why {country.name} families choose Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Ten reasons grounded in the realities of {country.name} education — KHDA/ADEK waiting lists, corporate transfer timing, inter-emirate logistics, and the curriculum portability that mobile expat families need.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(310px,1fr))',gap:14}}>
+                  {country.whySmartious.map((r, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
+                      <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── TRUST / SOCIAL PROOF (factual signals, no fabricated quotes) ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    What you can verify about Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
+                  {[
+                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
+                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
+                    {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
+                  ].map((t, i) => (
+                    <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
+                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                  </p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── COMPREHENSIVE FAQ ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                  Common questions from {country.name} families
+                </h2>
+                <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                  {country.faqs.map((f, i) => (
+                    <details key={i} style={{background:V.white,padding:'16px 22px',borderRadius:10,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
+                      <summary style={{fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none',display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12}}>
+                        <span>{f.q}</span>
+                        <span style={{color:V.cr,fontSize:18,lineHeight:1,flexShrink:0,marginTop:2}}>+</span>
+                      </summary>
+                      <p style={{color:V.sl,fontSize:14,lineHeight:1.75,margin:'14px 0 0'}}>{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── FINAL CTA ─── */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:64,paddingBottom:64,position:'relative',overflow:'hidden'}}>
+              <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
+              <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
+                <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
+                <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
+                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free 15-min Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+                    WhatsApp +254 745 021 212
+                  </a>
+                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                    Begin Enrolment
+                  </button>
+                </div>
+                <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
+                  <span>[+] Immediate enrolment</span>
+                  <span>[+] No KHDA/ADEK waiting lists</span>
+                  <span>[+] AED-USD peg pricing</span>
+                  <span>[+] Multi-emirate coverage</span>
+                </div>
+              </div>
+            </section>
+          </>
+        )
+      })()}
       {/* /online-school/south-africa hub */}
 
       {/* ══════════════════════════════════════════
@@ -14486,116 +15189,291 @@ export default function LandingPage() {
           Rich landing page for Rwandan families.
           4 city pages: Kigali, Huye, Musanze, Rubavu
       ══════════════════════════════════════════ */}
-      {page === 'homeschooling-rwanda' && (
-        <>
-          {/* Schema */}
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/online-school/rwanda#org',
-            'name':'Smartious — Online Homeschooling Across Rwanda',
-            'url':'https://smartioushomeschool.com/online-school/rwanda',
-            'description':'Online homeschooling for Rwandan families across Kigali, Huye, Musanze, and Rubavu. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month — Green Hills Academy, ICS Kigali, and Riviera High School alternative. Kigali Smart City infrastructure.',
-            'areaServed': RWANDA_CITIES.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-          })}}/>
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'BreadcrumbList',
-            'itemListElement':[
-              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-              {'@type':'ListItem','position':2,'name':'Homeschooling Rwanda','item':'https://smartioushomeschool.com/online-school/rwanda'},
-            ],
-          })}}/>
+      {page === 'homeschooling-rwanda' && (() => {
+        const country = RWANDA_COUNTRY
+        const cities = RWANDA_CITIES
+        return (
+          <>
+            {/* Schema */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'EducationalOrganization',
+              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
+              'name':'Smartious — Online Homeschooling Across ' + country.longName,
+              'url':'https://smartioushomeschool.com' + country.hub,
+              'description': country.heroSubhead + ' ' + country.heroValueProp,
+              'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
+              'offers': country.competitors.filter(c => c.isUs).map(c => ({
+                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
+                'description': 'Annual tuition range for ' + c.curriculum,
+              })),
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Homeschooling ' + country.name,'item':'https://smartioushomeschool.com' + country.hub},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'FAQPage',
+              'mainEntity': country.faqs.map(f => ({
+                '@type':'Question','name': f.q,
+                'acceptedAnswer':{'@type':'Answer','text': f.a},
+              })),
+            })}}/>
 
-          {/* HERO */}
-          <section className="sec" style={{
-            position:'relative',
-            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-            color:'#fff', padding:'72px 0 56px', overflow:'hidden',
-          }}>
-            <img src="https://images.unsplash.com/photo-1610891015291-3da53b71366c?w=1600&q=80&auto=format&fit=crop" alt="" aria-hidden="true"
-              onError={e => { e.currentTarget.style.display='none' }}
-              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online homeschooling · Across Rwanda</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>Rwanda</em>
-              </h1>
-              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
-                Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Rwandan families in Kigali, Huye, Musanze, Rubavu. The <strong style={{color:V.gold3}}>Green Hills Academy / ICS Kigali / Riviera High School alternative</strong> at <strong style={{color:V.gold3}}>USD 180/month</strong>. Built for Kigali Smart City diplomatic missions, ALU and CMU-Africa professional community, Belgian/French/Canadian diaspora returnees, and middle-class Rwandan families seeking international curriculum without USD 12,000–25,000/year tuition.
-              </p>
-              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Book a Free Consultation
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child in Rwanda.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp Us
-                </a>
+            {/* ─── HERO ─── */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff', padding:'72px 0 56px', overflow:'hidden',
+            }}>
+              <img src={country.heroImage} alt="" aria-hidden="true"
+                onError={e => { e.currentTarget.style.display='none' }}
+                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                </h1>
+                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp
+                  </a>
+                  <button onClick={() => P('pricing')}
+                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
+                    View Pricing ({country.currency})
+                  </button>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          {/* CITIES GRID */}
-          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
-            <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                Online homeschooling across <em style={{color:V.cr,fontStyle:'italic'}}>Rwanda</em>
-              </h2>
-              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
-                Four major Rwandan cities. Each page covers local international schools, education challenges, family situations and answers specific to your city — from Kigali Smart City diplomatic families to Volcanoes National Park conservation households.
-              </p>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
-              {RWANDA_CITIES.map(c => (
-                <a key={c.slug} href={'/homeschool-' + c.slug}
-                  onClick={(e) => { e.preventDefault(); setCurrentRwandaCity(c.slug); nav('/homeschool-' + c.slug); P('rwanda-city') }}
-                  style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
-                  <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
-                    View {c.name} details
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div></section>
+            {/* ─── TRUST BAR (immediately under hero) ─── */}
+            <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>
+              <div className="wrap">
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
+                  {country.trustSignals.map((t,i) => (
+                    <div key={i}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
+                      <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-          {/* WHY ONLINE HOMESCHOOLING WORKS FOR RWANDAN FAMILIES */}
-          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36,maxWidth:720,margin:'0 auto 36px'}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Why Rwandan families choose Smartious</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                  International curriculum on Kigali Smart City infrastructure
+            {/* ─── CITIES GRID ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+              <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Emirates we serve</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  {country.citiesSectionTitle}
                 </h2>
+                <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-                {[
-                  ['Green Hills / ICS Kigali / Riviera alternative pricing','USD 180/month Online tier, USD 295/month Online Plus, USD 540/month Premium 1-on-1 — versus USD 12,000-25,000/year at top Kigali international schools.'],
-                  ['Kigali Smart City infrastructure advantage','MTN Rwanda and Airtel Rwanda 4G LTE blanket coverage, fibre in major Kigali neighbourhoods, plus Korea Telecom Rwanda Networks. Among Africa\'s most reliable connectivity for live online instruction.'],
-                  ['Central Africa Time live class scheduling','Classes run 9 AM – 6 PM CAT, matching Rwandan school hours. Smartious Nairobi-based subject specialists deliver instruction one hour earlier in their EAT day — no time zone gymnastics for Kigali, Huye, Musanze, Rubavu families.'],
-                  ['Cambridge exam centre access in Kigali','British Council Kigali (Kimihurura) hosts Cambridge IGCSE and A-Level examinations during May/November series. Students from Kigali, Huye, Musanze, Rubavu sit examinations locally without international travel.'],
-                  ['Belgian/French diaspora returnee transition support','Graduated English-medium academic instruction for children with strong French preparation. Cambridge French A-Level maintains French academic depth alongside English transition.'],
-                  ['ALU, CMU-Africa, University of Rwanda pathway alignment','Cambridge qualifications work for African Leadership University (ALU), Carnegie Mellon University Africa (CMU-Africa), University of Global Health Equity (UGHE), University of Rwanda AND international applications via UCAS, Common App, OUAC.'],
-                ].map(([h, p], i) => (
-                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
-                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
-                  </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
+                {cities.map(c => (
+                  <a key={c.slug} href={'/homeschool-' + c.slug}
+                    onClick={(e) => { e.preventDefault(); setCurrentRwandaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
+                    <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
+                      View {c.name} details
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                  </a>
                 ))}
               </div>
-            </div>
-          </div></section>
-        </>
-      )}
+            </div></section>
+
+            {/* ─── COMPETITOR ANALYSIS ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                    How Smartious compares to top {country.name} schools
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
+                </div>
+                <div style={{background:V.white,borderRadius:12,border:`1px solid ${V.bone3}`,overflow:'auto'}}>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:13,minWidth:760}}>
+                    <thead>
+                      <tr style={{background:V.ink,color:'#fff'}}>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>School</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Curriculum</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Fees ({country.currency}/year)</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Status / Rating</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Reality check</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {country.competitors.map((c, i) => (
+                        <tr key={i} style={{
+                          background: c.isUs ? `rgba(139,26,46,.06)` : (i % 2 === 0 ? V.white : V.bone),
+                          borderTop: c.isUs ? `2px solid ${V.cr}` : `1px solid ${V.bone3}`,
+                        }}>
+                          <td style={{padding:'14px 16px',verticalAlign:'top'}}>
+                            <div style={{fontWeight:700,color:c.isUs?V.cr:V.ink,marginBottom:2,fontSize:13.5}}>{c.name}{c.isUs && <span style={{marginLeft:8,fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,fontWeight:700}}>← us</span>}</div>
+                            <div style={{fontSize:11.5,color:V.sl}}>{c.city}</div>
+                          </td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12.5}}>{c.curriculum}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.ink,fontSize:12.5,fontWeight:600,whiteSpace:'nowrap'}}>{c.feesAed}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12}}>{c.rating}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12,fontStyle:c.isUs?'normal':'italic'}}>{c.capacityNote}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{fontSize:11.5,color:V.sl,textAlign:'center',marginTop:14,fontStyle:'italic'}}>
+                  Fee ranges reflect published 2026 tuition for Year 7-13 across the school's tier structure. Specific fees vary by year group and additional school charges (registration, capital fee, books, transport, uniforms). Smartious USD pricing translates to fixed {country.currency} via the {country.currencyPeg.rate} peg.
+                </p>
+              </div>
+            </div></section>
+
+            {/* ─── HOMESCHOOL LEGAL FRAMEWORK ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Regulatory framework</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                  Homeschool laws & regulatory framework in the {country.name}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
+                <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                  {country.legalFramework.map((item, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── WHY SMARTIOUS — EXPANDED ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    Why {country.name} families choose Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Ten reasons grounded in the realities of {country.name} education — KHDA/ADEK waiting lists, corporate transfer timing, inter-emirate logistics, and the curriculum portability that mobile expat families need.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(310px,1fr))',gap:14}}>
+                  {country.whySmartious.map((r, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
+                      <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── TRUST / SOCIAL PROOF (factual signals, no fabricated quotes) ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    What you can verify about Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
+                  {[
+                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
+                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
+                    {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
+                  ].map((t, i) => (
+                    <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
+                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                  </p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── COMPREHENSIVE FAQ ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                  Common questions from {country.name} families
+                </h2>
+                <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                  {country.faqs.map((f, i) => (
+                    <details key={i} style={{background:V.white,padding:'16px 22px',borderRadius:10,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
+                      <summary style={{fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none',display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12}}>
+                        <span>{f.q}</span>
+                        <span style={{color:V.cr,fontSize:18,lineHeight:1,flexShrink:0,marginTop:2}}>+</span>
+                      </summary>
+                      <p style={{color:V.sl,fontSize:14,lineHeight:1.75,margin:'14px 0 0'}}>{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── FINAL CTA ─── */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:64,paddingBottom:64,position:'relative',overflow:'hidden'}}>
+              <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
+              <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
+                <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
+                <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
+                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free 15-min Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+                    WhatsApp +254 745 021 212
+                  </a>
+                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                    Begin Enrolment
+                  </button>
+                </div>
+                <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
+                  <span>[+] Immediate enrolment</span>
+                  <span>[+] No KHDA/ADEK waiting lists</span>
+                  <span>[+] AED-USD peg pricing</span>
+                  <span>[+] Multi-emirate coverage</span>
+                </div>
+              </div>
+            </section>
+          </>
+        )
+      })()}
       {/* /online-school/rwanda hub */}
 
       {/* ══════════════════════════════════════════
@@ -14778,116 +15656,291 @@ export default function LandingPage() {
           Rich landing page for Ethiopian families.
           5 city pages: Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar
       ══════════════════════════════════════════ */}
-      {page === 'homeschooling-ethiopia' && (
-        <>
-          {/* Schema */}
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/online-school/ethiopia#org',
-            'name':'Smartious — Online Homeschooling Across Ethiopia',
-            'url':'https://smartioushomeschool.com/online-school/ethiopia',
-            'description':'Online homeschooling for Ethiopian families across Addis Ababa, Dire Dawa, Mekelle, Hawassa and Bahir Dar. Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP. From USD 180/month — ICS Addis and Sandford International School alternative.',
-            'areaServed': ETHIOPIA_CITIES.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-          })}}/>
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'BreadcrumbList',
-            'itemListElement':[
-              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-              {'@type':'ListItem','position':2,'name':'Homeschooling Ethiopia','item':'https://smartioushomeschool.com/online-school/ethiopia'},
-            ],
-          })}}/>
+      {page === 'homeschooling-ethiopia' && (() => {
+        const country = ETHIOPIA_COUNTRY
+        const cities = ETHIOPIA_CITIES
+        return (
+          <>
+            {/* Schema */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'EducationalOrganization',
+              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
+              'name':'Smartious — Online Homeschooling Across ' + country.longName,
+              'url':'https://smartioushomeschool.com' + country.hub,
+              'description': country.heroSubhead + ' ' + country.heroValueProp,
+              'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
+              'offers': country.competitors.filter(c => c.isUs).map(c => ({
+                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
+                'description': 'Annual tuition range for ' + c.curriculum,
+              })),
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Homeschooling ' + country.name,'item':'https://smartioushomeschool.com' + country.hub},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'FAQPage',
+              'mainEntity': country.faqs.map(f => ({
+                '@type':'Question','name': f.q,
+                'acceptedAnswer':{'@type':'Answer','text': f.a},
+              })),
+            })}}/>
 
-          {/* HERO */}
-          <section className="sec" style={{
-            position:'relative',
-            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-            color:'#fff', padding:'72px 0 56px', overflow:'hidden',
-          }}>
-            <img src="https://images.unsplash.com/photo-1633393834745-487e80c2e94d?w=1600&q=80&auto=format&fit=crop" alt="" aria-hidden="true"
-              onError={e => { e.currentTarget.style.display='none' }}
-              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online homeschooling · Across Ethiopia</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>Ethiopia</em>
-              </h1>
-              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
-                Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ethiopian families in Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar. The <strong style={{color:V.gold3}}>ICS Addis / Sandford International School alternative</strong> at <strong style={{color:V.gold3}}>USD 180/month</strong>. Built for diplomatic, diaspora-returnee, and middle-class Ethiopian families seeking international curriculum access without USD 18,000–35,000/year tuition.
-              </p>
-              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Book a Free Consultation
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child in Ethiopia.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp Us
-                </a>
+            {/* ─── HERO ─── */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff', padding:'72px 0 56px', overflow:'hidden',
+            }}>
+              <img src={country.heroImage} alt="" aria-hidden="true"
+                onError={e => { e.currentTarget.style.display='none' }}
+                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                </h1>
+                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp
+                  </a>
+                  <button onClick={() => P('pricing')}
+                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
+                    View Pricing ({country.currency})
+                  </button>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          {/* CITIES GRID */}
-          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
-            <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                Online homeschooling across <em style={{color:V.cr,fontStyle:'italic'}}>Ethiopia</em>
-              </h2>
-              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
-                Five major Ethiopian cities. Each page covers local international schools, education challenges, family situations and answers specific to your city — from Addis Ababa diplomatic families to Bahir Dar Lake Tana communities.
-              </p>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
-              {ETHIOPIA_CITIES.map(c => (
-                <a key={c.slug} href={'/homeschool-' + c.slug}
-                  onClick={(e) => { e.preventDefault(); setCurrentEthiopiaCity(c.slug); nav('/homeschool-' + c.slug); P('ethiopia-city') }}
-                  style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
-                  <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
-                    View {c.name} details
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div></section>
+            {/* ─── TRUST BAR (immediately under hero) ─── */}
+            <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>
+              <div className="wrap">
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
+                  {country.trustSignals.map((t,i) => (
+                    <div key={i}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
+                      <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-          {/* WHY ONLINE HOMESCHOOLING WORKS FOR ETHIOPIAN FAMILIES */}
-          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36,maxWidth:720,margin:'0 auto 36px'}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Why Ethiopian families choose Smartious</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                  International curriculum without international school tuition
+            {/* ─── CITIES GRID ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+              <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Emirates we serve</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  {country.citiesSectionTitle}
                 </h2>
+                <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-                {[
-                  ['ICS Addis / Sandford alternative pricing','USD 180/month Online tier, USD 295/month Online Plus, USD 540/month Premium 1-on-1 — versus USD 18,000-35,000/year at top Addis Ababa international schools.'],
-                  ['No relocation pressure outside Addis Ababa','Dire Dawa, Mekelle, Hawassa, Bahir Dar families historically faced binary choice — relocate to Addis Ababa or boarding school abroad. Smartious removes this entirely.'],
-                  ['East Africa Time live class scheduling','Classes run 8 AM – 5 PM EAT, matching Ethiopian school hours. Same time zone as Kenya means Nairobi-based subject specialists available without timezone gymnastics.'],
-                  ['Cambridge exam centre access in Addis Ababa','British Council Addis Ababa hosts Cambridge IGCSE and A-Level examinations during May/November series. Students travel for exams twice per year only.'],
-                  ['Diaspora-returnee curriculum continuity','Returning families from the US, UK, Canada, Australia maintain home-country curriculum throughout their Ethiopia stay — making the eventual return seamless.'],
-                  ['AAU and international university pathways','Cambridge qualifications work for Addis Ababa University, Adama Science and Technology, Hawassa, Mekelle, Bahir Dar universities AND international applications via UCAS, Common App, OUAC.'],
-                ].map(([h, p], i) => (
-                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
-                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
-                  </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
+                {cities.map(c => (
+                  <a key={c.slug} href={'/homeschool-' + c.slug}
+                    onClick={(e) => { e.preventDefault(); setCurrentEthiopiaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
+                    <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
+                      View {c.name} details
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                  </a>
                 ))}
               </div>
-            </div>
-          </div></section>
-        </>
-      )}
+            </div></section>
+
+            {/* ─── COMPETITOR ANALYSIS ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                    How Smartious compares to top {country.name} schools
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
+                </div>
+                <div style={{background:V.white,borderRadius:12,border:`1px solid ${V.bone3}`,overflow:'auto'}}>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:13,minWidth:760}}>
+                    <thead>
+                      <tr style={{background:V.ink,color:'#fff'}}>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>School</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Curriculum</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Fees ({country.currency}/year)</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Status / Rating</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Reality check</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {country.competitors.map((c, i) => (
+                        <tr key={i} style={{
+                          background: c.isUs ? `rgba(139,26,46,.06)` : (i % 2 === 0 ? V.white : V.bone),
+                          borderTop: c.isUs ? `2px solid ${V.cr}` : `1px solid ${V.bone3}`,
+                        }}>
+                          <td style={{padding:'14px 16px',verticalAlign:'top'}}>
+                            <div style={{fontWeight:700,color:c.isUs?V.cr:V.ink,marginBottom:2,fontSize:13.5}}>{c.name}{c.isUs && <span style={{marginLeft:8,fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,fontWeight:700}}>← us</span>}</div>
+                            <div style={{fontSize:11.5,color:V.sl}}>{c.city}</div>
+                          </td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12.5}}>{c.curriculum}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.ink,fontSize:12.5,fontWeight:600,whiteSpace:'nowrap'}}>{c.feesAed}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12}}>{c.rating}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12,fontStyle:c.isUs?'normal':'italic'}}>{c.capacityNote}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{fontSize:11.5,color:V.sl,textAlign:'center',marginTop:14,fontStyle:'italic'}}>
+                  Fee ranges reflect published 2026 tuition for Year 7-13 across the school's tier structure. Specific fees vary by year group and additional school charges (registration, capital fee, books, transport, uniforms). Smartious USD pricing translates to fixed {country.currency} via the {country.currencyPeg.rate} peg.
+                </p>
+              </div>
+            </div></section>
+
+            {/* ─── HOMESCHOOL LEGAL FRAMEWORK ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Regulatory framework</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                  Homeschool laws & regulatory framework in the {country.name}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
+                <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                  {country.legalFramework.map((item, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── WHY SMARTIOUS — EXPANDED ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    Why {country.name} families choose Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Ten reasons grounded in the realities of {country.name} education — KHDA/ADEK waiting lists, corporate transfer timing, inter-emirate logistics, and the curriculum portability that mobile expat families need.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(310px,1fr))',gap:14}}>
+                  {country.whySmartious.map((r, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
+                      <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── TRUST / SOCIAL PROOF (factual signals, no fabricated quotes) ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    What you can verify about Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
+                  {[
+                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
+                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
+                    {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
+                  ].map((t, i) => (
+                    <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
+                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                  </p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── COMPREHENSIVE FAQ ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                  Common questions from {country.name} families
+                </h2>
+                <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                  {country.faqs.map((f, i) => (
+                    <details key={i} style={{background:V.white,padding:'16px 22px',borderRadius:10,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
+                      <summary style={{fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none',display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12}}>
+                        <span>{f.q}</span>
+                        <span style={{color:V.cr,fontSize:18,lineHeight:1,flexShrink:0,marginTop:2}}>+</span>
+                      </summary>
+                      <p style={{color:V.sl,fontSize:14,lineHeight:1.75,margin:'14px 0 0'}}>{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── FINAL CTA ─── */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:64,paddingBottom:64,position:'relative',overflow:'hidden'}}>
+              <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
+              <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
+                <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
+                <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
+                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free 15-min Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+                    WhatsApp +254 745 021 212
+                  </a>
+                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                    Begin Enrolment
+                  </button>
+                </div>
+                <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
+                  <span>[+] Immediate enrolment</span>
+                  <span>[+] No KHDA/ADEK waiting lists</span>
+                  <span>[+] AED-USD peg pricing</span>
+                  <span>[+] Multi-emirate coverage</span>
+                </div>
+              </div>
+            </section>
+          </>
+        )
+      })()}
       {/* /online-school/ethiopia hub */}
 
       {/* ══════════════════════════════════════════
@@ -15069,116 +16122,291 @@ export default function LandingPage() {
           HOMESCHOOLING KENYA — Hub page at /homeschooling-kenya
           6 city pages: Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu
       ══════════════════════════════════════════ */}
-      {page === 'homeschooling-kenya' && (
-        <>
-          {/* Schema */}
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'EducationalOrganization',
-            '@id':'https://smartioushomeschool.com/online-school/kenya#org',
-            'name':'Smartious — Online Homeschooling Across Kenya',
-            'url':'https://smartioushomeschool.com/online-school/kenya',
-            'description':'Online homeschooling and 1-on-1 tuition for Kenyan families across Mombasa, Kisumu, Nakuru, Eldoret, Thika and Kiambu. Cambridge IGCSE, A-Level, IB, CBC, American Curriculum. From KSh 1,300/hour.',
-            'areaServed': KENYA_CITIES.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-          })}}/>
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context':'https://schema.org','@type':'BreadcrumbList',
-            'itemListElement':[
-              {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-              {'@type':'ListItem','position':2,'name':'Homeschooling Kenya','item':'https://smartioushomeschool.com/online-school/kenya'},
-            ],
-          })}}/>
+      {page === 'homeschooling-kenya' && (() => {
+        const country = KENYA_COUNTRY
+        const cities = KENYA_CITIES
+        return (
+          <>
+            {/* Schema */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'EducationalOrganization',
+              '@id':'https://smartioushomeschool.com' + country.hub + '#org',
+              'name':'Smartious — Online Homeschooling Across ' + country.longName,
+              'url':'https://smartioushomeschool.com' + country.hub,
+              'description': country.heroSubhead + ' ' + country.heroValueProp,
+              'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
+              'offers': country.competitors.filter(c => c.isUs).map(c => ({
+                '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
+                'description': 'Annual tuition range for ' + c.curriculum,
+              })),
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Homeschooling ' + country.name,'item':'https://smartioushomeschool.com' + country.hub},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+              '@context':'https://schema.org','@type':'FAQPage',
+              'mainEntity': country.faqs.map(f => ({
+                '@type':'Question','name': f.q,
+                'acceptedAnswer':{'@type':'Answer','text': f.a},
+              })),
+            })}}/>
 
-          {/* HERO */}
-          <section className="sec" style={{
-            position:'relative',
-            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-            color:'#fff', padding:'72px 0 56px', overflow:'hidden',
-          }}>
-            <img src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1600&q=80&auto=format&fit=crop" alt="" aria-hidden="true"
-              onError={e => { e.currentTarget.style.display='none' }}
-              style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-            <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-            <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online homeschooling · Across Kenya</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>Kenya</em>
-              </h1>
-              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
-                Live online homeschool and 1-on-1 tuition for families in Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu and other Kenyan cities beyond Nairobi. Cambridge IGCSE, A-Level, IB Diploma, CBC, American AP. From <strong style={{color:V.gold3}}>KSh 1,300/hour</strong> (USD 10/hr) or <strong style={{color:V.gold3}}>USD 423/month</strong> for full programmes.
-              </p>
-              <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Book a Free Consultation
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp Us
-                </a>
+            {/* ─── HERO ─── */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff', padding:'72px 0 56px', overflow:'hidden',
+            }}>
+              <img src={country.heroImage} alt="" aria-hidden="true"
+                onError={e => { e.currentTarget.style.display='none' }}
+                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
+              <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                </h1>
+                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
+                <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
+                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                  <button onClick={() => P('consult')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
+                    WhatsApp
+                  </a>
+                  <button onClick={() => P('pricing')}
+                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
+                    View Pricing ({country.currency})
+                  </button>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          {/* CITIES GRID */}
-          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
-            <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                Online homeschooling across <em style={{color:V.cr,fontStyle:'italic'}}>Kenya</em>
-              </h2>
-              <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
-                Six major Kenyan cities outside Nairobi. Each page covers the local schools, education challenges, family situations and answers specific to your city.
-              </p>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
-              {KENYA_CITIES.map(c => (
-                <a key={c.slug} href={'/homeschooling/' + c.slug}
-                  onClick={(e) => { e.preventDefault(); openKenyaCity(c.slug) }}
-                  style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                  <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
-                  <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
-                    View {c.name} details
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div></section>
+            {/* ─── TRUST BAR (immediately under hero) ─── */}
+            <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>
+              <div className="wrap">
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
+                  {country.trustSignals.map((t,i) => (
+                    <div key={i}>
+                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
+                      <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-          {/* WHY ONLINE HOMESCHOOLING WORKS FOR KENYAN FAMILIES */}
-          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36,maxWidth:720,margin:'0 auto 36px'}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Why families across Kenya choose Smartious</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-                  Internationally qualified teaching, accessible from anywhere in Kenya
+            {/* ─── CITIES GRID ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+              <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
+                <div className="eyebrow" style={{justifyContent:'center'}}>Emirates we serve</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  {country.citiesSectionTitle}
                 </h2>
+                <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-                {[
-                  ['Access specialists not available locally','For A-Level Further Mathematics, IB HL Sciences, SAT/UCAS preparation, Smartious connects your child with Nairobi-based internationally qualified teachers without family relocation.'],
-                  ['Eliminate Nairobi commutes','For Thika, Kiambu and Kenyan-city families currently commuting to Nairobi international schools, online homeschool reclaims 3-4 hours daily for deeper learning and rest.'],
-                  ['All major curricula','Cambridge IGCSE, A-Level, Pearson Edexcel, IB (PYP, MYP, Diploma), Kenya CBC (KICD-aligned, KCSE-eligible), American Curriculum with AP.'],
-                  ['University admissions support','UCAS for UK, Common App for US, plus African universities (KUCCPS, direct), Canadian, Australian, UAE branch campus pathways.'],
-                  ['Quality at accessible pricing','1-on-1 sessions from KSh 1,300/hour, full programmes from USD 423/month — meaningfully below international school total cost.'],
-                  ['Recorded sessions for review','Every session is recorded automatically — your child rewatches difficult explanations, parents review the week\'s coverage.'],
-                ].map(([h, p], i) => (
-                  <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
-                    <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
-                  </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
+                {cities.map(c => (
+                  <a key={c.slug} href={'/homeschool-' + c.slug}
+                    onClick={(e) => { e.preventDefault(); setCurrentKenyaCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
+                    style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
+                    <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
+                      View {c.name} details
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </div>
+                  </a>
                 ))}
               </div>
-            </div>
-          </div></section>
-        </>
-      )}
+            </div></section>
+
+            {/* ─── COMPETITOR ANALYSIS ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                    How Smartious compares to top {country.name} schools
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
+                </div>
+                <div style={{background:V.white,borderRadius:12,border:`1px solid ${V.bone3}`,overflow:'auto'}}>
+                  <table style={{width:'100%',borderCollapse:'collapse',fontSize:13,minWidth:760}}>
+                    <thead>
+                      <tr style={{background:V.ink,color:'#fff'}}>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>School</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Curriculum</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Fees ({country.currency}/year)</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Status / Rating</th>
+                        <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Reality check</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {country.competitors.map((c, i) => (
+                        <tr key={i} style={{
+                          background: c.isUs ? `rgba(139,26,46,.06)` : (i % 2 === 0 ? V.white : V.bone),
+                          borderTop: c.isUs ? `2px solid ${V.cr}` : `1px solid ${V.bone3}`,
+                        }}>
+                          <td style={{padding:'14px 16px',verticalAlign:'top'}}>
+                            <div style={{fontWeight:700,color:c.isUs?V.cr:V.ink,marginBottom:2,fontSize:13.5}}>{c.name}{c.isUs && <span style={{marginLeft:8,fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,fontWeight:700}}>← us</span>}</div>
+                            <div style={{fontSize:11.5,color:V.sl}}>{c.city}</div>
+                          </td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12.5}}>{c.curriculum}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.ink,fontSize:12.5,fontWeight:600,whiteSpace:'nowrap'}}>{c.feesAed}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12}}>{c.rating}</td>
+                          <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12,fontStyle:c.isUs?'normal':'italic'}}>{c.capacityNote}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p style={{fontSize:11.5,color:V.sl,textAlign:'center',marginTop:14,fontStyle:'italic'}}>
+                  Fee ranges reflect published 2026 tuition for Year 7-13 across the school's tier structure. Specific fees vary by year group and additional school charges (registration, capital fee, books, transport, uniforms). Smartious USD pricing translates to fixed {country.currency} via the {country.currencyPeg.rate} peg.
+                </p>
+              </div>
+            </div></section>
+
+            {/* ─── HOMESCHOOL LEGAL FRAMEWORK ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">Regulatory framework</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                  Homeschool laws & regulatory framework in the {country.name}
+                </h2>
+                <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
+                <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                  {country.legalFramework.map((item, i) => (
+                    <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── WHY SMARTIOUS — EXPANDED ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    Why {country.name} families choose Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Ten reasons grounded in the realities of {country.name} education — KHDA/ADEK waiting lists, corporate transfer timing, inter-emirate logistics, and the curriculum portability that mobile expat families need.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(310px,1fr))',gap:14}}>
+                  {country.whySmartious.map((r, i) => (
+                    <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
+                      <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── TRUST / SOCIAL PROOF (factual signals, no fabricated quotes) ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:980,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    What you can verify about Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
+                  {[
+                    {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+                    {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+                    {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
+                    {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, UAE, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+                    {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
+                    {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
+                  ].map((t, i) => (
+                    <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
+                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                  </p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── COMPREHENSIVE FAQ ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto'}}>
+                <div className="eyebrow">FAQs</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                  Common questions from {country.name} families
+                </h2>
+                <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                  {country.faqs.map((f, i) => (
+                    <details key={i} style={{background:V.white,padding:'16px 22px',borderRadius:10,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
+                      <summary style={{fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none',display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12}}>
+                        <span>{f.q}</span>
+                        <span style={{color:V.cr,fontSize:18,lineHeight:1,flexShrink:0,marginTop:2}}>+</span>
+                      </summary>
+                      <p style={{color:V.sl,fontSize:14,lineHeight:1.75,margin:'14px 0 0'}}>{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── FINAL CTA ─── */}
+            <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:64,paddingBottom:64,position:'relative',overflow:'hidden'}}>
+              <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
+              <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
+                <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
+                <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
+                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
+                    Book Free 15-min Consultation
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+                    WhatsApp +254 745 021 212
+                  </a>
+                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
+                    Begin Enrolment
+                  </button>
+                </div>
+                <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
+                  <span>[+] Immediate enrolment</span>
+                  <span>[+] No KHDA/ADEK waiting lists</span>
+                  <span>[+] AED-USD peg pricing</span>
+                  <span>[+] Multi-emirate coverage</span>
+                </div>
+              </div>
+            </section>
+          </>
+        )
+      })()}
       {/* /homeschooling-kenya hub */}
 
       {/* ══════════════════════════════════════════
