@@ -344,3 +344,230 @@ export const SAUDI_ARABIA_CITIES = [
 ]
 
 export const SAUDI_ARABIA_CITIES_LIST = SAUDI_ARABIA_CITIES.map(c => c.slug)
+
+// ═══════════════════════════════════════════════════════════════════
+// SAUDI_ARABIA_COUNTRY — Comprehensive country-level data for the Saudi Arabia hub
+// Mirrors UAE_COUNTRY schema. Consumed by the shared rich hub renderer.
+// ═══════════════════════════════════════════════════════════════════
+export const SAUDI_ARABIA_COUNTRY = {
+  slug: 'saudi-arabia',
+  name: 'Saudi Arabia',
+  longName: 'Kingdom of Saudi Arabia',
+  flag: '🇸🇦',
+  hub: '/online-school/saudi-arabia',
+  hubPageId: 'homeschooling-saudi-arabia',
+  cityPageId: 'saudi-city',
+  currency: 'SAR',
+  currencyName: 'Saudi Riyal',
+  currencyPeg: { rate: 3.75, since: 1986 },
+  timezone: { code: 'AST', name: 'Arabia Standard Time', utcOffset: 3, offsetFromEAT: 0 },
+  examCentres: [
+    'British Council Riyadh (Al Olaya, King Fahd Road)',
+    'British Council Jeddah (Al Hamra)',
+    'British Council Al Khobar (Eastern Province)',
+    'AISR, BISR, BISJ, Dhahran British Grammar School',
+    'Manarat schools (IB), King Faisal School',
+  ],
+  heroImage: 'https://images.unsplash.com/photo-1586724237569-f3d0c1dee8c6?w=1600&q=80&auto=format&fit=crop',
+  heroEyebrow: 'Online homeschooling · Across Saudi Arabia',
+  heroH1Suffix: 'Saudi Arabia',
+  heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Saudi families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM.',
+  heroValueProp: 'The AISR / BISR / Saudi Aramco schools / Dhahran British Grammar / BISJ alternative at USD 180/month (~SAR 675). Built for Vision 2030 mega-project executive families (NEOM, Red Sea Global, Qiddiya, ROSHN, PIF), Saudi Aramco rotational professionals, diplomatic missions, plus Saudi national families seeking Cambridge curriculum portability. Immediate enrolment — no waiting lists.',
+  whatsappTrigger: 'Hi Smartious, I would like online homeschooling for my child in Saudi Arabia.',
+  citiesSectionTitle: 'Online homeschooling across Saudi Arabia',
+  citiesSectionBody: 'Five major Saudi urban areas. Each page covers local international schools, capacity constraints, family situations and answers specific to your city — from Riyadh KAFD financial families to Dhahran Saudi Aramco compound households to NEOM Vision 2030 mega-project executives.',
+
+  trustSignals: [
+    { metric: 'Established', value: '2022', sub: 'Nairobi-based' },
+    { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
+    { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
+    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
+    { metric: 'SAR-USD peg', value: '3.75', sub: 'Fixed since 1986 — predictable pricing' },
+  ],
+
+  competitorsIntro: 'Saudi Arabia\'s international school sector is well-developed in Riyadh and Jeddah, specialised in the Eastern Province (Saudi Aramco compound community), and emerging in NEOM. Below are the major Cambridge, IB, and American curriculum schools Saudi families compare with Smartious. Tuition figures are 2026 published ranges; capacity constraints reflect typical admission realities.',
+  competitors: [
+    {
+      name: 'AISR (American International School Riyadh)',
+      city: 'Riyadh',
+      curriculum: 'American / IB Diploma',
+      feesAed: '82,500 – 112,500',
+      feesUsd: '22,000 – 30,000+',
+      rating: 'Established US Embassy school',
+      capacityNote: 'Multi-year waiting list, particularly Year 7-10',
+    },
+    {
+      name: 'BISR (British International School Riyadh)',
+      city: 'Riyadh',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '67,500 – 101,250',
+      feesUsd: '18,000 – 27,000',
+      rating: 'Established British curriculum',
+      capacityNote: 'Long waiting list, popular year groups',
+    },
+    {
+      name: 'King Faisal School',
+      city: 'Riyadh',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '45,000 – 75,000',
+      feesUsd: '12,000 – 20,000',
+      rating: 'Manarat schools network',
+      capacityNote: 'Established admissions process',
+    },
+    {
+      name: 'BISJ (British International School Jeddah)',
+      city: 'Jeddah',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '67,500 – 93,750',
+      feesUsd: '18,000 – 25,000',
+      rating: 'Red Sea region British curriculum hub',
+      capacityNote: 'Waiting list for popular year groups',
+    },
+    {
+      name: 'Saudi Aramco Schools',
+      city: 'Dhahran, Ras Tanura, Abqaiq, Udhailiyah',
+      curriculum: 'Saudi national + international elements',
+      feesAed: 'Subsidised for Aramco employees',
+      feesUsd: 'Employer-paid',
+      rating: 'Aramco compound community',
+      capacityNote: 'Aramco employee eligibility only',
+    },
+    {
+      name: 'Dhahran British Grammar School',
+      city: 'Dhahran',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '56,250 – 82,500',
+      feesUsd: '15,000 – 22,000',
+      rating: 'Eastern Province British curriculum',
+      capacityNote: 'Capacity-constrained for Eastern Province expat demand',
+    },
+    {
+      name: 'Smartious (live online)',
+      city: 'All five major Saudi cities',
+      curriculum: 'Cambridge IGCSE & A-Level · Edexcel · IB · American AP · CBC',
+      feesAed: '8,100 – 24,300 (~USD 2,160 – 6,480)',
+      feesUsd: '2,160 – 6,480',
+      rating: 'Live online · PGCE specialists',
+      capacityNote: 'Immediate enrolment — no waiting lists',
+      isUs: true,
+    },
+  ],
+
+  legalFrameworkIntro: 'Saudi Arabia does not currently have a formal homeschool registration framework comparable to the UK or USA. Here is exactly what Saudi-based families need to know about education regulation, curriculum recognition, and university pathway access.',
+  legalFramework: [
+    {
+      h: 'Saudi Ministry of Education — physical school regulation',
+      p: 'The Saudi Ministry of Education regulates physical schools (national curriculum public/private and international schools). The Education and Training Evaluation Commission (ETEC) and National Center for Assessment provide quality oversight. These authorities do not formally regulate online homeschool delivery for non-Saudi expat families — their mandate covers physical schools operating in Saudi Arabia.',
+    },
+    {
+      h: 'Homeschool registration for expat families',
+      p: 'Saudi-based expat families operate under home-country curriculum provider documentation supporting eventual return to home-country universities (UK UCAS, US Common App, Canadian provincial systems, Australian, Indian, Pakistani, etc.). Smartious provides comprehensive curriculum documentation, scheme of work, learning outcomes, and assessment records suitable for all home-country contexts. Cambridge IGCSE and A-Level qualifications carry independent international recognition regardless of Saudi regulatory positioning.',
+    },
+    {
+      h: 'Saudi national families seeking international curriculum',
+      p: 'Saudi national families wanting international curriculum access can use international curriculum provider documentation alongside the Ministry of Education national pathways. Cambridge IGCSE and A-Level qualifications are accepted by Saudi universities (King Saud University, KFUPM, KAUST, King Abdulaziz University, Princess Nora bint Abdulrahman, Prince Sultan University) for international student admissions. Vision 2030 educational reforms have steadily opened space for international curriculum diversity.',
+    },
+    {
+      h: 'Vision 2030 mega-project family considerations',
+      p: 'For families on Vision 2030 mega-project assignments (NEOM, Red Sea Global, Qiddiya Investment Company, ROSHN, Diriyah Gate, PIF portfolio companies), curriculum portability is the defining concern. Cambridge IGCSE and A-Level qualifications transfer seamlessly to next postings — UK, USA, Canada, Australia, UAE, Qatar, anywhere worldwide.',
+    },
+    {
+      h: 'Cambridge International examination centres',
+      p: 'Three British Council examination centres serve Saudi Arabia: British Council Riyadh (Al Olaya, King Fahd Road), British Council Jeddah (Al Hamra), British Council Al Khobar (Eastern Province). Cambridge-authorised Saudi schools (BISR, BISJ, Dhahran British Grammar School, AISR) also serve as examination centres for their respective student bodies. May/June and October/November Cambridge series held annually.',
+    },
+    {
+      h: 'Saudi Aramco family considerations',
+      p: 'Saudi Aramco employee families have access to Saudi Aramco Schools at subsidised rates as a meaningful employer benefit. Smartious complements this for families wanting Cambridge curriculum specifically (Aramco Schools follow Saudi curriculum with international elements), credentials independent of Aramco affiliation for future career transitions, smaller class sizes, or international student community interaction beyond the Aramco compound.',
+    },
+    {
+      h: 'University acceptance — Saudi and worldwide',
+      p: 'Cambridge IGCSE and A-Level qualifications are accepted by all major Saudi universities — King Saud University, King Fahd University of Petroleum and Minerals (KFUPM), King Abdullah University of Science and Technology (KAUST), King Abdulaziz University, Princess Nora bint Abdulrahman University, Prince Sultan University — plus UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, Indian, Pakistani, Egyptian universities. Cambridge A-Level often grants advanced credit for first-year university courses, particularly KFUPM petroleum engineering programmes.',
+    },
+  ],
+
+  whySmartious: [
+    {
+      h: 'Immediate enrolment — no multi-year waiting lists',
+      p: 'AISR, BISR, BISJ, and Dhahran British Grammar School all maintain multi-year waiting lists for popular year groups. Smartious enrolment is immediate — students typically start within days of consultation. Critical for Vision 2030 mega-project families arriving Saudi Arabia mid-year on corporate assignments, or families denied admission at preferred schools.',
+    },
+    {
+      h: 'Pricing — SAR 675-2,025/month vs SAR 45,000-112,500/year',
+      p: 'Smartious Online tier is SAR 675/month (USD 180), Online Plus SAR 1,106/month (USD 295), Premium 1-on-1 SAR 2,025/month (USD 540). Annual cost SAR 8,100-24,300 (USD 2,160-6,480). Compare to AISR SAR 82,500-112,500/year, BISR SAR 67,500-101,250/year, BISJ SAR 67,500-93,750/year, Dhahran British Grammar SAR 56,250-82,500/year.',
+    },
+    {
+      h: 'Vision 2030 mega-project family portability',
+      p: 'Cambridge IGCSE and A-Level transfer seamlessly when Vision 2030 assignments end — UK, USA, Canada, Australia, UAE, Qatar, Bahrain, anywhere worldwide. No transcript reconciliation, no curriculum bridging, no academic year loss. Essential for NEOM, Red Sea Global, Qiddiya, ROSHN, PIF executive families on 2-5 year assignments.',
+    },
+    {
+      h: 'Saudi Aramco curriculum independence',
+      p: 'For Saudi Aramco rotational families heading to next petroleum industry destinations (Houston, Aberdeen, Calgary, Perth, Stavanger, Singapore, Lagos, anywhere in global oil & gas), Cambridge curriculum credentials belong to your child regardless of future Aramco affiliation changes. Independence from employer schooling dependency.',
+    },
+    {
+      h: 'AST live class scheduling — exact match with Saudi school hours',
+      p: 'Live classes run 8 AM – 5 PM Arabia Standard Time (AST, UTC+3) — exactly matching Saudi school hours across all five major Saudi cities. Same time zone as Nairobi (Smartious tutor pool) — no time zone gymnastics, no asynchronous delivery compromises.',
+    },
+    {
+      h: 'SAR-USD peg — fixed pricing since 1986',
+      p: 'The SAR is pegged to USD at 3.75 since 1986 — among the world\'s longest-running fixed currency pegs. Smartious USD pricing translates directly to fixed SAR pricing across multi-year educational planning. No exchange rate volatility risk — essential for corporate transfer families planning education across 2-5 year Saudi assignments.',
+    },
+    {
+      h: 'Three Cambridge exam centres across Saudi Arabia',
+      p: 'British Council Riyadh (Al Olaya) for central Saudi Arabia families, British Council Jeddah (Al Hamra) for the Western Region, British Council Al Khobar for Eastern Province (Dhahran, Al Khobar, Dammam) students. NEOM students travel to Jeddah or Riyadh for May/November Cambridge series.',
+    },
+  ],
+
+  faqs: [
+    {
+      q: 'How does Smartious compare to AISR, BISR, BISJ, Saudi Aramco Schools, Dhahran British Grammar School?',
+      a: 'AISR (USD 22,000-30,000+/year), BISR (USD 18,000-27,000/year), BISJ (USD 18,000-25,000/year), Dhahran British Grammar School (USD 15,000-22,000/year), King Faisal School (USD 12,000-20,000/year), Saudi Aramco Schools (subsidised for Aramco employees) provide physical campus education. Smartious provides live online Cambridge, IB, or American curriculum at USD 2,160-6,480/year (~SAR 8,100-24,300/year). The trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment without waiting lists, smaller class sizes (4-6 students vs typical 20-25), and curriculum credentials independent of employer affiliation (particularly meaningful for Aramco-adjacent families).',
+    },
+    {
+      q: 'Will my child miss out on sports, arts, and social development without a physical school?',
+      a: 'This is the most common concern. The honest answer: a physical school provides a complete daily environment that an online programme does not replicate. However, many Saudi-based families combine Smartious academic instruction with sports clubs (Saudi has growing youth football academies, swimming, equestrian, motorsports), music academies, scouts, debate clubs, plus religious and cultural community involvement. Smartious classes themselves provide regular live peer interaction across 14+ countries. Many families find the time freed from school commute and the academic depth from smaller class sizes more than compensates for the absence of a school sports field — particularly during summer heat months when in-person commutes are burdensome.',
+    },
+    {
+      q: 'What about social interaction and peer relationships?',
+      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 14+ countries. Many Saudi-based families supplement with local community activities — sports clubs, mosque/church communities, neighbourhood friendships, scouts, family gatherings. For expat families on 2-5 year assignments, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
+    },
+    {
+      q: 'Can my child apply to King Saud University, KFUPM, KAUST, or King Abdulaziz University with Cambridge qualifications?',
+      a: 'Yes. All major Saudi universities — King Saud University, KFUPM (King Fahd University of Petroleum and Minerals — consistently ranked among the top petroleum engineering universities globally), KAUST (King Abdullah University of Science and Technology), King Abdulaziz University, Princess Nora bint Abdulrahman University, Prince Sultan University — accept Cambridge IGCSE and A-Level qualifications for international student admissions. Cambridge A-Level Mathematics, Further Mathematics, Physics, and Chemistry are particularly well-aligned with KFUPM petroleum engineering programmes.',
+    },
+    {
+      q: 'My family is on a Vision 2030 mega-project assignment. How does Cambridge help with future career?',
+      a: 'Cambridge IGCSE and A-Level qualifications are designed for international portability — children mid-stream through Cambridge IGCSE Year 10-11 or A-Level Year 12-13 transfer seamlessly to Cambridge schools or homeschool providers anywhere worldwide. Vision 2030 mega-project executive families (NEOM, Red Sea Global, Qiddiya, ROSHN, PIF) on 2-5 year assignments need exactly this portability when assignments end or transition to next global posting. UK, USA, Canada, Australia, UAE, Qatar, anywhere — Cambridge transfers without curriculum bridging or academic year loss.',
+    },
+    {
+      q: 'I am Saudi Aramco employed — should I use Saudi Aramco Schools or Smartious?',
+      a: 'Both are legitimate options. Saudi Aramco Schools provide established education at subsidised rates for Aramco employees — a meaningful employer benefit, particularly valuable for younger children where Saudi-curriculum exposure plus international elements suits the family. Smartious complements Aramco Schools for families wanting (1) Cambridge curriculum specifically — Aramco Schools follow Saudi curriculum with international elements, not Cambridge IGCSE/A-Level directly, (2) credentials independent of Aramco affiliation for future career transitions, (3) smaller class sizes than Aramco Schools typically provide, (4) live international student community interaction beyond the Aramco compound. Many Aramco families use both — Aramco Schools for primary, Smartious for IGCSE/A-Level secondary.',
+    },
+    {
+      q: 'What happens if we decide to enrol our child in a physical Saudi school after starting Smartious?',
+      a: 'Cambridge IGCSE and A-Level qualifications transfer cleanly to any Cambridge-authorised Saudi school — BISR, BISJ, Dhahran British Grammar School, and Cambridge IGCSE-authorised AISR programmes. We provide complete transcript and progress documentation. Many families use Smartious as bridge education while waiting for top-tier school admission, then transition mid-year or at academic year start when a spot opens up.',
+    },
+    {
+      q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',
+      a: 'Yes. Smartious teaching staff are PGCE-qualified (Postgraduate Certificate in Education) subject specialists with Cambridge International training. Teachers are based primarily in Nairobi, where Smartious operates two physical centres (Diamond Plaza Parklands HQ and Karen Hardy). The PGCE qualification is the standard professional teaching credential used by Cambridge schools globally. Subject specialism means a Mathematics teacher teaches only Mathematics, a Chemistry teacher only Chemistry, etc. — not generalist primary-school-style teaching.',
+    },
+    {
+      q: 'What technology and internet do we need at home in Saudi Arabia?',
+      a: 'STC, Mobily, or Zain fibre internet provides excellent connectivity across Saudi Arabia. 5G LTE also works well throughout Riyadh, Jeddah, Eastern Province cities, and NEOM. Students need a laptop or desktop computer with webcam and microphone. The Smartious LMS works on Chrome, Safari, Edge, Firefox. For Saudi Aramco compound families, dedicated fibre infrastructure is among the world\'s most reliable. For NEOM families during development phase, Starlink satellite backup is recommended.',
+    },
+    {
+      q: 'How does payment work in Saudi Riyal (SAR)?',
+      a: 'Smartious tuition is denominated in USD (USD 180/295/540 per month) with payments accepted via international card (Visa, Mastercard, Amex), PayPal, or bank transfer for Saudi residents. The SAR-USD peg at 3.75 since 1986 means the SAR-equivalent (SAR 675/1,106/2,025 per month) is genuinely fixed across multi-year planning. No exchange rate volatility risk. Monthly billing is standard; annual prepayment available with modest discount.',
+    },
+    {
+      q: 'How does Smartious handle Saudi public holidays, Ramadan, and Hajj season?',
+      a: 'Smartious follows the Saudi academic calendar including Saudi National Day (September 23), Eid Al Fitr, Eid Al Adha (which coincides with Hajj season), and other Saudi public holidays. During Ramadan, class schedules adjust to respect fasting timing — particularly for older students fasting. We work with families to accommodate Ramadan religious observance while maintaining academic continuity. During Hajj season (Dhul Hijjah, ~6 weeks each year), recorded sessions enable flexible viewing for families involved in or affected by Hajj logistics, particularly in Jeddah and Western Region.',
+    },
+    {
+      q: 'How do we know if Smartious is the right fit for our family?',
+      a: 'Book a free 15-minute consultation. We will discuss your child\'s current year group, target university destinations (Saudi, regional Gulf, UK, US, Canada, Australia, India, anywhere), family situation (which city, Vision 2030 / Aramco / diplomatic / corporate context, child\'s learning preferences), and curriculum options. The consultation is genuinely no-commitment — we will be straightforward about whether Smartious or a different option (physical international school, Aramco Schools, different online provider, hybrid approach) better fits your circumstances.',
+    },
+  ],
+
+  ctaH: 'Ready to start your child\'s Cambridge journey from Saudi Arabia?',
+  ctaSubhead: 'Free 15-minute consultation. We\'ll walk through your child\'s year group, target universities, and curriculum fit. No commitment.',
+}
