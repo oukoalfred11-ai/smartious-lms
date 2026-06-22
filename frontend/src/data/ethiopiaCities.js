@@ -324,3 +324,202 @@ export const ETHIOPIA_CITIES = [
 ]
 
 export const ETHIOPIA_CITIES_LIST = ETHIOPIA_CITIES.map(c => c.slug)
+
+// ═══════════════════════════════════════════════════════════════════
+// ETHIOPIA_COUNTRY — Comprehensive country-level data for Ethiopia hub
+// ═══════════════════════════════════════════════════════════════════
+export const ETHIOPIA_COUNTRY = {
+  slug: 'ethiopia',
+  name: 'Ethiopia',
+  longName: 'Federal Democratic Republic of Ethiopia',
+  flag: '🇪🇹',
+  hub: '/online-school/ethiopia',
+  hubPageId: 'homeschooling-ethiopia',
+  cityPageId: 'ethiopia-city',
+  currency: 'USD',
+  currencyName: 'US Dollar (preferred over volatile Ethiopian Birr)',
+  currencyPeg: { rate: null, since: null, note: 'USD pricing protects against Birr volatility' },
+  timezone: { code: 'EAT', name: 'East Africa Time', utcOffset: 3, offsetFromEAT: 0 },
+  examCentres: [
+    'British Council Addis Ababa (Adwa Avenue)',
+    'ICS Addis Ababa (International Community School)',
+    'Sandford International School',
+    'German International School Addis Ababa',
+  ],
+  heroImage: 'https://images.unsplash.com/photo-1535397459466-3a01a3ba6b21?w=1600&q=80&auto=format&fit=crop',
+  heroEyebrow: 'Online homeschooling · Across Ethiopia',
+  heroH1Suffix: 'Ethiopia',
+  heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Ethiopian families across Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar.',
+  heroValueProp: 'The ICS Addis Ababa / Sandford International School alternative at USD 180/month. Built for AU/UN ECA diplomatic families, diaspora returnees, NGO professional families, Ethiopian families seeking international university pathways. USD pricing protects against Ethiopian Birr volatility for multi-year planning.',
+  whatsappTrigger: 'Hi Smartious, I would like online homeschooling for my child in Ethiopia.',
+  citiesSectionTitle: 'Online homeschooling across Ethiopia',
+  citiesSectionBody: 'Five Ethiopian cities. Each page covers local international school options, family situations, and answers specific to your area — from Addis Ababa diplomatic households to Mekelle regional families to Bahir Dar academic communities.',
+
+  trustSignals: [
+    { metric: 'Established', value: '2022', sub: 'Nairobi-based' },
+    { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
+    { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
+    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
+    { metric: 'USD pricing', value: 'Fixed', sub: 'Protects against Birr volatility' },
+  ],
+
+  competitorsIntro: 'Ethiopia\'s international school sector is concentrated in Addis Ababa, with limited options in regional cities. Below are major international schools and online providers Ethiopian families compare with Smartious.',
+  competitors: [
+    {
+      name: 'ICS Addis Ababa (International Community School)',
+      city: 'Addis Ababa (Old Airport)',
+      curriculum: 'American / IB Diploma',
+      feesAed: 'USD 16,000 – 24,000',
+      feesUsd: '16,000 – 24,000',
+      rating: 'Established US-style international school',
+      capacityNote: 'Waiting list for popular grades, diplomatic priority',
+    },
+    {
+      name: 'Sandford International School',
+      city: 'Addis Ababa (Old Airport)',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: 'USD 12,000 – 18,000',
+      feesUsd: '12,000 – 18,000',
+      rating: 'Established British curriculum',
+      capacityNote: 'Selective admissions',
+    },
+    {
+      name: 'German International School Addis Ababa',
+      city: 'Addis Ababa',
+      curriculum: 'German Abitur + IB',
+      feesAed: 'USD 10,000 – 16,000',
+      feesUsd: '10,000 – 16,000',
+      rating: 'German community school',
+      capacityNote: 'German curriculum focus',
+    },
+    {
+      name: 'Bingham Academy',
+      city: 'Addis Ababa',
+      curriculum: 'American Christian curriculum',
+      feesAed: 'USD 8,000 – 14,000',
+      feesUsd: '8,000 – 14,000',
+      rating: 'Mission-affiliated school',
+      capacityNote: 'Selective admissions',
+    },
+    {
+      name: 'Smartious (live online)',
+      city: 'All five Ethiopian cities',
+      curriculum: 'Cambridge IGCSE & A-Level · Edexcel · IB · American AP · CBC',
+      feesAed: 'USD 2,160 – 6,480',
+      feesUsd: '2,160 – 6,480',
+      rating: 'Live online · PGCE specialists · EAT time zone',
+      capacityNote: 'Immediate enrolment — accessible from any Ethiopian city',
+      isUs: true,
+    },
+  ],
+
+  legalFrameworkIntro: 'Ethiopia does not have a formal homeschool registration framework comparable to South Africa or the UK. Here is what Ethiopian families need to know about education regulation and curriculum recognition.',
+  legalFramework: [
+    {
+      h: 'Ethiopian Ministry of Education',
+      p: 'The Ministry of Education regulates physical schools (national curriculum public/private and international schools). Ethiopian Higher Education Entrance Certificate Examination (EHEECE) is the national school-leaving qualification. The ministry does not formally regulate online homeschool delivery for expat or returning-diaspora families.',
+    },
+    {
+      h: 'Homeschool documentation for Ethiopian families',
+      p: 'Ethiopian families using Smartious operate under international curriculum provider documentation. Smartious provides comprehensive curriculum, scheme of work, learning outcomes, and assessment records suitable for international university applications. Cambridge IGCSE and A-Level qualifications carry independent international recognition.',
+    },
+    {
+      h: 'Diplomatic family considerations',
+      p: 'For AU (African Union) and UN Economic Commission for Africa (UN ECA) diplomatic families based in Addis Ababa, Cambridge IGCSE and A-Level qualifications transfer seamlessly to next postings — Geneva, New York, Brussels, Nairobi, Cairo, anywhere worldwide. Smartious documentation supports embassy/UN school verification.',
+    },
+    {
+      h: 'NGO and international organisation families',
+      p: 'For UNICEF, WFP, USAID, GIZ, JICA, and other international organisation families based in Ethiopia on rotational assignments, curriculum portability matters profoundly. Cambridge transfers anywhere globally.',
+    },
+    {
+      h: 'Diaspora returnee families',
+      p: 'For Ethiopian diaspora families returning from US, UK, Canada, Germany, and elsewhere, Smartious provides curriculum continuity — children continue the international curriculum they were following abroad without disruption.',
+    },
+    {
+      h: 'Cambridge International examination centre',
+      p: 'British Council Addis Ababa (Adwa Avenue) is the official Cambridge International examination centre for Ethiopia. Cambridge IGCSE and A-Level examinations held during May/June and October/November series annually. ICS Addis Ababa and Sandford International School also serve as examination centres.',
+    },
+    {
+      h: 'University acceptance — Ethiopia and worldwide',
+      p: 'Cambridge IGCSE and A-Level qualifications are accepted by Addis Ababa University and other Ethiopian universities for international student admissions, plus UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, all major African universities (Kenya, South Africa, Ghana, Nigeria, Rwanda).',
+    },
+  ],
+
+  whySmartious: [
+    {
+      h: 'ICS Addis / Sandford alternative pricing',
+      p: 'ICS Addis Ababa USD 16,000-24,000/year, Sandford International USD 12,000-18,000/year, German International USD 10,000-16,000/year. Smartious USD 2,160-6,480/year delivers Cambridge curriculum at meaningfully lower cost.',
+    },
+    {
+      h: 'Accessible from any Ethiopian city',
+      p: 'ICS, Sandford, German International are all in Addis Ababa. For families in Dire Dawa, Mekelle, Hawassa, Bahir Dar, the binary choice was relocation to Addis or limited local options. Smartious eliminates this — Cambridge curriculum from any Ethiopian city.',
+    },
+    {
+      h: 'EAT live class scheduling — same time zone',
+      p: 'Live classes run 8 AM – 5 PM East Africa Time (EAT, UTC+3) — exactly matching Ethiopian school hours. Same time zone as Nairobi (Smartious tutor pool) — no time zone gymnastics.',
+    },
+    {
+      h: 'USD pricing — protects against Birr volatility',
+      p: 'The Ethiopian Birr has experienced significant volatility. Smartious USD pricing (USD 180/295/540 per month) provides stable multi-year planning. Payments via international card or bank transfer.',
+    },
+    {
+      h: 'AU / UN ECA diplomatic family portability',
+      p: 'For African Union and UN Economic Commission for Africa families on Addis Ababa postings, Cambridge IGCSE/A-Level transfers seamlessly to next postings — Geneva, New York, Brussels, Nairobi, Cairo, anywhere worldwide.',
+    },
+    {
+      h: 'Diaspora returnee curriculum continuity',
+      p: 'For Ethiopian diaspora families returning from US, UK, Canada, Germany, Smartious provides Cambridge or American curriculum continuity — children continue the international curriculum they were following abroad without disruption from Ethiopian national curriculum bridging.',
+    },
+  ],
+
+  faqs: [
+    {
+      q: 'How does Smartious compare to ICS Addis Ababa, Sandford International School, German International School?',
+      a: 'ICS Addis Ababa (USD 16,000-24,000/year — American/IB curriculum), Sandford International School (USD 12,000-18,000/year — British/Cambridge curriculum), German International School Addis Ababa (USD 10,000-16,000/year — German Abitur + IB) provide physical campus education with established sports, arts, and pastoral programmes — all in Addis Ababa. Smartious provides live online Cambridge, IB, or American curriculum at USD 2,160-6,480/year. The trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment, smaller class sizes (4-6 students), and accessibility from any Ethiopian city (not just Addis Ababa).',
+    },
+    {
+      q: 'Will my child miss out on sports, arts, and social development without a physical school?',
+      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, Ethiopian families combine Smartious academic instruction with local sports (football clubs, athletics — Ethiopia has world-class running culture, tennis, swimming clubs), music, scouts, and religious/community involvement. Smartious classes themselves provide regular live peer interaction across 14+ countries.',
+    },
+    {
+      q: 'Can my Ethiopian child apply to Addis Ababa University or international universities with Cambridge qualifications?',
+      a: 'Yes. Addis Ababa University and other Ethiopian universities accept Cambridge IGCSE and A-Level qualifications for international student admissions. Cambridge qualifications simultaneously support UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, plus African universities (Kenya, South Africa, Ghana, Rwanda) via standard international applications.',
+    },
+    {
+      q: 'My family lives in Dire Dawa / Mekelle / Hawassa / Bahir Dar. How does Smartious work outside Addis Ababa?',
+      a: 'Smartious works from any Ethiopian city with reliable internet — Dire Dawa, Mekelle, Hawassa, Bahir Dar, plus smaller cities and rural areas. Live online classes deliver in East Africa Time (UTC+3) matching standard school hours. Cambridge examinations require travel to British Council Addis Ababa twice per year (May/November series) — short flights or road travel from regional cities.',
+    },
+    {
+      q: 'How does Smartious work for AU / UN ECA diplomatic families?',
+      a: 'For African Union (AU) and UN Economic Commission for Africa (UN ECA) families on Addis Ababa postings, Smartious provides Cambridge IGCSE/A-Level, IB Diploma, or American AP curriculum that transfers seamlessly to next postings — Geneva, New York, Brussels, Nairobi, Cairo, Vienna, anywhere worldwide. Documentation supports embassy/UN school verification.',
+    },
+    {
+      q: 'I am an Ethiopian diaspora family returning from US / UK / Canada / Germany. How does Smartious help with curriculum continuity?',
+      a: 'For Ethiopian diaspora returnees, Smartious provides Cambridge, IB, or American curriculum continuity — children continue the international curriculum they were following abroad (UK British, US American, Canadian provincial) without disruption from Ethiopian national curriculum bridging. This preserves university pathway access in your previous country if you eventually return abroad, plus opens international university applications worldwide.',
+    },
+    {
+      q: 'How does payment work — Birr or USD?',
+      a: 'Smartious tuition is denominated in USD (USD 180/295/540 per month) with payments accepted via international card (Visa, Mastercard, Amex), PayPal, or bank transfer. USD pricing protects against Ethiopian Birr volatility — particularly important for multi-year educational planning. For families paying from Ethiopia, international card or Forex bank transfer is standard.',
+    },
+    {
+      q: 'How reliable is internet connectivity for live online learning in Ethiopia?',
+      a: 'Ethio Telecom and Safaricom Ethiopia provide 4G LTE across major Ethiopian cities, with fibre internet expanding in Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar. Live online learning works well across these cities. For more rural locations, Starlink satellite (now available in Ethiopia) provides reliable backup. Smartious recorded sessions ensure no lost lessons regardless of connectivity events.',
+    },
+    {
+      q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',
+      a: 'Yes. Smartious teaching staff are PGCE-qualified (Postgraduate Certificate in Education) subject specialists with Cambridge International training. Teachers are based primarily in Nairobi. PGCE is the standard professional teaching credential used by Cambridge schools globally. Subject specialism means a Mathematics teacher teaches only Mathematics, not generalist primary-style teaching.',
+    },
+    {
+      q: 'Where do Ethiopian students sit Cambridge IGCSE and A-Level examinations?',
+      a: 'British Council Addis Ababa (Adwa Avenue) is the official Cambridge International examination centre for Ethiopia. ICS Addis Ababa and Sandford International School also serve as examination centres. Cambridge IGCSE and A-Level examinations held during May/June and October/November series annually. Students from regional cities (Dire Dawa, Mekelle, Hawassa, Bahir Dar) travel to Addis Ababa twice per year for examinations.',
+    },
+    {
+      q: 'How do we know if Smartious is the right fit for our family?',
+      a: 'Book a free 15-minute consultation. We will discuss your child\'s current year group, target university destinations (Ethiopia, Kenya, South Africa, UK, US, Canada, Germany, anywhere), family situation (which city, diplomatic / NGO / diaspora returnee / business context, child\'s learning preferences), and curriculum options. The consultation is no-commitment.',
+    },
+  ],
+
+  ctaH: 'Ready to start your child\'s Cambridge journey from Ethiopia?',
+  ctaSubhead: 'Free 15-minute consultation. We\'ll walk through your child\'s year group, target universities, and curriculum fit. No commitment.',
+}
