@@ -350,3 +350,286 @@ export const UAE_CITIES = [
 ]
 
 export const UAE_CITIES_LIST = UAE_CITIES.map(c => c.slug)
+
+// ═══════════════════════════════════════════════════════════════════
+// UAE_COUNTRY — Comprehensive country-level data for the UAE hub
+// Includes: competitors, homeschool legal framework, why-smartious,
+// trust signals, FAQ, CTA messaging.
+// Consumed by the shared comprehensive hub renderer in LandingPage.jsx.
+// ═══════════════════════════════════════════════════════════════════
+export const UAE_COUNTRY = {
+  slug: 'uae',
+  name: 'UAE',
+  longName: 'United Arab Emirates',
+  flag: '🇦🇪',
+  hub: '/online-school/uae',
+  hubPageId: 'homeschooling-uae',
+  cityPageId: 'uae-city',
+  currency: 'AED',
+  currencyName: 'UAE Dirham',
+  currencyPeg: { rate: 3.6725, since: 1997 },
+  timezone: { code: 'GST', name: 'Gulf Standard Time', utcOffset: 4, offsetFromEAT: 1 },
+  examCentres: [
+    'British Council Dubai (Knowledge Village)',
+    'British Council Abu Dhabi (Tourist Club Area)',
+    'Wellington, JESS, Dubai College, DAA, Repton Dubai, Brighton College Dubai, Cranleigh Dubai',
+    'BSAK, Cranleigh AD, Brighton College AD, Repton AD, ACS Abu Dhabi',
+    'GEMS schools network, NLCS Dubai, Aldar Academies',
+  ],
+  heroImage: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=80&auto=format&fit=crop',
+  heroEyebrow: 'Online homeschooling · Across the UAE',
+  heroH1Suffix: 'UAE',
+  heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for UAE families in Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah.',
+  heroValueProp: 'The Wellington / Dubai College / BSAK / Repton / Brighton College / JESS / DAA / ACS / Cranleigh alternative at USD 180/month (~AED 660). Built for KHDA/ADEK-rated school waiting list families, multinational corporate transfers, diplomatic missions, plus Emirati and UAE-resident families seeking Cambridge curriculum portability. Immediate enrolment.',
+  whatsappTrigger: 'Hi Smartious, I would like online homeschooling for my child in the UAE.',
+  citiesSectionTitle: 'Online homeschooling across the UAE',
+  citiesSectionBody: 'Five UAE emirates. Each page covers local KHDA/ADEK-rated school alternatives, capacity constraints, community-specific family situations and answers — from Dubai Marina financial families to Abu Dhabi diplomatic households to Sharjah commuter families to RAK tourism professionals.',
+
+  // ─── Trust signals (factual, no fabricated metrics) ───
+  trustSignals: [
+    { metric: 'Established', value: '2022', sub: 'Nairobi-based' },
+    { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
+    { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
+    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
+    { metric: 'AED-USD peg', value: '3.6725', sub: 'Predictable multi-year pricing' },
+  ],
+
+  // ─── Competitor comparison ───
+  competitorsIntro: 'The UAE international school market is the most developed in the Middle East. Below are the major Cambridge, IB, and American curriculum schools UAE families compare with Smartious. Tuition figures are 2026 published ranges; capacity constraints and waiting lists reflect typical KHDA/ADEK admission realities.',
+  competitors: [
+    {
+      name: 'Wellington International School',
+      city: 'Dubai',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '75,000 – 110,000+',
+      feesUsd: '20,400 – 30,000+',
+      rating: 'Outstanding (KHDA)',
+      capacityNote: 'Multi-year waiting list for popular year groups',
+    },
+    {
+      name: 'Dubai College',
+      city: 'Dubai (Al Sufouh)',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '90,000 – 120,000',
+      feesUsd: '24,500 – 32,700',
+      rating: 'Outstanding (KHDA)',
+      capacityNote: 'Long waiting list, particularly Year 7-10',
+    },
+    {
+      name: 'JESS (Jumeirah English Speaking School)',
+      city: 'Dubai (Jumeirah, Arabian Ranches)',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '70,000 – 100,000',
+      feesUsd: '19,000 – 27,200',
+      rating: 'Outstanding (KHDA)',
+      capacityNote: 'Established waiting list',
+    },
+    {
+      name: 'Repton Dubai',
+      city: 'Dubai (Nad Al Sheba)',
+      curriculum: 'British / IB / Cambridge',
+      feesAed: '85,000 – 130,000+',
+      feesUsd: '23,100 – 35,400+',
+      rating: 'Outstanding (KHDA)',
+      capacityNote: 'Premium pricing, selective admissions',
+    },
+    {
+      name: 'Brighton College Dubai',
+      city: 'Dubai (Dubailand)',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '90,000 – 140,000+',
+      feesUsd: '24,500 – 38,100+',
+      rating: 'Outstanding (KHDA)',
+      capacityNote: 'Selective admissions, premium tier',
+    },
+    {
+      name: 'Cranleigh Dubai',
+      city: 'Dubai (Saadiyat-style campus)',
+      curriculum: 'British / Cambridge',
+      feesAed: '95,000 – 135,000+',
+      feesUsd: '25,900 – 36,800+',
+      rating: 'Outstanding (KHDA)',
+      capacityNote: 'Premium pricing, capacity-constrained',
+    },
+    {
+      name: 'BSAK (British School Al Khubairat)',
+      city: 'Abu Dhabi (Mushrif)',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '60,000 – 95,000',
+      feesUsd: '16,300 – 25,900',
+      rating: 'Outstanding (ADEK)',
+      capacityNote: 'Diplomatic and corporate family hub, established waiting list',
+    },
+    {
+      name: 'Cranleigh Abu Dhabi',
+      city: 'Abu Dhabi (Saadiyat)',
+      curriculum: 'British / Cambridge',
+      feesAed: '75,000 – 120,000+',
+      feesUsd: '20,400 – 32,700+',
+      rating: 'Very Good / Outstanding (ADEK)',
+      capacityNote: 'Newer establishment, growing waiting list',
+    },
+    {
+      name: 'ACS Abu Dhabi',
+      city: 'Abu Dhabi',
+      curriculum: 'American / IB',
+      feesAed: '70,000 – 105,000',
+      feesUsd: '19,000 – 28,600',
+      rating: 'Very Good (ADEK)',
+      capacityNote: 'US Embassy proximity, established programme',
+    },
+    {
+      name: 'GEMS Modern Academy',
+      city: 'Dubai (Nad Al Sheba)',
+      curriculum: 'Indian (CBSE) / Cambridge IGCSE & A-Level',
+      feesAed: '60,000 – 90,000',
+      feesUsd: '16,300 – 24,500',
+      rating: 'Outstanding (KHDA)',
+      capacityNote: 'Indian community pillar, Cambridge IGCSE Year 9-13',
+    },
+    {
+      name: 'Smartious (live online)',
+      city: 'All UAE emirates',
+      curriculum: 'Cambridge IGCSE & A-Level · Edexcel · IB · American AP · CBC',
+      feesAed: '7,920 – 23,790 (~ USD 2,160 – 6,480)',
+      feesUsd: '2,160 – 6,480',
+      rating: 'Live online · PGCE specialists',
+      capacityNote: 'Immediate enrolment — no waiting lists',
+      isUs: true,
+    },
+  ],
+
+  // ─── Homeschool legal framework ───
+  legalFrameworkIntro: 'The UAE international school sector is closely regulated for physical schools, but online homeschool delivery for non-Emirati expat families operates under home-country curriculum documentation. Here is exactly what UAE families need to know.',
+  legalFramework: [
+    {
+      h: 'KHDA (Knowledge and Human Development Authority) — Dubai',
+      p: 'KHDA regulates Dubai\'s 220+ private schools with annual inspection ratings: Outstanding, Very Good, Good, Acceptable, Weak. KHDA also sets fee frameworks (annual increases tied to inflation and ratings) and governs admissions policies. KHDA does not formally regulate online homeschool delivery for non-Emirati families — its mandate covers physical schools operating in Dubai.',
+    },
+    {
+      h: 'ADEK (Abu Dhabi Department of Education and Knowledge)',
+      p: 'ADEK regulates the Abu Dhabi emirate physical school sector under a parallel framework. Similar five-tier rating system (Outstanding, Very Good, Good, Acceptable, Weak). ADEK does not regulate online homeschool delivery for non-Emirati expat families.',
+    },
+    {
+      h: 'SPEA (Sharjah Private Education Authority)',
+      p: 'Sharjah operates under SPEA with similar private school regulation. Sharjah-resident expat families using online homeschool fall outside formal SPEA regulation.',
+    },
+    {
+      h: 'Homeschool registration for UAE expat families',
+      p: 'In practice, UAE expat families operate under home-country curriculum provider documentation supporting eventual return to home-country universities (UK UCAS, US Common App, Canadian provincial systems, Australian, Indian, Pakistani, etc.). Smartious provides comprehensive curriculum, scheme of work, learning outcomes, and assessment documentation suitable for all home-country contexts. Cambridge IGCSE and A-Level qualifications carry independent international recognition regardless of UAE regulatory positioning.',
+    },
+    {
+      h: 'Emirati national families',
+      p: 'Emirati national families seeking international curriculum access can use international curriculum provider documentation alongside the UAE Ministry of Education national pathways. Cambridge IGCSE and A-Level qualifications are accepted by UAE universities (Zayed, UAE University, AUS, AUD, Khalifa, NYU Abu Dhabi, Sorbonne Abu Dhabi) for international student admissions.',
+    },
+    {
+      h: 'Cambridge International examination centres',
+      p: 'British Council Dubai (Knowledge Village) and British Council Abu Dhabi (Tourist Club Area) host Cambridge IGCSE and A-Level examinations during May/June and October/November series annually. Cambridge-authorised UAE schools (Wellington, JESS, Dubai College, DAA, Repton, Brighton College, Cranleigh, BSAK, GEMS schools, NLCS, Aldar Academies) also serve as examination centres. Smartious handles examination registration logistics.',
+    },
+    {
+      h: 'University acceptance — UAE and worldwide',
+      p: 'Cambridge IGCSE and A-Level qualifications are accepted by all UAE universities (national and branch campuses), plus UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, Indian, Pakistani, Egyptian, and other international universities. Cambridge A-Level often grants advanced credit for first-year university courses, particularly at UK and branch-campus universities.',
+    },
+  ],
+
+  // ─── Why Smartious — expanded comprehensive treatment ───
+  whySmartious: [
+    {
+      h: 'Immediate enrolment — no KHDA/ADEK waiting lists',
+      p: 'Outstanding and Very Good rated UAE schools (Wellington, Dubai College, JESS, Repton, Brighton College, Cranleigh, BSAK, Cranleigh AD) maintain multi-year waiting lists for popular year groups, particularly Year 7-10 entry. Smartious enrolment is immediate — students typically start within days of consultation. This is critical for families arriving UAE mid-year on corporate assignments, or families denied admission at preferred schools.',
+    },
+    {
+      h: 'Pricing — AED 660-1,982/month vs AED 60,000-140,000+/year',
+      p: 'Smartious Online tier is AED 660/month (USD 180), Online Plus AED 1,083/month (USD 295), Premium 1-on-1 AED 1,982/month (USD 540). Annual cost AED 7,920-23,790 (USD 2,160-6,480). Compare to Wellington AED 75,000-110,000+/year, Dubai College AED 90,000-120,000/year, Repton AED 85,000-130,000+/year, Brighton College AED 90,000-140,000+/year. For multi-child families and families paying privately, the difference is genuinely transformative.',
+    },
+    {
+      h: 'Live Cambridge-trained PGCE teachers, not pre-recorded video',
+      p: 'Every Smartious class is taught live by Cambridge-trained PGCE-qualified subject specialists. This is distinct from many online schools that rely heavily on pre-recorded video lessons with light tutor support. Live instruction means real-time questions, real-time clarifications, real-time student-teacher interaction across the full lesson.',
+    },
+    {
+      h: 'Smaller class sizes — 4-6 students vs typical 22-26',
+      p: 'Smartious Online tier classes are 4-6 students. Online Plus smaller groups. Premium 1-on-1. Compare to typical KHDA/ADEK school class sizes of 22-26 students. The smaller class structure enables more individual attention per student than even premium physical schools provide.',
+    },
+    {
+      h: 'AED-USD peg — genuinely predictable multi-year pricing',
+      p: 'The AED is pegged to USD at 3.6725 since 1997. Smartious USD pricing translates directly to fixed AED pricing across multi-year educational planning (Cambridge IGCSE 2-year programme, A-Level 2-year programme). No exchange rate volatility risk — essential for corporate transfer families planning education across 2-5 year UAE assignments.',
+    },
+    {
+      h: 'Multi-emirate coverage — same curriculum across all five emirates',
+      p: 'Children continue identical Cambridge curriculum whether you live in Dubai, Abu Dhabi, Sharjah, Ajman, or Ras Al Khaimah — and continue seamlessly through inter-emirate moves (Sharjah → Dubai, Ajman → Abu Dhabi, etc.). One curriculum, one teacher pool, one set of qualifications across the entire UAE.',
+    },
+    {
+      h: 'Eliminate inter-emirate school commutes',
+      p: 'Sharjah-Dubai 30-60 minute commutes, Ajman-Dubai 30-90 minute commutes, RAK-Dubai 90-120 minute commutes are common reality for families pursuing KHDA Outstanding-rated Dubai schools from Northern Emirates residence. Smartious eliminates these entirely. Children save 1-2 hours per day; families gain Cambridge curriculum quality without commute burden.',
+    },
+    {
+      h: 'GST live class scheduling — exactly matching UAE school hours',
+      p: 'Live classes run 9 AM – 6 PM Gulf Standard Time (GST, UTC+4) — exactly matching UAE school hours across all five emirates. Smartious Nairobi-based PGCE specialists deliver one hour later in their EAT day (UTC+3). Whole-day flexibility leaves afternoons for sports, music, swimming, and UAE lifestyle activities.',
+    },
+    {
+      h: 'Three Cambridge exam centre options across the UAE',
+      p: 'British Council Dubai (Knowledge Village) for Northern Emirates and Dubai families. British Council Abu Dhabi (Tourist Club Area) for Abu Dhabi emirate families. Cambridge-authorised UAE schools (Wellington, JESS, Dubai College, DAA, Repton, Brighton College, Cranleigh, BSAK, GEMS schools, NLCS, Aldar Academies) also serve as examination centres. Local examination access without travel during May/November Cambridge series.',
+    },
+    {
+      h: 'Corporate transfer curriculum portability',
+      p: 'Cambridge IGCSE and A-Level transfer seamlessly when corporate assignments end or transition to next global posting — Singapore, Hong Kong, London, New York, Riyadh, Doha, Manama, anywhere worldwide. No transcript reconciliation, no curriculum bridging, no academic year loss. This is the primary value proposition for mobile expat families on 2-5 year UAE assignments.',
+    },
+  ],
+
+  // ─── Comprehensive FAQ ───
+  faqs: [
+    {
+      q: 'How does Smartious compare to Wellington, Dubai College, BSAK, Repton, Brighton College, Cranleigh, JESS?',
+      a: 'Top KHDA/ADEK-rated schools provide physical campus education with established sports, arts, and pastoral programmes — Wellington AED 75,000-110,000+/year, Dubai College AED 90,000-120,000/year, BSAK AED 60,000-95,000/year, Repton Dubai AED 85,000-130,000+/year, Brighton College Dubai AED 90,000-140,000+/year, Cranleigh Dubai AED 95,000-135,000+/year, JESS AED 70,000-100,000/year. Smartious provides live online Cambridge, IB, or American curriculum at USD 2,160-6,480/year (~AED 7,920-23,790/year). The trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment without waiting lists, smaller class sizes (4-6 students vs typical 22-26), and meaningful cost savings even for corporate-paid education allowances.',
+    },
+    {
+      q: 'Will my child miss out on sports, arts, and social development without a physical school?',
+      a: 'This is the most common concern from UAE families considering online curriculum. The honest answer: a physical school provides a complete daily environment that an online programme does not replicate. However, many UAE families combine Smartious academic instruction with: (1) Sports clubs — UAE has world-class sports infrastructure (football academies at Aspire, Manchester City Football School Dubai, ICC Academy cricket, Hamdan Sports Complex swimming, tennis academies, gymnastics, martial arts). (2) Arts and music — community music schools, dance academies, art studios across Dubai and Abu Dhabi. (3) Scouts, debate clubs, coding academies. (4) Online Smartious classes themselves provide regular live peer interaction across the 14+ country student community. (5) Family lifestyle activities — UAE\'s outdoor culture (beaches, desert, mountains) is genuinely formative. Many families find the time freed from school commute and the academic depth from smaller class sizes more than compensates for the absence of a school sports field.',
+    },
+    {
+      q: 'What about social interaction and peer relationships?',
+      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 14+ countries. This is different from a physical school playground, but it is genuine peer interaction with consistent classmates. Many UAE families supplement with local community activities — sports clubs, mosque/church communities, neighbourhood friendships, scouts, family gatherings. For UAE expat families on 2-5 year assignments who will move again, the Smartious model actually provides more consistent peer relationships across moves (because the classmates continue regardless of geography) than physical school relationships that reset with each relocation.',
+    },
+    {
+      q: 'Can my UAE child apply to UAE universities (Zayed, UAE University, AUS, AUD, NYU Abu Dhabi) with Cambridge qualifications?',
+      a: 'Yes. All UAE universities — Zayed University, UAE University, University of Sharjah, American University in Dubai (AUD), American University of Sharjah (AUS), Khalifa University, NYU Abu Dhabi, Sorbonne Abu Dhabi, Heriot-Watt University Dubai, Middlesex University Dubai, University of Birmingham Dubai, University of Wollongong Dubai, Murdoch University Dubai, and the dozens of UAE branch campuses — accept Cambridge IGCSE and A-Level qualifications for admissions. Cambridge qualifications simultaneously support UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, Indian, Pakistani, and other international university applications via UCAS, Common App, OUAC. The international portability is the primary value for mobile expat families.',
+    },
+    {
+      q: 'What happens if we decide to enrol our child in a physical UAE school after starting Smartious?',
+      a: 'Cambridge IGCSE and A-Level qualifications transfer cleanly to any Cambridge-authorised UAE school — Wellington, Dubai College, JESS, Repton, Brighton College, Cranleigh, BSAK, GEMS schools, NLCS, and others. We provide complete transcript and progress documentation. Many families use Smartious as bridge education while waiting for KHDA/ADEK Outstanding-rated school admission, then transition mid-year or at academic year start when a spot opens. Cambridge IGCSE and A-Level curricula are standardised internationally, so the curriculum continues seamlessly at the new school.',
+    },
+    {
+      q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',
+      a: 'Yes. Smartious teaching staff are PGCE-qualified (Postgraduate Certificate in Education) subject specialists with Cambridge International training. Teachers are based primarily in Nairobi, where Smartious operates two physical centres (Diamond Plaza Parklands HQ and Karen Hardy). The PGCE qualification is the standard professional teaching credential used by Cambridge schools globally, including the UAE schools listed above. Subject specialism means a Mathematics teacher teaches only Mathematics, a Chemistry teacher only Chemistry, etc. — not generalist primary-school-style teaching.',
+    },
+    {
+      q: 'What technology and internet do we need at home in the UAE?',
+      a: 'Etisalat or du fibre internet (UAE has excellent connectivity infrastructure — among the world\'s most reliable) is more than sufficient. Mobile 5G LTE also works well. Students need a laptop or desktop computer with webcam and microphone (any modern device works). The Smartious LMS works on Chrome, Safari, Edge, Firefox. Tablet attendance is possible but laptop is recommended for written work. Recorded lessons remain available for catch-up review if internet briefly drops.',
+    },
+    {
+      q: 'How does payment work in UAE Dirham (AED)?',
+      a: 'Smartious tuition is denominated in USD (USD 180/295/540 per month) with payments accepted via international card (Visa, Mastercard, Amex), PayPal, or bank transfer for UAE residents. The AED-USD peg at 3.6725 since 1997 means the AED-equivalent (AED 660/1,083/1,982 per month) is genuinely fixed across multi-year planning. No exchange rate volatility risk. Monthly billing is standard; annual prepayment available with modest discount.',
+    },
+    {
+      q: 'Can my employer\'s education allowance cover Smartious tuition?',
+      a: 'Yes — Smartious provides standard tuition invoices, registration documentation, and receipts suitable for corporate education allowance reimbursement. The annual cost (USD 2,160-6,480) is typically well within standard UAE corporate education allowance budgets, often leaving margin for sports clubs, music lessons, or additional curriculum support. For multi-child families where employer allowance covers one child but not all, Smartious provides cost-effective coverage for additional children. We can provide pricing certifications in either USD or AED for HR reimbursement purposes.',
+    },
+    {
+      q: 'How does Smartious handle UAE public holidays and Ramadan?',
+      a: 'Smartious follows the UAE academic calendar including National Day (December 2-3), Commemoration Day, Eid Al Fitr, Eid Al Adha, and other UAE public holidays. During Ramadan, class schedules adjust to respect fasting timing — particularly for older students fasting. We work with families to accommodate Ramadan religious observance while maintaining academic continuity. Recorded sessions enable flexible viewing during Suhoor and Iftar times.',
+    },
+    {
+      q: 'What happens if my family moves to another emirate or another country?',
+      a: 'Cambridge IGCSE and A-Level are designed for international portability. Within the UAE, you simply continue Smartious from your new emirate residence — same classes, same teachers, same curriculum. If you move internationally (UK, USA, Canada, Australia, Singapore, Hong Kong, Riyadh, Doha, anywhere), your child continues Cambridge IGCSE/A-Level either with Smartious (live online works from any reliable internet location) or transfers credentials to a Cambridge school in the new country. No transcript reconciliation, no curriculum bridging, no academic year loss. This portability is the primary reason corporate transfer families choose Cambridge over national curricula.',
+    },
+    {
+      q: 'How do we know if Smartious is the right fit for our family?',
+      a: 'Book a free 15-minute consultation. We will discuss your child\'s current year group, target university destinations, family situation (which emirate, corporate assignment timeline, child\'s learning preferences), and curriculum options. The consultation is genuinely no-commitment — we will be straightforward about whether Smartious or a different option (physical KHDA/ADEK school, different online provider, hybrid approach) better fits your circumstances. Many families benefit from trying a single Smartious class as a trial before committing to enrolment.',
+    },
+  ],
+
+  // ─── Final CTA messaging ───
+  ctaH: 'Ready to start your child\'s Cambridge journey from the UAE?',
+  ctaSubhead: 'Free 15-minute consultation. We\'ll walk through your child\'s year group, target universities, and curriculum fit. No commitment.',
+}
