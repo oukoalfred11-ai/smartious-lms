@@ -271,3 +271,233 @@ export const QATAR_CITIES = [
 ]
 
 export const QATAR_CITIES_LIST = QATAR_CITIES.map(c => c.slug)
+
+// ═══════════════════════════════════════════════════════════════════
+// QATAR_COUNTRY — Comprehensive country-level data for the Qatar hub
+// ═══════════════════════════════════════════════════════════════════
+export const QATAR_COUNTRY = {
+  slug: 'qatar',
+  name: 'Qatar',
+  longName: 'State of Qatar',
+  flag: '🇶🇦',
+  hub: '/online-school/qatar',
+  hubPageId: 'homeschooling-qatar',
+  cityPageId: 'qatar-city',
+  currency: 'QAR',
+  currencyName: 'Qatari Riyal',
+  currencyPeg: { rate: 3.64, since: 2001 },
+  timezone: { code: 'AST', name: 'Arabia Standard Time', utcOffset: 3, offsetFromEAT: 0 },
+  examCentres: [
+    'British Council Doha (Al Sadd)',
+    'Doha College, ASD, Compass International, Sherborne Qatar',
+    'Newton British Academy, Park House English School',
+    'Qatar Academy (Qatar Foundation)',
+  ],
+  heroImage: 'https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1600&q=80&auto=format&fit=crop',
+  heroEyebrow: 'Online homeschooling · Across Qatar',
+  heroH1Suffix: 'Qatar',
+  heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Qatari families in Doha, Al Wakrah, Al Khor, Lusail.',
+  heroValueProp: 'The Doha College / ASD / Sherborne Qatar / Compass International alternative at USD 180/month (~QAR 655). Immediate enrolment — no waiting lists. Built for British, American, Indian, Pakistani, Filipino, Arab expat families plus Qatari national families seeking Cambridge curriculum portability for next postings worldwide.',
+  whatsappTrigger: 'Hi Smartious, I would like online homeschooling for my child in Qatar.',
+  citiesSectionTitle: 'Online homeschooling across Qatar',
+  citiesSectionBody: 'Four Qatari urban areas. Each page covers local international schools, capacity constraints, family situations and answers specific to your city — from Doha West Bay financial families to Al Khor QatarEnergy LNG industrial households.',
+
+  trustSignals: [
+    { metric: 'Established', value: '2022', sub: 'Nairobi-based' },
+    { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
+    { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
+    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
+    { metric: 'QAR-USD peg', value: '3.64', sub: 'Fixed since 2001 — predictable pricing' },
+  ],
+
+  competitorsIntro: 'Qatar hosts approximately 40+ international schools concentrated in Doha. Below are the major Cambridge, IB, and American curriculum schools Qatari families compare with Smartious. Tuition figures are 2026 published ranges; waiting lists reflect typical admission realities for Outstanding/Very Good rated schools.',
+  competitors: [
+    {
+      name: 'Doha College',
+      city: 'Doha',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '75,000 – 90,000+',
+      feesUsd: '20,600 – 24,700+',
+      rating: 'Established British curriculum',
+      capacityNote: 'Multi-year waiting list, particularly Year 7-10',
+    },
+    {
+      name: 'ASD (American School of Doha)',
+      city: 'Doha',
+      curriculum: 'American / IB Diploma',
+      feesAed: '91,000 – 116,500',
+      feesUsd: '25,000 – 32,000+',
+      rating: 'US Embassy school',
+      capacityNote: 'Established waiting list',
+    },
+    {
+      name: 'Compass International School Doha',
+      city: 'Doha (multiple campuses)',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '40,000 – 65,000',
+      feesUsd: '11,000 – 17,800',
+      rating: 'Nord Anglia network',
+      capacityNote: 'Selective admissions',
+    },
+    {
+      name: 'Sherborne Qatar',
+      city: 'Doha',
+      curriculum: 'British boarding model / Cambridge',
+      feesAed: '65,000 – 90,000',
+      feesUsd: '17,800 – 24,700',
+      rating: 'British boarding school partnership',
+      capacityNote: 'Premium tier admissions',
+    },
+    {
+      name: 'Newton British Academy',
+      city: 'Doha (multiple campuses)',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: '35,000 – 50,000',
+      feesUsd: '9,600 – 13,700',
+      rating: 'Mid-tier British curriculum',
+      capacityNote: 'Established programme',
+    },
+    {
+      name: 'Qatar Academy (Qatar Foundation)',
+      city: 'Doha (Education City)',
+      curriculum: 'IB Diploma',
+      feesAed: '70,000 – 105,000',
+      feesUsd: '19,200 – 28,800',
+      rating: 'Qatar Foundation prestige school',
+      capacityNote: 'Highly selective',
+    },
+    {
+      name: 'DPS Modern Indian School',
+      city: 'Doha',
+      curriculum: 'Indian CBSE',
+      feesAed: '20,000 – 30,000',
+      feesUsd: '5,500 – 8,200',
+      rating: 'Indian community pillar',
+      capacityNote: 'Indian curriculum focus',
+    },
+    {
+      name: 'Smartious (live online)',
+      city: 'All four Qatari cities',
+      curriculum: 'Cambridge IGCSE & A-Level · Edexcel · IB · American AP · CBC',
+      feesAed: '7,860 – 23,580 (~USD 2,160 – 6,480)',
+      feesUsd: '2,160 – 6,480',
+      rating: 'Live online · PGCE specialists',
+      capacityNote: 'Immediate enrolment — no waiting lists',
+      isUs: true,
+    },
+  ],
+
+  legalFrameworkIntro: 'Qatar does not have a formal homeschool registration framework comparable to the UK or USA. Here is what Qatar-based families need to know about education regulation, curriculum recognition, and university pathway access.',
+  legalFramework: [
+    {
+      h: 'Qatar Ministry of Education and Higher Education',
+      p: 'The Ministry of Education and Higher Education regulates physical schools (national curriculum public/private and international schools) under the Supreme Education Council framework. These authorities do not formally regulate online homeschool delivery for non-Qatari expat families.',
+    },
+    {
+      h: 'Homeschool registration for expat families',
+      p: 'Qatar-based expat families operate under home-country curriculum provider documentation supporting eventual return to home-country universities (UK UCAS, US Common App, Canadian provincial systems, Australian, Indian, Pakistani, Filipino TESDA, etc.). Smartious provides comprehensive curriculum documentation, scheme of work, learning outcomes, and assessment records suitable for all home-country contexts.',
+    },
+    {
+      h: 'Qatari national families seeking international curriculum',
+      p: 'Qatari national families wanting international curriculum access can use international curriculum provider documentation alongside Ministry of Education national pathways. Cambridge IGCSE and A-Level qualifications are accepted by Qatar University and the Education City universities for international student admissions.',
+    },
+    {
+      h: 'Education City pathway — unique to Qatar',
+      p: 'Qatar Foundation\'s Education City hosts seven top US/European universities — Georgetown University in Qatar, Northwestern University in Qatar, Carnegie Mellon University Qatar, Weill Cornell Medicine Qatar, Texas A&M University at Qatar, HEC Paris in Qatar, University College London Qatar. All accept Cambridge IGCSE and A-Level qualifications. This concentration provides Qatar-based families with uniquely accessible top US/European university pathways.',
+    },
+    {
+      h: 'Cambridge International examination centre',
+      p: 'British Council Doha (Al Sadd) is the official Cambridge International examination centre for Qatar. Cambridge-authorised Qatar schools (Doha College, Compass International, Sherborne Qatar, Newton British Academy, Park House English School) also serve as examination centres. May/June and October/November Cambridge series held annually.',
+    },
+    {
+      h: 'University acceptance — Qatar and worldwide',
+      p: 'Cambridge IGCSE and A-Level qualifications are accepted by Qatar University, all Education City universities (Georgetown Qatar, Northwestern Qatar, CMU Qatar, Weill Cornell Qatar, Texas A&M Qatar, HEC Paris Qatar, UCL Qatar), plus UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, Indian, Pakistani, Egyptian universities. Cambridge A-Level often grants advanced credit for first-year university courses.',
+    },
+  ],
+
+  whySmartious: [
+    {
+      h: 'Immediate enrolment — no Doha school waiting lists',
+      p: 'Doha College, ASD, Compass International, Sherborne Qatar, Newton British Academy, Qatar Academy all maintain multi-year waiting lists for popular year groups (Year 7-10 entry particularly difficult). Smartious enrolment is immediate — students typically start within days of consultation. Critical for families arriving Qatar mid-year on corporate assignments.',
+    },
+    {
+      h: 'Pricing — QAR 655-1,965/month vs QAR 35,000-116,500/year',
+      p: 'Smartious Online tier is QAR 655/month (USD 180), Online Plus QAR 1,075/month (USD 295), Premium 1-on-1 QAR 1,965/month (USD 540). Annual cost QAR 7,860-23,580 (USD 2,160-6,480). Compare to Doha College QAR 75,000-90,000+/year, ASD QAR 91,000-116,500/year, Sherborne Qatar QAR 65,000-90,000/year, Compass International QAR 40,000-65,000/year.',
+    },
+    {
+      h: 'Education City university pathway alignment',
+      p: 'Cambridge IGCSE and A-Level qualifications work for Georgetown Qatar, Northwestern Qatar, CMU Qatar, Weill Cornell Qatar, Texas A&M Qatar, HEC Paris Qatar, UCL Qatar — uniquely concentrated US/European university access in Doha. Plus Qatar University, plus international universities worldwide via UCAS, Common App, OUAC.',
+    },
+    {
+      h: 'Expat 2-5 year assignment curriculum portability',
+      p: 'Qatar is typically a 2-5 year expat assignment. Cambridge IGCSE/A-Level transfers seamlessly to next postings — UK, USA, Canada, Australia, Singapore, Hong Kong, Dubai, Riyadh, Manama, anywhere worldwide. No transcript reconciliation, no curriculum bridging, no academic year loss.',
+    },
+    {
+      h: 'AST live class scheduling — exact match',
+      p: 'Live classes run 8 AM – 5 PM Arabia Standard Time (AST, UTC+3) — exactly matching Qatari school hours. Same time zone as Nairobi (Smartious tutor pool) — no time zone gymnastics.',
+    },
+    {
+      h: 'QAR-USD peg — fixed pricing since 2001',
+      p: 'The QAR is pegged to USD at 3.64 since 2001. Smartious USD pricing translates directly to fixed QAR pricing across multi-year educational planning. No exchange rate volatility risk for 2-5 year assignment families.',
+    },
+    {
+      h: 'Cambridge exam centre at British Council Doha',
+      p: 'British Council Doha (Al Sadd) hosts Cambridge IGCSE and A-Level examinations during May/November series. Cambridge-authorised Qatar schools also serve as examination centres. Local examination access without travel.',
+    },
+  ],
+
+  faqs: [
+    {
+      q: 'How does Smartious compare to Doha College, ASD, Compass International, Sherborne Qatar, Newton British Academy?',
+      a: 'Doha College (QAR 75,000-90,000+/year), ASD (USD 25,000-32,000+/year), Compass International (QAR 40,000-65,000/year), Sherborne Qatar (QAR 65,000-90,000/year), Newton British Academy (QAR 35,000-50,000/year), Qatar Academy (Qatar Foundation IB), DPS Modern Indian School (QAR 20,000-30,000/year) provide physical campus education with established sports, arts, and pastoral programmes. Smartious provides live online Cambridge, IB, or American curriculum at USD 2,160-6,480/year (~QAR 7,860-23,580/year). The trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment without waiting lists, smaller class sizes (4-6 students vs typical 20-25), and meaningful cost savings even for employer-paid education allowances.',
+    },
+    {
+      q: 'Will my child miss out on sports, arts, and social development without a physical school?',
+      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, many Qatar-based families combine Smartious academic instruction with local sports clubs (Aspire Zone, club facilities, swimming at Hamad Aquatic Centre), music academies, scouts, debate clubs, plus religious and cultural community involvement. Smartious classes themselves provide regular live peer interaction across 14+ countries. Many families find the time freed from school commute and academic depth from smaller class sizes more than compensates for the absence of a school sports field — particularly during summer heat months.',
+    },
+    {
+      q: 'What about social interaction and peer relationships?',
+      a: 'Smartious classes are small live groups of 4-6 students (Online tier) or smaller (Online Plus). Students attend the same classes with the same peers throughout the academic year, building relationships across the international student body spanning 14+ countries. Many Qatar-based families supplement with local community activities — sports clubs, mosque/church communities, neighbourhood friendships. For expat families on 2-5 year Qatar assignments, the Smartious model provides more consistent peer relationships across moves than physical school relationships that reset with each relocation.',
+    },
+    {
+      q: 'Can my child apply to Education City universities (Georgetown, Northwestern, CMU, Cornell, Texas A&M, HEC Paris, UCL) with Cambridge?',
+      a: 'Yes. All Education City universities (Georgetown University in Qatar, Northwestern University in Qatar, Carnegie Mellon University Qatar, Weill Cornell Medicine Qatar, Texas A&M University at Qatar, HEC Paris in Qatar, University College London Qatar) accept Cambridge IGCSE and A-Level qualifications. Qatar University also accepts Cambridge for international student admissions. Cambridge A-Level often grants advanced credit for first-year university courses. This concentration of seven top US/European universities in Doha makes Cambridge curriculum particularly valuable for Qatar-based families.',
+    },
+    {
+      q: 'My family is on a 2-3 year Doha assignment then moving to next posting. How does Cambridge help?',
+      a: 'Cambridge IGCSE and A-Level qualifications are designed for international portability. Children mid-stream through Cambridge IGCSE Year 10-11 or A-Level Year 12-13 transfer seamlessly to Cambridge schools or homeschool providers anywhere worldwide — UK, USA, Canada, Australia, Singapore, Hong Kong, Dubai, Riyadh, anywhere. No transcript reconciliation, no curriculum bridging, no academic year loss.',
+    },
+    {
+      q: 'My company education allowance covers Doha College / ASD fees. Why would I choose Smartious?',
+      a: 'Several reasons: (1) Top schools have multi-year waiting lists — Smartious enrolment is immediate. (2) Many corporate allowances now have caps that don\'t cover full top-tier fees. (3) For multi-child families, allowances may cover one but not all. (4) Premium tier 1-on-1 instruction at Smartious provides personalisation beyond typical 20-25 student classes. (5) Curriculum continuity for next posting — Doha College / ASD don\'t transfer directly to next country posting, while Cambridge IGCSE/A-Level transfer anywhere.',
+    },
+    {
+      q: 'What happens if we decide to enrol our child in a physical Qatar school after starting Smartious?',
+      a: 'Cambridge IGCSE and A-Level qualifications transfer cleanly to any Cambridge-authorised Qatar school — Doha College, Compass International, Sherborne Qatar, Newton British Academy, Park House English School. We provide complete transcript and progress documentation. Many families use Smartious as bridge education while waiting for top-tier school admission, then transition when a spot opens.',
+    },
+    {
+      q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',
+      a: 'Yes. Smartious teaching staff are PGCE-qualified (Postgraduate Certificate in Education) subject specialists with Cambridge International training. Teachers are based primarily in Nairobi, where Smartious operates two physical centres. PGCE is the standard professional teaching credential used by Cambridge schools globally, including the Qatar schools listed above. Subject specialism means a Mathematics teacher teaches only Mathematics, a Chemistry teacher only Chemistry — not generalist primary-style teaching.',
+    },
+    {
+      q: 'What technology and internet do we need at home in Qatar?',
+      a: 'Ooredoo or Vodafone Qatar fibre internet (Q.NBN national broadband infrastructure) provides excellent connectivity. 5G LTE also works well throughout Doha, Al Wakrah, Lusail, and Al Khor. Students need a laptop or desktop computer with webcam and microphone. The Smartious LMS works on Chrome, Safari, Edge, Firefox.',
+    },
+    {
+      q: 'How does payment work in Qatari Riyal (QAR)?',
+      a: 'Smartious tuition is denominated in USD (USD 180/295/540 per month) with payments accepted via international card, PayPal, or bank transfer for Qatar residents. The QAR-USD peg at 3.64 since 2001 means the QAR-equivalent (QAR 655/1,075/1,965 per month) is genuinely fixed across multi-year planning. No exchange rate volatility risk.',
+    },
+    {
+      q: 'How does Smartious handle Qatar public holidays, Ramadan, and National Day?',
+      a: 'Smartious follows the Qatari academic calendar including Qatar National Day (December 18), Eid Al Fitr, Eid Al Adha, and other Qatar public holidays. During Ramadan, class schedules adjust to respect fasting timing — particularly for older students fasting. We work with families to accommodate Ramadan religious observance while maintaining academic continuity. Recorded sessions enable flexible viewing during Suhoor and Iftar times.',
+    },
+    {
+      q: 'How do we know if Smartious is the right fit for our family?',
+      a: 'Book a free 15-minute consultation. We will discuss your child\'s current year group, target university destinations (Qatar University, Education City universities, UK, US, Canada, Australia, anywhere), family situation (which area, corporate assignment context, child\'s learning preferences), and curriculum options. The consultation is genuinely no-commitment.',
+    },
+  ],
+
+  ctaH: 'Ready to start your child\'s Cambridge journey from Qatar?',
+  ctaSubhead: 'Free 15-minute consultation. We\'ll walk through your child\'s year group, target universities, and curriculum fit. No commitment.',
+}
