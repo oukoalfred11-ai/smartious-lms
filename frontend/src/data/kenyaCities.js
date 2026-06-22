@@ -499,3 +499,238 @@ export const KENYA_CITIES = [
     },
   },
 ]
+
+// ═══════════════════════════════════════════════════════════════════
+// KENYA_COUNTRY — Comprehensive country-level data for Kenya hub
+// ═══════════════════════════════════════════════════════════════════
+export const KENYA_COUNTRY = {
+  slug: 'kenya',
+  name: 'Kenya',
+  longName: 'Republic of Kenya',
+  flag: '🇰🇪',
+  hub: '/online-school/kenya',
+  hubPageId: 'homeschooling-kenya',
+  cityPageId: 'kenya-city',
+  currency: 'KES',
+  currencyName: 'Kenyan Shilling',
+  currencyPeg: { rate: 129, since: null, note: 'KES floating, ~KES 129/USD typical 2026 range' },
+  timezone: { code: 'EAT', name: 'East Africa Time', utcOffset: 3, offsetFromEAT: 0 },
+  examCentres: [
+    'British Council Nairobi (Upper Hill / Lavington Mall)',
+    'Cambridge-authorised Kenyan schools',
+    'Braeburn Schools, Brookhouse, Hillcrest International',
+    'Aga Khan Academy, GEMS Cambridge International School',
+    'Strathmore School, Greensteds International School',
+  ],
+  heroImage: 'https://images.unsplash.com/photo-1535397459466-3a01a3ba6b21?w=1600&q=80&auto=format&fit=crop',
+  heroEyebrow: 'Online homeschooling · Across Kenya',
+  heroH1Suffix: 'Kenya',
+  heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for Kenyan families across Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, plus diaspora families globally.',
+  heroValueProp: 'The Brookhouse / Braeburn / Aga Khan Academy / Hillcrest / GEMS Cambridge / Strathmore / Pembroke House alternative. Built for Kenyan families across all 47 counties — plus Kenyan diaspora globally seeking curriculum continuity for return home. Our headquarters are in Nairobi (Diamond Plaza Parklands HQ + Karen Hardy centre). USD pricing protects against KES volatility.',
+  whatsappTrigger: 'Hi Smartious, I would like online homeschooling for my child in Kenya.',
+  citiesSectionTitle: 'Online homeschooling across Kenya',
+  citiesSectionBody: 'Six Kenyan cities. Each page covers local schools, CBC and 8-4-4 alternatives, family situations and answers — from Nairobi Westlands/Karen/Runda families to Mombasa coastal households to Kisumu lake region communities.',
+
+  trustSignals: [
+    { metric: 'Established', value: '2022', sub: 'Nairobi-based — HQ in Kenya' },
+    { metric: 'Curricula', value: '5', sub: 'Cambridge · Edexcel · IB · American AP · CBC' },
+    { metric: 'Tutors', value: '78+', sub: 'PGCE-qualified subject specialists' },
+    { metric: 'Countries served', value: '14+', sub: 'Africa · Gulf · Europe · Americas' },
+    { metric: 'Physical centres', value: '2', sub: 'Diamond Plaza Parklands · Karen Hardy' },
+    { metric: 'Founded by', value: 'Alfred Ouko', sub: 'UoN-trained Maths & Physics educator' },
+  ],
+
+  competitorsIntro: 'Kenya has one of Africa\'s most developed international school sectors, concentrated in Nairobi with established options in Mombasa, Nakuru, Naivasha, and other towns. Below are major Cambridge, IB, and American curriculum schools Kenyan families compare with Smartious.',
+  competitors: [
+    {
+      name: 'Brookhouse Schools',
+      city: 'Nairobi (Karen, Runda campuses)',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: 'KES 1.6M – 2.4M / year',
+      feesUsd: '12,400 – 18,600',
+      rating: 'Established Cambridge school',
+      capacityNote: 'Selective admissions',
+    },
+    {
+      name: 'Braeburn Schools (Network)',
+      city: 'Nairobi multiple campuses + Mombasa, Nakuru, Eldoret',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: 'KES 1.4M – 2.2M / year',
+      feesUsd: '10,900 – 17,100',
+      rating: 'Established Cambridge network',
+      capacityNote: 'Multiple campus locations',
+    },
+    {
+      name: 'Aga Khan Academy Nairobi',
+      city: 'Nairobi',
+      curriculum: 'IB Diploma + IB MYP',
+      feesAed: 'KES 1.8M – 2.6M / year',
+      feesUsd: '14,000 – 20,200',
+      rating: 'Established IB school',
+      capacityNote: 'Highly selective',
+    },
+    {
+      name: 'GEMS Cambridge International School Nairobi',
+      city: 'Nairobi (Karen)',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: 'KES 1.4M – 2.0M / year',
+      feesUsd: '10,900 – 15,500',
+      rating: 'GEMS network school',
+      capacityNote: 'Established programme',
+    },
+    {
+      name: 'Hillcrest International Schools',
+      city: 'Nairobi (Karen)',
+      curriculum: 'British / Cambridge IGCSE & A-Level',
+      feesAed: 'KES 1.5M – 2.2M / year',
+      feesUsd: '11,600 – 17,100',
+      rating: 'Established Karen school',
+      capacityNote: 'Established admissions',
+    },
+    {
+      name: 'Strathmore School',
+      city: 'Nairobi',
+      curriculum: 'Cambridge IGCSE & A-Level',
+      feesAed: 'KES 800K – 1.4M / year',
+      feesUsd: '6,200 – 10,900',
+      rating: 'Established boys school, Cambridge',
+      capacityNote: 'Selective boys school',
+    },
+    {
+      name: 'Pembroke House',
+      city: 'Gilgil (rural Rift Valley)',
+      curriculum: 'British prep school / Cambridge',
+      feesAed: 'KES 1.8M – 2.4M / year',
+      feesUsd: '14,000 – 18,600',
+      rating: 'Established boarding prep',
+      capacityNote: 'Boarding school commitment',
+    },
+    {
+      name: 'Smartious (live online)',
+      city: 'All 47 Kenyan counties',
+      curriculum: 'Cambridge IGCSE & A-Level · Edexcel · IB · American AP · CBC',
+      feesAed: 'KES 280K – 836K / year (~USD 2,160 – 6,480)',
+      feesUsd: '2,160 – 6,480',
+      rating: 'Live online · PGCE specialists · Nairobi HQ',
+      capacityNote: 'Immediate enrolment — accessible from any county',
+      isUs: true,
+    },
+  ],
+
+  legalFrameworkIntro: 'Kenya has a formal homeschool framework recognised under the Cabinet on Homeschooling (2017) and Basic Education Act. Here is what Kenyan families need to know about homeschool registration, CBC vs 8-4-4 vs international curricula, and university pathway access.',
+  legalFramework: [
+    {
+      h: 'Kenya Ministry of Education and KICD',
+      p: 'The Ministry of Education and Kenya Institute of Curriculum Development (KICD) oversee the national curriculum (Competency-Based Curriculum / CBC, replacing 8-4-4). Homeschool is recognised under the Cabinet on Homeschooling (2017). Families can homeschool using either national curriculum (CBC or transitioning 8-4-4) or international curricula (Cambridge IGCSE/A-Level, IB, American).',
+    },
+    {
+      h: 'CBC (Competency-Based Curriculum)',
+      p: 'CBC is Kenya\'s current national curriculum, launched 2017, fully phased in by 2025. Grade structure: PP1-PP2 (Pre-Primary), Grade 1-6 (Lower Primary), Grade 7-9 (Junior School), Grade 10-12 (Senior School). KCPE replaced by KPSEA at end of Grade 6; KCSE evolution at end of Grade 12. Smartious delivers CBC for families wanting national curriculum.',
+    },
+    {
+      h: 'Cambridge IGCSE/A-Level — international pathway',
+      p: 'Cambridge IGCSE (Year 10-11, equivalent to Grade 10-11) and A-Level (Year 12-13, equivalent to Grade 11-12) are widely delivered in Kenyan international schools (Brookhouse, Braeburn, GEMS Cambridge, Hillcrest, Strathmore, etc.). Accepted by Kenyan universities (Strathmore, USIU-Africa, Aga Khan University, UoN, Kenyatta, Riara, AKU-EA) for international student pathway, plus UK, US, Canadian, Australian, South African universities worldwide.',
+    },
+    {
+      h: 'Pestalozzi Trust / Homeschool Kenya support',
+      p: 'Homeschool Kenya and various community organisations provide guidance on homeschool registration with Kenya Ministry of Education. Smartious provides comprehensive curriculum documentation supporting all homeschool registration contexts.',
+    },
+    {
+      h: 'Cambridge International examination centre',
+      p: 'British Council Nairobi (Upper Hill / Lavington Mall) is the primary Cambridge International examination centre. Cambridge-authorised Kenyan schools (Brookhouse, Braeburn, GEMS Cambridge, Hillcrest, Aga Khan Academy, Greensteds, Pembroke House, Strathmore, ISK) also serve as examination centres. May/June and October/November Cambridge series held annually.',
+    },
+    {
+      h: 'University pathways — Kenya, regional Africa, worldwide',
+      p: 'Cambridge IGCSE and A-Level qualifications are accepted by Kenyan universities (Strathmore, USIU-Africa, Aga Khan University, UoN, Kenyatta University, Riara University, AKU-EA), regional African universities (South Africa UCT/Wits/Stellenbosch, Rwanda ALU/CMU-Africa, Tanzania, Uganda, Ethiopia), plus UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight universities.',
+    },
+    {
+      h: 'Kenyan diaspora considerations',
+      p: 'For Kenyan diaspora families abroad (UK, US, Canada, Australia, UAE, South Africa, Germany) considering return home, Smartious provides curriculum continuity in Cambridge or IB pathways. Children continue international curriculum without disruption, with seamless return to Kenyan international schools (Brookhouse, Braeburn, etc.) or continued Smartious enrolment from any Kenyan city.',
+    },
+  ],
+
+  whySmartious: [
+    {
+      h: 'Nairobi-based — we are Kenyan',
+      p: 'Smartious is headquartered in Nairobi with two physical centres (Diamond Plaza Parklands HQ and Karen Hardy). Founded by Alfred Ouko, University of Nairobi-trained Mathematics and Physics educator. We are Kenyan-built, Kenyan-led, and Kenyan-serving — with global reach to 14+ countries.',
+    },
+    {
+      h: 'Brookhouse / Braeburn / Aga Khan Academy alternative pricing',
+      p: 'Brookhouse KES 1.6M-2.4M/year, Braeburn KES 1.4M-2.2M/year, Aga Khan Academy KES 1.8M-2.6M/year, GEMS Cambridge KES 1.4M-2.0M/year, Hillcrest KES 1.5M-2.2M/year. Smartious KES 280K-836K/year (~USD 2,160-6,480) — delivers Cambridge curriculum at meaningfully lower cost.',
+    },
+    {
+      h: 'Accessible from any of Kenya\'s 47 counties',
+      p: 'Top Cambridge schools are concentrated in Nairobi (Karen, Runda, Westlands) and a few other major towns. For families in Kisumu, Eldoret, Kakamega, Meru, Nyeri, Machakos, Kitui, Kilifi, Lamu, Garissa, Lodwar — and all other Kenyan counties — Cambridge international school access historically required Nairobi relocation. Smartious eliminates this — Cambridge curriculum from any Kenyan county with reliable internet.',
+    },
+    {
+      h: 'EAT live class scheduling — exact match Kenyan school hours',
+      p: 'Live classes run 8 AM – 5 PM East Africa Time (EAT, UTC+3) — exactly matching Kenyan school hours nationally. Same time zone whether you\'re in Nairobi Karen, Mombasa Nyali, Kisumu Milimani, or Eldoret town.',
+    },
+    {
+      h: 'Five curricula — CBC plus four international',
+      p: 'Smartious delivers CBC (Kenyan national), Cambridge IGCSE/A-Level (British), Pearson Edexcel, IB Diploma, plus American AP. Families can choose national curriculum (CBC) for domestic Kenyan university pathways, international curriculum (Cambridge/IB/American) for global university pathways, or combine for maximum optionality.',
+    },
+    {
+      h: 'Live Cambridge-trained PGCE teachers, not pre-recorded video',
+      p: 'Every Smartious class is taught live by Cambridge-trained PGCE-qualified subject specialists. Real-time questions, real-time clarifications. Distinct from pre-recorded online providers.',
+    },
+    {
+      h: 'Diaspora-friendly — global delivery for Kenyan families abroad',
+      p: 'For Kenyan diaspora families in UK, US, Canada, Australia, UAE, South Africa, Germany, Smartious provides curriculum continuity for eventual return home. Children continue international curriculum without disruption.',
+    },
+  ],
+
+  faqs: [
+    {
+      q: 'How does Smartious compare to Brookhouse, Braeburn, Aga Khan Academy, GEMS Cambridge, Hillcrest, Strathmore?',
+      a: 'Top Cambridge schools in Kenya — Brookhouse (KES 1.6M-2.4M/year), Braeburn (KES 1.4M-2.2M/year), Aga Khan Academy (KES 1.8M-2.6M/year — IB), GEMS Cambridge International School (KES 1.4M-2.0M/year), Hillcrest International (KES 1.5M-2.2M/year), Strathmore School (KES 800K-1.4M/year) — provide physical campus education with established sports, arts, and pastoral programmes. Smartious provides live online Cambridge, IB, American, or CBC curriculum at KES 280K-836K/year (~USD 2,160-6,480). Trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment, smaller class sizes (4-6 students vs typical 20-30), accessibility from any Kenyan county.',
+    },
+    {
+      q: 'My family lives outside Nairobi (Mombasa / Kisumu / Eldoret / Kakamega / Meru / Nyeri / rural Kenya). How does Smartious work?',
+      a: 'Smartious works from any Kenyan county with reliable internet — Mombasa, Kisumu, Nakuru, Eldoret, Kakamega, Meru, Nyeri, Machakos, Kitui, Kilifi, Malindi, Lamu, Garissa, Kitale, Lodwar — every county. Live online classes deliver in East Africa Time matching standard Kenyan school hours nationally. Cambridge examinations require travel to British Council Nairobi or other Cambridge-authorised centres twice per year (May/November series). Safaricom and Airtel 4G LTE plus growing fibre coverage make live online learning viable across most of Kenya.',
+    },
+    {
+      q: 'Should I choose CBC, 8-4-4, or Cambridge IGCSE/A-Level?',
+      a: 'Depends on your child\'s university destination preferences. CBC is the current Kenyan national curriculum, fully phased in by 2025. CBC qualifications work for Kenyan universities (UoN, Strathmore, USIU-Africa, Kenyatta, Riara, AKU-EA). Cambridge IGCSE/A-Level qualifications work for Kenyan universities AND international universities (UK, US, Canada, Australia, South Africa) without credential evaluation. For families considering international university applications, Cambridge provides immediate international portability. For families pursuing Kenyan universities only, CBC may suffice. Smartious delivers both — many families combine.',
+    },
+    {
+      q: 'Can my Kenyan child apply to UoN, Strathmore, USIU-Africa, Aga Khan University with Cambridge qualifications?',
+      a: 'Yes. University of Nairobi (UoN), Strathmore University, USIU-Africa (United States International University-Africa), Aga Khan University (AKU-EA), Kenyatta University, Riara University, Moi University, Egerton University, Jomo Kenyatta University of Agriculture and Technology (JKUAT), and all Kenyan universities accept Cambridge IGCSE and A-Level qualifications for international student admissions. Strathmore and USIU-Africa particularly value Cambridge for direct admissions pathway. Cambridge A-Level often grants credit toward first-year university courses.',
+    },
+    {
+      q: 'How does Smartious work for Kenyan diaspora families considering return home?',
+      a: 'For Kenyan diaspora families in UK, US, Canada, Australia, UAE, South Africa, Germany, considering return to Kenya over 2-5 year timelines, Smartious provides curriculum continuity. Children continue Cambridge IGCSE/A-Level, IB Diploma, or American curriculum while abroad, with seamless continuation upon return to Kenya (either continued Smartious enrolment from any Kenyan county or transition to Kenyan international school like Brookhouse, Braeburn). No curriculum bridging required.',
+    },
+    {
+      q: 'Will my child miss out on sports, arts, and social development without a physical school?',
+      a: 'A physical school provides a complete daily environment that an online programme does not replicate. However, Kenyan families combine Smartious academic instruction with sports clubs (athletics — Kenya has world-class running culture, football, rugby, swimming, equestrian, golf), music academies, scouts, debate, plus religious community involvement. Smartious classes themselves provide live peer interaction across 14+ countries.',
+    },
+    {
+      q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',
+      a: 'Yes. Smartious teaching staff are PGCE-qualified (Postgraduate Certificate in Education) subject specialists with Cambridge International training. Teachers are based in Nairobi at our two physical centres (Diamond Plaza Parklands HQ and Karen Hardy). PGCE is the standard professional teaching credential used by Cambridge schools globally, including Kenya\'s top Cambridge schools (Brookhouse, Braeburn, Hillcrest, GEMS Cambridge).',
+    },
+    {
+      q: 'How does Smartious work with Kenya\'s homeschool registration framework?',
+      a: 'Kenya recognises homeschool under the Cabinet on Homeschooling (2017) and Basic Education Act. Families register with the Ministry of Education and provide curriculum documentation. Smartious supplies comprehensive curriculum, scheme of work, learning outcomes, and assessment documentation suitable for Ministry of Education compliance. For families wanting additional support, Homeschool Kenya provides excellent registration guidance.',
+    },
+    {
+      q: 'How does payment work — KES or USD?',
+      a: 'Smartious tuition is denominated in USD (USD 180/295/540 per month — approximately KES 23,000/38,000/70,000 at typical 2026 ~KES 129/USD range). Payments accepted via M-Pesa Paybill 247247 Account 745021, Paystack, international card (Visa, Mastercard, Amex), PayPal, or bank transfer. USD denomination provides stability against KES-USD volatility for multi-year planning. M-Pesa makes Kenya-based payments simple.',
+    },
+    {
+      q: 'How reliable is internet connectivity for live online learning in Kenya?',
+      a: 'Safaricom 4G LTE and growing 5G provides excellent connectivity across Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, and all major Kenyan cities. Fibre internet (Safaricom Home Fibre, Zuku, Faiba) is increasingly available in Nairobi, Mombasa, Kisumu, Eldoret. Airtel Kenya provides additional coverage. For more rural locations (Kitui, Marsabit, Turkana, parts of Garissa), Starlink satellite provides reliable backup. Smartious recorded sessions ensure no lost lessons regardless of connectivity events.',
+    },
+    {
+      q: 'Where do Kenyan students sit Cambridge IGCSE and A-Level examinations?',
+      a: 'British Council Nairobi (Upper Hill / Lavington Mall) is the primary Cambridge International examination centre for Kenya. Cambridge-authorised Kenyan schools (Brookhouse, Braeburn campuses across multiple cities, GEMS Cambridge, Hillcrest, Aga Khan Academy, Greensteds, Pembroke House, Strathmore, ISK) also serve as examination centres. Cambridge IGCSE and A-Level examinations held during May/June and October/November series annually.',
+    },
+    {
+      q: 'How do we know if Smartious is the right fit for our family?',
+      a: 'Book a free 15-minute consultation. We will discuss your child\'s current grade/year, target university destinations (Kenyan, regional African, UK, US, Canada, Australia, anywhere), family situation (which county, professional context, child\'s learning preferences, CBC vs international curriculum preference), and curriculum options. The consultation is genuinely no-commitment — we will be straightforward about whether Smartious or a different option (physical Kenyan international school, CBC-pathway local school, hybrid approach) better fits your circumstances. You can also visit our physical centres at Diamond Plaza Parklands or Karen Hardy.',
+    },
+  ],
+
+  ctaH: 'Ready to start your child\'s Cambridge journey from Kenya?',
+  ctaSubhead: 'Free 15-minute consultation. We\'ll walk through your child\'s year group, target universities, and curriculum fit. Visit our Diamond Plaza Parklands or Karen Hardy centre, or join online. No commitment.',
+}
