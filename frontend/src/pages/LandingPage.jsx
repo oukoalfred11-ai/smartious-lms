@@ -13967,8 +13967,263 @@ export default function LandingPage() {
                     </a>
                   </div>
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free assessment — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── ACCREDITATION, RECOGNITION & UNIVERSITY PATHWAYS — E-E-A-T anchor ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64,borderTop:`1px solid ${V.bone3}`}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Accreditation &amp; Recognition</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                    Accreditation, Recognition &amp; University Pathways
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
+                    Smartious students earn qualifications administered by independent international examination boards. Recognition flows from the board itself &mdash; not from the school that delivered the curriculum. Below is the accreditation, examination and verification framework that connects Egyptian Smartious students to universities worldwide.
+                  </p>
+                </div>
+
+                {/* Four curriculum pathways */}
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))',gap:18,marginBottom:40}}>
+                  {[
+                    {h:'Cambridge International',sub:'Cambridge Assessment International Education · University of Cambridge',p:'Cambridge IGCSE and Cambridge A-Level qualifications, administered by the University of Cambridge\'s international examinations arm. Recognised by universities in over 195 countries. The most widely-adopted British curriculum pathway among Egyptian families.'},
+                    {h:'Pearson Edexcel International',sub:'Pearson · UK Edexcel curriculum adapted for international delivery',p:'International GCSE and International A-Level qualifications, administered by Pearson. Three examination series annually (January, May/June, October/November) providing additional flexibility versus the Cambridge twice-yearly schedule.'},
+                    {h:'International Baccalaureate Organisation',sub:'IB Diploma Programme · IBO Geneva',p:'IB Diploma administered by the International Baccalaureate Organisation in Geneva. Recognised by leading universities globally with particularly strong weighting at US Ivy League, US selective liberal arts colleges, Canadian U15 and top European universities.'},
+                    {h:'College Board',sub:'American Curriculum with Advanced Placement (AP)',p:'AP courses and examinations administered by the College Board, the US non-profit responsible for the SAT and AP programmes. AP scores are widely recognised by US universities for university credit, plus by Canadian, UK, Australian and many universities worldwide.'},
+                  ].map((c,i) => (
+                    <div key={i} style={{padding:'22px 22px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,borderLeft:`3px solid ${V.cr}`}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,margin:'0 0 4px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
+                      <p style={{fontSize:11.5,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:'0 0 10px'}}>{c.sub}</p>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.p}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Examination centre arrangements */}
+                <div style={{padding:'28px 30px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:32}}>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,margin:'0 0 12px',lineHeight:1.3,fontWeight:400}}>Examination centre arrangements in Egypt</h3>
+                  <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:'0 0 14px'}}>
+                    International examinations require attendance at authorised examination centres on specific dates. In Egypt, established examination centres serve Cambridge International, Pearson Edexcel and other major international qualifications.
+                  </p>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))',gap:12}}>
+                    {[
+                      {city:'Cairo',centre:'British Council Cairo',area:'Agouza, El Dokki'},
+                      {city:'Alexandria',centre:'British Council Alexandria',area:'Roushdy district'},
+                      {city:'Cambridge-authorised schools',centre:'Across Cairo and Alexandria',area:'External candidates accepted at selected schools'},
+                    ].map((c,i) => (
+                      <div key={i} style={{padding:'12px 14px',background:V.white,borderRadius:8,border:`1px solid ${V.bone3}`}}>
+                        <div style={{fontSize:11,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:4}}>{c.city}</div>
+                        <div style={{fontSize:13.5,color:V.ink,fontWeight:600,marginBottom:2}}>{c.centre}</div>
+                        <div style={{fontSize:12,color:V.sl}}>{c.area}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:'14px 0 0',fontStyle:'italic'}}>
+                    Smartious manages examination registration logistics including centre selection, registration paperwork and deadline compliance. Students in cities outside Cairo and Alexandria coordinate travel for the relevant examination series.
+                  </p>
+                </div>
+
+                {/* University recognition worldwide */}
+                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,marginTop:24,marginBottom:14,lineHeight:1.3,fontWeight:400,textAlign:'center'}}>University recognition worldwide</h3>
+                <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginBottom:20,textAlign:'center',maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
+                  Cambridge International, Pearson Edexcel, IB Diploma and American AP qualifications are recognised across the major university systems globally.
+                </p>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:14,marginBottom:32}}>
+                  {[
+                    {region:'Egypt',unis:'American University in Cairo (AUC) · German University in Cairo (GUC) · British University in Egypt (BUE) · Future University in Egypt · MSA University · Heliopolis University · Cairo University · Ain Shams · Alexandria University · Helwan · Mansoura'},
+                    {region:'United Kingdom',unis:'Cambridge · Oxford · Imperial College London · UCL · LSE · King\'s College London · Edinburgh · Manchester · Bristol · Birmingham · Warwick · Durham · the Russell Group · the broader UK system via UCAS'},
+                    {region:'United States',unis:'Harvard · Yale · Princeton · Columbia · Penn · Brown · Dartmouth · Cornell · Amherst · Williams · Pomona · UC Berkeley · UCLA · Michigan · Virginia · top liberal arts and public research universities via the Common Application'},
+                    {region:'Canada',unis:'Toronto · McGill · UBC · McMaster · Waterloo · Western · Queen\'s · the U15 research universities · OUAC for Ontario applications'},
+                    {region:'Australia',unis:'Melbourne · Sydney · ANU · Monash · Queensland · UWA · Adelaide · UNSW · the Group of Eight via UAC'},
+                    {region:'Gulf &amp; Saudi Arabia',unis:'NYU Abu Dhabi · Sorbonne Abu Dhabi · Khalifa · AUS · AUD · UAE branch campuses · KFUPM · KAUST · KSU · KAU · Saudi national universities · Education City Doha (Georgetown · Northwestern · CMU · Cornell · Texas A&amp;M · HEC Paris · UCL)'},
+                    {region:'Europe',unis:'Berlin Humboldt · Munich LMU · Heidelberg · RWTH Aachen · TU Munich · French Grandes &Eacute;coles · Amsterdam · Leiden · Utrecht · Bologna · Sapienza · ETH Zurich · EPFL'},
+                  ].map((r,i) => (
+                    <div key={i} style={{padding:'18px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10}}>
+                      <div style={{fontSize:11,color:V.gold3,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>{r.region}</div>
+                      <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{r.unis}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* How universities verify */}
+                <div style={{padding:'24px 28px',background:`linear-gradient(135deg, ${V.bone} 0%, ${V.white} 100%)`,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.gold3}`,borderRadius:10}}>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 10px',lineHeight:1.3,fontWeight:400}}>How universities verify qualifications</h3>
+                  <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>
+                    Universities verify Cambridge International, Pearson Edexcel, IB Diploma and American AP qualifications directly with the issuing examination boards through standard verification services &mdash; Cambridge International Verification of Awards, Pearson\'s Verification of Results, the IB Organisation\'s verification service, and the College Board AP Score Reporting service. The qualification\'s credibility comes from the examination board itself, which is why these qualifications are equally valid whether earned at a physical school or through Smartious.
+                  </p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── CURRICULUM DEEP DIVES ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Curriculum pathways</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                    Four curriculum pathways for Egyptian families
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))',gap:18}}>
+                  {[
+                    {
+                      h:'British Curriculum',
+                      sub:'Cambridge IGCSE &amp; A-Level · Pearson Edexcel',
+                      structure:'Cambridge IGCSE: Years 10-11, eight to ten subjects. Cambridge A-Level: Years 12-13, three or four subjects in depth. Pearson Edexcel as British alternative with three examination series annually.',
+                      suits:'Egyptian families targeting UK universities, AUC, GUC, BUE, broad international portability, and Gulf university applications.',
+                      delivery:'Live online classes by subject specialists in Eastern European Time. Examination registration at British Council Cairo or Alexandria.',
+                    },
+                    {
+                      h:'IB Diploma Programme',
+                      sub:'International Baccalaureate Organisation',
+                      structure:'Grades 11-12. Six subjects (three Higher Level, three Standard Level), plus Theory of Knowledge, the Extended Essay (4,000-word independent research paper), and Creativity, Activity and Service (CAS).',
+                      suits:'Egyptian families targeting US Ivy League, US selective liberal arts colleges, Canadian U15, top European universities, and AUC for the curriculum breadth match.',
+                      delivery:'Live online IB delivery with TOK, Extended Essay supervision across all subject categories, and CAS coordination through local Egyptian community partnerships.',
+                    },
+                    {
+                      h:'American Curriculum',
+                      sub:'College Board · AP · SAT &amp; ACT',
+                      structure:'US high school curriculum through Grade 12. Advanced Placement courses Grades 9-12 with college-level subject specialisation. SAT or ACT preparation integrated alongside curriculum delivery.',
+                      suits:'Egyptian families with US Embassy or US corporate connections, US-based extended family, or targeting American universities specifically including the Ivy League and top liberal arts colleges.',
+                      delivery:'AP course delivery, SAT/ACT preparation, US college application essay coaching, Common Application platform support, university interview preparation.',
+                    },
+                  ].map((c,i) => (
+                    <div key={i} style={{padding:'24px 24px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:14}}>
+                      <div>
+                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 4px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
+                        <p style={{fontSize:11,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:0}}>{c.sub}</p>
+                      </div>
+                      <div>
+                        <div style={{fontSize:11,color:V.ink,fontWeight:700,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:4}}>Structure</div>
+                        <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.structure}</p>
+                      </div>
+                      <div>
+                        <div style={{fontSize:11,color:V.ink,fontWeight:700,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:4}}>Suits families targeting</div>
+                        <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.suits}</p>
+                      </div>
+                      <div>
+                        <div style={{fontSize:11,color:V.ink,fontWeight:700,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:4}}>Smartious delivery</div>
+                        <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.delivery}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── PRIMARY / SECONDARY / SIXTH FORM PROGRAMMES ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>School programmes</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                    Primary, Secondary &amp; Sixth Form
+                  </h2>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:18}}>
+                  {[
+                    {
+                      h:'Primary Programmes',
+                      age:'Ages 5-11 · Years 1-6 · Grades 1-5 · IB PYP',
+                      p:'Cambridge Primary, Common Core or IB Primary Years Programme. Live classes are age-appropriate in length (40-50 minutes), scheduled in the morning EET window. Small group sizes support individual attention. Weekly parent dashboards and monthly written reports cover academic and developmental progress.',
+                    },
+                    {
+                      h:'Secondary Programmes',
+                      age:'Years 7-11 · Grades 6-11',
+                      p:'Lower Secondary (Years 7-9) builds the foundations for IGCSE entry. IGCSE Years (10-11) cover eight to ten subjects with examination registration at British Council Cairo or Alexandria. One-on-one subject choice consultation at IGCSE entry aligns subjects with university targets. Mid-year arrivals accepted with academic catch-up support.',
+                    },
+                    {
+                      h:'Sixth Form &amp; University Preparation',
+                      age:'Years 12-13 · Grades 11-12',
+                      p:'A-Level (Cambridge or Edexcel), IB Diploma, or American AP. Small class sizes support depth. University application support across UCAS, Common Application, OUAC, UAC, AUC direct application, and direct channels for German, French, Dutch, Italian, Russian, Gulf and Saudi universities. Personal statement coaching and interview preparation included.',
+                    },
+                  ].map((c,i) => (
+                    <div key={i} style={{padding:'24px 24px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
+                      <p style={{fontSize:11,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:'0 0 12px'}}>{c.age}</p>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.7,margin:0}}>{c.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── WHY FAMILIES TRUST SMARTIOUS — 8 PILLARS ─── */}
+            <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Why families trust Smartious</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                    Eight reasons Egyptian families choose Smartious
+                  </h2>
+                  <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
+                    Each reason is grounded in something verifiable &mdash; not in marketing claims.
+                  </p>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:14}}>
+                  {[
+                    {h:'Experienced international educators',p:'Subject-specific degree-qualified teaching staff with cumulative experience across Cambridge International, Pearson Edexcel, IB Diploma and American Curriculum. Many are TSC-registered (Kenya Teachers Service Commission); several hold advanced teaching credentials including PGCE.'},
+                    {h:'Personalised learning plans',p:'Every student begins with an initial assessment. The learning plan that follows is tailored to academic level, subject preferences, target universities and family situation &mdash; not a one-size-fits-all schedule.'},
+                    {h:'Academic assessments',p:'Initial diagnostic assessment. Weekly informal assessment within classes. Monthly formal assessments. Mock examinations under timed conditions during IGCSE and A-Level years. Results inform teaching adjustments.'},
+                    {h:'Small class sizes',p:'Online tier classes have four to six students. Online Plus has smaller groups. Premium is one-on-one. Class size affects individual attention, question response time, and student speaking time during class.'},
+                    {h:'Progress monitoring',p:'Weekly parent dashboards showing attendance and assessment results. Monthly written subject reports from each teacher. Termly comprehensive reports covering academic progress, study habits and university preparation.'},
+                    {h:'Parent communication',p:'Direct communication with subject teachers and form tutors via the parent portal. WhatsApp and email for admissions and pastoral matters. Scheduled parent-teacher meetings each term.'},
+                    {h:'Global student community',p:'Live classes bring together students from across 14 countries. Wednesday afternoon enrichment programmes &mdash; coding, robotics, debate, Model UN, chess, journalism, leadership &mdash; develop collaborative learning across geographies.'},
+                    {h:'University admissions guidance',p:'Progressive guidance from Year 10 onwards. UCAS, Common Application, OUAC, UAC and direct university application support. Personal statement coaching, interview preparation and offer-management guidance.'},
+                  ].map((c,i) => (
+                    <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,borderTop:`3px solid ${V.gold3}`}}>
+                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,margin:'0 0 8px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div></section>
+
+            {/* ─── ABOUT THE FOUNDER — Alfred Ouko ─── */}
+            <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64,borderTop:`1px solid ${V.bone3}`}}><div className="wrap">
+              <div style={{maxWidth:1100,margin:'0 auto'}}>
+                <div style={{display:'grid',gridTemplateColumns:'auto 1fr',gap:36,alignItems:'start'}}>
+                  {/* Avatar / initials block */}
+                  <div style={{width:180,height:180,borderRadius:'50%',background:`linear-gradient(135deg, ${V.cr} 0%, ${V.gold3} 100%)`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'3.2rem',flexShrink:0,boxShadow:'0 8px 24px rgba(139,26,46,.25)'}}>
+                    AO
+                  </div>
+                  {/* Bio content */}
+                  <div>
+                    <div className="eyebrow">About the founder</div>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:6,lineHeight:1.2}}>Alfred Ouko</h2>
+                    <p style={{fontSize:13.5,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:'0 0 18px'}}>Founder, Smartious Homeschool &amp; eSchool</p>
+
+                    <p style={{fontSize:14.5,color:V.sl,lineHeight:1.75,margin:'0 0 16px'}}>
+                      Alfred Ouko is the founder of Smartious Homeschool &amp; eSchool, established in 2019 while studying at the University of Nairobi. He has grown the organisation from a tuition support service into an international online school serving families across 14 countries, including Egyptian families across Cairo, Alexandria, Giza, New Cairo, Sheikh Zayed City and the New Administrative Capital.
+                    </p>
+
+                    <div style={{marginBottom:18}}>
+                      <div style={{fontSize:11,color:V.ink,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>Qualifications</div>
+                      <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>
+                        Bachelor of Education (Science) &mdash; Mathematics and Physics, University of Nairobi (2022)
+                      </p>
+                    </div>
+
+                    <div style={{marginBottom:18}}>
+                      <div style={{fontSize:11,color:V.ink,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>Experience</div>
+                      <ul style={{fontSize:13.5,color:V.sl,lineHeight:1.75,margin:0,paddingLeft:20}}>
+                        <li style={{marginBottom:6}}>Over six years supporting students through international curriculum pathways &mdash; Cambridge International (IGCSE and A-Level), Pearson Edexcel International, IB Diploma Programme, American Curriculum with AP, and homeschooling pathways.</li>
+                        <li style={{marginBottom:6}}>Direct teaching experience in secondary-level Mathematics and Physics across multiple international curriculum boards.</li>
+                        <li style={{marginBottom:6}}>Leadership of curriculum development, teacher recruitment and academic standards across Smartious\'s two Nairobi-based physical centres (Diamond Plaza Parklands HQ and Karen Hardy) and online programmes.</li>
+                        <li>Specialism in supporting students through university admissions to UK Russell Group, US universities, Canadian U15, Australian Group of Eight, Gulf universities, and Egyptian universities including AUC, GUC and BUE.</li>
+                      </ul>
+                    </div>
+
+                    <div style={{padding:'16px 18px',background:V.bone,borderLeft:`3px solid ${V.cr}`,borderRadius:6}}>
+                      <p style={{fontSize:13,color:V.sl,lineHeight:1.7,margin:0,fontStyle:'italic'}}>
+                        &ldquo;International curriculum mastery is achievable for students from any background when subject specialists, small class sizes, and individual academic plans are combined with the discipline and structure good schools provide.&rdquo;
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div></section>
@@ -14003,7 +14258,7 @@ export default function LandingPage() {
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
                   <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free 15-min Consultation
+                    Book Free Assessment
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   </button>
                   <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
@@ -14019,7 +14274,7 @@ export default function LandingPage() {
                   <span>[+] Immediate enrolment</span>
                   <span>[+] No school waiting lists</span>
                   <span>[+] USD pricing stability</span>
-                  <span>[+] Multi-emirate coverage</span>
+                  <span>[+] Local exam centres at British Council Cairo &amp; Alexandria</span>
                 </div>
               </div>
             </section>
