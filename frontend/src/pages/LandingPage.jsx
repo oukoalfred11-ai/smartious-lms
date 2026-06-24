@@ -875,6 +875,22 @@ const styles = `
 
 const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
 
+// ─────────────────────────────────────────────────────────────────
+// Google Business Profile reviews — Smartious Homeschool & Tuition
+// Diamond Plaza, Fourth Parklands Ave, Nairobi
+// 4.9★ from 123+ verified reviews
+// ─────────────────────────────────────────────────────────────────
+const SMARTIOUS_REVIEWS = [
+  { text: 'I am truly impressed by the level of professionalism at Smartious Homeschool and Tuition. The tutors are not only knowledgeable but also very patient and supportive. They create a comfortable learning environment where children feel free to ask questions. My child now enjoys studying and looks forward to every session.', source: 'Verified Google Review', rating: 5 },
+  { text: 'What stands out most about Smartious Homeschool and Tuition is their dedication to each learner. They don\'t rush through topics but ensure the child fully understands before moving forward. The progress my child has made in a short time is impressive. I would definitely recommend them to any parent.', source: 'Verified Google Review', rating: 5 },
+  { text: 'Smartious Homeschooling delivers genuinely effective one-on-one instruction. The teachers are patient, consistent, and skilled at identifying and addressing each learner\'s specific academic gaps. Since enrolling, our child has become more confident, enjoys lessons, and is now performing above grade level. For families in Nairobi seeking a dependable, academically rigorous homeschooling programme with personalised support, Smartious is a standout choice.', source: 'Verified Google Review', rating: 5 },
+  { text: 'What I love most about Smartious is how they make learning enjoyable. The tutors use engaging methods that keep children interested throughout the lesson. My child now looks forward to studying instead of avoiding it.', source: 'Verified Google Review', rating: 5 },
+  { text: 'I have peace of mind as a Smartious Homeschool parent. No more traffic and early morning rush to school. Smartious are the most organized homeschool providers.', source: 'Verified Google Review', rating: 5 },
+]
+const GOOGLE_REVIEWS_URL = 'https://search.google.com/local/reviews?placeid=ChIJM59xkrsXLxgRNJot8ptZ1l8'
+const LEAVE_REVIEW_URL = 'https://g.page/r/CTSaLfKbWdZfEAE/review'
+const SMARTIOUS_RATING = { stars: 4.9, count: 123 }
+
 const Stars = () => (
   <div style={{display:'flex',gap:2,marginBottom:16}}>
     {[...Array(5)].map((_,i) => <svg key={i} className="t-s" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>)}
@@ -5031,8 +5047,8 @@ export default function LandingPage() {
                   ],
                   'aggregateRating': {
                     '@type': 'AggregateRating',
-                    'ratingValue': '5',
-                    'reviewCount': '4',
+                    'ratingValue': SMARTIOUS_RATING.stars,
+                    'reviewCount': SMARTIOUS_RATING.count,
                     'bestRating': '5',
                     'worstRating': '1',
                   },
@@ -13368,6 +13384,13 @@ export default function LandingPage() {
               '@id':'https://smartioushomeschool.com' + country.hub + '#org',
               'name':'Smartious — Online Homeschooling Across the UAE',
               'url':'https://smartioushomeschool.com' + country.hub,
+              'aggregateRating': {
+                '@type':'AggregateRating',
+                'ratingValue': SMARTIOUS_RATING.stars,
+                'reviewCount': SMARTIOUS_RATING.count,
+                'bestRating': 5,
+                'worstRating': 1,
+              },
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': country.competitors.filter(c => c.isUs).map(c => ({
@@ -13581,9 +13604,39 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
-                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                {/* ─── REAL GOOGLE REVIEWS — Smartious Homeschool Diamond Plaza ─── */}
+                <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What parents say</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                      {SMARTIOUS_RATING.stars} from {SMARTIOUS_RATING.count}+ verified Google reviews
+                    </h3>
+                    <div style={{display:'inline-flex',alignItems:'center',gap:10,padding:'8px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:24,fontSize:12.5,color:V.sl}}>
+                      <span style={{color:V.gold3,fontSize:16,letterSpacing:'.05em'}}>{'\u2605\u2605\u2605\u2605\u2605'}</span>
+                      <span style={{fontWeight:700,color:V.ink}}>{SMARTIOUS_RATING.stars} / 5</span>
+                      <span>·</span>
+                      <span>{SMARTIOUS_RATING.count}+ Google reviews</span>
+                    </div>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
+                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                      <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
+                        <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
+                        <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
+                        <div style={{fontSize:11,color:V.sl,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginTop:4}}>[+] {r.source}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginTop:8}}>
+                    <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="btn-o" style={{textDecoration:'none'}}>
+                      Read all reviews on Google &raquo;
+                    </a>
+                    <a href={LEAVE_REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-p" style={{textDecoration:'none'}}>
+                      Leave us a review &raquo;
+                    </a>
+                  </div>
+                  <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -13662,6 +13715,13 @@ export default function LandingPage() {
               '@id':'https://smartioushomeschool.com' + country.hub + '#org',
               'name':'Smartious — Online Homeschooling Across Egypt',
               'url':'https://smartioushomeschool.com' + country.hub,
+              'aggregateRating': {
+                '@type':'AggregateRating',
+                'ratingValue': SMARTIOUS_RATING.stars,
+                'reviewCount': SMARTIOUS_RATING.count,
+                'bestRating': 5,
+                'worstRating': 1,
+              },
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': country.competitors.filter(c => c.isUs).map(c => ({
@@ -13875,9 +13935,39 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
-                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                {/* ─── REAL GOOGLE REVIEWS — Smartious Homeschool Diamond Plaza ─── */}
+                <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What parents say</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                      {SMARTIOUS_RATING.stars} from {SMARTIOUS_RATING.count}+ verified Google reviews
+                    </h3>
+                    <div style={{display:'inline-flex',alignItems:'center',gap:10,padding:'8px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:24,fontSize:12.5,color:V.sl}}>
+                      <span style={{color:V.gold3,fontSize:16,letterSpacing:'.05em'}}>{'\u2605\u2605\u2605\u2605\u2605'}</span>
+                      <span style={{fontWeight:700,color:V.ink}}>{SMARTIOUS_RATING.stars} / 5</span>
+                      <span>·</span>
+                      <span>{SMARTIOUS_RATING.count}+ Google reviews</span>
+                    </div>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
+                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                      <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
+                        <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
+                        <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
+                        <div style={{fontSize:11,color:V.sl,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginTop:4}}>[+] {r.source}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginTop:8}}>
+                    <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="btn-o" style={{textDecoration:'none'}}>
+                      Read all reviews on Google &raquo;
+                    </a>
+                    <a href={LEAVE_REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-p" style={{textDecoration:'none'}}>
+                      Leave us a review &raquo;
+                    </a>
+                  </div>
+                  <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -14289,6 +14379,13 @@ export default function LandingPage() {
               '@id':'https://smartioushomeschool.com' + country.hub + '#org',
               'name':'Smartious — Online Homeschooling Across ' + country.longName,
               'url':'https://smartioushomeschool.com' + country.hub,
+              'aggregateRating': {
+                '@type':'AggregateRating',
+                'ratingValue': SMARTIOUS_RATING.stars,
+                'reviewCount': SMARTIOUS_RATING.count,
+                'bestRating': 5,
+                'worstRating': 1,
+              },
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': country.competitors.filter(c => c.isUs).map(c => ({
@@ -14502,9 +14599,39 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
-                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                {/* ─── REAL GOOGLE REVIEWS — Smartious Homeschool Diamond Plaza ─── */}
+                <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What parents say</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                      {SMARTIOUS_RATING.stars} from {SMARTIOUS_RATING.count}+ verified Google reviews
+                    </h3>
+                    <div style={{display:'inline-flex',alignItems:'center',gap:10,padding:'8px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:24,fontSize:12.5,color:V.sl}}>
+                      <span style={{color:V.gold3,fontSize:16,letterSpacing:'.05em'}}>{'\u2605\u2605\u2605\u2605\u2605'}</span>
+                      <span style={{fontWeight:700,color:V.ink}}>{SMARTIOUS_RATING.stars} / 5</span>
+                      <span>·</span>
+                      <span>{SMARTIOUS_RATING.count}+ Google reviews</span>
+                    </div>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
+                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                      <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
+                        <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
+                        <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
+                        <div style={{fontSize:11,color:V.sl,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginTop:4}}>[+] {r.source}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginTop:8}}>
+                    <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="btn-o" style={{textDecoration:'none'}}>
+                      Read all reviews on Google &raquo;
+                    </a>
+                    <a href={LEAVE_REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-p" style={{textDecoration:'none'}}>
+                      Leave us a review &raquo;
+                    </a>
+                  </div>
+                  <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -14756,6 +14883,13 @@ export default function LandingPage() {
               '@id':'https://smartioushomeschool.com' + country.hub + '#org',
               'name':'Smartious — Online Homeschooling Across ' + country.longName,
               'url':'https://smartioushomeschool.com' + country.hub,
+              'aggregateRating': {
+                '@type':'AggregateRating',
+                'ratingValue': SMARTIOUS_RATING.stars,
+                'reviewCount': SMARTIOUS_RATING.count,
+                'bestRating': 5,
+                'worstRating': 1,
+              },
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': country.competitors.filter(c => c.isUs).map(c => ({
@@ -14969,9 +15103,39 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
-                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                {/* ─── REAL GOOGLE REVIEWS — Smartious Homeschool Diamond Plaza ─── */}
+                <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What parents say</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                      {SMARTIOUS_RATING.stars} from {SMARTIOUS_RATING.count}+ verified Google reviews
+                    </h3>
+                    <div style={{display:'inline-flex',alignItems:'center',gap:10,padding:'8px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:24,fontSize:12.5,color:V.sl}}>
+                      <span style={{color:V.gold3,fontSize:16,letterSpacing:'.05em'}}>{'\u2605\u2605\u2605\u2605\u2605'}</span>
+                      <span style={{fontWeight:700,color:V.ink}}>{SMARTIOUS_RATING.stars} / 5</span>
+                      <span>·</span>
+                      <span>{SMARTIOUS_RATING.count}+ Google reviews</span>
+                    </div>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
+                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                      <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
+                        <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
+                        <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
+                        <div style={{fontSize:11,color:V.sl,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginTop:4}}>[+] {r.source}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginTop:8}}>
+                    <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="btn-o" style={{textDecoration:'none'}}>
+                      Read all reviews on Google &raquo;
+                    </a>
+                    <a href={LEAVE_REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-p" style={{textDecoration:'none'}}>
+                      Leave us a review &raquo;
+                    </a>
+                  </div>
+                  <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -15223,6 +15387,13 @@ export default function LandingPage() {
               '@id':'https://smartioushomeschool.com' + country.hub + '#org',
               'name':'Smartious — Online Homeschooling Across ' + country.longName,
               'url':'https://smartioushomeschool.com' + country.hub,
+              'aggregateRating': {
+                '@type':'AggregateRating',
+                'ratingValue': SMARTIOUS_RATING.stars,
+                'reviewCount': SMARTIOUS_RATING.count,
+                'bestRating': 5,
+                'worstRating': 1,
+              },
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': country.competitors.filter(c => c.isUs).map(c => ({
@@ -15436,9 +15607,39 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
-                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                {/* ─── REAL GOOGLE REVIEWS — Smartious Homeschool Diamond Plaza ─── */}
+                <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What parents say</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                      {SMARTIOUS_RATING.stars} from {SMARTIOUS_RATING.count}+ verified Google reviews
+                    </h3>
+                    <div style={{display:'inline-flex',alignItems:'center',gap:10,padding:'8px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:24,fontSize:12.5,color:V.sl}}>
+                      <span style={{color:V.gold3,fontSize:16,letterSpacing:'.05em'}}>{'\u2605\u2605\u2605\u2605\u2605'}</span>
+                      <span style={{fontWeight:700,color:V.ink}}>{SMARTIOUS_RATING.stars} / 5</span>
+                      <span>·</span>
+                      <span>{SMARTIOUS_RATING.count}+ Google reviews</span>
+                    </div>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
+                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                      <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
+                        <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
+                        <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
+                        <div style={{fontSize:11,color:V.sl,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginTop:4}}>[+] {r.source}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginTop:8}}>
+                    <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="btn-o" style={{textDecoration:'none'}}>
+                      Read all reviews on Google &raquo;
+                    </a>
+                    <a href={LEAVE_REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-p" style={{textDecoration:'none'}}>
+                      Leave us a review &raquo;
+                    </a>
+                  </div>
+                  <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -15690,6 +15891,13 @@ export default function LandingPage() {
               '@id':'https://smartioushomeschool.com' + country.hub + '#org',
               'name':'Smartious — Online Homeschooling Across ' + country.longName,
               'url':'https://smartioushomeschool.com' + country.hub,
+              'aggregateRating': {
+                '@type':'AggregateRating',
+                'ratingValue': SMARTIOUS_RATING.stars,
+                'reviewCount': SMARTIOUS_RATING.count,
+                'bestRating': 5,
+                'worstRating': 1,
+              },
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': country.competitors.filter(c => c.isUs).map(c => ({
@@ -15903,9 +16111,39 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
-                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                {/* ─── REAL GOOGLE REVIEWS — Smartious Homeschool Diamond Plaza ─── */}
+                <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What parents say</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                      {SMARTIOUS_RATING.stars} from {SMARTIOUS_RATING.count}+ verified Google reviews
+                    </h3>
+                    <div style={{display:'inline-flex',alignItems:'center',gap:10,padding:'8px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:24,fontSize:12.5,color:V.sl}}>
+                      <span style={{color:V.gold3,fontSize:16,letterSpacing:'.05em'}}>{'\u2605\u2605\u2605\u2605\u2605'}</span>
+                      <span style={{fontWeight:700,color:V.ink}}>{SMARTIOUS_RATING.stars} / 5</span>
+                      <span>·</span>
+                      <span>{SMARTIOUS_RATING.count}+ Google reviews</span>
+                    </div>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
+                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                      <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
+                        <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
+                        <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
+                        <div style={{fontSize:11,color:V.sl,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginTop:4}}>[+] {r.source}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginTop:8}}>
+                    <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="btn-o" style={{textDecoration:'none'}}>
+                      Read all reviews on Google &raquo;
+                    </a>
+                    <a href={LEAVE_REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-p" style={{textDecoration:'none'}}>
+                      Leave us a review &raquo;
+                    </a>
+                  </div>
+                  <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -16157,6 +16395,13 @@ export default function LandingPage() {
               '@id':'https://smartioushomeschool.com' + country.hub + '#org',
               'name':'Smartious — Online Homeschooling Across ' + country.longName,
               'url':'https://smartioushomeschool.com' + country.hub,
+              'aggregateRating': {
+                '@type':'AggregateRating',
+                'ratingValue': SMARTIOUS_RATING.stars,
+                'reviewCount': SMARTIOUS_RATING.count,
+                'bestRating': 5,
+                'worstRating': 1,
+              },
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': country.competitors.filter(c => c.isUs).map(c => ({
@@ -16370,9 +16615,39 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
-                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                {/* ─── REAL GOOGLE REVIEWS — Smartious Homeschool Diamond Plaza ─── */}
+                <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What parents say</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                      {SMARTIOUS_RATING.stars} from {SMARTIOUS_RATING.count}+ verified Google reviews
+                    </h3>
+                    <div style={{display:'inline-flex',alignItems:'center',gap:10,padding:'8px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:24,fontSize:12.5,color:V.sl}}>
+                      <span style={{color:V.gold3,fontSize:16,letterSpacing:'.05em'}}>{'\u2605\u2605\u2605\u2605\u2605'}</span>
+                      <span style={{fontWeight:700,color:V.ink}}>{SMARTIOUS_RATING.stars} / 5</span>
+                      <span>·</span>
+                      <span>{SMARTIOUS_RATING.count}+ Google reviews</span>
+                    </div>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
+                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                      <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
+                        <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
+                        <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
+                        <div style={{fontSize:11,color:V.sl,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginTop:4}}>[+] {r.source}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginTop:8}}>
+                    <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="btn-o" style={{textDecoration:'none'}}>
+                      Read all reviews on Google &raquo;
+                    </a>
+                    <a href={LEAVE_REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-p" style={{textDecoration:'none'}}>
+                      Leave us a review &raquo;
+                    </a>
+                  </div>
+                  <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -16623,6 +16898,13 @@ export default function LandingPage() {
               '@id':'https://smartioushomeschool.com' + country.hub + '#org',
               'name':'Smartious — Online Homeschooling Across ' + country.longName,
               'url':'https://smartioushomeschool.com' + country.hub,
+              'aggregateRating': {
+                '@type':'AggregateRating',
+                'ratingValue': SMARTIOUS_RATING.stars,
+                'reviewCount': SMARTIOUS_RATING.count,
+                'bestRating': 5,
+                'worstRating': 1,
+              },
               'description': country.heroSubhead + ' ' + country.heroValueProp,
               'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
               'offers': country.competitors.filter(c => c.isUs).map(c => ({
@@ -16836,9 +17118,39 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div style={{textAlign:'center',padding:'18px 20px',background:`rgba(201,151,58,.08)`,border:`1px dashed ${V.gold3}`,borderRadius:10}}>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0,fontStyle:'italic'}}>
-                    Parent reviews and case studies are added here as our {country.name} families consent to publication. For real parent contacts and references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                {/* ─── REAL GOOGLE REVIEWS — Smartious Homeschool Diamond Plaza ─── */}
+                <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What parents say</div>
+                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                      {SMARTIOUS_RATING.stars} from {SMARTIOUS_RATING.count}+ verified Google reviews
+                    </h3>
+                    <div style={{display:'inline-flex',alignItems:'center',gap:10,padding:'8px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:24,fontSize:12.5,color:V.sl}}>
+                      <span style={{color:V.gold3,fontSize:16,letterSpacing:'.05em'}}>{'\u2605\u2605\u2605\u2605\u2605'}</span>
+                      <span style={{fontWeight:700,color:V.ink}}>{SMARTIOUS_RATING.stars} / 5</span>
+                      <span>·</span>
+                      <span>{SMARTIOUS_RATING.count}+ Google reviews</span>
+                    </div>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
+                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                      <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
+                        <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
+                        <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
+                        <div style={{fontSize:11,color:V.sl,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginTop:4}}>[+] {r.source}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginTop:8}}>
+                    <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="btn-o" style={{textDecoration:'none'}}>
+                      Read all reviews on Google &raquo;
+                    </a>
+                    <a href={LEAVE_REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-p" style={{textDecoration:'none'}}>
+                      Leave us a review &raquo;
+                    </a>
+                  </div>
+                  <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
