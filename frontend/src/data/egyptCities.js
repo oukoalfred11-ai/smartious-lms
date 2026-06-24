@@ -719,6 +719,6 @@ export const EGYPT_COUNTRY = {
     },
   ],
 
-  ctaH: 'Ready to start your child\'s Cambridge journey from Egypt?',
-  ctaSubhead: 'Free 15-minute consultation. We\'ll walk through your child\'s grade, target universities, and curriculum fit. USD pricing protects against Egyptian Pound volatility. No commitment.',
+  ctaH: 'Start with a free academic assessment',
+  ctaSubhead: 'A 30-minute assessment covers your child\'s current academic level, family situation, target universities, and curriculum recommendation (Cambridge, Edexcel, IB or American). USD pricing. Local exam centres. No commitment.',
 }
