@@ -2334,6 +2334,10 @@ export default function LandingPage() {
         setPage('homeschooling-egypt')
         return
       }
+      if (slug === 'morocco') {
+        setPage('homeschooling-morocco')
+        return
+      }
       const country = COUNTRIES.find(c => c.slug === slug)
       if (country) {
         setCurrentCountry(slug)
