@@ -170,21 +170,59 @@ function usePageMeta(title, description, canonicalOverride) {
 function useHeroPreload(active) {
   useEffect(() => {
     if (!active) return
-    const linkId = 'sm-hero-preload'
-    if (document.getElementById(linkId)) return
-    const link = document.createElement('link')
-    link.id = linkId
-    link.rel = 'preload'
-    link.as = 'video'
-    // Hero video is now served from the local public folder (frontend/public/0528.mp4)
-    // — same file for mobile and desktop, single MP4 served by Netlify.
-    link.href = '/0528.mp4'
-    link.setAttribute('type', 'video/mp4')
-    link.setAttribute('fetchpriority', 'high')
-    document.head.appendChild(link)
+
+    const cleanups = []
+
+    // 1. Preload the POSTER IMAGE at high priority — this is what users see
+    //    first while the video buffers. Image is small (KB) and renders instantly,
+    //    eliminating the blank-hero flash.
+    const posterId = 'sm-hero-poster-preload'
+    if (!document.getElementById(posterId)) {
+      const posterLink = document.createElement('link')
+      posterLink.id = posterId
+      posterLink.rel = 'preload'
+      posterLink.as = 'image'
+      posterLink.href = '/hero-learning-centre.jpg'
+      posterLink.setAttribute('fetchpriority', 'high')
+      document.head.appendChild(posterLink)
+      cleanups.push(posterId)
+    }
+
+    // 2. Preload the video at LOW priority so it doesn't compete with critical
+    //    CSS, fonts and hero text rendering. The <video preload="auto"> element
+    //    will pick it up as soon as the critical render path completes.
+    //    Hero video served from local public folder (frontend/public/0528.mp4).
+    const videoId = 'sm-hero-video-preload'
+    if (!document.getElementById(videoId)) {
+      const videoLink = document.createElement('link')
+      videoLink.id = videoId
+      videoLink.rel = 'preload'
+      videoLink.as = 'video'
+      videoLink.href = '/0528.mp4'
+      videoLink.setAttribute('type', 'video/mp4')
+      videoLink.setAttribute('fetchpriority', 'low')
+      document.head.appendChild(videoLink)
+      cleanups.push(videoId)
+    }
+
+    // 3. Preconnect to Cloudinary so DNS/TLS handshake is ready when gallery
+    //    videos, founder images, course banners and other Cloudinary media load.
+    const preconnectId = 'sm-cloudinary-preconnect'
+    if (!document.getElementById(preconnectId)) {
+      const preconnectLink = document.createElement('link')
+      preconnectLink.id = preconnectId
+      preconnectLink.rel = 'preconnect'
+      preconnectLink.href = 'https://res.cloudinary.com'
+      preconnectLink.crossOrigin = 'anonymous'
+      document.head.appendChild(preconnectLink)
+      cleanups.push(preconnectId)
+    }
+
     return () => {
-      const el = document.getElementById(linkId)
-      if (el) el.remove()
+      cleanups.forEach(id => {
+        const el = document.getElementById(id)
+        if (el) el.remove()
+      })
     }
   }, [active])
 }
@@ -3266,9 +3304,10 @@ export default function LandingPage() {
               loop
               muted
               playsInline
-              preload="metadata"
+              preload="auto"
               poster="/hero-learning-centre.jpg"
               aria-hidden="true"
+              disablePictureInPicture
             >
               <source src="/0528.mp4" type="video/mp4" />
             </video>
