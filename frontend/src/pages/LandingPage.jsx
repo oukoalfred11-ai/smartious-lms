@@ -4253,7 +4253,7 @@ export default function LandingPage() {
                     background:V.ink2,
                     boxShadow:'0 20px 60px rgba(8,12,20,.12)',
                   }}>
-                    <img src="https://res.cloudinary.com/dae99gz1m/image/upload/v1780593515/photo_2026-06-04_20-13-02_sr7u5a.jpg"
+                    <img src="/alfred-ouko-founder.jpg"
                       alt="Alfred Ouko, founder and CEO of Smartious Homeschool, teaching A-Level Physics"
                       loading="lazy"
                       style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
@@ -14262,9 +14262,12 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64,borderTop:`1px solid ${V.bone3}`}}><div className="wrap">
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{display:'grid',gridTemplateColumns:'auto 1fr',gap:36,alignItems:'start'}}>
-                  {/* Avatar / initials block */}
-                  <div style={{width:180,height:180,borderRadius:'50%',background:`linear-gradient(135deg, ${V.cr} 0%, ${V.gold3} 100%)`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'3.2rem',flexShrink:0,boxShadow:'0 8px 24px rgba(139,26,46,.25)'}}>
-                    AO
+                  {/* Founder photograph */}
+                  <div style={{width:180,height:180,borderRadius:'50%',overflow:'hidden',flexShrink:0,boxShadow:'0 8px 24px rgba(139,26,46,.25)',border:`3px solid ${V.gold3}`,background:V.bone}}>
+                    <img src="/alfred-ouko-founder.jpg"
+                      alt="Alfred Ouko, founder and CEO of Smartious Homeschool"
+                      loading="lazy"
+                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
                   </div>
                   {/* Bio content */}
                   <div>
@@ -14847,9 +14850,12 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64,borderTop:`1px solid ${V.bone3}`}}><div className="wrap">
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{display:'grid',gridTemplateColumns:'auto 1fr',gap:36,alignItems:'start'}}>
-                  {/* Avatar / initials block */}
-                  <div style={{width:180,height:180,borderRadius:'50%',background:`linear-gradient(135deg, ${V.cr} 0%, ${V.gold3} 100%)`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'3.2rem',flexShrink:0,boxShadow:'0 8px 24px rgba(139,26,46,.25)'}}>
-                    AO
+                  {/* Founder photograph */}
+                  <div style={{width:180,height:180,borderRadius:'50%',overflow:'hidden',flexShrink:0,boxShadow:'0 8px 24px rgba(139,26,46,.25)',border:`3px solid ${V.gold3}`,background:V.bone}}>
+                    <img src="/alfred-ouko-founder.jpg"
+                      alt="Alfred Ouko, founder and CEO of Smartious Homeschool"
+                      loading="lazy"
+                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
                   </div>
                   {/* Bio content */}
                   <div>
@@ -15432,9 +15438,12 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64,borderTop:`1px solid ${V.bone3}`}}><div className="wrap">
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{display:'grid',gridTemplateColumns:'auto 1fr',gap:36,alignItems:'start'}}>
-                  {/* Avatar / initials block */}
-                  <div style={{width:180,height:180,borderRadius:'50%',background:`linear-gradient(135deg, ${V.cr} 0%, ${V.gold3} 100%)`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'3.2rem',flexShrink:0,boxShadow:'0 8px 24px rgba(139,26,46,.25)'}}>
-                    AO
+                  {/* Founder photograph */}
+                  <div style={{width:180,height:180,borderRadius:'50%',overflow:'hidden',flexShrink:0,boxShadow:'0 8px 24px rgba(139,26,46,.25)',border:`3px solid ${V.gold3}`,background:V.bone}}>
+                    <img src="/alfred-ouko-founder.jpg"
+                      alt="Alfred Ouko, founder and CEO of Smartious Homeschool"
+                      loading="lazy"
+                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
                   </div>
                   {/* Bio content */}
                   <div>
@@ -16017,9 +16026,12 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64,borderTop:`1px solid ${V.bone3}`}}><div className="wrap">
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{display:'grid',gridTemplateColumns:'auto 1fr',gap:36,alignItems:'start'}}>
-                  {/* Avatar / initials block */}
-                  <div style={{width:180,height:180,borderRadius:'50%',background:`linear-gradient(135deg, ${V.cr} 0%, ${V.gold3} 100%)`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'3.2rem',flexShrink:0,boxShadow:'0 8px 24px rgba(139,26,46,.25)'}}>
-                    AO
+                  {/* Founder photograph */}
+                  <div style={{width:180,height:180,borderRadius:'50%',overflow:'hidden',flexShrink:0,boxShadow:'0 8px 24px rgba(139,26,46,.25)',border:`3px solid ${V.gold3}`,background:V.bone}}>
+                    <img src="/alfred-ouko-founder.jpg"
+                      alt="Alfred Ouko, founder and CEO of Smartious Homeschool"
+                      loading="lazy"
+                      style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
                   </div>
                   {/* Bio content */}
                   <div>
