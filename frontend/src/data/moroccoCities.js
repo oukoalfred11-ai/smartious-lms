@@ -721,4 +721,28 @@ export const MOROCCO_COUNTRY = {
 
   ctaH: 'Start with a free academic assessment',
   ctaSubhead: 'A 30-minute assessment covers your child\'s current academic level, family situation, target universities, and curriculum recommendation (Cambridge British, Pearson Edexcel, IB Diploma or American AP). CET live classes matching Moroccan school hours. No commitment.',
+
+  /* ── v2-hub fields (added in Phase 2 refactor) ── */
+  adjective: 'Moroccan',
+  cambridgeCardDescription: 'Cambridge IGCSE and Cambridge A-Level qualifications, administered by the University of Cambridge\'s international examinations arm. Recognised by universities in over 195 countries. The most widely-adopted British curriculum pathway among Moroccan families seeking English-language university access alongside French Mission education.',
+  examCentreTiles: [
+    { city: 'Casablanca', centre: 'British Council Casablanca', area: 'Boulevard Anfa' },
+    { city: 'Rabat', centre: 'British Council Rabat', area: 'Rabat city centre' },
+    { city: 'Cambridge-authorised schools', centre: 'Across Casablanca, Rabat and Tangier', area: 'External candidates accepted at CAS, GWA, BISC, RAS, ASR, AST and ISM' }
+  ],
+  examLogisticsProse: 'Students in Marrakech, Fes, Agadir and other cities outside Casablanca and Rabat coordinate travel for the relevant examination series — manageable via the well-developed motorway network, Al Boraq high-speed rail (Tangier-Kenitra-Rabat-Casablanca line), or short domestic flights.',
+  universitiesInCountry: 'Mohammed V University Rabat · Hassan II University Casablanca · Université Internationale de Casablanca · Université Internationale de Rabat · Université Mohammed VI Polytechnique (Ben Guerir, English-medium) · Al Akhawayn University Ifrane (English-medium liberal arts) · Cadi Ayyad University Marrakech · Université Sidi Mohamed Ben Abdellah Fes · Université Ibn Zohr Agadir · Université Abdelmalek Essaâdi (Tétouan-Tangier)',
+  secondaryProgrammeExamRef: 'British Council Casablanca or Rabat',
+  universityChannels: 'A-Level (Cambridge or Edexcel), IB Diploma, or American AP. Small class sizes support depth. University application support across UCAS, Common Application, OUAC, UAC, Moroccan university direct applications, and direct channels for German, French (Grandes Écoles), Dutch, Italian, Spanish, Gulf and Saudi universities. Personal statement coaching and interview preparation included.',
+  founderBioCountrySpecific: 'Moroccan families across Casablanca, Rabat, Marrakech, Tangier, Fes, and Agadir',
+  finalCTABadgeExamRef: 'Local exam centres at British Council Casablanca & Rabat',
+
+  /* ── v2-hub Curriculum Deep Dives fields (added in Phase 2 refactor) ── */
+  britishCurriculumSuits: 'Moroccan families targeting UK universities, Mohammed V University Rabat, Hassan II University Casablanca, Al Akhawayn University, broad international portability, and Gulf university applications.',
+  britishCurriculumDelivery: 'Live online classes by subject specialists in Central European Time. Examination registration at British Council Casablanca (Boulevard Anfa) or British Council Rabat.',
+  ibDiplomaSuits: 'Moroccan families targeting US Ivy League, US selective liberal arts colleges, Canadian U15, top European universities, French Grandes Écoles (with French Baccalauréat alongside), and Al Akhawayn for the curriculum breadth match.',
+  ibDiplomaDelivery: 'Live online IB delivery with TOK, Extended Essay supervision across all subject categories, and CAS coordination through local Moroccan community partnerships.',
+  americanCurriculumSuits: 'Moroccan families with US Embassy or US corporate connections in Morocco, US-based extended family, or targeting American universities specifically including the Ivy League and top liberal arts colleges.',
+  americanCurriculumDelivery: 'AP course delivery, SAT/ACT preparation, US college application essay coaching, Common Application platform support, university interview preparation.',
+  founderUniversitySpecialism: 'UK Russell Group, US universities, Canadian U15, Australian Group of Eight, French Grandes Écoles, and Moroccan English-medium institutions including Al Akhawayn University and Mohammed VI Polytechnic University',
 }
