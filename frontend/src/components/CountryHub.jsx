@@ -443,7 +443,7 @@ export default function CountryHub({
               {
                 h:'Primary Programmes',
                 age:'Ages 5-11 · Years 1-6 · Grades 1-5 · IB PYP',
-                p:'Cambridge Primary, Common Core or IB Primary Years Programme. Live classes are age-appropriate in length (40-50 minutes), scheduled in the morning EET window. Small group sizes support individual attention. Weekly parent dashboards and monthly written reports cover academic and developmental progress.',
+                p:`Cambridge Primary, Common Core or IB Primary Years Programme. Live classes are age-appropriate in length (40-50 minutes), scheduled in ${country.timezone?.code || 'local'} windows matched to Primary-age attention spans. Small group sizes support individual attention. Weekly parent dashboards and monthly written reports cover academic and developmental progress.`,
               },
               {
                 h:'Secondary Programmes',
