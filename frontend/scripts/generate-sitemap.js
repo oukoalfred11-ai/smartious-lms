@@ -30,7 +30,6 @@ import { fileURLToPath } from 'node:url'
 
 /* Data imports — match the imports at the top of LandingPage.jsx */
 import { COUNTRIES } from '../src/data/countries.js'
-import { CURRICULA } from '../src/data/curricula.js'
 import { SERVICES } from '../src/data/services.js'
 import { FULL_ARTICLES } from '../src/data/fullArticles.js'
 import { US_STATES_LIST } from '../src/data/usStates.js'
@@ -202,11 +201,13 @@ function urlsForStudyAbroad(s) {
   }]
 }
 
-function urlsForArticle(a) {
+function urlsForArticle(slug, article) {
   return [{
-    loc: `${BASE_URL}/article/${a.slug}`,
+    loc: `${BASE_URL}/blog/${slug}`,
     priority: 0.7, changefreq: 'monthly',
-    lastmod: a.date || a.publishedAt || TODAY,
+    /* Articles have human-readable date strings like "May 2026 · 7 min read"
+       that aren't ISO-parseable, so fall back to today's date for lastmod. */
+    lastmod: TODAY,
   }]
 }
 
@@ -219,7 +220,7 @@ function urlsForCurriculum(c) {
 
 function urlsForService(s) {
   return [{
-    loc: `${BASE_URL}/service/${s.slug}`,
+    loc: `${BASE_URL}/services/${s.slug}`,
     priority: 0.7, changefreq: 'monthly', lastmod: TODAY,
   }]
 }
@@ -245,9 +246,15 @@ function buildAllUrls() {
   for (const t of TEST_PREP)          urls.push(...urlsForTestPrep(t))
   for (const l of LANGUAGES)          urls.push(...urlsForLanguage(l))
   for (const s of STUDY_ABROAD)       urls.push(...urlsForStudyAbroad(s))
-  for (const a of FULL_ARTICLES)      urls.push(...urlsForArticle(a))
-  for (const c of CURRICULA)          urls.push(...urlsForCurriculum(c))
+  /* FULL_ARTICLES is an object keyed by slug, not an array.
+     Article URL pattern in the app is /blog/<slug>. */
+  for (const [slug, article] of Object.entries(FULL_ARTICLES)) {
+    urls.push(...urlsForArticle(slug, article))
+  }
   for (const s of SERVICES)           urls.push(...urlsForService(s))
+  /* CURRICULA has no per-curriculum URL route in the app — the
+     curriculum-detail page is state-routed not URL-routed — so we
+     deliberately don't emit /curriculum/<slug> URLs that would 404. */
 
   /* Dedupe by loc, keeping the highest-priority entry when a URL
      appears more than once. The COUNTRIES list and COUNTRY_DATA hub
@@ -313,8 +320,7 @@ const counts = {
   testPrep: TEST_PREP.length,
   languages: LANGUAGES.length,
   studyAbroad: STUDY_ABROAD.length,
-  articles: FULL_ARTICLES.length,
-  curricula: CURRICULA.length,
+  articles: Object.keys(FULL_ARTICLES).length,
   services: SERVICES.length,
 }
 
