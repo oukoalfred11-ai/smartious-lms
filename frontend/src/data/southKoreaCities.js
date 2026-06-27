@@ -562,4 +562,28 @@ export const SOUTH_KOREA_COUNTRY = {
 
   ctaH: 'Start with a free academic assessment',
   ctaSubhead: 'A 30-minute assessment covers your child\'s current academic level, family situation, target universities, and curriculum recommendation (Cambridge British, Pearson Edexcel, IB Diploma or American AP). KST afternoon and evening live classes (3 PM – 10 PM Korean time). No commitment.',
+
+  /* ── v2-hub fields (added in Phase 2 refactor) ── */
+  adjective: 'Korean',
+  cambridgeCardDescription: 'Cambridge IGCSE and Cambridge A-Level qualifications, administered by the University of Cambridge\'s international examinations arm. Recognised by universities in over 195 countries. Widely adopted by Korean families seeking English-language university access (US Ivy League, UK Russell Group, Canadian U15, Australian Group of Eight) alongside Korean Suneung or as a structured hagwon replacement model.',
+  examCentreTiles: [
+    { city: 'Seoul', centre: 'British Council Korea', area: 'Central Seoul' },
+    { city: 'Cambridge-authorised schools', centre: 'Across Seoul, Songdo and Jeju', area: 'External candidates accepted at SFS, KIS, Dwight, YISS, Chadwick, NLCS Jeju, BIFS' },
+    { city: 'AP and IB testing', centre: 'College Board AP Korea · IB-authorised schools', area: 'AP centres in Seoul, Songdo, Busan, Daejeon, Jeju' }
+  ],
+  examLogisticsProse: 'Students in Songdo, Busan, Pyeongtaek, Daejeon, Jeju and other Korean cities outside Seoul coordinate travel to British Council Korea (Seoul) for the May/June and October/November Cambridge series — manageable via the KTX high-speed rail network (Daejeon 1 hour, Busan 2.5 hours, Gwangju 2 hours, Pohang/Ulsan 1 hour) or short domestic flights (Jeju 1 hour). Round-trip in a single day from most Korean cities.',
+  universitiesInCountry: 'Seoul National University (SNU) · Korea University · Yonsei University (the SKY universities) · Yonsei Underwood International College (English-medium) · KAIST (Korea Advanced Institute of Science and Technology, English-medium STEM) · POSTECH (Pohang, English-medium) · UNIST (Ulsan, English-medium) · SUNY Korea (Songdo) · University of Utah Asia Campus (Songdo) · George Mason Korea (Songdo) · Ghent University Global Campus (Songdo) · Pusan National University · Cadi Ayyad-equivalent regional Korean universities',
+  secondaryProgrammeExamRef: 'British Council Korea (Seoul)',
+  universityChannels: 'A-Level (Cambridge or Edexcel), IB Diploma, or American AP. Small class sizes support depth. University application support across Common Application, UCAS, OUAC, UAC, plus Korean university direct applications (Yonsei Underwood, KAIST, POSTECH, UNIST, SKY international tracks), and direct channels for German, French Grandes Écoles, Dutch, Italian, Swiss (ETH Zurich, EPFL), Japanese (University of Tokyo, Kyoto, Waseda, Keio), Singaporean (NUS, NTU, SMU), Hong Kong (HKU, HKUST, CUHK) and broader Asian universities. Personal statement coaching and interview preparation included.',
+  founderBioCountrySpecific: 'Korean families across Seoul, Songdo (Incheon IBD), Busan, Pyeongtaek (USAG Camp Humphreys), Daejeon (KAIST/Daedeok Innopolis), and Jeju (Jeju Global Education City)',
+  finalCTABadgeExamRef: 'Cambridge exam centre at British Council Korea (Seoul) · KST live classes',
+
+  /* ── v2-hub Curriculum Deep Dives fields (added in Phase 2 refactor) ── */
+  britishCurriculumSuits: 'Korean families targeting UK universities (Cambridge, Oxford, Imperial, UCL, LSE plus the Russell Group), Yonsei Underwood International College, Korea University, KAIST, broad international portability, and Gulf university applications.',
+  britishCurriculumDelivery: 'Live online classes by subject specialists in Korea Standard Time. Examination registration at British Council Korea (Seoul) or Cambridge-authorised Korean international schools (SFS, KIS, Dwight, YISS).',
+  ibDiplomaSuits: 'Korean families targeting US Ivy League, US selective liberal arts colleges, Canadian U15, top European universities, and Yonsei Underwood International College, KAIST, POSTECH, UNIST for the curriculum breadth match.',
+  ibDiplomaDelivery: 'Live online IB delivery with TOK, Extended Essay supervision across all subject categories, and CAS coordination through local Korean community partnerships.',
+  americanCurriculumSuits: 'Korean families with US Embassy or US corporate connections in Korea (Samsung/LG/Hyundai multinationals, USFK Camp Humphreys military, USAID), US-based extended family, or targeting American universities specifically including the Ivy League and top liberal arts colleges.',
+  americanCurriculumDelivery: 'AP course delivery, SAT/ACT preparation, US college application essay coaching, Common Application platform support, university interview preparation.',
+  founderUniversitySpecialism: 'UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, plus Korean university English-medium tracks including Yonsei Underwood International College, KAIST, POSTECH, UNIST and Seoul National University international tracks',
 }
