@@ -577,4 +577,28 @@ export const JAPAN_COUNTRY = {
 
   ctaH: 'Start with a free academic assessment',
   ctaSubhead: 'A 30-minute assessment covers your child\'s current academic level, family situation, target universities, and curriculum recommendation (Cambridge British, Pearson Edexcel, IB Diploma or American AP). JST afternoon and evening live classes (3 PM – 10 PM Japan time). No commitment.',
+
+  /* ── v2-hub fields (added in Phase 2 refactor) ── */
+  adjective: 'Japanese',
+  cambridgeCardDescription: 'Cambridge IGCSE and Cambridge A-Level qualifications, administered by the University of Cambridge\'s international examinations arm. Recognised by universities in over 195 countries. Widely adopted by Japanese families seeking English-language university access (US Ivy League, UK Russell Group, Canadian U15, Australian Group of Eight) alongside Common Test for University Admissions (共通テスト) or as a structured juku replacement model, with strong recognition by Japanese university kikokushijo admissions tracks.',
+  examCentreTiles: [
+    { city: 'Tokyo', centre: 'British Council Tokyo', area: 'Central Tokyo' },
+    { city: 'Cambridge-authorised schools', centre: 'Across Tokyo, Yokohama and Osaka', area: 'External candidates accepted at BST, KIST, Tokyo International School, YIS, Saint Maur, OIS, Canadian Academy, NIS' },
+    { city: 'AP and IB testing', centre: 'College Board AP Japan · IB-authorised schools', area: 'AP centres at Tokyo, Yokohama, Osaka, Nagoya international schools, plus DODEA Okinawa' }
+  ],
+  examLogisticsProse: 'Students in Yokohama, Osaka, Kobe, Nagoya, Okinawa and other Japanese cities outside Tokyo coordinate travel to British Council Tokyo for the May/June and October/November Cambridge series — manageable via the Tokaido Shinkansen high-speed rail network (Yokohama 30 minutes, Nagoya 1hr 40min, Osaka 3 hours, Kobe 3.5 hours via Shin-Kobe) or short domestic flights (Okinawa 2.5 hours via Naha-Tokyo Haneda or Narita). Round-trip in a single day from most Japanese cities.',
+  universitiesInCountry: 'University of Tokyo PEAK Programme (English-medium liberal arts) · Keio PEARL (Programme in Economics, English-medium) · Waseda SILS (School of International Liberal Studies, English-medium) · Sophia FLA (Faculty of Liberal Arts, English-medium) · International Christian University (ICU — fully bilingual) · Hitotsubashi University international programmes · Tokyo Institute of Technology · Osaka University · Kyoto University · Nagoya University · Tohoku University · Hokkaido University · Kyushu University (the former imperial seven plus the major Japanese universities international student admissions tracks)',
+  secondaryProgrammeExamRef: 'British Council Tokyo',
+  universityChannels: 'A-Level (Cambridge or Edexcel), IB Diploma, or American AP. Small class sizes support depth. University application support across Common Application, UCAS, OUAC, UAC, plus Japanese university direct applications and kikokushijo tracks (UTokyo PEAK, Keio PEARL, Waseda SILS, Sophia FLA, ICU, Hitotsubashi international programmes), and direct channels for German, French Grandes Écoles, Dutch, Italian, Swiss (ETH Zurich, EPFL), Korean (SNU, KAIST, POSTECH, UNIST), Singaporean (NUS, NTU, SMU), Hong Kong (HKU, HKUST, CUHK), Taiwanese (NTU, NTHU) and broader Asian universities. Personal statement coaching and interview preparation included.',
+  founderBioCountrySpecific: 'Japanese families across Tokyo, Yokohama, Osaka, Kobe, Nagoya (Toyota automotive), and Okinawa (USMC + USAF US military bases)',
+  finalCTABadgeExamRef: 'Cambridge exam centre at British Council Tokyo · JST live classes',
+
+  /* ── v2-hub Curriculum Deep Dives fields (added in Phase 2 refactor) ── */
+  britishCurriculumSuits: 'Japanese families targeting UK universities (Cambridge, Oxford, Imperial, UCL, LSE plus the Russell Group), University of Tokyo PEAK Programme, Keio PEARL, Waseda SILS, broad international portability, and Gulf university applications.',
+  britishCurriculumDelivery: 'Live online classes by subject specialists in Japan Standard Time. Examination registration at British Council Tokyo or Cambridge-authorised Japanese international schools (BST, KIST, Tokyo International School).',
+  ibDiplomaSuits: 'Japanese families targeting US Ivy League, US selective liberal arts colleges, Canadian U15, top European universities, and University of Tokyo PEAK, Keio, Waseda, ICU for the curriculum breadth match.',
+  ibDiplomaDelivery: 'Live online IB delivery with TOK, Extended Essay supervision across all subject categories, and CAS coordination through local Japanese community partnerships.',
+  americanCurriculumSuits: 'Japanese families with US Embassy or US corporate connections in Japan (sogo shosha global partnerships, USFJ military Okinawa/Yokosuka/Camp Zama/Yokota, US tech regional HQs), US-based extended family, or targeting American universities specifically including the Ivy League and top liberal arts colleges.',
+  americanCurriculumDelivery: 'AP course delivery, SAT/ACT preparation, US college application essay coaching, Common Application platform support, university interview preparation.',
+  founderUniversitySpecialism: 'UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight, plus Japanese university English-medium tracks (University of Tokyo PEAK, Keio PEARL, Waseda SILS, Sophia FLA, ICU, Hitotsubashi international programmes)',
 }
