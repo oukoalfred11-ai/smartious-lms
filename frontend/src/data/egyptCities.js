@@ -721,4 +721,28 @@ export const EGYPT_COUNTRY = {
 
   ctaH: 'Start with a free academic assessment',
   ctaSubhead: 'A 30-minute assessment covers your child\'s current academic level, family situation, target universities, and curriculum recommendation (Cambridge, Edexcel, IB or American). USD pricing. Local exam centres. No commitment.',
+
+  /* ── v2-hub fields (added in Phase 2 refactor) ── */
+  adjective: 'Egyptian',
+  cambridgeCardDescription: 'Cambridge IGCSE and Cambridge A-Level qualifications, administered by the University of Cambridge\'s international examinations arm. Recognised by universities in over 195 countries. The most widely-adopted British curriculum pathway among Egyptian families.',
+  examCentreTiles: [
+    { city: 'Cairo', centre: 'British Council Cairo', area: 'Agouza, El Dokki' },
+    { city: 'Alexandria', centre: 'British Council Alexandria', area: 'Roushdy district' },
+    { city: 'Cambridge-authorised schools', centre: 'Across Cairo and Alexandria', area: 'External candidates accepted at selected schools' }
+  ],
+  examLogisticsProse: 'Students in cities outside Cairo and Alexandria coordinate travel for the relevant examination series.',
+  universitiesInCountry: 'American University in Cairo (AUC) · German University in Cairo (GUC) · British University in Egypt (BUE) · Future University in Egypt · MSA University · Heliopolis University · Cairo University · Ain Shams · Alexandria University · Helwan · Mansoura',
+  secondaryProgrammeExamRef: 'British Council Cairo or Alexandria',
+  universityChannels: 'A-Level (Cambridge or Edexcel), IB Diploma, or American AP. Small class sizes support depth. University application support across UCAS, Common Application, OUAC, UAC, AUC direct application, and direct channels for German, French, Dutch, Italian, Russian, Gulf and Saudi universities. Personal statement coaching and interview preparation included.',
+  founderBioCountrySpecific: 'Egyptian families across Cairo, Alexandria, Giza, New Cairo, Sheikh Zayed City and the New Administrative Capital',
+  finalCTABadgeExamRef: 'Local exam centres at British Council Cairo & Alexandria',
+
+  /* ── v2-hub Curriculum Deep Dives fields (added in Phase 2 refactor) ── */
+  britishCurriculumSuits: 'Egyptian families targeting UK universities, AUC, GUC, BUE, broad international portability, and Gulf university applications.',
+  britishCurriculumDelivery: 'Live online classes by subject specialists in Eastern European Time. Examination registration at British Council Cairo or Alexandria.',
+  ibDiplomaSuits: 'Egyptian families targeting US Ivy League, US selective liberal arts colleges, Canadian U15, top European universities, and AUC for the curriculum breadth match.',
+  ibDiplomaDelivery: 'Live online IB delivery with TOK, Extended Essay supervision across all subject categories, and CAS coordination through local Egyptian community partnerships.',
+  americanCurriculumSuits: 'Egyptian families with US Embassy or US corporate connections, US-based extended family, or targeting American universities specifically including the Ivy League and top liberal arts colleges.',
+  americanCurriculumDelivery: 'AP course delivery, SAT/ACT preparation, US college application essay coaching, Common Application platform support, university interview preparation.',
+  founderUniversitySpecialism: 'UK Russell Group, US universities, Canadian U15, Australian Group of Eight, Gulf universities, and Egyptian universities including AUC, GUC and BUE',
 }
