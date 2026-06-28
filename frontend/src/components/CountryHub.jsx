@@ -80,21 +80,15 @@ export default function CountryHub({
           </h1>
           <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
           <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
-          <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-            <button onClick={() => P('consult')}
-              style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-              Book Free Consultation
+          <div style={{display:'flex',gap:12,flexWrap:'wrap',alignItems:'center'}}>
+            <button onClick={() => nav('/assessment?from=' + country.slug)}
+              style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,letterSpacing:'.01em'}}>
+              Book assessment
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
-            <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-              target="_blank" rel="noopener noreferrer"
-              style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-              WhatsApp
-            </a>
-            <button onClick={() => P('pricing')}
-              style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
-              View Pricing ({country.currency})
-            </button>
+            <span style={{fontSize:12.5,color:'rgba(255,255,255,.62)',letterSpacing:'.01em'}}>
+              Admissions reviews every request &middot; assessment fee billed only on acceptance
+            </span>
           </div>
         </div>
       </section>
@@ -494,7 +488,7 @@ export default function CountryHub({
               {h:'Academic assessments',p:'Initial diagnostic assessment. Weekly informal assessment within classes. Monthly formal assessments. Mock examinations under timed conditions during IGCSE and A-Level years. Results inform teaching adjustments.'},
               {h:'Small class sizes',p:'Online tier classes have four to six students. Online Plus has smaller groups. Premium is one-on-one. Class size affects individual attention, question response time, and student speaking time during class.'},
               {h:'Progress monitoring',p:'Weekly parent dashboards showing attendance and assessment results. Monthly written subject reports from each teacher. Termly comprehensive reports covering academic progress, study habits and university preparation.'},
-              {h:'Parent communication',p:'Direct communication with subject teachers and form tutors via the parent portal. WhatsApp and email for admissions and pastoral matters. Scheduled parent-teacher meetings each term.'},
+              {h:'Parent communication',p:'Direct communication with subject teachers and form tutors via the parent portal. Email for admissions and pastoral matters, with response within one business day. Scheduled parent-teacher meetings each term.'},
               {h:'Global student community',p:'Live classes bring together students from across 14 countries. Wednesday afternoon enrichment programmes &mdash; coding, robotics, debate, Model UN, chess, journalism, leadership &mdash; develop collaborative learning across geographies.'},
               {h:'University admissions guidance',p:'Progressive guidance from Year 10 onwards. UCAS, Common Application, OUAC, UAC and direct university application support. Personal statement coaching, interview preparation and offer-management guidance.'},
             ].map((c,i) => (
@@ -644,20 +638,28 @@ export default function CountryHub({
           <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
           <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
           <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
-          <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-            <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-              Book Free Assessment
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-              target="_blank" rel="noopener noreferrer"
-              style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-              WhatsApp +254 745 021 212
-            </a>
-            <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-              Begin Enrolment
+          {/* SINGLE primary CTA: Book Assessment.
+              Two-gate funnel: form submission → admissions review → fee invoice on
+              acceptance → assessment → enrolment decision. No other CTAs anywhere. */}
+          <div style={{display:'flex',justifyContent:'center',marginBottom:18}}>
+            <button onClick={() => nav('/assessment?from=' + country.slug)} style={{background:V.gold3,color:V.ink,border:'none',padding:'16px 36px',borderRadius:8,fontSize:15,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em'}}>
+              Book assessment
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
           </div>
+
+          {/* Process explanation — replaces the old fee-transparency paragraph */}
+          <div style={{maxWidth:680,margin:'0 auto 24px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.12)',borderRadius:8,padding:'18px 22px'}}>
+            <div style={{fontSize:11,color:V.gold3,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',marginBottom:10,textAlign:'center'}}>How the process works</div>
+            <ol style={{margin:0,paddingLeft:20,fontSize:13,color:'rgba(255,255,255,.82)',lineHeight:1.75}}>
+              <li><strong style={{color:'#fff'}}>Submit the assessment request form.</strong> Full student and family details, curriculum interest, target universities. No payment at this stage.</li>
+              <li><strong style={{color:'#fff'}}>Admissions reviews the request.</strong> Our Head of Admissions evaluates fit against current cohort, year-group capacity, and curriculum alignment. We respond to every request within three business days regardless of decision.</li>
+              <li><strong style={{color:'#fff'}}>Assessment fee invoiced on acceptance.</strong> If the request is accepted, the family receives an invoice for the assessment fee. The fee is required before the diagnostic is scheduled, and is credited against the first month's tuition if the family proceeds to enrolment.</li>
+              <li><strong style={{color:'#fff'}}>Diagnostic assessment and curriculum recommendation.</strong> Structured testing across English, Mathematics and Science, written report, and a 30-minute consultation with the Head of Academics.</li>
+              <li><strong style={{color:'#fff'}}>Enrolment decision.</strong> Admission is determined on the basis of the assessment results, not the form alone. Families that are a good fit receive a formal enrolment offer; families that aren't receive an honest recommendation of better-suited alternatives.</li>
+            </ol>
+          </div>
+
           <div style={{display:'flex',gap:16,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
             <span>[+] Immediate enrolment</span>
             <span>[+] No school waiting lists</span>
