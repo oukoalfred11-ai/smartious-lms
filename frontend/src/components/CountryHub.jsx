@@ -241,11 +241,12 @@ export default function CountryHub({
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
             {[
-              {h:'Founder-led education company', p:'Founded 2022 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres alongside the online platform.'},
+              {h:'Founder-led education company', p:'Founded 2019 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres (Diamond Plaza Parklands HQ established 2022, Karen Hardy centre established 2023) alongside the online platform.'},
               {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
               {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
               {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, Egypt, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
-              {h:'5 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Kenya CBC. Multiple credential pathways per family.'},
+              {h:'Ontario Diploma (OSSD) partnership', p:'Smartious students can earn the Ontario Secondary School Diploma through our partnership with Canadian Cross International School (Ontario-inspected private school). The OSSD is recognised by Canadian universities (OUAC), US universities (Common Application), UK universities (UCAS) and globally — particularly valuable for Canadian U15 applications.'},
+              {h:'6 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Ontario Secondary School Diploma (OSSD) via Canadian Cross International School partnership, Kenya CBC. Multiple credential pathways per family.'},
               {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
             ].map((t, i) => (
               <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
@@ -305,13 +306,14 @@ export default function CountryHub({
             </p>
           </div>
 
-          {/* Four curriculum pathways */}
+          {/* Five curriculum pathways */}
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))',gap:18,marginBottom:40}}>
             {[
               {h:'Cambridge International',sub:'Cambridge Assessment International Education · University of Cambridge',p:country.cambridgeCardDescription},
               {h:'Pearson Edexcel International',sub:'Pearson · UK Edexcel curriculum adapted for international delivery',p:'International GCSE and International A-Level qualifications, administered by Pearson. Three examination series annually (January, May/June, October/November) providing additional flexibility versus the Cambridge twice-yearly schedule.'},
               {h:'International Baccalaureate Organisation',sub:'IB Diploma Programme · IBO Geneva',p:'IB Diploma administered by the International Baccalaureate Organisation in Geneva. Recognised by leading universities globally with particularly strong weighting at US Ivy League, US selective liberal arts colleges, Canadian U15 and top European universities.'},
               {h:'College Board',sub:'American Curriculum with Advanced Placement (AP)',p:'AP courses and examinations administered by the College Board, the US non-profit responsible for the SAT and AP programmes. AP scores are widely recognised by US universities for university credit, plus by Canadian, UK, Australian and many universities worldwide.'},
+              {h:'Ontario Secondary School Diploma (OSSD)',sub:'Canadian Cross International School · Ontario Ministry of Education',p:'OSSD earned through Smartious\'s partnership with Canadian Cross International School, an Ontario-inspected private school. Smartious students enrol concurrently with CCIS to complete the OSSD curriculum and credit requirements alongside Cambridge or other pathways. OSSD is one of the most recognised secondary credentials worldwide — particularly strong for Canadian U15 admissions via OUAC, US universities via Common Application, and UK universities via UCAS.'},
             ].map((c,i) => (
               <div key={i} style={{padding:'22px 22px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,borderLeft:`3px solid ${V.cr}`}}>
                 <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,margin:'0 0 4px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
@@ -379,7 +381,7 @@ export default function CountryHub({
           <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
             <div className="eyebrow" style={{justifyContent:'center'}}>Curriculum pathways</div>
             <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
-              Four curriculum pathways for {country.adjective} families
+              Curriculum approaches we offer {country.adjective} families
             </h2>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))',gap:18}}>
@@ -404,6 +406,13 @@ export default function CountryHub({
                 structure:'US high school curriculum through Grade 12. Advanced Placement courses Grades 9-12 with college-level subject specialisation. SAT or ACT preparation integrated alongside curriculum delivery.',
                 suits: country.americanCurriculumSuits,
                 delivery: country.americanCurriculumDelivery,
+              },
+              {
+                h:'Ontario Secondary School Diploma',
+                sub:'OSSD · via Canadian Cross International School partnership',
+                structure:'Grades 9-12 Ontario curriculum delivered through Smartious\'s partnership with Canadian Cross International School (Ontario-inspected private secondary school). Students complete the 30 credits required for OSSD including the Ontario Secondary School Literacy Test (OSSLT) and 40 community involvement hours.',
+                suits:`${country.adjective} families targeting Canadian U15 universities (Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen's) via OUAC, US universities via the Common Application, UK universities via UCAS, and Australian universities. The OSSD is particularly strong for direct Canadian university applications because students apply as Ontario secondary graduates rather than international students.`,
+                delivery:'Live online instruction by qualified subject teachers, concurrent enrolment with Canadian Cross International School for official OSSD transcripting, Ontario course codes (ENG4U, MHF4U, SCH4U etc.) recorded against each student. CCIS issues the official Ontario diploma and transcript on successful completion of the OSSD requirements.',
               },
             ].map((c,i) => (
               <div key={i} style={{padding:'24px 24px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:14}}>
@@ -443,7 +452,7 @@ export default function CountryHub({
               {
                 h:'Primary Programmes',
                 age:'Ages 5-11 · Years 1-6 · Grades 1-5 · IB PYP',
-                p:`Cambridge Primary, Common Core or IB Primary Years Programme. Live classes are age-appropriate in length (40-50 minutes), scheduled in ${country.timezone?.code || 'local'} windows matched to Primary-age attention spans. Small group sizes support individual attention. Weekly parent dashboards and monthly written reports cover academic and developmental progress.`,
+                p:`Cambridge Primary, Common Core or IB Primary Years Programme. Live classes are age-appropriate in length (40-50 minutes), scheduled in your local ${country.timezone?.code || 'EAT'} time zone to suit Primary-age attention spans. Small group sizes support individual attention. Weekly parent dashboards and monthly written reports cover academic and developmental progress.`,
               },
               {
                 h:'Secondary Programmes',
@@ -565,6 +574,69 @@ export default function CountryHub({
         </div>
       </div></section>
 
+      {/* ─── SMARTIOUS WORLDWIDE — internal linking + global cohort signal ─── */}
+      <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64,borderTop:`1px solid ${V.bone3}`}}><div className="wrap">
+        <div style={{maxWidth:1100,margin:'0 auto'}}>
+          <div style={{textAlign:'center',marginBottom:40,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
+            <div className="eyebrow" style={{justifyContent:'center'}}>Smartious worldwide</div>
+            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+              {country.adjective} students join a 14+ country global cohort
+            </h2>
+            <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
+              Live classes bring together students from across Africa, the Gulf, Europe and Asia. A {country.name} student in our Year 11 IGCSE Mathematics class will be alongside peers in Cairo, Dubai, Bangkok, Seoul, Casablanca and Kigali. The Wednesday enrichment programmes (debate, Model UN, robotics, journalism) operate as one global classroom rather than thirteen separate national ones.
+            </p>
+          </div>
+          {[
+            {region:'East & Southern Africa', hubs:[
+              {slug:'kenya', name:'Kenya', note:'Nairobi HQ · founding market'},
+              {slug:'ethiopia', name:'Ethiopia', note:'Addis Ababa diplomatic + AU corporate'},
+              {slug:'rwanda', name:'Rwanda', note:'Kigali tech + East African Community'},
+              {slug:'south-africa', name:'South Africa', note:'Johannesburg + Cape Town expat'},
+            ]},
+            {region:'North Africa', hubs:[
+              {slug:'egypt', name:'Egypt', note:'Cairo · Alexandria · New Capital'},
+              {slug:'morocco', name:'Morocco', note:'Casablanca · Rabat · Marrakech'},
+            ]},
+            {region:'Gulf & Middle East', hubs:[
+              {slug:'uae', name:'UAE', note:'Dubai · Abu Dhabi · Sharjah'},
+              {slug:'qatar', name:'Qatar', note:'Doha · Education City'},
+              {slug:'saudi-arabia', name:'Saudi Arabia', note:'Riyadh · Jeddah · Dammam'},
+            ]},
+            {region:'East & Southeast Asia', hubs:[
+              {slug:'japan', name:'Japan', note:'Tokyo · Yokohama · Osaka · Kobe'},
+              {slug:'south-korea', name:'South Korea', note:'Seoul · Songdo · Busan'},
+              {slug:'vietnam', name:'Vietnam', note:'HCMC · Hanoi · Da Nang'},
+              {slug:'thailand', name:'Thailand', note:'Bangkok · Chiang Mai · Phuket'},
+            ]},
+          ].map((group, gi) => (
+            <div key={gi} style={{marginBottom:24}}>
+              <div style={{fontSize:11,color:V.gold3,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:12}}>{group.region}</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))',gap:10}}>
+                {group.hubs.map((h, i) => {
+                  const isCurrent = country.slug === h.slug
+                  const href = `/online-school/${h.slug}`
+                  return isCurrent ? (
+                    <div key={i} style={{padding:'14px 16px',background:`rgba(139,26,46,.06)`,border:`1px solid ${V.cr}`,borderRadius:8}}>
+                      <div style={{fontSize:13.5,fontWeight:700,color:V.cr,marginBottom:2}}>{h.name} <span style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,fontWeight:700,marginLeft:6}}>← you are here</span></div>
+                      <div style={{fontSize:11.5,color:V.sl}}>{h.note}</div>
+                    </div>
+                  ) : (
+                    <a key={i} href={href}
+                      onClick={(e)=>{e.preventDefault(); nav(href)}}
+                      style={{display:'block',padding:'14px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:8,textDecoration:'none',color:'inherit',transition:'all .15s'}}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.background = '#fff' }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.background = V.bone }}>
+                      <div style={{fontSize:13.5,fontWeight:700,color:V.ink,marginBottom:2}}>{h.name} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="3" strokeLinecap="round" style={{marginLeft:4,verticalAlign:'middle'}}><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+                      <div style={{fontSize:11.5,color:V.sl}}>{h.note}</div>
+                    </a>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div></section>
+
       {/* ─── FINAL CTA ─── */}
       <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:64,paddingBottom:64,position:'relative',overflow:'hidden'}}>
         <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
@@ -586,10 +658,11 @@ export default function CountryHub({
               Begin Enrolment
             </button>
           </div>
-          <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
+          <div style={{display:'flex',gap:16,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
             <span>[+] Immediate enrolment</span>
             <span>[+] No school waiting lists</span>
             <span>[+] USD pricing stability</span>
+            <span>[+] Ontario OSSD pathway via CCIS partnership</span>
             <span>[+] {country.finalCTABadgeExamRef}</span>
           </div>
         </div>
