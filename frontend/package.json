@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "postinstall": "node scripts/install-chrome.js",
     "prebuild": "node scripts/generate-sitemap.js",
     "build": "vite build",
     "postbuild": "node scripts/prerender.js",
