@@ -5,25 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
-  <!-- ═══════════════════════════════════════════════════
-       GOOGLE TAG MANAGER (GTM-55SRQS2G)
-       Google's recommendation: place as high in <head> as
-       possible. GTM is the master tag controller for all
-       analytics, ads pixels, and future tracking tags.
-       Companion <noscript> iframe sits right after <body>.<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-
-  <!-- ═══════════════════════════════════════════════════
-       GOOGLE TAG MANAGER (GTM-55SRQS2G)
-       Google's recommendation: place as high in <head> as
-       possible. GTM is the master tag controller for all
-       analytics, ads pixels, and future tracking tags.
-       Companion <noscript> iframe sits right after <body>.
-       ═══════════════════════════════════════════════════ -->
+  <!-- Google Tag Manager (GTM-55SRQS2G) -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
   j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
@@ -31,19 +13,11 @@
   })(window,document,'script','dataLayer','GTM-55SRQS2G');</script>
   <!-- End Google Tag Manager -->
 
-  <!-- ═══════════════════════════════════════════════════
-       GOOGLE SEARCH CONSOLE OWNERSHIP VERIFICATION
-       ═══════════════════════════════════════════════════ -->
+  <!-- Search engine ownership verification -->
   <meta name="google-site-verification" content="eiGdv2Lik2kFbA9m2DXHDBdfbI6WYQzWtBQXOPZU5TY"/>
-
-  <!-- ═══════════════════════════════════════════════════
-       BING WEBMASTER TOOLS OWNERSHIP VERIFICATION
-       ═══════════════════════════════════════════════════ -->
   <meta name="msvalidate.01" content="C0FEDFD7BDC2F88456F9DED6DFC17126"/>
 
-  <!-- ═══════════════════════════════════════════════════
-       PERFORMANCE — preconnect + preload
-       ═══════════════════════════════════════════════════ -->
+  <!-- Performance: preconnect + preload -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin/>
@@ -58,22 +32,11 @@
   <link rel="dns-prefetch" href="https://smartious-backend.onrender.com"/>
   <link rel="dns-prefetch" href="https://formsubmit.co"/>
 
-  <!-- ═══════════════════════════════════════════════════
-       GOOGLE ADS CONVERSION TRACKING (gtag.js)
-       Account: AW-17733479094 (Smartious Homeschool)
-
-       This sits alongside GTM and is the direct path used by
-       trackConversion() in LandingPage.jsx for the 4 wired
-       conversion events on /us-families:
-         · US Consult Booked   ($50)
-         · US Enrol Started    ($200)
-         · US WhatsApp Click   ($20)
-         · US Phone Click      ($20)
-
-       IMPORTANT: do NOT also configure these same conversion
-       actions inside GTM, or events will be counted twice.
-       GTM is reserved for future tags (GA4, Meta Pixel, etc.)
-       ═══════════════════════════════════════════════════ -->
+  <!-- Google Ads conversion tracking (AW-17733479094). Used directly by
+       trackConversion() in LandingPage.jsx for the 4 wired conversion events
+       on /us-families (Consult Booked, Enrol Started, WhatsApp Click, Phone
+       Click). Do NOT also configure these same conversion actions inside GTM
+       or events double-count. GTM is reserved for future tags (GA4, Pixel). -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17733479094"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -82,40 +45,26 @@
     gtag('config', 'AW-17733479094');
   </script>
 
-  <!-- ═══════════════════════════════════════════════════
-       Permissions Policy — allow camera, microphone,
-       and screen-share for our own origin (Live Classes).
-       ═══════════════════════════════════════════════════ -->
+  <!-- Permissions Policy: allow camera, microphone, screen-share for Live Classes -->
   <meta http-equiv="Permissions-Policy" content="camera=(self), microphone=(self), display-capture=(self), autoplay=(self)"/>
   <meta http-equiv="Feature-Policy" content="camera 'self'; microphone 'self'; display-capture 'self'"/>
 
-  <!-- ═══════════════════════════════════════════════════
-       Primary page title & description
-       Generic homepage-friendly defaults. Overridden per-route at
-       runtime by usePageMeta() in LandingPage.jsx, and baked into
-       prerendered HTML for each route by scripts/prerender.js.
-       ═══════════════════════════════════════════════════ -->
+  <!-- Primary page title and description. Generic homepage-friendly defaults.
+       Overridden per-route at runtime by usePageMeta() in LandingPage.jsx,
+       and baked into prerendered HTML for each route by scripts/prerender.js. -->
   <title>Online Homeschool | IGCSE, A-Level, IB & American — Smartious</title>
   <meta name="description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 85/month."/>
   <meta name="keywords" content="online homeschool, homeschooling Kenya, IGCSE online school, Cambridge IGCSE, A-Level online, IB Diploma, online school UAE, homeschool Canada, homeschool Australia, homeschool Nigeria, homeschool South Africa, Smartious"/>
   <meta name="author" content="Smartious Homeschool"/>
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1"/>
 
-  <!-- ═══════════════════════════════════════════════════
-       CRITICAL: NO static <link rel="canonical"> here.
-       The previous static canonical pointed every URL on the site
-       at the homepage, which told Googlebot every page was a
-       duplicate. usePageMeta() in LandingPage.jsx sets the correct
-       per-route canonical at runtime (via setCanonical), and
-       scripts/prerender.js bakes the correct canonical into each
-       route's static HTML at build time.
-       Same rule for <meta property="og:url"> — set dynamically.
-       Do not add static versions of either here.
-       ═══════════════════════════════════════════════════ -->
+  <!-- IMPORTANT: NO static canonical or og:url tag here. usePageMeta()
+       sets per-route canonicals at runtime, and scripts/prerender.js bakes
+       the correct canonical into each route at build time. A static
+       homepage canonical here would tell Googlebot every URL is a duplicate
+       of the homepage. Do not re-add either tag in this file. -->
 
-  <!-- ═══════════════════════════════════════════════════
-       Favicons
-       ═══════════════════════════════════════════════════ -->
+  <!-- Favicons -->
   <link rel="icon"           type="image/x-icon"  href="/favicon.ico"/>
   <link rel="icon"           type="image/svg+xml" href="/favicon.svg"/>
   <link rel="icon"           type="image/png"     href="/favicon-32x32.png" sizes="32x32"/>
@@ -127,10 +76,7 @@
   <meta name="msapplication-TileColor" content="#8B1A2E"/>
   <meta name="msapplication-TileImage" content="/favicon-192x192.png"/>
 
-  <!-- ═══════════════════════════════════════════════════
-       Open Graph (Facebook, LinkedIn, WhatsApp previews)
-       og:url is set dynamically per route — see note above.
-       ═══════════════════════════════════════════════════ -->
+  <!-- Open Graph (Facebook, LinkedIn, WhatsApp). og:url set dynamically per route. -->
   <meta property="og:type" content="website"/>
   <meta property="og:site_name" content="Smartious Homeschool"/>
   <meta property="og:title" content="Online Homeschool | IGCSE, A-Level, IB & American — Smartious"/>
@@ -147,9 +93,7 @@
   <meta name="twitter:description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya."/>
   <meta name="twitter:image" content="https://smartioushomeschool.com/favicon-512x512.png"/>
 
-  <!-- ═══════════════════════════════════════════════════
-       Fonts (non-blocking load)
-       ═══════════════════════════════════════════════════ -->
+  <!-- Fonts (non-blocking) -->
   <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&family=Syne+Mono&display=swap"
         media="print"
@@ -159,9 +103,7 @@
           href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&family=Syne+Mono&display=swap"/>
   </noscript>
 
-  <!-- ═══════════════════════════════════════════════════
-       Structured data — EducationalOrganization
-       ═══════════════════════════════════════════════════ -->
+  <!-- Structured data: EducationalOrganization (with OSSD + American as 5 credentials, foundingDate 2019) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -262,236 +204,9 @@
   </script>
 </head>
 <body>
-  <!-- Google Tag Manager (noscript) — runs for users with JS disabled -->
+  <!-- Google Tag Manager noscript fallback -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-55SRQS2G"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
-
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-</body>
-</html>
-       ═══════════════════════════════════════════════════ -->
-  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-55SRQS2G');</script>
-  <!-- End Google Tag Manager -->
-
-  <!-- ═══════════════════════════════════════════════════
-       GOOGLE SEARCH CONSOLE OWNERSHIP VERIFICATION
-       ═══════════════════════════════════════════════════ -->
-  <meta name="google-site-verification" content="eiGdv2Lik2kFbA9m2DXHDBdfbI6WYQzWtBQXOPZU5TY"/>
-
-  <!-- ═══════════════════════════════════════════════════
-       BING WEBMASTER TOOLS OWNERSHIP VERIFICATION
-       ═══════════════════════════════════════════════════ -->
-  <meta name="msvalidate.01" content="C0FEDFD7BDC2F88456F9DED6DFC17126"/>
-
-  <!-- ═══════════════════════════════════════════════════
-       PERFORMANCE — preconnect + preload
-       ═══════════════════════════════════════════════════ -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin/>
-  <link rel="preconnect" href="https://images.unsplash.com" crossorigin/>
-  <link rel="preconnect" href="https://www.googletagmanager.com"/>
-
-  <link rel="preload" as="image" href="/hero-learning-centre.jpg" fetchpriority="high"/>
-  <link rel="preload" as="font" type="font/woff2"
-        href="https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.woff2"
-        crossorigin/>
-
-  <link rel="dns-prefetch" href="https://smartious-backend.onrender.com"/>
-  <link rel="dns-prefetch" href="https://formsubmit.co"/>
-
-  <!-- ═══════════════════════════════════════════════════
-       GOOGLE ADS CONVERSION TRACKING (gtag.js)
-       Account: AW-17733479094 (Smartious Homeschool)
-
-       This sits alongside GTM and is the direct path used by
-       trackConversion() in LandingPage.jsx for the 4 wired
-       conversion events on /us-families:
-         · US Consult Booked   ($50)
-         · US Enrol Started    ($200)
-         · US WhatsApp Click   ($20)
-         · US Phone Click      ($20)
-
-       IMPORTANT: do NOT also configure these same conversion
-       actions inside GTM, or events will be counted twice.
-       GTM is reserved for future tags (GA4, Meta Pixel, etc.)
-       ═══════════════════════════════════════════════════ -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17733479094"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'AW-17733479094');
-  </script>
-
-  <!-- ═══════════════════════════════════════════════════
-       Permissions Policy — allow camera, microphone,
-       and screen-share for our own origin (Live Classes).
-       ═══════════════════════════════════════════════════ -->
-  <meta http-equiv="Permissions-Policy" content="camera=(self), microphone=(self), display-capture=(self), autoplay=(self)"/>
-  <meta http-equiv="Feature-Policy" content="camera 'self'; microphone 'self'; display-capture 'self'"/>
-
-  <!-- ═══════════════════════════════════════════════════
-       Primary page title & description
-       Generic homepage-friendly defaults. Overridden per-route at
-       runtime by usePageMeta() in LandingPage.jsx, and baked into
-       prerendered HTML for each route by scripts/prerender.js.
-       ═══════════════════════════════════════════════════ -->
-  <title>Online Homeschool | IGCSE, A-Level, IB & American — Smartious</title>
-  <meta name="description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 85/month."/>
-  <meta name="keywords" content="online homeschool, homeschooling Kenya, IGCSE online school, Cambridge IGCSE, A-Level online, IB Diploma, online school UAE, homeschool Canada, homeschool Australia, homeschool Nigeria, homeschool South Africa, Smartious"/>
-  <meta name="author" content="Smartious Homeschool"/>
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1"/>
-
-  <!-- ═══════════════════════════════════════════════════
-       CRITICAL: NO static <link rel="canonical"> here.
-       The previous static canonical pointed every URL on the site
-       at the homepage, which told Googlebot every page was a
-       duplicate. usePageMeta() in LandingPage.jsx sets the correct
-       per-route canonical at runtime (via setCanonical), and
-       scripts/prerender.js bakes the correct canonical into each
-       route's static HTML at build time.
-       Same rule for <meta property="og:url"> — set dynamically.
-       Do not add static versions of either here.
-       ═══════════════════════════════════════════════════ -->
-
-  <!-- ═══════════════════════════════════════════════════
-       Favicons
-       ═══════════════════════════════════════════════════ -->
-  <link rel="icon"           type="image/x-icon"  href="/favicon.ico"/>
-  <link rel="icon"           type="image/svg+xml" href="/favicon.svg"/>
-  <link rel="icon"           type="image/png"     href="/favicon-32x32.png" sizes="32x32"/>
-  <link rel="icon"           type="image/png"     href="/favicon-16x16.png" sizes="16x16"/>
-  <link rel="icon"           type="image/png"     href="/favicon-192x192.png" sizes="192x192"/>
-  <link rel="apple-touch-icon" sizes="180x180"   href="/apple-touch-icon.png"/>
-  <link rel="manifest" href="/site.webmanifest"/>
-  <meta name="theme-color" content="#8B1A2E"/>
-  <meta name="msapplication-TileColor" content="#8B1A2E"/>
-  <meta name="msapplication-TileImage" content="/favicon-192x192.png"/>
-
-  <!-- ═══════════════════════════════════════════════════
-       Open Graph (Facebook, LinkedIn, WhatsApp previews)
-       og:url is set dynamically per route — see note above.
-       ═══════════════════════════════════════════════════ -->
-  <meta property="og:type" content="website"/>
-  <meta property="og:site_name" content="Smartious Homeschool"/>
-  <meta property="og:title" content="Online Homeschool | IGCSE, A-Level, IB & American — Smartious"/>
-  <meta property="og:description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula."/>
-  <meta property="og:image" content="https://smartioushomeschool.com/favicon-512x512.png"/>
-  <meta property="og:image:width" content="512"/>
-  <meta property="og:image:height" content="512"/>
-  <meta property="og:image:alt" content="Smartious Homeschool logo"/>
-  <meta property="og:locale" content="en_US"/>
-
-  <!-- Twitter / X card -->
-  <meta name="twitter:card" content="summary"/>
-  <meta name="twitter:title" content="Online Homeschool | IGCSE, A-Level, IB & American — Smartious"/>
-  <meta name="twitter:description" content="Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya."/>
-  <meta name="twitter:image" content="https://smartioushomeschool.com/favicon-512x512.png"/>
-
-  <!-- ═══════════════════════════════════════════════════
-       Fonts (non-blocking load)
-       ═══════════════════════════════════════════════════ -->
-  <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&family=Syne+Mono&display=swap"
-        media="print"
-        onload="this.media='all'"/>
-  <noscript>
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500;600&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Syne:wght@400..800&family=Syne+Mono&display=swap"/>
-  </noscript>
-
-  <!-- ═══════════════════════════════════════════════════
-       Structured data — EducationalOrganization
-       ═══════════════════════════════════════════════════ -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "EducationalOrganization",
-    "@id": "https://smartioushomeschool.com/#organization",
-    "name": "Smartious Homeschool & eSchool",
-    "alternateName": ["Smartious", "Smartious Homeschool", "Smartious eSchool"],
-    "url": "https://smartioushomeschool.com/",
-    "logo": "https://smartioushomeschool.com/favicon-512x512.png",
-    "image": "https://smartioushomeschool.com/favicon-512x512.png",
-    "description": "Smartious Homeschool & eSchool is an accredited international online and home-based school. We deliver Cambridge IGCSE, Cambridge A-Level, IB Diploma, Pearson Edexcel and the British and American curricula to students across Kenya, the diaspora and worldwide. Live classes, qualified specialists, and full university-application support.",
-    "foundingDate": "2018",
-    "foundingLocation": {
-      "@type": "Place",
-      "name": "Nairobi, Kenya"
-    },
-    "email": "hellosmartious@gmail.com",
-    "telephone": "+254745021212",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Diamond Plaza I Annex, 3rd Floor, Office 20, Fourth Parklands Avenue",
-      "addressLocality": "Parklands",
-      "addressRegion": "Nairobi County",
-      "postalCode": "00100",
-      "addressCountry": "KE"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": -1.2573424,
-      "longitude": 36.8182174
-    },
-    "contactPoint": [{
-      "@type": "ContactPoint",
-      "telephone": "+254-745-021212",
-      "contactType": "admissions",
-      "areaServed": ["KE", "AE", "GB", "US", "CA", "AU", "NG", "ZA", "QA", "EG"],
-      "availableLanguage": ["English"]
-    }],
-    "areaServed": [
-      { "@type": "Country", "name": "Kenya" },
-      { "@type": "Country", "name": "United Arab Emirates" },
-      { "@type": "Country", "name": "United Kingdom" },
-      { "@type": "Country", "name": "United States" },
-      { "@type": "Country", "name": "Canada" },
-      { "@type": "Country", "name": "Australia" },
-      { "@type": "Country", "name": "Nigeria" },
-      { "@type": "Country", "name": "South Africa" },
-      { "@type": "Country", "name": "Qatar" },
-      { "@type": "Country", "name": "Egypt" }
-    ],
-    "sameAs": [
-      "https://www.facebook.com/smartioushomeschool",
-      "https://www.instagram.com/smartioushomeschool",
-      "https://www.linkedin.com/company/smartious-homeschool",
-      "https://www.tiktok.com/@smartioushomeschool",
-      "https://wa.me/254745021212"
-    ],
-    "hasCredential": [
-      {
-        "@type": "EducationalOccupationalCredential",
-        "credentialCategory": "certification",
-        "name": "Cambridge International Examinations (IGCSE & A-Level)"
-      },
-      {
-        "@type": "EducationalOccupationalCredential",
-        "credentialCategory": "certification",
-        "name": "International Baccalaureate (IB) Diploma Programme"
-      },
-      {
-        "@type": "EducationalOccupationalCredential",
-        "credentialCategory": "certification",
-        "name": "Pearson Edexcel International"
-      }
-    ]
-  }
-  </script>
-</head>
-<body>
-  <!-- Google Tag Manager (noscript) — runs for users with JS disabled -->
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-55SRQS2G"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
 
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
