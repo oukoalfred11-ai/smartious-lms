@@ -28,6 +28,7 @@ import { VIETNAM_CITIES, VIETNAM_COUNTRY } from '../data/vietnamCities.js'
 import { THAILAND_CITIES, THAILAND_COUNTRY } from '../data/thailandCities.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
 import CountryHub from '../components/CountryHub.jsx'
+import AssessmentForm from '../components/AssessmentForm.jsx'
 import { TEST_PREP } from '../data/testPrep.js'
 import { STUDY_ABROAD } from '../data/studyAbroad.js'
 import { LANGUAGES } from '../data/languages.js'
@@ -918,7 +919,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1347,6 +1348,10 @@ const PAGE_META = {
   home: {
     title: 'Online Homeschool | IGCSE, A-Level, IB & American — Smartious',
     desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 8/hour for 1-on-1 tuition · from USD 423/month for full homeschool programmes.',
+  },
+  assessment: {
+    title: 'Book Academic Assessment | Admissions Request — Smartious',
+    desc: 'Request an academic assessment for your child. Our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled. Admission is determined on assessment results.',
   },
   about: {
     title: 'About Smartious | Homeschooling & eSchool in Nairobi, Kenya',
@@ -21187,6 +21192,15 @@ export default function LandingPage() {
           </div></div></section>
           <Footer P={P}/>
         </div>
+      )}
+
+      {/* ══ ASSESSMENT REQUEST PAGE ══
+          Single conversion path on the public site. Submits a request only —
+          no payment is collected here. Admissions reviews each request and
+          invoices the assessment fee separately if the request is accepted.
+          AssessmentForm is fully self-contained (own header, no Footer needed). */}
+      {page === 'assessment' && (
+        <AssessmentForm nav={nav}/>
       )}
 
       {/* ══ CONTACT PAGE ══ */}
