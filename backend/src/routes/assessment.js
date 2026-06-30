@@ -23,6 +23,7 @@ const rateLimit = require('express-rate-limit');
 const nodemailer = require('nodemailer');
 
 const AssessmentRequest = require('../models/AssessmentRequest');
+const { auth, requireRole } = require('../middleware/auth');
 
 // ─────────────────────────────────────────────────────────
 // Rate limiter — 5 submissions per IP per hour
@@ -444,6 +445,270 @@ router.post('/request', assessmentLimiter, async (req, res) => {
     }
 
     return res.status(500).json({ ok: false, error: 'Something went wrong while submitting your request. Please try again or email hellosmartious@gmail.com directly.' });
+  }
+});
+
+
+// ═══════════════════════════════════════════════════════════
+// EMAIL C — "More information requested" notice to parent
+// ═══════════════════════════════════════════════════════════
+function buildInfoRequestedHTML(r, message) {
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FDFAF4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#080C14;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(139,26,46,.08);">
+        <tr><td style="background:linear-gradient(135deg,#8B1A2E 0%,#6E1424 100%);padding:32px 36px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C9973A;margin-bottom:8px;">A Quick Follow-Up</div>
+          <div style="font-family:Georgia,serif;font-size:24px;color:#fff;line-height:1.25;">We need a little more information</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8);margin-top:8px;">Reference: ${r.requestRef}</div>
+        </td></tr>
+        <tr><td style="padding:32px 36px;">
+          <p style="font-size:15px;line-height:1.65;color:#2c2c2c;margin:0 0 18px;">
+            Dear ${r.parent1FirstName},
+          </p>
+          <p style="font-size:14.5px;line-height:1.7;color:#2c2c2c;margin:0 0 18px;">
+            Thank you for your assessment request for ${r.studentFirstName}. Before our Head of Admissions can make a decision, we'd like to ask:
+          </p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;border-left:4px solid #C9973A;border-radius:6px;padding:18px 22px;margin-bottom:24px;">
+            <tr><td style="font-size:14px;line-height:1.7;color:#1a1a1a;white-space:pre-line;">${message || 'Please reply to this email with any additional details about your enquiry.'}</td></tr>
+          </table>
+          <p style="font-size:14px;line-height:1.65;color:#2c2c2c;margin:0 0 22px;">
+            Simply reply to this email with the requested information and we'll continue the review right away.
+          </p>
+          <p style="font-size:13.5px;line-height:1.65;color:#2c2c2c;margin:0;">
+            Warm regards,<br><strong>Alfred Ouko</strong><br>Founder &amp; Head of Academics<br>Smartious Homeschool and eSchool
+          </p>
+        </td></tr>
+        <tr><td style="background:#FDFAF4;padding:22px 36px;border-top:1px solid #f0e8e8;">
+          <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool and eSchool · smartioushomeschool.com</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
+function buildInfoRequestedText(r, message) {
+  return [
+    `Dear ${r.parent1FirstName},`,
+    '',
+    `Thank you for your assessment request for ${r.studentFirstName}. Before our Head of Admissions can make a decision, we'd like to ask:`,
+    '',
+    message || 'Please reply to this email with any additional details about your enquiry.',
+    '',
+    "Simply reply to this email with the requested information and we'll continue the review right away.",
+    '',
+    'Warm regards,',
+    'Alfred Ouko',
+    'Founder & Head of Academics',
+    'Smartious Homeschool and eSchool',
+  ].join('\n');
+}
+
+// ═══════════════════════════════════════════════════════════
+// EMAIL D — "Declined" notice to parent
+// ═══════════════════════════════════════════════════════════
+function buildDeclinedHTML(r, message) {
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FDFAF4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#080C14;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(139,26,46,.08);">
+        <tr><td style="background:linear-gradient(135deg,#52616B 0%,#3B454D 100%);padding:32px 36px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C9973A;margin-bottom:8px;">Assessment Request Update</div>
+          <div style="font-family:Georgia,serif;font-size:24px;color:#fff;line-height:1.25;">Thank you for your interest in Smartious</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8);margin-top:8px;">Reference: ${r.requestRef}</div>
+        </td></tr>
+        <tr><td style="padding:32px 36px;">
+          <p style="font-size:15px;line-height:1.65;color:#2c2c2c;margin:0 0 18px;">
+            Dear ${r.parent1FirstName},
+          </p>
+          <p style="font-size:14.5px;line-height:1.7;color:#2c2c2c;margin:0 0 18px;">
+            Thank you for submitting an assessment request for ${r.studentFirstName}. After careful review, we don't believe we're the right fit at this time.
+          </p>
+          ${message ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;border-left:4px solid #C9973A;border-radius:6px;padding:18px 22px;margin-bottom:24px;">
+            <tr><td style="font-size:14px;line-height:1.7;color:#1a1a1a;white-space:pre-line;">${message}</td></tr>
+          </table>` : ''}
+          <p style="font-size:14px;line-height:1.65;color:#2c2c2c;margin:0 0 22px;">
+            We're grateful for the time you took to share details about ${r.studentFirstName}, and we wish your family all the best in finding the right educational fit.
+          </p>
+          <p style="font-size:13.5px;line-height:1.65;color:#2c2c2c;margin:0;">
+            Warm regards,<br><strong>Alfred Ouko</strong><br>Founder &amp; Head of Academics<br>Smartious Homeschool and eSchool
+          </p>
+        </td></tr>
+        <tr><td style="background:#FDFAF4;padding:22px 36px;border-top:1px solid #f0e8e8;">
+          <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool and eSchool · smartioushomeschool.com</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
+function buildDeclinedText(r, message) {
+  return [
+    `Dear ${r.parent1FirstName},`,
+    '',
+    `Thank you for submitting an assessment request for ${r.studentFirstName}. After careful review, we don't believe we're the right fit at this time.`,
+    '',
+    message || '',
+    '',
+    `We're grateful for the time you took to share details about ${r.studentFirstName}, and we wish your family all the best in finding the right educational fit.`,
+    '',
+    'Warm regards,',
+    'Alfred Ouko',
+    'Founder & Head of Academics',
+    'Smartious Homeschool and eSchool',
+  ].filter(Boolean).join('\n');
+}
+
+// ═══════════════════════════════════════════════════════════
+// GET /requests — list with filters + pagination (admin only)
+// Query params: status, search, page (1-based), limit
+// ═══════════════════════════════════════════════════════════
+router.get('/requests', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const { status, search, page = 1, limit = 25 } = req.query;
+    const filter = {};
+
+    if (status && status !== 'all') filter.status = status;
+
+    if (search && String(search).trim()) {
+      const term = String(search).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.$or = [
+        { studentFirstName: { $regex: term, $options: 'i' } },
+        { studentLastName:  { $regex: term, $options: 'i' } },
+        { parent1FirstName: { $regex: term, $options: 'i' } },
+        { parent1LastName:  { $regex: term, $options: 'i' } },
+        { parent1Email:     { $regex: term, $options: 'i' } },
+        { requestRef:       { $regex: term, $options: 'i' } },
+      ];
+    }
+
+    const pageNum  = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 25));
+    const skip     = (pageNum - 1) * limitNum;
+
+    const [requests, total, statusCounts] = await Promise.all([
+      AssessmentRequest.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .select('-submittedUserAgent')
+        .lean(),
+      AssessmentRequest.countDocuments(filter),
+      AssessmentRequest.aggregate([
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const counts = { awaiting_review: 0, info_requested: 0, accepted: 0, declined: 0 };
+    statusCounts.forEach(c => { if (c._id in counts) counts[c._id] = c.count; });
+
+    return res.json({
+      ok: true,
+      data: {
+        requests,
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
+        counts,
+      },
+    });
+  } catch (err) {
+    console.error('[assessment list]', err.message);
+    return res.status(500).json({ ok: false, error: 'Failed to load requests.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// GET /requests/:id — single request detail (admin only)
+// ═══════════════════════════════════════════════════════════
+router.get('/requests/:id', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const doc = await AssessmentRequest.findById(req.params.id)
+      .populate('reviewedBy', 'firstName lastName email')
+      .lean();
+    if (!doc) return res.status(404).json({ ok: false, error: 'Request not found.' });
+    return res.json({ ok: true, data: { request: doc } });
+  } catch (err) {
+    console.error('[assessment get]', err.message);
+    return res.status(500).json({ ok: false, error: 'Failed to load request.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// PATCH /requests/:id — update status / notes (admin only)
+// Body: { status?, internalNotes?, message? }
+//   status        — one of the four enum values
+//   internalNotes — admin-only notes, always saved if provided
+//   message       — optional custom text included in the
+//                   "info_requested" or "declined" parent email
+//
+// Triggers a parent email automatically when status changes to
+// 'info_requested' or 'declined'. 'accepted' does NOT send an
+// email here — that's tied to the separate Paystack invoicing
+// workflow which is out of scope for this endpoint.
+// ═══════════════════════════════════════════════════════════
+router.patch('/requests/:id', auth, requireRole('admin'), async (req, res) => {
+  try {
+    const { status, internalNotes, message } = req.body || {};
+    const doc = await AssessmentRequest.findById(req.params.id);
+    if (!doc) return res.status(404).json({ ok: false, error: 'Request not found.' });
+
+    const VALID_STATUSES = ['awaiting_review', 'info_requested', 'accepted', 'declined'];
+    const statusChanged = status && status !== doc.status;
+
+    if (status) {
+      if (!VALID_STATUSES.includes(status))
+        return res.status(400).json({ ok: false, error: 'Invalid status value.' });
+      doc.status = status;
+      doc.reviewedAt = new Date();
+      doc.reviewedBy = req.user._id;
+    }
+
+    if (internalNotes !== undefined) {
+      doc.internalNotes = String(internalNotes).trim();
+    }
+
+    await doc.save();
+
+    // Fire the appropriate parent email on status transition
+    if (statusChanged && (status === 'info_requested' || status === 'declined')) {
+      const t = getTransporter();
+      const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>';
+
+      if (t) {
+        const mail = status === 'info_requested'
+          ? {
+              from, to: doc.parent1Email,
+              subject: `A quick follow-up on your Smartious assessment request — ${doc.requestRef}`,
+              html: buildInfoRequestedHTML(doc, message),
+              text: buildInfoRequestedText(doc, message),
+            }
+          : {
+              from, to: doc.parent1Email,
+              subject: `Update on your Smartious assessment request — ${doc.requestRef}`,
+              html: buildDeclinedHTML(doc, message),
+              text: buildDeclinedText(doc, message),
+            };
+
+        t.sendMail(mail)
+          .then(() => console.log(`[assessment] Sent ${status} email for ${doc.requestRef}`))
+          .catch(e => console.error(`[assessment] Failed to send ${status} email for ${doc.requestRef}:`, e.message));
+      } else {
+        console.error('[assessment] No transporter — could not send', status, 'email for', doc.requestRef);
+      }
+    }
+
+    return res.json({ ok: true, data: { request: doc } });
+  } catch (err) {
+    console.error('[assessment patch]', err.message);
+    return res.status(500).json({ ok: false, error: 'Failed to update request.' });
   }
 });
 
