@@ -1,0 +1,450 @@
+/**
+ * routes/assessment.js
+ * ============================================================
+ * Public-facing assessment request endpoint.
+ * Mounted at /api/assessment
+ *
+ * POST /request
+ *   - validates the payload from AssessmentForm.jsx
+ *   - persists an AssessmentRequest document with
+ *     status='awaiting_review' (no payment collected here)
+ *   - sends two emails in parallel:
+ *       A. admin notification → hellosmartious@gmail.com
+ *       B. parent confirmation → form.parent1Email
+ *   - rate limited to 5 submissions / IP / hour
+ *
+ * Returns { ok: true, requestRef } on success,
+ *         { ok: false, error } on failure.
+ */
+
+const express   = require('express');
+const router    = express.Router();
+const rateLimit = require('express-rate-limit');
+const nodemailer = require('nodemailer');
+
+const AssessmentRequest = require('../models/AssessmentRequest');
+
+// ─────────────────────────────────────────────────────────
+// Rate limiter — 5 submissions per IP per hour
+// ─────────────────────────────────────────────────────────
+const assessmentLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { ok: false, error: 'Too many assessment requests from this device. Please try again in an hour, or email hellosmartious@gmail.com directly.' },
+});
+
+// ─────────────────────────────────────────────────────────
+// Email transporter — reuses the same Gmail SMTP convention
+// as lib/email.js (EMAIL_HOST / EMAIL_USER / EMAIL_PASSWORD).
+// Kept local to this file rather than importing lib/email.js
+// directly so this route has zero dependency on its internals;
+// if lib/email.js changes shape later this route is unaffected.
+// ─────────────────────────────────────────────────────────
+let transporter = null;
+function getTransporter() {
+  if (transporter) return transporter;
+  const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
+  const port = parseInt(process.env.EMAIL_PORT || '587', 10);
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASSWORD;
+  if (!user || !pass) {
+    console.error('[assessment] EMAIL_USER / EMAIL_PASSWORD not set — emails will not send');
+    return null;
+  }
+  transporter = nodemailer.createTransport({
+    host, port, secure: port === 465,
+    auth: { user, pass },
+  });
+  return transporter;
+}
+
+const ADMIN_NOTIFY_EMAIL = 'hellosmartious@gmail.com';
+const ASSESSMENT_FEE_USD = 45;
+const ASSESSMENT_FEE_KES = 5800;
+
+// Admin panel review URL pattern — adjust to match the real
+// Admin Portal route once that page exists. Uses requestRef as
+// the lookup key so the link works regardless of Mongo _id format.
+const adminReviewUrl = (requestRef) =>
+  `https://smartioushomeschool.com/admin/assessment-requests/${encodeURIComponent(requestRef)}`;
+
+// ─────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────
+const isValidEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || '').trim());
+
+// Generate a short reference like 'A-12847'. Retries on the rare
+// collision (unique index also guards this at the DB level).
+async function generateRequestRef() {
+  for (let i = 0; i < 5; i++) {
+    const ref = 'A-' + Math.floor(10000 + Math.random() * 90000);
+    const exists = await AssessmentRequest.exists({ requestRef: ref });
+    if (!exists) return ref;
+  }
+  // Fallback — timestamp-based, astronomically unlikely to collide
+  return 'A-' + Date.now().toString().slice(-6);
+}
+
+// Server-side validation mirroring AssessmentForm.jsx's validate()
+function validatePayload(body) {
+  const errors = {};
+
+  if (!body.studentFirstName?.trim()) errors.studentFirstName = 'Required';
+  if (!body.studentLastName?.trim())  errors.studentLastName  = 'Required';
+  if (!body.studentDOB)               errors.studentDOB       = 'Required';
+  if (!body.studentGrade)             errors.studentGrade     = 'Required';
+
+  if (!body.parent1FirstName?.trim()) errors.parent1FirstName = 'Required';
+  if (!body.parent1LastName?.trim())  errors.parent1LastName  = 'Required';
+  if (!body.parent1Relationship)      errors.parent1Relationship = 'Required';
+
+  if (!body.parent1Email?.trim())          errors.parent1Email = 'Required';
+  else if (!isValidEmail(body.parent1Email)) errors.parent1Email = 'Invalid email';
+
+  if (!body.parent1Phone?.trim())     errors.parent1Phone = 'Required';
+  if (!body.preferredContact)         errors.preferredContact = 'Required';
+  if (!body.countryIso)               errors.countryIso = 'Required';
+  if (!body.city?.trim())             errors.city = 'Required';
+
+  if (!Array.isArray(body.curriculumInterest) || body.curriculumInterest.length === 0)
+    errors.curriculumInterest = 'Select at least one';
+
+  if (body.feeAcknowledged !== true)
+    errors.feeAcknowledged = 'Required to proceed';
+
+  // Optional-but-if-present email validations
+  if (body.studentEmail && !isValidEmail(body.studentEmail))
+    errors.studentEmail = 'Invalid email';
+  if (body.hasParent2 && body.parent2Email && !isValidEmail(body.parent2Email))
+    errors.parent2Email = 'Invalid email';
+
+  return errors;
+}
+
+// ═══════════════════════════════════════════════════════════
+// EMAIL A — Admin notification
+// ═══════════════════════════════════════════════════════════
+function buildAdminEmailHTML(reqDoc) {
+  const r = reqDoc;
+  const fullName = `${r.studentFirstName} ${r.studentLastName}`;
+  const countryLabel = r.countryIso === 'OTHER' ? 'Other (remote)' : r.countryIso;
+
+  const row = (label, value) =>
+    value ? `<tr>
+      <td style="padding:8px 14px;font-size:12px;color:#6b6b6b;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;vertical-align:top;border-bottom:1px solid #f0e8e8;">${label}</td>
+      <td style="padding:8px 14px;font-size:13.5px;color:#1a1a1a;border-bottom:1px solid #f0e8e8;">${value}</td>
+    </tr>` : '';
+
+  const sectionHeader = (label) =>
+    `<tr><td colspan="2" style="padding:18px 14px 6px;font-size:11px;color:#8B1A2E;font-weight:800;text-transform:uppercase;letter-spacing:.08em;">${label}</td></tr>`;
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FDFAF4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#080C14;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(139,26,46,.1);">
+
+        <tr><td style="background:linear-gradient(135deg,#8B1A2E 0%,#6E1424 100%);padding:26px 30px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C9973A;margin-bottom:6px;">New Assessment Request</div>
+          <div style="font-family:Georgia,serif;font-size:22px;color:#fff;">${fullName}</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8);margin-top:4px;">${countryLabel} · Ref: ${r.requestRef}</div>
+        </td></tr>
+
+        <tr><td style="padding:24px 24px 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            ${sectionHeader('Student')}
+            ${row('Name', fullName)}
+            ${row('Date of birth', r.studentDOB)}
+            ${row('Grade level', r.studentGrade)}
+            ${row('Current school', r.currentSchool)}
+            ${row('Student email', r.studentEmail)}
+            ${row('Home language(s)', r.studentLanguages)}
+            ${row('Learning needs', r.learningNeeds)}
+
+            ${sectionHeader('Parent / Guardian')}
+            ${row('Name', `${r.parent1FirstName} ${r.parent1LastName} (${r.parent1Relationship})`)}
+            ${row('Email', `<a href="mailto:${r.parent1Email}" style="color:#8B1A2E;">${r.parent1Email}</a>`)}
+            ${row('Phone', r.parent1Phone)}
+            ${row('Preferred contact', r.preferredContact)}
+            ${row('Preferred time', r.preferredContactTime)}
+            ${r.hasParent2 ? row('Second parent', `${r.parent2FirstName} ${r.parent2LastName} (${r.parent2Relationship}) — ${r.parent2Email || ''} ${r.parent2Phone || ''}`) : ''}
+
+            ${sectionHeader('Location')}
+            ${row('Country', countryLabel)}
+            ${row('State / Province', r.stateProvince)}
+            ${row('City', r.city)}
+            ${row('Timezone', r.timezone)}
+
+            ${sectionHeader('Academic')}
+            ${row('Curriculum interest', (r.curriculumInterest || []).join('; '))}
+            ${row('Target university', (r.targetUniversity || []).join('; '))}
+            ${row('Why considering Smartious', (r.whyConsidering || []).join('; '))}
+            ${row('Preferred schedule', r.preferredSchedule)}
+
+            ${sectionHeader('Additional')}
+            ${row('How they heard about us', r.howDidYouHear)}
+            ${row('Additional info', r.additionalInfo)}
+          </table>
+        </td></tr>
+
+        <tr><td style="padding:8px 24px 28px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td align="center" style="padding-top:14px;">
+              <a href="${adminReviewUrl(r.requestRef)}" style="display:inline-block;background:#8B1A2E;color:#fff;padding:13px 30px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">Review in Admin Portal</a>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <tr><td style="background:#FDFAF4;padding:16px 24px;border-top:1px solid #f0e8e8;">
+          <p style="font-size:11px;color:#999;margin:0;">Submitted ${new Date(r.createdAt || Date.now()).toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })} EAT · ${r.submittedIp || ''}</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
+function buildAdminEmailText(r) {
+  const fullName = `${r.studentFirstName} ${r.studentLastName}`;
+  const lines = [
+    `New assessment request — ${fullName} (Ref: ${r.requestRef})`,
+    '',
+    '--- STUDENT ---',
+    `Name: ${fullName}`,
+    `DOB: ${r.studentDOB}`,
+    `Grade: ${r.studentGrade}`,
+    `Current school: ${r.currentSchool || '—'}`,
+    `Learning needs: ${r.learningNeeds || '—'}`,
+    '',
+    '--- PARENT ---',
+    `${r.parent1FirstName} ${r.parent1LastName} (${r.parent1Relationship})`,
+    `Email: ${r.parent1Email}`,
+    `Phone: ${r.parent1Phone}`,
+    `Preferred contact: ${r.preferredContact}`,
+    '',
+    '--- LOCATION ---',
+    `${r.city}, ${r.stateProvince || ''} ${r.countryIso}`.trim(),
+    `Timezone: ${r.timezone || '—'}`,
+    '',
+    '--- ACADEMIC ---',
+    `Curriculum interest: ${(r.curriculumInterest || []).join('; ')}`,
+    `Why considering Smartious: ${(r.whyConsidering || []).join('; ')}`,
+    '',
+    `Review: ${adminReviewUrl(r.requestRef)}`,
+  ];
+  return lines.join('\n');
+}
+
+// ═══════════════════════════════════════════════════════════
+// EMAIL B — Parent confirmation
+// ═══════════════════════════════════════════════════════════
+function buildParentEmailHTML(r) {
+  const studentFirst = r.studentFirstName;
+  const parentFirst  = r.parent1FirstName;
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FDFAF4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#080C14;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(139,26,46,.08);">
+
+        <tr><td style="background:linear-gradient(135deg,#8B1A2E 0%,#6E1424 100%);padding:32px 36px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#C9973A;margin-bottom:8px;">Request Received</div>
+          <div style="font-family:Georgia,serif;font-size:26px;color:#fff;line-height:1.25;">Thank you, ${parentFirst}.</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8);margin-top:8px;">Reference: ${r.requestRef}</div>
+        </td></tr>
+
+        <tr><td style="padding:32px 36px;">
+          <p style="font-size:15px;line-height:1.65;color:#2c2c2c;margin:0 0 22px;">
+            We've received your assessment request for <strong>${studentFirst}</strong>. Our Head of Admissions will review the request and respond to this email address within <strong>three business days</strong>, regardless of decision.
+          </p>
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;border-left:4px solid #C9973A;border-radius:6px;padding:18px 22px;margin-bottom:26px;">
+            <tr><td>
+              <div style="font-size:11px;color:#C9973A;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">What happens next</div>
+              <ol style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.85;color:#1a1a1a;">
+                <li>Confirmation email (this one) acknowledging receipt of your request</li>
+                <li>Admissions decision within three business days — one of three outcomes:
+                  <ul style="margin:6px 0;padding-left:18px;color:#52616B;font-size:12.5px;">
+                    <li><strong style="color:#1a1a1a;">Accepted</strong> — you'll receive an invoice for the USD ${ASSESSMENT_FEE_USD} (approx KES ${ASSESSMENT_FEE_KES.toLocaleString()}) assessment fee. The diagnostic is scheduled once payment is received. This fee is credited against your first month's tuition if you proceed to enrolment.</li>
+                    <li><strong style="color:#1a1a1a;">More information requested</strong> — we may ask clarifying questions before deciding.</li>
+                    <li><strong style="color:#1a1a1a;">Not a current fit</strong> — we'll explain why and recommend better-suited alternatives where we can.</li>
+                  </ul>
+                </li>
+                <li>If accepted and the fee is paid: a structured diagnostic across English, Mathematics and Science (approximately 90 minutes)</li>
+                <li>A written report with subject-specific recommendations, plus a 30-minute consultation with our Head of Academics</li>
+                <li>A curriculum pathway recommendation and, where results indicate fit, a formal enrolment offer</li>
+              </ol>
+            </td></tr>
+          </table>
+
+          <p style="font-size:13px;line-height:1.65;color:#6b6b6b;margin:0 0 4px;">Please keep your reference number for any follow-up correspondence:</p>
+          <p style="font-size:18px;font-family:'JetBrains Mono',monospace;color:#8B1A2E;font-weight:700;margin:0 0 26px;">${r.requestRef}</p>
+
+          <p style="font-size:13.5px;line-height:1.65;color:#2c2c2c;margin:0;">
+            Warm regards,<br>
+            <strong>Alfred Ouko</strong><br>
+            Founder &amp; Head of Academics<br>
+            Smartious Homeschool and eSchool
+          </p>
+        </td></tr>
+
+        <tr><td style="background:#FDFAF4;padding:22px 36px;border-top:1px solid #f0e8e8;">
+          <p style="font-size:12px;line-height:1.55;color:#6b6b6b;margin:0 0 8px;">Questions in the meantime? Reply to this email or contact <a href="mailto:hellosmartious@gmail.com" style="color:#8B1A2E;">hellosmartious@gmail.com</a>.</p>
+          <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool and eSchool · Nairobi, Kenya · <a href="https://smartioushomeschool.com" style="color:#999;">smartioushomeschool.com</a></p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
+function buildParentEmailText(r) {
+  const lines = [
+    `Thank you, ${r.parent1FirstName}.`,
+    '',
+    `We've received your assessment request for ${r.studentFirstName}. Our Head of Admissions will review the request and respond within three business days, regardless of decision.`,
+    '',
+    'WHAT HAPPENS NEXT',
+    '1. Confirmation email (this one)',
+    '2. Admissions decision within three business days:',
+    `   - Accepted: invoice for USD ${ASSESSMENT_FEE_USD} (approx KES ${ASSESSMENT_FEE_KES.toLocaleString()}) assessment fee, credited against first month's tuition on enrolment`,
+    '   - More information requested: clarifying questions before deciding',
+    '   - Not a current fit: explanation and alternative recommendations',
+    '3. If accepted: structured diagnostic (English, Mathematics, Science — approx 90 minutes)',
+    '4. Written report plus 30-minute consultation with our Head of Academics',
+    '5. Curriculum pathway recommendation and enrolment offer where results indicate fit',
+    '',
+    `Your reference number: ${r.requestRef}`,
+    '',
+    'Warm regards,',
+    'Alfred Ouko',
+    'Founder & Head of Academics',
+    'Smartious Homeschool and eSchool',
+    '',
+    'Questions? Reply to this email or contact hellosmartious@gmail.com',
+  ];
+  return lines.join('\n');
+}
+
+// ═══════════════════════════════════════════════════════════
+// POST /request
+// ═══════════════════════════════════════════════════════════
+router.post('/request', assessmentLimiter, async (req, res) => {
+  try {
+    const body = req.body || {};
+
+    // ── Validate ──────────────────────────────────────────
+    const errors = validatePayload(body);
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ ok: false, error: 'Validation failed', fieldErrors: errors });
+    }
+
+    // ── Generate reference and persist ───────────────────
+    const requestRef = await generateRequestRef();
+
+    const doc = await AssessmentRequest.create({
+      studentFirstName: body.studentFirstName.trim(),
+      studentLastName:  body.studentLastName.trim(),
+      studentDOB:       body.studentDOB,
+      studentGrade:     body.studentGrade,
+      currentSchool:    (body.currentSchool || '').trim(),
+      studentEmail:     (body.studentEmail || '').trim(),
+      studentLanguages: (body.studentLanguages || '').trim(),
+      learningNeeds:    (body.learningNeeds || '').trim(),
+
+      parent1FirstName:    body.parent1FirstName.trim(),
+      parent1LastName:     body.parent1LastName.trim(),
+      parent1Relationship: body.parent1Relationship,
+      parent1Email:        body.parent1Email.trim().toLowerCase(),
+      parent1Phone:        body.parent1Phone.trim(),
+
+      hasParent2:          !!body.hasParent2,
+      parent2FirstName:    (body.parent2FirstName || '').trim(),
+      parent2LastName:     (body.parent2LastName || '').trim(),
+      parent2Relationship: body.parent2Relationship || '',
+      parent2Email:        (body.parent2Email || '').trim().toLowerCase(),
+      parent2Phone:        (body.parent2Phone || '').trim(),
+
+      preferredContact:     body.preferredContact,
+      preferredContactTime: (body.preferredContactTime || '').trim(),
+
+      countryIso:    body.countryIso,
+      stateProvince: (body.stateProvince || '').trim(),
+      city:          body.city.trim(),
+      timezone:      (body.timezone || '').trim(),
+
+      curriculumInterest: Array.isArray(body.curriculumInterest) ? body.curriculumInterest : [],
+      targetUniversity:   Array.isArray(body.targetUniversity) ? body.targetUniversity : [],
+      whyConsidering:      Array.isArray(body.whyConsidering) ? body.whyConsidering : [],
+      preferredSchedule:  (body.preferredSchedule || '').trim(),
+
+      howDidYouHear:  body.howDidYouHear || '',
+      additionalInfo: (body.additionalInfo || '').trim(),
+
+      feeAcknowledged: body.feeAcknowledged === true,
+
+      status: 'awaiting_review',
+      requestRef,
+
+      submittedIp:        req.ip || req.headers['x-forwarded-for'] || '',
+      submittedUserAgent: req.headers['user-agent'] || '',
+    });
+
+    console.log('[assessment] new request created:', requestRef, '—', doc.studentFirstName, doc.studentLastName);
+
+    // ── Send both emails in parallel ─────────────────────
+    const t = getTransporter();
+    const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>';
+
+    const emailResults = await Promise.allSettled([
+      t ? t.sendMail({
+        from,
+        to: ADMIN_NOTIFY_EMAIL,
+        subject: `New assessment request — ${doc.studentFirstName} ${doc.studentLastName} (${doc.countryIso})`,
+        html: buildAdminEmailHTML(doc),
+        text: buildAdminEmailText(doc),
+      }) : Promise.reject(new Error('No transporter configured')),
+
+      t ? t.sendMail({
+        from,
+        to: doc.parent1Email,
+        subject: `Your Smartious assessment request — ${doc.studentFirstName} ${doc.studentLastName}`,
+        html: buildParentEmailHTML(doc),
+        text: buildParentEmailText(doc),
+      }) : Promise.reject(new Error('No transporter configured')),
+    ]);
+
+    emailResults.forEach((result, i) => {
+      const label = i === 0 ? 'admin notification' : 'parent confirmation';
+      if (result.status === 'rejected') {
+        console.error(`[assessment] Failed to send ${label} email for ${requestRef}:`, result.reason?.message || result.reason);
+      } else {
+        console.log(`[assessment] Sent ${label} email for ${requestRef}`);
+      }
+    });
+
+    // Request succeeds even if email sending fails — the record
+    // is saved either way. Email failures are logged, not surfaced
+    // to the family (they'd just retry and create a duplicate).
+    return res.json({ ok: true, requestRef });
+
+  } catch (err) {
+    console.error('[assessment request]', err.message);
+
+    if (err.code === 11000) {
+      // Extremely rare requestRef collision — ask the client to retry
+      return res.status(500).json({ ok: false, error: 'Could not generate a unique reference. Please try submitting again.' });
+    }
+
+    return res.status(500).json({ ok: false, error: 'Something went wrong while submitting your request. Please try again or email hellosmartious@gmail.com directly.' });
+  }
+});
+
+module.exports = router;
