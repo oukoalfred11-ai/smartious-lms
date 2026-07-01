@@ -2,15 +2,13 @@
  * AssessmentRequest model
  * ============================================================
  * One document per academic assessment request submitted via
- * the public AssessmentForm.jsx. Mirrors the `form` state shape
- * in that component field-for-field, plus admin-side workflow
- * fields appended at the bottom.
+ * the public AssessmentForm.jsx.
  *
- * Two-gate funnel: this record starts at 'awaiting_review' and
- * NO payment has been collected at creation time. Payment (via
- * Paystack) happens separately once admissions accepts the
- * request — that workflow is out of scope for this model, but
- * paystackInvoiceId is reserved here for when it's wired up.
+ * Status flow:
+ *   awaiting_review → info_requested → awaiting_review (loop)
+ *   awaiting_review → accepted       → payment_pending
+ *                                    → payment_received
+ *   awaiting_review → declined
  */
 
 const mongoose = require('mongoose');
@@ -19,21 +17,21 @@ const assessmentRequestSchema = new mongoose.Schema({
   // ── Student ────────────────────────────────────────────────
   studentFirstName: { type: String, required: true, trim: true, maxlength: 100 },
   studentLastName:  { type: String, required: true, trim: true, maxlength: 100 },
-  studentDOB:       { type: String, required: true },              // ISO date string from <input type="date">
+  studentDOB:       { type: String, required: true },
   studentGrade:     { type: String, required: true, trim: true },
   currentSchool:    { type: String, default: '', trim: true },
   studentEmail:     { type: String, default: '', trim: true, lowercase: true },
   studentLanguages: { type: String, default: '', trim: true },
   learningNeeds:    { type: String, default: '', trim: true, maxlength: 2000 },
 
-  // ── Parent 1 (primary contact) ───────────────────────────────
+  // ── Parent 1 ───────────────────────────────────────────────
   parent1FirstName:    { type: String, required: true, trim: true, maxlength: 100 },
   parent1LastName:     { type: String, required: true, trim: true, maxlength: 100 },
   parent1Relationship: { type: String, required: true, trim: true },
   parent1Email:        { type: String, required: true, trim: true, lowercase: true },
   parent1Phone:        { type: String, required: true, trim: true },
 
-  // ── Parent 2 (optional) ───────────────────────────────────────
+  // ── Parent 2 (optional) ────────────────────────────────────
   hasParent2:          { type: Boolean, default: false },
   parent2FirstName:    { type: String, default: '', trim: true },
   parent2LastName:     { type: String, default: '', trim: true },
@@ -41,12 +39,12 @@ const assessmentRequestSchema = new mongoose.Schema({
   parent2Email:        { type: String, default: '', trim: true, lowercase: true },
   parent2Phone:        { type: String, default: '', trim: true },
 
-  // ── Contact preferences ────────────────────────────────────
+  // ── Contact preferences ─────────────────────────────────────
   preferredContact:     { type: String, required: true, trim: true },
   preferredContactTime: { type: String, default: '', trim: true },
 
   // ── Location ────────────────────────────────────────────────
-  countryIso:    { type: String, required: true, trim: true, uppercase: true }, // ISO code or 'OTHER'
+  countryIso:    { type: String, required: true, trim: true, uppercase: true },
   stateProvince: { type: String, default: '', trim: true },
   city:          { type: String, required: true, trim: true },
   timezone:      { type: String, default: '', trim: true },
@@ -54,32 +52,42 @@ const assessmentRequestSchema = new mongoose.Schema({
   // ── Academic ────────────────────────────────────────────────
   curriculumInterest: { type: [String], default: [] },
   targetUniversity:   { type: [String], default: [] },
-  whyConsidering:      { type: [String], default: [] },
+  whyConsidering:     { type: [String], default: [] },
   preferredSchedule:  { type: String, default: '', trim: true },
 
   // ── Additional ──────────────────────────────────────────────
   howDidYouHear:  { type: String, default: '', trim: true },
   additionalInfo: { type: String, default: '', trim: true, maxlength: 3000 },
-
-  // ── Fee acknowledgment ────────────────────────────────────
   feeAcknowledged: { type: Boolean, required: true },
 
-  // ── Admin workflow fields ──────────────────────────────────
+  // ── Admin workflow ─────────────────────────────────────────
   status: {
     type: String,
-    enum: ['awaiting_review', 'info_requested', 'accepted', 'declined'],
+    enum: [
+      'awaiting_review',
+      'info_requested',
+      'accepted',
+      'payment_pending',    // accepted + invoice sent, awaiting payment
+      'payment_received',   // Paystack confirmed payment
+      'declined',
+    ],
     default: 'awaiting_review',
     index: true,
   },
-  requestRef: { type: String, required: true, unique: true, index: true }, // e.g. 'A-12847'
+  requestRef:  { type: String, required: true, unique: true, index: true },
+  reviewedAt:  { type: Date, default: null },
+  reviewedBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  internalNotes: { type: String, default: '', trim: true, maxlength: 5000 },
 
-  reviewedAt:     { type: Date, default: null },
-  reviewedBy:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-  internalNotes:  { type: String, default: '', trim: true, maxlength: 5000 },
+  // ── Paystack payment ───────────────────────────────────────
+  paystackReference:    { type: String, default: '' }, // e.g. ASS-A12847-1234567890
+  paystackAuthUrl:      { type: String, default: '' }, // the hosted payment page URL
+  paystackAmountKobo:   { type: Number, default: 0  }, // amount in kobo (KES × 100)
+  paystackData:         { type: mongoose.Schema.Types.Mixed, default: null },
+  invoiceSentAt:        { type: Date, default: null },
+  paidAt:               { type: Date, default: null },
 
-  paystackInvoiceId: { type: String, default: '' }, // filled in later by the separate invoicing workflow
-
-  // ── Submission metadata ────────────────────────────────────
+  // ── Submission metadata ─────────────────────────────────────
   submittedIp:        { type: String, default: '' },
   submittedUserAgent: { type: String, default: '' },
 
@@ -87,6 +95,6 @@ const assessmentRequestSchema = new mongoose.Schema({
 
 assessmentRequestSchema.index({ status: 1, createdAt: -1 });
 assessmentRequestSchema.index({ parent1Email: 1 });
-assessmentRequestSchema.index({ countryIso: 1 });
+assessmentRequestSchema.index({ paystackReference: 1 });
 
 module.exports = mongoose.model('AssessmentRequest', assessmentRequestSchema);
