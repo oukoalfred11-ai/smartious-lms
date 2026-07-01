@@ -4824,7 +4824,7 @@ function AssessmentModule({ refreshKey, toast }) {
 // ─────────────────────────────────────────────────────────
 function AssessmentRequestsList({ refreshKey, toast, onOpen }) {
   const [requests, setRequests] = useState([])
-  const [counts, setCounts]     = useState({ awaiting_review: 0, info_requested: 0, accepted: 0, declined: 0 })
+  const [counts, setCounts]     = useState({ awaiting_review: 0, info_requested: 0, payment_pending: 0, payment_received: 0, accepted: 0, declined: 0 })
   const [loading, setLoading]   = useState(true)
   const [statusF, setStatusF]   = useState('all')
   const [search, setSearch]     = useState('')
@@ -4851,19 +4851,23 @@ function AssessmentRequestsList({ refreshKey, toast, onOpen }) {
   useEffect(() => { setPage(1) }, [statusF, search])
 
   const STATUS_TABS = [
-    { id: 'all',             label: 'All' },
-    { id: 'awaiting_review', label: 'Awaiting Review', count: counts.awaiting_review },
-    { id: 'info_requested',  label: 'Info Requested',  count: counts.info_requested },
-    { id: 'accepted',        label: 'Accepted',        count: counts.accepted },
-    { id: 'declined',        label: 'Declined',        count: counts.declined },
+    { id: 'all',              label: 'All' },
+    { id: 'awaiting_review',  label: 'Awaiting Review',  count: counts.awaiting_review },
+    { id: 'info_requested',   label: 'Info Requested',   count: counts.info_requested },
+    { id: 'payment_pending',  label: 'Invoice Sent',     count: counts.payment_pending },
+    { id: 'payment_received', label: 'Paid',             count: counts.payment_received },
+    { id: 'accepted',         label: 'Accepted',         count: counts.accepted },
+    { id: 'declined',         label: 'Declined',         count: counts.declined },
   ]
 
   const statusBadge = (status) => {
     const map = {
-      awaiting_review: { bg: '#FEF3C7', fg: '#92400E', label: 'Awaiting Review' },
-      info_requested:  { bg: '#DBEAFE', fg: '#1E40AF', label: 'Info Requested' },
-      accepted:        { bg: '#D1FAE5', fg: '#065F46', label: 'Accepted' },
-      declined:        { bg: '#F3F4F6', fg: '#374151', label: 'Declined' },
+      awaiting_review:  { bg: '#FEF3C7', fg: '#92400E', label: 'Awaiting Review' },
+      info_requested:   { bg: '#DBEAFE', fg: '#1E40AF', label: 'Info Requested' },
+      payment_pending:  { bg: '#FEF9C3', fg: '#854D0E', label: 'Invoice Sent' },
+      payment_received: { bg: '#D1FAE5', fg: '#065F46', label: 'Paid ✓' },
+      accepted:         { bg: '#DCFCE7', fg: '#166534', label: 'Accepted' },
+      declined:         { bg: '#F3F4F6', fg: '#374151', label: 'Declined' },
     }
     const s = map[status] || map.awaiting_review
     return (
@@ -5203,18 +5207,32 @@ function AssessmentRequestDetail({ id, toast, onBack }) {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <button onClick={() => setStatus('accepted')} disabled={req.status === 'accepted'}
+                <button
+                  onClick={() => setStatus('accepted')}
+                  disabled={['accepted','payment_pending','payment_received'].includes(req.status)}
                   style={{
                     background: '#059669', color: '#fff', border: 'none',
                     padding: '10px 0', borderRadius: 7, fontSize: 12.5, fontWeight: 700,
-                    cursor: req.status === 'accepted' ? 'not-allowed' : 'pointer',
-                    opacity: req.status === 'accepted' ? .5 : 1,
+                    cursor: ['accepted','payment_pending','payment_received'].includes(req.status) ? 'not-allowed' : 'pointer',
+                    opacity: ['accepted','payment_pending','payment_received'].includes(req.status) ? .5 : 1,
                   }}>
-                  Accept request
+                  Accept & send invoice
                 </button>
                 <div style={{ fontSize: 10.5, color: TOKENS.s500, lineHeight: 1.4, marginTop: -4, marginBottom: 2 }}>
-                  Marks accepted. Send the Paystack invoice separately from Billing.
+                  Generates a Paystack payment link and emails the family.
                 </div>
+                {req.status === 'payment_pending' && req.paystackAuthUrl && (
+                  <a href={req.paystackAuthUrl} target="_blank" rel="noopener noreferrer" style={{
+                    display: 'block', textAlign: 'center', fontSize: 11.5, color: TOKENS.crimson,
+                    marginTop: 2, wordBreak: 'break-all',
+                  }}>View payment link ↗</a>
+                )}
+                {req.status === 'payment_received' && (
+                  <div style={{ fontSize: 11.5, color: '#059669', fontWeight: 700, marginTop: 2 }}>
+                    ✓ Payment received
+                    {req.paidAt && ` · ${new Date(req.paidAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
+                  </div>
+                )}
                 <button onClick={() => setActionPanel('info_requested')} disabled={req.status === 'accepted' || req.status === 'declined'}
                   style={{
                     background: '#fff', color: '#1E40AF', border: '1.5px solid #1E40AF',
