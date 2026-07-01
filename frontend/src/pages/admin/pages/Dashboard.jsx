@@ -5043,11 +5043,18 @@ function AssessmentRequestDetail({ id, toast, onBack }) {
         setReq(data.data.request)
         setActionPanel(null)
         setActionMessage('')
-        const labels = { accepted: 'accepted', info_requested: 'info request sent', declined: 'declined' }
+        const labels = {
+          payment_pending:  'accepted — invoice sent to parent',
+          info_requested:   'info request sent to parent',
+          declined:         'declined — parent notified',
+        }
         toast?.ok?.(`Request ${labels[status] || 'updated'}.`)
+      } else {
+        toast?.error?.(data?.error || 'Could not update status.')
       }
     } catch (e) {
-      toast?.error?.('Could not update status.')
+      const msg = e?.response?.data?.error || e?.response?.data?.message || e.message || 'Could not update status.'
+      toast?.error?.(msg)
     } finally {
       setSubmittingAction(false)
     }
