@@ -7,6 +7,11 @@ const mongoose   = require('mongoose');
 
 const app = express();
 
+// Render sits behind a reverse proxy — trust the X-Forwarded-For
+// header so express-rate-limit identifies clients by their real IP
+// instead of Render's proxy IP. Required for accurate rate limiting.
+app.set('trust proxy', 1);
+
 // ── Security headers ─────────────────────────────────────
 // Disable CSP in development — Vite uses inline scripts for HMR
 app.use(helmet({
