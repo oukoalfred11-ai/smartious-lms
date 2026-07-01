@@ -24,6 +24,18 @@ const nodemailer = require('nodemailer');
 
 const AssessmentRequest = require('../models/AssessmentRequest');
 const { auth, requireRole } = require('../middleware/auth');
+const axios = require('axios');
+
+// ── Paystack ──────────────────────────────────────────────────
+const PS_BASE    = 'https://api.paystack.co';
+const psHeaders  = () => ({ Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`, 'Content-Type': 'application/json' });
+// Assessment fee in KES (multiply by 100 for kobo/pesewas).
+// Paystack Kenya uses KES; change currency below if needed.
+const ASSESSMENT_AMOUNT_KES  = 5800;
+const ASSESSMENT_AMOUNT_KOBO = ASSESSMENT_AMOUNT_KES * 100;
+// Callback URL Paystack redirects to after payment
+const paystackCallbackUrl = () =>
+  `${(process.env.CLIENT_URL || 'https://smartioushomeschool.com').replace(/\/$/, '')}/assessment/payment-callback`;
 
 // ─────────────────────────────────────────────────────────
 // Rate limiter — 5 submissions per IP per hour
@@ -566,6 +578,91 @@ function buildDeclinedText(r, message) {
 }
 
 // ═══════════════════════════════════════════════════════════
+// EMAIL E — Acceptance + payment invoice to parent
+// ═══════════════════════════════════════════════════════════
+function buildAcceptedHTML(r, payUrl) {
+  return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FDFAF4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#080C14;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(139,26,46,.08);">
+        <tr><td style="background:linear-gradient(135deg,#166534 0%,#14532D 100%);padding:32px 36px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#86EFAC;margin-bottom:8px;">Great news</div>
+          <div style="font-family:Georgia,serif;font-size:26px;color:#fff;line-height:1.25;">Your request has been accepted</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8);margin-top:8px;">Reference: ${r.requestRef}</div>
+        </td></tr>
+        <tr><td style="padding:32px 36px;">
+          <p style="font-size:15px;line-height:1.65;color:#2c2c2c;margin:0 0 18px;">
+            Dear ${r.parent1FirstName},
+          </p>
+          <p style="font-size:14.5px;line-height:1.7;color:#2c2c2c;margin:0 0 18px;">
+            We're pleased to accept your assessment request for <strong>${r.studentFirstName}</strong>. To schedule the diagnostic assessment, please pay the assessment fee of <strong>KES ${ASSESSMENT_AMOUNT_KES.toLocaleString()}</strong> using the button below.
+          </p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F0FDF4;border-left:4px solid #166534;border-radius:6px;padding:16px 20px;margin-bottom:26px;">
+            <tr><td>
+              <div style="font-size:12px;color:#166534;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">What you're paying for</div>
+              <ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.8;color:#1a1a1a;">
+                <li>Structured diagnostic across English, Mathematics and Science (~90 minutes)</li>
+                <li>Detailed written report with subject-specific recommendations</li>
+                <li>30-minute consultation with our Head of Academics</li>
+                <li>Curriculum pathway recommendation</li>
+              </ul>
+              <p style="margin:12px 0 0;font-size:12.5px;color:#166534;font-weight:600;">
+                This fee is credited against your first month's tuition if you proceed to enrolment.
+              </p>
+            </td></tr>
+          </table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:26px;">
+            <tr><td align="center">
+              <a href="${payUrl}" style="display:inline-block;background:#166534;color:#fff;padding:16px 40px;border-radius:8px;text-decoration:none;font-weight:800;font-size:15px;letter-spacing:.01em;">
+                Pay KES ${ASSESSMENT_AMOUNT_KES.toLocaleString()} — Secure Payment
+              </a>
+            </td></tr>
+            <tr><td align="center" style="padding-top:10px;">
+              <p style="font-size:11px;color:#9CA3AF;margin:0;">Powered by Paystack · Secure · Encrypted</p>
+            </td></tr>
+          </table>
+          <p style="font-size:13px;line-height:1.6;color:#6B6B6B;margin:0 0 22px;">
+            Once payment is confirmed, our Head of Admissions will contact you within one business day to schedule the assessment at a time that suits your timezone.
+          </p>
+          <p style="font-size:13.5px;line-height:1.65;color:#2c2c2c;margin:0;">
+            Warm regards,<br><strong>Alfred Ouko</strong><br>Founder &amp; Head of Academics<br>Smartious Homeschool and eSchool
+          </p>
+        </td></tr>
+        <tr><td style="background:#FDFAF4;padding:22px 36px;border-top:1px solid #f0e8e8;">
+          <p style="font-size:11px;color:#999;margin:0;">Questions? Reply to this email or contact <a href="mailto:hellosmartious@gmail.com" style="color:#8B1A2E;">hellosmartious@gmail.com</a></p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
+function buildAcceptedText(r, payUrl) {
+  return [
+    `Dear ${r.parent1FirstName},`,
+    '',
+    `Great news — we've accepted your assessment request for ${r.studentFirstName}.`,
+    '',
+    `To schedule the assessment, please pay the KES ${ASSESSMENT_AMOUNT_KES.toLocaleString()} assessment fee:`,
+    payUrl,
+    '',
+    'This covers:',
+    '- Structured diagnostic across English, Mathematics and Science (~90 minutes)',
+    '- Detailed written report with subject-specific recommendations',
+    '- 30-minute consultation with our Head of Academics',
+    '',
+    "The fee is credited against your first month's tuition on enrolment.",
+    '',
+    'Warm regards,',
+    'Alfred Ouko',
+    'Founder & Head of Academics',
+    'Smartious Homeschool and eSchool',
+  ].join('\n');
+}
+
+// ═══════════════════════════════════════════════════════════
 // GET /requests — list with filters + pagination (admin only)
 // Query params: status, search, page (1-based), limit
 // ═══════════════════════════════════════════════════════════
@@ -677,31 +774,78 @@ router.patch('/requests/:id', auth, requireRole('admin'), async (req, res) => {
 
     await doc.save();
 
-    // Fire the appropriate parent email on status transition
-    if (statusChanged && (status === 'info_requested' || status === 'declined')) {
+    // Fire appropriate email on status transition
+    if (statusChanged) {
       const t = getTransporter();
       const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>';
 
-      if (t) {
-        const mail = status === 'info_requested'
-          ? {
-              from, to: doc.parent1Email,
-              subject: `A quick follow-up on your Smartious assessment request — ${doc.requestRef}`,
-              html: buildInfoRequestedHTML(doc, message),
-              text: buildInfoRequestedText(doc, message),
-            }
-          : {
-              from, to: doc.parent1Email,
-              subject: `Update on your Smartious assessment request — ${doc.requestRef}`,
-              html: buildDeclinedHTML(doc, message),
-              text: buildDeclinedText(doc, message),
-            };
+      if (status === 'accepted') {
+        // ── Generate Paystack payment link ────────────────────
+        try {
+          const reference = `ASS-${doc.requestRef}-${Date.now()}`;
+          const psRes = await axios.post(`${PS_BASE}/transaction/initialize`, {
+            email:        doc.parent1Email,
+            amount:       ASSESSMENT_AMOUNT_KOBO,
+            currency:     'KES',
+            reference,
+            callback_url: paystackCallbackUrl(),
+            metadata: {
+              requestRef:       doc.requestRef,
+              studentName:      `${doc.studentFirstName} ${doc.studentLastName}`,
+              parentName:       `${doc.parent1FirstName} ${doc.parent1LastName}`,
+              assessmentRequest: String(doc._id),
+            },
+          }, { headers: psHeaders() });
 
-        t.sendMail(mail)
-          .then(() => console.log(`[assessment] Sent ${status} email for ${doc.requestRef}`))
-          .catch(e => console.error(`[assessment] Failed to send ${status} email for ${doc.requestRef}:`, e.message));
-      } else {
-        console.error('[assessment] No transporter — could not send', status, 'email for', doc.requestRef);
+          const payUrl = psRes.data?.data?.authorization_url;
+          if (!payUrl) throw new Error('No authorization_url from Paystack');
+
+          // Save payment reference + link + bump status to payment_pending
+          doc.paystackReference  = reference;
+          doc.paystackAuthUrl    = payUrl;
+          doc.paystackAmountKobo = ASSESSMENT_AMOUNT_KOBO;
+          doc.status             = 'payment_pending';
+          doc.invoiceSentAt      = new Date();
+          await doc.save();
+
+          if (t) {
+            t.sendMail({
+              from, to: doc.parent1Email,
+              subject: `Your Smartious assessment request is accepted — pay to confirm — ${doc.requestRef}`,
+              html: buildAcceptedHTML(doc, payUrl),
+              text: buildAcceptedText(doc, payUrl),
+            })
+              .then(() => console.log(`[assessment] Sent acceptance+invoice email for ${doc.requestRef}`))
+              .catch(e => console.error(`[assessment] Failed to send acceptance email for ${doc.requestRef}:`, e.message));
+          }
+          console.log(`[assessment] Paystack link created for ${doc.requestRef}: ${payUrl}`);
+        } catch (psErr) {
+          console.error(`[assessment] Paystack init failed for ${doc.requestRef}:`, psErr?.response?.data || psErr.message);
+          // Don't fail the whole request — just log. Admin can retry.
+          return res.status(502).json({ ok: false, error: 'Request accepted but could not generate payment link. Check PAYSTACK_SECRET_KEY env var and try again.' });
+        }
+
+      } else if (status === 'info_requested' || status === 'declined') {
+        if (t) {
+          const mail = status === 'info_requested'
+            ? {
+                from, to: doc.parent1Email,
+                subject: `A quick follow-up on your Smartious assessment request — ${doc.requestRef}`,
+                html: buildInfoRequestedHTML(doc, message),
+                text: buildInfoRequestedText(doc, message),
+              }
+            : {
+                from, to: doc.parent1Email,
+                subject: `Update on your Smartious assessment request — ${doc.requestRef}`,
+                html: buildDeclinedHTML(doc, message),
+                text: buildDeclinedText(doc, message),
+              };
+          t.sendMail(mail)
+            .then(() => console.log(`[assessment] Sent ${status} email for ${doc.requestRef}`))
+            .catch(e => console.error(`[assessment] Failed to send ${status} email for ${doc.requestRef}:`, e.message));
+        } else {
+          console.error('[assessment] No transporter — could not send', status, 'email for', doc.requestRef);
+        }
       }
     }
 
@@ -709,6 +853,71 @@ router.patch('/requests/:id', auth, requireRole('admin'), async (req, res) => {
   } catch (err) {
     console.error('[assessment patch]', err.message);
     return res.status(500).json({ ok: false, error: 'Failed to update request.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// GET /payment-callback
+// Paystack redirects here after payment (success or failure).
+// Public endpoint — no auth (parent is not a logged-in user).
+// Verifies the transaction with Paystack API, updates status
+// to 'payment_received', then redirects parent to a result page.
+// ═══════════════════════════════════════════════════════════
+router.get('/payment-callback', async (req, res) => {
+  const { reference, trxref } = req.query;
+  const ref = reference || trxref;
+
+  const frontendBase = (process.env.CLIENT_URL || 'https://smartioushomeschool.com').replace(/\/$/, '');
+
+  if (!ref) {
+    return res.redirect(`${frontendBase}/assessment/payment-result?status=error&reason=missing_reference`);
+  }
+
+  try {
+    // Verify with Paystack
+    const { data: psData } = await axios.get(
+      `${PS_BASE}/transaction/verify/${encodeURIComponent(ref)}`,
+      { headers: psHeaders() }
+    );
+
+    const txn = psData?.data;
+    const requestDoc = await AssessmentRequest.findOne({ paystackReference: ref });
+
+    if (!requestDoc) {
+      console.error('[assessment callback] No request found for reference:', ref);
+      return res.redirect(`${frontendBase}/assessment/payment-result?status=error&reason=not_found`);
+    }
+
+    if (txn?.status === 'success') {
+      requestDoc.status      = 'payment_received';
+      requestDoc.paidAt      = new Date();
+      requestDoc.paystackData = txn;
+      await requestDoc.save();
+      console.log(`[assessment] Payment received for ${requestDoc.requestRef}`);
+
+      // Notify admin
+      const t = getTransporter();
+      const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>';
+      if (t) {
+        t.sendMail({
+          from,
+          to: ADMIN_NOTIFY_EMAIL,
+          subject: `Assessment fee paid — ${requestDoc.studentFirstName} ${requestDoc.studentLastName} (${requestDoc.requestRef})`,
+          html: `<p>The assessment fee for <strong>${requestDoc.studentFirstName} ${requestDoc.studentLastName}</strong> (Ref: ${requestDoc.requestRef}) has been paid.<br>Amount: KES ${Math.round((txn.amount || 0) / 100).toLocaleString()}<br>Schedule the assessment now.</p>`,
+          text: `Assessment fee paid — ${requestDoc.requestRef}\nAmount: KES ${Math.round((txn.amount || 0) / 100).toLocaleString()}\nSchedule the assessment now.`,
+        }).catch(e => console.error('[assessment callback] admin notify email failed:', e.message));
+      }
+
+      return res.redirect(`${frontendBase}/assessment/payment-result?status=success&ref=${encodeURIComponent(requestDoc.requestRef)}&name=${encodeURIComponent(requestDoc.studentFirstName)}`);
+    } else {
+      requestDoc.paystackData = txn;
+      await requestDoc.save();
+      console.log(`[assessment] Payment not successful for ${requestDoc.requestRef}:`, txn?.status);
+      return res.redirect(`${frontendBase}/assessment/payment-result?status=failed&ref=${encodeURIComponent(requestDoc.requestRef)}&payUrl=${encodeURIComponent(requestDoc.paystackAuthUrl || '')}`);
+    }
+  } catch (err) {
+    console.error('[assessment callback] error:', err.message);
+    return res.redirect(`${frontendBase}/assessment/payment-result?status=error&reason=${encodeURIComponent(err.message)}`);
   }
 });
 
