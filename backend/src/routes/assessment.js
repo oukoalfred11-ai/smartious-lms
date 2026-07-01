@@ -757,10 +757,12 @@ router.patch('/requests/:id', auth, requireRole('admin'), async (req, res) => {
     const doc = await AssessmentRequest.findById(req.params.id);
     if (!doc) return res.status(404).json({ ok: false, error: 'Request not found.' });
 
-    const VALID_STATUSES = ['awaiting_review', 'info_requested', 'accepted', 'declined'];
+    const VALID_STATUSES = ['awaiting_review', 'info_requested', 'accepted', 'payment_pending', 'declined'];
     const statusChanged = status && status !== doc.status;
 
-    if (status) {
+    // For 'accepted' we don't save yet — Paystack must succeed first.
+    // For all other statuses, save immediately.
+    if (status && status !== 'accepted') {
       if (!VALID_STATUSES.includes(status))
         return res.status(400).json({ ok: false, error: 'Invalid status value.' });
       doc.status = status;
@@ -772,7 +774,10 @@ router.patch('/requests/:id', auth, requireRole('admin'), async (req, res) => {
       doc.internalNotes = String(internalNotes).trim();
     }
 
-    await doc.save();
+    // Save now for non-accept transitions; accept saves after Paystack succeeds
+    if (status !== 'accepted') {
+      await doc.save();
+    }
 
     // Fire appropriate email on status transition
     if (statusChanged) {
@@ -806,7 +811,10 @@ router.patch('/requests/:id', auth, requireRole('admin'), async (req, res) => {
           doc.paystackAmountKobo = ASSESSMENT_AMOUNT_KOBO;
           doc.status             = 'payment_pending';
           doc.invoiceSentAt      = new Date();
+          doc.reviewedAt         = new Date();
+          doc.reviewedBy         = req.user._id;
           await doc.save();
+          console.log('[assessment] Status updated to payment_pending for', doc.requestRef);
 
           if (t) {
             t.sendMail({
