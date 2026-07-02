@@ -80,17 +80,12 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             {city.intro}
           </p>
           <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-            <button onClick={() => P('consult')}
+            <button onClick={() => nav('/assessment')}
               style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-              Book a Free Consultation
+              Book assessment
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
-            <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child in ' + city.name + '.')}
-              target="_blank" rel="noopener noreferrer"
-              style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
-              WhatsApp Us
-            </a>
-          </div>
+</div>
         </div>
       </section>
 
@@ -186,8 +181,8 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
           <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.4rem)',margin:'0 0 14px',color:'#fff'}}>Ready to start your child's Cambridge journey from {city.name}?</h2>
           <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>Free 15-minute consultation. No commitment.</p>
           <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-            <button onClick={() => P('enroll')} style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Begin Enrolment</button>
-            <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>Free Consultation</button>
+            <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+            <button onClick={() => nav('/assessment')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>Book assessment</button>
           </div>
         </div>
       </section>
