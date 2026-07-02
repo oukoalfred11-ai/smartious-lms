@@ -20,12 +20,93 @@
    data file and Smartious renders the full hub automatically.
 ═══════════════════════════════════════════════════════════════════ */
 
+import { useEffect } from 'react'
+
+/* ────────────────────────────────────────────────────────────────
+   Country-awareness helpers for cross-market content cleanup.
+   
+   EAST_AFRICA_HUBS: hubs where Nairobi-specific content (Diamond
+   Plaza Parklands / Karen Hardy centre names, Kenya CBC in the
+   curricula list) is genuinely locally relevant. On all other
+   hubs (Gulf, North Africa, East Asia, Southeast Asia, Southern
+   Africa) that content is replaced with country-neutral operational
+   language to avoid diluting local search intent.
+   
+   REGION_LABELS: used in the "14+ countries served" trust card to
+   frame the geographic distribution around the current country's
+   region rather than always leading with East Africa.
+   ──────────────────────────────────────────────────────────────── */
+const EAST_AFRICA_HUBS = new Set(['kenya', 'ethiopia', 'rwanda'])
+
+const REGION_LABELS = {
+  kenya:         'East Africa, the Gulf and Asia',
+  ethiopia:      'East Africa, the Gulf and Asia',
+  rwanda:        'East Africa, the Gulf and Asia',
+  'south-africa':'Africa, the Gulf and Asia',
+  egypt:         'North Africa, the Gulf and East Asia',
+  morocco:       'North Africa, Europe, the Gulf and Asia',
+  uae:           'the Gulf, North Africa and Asia',
+  qatar:         'the Gulf, North Africa and Asia',
+  'saudi-arabia':'the Gulf, North Africa and Asia',
+  japan:         'East Asia, the Gulf and Africa',
+  'south-korea': 'East Asia, the Gulf and Africa',
+  vietnam:       'Southeast Asia, the Gulf and Africa',
+  thailand:      'Southeast Asia, the Gulf and Africa',
+}
+
+/* ISO country codes for hreflang. Format: en-<CC> tells Google
+   the page is English-language content targeting a specific
+   country. Improves regional search indexation. */
+const HREFLANG_MAP = {
+  kenya:'en-ke', ethiopia:'en-et', rwanda:'en-rw',
+  'south-africa':'en-za',
+  egypt:'en-eg', morocco:'en-ma',
+  uae:'en-ae', qatar:'en-qa', 'saudi-arabia':'en-sa',
+  japan:'en-jp', 'south-korea':'en-kr',
+  vietnam:'en-vn', thailand:'en-th',
+}
+
+/* Idempotent hreflang tag injection. Adds one rel=alternate tag for
+   the current country's en-<CC>, one for the general en fallback,
+   and one x-default pointing to the homepage. Cleanup removes any
+   Smartious hreflang tags this instance created, so navigating to
+   another hub doesn't leave stale tags in the head. */
+function useHreflang(countrySlug) {
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const hreflangCC = HREFLANG_MAP[countrySlug]
+    if (!hreflangCC) return
+    
+    const url = `https://smartioushomeschool.com/online-school/${countrySlug}`
+    const tags = [
+      { rel: 'alternate', hreflang: hreflangCC, href: url },
+      { rel: 'alternate', hreflang: 'en',       href: url },
+      { rel: 'alternate', hreflang: 'x-default', href: 'https://smartioushomeschool.com/' },
+    ]
+    
+    const created = tags.map(({ rel, hreflang, href }) => {
+      const el = document.createElement('link')
+      el.setAttribute('rel', rel)
+      el.setAttribute('hreflang', hreflang)
+      el.setAttribute('href', href)
+      el.setAttribute('data-smartious-hreflang', '1')
+      document.head.appendChild(el)
+      return el
+    })
+    
+    return () => {
+      created.forEach(el => { try { el.remove() } catch (_) {} })
+    }
+  }, [countrySlug])
+}
+
 export default function CountryHub({
   country, cities, setCurrentCity,
   P, V, nav,
   SMARTIOUS_RATING, SMARTIOUS_REVIEWS,
   GOOGLE_REVIEWS_URL, LEAVE_REVIEW_URL,
 }) {
+  useHreflang(country.slug)
   return (
     <>
       {/* Schema */}
@@ -235,12 +316,20 @@ export default function CountryHub({
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
             {[
-              {h:'Founder-led education company', p:'Founded 2019 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered Kenyan education company operating two physical centres (Diamond Plaza Parklands HQ established 2022, Karen Hardy centre established 2023) alongside the online platform.'},
-              {h:'Two physical Nairobi centres', p:'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'},
+              {h:'Founder-led education company', p: EAST_AFRICA_HUBS.has(country.slug)
+                ? 'Founded 2019 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered education company operating two physical centres (Diamond Plaza Parklands HQ established 2022, Karen Hardy centre established 2023) alongside the online platform.'
+                : 'Founded 2019 by Alfred Ouko (BEd Mathematics & Physics). Smartious operates a full teaching team of 11 with two international-standard operational centres established 2022 and 2023. Not a marketplace, not a freelance network.'},
+              {h: EAST_AFRICA_HUBS.has(country.slug) ? 'Two physical Nairobi centres' : 'Two operational centres',
+                p: EAST_AFRICA_HUBS.has(country.slug)
+                  ? 'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'
+                  : `Live teaching is delivered to ${country.name} families from two international-standard operational centres, established 2022 and 2023. Teachers work from professional academic facilities with accountability and infrastructure beyond marketplace or freelance models.`},
               {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
-              {h:'14+ countries served', p:'Active students across Kenya, Uganda, Ethiopia, Rwanda, Tanzania, South Africa, Egypt, Qatar, Saudi Arabia, USA, Canada, UK, plus diaspora families. Verifiable through student community interaction in live classes.'},
+              {h:'14+ countries served', p: `Active students in ${country.name} and 13 other markets across ${REGION_LABELS[country.slug] || 'Africa, the Gulf, Europe and Asia'}. Verifiable through cross-country cohort interaction in live classes.`},
               {h:'Ontario Diploma (OSSD) partnership', p:'Smartious students can earn the Ontario Secondary School Diploma through our partnership with Canadian Cross International School (Ontario-inspected private school). The OSSD is recognised by Canadian universities (OUAC), US universities (Common Application), UK universities (UCAS) and globally — particularly valuable for Canadian U15 applications.'},
-              {h:'6 international curricula', p:'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Ontario Secondary School Diploma (OSSD) via Canadian Cross International School partnership, Kenya CBC. Multiple credential pathways per family.'},
+              {h: EAST_AFRICA_HUBS.has(country.slug) ? '6 international curricula' : '5 international curricula',
+                p: EAST_AFRICA_HUBS.has(country.slug)
+                  ? 'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Ontario Secondary School Diploma (OSSD) via Canadian Cross International School partnership, Kenya CBC. Multiple credential pathways per family.'
+                  : 'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Ontario Secondary School Diploma (OSSD) via Canadian Cross International School partnership. Multiple credential pathways per family.'},
               {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
             ].map((t, i) => (
               <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
@@ -281,7 +370,7 @@ export default function CountryHub({
               </a>
             </div>
             <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-              Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free assessment — we can introduce you to current {country.name} families happy to share their experience directly.
+              Reviews above are from our verified Google Business Profile. For {country.name}-specific parent references during your decision-making, request these during your free assessment — we can introduce you to current {country.name} families happy to share their experience directly.
             </p>
           </div>
         </div>
@@ -483,7 +572,7 @@ export default function CountryHub({
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:14}}>
             {[
-              {h:'Experienced international educators',p:'Subject-specific degree-qualified teaching staff with cumulative experience across Cambridge International, Pearson Edexcel, IB Diploma and American Curriculum. Many are TSC-registered (Kenya Teachers Service Commission); several hold advanced teaching credentials including PGCE.'},
+              {h:'Experienced international educators',p:'Subject-specific degree-qualified teaching staff with cumulative experience across Cambridge International, Pearson Edexcel, IB Diploma and American Curriculum. Many hold advanced teaching credentials including PGCE, Cambridge PDT certification, or national teaching registration in their home jurisdiction.'},
               {h:'Personalised learning plans',p:'Every student begins with an initial assessment. The learning plan that follows is tailored to academic level, subject preferences, target universities and family situation &mdash; not a one-size-fits-all schedule.'},
               {h:'Academic assessments',p:'Initial diagnostic assessment. Weekly informal assessment within classes. Monthly formal assessments. Mock examinations under timed conditions during IGCSE and A-Level years. Results inform teaching adjustments.'},
               {h:'Small class sizes',p:'Online tier classes have four to six students. Online Plus has smaller groups. Premium is one-on-one. Class size affects individual attention, question response time, and student speaking time during class.'},
@@ -532,7 +621,9 @@ export default function CountryHub({
                 <ul style={{fontSize:13.5,color:V.sl,lineHeight:1.75,margin:0,paddingLeft:20}}>
                   <li style={{marginBottom:6}}>Over six years supporting students through international curriculum pathways &mdash; Cambridge International (IGCSE and A-Level), Pearson Edexcel International, IB Diploma Programme, American Curriculum with AP, and homeschooling pathways.</li>
                   <li style={{marginBottom:6}}>Direct teaching experience in secondary-level Mathematics and Physics across multiple international curriculum boards.</li>
-                  <li style={{marginBottom:6}}>Leadership of curriculum development, teacher recruitment and academic standards across Smartious's two Nairobi-based physical centres (Diamond Plaza Parklands HQ and Karen Hardy) and online programmes.</li>
+                  <li style={{marginBottom:6}}>{ EAST_AFRICA_HUBS.has(country.slug)
+                    ? "Leadership of curriculum development, teacher recruitment and academic standards across Smartious's two Nairobi-based physical centres (Diamond Plaza Parklands HQ and Karen Hardy) and online programmes."
+                    : "Leadership of curriculum development, teacher recruitment and academic standards across Smartious's two international-standard operational centres and online programmes serving " + country.name + " families." }</li>
                   <li>Specialism in supporting students through university admissions to {country.founderUniversitySpecialism}.</li>
                 </ul>
               </div>
