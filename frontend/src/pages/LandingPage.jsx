@@ -1398,12 +1398,12 @@ const PAGE_META = {
     desc: 'Enroll with Smartious Homeschool & eSchool. Start your child\'s accredited home or online education — Cambridge, IB, Edexcel or CBC — with qualified specialist teachers.',
   },
   consult: {
-    title: 'Book a Free Consultation — Smartious Homeschool & eSchool',
-    desc: 'Book a free consultation with Smartious to discuss homeschooling, curricula and the right programme for your child — online or at our Parklands, Nairobi centre.',
+    title: 'Book assessment — Smartious Homeschool & eSchool',
+    desc: 'Request an academic assessment with Smartious. Our Head of Admissions reviews every request within three business days. On acceptance, the assessment fee is invoiced before the diagnostic is scheduled.',
   },
   contact: {
     title: 'Contact Smartious Homeschool & eSchool — Nairobi, Kenya',
-    desc: 'Contact Smartious Homeschool & eSchool. Reach our Parklands, Nairobi team by phone, email or WhatsApp for enrolment, curricula and programme enquiries.',
+    desc: 'Contact Smartious Homeschool & eSchool. Reach our Parklands, Nairobi team by phone or email for enrolment, curricula and programme enquiries. For admissions, submit an assessment request.',
   },
 }
 
@@ -3149,7 +3149,7 @@ export default function LandingPage() {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Portal Login
             </button>
-            <div className="nav-cta" onClick={() => P('enroll')}>
+            <div className="nav-cta" onClick={() => nav('/assessment')}>
               Enroll Now
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </div>
@@ -3210,7 +3210,7 @@ export default function LandingPage() {
               ]},
               { cat:'Get Started', items:[
                 ['Enroll Now','enroll'],
-                ['Free Consultation','consult'],
+                ['Book assessment','assessment'],
               ]},
             ].map((group, gi) => (
               <div key={group.cat} style={{
@@ -3318,7 +3318,7 @@ export default function LandingPage() {
                 Portal Login
               </button>
               <button
-                onClick={() => { P('enroll'); setMobileMenuOpen(false) }}
+                onClick={() => { nav('/assessment'); setMobileMenuOpen(false) }}
                 style={{
                   width:'100%',
                   background:'#8B1A2E',
@@ -3374,7 +3374,7 @@ export default function LandingPage() {
               </h1>
               <p className="h-sub">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious delivers Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and 10+ other countries. <strong style={{color:V.gold3}}>From USD 8/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
               <div className="h-act">
-                <button className="btn-p" onClick={() => P('consult')}>Book Free Consultation <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 <button className="btn-o lt" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.9)'}} onClick={() => P('programs')}>View Programmes</button>
               </div>
             </div>
@@ -3881,7 +3881,7 @@ export default function LandingPage() {
               marginTop:36,
             }}>
               {[
-                ['01', 'Free consultation', 'Speak with our admissions team. We review your child\'s current academic level, family goals, and the curriculum that best fits. No commitment.'],
+                ['01', 'Submit assessment request', 'Speak with our admissions team. We review your child\'s current academic level, family goals, and the curriculum that best fits. No commitment.'],
                 ['02', 'Personalised plan', 'We map a study plan: subjects, weekly timetable, exam pathway and teacher allocation. Year-round enrolment — start within days.'],
                 ['03', 'Live online classes', 'Daily live lessons with degree-qualified specialists. Recordings available. Weekly progress reports for parents. Wednesday enrichment programme included.'],
                 ['04', 'Exams & university', 'Sit Cambridge, Edexcel, IB or American exams at registered centres locally. Full UCAS, Common App and university application support.'],
@@ -3919,10 +3919,7 @@ export default function LandingPage() {
             </div>
 
             <div style={{textAlign:'center',marginTop:32}}>
-              <button className="btn-p" onClick={() => P('consult')}>
-                Book Free Consultation
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
+              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
             </div>
           </div></section>
 
@@ -4233,12 +4230,8 @@ export default function LandingPage() {
               <h2 className="cta-h">Give Your Child a <em>Global Education</em> — Without Paying International School Fees</h2>
               <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 8/hour</strong> tuition · <strong style={{color:V.gold3}}>USD 423/month</strong> full homeschool.</p>
               <div className="cta-btns">
-                <button className="btn-p" onClick={() => P('consult')}>Book Free Consultation <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                <button className="btn-o lt" onClick={() => window.open('https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20a%20free%20consultation.','_blank')} style={{background:'rgba(37,211,102,.12)',borderColor:'rgba(37,211,102,.45)',color:'#fff'}}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#25D366" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1 19.79 19.79 0 0 1 1.64 4.46 2 2 0 0 1 3.62 2.26h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.08 6.08l.97-.97a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.72 16.92z"/></svg>
-                  WhatsApp +254 745 021 212
-                </button>
-              </div>
+                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
               <div style={{marginTop:18,fontSize:12,color:'rgba(255,255,255,.55)'}}>Most families complete enrolment within 7-10 working days · No long-term contracts</div>
             </div></div>
           </section>
@@ -4787,12 +4780,7 @@ export default function LandingPage() {
                   Email your story
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
-                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20to%20share%20our%20family%27s%20story"
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'11px 22px',borderRadius:6,fontSize:13,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+</div>
             </div>
           </div></section>
 
@@ -4806,12 +4794,8 @@ export default function LandingPage() {
               <h2 className="cta-h">Give Your Child a <em>Real Education</em>. Not Just a School Day.</h2>
               <p className="cta-sub">Book a free 30-minute consultation. We'll review your child's situation, current school reports if available, and recommend a Smartious pathway. From <strong style={{color:V.gold3}}>USD 8/hour</strong> tuition · <strong style={{color:V.gold3}}>USD 423/month</strong> full homeschool. USD 38 / KSh 5,000 application fee applies only when you decide to enrol.</p>
               <div className="cta-btns">
-                <button className="btn-p" onClick={() => P('consult')}>Book Free Consultation <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                <button className="btn-o lt" onClick={() => window.open('https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20to%20discuss%20enrolment%20for%20my%20child.','_blank')} style={{background:'rgba(37,211,102,.12)',borderColor:'rgba(37,211,102,.45)',color:'#fff'}}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#25D366" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1 19.79 19.79 0 0 1 1.64 4.46 2 2 0 0 1 3.62 2.26h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.08 6.08l.97-.97a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.72 16.92z"/></svg>
-                  WhatsApp +254 745 021 212
-                </button>
-              </div>
+                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
               <div style={{marginTop:18,fontSize:12,color:'rgba(255,255,255,.55)'}}>Most families complete enrolment within 7-10 working days · No long-term contracts</div>
             </div></div>
           </section>
@@ -4834,7 +4818,7 @@ export default function LandingPage() {
                   Smartious supports families relocating between countries needing curriculum continuity, athletes and performers balancing serious training with academic ambition, gifted students whose schools move too slowly, students struggling at school due to oversized classrooms or bullying, IGCSE and A-Level candidates preparing for external examinations, IB Diploma students needing specialist HL subject support, and students with learning differences benefiting from 1-on-1 personal attention. Pricing starts at USD 8/hour for 1-on-1 tuition (KSh 1,300/hour for Kenya-based families) and USD 423/month for full online homeschool programmes — meaningfully below typical premium international school fees while delivering equivalent qualifications.
                 </p>
                 <p style={{fontSize:12.5,lineHeight:1.7,marginTop:18,color:'rgba(247,243,237,.55)'}}>
-                  Contact Smartious: <a href="mailto:hellosmartious@gmail.com" style={{color:V.gold3,textDecoration:'none'}}>hellosmartious@gmail.com</a> · WhatsApp <a href="https://wa.me/254745021212" style={{color:V.gold3,textDecoration:'none'}}>+254 745 021 212</a> · Diamond Plaza, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
+                  Contact Smartious: <a href="mailto:hellosmartious@gmail.com" style={{color:V.gold3,textDecoration:'none'}}>hellosmartious@gmail.com</a> · WhatsApp· Diamond Plaza, Parklands, Nairobi, Kenya · M-Pesa Paybill 247247, Account 745021 (Smartious Edtech).
                 </p>
               </div>
             </div>
@@ -4872,7 +4856,7 @@ export default function LandingPage() {
               ))}
             </div>
             <div style={{textAlign:'center',marginTop:48}}>
-              <button className="btn-p" onClick={() => P('enroll')}>Enroll in Any Curriculum <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
             </div>
           </div></section>
 
@@ -5032,8 +5016,7 @@ export default function LandingPage() {
 
               {/* CTA */}
               <div style={{textAlign:'center',display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button className="btn-p" onClick={() => P('enroll')}>Enroll in {c.h} <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                <button className="btn-o" onClick={() => P('consult')}>Book a Free Consultation</button>
+                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
               </div>
             </div></section>
             <Footer P={P}/>
@@ -5062,7 +5045,7 @@ export default function LandingPage() {
               ))}
             </div>
             <div style={{textAlign:'center',marginTop:48,display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-              <button className="btn-p" onClick={() => P('enroll')}>Enroll Now <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
               <button className="btn-o lt" onClick={() => P('pricing')}>Compare Prices</button>
             </div>
           </div></section>
@@ -5138,7 +5121,7 @@ export default function LandingPage() {
 
               {/* CTA */}
               <div style={{textAlign:'center',display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button className="btn-p" onClick={() => P('enroll')}>Enroll Now <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 <button className="btn-o" onClick={() => P('pricing')}>View Pricing</button>
               </div>
             </div></section>
@@ -5951,14 +5934,8 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
-                <button className="btn-p" onClick={() => P('enroll')}>Enroll Now <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                <button className="btn-o lt" onClick={() => P('consult')}>Book Consultation</button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like more information about online school for families in ' + ctry.country + '.')}
-                  target="_blank" rel="noopener noreferrer"
-                  className="btn-o lt" style={{textDecoration:'none'}}>
-                  WhatsApp Us
-                </a>
-              </div>
+                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
             </div></div>
 
             {/* WHY SMARTIOUS — PAIN POINTS */}
@@ -6238,9 +6215,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.pricingTable.note}</p>
                   <div style={{textAlign:'center',marginTop:24}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                   </div>
                 </div></section>
 
@@ -6435,16 +6410,8 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.uaePricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from the UAE.')}
-                       target="_blank" rel="noopener noreferrer"
-                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'13px 26px',borderRadius:8,background:'#25D366',color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
-                      WhatsApp Inquiry
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                    </a>
-                  </div>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
                 </div></section>
 
                 {/* ══════════════════════════════════════════
@@ -6594,7 +6561,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{display:'flex',flexDirection:'column',gap:12}}>
                       {[
-                        { n:'01', h:'Free consultation', p:'Book a 30-60 minute call with our admissions team. We assess your child\'s current academic level (school transcripts, sample work), discuss your family\'s timeline and target university destinations, and recommend a curriculum and pathway.' },
+                        { n:'01', h:'Submit assessment request', p:'Book a 30-60 minute call with our admissions team. We assess your child\'s current academic level (school transcripts, sample work), discuss your family\'s timeline and target university destinations, and recommend a curriculum and pathway.' },
                         { n:'02', h:'Choose curriculum and pathway', p:'Most UAE families choose Cambridge IGCSE (Year 7-11) progressing to A-Level (Year 12-13) — well-recognised by UAE universities and globally. IB Diploma is also popular for university-bound students. American curriculum suits families targeting US universities. We match curriculum to your university goals.' },
                         { n:'03', h:'Enrol with Smartious', p:'Pay the USD 38 one-time registration fee, choose your billing plan (monthly, termly with 5% saving, or annual with 12% saving), and receive your child\'s LMS access. No KHDA or ADEK approval required for expatriate families.' },
                         { n:'04', h:'Set up your learning environment', p:'A quiet space, laptop or tablet, stable internet, and noise-cancelling headphones. We provide a recommended equipment list. No expensive equipment needed.' },
@@ -6786,10 +6753,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:680,margin:'24px auto 0',lineHeight:1.7}}>{ctry.ukPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <button className="btn-o" style={{borderColor:V.cr,color:V.cr}} onClick={() => P('consult')}>Book Free Consultation</button>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                   </div>
                 </div></section>
               </>
@@ -6919,16 +6883,8 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.nigeriaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from Nigeria.')}
-                       target="_blank" rel="noopener noreferrer"
-                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'13px 26px',borderRadius:8,background:'#25D366',color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
-                      WhatsApp Inquiry
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                    </a>
-                  </div>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
                 </div></section>
               </>
             )}
@@ -7046,10 +7002,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.usaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <button className="btn-o" style={{borderColor:V.cr,color:V.cr}} onClick={() => P('consult')}>Book Free Consultation</button>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                   </div>
                 </div></section>
               </>
@@ -7225,10 +7178,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.canadaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <button className="btn-o" style={{borderColor:V.cr,color:V.cr}} onClick={() => P('consult')}>Book Free Consultation</button>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                   </div>
                 </div></section>
               </>
@@ -7406,10 +7356,7 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.australiaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <button className="btn-o" style={{borderColor:V.cr,color:V.cr}} onClick={() => P('consult')}>Book Free Consultation</button>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                   </div>
                 </div></section>
               </>
@@ -7539,16 +7486,8 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.bahrainPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from Bahrain.')}
-                       target="_blank" rel="noopener noreferrer"
-                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'13px 26px',borderRadius:8,background:'#25D366',color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
-                      WhatsApp Inquiry
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                    </a>
-                  </div>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
                 </div></section>
               </>
             )}
@@ -7817,16 +7756,8 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.pakistanPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from Pakistan.')}
-                       target="_blank" rel="noopener noreferrer"
-                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'13px 26px',borderRadius:8,background:'#25D366',color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
-                      WhatsApp Inquiry
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                    </a>
-                  </div>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
                 </div></section>
               </>
             )}
@@ -7982,16 +7913,8 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.saPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from South Africa.')}
-                       target="_blank" rel="noopener noreferrer"
-                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'13px 26px',borderRadius:8,background:'#25D366',color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
-                      WhatsApp Inquiry
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                    </a>
-                  </div>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
                 </div></section>
               </>
             )}
@@ -8158,16 +8081,8 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.ugandaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from Uganda.')}
-                       target="_blank" rel="noopener noreferrer"
-                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'13px 26px',borderRadius:8,background:'#25D366',color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
-                      WhatsApp Inquiry
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                    </a>
-                  </div>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
                 </div></section>
               </>
             )}
@@ -8295,16 +8210,8 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.somaliaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from Somalia.')}
-                       target="_blank" rel="noopener noreferrer"
-                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'13px 26px',borderRadius:8,background:'#25D366',color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
-                      WhatsApp Inquiry
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                    </a>
-                  </div>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
                 </div></section>
               </>
             )}
@@ -8471,16 +8378,8 @@ export default function LandingPage() {
                   </div>
                   <p style={{textAlign:'center',marginTop:24,fontSize:13,color:V.sl,maxWidth:760,margin:'24px auto 0',lineHeight:1.7}}>{ctry.tanzaniaPricing.note}</p>
                   <div style={{textAlign:'center',marginTop:24,display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('enroll')}>Begin Enrolment
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </button>
-                    <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from Tanzania.')}
-                       target="_blank" rel="noopener noreferrer"
-                       style={{display:'inline-flex',alignItems:'center',gap:8,padding:'13px 26px',borderRadius:8,background:'#25D366',color:'#fff',textDecoration:'none',fontSize:13.5,fontWeight:700}}>
-                      WhatsApp Inquiry
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                    </a>
-                  </div>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
                 </div></section>
               </>
             )}
@@ -8495,22 +8394,9 @@ export default function LandingPage() {
                 Speak with our admissions team. We'll guide you through the right curriculum, exam pathway and enrolment process for your family.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => P('enroll')}
-                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Enroll Now
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => P('consult')}
-                  style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'11px 26px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                  Book Free Consultation
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol my child from ' + ctry.country + '.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'13px 26px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-                  WhatsApp
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
             </div></section>
 
             <Footer P={P}/>
@@ -8547,8 +8433,7 @@ export default function LandingPage() {
               <h1 className="pg-h">Smartious vs <em>{cmp.competitor}</em></h1>
               <p className="pg-sub" style={{marginTop:12}}>{cmp.intro}</p>
               <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
-                <button className="btn-p" onClick={() => P('enroll')}>Enroll with Smartious <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                <button className="btn-o lt" onClick={() => P('consult')}>Book Free Consultation</button>
+                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
               </div>
             </div></div>
 
@@ -8734,25 +8619,12 @@ export default function LandingPage() {
                 Ready to see Smartious in <em style={{color:V.gold2}}>action?</em>
               </h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:28,lineHeight:1.7}}>
-                Book a free consultation. We'll walk you through a live class, review your child's current level, and help you decide whether Smartious fits.
+                Book an assessment. Our Head of Admissions reviews every request and, on acceptance, the diagnostic assessment determines whether Smartious is the right fit.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Book Free Consultation
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <button onClick={() => P('enroll')}
-                  style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'11px 26px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                  Begin Enrollment
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I was comparing you against ' + cmp.competitor + ' and have some questions.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'13px 26px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-                  WhatsApp
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold2,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
             </div></section>
 
             <Footer P={P}/>
@@ -9173,9 +9045,7 @@ export default function LandingPage() {
                             </div>
                           ))}
                         </div>
-                        <button onClick={() => P('enroll')} style={{marginTop:20,width:'100%',padding:'12px 16px',background: t.gold ? V.gold3 : V.cr, color: t.gold ? V.ink : '#fff', border:'none', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
-                          Begin Enrolment →
-                        </button>
+                        <button onClick={() => nav('/assessment')} style={{marginTop:20,width:'100%',padding:'12px 16px',background: t.gold ? V.gold3 : V.cr, color: t.gold ? V.ink : '#fff', border:'none', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>Book assessment</button>
                       </div>
                     ))}
                   </div>
@@ -9241,9 +9111,7 @@ export default function LandingPage() {
                             </div>
                           ))}
                         </div>
-                        <button onClick={() => P('enroll')} style={{marginTop:20,width:'100%',padding:'12px 16px',background: t.gold ? V.gold3 : V.cr, color: t.gold ? V.ink : '#fff', border:'none', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
-                          Begin Enrolment →
-                        </button>
+                        <button onClick={() => nav('/assessment')} style={{marginTop:20,width:'100%',padding:'12px 16px',background: t.gold ? V.gold3 : V.cr, color: t.gold ? V.ink : '#fff', border:'none', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>Book assessment</button>
                       </div>
                     ))}
                   </div>
@@ -9797,20 +9665,9 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll walk through pricing for your specific situation, including all discounts that apply to your family.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
-                </button>
-                <button onClick={() => P('enroll')}
-                  style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                  Begin Enrolment →
-                </button>
-                <a href="https://wa.me/254745021212"
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
               <p style={{fontSize:11,color:'rgba(255,255,255,.5)',marginTop:24,lineHeight:1.7,maxWidth:560,margin:'24px auto 0'}}>
                 Fees may be revised annually with 30 days&apos; written notice to existing families. Sibling discount applied per child. Examination fees are pass-through to the relevant board.
               </p>
@@ -9848,7 +9705,7 @@ export default function LandingPage() {
                   Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus or BJU Press lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to American homeschool families from $180/month.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                     Book a free 30-min consultation
                   </button>
@@ -10090,12 +9947,12 @@ export default function LandingPage() {
                         <span style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.6)' : V.sl}}>{t.sub}</span>
                       </div>
                       <p style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.75)' : V.sl, lineHeight:1.6, marginBottom:22}}>{t.desc}</p>
-                      <button onClick={() => { trackConversion('enrol_started'); P('enroll') }} style={{
+                      <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
                         width:'100%',padding:'12px 16px',
                         background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                         border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                       }}>
-                        Begin Enrolment →
+                        Book assessment →
                       </button>
                     </div>
                   ))}
@@ -10130,7 +9987,7 @@ export default function LandingPage() {
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:16}}>
                   {[
-                    {n:'1',h:'Book free consultation',p:'30-minute video call with our admissions team. We discuss your child, their level, your goals, and whether Smartious is the right fit. No pressure.'},
+                    {n:'1',h:'Book assessment',p:'Submit the request via our online form. Our Head of Admissions reviews within three business days and responds regardless of decision.'},
                     {n:'2',h:'Placement assessment',p:'A 60-minute diagnostic to determine the right grade, curriculum and tutor match. $40 (waived if you have recent transcripts).'},
                     {n:'3',h:'Enrolment & onboarding',p:'$120 one-time registration. We set up the LMS account, student ID, family portal, initial materials. You meet your child\'s teacher.'},
                     {n:'4',h:'First live class',p:'Within 7-14 days. Your child joins their first live class. We check in after week 1, week 4, and monthly thereafter.'},
@@ -10239,21 +10096,11 @@ export default function LandingPage() {
                   Book a 30-minute consultation with our admissions team. We'll discuss your child, your goals, and whether Smartious is the right fit. No high-pressure sales. No commitment. Just a conversation.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                    Book free consultation
+                    Book assessment
                   </button>
-                  <button onClick={() => { trackConversion('enrol_started'); P('enroll') }}
-                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                    Begin Enrolment →
-                  </button>
-                  <a href="https://wa.me/254745021212"
-                    target="_blank" rel="noopener noreferrer"
-                    onClick={() => trackConversion('whatsapp_click')}
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp us
-                  </a>
-                </div>
+</div>
                 <p style={{fontSize:11.5,color:'rgba(255,255,255,.5)',marginTop:24,lineHeight:1.7}}>
                   Smartious responds to all enquiries within one US business day. WhatsApp messages typically answered within 2-4 hours.
                 </p>
@@ -10293,7 +10140,7 @@ export default function LandingPage() {
                   Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious delivers <strong>Cambridge IGCSE, Pearson Edexcel, A-Level and IB Diploma</strong> programmes — taught live by qualified teachers — to Canadian homeschool families from $245 CAD/month ($180 USD).
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                     Book a free 30-min consultation
                   </button>
@@ -10535,12 +10382,12 @@ export default function LandingPage() {
                         <span style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.6)' : V.sl}}>{t.sub}</span>
                       </div>
                       <p style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.75)' : V.sl, lineHeight:1.6, marginBottom:22}}>{t.desc}</p>
-                      <button onClick={() => { trackConversion('enrol_started'); P('enroll') }} style={{
+                      <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
                         width:'100%',padding:'12px 16px',
                         background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                         border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                       }}>
-                        Begin Enrolment →
+                        Book assessment →
                       </button>
                     </div>
                   ))}
@@ -10575,7 +10422,7 @@ export default function LandingPage() {
 
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:16}}>
                   {[
-                    {n:'1',h:'Book free consultation',p:'30-minute video call with our admissions team. We discuss your child, their level, your goals, and whether Smartious is the right fit. No pressure.'},
+                    {n:'1',h:'Book assessment',p:'Submit the request via our online form. Our Head of Admissions reviews within three business days and responds regardless of decision.'},
                     {n:'2',h:'Placement assessment',p:'A 60-minute diagnostic to determine the right grade, curriculum and tutor match. $40 (waived if you have recent transcripts).'},
                     {n:'3',h:'Enrolment & onboarding',p:'$120 one-time registration. We set up the LMS account, student ID, family portal, initial materials. You meet your child\'s teacher.'},
                     {n:'4',h:'First live class',p:'Within 7-14 days. Your child joins their first live class. We check in after week 1, week 4, and monthly thereafter.'},
@@ -10726,21 +10573,11 @@ export default function LandingPage() {
                   Book a 30-minute consultation with our admissions team. We'll discuss your child, your goals, and whether Smartious is the right fit. No high-pressure sales. No commitment. Just a conversation.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                  <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                     style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                    Book free consultation
+                    Book assessment
                   </button>
-                  <button onClick={() => { trackConversion('enrol_started'); P('enroll') }}
-                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                    Begin Enrolment →
-                  </button>
-                  <a href="https://wa.me/254745021212"
-                    target="_blank" rel="noopener noreferrer"
-                    onClick={() => trackConversion('whatsapp_click')}
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp us
-                  </a>
-                </div>
+</div>
                 <p style={{fontSize:11.5,color:'rgba(255,255,255,.5)',marginTop:24,lineHeight:1.7}}>
                   Smartious responds to all enquiries within one business day. WhatsApp messages typically answered within 2-4 hours.
                 </p>
@@ -10782,7 +10619,7 @@ export default function LandingPage() {
                 {s.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
                 </button>
@@ -10903,12 +10740,12 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); P('enroll') }} style={{
+                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
-                      Begin Enrolment →
+                      Book assessment →
                     </button>
                   </div>
                 ))}
@@ -11046,21 +10883,11 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {s.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
+                  Book assessment
                 </button>
-                <button onClick={() => { trackConversion('enrol_started'); P('enroll') }}
-                  style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                  Begin Enrolment →
-                </button>
-                <a href="https://wa.me/254745021212"
-                  target="_blank" rel="noopener noreferrer"
-                  onClick={() => trackConversion('whatsapp_click')}
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+</div>
             </div>
           </section>
           <Footer P={P}/>
@@ -11100,7 +10927,7 @@ export default function LandingPage() {
                 {s.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
                 </button>
@@ -11242,12 +11069,12 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); P('enroll') }} style={{
+                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
-                      Begin Enrolment →
+                      Book assessment →
                     </button>
                   </div>
                 ))}
@@ -11385,21 +11212,11 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {s.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                   style={{background:s.accentColor,color:V.ink,border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
+                  Book assessment
                 </button>
-                <button onClick={() => { trackConversion('enrol_started'); P('enroll') }}
-                  style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                  Begin Enrolment →
-                </button>
-                <a href="https://wa.me/254745021212"
-                  target="_blank" rel="noopener noreferrer"
-                  onClick={() => trackConversion('whatsapp_click')}
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+</div>
             </div>
           </section>
           <Footer P={P}/>
@@ -11449,7 +11266,7 @@ export default function LandingPage() {
                 {c.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
                 </button>
@@ -11535,12 +11352,12 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); P('enroll') }} style={{
+                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
-                      Begin Enrolment →
+                      Book assessment →
                     </button>
                   </div>
                 ))}
@@ -11627,21 +11444,11 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {c.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
+                  Book assessment
                 </button>
-                <button onClick={() => { trackConversion('enrol_started'); P('enroll') }}
-                  style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                  Begin Enrolment →
-                </button>
-                <a href="https://wa.me/254745021212"
-                  target="_blank" rel="noopener noreferrer"
-                  onClick={() => trackConversion('whatsapp_click')}
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+</div>
             </div>
           </section>
           <Footer P={P}/>
@@ -11690,8 +11497,7 @@ export default function LandingPage() {
                   Alberta gives every home-educating family roughly $850 CAD per child per year. Curriculum, tutoring, exam fees — all eligible. Smartious live Cambridge IGCSE &amp; A-Level instruction qualifies as eligible curriculum &amp; tutoring under Alberta Education guidelines. Register with a school authority, send us your receipts, get reimbursed.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll — use my $850 CAD</button>
-                  <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free 15-min funding chat</button>
+                  <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
                 </div>
               </div>
             </div>
@@ -11818,8 +11624,7 @@ export default function LandingPage() {
               <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Use your $850 CAD allocation on Smartious this year</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>15-minute call to confirm your school authority partnership and what your specific funding lets you book. No commitment.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll now</button>
-                <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free funding chat</button>
+                <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
               </div>
             </div>
           </section>
@@ -11869,8 +11674,7 @@ export default function LandingPage() {
                   BC Distributed Learning (DL) schools provide a $200–$700 CAD/yr resource allocation per student. Smartious isn\'t a BC DL school — but families can register with a flexible DL school and use part of that allocation to offset Smartious live Cambridge tuition. Or skip DL entirely and self-register as a homeschooler with your school district. Here\'s how each path works.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll Smartious</button>
-                  <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free 15-min BC pathway chat</button>
+                  <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
                 </div>
               </div>
             </div>
@@ -11980,8 +11784,7 @@ export default function LandingPage() {
               <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>BC families — find your pathway in one 15-minute call</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>We\'ll help you pick between Path A (self-registered) and Path B (DL + Smartious) based on your specific family situation.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll now</button>
-                <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free pathway chat</button>
+                <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
               </div>
             </div>
           </section>
@@ -12031,8 +11834,7 @@ export default function LandingPage() {
                   Saskatchewan delegates homeschool funding to its 28 school divisions. The amount varies — Saskatoon Public, Regina Public, Prairie Spirit, Sun West and others each set their own policy. Some divisions offer $1,500 CAD/yr in flexible curriculum spending. Others provide $500 CAD plus library access. Smartious tuition is reimbursable in divisions that allow outside curriculum providers.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll Smartious</button>
-                  <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free 15-min SK division chat</button>
+                  <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
                 </div>
               </div>
             </div>
@@ -12136,8 +11938,7 @@ export default function LandingPage() {
               <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Get your Saskatchewan division\'s funding answer in one call</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>15-minute consult — we\'ll help you call your division\'s homeschool coordinator and walk you through the questions that matter. No commitment.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button onClick={() => P('enroll')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Enroll now</button>
-                <button onClick={() => P('consult')} style={{background:'transparent',color:'#fff',border:'2px solid #fff',padding:'12px 26px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Free division chat</button>
+                <button onClick={() => nav('/assessment')} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</button>
               </div>
             </div>
           </section>
@@ -12182,7 +11983,7 @@ export default function LandingPage() {
                 {c.pitch}
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:36}}>
-                <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
                   Book a free 30-min consultation
                 </button>
@@ -12268,12 +12069,12 @@ export default function LandingPage() {
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
                     </div>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,marginBottom:18}}>{t.desc}</p>
-                    <button onClick={() => { trackConversion('enrol_started'); P('enroll') }} style={{
+                    <button onClick={() => { trackConversion('enrol_started'); nav('/assessment') }} style={{
                       width:'100%',padding:'12px 16px',
                       background: t.popular ? V.gold3 : V.cr, color: t.popular ? V.ink : '#fff',
                       border:'none',borderRadius:8,fontWeight:700,fontSize:13,cursor:'pointer',
                     }}>
-                      Begin Enrolment →
+                      Book assessment →
                     </button>
                   </div>
                 ))}
@@ -12360,21 +12161,11 @@ export default function LandingPage() {
                 Book a free 30-minute consultation. We'll review your child's current level, recommend the right pathway, and answer every {c.name}-specific question.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => { trackConversion('consult_booked'); P('consult') }}
+                <button onClick={() => { trackConversion('consult_booked'); nav('/assessment') }}
                   style={{background:s.accentColor,color:'#fff',border:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
+                  Book assessment
                 </button>
-                <button onClick={() => { trackConversion('enrol_started'); P('enroll') }}
-                  style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                  Begin Enrolment →
-                </button>
-                <a href="https://wa.me/254745021212"
-                  target="_blank" rel="noopener noreferrer"
-                  onClick={() => trackConversion('whatsapp_click')}
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 36px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+</div>
             </div>
           </section>
           <Footer P={P}/>
@@ -12416,7 +12207,7 @@ export default function LandingPage() {
                 <div className="prog-unis">
                   {['University of Birmingham','Coventry University','University of Manchester','Purdue Global','Northeastern University','Deakin University','Griffith University','RWTH Aachen','Maastricht University','+ 190 more'].map(u => <span key={u} className="prog-uni">{u}</span>)}
                 </div>
-                <button className="btn-p" onClick={() => P('enroll')}>Apply for IUFP <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
               </div>
             </div>
 
@@ -12466,9 +12257,8 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button className="btn-p" onClick={() => P('enroll')}>Apply for Study Abroad <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                  <button className="btn-o" onClick={() => window.open('https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20Study%20Abroad%20details.','_blank')}>WhatsApp for Details</button>
-                </div>
+                  <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
               </div>
             </div>
           </div></section>
@@ -12563,28 +12353,14 @@ export default function LandingPage() {
                 Qualified subject specialists for <strong style={{color:V.gold3}}>CBC, Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel and American curricula</strong>. Home tuition across 20 Nairobi neighbourhoods. Online tuition from USD 8/hour anywhere in the world.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:32}}>
-                <button onClick={() => P('consult')}
+                <button onClick={() => nav('/assessment')}
                   style={{
                     background:V.gold3,color:V.ink,border:'none',
                     padding:'13px 26px',borderRadius:8,
                     fontSize:14,fontWeight:800,letterSpacing:'.02em',
                     cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,
-                  }}>
-                  Book Free Consultation
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a
-                  href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20to%20discuss%20tuition%20in%20Nairobi."
-                  target="_blank" rel="noopener noreferrer"
-                  style={{
-                    background:'#25D366',color:'#fff',textDecoration:'none',
-                    padding:'13px 26px',borderRadius:8,
-                    fontSize:14,fontWeight:700,
-                    display:'inline-flex',alignItems:'center',gap:8,
-                  }}>
-                  WhatsApp +254 745 021 212
-                </a>
-              </div>
+                  }}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
 
               {/* Quick stats */}
               <div style={{
@@ -12756,7 +12532,7 @@ export default function LandingPage() {
                 {q:'Can you help with university applications?', a:'Yes — we support UCAS (UK), Common App (USA), and direct applications to universities in Canada, Australia, South Africa and the Gulf. This includes personal statement coaching, essay editing, interview preparation and standardised test prep (SAT, ACT). USD 15/hour for one-on-one admissions counselling.'},
                 {q:'Are your tutors safeguarding-checked?', a:'Yes — every Smartious tutor undergoes our internal safeguarding review including reference checks, identity verification and a teaching demonstration before any contact with a student. We follow safeguarding protocols modelled on UK and international standards.'},
                 {q:'Can a tutor visit a home anywhere in Nairobi?', a:'We send tutors to 20 specific neighbourhoods across Nairobi (see the area grid above). For each neighbourhood, the transport contribution is set based on distance. For estates outside our standard service area, online tuition is the practical option — the quality is identical and there\'s no scheduling risk from traffic.'},
-                {q:'What happens in a free consultation?', a:'A 20-minute call with our admissions team to understand your child\'s level, the subject(s) needed, your preferred schedule, and your specific goals (catch-up vs exam prep vs acceleration vs admissions). We then match a tutor and propose a session schedule. No payment required until you\'ve approved the match.'},
+                {q:'What happens after I submit an assessment request?', a:'Our Head of Admissions reviews your request within three business days. If accepted, you receive an invoice for the assessment fee. After payment, the diagnostic assessment is scheduled: a structured evaluation across English, Mathematics and Science (approx 90 minutes), a written report with subject-specific recommendations, and a 30-minute consultation with the Head of Academics. Enrolment is offered on the basis of assessment results.'},
               ].map((f, i) => (
                 <details key={i} style={{
                   background:V.bone,border:'1px solid '+V.line,borderRadius:10,
@@ -12785,7 +12561,7 @@ export default function LandingPage() {
                 'Can you help with university applications?',
                 'Are your tutors safeguarding-checked?',
                 'Can a tutor visit a home anywhere in Nairobi?',
-                'What happens in a free consultation?',
+                'What happens after I submit an assessment request?',
               ].map(q => ({ '@type':'Question', 'name': q, 'acceptedAnswer': { '@type':'Answer', 'text': 'See full answer at https://smartioushomeschool.com/tuition-nairobi' } })),
             })}}/>
           </div></section>
@@ -12796,22 +12572,15 @@ export default function LandingPage() {
             color:'#fff',
           }}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
             <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.1rem',fontWeight:700,color:'#fff',marginBottom:14,lineHeight:1.2}}>
-              Book a <em style={{color:V.gold3}}>Free Consultation</em>
+              Book a <em style={{color:V.gold3}}>Book assessment</em>
             </h2>
             <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.7}}>
               20 minutes with our admissions team to understand your child's needs, match a tutor, and agree a schedule. No payment until you've approved the match.
             </p>
             <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-              <button onClick={() => P('consult')}
-                style={{background:V.gold3,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,letterSpacing:'.02em',cursor:'pointer'}}>
-                Book Consultation →
-              </button>
-              <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20a%20tuition%20consultation."
-                target="_blank" rel="noopener noreferrer"
-                style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-                WhatsApp +254 745 021 212
-              </a>
-            </div>
+              <button onClick={() => nav('/assessment')}
+                style={{background:V.gold3,color:V.ink,border:'none',padding:'13px 28px',borderRadius:8,fontSize:14,fontWeight:800,letterSpacing:'.02em',cursor:'pointer'}}>Book assessment</button>
+</div>
             <div style={{marginTop:30,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
               Phone: +254 745 021 212 · Email: hellosmartious@gmail.com · Office: Diamond Plaza, Parklands, Nairobi
             </div>
@@ -12904,17 +12673,9 @@ export default function LandingPage() {
                   {area.intro}
                 </p>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book a Tutor
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like tuition in ' + area.name + '.')}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
-                    WhatsApp Us
-                  </a>
-                </div>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
               </div>
             </section>
 
@@ -13081,16 +12842,9 @@ export default function LandingPage() {
                 Book a free 20-minute consultation. We'll match a tutor to your child's subject, level and schedule — and you only pay once you've approved the match.
               </p>
               <div style={{display:'flex',gap:10,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>
-                  Book Consultation →
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like tuition in ' + area.name + '.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
-                  WhatsApp +254 745 021 212
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
             </div></section>
           </>
         )
@@ -13161,17 +12915,9 @@ export default function LandingPage() {
                 Live online 1-on-1 tuition for students across all seven emirates — Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah, Fujairah and Al Ain. Cambridge IGCSE, A-Level, IB Diploma, Pearson Edexcel, CBSE and American AP. From <strong style={{color:V.gold3}}>USD 15/hour</strong> (≈ AED 55/hr) — meaningfully below typical UAE tutor rates (AED 150-400/hour).
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,letterSpacing:'.02em'}}>
-                  Book a Free Consultation
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online tuition for my child in the UAE.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp Us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8,letterSpacing:'.02em'}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
             </div>
           </section>
 
@@ -13360,17 +13106,9 @@ export default function LandingPage() {
                   {area.intro}
                 </p>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book a Free Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online tuition for my child in ' + area.name + ', ' + area.emirate + '.')}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
-                    WhatsApp Us
-                  </a>
-                </div>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
               </div>
             </section>
 
@@ -13602,17 +13340,9 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp
-                  </a>
-                  <button onClick={() => P('pricing')}
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+<button onClick={() => P('pricing')}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
                   </button>
@@ -13807,7 +13537,7 @@ export default function LandingPage() {
                     </a>
                   </div>
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -13842,18 +13572,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free 15-min Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-                    WhatsApp +254 745 021 212
-                  </a>
-                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                    Begin Enrolment
-                  </button>
+                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -14076,17 +13795,9 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp
-                  </a>
-                  <button onClick={() => P('pricing')}
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+<button onClick={() => P('pricing')}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
                   </button>
@@ -14281,7 +13992,7 @@ export default function LandingPage() {
                     </a>
                   </div>
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -14316,18 +14027,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free 15-min Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-                    WhatsApp +254 745 021 212
-                  </a>
-                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                    Begin Enrolment
-                  </button>
+                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -14415,17 +14115,9 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp
-                  </a>
-                  <button onClick={() => P('pricing')}
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+<button onClick={() => P('pricing')}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
                   </button>
@@ -14620,7 +14312,7 @@ export default function LandingPage() {
                     </a>
                   </div>
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -14655,18 +14347,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free 15-min Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-                    WhatsApp +254 745 021 212
-                  </a>
-                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                    Begin Enrolment
-                  </button>
+                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -14754,17 +14435,9 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp
-                  </a>
-                  <button onClick={() => P('pricing')}
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+<button onClick={() => P('pricing')}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
                   </button>
@@ -14959,7 +14632,7 @@ export default function LandingPage() {
                     </a>
                   </div>
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -14994,18 +14667,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free 15-min Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-                    WhatsApp +254 745 021 212
-                  </a>
-                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                    Begin Enrolment
-                  </button>
+                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -15093,17 +14755,9 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp
-                  </a>
-                  <button onClick={() => P('pricing')}
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+<button onClick={() => P('pricing')}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
                   </button>
@@ -15298,7 +14952,7 @@ export default function LandingPage() {
                     </a>
                   </div>
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -15333,18 +14987,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free 15-min Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-                    WhatsApp +254 745 021 212
-                  </a>
-                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                    Begin Enrolment
-                  </button>
+                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -15432,17 +15075,9 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp
-                  </a>
-                  <button onClick={() => P('pricing')}
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+<button onClick={() => P('pricing')}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
                   </button>
@@ -15637,7 +15272,7 @@ export default function LandingPage() {
                     </a>
                   </div>
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -15672,18 +15307,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free 15-min Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-                    WhatsApp +254 745 021 212
-                  </a>
-                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                    Begin Enrolment
-                  </button>
+                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -15770,17 +15394,9 @@ export default function LandingPage() {
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp
-                  </a>
-                  <button onClick={() => P('pricing')}
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+<button onClick={() => P('pricing')}
                     style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
                     View Pricing ({country.currency})
                   </button>
@@ -15975,7 +15591,7 @@ export default function LandingPage() {
                     </a>
                   </div>
                   <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these during your free consultation — we can introduce you to current {country.name} families happy to share their experience directly.
+                    Reviews above are from our verified Google Business Profile (Diamond Plaza, Parklands Nairobi HQ). For {country.name}-specific parent references during your decision-making, request these when you submit your assessment request — we can introduce you to current {country.name} families happy to share their experience directly.
                   </p>
                 </div>
               </div>
@@ -16010,18 +15626,7 @@ export default function LandingPage() {
                 <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
-                  <button onClick={() => P('consult')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book Free 15-min Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent(country.whatsappTrigger)}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
-                    WhatsApp +254 745 021 212
-                  </a>
-                  <button onClick={() => P('enroll')} style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.4)',padding:'13px 30px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                    Begin Enrolment
-                  </button>
+                  <button onClick={() => nav('/assessment')} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                 </div>
                 <div style={{display:'flex',gap:22,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
                   <span>[+] Immediate enrolment</span>
@@ -16093,17 +15698,9 @@ export default function LandingPage() {
                   {city.intro}
                 </p>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book a Free Consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like online homeschooling for my child in ' + city.name + '.')}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
-                    WhatsApp Us
-                  </a>
-                </div>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
               </div>
             </section>
 
@@ -16278,7 +15875,7 @@ export default function LandingPage() {
               <div style={{maxWidth:720,margin:'0 auto',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 32px',textAlign:'center'}}>
                 <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>Share your Smartious story</h3>
                 <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginBottom:16}}>
-                  If your {city.name} family has used Smartious, we'd love to feature your story (with your permission). Email us at <a href="mailto:hellosmartious@gmail.com" style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>hellosmartious@gmail.com</a> or WhatsApp us at <a href="https://wa.me/254745021212" style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>+254 745 021 212</a>.
+                  If your {city.name} family has used Smartious, we'd love to feature your story (with your permission). Email us at <a href="mailto:hellosmartious@gmail.com" style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>hellosmartious@gmail.com</a> or WhatsApp us at.
                 </p>
               </div>
             </div></section>
@@ -16313,17 +15910,11 @@ export default function LandingPage() {
                   Start your {city.name} child's Smartious journey
                 </h2>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:24,maxWidth:560,margin:'0 auto 24px'}}>
-                  The enrolment process takes most {city.name} families 7-10 working days from first enquiry to LMS access. Book a free consultation to discuss your child's situation.
+                  The enrolment process takes most {city.name} families 7-10 working days from first enquiry to LMS access. Book an assessment — our Head of Admissions will review your request and respond within three business days.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => P('enroll')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                    Start Application
-                  </button>
-                  <button onClick={() => P('consult')}
-                    style={{background:'transparent',color:'#fff',border:`1.5px solid rgba(255,255,255,.3)`,padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer'}}>
-                    Free Consultation
-                  </button>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
                 </div>
               </div>
             </div></section>
@@ -16360,17 +15951,9 @@ export default function LandingPage() {
                 Live 1-on-1 preparation for the world's most important standardised tests. IELTS, TOEFL, PTE for English proficiency. GRE, GMAT, SAT for graduate and undergraduate admissions. Delivered online by qualified specialists, with mock tests, detailed feedback and a clear path to your target score.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Book free consultation
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to discuss test preparation.')}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
             </div>
           </section>
 
@@ -16514,17 +16097,9 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book free consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to book ' + test.code + ' preparation.')}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
-                    WhatsApp us
-                  </a>
-                </div>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
               </div>
             </section>
 
@@ -16681,16 +16256,9 @@ export default function LandingPage() {
                   {test.fee} · {test.sessions} live sessions · {test.duration}. Most students see meaningful improvement within the first 4 sessions.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                    Book free consultation
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enrol in ' + test.code + ' preparation.')}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp us
-                  </a>
-                </div>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
               </div>
             </div></section>
           </>
@@ -16726,16 +16294,9 @@ export default function LandingPage() {
                 One-on-one foreign language tuition with qualified specialists. 8 languages, CEFR A1 through C2, plus examination preparation for DELF, DELE, Goethe-Zertifikat, HSK, CILS and more. From KSh 1,500/hour.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
-                </button>
-                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20foreign%20language%20coaching."
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
             </div>
           </section>
 
@@ -16814,16 +16375,9 @@ export default function LandingPage() {
                 Start your <em style={{color:V.gold3,fontStyle:'italic'}}>language journey</em>
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
-                </button>
-                <a href="https://wa.me/254745021212"
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
             </div>
           </div></section>
         </>
@@ -16894,16 +16448,9 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>
-                    Book free consultation
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to learn ' + lang.name + '.')}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
-                    WhatsApp us
-                  </a>
-                </div>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
               </div>
             </section>
 
@@ -17044,16 +16591,9 @@ export default function LandingPage() {
                   Start learning <em style={{color:V.gold3,fontStyle:'italic'}}>{lang.name}</em> today
                 </h2>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                    Book free consultation
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to learn ' + lang.name + '.')}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp us
-                  </a>
-                </div>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
               </div>
             </div></section>
           </>
@@ -17092,17 +16632,9 @@ export default function LandingPage() {
                 Full curriculum delivery for K-12 students across 5 curricula and 14 countries. Live 1-on-1 lessons with qualified teachers, structured progress tracking and university-pathway planning — built for families serious about their child's academic future.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Book free assessment
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20to%20discuss%20homeschooling."
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
             </div>
           </section>
 
@@ -17301,7 +16833,7 @@ export default function LandingPage() {
                 const hsFaqs = [
                   { q:'What curricula do you offer?', a:'Five core curricula: Cambridge IGCSE (and Edexcel), Cambridge A-Level, International Baccalaureate (IB), American Curriculum (with SAT/AP integration), and Kenya CBC. All are delivered by qualified teachers with curriculum-specific experience.' },
                   { q:'Where can we homeschool with Smartious?', a:'Online globally (anywhere with internet), in-centre at our Nairobi Parklands or Karen Hardy locations, or home tutoring in 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. We serve diaspora families in 14 countries primarily online.' },
-                  { q:'How much does homeschooling with Smartious cost?', a:'Pricing depends on curriculum, year level and delivery mode. We work with families across multiple budgets — premium full-day programmes at one end and focused subject-only support at the other. Book a free consultation for personalised pricing.' },
+                  { q:'How much does homeschooling with Smartious cost?', a:'Pricing depends on curriculum, year level and delivery mode. We work with families across multiple budgets — premium full-day programmes at one end and focused subject-only support at the other. Book an assessment to receive personalised pricing recommendations.' },
                   { q:'Are your teachers qualified?', a:'Yes — all Smartious teachers hold relevant academic qualifications (Bachelor\'s or higher in their teaching subject area), with verified teaching experience. Many hold curriculum-specific certifications from Cambridge, IB or local boards.' },
                   { q:'How do we track our child\'s progress?', a:'Through the Smartious LMS — parents see live attendance, assignment submissions, grades, teacher feedback and progress reports. Weekly summaries and monthly progress reports keep families fully informed.' },
                   { q:'Can my child sit official examinations through Smartious?', a:'Yes — we coordinate examination registration with Cambridge International, Edexcel, IB and KNEC for Smartious students. Examinations are sat at registered examination centres in your country.' },
@@ -17333,16 +16865,9 @@ export default function LandingPage() {
                 Start your child's <em style={{color:V.gold3,fontStyle:'italic'}}>Smartious</em> journey
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free assessment
-                </button>
-                <a href="https://wa.me/254745021212"
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
             </div>
           </div></section>
         </>
@@ -17379,17 +16904,9 @@ export default function LandingPage() {
                 Specialist subject tuition delivered by qualified teachers. Mathematics, Sciences, English, Foreign Languages, IGCSE, A-Level, IB and exam preparation. Online live, in-centre at our Nairobi locations, or home tutoring across 21 Nairobi areas and 27 UAE areas.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                  Book free trial session
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20to%20discuss%20tuition."
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
             </div>
           </section>
 
@@ -17415,7 +16932,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <div style={{marginTop:18,textAlign:'center',fontSize:13,color:V.sl}}>
-                Plus all curricula-specific subjects across IGCSE, A-Level, IB, American and CBC. <span style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={()=>P('consult')}>Don't see your subject? Ask us.</span>
+                Plus all curricula-specific subjects across IGCSE, A-Level, IB, American and CBC. <span style={{color:V.cr,fontWeight:600,cursor:'pointer'}} onClick={()=>nav('/assessment')}>Don't see your subject? Ask us.</span>
               </div>
             </div>
           </div></section>
@@ -17489,7 +17006,7 @@ export default function LandingPage() {
               {(() => {
                 const tFaqs = [
                   { q:'What subjects do you tutor?', a:'All major academic subjects across IGCSE, A-Level, IB, American and CBC curricula. Core subjects include Mathematics, Physics, Chemistry, Biology, English (Language and Literature), Computer Science, Business Studies, Economics, Accounting, Geography and History. Foreign languages: French, Spanish, German, Mandarin, Arabic, Kiswahili. Specialised subjects (Music, Art, Design) available on request.' },
-                  { q:'How much does Smartious tuition cost?', a:'Tuition rates vary by curriculum level, subject specialism, and delivery mode (online, in-centre, home tutoring). We have flexible packages — single-subject focused support through to full-curriculum tutoring. Book a free consultation for personalised pricing.' },
+                  { q:'How much does Smartious tuition cost?', a:'Tuition rates vary by curriculum level, subject specialism, and delivery mode (online, in-centre, home tutoring). We have flexible packages — single-subject focused support through to full-curriculum tutoring. Book an assessment to receive personalised pricing recommendations.' },
                   { q:'Can I have a trial session before committing?', a:'Yes — we offer free trial sessions so you can experience the teacher and teaching style before signing up for a full programme. This is the easiest way to assess fit.' },
                   { q:'How are tutors selected?', a:'All Smartious tutors are screened for qualifications, subject expertise and teaching experience. Many hold curriculum-specific certifications (Cambridge, IB) or are practicing professionals (engineers tutoring Mathematics, scientists tutoring sciences, lawyers tutoring Law). We match tutors to students based on subject, curriculum, level and personality.' },
                   { q:'Can I change tutors if needed?', a:'Yes — fit matters. If a tutor isn\'t the right match, we can reassign at no penalty. We aim to find the right teacher for your child, not lock you into one assignment.' },
@@ -17522,16 +17039,9 @@ export default function LandingPage() {
                 Find the right <em style={{color:V.gold3,fontStyle:'italic'}}>tutor</em> for your child
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free trial session
-                </button>
-                <a href="https://wa.me/254745021212"
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
             </div>
           </div></section>
         </>
@@ -17566,16 +17076,9 @@ export default function LandingPage() {
                 A one-year academic foundation programme designed to prepare Kenyan and African secondary school graduates for direct entry to top universities in the UK, Australia, Canada and the US. IUFP bridges the gap between KCSE/national qualifications and international university entry requirements.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
-                </button>
-                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20to%20discuss%20IUFP."
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
             </div>
           </section>
 
@@ -17663,7 +17166,7 @@ export default function LandingPage() {
                   { q:'How is IUFP different from A-Level or IB?', a:'A-Level and IB are full 2-year secondary school qualifications. IUFP is a focused 1-year university-preparation programme — typically taken after KCSE or equivalent national qualification, before starting university. IUFP is faster and university-targeted; A-Level/IB are broader secondary qualifications.' },
                   { q:'Which universities accept IUFP?', a:'IUFP completion typically supports applications to UK universities (mid-tier to upper-mid-tier), Australian universities, Canadian universities and some US universities. Top universities (Russell Group, Ivy League) typically still prefer A-Level or IB. IUFP\'s strength is broadening access for students whose secondary grades don\'t meet direct entry.' },
                   { q:'What\'s the IUFP duration and schedule?', a:'IUFP is typically 9-12 months of intensive academic study. Full-time, structured timetable similar to university. Delivered online live or in-centre depending on student location and preference.' },
-                  { q:'How much does IUFP cost?', a:'Programme costs vary based on stream, delivery mode and intensity. Book a free consultation for personalised pricing and timeline planning. Smartious offers competitive rates compared to in-country foundation programmes at international universities.' },
+                  { q:'How much does IUFP cost?', a:'Programme costs vary based on stream, delivery mode and intensity. Book an assessment to receive personalised pricing recommendations and timeline planning. Smartious offers competitive rates compared to in-country foundation programmes at international universities.' },
                   { q:'Can I combine IUFP with IELTS/TOEFL preparation?', a:'Yes — Academic English is built into all IUFP streams. Students typically reach IELTS 6.5+ level by programme end. Additional dedicated IELTS preparation is available via our Test Prep programme if needed.' },
                   { q:'What happens after IUFP?', a:'After successful IUFP completion, students apply directly to international universities for degree entry. Smartious Study Abroad team provides full university application support — free of charge — including university selection, application essays, scholarship applications and visa guidance.' },
                   { q:'Is IUFP suitable for medicine pathway?', a:'For top-tier medicine programmes (UK, Ireland, Australia), A-Level or IB Diploma is typically preferred. IUFP can support medicine pathway for mid-tier programmes in countries like Hungary, Bulgaria, or some Caribbean schools. We advise based on your specific medicine destination preferences.' },
@@ -17693,16 +17196,9 @@ export default function LandingPage() {
                 Start your <em style={{color:V.gold3,fontStyle:'italic'}}>IUFP</em> pathway
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
-                </button>
-                <a href="https://wa.me/254745021212"
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
             </div>
           </div></section>
         </>
@@ -17736,16 +17232,9 @@ export default function LandingPage() {
                 A structured gap-year academic programme for students who have completed secondary school and want focused preparation before starting university. Subject-specific intensive coursework, university entrance examination preparation and academic skills development.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
-                </button>
-                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20to%20discuss%20Pre-University."
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
             </div>
           </section>
 
@@ -17831,7 +17320,7 @@ export default function LandingPage() {
                   { q:'How is Pre-University different from IUFP?', a:'IUFP is for students whose secondary qualifications don\'t directly meet international university entry — it bridges that gap to gain entry. Pre-University assumes you already meet entry requirements and focuses on strengthening your knowledge and skills for degree-level success. IUFP gets you in; Pre-University gets you ready.' },
                   { q:'What\'s the duration?', a:'Typically 9-12 months of structured academic study. Flexible delivery — full-time intensive, part-time alongside other gap-year activities, or specific subject blocks. We tailor based on student goals and university start date.' },
                   { q:'Which pathway should I choose?', a:'Depends on your university destination and degree subject. UK-bound? A-Level Intensive strengthens UCAS applications. US-bound? AP Coursework + SAT preparation. IB students? IB Preparation. Multiple destinations? Entrance Exam Preparation with broader subject coverage. We help you decide based on your goals.' },
-                  { q:'How much does Pre-University cost?', a:'Pricing varies by pathway, intensity and delivery mode. Book a free consultation for personalised pricing and timeline planning.' },
+                  { q:'How much does Pre-University cost?', a:'Pricing varies by pathway, intensity and delivery mode. Book an assessment to receive personalised pricing recommendations and timeline planning.' },
                   { q:'Will my A-Level/AP/IB results count?', a:'Yes — A-Level and IB qualifications earned through Smartious Pre-University are officially recognised through registered examination centres (Cambridge International, Edexcel, IB). AP exams are externally sat via College Board. These results strengthen your university application.' },
                   { q:'Can I take this alongside other gap year activities?', a:'Yes — Pre-University is designed to be flexible enough to combine with work, internships, travel or volunteering. Many students do mornings on academic study, afternoons on other gap year commitments. We tailor schedule to your overall plan.' },
                   { q:'Do you support university applications during Pre-University?', a:'Yes — students enrolled in Smartious Pre-University receive integrated Smartious Study Abroad support: university selection, UCAS/Common App support, personal statement coaching, scholarship applications. All free of charge.' },
@@ -17861,16 +17350,9 @@ export default function LandingPage() {
                 Build your <em style={{color:V.gold3,fontStyle:'italic'}}>pre-university</em> pathway
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
-                </button>
-                <a href="https://wa.me/254745021212"
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
             </div>
           </div></section>
         </>
@@ -17917,17 +17399,9 @@ export default function LandingPage() {
                   <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>100% free for students · No consultation fees · No application processing fees</div>
                 </div>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book free consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to discuss study abroad options.')}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp us
-                  </a>
-                </div>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
               </div>
             </div>
           </section>
@@ -17943,7 +17417,7 @@ export default function LandingPage() {
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:14}}>
                 {[
-                  { n:'01', h:'Free consultation', p:'A 1-on-1 conversation to understand your academic profile, career goals, family situation and target destinations.' },
+                  { n:'01', h:'Submit assessment request', p:'A 1-on-1 conversation to understand your academic profile, career goals, family situation and target destinations.' },
                   { n:'02', h:'University shortlist', p:'We build a personalised list of 5-12 universities matching your profile, budget and ambitions across reach, match and safety options.' },
                   { n:'03', h:'Application support', p:'Personal statement coaching, application form completion, recommendation letter strategy, document handling — all of it, free.' },
                   { n:'04', h:'Scholarship hunt', p:'We identify and prepare scholarship applications (Chevening, Mastercard Foundation, CSC, Türkiye Bursları, university-specific) — all coached, free.' },
@@ -18074,7 +17548,7 @@ export default function LandingPage() {
                 const hubFaqs = [
                   { q:'Is Smartious Study Abroad really free?', a:'Yes — completely free for students. There are no consultation fees, no application processing fees, no document handling fees and no hidden charges at any stage. From your first consultation through to your destination country arrival, Smartious provides full study abroad support at zero cost to you or your family.' },
                   { q:'Which destinations do you support?', a:'Currently 10 destinations: United Kingdom, USA, Canada, Australia, Germany, Netherlands, Ireland, China, Turkey and UAE. These cover the highest-demand destinations for Kenyan and African students seeking quality higher education with clear post-study pathways. We can also advise on additional destinations on a case-by-case basis (Hungary, India, South Africa, Malaysia, others).' },
-                  { q:'How do I start?', a:'Book a free consultation via the button on this page, WhatsApp us on +254 745 021 212, or email hellosmartious@gmail.com. Initial consultation is a 30-60 minute conversation to understand your goals, profile and constraints, after which we propose a personalised plan.' },
+                  { q:'How do I start?', a:'Book an assessment via the button on this page, WhatsApp us on +254 745 021 212, or email hellosmartious@gmail.com. Initial consultation is a 30-60 minute conversation to understand your goals, profile and constraints, after which we propose a personalised plan.' },
                   { q:'How long does the study abroad process take?', a:'Typical timeline is 12-18 months from first consultation to destination arrival. For students with English tests done and clear university preferences, 6-9 months. Compressed timelines work for some destinations and intake windows. Specific timelines depend on destination, programme level and scholarship strategy.' },
                   { q:'What costs are involved?', a:'Smartious services are free. Costs paid directly by students/families: university application fees (varies $50-150 per university), English tests (IELTS ~$220, TOEFL ~$220, SAT ~$93), visa fees (varies), tuition and living costs after admission. Scholarships can cover much or all of tuition and living costs.' },
                   { q:'What if I don\'t have strong KCSE grades?', a:'Different destinations have different entry thresholds, and many pathways exist for students with KCSE B (Plain) or lower — foundation years, pathway programmes, applied universities, community college transfer routes. We work with realistic profiles, not just the top tier. Honest assessment in the first consultation is the starting point.' },
@@ -18109,19 +17583,12 @@ export default function LandingPage() {
                 Your <em style={{color:V.gold3,fontStyle:'italic'}}>free</em> study abroad journey starts with one conversation
               </h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:24,maxWidth:580,margin:'0 auto 24px'}}>
-                Book a free consultation and we'll map out your most realistic path to your top university destinations.
+                Book an assessment and we'll map out your most realistic path to your top university destinations.
               </p>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => P('consult')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                  Book free consultation
-                </button>
-                <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20would%20like%20to%20discuss%20study%20abroad."
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
             </div>
           </div></section>
         </>
@@ -18184,17 +17651,9 @@ export default function LandingPage() {
                   <div style={{fontSize:13,fontWeight:700,color:'#fff'}}>Smartious Study in {dest.name} — 100% free for students</div>
                 </div>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>
-                    Book free consultation
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to discuss study in ' + dest.name + '.')}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp us
-                  </a>
-                </div>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
               </div>
             </section>
 
@@ -18404,19 +17863,12 @@ export default function LandingPage() {
                   Start your <em style={{color:V.gold3,fontStyle:'italic'}}>{dest.name}</em> journey — free
                 </h2>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:24,maxWidth:560,margin:'0 auto 24px'}}>
-                  Book a free consultation and we'll build a personalised application strategy for {dest.fullName}.
+                  Book an assessment and we'll build a personalised application strategy for {dest.fullName}.
                 </p>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                  <button onClick={() => P('consult')}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>
-                    Book free consultation
-                  </button>
-                  <a href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to study in ' + dest.name + '.')}
-                    target="_blank" rel="noopener noreferrer"
-                    style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:700}}>
-                    WhatsApp us
-                  </a>
-                </div>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
+</div>
               </div>
             </div></section>
           </>
@@ -18520,12 +17972,7 @@ export default function LandingPage() {
                   style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 28px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer'}}>
                   View blog
                 </button>
-                <a href="https://wa.me/254745021212"
-                  target="_blank" rel="noopener noreferrer"
-                  style={{background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 28px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
-                  WhatsApp us
-                </a>
-              </div>
+</div>
             </div>
           </div></section>
         </>
@@ -18693,12 +18140,7 @@ export default function LandingPage() {
               <p style={{fontSize:14,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:18}}>
                 WhatsApp our admissions team for a PDF copy of the academic calendar with specific examination registration deadlines for your child.
               </p>
-              <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20please%20send%20the%20academic%20calendar."
-                target="_blank" rel="noopener noreferrer"
-                style={{display:'inline-block',background:'#25D366',color:'#fff',textDecoration:'none',padding:'12px 28px',borderRadius:8,fontSize:13.5,fontWeight:700}}>
-                Request calendar PDF
-              </a>
-            </div>
+</div>
           </div></section>
         </>
       )}
@@ -18851,7 +18293,6 @@ export default function LandingPage() {
             <p className="pg-sub" style={{marginTop:12}}>Smartious students participate in engaging weekly activities designed to build confidence, teamwork, creativity, wellness and global exposure. A world-class enrichment ecosystem alongside an internationally recognised academic programme.</p>
             <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:24}}>
               <button className="btn-p" onClick={() => { const el = document.getElementById('malaysia-application'); if (el) el.scrollIntoView({behavior:'smooth'}); }}>Apply: Malaysia Trip 2026 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-              <button className="btn-o lt" onClick={() => P('enroll')}>Join Smartious</button>
               <button className="btn-o lt" onClick={() => { const el = document.getElementById('student-life'); if (el) el.scrollIntoView({behavior:'smooth'}); }}>Explore Student Life</button>
             </div>
           </div></div>
@@ -19888,26 +19329,7 @@ export default function LandingPage() {
                   </p>
                   <div style={{textAlign:'center',marginTop:18,paddingTop:18,borderTop:'1px solid '+V.line}}>
                     <p style={{fontSize:12,color:V.sl3,marginBottom:10}}>Prefer to message us directly?</p>
-                    <a
-                      href={'https://wa.me/254745021212?text=' + encodeURIComponent('Hi Smartious, I would like to enquire about the Malaysia Trip 2026.')}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display:'inline-flex',
-                        alignItems:'center',
-                        gap:8,
-                        padding:'10px 18px',
-                        borderRadius:8,
-                        background:'#25D366',
-                        color:'#fff',
-                        textDecoration:'none',
-                        fontSize:13,
-                        fontWeight:700,
-                      }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                      WhatsApp: +254 745 021 212
-                    </a>
-                  </div>
+</div>
                 </>
               ) : (
                 <div style={{textAlign:'center',padding:'20px 0'}}>
@@ -19934,7 +19356,7 @@ export default function LandingPage() {
                     Thank you, {malaysiaTripForm.parentName}. Our trips team will contact you on {malaysiaTripForm.parentPhone} within one working day to confirm availability and walk you through the next steps.
                   </p>
                   <p style={{fontSize:13,color:V.sl3,marginTop:16}}>
-                    Any urgent questions? WhatsApp us at <a href="https://wa.me/254745021212" target="_blank" rel="noopener noreferrer" style={{color:V.cr,fontWeight:700}}>+254 745 021 212</a> or email <a href="mailto:hellosmartious@gmail.com" style={{color:V.cr,fontWeight:700}}>hellosmartious@gmail.com</a>.
+                    Any urgent questions? WhatsApp us ator email <a href="mailto:hellosmartious@gmail.com" style={{color:V.cr,fontWeight:700}}>hellosmartious@gmail.com</a>.
                   </p>
                 </div>
               )}
@@ -20221,37 +19643,14 @@ export default function LandingPage() {
               Sports. Music. Code. Leadership. Friendship. Every Wednesday, 2–4 PM, your child is somewhere they want to be — building skills no exam paper can measure.
             </p>
             <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-              <button onClick={() => P('enroll')}
+              <button onClick={() => nav('/assessment')}
                 style={{
                   background:V.gold2, color:V.ink, border:'none',
                   padding:'13px 28px', borderRadius:8,
                   fontSize:14, fontWeight:800, cursor:'pointer',
                   display:'inline-flex', alignItems:'center', gap:8,
-                }}>
-                Enroll Now
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
-              <button onClick={() => P('consult')}
-                style={{
-                  background:'transparent', color:'#fff',
-                  border:'2px solid rgba(255,255,255,.4)',
-                  padding:'11px 26px', borderRadius:8,
-                  fontSize:14, fontWeight:700, cursor:'pointer',
-                }}>
-                Book Free Consultation
-              </button>
-              <a href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20to%20know%20more%20about%20the%20Wednesday%20activities%20programme."
-                target="_blank" rel="noopener noreferrer"
-                style={{
-                  background:'#25D366', color:'#fff', textDecoration:'none',
-                  padding:'13px 26px', borderRadius:8,
-                  fontSize:14, fontWeight:700,
-                  display:'inline-flex', alignItems:'center', gap:8,
-                }}>
-                WhatsApp
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-              </a>
-            </div>
+                }}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+</div>
 
             <div style={{marginTop:32,paddingTop:24,borderTop:'1px solid rgba(255,255,255,.15)',fontSize:12,color:'rgba(255,255,255,.6)',letterSpacing:'.04em'}}>
               Trial activity sessions available · Sibling discount · Diaspora and local families welcome
@@ -20389,29 +19788,17 @@ export default function LandingPage() {
                     marginTop:22,paddingTop:20,borderTop:'1px solid '+V.line,
                   }}>
                     <button
-                      onClick={() => { setOpenActivity(null); P('enroll') }}
+                      onClick={() => { setOpenActivity(null); nav('/assessment') }}
                       style={{
                         padding:'11px 22px',borderRadius:8,
                         background:openActivity.c,color:'#fff',border:'none',
                         fontSize:13,fontWeight:800,letterSpacing:'.02em',
                         cursor:'pointer',display:'inline-flex',alignItems:'center',gap:6,
                       }}>
-                      Enrol now
+                      Book assessment
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </button>
-                    <a
-                      href={`https://wa.me/254745021212?text=${encodeURIComponent('Hi Smartious, I would like to know more about the ' + openActivity.n + ' Wednesday activity.')}`}
-                      target="_blank" rel="noopener noreferrer"
-                      style={{
-                        padding:'11px 22px',borderRadius:8,
-                        background:'#25D366',color:'#fff',textDecoration:'none',
-                        fontSize:13,fontWeight:700,
-                        display:'inline-flex',alignItems:'center',gap:6,
-                      }}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4l-2.4-1.2c-.3-.2-.7-.1-.9.1l-.7.8c-.2.2-.5.3-.7.1-.9-.4-1.9-1.1-2.6-1.9-.7-.8-1.4-1.7-1.7-2.7-.1-.3 0-.5.2-.7l.8-.7c.3-.2.4-.6.1-.9L8.4 4.7c-.2-.4-.7-.5-1-.2L5.6 6.3c-.6.6-.8 1.5-.6 2.4.7 2.7 2.2 5 4.4 6.8 2.1 1.7 4.6 2.8 7.3 3.1.9.1 1.7-.2 2.3-.9l1.6-1.7c.3-.3.2-.8-.2-1l-2.9-1.8z"/></svg>
-                      Ask on WhatsApp
-                    </a>
-                    <button
+<button
                       onClick={() => setOpenActivity(null)}
                       style={{
                         padding:'11px 22px',borderRadius:8,
@@ -20521,7 +19908,7 @@ export default function LandingPage() {
               </div>
             )}
             <div style={{textAlign:'center',marginTop:48}}>
-              <button className="btn-p" onClick={() => P('enroll')}>Learn With Our Teachers <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
             </div>
           </div></section>
           <Footer P={P}/>
@@ -20557,10 +19944,7 @@ export default function LandingPage() {
             <div style={{textAlign:'center',marginTop:44}}>
               <p style={{fontSize:15,color:V.sl,marginBottom:18}}>Still have questions? We answer within 2 hours.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                <button className="btn-p" onClick={() => window.open('https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%20have%20a%20question.','_blank')}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1 19.79 19.79 0 0 1 1.64 4.46 2 2 0 0 1 3.62 2.26h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6.08 6.08l.97-.97a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.72 16.92z"/></svg>WhatsApp Us
-                </button>
-                <button className="btn-o" onClick={() => P('enroll')}>Enroll Now</button>
+<button className="btn-o" onClick={() => nav('/assessment')}>Book assessment</button>
               </div>
             </div>
           </div></section>
@@ -20806,11 +20190,10 @@ export default function LandingPage() {
                     Ready to put this into practice?
                   </h3>
                   <p style={{fontSize:14,color:'rgba(247,243,237,.55)',marginBottom:22,maxWidth:440,margin:'0 auto 22px',lineHeight:1.6}}>
-                    Book a free consultation with our admissions team. We'll review your child's profile and build a personalised learning plan.
+                    Book an assessment with our admissions team. We'll review your child's profile and build a personalised learning plan.
                   </p>
                   <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
-                    <button className="btn-p" onClick={() => P('consult')}>Book Free Consultation <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
-                    <button className="btn-o lt" onClick={() => P('enroll')} style={{borderColor:'rgba(184,150,12,.4)',color:V.gold2}}>Begin Enrollment</button>
+                    <button className="btn-p" onClick={() => nav('/assessment')}>Book assessment <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
                   </div>
                 </div>
 
@@ -21183,7 +20566,7 @@ export default function LandingPage() {
       {page === 'consult' && (
         <div>
           <div className="pg-hero"><div className="wrap">
-            <div className="eyebrow">Free Consultation</div>
+            <div className="eyebrow">Book assessment</div>
             <h1 className="pg-h">Book a Free <em>Consultation</em></h1>
             <p className="pg-sub">Speak with our admissions team about the right curriculum and learning plan for your child. No commitment required.</p>
           </div></div>
@@ -21219,8 +20602,7 @@ export default function LandingPage() {
                 {[
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label:'Email', value:'hellosmartious@gmail.com', sub:'Response within 2 hours', href:'mailto:hellosmartious@gmail.com'},
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Phone', value:'+254 745 021 212', sub:'Mon–Fri, 8am–6pm EAT', href:'tel:+254745021212'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>, label:'WhatsApp', value:'+254 745 021 212', sub:'Quick responses · Tap to chat', href:'https://wa.me/254745021212'},
-                  {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I, Parklands', sub:'Nairobi, Kenya · 4th Avenue', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
+{icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>, label:'Office', value:'Diamond Plaza I, Parklands', sub:'Nairobi, Kenya · 4th Avenue', href:'https://maps.google.com/?q=Diamond+Plaza+Parklands+Nairobi'},
                 ].map(({icon,label,value,sub,href}) => (
                   <a key={label} href={href} target="_blank" rel="noreferrer" style={{textDecoration:'none'}} className="contact-method">
                     <div className="contact-icon">{icon}</div>
@@ -21298,19 +20680,7 @@ export default function LandingPage() {
 
       {/* ── FLOATING ASSISTANCE + WHATSAPP ── */}
       <div className="fab-stack">
-        <a
-          className="fab-wa"
-          href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20more%20information."
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Chat on WhatsApp"
-        >
-          <span className="fab-wa-ic">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.297-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          </span>
-          <span className="fab-lbl">Chat on WhatsApp</span>
-        </a>
-        <button
+<button
           className="fab-help"
           onClick={() => setFabOpen(o => !o)}
           aria-label="Get assistance"
@@ -21344,17 +20714,17 @@ export default function LandingPage() {
               Welcome to <strong>Smartious Homeschool</strong>! How can we help you today? Choose an option below or message us directly.
             </div>
             <div className="fab-opts">
-              <button className="fab-opt" onClick={() => { setFabOpen(false); P('enroll') }}>
+              <button className="fab-opt" onClick={() => { setFabOpen(false); nav('/assessment') }}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 </span>
                 Start enrollment application
               </button>
-              <button className="fab-opt" onClick={() => { setFabOpen(false); P('consult') }}>
+              <button className="fab-opt" onClick={() => { setFabOpen(false); nav('/assessment') }}>
                 <span className="fab-opt-ic">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </span>
-                Book a free consultation
+                Book an assessment
               </button>
               <button className="fab-opt" onClick={() => { setFabOpen(false); P('pricing') }}>
                 <span className="fab-opt-ic">
@@ -21368,20 +20738,7 @@ export default function LandingPage() {
                 </span>
                 Explore curricula
               </button>
-              <a
-                className="fab-opt"
-                href="https://wa.me/254745021212?text=Hi%20Smartious%2C%20I%27d%20like%20to%20speak%20to%20your%20admissions%20team."
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => setFabOpen(false)}
-                style={{textDecoration:'none'}}
-              >
-                <span className="fab-opt-ic" style={{background:'rgba(37,211,102,.12)',color:'#25D366'}}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.297-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
-                </span>
-                Chat on WhatsApp
-              </a>
-              <a
+<a
                 className="fab-opt"
                 href="mailto:hellosmartious@gmail.com?subject=Smartious%20Enquiry"
                 onClick={() => setFabOpen(false)}
@@ -21484,7 +20841,7 @@ function PriceCard({ lbl, ti, base, am, pr, fs, gold, badge, cta = 'Enroll Now',
           </li>
         ))}
       </ul>
-      <button className={`p-btn ${gold?'p-gd':'p-ol'}`} onClick={() => P('enroll')}>{cta}</button>
+      <button className={`p-btn ${gold?'p-gd':'p-ol'}`} onClick={() => nav('/assessment')}>Book assessment</button>
     </div>
   )
 }
@@ -21696,7 +21053,7 @@ function ConsultForm({ P }) {
       <button className="btn-p" style={{width:'100%',justifyContent:'center',padding:'14px',fontSize:14.5}} onClick={submit} disabled={sending}>
         {sending ? 'Sending…' : <>
           <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          Book Free Consultation
+          Book assessment
         </>}
       </button>
       <p style={{fontSize:12,color:'#B0A490',textAlign:'center',marginTop:14}}>No commitment · Our team contacts you within 2 hours · 100% free</p>
@@ -21840,11 +21197,7 @@ function Footer({ P }) {
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 +254 745 021 212
               </a>
-              <a href="https://wa.me/254745021212" target="_blank" rel="noreferrer" style={{color:'inherit',textDecoration:'none',display:'flex',alignItems:'center',gap:7,transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#25D366'} onMouseLeave={e=>e.currentTarget.style.color='inherit'}>
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                WhatsApp Chat
-              </a>
-              <div style={{display:'flex',alignItems:'center',gap:7}}>
+<div style={{display:'flex',alignItems:'center',gap:7}}>
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 Diamond Plaza I, Parklands, Nairobi, Kenya
               </div>
