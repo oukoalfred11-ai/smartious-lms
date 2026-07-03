@@ -25,6 +25,8 @@ import { MOROCCO_CITIES, MOROCCO_COUNTRY } from '../data/moroccoCities.js'
 import { SOUTH_KOREA_CITIES, SOUTH_KOREA_COUNTRY } from '../data/southKoreaCities.js'
 import { JAPAN_CITIES, JAPAN_COUNTRY } from '../data/japanCities.js'
 import { MALAYSIA_CITIES, MALAYSIA_COUNTRY } from '../data/malaysiaCities.js'
+import { TOPICAL_ARTICLES, findTopicalArticle } from '../data/topicalArticles.js'
+import TopicalArticlePage from '../components/TopicalArticlePage.jsx'
 import { VIETNAM_CITIES, VIETNAM_COUNTRY } from '../data/vietnamCities.js'
 import { THAILAND_CITIES, THAILAND_COUNTRY } from '../data/thailandCities.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
@@ -920,7 +922,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','topical-article','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1765,6 +1767,7 @@ export default function LandingPage() {
   const [currentSouthKoreaCity, setCurrentSouthKoreaCity] = useState(null)
   const [currentJapanCity, setCurrentJapanCity] = useState(null)
   const [currentMalaysiaCity, setCurrentMalaysiaCity] = useState(null)
+  const [currentTopicalArticle, setCurrentTopicalArticle] = useState(null)
   const [currentVietnamCity, setCurrentVietnamCity] = useState(null)
   const [currentThailandCity, setCurrentThailandCity] = useState(null)
   const [currentTestPrep, setCurrentTestPrep] = useState(null)
@@ -2451,6 +2454,13 @@ export default function LandingPage() {
         setPage('homeschooling-malaysia')
         return
       }
+      // Topical cluster articles — check before country fallback
+      const topical = TOPICAL_ARTICLES.find(a => a.slug === path.slice(1))
+      if (topical) {
+        setCurrentTopicalArticle(topical.slug)
+        setPage('topical-article')
+        return
+      }
       const country = COUNTRIES.find(c => c.slug === slug)
       if (country) {
         setCurrentCountry(slug)
@@ -2745,6 +2755,13 @@ export default function LandingPage() {
     if (c) {
       metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
+    }
+  } else if (page === 'topical-article' && currentTopicalArticle) {
+    const article = findTopicalArticle(currentTopicalArticle)
+    if (article) {
+      metaTitle = article.title
+      metaDesc = article.metaDesc
+      canonicalOverride = '/' + article.slug
     }
   } else if (page === 'malaysia-city' && currentMalaysiaCity) {
     const c = MALAYSIA_CITIES.find(x => x.slug === currentMalaysiaCity)
@@ -13703,7 +13720,7 @@ export default function LandingPage() {
           country={UAE_COUNTRY}
           cities={UAE_CITIES}
           currentCitySlug={currentUaeCity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
 
@@ -13713,7 +13730,7 @@ export default function LandingPage() {
           country={EGYPT_COUNTRY}
           cities={EGYPT_CITIES}
           currentCitySlug={currentEgyptCity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
 
@@ -13722,7 +13739,7 @@ export default function LandingPage() {
           country={MOROCCO_COUNTRY}
           cities={MOROCCO_CITIES}
           currentCitySlug={currentMoroccoCity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
 
@@ -13731,19 +13748,31 @@ export default function LandingPage() {
           country={SOUTH_KOREA_COUNTRY}
           cities={SOUTH_KOREA_CITIES}
           currentCitySlug={currentSouthKoreaCity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
+
+      {page === 'topical-article' && currentTopicalArticle && (
+        <TopicalArticlePage
+          article={findTopicalArticle(currentTopicalArticle)}
+          V={V} nav={nav} Footer={Footer}
         />
       )}
 
       {page === 'malaysia-city' && currentMalaysiaCity && (
-        <CountryCityPage country="Malaysia" cities={MALAYSIA_CITIES} currentCitySlug={currentMalaysiaCity} P={P} V={V} Footer={Footer}/>
+        <CountryCityPage
+          country={MALAYSIA_COUNTRY}
+          cities={MALAYSIA_CITIES}
+          currentCitySlug={currentMalaysiaCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
       )}
       {page === 'japan-city' && currentJapanCity && (
         <CountryCityPage
           country={JAPAN_COUNTRY}
           cities={JAPAN_CITIES}
           currentCitySlug={currentJapanCity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
 
@@ -13752,7 +13781,7 @@ export default function LandingPage() {
           country={VIETNAM_COUNTRY}
           cities={VIETNAM_CITIES}
           currentCitySlug={currentVietnamCity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
 
@@ -13761,7 +13790,7 @@ export default function LandingPage() {
           country={THAILAND_COUNTRY}
           cities={THAILAND_CITIES}
           currentCitySlug={currentThailandCity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
 
@@ -14081,7 +14110,7 @@ export default function LandingPage() {
           country={SAUDI_ARABIA_COUNTRY}
           cities={SAUDI_ARABIA_CITIES}
           currentCitySlug={currentSaudiCity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
 
@@ -14401,7 +14430,7 @@ export default function LandingPage() {
           country={QATAR_COUNTRY}
           cities={QATAR_CITIES}
           currentCitySlug={currentQatarCity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
 
@@ -14721,7 +14750,7 @@ export default function LandingPage() {
           country={SOUTH_AFRICA_COUNTRY}
           cities={SOUTH_AFRICA_CITIES}
           currentCitySlug={currentSACity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
 
@@ -15041,7 +15070,7 @@ export default function LandingPage() {
           country={RWANDA_COUNTRY}
           cities={RWANDA_CITIES}
           currentCitySlug={currentRwandaCity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
 
@@ -15361,7 +15390,7 @@ export default function LandingPage() {
           country={ETHIOPIA_COUNTRY}
           cities={ETHIOPIA_CITIES}
           currentCitySlug={currentEthiopiaCity}
-          P={P} V={V} Footer={Footer}
+          P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
 
