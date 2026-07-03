@@ -922,7 +922,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','topical-article','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','topical-article','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -2467,7 +2467,7 @@ export default function LandingPage() {
         setPage('country-detail')
       } else {
         // Unknown country slug — fall back to the global page
-        setPage('global')
+        setPage('home')
       }
       return
     }
@@ -3881,7 +3881,7 @@ export default function LandingPage() {
                     else if (c.slug === 'saudi-arabia') P('homeschooling-saudi-arabia')
                     else if (c.slug === 'uae') P('homeschooling-uae')
                     else if (c.slug) openCountry(c.slug)
-                    else P('global')
+                    else P('home')
                   }}
                   style={{
                     display:'block',
@@ -4207,7 +4207,7 @@ export default function LandingPage() {
                   {n:'7 yrs',h:'About Us',p:'Founded 2019 · Nairobi-based · Our story & team',pg:'about',svg:'<circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/>'},
                   {n:'5',h:'Curricula',p:'Cambridge · IB · Edexcel · CBC · American',pg:'curricula',svg:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>'},
                   {n:'6',h:'Services',p:'Homeschool · Tuition · Online · Mshauri AI',pg:'services',svg:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>'},
-                  {n:'14',h:'Countries',p:'Kenya · UAE · UK · USA · Canada · Australia · +8 more',pg:'global',svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
+                  {n:'14',h:'Countries',p:'Kenya · UAE · UK · USA · Canada · Australia · +8 more',pg:'home',svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
                   {n:'$8/hr',h:'Pricing',p:'Transparent USD pricing · From $8 hourly tuition · No contracts',pg:'pricing',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
                   {n:'78+',h:'Tutors',p:'Qualified specialists · BEd, MEd, PhD profiles',pg:'teachers',svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'},
                   {n:'10',h:'FAQ',p:'Enrolment, exams, pricing & Mshauri AI answered',pg:'faq',svg:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
@@ -4310,8 +4310,8 @@ export default function LandingPage() {
                       <li><a onClick={() => P('tuition-nairobi')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>Tuition Nairobi (21 areas)</a></li>
                       <li><a onClick={() => P('homeschooling-kenya')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>Homeschooling Mombasa · Kisumu · Nakuru · Eldoret · Thika · Kiambu</a></li>
                       <li><a onClick={() => P('tuition-uae')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>Tuition UAE (27 emirate areas: Dubai · Abu Dhabi · Sharjah)</a></li>
-                      <li><a onClick={() => P('global')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>Qatar · Bahrain · UK · Canada · Australia</a></li>
-                      <li><a onClick={() => P('global')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>USA · Nigeria · South Africa · Uganda · Tanzania · Somalia · Pakistan</a></li>
+                      <li><a onClick={() => P('home')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>Qatar · Bahrain · UK · Canada · Australia</a></li>
+                      <li><a onClick={() => P('home')} style={{color:'inherit',textDecoration:'none',cursor:'pointer'}}>USA · Nigeria · South Africa · Uganda · Tanzania · Somalia · Pakistan</a></li>
                     </ul>
                   </div>
                   <div>
@@ -4738,7 +4738,7 @@ export default function LandingPage() {
                 {flag:'🇸🇴',c:'Somalia', cities:'Mogadishu · Hargeisa', slug:'somalia'},
                 {flag:'🇵🇰',c:'Pakistan', cities:'Karachi · Lahore · Islamabad', slug:'pakistan'},
               ].map(country => (
-                <div key={country.c} className="reveal" onClick={() => P('global')}
+                <div key={country.c} className="reveal" onClick={() => P('home')}
                   style={{
                     background:V.bone,
                     border:`1px solid ${V.bone3}`,
@@ -8677,245 +8677,6 @@ export default function LandingPage() {
       {/* ══════════════════════════════════════════
           GLOBAL
       ══════════════════════════════════════════ */}
-      {page === 'global' && (
-        <>
-          <div className="pg-hero"><div className="wrap"><div className="eyebrow">Global Footprint</div><h1 className="pg-h">Educating Students <em>Across the World</em></h1><p className="pg-sub" style={{marginTop:12}}>From Diamond Plaza I, Parklands, Nairobi to 13 countries across 4 continents.</p></div></div>
-          <section className="sec" style={{background:V.ink,padding:'80px 0'}}><div className="wrap">
-            <div style={{position:'relative',borderRadius:24,overflow:'hidden',background:'radial-gradient(ellipse at 55% 50%,#1a1028 0%,#0a0812 70%,#050309 100%)',border:'1px solid rgba(184,150,12,.08)',padding:'48px 24px'}}>
-              {/* Star field */}
-              <div style={{position:'absolute',inset:0,backgroundImage:`radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.3),transparent),radial-gradient(1px 1px at 60% 70%,rgba(255,255,255,.2),transparent),radial-gradient(1px 1px at 80% 20%,rgba(255,255,255,.25),transparent),radial-gradient(1px 1px at 35% 80%,rgba(255,255,255,.2),transparent),radial-gradient(1px 1px at 90% 60%,rgba(255,255,255,.15),transparent),radial-gradient(1px 1px at 10% 90%,rgba(255,255,255,.2),transparent)`,backgroundSize:'100% 100%',pointerEvents:'none'}}/>
-
-              <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',display:'block',maxWidth:1100,margin:'0 auto',position:'relative'}}>
-                <defs>
-                  <radialGradient id="glow-cr" cx="50%" cy="50%">
-                    <stop offset="0%"  stopColor="#E8354A" stopOpacity="1"/>
-                    <stop offset="40%" stopColor="#8B1A2E" stopOpacity=".6"/>
-                    <stop offset="100%" stopColor="#8B1A2E" stopOpacity="0"/>
-                  </radialGradient>
-                  <radialGradient id="glow-gd" cx="50%" cy="50%">
-                    <stop offset="0%"  stopColor="#C9973A" stopOpacity="1"/>
-                    <stop offset="40%" stopColor="#B8960C" stopOpacity=".55"/>
-                    <stop offset="100%" stopColor="#B8960C" stopOpacity="0"/>
-                  </radialGradient>
-                  <filter id="soft-blur"><feGaussianBlur stdDeviation="1.2"/></filter>
-                  <filter id="strong-glow"><feGaussianBlur stdDeviation="4"/></filter>
-                </defs>
-
-                {/* Dotted world-map continents — Paystack-style stippled silhouette */}
-                {/* Africa */}
-                {[
-                  // rows of dots forming Africa
-                  [450,140],[465,140],[480,140],[495,144],[508,148],[520,156],[530,166],
-                  [445,155],[460,155],[475,155],[490,155],[505,160],[518,170],[528,180],[538,190],
-                  [448,170],[462,170],[478,170],[492,172],[506,178],[520,186],[534,196],[544,208],
-                  [452,185],[466,185],[480,187],[494,190],[508,196],[522,204],[536,214],[548,224],[556,234],
-                  [454,200],[468,200],[482,204],[496,208],[510,214],[524,222],[538,232],[550,244],[560,256],
-                  [456,215],[470,218],[484,222],[498,228],[512,236],[526,244],[540,254],[550,266],[558,278],
-                  [458,230],[472,234],[486,240],[500,248],[514,256],[528,264],[540,274],[548,284],[554,294],
-                  [462,250],[476,254],[490,260],[504,266],[516,274],[528,282],[538,292],[546,302],
-                  [468,272],[482,276],[496,280],[508,286],[520,292],[530,300],[538,310],
-                  [476,292],[490,294],[502,298],[514,304],[524,312],[532,320],
-                  [484,312],[498,314],[510,318],[520,324],[528,332],
-                  [494,332],[506,334],[516,338],[524,344],
-                  [504,352],[512,356],[520,362],
-                  // North Africa (Egypt, Morocco strip)
-                  [420,110],[435,112],[450,114],[465,116],[480,118],[495,122],[510,126],[525,132],[540,138],[555,144],[568,150],
-                  [415,125],[430,128],[445,130],[460,132],[475,136],[490,140],
-                ].map(([x,y],i) => <circle key={'af'+i} cx={x} cy={y} r="2" fill="#3A2A4A" opacity=".85"/>)}
-
-                {/* Middle East */}
-                {[
-                  [540,150],[555,146],[570,144],[585,148],[598,154],[610,162],[618,172],[622,184],
-                  [548,160],[562,158],[576,160],[590,166],[604,176],[616,188],
-                  [558,172],[572,174],[586,180],[600,190],
-                ].map(([x,y],i) => <circle key={'me'+i} cx={x} cy={y} r="2" fill="#3A2A4A" opacity=".85"/>)}
-
-                {/* Europe */}
-                {[
-                  [140,70],[160,68],[180,66],[200,66],[220,66],[240,68],[260,70],[280,74],
-                  [130,85],[150,82],[170,80],[190,80],[210,82],[230,84],[250,88],[270,92],[290,96],[308,100],
-                  [120,100],[140,98],[160,98],[180,100],[200,102],[220,106],[240,110],[260,114],[280,118],[300,122],
-                  [115,115],[135,115],[155,118],[175,122],[195,126],[215,130],[235,134],[255,138],[275,142],[295,146],
-                  [125,132],[145,136],[165,140],[185,144],[205,148],[225,152],[245,156],[265,160],
-                  [150,156],[170,160],[190,164],[210,168],[230,172],
-                ].map(([x,y],i) => <circle key={'eu'+i} cx={x} cy={y} r="2" fill="#3A2A4A" opacity=".8"/>)}
-
-                {/* Asia */}
-                {[
-                  [620,80],[640,78],[660,76],[680,76],[700,76],[720,78],[740,80],[760,84],[780,88],[800,92],[820,96],[840,102],[860,110],
-                  [610,98],[630,96],[650,96],[670,96],[690,98],[710,100],[730,102],[750,104],[770,108],[790,112],[810,116],[830,122],[850,130],[868,140],
-                  [615,115],[635,115],[655,116],[675,118],[695,120],[715,122],[735,124],[755,126],[775,130],[795,134],[815,138],[835,144],[850,152],
-                  [625,132],[645,134],[665,136],[685,138],[705,140],[725,142],[745,144],[765,146],[785,150],[805,156],[825,162],
-                  [640,150],[660,152],[680,154],[700,156],[720,158],[740,160],[760,164],[780,168],[800,174],[820,180],
-                  [650,170],[670,172],[690,174],[710,176],[730,180],[750,184],[770,190],[788,196],
-                  [660,190],[680,192],[700,196],[720,200],[740,206],[758,214],
-                  [670,210],[690,214],[710,220],[728,228],
-                ].map(([x,y],i) => <circle key={'as'+i} cx={x} cy={y} r="2" fill="#3A2A4A" opacity=".8"/>)}
-
-                {/* Australia */}
-                {[
-                  [760,320],[780,318],[800,318],[820,320],[840,324],[855,330],
-                  [755,338],[775,338],[795,340],[815,344],[835,350],[852,358],
-                  [760,358],[780,360],[800,364],[820,370],[838,378],
-                  [770,378],[790,380],[808,386],
-                ].map(([x,y],i) => <circle key={'au'+i} cx={x} cy={y} r="2" fill="#3A2A4A" opacity=".8"/>)}
-
-                {/* North America */}
-                {[
-                  [90,90],[110,88],[130,86],[150,86],[170,88],[190,90],[210,94],[230,98],[250,104],
-                  [80,108],[100,106],[120,104],[140,104],[160,106],[180,110],[200,114],[220,120],[240,126],[258,132],
-                  [85,126],[105,124],[125,124],[145,126],[165,130],[185,134],[205,140],[225,146],[243,152],
-                  [95,144],[115,144],[135,146],[155,150],[175,154],[195,160],[215,166],[233,174],
-                  [110,162],[130,164],[150,168],[170,172],[190,180],[208,188],[224,198],
-                  [130,180],[150,184],[170,190],[188,198],[204,208],
-                  [150,198],[170,204],[188,214],[202,224],
-                  [170,218],[186,228],[200,240],
-                  [186,242],[200,252],[210,264],
-                  [200,270],[210,282],[218,294],
-                  [210,300],[218,314],[226,326],
-                  [218,332],[226,346],[232,358],
-                  [226,362],[232,374],
-                ].map(([x,y],i) => <circle key={'na'+i} cx={x} cy={y} r="2" fill="#3A2A4A" opacity=".8"/>)}
-
-                {/* South America */}
-                {[
-                  [250,280],[270,278],[288,282],
-                  [245,298],[265,300],[285,304],[300,310],
-                  [248,318],[268,322],[286,328],[300,336],
-                  [254,338],[274,342],[290,350],[302,360],
-                  [260,360],[278,366],[292,376],
-                  [266,380],[282,388],[294,398],
-                  [272,400],[286,410],
-                  [274,420],[286,430],
-                  [276,440],
-                ].map(([x,y],i) => <circle key={'sa'+i} cx={x} cy={y} r="2" fill="#3A2A4A" opacity=".8"/>)}
-
-                {/* Animated flight arcs from Nairobi HQ */}
-                {[
-                  {to:[200,115],label:'UK'},
-                  {to:[160,160],label:'USA'},
-                  {to:[140,100],label:'Canada'},
-                  {to:[600,170],label:'UAE'},
-                  {to:[790,340],label:'Australia'},
-                  {to:[490,135],label:'Egypt'},
-                  {to:[470,280],label:'Nigeria'},
-                  {to:[510,360],label:'S.Africa'},
-                ].map((t, i) => {
-                  const [x1,y1] = [522, 282]
-                  const [x2,y2] = t.to
-                  const mx = (x1+x2)/2
-                  const my = Math.min(y1,y2) - 50 - i*6
-                  const d = `M${x1} ${y1} Q ${mx} ${my} ${x2} ${y2}`
-                  return (
-                    <g key={'arc'+i}>
-                      <path d={d} stroke="rgba(201,151,58,.15)" strokeWidth="0.8" fill="none" strokeDasharray="4,5"/>
-                      <circle r="2.2" fill="#C9973A">
-                        <animateMotion dur={`${6+i*0.4}s`} repeatCount="indefinite" path={d}/>
-                        <animate attributeName="opacity" values="0;1;1;0" dur={`${6+i*0.4}s`} repeatCount="indefinite"/>
-                      </circle>
-                    </g>
-                  )
-                })}
-
-                {/* Country location markers with pulses — Paystack-style */}
-                {[
-                  {cx:200,cy:115,label:'United Kingdom',tone:'cr',sub:'London · Manchester'},
-                  {cx:160,cy:160,label:'United States',tone:'cr',sub:'New York · California'},
-                  {cx:140,cy:100,label:'Canada',tone:'cr',sub:'Toronto · Vancouver'},
-                  {cx:600,cy:170,label:'UAE',tone:'gd',sub:'Dubai · Abu Dhabi'},
-                  {cx:790,cy:340,label:'Australia',tone:'gd',sub:'Sydney · Melbourne'},
-                  {cx:490,cy:135,label:'Egypt',tone:'gd',sub:'Cairo'},
-                  {cx:470,cy:280,label:'Nigeria',tone:'gd',sub:'Lagos · Abuja'},
-                  {cx:510,cy:360,label:'South Africa',tone:'gd',sub:'Cape Town · Joburg'},
-                  {cx:545,cy:290,label:'Tanzania',tone:'gd',sub:''},
-                  {cx:545,cy:260,label:'Uganda',tone:'gd',sub:''},
-                ].map((p, i) => (
-                  <g key={'pt'+i}>
-                    {/* Outer glow halo */}
-                    <circle cx={p.cx} cy={p.cy} r="14" fill={`url(#glow-${p.tone})`} opacity=".6">
-                      <animate attributeName="r" values="8;18;8" dur={`${2.6+i*.15}s`} repeatCount="indefinite"/>
-                      <animate attributeName="opacity" values=".7;.15;.7" dur={`${2.6+i*.15}s`} repeatCount="indefinite"/>
-                    </circle>
-                    {/* Pulse ring */}
-                    <circle cx={p.cx} cy={p.cy} r="4" fill="none" stroke={p.tone==='cr'?'#E8354A':'#C9973A'} strokeWidth="1" opacity=".8">
-                      <animate attributeName="r"       values="4;14;4"     dur={`${2.4+i*.18}s`} repeatCount="indefinite"/>
-                      <animate attributeName="opacity" values="0.9;0;0.9"  dur={`${2.4+i*.18}s`} repeatCount="indefinite"/>
-                    </circle>
-                    {/* Dot core */}
-                    <circle cx={p.cx} cy={p.cy} r="3" fill={p.tone==='cr'?'#E8354A':'#C9973A'} stroke="#fff" strokeWidth=".6"/>
-                  </g>
-                ))}
-
-                {/* Nairobi HQ — star beacon */}
-                <g>
-                  <circle cx="522" cy="282" r="22" fill="url(#glow-cr)" opacity=".8">
-                    <animate attributeName="r" values="16;28;16" dur="2.4s" repeatCount="indefinite"/>
-                  </circle>
-                  <circle cx="522" cy="282" r="9" fill="#8B1A2E" stroke="#E8354A" strokeWidth="1.2"/>
-                  <polygon points="522,276 524,281 529,281 525,285 527,290 522,287 517,290 519,285 515,281 520,281" fill="#C9973A" stroke="#C89A28" strokeWidth=".3"/>
-                  <text x="522" y="262" textAnchor="middle" fill="#C9973A" fontSize="10" fontFamily="Syne,sans-serif" fontWeight="700" letterSpacing=".1em">NAIROBI · HQ</text>
-                  <text x="522" y="305" textAnchor="middle" fill="rgba(201,151,58,.7)" fontSize="7" fontFamily="Syne,sans-serif" fontWeight="600">Diamond Plaza · Parklands</text>
-                </g>
-
-                {/* Country labels */}
-                {[
-                  {cx:200,cy:115,label:'UK',dy:-22},
-                  {cx:160,cy:160,label:'USA',dy:-22},
-                  {cx:140,cy:100,label:'Canada',dy:-22},
-                  {cx:600,cy:170,label:'UAE',dy:-22},
-                  {cx:790,cy:340,label:'Australia',dy:-22},
-                  {cx:490,cy:135,label:'Egypt',dy:-22},
-                  {cx:470,cy:280,label:'Nigeria',dy:22},
-                  {cx:510,cy:360,label:'S.Africa',dy:22},
-                ].map((p, i) => (
-                  <text key={'lbl'+i} x={p.cx} y={p.cy + p.dy} textAnchor="middle" fill="rgba(255,255,255,.85)" fontSize="9" fontFamily="Syne,sans-serif" fontWeight="600">{p.label}</text>
-                ))}
-              </svg>
-
-              {/* Live stats bar */}
-              <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:20,marginTop:48,paddingTop:32,borderTop:'1px solid rgba(184,150,12,.12)'}}>
-                {[
-                  ['7 yrs','Teaching'],
-                  ['13','Countries'],
-                  ['4','Continents'],
-                  ['78+','Expert Tutors'],
-                ].map(([n,l]) => (
-                  <div key={l} style={{textAlign:'center'}}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.white,lineHeight:1}}>
-                      {n.includes('+')?<>{n.replace('+','')}<em style={{color:V.gold3,fontStyle:'normal'}}>+</em></>:n}
-                    </div>
-                    <div style={{fontSize:11,color:'rgba(247,243,237,.5)',marginTop:6,letterSpacing:'.08em',textTransform:'uppercase'}}>{l}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="cp-row" style={{marginTop:40,justifyContent:'center'}}>
-              {[
-                ['Kenya HQ', null],
-                ['Uganda', null],
-                ['Tanzania', null],
-                ['Botswana', null],
-                ['Nigeria', 'nigeria'],
-                ['South Africa', 'south-africa'],
-                ['Egypt', 'egypt'],
-                ['UAE', 'uae'],
-                ['Dubai', 'dubai'],
-                ['Qatar', 'qatar'],
-                ['United Kingdom', 'uk'],
-                ['United States', 'usa'],
-                ['Canada', 'canada'],
-                ['Australia', 'australia'],
-              ].map(([label, slug]) => (
-                <div key={label} className="cp"
-                  onClick={() => slug ? openCountry(slug) : showToast(`${label} — Smartious virtual school & online tuition available.`)}
-                  style={{background:'rgba(247,243,237,.06)',borderColor:'rgba(184,150,12,.15)',color:V.white,cursor:'pointer'}}>{label}</div>
-              ))}
-            </div>
-          </div></section>
-          <Footer P={P}/>
-        </>
-      )}
 
       {/* ══════════════════════════════════════════
           PRICING
@@ -16842,7 +16603,7 @@ export default function LandingPage() {
                   <div style={{fontSize:12,fontWeight:700,color:V.cr}}>View Kenya cities homeschool →</div>
                 </div>
                 <div
-                  onClick={() => P('global')}
+                  onClick={() => P('home')}
                   style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
@@ -17041,7 +16802,7 @@ export default function LandingPage() {
                 {[
                   { h:'Nairobi (21 areas)', d:'Karen, Westlands, Lavington, Kileleshwa, Runda, Muthaiga, Parklands and more — home tutoring delivered to your door', id:'tuition-nairobi', cta:'View Nairobi tuition →' },
                   { h:'UAE (27 areas)', d:'Downtown Dubai, Business Bay, JBR, Palm Jumeirah, Abu Dhabi, Sharjah, Al Ain and more', id:'tuition-uae', cta:'View UAE tuition →' },
-                  { h:'Online — 14 countries', d:'Live 1-on-1 sessions to any timezone. UK, USA, Canada, Qatar, South Africa, Nigeria and more', id:'global', cta:'View all countries →' },
+                  { h:'Online — 14 countries', d:'Live 1-on-1 sessions to any timezone. UK, USA, Canada, Qatar, South Africa, Nigeria and more', id:'home', cta:'View all countries →' },
                 ].map(r => (
                   <div key={r.h}
                     onClick={() => P(r.id)}
@@ -20033,7 +19794,6 @@ export default function LandingPage() {
               <div style={{fontSize:11,color:V.sl2,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:700,marginRight:6,padding:'8px 0',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>Country:</div>
               {[
                 ['all','🌍 All'],
-                ['global','🌐 Global'],
                 ['kenya','🇰🇪 Kenya'],
                 ['usa','🇺🇸 USA'],
                 ['uae','🇦🇪 UAE'],
