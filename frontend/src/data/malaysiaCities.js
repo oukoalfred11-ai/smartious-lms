@@ -1,0 +1,692 @@
+// ═══════════════════════════════════════════════════════════════════
+// MALAYSIA — Smartious city-level + country-level data
+// Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma,
+// American AP, and Ontario OSSD (via CCIS partnership) for Malaysian
+// families across Kuala Lumpur (Klang Valley), Petaling Jaya, Subang
+// Jaya, Cyberjaya, Johor Bahru + Iskandar Puteri (EduCity), Penang
+// (George Town), and Kota Kinabalu (Sabah / East Malaysia).
+//
+// Built for Malaysia's context: post-Sept-2025 SST on international
+// school fees above RM 60,000/year, private-candidate Cambridge
+// IGCSE via British Council Kuala Lumpur or Penang, Chinese Malaysian
+// families targeting Canadian U15 via OSSD, expat corporate families
+// in Mont Kiara / Damansara / Bangsar, Malaysian branch campuses
+// (Monash, Nottingham, Heriot-Watt, Xiamen, Newcastle, Southampton,
+// Reading, Curtin, Swinburne) as first-class university pathways.
+// ═══════════════════════════════════════════════════════════════════
+
+export const MALAYSIA_CITIES = [
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'kuala-lumpur-my',
+    name: 'Kuala Lumpur',
+    county: 'Federal Territory of Kuala Lumpur',
+    region: 'Capital · 1.8M city · 8M Klang Valley metro · KLCC · Mont Kiara · Damansara Heights · Bangsar · Ampang · Sri Hartamas · finance · corporate HQ · expat concentration',
+    primaryKeyword: 'Online homeschooling in Kuala Lumpur',
+    heroTagline: 'For Kuala Lumpur families across Mont Kiara (the primary expat concentration around Garden International School, Mont\'Kiara International School, French School), Damansara Heights (premium residential above the city), Bangsar (urban expat + Malaysian professional), Sri Hartamas (BSKL and Nord Anglia catchment), Ampang (KL East diplomatic and expat), Bukit Damansara, KLCC (Kuala Lumpur City Centre — corporate HQs, Petronas, Malayan Banking, KLSE), Bukit Bintang, and the broader Klang Valley — Alice Smith School, Garden International School (GIS), British International School Kuala Lumpur (BSKL, Nord Anglia), International School of Kuala Lumpur (ISKL), Mont\'Kiara International School (M\'KIS), Cempaka International School alternative-seekers, Malaysian families switching from RM 60,000+ international schools after the September 2025 SST changes, Chinese Malaysian families targeting Canadian universities via OSSD pathway, and expat corporate families from the UK, Australia, Japan, South Korea, US, France, Germany, and India.',
+    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, American Curriculum with Advanced Placement (AP), and Ontario Secondary School Diploma (OSSD via Canadian Cross International School partnership) for Kuala Lumpur families across Mont Kiara (the primary expat concentration in the Klang Valley — home to Garden International School on Jalan Kiara, Mont\'Kiara International School, French School Kuala Lumpur, Australian International School Malaysia, plus Sri Hartamas immediately adjacent), Damansara Heights (Bukit Damansara — the elevated premium residential district above the city with easy access to Alice Smith Jalan Bellamy campus), Bangsar (Bangsar Baru, Bangsar Village — the urban expat and Malaysian professional concentration), Sri Hartamas (adjacent to Mont Kiara — British International School of Kuala Lumpur / BSKL Nord Anglia catchment), Ampang and Ampang Hilir (KL East — diplomatic and expat concentration, the International School of Kuala Lumpur / ISKL is here since 2018), Bukit Damansara, KLCC (Kuala Lumpur City Centre — Petronas Twin Towers corporate HQs, Bukit Bintang), Taman Tun Dr Ismail (TTDI), Kenny Hills / Bukit Tunku, plus the broader Klang Valley extensions to Petaling Jaya, Subang Jaya, and Cheras. Built for Alice Smith School (Malaysia\'s oldest British international school since 1946), Garden International School (GIS — largest private co-ed in Malaysia, 2,000+ students since 1951), British International School of Kuala Lumpur (BSKL — Nord Anglia global network), International School of Kuala Lumpur (ISKL — Malaysia\'s oldest, 1965, non-profit, IB + AP), Mont\'Kiara International School (M\'KIS — IB continuum, 50+ nationalities), Cempaka International School, Sri KDU International School, IGB International School (IGBIS — full IB continuum), Marlborough College Malaysia alternative-seekers; Malaysian families switching from RM 60,000-165,000/year premium international schools after the September 2025 6% SST addition on fees above RM 60,000; Chinese Malaysian families targeting Canadian U15 (Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s) via OSSD pathway through our Canadian Cross International School partnership; Malaysian families targeting UK Russell Group (Oxbridge, Imperial, UCL, LSE, plus Manchester, Bristol, Warwick), Australian Group of Eight (Melbourne, Sydney, ANU, UNSW), Singapore (NUS, NTU), US Common Application; expat corporate families across British (BAT, Shell, HSBC Malaysia), Australian (BHP, Rio Tinto regional), Japanese (Panasonic, Sony, Mitsubishi Corporation Malaysia, Toyota Tsusho, MUFG Malaysia), Korean (Samsung, LG, POSCO Malaysia), US (Google Malaysia, Microsoft, Intel Penang extended to KL), French (Air Liquide, L\'Oreal, Schneider Electric), German (Siemens, BASF), plus Indian corporate (Tata, Infosys) executives; and Malaysian branch campus pathway families targeting Monash Malaysia (Bandar Sunway), University of Nottingham Malaysia (Semenyih), Heriot-Watt Malaysia (Putrajaya), Newcastle Medicine Malaysia and Southampton Malaysia (Iskandar Puteri, Johor).',
+    heroImg: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Kuala Lumpur skyline showing the Petronas Twin Towers, KLCC, and Mont Kiara' },
+    seoDesc: 'Live online homeschooling for Kuala Lumpur families in Mont Kiara, Damansara Heights, Bangsar, Ampang. Alice Smith, GIS, BSKL, ISKL, M\'KIS alternative. Cambridge IGCSE, A-Level, IB, American AP, OSSD via CCIS. From USD 180/month. MYT afternoon live classes.',
+    challenges: [
+      'Post-September-2025 SST reality: Malaysia\'s Royal Malaysian Customs Department now applies 6% Service Tax on private and international school annual fees exceeding RM 60,000 per student. The threshold catches Reception and Year 1 at premium British schools (Alice Smith, Garden, BSKL, Marlborough), all years from Year 2 onwards at most international schools, and the full High School and Sixth Form tier across the elite band. Families paying RM 90,000-165,000/year now add another RM 1,800-6,300+ in SST on top. This is a real, recent pain point driving families to evaluate online alternatives.',
+      'Premium Kuala Lumpur international school fees: Alice Smith School (RM 55,000-92,000/year Reception-Sixth Form), Garden International School (RM 65,000-95,000 primary, RM 95,000-130,000 secondary/IB), British International School of Kuala Lumpur (BSKL Nord Anglia — RM 100,000-140,000 primary, RM 120,000-165,000+ secondary), International School of Kuala Lumpur (ISKL, non-profit — USD 15,000-30,000/year equivalent RM 70,000-140,000), Mont\'Kiara International School (M\'KIS — RM 65,000-95,000 primary, RM 95,000-130,000 secondary), Cempaka International School (premium tier), plus registration RM 5,000-20,000, capital development RM 8,000-25,000+, learning support / EAL RM 10,000-35,000+/year, board exam fees separate.',
+      'Kuala Lumpur international school waiting lists: Popular grade-entry points at Alice Smith, Garden, BSKL, ISKL, M\'KIS operate structured admissions cycles with waiting lists at Year 3, Year 7, Year 10 IGCSE entry, and Year 12 IB Diploma / Sixth Form entry. Mid-year moves from other international schools (Singapore, Hong Kong, Dubai) or from Malaysian national school system into Cambridge track face capacity constraints.',
+      'Klang Valley traffic reality: Kuala Lumpur cross-Klang-Valley commutes between Mont Kiara / Damansara / Bangsar / Ampang and school clusters run 45-90 minutes each way during rush hour. Alice Smith is now split across two campuses (Jalan Bellamy primary and Equine Park secondary at Bandar Baru Bangi — a 40-minute drive south during peak times). ISKL relocated to Ampang Hilir purpose-built campus in 2018, still a commute from Mont Kiara. Physical school attendance in Kuala Lumpur means locking family logistics around school location.',
+      'Chinese Malaysian family Canadian pathway underserved: Chinese Malaysian families (~23% of Malaysian population, disproportionately represented in international school enrolment) increasingly target Canadian U15 universities — University of Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s. Applying via Ontario Universities Application Centre (OUAC) as an Ontario Secondary School Diploma holder rather than an international student is materially advantageous. Only Sunway International School in Kuala Lumpur (Subang Jaya) offers the Ontario curriculum locally. Smartious extends OSSD access to families in Mont Kiara, Damansara, Bangsar, Ampang and across Malaysia via our Canadian Cross International School partnership.',
+      'Time zone reality for international curriculum delivery: Malaysia Standard Time (MYT, UTC+8) is five hours ahead of East Africa Time (EAT, UTC+3). Addressed by scheduling Smartious live classes 2 PM – 6 PM MYT matching Malaysian post-school and post-primary hours (families with Malaysian national school children can use Smartious in the afternoon Cambridge/IB stream), delivered 9 AM – 1 PM EAT; or 6 PM – 9 PM MYT for evening-preferring families and older students, delivered 1 PM – 4 PM EAT.',
+    ],
+    familySituations: [
+      'Mont Kiara families — the primary expat concentration in the Klang Valley, home to Garden International School on Jalan Kiara, Mont\'Kiara International School, French School Kuala Lumpur (Lycée Français de Kuala Lumpur), Australian International School Malaysia (AISM), plus Sri Hartamas immediately adjacent with BSKL Nord Anglia. British, Australian, Japanese, Korean, French, German and Malaysian professional families concentrated in the Mont Kiara high-rise residential complexes.',
+      'Damansara Heights (Bukit Damansara) families — the elevated premium residential district with easy access to Alice Smith Jalan Bellamy campus. Malaysian professional and expat families in the tree-lined Damansara Heights, Bukit Tunku (Kenny Hills), Damansara Endah.',
+      'Bangsar families — Bangsar Baru, Bangsar Village, Lucky Garden, Jalan Ara — the urban expat and Malaysian professional concentration. British, Australian, and Malaysian Chinese and Indian professional families.',
+      'Sri Hartamas families — adjacent to Mont Kiara, in the BSKL Nord Anglia catchment. British, Australian and Malaysian professional families.',
+      'Ampang and Ampang Hilir families — KL East diplomatic and expat concentration. Multiple embassy residences (Japanese Embassy staff, Korean Embassy, French Embassy, plus various Middle Eastern and African embassies). International School of Kuala Lumpur (ISKL) purpose-built campus since 2018.',
+      'KLCC (Kuala Lumpur City Centre) corporate families — Petronas Twin Towers, Suria KLCC, Persiaran KLCC — Petronas executive families, Malayan Banking (Maybank), CIMB, RHB Bank, Public Bank, plus international bank Malaysia regional operations (HSBC Malaysia, Standard Chartered Malaysia, Citibank Malaysia).',
+      'Chinese Malaysian families in Mont Kiara / Damansara / Bangsar / TTDI (Taman Tun Dr Ismail) / Bukit Damansara / Bukit Tunku — targeting Canadian U15 (Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s) via OSSD pathway, Australian Group of Eight (Melbourne, Sydney, ANU, UNSW), UK Russell Group, or Singapore NUS/NTU.',
+      'Malaysian families switching from RM 60,000+/year international schools following the September 2025 6% SST addition — recalibrating cost-value at RM 90,000-165,000/year physical schools + SST versus RM 10,000-30,000/year Smartious online delivery with identical Cambridge, IB, or American qualifications.',
+      'British expat corporate families — BAT (British American Tobacco Malaysia), Shell Malaysia, HSBC Malaysia, Standard Chartered Malaysia, Diageo, PwC / KPMG / EY / Deloitte Malaysia partner families concentrated in Mont Kiara, Damansara, Bangsar.',
+      'Australian expat families — BHP, Rio Tinto regional operations, Woodside Energy, plus Australian professionals across Malaysian operations.',
+      'Japanese expat families — Panasonic Malaysia, Sony Malaysia, Mitsubishi Corporation Malaysia, Toyota Tsusho Malaysia, MUFG Bank Malaysia, Mizuho Bank Malaysia, plus the Japanese Chamber of Trade and Industry Malaysia (JACTIM) community concentrated in Mont Kiara around Sri Hartamas and around the Japanese School of Kuala Lumpur (Saujana).',
+      'Korean expat families — Samsung Malaysia, LG Electronics Malaysia, POSCO Malaysia, Korean corporate concentrated in Mont Kiara / Ampang.',
+      'US expat families — Google Malaysia, Microsoft Malaysia, plus US Embassy Kuala Lumpur diplomatic families, US corporate regional operations.',
+      'French expat families — Air Liquide, L\'Oreal Malaysia, Schneider Electric, Alstom, plus French Embassy — concentrated in Mont Kiara around the French School.',
+      'German expat families — Siemens, BASF, Bosch Malaysia, Mercedes-Benz Malaysia, BMW Malaysia — often around the German School Kuala Lumpur.',
+      'Indian expat families — Tata Consultancy Services (TCS) Malaysia, Infosys Malaysia, plus Malaysian Indian professional families targeting UK, Australian, or US universities.',
+      'Malaysian branch campus pathway families — targeting Monash University Malaysia (Bandar Sunway, ~30 min from Mont Kiara), University of Nottingham Malaysia (Semenyih), Heriot-Watt University Malaysia (Putrajaya), Xiamen University Malaysia (Sepang), or Newcastle Medicine / Southampton / Reading at Iskandar Puteri Johor for university-in-Malaysia foreign-degree pathway.',
+    ],
+    nearbyAreas: ['Mont Kiara (Jalan Kiara, Plaza Mont Kiara, Kiara Hills)', 'Sri Hartamas (BSKL Nord Anglia catchment)', 'Damansara Heights (Bukit Damansara)', 'Bukit Tunku (Kenny Hills)', 'Bangsar (Bangsar Baru, Bangsar Village, Lucky Garden)', 'Ampang and Ampang Hilir (ISKL area)', 'KLCC (Kuala Lumpur City Centre — Petronas Twin Towers)', 'Bukit Bintang', 'Taman Tun Dr Ismail (TTDI)', 'Desa ParkCity', 'Bangsar South', 'Kenny Hills', 'Damansara Endah', 'Petaling Jaya (adjacent Klang Valley)', 'Subang Jaya (adjacent Klang Valley)', 'Cheras', 'Kepong', 'Setapak', 'Wangsa Maju', 'Saujana (Japanese School KL area)', 'Bandar Sunway (Monash Malaysia)', 'Semenyih (Nottingham Malaysia)', 'Putrajaya (Heriot-Watt Malaysia + administrative capital)', 'Cyberjaya (tech hub)'],
+    subjects: [
+      'Cambridge IGCSE Mathematics, Additional Mathematics, English Language, English First Language, English as a Second Language, English Literature',
+      'Cambridge IGCSE Sciences (Biology, Chemistry, Physics, Combined Science, Co-ordinated Sciences)',
+      'Cambridge IGCSE Humanities (Geography, History, Global Perspectives, Economics, Business Studies, Accounting)',
+      'Cambridge IGCSE Bahasa Malaysia as a Foreign Language (for non-Malay expat students) and Bahasa Melayu for Malaysian students',
+      'Cambridge IGCSE Malay, Mandarin Chinese, Tamil — home language options for Malaysian Chinese and Indian families',
+      'Cambridge IGCSE Computer Science, ICT',
+      'Cambridge A-Level Mathematics, Further Mathematics, Physics, Chemistry, Biology — STEM targets',
+      'Cambridge A-Level Economics, Business, Accounting, Psychology, English Literature, History',
+      'Pearson Edexcel International GCSE and International A-Level — three-series annual flexibility (January, May/June, October/November)',
+      'IB Diploma Programme — all six groups, particularly popular at ISKL, M\'KIS, IGBIS, Nexus catchment families',
+      'American Curriculum — AP Calculus AB/BC, AP Statistics, AP Physics 1/2/C, AP Chemistry, AP Biology, AP Computer Science A, AP English Lit, AP US/World History, AP Economics, AP Psychology',
+      'Ontario Secondary School Diploma (OSSD) — 30 credits, OSSLT, Ontario course codes (ENG4U, MHF4U, SCH4U) via Canadian Cross International School partnership',
+      'SAT, ACT, TOEFL, IELTS, UCAT for UK Medicine — comprehensive test preparation',
+      'University application support — Common Application, UCAS, OUAC, UAC, plus Malaysian branch campus foundation pathways',
+    ],
+    whyChoose: [
+      ['Alice Smith / GIS / BSKL / ISKL / M\'KIS / IGBIS / Cempaka / Marlborough alternative', 'Smartious provides Cambridge, IB, American, or Ontario OSSD Curriculum at USD 2,160-6,480/year (~RM 10,000-30,000/year) vs RM 55,000-165,000+/year premium Klang Valley international schools — plus 6% SST on fees above RM 60,000 since September 2025. Qualifications earned are identical — universities recognise the examination board, not the delivery school.'],
+      ['Post-September-2025 SST arbitrage', 'Families paying RM 90,000-165,000/year at Alice Smith, GIS, BSKL, ISKL, M\'KIS now add RM 1,800-6,300+ in SST on top. Smartious online delivery is exempt from the 6% SST — the effective annual saving vs premium physical schools ranges from RM 50,000 to RM 130,000 depending on tier, with identical Cambridge/IB/AP outcomes.'],
+      ['Ontario OSSD pathway for Chinese Malaysian families targeting Canadian U15', 'Only Sunway International School in Subang Jaya offers Ontario curriculum locally in Kuala Lumpur. Smartious extends OSSD access via our Canadian Cross International School partnership — Chinese Malaysian families in Mont Kiara / Damansara / Bangsar / TTDI targeting Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s can apply via OUAC as Ontario secondary graduates rather than international students, materially strengthening the application.'],
+      ['MYT afternoon live classes — post-Malaysian-school hours', 'Live classes scheduled 2 PM – 6 PM Malaysia Standard Time matching Malaysian post-school hours, with 6 PM – 9 PM MYT alternatives for evening-preferring families and older students. Malaysian national school children can dual-track — attending sekolah kebangsaan in the morning plus Smartious Cambridge/IB/AP in the afternoon. Recorded sessions 24/7.'],
+      ['Kuala Lumpur traffic and commute elimination', 'Live online classes work from any Kuala Lumpur residence — Mont Kiara, Damansara Heights, Bangsar, Sri Hartamas, Ampang, KLCC, TTDI, Bukit Damansara, Desa ParkCity — eliminating the 45-90 minute daily commute to Alice Smith (Bellamy + Equine Park), Garden International (Jalan Kiara but crowded traffic), BSKL Sri Hartamas, ISKL Ampang Hilir, M\'KIS Mont Kiara. Family logistics no longer locked around school location.'],
+      ['Malaysian branch campus foundation pathway', 'Cambridge A-Level and IB Diploma qualifications support direct entry to Monash University Malaysia (Bandar Sunway), University of Nottingham Malaysia (Semenyih), Heriot-Watt Malaysia (Putrajaya), Xiamen University Malaysia (Sepang), Curtin Malaysia, Newcastle Medicine Malaysia (Iskandar Puteri EduCity), Southampton Malaysia — foreign degree awarded from within Malaysia at a fraction of home-country fees.'],
+      ['Cross-country cohort in live classes', 'A Kuala Lumpur student in Year 11 IGCSE Chemistry sits alongside peers in Cairo, Dubai, Bangkok, Tokyo, Ho Chi Minh City, Seoul, Casablanca, Riyadh, Kigali. Wednesday enrichment programmes (Model UN, debate, robotics, journalism) operate as one global classroom.'],
+    ],
+    growingReason: 'Kuala Lumpur is Malaysia\'s political, economic, financial and cultural capital, and the primary anchor of the Klang Valley metropolitan area (approximately 8 million residents including Petaling Jaya, Subang Jaya, Shah Alam, Klang, Kajang, Puchong, Cheras). KLCC hosts Petronas (Malaysia\'s national oil company and one of the world\'s largest energy companies), Bursa Malaysia (the Kuala Lumpur Stock Exchange), Malayan Banking (Maybank), CIMB Group, Public Bank, RHB Bank, plus regional operations of HSBC, Standard Chartered, Citibank, UOB, DBS, and OCBC. Premium international school provision in Kuala Lumpur centres on Alice Smith School (Malaysia\'s oldest British international school since 1946, Jalan Bellamy primary + Equine Park secondary), Garden International School (GIS — the largest private co-ed in Malaysia, 2,000+ students since 1951, Mont Kiara), British International School of Kuala Lumpur (BSKL — Nord Anglia global network, Sri Hartamas), International School of Kuala Lumpur (ISKL — Malaysia\'s oldest since 1965, Ampang Hilir purpose-built campus 2018, non-profit, IB + AP), Mont\'Kiara International School (M\'KIS — Mont Kiara, IB continuum, 50+ nationalities), Cempaka International School, Sri KDU International School, IGB International School (IGBIS — full IB continuum PYP to Diploma), plus French School Kuala Lumpur, Deutsche Schule Kuala Lumpur, Australian International School Malaysia (AISM), Japanese School Kuala Lumpur (Saujana), Korean School. Kuala Lumpur\'s education demand intersects premium Malaysian professional families, Chinese Malaysian and Indian Malaysian families targeting international university destinations, expat corporate families from the UK, Australia, Japan, Korea, US, France, Germany, and India, and Malaysian branch campus pathway families. Post-September-2025 6% SST on international school fees above RM 60,000/year has meaningfully shifted family cost-value calculations, driving evaluation of online Cambridge, IB, and OSSD alternatives.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and Cambridge A-Level — Smartious\'s primary offer. British Council Kuala Lumpur is the dominant private-candidate Cambridge examination centre in Malaysia. Pathway accepted by University of Malaya, Universiti Sains Malaysia, plus branch campuses (Monash Malaysia, Nottingham Malaysia, Heriot-Watt Malaysia), UK Russell Group, US Ivy League, Canadian U15, Australian Group of Eight.',
+      cbc: 'Kenya CBC available for Kuala Lumpur families with East African ties.',
+      ib: 'IB Diploma Programme — popular pathway at ISKL, M\'KIS, IGBIS, plus a growing Malaysian family choice for university breadth.',
+      american: 'American Curriculum — Common Core through Grade 8, then AP courses Grades 9-12. Strong fit for Malaysian families targeting US universities and ISKL / Oasis / Rocklin alternative families.',
+    },
+    homeschoolDetail: 'Malaysia operates a regulated education sector under the Ministry of Education (MOE) via State Education Departments (Jabatan Pendidikan Negeri / JPN). Under Section 135(1) of the Education Act 1996, Malaysian citizen children aged 6-12 are required to attend formal primary school unless granted a homeschool exemption by JPN — approvals are case-by-case, typically for special educational needs, medical grounds, or documented expatriate/travelling families. Non-citizen expatriate children are not bound by Section 135 and may homeschool without MOE exemption. Pre-primary (under 6) and secondary (12+) are unrestricted for all families. Most Kuala Lumpur families using Smartious for Malaysian primary-age citizens do so alongside a legitimate exemption or after transferring from an international school with documented curriculum plan. Expat families operate under home-country curriculum provider documentation.',
+    homeTuitionDetail: 'Premium tier (USD 540/month / ~RM 2,500/month) includes optional in-person home tuition supplementation for Mont Kiara, Damansara Heights, Bangsar, Sri Hartamas, Ampang families during Cambridge IGCSE, A-Level, IB Diploma and AP examination preparation periods where logistically feasible via our Kuala Lumpur associate teacher network.',
+    onlineLearningDetail: 'Live online via Smartious LMS. Classes scheduled 2 PM – 6 PM Malaysia Standard Time (MYT, UTC+8) matching Malaysian post-school hours, or 6 PM – 9 PM MYT for evening-preferring families. Recorded sessions 24/7. Class sizes 4-6 students Online, smaller groups Online Plus, 1-on-1 Premium. Mshauri AI tutor 24/7. Works across TIME Fibre, Unifi (Telekom Malaysia), Maxis Fibre, plus 5G mobile — Kuala Lumpur has strong residential fibre infrastructure across Mont Kiara, Damansara, Bangsar, Ampang, KLCC.',
+    faqs: [
+      { q: 'How does Smartious compare to Alice Smith School, Garden International School, BSKL, ISKL, Mont\'Kiara International School, Cempaka, IGBIS?', a: 'Premium Kuala Lumpur international schools — Alice Smith (RM 55,000-92,000/year Reception-Sixth Form, Jalan Bellamy + Equine Park), Garden International (RM 65,000-130,000/year, Mont Kiara), BSKL Nord Anglia (RM 100,000-165,000+/year, Sri Hartamas), ISKL (USD 15,000-30,000/year ~ RM 70,000-140,000, Ampang Hilir, IB + AP), M\'KIS (RM 65,000-130,000/year, Mont Kiara, IB continuum), Cempaka, IGBIS (full IB PYP-Diploma) — all provide physical campus education with established sports, arts and pastoral programmes. Since September 2025 the Malaysian Government adds 6% SST on fees above RM 60,000/year. Smartious provides live online Cambridge, IB, American, or Ontario OSSD Curriculum at USD 2,160-6,480/year (~RM 10,000-30,000/year) with immediate enrolment, small class sizes (4-6 students vs 18-24), MYT afternoon time zone matching Malaysian school hours. Qualifications earned are identical.' },
+      { q: 'My Chinese Malaysian family is targeting Canadian universities. How does the Smartious Ontario OSSD pathway work?', a: 'Ontario OSSD via our Canadian Cross International School (CCIS) partnership is one of Smartious\'s strongest differentiators for Chinese Malaysian families targeting Canadian U15 (University of Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s). Students enrol concurrently with CCIS (an Ontario-inspected private school) and complete the 30 credits required for OSSD including the Ontario Secondary School Literacy Test (OSSLT) and 40 community involvement hours. On completion, CCIS issues the official Ontario Secondary School Diploma. Canadian universities accept the OSSD via Ontario Universities Application Centre (OUAC) as an Ontario secondary graduate rather than international student — materially advantageous versus applying with A-Level or IB from Malaysia. Only Sunway International School in Subang Jaya offers Ontario curriculum locally in the Kuala Lumpur area; Smartious extends OSSD access to Mont Kiara, Damansara, Bangsar, Ampang, and across Malaysia.' },
+      { q: 'We\'ve been paying RM 90,000/year at an international school and September 2025\'s 6% SST just added RM 5,400 more. What does Smartious cost?', a: 'A common Kuala Lumpur family calculation post-September-2025. Smartious tiers: Online (small group, USD 180/month = ~RM 850/month = ~RM 10,200/year), Online Plus (smaller groups, USD 300/month = ~RM 1,400/month), Premium (1-on-1 with home tuition supplement, USD 540/month = ~RM 2,500/month). Effective annual saving vs a RM 90,000/year physical school + RM 5,400 SST is RM 79,800-85,200/year depending on Smartious tier — with identical Cambridge, IB, or AP qualifications and immediate enrolment.' },
+      { q: 'Where do Kuala Lumpur students sit Cambridge IGCSE and A-Level examinations?', a: 'British Council Kuala Lumpur is the primary Cambridge International examination centre in Malaysia, hosting Cambridge IGCSE and A-Level examinations during the May/June and October/November series each year. Private candidate fees run roughly RM 600-900 per subject all-in (CAIE entry fee plus centre administrative fee), late entry adds RM 100-250 per subject. A full 8-subject IGCSE sitting costs approximately RM 5,000-7,500 in examination fees. Alternative Cambridge-authorised examination venues include several Klang Valley international schools that accept external candidates (Erican English Language Centre, MSO Education, and individual international schools). Smartious handles examination registration logistics.' },
+      { q: 'How does live class scheduling work given the five-hour time gap between Malaysia and Kenya?', a: 'Malaysia Standard Time (MYT, UTC+8) is five hours ahead of East Africa Time (EAT, UTC+3). Smartious classes scheduled in two windows: (1) 2 PM – 6 PM MYT matching Malaysian post-school hours (after sekolah kebangsaan or international school afternoon dismissal), delivered 9 AM – 1 PM EAT; (2) 6 PM – 9 PM MYT for evening-preferring families and older students, delivered 1 PM – 4 PM EAT. Recorded sessions available 24/7.' },
+      { q: 'My Malaysian child attends a national school (sekolah kebangsaan) — can we combine national school with Smartious for Cambridge?', a: 'A common Malaysian family configuration. Sekolah kebangsaan in the morning, Smartious Cambridge/IB in the afternoon — 2 PM – 6 PM MYT slot works after Malaysian primary/secondary school hours. Malaysian family combines national qualifications (UPSR replaced by school-based assessment, PT3, SPM) with international qualifications (Cambridge IGCSE, A-Level) for university options — both Malaysian universities (UM, USM, UKM) and international destinations. Some families use Smartious as the primary international track and Malaysian national school for socialisation and Bahasa Malaysia progression.' },
+      { q: 'What Kuala Lumpur neighbourhoods do Smartious families typically live in?', a: 'Concentration in Mont Kiara (the primary expat concentration, adjacent to Garden International, M\'KIS, French School, AISM), Sri Hartamas (BSKL Nord Anglia catchment), Damansara Heights (Bukit Damansara), Bangsar (Bangsar Baru, Bangsar Village, Lucky Garden), Ampang and Ampang Hilir (near ISKL and multiple embassies), Bukit Tunku (Kenny Hills), TTDI, Desa ParkCity. All served equally by live online delivery — no location constraint.' },
+      { q: 'Can my Kuala Lumpur child apply to Universiti Malaya (UM), Monash Malaysia, Nottingham Malaysia, or Sunway University with Cambridge or IB qualifications?', a: 'Yes. Universiti Malaya, Universiti Sains Malaysia, Universiti Kebangsaan Malaysia, and the major Malaysian universities accept Cambridge A-Level, IB Diploma, and AP qualifications via their international admissions or foundation entry pathways. Malaysian branch campuses of foreign universities — Monash University Malaysia (Bandar Sunway, ~30 min from Mont Kiara), University of Nottingham Malaysia (Semenyih), Heriot-Watt Malaysia (Putrajaya), Xiamen University Malaysia (Sepang), Curtin Malaysia, Swinburne Malaysia — accept Cambridge, IB, or AP with respective foundation programmes. Newcastle Medicine Malaysia and Southampton Malaysia at Iskandar Puteri EduCity accept Cambridge A-Level Sciences or IB Diploma for direct medical / STEM entry pathways.' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'petaling-jaya-my',
+    name: 'Petaling Jaya',
+    county: 'Selangor',
+    region: 'Klang Valley · 620K city · adjacent to Kuala Lumpur · SS2 · Damansara Utama · Bandar Utama · Taman Jaya · commercial and residential belt',
+    primaryKeyword: 'Online homeschooling in Petaling Jaya',
+    heroTagline: 'For Petaling Jaya families across SS2, Section 14, Damansara Utama, Bandar Utama, Taman Jaya, Kelana Jaya, Ara Damansara and the broader PJ commercial-residential belt — Sri KDU International School, Sayfol International School, Beaconhouse Sri Inai International School, HELP International School, Wesley Methodist School PJ, plus the Klang Valley international school catchment.',
+    intro: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD via Canadian Cross International School partnership for Petaling Jaya families across SS2, SS3, SS5, SS15, Section 14 (Jaya One), Damansara Utama (Uptown Damansara), Bandar Utama, Taman Jaya, Kelana Jaya, Ara Damansara (near Subang Skypark airport), and the broader PJ commercial-residential belt. Built for Sri KDU International School (part of Taylor\'s Education Group), Sayfol International School, Beaconhouse Sri Inai International School (RM 22,000-40,000/year mid-tier), HELP International School, Wesley Methodist School Petaling Jaya, Sri Emas International School alternative-seekers; Malaysian professional families straddling KL corporate work and PJ residential; Chinese Malaysian families in SS2, Damansara Utama, Bandar Utama targeting Australian Group of Eight, Canadian U15 via OSSD, or Singapore NUS/NTU; expat families adjacent to the Mont Kiara / Damansara concentration; and families targeting Monash Malaysia (Bandar Sunway, 15 min from PJ) or Taylor\'s University (Subang).',
+    heroImg: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Petaling Jaya skyline showing PJ commercial belt and residential neighborhoods' },
+    seoDesc: 'Live online homeschooling for Petaling Jaya families in SS2, Damansara Utama, Bandar Utama, Kelana Jaya. Sri KDU, Sayfol, Beaconhouse, HELP International alternative. Cambridge IGCSE, A-Level, IB, AP, OSSD. From USD 180/month.',
+    challenges: [
+      'Petaling Jaya international school fees: Sri KDU International (Taylor\'s Education Group tier, RM 40,000-75,000/year), Sayfol International, Beaconhouse Sri Inai (RM 22,000-40,000/year), HELP International School, Wesley Methodist School PJ, Sri Emas International, plus a growing mid-tier band. Post-September-2025 6% SST on fees above RM 60,000/year now catches the upper PJ tier.',
+      'Klang Valley traffic: PJ-to-KL commutes to premium international schools in Mont Kiara / Sri Hartamas / Ampang run 40-70 minutes during peak hours. Families in Damansara Utama or Bandar Utama choosing Alice Smith Jalan Bellamy face daily rush-hour negotiation.',
+      'Malaysian professional family cost-value calibration: PJ Malaysian families increasingly evaluate the RM 40,000-95,000/year international school investment against Smartious online delivery producing identical Cambridge, IB or American credentials at RM 10,000-30,000/year.',
+      'Chinese Malaysian Canadian pathway: Chinese Malaysian PJ families in SS2, Damansara Utama, Bandar Utama disproportionately target Canadian U15. Local Ontario curriculum access is limited (only Sunway International School Subang Jaya nearby). Smartious extends OSSD via CCIS partnership.',
+      'Time zone: MYT (UTC+8), five hours ahead of EAT (UTC+3). Classes 2 PM – 6 PM MYT post-Malaysian-school hours or 6 PM – 9 PM MYT evening slot.',
+    ],
+    familySituations: [
+      'SS2 families — Chinese Malaysian professional concentration, adjacent to Section 14 commercial belt.',
+      'Damansara Utama (Uptown Damansara) families — Malaysian professional and expat concentration in the SS20-SS22 corridor.',
+      'Bandar Utama families — Malaysian professional and Chinese Malaysian families in the Bandar Utama 1 Utama Shopping Centre catchment.',
+      'Section 14 / Jaya One families — commercial-residential mix with young Malaysian professional families.',
+      'Kelana Jaya families — SS4-SS7 concentration, adjacent to Ara Damansara.',
+      'Ara Damansara families — near Subang Skypark airport, Malaysian professional and expat families.',
+      'Malaysian professional families straddling KL corporate work (Petronas, banking, professional services) and PJ residential.',
+      'Chinese Malaysian families targeting Australian Group of Eight (Melbourne, Sydney, Monash, UNSW, ANU), Canadian U15 via OSSD, Singapore NUS/NTU, or UK Russell Group.',
+      'Families switching from Sri KDU / Sayfol / Beaconhouse / HELP / Wesley Methodist to Smartious online delivery for fee arbitrage or MYT schedule flexibility.',
+      'Families targeting Monash Malaysia (Bandar Sunway, ~15 min from PJ), Taylor\'s University (Subang Jaya), Sunway University, or UCSI (KL).',
+    ],
+    nearbyAreas: ['SS2', 'SS3', 'SS5', 'SS15', 'Section 14 (Jaya One)', 'Damansara Utama (Uptown Damansara)', 'Bandar Utama', 'Taman Jaya', 'Kelana Jaya', 'Ara Damansara', 'Bandar Sunway (Monash)', 'Subang Jaya', 'Damansara Heights (KL)', 'Bangsar (KL)', 'Mont Kiara (KL)'],
+    subjects: [
+      'Cambridge IGCSE Mathematics, Additional Mathematics, English, Sciences, Humanities, Bahasa Malaysia, Mandarin, Tamil',
+      'Cambridge A-Level Mathematics, Further Mathematics, Physics, Chemistry, Biology, Economics, Business',
+      'Pearson Edexcel International GCSE and International A-Level',
+      'IB Diploma Programme all six groups',
+      'American Curriculum AP courses',
+      'Ontario OSSD via Canadian Cross International School partnership',
+      'SAT, ACT, TOEFL, IELTS, UCAT preparation',
+    ],
+    whyChoose: [
+      ['Sri KDU / Sayfol / Beaconhouse / HELP / Wesley Methodist PJ alternative', 'Smartious at USD 2,160-6,480/year vs RM 22,000-75,000/year PJ international schools. Identical qualifications.'],
+      ['Post-SST arbitrage on RM 60,000+ tier', 'Families at Sri KDU tier now paying 6% SST on the portion above RM 60,000. Smartious online delivery is exempt.'],
+      ['Klang Valley commute elimination', 'Live online works from SS2, Damansara Utama, Bandar Utama — no more 40-70 minute rush-hour commutes to Mont Kiara / Sri Hartamas / Ampang.'],
+      ['Ontario OSSD for Chinese Malaysian families', 'CCIS partnership extends Ontario curriculum to PJ families targeting Canadian U15 — the only local Ontario option is Sunway International School Subang Jaya.'],
+      ['MYT afternoon window', '2 PM – 6 PM MYT post-school hours, 6 PM – 9 PM MYT evening slot.'],
+    ],
+    growingReason: 'Petaling Jaya is Malaysia\'s original planned satellite city, established 1954 immediately adjacent to Kuala Lumpur. Now 620,000 residents in the city proper, part of the broader Klang Valley metropolitan area. PJ hosts significant Malaysian corporate operations (Sunway Group HQ, IOI Group, Star Media Group, Panasonic Malaysia HQ), plus a strong Chinese Malaysian professional community concentrated in SS2, Damansara Utama, Bandar Utama. International school provision centres on Sri KDU International (Taylor\'s Education Group), Sayfol International, Beaconhouse Sri Inai, HELP International School, Wesley Methodist PJ, Sri Emas International, plus proximity to premium Klang Valley options (Alice Smith, Garden, BSKL, M\'KIS, ISKL) at 30-70 minute rush-hour commutes. PJ families increasingly evaluate the Klang Valley international school investment against Smartious online delivery.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and A-Level via British Council Kuala Lumpur (short drive from PJ) — Smartious\'s primary offer.',
+      cbc: 'Kenya CBC available for PJ families with East African ties.',
+      ib: 'IB Diploma Programme — growing PJ family choice for university breadth.',
+      american: 'American Curriculum with AP courses — SAT/ACT integrated preparation.',
+    },
+    homeschoolDetail: 'Malaysian Ministry of Education (MOE) regulates via State Education Department Selangor (JPN Selangor). Section 135(1) applies to Malaysian citizens 6-12; non-citizens unrestricted; pre-primary and secondary unrestricted. PJ families with Malaysian primary-age citizens typically pursue exemption or dual-track configuration.',
+    homeTuitionDetail: 'Premium tier optional home tuition supplementation available for PJ Damansara Utama / Bandar Utama families during examination preparation periods.',
+    onlineLearningDetail: 'Live online via Smartious LMS. Classes 2 PM – 6 PM MYT or 6 PM – 9 PM MYT. Recorded sessions 24/7. Works across TIME Fibre, Unifi, Maxis Fibre across PJ.',
+    faqs: [
+      { q: 'How does Smartious compare to Sri KDU International, Sayfol, Beaconhouse Sri Inai, HELP International?', a: 'PJ international schools (RM 22,000-75,000/year, with 6% SST on the portion above RM 60,000 since September 2025) provide physical campus education. Smartious provides live online Cambridge, IB, American, or Ontario OSSD at USD 2,160-6,480/year with identical qualifications, immediate enrolment, MYT afternoon time zone.' },
+      { q: 'Where do PJ students sit Cambridge exams?', a: 'British Council Kuala Lumpur is the primary Cambridge examination centre — 20-30 minutes from most PJ residential areas. Some Klang Valley international schools also accept external candidates.' },
+      { q: 'My Chinese Malaysian family in Damansara Utama is targeting Canadian universities. Does Smartious offer Ontario OSSD?', a: 'Yes, via Canadian Cross International School partnership. Chinese Malaysian PJ families targeting Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s can complete the OSSD alongside Cambridge or as the primary credential, applying via OUAC as an Ontario secondary graduate.' },
+      { q: 'How does Smartious schedule live classes for PJ families?', a: '2 PM – 6 PM MYT matching Malaysian post-school hours, or 6 PM – 9 PM MYT for evening-preferring families. Recorded sessions available 24/7.' },
+      { q: 'Can PJ students apply to Monash Malaysia or Taylor\'s University with Smartious qualifications?', a: 'Yes — Monash Malaysia (Bandar Sunway, 15 min from PJ), Taylor\'s University (Subang Jaya), Sunway University, UCSI KL accept Cambridge A-Level, IB Diploma, and AP via foundation or direct entry pathways.' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'subang-jaya-my',
+    name: 'Subang Jaya',
+    county: 'Selangor',
+    region: 'Klang Valley · 780K city · SS15 · USJ · Bandar Sunway (Monash Malaysia) · Sunway City · Taylor\'s University · student and Malaysian professional concentration',
+    primaryKeyword: 'Online homeschooling in Subang Jaya',
+    heroTagline: 'For Subang Jaya families across SS15, SS17, SS19, USJ (UEP Subang Jaya) 1-27, Bandar Sunway (Monash Malaysia campus, Sunway Pyramid), and Sunway City — Taylor\'s International School Subang Jaya, Sunway International School (offering the Ontario curriculum), plus proximity to Monash Malaysia and Taylor\'s University.',
+    intro: 'Live online Cambridge IGCSE, A-Level, IB Diploma, American AP, and Ontario OSSD via CCIS partnership for Subang Jaya families across SS15, SS17, SS19, USJ 1-27, Bandar Sunway, and Sunway City. Built for Taylor\'s International School Subang Jaya (part of Taylor\'s Education Group, EAL programme adds 10-20% to tuition from 2026), Sunway International School Sunway City Kuala Lumpur (Canadian Ontario curriculum + Cambridge + IB, 9-acre green-certified campus), Wesley Methodist School Subang Jaya, plus adjacent Petaling Jaya options; Malaysian professional families concentrated in USJ residential grid; Chinese Malaysian families targeting Australian Group of Eight or Canadian U15; and families adjacent to Monash Malaysia (Bandar Sunway) and Taylor\'s University targeting foundation-to-degree pathways.',
+    heroImg: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Subang Jaya showing Sunway Pyramid and Bandar Sunway educational hub' },
+    seoDesc: 'Live online homeschooling for Subang Jaya families in SS15, USJ, Bandar Sunway. Taylor\'s International, Sunway International School alternative. Cambridge IGCSE, A-Level, IB, AP, OSSD. From USD 180/month.',
+    challenges: [
+      'Subang Jaya international school fees: Taylor\'s International Subang (RM 45,000-90,000/year, with 10% EAL surcharge added January 2026 and 20% Essential English Program surcharge), Sunway International School (competitive tier, Ontario + Cambridge + IB), Wesley Methodist Subang. Post-September-2025 6% SST on fees above RM 60,000.',
+      'Ontario curriculum locally already available at Sunway International School — Chinese Malaysian families in USJ / SS15 / Bandar Sunway targeting Canadian universities have local Ontario access. Smartious competes on delivery model (live online vs physical), fee (RM 10,000-30,000/year vs RM 45,000+/year), and cross-country cohort.',
+      'Klang Valley traffic between Subang Jaya and Mont Kiara / Sri Hartamas / Ampang international schools: 45-75 minutes rush hour. Bandar Sunway → Mont Kiara particularly congested via Federal Highway or NKVE.',
+      'Malaysian branch campus foundation pipeline: Monash University Malaysia (Bandar Sunway) and Taylor\'s University (Subang Jaya) are the two dominant local university destinations. Foundation entry from Cambridge A-Level or IB Diploma is streamlined.',
+      'Time zone: MYT UTC+8. Live classes 2 PM – 6 PM MYT or 6 PM – 9 PM MYT.',
+    ],
+    familySituations: [
+      'USJ (UEP Subang Jaya) 1-27 families — Malaysian professional and Chinese Malaysian concentration.',
+      'SS15 / SS17 / SS19 families — established Subang Jaya residential grid.',
+      'Bandar Sunway families — adjacent to Monash Malaysia, Sunway University, Sunway Pyramid, Sunway Medical Centre.',
+      'Sunway City families — planned Sunway township with Sunway International School.',
+      'Chinese Malaysian families targeting Australian Group of Eight (Monash Melbourne especially popular given Monash Malaysia local presence), Canadian U15 via OSSD, Singapore NUS/NTU.',
+      'Malaysian families using Monash Malaysia / Taylor\'s / Sunway University foundation-to-degree pipelines.',
+      'Families switching from Taylor\'s International Subang or Sunway International School to Smartious online delivery for fee or schedule flexibility.',
+      'Expat families adjacent to the Bandar Sunway / Monash Malaysia international student community.',
+    ],
+    nearbyAreas: ['SS15', 'SS17', 'SS19', 'USJ 1-27', 'Bandar Sunway', 'Sunway City', 'Puchong (adjacent)', 'Petaling Jaya (adjacent)', 'Shah Alam (adjacent Selangor)', 'Cyberjaya (30 min south)', 'Kuala Lumpur (adjacent)'],
+    subjects: [
+      'Cambridge IGCSE, A-Level across all major subjects',
+      'Pearson Edexcel International GCSE and A-Level',
+      'IB Diploma Programme',
+      'American Curriculum with AP',
+      'Ontario Secondary School Diploma via CCIS partnership',
+      'SAT, ACT, TOEFL, IELTS preparation',
+    ],
+    whyChoose: [
+      ['Taylor\'s International Subang / Sunway International School alternative', 'Smartious at USD 2,160-6,480/year vs RM 45,000-90,000+/year local options. Plus post-SST advantage on RM 60,000+ tier and Taylor\'s EAL surcharges added 2026.'],
+      ['Ontario OSSD via CCIS — different delivery from Sunway International', 'Sunway International offers Ontario physically. Smartious offers Ontario via CCIS partnership online — different fee point, MYT afternoon schedule, cross-country cohort.'],
+      ['Monash Malaysia / Taylor\'s foundation pipeline', 'Smartious Cambridge A-Level / IB / AP → Monash Malaysia, Taylor\'s University, Sunway University foundation or direct entry.'],
+      ['MYT afternoon window matches Malaysian family rhythm', '2 PM – 6 PM MYT after Malaysian school hours.'],
+    ],
+    growingReason: 'Subang Jaya is a major Klang Valley city (780,000 residents) grown from planned townships in the 1970s-80s. Bandar Sunway hosts Monash University Malaysia (established 1998, one of Malaysia\'s first branch campuses of a foreign university), Sunway University, Sunway Pyramid Shopping Mall, Sunway Lagoon theme park, and Sunway Medical Centre. Taylor\'s University adjacent in Subang Jaya. This is a genuine education hub. Sunway International School was one of the first Malaysian schools to offer the Ontario curriculum, addressing the Chinese Malaysian community\'s substantial Canadian university targeting. Subang Jaya families increasingly evaluate premium local international school fees (Taylor\'s International Subang RM 45,000-90,000+/year, Sunway International School competitive tier) against Smartious online delivery with identical Cambridge, IB, AP or Ontario OSSD outcomes.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and A-Level via British Council Kuala Lumpur.',
+      cbc: 'Kenya CBC available.',
+      ib: 'IB Diploma Programme.',
+      american: 'American Curriculum with AP.',
+    },
+    homeschoolDetail: 'JPN Selangor regulates. Section 135(1) applies to Malaysian citizens 6-12; exemption possible. Non-citizens unrestricted.',
+    homeTuitionDetail: 'Premium tier optional home tuition supplementation for Subang Jaya families.',
+    onlineLearningDetail: 'Live online 2 PM – 6 PM MYT or 6 PM – 9 PM MYT. Works across TIME Fibre, Unifi, Maxis Fibre.',
+    faqs: [
+      { q: 'How does Smartious compare to Sunway International School which already offers Ontario curriculum?', a: 'Sunway International School offers Ontario curriculum physically at their Sunway City campus — this is a real local option. Smartious offers Ontario OSSD via Canadian Cross International School partnership online, at USD 2,160-6,480/year vs Sunway\'s competitive tier fees. Different delivery model (online vs physical), different fee point, MYT afternoon schedule flexibility, cross-country cohort with families in 13 other markets.' },
+      { q: 'How does Smartious compare to Taylor\'s International School Subang?', a: 'Taylor\'s International Subang (RM 45,000-90,000/year, with 10% EAL surcharge added January 2026 and 20% Essential English Program surcharge for intensive English support, both charged annually alongside tuition) provides physical campus education as part of Taylor\'s Education Group. Smartious provides live online Cambridge, IB, American, or Ontario OSSD at USD 2,160-6,480/year with identical qualifications.' },
+      { q: 'My family targets Monash Malaysia — how does Smartious support this?', a: 'Smartious Cambridge A-Level (mathematics, sciences, humanities) or IB Diploma feeds directly into Monash Malaysia foundation programme (Monash University Foundation Year, MUFY) or direct undergraduate entry depending on grades. Monash Malaysia (Bandar Sunway) awards the same Australian degree as Monash Melbourne — the same Group of Eight qualification at Malaysian branch-campus fees.' },
+      { q: 'Where do Subang Jaya students sit Cambridge exams?', a: 'British Council Kuala Lumpur (~30 min from Subang Jaya). Also some Klang Valley international schools accept external candidates.' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'cyberjaya-my',
+    name: 'Cyberjaya',
+    county: 'Selangor',
+    region: 'MSC Malaysia tech hub · Multimedia Super Corridor · adjacent to Putrajaya · 55K residents · Cyberview · government tech agencies · Multimedia University · fibre-first infrastructure',
+    primaryKeyword: 'Online homeschooling in Cyberjaya',
+    heroTagline: 'For Cyberjaya families across Cyber 1-12 residential precincts, Cyber Heights, MKN Embassy Techzone, and adjacent Putrajaya (Precinct 8, 9, 10, 11, 15, 16, 18) — Orient Academy IGCSE homeschool, plus tech-industry professional families concentrated around the Multimedia Super Corridor, Multimedia University, and Cyberview infrastructure.',
+    intro: 'Live online Cambridge IGCSE, A-Level, IB, American AP, and Ontario OSSD for Cyberjaya tech-professional families in Cyber 1-12 precincts, Cyber Heights, Cyber Village, plus Putrajaya administrative capital families (Precinct 8-18 residential). Built for Orient Academy IGCSE homeschool alternative-seekers (Orient runs a well-known IGCSE learning centre in Cyberjaya using their Orient Learning Framework), families adjacent to Heriot-Watt University Malaysia (Putrajaya campus, UK degree awarded), Multimedia University Cyberjaya, plus MSC-status corporate families (Microsoft, IBM, HP, DXC Technology, Shell IT, plus Malaysian tech operations concentrated in the Multimedia Super Corridor).',
+    heroImg: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Cyberjaya showing MSC Malaysia tech hub and Cyberview infrastructure' },
+    seoDesc: 'Live online homeschooling for Cyberjaya families in Cyber 1-12 precincts, plus Putrajaya administrative capital. Orient Academy alternative. Cambridge IGCSE, A-Level, IB, AP, OSSD. Heriot-Watt Malaysia pathway. From USD 180/month.',
+    challenges: [
+      'Cyberjaya\'s international school ecosystem is smaller than KL — Orient Academy operates as a well-regarded IGCSE learning centre with their Orient Learning Framework structure (OES Elementary, OBS Bridging, OIS Integrated, OWS Workshop tracks). Families historically travel to Klang Valley premium schools (30-45 min to Bandar Sunway, 45-70 min to Mont Kiara / Sri Hartamas / Ampang) — a real logistics burden.',
+      'Tech professional families disproportionately value flexible schedules, remote-work-compatible children\'s education, and outcome-focused delivery over prestigious campus facilities. Smartious online delivery fits Cyberjaya cultural expectations.',
+      'Heriot-Watt Malaysia (Putrajaya) — direct pipeline from Cambridge A-Level, particularly for engineering, business, actuarial, and computer science degrees. Also Xiamen University Malaysia in adjacent Sepang for families targeting Chinese "985 Project" universities.',
+      'Putrajaya administrative capital adjacency: government service families in Putrajaya precincts increasingly seek international curriculum for children targeting overseas universities.',
+      'Time zone: MYT UTC+8. Live classes 2 PM – 6 PM MYT or 6 PM – 9 PM MYT.',
+    ],
+    familySituations: [
+      'Cyber 1-12 precinct families — tech professional concentration, MSC-status corporate residence.',
+      'Cyber Heights / Cyber Village families — Cyberjaya residential premium.',
+      'MKN Embassy Techzone / Cyberview managed properties — corporate tech expat families.',
+      'Multimedia University adjacent families.',
+      'Putrajaya administrative capital families (Precinct 8-18) — Malaysian government service, plus adjacent Putrajaya expat families.',
+      'Malaysian tech professional families targeting Australian Group of Eight, Canadian U15, UK Russell Group, or Singapore NUS/NTU for Computer Science / Engineering.',
+      'Chinese Malaysian families targeting Canadian universities via OSSD pathway.',
+      'Families adjacent to Heriot-Watt Malaysia (Putrajaya), Xiamen University Malaysia (Sepang), Multimedia University Cyberjaya foundation pipelines.',
+    ],
+    nearbyAreas: ['Cyber 1-12 precincts', 'Cyber Heights', 'Cyber Village', 'MKN Embassy Techzone', 'Putrajaya Precinct 8-18', 'Sepang (Xiamen Malaysia)', 'KLIA airport area', 'Dengkil', 'Bangi', 'Bandar Baru Bangi', 'Semenyih (Nottingham Malaysia — 40 min)', 'Bandar Sunway (Monash Malaysia — 30 min)', 'Kuala Lumpur (30-45 min)'],
+    subjects: [
+      'Cambridge IGCSE Mathematics, Additional Mathematics, Sciences, Computer Science, ICT',
+      'Cambridge A-Level Mathematics, Further Mathematics, Physics, Chemistry, Computer Science',
+      'Pearson Edexcel International GCSE and A-Level',
+      'IB Diploma Programme',
+      'American AP Computer Science A, AP Calculus AB/BC, AP Physics, AP Chemistry',
+      'Ontario Secondary School Diploma',
+      'SAT, ACT, TOEFL, IELTS',
+    ],
+    whyChoose: [
+      ['Orient Academy Cyberjaya alternative', 'Orient Academy is a well-regarded local IGCSE centre. Smartious offers online delivery at USD 2,160-6,480/year, live afternoon MYT classes, cross-country cohort, plus IB and Ontario OSSD (which Orient doesn\'t offer).'],
+      ['Klang Valley commute elimination', 'Live online means no 30-70 minute commutes to Bandar Sunway, Mont Kiara, Sri Hartamas, Ampang.'],
+      ['Heriot-Watt Malaysia direct pipeline', 'Cambridge A-Level (particularly Maths, Physics, Chemistry, Computer Science) feeds directly into Heriot-Watt Malaysia (Putrajaya) engineering / business / actuarial degrees — UK degree awarded.'],
+      ['Tech industry family fit', 'Flexible schedule matches tech professional working patterns; outcome-focused delivery matches tech cultural preferences.'],
+    ],
+    growingReason: 'Cyberjaya is Malaysia\'s planned technology city (established 1997) at the heart of the Multimedia Super Corridor (MSC Malaysia). Hosts Microsoft, IBM, HP, DXC Technology, Shell IT Malaysia, plus Malaysian tech operations. Multimedia University (established 1997) is the anchor tertiary institution. Adjacent Putrajaya is Malaysia\'s administrative capital, with the Prime Minister\'s Office, most Malaysian federal ministries, and Heriot-Watt University Malaysia. Xiamen University Malaysia in Sepang serves the Chinese "985 Project" pipeline. Cyberjaya\'s tech-forward culture, fibre-first infrastructure, and preference for outcome-focused delivery make it a natural Smartious market.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and A-Level with particular STEM focus (Mathematics, Physics, Chemistry, Computer Science).',
+      cbc: 'Kenya CBC available.',
+      ib: 'IB Diploma Programme.',
+      american: 'American Curriculum with AP — Computer Science A particularly popular for Cyberjaya tech families.',
+    },
+    homeschoolDetail: 'JPN Selangor regulates. Section 135(1) applies to Malaysian citizens 6-12; exemption possible.',
+    homeTuitionDetail: 'Premium tier optional home tuition supplementation available.',
+    onlineLearningDetail: 'Live online 2 PM – 6 PM MYT or 6 PM – 9 PM MYT. Cyberjaya has world-class fibre infrastructure via TIME Fibre, Unifi, Maxis Fibre — the MSC Malaysia legacy delivers gigabit-class connectivity across the tech city.',
+    faqs: [
+      { q: 'How does Smartious compare to Orient Academy in Cyberjaya?', a: 'Orient Academy operates as a physical IGCSE learning centre in Cyberjaya with their Orient Learning Framework structure. Smartious operates as a live online school delivering Cambridge IGCSE, A-Level, IB Diploma, American AP, and Ontario OSSD at USD 2,160-6,480/year with MYT afternoon live classes and cross-country cohort across 14+ markets.' },
+      { q: 'My family targets Heriot-Watt Malaysia in Putrajaya — how does Smartious support this?', a: 'Cambridge A-Level in Mathematics, Physics, Chemistry, Computer Science, plus Economics or Business, feeds directly into Heriot-Watt Malaysia (Putrajaya) engineering, business, actuarial, or computer science degrees. Heriot-Watt Malaysia awards the UK degree (same as Edinburgh, Dubai, Malaysia campuses).' },
+      { q: 'Where do Cyberjaya students sit Cambridge exams?', a: 'British Council Kuala Lumpur is the primary Cambridge examination centre (~30-40 min drive from Cyberjaya). Alternative Cambridge-authorised Klang Valley schools accepting external candidates also available.' },
+      { q: 'Is Cyberjaya internet reliable enough for live online learning?', a: 'Yes — Cyberjaya has some of Malaysia\'s best residential and commercial fibre infrastructure, a legacy of MSC Malaysia. TIME Fibre and Unifi deliver gigabit-class connectivity across all Cyber precincts. Live HD video conferencing works seamlessly.' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'johor-bahru-my',
+    name: 'Johor Bahru',
+    county: 'Johor',
+    region: 'Second-largest Malaysian city · 500K city · 1.7M metro · Singapore border · Causeway · Iskandar Puteri · EduCity · Marlborough College Malaysia · Newcastle Medicine Malaysia · Southampton Malaysia · Reading Malaysia',
+    primaryKeyword: 'Online homeschooling in Johor Bahru',
+    heroTagline: 'For Johor Bahru families across JB city centre, Taman Molek, Taman Sutera Utama, plus Iskandar Puteri and EduCity (Marlborough College Malaysia, Newcastle Medicine Malaysia, University of Southampton Malaysia, University of Reading Malaysia) — cross-border Singapore commuter families, expat corporate families across the Johor industrial belt, and Chinese Malaysian families in the JB / Iskandar Puteri corridor.',
+    intro: 'Live online Cambridge IGCSE, A-Level, IB, American AP, and Ontario OSSD for Johor Bahru families across JB city (Taman Molek, Taman Sutera Utama, Bandar Baru Uda, Skudai) plus Iskandar Puteri (formerly Nusajaya) and EduCity township. Built for Marlborough College Malaysia (Iskandar Puteri, premium British boarding + day at RM 100,000-160,000+/year), Newcastle University Medicine Malaysia (NUMed Malaysia, Iskandar Puteri EduCity, UK medical degree awarded), University of Southampton Malaysia (Iskandar Puteri EduCity), University of Reading Malaysia (Iskandar Puteri EduCity), Raffles American School Malaysia, Stellar International School (Iskandar Puteri, RM 20,000-23,760/year IGCSE — mid-tier), Forest City area international schools; cross-border Singapore commuter families (Singapore working residents living in JB for cost efficiency), expat corporate families across the Johor petrochemical, port, and manufacturing belt (PETRONAS Refinery and Petrochemical Integrated Development Complex / PIC RAPID, Pengerang Deepwater Terminal), Chinese Malaysian families concentrated in JB city and Taman Sutera Utama targeting Australian, Canadian, or Singapore universities.',
+    heroImg: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Johor Bahru showing JB city skyline and Iskandar Puteri EduCity development' },
+    seoDesc: 'Live online homeschooling for Johor Bahru + Iskandar Puteri families. Marlborough College Malaysia, Newcastle Medicine Malaysia, Southampton Malaysia, Reading Malaysia, Stellar, Raffles American School alternative. Cambridge IGCSE, A-Level, IB, AP, OSSD. From USD 180/month.',
+    challenges: [
+      'JB / Iskandar Puteri international school fees: Marlborough College Malaysia (RM 100,000-160,000+/year premium British boarding + day), Raffles American School (competitive tier), Stellar International School (RM 20,000-23,760/year IGCSE — mid-tier), plus adjacent Dalat International (boarding-capable), Tenby Tanjung Bungah, ISK Kuantan (RM 19,515-48,720/year for East Coast families). Post-September-2025 6% SST catches Marlborough tier substantially.',
+      'Iskandar Puteri EduCity is a genuine higher-education hub: Newcastle University Medicine Malaysia (NUMed Malaysia — UK medical degree), University of Southampton Malaysia (Russell Group Engineering focus), University of Reading Malaysia, Marlborough College Malaysia (secondary + Sixth Form). Cambridge A-Level and IB Diploma feed directly into these programmes for foreign-degree-in-Malaysia pathways.',
+      'Cross-border Singapore families: JB residents working in Singapore (via the Causeway) balance cost-efficient JB residence with Singapore workplace. Malaysian children of Singapore-working parents often use international curriculum for university options.',
+      'Johor petrochemical / port industrial belt corporate families: PETRONAS RAPID Pengerang, Pengerang Deepwater Terminal, plus Johor Port operations bring expat corporate families across South Johor.',
+      'Time zone: MYT UTC+8. Live classes 2 PM – 6 PM MYT or 6 PM – 9 PM MYT.',
+    ],
+    familySituations: [
+      'JB city families — Taman Molek, Taman Sutera Utama, Skudai, Bandar Baru Uda — Malaysian professional concentration.',
+      'Iskandar Puteri families — planned EduCity township with Marlborough College Malaysia and branch campus universities.',
+      'Forest City families — planned township adjacent to Iskandar Puteri.',
+      'Cross-border Singapore-working families based in JB for cost efficiency — children needing international university pathways.',
+      'Expat corporate families across Johor petrochemical, port, and manufacturing belt.',
+      'Chinese Malaysian families in JB and Iskandar Puteri targeting Australian Group of Eight, Singapore NUS/NTU, Canadian U15 via OSSD, or UK Russell Group.',
+      'Families targeting Newcastle Medicine Malaysia for medical degree pathway (UK MBBS awarded).',
+      'Families targeting Southampton Malaysia for Engineering / Marine.',
+      'Families switching from Marlborough College Malaysia or Raffles American School to Smartious online delivery for fee arbitrage.',
+    ],
+    nearbyAreas: ['JB city centre', 'Taman Molek', 'Taman Sutera Utama', 'Bandar Baru Uda', 'Skudai', 'Iskandar Puteri (formerly Nusajaya)', 'EduCity Iskandar', 'Forest City', 'Pasir Gudang', 'Kulai', 'Senai (Senai International Airport)', 'Pengerang', 'Singapore (via Causeway — 30-90 min depending on traffic)'],
+    subjects: [
+      'Cambridge IGCSE, A-Level all major subjects',
+      'Pearson Edexcel International GCSE and A-Level',
+      'IB Diploma Programme',
+      'American AP',
+      'Ontario Secondary School Diploma',
+      'Medical school preparation (NUMed Malaysia pathway) — Biology, Chemistry, Physics A-Level',
+      'Engineering foundation prep (Southampton Malaysia pathway)',
+      'SAT, ACT, TOEFL, IELTS, UCAT',
+    ],
+    whyChoose: [
+      ['Marlborough College Malaysia / Raffles / Stellar / Dalat alternative', 'Smartious at USD 2,160-6,480/year vs RM 20,000-160,000+/year JB / Iskandar Puteri options. Marlborough tier saves RM 90,000-130,000+/year with identical Cambridge/IB outcomes.'],
+      ['Iskandar Puteri EduCity pipeline', 'Cambridge A-Level Biology + Chemistry + Physics → Newcastle Medicine Malaysia. Cambridge A-Level STEM → Southampton Malaysia Engineering. IB Diploma → Reading Malaysia.'],
+      ['Cross-border Singapore family flexibility', 'JB residents with Singapore workplaces get children\'s international education without Singapore fees or JB-to-Singapore-school commute.'],
+      ['Post-SST arbitrage on Marlborough tier', 'Marlborough at RM 100,000-160,000/year now pays 6% SST on the amount above RM 60,000. Smartious online delivery is exempt.'],
+      ['MYT afternoon window', '2 PM – 6 PM MYT after Malaysian school hours.'],
+    ],
+    growingReason: 'Johor Bahru is Malaysia\'s second-largest city (500,000 city, 1.7M metro), the southern gateway across the Causeway to Singapore. Iskandar Puteri (formerly Nusajaya) is a planned economic zone hosting EduCity — a genuine higher-education township with Marlborough College Malaysia (premium British boarding + day school modelled on the UK original), Newcastle University Medicine Malaysia (NUMed Malaysia — UK MBBS medical degree awarded, a rare and prestigious pathway), University of Southampton Malaysia (UK Russell Group Engineering focus), University of Reading Malaysia. Also Raffles American School Malaysia. Forest City township adjacent brings Chinese-developed residential + international school infrastructure. Johor Bahru families operate at the intersection of cross-border Singapore employment (via the Causeway to Woodlands, or Tuas Second Link), Iskandar Puteri EduCity university-in-Malaysia pathways, and Malaysian home-town residence. Smartious extends online Cambridge, IB, and OSSD delivery to JB and Iskandar Puteri families.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and A-Level.',
+      cbc: 'Kenya CBC available.',
+      ib: 'IB Diploma Programme.',
+      american: 'American Curriculum with AP — Raffles American School alternative.',
+    },
+    homeschoolDetail: 'JPN Johor regulates. Section 135(1) applies to Malaysian citizens 6-12; exemption possible.',
+    homeTuitionDetail: 'Premium tier optional home tuition supplementation for JB Taman Molek / Sutera Utama / Iskandar Puteri families.',
+    onlineLearningDetail: 'Live online 2 PM – 6 PM MYT or 6 PM – 9 PM MYT. Works across TIME Fibre, Unifi, Maxis Fibre across JB, Iskandar Puteri, Skudai.',
+    faqs: [
+      { q: 'How does Smartious compare to Marlborough College Malaysia?', a: 'Marlborough College Malaysia (Iskandar Puteri, premium British boarding + day at RM 100,000-160,000+/year) is one of Malaysia\'s premium international schools with strong Sixth Form and university placement. Smartious provides live online Cambridge or IB at USD 2,160-6,480/year with identical qualifications — a 90-95% fee saving without compromising exam board recognition.' },
+      { q: 'My family targets Newcastle Medicine Malaysia (NUMed Malaysia) in Iskandar Puteri — how does Smartious support this?', a: 'Newcastle Medicine Malaysia requires Cambridge A-Level Biology, Chemistry, Physics (typically AAA or AAB) or IB Diploma with Higher Level Sciences (typically 38+ points). Smartious A-Level Sciences delivery is intensive and structured for medical school preparation, including UCAT preparation for the UK-standard entrance test.' },
+      { q: 'We commute from JB to Singapore for work daily — how does Smartious fit our schedule?', a: 'MYT afternoon window (2 PM – 6 PM) works after Malaysian school hours or when Singapore-working parents return across the Causeway in the evening. 6 PM – 9 PM MYT slot also available. Recorded sessions 24/7 for flexibility around Causeway congestion.' },
+      { q: 'Where do JB students sit Cambridge exams?', a: 'British Council Kuala Lumpur is the primary Cambridge examination centre in Malaysia — a ~4 hour drive from JB, or 45-minute flight to KL via Senai International Airport. Some JB / Iskandar Puteri international schools also accept external candidates for their examination sessions.' },
+      { q: 'My family is Chinese Malaysian in Taman Sutera Utama targeting Australian universities. What\'s the pathway?', a: 'Cambridge A-Level or IB Diploma via Smartious feeds directly into Australian Group of Eight (Melbourne, Sydney, ANU, UNSW, Queensland, Adelaide, Western Australia, Monash — the last also available via Monash Malaysia in Bandar Sunway). Alternatively, Ontario OSSD via CCIS partnership for the Canadian U15 pathway.' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'penang-my',
+    name: 'Penang',
+    county: 'Pulau Pinang',
+    region: 'George Town (UNESCO World Heritage) · 1.7M state · Bayan Lepas free trade zone · Tanjung Bungah · Tanjung Tokong · Batu Ferringhi · Jelutong · Silicon Valley of the East · Intel · AMD · Bosch · Osram semiconductor cluster',
+    primaryKeyword: 'Online homeschooling in Penang',
+    heroTagline: 'For Penang families across George Town (Georgetown UNESCO heritage core), Tanjung Bungah (northern expat concentration), Tanjung Tokong, Batu Ferringhi, Bayan Lepas (Free Trade Zone / semiconductor manufacturing) and Seberang Perai (mainland Penang) — Uplands International School, Prince of Wales Island International School (POWIIS), Straits International School, Tenby International School Penang, Dalat International, plus expat semiconductor engineering families and Chinese Penangite Malaysian families targeting international universities.',
+    intro: 'Live online Cambridge IGCSE, A-Level, IB, American AP, and Ontario OSSD for Penang families across George Town heritage core, Tanjung Bungah (the primary northern Penang expat concentration), Tanjung Tokong, Batu Ferringhi (beachfront), Bayan Lepas (semiconductor cluster), Jelutong, plus Seberang Perai mainland. Built for Uplands International School (Batu Ferringhi, established 1955 as the oldest international school in Penang), Prince of Wales Island International School (POWIIS — Balik Pulau, RM 30,000-70,000/year, Cambridge focus), Straits International School (Tanjung Bungah), Tenby International School Penang (Seberang Perai), Dalat International (Tanjung Tokong, US-curriculum boarding), Wesley Methodist Penang; expat semiconductor engineering families across Bayan Lepas Free Trade Zone (Intel Malaysia — established 1972 as Intel\'s first offshore facility; AMD Penang; Bosch Penang; Osram; Broadcom; Motorola Penang; plus Malaysian semiconductor operations); Chinese Penangite Malaysian families targeting Australian Group of Eight, Canadian U15 via OSSD, Singapore NUS/NTU, or UK Russell Group; and Malaysian mainland families in Seberang Perai adjacent to Kulim Hi-Tech Park.',
+    heroImg: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Penang showing George Town UNESCO heritage core and Tanjung Bungah coast' },
+    seoDesc: 'Live online homeschooling for Penang families in George Town, Tanjung Bungah, Bayan Lepas. Uplands, POWIIS, Straits, Tenby, Dalat International alternative. Cambridge IGCSE, A-Level, IB, AP, OSSD. British Council Penang exam centre. From USD 180/month.',
+    challenges: [
+      'Penang international school fees: Uplands International (RM 45,000-85,000/year), POWIIS (RM 30,000-70,000/year), Straits International (competitive tier), Tenby Penang, Dalat International (US-curriculum boarding capable). Post-September-2025 6% SST catches upper Penang tier.',
+      'British Council Penang is Malaysia\'s SECOND Cambridge examination centre after Kuala Lumpur — Penang families can sit Cambridge IGCSE and A-Level locally without travelling to KL, a genuine advantage for the state.',
+      'Semiconductor engineering expat families concentrated in Tanjung Bungah, Tanjung Tokong, and Bayan Lepas — Intel, AMD, Bosch, Osram, Broadcom, plus Malaysian engineering. Rotational assignment cycles (3-5 years typical) mean mid-year moves in and out.',
+      'Chinese Penangite Malaysian community — one of Malaysia\'s most historically established Chinese communities. Strong emphasis on academic outcomes and international university pathways.',
+      'Time zone: MYT UTC+8. Live classes 2 PM – 6 PM MYT or 6 PM – 9 PM MYT.',
+    ],
+    familySituations: [
+      'George Town heritage core families — Chinese Penangite Malaysian, plus expat professional and creative communities.',
+      'Tanjung Bungah families — primary northern Penang expat concentration, Uplands International catchment.',
+      'Tanjung Tokong families — Straits Quay / Dalat International area, mixed Malaysian professional and expat.',
+      'Batu Ferringhi families — beachfront residential adjacent to Uplands International School.',
+      'Bayan Lepas families — semiconductor engineering families, Intel Malaysia / AMD Penang / Bosch corporate.',
+      'Jelutong families — Malaysian professional concentration in Penang island south.',
+      'Seberang Perai mainland families — Butterworth, Bukit Mertajam, Perai Free Trade Zone.',
+      'Chinese Penangite Malaysian families targeting Australian Group of Eight, Canadian U15 via OSSD, Singapore NUS/NTU, UK Russell Group.',
+      'Semiconductor engineering expat families with rotational assignment cycles.',
+      'Families switching from Uplands / POWIIS / Straits to Smartious online delivery for fee arbitrage or MYT schedule.',
+    ],
+    nearbyAreas: ['George Town (UNESCO heritage)', 'Tanjung Bungah', 'Tanjung Tokong', 'Batu Ferringhi', 'Gurney Drive', 'Pulau Tikus', 'Jelutong', 'Bayan Lepas (Free Trade Zone)', 'Balik Pulau (POWIIS)', 'Seberang Perai (Butterworth, Bukit Mertajam)', 'Perai Free Trade Zone', 'Kulim Hi-Tech Park (Kedah, adjacent)'],
+    subjects: [
+      'Cambridge IGCSE, A-Level all major subjects',
+      'Cambridge A-Level Mathematics, Physics, Chemistry — for semiconductor / engineering family targets',
+      'Pearson Edexcel International GCSE and A-Level',
+      'IB Diploma Programme',
+      'American AP Computer Science, Calculus, Physics, Chemistry',
+      'Ontario Secondary School Diploma',
+      'SAT, ACT, TOEFL, IELTS',
+    ],
+    whyChoose: [
+      ['Uplands / POWIIS / Straits / Tenby / Dalat alternative', 'Smartious at USD 2,160-6,480/year vs RM 30,000-85,000/year Penang international schools. Identical qualifications.'],
+      ['British Council Penang exam centre — no KL travel', 'Cambridge IGCSE and A-Level examinations can be sat locally at British Council Penang. Full private candidate registration supported.'],
+      ['Semiconductor expat family rotation flexibility', 'Mid-year moves between Intel Penang, Intel other sites (US, Ireland, Israel), or AMD, Bosch, Broadcom global rotations — Smartious continuous enrolment across any move.'],
+      ['Chinese Penangite Malaysian family academic focus', 'Small-group live delivery, homework accountability, weekly progress tracking, subject specialism.'],
+      ['Post-SST arbitrage', 'Uplands / POWIIS upper tiers now pay 6% SST on the amount above RM 60,000. Smartious online delivery is exempt.'],
+    ],
+    growingReason: 'Penang is Malaysia\'s northern economic anchor with a population of 1.7 million across Penang Island and Seberang Perai mainland. George Town (UNESCO World Heritage since 2008) is Malaysia\'s second-most-important city for tourism, heritage, and culture. Bayan Lepas Free Trade Zone hosts the "Silicon Valley of the East" — Intel Malaysia (established 1972 as Intel\'s first offshore facility, a landmark in global semiconductor history), AMD Penang, Bosch Penang, Osram, Broadcom, Motorola Solutions Penang, plus Malaysian semiconductor operations. This drives a substantial expat engineering community concentrated in Tanjung Bungah, Tanjung Tokong, Batu Ferringhi, and Bayan Lepas residential. Chinese Penangite Malaysian community is one of Malaysia\'s most historically established Chinese diaspora communities with strong academic emphasis. International school provision centres on Uplands International (1955 — Malaysia\'s oldest international school in Penang, Batu Ferringhi), POWIIS (Balik Pulau, Cambridge focus, boarding capable), Straits International, Tenby Penang, Dalat International (US curriculum, boarding). British Council Penang is Malaysia\'s second Cambridge examination centre after Kuala Lumpur — a genuine advantage for Penang families.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and A-Level via British Council Penang (in-state examination centre).',
+      cbc: 'Kenya CBC available.',
+      ib: 'IB Diploma Programme.',
+      american: 'American Curriculum with AP — Dalat International alternative.',
+    },
+    homeschoolDetail: 'JPN Penang regulates. Section 135(1) applies to Malaysian citizens 6-12; exemption possible.',
+    homeTuitionDetail: 'Premium tier optional home tuition supplementation for Penang families in Tanjung Bungah / George Town / Bayan Lepas.',
+    onlineLearningDetail: 'Live online 2 PM – 6 PM MYT or 6 PM – 9 PM MYT. Works across TIME Fibre, Unifi, Maxis Fibre across Penang Island and Seberang Perai.',
+    faqs: [
+      { q: 'How does Smartious compare to Uplands International or POWIIS?', a: 'Uplands International (Malaysia\'s oldest international school in Penang since 1955, RM 45,000-85,000/year) and POWIIS (Balik Pulau, RM 30,000-70,000/year, Cambridge focus) provide physical campus education. Smartious provides live online Cambridge, IB, American, or OSSD at USD 2,160-6,480/year with identical qualifications.' },
+      { q: 'Can Penang students sit Cambridge exams locally?', a: 'Yes. British Council Penang is Malaysia\'s second Cambridge examination centre after Kuala Lumpur — Penang families can sit Cambridge IGCSE and A-Level examinations locally without travelling to KL. Full private candidate registration supported.' },
+      { q: 'My family is Intel Penang expat with rotational assignments. How does Smartious support continuity?', a: 'Enrolment is portable. Cambridge/IB/AP delivery continues seamlessly whether you\'re in Bayan Lepas, Portland Oregon, Kildare Ireland, Kiryat Gat Israel, or Ho Chi Minh City. No re-enrolment friction on move.' },
+      { q: 'My family is Chinese Penangite Malaysian in George Town targeting Canadian universities. How does the Ontario OSSD pathway work?', a: 'Via Canadian Cross International School (CCIS) partnership. Enrol concurrently with CCIS, complete 30 credits + OSSLT + community involvement hours, receive Ontario Secondary School Diploma. Apply to Canadian U15 (Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s) via OUAC as Ontario secondary graduate.' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'kota-kinabalu-my',
+    name: 'Kota Kinabalu',
+    county: 'Sabah (East Malaysia)',
+    region: 'Sabah state capital · 500K city · East Malaysia · Mount Kinabalu region · underserved online-first opportunity · limited local international schools',
+    primaryKeyword: 'Online homeschooling in Kota Kinabalu',
+    heroTagline: 'For Kota Kinabalu families across KK city centre, Likas, Luyang, Kepayan, Tanjung Aru, plus wider Sabah — Sayfol International School Sabah (KK\'s primary international option), Rikaz Preparatory School, plus limited local alternatives. Underserved market with strong demand for international curriculum access via online delivery.',
+    intro: 'Live online Cambridge IGCSE, A-Level, IB, American AP, and Ontario OSSD for Kota Kinabalu families across KK city, Likas, Luyang, Kepayan (near KKIA airport), Tanjung Aru, Sepanggar. East Malaysia\'s Sabah state has fewer international school options than Peninsular Malaysia — Sayfol International School Sabah (KK), Rikaz Preparatory School, Tenby International Setia Eco Kota Kinabalu, plus limited local alternatives means many Sabahan families historically send children to Peninsular Malaysia (KL, Penang) or overseas for international curriculum. Smartious extends full Cambridge, IB, AP, and Ontario OSSD access to KK families locally via live online delivery — no relocation required, no cross-Malaysia flights for schooling.',
+    heroImg: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Kota Kinabalu showing Sabah coastal city with Mount Kinabalu in the distance' },
+    seoDesc: 'Live online homeschooling for Kota Kinabalu families across Sabah. Sayfol International Sabah, Rikaz Preparatory alternative. Cambridge IGCSE, A-Level, IB, AP, OSSD delivered directly to KK families. From USD 180/month.',
+    challenges: [
+      'Limited Sabah international school options: Sayfol International Sabah, Rikaz Preparatory, Tenby International Setia Eco KK, plus a small local band. Historically many Sabahan families relocate children to Peninsular Malaysia (KL, Penang) or send abroad for international curriculum — a significant cost and family separation burden.',
+      'No British Council Cambridge examination centre in Sabah — Kota Kinabalu families sitting Cambridge IGCSE / A-Level travel to British Council Kuala Lumpur or Penang (flight required). Some Sabah international schools accept external candidates.',
+      'Chinese Sabahan Malaysian community — established Chinese diaspora with strong academic emphasis, targeting international universities.',
+      'Malaysian government service families in Sabah — federal government service, Sabah state government, plus KK regional operations.',
+      'Palm oil, timber, tourism, and offshore oil-and-gas corporate families concentrated in KK and Sepanggar.',
+      'Time zone: MYT UTC+8 (Sabah is on Malaysia Standard Time, no Sabah-specific offset — East Malaysia and Peninsular Malaysia share the same time zone despite being separated by the South China Sea).',
+    ],
+    familySituations: [
+      'KK city centre families — Likas, Luyang, Karamunsing, Api-Api.',
+      'Kepayan families — near KKIA airport, mixed residential.',
+      'Tanjung Aru families — beachfront residential.',
+      'Sepanggar families — port and industrial adjacent.',
+      'Chinese Sabahan Malaysian families targeting Australian Group of Eight (particularly Queensland, UWA given regional proximity), Canadian U15 via OSSD, UK Russell Group, or Singapore NUS/NTU.',
+      'Malaysian government service families in KK.',
+      'Palm oil / timber / tourism corporate families.',
+      'Offshore oil-and-gas expat families (Petronas Carigali, Shell Sarawak/Sabah operations, Murphy Oil, ConocoPhillips).',
+      'Interior Sabah families (Ranau, Kundasang, Kota Belud, Tuaran) with limited international school access — Smartious online delivery reaches all Sabah locations with adequate internet.',
+    ],
+    nearbyAreas: ['KK city centre (Api-Api, Karamunsing)', 'Likas', 'Luyang', 'Kepayan', 'Tanjung Aru', 'Sepanggar', 'Kingfisher Park', 'Signal Hill', 'Bundusan', 'Penampang', 'Putatan', 'Sabah interior (Ranau, Kundasang, Tuaran, Kota Belud)', 'East Malaysia broader Sabah'],
+    subjects: [
+      'Cambridge IGCSE, A-Level',
+      'Pearson Edexcel International GCSE and A-Level',
+      'IB Diploma Programme',
+      'American AP',
+      'Ontario Secondary School Diploma',
+      'SAT, ACT, TOEFL, IELTS preparation',
+    ],
+    whyChoose: [
+      ['Full international curriculum access without Peninsular Malaysia relocation', 'KK families historically relocate children to KL or Penang for premium international schools. Smartious delivers Cambridge, IB, American, or Ontario OSSD live online directly to KK — no relocation, no family separation.'],
+      ['Sayfol Sabah / Rikaz / Tenby KK alternative', 'Smartious at USD 2,160-6,480/year vs local Sabah international school fees. Larger curriculum and university pathway range than local options.'],
+      ['MYT time zone (same as Peninsular Malaysia)', 'East Malaysia and Peninsular Malaysia share Malaysia Standard Time — Smartious afternoon 2 PM – 6 PM MYT works identically for KK families.'],
+      ['Interior Sabah reach', 'Live online delivery reaches Ranau, Kundasang, Kota Belud, Tuaran, and interior Sabah locations underserved by any physical international school.'],
+      ['Ontario OSSD for Chinese Sabahan families targeting Canada', 'CCIS partnership extends Ontario Secondary School Diploma access to Sabah for the first time — an outcome only otherwise achievable via relocation or overseas boarding.'],
+    ],
+    growingReason: 'Kota Kinabalu is Sabah\'s state capital (500,000 residents) and the primary East Malaysia urban centre. Sabah\'s economy centres on palm oil, timber, tourism (Mount Kinabalu, Sipadan, Kinabatangan), and offshore oil-and-gas operations. International school provision is genuinely limited compared to Peninsular Malaysia — Sayfol International Sabah, Rikaz Preparatory School, Tenby International Setia Eco Kota Kinabalu are the primary local options. Many Sabahan families historically relocate children to KL or Penang for premium international schools, or send children abroad — a significant cost and family separation. Smartious online delivery represents genuinely new access to Cambridge, IB, American, and Ontario OSSD curricula for Sabah families, particularly Chinese Sabahan Malaysian families targeting international universities, without relocation. Interior Sabah locations (Ranau, Kundasang, Kota Belud, Tuaran) with no local international school access are reached via live online delivery.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and A-Level — Sabah families sit examinations at British Council KL or Penang (flight required for the exam period), or at Sabah international schools accepting external candidates.',
+      cbc: 'Kenya CBC available.',
+      ib: 'IB Diploma Programme.',
+      american: 'American Curriculum with AP.',
+    },
+    homeschoolDetail: 'JPN Sabah regulates. Section 135(1) applies to Malaysian citizens 6-12; exemption possible.',
+    homeTuitionDetail: 'Premium tier optional home tuition supplementation subject to KK-area teacher availability.',
+    onlineLearningDetail: 'Live online 2 PM – 6 PM MYT or 6 PM – 9 PM MYT. Works across TIME Fibre, Unifi, Maxis Fibre across KK and major Sabah towns. Interior Sabah locations require adequate broadband (typically Unifi in townships).',
+    faqs: [
+      { q: 'How does Smartious solve the international schooling gap in Sabah?', a: 'Sabah has fewer international school options than Peninsular Malaysia — Sayfol Sabah, Rikaz Preparatory, Tenby KK are the primary local options. Many Sabahan families historically relocate children to KL or Penang for premium international schools, at significant cost and family separation. Smartious delivers Cambridge, IB, American, or Ontario OSSD live online directly to KK families — no relocation, no family separation, full curriculum choice and university pathway access.' },
+      { q: 'Where do Sabah students sit Cambridge examinations?', a: 'British Council Kuala Lumpur or British Council Penang (flight required for the examination period, typically May/June or October/November). Some Sabah international schools accept external candidates for their examination sessions — worth investigating locally.' },
+      { q: 'My family is Chinese Sabahan Malaysian in Likas targeting Canadian universities. How does Ontario OSSD work?', a: 'Via Canadian Cross International School (CCIS) partnership. Enrol concurrently with CCIS, complete Ontario 30 credits + OSSLT + community involvement hours, receive Ontario Secondary School Diploma. Apply to Canadian U15 via OUAC as Ontario secondary graduate — materially advantageous for university applications.' },
+      { q: 'We live in Ranau (interior Sabah) — can Smartious deliver to interior Sabah?', a: 'Yes, subject to adequate internet connectivity. Unifi typically reaches Ranau, Kundasang, Tuaran, Kota Belud townships. Live online video conferencing requires ~5-10 Mbps sustained per student. Recorded sessions available 24/7 for bandwidth-constrained times.' },
+    ],
+  },
+]
+
+// Export a lightweight name→slug list for internal linking helpers
+export const MALAYSIA_CITIES_LIST = MALAYSIA_CITIES.map(c => ({
+  slug: c.slug,
+  name: c.name,
+  county: c.county,
+}))
+
+// ═══════════════════════════════════════════════════════════════════
+// MALAYSIA COUNTRY-LEVEL OBJECT
+// Consumed by CountryHub.jsx for /online-school/malaysia
+// ═══════════════════════════════════════════════════════════════════
+export const MALAYSIA_COUNTRY = {
+  // ── Identity ───────────────────────────────────────────────────
+  slug: 'malaysia',
+  name: 'Malaysia',
+  longName: 'Malaysia',
+  adjective: 'Malaysian',
+  flag: '🇲🇾',
+  hub: 'Kuala Lumpur',
+  hubPageId: 'homeschooling-malaysia',
+  cityPageId: 'malaysia-city',
+
+  // ── Currency ──────────────────────────────────────────────────
+  currency: 'MYR',
+  currencyName: 'Malaysian Ringgit',
+  currencyPeg: 'Approximate MYR conversion at ~RM 4.7 per USD (2026 indicative rate; final invoicing in USD).',
+
+  // ── Time zone ─────────────────────────────────────────────────
+  timezone: {
+    code: 'MYT',
+    name: 'Malaysia Standard Time',
+    utcOffset: '+8',
+    offsetFromEAT: '+5 hours',
+  },
+
+  // ── Exam centres (v2 hub) ─────────────────────────────────────
+  examCentres: ['British Council Kuala Lumpur', 'British Council Penang'],
+  examCentreTiles: [
+    { city: 'Kuala Lumpur', centre: 'British Council Kuala Lumpur', area: 'Malaysia\'s primary Cambridge examination centre — hosts Cambridge IGCSE and A-Level examinations during the May/June and October/November series' },
+    { city: 'Penang', centre: 'British Council Penang', area: 'Malaysia\'s second Cambridge examination centre — direct Cambridge examinations for Penang and northern Peninsular Malaysia families without KL travel' },
+  ],
+  examLogisticsProse: 'Cambridge IGCSE and A-Level examinations for Malaysian students are hosted at British Council Kuala Lumpur (primary Malaysia centre) and British Council Penang (northern Malaysia). Private candidate fees run approximately RM 600-900 per subject all-in (Cambridge International Education entry fee plus centre administrative fee), with late entry adding RM 100-250 per subject. A full 8-subject IGCSE sitting as a private candidate costs approximately RM 5,000-7,500 in examination fees. Some Malaysian international schools also accept external private candidates for their examination sessions — worth investigating locally in each state. Smartious handles examination registration logistics and administrative liaison. Pearson Edexcel International GCSE and International A-Level offer three examination series each year (January, May/June, October/November) providing greater flexibility than Cambridge\'s two series.',
+  secondaryProgrammeExamRef: 'British Council Kuala Lumpur',
+  finalCTABadgeExamRef: 'British Council KL + Penang exam centres',
+
+  // ── Hero ──────────────────────────────────────────────────────
+  heroImage: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?w=1600&q=80&auto=format&fit=crop',
+  heroEyebrow: 'Online homeschool for Malaysia',
+  heroH1Suffix: 'Malaysia',
+  heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP and Ontario Secondary School Diploma (OSSD via Canadian Cross International School partnership) for Malaysian families — Kuala Lumpur (Mont Kiara, Damansara Heights, Bangsar, Ampang), Petaling Jaya, Subang Jaya (near Monash Malaysia), Cyberjaya (near Heriot-Watt Malaysia), Johor Bahru + Iskandar Puteri (EduCity — Newcastle Medicine, Southampton, Reading, Marlborough College), Penang (British Council Penang exam centre, Silicon Valley of the East), and Sabah / East Malaysia. Delivered in Malaysia Standard Time (MYT, UTC+8) with afternoon classes matching Malaysian school-hours flexibility.',
+  heroValueProp: 'From USD 180/month (~RM 850/month). Small live classes 4-6 students, MYT afternoon window, Cambridge/IB/AP/Ontario OSSD pathway options, all major Malaysian branch campus universities (Monash Malaysia, Nottingham Malaysia, Heriot-Watt Malaysia, Newcastle Medicine, Southampton, Reading) and UK/US/Canadian/Australian/Singapore destinations reachable.',
+  whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Malaysia',
+
+  // ── Cities section (v2 hub) ───────────────────────────────────
+  citiesSectionTitle: 'Where our Malaysian families are',
+  citiesSectionBody: 'Smartious Malaysian families concentrate across the Klang Valley (Kuala Lumpur, Petaling Jaya, Subang Jaya, Cyberjaya), Johor Bahru + Iskandar Puteri (EduCity township), Penang (George Town + Tanjung Bungah), and Kota Kinabalu (Sabah / East Malaysia). Each hub has its own local context — mid-tier alternative for KL Mont Kiara Alice Smith / Garden International / BSKL / ISKL / M\'KIS families, Chinese Malaysian Canadian university pathway via Ontario OSSD for Damansara Utama / TTDI / Bangsar families, cross-border Singapore commuter families in Johor Bahru, semiconductor engineering expat families in Penang Bayan Lepas, underserved East Malaysia access in Sabah — but all share the same live online delivery infrastructure.',
+
+  // ── Trust signals (country-neutral — component renders these) ─
+  trustSignals: [
+    { h: 'Two operational teaching centres',        p: 'Live teaching to Malaysian families is delivered from two international-standard operational centres established 2022 and 2023. Teachers work from professional academic facilities, not marketplace or freelance networks.' },
+    { h: 'Cambridge-registered infrastructure',      p: 'Smartious registers students as private candidates at British Council Kuala Lumpur and British Council Penang for Cambridge IGCSE and A-Level examinations. Full administrative handling.' },
+    { h: 'Malaysian branch campus pathway',          p: 'Cambridge A-Level and IB Diploma qualifications support Monash Malaysia (Bandar Sunway), Nottingham Malaysia (Semenyih), Heriot-Watt Malaysia (Putrajaya), Xiamen Malaysia (Sepang), Newcastle Medicine Malaysia (Iskandar Puteri EduCity), Southampton Malaysia, Reading Malaysia foundation and direct entry.' },
+    { h: 'Ontario OSSD via CCIS partnership',        p: 'Chinese Malaysian families targeting Canadian U15 (Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s) can complete Ontario Secondary School Diploma via our Canadian Cross International School partnership — only Sunway International in KL offers Ontario locally.' },
+  ],
+
+  // ── Universities in country (v2 hub) ──────────────────────────
+  universitiesInCountry: 'University of Malaya (UM), Universiti Sains Malaysia (USM), Universiti Kebangsaan Malaysia (UKM), Universiti Putra Malaysia (UPM), plus Malaysian branch campuses of foreign universities: Monash University Malaysia (Bandar Sunway, Selangor — Australian degree), University of Nottingham Malaysia (Semenyih, Selangor — UK degree), Heriot-Watt University Malaysia (Putrajaya — UK degree), Xiamen University Malaysia (Sepang, Selangor — Chinese "985" degree), Curtin University Malaysia (Miri, Sarawak — Australian degree), Swinburne University Sarawak (Kuching — Australian degree), Newcastle University Medicine Malaysia (Iskandar Puteri, Johor — UK MBBS medical degree), University of Southampton Malaysia (Iskandar Puteri, Johor — UK Russell Group degree), University of Reading Malaysia (Iskandar Puteri, Johor — UK degree), plus Taylor\'s University (Subang Jaya), Sunway University (Bandar Sunway), UCSI University (KL), Multimedia University (Cyberjaya), International Medical University (IMU).',
+  universityChannels: 'Malaysian branch campus foundation programmes (Monash MUFY, Nottingham UNM Foundation, Heriot-Watt Foundation, Taylor\'s Foundation in Arts/Business/Science, Sunway Foundation), UK UCAS applications supported through Cambridge A-Level or IB Diploma, US Common Application via SAT/ACT + AP portfolios, Canadian OUAC via Ontario OSSD (CCIS partnership) or as international student via Cambridge/IB, Australian direct entry via A-Level or IB, Singapore NUS/NTU competitive entry via Cambridge A-Level or IB Diploma. Personalised university guidance sessions with the Head of Academics for target-university strategy.',
+  cambridgeCardDescription: 'Smartious\'s primary offer for Malaysian families. Cambridge IGCSE (Years 10-11) and Cambridge A-Level (Years 12-13) delivered as live online classes matching MYT afternoon hours. Private candidate examination registration at British Council Kuala Lumpur or British Council Penang. Pathway accepted by all Malaysian universities, all Malaysian branch campuses, UK Russell Group (including Oxbridge for elite candidates), US Ivy League, Canadian U15, Australian Group of Eight, and Singapore NUS/NTU.',
+  britishCurriculumSuits: 'Malaysian families targeting Cambridge IGCSE + A-Level pathway — the dominant international qualification in Malaysia. Best fit for families targeting UK Russell Group, Malaysian branch campuses (Monash, Nottingham, Heriot-Watt, Newcastle Medicine, Southampton), Australian Group of Eight, Singapore NUS/NTU, or Canadian universities as international students.',
+  britishCurriculumDelivery: 'Live online classes MYT afternoon (2 PM – 6 PM) or evening (6 PM – 9 PM), small groups 4-6 students. Cambridge examinations at British Council KL or Penang.',
+  ibDiplomaSuits: 'Malaysian families targeting IB Diploma\'s breadth (six subjects, Theory of Knowledge, Extended Essay, CAS). Best fit for families targeting US Ivy League, Canadian U15, Singapore NUS/NTU, IB-preferred UK universities, and holistic university applications.',
+  ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
+  americanCurriculumSuits: 'Malaysian families targeting US universities via Common Application. AP portfolio strengthens US applications; SAT/ACT preparation integrated.',
+  americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in 2019 to make international qualifications (Cambridge, IB, American, Ontario OSSD) accessible to families across emerging markets at online-delivery fees. Malaysian families join students in 13 other countries — from Kuala Lumpur Mont Kiara to Cairo Zamalek, Tokyo Setagaya to Dubai Downtown, Ho Chi Minh City District 2 to Casablanca Ain Diab.',
+  founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed. Head of Academics supervises curriculum delivery and university placement strategy per family.',
+
+  // ── Competitors ───────────────────────────────────────────────
+  competitorsIntro: 'Malaysian premium international school fees are among the highest in Southeast Asia, with a September 2025 6% SST added on fees above RM 60,000. Physical international schools cluster in Klang Valley (Alice Smith, Garden International, BSKL, ISKL, M\'KIS, Cempaka, IGBIS), Iskandar Puteri (Marlborough College Malaysia), and Penang (Uplands, POWIIS, Straits, Dalat). Online competitors include King\'s InterHigh (UK-based, has Southeast Asia timetable), Wolsey Hall Oxford (self-paced, no live classes), Cambridge Home School, and My Online Schooling. Local Malaysian homeschool centres — Sri KDU, Sayfol, Beaconhouse, HELP, Sunway International, Tenby, Taylor\'s International Subang, Stellar, Sayfol Sabah, Orient Academy — operate at mid-tier fees between the physical premium tier and the online alternative tier.',
+  competitors: [
+    { name: 'Alice Smith School (Kuala Lumpur)',                       city: 'Jalan Bellamy + Equine Park', curriculum: 'Cambridge IGCSE, A-Level, IB', feesUsd: 'RM 55,000-92,000/year',   feesAed: '~USD 11,700-19,600/year', rating: 4.5, capacityNote: 'Malaysia\'s oldest British international school (1946)' },
+    { name: 'Garden International School (Kuala Lumpur)',             city: 'Mont Kiara',                   curriculum: 'Cambridge IGCSE + A-Level',   feesUsd: 'RM 65,000-130,000/year',   feesAed: '~USD 13,800-27,700/year', rating: 4.4, capacityNote: 'Largest private co-ed in Malaysia (2,000+ students since 1951)' },
+    { name: 'BSKL Nord Anglia (Kuala Lumpur)',                        city: 'Sri Hartamas',                 curriculum: 'Cambridge IGCSE, A-Level, IB', feesUsd: 'RM 100,000-165,000+/year', feesAed: '~USD 21,300-35,100/year', rating: 4.5, capacityNote: 'Nord Anglia global network — premium tier' },
+    { name: 'International School Kuala Lumpur (ISKL)',                city: 'Ampang Hilir',                 curriculum: 'IB PYP/MYP/DP + AP',           feesUsd: 'USD 15,000-30,000/year',    feesAed: '~RM 70,000-140,000/year', rating: 4.6, capacityNote: 'Malaysia\'s oldest international school (1965), non-profit' },
+    { name: 'Mont\'Kiara International School (M\'KIS)',                city: 'Mont Kiara',                   curriculum: 'IB PYP/MYP/DP',                feesUsd: 'RM 65,000-130,000/year',    feesAed: '~USD 13,800-27,700/year', rating: 4.4, capacityNote: 'Full IB continuum, 50+ nationalities' },
+    { name: 'Marlborough College Malaysia (Iskandar Puteri)',          city: 'Iskandar Puteri, Johor',       curriculum: 'Cambridge IGCSE + A-Level',    feesUsd: 'RM 100,000-160,000+/year',  feesAed: '~USD 21,300-34,000/year', rating: 4.5, capacityNote: 'Premium British boarding + day school' },
+    { name: 'Sunway International School (Subang Jaya)',              city: 'Sunway City',                  curriculum: 'Ontario + Cambridge + IB',     feesUsd: 'RM 45,000-90,000/year',    feesAed: '~USD 9,600-19,100/year',  rating: 4.3, capacityNote: 'Only KL-area school offering Ontario curriculum' },
+    { name: 'Taylor\'s International School Subang',                   city: 'Subang Jaya',                  curriculum: 'Cambridge IGCSE + A-Level, IB', feesUsd: 'RM 45,000-90,000/year',   feesAed: '~USD 9,600-19,100/year',  rating: 4.3, capacityNote: 'Part of Taylor\'s Education Group. Adds 10% EAL + 20% EEP surcharges Jan 2026' },
+    { name: 'Sri KDU International School (Petaling Jaya)',           city: 'Petaling Jaya',                curriculum: 'Cambridge IGCSE + A-Level',    feesUsd: 'RM 40,000-75,000/year',    feesAed: '~USD 8,500-16,000/year',  rating: 4.2, capacityNote: 'Taylor\'s Education Group' },
+    { name: 'Uplands International School (Penang)',                  city: 'Batu Ferringhi',               curriculum: 'Cambridge IGCSE + A-Level, IB', feesUsd: 'RM 45,000-85,000/year',   feesAed: '~USD 9,600-18,100/year',  rating: 4.3, capacityNote: 'Penang\'s oldest international school (1955)' },
+    { name: 'King\'s InterHigh (UK — Southeast Asia timetable)',       city: 'Online (UK-based)',            curriculum: 'Cambridge, Edexcel, IB Online', feesUsd: 'GBP 8,000-15,000/year',    feesAed: '~USD 10,000-19,000/year', rating: 4.2, capacityNote: 'DfE-accredited online school with SEA timetable' },
+    { name: 'Wolsey Hall Oxford',                                     city: 'Online (UK-based)',            curriculum: 'Cambridge (self-paced)',       feesUsd: 'GBP 4,000-7,000/year',     feesAed: '~USD 5,000-8,800/year',   rating: 4.0, capacityNote: 'Self-paced only — no live classes' },
+    { name: 'Smartious Homeschool (Malaysia via online delivery)',     city: 'Delivered to all Malaysia',    curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP, Ontario OSSD', feesUsd: 'USD 2,160-6,480/year', feesAed: '~RM 10,000-30,000/year', rating: 4.8, capacityNote: 'Live small-group MYT afternoon delivery + Ontario OSSD via CCIS partnership' },
+  ],
+
+  // ── Legal framework ──────────────────────────────────────────
+  legalFrameworkIntro: 'Malaysia operates a structured education framework under the Ministry of Education (MOE) with State Education Departments (Jabatan Pendidikan Negeri / JPN) at state level. Homeschooling is legal but with specific conditions for Malaysian citizens of primary age.',
+  legalFramework: [
+    { h: 'Section 135(1) Education Act 1996',           p: 'Malaysian citizen children aged 6-12 must attend formal primary school unless granted a homeschool exemption by their State Education Department (JPN). Exemptions are case-by-case, typically granted for special educational needs (autism, dyslexia, ADHD, learning disabilities), medical conditions, documented expatriate or travelling families, or exceptional circumstances. No prosecutions to date, but formal exemption is the correct path for Malaysian primary-age citizens.' },
+    { h: 'Non-citizen expatriate children — unrestricted', p: 'Children of non-citizen expatriate families are not bound by Section 135. Expat families may homeschool without MOE exemption. Documentation of home-country curriculum provider (Smartious registration confirmation) is sufficient.' },
+    { h: 'Pre-primary and secondary — unrestricted',     p: 'Children under 6 (pre-primary) and children 12+ (secondary — Cambridge IGCSE Years 10-11, A-Level Years 12-13, IB Diploma) are unrestricted for all Malaysian and expat families. This is Smartious\'s core Malaysian delivery window.' },
+    { h: 'September 2025 SST on international school fees', p: 'From 1 September 2025, the Royal Malaysian Customs Department applies 6% Service Tax on private and international school annual fees exceeding RM 60,000 per student. Online education delivery is not subject to this SST. This changes the cost calculation for Malaysian families paying RM 60,000+/year at physical international schools.' },
+  ],
+
+  // ── Why Smartious ────────────────────────────────────────────
+  whySmartious: [
+    { h: 'Fee arbitrage on premium Klang Valley international schools',       p: 'Smartious at USD 2,160-6,480/year (~RM 10,000-30,000/year) vs RM 55,000-165,000+/year at Alice Smith, Garden International, BSKL, ISKL, M\'KIS, Marlborough College Malaysia — plus 6% SST on fees above RM 60,000 since September 2025. Identical Cambridge, IB, or American qualifications.' },
+    { h: 'MYT afternoon window — post-Malaysian-school hours',                 p: 'Live classes scheduled 2 PM – 6 PM Malaysia Standard Time matching Malaysian post-school hours. Malaysian national school children can dual-track — sekolah kebangsaan morning + Smartious Cambridge/IB/AP afternoon. Recorded sessions 24/7.' },
+    { h: 'Ontario OSSD pathway for Chinese Malaysian Canadian targeting',      p: 'Via our Canadian Cross International School partnership — the only online Ontario Secondary School Diploma provider serving Malaysian families. Only Sunway International in Subang Jaya offers Ontario locally. Chinese Malaysian families targeting Canadian U15 apply via OUAC as Ontario secondary graduates.' },
+    { h: 'Malaysian branch campus foundation pipeline',                        p: 'Cambridge A-Level or IB Diploma feeds directly into Monash Malaysia (Bandar Sunway), Nottingham Malaysia (Semenyih), Heriot-Watt Malaysia (Putrajaya), Xiamen Malaysia (Sepang), Newcastle Medicine Malaysia (Iskandar Puteri EduCity), Southampton Malaysia, Reading Malaysia, Taylor\'s University, Sunway University.' },
+    { h: 'Sabah / East Malaysia access',                                       p: 'Sabah and Sarawak have limited local international school provision. Smartious delivers Cambridge, IB, American, or Ontario OSSD live online to Kota Kinabalu, Kuching, and interior East Malaysia — no relocation to Peninsular Malaysia required.' },
+    { h: 'British Council KL + Penang examination centres',                    p: 'Cambridge IGCSE and A-Level examinations at British Council Kuala Lumpur or British Council Penang. Smartious handles private candidate registration logistics.' },
+  ],
+
+  // ── FAQs ─────────────────────────────────────────────────────
+  faqs: [
+    { q: 'Is homeschooling legal in Malaysia?',                                                                             a: 'For Malaysian citizens aged 6-12 (primary), homeschooling requires a Section 135(1) exemption from your State Education Department (JPN Selangor, JPN Kuala Lumpur, JPN Johor, JPN Penang, JPN Sabah, etc.), typically granted for special educational needs, medical, travel/expat, or exceptional circumstances. For non-citizen expatriate children, homeschooling is unrestricted. For all pre-primary (under 6) and secondary (12+) children, homeschooling is unrestricted for both Malaysian citizens and non-citizens. Most Smartious Malaysian delivery is in the secondary (Cambridge IGCSE Years 10-11, A-Level Years 12-13, IB Diploma) window — legally straightforward for all families.' },
+    { q: 'What Cambridge examination centres serve Malaysia?',                                                              a: 'British Council Kuala Lumpur is the primary Cambridge IGCSE and A-Level examination centre in Malaysia. British Council Penang is the second. Some Malaysian international schools also accept external candidates for their examination sessions. Sabah, Sarawak, and East Coast families sit examinations at KL or Penang (flight or drive required for the exam period). Private candidate fees run approximately RM 600-900 per subject; a full 8-subject IGCSE sitting costs approximately RM 5,000-7,500.' },
+    { q: 'What Malaysian universities accept Cambridge, IB, and AP qualifications?',                                        a: 'All major Malaysian universities — University of Malaya (UM), Universiti Sains Malaysia (USM), Universiti Kebangsaan Malaysia (UKM), Universiti Putra Malaysia (UPM). All Malaysian branch campuses — Monash Malaysia (Bandar Sunway), Nottingham Malaysia (Semenyih), Heriot-Watt Malaysia (Putrajaya), Xiamen Malaysia (Sepang), Curtin Malaysia (Miri, Sarawak), Swinburne Malaysia (Kuching), Newcastle Medicine Malaysia (Iskandar Puteri), Southampton Malaysia, Reading Malaysia. Plus Taylor\'s, Sunway, UCSI, MMU, IMU. Foundation-to-degree entry via Cambridge A-Level or IB Diploma is streamlined.' },
+    { q: 'Does the September 2025 SST on international school fees affect Smartious?',                                       a: 'No. The 6% Service Tax applies to private and international school annual fees exceeding RM 60,000 per student, effective 1 September 2025. Online education delivery is not subject to this SST. Smartious online delivery is exempt.' },
+    { q: 'Can Chinese Malaysian families access Ontario OSSD for Canadian university applications?',                          a: 'Yes, via our Canadian Cross International School (CCIS) partnership. Only Sunway International School in Subang Jaya offers Ontario curriculum physically in the Klang Valley. Smartious extends OSSD access to all Malaysian cities online. Chinese Malaysian families targeting Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s apply via OUAC as Ontario secondary graduates — materially advantageous vs applying as international students.' },
+    { q: 'Can my Malaysian child attend national school (sekolah kebangsaan) and Smartious for Cambridge?',                  a: 'Yes — a common Malaysian family configuration. Malaysian national school morning + Smartious Cambridge/IB/AP afternoon (2 PM – 6 PM MYT window). Family combines national qualifications (SPM) with international qualifications (Cambridge IGCSE, A-Level) for maximum university options.' },
+    { q: 'How does Smartious schedule live classes for Malaysian families?',                                                 a: 'Live classes 2 PM – 6 PM Malaysia Standard Time (matching post-school hours) or 6 PM – 9 PM MYT (evening slot for older students). Recorded sessions available 24/7. Malaysia is UTC+8 — East Malaysia (Sabah, Sarawak) uses the same MYT as Peninsular Malaysia despite geographical separation.' },
+    { q: 'How does Smartious compare to King\'s InterHigh which has a Southeast Asia timetable?',                             a: 'King\'s InterHigh is UK-based (GBP 8,000-15,000/year ≈ USD 10,000-19,000). Smartious is USD 2,160-6,480/year — 3-5× cheaper — with live small-group delivery, Cambridge/IB/American/Ontario OSSD choice, and cross-country cohort across 14+ markets.' },
+    { q: 'What Malaysian cities does Smartious serve?',                                                                     a: 'Kuala Lumpur (Mont Kiara, Damansara Heights, Bangsar, Ampang, Sri Hartamas), Petaling Jaya (SS2, Damansara Utama, Bandar Utama), Subang Jaya (SS15, USJ, Bandar Sunway), Cyberjaya (Cyber precincts, Putrajaya), Johor Bahru + Iskandar Puteri (JB city, EduCity, Forest City), Penang (George Town, Tanjung Bungah, Batu Ferringhi, Bayan Lepas), Kota Kinabalu (Sabah / East Malaysia), plus other Malaysian cities via live online delivery.' },
+    { q: 'What internet speed does Smartious require in Malaysia?',                                                          a: 'Sustained ~5-10 Mbps per student for live HD video conferencing. TIME Fibre, Unifi, and Maxis Fibre residential broadband across the Klang Valley, Penang, and JB routinely deliver 100+ Mbps. Cyberjaya has gigabit-class MSC Malaysia infrastructure. Sabah/Sarawak Unifi reaches major townships adequately.' },
+  ],
+
+  // ── CTA ──────────────────────────────────────────────────────
+  ctaH: 'Book an assessment for your child',
+  ctaSubhead: 'Two-gate admissions process. Submit the assessment request form — our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled.',
+
+  // ═══════════════════════════════════════════════════════════════
+  // NEW v2+ FIELDS — extend CountryHub with these optional sections
+  // ═══════════════════════════════════════════════════════════════
+
+  // ── Comparison table (Smartious vs Malaysian physical schools) ─
+  comparisonTable: {
+    title: 'Smartious vs Malaysian premium international schools',
+    intro: 'How Smartious online delivery compares against physical Klang Valley, Iskandar Puteri, and Penang international schools on the factors Malaysian families actually weigh.',
+    columns: ['Feature', 'Smartious online', 'Physical international school', 'What this means for you'],
+    rows: [
+      { feature: 'Curriculum options',       smartious: 'Cambridge IGCSE + A-Level, IB Diploma, American AP, Ontario OSSD (all in one school)', competitor: 'Usually one primary curriculum',                    note: 'Choose the pathway matching your target universities without switching schools' },
+      { feature: 'Live classes',              smartious: 'Yes — daily live classes, small groups (4-6)',                                          competitor: 'Yes — in-person classes, 18-24 per class',           note: 'Smaller Smartious groups = more direct teacher attention' },
+      { feature: 'Cambridge IGCSE + A-Level', smartious: 'Full pathway',                                                                          competitor: 'Common (Alice Smith, Garden, BSKL, Marlborough)',     note: 'Identical qualification either route' },
+      { feature: 'IB Diploma',                smartious: 'Available',                                                                             competitor: 'Some schools only (ISKL, M\'KIS, IGBIS)',              note: 'Fewer physical schools offer IB' },
+      { feature: 'Ontario OSSD',              smartious: 'Available via CCIS partnership',                                                        competitor: 'Only Sunway International School Subang Jaya',        note: 'Smartious extends OSSD access to all Malaysian cities online' },
+      { feature: 'Annual fee (typical)',      smartious: 'USD 2,160-6,480/year (~RM 10,000-30,000/year)',                                        competitor: 'RM 40,000-165,000+/year (Klang Valley premium tier)', note: '4-15× fee difference' },
+      { feature: 'September 2025 6% SST',     smartious: 'Exempt (online delivery)',                                                              competitor: 'Applies on fees above RM 60,000/year',                note: 'Additional RM 1,800-6,300+/year at premium tier' },
+      { feature: 'Flexible schedule',         smartious: 'MYT afternoon (2 PM–6 PM local) or evening',                                            competitor: 'Fixed 8am-3pm timetable',                             note: 'Malaysian sekolah kebangsaan children can dual-track' },
+      { feature: 'Cross-country cohort',      smartious: 'Alongside families in 13 other markets',                                                competitor: 'National/expat community only',                       note: 'A Mont Kiara Year 11 student in the same Chemistry class as students in Tokyo, Dubai, Cairo' },
+      { feature: 'Location constraints',      smartious: 'None — works anywhere in Malaysia with broadband',                                     competitor: 'Klang Valley / Penang / JB clusters',                 note: 'Smartious accessible from Kota Kinabalu, interior Sabah, East Coast' },
+      { feature: 'Enrolment timing',          smartious: 'Immediate',                                                                             competitor: 'Waiting lists at popular grade entry points',         note: 'Mid-year moves supported' },
+      { feature: 'Malaysian branch campus pathway', smartious: 'Cambridge A-Level / IB → Monash, Nottingham, Heriot-Watt, Newcastle Medicine, Southampton, Reading Malaysia', competitor: 'Same qualification recognition', note: 'Identical downstream pathway' },
+    ],
+  },
+
+  // ── Local statistics with sourced figures ────────────────────
+  localStatistics: [
+    { number: '217',                     label: 'Cambridge-registered schools in Malaysia',                                             source: 'Cambridge International Education 2026 registered centre listings' },
+    { number: '~190',                    label: 'International schools across 16 Malaysian cities',                                     source: 'Ministry of Education Malaysia · Private Education Department 2026' },
+    { number: 'RM 12.3B',                label: 'Malaysian household spending on private/international schooling (2023)',              source: 'Malaysian market analysis, 2023 baseline' },
+    { number: 'RM 45,000',               label: 'Median annual international school fee in Malaysia (2026 indicative)',                source: 'Industry survey aggregates 2026' },
+    { number: '6%',                      label: 'Service Tax now applies to international school fees above RM 60,000/year',            source: 'Royal Malaysian Customs Department, effective 1 September 2025' },
+    { number: '25,000-35,000',           label: 'Estimated Malaysian homeschooled children (2026 projection from ~10,000 in 2012)',    source: 'Aggregate industry sources 2026' },
+    { number: 'RM 600-900',              label: 'Cambridge IGCSE private-candidate fee per subject at British Council KL or Penang',   source: 'British Council Malaysia examination centre 2026 fee schedule' },
+    { number: '2',                       label: 'British Council Cambridge examination centres in Malaysia (Kuala Lumpur, Penang)',    source: 'British Council Malaysia' },
+    { number: '9',                       label: 'Foreign university branch campuses in Malaysia (Monash, Nottingham, Heriot-Watt, Xiamen, Curtin, Swinburne, Newcastle Medicine, Southampton, Reading)', source: 'Ministry of Higher Education Malaysia' },
+  ],
+
+  // ── Branch campus universities (unique to Malaysia positioning) ─
+  branchCampusUniversities: [
+    { name: 'Monash University Malaysia',                     city: 'Bandar Sunway, Selangor',    accepts: 'Cambridge A-Level, IB Diploma, IGCSE + Monash Foundation (MUFY)', note: 'Australian degree awarded · Group of Eight member · same qualification as Monash Melbourne' },
+    { name: 'University of Nottingham Malaysia',              city: 'Semenyih, Selangor',         accepts: 'Cambridge A-Level, IB Diploma, IGCSE + UNM Foundation',           note: 'UK degree awarded · Russell Group member · same qualification as Nottingham UK' },
+    { name: 'Heriot-Watt University Malaysia',                city: 'Putrajaya',                  accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'UK degree awarded · strong engineering, business, actuarial, computer science' },
+    { name: 'Xiamen University Malaysia',                     city: 'Sepang, Selangor',           accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'Chinese "985 Project" university · degree conferred by Xiamen University China' },
+    { name: 'Curtin University Malaysia',                     city: 'Miri, Sarawak',              accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'Australian degree awarded · East Malaysia campus' },
+    { name: 'Swinburne University of Technology Sarawak',     city: 'Kuching, Sarawak',           accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'Australian degree awarded' },
+    { name: 'Newcastle University Medicine Malaysia (NUMed)', city: 'Iskandar Puteri, Johor',     accepts: 'Cambridge A-Level Biology, Chemistry, Physics · IB Higher Level Sciences · UCAT for UK MBBS pathway', note: 'UK medical degree awarded · one of the rare MBBS pathways in Malaysia' },
+    { name: 'University of Southampton Malaysia',             city: 'Iskandar Puteri, Johor',     accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'UK Russell Group degree · Engineering focus' },
+    { name: 'University of Reading Malaysia',                 city: 'Iskandar Puteri, Johor',     accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'UK degree awarded · Business, Property, Finance strong areas' },
+  ],
+
+  // ── Topical cluster links (SEO cluster architecture) ──────────
+  topicalClusterLinks: [
+    { title: 'Cambridge IGCSE homeschooling in Malaysia — private candidate guide', href: '/online-igcse-malaysia',                     category: 'Curriculum' },
+    { title: 'Cambridge A-Level online in Malaysia',                                 href: '/online-a-level-malaysia',                    category: 'Curriculum' },
+    { title: 'IB Diploma online in Malaysia',                                        href: '/online-ib-malaysia',                         category: 'Curriculum' },
+    { title: 'International school alternatives in Malaysia',                        href: '/international-school-alternative-malaysia',  category: 'Comparison' },
+    { title: 'Expatriate homeschooling in Malaysia',                                 href: '/expat-education-malaysia',                   category: 'Guide' },
+    { title: 'Ontario Secondary School Diploma (OSSD) for Malaysian families',       href: '/ossd-malaysia',                              category: 'Pathway' },
+    { title: 'Chinese Malaysian families targeting Canadian universities',           href: '/chinese-malaysian-canadian-universities',    category: 'Pathway' },
+    { title: 'Malaysian branch campus universities — Monash, Nottingham, Heriot-Watt', href: '/branch-campus-universities-malaysia',      category: 'University pathway' },
+  ],
+}
