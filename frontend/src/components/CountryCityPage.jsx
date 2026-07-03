@@ -21,7 +21,7 @@
      8. Final CTA (dark band + Footer)
 ═══════════════════════════════════════════════════════════════════ */
 
-export default function CountryCityPage({ country, cities, currentCitySlug, P, V, Footer }) {
+export default function CountryCityPage({ country, cities, currentCitySlug, P, V, nav, Footer }) {
   const city = cities.find(c => c.slug === currentCitySlug)
   if (!city) return null
 
