@@ -24,6 +24,7 @@ import { EGYPT_CITIES, EGYPT_COUNTRY } from '../data/egyptCities.js'
 import { MOROCCO_CITIES, MOROCCO_COUNTRY } from '../data/moroccoCities.js'
 import { SOUTH_KOREA_CITIES, SOUTH_KOREA_COUNTRY } from '../data/southKoreaCities.js'
 import { JAPAN_CITIES, JAPAN_COUNTRY } from '../data/japanCities.js'
+import { MALAYSIA_CITIES, MALAYSIA_COUNTRY } from '../data/malaysiaCities.js'
 import { VIETNAM_CITIES, VIETNAM_COUNTRY } from '../data/vietnamCities.js'
 import { THAILAND_CITIES, THAILAND_COUNTRY } from '../data/thailandCities.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
@@ -919,7 +920,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','global','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1349,6 +1350,10 @@ const PAGE_META = {
     title: 'Online Homeschool | IGCSE, A-Level, IB & American — Smartious',
     desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 8/hour for 1-on-1 tuition · from USD 423/month for full homeschool programmes.',
   },
+  'homeschooling-malaysia': {
+    title: 'Online Homeschool Malaysia | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Malaysian families across Kuala Lumpur, Petaling Jaya, Subang Jaya, Cyberjaya, Johor Bahru + Iskandar Puteri, Penang, Kota Kinabalu. British Council KL + Penang exam centres. From USD 180/month.',
+  },
   assessment: {
     title: 'Book Academic Assessment | Admissions Request — Smartious',
     desc: 'Request an academic assessment for your child. Our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled. Admission is determined on assessment results.',
@@ -1759,6 +1764,7 @@ export default function LandingPage() {
   const [currentMoroccoCity, setCurrentMoroccoCity] = useState(null)
   const [currentSouthKoreaCity, setCurrentSouthKoreaCity] = useState(null)
   const [currentJapanCity, setCurrentJapanCity] = useState(null)
+  const [currentMalaysiaCity, setCurrentMalaysiaCity] = useState(null)
   const [currentVietnamCity, setCurrentVietnamCity] = useState(null)
   const [currentThailandCity, setCurrentThailandCity] = useState(null)
   const [currentTestPrep, setCurrentTestPrep] = useState(null)
@@ -2328,6 +2334,12 @@ export default function LandingPage() {
           setPage('thailand-city')
           return
         }
+        const malaysiaCity = MALAYSIA_CITIES.find(c => c.slug === slug)
+        if (malaysiaCity) {
+          setCurrentMalaysiaCity(slug)
+          setPage('malaysia-city')
+          return
+        }
       }
       // Fall back to US state (slug like "texas", "california", "north-carolina")
       if (slug && US_STATES[slug]) {
@@ -2433,6 +2445,10 @@ export default function LandingPage() {
       }
       if (slug === 'thailand') {
         setPage('homeschooling-thailand')
+        return
+      }
+      if (slug === 'malaysia') {
+        setPage('homeschooling-malaysia')
         return
       }
       const country = COUNTRIES.find(c => c.slug === slug)
@@ -2730,6 +2746,13 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'malaysia-city' && currentMalaysiaCity) {
+    const c = MALAYSIA_CITIES.find(x => x.slug === currentMalaysiaCity)
+    if (c) {
+      metaTitle = `Online Homeschooling in ${c.name}, Malaysia | Smartious`
+      metaDesc = c.seoDesc || metaDesc
+      canonicalOverride = `/homeschool-${c.slug}`
+    }
   } else if (page === 'japan-city' && currentJapanCity) {
     const c = JAPAN_CITIES.find(x => x.slug === currentJapanCity)
     if (c) {
@@ -2770,6 +2793,7 @@ export default function LandingPage() {
   if (page === 'homeschooling-morocco') canonicalOverride = '/online-school/morocco'
   if (page === 'homeschooling-south-korea') canonicalOverride = '/online-school/south-korea'
   if (page === 'homeschooling-japan') canonicalOverride = '/online-school/japan'
+  if (page === 'homeschooling-malaysia') canonicalOverride = '/online-school/malaysia'
   if (page === 'homeschooling-vietnam') canonicalOverride = '/online-school/vietnam'
   if (page === 'homeschooling-thailand') canonicalOverride = '/online-school/thailand'
   usePageMeta(metaTitle, metaDesc, canonicalOverride)
@@ -13627,6 +13651,13 @@ export default function LandingPage() {
         />
       )}
 
+            {page === 'homeschooling-malaysia' && (
+              <CountryHub country={MALAYSIA_COUNTRY} cities={MALAYSIA_CITIES}
+                setCurrentCity={setCurrentMalaysiaCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
             {page === 'homeschooling-japan' && (
         <CountryHub
           country={JAPAN_COUNTRY}
@@ -13704,6 +13735,9 @@ export default function LandingPage() {
         />
       )}
 
+      {page === 'malaysia-city' && currentMalaysiaCity && (
+        <CountryCityPage country="Malaysia" cities={MALAYSIA_CITIES} currentCitySlug={currentMalaysiaCity} P={P} V={V} Footer={Footer}/>
+      )}
       {page === 'japan-city' && currentJapanCity && (
         <CountryCityPage
           country={JAPAN_COUNTRY}
