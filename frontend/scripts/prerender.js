@@ -3,20 +3,28 @@
    ───────────────────────────────────────────────────────────────────
    Runs after `vite build` completes (as `npm run postbuild`).
    
-   For each public-facing route, Puppeteer:
-     1. Loads dist/index.html in a headless browser
-     2. Navigates to the route (so React Router renders the matching page)
-     3. Waits for React to mount and for usePageMeta to set title/canonical
+   For each public-facing route, headless Chrome:
+     1. Loads dist/index.html in a virtual server
+     2. Navigates to the route (React Router renders the matching page)
+     3. Waits for React to mount + usePageMeta to set title/canonical
      4. Captures the full rendered HTML
      5. Writes it to dist/<route>/index.html
    
-   Netlify then serves the prerendered HTML directly when crawlers
-   (or users) request that URL. The SPA fallback redirect /* → /index.html
-   in netlify.toml only fires for routes that have no prerendered file
-   (e.g. dynamically-routed pages that aren't in this list).
+   Netlify serves the prerendered HTML directly when crawlers (or users)
+   request that URL. The SPA fallback /* → /index.html in netlify.toml
+   only fires for routes that have no prerendered file.
+   
+   ── Performance optimisations (vs. v1) ──────────────────────────────
+   v1 timed out on Netlify's 18-minute build limit. v2 fixes this:
+     · Concurrency=4 → 4 pages render in parallel (~4x speedup)
+     · Request blocking → drop GTM/analytics/fonts/CDN images that
+       slow render but don't affect output HTML
+     · waitUntil='domcontentloaded' → skip networkidle0 (which never
+       fires cleanly with GTM/gtag.js continuous pings)
+     · Per-page timeout 15s (was 45s) → fail fast on broken routes
+     · MAX_URLS cap → discovery can't run away
    
    Adding a new public route: drop it into ROUTES_TO_PRERENDER.
-   The build is idempotent — re-running just overwrites previous snapshots.
 ═══════════════════════════════════════════════════════════════════ */
 
 import { createServer } from 'node:http'
@@ -29,19 +37,37 @@ import puppeteer from 'puppeteer'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 const DIST = join(ROOT, 'dist')
-const PORT = 5051  /* avoid collision with `vite preview` default 4173 */
+const PORT = 5051
 
-/* ────────────────────────────────────────────────────────────────
-   Routes to prerender. These are the SEO-critical public pages.
-   Keep in sync with the sitemap generator's STATIC_PAGES + the
-   country hubs list. City pages and other dynamic routes will be
-   discovered via internal link-following (see CRAWL_FROM_HUBS).
-   
-   Pages NOT to include: auth-gated routes (/login, /dashboard),
-   API routes, anything that requires a logged-in session.
-   ──────────────────────────────────────────────────────────────── */
+const CONCURRENCY = 4
+const PAGE_TIMEOUT_MS = 15_000
+const WAIT_AFTER_MOUNT_MS = 250
+const MAX_URLS = 300
+
+/* Third-party domains blocked during render — they don't change the
+   output HTML but slow each page substantially. GTM and Google Ads
+   never resolve cleanly because they send heartbeat pings, which is
+   why v1's networkidle0 wait stalled forever. */
+const BLOCKED_DOMAINS = [
+  'googletagmanager.com',
+  'google-analytics.com',
+  'googleadservices.com',
+  'googlesyndication.com',
+  'doubleclick.net',
+  'fonts.googleapis.com',
+  'fonts.gstatic.com',
+  'res.cloudinary.com',
+  'images.unsplash.com',
+  'formsubmit.co',
+  'connect.facebook.net',
+  'snap.licdn.com',
+  'analytics.tiktok.com',
+]
+
+/* Routes to prerender. SEO-critical public pages only.
+   City pages and other dynamic routes auto-discover via internal links
+   from country hubs (see CRAWL_FROM_HUBS_PATTERN). */
 const ROUTES_TO_PRERENDER = [
-  /* Static top-level */
   '/',
   '/about', '/curricula', '/services', '/programs', '/pricing', '/teachers',
   '/global', '/contact', '/faq', '/enroll', '/consult',
@@ -54,7 +80,7 @@ const ROUTES_TO_PRERENDER = [
   '/saskatchewan-homeschool-funding',
   '/privacy', '/terms', '/cookies', '/gdpr',
 
-  /* Country hubs — v2-depth (full <CountryHub> rendering) */
+  /* v2-depth country hubs (full <CountryHub> rendering) */
   '/online-school/kenya',
   '/online-school/ethiopia',
   '/online-school/rwanda',
@@ -68,8 +94,9 @@ const ROUTES_TO_PRERENDER = [
   '/online-school/japan',
   '/online-school/vietnam',
   '/online-school/thailand',
+  '/online-school/malaysia',
 
-  /* Country detail pages (broader COUNTRIES list, lighter template) */
+  /* Country detail pages (lighter template, from COUNTRIES list) */
   '/online-school/usa',
   '/online-school/canada',
   '/online-school/uk',
@@ -81,7 +108,7 @@ const ROUTES_TO_PRERENDER = [
   '/online-school/bahrain',
   '/online-school/somalia',
 
-  /* Test prep details (in sitemap) */
+  /* Test prep details */
   '/test-prep/ielts',
   '/test-prep/toefl',
   '/test-prep/pte',
@@ -90,21 +117,17 @@ const ROUTES_TO_PRERENDER = [
   '/test-prep/sat',
 ]
 
-/* Hub pages whose internal links should be followed and prerendered
-   too. This catches the country city pages without listing all 80+
-   of them explicitly. Set CRAWL_FROM_HUBS=false to disable. */
-const CRAWL_FROM_HUBS = true
-const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)/  /* country city URLs */
-
-/* Per-page render timeout. The hub pages are heavy (lots of JSON-LD,
-   structured data, dozens of sections) so allow generous time. */
-const PAGE_TIMEOUT_MS = 45_000
-const WAIT_AFTER_MOUNT_MS = 800  /* let usePageMeta finish setting canonical/title */
+/* Only crawl internal links from the 13 v2-depth country hubs.
+   Excluding /online-school/usa etc. because their pages list ~120
+   US city links each, which would blow past MAX_URLS instantly.
+   US/Canada city pages fall back to SPA rendering (Google's JS
+   second-pass crawl will still index them via sitemap.xml). */
+const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia)$/
+const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)[a-z0-9-]+$/
 
 /* ────────────────────────────────────────────────────────────────
-   Local static server — serves dist/ on PORT so Puppeteer can hit
-   real URLs (file:// breaks SPA routing). The SPA fallback rewrites
-   any non-file request to /index.html, matching Netlify's behaviour.
+   Local static server — serves dist/ with SPA fallback that matches
+   netlify.toml's /* → /index.html redirect.
    ──────────────────────────────────────────────────────────────── */
 function startServer() {
   return new Promise((resolve, reject) => {
@@ -120,26 +143,76 @@ function startServer() {
   })
 }
 
-/* Convert a route path to its output file path under dist/.
-   '/' → 'dist/index.html'  (overwrite the root)
-   '/about' → 'dist/about/index.html'
-   '/online-school/egypt' → 'dist/online-school/egypt/index.html' */
 function routeToOutputPath(route) {
   if (route === '/' || route === '') return join(DIST, 'index.html')
   const clean = route.replace(/^\/+|\/+$/g, '')
   return join(DIST, clean, 'index.html')
 }
 
-/* Sanitize the rendered HTML before writing:
-   - Strip any Puppeteer artifacts
-   - Ensure no localhost URLs leaked into the output
-   - Keep React's hydration data attributes intact */
 function sanitize(html) {
   return html.replace(new RegExp(`http://localhost:${PORT}`, 'g'), 'https://smartioushomeschool.com')
 }
 
 /* ────────────────────────────────────────────────────────────────
-   Main.
+   Render one route. Returns { success, html?, links?, error? }.
+   Each call gets its own page (Puppeteer best practice for parallel
+   rendering — tab reuse across concurrent renders causes flakiness).
+   ──────────────────────────────────────────────────────────────── */
+async function renderRoute(browser, route) {
+  const page = await browser.newPage()
+  
+  try {
+    /* Block third-party requests — don't affect output, slow render. */
+    await page.setRequestInterception(true)
+    page.on('request', req => {
+      const url = req.url()
+      if (BLOCKED_DOMAINS.some(d => url.includes(d))) {
+        return req.abort()
+      }
+      return req.continue()
+    })
+    
+    /* Silently absorb console errors — they're often analytics-related
+       and don't affect the rendered HTML. */
+    page.on('pageerror', () => {})
+    
+    const url = `http://localhost:${PORT}${route}`
+    await page.goto(url, {
+      waitUntil: 'domcontentloaded',
+      timeout: PAGE_TIMEOUT_MS,
+    })
+    
+    /* Wait for React to mount. */
+    await page.waitForFunction(
+      () => document.getElementById('root')?.childElementCount > 0,
+      { timeout: PAGE_TIMEOUT_MS },
+    )
+    
+    /* Brief pause for usePageMeta to write canonical/title into <head>. */
+    await new Promise(r => setTimeout(r, WAIT_AFTER_MOUNT_MS))
+    
+    const html = sanitize(await page.content())
+    
+    /* Discover internal links from v2-depth country hubs only. */
+    let links = []
+    if (CRAWL_FROM_HUBS_PATTERN.test(route)) {
+      links = await page.evaluate(() => {
+        return Array.from(document.querySelectorAll('a[href]'))
+          .map(a => a.getAttribute('href'))
+          .filter(Boolean)
+      })
+    }
+    
+    return { success: true, html, links }
+  } catch (err) {
+    return { success: false, error: err.message }
+  } finally {
+    await page.close().catch(() => {})
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Main — set up server + browser, run worker pool, write outputs.
    ──────────────────────────────────────────────────────────────── */
 async function prerender() {
   if (!existsSync(DIST)) {
@@ -147,7 +220,8 @@ async function prerender() {
     process.exit(1)
   }
 
-  console.log('[prerender] Starting local server on port', PORT)
+  const startTime = Date.now()
+  console.log(`[prerender] Starting local server on port ${PORT}`)
   const server = await startServer()
 
   console.log('[prerender] Launching headless Chrome')
@@ -158,79 +232,69 @@ async function prerender() {
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--disable-gpu',
+      '--disable-background-timer-throttling',
+      '--disable-renderer-backgrounding',
+      '--disable-backgrounding-occluded-windows',
     ],
   })
 
   const discovered = new Set(ROUTES_TO_PRERENDER)
-  const completed = new Set()
   const queue = [...ROUTES_TO_PRERENDER]
   let successCount = 0
   let failCount = 0
+  
+  console.log(`[prerender] Rendering ${queue.length} initial routes (concurrency=${CONCURRENCY}, max=${MAX_URLS})`)
 
-  try {
+  const queueLink = (href) => {
+    if (discovered.size >= MAX_URLS) return
+    if (!CRAWL_LINK_PATTERN.test(href)) return
+    if (discovered.has(href)) return
+    discovered.add(href)
+    queue.push(href)
+  }
+
+  /* Worker: pull from queue, render, write, queue any discovered links.
+     Run CONCURRENCY workers in parallel. Each shares the browser but
+     uses its own page. */
+  const runWorker = async (workerId) => {
     while (queue.length > 0) {
       const route = queue.shift()
-      if (completed.has(route)) continue
-      completed.add(route)
-
-      const url = `http://localhost:${PORT}${route}`
-      const page = await browser.newPage()
-      page.setDefaultTimeout(PAGE_TIMEOUT_MS)
-
-      /* Mute most console noise from the rendered page, but keep errors. */
-      page.on('pageerror', err => {
-        console.warn(`[prerender] ${route} JS error: ${err.message}`)
-      })
-
-      try {
-        await page.goto(url, { waitUntil: 'networkidle0' })
-
-        /* Wait for React to mount — #root must have children. */
-        await page.waitForFunction(
-          () => document.getElementById('root')?.childElementCount > 0,
-          { timeout: PAGE_TIMEOUT_MS },
-        )
-
-        /* Give usePageMeta a moment to write canonical/title into <head>. */
-        await new Promise(r => setTimeout(r, WAIT_AFTER_MOUNT_MS))
-
-        const html = sanitize(await page.content())
-
-        /* Optionally crawl internal links to discover city/dynamic routes. */
-        if (CRAWL_FROM_HUBS && route.startsWith('/online-school/')) {
-          const internalLinks = await page.evaluate(() => {
-            return Array.from(document.querySelectorAll('a[href]'))
-              .map(a => a.getAttribute('href'))
-              .filter(Boolean)
-          })
-          for (const href of internalLinks) {
-            if (CRAWL_LINK_PATTERN.test(href) && !discovered.has(href)) {
-              discovered.add(href)
-              queue.push(href)
-            }
-          }
-        }
-
+      if (!route) return
+      
+      const result = await renderRoute(browser, route)
+      
+      if (result.success) {
         const outPath = routeToOutputPath(route)
         mkdirSync(dirname(outPath), { recursive: true })
-        writeFileSync(outPath, html)
-        console.log(`[prerender] ✓ ${route} (${(html.length / 1024).toFixed(0)} KB)`)
+        writeFileSync(outPath, result.html)
+        const sizeKB = (result.html.length / 1024).toFixed(0)
+        console.log(`[prerender] ✓ ${route} (${sizeKB} KB)`)
         successCount++
-      } catch (err) {
-        console.warn(`[prerender] ✗ ${route} — ${err.message}`)
+        
+        for (const href of result.links || []) queueLink(href)
+      } else {
+        console.warn(`[prerender] ✗ ${route} — ${result.error}`)
         failCount++
-      } finally {
-        await page.close()
       }
     }
+  }
+
+  try {
+    await Promise.all(
+      Array.from({ length: CONCURRENCY }, (_, i) => runWorker(i))
+    )
   } finally {
     await browser.close()
     server.close()
   }
 
-  console.log(`[prerender] Done. ${successCount} succeeded, ${failCount} failed, ${discovered.size} total discovered`)
-  if (failCount > 0 && successCount === 0) {
-    /* All routes failed — likely a config issue, fail the build. */
+  const elapsedSec = ((Date.now() - startTime) / 1000).toFixed(1)
+  console.log(`[prerender] Done in ${elapsedSec}s. ${successCount} succeeded, ${failCount} failed, ${discovered.size} total discovered`)
+  
+  /* Only fail the build if EVERY route failed — partial failures shouldn't
+     block deploy because Netlify SPA fallback still serves the failed routes. */
+  if (successCount === 0 && failCount > 0) {
+    console.error('[prerender] All routes failed — likely a config issue')
     process.exit(1)
   }
 }
