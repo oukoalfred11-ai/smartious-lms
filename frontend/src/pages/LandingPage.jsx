@@ -2749,9 +2749,8 @@ export default function LandingPage() {
   } else if (page === 'malaysia-city' && currentMalaysiaCity) {
     const c = MALAYSIA_CITIES.find(x => x.slug === currentMalaysiaCity)
     if (c) {
-      metaTitle = `Online Homeschooling in ${c.name}, Malaysia | Smartious`
-      metaDesc = c.seoDesc || metaDesc
-      canonicalOverride = `/homeschool-${c.slug}`
+      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'japan-city' && currentJapanCity) {
     const c = JAPAN_CITIES.find(x => x.slug === currentJapanCity)
