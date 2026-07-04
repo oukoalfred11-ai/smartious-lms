@@ -512,7 +512,7 @@ export const MALAYSIA_COUNTRY = {
   longName: 'Malaysia',
   adjective: 'Malaysian',
   flag: '🇲🇾',
-  hub: 'Kuala Lumpur',
+  hub: '/online-school/malaysia',
   hubPageId: 'homeschooling-malaysia',
   cityPageId: 'malaysia-city',
 
@@ -627,66 +627,4 @@ export const MALAYSIA_COUNTRY = {
   ctaH: 'Book an assessment for your child',
   ctaSubhead: 'Two-gate admissions process. Submit the assessment request form — our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled.',
 
-  // ═══════════════════════════════════════════════════════════════
-  // NEW v2+ FIELDS — extend CountryHub with these optional sections
-  // ═══════════════════════════════════════════════════════════════
-
-  // ── Comparison table (Smartious vs Malaysian physical schools) ─
-  comparisonTable: {
-    title: 'Smartious vs Malaysian premium international schools',
-    intro: 'How Smartious online delivery compares against physical Klang Valley, Iskandar Puteri, and Penang international schools on the factors Malaysian families actually weigh.',
-    columns: ['Feature', 'Smartious online', 'Physical international school', 'What this means for you'],
-    rows: [
-      { feature: 'Curriculum options',       smartious: 'Cambridge IGCSE + A-Level, IB Diploma, American AP, Ontario OSSD (all in one school)', competitor: 'Usually one primary curriculum',                    note: 'Choose the pathway matching your target universities without switching schools' },
-      { feature: 'Live classes',              smartious: 'Yes — daily live classes, small groups (4-6)',                                          competitor: 'Yes — in-person classes, 18-24 per class',           note: 'Smaller Smartious groups = more direct teacher attention' },
-      { feature: 'Cambridge IGCSE + A-Level', smartious: 'Full pathway',                                                                          competitor: 'Common (Alice Smith, Garden, BSKL, Marlborough)',     note: 'Identical qualification either route' },
-      { feature: 'IB Diploma',                smartious: 'Available',                                                                             competitor: 'Some schools only (ISKL, M\'KIS, IGBIS)',              note: 'Fewer physical schools offer IB' },
-      { feature: 'Ontario OSSD',              smartious: 'Available via CCIS partnership',                                                        competitor: 'Only Sunway International School Subang Jaya',        note: 'Smartious extends OSSD access to all Malaysian cities online' },
-      { feature: 'Annual fee (typical)',      smartious: 'USD 2,160-6,480/year (~RM 10,000-30,000/year)',                                        competitor: 'RM 40,000-165,000+/year (Klang Valley premium tier)', note: '4-15× fee difference' },
-      { feature: 'September 2025 6% SST',     smartious: 'Exempt (online delivery)',                                                              competitor: 'Applies on fees above RM 60,000/year',                note: 'Additional RM 1,800-6,300+/year at premium tier' },
-      { feature: 'Flexible schedule',         smartious: 'MYT afternoon (2 PM–6 PM local) or evening',                                            competitor: 'Fixed 8am-3pm timetable',                             note: 'Malaysian sekolah kebangsaan children can dual-track' },
-      { feature: 'Cross-country cohort',      smartious: 'Alongside families in 13 other markets',                                                competitor: 'National/expat community only',                       note: 'A Mont Kiara Year 11 student in the same Chemistry class as students in Tokyo, Dubai, Cairo' },
-      { feature: 'Location constraints',      smartious: 'None — works anywhere in Malaysia with broadband',                                     competitor: 'Klang Valley / Penang / JB clusters',                 note: 'Smartious accessible from Kota Kinabalu, interior Sabah, East Coast' },
-      { feature: 'Enrolment timing',          smartious: 'Immediate',                                                                             competitor: 'Waiting lists at popular grade entry points',         note: 'Mid-year moves supported' },
-      { feature: 'Malaysian branch campus pathway', smartious: 'Cambridge A-Level / IB → Monash, Nottingham, Heriot-Watt, Newcastle Medicine, Southampton, Reading Malaysia', competitor: 'Same qualification recognition', note: 'Identical downstream pathway' },
-    ],
-  },
-
-  // ── Local statistics with sourced figures ────────────────────
-  localStatistics: [
-    { number: '217',                     label: 'Cambridge-registered schools in Malaysia',                                             source: 'Cambridge International Education 2026 registered centre listings' },
-    { number: '~190',                    label: 'International schools across 16 Malaysian cities',                                     source: 'Ministry of Education Malaysia · Private Education Department 2026' },
-    { number: 'RM 12.3B',                label: 'Malaysian household spending on private/international schooling (2023)',              source: 'Malaysian market analysis, 2023 baseline' },
-    { number: 'RM 45,000',               label: 'Median annual international school fee in Malaysia (2026 indicative)',                source: 'Industry survey aggregates 2026' },
-    { number: '6%',                      label: 'Service Tax now applies to international school fees above RM 60,000/year',            source: 'Royal Malaysian Customs Department, effective 1 September 2025' },
-    { number: '25,000-35,000',           label: 'Estimated Malaysian homeschooled children (2026 projection from ~10,000 in 2012)',    source: 'Aggregate industry sources 2026' },
-    { number: 'RM 600-900',              label: 'Cambridge IGCSE private-candidate fee per subject at British Council KL or Penang',   source: 'British Council Malaysia examination centre 2026 fee schedule' },
-    { number: '2',                       label: 'British Council Cambridge examination centres in Malaysia (Kuala Lumpur, Penang)',    source: 'British Council Malaysia' },
-    { number: '9',                       label: 'Foreign university branch campuses in Malaysia (Monash, Nottingham, Heriot-Watt, Xiamen, Curtin, Swinburne, Newcastle Medicine, Southampton, Reading)', source: 'Ministry of Higher Education Malaysia' },
-  ],
-
-  // ── Branch campus universities (unique to Malaysia positioning) ─
-  branchCampusUniversities: [
-    { name: 'Monash University Malaysia',                     city: 'Bandar Sunway, Selangor',    accepts: 'Cambridge A-Level, IB Diploma, IGCSE + Monash Foundation (MUFY)', note: 'Australian degree awarded · Group of Eight member · same qualification as Monash Melbourne' },
-    { name: 'University of Nottingham Malaysia',              city: 'Semenyih, Selangor',         accepts: 'Cambridge A-Level, IB Diploma, IGCSE + UNM Foundation',           note: 'UK degree awarded · Russell Group member · same qualification as Nottingham UK' },
-    { name: 'Heriot-Watt University Malaysia',                city: 'Putrajaya',                  accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'UK degree awarded · strong engineering, business, actuarial, computer science' },
-    { name: 'Xiamen University Malaysia',                     city: 'Sepang, Selangor',           accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'Chinese "985 Project" university · degree conferred by Xiamen University China' },
-    { name: 'Curtin University Malaysia',                     city: 'Miri, Sarawak',              accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'Australian degree awarded · East Malaysia campus' },
-    { name: 'Swinburne University of Technology Sarawak',     city: 'Kuching, Sarawak',           accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'Australian degree awarded' },
-    { name: 'Newcastle University Medicine Malaysia (NUMed)', city: 'Iskandar Puteri, Johor',     accepts: 'Cambridge A-Level Biology, Chemistry, Physics · IB Higher Level Sciences · UCAT for UK MBBS pathway', note: 'UK medical degree awarded · one of the rare MBBS pathways in Malaysia' },
-    { name: 'University of Southampton Malaysia',             city: 'Iskandar Puteri, Johor',     accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'UK Russell Group degree · Engineering focus' },
-    { name: 'University of Reading Malaysia',                 city: 'Iskandar Puteri, Johor',     accepts: 'Cambridge A-Level, IB Diploma + Foundation',                       note: 'UK degree awarded · Business, Property, Finance strong areas' },
-  ],
-
-  // ── Topical cluster links (SEO cluster architecture) ──────────
-  topicalClusterLinks: [
-    { title: 'Cambridge IGCSE homeschooling in Malaysia — private candidate guide', href: '/online-igcse-malaysia',                     category: 'Curriculum' },
-    { title: 'Cambridge A-Level online in Malaysia',                                 href: '/online-a-level-malaysia',                    category: 'Curriculum' },
-    { title: 'IB Diploma online in Malaysia',                                        href: '/online-ib-malaysia',                         category: 'Curriculum' },
-    { title: 'International school alternatives in Malaysia',                        href: '/international-school-alternative-malaysia',  category: 'Comparison' },
-    { title: 'Expatriate homeschooling in Malaysia',                                 href: '/expat-education-malaysia',                   category: 'Guide' },
-    { title: 'Ontario Secondary School Diploma (OSSD) for Malaysian families',       href: '/ossd-malaysia',                              category: 'Pathway' },
-    { title: 'Chinese Malaysian families targeting Canadian universities',           href: '/chinese-malaysian-canadian-universities',    category: 'Pathway' },
-    { title: 'Malaysian branch campus universities — Monash, Nottingham, Heriot-Watt', href: '/branch-campus-universities-malaysia',      category: 'University pathway' },
-  ],
 }
