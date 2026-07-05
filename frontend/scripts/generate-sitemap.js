@@ -52,7 +52,6 @@ import { SOUTH_KOREA_CITIES, SOUTH_KOREA_COUNTRY } from '../src/data/southKoreaC
 import { JAPAN_CITIES, JAPAN_COUNTRY } from '../src/data/japanCities.js'
 import { MALAYSIA_CITIES, MALAYSIA_COUNTRY } from '../src/data/malaysiaCities.js'
 import { TURKEY_CITIES, TURKEY_COUNTRY } from '../src/data/turkeyCities.js'
-import { TOPICAL_ARTICLE_SLUGS } from '../src/data/topicalArticles.js'
 import { VIETNAM_CITIES, VIETNAM_COUNTRY } from '../src/data/vietnamCities.js'
 import { THAILAND_CITIES, THAILAND_COUNTRY } from '../src/data/thailandCities.js'
 
@@ -257,14 +256,6 @@ function buildAllUrls() {
     urls.push(...urlsForArticle(slug, article))
   }
   for (const s of SERVICES)           urls.push(...urlsForService(s))
-  /* Topical cluster articles — long-form landing pages per country.
-     URL pattern: /<slug> (e.g. /online-igcse-malaysia). */
-  for (const slug of TOPICAL_ARTICLE_SLUGS) {
-    urls.push({
-      loc: BASE_URL + '/' + slug,
-      priority: '0.7', changefreq: 'monthly', lastmod: TODAY,
-    })
-  }
   /* CURRICULA has no per-curriculum URL route in the app — the
      curriculum-detail page is state-routed not URL-routed — so we
      deliberately don't emit /curriculum/<slug> URLs that would 404. */
@@ -335,7 +326,6 @@ const counts = {
   studyAbroad: STUDY_ABROAD.length,
   articles: Object.keys(FULL_ARTICLES).length,
   services: SERVICES.length,
-  topicalArticles: TOPICAL_ARTICLE_SLUGS.length,
 }
 
 console.log(`[sitemap] generated ${urls.length} URLs at ${outPath}`)
