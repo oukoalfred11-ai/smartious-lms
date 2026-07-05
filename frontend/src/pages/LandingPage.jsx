@@ -26,6 +26,7 @@ import { SOUTH_KOREA_CITIES, SOUTH_KOREA_COUNTRY } from '../data/southKoreaCitie
 import { JAPAN_CITIES, JAPAN_COUNTRY } from '../data/japanCities.js'
 import { MALAYSIA_CITIES, MALAYSIA_COUNTRY } from '../data/malaysiaCities.js'
 import { TURKEY_CITIES, TURKEY_COUNTRY } from '../data/turkeyCities.js'
+import { KUWAIT_CITIES, KUWAIT_COUNTRY } from '../data/kuwaitCities.js'
 import { VIETNAM_CITIES, VIETNAM_COUNTRY } from '../data/vietnamCities.js'
 import { THAILAND_CITIES, THAILAND_COUNTRY } from '../data/thailandCities.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
@@ -921,7 +922,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1359,6 +1360,10 @@ const PAGE_META = {
     title: 'Online Homeschool Türkiye | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Turkish and expat families across Istanbul (Bebek, Etiler, Nişantaşı, Kadıköy, Ataşehir), Ankara (Çankaya, Bilkent), Izmir, Antalya (post-2022 Russian and Ukrainian community), Bursa, Adana. British Council Istanbul + Ankara + BESA exam centres. TRT time zone exactly matching Nairobi teaching hours. From USD 180/month.',
   },
+  'homeschooling-kuwait': {
+    title: 'Online Homeschool Kuwait | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Kuwaiti and expat families across Kuwait City, Salmiya (densest expat district), Hawally (Cambridge English School catchment), Salwa (premium coastal), Bayan (embassy district), and Ahmadi (KOC oil town). British Council Kuwait exam centre. AST time zone exactly matching Nairobi teaching hours. MOHE scholarship pathway alignment. From USD 180/month.',
+  },
   assessment: {
     title: 'Book Academic Assessment | Admissions Request — Smartious',
     desc: 'Request an academic assessment for your child. Our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled. Admission is determined on assessment results.',
@@ -1771,6 +1776,7 @@ export default function LandingPage() {
   const [currentJapanCity, setCurrentJapanCity] = useState(null)
   const [currentMalaysiaCity, setCurrentMalaysiaCity] = useState(null)
   const [currentTurkeyCity, setCurrentTurkeyCity] = useState(null)
+  const [currentKuwaitCity, setCurrentKuwaitCity] = useState(null)
   const [currentVietnamCity, setCurrentVietnamCity] = useState(null)
   const [currentThailandCity, setCurrentThailandCity] = useState(null)
   const [currentTestPrep, setCurrentTestPrep] = useState(null)
@@ -2352,6 +2358,12 @@ export default function LandingPage() {
           setPage('turkey-city')
           return
         }
+        const kuwaitCity = KUWAIT_CITIES.find(c => c.slug === slug)
+        if (kuwaitCity) {
+          setCurrentKuwaitCity(slug)
+          setPage('kuwait-city')
+          return
+        }
       }
       // Fall back to US state (slug like "texas", "california", "north-carolina")
       if (slug && US_STATES[slug]) {
@@ -2465,6 +2477,10 @@ export default function LandingPage() {
       }
       if (slug === 'turkey') {
         setPage('homeschooling-turkey')
+        return
+      }
+      if (slug === 'kuwait') {
+        setPage('homeschooling-kuwait')
         return
       }
       const country = COUNTRIES.find(c => c.slug === slug)
@@ -2774,6 +2790,12 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'kuwait-city' && currentKuwaitCity) {
+    const c = KUWAIT_CITIES.find(x => x.slug === currentKuwaitCity)
+    if (c) {
+      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
+    }
   } else if (page === 'japan-city' && currentJapanCity) {
     const c = JAPAN_CITIES.find(x => x.slug === currentJapanCity)
     if (c) {
@@ -2816,6 +2838,7 @@ export default function LandingPage() {
   if (page === 'homeschooling-japan') canonicalOverride = '/online-school/japan'
   if (page === 'homeschooling-malaysia') canonicalOverride = '/online-school/malaysia'
   if (page === 'homeschooling-turkey') canonicalOverride = '/online-school/turkey'
+  if (page === 'homeschooling-kuwait') canonicalOverride = '/online-school/kuwait'
   if (page === 'homeschooling-vietnam') canonicalOverride = '/online-school/vietnam'
   if (page === 'homeschooling-thailand') canonicalOverride = '/online-school/thailand'
   usePageMeta(metaTitle, metaDesc, canonicalOverride)
@@ -13434,6 +13457,13 @@ export default function LandingPage() {
         />
       )}
 
+            {page === 'homeschooling-kuwait' && (
+              <CountryHub country={KUWAIT_COUNTRY} cities={KUWAIT_CITIES}
+                setCurrentCity={setCurrentKuwaitCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
             {page === 'homeschooling-turkey' && (
               <CountryHub country={TURKEY_COUNTRY} cities={TURKEY_CITIES}
                 setCurrentCity={setCurrentTurkeyCity}
@@ -13525,6 +13555,14 @@ export default function LandingPage() {
         />
       )}
 
+      {page === 'kuwait-city' && currentKuwaitCity && (
+        <CountryCityPage
+          country={KUWAIT_COUNTRY}
+          cities={KUWAIT_CITIES}
+          currentCitySlug={currentKuwaitCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
       {page === 'turkey-city' && currentTurkeyCity && (
         <CountryCityPage
           country={TURKEY_COUNTRY}
