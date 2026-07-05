@@ -39,7 +39,7 @@ const ROOT = join(__dirname, '..')
 const DIST = join(ROOT, 'dist')
 const PORT = 5051
 
-const CONCURRENCY = 4
+const CONCURRENCY = 2
 const PAGE_TIMEOUT_MS = 15_000
 const WAIT_AFTER_MOUNT_MS = 250
 const MAX_URLS = 300
@@ -96,6 +96,7 @@ const ROUTES_TO_PRERENDER = [
   '/online-school/thailand',
   '/online-school/malaysia',
   '/online-school/turkey',
+  '/online-school/kuwait',
 
   /* Topical cluster articles (Malaysia — will scale to other countries) */
   '/online-igcse-malaysia',
@@ -129,7 +130,7 @@ const ROUTES_TO_PRERENDER = [
    US city links each, which would blow past MAX_URLS instantly.
    US/Canada city pages fall back to SPA rendering (Google's JS
    second-pass crawl will still index them via sitemap.xml). */
-const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey)$/
+const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait)$/
 const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)[a-z0-9-]+$/
 
 /* ────────────────────────────────────────────────────────────────
@@ -166,9 +167,14 @@ function sanitize(html) {
    rendering — tab reuse across concurrent renders causes flakiness).
    ──────────────────────────────────────────────────────────────── */
 async function renderRoute(browser, route) {
-  const page = await browser.newPage()
+  let page
   
   try {
+    /* newPage() must be inside try — if Chromium has crashed on
+       Netlify (memory pressure with large bundle), this throws and
+       we want to catch it per-route, not let it kill the build. */
+    page = await browser.newPage()
+    
     /* Block third-party requests — don't affect output, slow render. */
     await page.setRequestInterception(true)
     page.on('request', req => {
@@ -214,7 +220,7 @@ async function renderRoute(browser, route) {
   } catch (err) {
     return { success: false, error: err.message }
   } finally {
-    await page.close().catch(() => {})
+    if (page) await page.close().catch(() => {})
   }
 }
 
