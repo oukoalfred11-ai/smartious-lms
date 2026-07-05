@@ -52,6 +52,7 @@ import { SOUTH_KOREA_CITIES, SOUTH_KOREA_COUNTRY } from '../src/data/southKoreaC
 import { JAPAN_CITIES, JAPAN_COUNTRY } from '../src/data/japanCities.js'
 import { MALAYSIA_CITIES, MALAYSIA_COUNTRY } from '../src/data/malaysiaCities.js'
 import { TURKEY_CITIES, TURKEY_COUNTRY } from '../src/data/turkeyCities.js'
+import { KUWAIT_CITIES, KUWAIT_COUNTRY } from '../src/data/kuwaitCities.js'
 import { VIETNAM_CITIES, VIETNAM_COUNTRY } from '../src/data/vietnamCities.js'
 import { THAILAND_CITIES, THAILAND_COUNTRY } from '../src/data/thailandCities.js'
 
@@ -124,6 +125,7 @@ const COUNTRY_DATA = [
   { country: THAILAND_COUNTRY,     cities: THAILAND_CITIES                                       },
   { country: MALAYSIA_COUNTRY,     cities: MALAYSIA_CITIES                                       },
   { country: TURKEY_COUNTRY,       cities: TURKEY_CITIES                                         },
+  { country: KUWAIT_COUNTRY,       cities: KUWAIT_CITIES                                         },
 ]
 
 /* ────────────────────────────────────────────────────────────────
