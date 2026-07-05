@@ -53,6 +53,7 @@ const REGION_LABELS = {
   vietnam:       'Southeast Asia, the Gulf and Africa',
   thailand:      'Southeast Asia, the Gulf and Africa',
   malaysia:      'Southeast Asia, the Gulf and East Asia',
+  turkey:        'the Middle East, Europe, and East Africa',
 }
 
 /* ISO country codes for hreflang. Format: en-<CC> tells Google
@@ -66,6 +67,7 @@ const HREFLANG_MAP = {
   japan:'en-jp', 'south-korea':'en-kr',
   vietnam:'en-vn', thailand:'en-th',
   malaysia:'en-my',
+  turkey:'en-tr',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
