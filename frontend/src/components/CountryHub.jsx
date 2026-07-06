@@ -56,6 +56,7 @@ const REGION_LABELS = {
   turkey:        'the Middle East, Europe, and East Africa',
   kuwait:        'the Middle East, the Gulf, and East Africa',
   oman:          'the Gulf, East Africa, and Southeast Asia',
+  taiwan:        'East Asia, Southeast Asia, and East Africa',
 }
 
 /* ISO country codes for hreflang. Format: en-<CC> tells Google
@@ -72,6 +73,7 @@ const HREFLANG_MAP = {
   turkey:'en-tr',
   kuwait:'en-kw',
   oman:'en-om',
+  taiwan:'en-tw',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
