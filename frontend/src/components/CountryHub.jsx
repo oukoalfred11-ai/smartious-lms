@@ -55,6 +55,7 @@ const REGION_LABELS = {
   malaysia:      'Southeast Asia, the Gulf and East Asia',
   turkey:        'the Middle East, Europe, and East Africa',
   kuwait:        'the Middle East, the Gulf, and East Africa',
+  oman:          'the Gulf, East Africa, and Southeast Asia',
 }
 
 /* ISO country codes for hreflang. Format: en-<CC> tells Google
@@ -70,6 +71,7 @@ const HREFLANG_MAP = {
   malaysia:'en-my',
   turkey:'en-tr',
   kuwait:'en-kw',
+  oman:'en-om',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
