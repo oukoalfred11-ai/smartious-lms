@@ -230,6 +230,20 @@
     <lastmod>2026-07-06</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-om" href="https://smartioushomeschool.com/online-school/oman"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/taiwan</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-tw" href="https://smartioushomeschool.com/online-school/taiwan"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/ireland</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ie" href="https://smartioushomeschool.com/online-school/ireland"/>
+  </url>
 
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
@@ -568,6 +582,82 @@
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-07-06</lastmod>
+  </url>
+
+  <!-- Taiwan cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-taipei-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-new-taipei-city-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-hsinchu-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-taichung-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kaohsiung-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-taoyuan-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+
+  <!-- Ireland cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-dublin-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-cork-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-galway-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-limerick-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-waterford-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kildare-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
   </url>
 
 </urlset>
