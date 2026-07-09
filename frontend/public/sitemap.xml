@@ -244,6 +244,13 @@
     <lastmod>2026-07-09</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ie" href="https://smartioushomeschool.com/online-school/ireland"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/united-kingdom</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-gb" href="https://smartioushomeschool.com/online-school/united-kingdom"/>
+  </url>
 
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
@@ -655,6 +662,44 @@
   </url>
   <url>
     <loc>https://smartioushomeschool.com/homeschool-kildare-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+
+  <!-- United Kingdom cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-london-uk</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-manchester-uk</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-birmingham-uk</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-leeds-uk</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-bristol-uk</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-edinburgh-uk</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-07-09</lastmod>
