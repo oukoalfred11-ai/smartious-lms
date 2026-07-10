@@ -13,6 +13,7 @@ import { CA_PROVINCES, CA_PROVINCES_LIST } from '../data/caProvinces.js'
 import { CA_CITIES, CA_CITIES_LIST, CA_CITIES_BY_PROVINCE } from '../data/caCities.js'
 import { NAIROBI_AREAS } from '../data/nairobiAreas.js'
 import { UAE_AREAS } from '../data/uaeAreas.js'
+import { UK_AREAS, UK_AREAS_BY_CITY } from '../data/ukAreas.js'
 import { KENYA_CITIES, KENYA_COUNTRY } from '../data/kenyaCities.js'
 import { ETHIOPIA_CITIES, ETHIOPIA_COUNTRY } from '../data/ethiopiaCities.js'
 import { RWANDA_CITIES, RWANDA_COUNTRY } from '../data/rwandaCities.js'
@@ -926,7 +927,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1400,6 +1401,14 @@ const PAGE_META = {
     title: 'Our Services | Homeschooling, Online School & Tuition — Smartious',
     desc: 'Smartious services — homeschooling at home, the Parklands learning centre, the online Virtual School, private tuition, the Mshauri AI tutor, and intensive exam preparation.',
   },
+  'tuition-uk': {
+    title: 'Private Tuition UK — Online Cambridge, A-Level, IB, 11+ | Smartious',
+    desc: 'Live online private tuition for UK families across London (Kensington, Chelsea, Notting Hill, Hampstead, Wimbledon, Dulwich), Manchester (Didsbury, Altrincham, Salford), Birmingham (Edgbaston, Solihull, Harborne), Leeds (Roundhay, Alwoodley), Bristol (Clifton, Redland), and Edinburgh (Morningside, New Town). Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance preparation. From USD 8/hour.',
+  },
+  'uk-area': {
+    title: 'Private Tuition UK — Online IGCSE, A-Level, 11+ | Smartious',
+    desc: 'Live online and in-person private tuition in select UK areas — Cambridge IGCSE, A-Level, IB Diploma, 11+ Common Entrance preparation. From USD 8/hour.',
+  },
   pricing: {
     title: 'Fee Structure 2026 | Homeschool & Tuition Fees — Smartious',
     desc: 'Smartious 2026 fee structure — transparent monthly, termly and annual fees for homeschool programmes, A-Level, IB, single subjects and private tuition.',
@@ -1783,6 +1792,7 @@ export default function LandingPage() {
   const [currentCountry, setCurrentCountry] = useState(null)
   const [currentTuitionArea, setCurrentTuitionArea] = useState(null)
   const [currentUaeArea, setCurrentUaeArea] = useState(null)
+  const [currentUkArea, setCurrentUkArea] = useState(null)
   const [currentKenyaCity, setCurrentKenyaCity] = useState(null)
   const [currentEthiopiaCity, setCurrentEthiopiaCity] = useState(null)
   const [currentRwandaCity, setCurrentRwandaCity] = useState(null)
@@ -2601,6 +2611,21 @@ export default function LandingPage() {
       }
       return
     }
+    if (path === '/tuition-uk') {
+      setPage('tuition-uk')
+      return
+    }
+    if (path.startsWith('/tuition-uk/')) {
+      const slug = decodeURIComponent(path.slice('/tuition-uk/'.length))
+      const area = UK_AREAS.find(a => a.slug === slug)
+      if (area) {
+        setCurrentUkArea(slug)
+        setPage('uk-area')
+      } else {
+        setPage('tuition-uk')
+      }
+      return
+    }
     if (path === '/homeschooling-kenya') {
       setPage('homeschooling-kenya')
       return
@@ -2931,6 +2956,7 @@ export default function LandingPage() {
   if (page === 'homeschooling-taiwan') canonicalOverride = '/online-school/taiwan'
   if (page === 'homeschooling-ireland') canonicalOverride = '/online-school/ireland'
   if (page === 'homeschooling-united-kingdom') canonicalOverride = '/online-school/united-kingdom'
+  if (page === 'tuition-uk') canonicalOverride = '/tuition-uk'
   if (page === 'homeschooling-vietnam') canonicalOverride = '/online-school/vietnam'
   if (page === 'homeschooling-thailand') canonicalOverride = '/online-school/thailand'
   usePageMeta(metaTitle, metaDesc, canonicalOverride)
@@ -3016,6 +3042,12 @@ export default function LandingPage() {
     nav('/tuition-uae/' + encodeURIComponent(slug))
     window.scrollTo(0, 0)
     topRef.current?.scrollIntoView()
+  }
+
+  // openUkArea(slug) — navigate to a UK city/area tuition page
+  const openUkArea = (slug) => {
+    setPage('uk-area')
+    nav('/tuition-uk/' + encodeURIComponent(slug))
   }
 
   // openKenyaCity(slug) — navigate to a Kenya city homeschooling page
@@ -16900,6 +16932,325 @@ export default function LandingPage() {
         </>
       )}
       {/* /homeschool */}
+
+      {/* ══════════════════════════════════════════
+          TUITION UK — Hub page at /tuition-uk
+          Landing page for UK city + area tuition network
+      ══════════════════════════════════════════ */}
+      {page === 'tuition-uk' && (
+        <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'EducationalOrganization',
+            '@id': 'https://smartioushomeschool.com/tuition-uk#org',
+            'name': 'Smartious — Private Tuition UK',
+            'url': 'https://smartioushomeschool.com/tuition-uk',
+            'description': 'Live online private tuition for UK families across London, Manchester, Birmingham, Leeds, Bristol, Edinburgh. Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance. From USD 8/hour.',
+            'areaServed': UK_AREAS.map(a => ({ '@type': 'Place', 'name': a.name + ', ' + a.city })),
+            'sameAs': ['https://smartioushomeschool.com'],
+          }) }}/>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+            'itemListElement': [
+              { '@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': 'https://smartioushomeschool.com/' },
+              { '@type': 'ListItem', 'position': 2, 'name': 'Tuition UK', 'item': 'https://smartioushomeschool.com/tuition-uk' },
+            ],
+          }) }}/>
+
+          {/* HERO */}
+          <section className="sec" style={{
+            position:'relative',
+            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+            color:'#fff',
+            padding:'72px 0 56px',
+            overflow:'hidden',
+          }}>
+            <div className="wrap">
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Private tuition across the United Kingdom</div>
+              <h1 style={{
+                fontFamily:"'DM Serif Display',Georgia,serif",
+                fontSize:'clamp(2rem,4.5vw,3rem)',
+                fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:16,
+              }}>Tuition <em style={{color:V.gold3,fontStyle:'italic'}}>UK</em></h1>
+              <p style={{fontSize:16,color:'rgba(255,255,255,.9)',lineHeight:1.65,marginBottom:22,maxWidth:820}}>
+                Live online and in-person private tuition for UK families across London (Kensington, Chelsea, Notting Hill, Hampstead, Wimbledon, Dulwich), Manchester (Didsbury, Altrincham, Salford), Birmingham (Edgbaston, Solihull, Harborne), Leeds (Roundhay, Alwoodley), Bristol (Clifton, Redland), and Edinburgh (Morningside, New Town). Cambridge IGCSE, A-Level, IB Diploma, 11+ and 13+ Common Entrance preparation.
+              </p>
+              <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+              </div>
+            </div>
+          </section>
+
+          {/* KEY VALUE PROPS */}
+          <section className="sec" style={{background:V.bone}}><div className="wrap">
+            <div style={{maxWidth:1000,margin:'0 auto',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:16}}>
+              {[
+                {h:'From USD 8/hour',p:'Meaningfully more affordable than Cambridge Home School Online (£10,950/year) and traditional UK online school competitors. Live small-group classes 4-6 students.'},
+                {h:'Cambridge IGCSE and A-Level',p:'UCAS-recognised pathway to all UK universities including Oxbridge, Imperial, LSE, UCL, Warwick, plus international destinations.'},
+                {h:'11+ and 13+ Common Entrance',p:'Structured preparation for Westminster, Eton, Harrow, St. Paul\'s, KCS Wimbledon, Manchester Grammar, King Edward VI, Clifton College, Fettes.'},
+                {h:'EHE-compatible curriculum',p:'Meets Section 7 Education Act 1996 "suitable education" standard. Documented curriculum suitable for local authority enquiry response.'},
+              ].map((v, i) => (
+                <div key={i} style={{background:'#fff',border:'1px solid '+V.line,borderRadius:12,padding:'20px 22px'}}>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:10}}>{v.h}</h3>
+                  <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6}}>{v.p}</p>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* AREA DIRECTORY — grouped by city */}
+          <section className="sec" style={{background:'#fff'}}><div className="wrap">
+            <div style={{textAlign:'center',marginBottom:36}}>
+              <div className="eyebrow" style={{justifyContent:'center'}}>Cities and areas we serve</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:V.ink,marginTop:8}}>
+                Find your area
+              </h2>
+            </div>
+            <div style={{maxWidth:1000,margin:'0 auto'}}>
+              {Object.entries(UK_AREAS_BY_CITY).map(([city, areas]) => (
+                <div key={city} style={{marginBottom:32}}>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:700,color:V.cr,marginBottom:16,paddingBottom:8,borderBottom:'2px solid '+V.line}}>{city}</h3>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))',gap:12}}>
+                    {areas.map(area => (
+                      <a key={area.slug}
+                        href={'/tuition-uk/' + area.slug}
+                        onClick={(e) => { e.preventDefault(); openUkArea(area.slug) }}
+                        style={{
+                          display:'block',
+                          background:V.bone,border:'1px solid '+V.line,borderRadius:10,
+                          padding:'14px 16px',
+                          textDecoration:'none',color:V.ink,
+                          transition:'all 0.2s ease',
+                          cursor:'pointer',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = V.line; e.currentTarget.style.transform = 'translateY(0)' }}>
+                        <div style={{fontSize:14.5,fontWeight:700,color:V.ink,marginBottom:4}}>{area.name}</div>
+                        <div style={{fontSize:11.5,color:V.sl3,letterSpacing:'.03em'}}>Private tuition · from USD 8/hour</div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div></section>
+
+          {/* CTA */}
+          <section className="sec" style={{background:V.ink,color:'#fff',padding:'60px 0'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
+            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:'#fff',marginBottom:16}}>Book an assessment for your child</h2>
+            <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.65}}>Two-gate admissions process. Submit the assessment request form — our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled.</p>
+            <button onClick={() => nav('/assessment')}
+              style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+          </div></section>
+        </>
+      )}
+
+      {/* ══════════════════════════════════════════
+          TUITION UK AREA — Individual city/street pages
+          One renderer, data-driven from UK_AREAS.
+      ══════════════════════════════════════════ */}
+      {page === 'uk-area' && currentUkArea && (() => {
+        const area = UK_AREAS.find(a => a.slug === currentUkArea)
+        if (!area) return null
+        return (
+          <>
+            {/* Schema */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'BreadcrumbList',
+              'itemListElement':[
+                {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
+                {'@type':'ListItem','position':2,'name':'Tuition UK','item':'https://smartioushomeschool.com/tuition-uk'},
+                {'@type':'ListItem','position':3,'name':'Tuition in ' + area.name + ', ' + area.city,'item':'https://smartioushomeschool.com/tuition-uk/' + area.slug},
+              ],
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'LocalBusiness',
+              'name':'Smartious Tuition — ' + area.name,
+              'description': area.seoDesc,
+              'url':'https://smartioushomeschool.com/tuition-uk/' + area.slug,
+              'telephone':'+254745021212',
+              'email':'hellosmartious@gmail.com',
+              'areaServed':{'@type':'Place','name': area.name + ', ' + area.city + ', UK'},
+              'address':{'@type':'PostalAddress','addressLocality': area.name,'addressRegion': area.city,'addressCountry':'GB'},
+              'priceRange':'From USD 8/hour',
+            })}}/>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+              '@context':'https://schema.org','@type':'Service',
+              'serviceType':'Private Home & Online Tuition in ' + area.name,
+              'provider':{'@type':'EducationalOrganization','name':'Smartious Homeschool & eSchool'},
+              'areaServed':{'@type':'Place','name': area.name + ', ' + area.city + ', UK'},
+              'description': area.intro,
+            })}}/>
+
+            {/* HERO */}
+            <section className="sec" style={{
+              position:'relative',
+              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
+              color:'#fff',
+              padding:'60px 0 48px',
+              overflow:'hidden',
+            }}>
+              {area.heroImg && (
+                <>
+                  <img
+                    src={area.heroImg}
+                    alt=""
+                    aria-hidden="true"
+                    onError={e => { e.currentTarget.style.display='none' }}
+                    style={{
+                      position:'absolute',inset:0,
+                      width:'100%',height:'100%',objectFit:'cover',
+                      opacity:0.55,
+                      filter:'saturate(.85)',
+                      zIndex:0,
+                    }}
+                  />
+                  <div style={{
+                    position:'absolute',inset:0,
+                    background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,
+                    zIndex:1,
+                  }}/>
+                </>
+              )}
+              <div className="wrap" style={{position:'relative',zIndex:2}}>
+                <a
+                  href="/tuition-uk"
+                  onClick={(e)=>{e.preventDefault(); P('tuition-uk')}}
+                  style={{color:'rgba(255,255,255,.7)',textDecoration:'none',fontSize:12,letterSpacing:'.04em',marginBottom:16,display:'inline-flex',alignItems:'center',gap:6}}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  Tuition UK · {area.city}
+                </a>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{area.region}</div>
+                <h1 style={{
+                  fontFamily:"'DM Serif Display',Georgia,serif",
+                  fontSize:'clamp(2rem,4.5vw,3rem)',
+                  fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:16,
+                }}>Tuition in <em style={{color:V.gold3,fontStyle:'italic'}}>{area.name}</em>, {area.city}</h1>
+                <p style={{fontSize:16,color:'rgba(255,255,255,.9)',lineHeight:1.65,marginBottom:22,maxWidth:720}}>
+                  {area.intro}
+                </p>
+                <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+                  <button onClick={() => nav('/assessment')}
+                    style={{background:V.gold3,color:V.ink,border:'none',padding:'12px 24px',borderRadius:8,fontSize:13.5,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+                </div>
+              </div>
+            </section>
+
+            {/* EXTENDED INTRO */}
+            {area.introExtended && (
+              <section className="sec" style={{background:V.bone,padding:'40px 0'}}><div className="wrap">
+                <div style={{maxWidth:820,margin:'0 auto'}}>
+                  <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{area.introExtended}</p>
+                </div>
+              </div></section>
+            )}
+
+            {/* LOCAL CONTEXT */}
+            <section className="sec" style={{background:'#fff'}}><div className="wrap">
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="tuition-area-grid">
+                <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
+                  <div className="eyebrow" style={{marginBottom:8}}>The {area.name} parent</div>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>What we hear from families here</h3>
+                  <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7}}>{area.parentProfile}</p>
+                </div>
+                <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
+                  <div className="eyebrow" style={{marginBottom:8}}>Local schools we work with</div>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>Schools nearby</h3>
+                  <ul style={{listStyle:'none',padding:0,margin:0}}>
+                    {area.localSchools.map((s,i) => (
+                      <li key={i} style={{padding:'6px 0',fontSize:13.5,color:V.sl,borderTop: i===0?'none':'1px dashed '+V.line}}>
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <style>{`@media (max-width: 800px) { .tuition-area-grid { grid-template-columns: 1fr !important; } }`}</style>
+            </div></section>
+
+            {/* COMMUTE + PRICING */}
+            <section className="sec" style={{background:V.bone}}><div className="wrap">
+              <div style={{maxWidth:880,margin:'0 auto',display:'grid',gridTemplateColumns:'1fr 1fr',gap:24}} className="tuition-area-grid">
+                <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px'}}>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:8}}>Commute & timing</div>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>Reaching {area.name}</h3>
+                  <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65}}>{area.commuteNote}</p>
+                </div>
+                <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px'}}>
+                  <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:8}}>Pricing for {area.name}</div>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>How fees work here</h3>
+                  <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65}}>{area.pricingNote}</p>
+                </div>
+              </div>
+            </div></section>
+
+            {/* COMMON SUBJECTS */}
+            {area.commonSubjects && area.commonSubjects.length > 0 && (
+              <section className="sec" style={{background:'#fff'}}><div className="wrap">
+                <div style={{maxWidth:880,margin:'0 auto'}}>
+                  <div style={{textAlign:'center',marginBottom:28}}>
+                    <div className="eyebrow" style={{justifyContent:'center'}}>What we tutor in {area.name}</div>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                      Most-requested subjects
+                    </h2>
+                    <p style={{fontSize:13.5,color:V.sl3,marginTop:10,lineHeight:1.6,maxWidth:560,margin:'10px auto 0'}}>
+                      These are the subjects {area.name} families most commonly ask us about.
+                    </p>
+                  </div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:10}}>
+                    {area.commonSubjects.map((s, i) => (
+                      <div key={i} style={{
+                        background:V.bone,border:'1px solid '+V.line,borderRadius:8,
+                        padding:'10px 14px',
+                        fontSize:13,color:V.ink,fontWeight:600,
+                        display:'flex',alignItems:'center',gap:8,
+                      }}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={V.gold2} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0}}><path d="M5 12l5 5L20 7"/></svg>
+                        {s}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div></section>
+            )}
+
+            {/* LOCAL FAQ */}
+            <section className="sec" style={{background:V.bone}}><div className="wrap">
+              <div style={{maxWidth:780,margin:'0 auto'}}>
+                <div style={{textAlign:'center',marginBottom:24}}>
+                  <div className="eyebrow" style={{justifyContent:'center'}}>Quick answers for {area.name}</div>
+                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                    Frequently asked
+                  </h2>
+                </div>
+                {area.localFaqs && area.localFaqs.map((f, i) => (
+                  <details key={i} style={{background:'#fff',border:'1px solid '+V.line,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
+                    <summary style={{cursor:'pointer',padding:'16px 18px',fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none'}}>{f.q}</summary>
+                    <div style={{padding:'0 18px 16px',fontSize:14,color:V.sl,lineHeight:1.7,borderTop:'1px solid '+V.line,paddingTop:14}}>
+                      {f.a}
+                    </div>
+                  </details>
+                ))}
+              </div>
+              <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+                '@context':'https://schema.org','@type':'FAQPage',
+                'mainEntity':(area.localFaqs || []).map(f => ({
+                  '@type':'Question','name': f.q, 'acceptedAnswer':{ '@type':'Answer','text': f.a }
+                })),
+              })}}/>
+            </div></section>
+
+            {/* CTA */}
+            <section className="sec" style={{background:V.ink,color:'#fff',padding:'60px 0'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:'#fff',marginBottom:16}}>Book an assessment for your child in {area.name}</h2>
+              <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.65}}>Two-gate admissions process. Submit the assessment request form — our Head of Admissions reviews every request within three business days.</p>
+              <button onClick={() => nav('/assessment')}
+                style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+            </div></section>
+          </>
+        )
+      })()}
 
       {/* ══════════════════════════════════════════
           TUITION GLOBAL HUB — /tuition
