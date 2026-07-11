@@ -59,6 +59,7 @@ const REGION_LABELS = {
   taiwan:        'East Asia, Southeast Asia, and East Africa',
   ireland:       'Europe, North America, and East Africa',
   'united-kingdom': 'Europe, North America, and East Africa',
+  india:         'South Asia, East Africa, and the Gulf',
 }
 
 /* ISO country codes for hreflang. Format: en-<CC> tells Google
@@ -78,6 +79,7 @@ const HREFLANG_MAP = {
   taiwan:'en-tw',
   ireland:'en-ie',
   'united-kingdom':'en-gb',
+  india:'en-in',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
