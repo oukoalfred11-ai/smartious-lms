@@ -7,29 +7,41 @@ const jwt = require('jsonwebtoken');
 const { sendVerificationEmail, sendTeacherMemoEmail } = require('../services/emailService');
 const { sendWelcomeEmail } = require('../lib/email');
 
-// ── Avatar upload — multer memory storage + R2 ───────────
-const multer = require('multer');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
-const { v4: uuidv4 } = require('uuid');
+// ── Cloudinary avatar upload setup ────────────────────────
+// Wrapped defensively: if multer / multer-storage-cloudinary are not
+// installed, we must NOT throw at module load — that would crash the
+// entire server (index.js requires this file at boot). Instead the
+// avatar endpoint degrades to a clear 503 and every other /api/users
+// route keeps working.
+let uploadAvatar = null;
+let avatarUploadError = null;
+try {
+  const multer = require('multer');
+  const cloudinary = require('cloudinary').v2;
+  const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-const r2Avatar = new S3Client({
-  region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId:     process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-  },
-});
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key:    process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
 
-const uploadAvatar = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    if (['image/jpeg','image/png','image/webp','image/jpg'].includes(file.mimetype))
-      cb(null, true);
-    else cb(new Error('Image must be JPG, PNG or WebP.'), false);
-  },
-});
+  const avatarStorage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: 'smartious/avatars',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+      transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
+    },
+  });
+  uploadAvatar = multer({
+    storage: avatarStorage,
+    limits: { fileSize: 5 * 1024 * 1024 },   // 5 MB cap
+  });
+} catch (e) {
+  avatarUploadError = e.message;
+  console.error('[users] avatar upload disabled —', e.message);
+}
 
 // ─────────────────────────────────────────────────────────
 // HELPER: Sync a student's GroupRoom enrollments based on
@@ -123,6 +135,75 @@ router.get('/stats', auth, requireRole('admin'), async (req, res) => {
 });
 
 // GET all users (admin only) with advanced search and filtering
+// ─────────────────────────────────────────────────────────
+// GET /api/users/me — current logged-in user's own profile
+// ─────────────────────────────────────────────────────────
+router.get('/me', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password').lean();
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+    return res.json({ success: true, data: { user } });
+  } catch (e) {
+    console.error('[users/me]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// PATCH /api/users/me — update own profile (name, phone)
+// ─────────────────────────────────────────────────────────
+router.patch('/me', auth, async (req, res) => {
+  try {
+    const { firstName, lastName, phone } = req.body || {};
+    const update = {};
+    if (firstName?.trim()) update.firstName = firstName.trim();
+    if (lastName?.trim())  update.lastName  = lastName.trim();
+    if (phone !== undefined) update.phone   = String(phone).trim();
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: update },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+    return res.json({ success: true, message: 'Profile updated.', data: { user } });
+  } catch (e) {
+    console.error('[users patch/me]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// POST /api/users/change-password — change own password
+// Body: { currentPassword, newPassword }
+// ─────────────────────────────────────────────────────────
+router.post('/change-password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body || {};
+    if (!currentPassword) return res.status(400).json({ success: false, message: 'Current password is required.' });
+    if (!newPassword || newPassword.length < 8)
+      return res.status(400).json({ success: false, message: 'New password must be at least 8 characters.' });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+
+    const bcrypt = require('bcryptjs');
+    const valid  = await bcrypt.compare(currentPassword, user.password);
+    if (!valid) return res.status(401).json({ success: false, message: 'Current password is incorrect.' });
+
+    user.password = await bcrypt.hash(newPassword, 12);
+    await user.save();
+
+    console.log('[users change-password] password changed for', user.email);
+    return res.json({ success: true, message: 'Password changed successfully.' });
+  } catch (e) {
+    console.error('[users change-password]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+
 router.get('/', auth, requireRole('admin', 'teacher'), async (req, res) => {
   try {
     const { search, role, curriculum } = req.query;
@@ -204,36 +285,43 @@ router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
   }
 });
 
-// POST /api/users/:id/avatar — upload profile image to R2
-router.post('/:id/avatar', auth, requireRole('admin'), uploadAvatar.single('file'), async (req, res) => {
-  try {
+// POST /api/users/:id/avatar — admin uploads a profile image
+// for any user. Returns the Cloudinary URL and also saves it to
+// the user's avatar field.
+router.post('/:id/avatar', auth, requireRole('admin'), (req, res) => {
+  if (!uploadAvatar) {
+    return res.status(503).json({
+      success: false,
+      message: 'Image upload is unavailable on the server: ' + (avatarUploadError || 'upload module not installed.'),
+    });
+  }
+  uploadAvatar.single('file')(req, res, async (err) => {
+    if (err) {
+      console.error('[users avatar upload]', err.message);
+      return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
+    }
     if (!req.file)
       return res.status(400).json({ success: false, message: 'No file uploaded.' });
 
-    const ext = req.file.originalname.split('.').pop() || 'jpg';
-    const key = `avatars/${req.params.id}_${uuidv4()}.${ext}`;
-    await r2Avatar.send(new PutObjectCommand({
-      Bucket:      process.env.R2_BUCKET_NAME,
-      Key:         key,
-      Body:        req.file.buffer,
-      ContentType: req.file.mimetype,
-    }));
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        { $set: { avatar: req.file.path } },
+        { new: true }
+      ).select('-password');
+      if (!user)
+        return res.status(404).json({ success: false, message: 'User not found.' });
 
-    const avatarUrl = `${(process.env.R2_PUBLIC_URL || '').replace(/\/$/, '')}/${key}`;
-
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { $set: { avatar: avatarUrl } },
-      { new: true }
-    ).select('-password');
-    if (!user)
-      return res.status(404).json({ success: false, message: 'User not found.' });
-
-    res.json({ success: true, message: 'Avatar updated.', data: { avatar: avatarUrl } });
-  } catch (e) {
-    console.error('[users avatar upload]', e.message);
-    res.status(500).json({ success: false, message: 'Upload failed.' });
-  }
+      res.json({
+        success: true,
+        message: 'Avatar updated.',
+        data: { avatar: req.file.path },
+      });
+    } catch (e) {
+      console.error('[users avatar save]', e.message);
+      res.status(500).json({ success: false, message: 'Failed to save avatar.' });
+    }
+  });
 });
 
 // GET /api/users/teachers/qualified?subjectId=...&curriculum=...
