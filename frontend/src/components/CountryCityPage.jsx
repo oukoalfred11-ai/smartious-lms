@@ -74,9 +74,9 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Homeschooling {countryName}
           </a>
-          <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{city.county} · {city.region}</div>
+          <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online school &middot; Virtual school &middot; Homeschool &middot; {city.county}</div>
           <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:14,letterSpacing:'-.01em'}}>
-            {city.primaryKeyword}
+            Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{city.name}</em>
           </h1>
           <p style={{fontSize:14,color:V.gold3,fontStyle:'italic',marginBottom:18,maxWidth:720,lineHeight:1.5}}>{city.heroTagline}</p>
           <p style={{fontSize:16,color:'rgba(255,255,255,.9)',lineHeight:1.65,marginBottom:22,maxWidth:760}}>
