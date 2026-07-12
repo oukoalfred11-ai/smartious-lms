@@ -205,14 +205,14 @@ function useHeroPreload(active) {
     // 2. Preload the video at LOW priority so it doesn't compete with critical
     //    CSS, fonts and hero text rendering. The <video preload="auto"> element
     //    will pick it up as soon as the critical render path completes.
-    //    Hero video served from local public folder (frontend/public/0528.mp4).
+    //    Hero video served from Cloudinary CDN (cloud: dae99gz1m, public_id: hero_mhhwhf).
     const videoId = 'sm-hero-video-preload'
     if (!document.getElementById(videoId)) {
       const videoLink = document.createElement('link')
       videoLink.id = videoId
       videoLink.rel = 'preload'
       videoLink.as = 'video'
-      videoLink.href = '/0528.mp4'
+      videoLink.href = 'https://res.cloudinary.com/dae99gz1m/video/upload/q_auto/hero_mhhwhf.mp4'
       videoLink.setAttribute('type', 'video/mp4')
       videoLink.setAttribute('fetchpriority', 'high')
       document.head.appendChild(videoLink)
@@ -1368,39 +1368,39 @@ const COMPARES = [
 const SITE = 'Smartious Homeschool & eSchool'
 const PAGE_META = {
   home: {
-    title: 'Online Homeschool | IGCSE, A-Level, IB & American — Smartious',
+    title: 'Online School & Homeschool | IGCSE, A-Level, IB & American — Smartious',
     desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 8/hour for 1-on-1 tuition · from USD 423/month for full homeschool programmes.',
   },
   'homeschooling-malaysia': {
-    title: 'Online Homeschool Malaysia | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    title: 'Online School & Homeschool Malaysia | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Malaysian families across Kuala Lumpur, Petaling Jaya, Subang Jaya, Cyberjaya, Johor Bahru + Iskandar Puteri, Penang, Kota Kinabalu. British Council KL + Penang exam centres. From USD 180/month.',
   },
   'homeschooling-turkey': {
-    title: 'Online Homeschool Türkiye | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    title: 'Online School & Homeschool Türkiye | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Turkish and expat families across Istanbul (Bebek, Etiler, Nişantaşı, Kadıköy, Ataşehir), Ankara (Çankaya, Bilkent), Izmir, Antalya (post-2022 Russian and Ukrainian community), Bursa, Adana. British Council Istanbul + Ankara + BESA exam centres. TRT time zone exactly matching Nairobi teaching hours. From USD 180/month.',
   },
   'homeschooling-kuwait': {
-    title: 'Online Homeschool Kuwait | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    title: 'Online School & Homeschool Kuwait | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Kuwaiti and expat families across Kuwait City, Salmiya (densest expat district), Hawally (Cambridge English School catchment), Salwa (premium coastal), Bayan (embassy district), and Ahmadi (KOC oil town). British Council Kuwait exam centre. AST time zone exactly matching Nairobi teaching hours. MOHE scholarship pathway alignment. From USD 180/month.',
   },
   'homeschooling-oman': {
-    title: 'Online Homeschool Oman | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    title: 'Online School & Homeschool Oman | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Omani and expat families across Muscat (MSQ, Al Bandar, Al Khuwair — BSM, Cheltenham, TAISM catchment), Seeb (Sultan\'s School, RGSG Muscat, Downe House), Sohar (Al Batinah North industrial, ABIS), Salalah (Dhofar southern coast), Nizwa (interior cultural capital), and Sur (Ash Sharqiyah North coastal). British Council Muscat exam centre. Immediate enrolment — no BSM/ABA waiting list. From USD 180/month.',
   },
   'homeschooling-taiwan': {
-    title: 'Online Homeschool Taiwan | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    title: 'Online School & Homeschool Taiwan | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Taiwanese and expat families across Taipei (Tianmu — TAS catchment, Shilin — TES catchment), New Taipei City (Linkou — Morrison Academy + TCS), Hsinchu (TSMC ecosystem — HAS, IBSH), Taichung (Morrison Academy, Hong Wen IS Cambridge centre), Kaohsiung (KAS, I-Shou IB), and Taoyuan (TYAS). TES Taipei + HWIS Taichung Cambridge exam centres. Serves Taiwanese-national families that Taiwan physical international schools legally cannot accept. From USD 180/month.',
   },
   'homeschooling-ireland': {
-    title: 'Online Homeschool Ireland | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    title: 'Online School & Homeschool Ireland | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Irish and expat families across Dublin (South Dublin D4/6/14/18 — NAISD Leopardstown, SEK Kilternan, St. Andrew\'s catchment plus Silicon Docks Google/Meta/LinkedIn corporate), Cork (Apple European HQ + pharma cluster), Galway (Ireland\'s medtech capital — Medtronic + Boston Scientific), Limerick (Analog Devices, Dell), Waterford (South East biotech), and Kildare (Intel Leixlip Fab 34 semiconductor). Post-Brexit UK family continuity + multinational corporate rotation + Túsla-compatible homeschool. From USD 180/month.',
   },
   'homeschooling-united-kingdom': {
-    title: 'Online Homeschool UK | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    title: 'Online School & Homeschool UK | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) at USD 180/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 180/month.',
   },
   'homeschooling-india': {
-    title: 'Online Homeschool India | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    title: 'Online School & Homeschool India | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs INR 1.8-5.4 lakh/year Smartious (4-11× cheaper). Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 180/month.',
   },
   assessment: {
@@ -3592,17 +3592,17 @@ export default function LandingPage() {
               disablePictureInPicture
               fetchPriority="high"
             >
-              <source src="/0528.mp4" type="video/mp4" />
+              <source src="https://res.cloudinary.com/dae99gz1m/video/upload/q_auto/hero_mhhwhf.mp4" type="video/mp4" />
             </video>
             <div className="h-ov"/>
             <div className="h-vig"/>
             <div className="h-body">
               <h1 className="h1">
-                <span>International Homeschool</span>
+                <span>Online School &amp; Homeschool</span>
                 <span>for <em>IGCSE, A-Level,</em></span>
                 <span><em>IB, American &amp; CBC</em> Students</span>
               </h1>
-              <p className="h-sub">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious delivers Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and 10+ other countries. <strong style={{color:V.gold3}}>From USD 8/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
+              <p className="h-sub">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious is an accredited online school and homeschool provider delivering Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and 10+ other countries. <strong style={{color:V.gold3}}>From USD 8/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
               <div className="h-act">
                 <button className="btn-p" onClick={() => nav('/assessment')}
                   style={{padding:'18px 36px',fontSize:16,fontWeight:800,borderRadius:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
@@ -3657,7 +3657,7 @@ export default function LandingPage() {
           {/* MARQUEE */}
           <div className="marq">
             <div className="marq-in">
-              {[...Array(2)].map((_,ri) => ['IGCSE Excellence','Cambridge A-Level','IB Diploma','British Curriculum','American Curriculum','CBC Kenya','Pearson Edexcel','14 Countries Served','7 Years Teaching','78+ Qualified Tutors','Study Abroad','University Admissions Support'].map((t,i) => (
+              {[...Array(2)].map((_,ri) => ['Online School','Virtual School','Homeschool','IGCSE Excellence','Cambridge A-Level','IB Diploma','British Curriculum','American Curriculum','CBC Kenya','Pearson Edexcel','Live Online Classes','14 Countries Served','7 Years Teaching','78+ Qualified Tutors','Study Abroad','University Admissions Support'].map((t,i) => (
                 <div key={ri+'-'+i} className="mi"><div className="md"/>{t}</div>
               )))}
             </div>
@@ -3702,11 +3702,11 @@ export default function LandingPage() {
                 textAlign:'center',
               }}>
                 {[
-                  ['Since 2019', 'Founded in Nairobi'],
+                  ['Since 2019', 'Online school & homeschool'],
                   ['Cambridge & Edexcel', 'IGCSE & A-Level prep'],
-                  ['IB Diploma', 'Programme support'],
+                  ['IB Diploma', 'Live virtual classes'],
                   ['Kenya CBC', 'KICD-aligned, KCSE-eligible'],
-                  ['14 countries', 'Diaspora families served'],
+                  ['14 countries', 'Homeschool families served'],
                 ].map(([h, sub]) => (
                   <div key={h}>
                     <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,lineHeight:1.25}}>{h}</div>
