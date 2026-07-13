@@ -1,47 +1,38 @@
-/**
- * reset-admin-password.js
- * ============================================================
- * One-time script to reset the admin password.
- * Run on Render via the Shell tab:
- *   node src/reset-admin-password.js
- *
- * DELETE THIS FILE after running.
- */
-
 require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt   = require('bcryptjs');
 
-const MONGODB_URI = process.env.MONGODB_URI;
-const TARGET_EMAIL   = 'oukoalfredelliot@gmail.com';
-const NEW_PASSWORD   = 'Yukabeth@2026';
+const TARGET_EMAIL = 'oukoalfredelliot@gmail.com';
+const NEW_PASSWORD = 'Yukabeth@2026';
 
-if (!MONGODB_URI) { console.error('MONGODB_URI not set'); process.exit(1); }
-
-mongoose.connect(MONGODB_URI).then(async () => {
+mongoose.connect(process.env.MONGODB_URI).then(async () => {
   const User = require('./models/User');
 
   const user = await User.findOne({ email: TARGET_EMAIL });
-  if (!user) {
-    console.error('No user found with email:', TARGET_EMAIL);
-    process.exit(1);
-  }
+  if (!user) { console.error('User not found'); process.exit(1); }
+  console.log('Found:', user.firstName, user.lastName);
 
-  console.log('Found user:', user.firstName, user.lastName, '| role:', user.role);
-
+  // Bypass Mongoose entirely — write the hash directly to MongoDB
   const hash = await bcrypt.hash(NEW_PASSWORD, 12);
-  user.password = hash;
-  await user.save();
+  console.log('Hash generated:', hash.substring(0, 20) + '...');
 
-  // Verify immediately
-  const fresh = await User.findById(user._id);
-  const ok = await bcrypt.compare(NEW_PASSWORD, fresh.password);
-  console.log('Password reset:', ok ? '✅ SUCCESS' : '❌ FAILED');
-  console.log('Login with:', TARGET_EMAIL, '/', NEW_PASSWORD);
+  // Verify hash works before writing
+  const preCheck = await bcrypt.compare(NEW_PASSWORD, hash);
+  console.log('Pre-write check:', preCheck ? '✅ hash is valid' : '❌ hash broken');
+
+  // Write directly via updateOne — bypasses all Mongoose hooks
+  const result = await User.collection.updateOne(
+    { _id: user._id },
+    { $set: { password: hash } }
+  );
+  console.log('MongoDB write result:', result.modifiedCount, 'doc(s) modified');
+
+  // Read back and verify
+  const raw = await User.collection.findOne({ _id: user._id });
+  const postCheck = await bcrypt.compare(NEW_PASSWORD, raw.password);
+  console.log('Post-write stored hash:', raw.password.substring(0, 20) + '...');
+  console.log('Final check:', postCheck ? '✅ SUCCESS — login now works' : '❌ STILL FAILED');
 
   await mongoose.disconnect();
   process.exit(0);
-}).catch(err => {
-  console.error('DB error:', err.message);
-  process.exit(1);
-});
+}).catch(e => { console.error(e.message); process.exit(1); });
