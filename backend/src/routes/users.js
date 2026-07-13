@@ -117,6 +117,9 @@ function validateRoleFields(user, role) {
       if (!user.plan) user.plan = 'Basic';
       break;
     case 'admin':
+    case 'accountant':
+    case 'sales':
+    case 'ops_manager':
       if (!user.plan) user.plan = 'Staff';
       break;
   }
@@ -410,7 +413,7 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin'), async (req
 });
 
 // CREATE user (admin only) with role-specific logic and auto-generated temp password
-router.post('/', auth, requireRole('admin'), async (req, res) => {
+router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     validateRoleFields(req.body, req.body.role);
 
