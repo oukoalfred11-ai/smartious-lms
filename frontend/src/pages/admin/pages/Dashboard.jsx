@@ -517,13 +517,36 @@ function PNavigation({ page, setPage, adminFirst, onLogout }) {
   const [railOpen, setRailOpen] = useState(true)
 
   // Group modules into nav sections
-  const SECTIONS = [
-    { label: 'Overview', items: ['dashboard', 'analytics'] },
-    { label: 'People', items: ['users', 'teachers', 'allocations', 'communication'] },
-    { label: 'Operations', items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
-    { label: 'Teaching', items: ['livelessons', 'grouprooms', 'curriculum'] },
-    { label: 'System', items: ['billing', 'website', 'settings', 'ai'] },
-  ]
+  // Role-based module access — each role sees only its permitted modules
+  const role = auth?.user?.role || 'admin'
+  const ROLE_SECTIONS = {
+    admin: [
+      { label: 'Overview',    items: ['dashboard', 'analytics'] },
+      { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication'] },
+      { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
+      { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum'] },
+      { label: 'System',      items: ['billing', 'website', 'settings', 'ai'] },
+    ],
+    accountant: [
+      { label: 'Overview',    items: ['dashboard', 'analytics'] },
+      { label: 'Finance',     items: ['billing', 'payroll'] },
+      { label: 'System',      items: ['settings'] },
+    ],
+    sales: [
+      { label: 'Overview',    items: ['dashboard'] },
+      { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
+      { label: 'Content',     items: ['documents', 'website'] },
+      { label: 'System',      items: ['settings'] },
+    ],
+    ops_manager: [
+      { label: 'Overview',    items: ['dashboard', 'analytics'] },
+      { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication'] },
+      { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'leave', 'programmes'] },
+      { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum'] },
+      { label: 'System',      items: ['settings', 'ai'] },
+    ],
+  }
+  const SECTIONS = ROLE_SECTIONS[role] || ROLE_SECTIONS.admin
 
   const currentMod = MODULES[page] || MODULES.dashboard
 
@@ -735,7 +758,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         payload.linkedStudents = userForm.linkedStudents || []
         payload.plan = 'Basic'
         payload.avatar = userForm.avatar || ''
-      } else if (userForm.role === 'admin') {
+      } else if (['admin','accountant','sales','ops_manager'].includes(userForm.role)) {
         payload.plan = 'Staff'
       }
 
@@ -1858,7 +1881,7 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
     students: users.filter(u => u.role === 'student').length,
     teachers: users.filter(u => u.role === 'teacher').length,
     parents: users.filter(u => u.role === 'parent').length,
-    admins: users.filter(u => u.role === 'admin').length,
+    admins: users.filter(u => ['admin','accountant','sales','ops_manager'].includes(u.role)).length,
     pending: users.filter(u => u.mustChangePassword).length,
   }
 
@@ -5440,7 +5463,7 @@ function ComposeView({ toast }) {
     try {
       // Build an audience label
       let audience = ''
-      const roles = ['teacher', 'student', 'parent']
+      const roles = ['teacher', 'student', 'parent', 'accountant', 'sales', 'ops_manager']
       const groupLabels = []
       for (const role of roles) {
         const roleIds = recipients.filter(r => r.role === role).map(r => r._id)
@@ -9749,7 +9772,7 @@ function SettingsModule({ refreshKey, toast }) {
 
   return (
     <>
-      <PSection tag="Admin" title="Personal" em="Settings" sub="Manage your profile, password, and notification preferences"/>
+      <PSection tag="Personal" title="Account" em="Settings" sub="Manage your profile, password, and notification preferences"/>
 
       {/* Tab bar */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 20, borderBottom: '1.5px solid ' + TOKENS.line, paddingBottom: 0 }}>
