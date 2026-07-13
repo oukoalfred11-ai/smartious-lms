@@ -32,7 +32,14 @@ function Guard({ children, roles }) {
     </div>
   )
   if (!user) return <Navigate to="/login" replace />
-  if (roles && !roles.includes(user.role)) return <Navigate to={`/${user.role}`} replace />
+  const STAFF_ROLES = ['admin', 'accountant', 'sales', 'ops_manager']
+  if (roles && !roles.includes(user.role)) {
+    // Staff roles all use the admin portal
+    if (STAFF_ROLES.includes(user.role)) return <Navigate to="/admin" replace />
+    const STAFF_ROLES2 = ['admin', 'accountant', 'sales', 'ops_manager']
+  if (STAFF_ROLES2.includes(user.role)) return <Navigate to="/admin" replace />
+  return <Navigate to={`/${user.role}`} replace />
+  }
   return children
 }
 
@@ -54,7 +61,7 @@ export default function App() {
               <Route path="/verify-email"   element={<VerifyEmailPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/portal"         element={<RoleRedirect />} />
-              <Route path="/admin/*"        element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
+              <Route path="/admin/*"        element={<Guard roles={['admin','accountant','sales','ops_manager']}><AdminPortal /></Guard>} />
               <Route path="/teacher/*"      element={<Guard roles={['teacher','admin']}><TeacherPortal /></Guard>} />
               <Route path="/student/*"      element={<Guard roles={['student']}><StudentPortal /></Guard>} />
               <Route path="/parent/*"       element={<Guard roles={['parent']}><ParentPortal /></Guard>} />
