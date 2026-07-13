@@ -258,6 +258,13 @@
     <lastmod>2026-07-11</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-in" href="https://smartioushomeschool.com/online-school/india"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/germany</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-de" href="https://smartioushomeschool.com/online-school/germany"/>
+  </url>
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
        ═══════════════════════════════════════════════════════════ -->
@@ -867,4 +874,42 @@
     <lastmod>2026-07-11</lastmod>
   </url>
 
-  <!-- India cities --></urlset>
+  <!-- India cities -->
+  <!-- Germany cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-berlin-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-munich-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-frankfurt-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-hamburg-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-stuttgart-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-dusseldorf-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
+</urlset>
