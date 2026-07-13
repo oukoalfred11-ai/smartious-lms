@@ -666,7 +666,7 @@ function buildAcceptedText(r, payUrl) {
 // GET /requests — list with filters + pagination (admin only)
 // Query params: status, search, page (1-based), limit
 // ═══════════════════════════════════════════════════════════
-router.get('/requests', auth, requireRole('admin'), async (req, res) => {
+router.get('/requests', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
   try {
     const { status, search, page = 1, limit = 25 } = req.query;
     const filter = {};
@@ -725,7 +725,7 @@ router.get('/requests', auth, requireRole('admin'), async (req, res) => {
 // ═══════════════════════════════════════════════════════════
 // GET /requests/:id — single request detail (admin only)
 // ═══════════════════════════════════════════════════════════
-router.get('/requests/:id', auth, requireRole('admin'), async (req, res) => {
+router.get('/requests/:id', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
   try {
     const doc = await AssessmentRequest.findById(req.params.id)
       .populate('reviewedBy', 'firstName lastName email')
@@ -751,7 +751,7 @@ router.get('/requests/:id', auth, requireRole('admin'), async (req, res) => {
 // email here — that's tied to the separate Paystack invoicing
 // workflow which is out of scope for this endpoint.
 // ═══════════════════════════════════════════════════════════
-router.patch('/requests/:id', auth, requireRole('admin'), async (req, res) => {
+router.patch('/requests/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { status, internalNotes, message } = req.body || {};
     const doc = await AssessmentRequest.findById(req.params.id);
