@@ -60,6 +60,7 @@ const REGION_LABELS = {
   ireland:       'Europe, North America, and East Africa',
   'united-kingdom': 'Europe, North America, and East Africa',
   india:         'South Asia, East Africa, and the Gulf',
+  germany:       'Central Europe, North America, and East Africa',
 }
 
 /* ISO country codes for hreflang. Format: en-<CC> tells Google
@@ -80,6 +81,7 @@ const HREFLANG_MAP = {
   ireland:'en-ie',
   'united-kingdom':'en-gb',
   india:'en-in',
+  germany:'en-de',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
