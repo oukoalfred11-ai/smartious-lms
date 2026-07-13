@@ -33,6 +33,7 @@ import { TAIWAN_CITIES, TAIWAN_COUNTRY } from '../data/taiwanCities.js'
 import { IRELAND_CITIES, IRELAND_COUNTRY } from '../data/irelandCities.js'
 import { UK_CITIES, UK_COUNTRY } from '../data/ukCities.js'
 import { INDIA_CITIES, INDIA_COUNTRY } from '../data/indiaCities.js'
+import { GERMANY_CITIES, GERMANY_COUNTRY } from '../data/germanyCities.js'
 import { VIETNAM_CITIES, VIETNAM_COUNTRY } from '../data/vietnamCities.js'
 import { THAILAND_CITIES, THAILAND_COUNTRY } from '../data/thailandCities.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
@@ -941,7 +942,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1403,6 +1404,10 @@ const PAGE_META = {
     title: 'Online School & Homeschool India | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs INR 1.8-5.4 lakh/year Smartious (4-11× cheaper). Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 180/month.',
   },
+  'homeschooling-germany': {
+    title: 'Online School & Homeschool Germany | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Germany-resident families across Berlin (BIS Charlottenburg + BBS + BBIS Kleinmachnow + Berlin Metropolitan School alternative), Munich (MIS Starnberg + BIS Haimhausen + European School alternative), Frankfurt (FIS Oberursel + European School + ISF Wiesbaden alternative), Hamburg (ISH Blankenese alternative), Stuttgart (ISS Sindelfingen alternative), and Düsseldorf (ISD Kaiserswerth alternative). Homeschool is illegal in Germany for German citizen children under Schulpflicht — Smartious serves expat families with foreign passports, Sixth Form 16+ students post-Schulpflicht, supplementary tuition alongside German Gymnasium, and international corporate rotational families. From USD 180/month.',
+  },
   assessment: {
     title: 'Book Academic Assessment | Admissions Request — Smartious',
     desc: 'Request an academic assessment for your child. Our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled. Admission is determined on assessment results.',
@@ -1830,6 +1835,7 @@ export default function LandingPage() {
   const [currentIrelandCity, setCurrentIrelandCity] = useState(null)
   const [currentUkCity, setCurrentUkCity] = useState(null)
   const [currentIndiaCity, setCurrentIndiaCity] = useState(null)
+  const [currentGermanyCity, setCurrentGermanyCity] = useState(null)
   const [currentVietnamCity, setCurrentVietnamCity] = useState(null)
   const [currentThailandCity, setCurrentThailandCity] = useState(null)
   const [currentTestPrep, setCurrentTestPrep] = useState(null)
@@ -2447,6 +2453,12 @@ export default function LandingPage() {
           setPage('india-city')
           return
         }
+        const germanyCity = GERMANY_CITIES.find(c => c.slug === slug)
+        if (germanyCity) {
+          setCurrentGermanyCity(slug)
+          setPage('germany-city')
+          return
+        }
       }
       // Fall back to US state (slug like "texas", "california", "north-carolina")
       if (slug && US_STATES[slug]) {
@@ -2584,6 +2596,10 @@ export default function LandingPage() {
       }
       if (slug === 'india') {
         setPage('homeschooling-india')
+        return
+      }
+      if (slug === 'germany') {
+        setPage('homeschooling-germany')
         return
       }
       const country = COUNTRIES.find(c => c.slug === slug)
@@ -2944,6 +2960,12 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'germany-city' && currentGermanyCity) {
+    const c = GERMANY_CITIES.find(x => x.slug === currentGermanyCity)
+    if (c) {
+      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
+    }
   } else if (page === 'japan-city' && currentJapanCity) {
     const c = JAPAN_CITIES.find(x => x.slug === currentJapanCity)
     if (c) {
@@ -2992,6 +3014,7 @@ export default function LandingPage() {
   if (page === 'homeschooling-ireland') canonicalOverride = '/online-school/ireland'
   if (page === 'homeschooling-united-kingdom') canonicalOverride = '/online-school/united-kingdom'
   if (page === 'homeschooling-india') canonicalOverride = '/online-school/india'
+  if (page === 'homeschooling-germany') canonicalOverride = '/online-school/germany'
   if (page === 'tuition-uk') canonicalOverride = '/tuition-uk'
   if (page === 'homeschooling-vietnam') canonicalOverride = '/online-school/vietnam'
   if (page === 'homeschooling-thailand') canonicalOverride = '/online-school/thailand'
@@ -13642,6 +13665,13 @@ export default function LandingPage() {
                 SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
                 GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
             )}
+            {page === 'homeschooling-germany' && (
+              <CountryHub country={GERMANY_COUNTRY} cities={GERMANY_CITIES}
+                setCurrentCity={setCurrentGermanyCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
             {page === 'homeschooling-united-kingdom' && (
               <CountryHub country={UK_COUNTRY} cities={UK_CITIES}
                 setCurrentCity={setCurrentUkCity}
@@ -13773,6 +13803,14 @@ export default function LandingPage() {
           country={INDIA_COUNTRY}
           cities={INDIA_CITIES}
           currentCitySlug={currentIndiaCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
+      {page === 'germany-city' && currentGermanyCity && (
+        <CountryCityPage
+          country={GERMANY_COUNTRY}
+          cities={GERMANY_CITIES}
+          currentCitySlug={currentGermanyCity}
           P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
