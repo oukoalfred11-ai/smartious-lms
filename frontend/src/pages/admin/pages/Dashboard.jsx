@@ -515,10 +515,21 @@ function PlanBadge({ p }) {
 // ──────────────────────────────────────────────────────
 function PNavigation({ page, setPage, adminFirst, onLogout }) {
   const [railOpen, setRailOpen] = useState(true)
+  const auth = useAuth()
 
   // Group modules into nav sections
   // Role-based module access — each role sees only its permitted modules
   const role = auth?.user?.role || 'admin'
+
+  // Portal identity per role — shown in the top nav bar
+  const PORTAL_META = {
+    admin:       { label: 'Admin Portal',      color: TOKENS.crimson },
+    accountant:  { label: 'Accounts Portal',   color: TOKENS.accentEmerald },
+    sales:       { label: 'Sales Portal',      color: TOKENS.accentNavy },
+    ops_manager: { label: 'Operations Portal', color: TOKENS.accentAmber },
+  }
+  const portalMeta = PORTAL_META[role] || PORTAL_META.admin
+
   const ROLE_SECTIONS = {
     admin: [
       { label: 'Overview',    items: ['dashboard', 'analytics'] },
@@ -548,7 +559,10 @@ function PNavigation({ page, setPage, adminFirst, onLogout }) {
   }
   const SECTIONS = ROLE_SECTIONS[role] || ROLE_SECTIONS.admin
 
-  const currentMod = MODULES[page] || MODULES.dashboard
+  // Guard: if the current page is not in this role's allowed modules, fall back to dashboard
+  const allowedPages = (ROLE_SECTIONS[role] || ROLE_SECTIONS.admin).flatMap(s => s.items)
+  const safePage = allowedPages.includes(page) ? page : 'dashboard'
+  const currentMod = MODULES[safePage] || MODULES.dashboard
 
   return (
     <>
@@ -616,7 +630,14 @@ function PNavigation({ page, setPage, adminFirst, onLogout }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: TOKENS.s900 }}>{adminFirst}</div>
-              <div style={{ fontSize: 10, color: TOKENS.s500, letterSpacing: '.06em', textTransform: 'uppercase' }}>Administrator</div>
+              <div style={{ fontSize: 10, color: TOKENS.s500, letterSpacing: '.06em', textTransform: 'uppercase' }}>
+                {{
+                  admin:       'Administrator',
+                  accountant:  'Accountant',
+                  sales:       'Sales & Front Desk',
+                  ops_manager: 'Operations Manager',
+                }[role] || 'Administrator'}
+              </div>
             </div>
             <button onClick={onLogout} title="Sign out" style={{
               width: 36, height: 36, borderRadius: 10,
@@ -783,6 +804,19 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
 
   const adminFirst = auth?.user?.firstName || 'Alfred'
 
+  // Role-based page access — mirrors the logic inside PNavigation
+  const role = auth?.user?.role || 'admin'
+  const ROLE_SECTIONS_MAIN = {
+    admin:       [
+      { items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','billing','website','settings','ai'] },
+    ],
+    accountant:  [{ items: ['dashboard','analytics','billing','payroll','settings'] }],
+    sales:       [{ items: ['dashboard','assessment','frontdesk','communication','documents','website','settings'] }],
+    ops_manager: [{ items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','assessment','documents','payroll','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
+  }
+  const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
+  const safePage = allowedPages.includes(page) ? page : 'dashboard'
+
   return (
     <div style={{
       background: TOKENS.s50, minHeight: '100vh',
@@ -797,25 +831,25 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         maxWidth: 1400,
         transition: 'margin-left 0.25s',
       }}>
-        {page === 'dashboard'   && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
-        {page === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
-        {page === 'users'       && <UsersModule      refreshKey={refreshKey} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} openAddUser={openAddUser} />}
-        {page === 'teachers'    && <TeachersModule   refreshKey={refreshKey} toast={toast} openAddUser={openAddUser} />}
-        {page === 'allocations' && <StudentsManagementModule refreshKey={refreshKey} toast={toast} />}
-        {page === 'communication' && <CommunicationModule refreshKey={refreshKey} toast={toast} />}
-        {page === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
-        {page === 'documents' && <DocumentsModule toast={toast} />}
-        {page === 'assessment' && <AssessmentModule refreshKey={refreshKey} toast={toast} />}
-        {page === 'payroll'     && <PayrollModule    refreshKey={refreshKey} toast={toast} />}
-        {page === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
-        {page === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
-        {page === 'livelessons' && <LiveLessonsModule refreshKey={refreshKey} toast={toast} />}
-        {page === 'grouprooms'  && <GroupRoomsModule refreshKey={refreshKey} toast={toast} />}
-        {page === 'curriculum'  && <CurriculumModule refreshKey={refreshKey} toast={toast} />}
-        {page === 'billing'     && <BillingModule    refreshKey={refreshKey} toast={toast} />}
-        {page === 'website'     && <WebsiteModule    refreshKey={refreshKey} toast={toast} />}
-        {page === 'settings'    && <SettingsModule   refreshKey={refreshKey} toast={toast} />}
-        {page === 'ai'          && <MshauriModule    refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'dashboard'   && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
+        {safePage === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'users'       && <UsersModule      refreshKey={refreshKey} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} openAddUser={openAddUser} />}
+        {safePage === 'teachers'    && <TeachersModule   refreshKey={refreshKey} toast={toast} openAddUser={openAddUser} />}
+        {safePage === 'allocations' && <StudentsManagementModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'communication' && <CommunicationModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'frontdesk' && <FrontDeskModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'documents' && <DocumentsModule toast={toast} />}
+        {safePage === 'assessment' && <AssessmentModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'payroll'     && <PayrollModule    refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'livelessons' && <LiveLessonsModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'grouprooms'  && <GroupRoomsModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'curriculum'  && <CurriculumModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'billing'     && <BillingModule    refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'website'     && <WebsiteModule    refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'settings'    && <SettingsModule   refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'ai'          && <MshauriModule    refreshKey={refreshKey} toast={toast} />}
       </div>
 
       {userModal && (
@@ -1324,7 +1358,12 @@ function UserFormFields({ userForm, setUserForm, toast }) {
           <option value="student">Student</option>
           <option value="teacher">Teacher</option>
           <option value="parent">Parent</option>
-          <option value="admin">Admin</option>
+          <optgroup label="Staff Portals">
+            <option value="admin">Administrator</option>
+            <option value="accountant">Accountant</option>
+            <option value="sales">Sales / Front Desk</option>
+            <option value="ops_manager">Operations Manager</option>
+          </optgroup>
         </select>
       </div>
 
@@ -9767,7 +9806,8 @@ function WebsiteModule({ refreshKey, toast }) {
 // 14. SETTINGS MODULE
 // ═══════════════════════════════════════════════════════════
 function SettingsModule({ refreshKey, toast }) {
-  const { user } = useAuth ? useAuth() : {}
+  const auth = useAuth()
+  const user = auth?.user
   const [activeTab, setActiveTab] = useState('profile')
 
   return (
