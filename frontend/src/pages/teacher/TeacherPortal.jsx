@@ -15083,8 +15083,8 @@ function TeacherTimetableTab({ user, toast }) {
           })}
         </div>
       )}
-        </div>
-      )}
-    </div>
+      </div>
+    )}
+  </div>
   )
 }
