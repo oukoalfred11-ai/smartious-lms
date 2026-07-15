@@ -108,6 +108,8 @@ const timetableEntrySchema = new mongoose.Schema({
   audienceGrade:      { type: String, default: '', trim: true },
 
   // ── State ───────────────────────────────────────
+  // Whether this slot is open to receive more students via grouping
+  canBeGrouped: { type: Boolean, default: false, index: true },
   isActive: { type: Boolean, default: true, index: true },
 
   // Audit
