@@ -14,6 +14,13 @@ const AllocationSchema = new mongoose.Schema({
   // Audit trail
   createdAt: { type: Date, default: Date.now },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+  // ── Grouping ────────────────────────────────────────────
+  // When true, the auto-timetable engine will try to merge this
+  // student into an existing class slot with other students who
+  // have the same teacher + subject + canBeGrouped=true.
+  // When false, the student gets their own individual slot.
+  canBeGrouped: { type: Boolean, default: false },
   updatedAt: { type: Date, default: Date.now },
   updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   notes: { type: String }
@@ -23,4 +30,3 @@ const AllocationSchema = new mongoose.Schema({
 AllocationSchema.index({ studentId: 1, subjectId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Allocation', AllocationSchema);
-
