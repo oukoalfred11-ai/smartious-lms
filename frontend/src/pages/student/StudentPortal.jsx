@@ -24,7 +24,7 @@ import {
 } from '../../components/exam/NestedQuestion.jsx'
 import LessonPlayerTab from './LessonPlayerTab.jsx'
 import SubjectProgressCard from '../../components/SubjectProgressCard.jsx'
-import GooglePDFViewer from '../../components/LibraryViewer.jsx'
+import LibraryViewer from '../../components/LibraryViewer.jsx'
 
 // ── SVG icon helper ───────────────────────────────────────
 const I = (d) => (
@@ -12176,7 +12176,9 @@ function StudentLibraryPage({ user, toast }) {
         </div>
       )}
 
-      {viewerBook && <GooglePDFViewer book={viewerBook} onClose={() => setViewerBook(null)}/>}
+      {viewerBook && (
+        <LibraryViewer book={viewerBook} api={api} onClose={() => setViewerBook(null)}/>
+      )}
     </div>
   )
 }
@@ -12190,59 +12192,54 @@ function StudentBookCard({ book, onOpen }) {
   const sizeMB = book.sizeBytes ? (book.sizeBytes / (1024 * 1024)).toFixed(1) + ' MB' : ''
   return (
     <div style={{
-      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12,
-      overflow: 'hidden', display: 'flex', flexDirection: 'column',
-      boxShadow: '0 1px 4px rgba(0,0,0,.05)',
+      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 10,
+      padding: 14, display: 'flex', flexDirection: 'column',
     }}>
-      {/* Cover image */}
-      <div style={{
-        height: 140, background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
-        position: 'relative', flexShrink: 0, overflow: 'hidden',
-      }}>
-        {book.coverImage ? (
-          <img src={book.coverImage} alt={book.title}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-        ) : (
-          <div style={{
-            width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center', gap: 6, padding: 12,
-          }}>
-            <div style={{ color: '#C9A030', fontSize: 10, fontWeight: 800, letterSpacing: '.12em' }}>PDF</div>
-            <div style={{
-              color: '#fff', fontSize: 12, fontWeight: 700, textAlign: 'center',
-              lineHeight: 1.3, maxWidth: 140,
-              display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-            }}>{book.title}</div>
-          </div>
-        )}
+      <div style={{ display:'flex', gap: 10, marginBottom: 10 }}>
         <div style={{
-          position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,.55)',
-          color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.06em',
-          padding: '3px 7px', borderRadius: 4,
-        }}>{book.curriculum}</div>
+          width: 42, height: 52, borderRadius: 4,
+          background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
+          flexShrink: 0,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
+        }}>PDF</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontWeight: 700, fontSize: 13.5, color: '#1A1A1A',
+            lineHeight: 1.3,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>{book.title}</div>
+          {book.author && (
+            <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 3 }}>{book.author}</div>
+          )}
+        </div>
       </div>
 
-      {/* Info */}
-      <div style={{ padding: '12px 12px 10px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+      {book.description && (
         <div style={{
-          fontWeight: 700, fontSize: 13, color: '#1A1A1A', lineHeight: 1.3, marginBottom: 4,
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-        }}>{book.title}</div>
-        {book.author && <div style={{ fontSize: 11, color: '#6B6B6B', marginBottom: 4 }}>{book.author}</div>}
-        {book.description && (
-          <div style={{
-            fontSize: 11, color: '#9A9A9A', lineHeight: 1.4, marginBottom: 6,
-            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-          }}>{book.description}</div>
-        )}
-        <div style={{ fontSize: 10.5, color: '#9A9A9A', marginTop: 'auto', paddingTop: 6 }}>
-          {[sizeMB, book.grades?.length ? book.grades.join(', ') : ''].filter(Boolean).join(' · ')}
+          fontSize: 11.5, color: '#6B6B6B', marginBottom: 8,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+          overflow: 'hidden', lineHeight: 1.4,
+        }}>
+          {book.description}
         </div>
-        <button onClick={onOpen} style={{
-          marginTop: 10, background: '#7D1025', color: '#fff', border: 'none',
-          padding: '8px 0', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
-        }}>Open book</button>
+      )}
+
+      <div style={{ fontSize: 10.5, color: '#9A9A9A', marginBottom: 10 }}>
+        {sizeMB}
+        {book.grades?.length ? ' · ' + book.grades.join(', ') : ''}
       </div>
+
+      <button onClick={onOpen}
+        style={{
+          background: '#7D1025', color: '#fff', border: 'none',
+          padding: '8px 14px', borderRadius: 6,
+          fontSize: 12, fontWeight: 700, cursor: 'pointer',
+          marginTop: 'auto',
+        }}>
+        Open book
+      </button>
     </div>
   )
 }
@@ -13058,356 +13055,245 @@ function StudentAttendancePage({ user, toast }) {
 // (students must use the Communication module to reach teachers).
 // ═══════════════════════════════════════════════════════════
 function RealTimetableTab({ user, setPage, toast }) {
-  const [entries, setEntries] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError]   = useState(null)
-  const [view, setView]     = useState('grid')   // 'grid' | 'list'
-  const [tick, setTick]     = useState(0)
-  const [teacherModal, setTeacherModal] = useState(null)   // teacher object to preview
+  const [entries, setEntries]           = useState([])
+  const [loading, setLoading]           = useState(true)
+  const [error, setError]               = useState(null)
+  const [tick, setTick]                 = useState(0)
+  const [selectedEntry, setSelectedEntry] = useState(null)
 
-  // Re-evaluate "live now" every 30s
-  useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 30000)
-    return () => clearInterval(id)
-  }, [])
+  useEffect(() => { const id = setInterval(() => setTick(t => t+1), 30_000); return () => clearInterval(id) }, [])
 
-  // Load from backend
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
-    setError(null)
+    setLoading(true); setError(null)
     api.get('/timetable/me')
-      .then(res => {
-        if (cancelled) return
-        setEntries(res.data?.data?.entries || [])
-      })
-      .catch(e => {
-        if (cancelled) return
-        setError(e?.response?.data?.message || e.message || 'Failed to load timetable.')
-        setEntries([])
-      })
-      .finally(() => { if (!cancelled) setLoading(false) })
+      .then(res => { if (!cancelled) setEntries(res.data?.data?.entries || []) })
+      .catch(e  => { if (!cancelled) setError(e?.response?.data?.message || e.message) })
+      .finally(()=> { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [user?._id])
 
-  // ── Display helpers ──
-  const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  const DAYS_LONG = {
-    Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday',
-    Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday',
-  }
+  const DAYS     = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+  const DAYS_LONG = { Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday' }
+  const toMins = h => { if (!h) return 0; const [hh,mm]=h.split(':').map(Number); return hh*60+mm }
+  const fmt    = h => { if (!h) return ''; const [hh,mm]=h.split(':').map(Number); const m=hh>=12?'PM':'AM'; let hr=hh%12; if(!hr)hr=12; return `${hr}${mm===0?'':':'+String(mm).padStart(2,'0')} ${m}` }
 
-  // Convert "HH:MM" to minutes since midnight
-  const toMinutes = (hhmm) => {
-    if (!hhmm) return 0
-    const [h, m] = hhmm.split(':').map(Number)
-    return (h || 0) * 60 + (m || 0)
-  }
+  const now      = new Date()
+  const todayIdx = (now.getDay()+6)%7
+  const nowMins  = now.getHours()*60+now.getMinutes()
+  const isLive = e => DAYS.indexOf(e.dayOfWeek)===todayIdx && nowMins>=toMins(e.startTime) && nowMins<toMins(e.endTime)
+  const isPast = e => DAYS.indexOf(e.dayOfWeek)===todayIdx && nowMins>=toMins(e.endTime)
 
-  // Format "HH:MM" as "9:00 am" / "1:30 pm"
-  const fmt = (hhmm) => {
-    if (!hhmm) return ''
-    const [h, m] = hhmm.split(':').map(Number)
-    const mer = h >= 12 ? 'PM' : 'AM'
-    let hr = h % 12
-    if (hr === 0) hr = 12
-    return `${hr}${m === 0 ? '' : ':' + String(m).padStart(2, '0')} ${mer}`
-  }
+  const PALETTES = [
+    ['#7D1025','#FDE7EC'],['#1E3A8A','#DBEAFE'],['#166534','#DCFCE7'],
+    ['#7C2D12','#FEF3C7'],['#6B21A8','#F3E8FF'],['#0F766E','#CCFBF1'],
+    ['#92400E','#FEF9C3'],['#1F2937','#F3F4F6'],['#9F1239','#FFE4E6'],
+    ['#0369A1','#E0F2FE'],['#7E22CE','#EDE9FE'],
+  ]
+  const paletteMap = {}
+  ;[...new Set(entries.map(e => e.subject))].forEach((s,i) => { paletteMap[s] = PALETTES[i%PALETTES.length] })
+  const pal = s => paletteMap[s] || PALETTES[0]
 
-  // Current week's "today" + now-in-minutes for live highlighting
-  const now = new Date()
-  const todayIdx = (now.getDay() + 6) % 7   // Convert Sun-first to Mon-first 0..6
-  const nowMins = now.getHours() * 60 + now.getMinutes()
-  const isLive = (entry) => {
-    const dIdx = DAYS.indexOf(entry.dayOfWeek)
-    if (dIdx !== todayIdx) return false
-    const s = toMinutes(entry.startTime)
-    const e = toMinutes(entry.endTime)
-    return nowMins >= s && nowMins < e
-  }
-  const isPastToday = (entry) => {
-    const dIdx = DAYS.indexOf(entry.dayOfWeek)
-    if (dIdx !== todayIdx) return false
-    return nowMins >= toMinutes(entry.endTime)
-  }
+  const HOUR_START = 6; const HOUR_END = 22; const TOTAL_MINS = (HOUR_END-HOUR_START)*60
+  const GRID_H = 820; const COL_W = 124; const TIME_COL_W = 52
+  const minToY = m => ((m - HOUR_START*60) / TOTAL_MINS) * GRID_H
+  const entryH = e => Math.max(28, minToY(toMins(e.endTime)) - minToY(toMins(e.startTime)))
 
-  // Subject colour mapping (matches the rest of the portal)
-  const subjColours = {
-    'Mathematics': '#8B1A2E', 'Physics': '#1E3A8A', 'Chemistry': '#166534',
-    'Biology': '#7C2D12', 'English': '#6B21A8', 'English Language': '#6B21A8',
-    'Literature': '#A21CAF', 'English Literature': '#A21CAF',
-    'History': '#92400E', 'Geography': '#0F766E',
-    'Computer Science': '#1F2937', 'Business Studies': '#7E22CE',
-    'Economics': '#9F1239', 'Sociology': '#0369A1',
-    'ESL': '#475569',
-  }
-  const colourFor = (subject) => subjColours[subject] || '#8B1A2E'
+  const byDay = {}; DAYS.forEach(d => { byDay[d]=[] })
+  entries.forEach(e => { if (byDay[e.dayOfWeek]) byDay[e.dayOfWeek].push(e) })
+  const todayEntries = [...(byDay[DAYS[todayIdx]]||[])].sort((a,b)=>toMins(a.startTime)-toMins(b.startTime))
+  const uniqueSubjects = [...new Set(entries.map(e=>e.subject))]
 
-  // ── PAGE HEADER ──
-  const header = (
-    <div style={{ marginBottom: 20 }}>
-      <div className="sec-tag">Weekly schedule</div>
-      <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
-        My Timetable
-      </h2>
-      <div style={{ fontSize: 13, color: '#6B6B6B' }}>
-        Your recurring weekly classes. Click any class to view the teacher.
-      </div>
+  if (loading) return (
+    <div style={{padding:'60px 0',textAlign:'center'}}>
+      <div style={{width:40,height:40,border:'3px solid #F0EBE6',borderTopColor:'#7D1025',borderRadius:'50%',animation:'sppn .75s linear infinite',margin:'0 auto 14px'}}/>
+      <div style={{fontSize:13,color:'#9A9A9A'}}>Loading your timetable...</div>
+      <style>{'@keyframes sppn{to{transform:rotate(360deg)}}'}</style>
     </div>
   )
-
-  if (loading) {
-    return (
-      <div>
-        {header}
-        <div style={{ padding: '40px 20px', textAlign: 'center', color: '#9A9A9A', fontSize: 13 }}>
-          Loading timetable...
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div>
-        {header}
-        <div style={{
-          background: '#FDE7EC',
-          border: '1px solid #F8B4C0',
-          borderRadius: 8, padding: '14px 18px',
-          fontSize: 13, color: '#7D1025',
-        }}>
-          Could not load timetable: {error}
-        </div>
-      </div>
-    )
-  }
-
-  if (entries.length === 0) {
-    return (
-      <div>
-        {header}
-        <div style={{
-          padding: 28, background: '#FBFAF5',
-          border: '1px solid #E8E2D6', borderRadius: 10,
-          textAlign: 'center',
-        }}>
-          <div style={{
-            fontFamily: "'Instrument Serif', serif",
-            fontSize: 20, color: '#1A0F0E', marginBottom: 6,
-          }}>
-            No timetable entries yet
-          </div>
-          <div style={{ fontSize: 13, color: '#857973', lineHeight: 1.6, maxWidth: 460, margin: '0 auto' }}>
-            Your teachers haven't added you to any recurring class slots.
-            Once they do, your weekly schedule will show here.
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // ── Group entries by day-of-week ──
-  const byDay = {}
-  for (const d of DAYS) byDay[d] = []
-  for (const e of entries) {
-    if (byDay[e.dayOfWeek]) byDay[e.dayOfWeek].push(e)
-  }
-  for (const d of DAYS) {
-    byDay[d].sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime))
-  }
+  if (error) return <div style={{background:'#FDE7EC',border:'1px solid #F8B4C0',borderRadius:8,padding:'14px 18px',fontSize:13,color:'#7D1025'}}>Could not load timetable: {error}</div>
 
   return (
-    <div>
-      {header}
-
-      {/* View switcher */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {[
-          ['grid', 'Week grid'],
-          ['list', 'List view'],
-        ].map(([k, l]) => (
-          <button key={k} onClick={() => setView(k)}
-            style={{
-              background: view === k ? '#7D1025' : 'transparent',
-              color: view === k ? '#fff' : '#564844',
-              border: '1.5px solid ' + (view === k ? '#7D1025' : '#E8E2D6'),
-              padding: '7px 14px', borderRadius: 6,
-              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-            }}>{l}</button>
-        ))}
+    <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"}}>
+      <div style={{marginBottom:20}}>
+        <div className="sec-tag">Weekly schedule</div>
+        <h2 className="serif" style={{fontSize:26,color:'var(--s900)',margin:'6px 0 4px'}}>My Timetable</h2>
+        <div style={{fontSize:13,color:'#6B6B6B'}}>Your recurring weekly classes — click any class for details.</div>
       </div>
 
-      {/* ── GRID VIEW ── */}
-      {view === 'grid' && (
-        <div style={{
-          background: '#fff',
-          border: '1px solid #E8E2D6',
-          borderRadius: 10, padding: 14,
-          overflowX: 'auto',
-        }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(140px, 1fr))', gap: 8, minWidth: 700 }}>
-            {DAYS.map((d, idx) => (
-              <div key={d} style={{
-                fontSize: 10, fontWeight: 800,
-                letterSpacing: '.1em', textTransform: 'uppercase',
-                color: idx === todayIdx ? '#7D1025' : '#857973',
-                textAlign: 'center',
-                paddingBottom: 8,
-                borderBottom: idx === todayIdx ? '2px solid #C9A030' : '1px solid #F4EFEB',
-              }}>
-                {DAYS_LONG[d]}
-                {idx === todayIdx && <div style={{ fontSize: 8, marginTop: 2, fontWeight: 700, color: '#C9A030' }}>TODAY</div>}
-              </div>
-            ))}
-            {DAYS.map((d, idx) => (
-              <div key={'col-' + d} style={{
-                display: 'flex', flexDirection: 'column', gap: 6,
-                minHeight: 100,
-                opacity: byDay[d].length === 0 ? 0.4 : 1,
-              }}>
-                {byDay[d].length === 0 && (
-                  <div style={{
-                    fontSize: 11, color: '#CFC7C2', textAlign: 'center',
-                    paddingTop: 30, fontStyle: 'italic',
-                  }}>—</div>
-                )}
-                {byDay[d].map(entry => {
-                  const live = isLive(entry)
-                  const past = isPastToday(entry)
-                  const col = colourFor(entry.subject)
+      {entries.length === 0 ? (
+        <div style={{padding:36,background:'#FBFAF5',border:'1px solid #E8E2D6',borderRadius:12,textAlign:'center'}}>
+          <div style={{fontSize:32,marginBottom:12}}>📅</div>
+          <div style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#1A0F0E',marginBottom:6}}>No timetable yet</div>
+          <div style={{fontSize:13,color:'#857973',lineHeight:1.6,maxWidth:400,margin:'0 auto'}}>Your classes will appear here once your teacher sets up your weekly schedule.</div>
+        </div>
+      ) : (
+        <>
+          {/* Today strip */}
+          <div style={{background:'linear-gradient(135deg,#7D1025,#5A0B1B)',borderRadius:12,padding:'14px 18px',marginBottom:14,color:'#fff'}}>
+            <div style={{fontSize:10,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:'rgba(255,255,255,.55)',marginBottom:8}}>
+              {DAYS_LONG[DAYS[todayIdx]]} · Today
+            </div>
+            {todayEntries.length===0
+              ? <div style={{fontSize:13,color:'rgba(255,255,255,.5)'}}>No classes scheduled today</div>
+              : <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                  {todayEntries.map(e => {
+                    const live=isLive(e); const past=isPast(e); const [fg]=pal(e.subject)
+                    return (
+                      <div key={e._id} onClick={()=>setSelectedEntry(e)} style={{
+                        background:live?'#fff':'rgba(255,255,255,.1)',
+                        border:'1px solid '+(live?'transparent':'rgba(255,255,255,.18)'),
+                        borderRadius:8,padding:'8px 14px',cursor:'pointer',opacity:past?.5:1,transition:'transform .12s',
+                      }} onMouseEnter={el=>el.currentTarget.style.transform='scale(1.04)'}
+                         onMouseLeave={el=>el.currentTarget.style.transform='scale(1)'}>
+                        {live && <div style={{fontSize:9,fontWeight:800,color:'#7D1025',marginBottom:3,display:'flex',alignItems:'center',gap:4}}>
+                          <span style={{width:6,height:6,borderRadius:'50%',background:'#DC2626',display:'inline-block'}}/>LIVE NOW
+                        </div>}
+                        <div style={{fontSize:12.5,fontWeight:700,color:live?fg:'#fff'}}>{e.subject}</div>
+                        <div style={{fontSize:11,color:live?'#9A2434':'rgba(255,255,255,.65)',marginTop:2}}>{fmt(e.startTime)} – {fmt(e.endTime)}</div>
+                      </div>
+                    )
+                  })}
+                </div>
+            }
+          </div>
+
+          {/* Time-grid */}
+          <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden',boxShadow:'0 2px 12px rgba(0,0,0,.05)'}}>
+            {/* Day headers */}
+            <div style={{display:'grid',gridTemplateColumns:TIME_COL_W+'px repeat(7,'+COL_W+'px)',borderBottom:'1.5px solid #E8E2D6',background:'#FBFAF5',position:'sticky',top:0,zIndex:10}}>
+              <div style={{padding:'10px 0'}}/>
+              {DAYS.map((d,i) => {
+                const isToday=i===todayIdx
+                return (
+                  <div key={d} style={{padding:'10px 8px',textAlign:'center',borderLeft:'1px solid #F0EBE6',background:isToday?'#7D1025':'transparent',color:isToday?'#fff':'#564844'}}>
+                    <div style={{fontSize:10,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase'}}>{d}</div>
+                    {isToday && <div style={{fontSize:8,marginTop:2,fontWeight:600,color:'rgba(255,255,255,.7)'}}>TODAY</div>}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Grid body */}
+            <div style={{overflowX:'auto',overflowY:'auto',maxHeight:500}}>
+              <div style={{position:'relative',width:TIME_COL_W+COL_W*7,height:GRID_H}}>
+
+                {/* Hour lines */}
+                {Array.from({length:HOUR_END-HOUR_START+1},(_,i) => {
+                  const h=HOUR_START+i; const y=(i/(HOUR_END-HOUR_START))*GRID_H; const is12=h===12
                   return (
-                    <div key={entry._id} onClick={() => setTeacherModal(entry.teacherId)}
-                      style={{
-                        background: live
-                          ? `linear-gradient(135deg, ${col}, ${col}DD)`
-                          : '#fff',
-                        color: live ? '#fff' : '#1A0F0E',
-                        border: '1.5px solid ' + (live ? col : col + '40'),
-                        borderRadius: 8,
-                        padding: '10px 12px',
-                        cursor: 'pointer',
-                        opacity: past ? 0.55 : 1,
-                        transition: 'transform .12s, box-shadow .12s',
-                        boxShadow: live ? `0 4px 12px ${col}40` : 'none',
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; if (!live) e.currentTarget.style.boxShadow = `0 4px 12px ${col}25` }}
-                      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; if (!live) e.currentTarget.style.boxShadow = 'none' }}
-                    >
-                      {live && (
-                        <div style={{
-                          fontSize: 9, fontWeight: 800, letterSpacing: '.1em',
-                          textTransform: 'uppercase', marginBottom: 4,
-                          display: 'flex', alignItems: 'center', gap: 4,
-                        }}>
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }}/>
-                          Live now
-                        </div>
-                      )}
-                      <div style={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.3, marginBottom: 4 }}>
-                        {entry.subject}
+                    <div key={h} style={{position:'absolute',top:y,left:0,right:0,display:'flex',alignItems:'flex-start'}}>
+                      <div style={{width:TIME_COL_W,paddingRight:8,textAlign:'right',fontSize:9.5,color:is12?'#7D1025':'#BBBBBB',fontWeight:is12?700:400,transform:'translateY(-50%)',flexShrink:0}}>
+                        {h===12?'12 PM':h>12?(h-12)+' PM':h+' AM'}
                       </div>
-                      <div style={{ fontSize: 10.5, opacity: live ? .95 : .65, marginBottom: 2 }}>
-                        {fmt(entry.startTime)} – {fmt(entry.endTime)}
-                      </div>
-                      {entry.teacherId && (
-                        <div style={{ fontSize: 10.5, opacity: live ? .9 : .55, fontWeight: 500 }}>
-                          {entry.teacherId.firstName} {(entry.teacherId.lastName || '')[0]}.
-                        </div>
-                      )}
+                      <div style={{flex:1,height:is12?1.5:1,background:is12?'#FECDD3':'#F4EFEB'}}/>
                     </div>
                   )
                 })}
+
+                {/* Now indicator */}
+                {nowMins>=HOUR_START*60 && nowMins<HOUR_END*60 && (
+                  <div style={{position:'absolute',top:minToY(nowMins),left:TIME_COL_W+COL_W*todayIdx,width:COL_W,height:2,background:'#DC2626',zIndex:8}}>
+                    <div style={{width:8,height:8,borderRadius:'50%',background:'#DC2626',position:'absolute',left:-4,top:-3}}/>
+                  </div>
+                )}
+
+                {/* Day columns */}
+                {DAYS.map((d,dIdx) => (
+                  <div key={d} style={{position:'absolute',top:0,bottom:0,left:TIME_COL_W+COL_W*dIdx,width:COL_W,borderLeft:'1px solid #F4EFEB',background:dIdx===todayIdx?'rgba(125,16,37,.025)':'transparent'}}>
+                    {(byDay[d]||[]).map(e => {
+                      const y=minToY(toMins(e.startTime)); const h=entryH(e)
+                      const live=isLive(e); const past=isPast(e)&&dIdx===todayIdx
+                      const [fg,bg]=pal(e.subject)
+                      return (
+                        <div key={e._id} onClick={()=>setSelectedEntry(e)} style={{
+                          position:'absolute',top:y+1,left:3,right:3,height:h-2,
+                          background:live?fg:bg,
+                          border:'1.5px solid '+(live?fg:fg+'55'),
+                          borderLeft:'3px solid '+fg,
+                          borderRadius:6,padding:'4px 6px',cursor:'pointer',overflow:'hidden',
+                          opacity:past?.4:1,
+                          boxShadow:live?'0 2px 10px '+fg+'45':'0 1px 3px rgba(0,0,0,.06)',
+                          zIndex:live?4:2,transition:'transform .1s,box-shadow .1s',
+                        }}
+                          onMouseEnter={el=>{el.currentTarget.style.transform='scale(1.02)';el.currentTarget.style.zIndex='10'}}
+                          onMouseLeave={el=>{el.currentTarget.style.transform='scale(1)';el.currentTarget.style.zIndex=live?'4':'2'}}
+                        >
+                          {live && <div style={{display:'flex',alignItems:'center',gap:3,marginBottom:1}}>
+                            <span style={{width:5,height:5,borderRadius:'50%',background:'#fff',display:'inline-block',flexShrink:0,animation:'pulse 1.5s infinite'}}/>
+                            <span style={{fontSize:8,fontWeight:800,color:'#fff',letterSpacing:'.06em'}}>LIVE</span>
+                            <style>{'@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}'}</style>
+                          </div>}
+                          <div style={{fontSize:h>46?11.5:9.5,fontWeight:700,color:live?'#fff':fg,lineHeight:1.2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:h>46?'normal':'nowrap'}}>
+                            {e.subject}
+                          </div>
+                          {h>42 && <div style={{fontSize:9,color:live?'rgba(255,255,255,.8)':'#6B6B6B',marginTop:1,lineHeight:1.2}}>
+                            {fmt(e.startTime)}–{fmt(e.endTime)}
+                          </div>}
+                          {h>58 && e.teacherId && <div style={{fontSize:8.5,color:live?'rgba(255,255,255,.65)':'#9A9A9A',marginTop:2}}>
+                            {e.teacherId.firstName} {(e.teacherId.lastName||'')[0]}.
+                          </div>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          </div>
+
+          {/* Subject legend */}
+          <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:12}}>
+            {uniqueSubjects.map(s => {
+              const [fg,bg]=pal(s)
+              return <div key={s} style={{display:'flex',alignItems:'center',gap:5,padding:'3px 10px',background:bg,borderRadius:99,border:'1px solid '+fg+'35'}}>
+                <span style={{width:7,height:7,borderRadius:'50%',background:fg,flexShrink:0}}/>
+                <span style={{fontSize:10.5,fontWeight:600,color:fg}}>{s}</span>
+              </div>
+            })}
+          </div>
+        </>
+      )}
+
+      {/* Detail modal */}
+      {selectedEntry && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.5)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:16}}
+          onClick={()=>setSelectedEntry(null)}>
+          <div style={{background:'#fff',borderRadius:14,padding:24,maxWidth:340,width:'100%',boxShadow:'0 20px 60px rgba(0,0,0,.25)'}}
+            onClick={ev=>ev.stopPropagation()}>
+            {(() => {
+              const e=selectedEntry; const [fg,bg]=pal(e.subject); const live=isLive(e)
+              return <>
+                <div style={{background:live?fg:bg,borderRadius:8,padding:'14px 16px',marginBottom:16}}>
+                  {live && <div style={{fontSize:10,fontWeight:800,color:'#fff',letterSpacing:'.1em',marginBottom:4}}>● LIVE NOW</div>}
+                  <div style={{fontSize:18,fontWeight:800,color:live?'#fff':fg}}>{e.subject}</div>
+                  <div style={{fontSize:12,color:live?'rgba(255,255,255,.7)':'#6B6B6B',marginTop:2}}>{e.curriculum}</div>
+                </div>
+                <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                  <TRow icon="📅" label="Day"    val={DAYS_LONG[e.dayOfWeek]}/>
+                  <TRow icon="🕐" label="Time"   val={fmt(e.startTime)+' – '+fmt(e.endTime)}/>
+                  {e.teacherId && <TRow icon="👩‍🏫" label="Teacher" val={e.teacherId.firstName+' '+(e.teacherId.lastName||'')}/>}
+                  <TRow icon={e.deliveryMode==='virtual'?'💻':'🏫'} label="Mode" val={e.deliveryMode==='virtual'?'Online class':'In-person'}/>
+                  {e.meetingLink && <a href={e.meetingLink} target="_blank" rel="noopener noreferrer" style={{display:'block',background:fg,color:'#fff',textAlign:'center',padding:'9px 0',borderRadius:7,fontSize:13,fontWeight:700,textDecoration:'none',marginTop:4}}>Join class →</a>}
+                </div>
+                <button onClick={()=>setSelectedEntry(null)} style={{marginTop:16,width:'100%',background:'transparent',border:'1px solid #E8E2D6',color:'#6B6B6B',padding:'8px 0',borderRadius:7,fontSize:12.5,fontWeight:700,cursor:'pointer'}}>Close</button>
+              </>
+            })()}
           </div>
         </div>
       )}
+    </div>
+  )
+}
 
-      {/* ── LIST VIEW ── */}
-      {view === 'list' && (
-        <div>
-          {DAYS.map((d, idx) => {
-            const items = byDay[d]
-            if (items.length === 0) return null
-            return (
-              <div key={'list-' + d} style={{ marginBottom: 18 }}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  marginBottom: 8, paddingBottom: 6,
-                  borderBottom: '1px solid #F4EFEB',
-                }}>
-                  <div style={{
-                    fontSize: 11, fontWeight: 800,
-                    letterSpacing: '.1em', textTransform: 'uppercase',
-                    color: idx === todayIdx ? '#7D1025' : '#564844',
-                  }}>{DAYS_LONG[d]}</div>
-                  {idx === todayIdx && (
-                    <span style={{
-                      fontSize: 9, fontWeight: 800,
-                      letterSpacing: '.08em', color: '#C9A030',
-                      background: '#FDF7E2', padding: '2px 8px', borderRadius: 99,
-                    }}>TODAY</span>
-                  )}
-                </div>
-                {items.map(entry => {
-                  const live = isLive(entry)
-                  const past = isPastToday(entry)
-                  const col = colourFor(entry.subject)
-                  return (
-                    <div key={entry._id} onClick={() => setTeacherModal(entry.teacherId)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 14,
-                        padding: '12px 14px', marginBottom: 6,
-                        background: '#fff',
-                        border: '1px solid #E8E2D6',
-                        borderLeft: '4px solid ' + col,
-                        borderRadius: 7, cursor: 'pointer',
-                        opacity: past ? 0.6 : 1,
-                        transition: 'background .12s',
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.background = '#FBFAF5'}
-                      onMouseLeave={e => e.currentTarget.style.background = '#fff'}
-                    >
-                      <div style={{
-                        width: 60, flexShrink: 0,
-                        fontSize: 11, fontWeight: 700, color: '#857973',
-                      }}>
-                        {fmt(entry.startTime)}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: '#1A0F0E', marginBottom: 2 }}>
-                          {entry.subject}
-                          {live && (
-                            <span style={{
-                              marginLeft: 8,
-                              fontSize: 9, fontWeight: 800, letterSpacing: '.1em',
-                              textTransform: 'uppercase', color: '#fff',
-                              background: '#B91C1C', padding: '2px 7px', borderRadius: 99,
-                            }}>Live</span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: 12, color: '#857973' }}>
-                          {entry.teacherId && `${entry.teacherId.firstName} ${entry.teacherId.lastName || ''}`.trim()}
-                          {entry.location && ' · ' + entry.location}
-                        </div>
-                      </div>
-                      <div style={{ fontSize: 11, color: '#857973', textAlign: 'right' }}>
-                        {entry.endTime && fmt(entry.endTime)}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {/* Teacher profile preview modal */}
-      {teacherModal && (
-        <TeacherProfilePreview teacher={teacherModal} onClose={() => setTeacherModal(null)} />
-      )}
+function TRow({ icon, label, val }) {
+  return (
+    <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
+      <span style={{fontSize:14,flexShrink:0,marginTop:1}}>{icon}</span>
+      <div>
+        <div style={{fontSize:10,fontWeight:700,color:'#9A9A9A',letterSpacing:'.05em',textTransform:'uppercase'}}>{label}</div>
+        <div style={{fontSize:13,color:'#1A0F0E',fontWeight:500}}>{val}</div>
+      </div>
     </div>
   )
 }
