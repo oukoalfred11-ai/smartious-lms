@@ -4,6 +4,17 @@ const User = require('../models/User');
 const Subject = require('../models/Subject');
 const GroupRoom = require('../models/GroupRoom');
 const { auth, requireRole } = require('../middleware/auth');
+
+// Lazy-load autoTimetable so a missing/broken service file
+// does not crash the entire allocations route on startup.
+function getAutoTimetable() {
+  try {
+    return require('../services/autoTimetable').autoGenerateTimetable;
+  } catch (e) {
+    console.error('[allocations] autoTimetable service not available:', e.message);
+    return null;
+  }
+}
 const {
   sendTeacherAllocationNotification,
   sendStudentAllocationNotification
@@ -442,13 +453,16 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
     // Non-blocking — runs after the response is sent so the
     // allocation endpoint doesn't slow down even if the teacher
     // has no availability set.
-    autoGenerateTimetable({
-      teacherId:    teacher._id,
-      studentId:    student._id,
-      subjectId:    subject._id,
-      createdBy:    req.user?._id,
-      canBeGrouped: !!canBeGrouped,
-    }).then(result => {
+    const autoGenerateTimetable = getAutoTimetable();
+    if (autoGenerateTimetable) {
+      autoGenerateTimetable({
+        teacherId:    teacher._id,
+        studentId:    student._id,
+        subjectId:    subject._id,
+        createdBy:    req.user?._id,
+        canBeGrouped: !!canBeGrouped,
+      })
+    }.then(result => {
       if (result.created) {
         console.log('[allocation] Auto-timetable created for', student.firstName, '-', subject.subjectName);
       } else {
