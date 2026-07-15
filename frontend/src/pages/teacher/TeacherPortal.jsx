@@ -786,7 +786,7 @@ export default function TeacherPortal() {
       {id:'attendance',    label:'Attendance',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
       {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
       {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
-      {id:'availability',  label:'My Availability',  iconName:'availability',  icon:'circle:12:12:4|line:12:8:12:12|line:12:12:16:12'},
+      {id:'availability',  label:'My Availability', iconName:'availability', icon:'circle:12:12:4|line:12:8:12:12|line:12:12:16:12'},
       {id:'timetable',     label:'Timetable',        iconName:'timetable',     icon:'rect:3:4:18:18:2|line:8:2:8:6|line:16:2:16:6|line:3:10:21:10'},
       {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
     ]},
@@ -14166,146 +14166,6 @@ function BookCard({ book, onView, onDelete, canDelete }) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// ─────────────────────────────────────────────────────────
-// TeacherAvailabilityTab
-// Teacher sets their weekly available time slots.
-// These are used to auto-generate timetable entries when
-// admin allocates this teacher to a student.
-// ─────────────────────────────────────────────────────────
-function TeacherAvailabilityTab({ user, toast }) {
-  const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
-  const DAYS_LONG = { Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday' }
-
-  const [slots, setSlots]   = useState([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving]   = useState(false)
-
-  useEffect(() => {
-    api.get('/users/teachers/' + user._id + '/availability')
-      .then(r => setSlots(r.data?.data?.availability || []))
-      .catch(() => toast?.error?.('Could not load availability.'))
-      .finally(() => setLoading(false))
-  }, [user._id])
-
-  const addSlot = () => {
-    setSlots(s => [...s, { dayOfWeek: 'Mon', startTime: '09:00', endTime: '10:00' }])
-  }
-
-  const updateSlot = (i, key, val) => {
-    setSlots(s => s.map((sl,idx) => idx===i ? {...sl,[key]:val} : sl))
-  }
-
-  const removeSlot = (i) => {
-    setSlots(s => s.filter((_,idx) => idx!==i))
-  }
-
-  const save = async () => {
-    // Validate no clashes within same day
-    const byDay = {}
-    for (const sl of slots) {
-      if (!byDay[sl.dayOfWeek]) byDay[sl.dayOfWeek] = []
-      const s = sl.startTime.split(':').map(Number); const e = sl.endTime.split(':').map(Number)
-      const sm = s[0]*60+s[1]; const em = e[0]*60+e[1]
-      if (em <= sm) { toast?.error?.('End time must be after start time on ' + sl.dayOfWeek); return }
-      for (const [ps,pe] of byDay[sl.dayOfWeek]) {
-        if (sm < pe && em > ps) { toast?.error?.('Overlapping slots on ' + sl.dayOfWeek); return }
-      }
-      byDay[sl.dayOfWeek].push([sm,em])
-    }
-
-    setSaving(true)
-    try {
-      const { data } = await api.patch('/users/teachers/' + user._id + '/availability', { availability: slots })
-      if (data?.success) toast?.ok?.('Availability saved. New student allocations will auto-schedule within these slots.')
-      else toast?.error?.(data?.message || 'Could not save.')
-    } catch(e) {
-      toast?.error?.(e?.response?.data?.message || 'Could not save availability.')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const DAY_COLOURS = { Mon:'#7D1025',Tue:'#1E3A8A',Wed:'#166534',Thu:'#92400E',Fri:'#6B21A8',Sat:'#0F766E',Sun:'#374151' }
-
-  const inp = { padding:'7px 10px', borderRadius:6, border:'1.5px solid #E8E2D6', fontSize:12.5, fontFamily:'inherit', background:'#FBFAF5' }
-
-  return (
-    <div>
-      <div className="sec-tag">Schedule</div>
-      <h2 className="serif" style={{fontSize:24,color:'var(--s900)',margin:'6px 0 4px'}}>My Availability</h2>
-      <div style={{fontSize:13,color:'#6B6B6B',marginBottom:20,lineHeight:1.6}}>
-        Set the time slots when you're available to teach. When admin allocates you to a new student, the system will automatically pick the first free slot from this list.
-      </div>
-
-      {loading ? (
-        <div style={{fontSize:13,color:'#9A9A9A',fontStyle:'italic'}}>Loading...</div>
-      ) : (
-        <>
-          {/* Slot list */}
-          <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16}}>
-            {slots.length === 0 && (
-              <div style={{padding:'20px',background:'#FBFAF5',border:'1px dashed #E8E2D6',borderRadius:8,textAlign:'center',fontSize:13,color:'#9A9A9A'}}>
-                No availability slots set. Add slots below so the system can auto-schedule your classes.
-              </div>
-            )}
-            {slots.map((sl,i) => (
-              <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'#fff',border:'1.5px solid #E8E2D6',borderLeft:'4px solid '+(DAY_COLOURS[sl.dayOfWeek]||'#7D1025'),borderRadius:8}}>
-                <select value={sl.dayOfWeek} onChange={e=>updateSlot(i,'dayOfWeek',e.target.value)} style={{...inp,fontWeight:700,color:DAY_COLOURS[sl.dayOfWeek]||'#7D1025',minWidth:110}}>
-                  {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => <option key={d} value={d}>{DAYS_LONG[d]}</option>)}
-                </select>
-                <input type="time" value={sl.startTime} onChange={e=>updateSlot(i,'startTime',e.target.value)} style={{...inp,minWidth:100}}/>
-                <span style={{fontSize:12,color:'#9A9A9A',fontWeight:600}}>to</span>
-                <input type="time" value={sl.endTime} onChange={e=>updateSlot(i,'endTime',e.target.value)} style={{...inp,minWidth:100}}/>
-                <div style={{flex:1}}/>
-                <button onClick={()=>removeSlot(i)} style={{background:'transparent',border:'none',color:'#B91C1C',cursor:'pointer',fontSize:18,lineHeight:1,padding:'0 4px'}}>×</button>
-              </div>
-            ))}
-          </div>
-
-          <div style={{display:'flex',gap:10}}>
-            <button onClick={addSlot} style={{background:'transparent',border:'1.5px solid #7D1025',color:'#7D1025',padding:'9px 18px',borderRadius:7,fontSize:12.5,fontWeight:700,cursor:'pointer'}}>
-              + Add slot
-            </button>
-            <button onClick={save} disabled={saving} style={{background:saving?'#9A9A9A':'#7D1025',color:'#fff',border:'none',padding:'9px 22px',borderRadius:7,fontSize:12.5,fontWeight:700,cursor:saving?'not-allowed':'pointer'}}>
-              {saving ? 'Saving...' : 'Save availability'}
-            </button>
-          </div>
-
-          {/* Visual preview */}
-          {slots.length > 0 && (
-            <div style={{marginTop:24}}>
-              <div style={{fontSize:12,fontWeight:700,color:'#6B6B6B',letterSpacing:'.06em',textTransform:'uppercase',marginBottom:10}}>Preview</div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:6}}>
-                {DAYS.map(d => {
-                  const daySlots = slots.filter(s=>s.dayOfWeek===d)
-                  return (
-                    <div key={d}>
-                      <div style={{fontSize:10,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:daySlots.length>0?DAY_COLOURS[d]:'#CCC',textAlign:'center',marginBottom:4}}>{d}</div>
-                      <div style={{display:'flex',flexDirection:'column',gap:3}}>
-                        {daySlots.length===0
-                          ? <div style={{height:28,background:'#F9F6F4',borderRadius:4,border:'1px dashed #E8E2D6'}}/>
-                          : daySlots.map((sl,i) => {
-                              const [hh,mm]=sl.startTime.split(':').map(Number)
-                              const [eh,em]=sl.endTime.split(':').map(Number)
-                              const fmt=h=>{ const m=h>=12?'PM':'AM'; let hr=h%12; if(!hr)hr=12; return hr+' '+m }
-                              return <div key={i} style={{background:DAY_COLOURS[d]+'15',border:'1.5px solid '+DAY_COLOURS[d]+'40',borderRadius:4,padding:'4px 6px',fontSize:9,color:DAY_COLOURS[d],fontWeight:700,textAlign:'center'}}>
-                                {fmt(hh)}–{fmt(eh)}
-                              </div>
-                            })
-                        }
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  )
-}
-
 // TeacherTimetableTab
 // ═══════════════════════════════════════════════════════════
 // Recurring weekly timetable management for teachers.
@@ -14321,6 +14181,110 @@ function TeacherAvailabilityTab({ user, toast }) {
 // represents "Maths every Monday 09:00–10:00 for these students."
 // The Student Portal reads from the same source.
 // ═══════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────
+// TeacherAvailabilityTab
+// Teacher sets weekly available slots used for auto-timetabling.
+// ─────────────────────────────────────────────────────────
+function TeacherAvailabilityTab({ user, toast }) {
+  const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+  const DAYS_LONG = { Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday' }
+  const [slots, setSlots]     = useState([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving]   = useState(false)
+
+  useEffect(() => {
+    api.get('/users/teachers/' + user._id + '/availability')
+      .then(r => setSlots(r.data?.data?.availability || []))
+      .catch(() => toast?.error?.('Could not load availability.'))
+      .finally(() => setLoading(false))
+  }, [user._id])
+
+  const addSlot  = () => setSlots(s => [...s, { dayOfWeek:'Mon', startTime:'09:00', endTime:'10:00' }])
+  const upd      = (i, k, v) => setSlots(s => s.map((sl,idx) => idx===i ? {...sl,[k]:v} : sl))
+  const remove   = i => setSlots(s => s.filter((_,idx) => idx!==i))
+
+  const save = async () => {
+    for (const sl of slots) {
+      const sm = sl.startTime.split(':').map(Number); const em = sl.endTime.split(':').map(Number)
+      if (em[0]*60+em[1] <= sm[0]*60+sm[1]) { toast?.error?.('End time must be after start time on ' + sl.dayOfWeek); return }
+    }
+    setSaving(true)
+    try {
+      const { data } = await api.patch('/users/teachers/' + user._id + '/availability', { availability: slots })
+      if (data?.success) toast?.ok?.('Availability saved. New allocations will auto-schedule within these slots.')
+      else toast?.error?.(data?.message || 'Could not save.')
+    } catch(e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not save.')
+    } finally { setSaving(false) }
+  }
+
+  const DC = { Mon:'#7D1025',Tue:'#1E3A8A',Wed:'#166534',Thu:'#92400E',Fri:'#6B21A8',Sat:'#0F766E',Sun:'#374151' }
+  const inp = { padding:'7px 10px', borderRadius:6, border:'1.5px solid #E8E2D6', fontSize:12.5, fontFamily:'inherit', background:'#FBFAF5' }
+
+  return (
+    <div>
+      <div className="sec-tag">Schedule</div>
+      <h2 className="serif" style={{fontSize:24,color:'var(--s900)',margin:'6px 0 4px'}}>My Availability</h2>
+      <div style={{fontSize:13,color:'#6B6B6B',marginBottom:20,lineHeight:1.6}}>
+        Set the time slots when you can teach. When admin allocates you to a new student, the system picks the first free slot from this list to auto-generate a timetable entry.
+      </div>
+      {loading ? <div style={{fontSize:13,color:'#9A9A9A',fontStyle:'italic'}}>Loading...</div> : (<>
+        <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16}}>
+          {slots.length===0 && (
+            <div style={{padding:20,background:'#FBFAF5',border:'1px dashed #E8E2D6',borderRadius:8,textAlign:'center',fontSize:13,color:'#9A9A9A'}}>
+              No slots set. Add your available times below.
+            </div>
+          )}
+          {slots.map((sl,i) => (
+            <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'#fff',border:'1.5px solid #E8E2D6',borderLeft:'4px solid '+(DC[sl.dayOfWeek]||'#7D1025'),borderRadius:8}}>
+              <select value={sl.dayOfWeek} onChange={e=>upd(i,'dayOfWeek',e.target.value)} style={{...inp,fontWeight:700,color:DC[sl.dayOfWeek]||'#7D1025',minWidth:110}}>
+                {DAYS.map(d=><option key={d} value={d}>{DAYS_LONG[d]}</option>)}
+              </select>
+              <input type="time" value={sl.startTime} onChange={e=>upd(i,'startTime',e.target.value)} style={{...inp,minWidth:100}}/>
+              <span style={{fontSize:12,color:'#9A9A9A',fontWeight:600}}>to</span>
+              <input type="time" value={sl.endTime} onChange={e=>upd(i,'endTime',e.target.value)} style={{...inp,minWidth:100}}/>
+              <div style={{flex:1}}/>
+              <button onClick={()=>remove(i)} style={{background:'transparent',border:'none',color:'#B91C1C',cursor:'pointer',fontSize:20,lineHeight:1,padding:'0 4px'}}>×</button>
+            </div>
+          ))}
+        </div>
+        <div style={{display:'flex',gap:10}}>
+          <button onClick={addSlot} style={{background:'transparent',border:'1.5px solid #7D1025',color:'#7D1025',padding:'9px 18px',borderRadius:7,fontSize:12.5,fontWeight:700,cursor:'pointer'}}>+ Add slot</button>
+          <button onClick={save} disabled={saving} style={{background:saving?'#9A9A9A':'#7D1025',color:'#fff',border:'none',padding:'9px 22px',borderRadius:7,fontSize:12.5,fontWeight:700,cursor:saving?'not-allowed':'pointer'}}>
+            {saving?'Saving...':'Save availability'}
+          </button>
+        </div>
+        {slots.length>0 && (
+          <div style={{marginTop:24}}>
+            <div style={{fontSize:12,fontWeight:700,color:'#6B6B6B',letterSpacing:'.06em',textTransform:'uppercase',marginBottom:10}}>Preview</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:6}}>
+              {DAYS.map(d => {
+                const ds=slots.filter(s=>s.dayOfWeek===d)
+                return (
+                  <div key={d}>
+                    <div style={{fontSize:10,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:ds.length>0?DC[d]:'#CCC',textAlign:'center',marginBottom:4}}>{d}</div>
+                    {ds.length===0
+                      ? <div style={{height:28,background:'#F9F6F4',borderRadius:4,border:'1px dashed #E8E2D6'}}/>
+                      : ds.map((sl,i)=>{
+                          const [hh]=sl.startTime.split(':').map(Number)
+                          const [eh]=sl.endTime.split(':').map(Number)
+                          const f=h=>{ const m=h>=12?'PM':'AM';let hr=h%12;if(!hr)hr=12;return hr+' '+m }
+                          return <div key={i} style={{background:DC[d]+'15',border:'1.5px solid '+DC[d]+'40',borderRadius:4,padding:'4px 6px',fontSize:9,color:DC[d],fontWeight:700,textAlign:'center',marginBottom:3}}>
+                            {f(hh)}–{f(eh)}
+                          </div>
+                        })
+                    }
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </>)}
+    </div>
+  )
+}
+
 function TeacherTimetableTab({ user, toast }) {
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
@@ -14600,195 +14564,31 @@ function TeacherTimetableTab({ user, toast }) {
     byDay[d].sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)))
   }
 
-  // ── view mode: 'grid' = premium calendar, 'manage' = form editor
-  const [viewMode, setViewMode] = React.useState('grid')
-
-  const HOUR_START=6, HOUR_END=22, TOTAL_MINS=(HOUR_END-HOUR_START)*60
-  const GRID_H=820, COL_W=130, TIME_COL_W=52
-  const toMinsT = h => { if(!h)return 0; const[hh,mm]=h.split(':').map(Number);return hh*60+mm }
-  const fmtT = h => { if(!h)return ''; const[hh,mm]=h.split(':').map(Number);const m=hh>=12?'PM':'AM';let hr=hh%12;if(!hr)hr=12;return `${hr}${mm===0?'':':'+String(mm).padStart(2,'0')} ${m}` }
-  const minToYT = m => ((m - HOUR_START*60) / TOTAL_MINS) * GRID_H
-  const entryHT = e => Math.max(30, minToYT(toMinsT(e.endTime)) - minToYT(toMinsT(e.startTime)))
-
-  const DAYLIST = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
-  const DAYS_LONGT = { Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday' }
-  const now=new Date(), todayIdx=(now.getDay()+6)%7, nowMins=now.getHours()*60+now.getMinutes()
-
-  const PALETTES_T = [
-    ['#7D1025','#FDE7EC'],['#1E3A8A','#DBEAFE'],['#166534','#DCFCE7'],
-    ['#7C2D12','#FEF3C7'],['#6B21A8','#F3E8FF'],['#0F766E','#CCFBF1'],
-    ['#92400E','#FEF9C3'],['#1F2937','#F3F4F6'],['#9F1239','#FFE4E6'],
-    ['#0369A1','#E0F2FE'],['#7E22CE','#EDE9FE'],
-  ]
-  const palMap = {}
-  ;[...new Set(entries.map(e=>e.subject))].forEach((s,i)=>{ palMap[s]=PALETTES_T[i%PALETTES_T.length] })
-  const palT = s => palMap[s] || PALETTES_T[0]
-
-  const byDayT = {}
-  DAYLIST.forEach(d => { byDayT[d]=[] })
-  entries.forEach(e => { if(byDayT[e.dayOfWeek]) byDayT[e.dayOfWeek].push(e) })
-
   return (
     <div>
-      {/* Header */}
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, gap:14, flexWrap:'wrap' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 14, flexWrap: 'wrap' }}>
         <div>
           <div className="sec-tag">Recurring weekly slots</div>
-          <h2 className="serif" style={{ fontSize:26, color:'var(--s900)', margin:'6px 0 4px' }}>Timetable</h2>
-          <div style={{ fontSize:13, color:'#6B6B6B', maxWidth:560, lineHeight:1.6 }}>
-            Your weekly class schedule. Use the grid to see your full week, or switch to Manage to add and edit slots.
+          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
+            Timetable
+          </h2>
+          <div style={{ fontSize: 13, color: '#6B6B6B', maxWidth: 560 }}>
+            Build a weekly schedule for your classes. Each slot repeats every week —
+            students see it automatically. Use Schedule Classes for one-off sessions instead.
           </div>
         </div>
-        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-          <div style={{ display:'flex', border:'1.5px solid #E8E2D6', borderRadius:8, overflow:'hidden' }}>
-            {[['grid','📅 Week view'],['manage','✏️ Manage']].map(([k,l]) => (
-              <button key={k} onClick={()=>setViewMode(k)} style={{
-                padding:'8px 14px', border:'none', fontSize:12, fontWeight:700, cursor:'pointer',
-                background:viewMode===k?'#7D1025':'transparent',
-                color:viewMode===k?'#fff':'#564844',
-              }}>{l}</button>
-            ))}
-          </div>
-          {viewMode==='manage' && !showForm && (
-            <button onClick={()=>{ resetForm(); setShowForm(true) }} style={{
-              background:'#7D1025', color:'#fff', border:'none',
-              padding:'9px 16px', borderRadius:8, fontSize:12.5, fontWeight:700, cursor:'pointer',
-            }}>+ Add slot</button>
-          )}
-        </div>
+        {!showForm && (
+          <button onClick={() => { resetForm(); setShowForm(true) }}
+            style={{
+              background: '#7D1025', color: '#fff', border: 'none',
+              padding: '10px 18px', borderRadius: 8,
+              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+              flexShrink: 0,
+            }}>
+            + Add slot
+          </button>
+        )}
       </div>
-
-      {/* ── GRID VIEW ── */}
-      {viewMode==='grid' && (
-        loading ? (
-          <div style={{padding:'40px 0',textAlign:'center',color:'#9A9A9A',fontSize:13}}>Loading timetable...</div>
-        ) : entries.length===0 ? (
-          <div style={{padding:32,textAlign:'center',background:'#FBFAF5',border:'1px solid #E8E2D6',borderRadius:12}}>
-            <div style={{fontSize:28,marginBottom:10}}>📅</div>
-            <div style={{fontSize:14,fontWeight:700,color:'#1A0F0E',marginBottom:4}}>No slots yet</div>
-            <div style={{fontSize:13,color:'#9A9A9A'}}>Switch to Manage to add your first class slot.</div>
-          </div>
-        ) : (
-          <>
-            {/* Today strip */}
-            <div style={{background:'linear-gradient(135deg,#7D1025,#5A0B1B)',borderRadius:12,padding:'14px 18px',marginBottom:14,color:'#fff'}}>
-              <div style={{fontSize:10,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:'rgba(255,255,255,.55)',marginBottom:8}}>
-                {DAYS_LONGT[DAYLIST[todayIdx]]} · Today
-              </div>
-              {(byDayT[DAYLIST[todayIdx]]||[]).length===0
-                ? <div style={{fontSize:13,color:'rgba(255,255,255,.5)'}}>No classes today</div>
-                : <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-                    {[...(byDayT[DAYLIST[todayIdx]]||[])].sort((a,b)=>toMinsT(a.startTime)-toMinsT(b.startTime)).map(e => {
-                      const live = DAYLIST.indexOf(e.dayOfWeek)===todayIdx && nowMins>=toMinsT(e.startTime) && nowMins<toMinsT(e.endTime)
-                      const [fg]=palT(e.subject)
-                      const stuCount = (e.assignedStudents||[]).length
-                      return (
-                        <div key={e._id} onClick={()=>beginEdit(e)} style={{
-                          background:live?'#fff':'rgba(255,255,255,.1)',
-                          border:'1px solid '+(live?'transparent':'rgba(255,255,255,.18)'),
-                          borderRadius:8,padding:'8px 14px',cursor:'pointer',transition:'transform .12s',
-                        }} onMouseEnter={el=>el.currentTarget.style.transform='scale(1.04)'}
-                           onMouseLeave={el=>el.currentTarget.style.transform='scale(1)'}>
-                          {live && <div style={{fontSize:9,fontWeight:800,color:'#7D1025',marginBottom:3,display:'flex',alignItems:'center',gap:4}}>
-                            <span style={{width:6,height:6,borderRadius:'50%',background:'#DC2626',display:'inline-block'}}/>LIVE NOW
-                          </div>}
-                          <div style={{fontSize:12.5,fontWeight:700,color:live?fg:'#fff'}}>{e.subject}</div>
-                          <div style={{fontSize:11,color:live?'#9A2434':'rgba(255,255,255,.65)',marginTop:2}}>
-                            {fmtT(e.startTime)} – {fmtT(e.endTime)}
-                            {stuCount>0 && <span style={{marginLeft:6,opacity:.8}}>· {stuCount} student{stuCount>1?'s':''}</span>}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-              }
-            </div>
-
-            {/* Time-grid */}
-            <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden',boxShadow:'0 2px 12px rgba(0,0,0,.05)'}}>
-              <div style={{display:'grid',gridTemplateColumns:TIME_COL_W+'px repeat(7,'+COL_W+'px)',borderBottom:'1.5px solid #E8E2D6',background:'#FBFAF5'}}>
-                <div style={{padding:'10px 0'}}/>
-                {DAYLIST.map((d,i) => {
-                  const isToday=i===todayIdx
-                  return <div key={d} style={{padding:'10px 8px',textAlign:'center',borderLeft:'1px solid #F0EBE6',background:isToday?'#7D1025':'transparent',color:isToday?'#fff':'#564844'}}>
-                    <div style={{fontSize:10,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase'}}>{d}</div>
-                    {isToday && <div style={{fontSize:8,marginTop:2,fontWeight:600,color:'rgba(255,255,255,.7)'}}>TODAY</div>}
-                  </div>
-                })}
-              </div>
-              <div style={{overflowX:'auto',overflowY:'auto',maxHeight:500}}>
-                <div style={{position:'relative',width:TIME_COL_W+COL_W*7,height:GRID_H}}>
-                  {Array.from({length:HOUR_END-HOUR_START+1},(_,i)=>{
-                    const h=HOUR_START+i,y=(i/(HOUR_END-HOUR_START))*GRID_H,is12=h===12
-                    return <div key={h} style={{position:'absolute',top:y,left:0,right:0,display:'flex',alignItems:'flex-start'}}>
-                      <div style={{width:TIME_COL_W,paddingRight:8,textAlign:'right',fontSize:9.5,color:is12?'#7D1025':'#BBBBBB',fontWeight:is12?700:400,transform:'translateY(-50%)',flexShrink:0}}>
-                        {h===12?'12 PM':h>12?(h-12)+' PM':h+' AM'}
-                      </div>
-                      <div style={{flex:1,height:is12?1.5:1,background:is12?'#FECDD3':'#F4EFEB'}}/>
-                    </div>
-                  })}
-                  {nowMins>=HOUR_START*60&&nowMins<HOUR_END*60&&(
-                    <div style={{position:'absolute',top:minToYT(nowMins),left:TIME_COL_W+COL_W*todayIdx,width:COL_W,height:2,background:'#DC2626',zIndex:8}}>
-                      <div style={{width:8,height:8,borderRadius:'50%',background:'#DC2626',position:'absolute',left:-4,top:-3}}/>
-                    </div>
-                  )}
-                  {DAYLIST.map((d,dIdx) => (
-                    <div key={d} style={{position:'absolute',top:0,bottom:0,left:TIME_COL_W+COL_W*dIdx,width:COL_W,borderLeft:'1px solid #F4EFEB',background:dIdx===todayIdx?'rgba(125,16,37,.025)':'transparent'}}>
-                      {(byDayT[d]||[]).map(e => {
-                        const y=minToYT(toMinsT(e.startTime)),h=entryHT(e)
-                        const live=DAYLIST.indexOf(e.dayOfWeek)===todayIdx&&nowMins>=toMinsT(e.startTime)&&nowMins<toMinsT(e.endTime)
-                        const [fg,bg]=palT(e.subject)
-                        const stuCount=(e.assignedStudents||[]).length
-                        return (
-                          <div key={e._id} onClick={()=>{ setViewMode('manage'); beginEdit(e) }}
-                            style={{position:'absolute',top:y+1,left:3,right:3,height:h-2,
-                              background:live?fg:bg,border:'1.5px solid '+(live?fg:fg+'55'),
-                              borderLeft:'3px solid '+fg,borderRadius:6,padding:'4px 6px',
-                              cursor:'pointer',overflow:'hidden',
-                              boxShadow:live?'0 2px 10px '+fg+'45':'0 1px 3px rgba(0,0,0,.06)',
-                              zIndex:live?4:2,transition:'transform .1s',
-                            }}
-                            onMouseEnter={el=>{el.currentTarget.style.transform='scale(1.02)';el.currentTarget.style.zIndex='10'}}
-                            onMouseLeave={el=>{el.currentTarget.style.transform='scale(1)';el.currentTarget.style.zIndex=live?'4':'2'}}
-                          >
-                            {live&&<div style={{display:'flex',alignItems:'center',gap:3,marginBottom:1}}>
-                              <span style={{width:5,height:5,borderRadius:'50%',background:'#fff',display:'inline-block',flexShrink:0}}/>
-                              <span style={{fontSize:8,fontWeight:800,color:'#fff',letterSpacing:'.06em'}}>LIVE</span>
-                            </div>}
-                            <div style={{fontSize:h>46?11.5:9.5,fontWeight:700,color:live?'#fff':fg,lineHeight:1.2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:h>46?'normal':'nowrap'}}>{e.subject}</div>
-                            {h>40&&<div style={{fontSize:9,color:live?'rgba(255,255,255,.8)':'#6B6B6B',marginTop:1}}>{fmtT(e.startTime)}–{fmtT(e.endTime)}</div>}
-                            {h>54&&stuCount>0&&<div style={{fontSize:8.5,color:live?'rgba(255,255,255,.65)':'#9A9A9A',marginTop:2}}>
-                              {stuCount} student{stuCount>1?'s':''}
-                              {e.canBeGrouped&&<span style={{marginLeft:4,fontSize:8,fontWeight:700,color:live?'rgba(255,255,255,.5)':fg+'80'}}>· group</span>}
-                            </div>}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Legend */}
-            <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:12}}>
-              {[...new Set(entries.map(e=>e.subject))].map(s => {
-                const [fg,bg]=palT(s)
-                return <div key={s} style={{display:'flex',alignItems:'center',gap:5,padding:'3px 10px',background:bg,borderRadius:99,border:'1px solid '+fg+'35'}}>
-                  <span style={{width:7,height:7,borderRadius:'50%',background:fg,flexShrink:0}}/>
-                  <span style={{fontSize:10.5,fontWeight:600,color:fg}}>{s}</span>
-                </div>
-              })}
-            </div>
-          </>
-        )
-      )}
-
-      {/* ── MANAGE VIEW ── (existing form + list) */}
-      {viewMode==='manage' && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 14, flexWrap: 'wrap' }}>
-        <div>
 
       {/* ── FORM (create / edit) ── */}
       {showForm && (
@@ -15083,8 +14883,6 @@ function TeacherTimetableTab({ user, toast }) {
           })}
         </div>
       )}
-      </div>
-    )}
-  </div>
+    </div>
   )
 }
