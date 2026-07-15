@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['admin','accountant','sales','ops_manager','teacher','student','parent','demo'], default: 'student' },
+  role: { type: String, enum: ['admin','teacher','student','parent','demo'], default: 'student' },
   grade: String,
 
   // ── PROGRAMME ENROLMENT (students) ──
@@ -46,6 +46,17 @@ const userSchema = new mongoose.Schema({
   // Teacher subject ObjectId references (used by Allocation/Subject system)
   // Renamed from old `subjects` field to avoid collision
   subjectRefs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
+  // ── Teacher weekly availability ──────────────────────────
+  // Array of time windows the teacher is available to teach.
+  // Used to auto-generate timetable entries on student enrollment.
+  // Each slot: { dayOfWeek: 'Mon', startTime: '09:00', endTime: '10:00' }
+  availability: [{
+    dayOfWeek:  { type: String, enum: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], required: true },
+    startTime:  { type: String, required: true, match: /^([01]\d|2[0-3]):[0-5]\d$/ },
+    endTime:    { type: String, required: true, match: /^([01]\d|2[0-3]):[0-5]\d$/ },
+    _id: false,
+  }],
+
   // PHASE 3-5 REFACTOR: Teacher teaching specialties (multi-curriculum support)
   teachingSpecialties: [{
     subjectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' },
