@@ -1,487 +1,220 @@
-const router   = require('express').Router();
+/**
+ * routes/auth.js
+ * ============================================================
+ * Authentication routes: login, forgot-password, reset.
+ * Mounted at /api/auth in index.js with authLimiter.
+ */
+
+const express  = require('express');
+const router   = express.Router();
+const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
-const User     = require('../models/User');
-const { auth } = require('../middleware/auth');
+const crypto   = require('crypto');
+const nodemailer = require('nodemailer');
+
+const User = require('../models/User');
 
 const JWT_SECRET  = process.env.JWT_SECRET;
 const JWT_EXPIRES = process.env.JWT_EXPIRES_IN || '7d';
+const CLIENT_URL  = (process.env.CLIENT_URL || 'https://smartioushomeschool.com').replace(/\/$/, '');
 
-if (!JWT_SECRET) {
-  console.error('JWT_SECRET is not set. Exiting.');
-  process.exit(1);
+// ── Email transporter ──────────────────────────────────────
+let _transporter = null;
+function getTransporter() {
+  if (_transporter) return _transporter;
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASSWORD;
+  if (!user || !pass) { console.error('[auth] EMAIL_USER/PASSWORD not set'); return null; }
+  _transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.EMAIL_PORT || '587', 10),
+    secure: parseInt(process.env.EMAIL_PORT || '587', 10) === 465,
+    auth: { user, pass },
+  });
+  return _transporter;
 }
 
-const sign = (id) => jwt.sign({ id }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
-
 // ─────────────────────────────────────────────────────────
-// Build the safe user object returned by /login and /me.
-// Single source of truth so the two endpoints can't drift
-// apart. Every field the portals (student / teacher / admin)
-// rely on must be listed here.
+// POST /api/auth/login
+// Body: { email, password }
 // ─────────────────────────────────────────────────────────
-const buildSafeUser = (u) => ({
-  _id:                   u._id,
-  firstName:             u.firstName,
-  lastName:              u.lastName,
-  email:                 u.email,
-  role:                  u.role,
-  plan:                  u.plan,
-
-  // ── Academic / enrolment ──
-  curriculum:            u.curriculum            || '',
-  gradeLevel:            u.gradeLevel            || '',
-  grade:                 u.grade                 || u.gradeLevel || '',
-  // Subjects is a list of subject names the student is enrolled in
-  // (or the teacher teaches). Always return an array, never undefined,
-  // so the frontend can render confidently.
-  subjects:              Array.isArray(u.subjects) ? u.subjects : [],
-  admissionNumber:       u.admissionNumber       || '',
-
-  // ── Profile ──
-  phone:                 u.phone                 || '',
-  bio:                   u.bio                   || '',
-  avatar:                u.avatar                || '',
-  jobTitle:              u.jobTitle              || '',
-  qualifications:        Array.isArray(u.qualifications) ? u.qualifications : [],
-  certifications:        Array.isArray(u.certifications) ? u.certifications : [],
-  specializations:       Array.isArray(u.specializations) ? u.specializations : [],
-  yearsOfExperience:     u.yearsOfExperience     || 0,
-
-  // ── Teacher specialties ──
-  // [{ subjectId, curriculum }] — the subjects/curricula a teacher
-  // delivers. The teacher portal reads this to know what they teach.
-  teachingSpecialties:   Array.isArray(u.teachingSpecialties) ? u.teachingSpecialties : [],
-
-  // ── Programme enrolment (students) ──
-  programme:             u.programme             || '',
-  deliveryMode:          u.deliveryMode          || '',
-
-  // ── Teacher meeting defaults ──
-  // Pre-fills the live-class scheduling form so teacher doesn't paste their
-  // Zoom URL every time. Empty for non-teacher users.
-  defaultMeetingLink:    u.defaultMeetingLink    || '',
-
-  // ── Gamification (mirrored from User for fast reads) ──
-  xp:                    u.xp                    || 0,
-  streak:                u.streak                || 0,
-
-  // ── Auth lifecycle flags ──
-  // PHASE 3-5: requirePasswordChange (renamed from forcePasswordChange)
-  requirePasswordChange: u.mustChangePassword    || false,
-  isEmailVerified:       u.isEmailVerified       || false,
-  isActive:              u.isActive              !== false, // default true
-});
-
-// ── Login ─────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
     if (!email || !password)
       return res.status(400).json({ success: false, message: 'Email and password are required.' });
 
     const user = await User.findOne({ email: email.toLowerCase().trim() });
-    if (!user || !(await user.comparePassword(password)))
+    if (!user)
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
 
     if (!user.isActive)
-      return res.status(403).json({ success: false, message: 'Account is deactivated. Contact support.' });
+      return res.status(403).json({ success: false, message: 'Your account has been deactivated. Contact admin.' });
 
-    user.lastActive = new Date();
-    await user.save();
+    const match = await bcrypt.compare(password, user.password);
+    if (!match)
+      return res.status(401).json({ success: false, message: 'Invalid email or password.' });
 
-    res.json({ success: true, token: sign(user._id), user: buildSafeUser(user) });
-  } catch (e) {
-    console.error('[auth/login]', e.message);
-    res.status(500).json({ success: false, message: 'Server error during login.' });
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+
+    const userOut = user.toObject();
+    delete userOut.password;
+    delete userOut.passwordResetToken;
+    delete userOut.passwordResetExpires;
+
+    console.log('[auth] Login:', user.email, '| role:', user.role);
+    return res.json({ success: true, token, user: userOut });
+  } catch (err) {
+    console.error('[auth/login]', err.message);
+    return res.status(500).json({ success: false, message: 'Login failed. Please try again.' });
   }
 });
 
-// ── Get current user ──────────────────────────────────────
-router.get('/me', auth, (req, res) => {
-  res.json({ success: true, user: buildSafeUser(req.user) });
+// ─────────────────────────────────────────────────────────
+// POST /api/auth/forgot-password
+// Public — sends a reset link email.
+// Body: { email }
+// Always returns success (don't reveal if email exists).
+// ─────────────────────────────────────────────────────────
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email) return res.status(400).json({ success: false, message: 'Email is required.' });
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) {
+      // Don't reveal whether the email exists
+      return res.json({ success: true, message: 'If that email is registered, a reset link has been sent.' });
+    }
+
+    // Generate token — store hash, send raw
+    const rawToken  = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    user.passwordResetToken   = tokenHash;
+    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await user.save();
+
+    const resetUrl = `${CLIENT_URL}/forgot-password/reset?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
+    const from     = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>';
+
+    const t = getTransporter();
+    if (t) {
+      await t.sendMail({
+        from,
+        to: user.email,
+        subject: 'Reset your Smartious password',
+        html: `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FDFAF4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;padding:40px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(139,26,46,.08);">
+        <tr><td style="background:linear-gradient(135deg,#8B1A2E,#6E1424);padding:28px 32px;">
+          <div style="font-family:Georgia,serif;font-size:22px;color:#fff;font-weight:700;">Reset your password</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px;">Smartious Homeschool and eSchool</div>
+        </td></tr>
+        <tr><td style="padding:28px 32px;">
+          <p style="font-size:15px;color:#2c2c2c;margin:0 0 14px;line-height:1.6;">Hi ${user.firstName || 'there'},</p>
+          <p style="font-size:14px;color:#2c2c2c;margin:0 0 24px;line-height:1.65;">
+            We received a request to reset the password on your Smartious account.
+            Click the button below — this link expires in <strong>1 hour</strong>.
+          </p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <tr><td align="center">
+              <a href="${resetUrl}" style="display:inline-block;background:#8B1A2E;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;letter-spacing:.01em;">
+                Reset my password
+              </a>
+            </td></tr>
+          </table>
+          <p style="font-size:12.5px;color:#6B6B6B;margin:0 0 8px;line-height:1.6;">
+            If you didn't request this, you can safely ignore this email. Your password won't change.
+          </p>
+          <p style="font-size:11px;color:#9CA3AF;margin:0;line-height:1.6;word-break:break-all;">
+            Or paste this link in your browser: ${resetUrl}
+          </p>
+        </td></tr>
+        <tr><td style="background:#FDFAF4;padding:18px 32px;border-top:1px solid #f0e8e8;">
+          <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool and eSchool · smartioushomeschool.com</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`,
+        text: `Hi ${user.firstName || 'there'},\n\nReset your Smartious password (link expires in 1 hour):\n\n${resetUrl}\n\nIf you didn't request this, ignore this email.\n\nSmartious Homeschool and eSchool`,
+      }).catch(e => console.error('[auth] Reset email send failed:', e.message));
+    }
+
+    console.log('[auth/forgot-password] Reset link sent to', user.email);
+    return res.json({ success: true, message: 'If that email is registered, a reset link has been sent.' });
+  } catch (err) {
+    console.error('[auth/forgot-password]', err.message);
+    return res.json({ success: true, message: 'If that email is registered, a reset link has been sent.' });
+  }
 });
 
-// ── Self-update — limited safe fields only ───────────────
-// Used by teacher to set their default meeting link, by anyone to
-// update phone/bio/avatar. Never accepts role/email/password/etc.
-router.patch('/me', auth, async (req, res) => {
+// ─────────────────────────────────────────────────────────
+// POST /api/auth/reset-password-confirm
+// Public — validates token and sets new password.
+// Body: { email, token, newPassword }
+// ─────────────────────────────────────────────────────────
+router.post('/reset-password-confirm', async (req, res) => {
   try {
-    const SAFE_FIELDS = ['phone', 'bio', 'avatar', 'defaultMeetingLink'];
-    const updates = {};
-    for (const k of SAFE_FIELDS) {
-      if (k in req.body) updates[k] = (req.body[k] || '').toString().trim();
-    }
-    if (Object.keys(updates).length === 0)
-      return res.status(400).json({ success: false, message: 'Nothing to update.' });
+    const { email, token, newPassword } = req.body || {};
 
-    const user = await User.findByIdAndUpdate(
-      req.user._id, { $set: updates }, { new: true, runValidators: true }
-    ).select('-password');
+    if (!email || !token || !newPassword)
+      return res.status(400).json({ success: false, message: 'Email, token and new password are required.' });
+    if (newPassword.length < 8)
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters.' });
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      email:                email.toLowerCase().trim(),
+      passwordResetToken:   tokenHash,
+      passwordResetExpires: { $gt: new Date() },
+    });
+
+    if (!user)
+      return res.status(400).json({ success: false, message: 'This reset link is invalid or has expired. Please request a new one.' });
+
+    // Set new password — pre-save hook hashes it
+    user.password             = newPassword;
+    user.passwordResetToken   = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    console.log('[auth/reset-password-confirm] Password reset for', user.email);
+    return res.json({ success: true, message: 'Password reset successfully. You can now log in with your new password.' });
+  } catch (err) {
+    console.error('[auth/reset-password-confirm]', err.message);
+    return res.status(500).json({ success: false, message: 'Password reset failed. Please try again.' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// POST /api/auth/reset-password
+// Legacy endpoint (used by existing ResetPasswordPage for
+// first-time login — no token required, user must be logged in).
+// Body: { newPassword }
+// ─────────────────────────────────────────────────────────
+const { auth: authMiddleware } = require('../middleware/auth');
+router.post('/reset-password', authMiddleware, async (req, res) => {
+  try {
+    const { newPassword } = req.body || {};
+    if (!newPassword || newPassword.length < 8)
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters.' });
+
+    const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
-    res.json({ success: true, user: buildSafeUser(user) });
-  } catch (e) {
-    console.error('[auth /me PATCH]', e.message);
-    res.status(500).json({ success: false, message: 'Failed to update profile.' });
-  }
-});
 
-// ── Teacher self-onboarding: set teaching specialties ────
-// Takes { curricula: ['IGCSE', ...], subjectIds: [<ObjectId>, ...] }
-// and builds the cartesian product as teachingSpecialties pairs.
-// Teacher only — students/admins use other channels.
-router.post('/me/teaching-specialties', auth, async (req, res) => {
-  try {
-    if (req.user.role !== 'teacher')
-      return res.status(403).json({ success: false, message: 'Only teachers can set teaching specialties.' });
-
-    const mongoose = require('mongoose');
-    const Subject  = require('../models/Subject');
-
-    const { curricula, subjectIds } = req.body;
-    if (!Array.isArray(curricula) || curricula.length === 0)
-      return res.status(400).json({ success: false, message: 'curricula must be a non-empty array.' });
-    if (!Array.isArray(subjectIds) || subjectIds.length === 0)
-      return res.status(400).json({ success: false, message: 'subjectIds must be a non-empty array.' });
-
-    const VALID_CURRICULA = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American'];
-    const cleanCurricula = curricula.filter(c => VALID_CURRICULA.includes(c));
-    if (cleanCurricula.length === 0)
-      return res.status(400).json({ success: false, message: 'No valid curricula in input.' });
-
-    const cleanIds = subjectIds.filter(id => mongoose.isValidObjectId(id));
-    if (cleanIds.length === 0)
-      return res.status(400).json({ success: false, message: 'No valid subjectIds in input.' });
-
-    // Verify every subjectId actually exists
-    const found = await Subject.countDocuments({ _id: { $in: cleanIds } });
-    if (found !== cleanIds.length)
-      return res.status(400).json({ success: false, message: 'One or more subjectIds do not exist.' });
-
-    // Build the cartesian product of (subjectId × curriculum)
-    // NOTE: Subject records are curriculum-specific — IGCSE Mathematics
-    // and A-Level Mathematics are different Subject docs. So a teacher
-    // pairing a subject with an "incompatible" curriculum (e.g. pairing
-    // an IGCSE-specific Subject with curriculum=A-Level) is technically
-    // allowed by this endpoint but won't match any allocations. We do
-    // not block this — the allocation system already enforces the right
-    // curriculum match downstream.
-    const pairs = [];
-    for (const sid of cleanIds) {
-      for (const curr of cleanCurricula) {
-        pairs.push({ subjectId: sid, curriculum: curr });
-      }
-    }
-
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { $set: { teachingSpecialties: pairs } },
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    res.json({
-      success: true,
-      message: `Saved ${pairs.length} teaching specialty pair${pairs.length === 1 ? '' : 's'}.`,
-      user: buildSafeUser(user),
-      data: { teachingSpecialties: user.teachingSpecialties }
-    });
-  } catch (e) {
-    console.error('[auth /me/teaching-specialties]', e.message);
-    res.status(500).json({ success: false, message: 'Failed to save teaching specialties.' });
-  }
-});
-
-// ── Mshauri AI — mastery-aware ────────────────────────────
-// The frontend sends masteryContext (from /api/adaptive/mshauri-context)
-// so every reply is personalised to the student's real topic scores.
-router.post('/mshauri', auth, async (req, res) => {
-  try {
-    const { message, masteryContext } = req.body;
-    if (!message)
-      return res.status(400).json({ success: false, message: 'Message is required.' });
-
-    const m    = message.toLowerCase();
-    const name = req.user.firstName;
-    const grade = req.user.grade || 'IGCSE Form 3';
-    const curr  = req.user.curriculum || 'IGCSE';
-    const ctx   = masteryContext || '';
-
-    // Extract key data from mastery context string
-    const weakMatch  = ctx.match(/Weakest topics[^:]*: ([^\n]+)/);
-    const focusMatch = ctx.match(/Focus topic right now: ([^(\n]+)/);
-    const weakTopics = weakMatch  ? weakMatch[1].trim()  : null;
-    const focusTopic = focusMatch ? focusMatch[1].trim() : null;
-
-    let reply = '';
-
-    if (m.includes('hello') || m.includes('habari') || m.startsWith('hi')) {
-
-      if (focusTopic && focusTopic !== 'not set') {
-        reply = 'Habari ' + name + '! Great to see you. Based on your progress, I recommend focusing on ' + focusTopic + ' today — it needs the most attention. Would you like me to explain it, generate flashcards, or give you a quick practice set?';
-      } else {
-        reply = 'Habari ' + name + "! I'm Mshauri, your personalised AI tutor. I know your exact mastery levels and I'll always direct you to what matters most. What shall we work on today?";
-      }
-
-    } else if (m.includes('what should i study') || m.includes('where do i start') || m.includes('help me')) {
-
-      if (weakTopics && weakTopics !== 'none below 60%') {
-        reply = 'Based on your current progress, ' + name + ', I recommend focusing on: ' + weakTopics + '. These are below 60% mastery — work on them before moving to new topics. Shall I create a practice set for the weakest one?';
-      } else {
-        reply = 'You are doing well across all topics, ' + name + '! Keep revising topics between 60-80% to push them to mastery level. Your focus topic is currently ' + (focusTopic || 'not yet set') + '.';
-      }
-
-    } else if (m.includes('pythagoras')) {
-
-      var pyEnd = (ctx.includes('Pythagoras') && ctx.includes('%'))
-        ? 'I can see this is one of your active topics — want a timed practice set?'
-        : 'Shall I generate some practice questions at your level?';
-      reply = 'Pythagoras Theorem: c squared = a squared + b squared, where c is the hypotenuse. Always identify the right angle first. Key triples to memorise: (3,4,5), (5,12,13), (8,15,17). ' + pyEnd;
-
-    } else if (m.includes('chemistry') || m.includes('periodic table') || m.includes('stoichiometry')) {
-
-      var chemEnd = (weakTopics && weakTopics.includes('Stoichiometry'))
-        ? 'I can see Stoichiometry is a weak area for you right now. Focus there — it is heavily tested.'
-        : 'Which area would you like help with?';
-      reply = 'For IGCSE Chemistry, the four biggest mark-earners are: Atomic structure, Chemical bonding, Stoichiometry, and Organic chemistry. ' + chemEnd;
-
-    } else if (m.includes('algebra') || m.includes('equation') || m.includes('quadratic')) {
-
-      var algEnd = m.includes('quadratic')
-        ? 'For IGCSE, always try factorising first — it is faster.'
-        : 'What specific type of algebra question are you working on?';
-      reply = 'Algebra tip for ' + name + ': Always check — are you solving (find x), simplifying (tidy the expression), or factorising (write as brackets)? The quadratic formula is x = (-b +/- sqrt(b^2 - 4ac)) / 2a. ' + algEnd;
-
-    } else if (m.includes('flashcard') || m.includes('revise') || m.includes('memorise')) {
-
-      if (focusTopic && focusTopic !== 'not set') {
-        reply = "I'll generate flashcards for " + focusTopic + " — that is your current priority topic. Use the Flashcards tab in the Lesson Player, or ask me to explain any card in more detail.";
-      } else {
-        reply = "Great idea! Flashcards work best for topics you're between 40-70% on — just enough to remember but still shaky. Which topic shall we make flashcards for?";
-      }
-
-    } else if (m.includes('exam') || m.includes('past paper') || m.includes('test')) {
-
-      var examEnd = (weakTopics && weakTopics !== 'none below 60%')
-        ? 'Your weakest topics right now are: ' + weakTopics + '. Drill these with past paper questions before attempting full papers.'
-        : 'You look ready to start full paper practice!';
-      reply = 'For exam preparation, ' + name + ': (1) Do past paper questions topic by topic, not full papers yet. (2) Time yourself from the start. (3) Mark your own answers before checking — this builds metacognition. ' + examEnd;
-
-    } else if (m.includes('progress') || m.includes('how am i doing') || m.includes('score')) {
-
-      var xpMatch = ctx.match(/Total XP: (\d+)/);
-      var xpVal   = xpMatch ? xpMatch[1] : null;
-      var subjLine = '';
-      if (ctx.includes('Subject averages:')) {
-        subjLine = ctx.split('Subject averages:')[1].split('\n')[0].trim();
-      }
-      if (ctx && subjLine) {
-        reply = "Here's your progress, " + name + ': ' + subjLine + '. ' + (xpVal ? 'You have earned ' + xpVal + ' XP so far. ' : '') + 'Focus areas needing attention: ' + (weakTopics || 'all looking good') + '. Consistency beats cramming every time!';
-      } else {
-        reply = "You're making progress, " + name + '! Complete a practice set so I can track your mastery and give you a detailed breakdown.';
-      }
-
-    } else if (m.includes('biology') || m.includes('cell') || m.includes('photosynthesis')) {
-
-      reply = 'For IGCSE Biology, focus on: Cell structure, Photosynthesis and Respiration, Genetics, and Ecosystems. These carry the most marks. Which area would you like to work on?';
-
-    } else if (m.includes('physics') || m.includes('force') || m.includes('newton') || m.includes('electricity')) {
-
-      reply = 'For IGCSE Physics the most tested topics are: Forces and Motion (SUVAT), Electricity (V=IR), Waves, and Thermal physics. Always show all working in calculations — method marks count even if the final answer is wrong. What would you like to practise?';
-
-    } else if (m.includes('english') || m.includes('essay') || m.includes('writing') || m.includes('comprehension')) {
-
-      reply = 'For IGCSE English: In comprehension, always quote from the text and explain the effect. In writing tasks, plan for 3 minutes before you start — structure matters as much as content. Use a variety of sentence lengths and always check punctuation. Would you like tips on a specific writing type?';
-
-    } else {
-
-      reply = "That's a great question, " + name + '. In ' + grade + ' ' + curr + ', this connects to several topics. Can you tell me which subject this is for, and what you have already tried? That way I can give you a targeted explanation rather than a generic one.';
-
-    }
-
-    res.json({ success: true, reply });
-  } catch (e) {
-    console.error('[mshauri]', e.message);
-    res.status(500).json({ success: false, message: e.message });
-  }
-});
-
-// ── Verify email ──────────────────────────────────────
-router.post('/verify-email', async (req, res) => {
-  try {
-    const { token } = req.body;
-
-    if (!token) {
-      return res.status(400).json({
-        success: false,
-        message: 'Verification token required'
-      });
-    }
-
-    // Verify JWT
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-      if (error.name === 'TokenExpiredError') {
-        return res.status(401).json({
-          success: false,
-          message: 'Verification link expired. Please sign up again.'
-        });
-      }
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid verification token'
-      });
-    }
-
-    if (decoded.action !== 'verify_email') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid token type'
-      });
-    }
-
-    // Find user and mark as verified
-    const user = await User.findById(decoded.userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    if (user.isEmailVerified) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email already verified'
-      });
-    }
-
-    // Mark as verified
-    user.isEmailVerified = true;
-    user.verificationToken = null;
-    user.verificationTokenExpiry = null;
-    await user.save();
-
-    console.log(`✓ Email verified for user: ${user.email}`);
-
-    res.json({
-      success: true,
-      message: 'Email verified! Please set your password to continue.',
-      userId: user._id
-    });
-  } catch (error) {
-    console.error('[auth/verify-email]', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during verification'
-    });
-  }
-});
-
-// ── Reset password (force or voluntary) ────────────────
-router.post('/reset-password', auth, async (req, res) => {
-  try {
-    const { newPassword } = req.body;
-
-    if (!newPassword || newPassword.length < 8) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password must be at least 8 characters'
-      });
-    }
-
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Update password and clear force flag
     user.password = newPassword;
-    user.mustChangePassword = false; // PHASE 3-5: Clear flag after successful reset
     await user.save();
 
-    console.log(`✓ Password reset for user: ${user.email}`);
-
-    res.json({
-      success: true,
-      message: 'Password updated successfully. You can now access your dashboard.'
-    });
-  } catch (error) {
-    console.error('[auth/reset-password]', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Server error resetting password'
-    });
-  }
-});
-
-// PHASE 7: Secure password reset endpoint
-// Used when user logs in with temporary credentials and must change password
-router.post('/secure-reset', auth, async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Current password and new password are required'
-      });
-    }
-
-    if (newPassword.length < 8) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password must be at least 8 characters'
-      });
-    }
-
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Verify current password
-    const isPasswordValid = await user.comparePassword(currentPassword);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Current password is incorrect'
-      });
-    }
-
-    // Check if new password is different from current
-    const isSamePassword = await user.comparePassword(newPassword);
-    if (isSamePassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password must be different from current password'
-      });
-    }
-
-     // Update password and clear force flag
-    user.password = newPassword;
-    user.mustChangePassword = false; // PHASE 3-5: Clear flag after successful reset
-    await user.save();
-
-    console.log(`✓ Secure password reset for user: ${user.email}`);
-
-    res.json({
-      success: true,
-      message: 'Password updated successfully. You now have full access to your dashboard.',
-      userUpdated: true
-    });
-  } catch (error) {
-    console.error('[auth/secure-reset]', error.message);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during secure reset'
-    });
+    return res.json({ success: true, message: 'Password updated.' });
+  } catch (err) {
+    console.error('[auth/reset-password]', err.message);
+    return res.status(500).json({ success: false, message: 'Failed to reset password.' });
   }
 });
 
