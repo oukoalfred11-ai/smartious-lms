@@ -11,7 +11,7 @@ import {
   labelAt,
 } from '../../components/exam/NestedQuestion.jsx'
 import ManageSubjectTab from './ManageSubjectTab.jsx'
-import GooglePDFViewer from '../../components/LibraryViewer.jsx'
+import LibraryViewer from '../../components/LibraryViewer.jsx'
 
 // ──────────────────────────────────────────────────────
 // DESIGN TOKENS — mirrors the admin Dashboard's TOKENS
@@ -786,6 +786,7 @@ export default function TeacherPortal() {
       {id:'attendance',    label:'Attendance',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
       {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
       {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
+      {id:'availability',  label:'My Availability',  iconName:'availability',  icon:'circle:12:12:4|line:12:8:12:12|line:12:12:16:12'},
       {id:'timetable',     label:'Timetable',        iconName:'timetable',     icon:'rect:3:4:18:18:2|line:8:2:8:6|line:16:2:16:6|line:3:10:21:10'},
       {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
     ]},
@@ -937,6 +938,7 @@ export default function TeacherPortal() {
           {page === 'library' && <TeacherLibraryTab user={currentUser} toast={toast} />}
 
           {page === 'timetable' && <TeacherTimetableTab user={currentUser} toast={toast} />}
+          {page === 'availability' && <TeacherAvailabilityTab user={currentUser} toast={toast} />}
 
 
           {/* ── QUESTION BANK ── */}
@@ -13729,29 +13731,27 @@ function ExternalEmailAdder({ onAdd, pickedEmails, toast }) {
 // backend; only metadata flows through React.
 // ═══════════════════════════════════════════════════════════
 function TeacherLibraryTab({ user, toast }) {
-  const [books, setBooks]                   = useState([])
-  const [loadingBooks, setLoadingBooks]     = useState(true)
-  const [subjects, setSubjects]             = useState([])
+  const [books, setBooks] = useState([])
+  const [loadingBooks, setLoadingBooks] = useState(true)
+  const [subjects, setSubjects] = useState([])
   const [loadingSubjects, setLoadingSubjects] = useState(true)
-  const [showUploadForm, setShowUploadForm] = useState(false)
-  const [viewerBook, setViewerBook]         = useState(null)
-  const [search, setSearch]                 = useState('')
 
   // Upload form state
-  const [upSubjectId,    setUpSubjectId]    = useState('')
-  const [upTitle,        setUpTitle]        = useState('')
-  const [upDescription,  setUpDescription]  = useState('')
-  const [upAuthor,       setUpAuthor]       = useState('')
-  const [upGrades,       setUpGrades]       = useState('')
-  const [upFile,         setUpFile]         = useState(null)
-  const [upCover,        setUpCover]        = useState(null)
-  const [upCoverPreview, setUpCoverPreview] = useState(null)
-  const [uploading,      setUploading]      = useState(false)
-  const [uploadStage,    setUploadStage]    = useState('')
+  const [showUploadForm, setShowUploadForm] = useState(false)
+  const [upSubjectId, setUpSubjectId] = useState('')
+  const [upTitle, setUpTitle] = useState('')
+  const [upDescription, setUpDescription] = useState('')
+  const [upAuthor, setUpAuthor] = useState('')
+  const [upGrades, setUpGrades] = useState('')
+  const [upFile, setUpFile] = useState(null)
+  const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
-  const fileInputRef  = useRef(null)
-  const coverInputRef = useRef(null)
+  const fileInputRef = useRef(null)
 
+  // Viewer state
+  const [viewerBook, setViewerBook] = useState(null)
+
+  // Load books visible to this teacher
   const loadBooks = async () => {
     setLoadingBooks(true)
     try {
@@ -13764,6 +13764,11 @@ function TeacherLibraryTab({ user, toast }) {
     }
   }
 
+  // Load all available subjects for the upload form dropdown.
+  // We deliberately use /subjects (full active list) rather than
+  // /lessons/my-subjects — a teacher should be able to upload a
+  // library book for any subject they think relevant, not be
+  // restricted to subjects they happen to author lessons for.
   useEffect(() => {
     let cancelled = false
     ;(async () => {
@@ -13771,112 +13776,91 @@ function TeacherLibraryTab({ user, toast }) {
         const { data } = await api.get('/subjects')
         if (cancelled) return
         const list = (data?.subjects || []).filter(s => s.isActive !== false)
+        // Sort by curriculum then subject name for easy scanning
         list.sort((a, b) => {
           const c = String(a.curriculum || '').localeCompare(String(b.curriculum || ''))
-          return c !== 0 ? c : String(a.subjectName || '').localeCompare(String(b.subjectName || ''))
+          if (c !== 0) return c
+          return String(a.subjectName || '').localeCompare(String(b.subjectName || ''))
         })
         setSubjects(list)
       } catch (e) {
-        if (!cancelled) toast?.error?.('Failed to load subjects.')
+        if (!cancelled) toast?.error?.('Failed to load subjects: ' + (e?.response?.data?.message || e.message))
       } finally {
         if (!cancelled) setLoadingSubjects(false)
       }
     })()
     return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  useEffect(() => { loadBooks() }, [])
+  useEffect(() => { loadBooks() // eslint-disable-next-line
+  }, [])
 
   const onFilePick = (file) => {
     if (!file) return
-    if (file.type !== 'application/pdf') { toast?.error?.('Only PDF files are accepted.'); return }
+    if (file.type !== 'application/pdf') {
+      toast?.error?.('Only PDF files are accepted.')
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast?.error?.(
+        'File exceeds 10 MB limit. Please compress the PDF first ' +
+        '(most coursebooks compress to under 10 MB with no visible loss).'
+      )
+      return
+    }
     setUpFile(file)
-    if (!upTitle) setUpTitle(file.name.replace(/\.pdf$/i, '').replace(/[_-]/g, ' '))
-  }
-
-  const onCoverPick = (file) => {
-    if (!file) return
-    const allowed = ['image/jpeg','image/png','image/webp','image/jpg']
-    if (!allowed.includes(file.type)) { toast?.error?.('Cover must be JPG, PNG or WebP.'); return }
-    if (file.size > 3 * 1024 * 1024) { toast?.error?.('Cover image must be under 3 MB.'); return }
-    setUpCover(file)
-    const reader = new FileReader()
-    reader.onload = (e) => setUpCoverPreview(e.target.result)
-    reader.readAsDataURL(file)
+    if (!upTitle) setUpTitle(file.name.replace(/\.pdf$/i, ''))
   }
 
   const resetForm = () => {
-    setUpSubjectId(''); setUpTitle(''); setUpDescription(''); setUpAuthor('')
-    setUpGrades(''); setUpFile(null); setUpCover(null); setUpCoverPreview(null)
-    setUploadProgress(0); setUploadStage('')
-    if (fileInputRef.current)  fileInputRef.current.value  = ''
-    if (coverInputRef.current) coverInputRef.current.value = ''
+    setUpSubjectId('')
+    setUpTitle('')
+    setUpDescription('')
+    setUpAuthor('')
+    setUpGrades('')
+    setUpFile(null)
+    setUploadProgress(0)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const uploadViaXHR = (url, file, contentType, onProgress) =>
-    new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest()
-      xhr.open('PUT', url)
-      xhr.setRequestHeader('Content-Type', contentType)
-      xhr.upload.onprogress = (e) => { if (e.total) onProgress(Math.round((e.loaded / e.total) * 100)) }
-      xhr.onload  = () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error('Upload failed: ' + xhr.status))
-      xhr.onerror = () => reject(new Error('Network error during upload.'))
-      xhr.send(file)
-    })
-
   const submitUpload = async () => {
-    if (!upSubjectId)    { toast?.error?.('Pick a subject.'); return }
-    if (!upTitle.trim()) { toast?.error?.('Title is required.'); return }
-    if (!upFile)         { toast?.error?.('Choose a PDF file.'); return }
+    if (!upSubjectId)         { toast?.error?.('Pick a subject.'); return }
+    if (!upTitle.trim())      { toast?.error?.('Title is required.'); return }
+    if (!upFile)              { toast?.error?.('Choose a PDF file.'); return }
 
-    setUploading(true); setUploadProgress(0)
+    setUploading(true)
+    setUploadProgress(0)
     try {
-      // Step 1 — presign PDF
-      setUploadStage('presigning')
-      const presignRes = await api.post('/library/presign', {
-        subjectId: upSubjectId, fileName: upFile.name,
-        fileSize: upFile.size, mimeType: upFile.type || 'application/pdf',
+      const fd = new FormData()
+      fd.append('file', upFile)
+      fd.append('subjectId', upSubjectId)
+      fd.append('title', upTitle.trim())
+      fd.append('description', upDescription.trim())
+      fd.append('author', upAuthor.trim())
+      fd.append('grades', upGrades.trim())
+
+      const { data } = await api.post('/library/upload', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (evt) => {
+          if (evt.total) {
+            const pct = Math.round((evt.loaded / evt.total) * 100)
+            setUploadProgress(pct)
+          }
+        },
       })
-      const { uploadUrl, r2Key, publicUrl } = presignRes.data.data
-
-      // Step 2 — upload PDF to R2
-      setUploadStage('uploading')
-      await uploadViaXHR(uploadUrl, upFile, upFile.type || 'application/pdf',
-        (pct) => setUploadProgress(pct))
-      setUploadProgress(100)
-
-      // Step 3 — upload cover image if provided
-      let coverImage = ''; let coverR2Key = ''
-      if (upCover) {
-        setUploadStage('cover')
-        const coverPresign = await api.post('/library/presign-cover', {
-          fileName: upCover.name, mimeType: upCover.type,
-        })
-        const { uploadUrl: coverUrl, r2Key: cKey, publicUrl: cPublic } = coverPresign.data.data
-        await uploadViaXHR(coverUrl, upCover, upCover.type, () => {})
-        coverImage = cPublic; coverR2Key = cKey
-      }
-
-      // Step 4 — confirm: save to MongoDB
-      setUploadStage('confirming')
-      const confirmRes = await api.post('/library/confirm', {
-        r2Key, publicUrl, subjectId: upSubjectId,
-        title: upTitle.trim(), description: upDescription.trim(),
-        author: upAuthor.trim(), grades: upGrades.trim(),
-        fileName: upFile.name, fileSize: upFile.size,
-        mimeType: upFile.type || 'application/pdf',
-        coverImage, coverR2Key,
-      })
-      if (confirmRes.data?.success) {
-        toast?.ok?.('Book uploaded successfully.')
-        resetForm(); setShowUploadForm(false); loadBooks()
+      if (data?.success) {
+        toast?.ok?.('Book uploaded.')
+        resetForm()
+        setShowUploadForm(false)
+        loadBooks()
       } else {
-        toast?.error?.(confirmRes.data?.message || 'Upload failed.')
+        toast?.error?.(data?.message || 'Upload failed.')
       }
     } catch (e) {
-      toast?.error?.(e?.response?.data?.message || e.message || 'Upload failed.')
+      toast?.error?.(e?.response?.data?.message || 'Upload failed: ' + e.message)
     } finally {
-      setUploading(false); setUploadStage('')
+      setUploading(false)
     }
   }
 
@@ -13884,195 +13868,150 @@ function TeacherLibraryTab({ user, toast }) {
     if (!window.confirm(`Delete "${book.title}"? This permanently removes the PDF.`)) return
     try {
       const { data } = await api.delete(`/library/${book._id}`)
-      if (data?.success) { toast?.ok?.('Book deleted.'); loadBooks() }
-      else toast?.error?.(data?.message || 'Delete failed.')
+      if (data?.success) {
+        toast?.ok?.('Book deleted.')
+        loadBooks()
+      } else {
+        toast?.error?.(data?.message || 'Delete failed.')
+      }
     } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Delete failed.')
+      toast?.error?.(e?.response?.data?.message || 'Delete failed: ' + e.message)
     }
   }
 
-  const filtered = (() => {
-    const q = search.trim().toLowerCase()
-    if (!q) return books
-    return books.filter(b =>
-      (b.title || '').toLowerCase().includes(q) ||
-      (b.author || '').toLowerCase().includes(q) ||
-      (b.subjectName || '').toLowerCase().includes(q)
-    )
-  })()
-
+  // Group books by subject for display
   const booksBySubject = (() => {
-    const g = {}
-    for (const b of filtered) {
+    const groups = {}
+    for (const b of books) {
       const k = b.subjectName + ' · ' + b.curriculum
-      if (!g[k]) g[k] = []
-      g[k].push(b)
+      if (!groups[k]) groups[k] = []
+      groups[k].push(b)
     }
-    return g
+    return groups
   })()
-
-  const stageLabel = {
-    presigning: 'Preparing upload...',
-    uploading:  `Uploading PDF — ${uploadProgress}%`,
-    cover:      'Uploading cover image...',
-    confirming: 'Saving to library...',
-  }[uploadStage] || ''
-
-  const inp = {
-    width: '100%', boxSizing: 'border-box', padding: '8px 11px',
-    borderRadius: 7, border: '1.5px solid #E8E2D6', fontSize: 13, fontFamily: 'inherit',
-  }
-  const lbl = {
-    display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.05em',
-    textTransform: 'uppercase', color: '#7D1025', marginBottom: 5,
-  }
 
   return (
     <div>
-      {/* Header */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom: 20 }}>
         <div>
           <div className="sec-tag">Coursebooks by subject</div>
-          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>Library</h2>
+          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
+            Library
+          </h2>
           <div style={{ fontSize: 13, color: '#6B6B6B' }}>
-            Upload and browse PDF coursebooks. Students read them inline.
+            Upload PDF coursebooks. Your students will be able to read them inline (no download).
           </div>
         </div>
         {!showUploadForm && (
-          <button onClick={() => setShowUploadForm(true)} style={{
-            background: '#7D1025', color: '#fff', border: 'none',
-            padding: '10px 18px', borderRadius: 8, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-          }}>+ Upload book</button>
+          <button onClick={() => setShowUploadForm(true)}
+            style={{
+              background: '#7D1025', color: '#fff', border: 'none',
+              padding: '10px 18px', borderRadius: 8,
+              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+            }}>
+            + Upload book
+          </button>
         )}
       </div>
 
       {/* Upload form */}
       {showUploadForm && (
-        <div className="card" style={{ padding: 22, marginBottom: 22, border: '1.5px solid #C9A030' }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: '#7D1025', marginBottom: 16 }}>
-            Upload a coursebook
-          </div>
+        <div className="card" style={{ padding: 20, marginBottom: 22, border: '1.5px solid #C9A030' }}>
+          <div style={{
+            fontSize: 11, fontWeight: 700, color: '#7D5A0F',
+            letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 14,
+          }}>Upload a coursebook</div>
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 14 }}>
             <div>
-              <label style={lbl}>Subject *</label>
-              <select value={upSubjectId} onChange={e => setUpSubjectId(e.target.value)}
-                disabled={loadingSubjects || uploading} style={inp}>
-                <option value="">{loadingSubjects ? 'Loading...' : 'Select subject...'}</option>
+              <label className="fl">Subject *</label>
+              <select className="fsel" value={upSubjectId}
+                onChange={e => setUpSubjectId(e.target.value)}
+                disabled={loadingSubjects || uploading}>
+                <option value="">
+                  {loadingSubjects ? 'Loading subjects...' : 'Select subject...'}
+                </option>
                 {subjects.map(s => (
-                  <option key={s._id} value={s._id}>{s.subjectName} · {s.curriculum}</option>
+                  <option key={s._id} value={s._id}>
+                    {s.subjectName} · {s.curriculum}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
-              <label style={lbl}>Book Title *</label>
-              <input value={upTitle} onChange={e => setUpTitle(e.target.value)}
-                placeholder="e.g. Cambridge IGCSE Biology Coursebook"
-                disabled={uploading} style={inp}/>
+              <label className="fl">Title *</label>
+              <input className="finput" value={upTitle}
+                onChange={e => setUpTitle(e.target.value)}
+                placeholder="e.g. Cambridge IGCSE Mathematics Coursebook"
+                disabled={uploading}/>
             </div>
           </div>
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 14 }}>
             <div>
-              <label style={lbl}>Author / Publisher</label>
-              <input value={upAuthor} onChange={e => setUpAuthor(e.target.value)}
-                placeholder="e.g. Cambridge University Press" disabled={uploading} style={inp}/>
+              <label className="fl">Author (optional)</label>
+              <input className="finput" value={upAuthor}
+                onChange={e => setUpAuthor(e.target.value)}
+                placeholder="e.g. Karen Morrison"
+                disabled={uploading}/>
             </div>
             <div>
-              <label style={lbl}>Grades (comma-separated)</label>
-              <input value={upGrades} onChange={e => setUpGrades(e.target.value)}
-                placeholder="e.g. Year 10, Year 11" disabled={uploading} style={inp}/>
+              <label className="fl">Grade(s) (optional, comma-separated)</label>
+              <input className="finput" value={upGrades}
+                onChange={e => setUpGrades(e.target.value)}
+                placeholder="e.g. Year 10, Year 11"
+                disabled={uploading}/>
             </div>
           </div>
 
           <div style={{ marginBottom: 14 }}>
-            <label style={lbl}>Description (optional)</label>
-            <textarea value={upDescription} onChange={e => setUpDescription(e.target.value)}
-              placeholder="Short description of what this book covers..." rows={2}
-              disabled={uploading} style={{ ...inp, resize: 'vertical' }}/>
+            <label className="fl">Description (optional)</label>
+            <textarea className="finput" value={upDescription}
+              onChange={e => setUpDescription(e.target.value)}
+              placeholder="A short description of the book"
+              rows={2}
+              style={{ resize:'vertical' }}
+              disabled={uploading}/>
           </div>
 
-          {/* PDF + Cover image side by side */}
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 14, marginBottom: 16 }}>
-            {/* PDF picker */}
-            <div>
-              <label style={lbl}>PDF File *</label>
-              <div style={{
-                border: '2px dashed ' + (upFile ? '#15803D' : '#E8E2D6'),
-                borderRadius: 8, padding: '14px 12px', textAlign: 'center',
-                background: upFile ? '#DCFCE7' : '#FBFAF5',
-                cursor: uploading ? 'not-allowed' : 'pointer',
-              }} onClick={() => !uploading && fileInputRef.current?.click()}>
-                <input ref={fileInputRef} type="file" accept="application/pdf"
-                  style={{ display: 'none' }}
-                  onChange={e => onFilePick(e.target.files?.[0])}
-                  disabled={uploading}/>
-                {upFile ? (
-                  <>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#15803D' }}>{upFile.name}</div>
-                    <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 3 }}>
-                      {(upFile.size / (1024*1024)).toFixed(1)} MB ·{' '}
-                      <span onClick={e => { e.stopPropagation(); if (!uploading) { setUpFile(null); fileInputRef.current.value = '' }}}
-                        style={{ color: '#B91C1C', cursor: 'pointer', textDecoration: 'underline' }}>Remove</span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ fontSize: 13, color: '#6B6B6B' }}>Click to select PDF</div>
-                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3 }}>Any size · uploads directly to cloud</div>
-                  </>
-                )}
+          <div style={{ marginBottom: 16 }}>
+            <label className="fl">PDF file * (max 10 MB)</label>
+            <input ref={fileInputRef} type="file" accept="application/pdf"
+              onChange={e => onFilePick(e.target.files?.[0])}
+              disabled={uploading}
+              style={{ fontSize: 12, marginTop: 4 }}/>
+            {upFile && (
+              <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 6 }}>
+                {upFile.name} ({(upFile.size / (1024*1024)).toFixed(1)} MB)
               </div>
-            </div>
-
-            {/* Cover image picker */}
-            <div>
-              <label style={lbl}>Cover Image (optional)</label>
-              <div style={{
-                border: '2px dashed ' + (upCover ? '#C9A030' : '#E8E2D6'),
-                borderRadius: 8, overflow: 'hidden',
-                cursor: uploading ? 'not-allowed' : 'pointer',
-                background: '#FBFAF5', height: 100,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                position: 'relative',
-              }} onClick={() => !uploading && coverInputRef.current?.click()}>
-                <input ref={coverInputRef} type="file" accept="image/jpeg,image/png,image/webp"
-                  style={{ display: 'none' }}
-                  onChange={e => onCoverPick(e.target.files?.[0])}
-                  disabled={uploading}/>
-                {upCoverPreview ? (
-                  <>
-                    <img src={upCoverPreview} alt="Cover preview"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-                    <button onClick={e => { e.stopPropagation(); if (!uploading) { setUpCover(null); setUpCoverPreview(null); coverInputRef.current.value = '' }}}
-                      style={{
-                        position: 'absolute', top: 4, right: 4,
-                        background: 'rgba(0,0,0,.55)', color: '#fff', border: 'none',
-                        borderRadius: '50%', width: 20, height: 20, cursor: 'pointer',
-                        fontSize: 11, fontWeight: 700, lineHeight: 1,
-                      }}>×</button>
-                  </>
-                ) : (
-                  <div style={{ textAlign: 'center', padding: 10 }}>
-                    <div style={{ fontSize: 22, marginBottom: 4 }}>🖼</div>
-                    <div style={{ fontSize: 11, color: '#6B6B6B' }}>JPG, PNG or WebP</div>
-                    <div style={{ fontSize: 10, color: '#9CA3AF' }}>Shown to students before opening</div>
-                  </div>
-                )}
-              </div>
+            )}
+            <div style={{
+              fontSize: 11, color: '#7D5A0F', marginTop: 8,
+              background: '#FDF7E2', border: '1px solid #E8D58F',
+              borderRadius: 5, padding: '6px 10px', lineHeight: 1.5,
+            }}>
+              <strong>Tip:</strong> If your PDF is larger than 10 MB,
+              compress it first using a free online tool like ilovepdf.com
+              or smallpdf.com. Most coursebooks shrink to under 10 MB
+              with no visible quality loss.
             </div>
           </div>
 
-          {/* Progress bar */}
           {uploading && (
             <div style={{ marginBottom: 14 }}>
-              <div style={{ height: 7, borderRadius: 99, background: '#E8E2D6', overflow: 'hidden', marginBottom: 5 }}>
+              <div style={{
+                height: 8, borderRadius: 99,
+                background: '#E8E2D6', overflow: 'hidden', marginBottom: 4,
+              }}>
                 <div style={{
-                  width: (uploadStage === 'uploading' ? uploadProgress : uploadStage === 'confirming' ? 100 : 20) + '%',
-                  height: '100%', background: '#C9A030', transition: 'width 200ms ease',
+                  width: uploadProgress + '%', height: '100%',
+                  background: '#C9A030',
+                  transition: 'width 200ms ease',
                 }}/>
               </div>
-              <div style={{ fontSize: 11, color: '#7D5A0F' }}>{stageLabel}</div>
+              <div style={{ fontSize: 11, color: '#7D5A0F' }}>
+                Uploading... {uploadProgress}%
+              </div>
             </div>
           )}
 
@@ -14081,54 +14020,57 @@ function TeacherLibraryTab({ user, toast }) {
               disabled={uploading || !upFile || !upTitle.trim() || !upSubjectId}
               style={{
                 background: '#7D1025', color: '#fff', border: 'none',
-                padding: '9px 20px', borderRadius: 7, fontSize: 12.5, fontWeight: 700,
+                padding: '9px 18px', borderRadius: 7,
+                fontSize: 12.5, fontWeight: 700,
                 cursor: (uploading || !upFile || !upTitle.trim() || !upSubjectId) ? 'not-allowed' : 'pointer',
-                opacity: (uploading || !upFile || !upTitle.trim() || !upSubjectId) ? .5 : 1,
+                opacity: (uploading || !upFile || !upTitle.trim() || !upSubjectId) ? 0.5 : 1,
               }}>
-              {uploading ? stageLabel || 'Uploading...' : 'Upload book'}
+              {uploading ? 'Uploading...' : 'Upload book'}
             </button>
-            <button onClick={() => { resetForm(); setShowUploadForm(false) }} disabled={uploading}
+            <button onClick={() => { resetForm(); setShowUploadForm(false) }}
+              disabled={uploading}
               style={{
-                background: 'transparent', color: '#6B6B6B', border: '1px solid #E8E2D6',
-                padding: '9px 18px', borderRadius: 7, fontSize: 12.5, fontWeight: 700,
+                background: 'transparent', color: '#6B6B6B',
+                border: '1px solid #E8E2D6', padding: '9px 18px',
+                borderRadius: 7, fontSize: 12.5, fontWeight: 700,
                 cursor: uploading ? 'not-allowed' : 'pointer',
-              }}>Cancel</button>
+              }}>
+              Cancel
+            </button>
           </div>
         </div>
       )}
 
-      {/* Search */}
-      {books.length > 0 && (
-        <div style={{ marginBottom: 16, maxWidth: 380 }}>
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search books by title, author or subject..."
-            style={{ width: '100%', boxSizing: 'border-box', padding: '9px 13px', borderRadius: 8, border: '1.5px solid #E8E2D6', fontSize: 13, background: '#FBFAF5' }}/>
-        </div>
-      )}
-
-      {/* Books grouped by subject */}
+      {/* Books list, grouped by subject */}
       {loadingBooks ? (
-        <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic', padding: 20 }}>Loading library...</div>
+        <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic', padding: 20 }}>
+          Loading library...
+        </div>
       ) : books.length === 0 ? (
         <div className="card" style={{ padding: 30, textAlign: 'center' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>No books yet</div>
-          <div style={{ fontSize: 12.5, color: '#6B6B6B' }}>Click "Upload book" to add your first coursebook PDF.</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#1A1A1A', marginBottom: 4 }}>
+            No books yet
+          </div>
+          <div style={{ fontSize: 12.5, color: '#6B6B6B' }}>
+            Click "Upload book" to add your first coursebook PDF.
+          </div>
         </div>
-      ) : filtered.length === 0 ? (
-        <div style={{ padding: 20, textAlign: 'center', color: '#9A9A9A', fontSize: 13 }}>No books match your search.</div>
       ) : (
-        <div style={{ display:'flex', flexDirection:'column', gap: 24 }}>
+        <div style={{ display:'flex', flexDirection:'column', gap: 22 }}>
           {Object.keys(booksBySubject).sort().map(groupKey => (
             <div key={groupKey}>
               <div style={{
-                fontSize: 11, fontWeight: 700, color: '#7D1025', letterSpacing: '.08em',
-                textTransform: 'uppercase', marginBottom: 10, paddingBottom: 6,
-                borderBottom: '1px solid #E8E2D6', display: 'flex', alignItems: 'center', gap: 8,
+                fontSize: 11, fontWeight: 700, color: '#7D1025',
+                letterSpacing: '.08em', textTransform: 'uppercase',
+                marginBottom: 8, paddingBottom: 6, borderBottom: '1px solid #E8E2D6',
               }}>
                 {groupKey}
-                <span style={{ color: '#9A9A9A', fontWeight: 600 }}>({booksBySubject[groupKey].length})</span>
               </div>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap: 14 }}>
+              <div style={{
+                display:'grid',
+                gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: 12,
+              }}>
                 {booksBySubject[groupKey].map(book => (
                   <BookCard key={book._id} book={book}
                     onView={() => setViewerBook(book)}
@@ -14141,7 +14083,10 @@ function TeacherLibraryTab({ user, toast }) {
         </div>
       )}
 
-      {viewerBook && <GooglePDFViewer book={viewerBook} onClose={() => setViewerBook(null)}/>}
+      {/* Viewer modal */}
+      {viewerBook && (
+        <LibraryViewer book={viewerBook} api={api} onClose={() => setViewerBook(null)}/>
+      )}
     </div>
   )
 }
@@ -14155,73 +14100,212 @@ function BookCard({ book, onView, onDelete, canDelete }) {
   const sizeMB = book.sizeBytes ? (book.sizeBytes / (1024 * 1024)).toFixed(1) + ' MB' : ''
   return (
     <div style={{
-      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12,
-      overflow: 'hidden', display: 'flex', flexDirection: 'column',
-      boxShadow: '0 1px 4px rgba(0,0,0,.05)',
+      background: '#fff', border: '1px solid #E8E2D6', borderRadius: 10,
+      padding: 14, display: 'flex', flexDirection: 'column',
     }}>
-      {/* Cover image */}
-      <div style={{
-        height: 140, background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
-        position: 'relative', flexShrink: 0, overflow: 'hidden',
-      }}>
-        {book.coverImage ? (
-          <img src={book.coverImage} alt={book.title}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
-        ) : (
-          <div style={{
-            width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center', gap: 6, padding: 12,
-          }}>
-            <div style={{ color: '#C9A030', fontSize: 10, fontWeight: 800, letterSpacing: '.12em' }}>PDF</div>
-            <div style={{
-              color: '#fff', fontSize: 12, fontWeight: 700, textAlign: 'center',
-              lineHeight: 1.3, maxWidth: 140,
-              display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-            }}>{book.title}</div>
-          </div>
-        )}
+      <div style={{ display:'flex', gap: 10, marginBottom: 10 }}>
         <div style={{
-          position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,.55)',
-          color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.06em',
-          padding: '3px 7px', borderRadius: 4,
-        }}>{book.curriculum}</div>
-      </div>
-
-      {/* Info */}
-      <div style={{ padding: '12px 12px 10px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{
-          fontWeight: 700, fontSize: 13, color: '#1A1A1A', lineHeight: 1.3, marginBottom: 4,
-          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-        }}>{book.title}</div>
-        {book.author && <div style={{ fontSize: 11, color: '#6B6B6B', marginBottom: 4 }}>{book.author}</div>}
-        {book.description && (
+          width: 38, height: 48, borderRadius: 4,
+          background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
+          flexShrink: 0,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
+        }}>PDF</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontSize: 11, color: '#9A9A9A', lineHeight: 1.4, marginBottom: 6,
-            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-          }}>{book.description}</div>
-        )}
-        <div style={{ fontSize: 10.5, color: '#9A9A9A', marginTop: 'auto', paddingTop: 6 }}>
-          {[sizeMB, book.grades?.length ? book.grades.join(', ') : ''].filter(Boolean).join(' · ')}
-        </div>
-        <div style={{ display:'flex', gap: 6, marginTop: 10 }}>
-          <button onClick={onView} style={{
-            flex: 1, background: '#7D1025', color: '#fff', border: 'none',
-            padding: '8px 0', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
-          }}>Open book</button>
-          {canDelete && onDelete && (
-            <button onClick={onDelete} style={{
-              background: 'transparent', color: '#9A2434', border: '1px solid #E8E2D6',
-              padding: '8px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
-            }}>Delete</button>
+            fontWeight: 700, fontSize: 13, color: '#1A1A1A',
+            lineHeight: 1.3,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>{book.title}</div>
+          {book.author && (
+            <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 3 }}>{book.author}</div>
           )}
         </div>
+      </div>
+
+      {book.description && (
+        <div style={{
+          fontSize: 11.5, color: '#6B6B6B', marginBottom: 8,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+          overflow: 'hidden', lineHeight: 1.4,
+        }}>
+          {book.description}
+        </div>
+      )}
+
+      <div style={{ fontSize: 10.5, color: '#9A9A9A', marginBottom: 10 }}>
+        {sizeMB}
+        {book.grades?.length ? ' · ' + book.grades.join(', ') : ''}
+        {book.uploadedByName ? ' · by ' + book.uploadedByName : ''}
+      </div>
+
+      <div style={{ display:'flex', gap: 6, marginTop: 'auto' }}>
+        <button onClick={onView}
+          style={{
+            flex: 1,
+            background: '#7D1025', color: '#fff', border: 'none',
+            padding: '7px 12px', borderRadius: 6,
+            fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+          }}>
+          Open
+        </button>
+        {canDelete && onDelete && (
+          <button onClick={onDelete}
+            style={{
+              background: 'transparent', color: '#9A2434',
+              border: '1px solid #E8E2D6', padding: '7px 12px',
+              borderRadius: 6, fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+            }}>
+            Delete
+          </button>
+        )}
       </div>
     </div>
   )
 }
 
-
 // ═══════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────
+// TeacherAvailabilityTab
+// Teacher sets their weekly available time slots.
+// These are used to auto-generate timetable entries when
+// admin allocates this teacher to a student.
+// ─────────────────────────────────────────────────────────
+function TeacherAvailabilityTab({ user, toast }) {
+  const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+  const DAYS_LONG = { Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday' }
+
+  const [slots, setSlots]   = useState([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving]   = useState(false)
+
+  useEffect(() => {
+    api.get('/users/teachers/' + user._id + '/availability')
+      .then(r => setSlots(r.data?.data?.availability || []))
+      .catch(() => toast?.error?.('Could not load availability.'))
+      .finally(() => setLoading(false))
+  }, [user._id])
+
+  const addSlot = () => {
+    setSlots(s => [...s, { dayOfWeek: 'Mon', startTime: '09:00', endTime: '10:00' }])
+  }
+
+  const updateSlot = (i, key, val) => {
+    setSlots(s => s.map((sl,idx) => idx===i ? {...sl,[key]:val} : sl))
+  }
+
+  const removeSlot = (i) => {
+    setSlots(s => s.filter((_,idx) => idx!==i))
+  }
+
+  const save = async () => {
+    // Validate no clashes within same day
+    const byDay = {}
+    for (const sl of slots) {
+      if (!byDay[sl.dayOfWeek]) byDay[sl.dayOfWeek] = []
+      const s = sl.startTime.split(':').map(Number); const e = sl.endTime.split(':').map(Number)
+      const sm = s[0]*60+s[1]; const em = e[0]*60+e[1]
+      if (em <= sm) { toast?.error?.('End time must be after start time on ' + sl.dayOfWeek); return }
+      for (const [ps,pe] of byDay[sl.dayOfWeek]) {
+        if (sm < pe && em > ps) { toast?.error?.('Overlapping slots on ' + sl.dayOfWeek); return }
+      }
+      byDay[sl.dayOfWeek].push([sm,em])
+    }
+
+    setSaving(true)
+    try {
+      const { data } = await api.patch('/users/teachers/' + user._id + '/availability', { availability: slots })
+      if (data?.success) toast?.ok?.('Availability saved. New student allocations will auto-schedule within these slots.')
+      else toast?.error?.(data?.message || 'Could not save.')
+    } catch(e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not save availability.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const DAY_COLOURS = { Mon:'#7D1025',Tue:'#1E3A8A',Wed:'#166534',Thu:'#92400E',Fri:'#6B21A8',Sat:'#0F766E',Sun:'#374151' }
+
+  const inp = { padding:'7px 10px', borderRadius:6, border:'1.5px solid #E8E2D6', fontSize:12.5, fontFamily:'inherit', background:'#FBFAF5' }
+
+  return (
+    <div>
+      <div className="sec-tag">Schedule</div>
+      <h2 className="serif" style={{fontSize:24,color:'var(--s900)',margin:'6px 0 4px'}}>My Availability</h2>
+      <div style={{fontSize:13,color:'#6B6B6B',marginBottom:20,lineHeight:1.6}}>
+        Set the time slots when you're available to teach. When admin allocates you to a new student, the system will automatically pick the first free slot from this list.
+      </div>
+
+      {loading ? (
+        <div style={{fontSize:13,color:'#9A9A9A',fontStyle:'italic'}}>Loading...</div>
+      ) : (
+        <>
+          {/* Slot list */}
+          <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16}}>
+            {slots.length === 0 && (
+              <div style={{padding:'20px',background:'#FBFAF5',border:'1px dashed #E8E2D6',borderRadius:8,textAlign:'center',fontSize:13,color:'#9A9A9A'}}>
+                No availability slots set. Add slots below so the system can auto-schedule your classes.
+              </div>
+            )}
+            {slots.map((sl,i) => (
+              <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'#fff',border:'1.5px solid #E8E2D6',borderLeft:'4px solid '+(DAY_COLOURS[sl.dayOfWeek]||'#7D1025'),borderRadius:8}}>
+                <select value={sl.dayOfWeek} onChange={e=>updateSlot(i,'dayOfWeek',e.target.value)} style={{...inp,fontWeight:700,color:DAY_COLOURS[sl.dayOfWeek]||'#7D1025',minWidth:110}}>
+                  {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => <option key={d} value={d}>{DAYS_LONG[d]}</option>)}
+                </select>
+                <input type="time" value={sl.startTime} onChange={e=>updateSlot(i,'startTime',e.target.value)} style={{...inp,minWidth:100}}/>
+                <span style={{fontSize:12,color:'#9A9A9A',fontWeight:600}}>to</span>
+                <input type="time" value={sl.endTime} onChange={e=>updateSlot(i,'endTime',e.target.value)} style={{...inp,minWidth:100}}/>
+                <div style={{flex:1}}/>
+                <button onClick={()=>removeSlot(i)} style={{background:'transparent',border:'none',color:'#B91C1C',cursor:'pointer',fontSize:18,lineHeight:1,padding:'0 4px'}}>×</button>
+              </div>
+            ))}
+          </div>
+
+          <div style={{display:'flex',gap:10}}>
+            <button onClick={addSlot} style={{background:'transparent',border:'1.5px solid #7D1025',color:'#7D1025',padding:'9px 18px',borderRadius:7,fontSize:12.5,fontWeight:700,cursor:'pointer'}}>
+              + Add slot
+            </button>
+            <button onClick={save} disabled={saving} style={{background:saving?'#9A9A9A':'#7D1025',color:'#fff',border:'none',padding:'9px 22px',borderRadius:7,fontSize:12.5,fontWeight:700,cursor:saving?'not-allowed':'pointer'}}>
+              {saving ? 'Saving...' : 'Save availability'}
+            </button>
+          </div>
+
+          {/* Visual preview */}
+          {slots.length > 0 && (
+            <div style={{marginTop:24}}>
+              <div style={{fontSize:12,fontWeight:700,color:'#6B6B6B',letterSpacing:'.06em',textTransform:'uppercase',marginBottom:10}}>Preview</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:6}}>
+                {DAYS.map(d => {
+                  const daySlots = slots.filter(s=>s.dayOfWeek===d)
+                  return (
+                    <div key={d}>
+                      <div style={{fontSize:10,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:daySlots.length>0?DAY_COLOURS[d]:'#CCC',textAlign:'center',marginBottom:4}}>{d}</div>
+                      <div style={{display:'flex',flexDirection:'column',gap:3}}>
+                        {daySlots.length===0
+                          ? <div style={{height:28,background:'#F9F6F4',borderRadius:4,border:'1px dashed #E8E2D6'}}/>
+                          : daySlots.map((sl,i) => {
+                              const [hh,mm]=sl.startTime.split(':').map(Number)
+                              const [eh,em]=sl.endTime.split(':').map(Number)
+                              const fmt=h=>{ const m=h>=12?'PM':'AM'; let hr=h%12; if(!hr)hr=12; return hr+' '+m }
+                              return <div key={i} style={{background:DAY_COLOURS[d]+'15',border:'1.5px solid '+DAY_COLOURS[d]+'40',borderRadius:4,padding:'4px 6px',fontSize:9,color:DAY_COLOURS[d],fontWeight:700,textAlign:'center'}}>
+                                {fmt(hh)}–{fmt(eh)}
+                              </div>
+                            })
+                        }
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 // TeacherTimetableTab
 // ═══════════════════════════════════════════════════════════
 // Recurring weekly timetable management for teachers.
@@ -14516,31 +14600,195 @@ function TeacherTimetableTab({ user, toast }) {
     byDay[d].sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)))
   }
 
+  // ── view mode: 'grid' = premium calendar, 'manage' = form editor
+  const [viewMode, setViewMode] = React.useState('grid')
+
+  const HOUR_START=6, HOUR_END=22, TOTAL_MINS=(HOUR_END-HOUR_START)*60
+  const GRID_H=820, COL_W=130, TIME_COL_W=52
+  const toMinsT = h => { if(!h)return 0; const[hh,mm]=h.split(':').map(Number);return hh*60+mm }
+  const fmtT = h => { if(!h)return ''; const[hh,mm]=h.split(':').map(Number);const m=hh>=12?'PM':'AM';let hr=hh%12;if(!hr)hr=12;return `${hr}${mm===0?'':':'+String(mm).padStart(2,'0')} ${m}` }
+  const minToYT = m => ((m - HOUR_START*60) / TOTAL_MINS) * GRID_H
+  const entryHT = e => Math.max(30, minToYT(toMinsT(e.endTime)) - minToYT(toMinsT(e.startTime)))
+
+  const DAYLIST = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+  const DAYS_LONGT = { Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday' }
+  const now=new Date(), todayIdx=(now.getDay()+6)%7, nowMins=now.getHours()*60+now.getMinutes()
+
+  const PALETTES_T = [
+    ['#7D1025','#FDE7EC'],['#1E3A8A','#DBEAFE'],['#166534','#DCFCE7'],
+    ['#7C2D12','#FEF3C7'],['#6B21A8','#F3E8FF'],['#0F766E','#CCFBF1'],
+    ['#92400E','#FEF9C3'],['#1F2937','#F3F4F6'],['#9F1239','#FFE4E6'],
+    ['#0369A1','#E0F2FE'],['#7E22CE','#EDE9FE'],
+  ]
+  const palMap = {}
+  ;[...new Set(entries.map(e=>e.subject))].forEach((s,i)=>{ palMap[s]=PALETTES_T[i%PALETTES_T.length] })
+  const palT = s => palMap[s] || PALETTES_T[0]
+
+  const byDayT = {}
+  DAYLIST.forEach(d => { byDayT[d]=[] })
+  entries.forEach(e => { if(byDayT[e.dayOfWeek]) byDayT[e.dayOfWeek].push(e) })
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 14, flexWrap: 'wrap' }}>
+      {/* Header */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, gap:14, flexWrap:'wrap' }}>
         <div>
           <div className="sec-tag">Recurring weekly slots</div>
-          <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
-            Timetable
-          </h2>
-          <div style={{ fontSize: 13, color: '#6B6B6B', maxWidth: 560 }}>
-            Build a weekly schedule for your classes. Each slot repeats every week —
-            students see it automatically. Use Schedule Classes for one-off sessions instead.
+          <h2 className="serif" style={{ fontSize:26, color:'var(--s900)', margin:'6px 0 4px' }}>Timetable</h2>
+          <div style={{ fontSize:13, color:'#6B6B6B', maxWidth:560, lineHeight:1.6 }}>
+            Your weekly class schedule. Use the grid to see your full week, or switch to Manage to add and edit slots.
           </div>
         </div>
-        {!showForm && (
-          <button onClick={() => { resetForm(); setShowForm(true) }}
-            style={{
-              background: '#7D1025', color: '#fff', border: 'none',
-              padding: '10px 18px', borderRadius: 8,
-              fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-              flexShrink: 0,
-            }}>
-            + Add slot
-          </button>
-        )}
+        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+          <div style={{ display:'flex', border:'1.5px solid #E8E2D6', borderRadius:8, overflow:'hidden' }}>
+            {[['grid','📅 Week view'],['manage','✏️ Manage']].map(([k,l]) => (
+              <button key={k} onClick={()=>setViewMode(k)} style={{
+                padding:'8px 14px', border:'none', fontSize:12, fontWeight:700, cursor:'pointer',
+                background:viewMode===k?'#7D1025':'transparent',
+                color:viewMode===k?'#fff':'#564844',
+              }}>{l}</button>
+            ))}
+          </div>
+          {viewMode==='manage' && !showForm && (
+            <button onClick={()=>{ resetForm(); setShowForm(true) }} style={{
+              background:'#7D1025', color:'#fff', border:'none',
+              padding:'9px 16px', borderRadius:8, fontSize:12.5, fontWeight:700, cursor:'pointer',
+            }}>+ Add slot</button>
+          )}
+        </div>
       </div>
+
+      {/* ── GRID VIEW ── */}
+      {viewMode==='grid' && (
+        loading ? (
+          <div style={{padding:'40px 0',textAlign:'center',color:'#9A9A9A',fontSize:13}}>Loading timetable...</div>
+        ) : entries.length===0 ? (
+          <div style={{padding:32,textAlign:'center',background:'#FBFAF5',border:'1px solid #E8E2D6',borderRadius:12}}>
+            <div style={{fontSize:28,marginBottom:10}}>📅</div>
+            <div style={{fontSize:14,fontWeight:700,color:'#1A0F0E',marginBottom:4}}>No slots yet</div>
+            <div style={{fontSize:13,color:'#9A9A9A'}}>Switch to Manage to add your first class slot.</div>
+          </div>
+        ) : (
+          <>
+            {/* Today strip */}
+            <div style={{background:'linear-gradient(135deg,#7D1025,#5A0B1B)',borderRadius:12,padding:'14px 18px',marginBottom:14,color:'#fff'}}>
+              <div style={{fontSize:10,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:'rgba(255,255,255,.55)',marginBottom:8}}>
+                {DAYS_LONGT[DAYLIST[todayIdx]]} · Today
+              </div>
+              {(byDayT[DAYLIST[todayIdx]]||[]).length===0
+                ? <div style={{fontSize:13,color:'rgba(255,255,255,.5)'}}>No classes today</div>
+                : <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                    {[...(byDayT[DAYLIST[todayIdx]]||[])].sort((a,b)=>toMinsT(a.startTime)-toMinsT(b.startTime)).map(e => {
+                      const live = DAYLIST.indexOf(e.dayOfWeek)===todayIdx && nowMins>=toMinsT(e.startTime) && nowMins<toMinsT(e.endTime)
+                      const [fg]=palT(e.subject)
+                      const stuCount = (e.assignedStudents||[]).length
+                      return (
+                        <div key={e._id} onClick={()=>beginEdit(e)} style={{
+                          background:live?'#fff':'rgba(255,255,255,.1)',
+                          border:'1px solid '+(live?'transparent':'rgba(255,255,255,.18)'),
+                          borderRadius:8,padding:'8px 14px',cursor:'pointer',transition:'transform .12s',
+                        }} onMouseEnter={el=>el.currentTarget.style.transform='scale(1.04)'}
+                           onMouseLeave={el=>el.currentTarget.style.transform='scale(1)'}>
+                          {live && <div style={{fontSize:9,fontWeight:800,color:'#7D1025',marginBottom:3,display:'flex',alignItems:'center',gap:4}}>
+                            <span style={{width:6,height:6,borderRadius:'50%',background:'#DC2626',display:'inline-block'}}/>LIVE NOW
+                          </div>}
+                          <div style={{fontSize:12.5,fontWeight:700,color:live?fg:'#fff'}}>{e.subject}</div>
+                          <div style={{fontSize:11,color:live?'#9A2434':'rgba(255,255,255,.65)',marginTop:2}}>
+                            {fmtT(e.startTime)} – {fmtT(e.endTime)}
+                            {stuCount>0 && <span style={{marginLeft:6,opacity:.8}}>· {stuCount} student{stuCount>1?'s':''}</span>}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+              }
+            </div>
+
+            {/* Time-grid */}
+            <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden',boxShadow:'0 2px 12px rgba(0,0,0,.05)'}}>
+              <div style={{display:'grid',gridTemplateColumns:TIME_COL_W+'px repeat(7,'+COL_W+'px)',borderBottom:'1.5px solid #E8E2D6',background:'#FBFAF5'}}>
+                <div style={{padding:'10px 0'}}/>
+                {DAYLIST.map((d,i) => {
+                  const isToday=i===todayIdx
+                  return <div key={d} style={{padding:'10px 8px',textAlign:'center',borderLeft:'1px solid #F0EBE6',background:isToday?'#7D1025':'transparent',color:isToday?'#fff':'#564844'}}>
+                    <div style={{fontSize:10,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase'}}>{d}</div>
+                    {isToday && <div style={{fontSize:8,marginTop:2,fontWeight:600,color:'rgba(255,255,255,.7)'}}>TODAY</div>}
+                  </div>
+                })}
+              </div>
+              <div style={{overflowX:'auto',overflowY:'auto',maxHeight:500}}>
+                <div style={{position:'relative',width:TIME_COL_W+COL_W*7,height:GRID_H}}>
+                  {Array.from({length:HOUR_END-HOUR_START+1},(_,i)=>{
+                    const h=HOUR_START+i,y=(i/(HOUR_END-HOUR_START))*GRID_H,is12=h===12
+                    return <div key={h} style={{position:'absolute',top:y,left:0,right:0,display:'flex',alignItems:'flex-start'}}>
+                      <div style={{width:TIME_COL_W,paddingRight:8,textAlign:'right',fontSize:9.5,color:is12?'#7D1025':'#BBBBBB',fontWeight:is12?700:400,transform:'translateY(-50%)',flexShrink:0}}>
+                        {h===12?'12 PM':h>12?(h-12)+' PM':h+' AM'}
+                      </div>
+                      <div style={{flex:1,height:is12?1.5:1,background:is12?'#FECDD3':'#F4EFEB'}}/>
+                    </div>
+                  })}
+                  {nowMins>=HOUR_START*60&&nowMins<HOUR_END*60&&(
+                    <div style={{position:'absolute',top:minToYT(nowMins),left:TIME_COL_W+COL_W*todayIdx,width:COL_W,height:2,background:'#DC2626',zIndex:8}}>
+                      <div style={{width:8,height:8,borderRadius:'50%',background:'#DC2626',position:'absolute',left:-4,top:-3}}/>
+                    </div>
+                  )}
+                  {DAYLIST.map((d,dIdx) => (
+                    <div key={d} style={{position:'absolute',top:0,bottom:0,left:TIME_COL_W+COL_W*dIdx,width:COL_W,borderLeft:'1px solid #F4EFEB',background:dIdx===todayIdx?'rgba(125,16,37,.025)':'transparent'}}>
+                      {(byDayT[d]||[]).map(e => {
+                        const y=minToYT(toMinsT(e.startTime)),h=entryHT(e)
+                        const live=DAYLIST.indexOf(e.dayOfWeek)===todayIdx&&nowMins>=toMinsT(e.startTime)&&nowMins<toMinsT(e.endTime)
+                        const [fg,bg]=palT(e.subject)
+                        const stuCount=(e.assignedStudents||[]).length
+                        return (
+                          <div key={e._id} onClick={()=>{ setViewMode('manage'); beginEdit(e) }}
+                            style={{position:'absolute',top:y+1,left:3,right:3,height:h-2,
+                              background:live?fg:bg,border:'1.5px solid '+(live?fg:fg+'55'),
+                              borderLeft:'3px solid '+fg,borderRadius:6,padding:'4px 6px',
+                              cursor:'pointer',overflow:'hidden',
+                              boxShadow:live?'0 2px 10px '+fg+'45':'0 1px 3px rgba(0,0,0,.06)',
+                              zIndex:live?4:2,transition:'transform .1s',
+                            }}
+                            onMouseEnter={el=>{el.currentTarget.style.transform='scale(1.02)';el.currentTarget.style.zIndex='10'}}
+                            onMouseLeave={el=>{el.currentTarget.style.transform='scale(1)';el.currentTarget.style.zIndex=live?'4':'2'}}
+                          >
+                            {live&&<div style={{display:'flex',alignItems:'center',gap:3,marginBottom:1}}>
+                              <span style={{width:5,height:5,borderRadius:'50%',background:'#fff',display:'inline-block',flexShrink:0}}/>
+                              <span style={{fontSize:8,fontWeight:800,color:'#fff',letterSpacing:'.06em'}}>LIVE</span>
+                            </div>}
+                            <div style={{fontSize:h>46?11.5:9.5,fontWeight:700,color:live?'#fff':fg,lineHeight:1.2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:h>46?'normal':'nowrap'}}>{e.subject}</div>
+                            {h>40&&<div style={{fontSize:9,color:live?'rgba(255,255,255,.8)':'#6B6B6B',marginTop:1}}>{fmtT(e.startTime)}–{fmtT(e.endTime)}</div>}
+                            {h>54&&stuCount>0&&<div style={{fontSize:8.5,color:live?'rgba(255,255,255,.65)':'#9A9A9A',marginTop:2}}>
+                              {stuCount} student{stuCount>1?'s':''}
+                              {e.canBeGrouped&&<span style={{marginLeft:4,fontSize:8,fontWeight:700,color:live?'rgba(255,255,255,.5)':fg+'80'}}>· group</span>}
+                            </div>}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:12}}>
+              {[...new Set(entries.map(e=>e.subject))].map(s => {
+                const [fg,bg]=palT(s)
+                return <div key={s} style={{display:'flex',alignItems:'center',gap:5,padding:'3px 10px',background:bg,borderRadius:99,border:'1px solid '+fg+'35'}}>
+                  <span style={{width:7,height:7,borderRadius:'50%',background:fg,flexShrink:0}}/>
+                  <span style={{fontSize:10.5,fontWeight:600,color:fg}}>{s}</span>
+                </div>
+              })}
+            </div>
+          </>
+        )
+      )}
+
+      {/* ── MANAGE VIEW ── (existing form + list) */}
+      {viewMode==='manage' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 14, flexWrap: 'wrap' }}>
+        <div>
 
       {/* ── FORM (create / edit) ── */}
       {showForm && (
@@ -14833,6 +15081,8 @@ function TeacherTimetableTab({ user, toast }) {
               </div>
             )
           })}
+        </div>
+      )}
         </div>
       )}
     </div>
