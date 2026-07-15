@@ -461,14 +461,14 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
         subjectId:    subject._id,
         createdBy:    req.user?._id,
         canBeGrouped: !!canBeGrouped,
-      })
-    }.then(result => {
-      if (result.created) {
-        console.log('[allocation] Auto-timetable created for', student.firstName, '-', subject.subjectName);
-      } else {
-        console.log('[allocation] Auto-timetable skipped:', result.reason);
-      }
-    }).catch(err => console.error('[allocation] Auto-timetable error:', err.message));
+      }).then(result => {
+        if (result.created) {
+          console.log('[allocation] Auto-timetable created for', student.firstName, '-', subject.subjectName);
+        } else {
+          console.log('[allocation] Auto-timetable skipped:', result.reason);
+        }
+      }).catch(err => console.error('[allocation] Auto-timetable error:', err.message));
+    }
 
     res.status(201).json({ success: true, allocation, emailsSent: sendEmails });
   } catch (e) {
