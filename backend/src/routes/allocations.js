@@ -385,6 +385,7 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
         teacherId,
         curriculum: student.curriculum,
         status: 'Active',
+        canBeGrouped: !!canBeGrouped,
         createdBy: req.user._id
       });
     }
@@ -436,6 +437,24 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
       'create_allocation',
       `${student.firstName} ${student.lastName} → ${teacher.firstName} ${teacher.lastName} (${subject.subjectName})`
     );
+
+    // ── Auto-generate timetable entry ─────────────────────
+    // Non-blocking — runs after the response is sent so the
+    // allocation endpoint doesn't slow down even if the teacher
+    // has no availability set.
+    autoGenerateTimetable({
+      teacherId:    teacher._id,
+      studentId:    student._id,
+      subjectId:    subject._id,
+      createdBy:    req.user?._id,
+      canBeGrouped: !!canBeGrouped,
+    }).then(result => {
+      if (result.created) {
+        console.log('[allocation] Auto-timetable created for', student.firstName, '-', subject.subjectName);
+      } else {
+        console.log('[allocation] Auto-timetable skipped:', result.reason);
+      }
+    }).catch(err => console.error('[allocation] Auto-timetable error:', err.message));
 
     res.status(201).json({ success: true, allocation, emailsSent: sendEmails });
   } catch (e) {
