@@ -128,7 +128,7 @@ function validateRoleFields(user, role) {
 }
 
 // GET /stats — Get total user count for sidebar badge
-router.get('/stats', auth, requireRole('admin'), async (req, res) => {
+router.get('/stats', auth, requireRole('admin', 'ops_manager', 'accountant'), async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     res.json({ success: true, totalUsers });
@@ -207,7 +207,7 @@ router.post('/change-password', auth, async (req, res) => {
 });
 
 
-router.get('/', auth, requireRole('admin', 'teacher'), async (req, res) => {
+router.get('/', auth, requireRole('admin', 'teacher', 'ops_manager', 'sales'), async (req, res) => {
   try {
     const { search, role, curriculum } = req.query;
     let query = {};
@@ -263,7 +263,7 @@ router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin')
 });
 
 // GET all students (for parent selection)
-router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
+router.get('/students/list', auth, requireRole('admin', 'ops_manager', 'sales'), async (req, res) => {
   try {
     const students = await User.find({ role: 'student' })
       .select('_id firstName lastName email curriculum grade gradeLevel subjects admissionNumber programme deliveryMode isActive status')
@@ -276,7 +276,7 @@ router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
 });
 
 // GET all teachers (for allocations)
-router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
+router.get('/teachers/list', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const teachers = await User.find({ role: 'teacher' })
       .select('_id firstName lastName email phone curriculum subjects createdAt status isActive isOnLeave leaveStartDate leaveEndDate jobTitle avatar bio yearsOfExperience teachingSpecialties statusReason sentEmails')
@@ -332,7 +332,7 @@ router.post('/:id/avatar', auth, requireRole('admin'), (req, res) => {
 // subject+curriculum pair. Used by the admin Manage Students module
 // to populate the teacher-allocation dropdown after the admin has
 // chosen a (student, subject) pair to allocate.
-router.get('/teachers/qualified', auth, requireRole('admin'), async (req, res) => {
+router.get('/teachers/qualified', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const mongoose = require('mongoose');
     const { subjectId, curriculum } = req.query;
@@ -1093,6 +1093,56 @@ router.get('/public-teachers', async (req, res) => {
   } catch (e) {
     console.error('[users public-teachers]', e.message);
     res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+
+// ─────────────────────────────────────────────────────────
+// PATCH /api/users/teachers/:id/availability
+// ─────────────────────────────────────────────────────────
+router.patch('/teachers/:id/availability', auth, requireRole('admin', 'teacher', 'ops_manager'), async (req, res) => {
+  try {
+    const { availability } = req.body || {};
+    if (!Array.isArray(availability))
+      return res.status(400).json({ success: false, message: 'availability must be an array.' });
+
+    const VALID_DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const TIME_RE    = /^([01]\d|2[0-3]):[0-5]\d$/;
+    const cleaned = [];
+    for (const slot of availability) {
+      if (!VALID_DAYS.includes(slot.dayOfWeek))
+        return res.status(400).json({ success: false, message: 'Invalid dayOfWeek: ' + slot.dayOfWeek });
+      if (!TIME_RE.test(slot.startTime) || !TIME_RE.test(slot.endTime))
+        return res.status(400).json({ success: false, message: 'Times must be HH:MM format.' });
+      cleaned.push({ dayOfWeek: slot.dayOfWeek, startTime: slot.startTime, endTime: slot.endTime });
+    }
+
+    const teacher = await User.findById(req.params.id);
+    if (!teacher || teacher.role !== 'teacher')
+      return res.status(404).json({ success: false, message: 'Teacher not found.' });
+    if (req.user.role === 'teacher' && String(teacher._id) !== String(req.user._id))
+      return res.status(403).json({ success: false, message: 'You can only update your own availability.' });
+
+    teacher.availability = cleaned;
+    await teacher.save();
+    console.log('[availability] saved', cleaned.length, 'slots for teacher', teacher._id);
+    return res.json({ success: true, message: 'Saved ' + cleaned.length + ' availability slot(s).', data: { availability: teacher.availability } });
+  } catch (e) {
+    console.error('[availability patch]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// GET /api/users/teachers/:id/availability
+// ─────────────────────────────────────────────────────────
+router.get('/teachers/:id/availability', auth, requireRole('admin', 'teacher', 'ops_manager'), async (req, res) => {
+  try {
+    const teacher = await User.findById(req.params.id).select('firstName lastName availability').lean();
+    if (!teacher) return res.status(404).json({ success: false, message: 'Teacher not found.' });
+    return res.json({ success: true, data: { availability: teacher.availability || [] } });
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message });
   }
 });
 
