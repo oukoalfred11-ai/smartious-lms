@@ -46,6 +46,10 @@ const userSchema = new mongoose.Schema({
   // Teacher subject ObjectId references (used by Allocation/Subject system)
   // Renamed from old `subjects` field to avoid collision
   subjectRefs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
+  // ── Password reset ───────────────────────────────────────
+  passwordResetToken:   { type: String, default: undefined },
+  passwordResetExpires: { type: Date,   default: undefined },
+
   // ── Teacher weekly availability ──────────────────────────
   // Array of time windows the teacher is available to teach.
   // Used to auto-generate timetable entries on student enrollment.
