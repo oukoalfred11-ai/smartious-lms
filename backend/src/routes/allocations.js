@@ -303,7 +303,7 @@ router.get('/suggest-teachers/:studentId/:subjectId', auth, requireRole('admin')
 // POST /api/allocations
 router.post('/', auth, requireRole('admin'), async (req, res) => {
   try {
-    const { studentId, subjectId, teacherId, sendEmails = true } = req.body;
+    const { studentId, subjectId, teacherId, sendEmails = true, canBeGrouped } = req.body;
 
     if (!studentId || !subjectId || !teacherId) {
       return res.status(400).json({
