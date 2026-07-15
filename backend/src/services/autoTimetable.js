@@ -1,31 +1,18 @@
 /**
  * services/autoTimetable.js
- * ============================================================
- * Auto-generates or updates TimetableEntry records when a
- * teacher is allocated to a student for a subject.
- *
- * Grouping logic:
- *   canBeGrouped=true  → try to merge into an existing class
- *                         that already has other grouped students.
- *                         If no existing group found, create a
- *                         new entry that others can join later.
- *   canBeGrouped=false → always create a dedicated 1-to-1 slot.
+ * Auto-generates TimetableEntry records on student allocation.
+ * Uses inline requires so a missing model won't crash on load.
  */
 
-const User           = require('../models/User')
-const TimetableEntry = require('../models/TimetableEntry')
-const Subject        = require('../models/Subject')
-
-const toMins = hhmm => {
-  if (!hhmm) return 0
-  const [h, m] = hhmm.split(':').map(Number)
-  return h * 60 + m
-}
-
-const overlaps = (s1, e1, s2, e2) => s1 < e2 && e1 > s2
+const toMins = h => { if (!h) return 0; const [hh,mm]=h.split(':').map(Number); return hh*60+mm }
+const overlaps = (s1,e1,s2,e2) => s1 < e2 && e1 > s2
 
 async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdBy, canBeGrouped = false }) {
   try {
+    const User           = require('../models/User')
+    const TimetableEntry = require('../models/TimetableEntry')
+    const Subject        = require('../models/Subject')
+
     const [teacher, subject, student] = await Promise.all([
       User.findById(teacherId).select('firstName lastName availability').lean(),
       Subject.findById(subjectId).lean(),
@@ -38,59 +25,49 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
 
     const availability = teacher.availability || []
     if (!availability.length) {
-      return { created: false, reason: 'Teacher has no availability slots set. Ask them to set availability in the Teacher Portal first.' }
+      return { created: false, reason: 'Teacher has no availability slots set.' }
     }
 
-    // Check if this student already has a timetable entry for this subject with this teacher
+    // Already timetabled?
     const alreadyExists = await TimetableEntry.findOne({
-      teacherId, assignedStudents: studentId, subject: subject.subjectName, isActive: true,
+      teacherId, assignedStudents: studentId,
+      subject: subject.subjectName, isActive: true,
     })
-    if (alreadyExists) {
-      return { created: false, reason: 'Timetable entry already exists.', entry: alreadyExists }
-    }
+    if (alreadyExists) return { created: false, reason: 'Entry already exists.', entry: alreadyExists }
 
-    // ── GROUPING: try to join an existing class ──────────────
+    // Try joining an existing group
     if (canBeGrouped) {
-      const existingGroupEntry = await TimetableEntry.findOne({
-        teacherId,
-        subject: subject.subjectName,
-        isActive: true,
-        canBeGrouped: true,
-      }).sort({ 'assignedStudents.length': 1 }) // prefer smaller groups
-
-      if (existingGroupEntry) {
-        // Check student isn't already in it
-        const alreadyIn = existingGroupEntry.assignedStudents.some(
-          id => String(id) === String(studentId)
-        )
+      const existingGroup = await TimetableEntry.findOne({
+        teacherId, subject: subject.subjectName,
+        isActive: true, canBeGrouped: true,
+      })
+      if (existingGroup) {
+        const alreadyIn = existingGroup.assignedStudents.some(id => String(id) === String(studentId))
         if (!alreadyIn) {
-          // Check student has no clash at this time
           const studentEntries = await TimetableEntry.find({ assignedStudents: studentId, isActive: true })
             .select('dayOfWeek startTime endTime').lean()
-          const studentBusy = (studentEntries || []).some(e =>
-            e.dayOfWeek === existingGroupEntry.dayOfWeek &&
-            overlaps(toMins(existingGroupEntry.startTime), toMins(existingGroupEntry.endTime), toMins(e.startTime), toMins(e.endTime))
+          const clash = (studentEntries || []).some(e =>
+            e.dayOfWeek === existingGroup.dayOfWeek &&
+            overlaps(toMins(existingGroup.startTime), toMins(existingGroup.endTime), toMins(e.startTime), toMins(e.endTime))
           )
-
-          if (!studentBusy) {
-            existingGroupEntry.assignedStudents.push(studentId)
-            existingGroupEntry.title = `${subject.subjectName} — Group (${existingGroupEntry.assignedStudents.length} students)`
-            await existingGroupEntry.save()
-            console.log('[autoTimetable] Student', student.firstName, 'added to existing group entry', existingGroupEntry._id)
-            return { created: true, grouped: true, entry: existingGroupEntry, reason: 'Added to existing group class.' }
+          if (!clash) {
+            existingGroup.assignedStudents.push(studentId)
+            existingGroup.title = subject.subjectName + ' — Group (' + existingGroup.assignedStudents.length + ' students)'
+            await existingGroup.save()
+            console.log('[autoTimetable] Added', student.firstName, 'to group entry', existingGroup._id)
+            return { created: true, grouped: true, entry: existingGroup, reason: 'Added to existing group class.' }
           }
         }
       }
     }
 
-    // ── FIND A FREE SLOT ─────────────────────────────────────
+    // Find a free slot
     const [teacherEntries, studentEntries] = await Promise.all([
       TimetableEntry.find({ teacherId, isActive: true }).select('dayOfWeek startTime endTime').lean(),
       TimetableEntry.find({ assignedStudents: studentId, isActive: true }).select('dayOfWeek startTime endTime').lean(),
     ])
 
-    const teacherBusy  = {}
-    const studentBusy  = {}
+    const teacherBusy = {}, studentBusy = {}
     teacherEntries.forEach(e => {
       if (!teacherBusy[e.dayOfWeek]) teacherBusy[e.dayOfWeek] = []
       teacherBusy[e.dayOfWeek].push([toMins(e.startTime), toMins(e.endTime)])
@@ -103,18 +80,18 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
     let chosenSlot = null
     for (const slot of availability) {
       const ss = toMins(slot.startTime), se = toMins(slot.endTime), d = slot.dayOfWeek
-      const tBusy = (teacherBusy[d] || []).some(([s, e]) => overlaps(ss, se, s, e))
-      const sBusy = (studentBusy[d] || []).some(([s, e]) => overlaps(ss, se, s, e))
+      const tBusy = (teacherBusy[d] || []).some(([s,e]) => overlaps(ss, se, s, e))
+      const sBusy = (studentBusy[d] || []).some(([s,e]) => overlaps(ss, se, s, e))
       if (!tBusy && !sBusy) { chosenSlot = slot; break }
     }
 
     if (!chosenSlot) {
-      return { created: false, reason: 'No free slot found for both teacher and student. Set manually in the Teacher Portal.' }
+      return { created: false, reason: 'No free slot found. Please set the timetable manually.' }
     }
 
     const title = canBeGrouped
-      ? `${subject.subjectName} — Group (1 student)`
-      : `${subject.subjectName} — ${student.firstName} ${student.lastName}`
+      ? subject.subjectName + ' — Group (1 student)'
+      : subject.subjectName + ' — ' + student.firstName + ' ' + student.lastName
 
     const entry = await TimetableEntry.create({
       title,
@@ -128,13 +105,14 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
       deliveryMode: 'virtual',
       teacherId,
       assignedStudents: [studentId],
-      canBeGrouped,
+      canBeGrouped: !!canBeGrouped,
       isActive: true,
       createdBy,
     })
 
-    console.log('[autoTimetable] Created', canBeGrouped ? 'groupable' : '1:1', 'entry', entry._id,
-      '—', subject.subjectName, chosenSlot.dayOfWeek, chosenSlot.startTime + '-' + chosenSlot.endTime)
+    console.log('[autoTimetable] Created', canBeGrouped ? 'group' : '1:1', 'entry',
+      entry._id, '—', subject.subjectName, chosenSlot.dayOfWeek,
+      chosenSlot.startTime + '-' + chosenSlot.endTime)
 
     return { created: true, grouped: false, entry, reason: 'Timetable entry auto-generated.' }
 
