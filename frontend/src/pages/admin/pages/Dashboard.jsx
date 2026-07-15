@@ -6402,25 +6402,6 @@ function StudentDetailModal({ student, allocations: initialAllocs, onClose, onCh
           </div>
         </div>
 
-        {/* Footer */}
-        {/* Grouping option — only shown when creating a new allocation */}
-        {!currentAlloc && (
-          <div style={{ padding: '12px 24px', borderTop: '1px solid #E8E2D6', background: '#FFFBF0' }}>
-            <label style={{ display:'flex', alignItems:'flex-start', gap:10, cursor:'pointer' }}>
-              <div style={{ position:'relative', width:40, height:22, flexShrink:0, marginTop:2 }}>
-                <input type="checkbox" checked={canBeGrouped} onChange={e => setCanBeGrouped(e.target.checked)} style={{ opacity:0, width:0, height:0 }}/>
-                <span style={{ position:'absolute', inset:0, background:canBeGrouped?TOKENS.crimson:'#D1D5DB', borderRadius:99, transition:'background .2s' }}/>
-                <span style={{ position:'absolute', top:3, left:canBeGrouped?21:3, width:16, height:16, background:'#fff', borderRadius:'50%', transition:'left .2s', boxShadow:'0 1px 3px rgba(0,0,0,.2)' }}/>
-              </div>
-              <div>
-                <div style={{ fontSize:12.5, fontWeight:700, color:TOKENS.s900, marginBottom:2 }}>Can be grouped with similar students</div>
-                <div style={{ fontSize:11, color:TOKENS.s500, lineHeight:1.5 }}>
-                  Puts this student in a shared class slot with others studying the same subject with the same teacher. Off = dedicated 1-to-1 slot.
-                </div>
-              </div>
-            </label>
-          </div>
-        )}
 
         <div style={{
           padding: '12px 24px',
@@ -6763,6 +6744,22 @@ function AllocateTeacherModal({ studentId, studentName, curriculum, subjectId, s
             </div>
           )}
         </div>
+        {!currentAlloc && (
+          <div style={{ padding:'12px 20px', borderTop:'1px solid #E8E2D6', background:'#FFFBF0' }}>
+            <label style={{ display:'flex', alignItems:'flex-start', gap:10, cursor:'pointer' }}>
+              <div style={{ position:'relative', width:40, height:22, flexShrink:0, marginTop:2 }}>
+                <input type="checkbox" checked={canBeGrouped} onChange={e => setCanBeGrouped(e.target.checked)} style={{ opacity:0, width:0, height:0 }}/>
+                <span style={{ position:'absolute', inset:0, background:canBeGrouped?TOKENS.crimson:'#D1D5DB', borderRadius:99, transition:'background .2s' }}/>
+                <span style={{ position:'absolute', top:3, left:canBeGrouped?21:3, width:16, height:16, background:'#fff', borderRadius:'50%', transition:'left .2s', boxShadow:'0 1px 3px rgba(0,0,0,.2)' }}/>
+              </div>
+              <div>
+                <div style={{ fontSize:12.5, fontWeight:700, color:TOKENS.s900, marginBottom:2 }}>Can be grouped with similar students</div>
+                <div style={{ fontSize:11, color:TOKENS.s500, lineHeight:1.5 }}>On = shared class slot with others on the same subject. Off = dedicated 1-to-1 slot.</div>
+              </div>
+            </label>
+          </div>
+        )}
+
         <div style={{
           padding: '12px 24px',
           background: '#FBFAF5', borderTop: '1px solid #E8E2D6',
