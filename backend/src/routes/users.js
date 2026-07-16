@@ -413,7 +413,7 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin'), async (req
 });
 
 // CREATE user (admin only) with role-specific logic and auto-generated temp password
-router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+router.post('/', auth, requireRole('admin', 'ops_manager', 'sales'), async (req, res) => {
   try {
     validateRoleFields(req.body, req.body.role);
 
@@ -761,7 +761,7 @@ router.delete('/:id/parent', auth, requireRole('admin'), async (req, res) => {
 });
 
 // UPDATE user (admin only) — demo users cannot be deleted or have role/isDemo changed
-router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
+router.patch('/:id', auth, requireRole('admin', 'ops_manager', 'sales'), async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
     if (!target) return res.status(404).json({ success: false, message: 'User not found' });
