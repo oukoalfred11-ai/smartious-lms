@@ -2,7 +2,7 @@ const router = require('express').Router()
 const User = require('../models/User')
 const { auth, requireRole } = require('../middleware/auth')
 
-router.get('/admin', auth, requireRole('admin'), async (req, res) => {
+router.get('/admin', auth, requireRole('admin', 'accountant', 'sales', 'ops_manager'), async (req, res) => {
   try {
     const [totalStudents, totalTeachers] = await Promise.all([
       User.countDocuments({ role:'student' }),
