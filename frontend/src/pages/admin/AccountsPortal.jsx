@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import AdminDashboard from '../admin/Dashboard.jsx'
+import AdminDashboard from './pages/Dashboard.jsx'
 import { api } from '../../context/ctx.jsx'
 
 const SMARTIOUS_THEME = `
