@@ -90,6 +90,7 @@ app.use('/api/frontdesk', require('./routes/frontdesk'));
 app.use('/api/library', require('./routes/library'));
 app.use('/api/leave-requests', require('./routes/status-management'));
 app.use('/api/assessment', require('./routes/assessment'));
+app.use('/api/inquiries',  require('./routes/inquiries'));
 
 // ── Health check ──────────────────────────────────────────
 app.get('/api/health', (_, res) =>
