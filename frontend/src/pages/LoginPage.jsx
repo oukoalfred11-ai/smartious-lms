@@ -70,13 +70,15 @@ export default function LoginPage() {
     try {
       const user = await login(email, pw)
       // Block staff roles that hit the public portal by mistake
-      if (user.role === 'teacher' || user.role === 'admin') {
+      const STAFF_ROLES = ['admin','teacher','ops_manager','accountant','sales']
+      if (STAFF_ROLES.includes(user.role)) {
         setErr('Staff accounts must sign in via the Admin Login link.')
         setLoading(false)
         return
       }
       toast.ok(`Welcome back, ${user.firstName}!`)
-      nav('/' + user.role)
+      const ROLE_PATHS = { student:'/student', parent:'/parent', demo:'/demo' }
+      nav(ROLE_PATHS[user.role] || '/portal')
     } catch (e) {
       setErr(e.message || 'Invalid email or password.')
     }
