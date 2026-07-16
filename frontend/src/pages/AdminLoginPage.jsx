@@ -87,6 +87,10 @@ export default function AdminLoginPage() {
         window.location.href = '/' + found.role
         return
       }
+      // ctx.login() returns null when mustChangePassword is true —
+      // in that case it already redirected to /reset-password, so just stop here.
+      if (!user) { setLoading(false); return }
+
       const STAFF_ROLES = ['admin','teacher','ops_manager','accountant','sales']
       if (!STAFF_ROLES.includes(user.role)) {
         setErr('This login is for staff only. Students and parents please use the main portal.')
