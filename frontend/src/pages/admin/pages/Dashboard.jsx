@@ -513,7 +513,7 @@ function PlanBadge({ p }) {
 // ──────────────────────────────────────────────────────
 // HYBRID NAVIGATION — top bar + collapsible left rail
 // ──────────────────────────────────────────────────────
-function PNavigation({ page, setPage, adminFirst, onLogout }) {
+function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
   const [railOpen, setRailOpen] = useState(true)
   const auth = useAuth()
 
@@ -710,7 +710,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout }) {
 // ═══════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════
-export default function AdminDashboard({ page, setPage, userStats, pendingAllocations, refreshKey, onUserSaved, forcedRole }) {
+export default function AdminDashboard({ page, setPage, userStats, pendingAllocations, refreshKey, onUserSaved, forcedRole = undefined }) {
   const toast = useToast()
   const auth = useAuth()
 
@@ -823,7 +823,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
       color: TOKENS.s900,
     }}>
-      <PNavigation page={page} setPage={setPage} adminFirst={adminFirst} onLogout={() => { localStorage.removeItem('sm_token'); localStorage.removeItem('sm_user'); window.location.href = '/login' }}/>
+      <PNavigation page={page} setPage={setPage} adminFirst={adminFirst} forcedRole={forcedRole} onLogout={() => { localStorage.removeItem('sm_token'); localStorage.removeItem('sm_user'); window.location.href = '/login' }}/>
 
       <div style={{
         marginLeft: 240,
