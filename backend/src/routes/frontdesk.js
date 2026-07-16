@@ -95,7 +95,7 @@ router.post('/submit', async (req, res) => {
 // GET /api/frontdesk/submissions   — admin
 // Optional filters: ?type= &status= &country= &search=
 // ─────────────────────────────────────────────────────────
-router.get('/submissions', auth, requireRole('admin'), async (req, res) => {
+router.get('/submissions', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
   try {
     const { type, status, country, search } = req.query;
     const q = {};
@@ -122,7 +122,7 @@ router.get('/submissions', auth, requireRole('admin'), async (req, res) => {
 // ─────────────────────────────────────────────────────────
 // PATCH /api/frontdesk/:id   — admin: update status / notes
 // ─────────────────────────────────────────────────────────
-router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
+router.patch('/:id', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
   try {
     const update = {};
     if (req.body.status !== undefined) {
@@ -148,7 +148,7 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
 // ─────────────────────────────────────────────────────────
 // DELETE /api/frontdesk/:id   — admin
 // ─────────────────────────────────────────────────────────
-router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
+router.delete('/:id', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
   try {
     const deleted = await FrontDeskSubmission.findByIdAndDelete(req.params.id);
     if (!deleted)
@@ -165,7 +165,7 @@ router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
 // Aggregate counts by type, status, country, programme,
 // curriculum, source channel, and a 30-day daily trend.
 // ─────────────────────────────────────────────────────────
-router.get('/stats', auth, requireRole('admin'), async (req, res) => {
+router.get('/stats', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
   try {
     const all = await FrontDeskSubmission.find()
       .select('type status country programme curriculum heardFrom createdAt')
@@ -218,7 +218,7 @@ router.get('/stats', auth, requireRole('admin'), async (req, res) => {
 // Body: { subject, body, template, attachments: [{name,url}] }
 // Sends one branded email to the lead's address and logs it.
 // ─────────────────────────────────────────────────────────
-router.post('/:id/email', auth, requireRole('admin'), async (req, res) => {
+router.post('/:id/email', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
   try {
     const { subject, body, template = 'custom', attachments = [] } = req.body;
 
@@ -294,7 +294,7 @@ router.post('/:id/email', auth, requireRole('admin'), async (req, res) => {
 // emails welcome credentials to both. Marks the lead converted
 // and records the created user ids so it cannot be re-imported.
 // ─────────────────────────────────────────────────────────
-router.post('/:id/import', auth, requireRole('admin'), async (req, res) => {
+router.post('/:id/import', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
   try {
     const User = require('../models/User');
     let sendWelcomeEmail = null;
