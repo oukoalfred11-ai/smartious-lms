@@ -87,13 +87,21 @@ export default function AdminLoginPage() {
         window.location.href = '/' + found.role
         return
       }
-      if (user.role !== 'teacher' && user.role !== 'admin') {
+      const STAFF_ROLES = ['admin','teacher','ops_manager','accountant','sales']
+      if (!STAFF_ROLES.includes(user.role)) {
         setErr('This login is for staff only. Students and parents please use the main portal.')
         setLoading(false)
         return
       }
       toast.ok(`Welcome back, ${user.firstName}!`)
-      nav('/' + user.role)
+      const ROLE_PATHS = {
+        admin:       '/admin',
+        teacher:     '/teacher',
+        ops_manager: '/ops',
+        accountant:  '/accounts',
+        sales:       '/sales',
+      }
+      nav(ROLE_PATHS[user.role] || '/admin')
     } catch (e) {
       setErr(e.message || 'Invalid email or password.')
     }
