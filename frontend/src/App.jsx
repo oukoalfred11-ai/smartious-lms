@@ -6,6 +6,9 @@ import AdminLoginPage    from './pages/AdminLoginPage.jsx'
 import VerifyEmailPage   from './pages/VerifyEmailPage.jsx'
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 import AdminPortal       from './pages/admin/AdminPortal.jsx'
+import OpsPortal         from './pages/admin/OpsPortal.jsx'
+import AccountsPortal    from './pages/admin/AccountsPortal.jsx'
+import SalesPortal       from './pages/admin/SalesPortal.jsx'
 import TeacherPortal     from './pages/teacher/TeacherPortal.jsx'
 import StudentPortal     from './pages/student/StudentPortal.jsx'
 import ParentPortal      from './pages/parent/ParentPortal.jsx'
@@ -32,21 +35,24 @@ function Guard({ children, roles }) {
     </div>
   )
   if (!user) return <Navigate to="/login" replace />
-  const STAFF_ROLES = ['admin', 'accountant', 'sales', 'ops_manager']
-  if (roles && !roles.includes(user.role)) {
-    // Staff roles all use the admin portal
-    if (STAFF_ROLES.includes(user.role)) return <Navigate to="/admin" replace />
-    const STAFF_ROLES2 = ['admin', 'accountant', 'sales', 'ops_manager']
-  if (STAFF_ROLES2.includes(user.role)) return <Navigate to="/admin" replace />
-  return <Navigate to={`/${user.role}`} replace />
-  }
+  if (roles && !roles.includes(user.role)) return <Navigate to={`/${user.role}`} replace />
   return children
 }
 
 function RoleRedirect() {
   const { user } = useAuth()
   if (!user) return <Navigate to="/login" replace />
-  return <Navigate to={`/${user.role}`} replace />
+  const ROLE_PATHS = {
+    admin:       '/admin',
+    ops_manager: '/ops',
+    accountant:  '/accounts',
+    sales:       '/sales',
+    teacher:     '/teacher',
+    student:     '/student',
+    parent:      '/parent',
+    demo:        '/demo',
+  }
+  return <Navigate to={ROLE_PATHS[user.role] || '/login'} replace />
 }
 
 export default function App() {
@@ -61,7 +67,10 @@ export default function App() {
               <Route path="/verify-email"   element={<VerifyEmailPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/portal"         element={<RoleRedirect />} />
-              <Route path="/admin/*"        element={<Guard roles={['admin','accountant','sales','ops_manager']}><AdminPortal /></Guard>} />
+              <Route path="/admin/*"        element={<Guard roles={['admin']}><AdminPortal /></Guard>} />
+              <Route path="/ops/*"          element={<Guard roles={['ops_manager','admin']}><OpsPortal /></Guard>} />
+              <Route path="/accounts/*"     element={<Guard roles={['accountant','admin']}><AccountsPortal /></Guard>} />
+              <Route path="/sales/*"        element={<Guard roles={['sales','admin']}><SalesPortal /></Guard>} />
               <Route path="/teacher/*"      element={<Guard roles={['teacher','admin']}><TeacherPortal /></Guard>} />
               <Route path="/student/*"      element={<Guard roles={['student']}><StudentPortal /></Guard>} />
               <Route path="/parent/*"       element={<Guard roles={['parent']}><ParentPortal /></Guard>} />
