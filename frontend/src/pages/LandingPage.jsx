@@ -197,7 +197,7 @@ function useHeroPreload(active) {
       posterLink.id = posterId
       posterLink.rel = 'preload'
       posterLink.as = 'image'
-      posterLink.href = '/hero-learning-centre.jpg'
+      posterLink.href = 'https://res.cloudinary.com/dae99gz1m/video/upload/f_webp,q_auto:good,w_1920,so_0/hero_mhhwhf.jpg'
       posterLink.setAttribute('fetchpriority', 'high')
       document.head.appendChild(posterLink)
       cleanups.push(posterId)
@@ -213,7 +213,7 @@ function useHeroPreload(active) {
       videoLink.id = videoId
       videoLink.rel = 'preload'
       videoLink.as = 'video'
-      videoLink.href = 'https://res.cloudinary.com/dae99gz1m/video/upload/q_auto/hero_mhhwhf.mp4'
+      videoLink.href = 'https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto:good,w_1920,vc_auto/hero_mhhwhf.mp4'
       videoLink.setAttribute('type', 'video/mp4')
       videoLink.setAttribute('fetchpriority', 'high')
       document.head.appendChild(videoLink)
@@ -3610,12 +3610,22 @@ export default function LandingPage() {
               muted
               playsInline
               preload="auto"
-              poster="/hero-learning-centre.jpg"
+              poster="https://res.cloudinary.com/dae99gz1m/video/upload/f_webp,q_auto:good,w_1920,so_0/hero_mhhwhf.jpg"
               aria-hidden="true"
               disablePictureInPicture
               fetchPriority="high"
             >
-              <source src="https://res.cloudinary.com/dae99gz1m/video/upload/q_auto/hero_mhhwhf.mp4" type="video/mp4" />
+              {/* Mobile-first: smaller file for phones/tablets (< 800px viewport) */}
+              <source
+                media="(max-width: 800px)"
+                src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto:good,w_800,vc_auto/hero_mhhwhf.mp4"
+                type="video/mp4"
+              />
+              {/* Desktop: full quality but auto-format + width capped at 1920px */}
+              <source
+                src="https://res.cloudinary.com/dae99gz1m/video/upload/f_auto,q_auto:good,w_1920,vc_auto/hero_mhhwhf.mp4"
+                type="video/mp4"
+              />
             </video>
             <div className="h-ov"/>
             <div className="h-vig"/>
