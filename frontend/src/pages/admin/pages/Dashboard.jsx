@@ -519,7 +519,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout }) {
 
   // Group modules into nav sections
   // Role-based module access — each role sees only its permitted modules
-  const role = auth?.user?.role || 'admin'
+  const role = forcedRole || auth?.user?.role || 'admin'
 
   // Portal identity per role — shown in the top nav bar
   const PORTAL_META = {
@@ -710,7 +710,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout }) {
 // ═══════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════
-export default function AdminDashboard({ page, setPage, userStats, pendingAllocations, refreshKey, onUserSaved }) {
+export default function AdminDashboard({ page, setPage, userStats, pendingAllocations, refreshKey, onUserSaved, forcedRole }) {
   const toast = useToast()
   const auth = useAuth()
 
