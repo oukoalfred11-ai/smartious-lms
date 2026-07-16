@@ -256,4 +256,65 @@ router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res
   }
 })
 
+
+// ── POST /api/inquiries/public ─────────────────────────────
+// No-auth endpoint called by the public landing page ConsultForm.
+// Creates a CRM inquiry so every consultation request lands in
+// the sales team's pipeline automatically.
+// Rate-limited by the global limiter in index.js (1000/15min).
+router.post('/public', async (req, res) => {
+  try {
+    const {
+      parentName, parentPhone, parentEmail,
+      country, city, studentName, studentGrade,
+      curriculum, source, consultFormat,
+      message, campaignTag, sourcePage,
+    } = req.body || {}
+
+    if (!parentName?.trim())
+      return res.status(400).json({ success: false, message: 'Name is required.' })
+
+    // Map consultation source to CRM source enum
+    const sourceMap = {
+      instagram: 'instagram', facebook: 'facebook', linkedin: 'linkedin',
+      whatsapp: 'whatsapp', google: 'website', tiktok: 'tiktok',
+      referral: 'referral', website: 'website',
+    }
+    const crmSource = sourceMap[String(source || '').toLowerCase()] || 'website'
+
+    const inq = await Inquiry.create({
+      parentName:   parentName.trim(),
+      parentPhone:  parentPhone?.trim() || '',
+      parentEmail:  parentEmail?.trim()?.toLowerCase() || '',
+      country:      country?.trim() || '',
+      city:         city?.trim() || '',
+      studentName:  studentName?.trim() || '',
+      studentGrade: studentGrade?.trim() || '',
+      curriculum:   curriculum?.trim() || '',
+      source:       crmSource,
+      campaignTag:  campaignTag?.trim() || sourcePage || '',
+      status:       'new',
+      priority:     'medium',
+      internalNote: [
+        consultFormat ? 'Format: ' + consultFormat : '',
+        message       ? 'Message: ' + message       : '',
+      ].filter(Boolean).join(' | '),
+      notes: message?.trim() ? [{
+        date:      new Date(),
+        type:      'other',
+        summary:   'Initial enquiry via consultation form',
+        outcome:   message.trim(),
+        callbackDone: false,
+      }] : [],
+    })
+
+    console.log('[inquiries/public] New inquiry from', parentName, '| source:', crmSource)
+    return res.json({ success: true, inquiryId: inq._id })
+  } catch (e) {
+    console.error('[inquiries/public]', e.message)
+    // Don't surface internal errors to public users
+    return res.status(500).json({ success: false, message: 'Could not record your enquiry. Please try again.' })
+  }
+})
+
 module.exports = router
