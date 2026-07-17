@@ -4,43 +4,26 @@ const Communication = require('../models/Communication');
 const { auth, requireRole } = require('../middleware/auth');
 const { sendBulkEmail } = require('../services/emailService');
 
-// ── Cloudinary attachment upload (defensive — never crash boot) ──
-let uploadAttachment = null;
-let attachmentUploadError = null;
-try {
-  const multer = require('multer');
-  const cloudinary = require('cloudinary').v2;
-  const { CloudinaryStorage } = require('multer-storage-cloudinary');
-
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key:    process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-
-  const attachmentStorage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-      folder: 'smartious/communication',
-      resource_type: 'raw',          // PDFs and docs, not images
-      allowed_formats: ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg'],
-    },
-  });
-  uploadAttachment = multer({
-    storage: attachmentStorage,
-    limits: { fileSize: 10 * 1024 * 1024 },   // 10 MB per file
-  });
-} catch (e) {
-  attachmentUploadError = e.message;
-  console.error('[communication] attachment upload disabled —', e.message);
-}
+// ── Attachment upload — multer memory + R2 (falls back to base64) ──
+const multer = require('multer');
+const uploadAttachment = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },   // 10 MB per file
+  fileFilter: (_, file, cb) => {
+    const ALLOWED = ['application/pdf','application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'image/png','image/jpeg','image/jpg','image/gif','text/plain'];
+    if (ALLOWED.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('File type not allowed. Use PDF, Word, or images.'));
+  },
+});
 
 // ─────────────────────────────────────────────────────────
 // GET /api/communication/recipients
 // The school community — all users, for the recipient picker.
 // Admin only (teacher/student scoping comes in later sessions).
 // ─────────────────────────────────────────────────────────
-router.get('/recipients', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
+router.get('/recipients', auth, requireRole('admin'), async (req, res) => {
   try {
     const users = await User.find({ role: { $in: ['teacher', 'student', 'parent', 'admin'] } })
       .select('_id firstName lastName email role programme curriculum')
@@ -71,24 +54,54 @@ router.get('/recipients', auth, requireRole('admin', 'sales', 'ops_manager'), as
 // The frontend uploads each attachment, then includes the
 // returned URLs in the /send payload.
 // ─────────────────────────────────────────────────────────
-router.post('/upload-attachment', auth, requireRole('admin', 'teacher', 'student'), (req, res) => {
-  if (!uploadAttachment) {
-    return res.status(503).json({
-      success: false,
-      message: 'Attachment upload unavailable: ' + (attachmentUploadError || 'module not installed.'),
-    });
-  }
-  uploadAttachment.single('file')(req, res, (err) => {
+router.post('/upload-attachment', auth, requireRole('admin', 'sales', 'ops_manager', 'teacher', 'student'), (req, res) => {
+  uploadAttachment.single('file')(req, res, async (err) => {
     if (err) {
       console.error('[communication upload]', err.message);
       return res.status(400).json({ success: false, message: err.message || 'Upload failed.' });
     }
     if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No file uploaded.' });
+      return res.status(400).json({ success: false, message: 'No file received.' });
     }
-    res.json({
+
+    let fileUrl = '';
+
+    // Try R2 first
+    try {
+      const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+      const { v4: uuid } = require('uuid');
+      const s3 = new S3Client({
+        region: 'auto',
+        endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+        credentials: {
+          accessKeyId:     process.env.R2_ACCESS_KEY_ID,
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+        },
+      });
+      const ext = (req.file.originalname || 'file').split('.').pop();
+      const key = `attachments/${Date.now()}-${uuid()}.${ext}`;
+      await s3.send(new PutObjectCommand({
+        Bucket:      process.env.R2_BUCKET_NAME,
+        Key:         key,
+        Body:        req.file.buffer,
+        ContentType: req.file.mimetype,
+      }));
+      fileUrl = `${(process.env.R2_PUBLIC_URL || '').replace(/\/+$/, '')}/${key}`;
+      console.log('[communication upload] Uploaded to R2:', key);
+    } catch (r2Err) {
+      // R2 unavailable — encode as base64 data URL so email nodemailer can still attach it
+      console.log('[communication upload] R2 unavailable, using base64:', r2Err.message);
+      fileUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    }
+
+    return res.json({
       success: true,
-      data: { name: req.file.originalname || 'attachment', url: req.file.path },
+      data: {
+        name: req.file.originalname || 'attachment',
+        url:  fileUrl,
+        size: req.file.size,
+        type: req.file.mimetype,
+      },
     });
   });
 });
@@ -103,7 +116,7 @@ router.post('/upload-attachment', auth, requireRole('admin', 'teacher', 'student
 //   audience: "All Teachers"   — label for history display
 // }
 // ─────────────────────────────────────────────────────────
-router.post('/send', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
+router.post('/send', auth, requireRole('admin'), async (req, res) => {
   try {
     const {
       subject, body,
@@ -196,7 +209,7 @@ router.post('/send', auth, requireRole('admin', 'sales', 'ops_manager'), async (
 // ─────────────────────────────────────────────────────────
 // GET /api/communication/history — past campaigns
 // ─────────────────────────────────────────────────────────
-router.get('/history', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
+router.get('/history', auth, requireRole('admin'), async (req, res) => {
   try {
     const history = await Communication.find()
       .sort('-createdAt')
