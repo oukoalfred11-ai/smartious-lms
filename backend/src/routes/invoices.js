@@ -94,83 +94,89 @@ router.get('/', auth, ALLOWED, async (req, res) => {
 // Commission: 3% of total sales + KES 40,000 retainer.
 router.get('/sales-performance', auth, requireRole('admin', 'sales', 'ops_manager'), async (req, res) => {
   try {
-    // Determine cycle: query param ?cycle=YYYY-MM or current cycle
-    let cycleStart, cycleEnd
+    const mongoose = require('mongoose')
     const { cycle, userId } = req.query
 
     // Who are we reporting on?
-    // Sales officer sees only themselves; admin/ops can query anyone
-    const targetUserId = (req.user.role === 'sales')
+    const targetUserId = req.user.role === 'sales'
       ? req.user._id
-      : (userId || req.user._id)
+      : (userId ? new mongoose.Types.ObjectId(userId) : req.user._id)
 
+    // Current cycle dates (15th to 14th)
+    let cycleStart, cycleEnd
     if (cycle) {
       const [yr, mo] = cycle.split('-').map(Number)
-      cycleStart = new Date(yr, mo - 1, 15)
-      cycleEnd   = new Date(yr, mo, 15)
+      cycleStart = new Date(yr, mo - 1, 15, 0, 0, 0)
+      cycleEnd   = new Date(yr, mo, 15, 0, 0, 0)
     } else {
       const now = new Date()
-      const day = now.getDate()
-      if (day >= 15) {
-        cycleStart = new Date(now.getFullYear(), now.getMonth(), 15)
-        cycleEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 15)
+      if (now.getDate() >= 15) {
+        cycleStart = new Date(now.getFullYear(), now.getMonth(), 15, 0, 0, 0)
+        cycleEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 15, 0, 0, 0)
       } else {
-        cycleStart = new Date(now.getFullYear(), now.getMonth() - 1, 15)
-        cycleEnd   = new Date(now.getFullYear(), now.getMonth(), 15)
+        cycleStart = new Date(now.getFullYear(), now.getMonth() - 1, 15, 0, 0, 0)
+        cycleEnd   = new Date(now.getFullYear(), now.getMonth(), 15, 0, 0, 0)
       }
     }
 
-    // Build the last 12 cycles for the cycle picker
-    const cycles = []
-    let d = new Date()
-    for (let i = 0; i < 13; i++) {
-      const yr = d.getFullYear()
-      const mo = d.getMonth()
-      const s  = new Date(yr, mo - i, 15)
-      const e  = new Date(yr, mo - i + 1, 15)
-      const label = s.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
-        + ' – ' + new Date(e - 1).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
-      cycles.push({
-        key: s.getFullYear() + '-' + String(s.getMonth() + 1).padStart(2,'0'),
-        label,
-        start: s,
-        end: e,
+    const cycleLabel = cycleStart.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})
+      + ' – ' + new Date(cycleEnd.getTime()-1).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})
+
+    // Build available cycles list (last 12)
+    const availableCycles = []
+    for (let i = 0; i < 12; i++) {
+      const now = new Date()
+      const s = new Date(now.getFullYear(), now.getMonth() - i + (now.getDate()>=15?0:-1), 15, 0, 0, 0)
+      const e = new Date(s.getFullYear(), s.getMonth() + 1, 15, 0, 0, 0)
+      availableCycles.push({
+        key:   s.getFullYear() + '-' + String(s.getMonth()+1).padStart(2,'0'),
+        label: s.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})
+          + ' – ' + new Date(e.getTime()-1).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
       })
     }
 
-    const filter = {
-      issuedBy: targetUserId,
+    const baseFilter = {
+      issuedBy:  targetUserId,
       createdAt: { $gte: cycleStart, $lt: cycleEnd },
     }
 
-    // Current cycle invoices
-    const [allInvoices, paidInvoices, prevCycles] = await Promise.all([
-      Invoice.find(filter).sort({ createdAt: -1 })
-        .populate('issuedBy', 'firstName lastName role').lean(),
-      Invoice.find({ ...filter, status: 'paid' }).lean(),
-      // Last 6 cycles for trend
-      Promise.all(cycles.slice(0, 7).map(async c => {
-        const f = { issuedBy: targetUserId, createdAt: { $gte: c.start, $lt: c.end } }
-        const [total, paid] = await Promise.all([
-          Invoice.countDocuments(f),
-          Invoice.aggregate([{ $match: { ...f, status: 'paid' } }, { $group: { _id: null, total: { $sum: '$totalDue' } } }]),
-        ])
-        return {
-          cycle:  c.label,
-          key:    c.key,
-          count:  total,
-          sales:  paid[0]?.total || 0,
-        }
-      })),
-    ])
+    // Fetch all invoices for this cycle
+    const allInvoices = await Invoice.find(baseFilter)
+      .sort({ createdAt: -1 })
+      .populate('issuedBy', 'firstName lastName role')
+      .lean()
 
-    // Totals for current cycle
+    const paidInvoices = allInvoices.filter(i => i.status === 'paid')
     const totalInvoiced = allInvoices.length
     const totalPaid     = paidInvoices.length
-    const totalPending  = allInvoices.filter(i => i.status === 'sent' || i.status === 'draft').length
-    const salesVolume   = paidInvoices.reduce((s, i) => s + (i.totalDue || 0), 0)
+    const totalPending  = allInvoices.filter(i => ['sent','draft'].includes(i.status)).length
+    const salesVolume   = paidInvoices.reduce((s,i) => s + (i.totalDue||0), 0)
 
-    // Earnings
+    // Group paid by currency
+    const byCurrency = {}
+    paidInvoices.forEach(i => {
+      byCurrency[i.currency] = (byCurrency[i.currency]||0) + (i.totalDue||0)
+    })
+
+    // Trend: last 7 cycles (sequential, not parallel to avoid timeout)
+    const trend = []
+    for (let i = 0; i < 7; i++) {
+      const now = new Date()
+      const s = new Date(now.getFullYear(), now.getMonth() - i + (now.getDate()>=15?0:-1), 15, 0, 0, 0)
+      const e = new Date(s.getFullYear(), s.getMonth() + 1, 15, 0, 0, 0)
+      const f = { issuedBy: targetUserId, createdAt: { $gte: s, $lt: e } }
+      const [count, paidAgg] = await Promise.all([
+        Invoice.countDocuments(f),
+        Invoice.aggregate([{ $match: { ...f, status:'paid' } }, { $group: { _id:null, total:{ $sum:'$totalDue' } } }]),
+      ])
+      trend.push({
+        key:   s.getFullYear() + '-' + String(s.getMonth()+1).padStart(2,'0'),
+        cycle: s.toLocaleDateString('en-GB',{month:'short',year:'2-digit'}) + ' – ' + new Date(e.getTime()-1).toLocaleDateString('en-GB',{month:'short',year:'2-digit'}),
+        count,
+        sales: paidAgg[0]?.total || 0,
+      })
+    }
+
     const COMMISSION_RATE = 0.03
     const RETAINER_KES    = 40000
     const commissionUSD   = salesVolume * COMMISSION_RATE   // 3% of USD sales
@@ -183,13 +189,6 @@ router.get('/sales-performance', auth, requireRole('admin', 'sales', 'ops_manage
       note: 'Commission is 3% of total paid invoice value. Retainer is KES 40,000/month.',
     }
 
-    // Group invoices by currency
-    const byCurrency = {}
-    paidInvoices.forEach(i => {
-      if (!byCurrency[i.currency]) byCurrency[i.currency] = 0
-      byCurrency[i.currency] += i.totalDue || 0
-    })
-
     return res.json({
       success: true,
       data: {
@@ -197,18 +196,17 @@ router.get('/sales-performance', auth, requireRole('admin', 'sales', 'ops_manage
         cycle: {
           start: cycleStart,
           end:   cycleEnd,
-          label: cycleStart.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
-            + ' – ' + new Date(cycleEnd - 1).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }),
+          label: cycleLabel,
         },
         summary: { totalInvoiced, totalPaid, totalPending, salesVolume, byCurrency },
         earnings: totalEarnings,
         invoices: allInvoices,
-        trend:    prevCycles,
-        availableCycles: cycles.map(c => ({ key: c.key, label: c.label })),
+        trend,
+        availableCycles,
       },
     })
   } catch (e) {
-    console.error('[sales-performance]', e.message)
+    console.error('[sales-performance] ERROR:', e.message, e.stack)
     return res.status(500).json({ success: false, message: e.message })
   }
 })
