@@ -64,7 +64,6 @@ const MODULES = {
   documents:   { label: 'Documents',    accent: TOKENS.gold,        icon: 'documents' },
   assessment:  { label: 'Assessments', accent: TOKENS.accentAmber, icon: 'frontdesk' },
   crm:         { label: 'CRM',         accent: TOKENS.accentNavy,  icon: 'frontdesk' },
-  salesperf:   { label: 'My Performance', accent: TOKENS.gold,      icon: 'frontdesk' },
   livelessons: { label: 'Live Classes', accent: TOKENS.accentRose,  icon: 'live' },
   grouprooms:  { label: 'Group Rooms',  accent: TOKENS.accentOcean, icon: 'rooms' },
   curriculum:  { label: 'Curriculum',   accent: TOKENS.gold,        icon: 'curriculum' },
@@ -546,10 +545,10 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'System',      items: ['settings'] },
     ],
     sales: [
-      { label: 'Overview',    items: ['dashboard', 'salesperf'] },
+      { label: 'Overview',    items: ['dashboard'] },
       { label: 'CRM',         items: ['crm'] },
       { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
-      { label: 'Content',     items: ['documents'] },
+      { label: 'Content',     items: ['documents', 'website'] },
       { label: 'System',      items: ['settings'] },
     ],
     ops_manager: [
@@ -814,7 +813,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       { items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','billing','website','settings','ai'] },
     ],
     accountant:  [{ items: ['dashboard','analytics','billing','payroll','settings'] }],
-    sales:       [{ items: ['dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
+    sales:       [{ items: ['dashboard','crm','assessment','frontdesk','communication','documents','website','settings'] }],
     ops_manager: [{ items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','assessment','documents','payroll','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
@@ -844,7 +843,6 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
         {safePage === 'assessment' && <AssessmentModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'crm' && <CRMModule toast={toast} refreshKey={refreshKey}/>}
-        {safePage === 'salesperf' && <SalesPerformanceModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'payroll'     && <PayrollModule    refreshKey={refreshKey} toast={toast} />}
         {safePage === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
         {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
@@ -3587,209 +3585,306 @@ function DocumentsModule({ toast }) {
 
 // ── INVOICE GENERATOR ──────────────────────────────────────
 function InvoiceGenerator({ toast, onBack }) {
-  const today = new Date().toISOString().split('T')[0]
-  const auth  = useAuth()
-
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
   const [f, setF] = useState({
-    billedToName:'', billedToAddress:'', billedToEmail:'',
-    studentName:'', studentGrade:'', subject:'', programmeLabel:'',
-    invoiceNo:'', issueDate:today, dueDate:'',
-    currency:'USD',
-    items:[{ description:'', sessions:'', duration:'1 hr', ratePerHr:'15', amount:'' }],
-    discount:'', vatPct:'0',
-    paymentNote:'', notes:'',
-    sendEmail:true,
+    billedTo: '', studentName: '',
+    invoiceNo: '', dateIssued: today, dueDate: '', period: '',
+    currency: 'KES',
+    items: [{ desc: '', period: '', amount: '' }],
+    discount: '', vatPct: '0',
+    paymentNote: 'Please use the invoice number as the payment reference.',
+    notes: 'This invoice is computer-generated and valid without a signature.\nLate payment may result in suspension of tuition sessions.',
   })
-  const [saving, setSaving]   = useState(false)
-  const [saved,  setSaved]    = useState(null)  // saved invoice doc
+  const set = (k, v) => setF(p => ({ ...p, [k]: v }))
+  const itemAdd = () => setF(p => ({ ...p, items: [...p.items, { desc: '', period: '', amount: '' }] }))
+  const itemSet = (i, key, v) => setF(p => ({ ...p, items: p.items.map((r, idx) => idx === i ? { ...r, [key]: v } : r) }))
+  const itemDel = (i) => setF(p => {
+    const next = p.items.filter((_, idx) => idx !== i)
+    return { ...p, items: next.length ? next : [{ desc: '', period: '', amount: '' }] }
+  })
 
-  const set = (k,v) => setF(p => ({...p,[k]:v}))
-  const itemSet = (i,k,v) => setF(p => ({...p, items:p.items.map((r,idx)=>idx===i?{...r,[k]:v}:r)}))
-  const itemAdd = () => setF(p => ({...p, items:[...p.items,{description:'',sessions:'',duration:'1 hr',ratePerHr:'15',amount:''}]}))
-  const itemDel = i  => setF(p => { const n=p.items.filter((_,idx)=>idx!==i); return{...p,items:n.length?n:[{description:'',sessions:'',duration:'1 hr',ratePerHr:'15',amount:''}]} })
-
-  const subtotal = f.items.reduce((s,it)=>s+(parseFloat(it.amount)||0),0)
-  const discount = parseFloat(f.discount)||0
-  const vatPct   = parseFloat(f.vatPct)||0
-  const vatAmount = (subtotal-discount)*(vatPct/100)
-  const totalDue  = subtotal-discount+vatAmount
-  const money = n=>n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
-
-  // Auto-calc amount when sessions+rate change
-  const calcAmount = (i, sessions, rate) => {
-    const s = parseInt(String(sessions||'').match(/\d+/)?.[0]||'0')
-    const r = parseFloat(rate)||0
-    if (s && r) itemSet(i,'amount',String(s*r))
-  }
+  // ── live totals ──
+  const subTotal = f.items.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0)
+  const discount = parseFloat(f.discount) || 0
+  const vatPct = parseFloat(f.vatPct) || 0
+  const vatAmount = (subTotal - discount) * (vatPct / 100)
+  const totalDue = subTotal - discount + vatAmount
 
   const generate = () => {
-    if (!f.billedToName.trim()) { toast?.error?.('Billed-to name is required.'); return }
-    const html = buildInvoiceHTML(f, { subtotal, discount, vatAmount, vatPct, totalDue })
-    const w = window.open('','_blank')
-    if (!w) { toast?.error?.('Please allow pop-ups to preview the invoice.'); return }
+    if (!f.billedTo.trim())  { toast?.error?.('Billed-to name is required.'); return }
+    if (!f.invoiceNo.trim()) { toast?.error?.('Invoice number is required.'); return }
+    if (!f.items.some(it => (it.desc || '').trim() && (parseFloat(it.amount) || 0) > 0)) {
+      toast?.error?.('Add at least one line item with an amount.'); return
+    }
+    const html = buildInvoiceHTML(f, { subTotal, discount, vatAmount, vatPct, totalDue })
+    const w = window.open('', '_blank')
+    if (!w) { toast?.error?.('Please allow pop-ups to generate the invoice.'); return }
     w.document.write(html); w.document.close()
   }
 
-  const saveAndSend = async () => {
-    if (!f.billedToName.trim()) { toast?.error?.('Billed-to name is required.'); return }
-    if (!f.items.some(it=>it.description?.trim())) { toast?.error?.('Add at least one line item.'); return }
-    setSaving(true)
-    try {
-      const { data } = await api.post('/invoices', {
-        ...f, lineItems: f.items, discount, vatPct, sendEmail: f.sendEmail,
-      })
-      if (data.success) {
-        setSaved(data.data.invoice)
-        toast?.ok?.('Invoice saved' + (f.sendEmail && f.billedToEmail ? ' and emailed to ' + f.billedToEmail : '') + '.')
-      } else {
-        toast?.error?.(data.message || 'Could not save invoice.')
-      }
-    } catch(e) {
-      toast?.error?.(e?.response?.data?.message || 'Could not save invoice.')
-    } finally { setSaving(false) }
-  }
-
-  const lbl = { display:'block', fontSize:11, fontWeight:700, letterSpacing:'.04em', textTransform:'uppercase', color:TOKENS.crimson, marginBottom:5 }
-  const inp = { width:'100%', boxSizing:'border-box', padding:'8px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }
-  const card = { background:'#fff', border:'1px solid '+TOKENS.line, borderRadius:12, padding:18, marginBottom:14 }
-
-  if (saved) return (
-    <div style={card}>
-      <div style={{ fontSize:14, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>✅ Invoice saved</div>
-      <div style={{ fontSize:13, color:TOKENS.s700, marginBottom:16, lineHeight:1.7 }}>
-        <strong>{saved.invoiceNo}</strong> · {saved.currency} {money(saved.totalDue)} · {saved.billedToName}
-        {saved.emailSentTo && <div style={{ fontSize:12, color:TOKENS.s500, marginTop:4 }}>Email sent to {saved.emailSentTo}</div>}
-      </div>
-      <div style={{ display:'flex', gap:10 }}>
-        <button onClick={generate} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>
-          Preview & Download PDF
-        </button>
-        <button onClick={() => { setSaved(null) }} style={{ background:'transparent', border:'1.5px solid '+TOKENS.line, color:TOKENS.s700, padding:'9px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>
-          New invoice
-        </button>
-        <button onClick={onBack} style={{ background:'transparent', border:'none', color:TOKENS.s500, padding:'9px 0', fontSize:12.5, cursor:'pointer' }}>← Back</button>
-      </div>
-    </div>
-  )
+  const lbl = { display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
+    textTransform: 'uppercase', color: TOKENS.crimson, marginBottom: 5 }
+  const inp = { width: '100%', boxSizing: 'border-box', padding: '8px 11px',
+    borderRadius: 7, border: '1.5px solid ' + TOKENS.line, fontSize: 13, fontFamily: 'inherit' }
+  const card = { background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 12,
+    padding: 18, marginBottom: 14 }
+  const addBtn = { background: 'transparent', border: '1.5px dashed ' + TOKENS.gold,
+    color: '#9A7B16', borderRadius: 7, padding: '6px 12px', fontSize: 12,
+    fontWeight: 700, cursor: 'pointer', marginTop: 6 }
+  const delBtn = { background: 'transparent', border: 'none', color: '#B91C1C',
+    cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '0 4px', flexShrink: 0 }
+  const money = (n) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
   return (
     <div>
-      <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:18 }}>
-        <button onClick={onBack} style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:5, padding:0 }}>← All invoices</button>
-        <div style={{ flex:1 }}/>
-        <button onClick={generate} style={{ background:'transparent', border:'1.5px solid '+TOKENS.crimson, color:TOKENS.crimson, padding:'8px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>Preview PDF</button>
-        <button onClick={saveAndSend} disabled={saving} style={{ background:saving?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:saving?'not-allowed':'pointer' }}>
-          {saving ? 'Saving...' : 'Save & send'}
-        </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+        <button onClick={onBack} style={{
+          background: '#fff', border: '1.5px solid ' + TOKENS.line, borderRadius: 8,
+          padding: '7px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: TOKENS.crimson,
+        }}>← Documents</button>
+        <div>
+          <h1 style={{ fontSize: 21, fontWeight: 800, color: TOKENS.s900, margin: 0 }}>Invoice</h1>
+          <div style={{ fontSize: 12, color: TOKENS.s500 }}>Fill the invoice, then generate the branded PDF.</div>
+        </div>
       </div>
 
-      {/* Header */}
+      {/* Billed-to + meta */}
       <div style={card}>
-        <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:14 }}>Invoice details</div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:12 }}>
-          <div><label style={lbl}>Invoice no.</label><input value={f.invoiceNo} onChange={e=>set('invoiceNo',e.target.value)} placeholder="Auto-generated" style={inp}/></div>
-          <div><label style={lbl}>Issue date</label><input type="date" value={f.issueDate} onChange={e=>set('issueDate',e.target.value)} style={inp}/></div>
-          <div><label style={lbl}>Due date</label><input type="date" value={f.dueDate} onChange={e=>set('dueDate',e.target.value)} style={inp}/></div>
-        </div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+          <div><label style={lbl}>Billed To *</label>
+            <input value={f.billedTo} onChange={e => set('billedTo', e.target.value)} placeholder="Client / parent name" style={inp}/></div>
+          <div><label style={lbl}>Student Name</label>
+            <input value={f.studentName} onChange={e => set('studentName', e.target.value)} placeholder="Student name" style={inp}/></div>
+          <div><label style={lbl}>Invoice No. *</label>
+            <input value={f.invoiceNo} onChange={e => set('invoiceNo', e.target.value)} placeholder="e.g. SMT-2026-0515" style={inp}/></div>
+          <div><label style={lbl}>Date Issued</label>
+            <input value={f.dateIssued} onChange={e => set('dateIssued', e.target.value)} style={inp}/></div>
+          <div><label style={lbl}>Due Date</label>
+            <input value={f.dueDate} onChange={e => set('dueDate', e.target.value)} placeholder="e.g. 16 May 2026" style={inp}/></div>
+          <div><label style={lbl}>Period</label>
+            <input value={f.period} onChange={e => set('period', e.target.value)} placeholder="e.g. May 2026" style={inp}/></div>
           <div><label style={lbl}>Currency</label>
-            <select value={f.currency} onChange={e=>set('currency',e.target.value)} style={inp}>
-              {['USD','KES','GBP','EUR','AED'].map(c=><option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-          <div><label style={lbl}>Programme label</label><input value={f.programmeLabel} onChange={e=>set('programmeLabel',e.target.value)} placeholder="e.g. HOME TUITION PROGRAMME · 13 July – 21 August 2026" style={inp}/></div>
-        </div>
-      </div>
-
-      {/* Bill To + Student */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:14 }}>
-        <div style={card}>
-          <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Bill to</div>
-          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-            <div><label style={lbl}>Full name *</label><input value={f.billedToName} onChange={e=>set('billedToName',e.target.value)} placeholder="e.g. Lola Coker" style={inp}/></div>
-            <div><label style={lbl}>Address</label><input value={f.billedToAddress} onChange={e=>set('billedToAddress',e.target.value)} placeholder="e.g. Lavington, Nairobi, Kenya" style={inp}/></div>
-            <div><label style={lbl}>Email</label><input type="email" value={f.billedToEmail} onChange={e=>set('billedToEmail',e.target.value)} placeholder="parent@email.com" style={inp}/></div>
-          </div>
-        </div>
-        <div style={card}>
-          <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Student</div>
-          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-            <div><label style={lbl}>Student name</label><input value={f.studentName} onChange={e=>set('studentName',e.target.value)} placeholder="e.g. Fikayomi Adewakun" style={inp}/></div>
-            <div><label style={lbl}>Grade</label><input value={f.studentGrade} onChange={e=>set('studentGrade',e.target.value)} placeholder="e.g. Grade 4" style={inp}/></div>
-            <div><label style={lbl}>Subject</label><input value={f.subject} onChange={e=>set('subject',e.target.value)} placeholder="e.g. English (Literacy — Writing & Spelling)" style={inp}/></div>
-          </div>
+            <select value={f.currency} onChange={e => set('currency', e.target.value)} style={inp}>
+              <option value="KES">KES</option><option value="USD">USD</option>
+            </select></div>
         </div>
       </div>
 
       {/* Line items */}
       <div style={card}>
-        <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Line items</div>
-        <table style={{ width:'100%', borderCollapse:'collapse', marginBottom:10 }}>
-          <thead>
-            <tr style={{ background:TOKENS.cream }}>
-              {['Description','Sessions','Duration','Rate / hr',f.currency+' Amount',''].map((h,i)=>(
-                <th key={i} style={{ padding:'8px 10px', textAlign:i>=3?'right':'left', fontSize:11, fontWeight:700, color:TOKENS.s700, letterSpacing:'.04em', whiteSpace:'nowrap' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {f.items.map((it,i)=>(
-              <tr key={i} style={{ borderTop:'1px solid '+TOKENS.line }}>
-                <td style={{ padding:'8px 10px', width:'36%' }}>
-                  <input value={it.description} onChange={e=>itemSet(i,'description',e.target.value)} placeholder="e.g. Week 1 — 13 to 17 July" style={{...inp,padding:'6px 8px'}}/>
-                </td>
-                <td style={{ padding:'8px 10px', width:'14%' }}>
-                  <input value={it.sessions} onChange={e=>{ itemSet(i,'sessions',e.target.value); calcAmount(i,e.target.value,it.ratePerHr) }} placeholder="3 sessions" style={{...inp,padding:'6px 8px'}}/>
-                </td>
-                <td style={{ padding:'8px 10px', width:'10%' }}>
-                  <input value={it.duration} onChange={e=>itemSet(i,'duration',e.target.value)} placeholder="1 hr" style={{...inp,padding:'6px 8px'}}/>
-                </td>
-                <td style={{ padding:'8px 10px', width:'12%' }}>
-                  <input type="number" value={it.ratePerHr} onChange={e=>{ itemSet(i,'ratePerHr',e.target.value); calcAmount(i,it.sessions,e.target.value) }} placeholder="15" style={{...inp,padding:'6px 8px',textAlign:'right'}}/>
-                </td>
-                <td style={{ padding:'8px 10px', width:'14%' }}>
-                  <input type="number" value={it.amount} onChange={e=>itemSet(i,'amount',e.target.value)} placeholder="45" style={{...inp,padding:'6px 8px',textAlign:'right'}}/>
-                </td>
-                <td style={{ padding:'8px 6px', textAlign:'center' }}>
-                  <button onClick={()=>itemDel(i)} style={{ background:'transparent', border:'none', color:'#B91C1C', cursor:'pointer', fontSize:16, lineHeight:1 }}>×</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <button onClick={itemAdd} style={{ background:'transparent', border:'1.5px dashed '+TOKENS.gold, color:'#9A7B16', borderRadius:7, padding:'6px 14px', fontSize:12, fontWeight:700, cursor:'pointer' }}>+ Add line</button>
+        <label style={lbl}>Line Items</label>
+        <div style={{ fontSize: 11, color: TOKENS.s500, marginBottom: 8 }}>
+          Sub-total and total are calculated automatically from the amounts below.
+        </div>
+        {f.items.map((row, i) => (
+          <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            <input value={row.desc} onChange={e => itemSet(i, 'desc', e.target.value)}
+              placeholder="Description" style={{ ...inp, flex: '1 1 240px' }}/>
+            <input value={row.period} onChange={e => itemSet(i, 'period', e.target.value)}
+              placeholder="Period" style={{ ...inp, width: 120, flex: '0 0 120px' }}/>
+            <input value={row.amount} onChange={e => itemSet(i, 'amount', e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="Amount" style={{ ...inp, width: 110, flex: '0 0 110px', textAlign: 'right' }}/>
+            <button onClick={() => itemDel(i)} style={delBtn} title="Remove">×</button>
+          </div>
+        ))}
+        <button onClick={itemAdd} style={addBtn}>+ Add Line Item</button>
+      </div>
 
-        {/* Totals */}
-        <div style={{ display:'flex', justifyContent:'flex-end', marginTop:16 }}>
-          <div style={{ width:280 }}>
-            {[
-              ['Subtotal ('+f.items.reduce((s,it)=>{ const n=parseInt(String(it.sessions).match(/\d+/)?.[0]||'0'); return s+n },0)+' hours)', money(subtotal)],
-              ['Discount', discount>0?money(discount):'—'],
-            ].map(([k,v])=>(
-              <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'5px 0', fontSize:12.5, color:TOKENS.s700 }}>
-                <span>{k}</span><span>{v}</span>
-              </div>
-            ))}
-            <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', background:TOKENS.crimson, borderRadius:8, marginTop:6 }}>
-              <span style={{ color:'#fff', fontWeight:800, fontSize:13 }}>TOTAL DUE ({f.currency})</span>
-              <span style={{ color:'#fff', fontWeight:800, fontSize:15 }}>{money(totalDue)}</span>
-            </div>
+      {/* Discount / VAT + live totals */}
+      <div style={card}>
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ flex: '0 0 150px' }}><label style={lbl}>Discount ({f.currency})</label>
+            <input value={f.discount} onChange={e => set('discount', e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="0.00" style={inp}/></div>
+          <div style={{ flex: '0 0 110px' }}><label style={lbl}>VAT %</label>
+            <input value={f.vatPct} onChange={e => set('vatPct', e.target.value.replace(/[^0-9.]/g, ''))}
+              placeholder="0" style={inp}/></div>
+          <div style={{ flex: 1, minWidth: 200, background: TOKENS.cream, borderRadius: 8, padding: '10px 14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: TOKENS.s500, padding: '2px 0' }}>
+              <span>Sub-total</span><span>{f.currency} {money(subTotal)}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: TOKENS.s500, padding: '2px 0' }}>
+              <span>Discount</span><span>− {money(discount)}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: TOKENS.s500, padding: '2px 0' }}>
+              <span>VAT ({vatPct}%)</span><span>{money(vatAmount)}</span></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, fontWeight: 800, color: TOKENS.crimson, padding: '4px 0 0', borderTop: '1px solid ' + TOKENS.line, marginTop: 4 }}>
+              <span>TOTAL DUE</span><span>{f.currency} {money(totalDue)}</span></div>
           </div>
         </div>
       </div>
 
-      {/* Email option */}
+      {/* Payment + notes */}
       <div style={card}>
-        <label style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer', fontSize:13 }}>
-          <input type="checkbox" checked={f.sendEmail} onChange={e=>set('sendEmail',e.target.checked)} style={{ width:16, height:16, accentColor:TOKENS.crimson }}/>
-          <span>Auto-email invoice to <strong>{f.billedToEmail || 'parent email above'}</strong> when saved</span>
-        </label>
+        <div style={{ marginBottom: 12 }}><label style={lbl}>Payment Note</label>
+          <textarea value={f.paymentNote} onChange={e => set('paymentNote', e.target.value)} rows={2}
+            style={{ ...inp, resize: 'vertical' }}/></div>
+        <div><label style={lbl}>Notes</label>
+          <textarea value={f.notes} onChange={e => set('notes', e.target.value)} rows={3}
+            style={{ ...inp, resize: 'vertical' }}/></div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 30 }}>
+        <button onClick={generate} style={{
+          background: TOKENS.crimson, color: '#fff', border: 'none', borderRadius: 8,
+          padding: '12px 26px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+        }}>Generate Invoice</button>
       </div>
     </div>
   )
 }
 
+// ── Build the branded invoice HTML ─────────────────────────
+function buildInvoiceHTML(f, t) {
+  const esc = (s) => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const cur = esc(f.currency || 'KES')
+  const items = (f.items || []).filter(it => (it.desc || '').trim())
 
+  const itemRows = items.map(it => `<tr>
+    <td class="desc">${esc(it.desc).replace(/\n/g, '<br>')}</td>
+    <td>${esc(it.period)}</td>
+    <td class="r">${money(parseFloat(it.amount) || 0)}</td>
+  </tr>`).join('')
+
+  const notesHtml = esc(f.notes).split('\n').map(l => l.trim()).filter(Boolean)
+    .map(l => `${l}<br>`).join('')
+  const payHtml = esc(f.paymentNote).split('\n').map(l => l.trim()).filter(Boolean)
+    .map(l => `${l}<br>`).join('')
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Invoice ${esc(f.invoiceNo)} — Smartious</title>
+<style>
+  :root{--crimson:#7D1025;--crimsonD:#5A0B1B;--gold:#C9A030;--ink:#1A1A1A;--mute:#6B6B6B;--line:#E8E2D6;--cream:#FBFAF5;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#e9e6df;color:var(--ink)}
+  .page{width:210mm;min-height:297mm;background:#fff;margin:18px auto;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.13)}
+  .page-body{padding:0 22mm;flex:1}
+  .topbar{height:8mm;background:linear-gradient(90deg,var(--crimsonD),var(--crimson))}
+  .hd{display:flex;justify-content:space-between;align-items:flex-start;padding:11mm 22mm 0}
+  .brand{display:flex;align-items:center;gap:10px}
+  .shield{width:50px;height:55px;flex-shrink:0}
+  .brand-tx .name{font-size:22px;font-weight:800;letter-spacing:-.5px;line-height:1}
+  .brand-tx .name em{font-style:italic;color:var(--crimson)}
+  .brand-tx .tag{font-size:7px;letter-spacing:3px;color:var(--mute);margin-top:3px;font-weight:600}
+  .hd-r{text-align:right}
+  .doc-title{font-size:32px;font-weight:800;letter-spacing:1px;color:var(--ink);line-height:1}
+  .doc-underline{height:3px;width:100%;background:var(--gold);margin-top:5px}
+  .meta-row{display:flex;justify-content:space-between;margin-top:9mm;gap:20px}
+  .billed .lbl{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--mute);text-transform:uppercase}
+  .billed .who{font-size:17px;font-weight:800;color:var(--ink);margin-top:5px}
+  .billed .sub{font-size:11px;color:var(--mute);margin-top:2px}
+  .inv-meta{font-size:10.5px;min-width:62mm}
+  .inv-meta .mr{display:flex;justify-content:space-between;padding:3px 0}
+  .inv-meta .mk{color:var(--mute)}
+  .inv-meta .mv{font-weight:700;color:var(--ink)}
+  .items{margin-top:8mm;border-collapse:collapse;width:100%}
+  .items thead td{background:var(--crimson);color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:9px 12px}
+  .items thead td.r{text-align:right}
+  .items tbody td{border-bottom:1px solid var(--line);padding:11px 12px;font-size:11px;vertical-align:top}
+  .items tbody td.r{text-align:right}
+  .items .desc{font-weight:600;color:var(--ink)}
+  .totals{margin-top:6mm;display:flex;justify-content:flex-end}
+  .totals-box{width:72mm}
+  .tr{display:flex;justify-content:space-between;padding:6px 12px;font-size:11px}
+  .tr .tk{color:var(--mute)}
+  .tr .tv{font-weight:600}
+  .tr.total{background:var(--crimson);color:#fff;padding:11px 12px;margin-top:5px}
+  .tr.total .tk{color:#fff;font-weight:700;font-size:11px;letter-spacing:.5px}
+  .tr.total .tv{color:#fff;font-weight:800;font-size:15px}
+  .sec{margin-top:9mm}
+  .sec-h{font-size:9.5px;font-weight:700;letter-spacing:1px;color:var(--mute);text-transform:uppercase;margin-bottom:6px}
+  .sec p{font-size:10.5px;line-height:1.7;color:#2c2c2c}
+  .notes p{font-style:italic;color:var(--mute)}
+  .ft{margin-top:auto;border-top:1px solid var(--line);padding:5mm 22mm;text-align:center;font-size:8.5px;color:var(--mute);line-height:1.6}
+  .ft b{color:var(--crimson);font-size:9.5px;letter-spacing:.5px}
+  .toolbar{position:fixed;top:0;left:0;right:0;background:#7D1025;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:99}
+  .toolbar button{background:#fff;color:#7D1025;border:none;padding:8px 18px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer}
+  .toolbar .hint{font-size:12px;opacity:.85}
+  @media print{
+    body{background:#fff}.toolbar{display:none}
+    .page{margin:0;box-shadow:none;width:100%;min-height:auto}
+    @page{size:A4;margin:0}
+  }
+</style></head><body>
+<div class="toolbar">
+  <span class="hint">Review the invoice, then download. Use "Save as PDF" as the destination.</span>
+  <button onclick="window.print()">Download PDF</button>
+</div>
+<div style="height:48px"></div>
+
+<div class="page">
+  <div class="topbar"></div>
+  <div class="hd">
+    <div class="brand">
+      <svg class="shield" viewBox="0 0 60 66">
+        <path d="M30 2 L56 9 V32 C56 47 44 58 30 63 C16 58 4 47 4 32 V9 Z" fill="#8A1228" stroke="#C9A030" stroke-width="2"/>
+        <path d="M30 13 l2.3 4.7 5.2 .75 -3.75 3.65 .9 5.15 -4.65 -2.45 -4.65 2.45 .9 -5.15 -3.75 -3.65 5.2 -.75 Z" fill="#C9A030"/>
+        <g transform="translate(30 40)">
+          <path d="M0 -6 C-4 -9 -11 -9 -14 -7 L-14 9 C-11 7 -4 7 0 10 Z" fill="#FFFFFF" stroke="#E3D9C4" stroke-width="0.6"/>
+          <path d="M0 -6 C4 -9 11 -9 14 -7 L14 9 C11 7 4 7 0 10 Z" fill="#FFFFFF" stroke="#E3D9C4" stroke-width="0.6"/>
+          <line x1="-10" y1="-3.5" x2="-3.5" y2="-2" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="-10" y1="0" x2="-3.5" y2="1.5" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="-10" y1="3.5" x2="-3.5" y2="5" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="3.5" y1="-2" x2="10" y2="-3.5" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="3.5" y1="1.5" x2="10" y2="0" stroke="#E7B7C0" stroke-width="0.8"/>
+          <line x1="3.5" y1="5" x2="10" y2="3.5" stroke="#E7B7C0" stroke-width="0.8"/>
+        </g>
+      </svg>
+      <div class="brand-tx"><div class="name">Smart<em>ious</em></div>
+        <div class="tag">HOMESCHOOL&nbsp;·&nbsp;GLOBAL</div></div>
+    </div>
+    <div class="hd-r"><div class="doc-title">INVOICE</div><div class="doc-underline"></div></div>
+  </div>
+
+  <div class="page-body">
+    <div class="meta-row">
+      <div class="billed">
+        <div class="lbl">Billed To</div>
+        <div class="who">${esc(f.billedTo)}</div>
+        ${f.studentName ? `<div class="sub">Student: ${esc(f.studentName)}</div>` : ''}
+      </div>
+      <div class="inv-meta">
+        <div class="mr"><span class="mk">Invoice No.</span><span class="mv">${esc(f.invoiceNo)}</span></div>
+        <div class="mr"><span class="mk">Date Issued</span><span class="mv">${esc(f.dateIssued)}</span></div>
+        <div class="mr"><span class="mk">Due Date</span><span class="mv">${esc(f.dueDate) || '—'}</span></div>
+        <div class="mr"><span class="mk">Period</span><span class="mv">${esc(f.period) || '—'}</span></div>
+      </div>
+    </div>
+
+    <table class="items">
+      <thead><tr><td>Description</td><td>Period</td><td class="r">Amount (${cur})</td></tr></thead>
+      <tbody>${itemRows}</tbody>
+    </table>
+
+    <div class="totals"><div class="totals-box">
+      <div class="tr"><span class="tk">Sub-total</span><span class="tv">${cur} ${money(t.subTotal)}</span></div>
+      <div class="tr"><span class="tk">Discount</span><span class="tv">${money(t.discount)}</span></div>
+      <div class="tr"><span class="tk">VAT (${t.vatPct}%)</span><span class="tv">${money(t.vatAmount)}</span></div>
+      <div class="tr total"><span class="tk">TOTAL DUE</span><span class="tv">${cur} ${money(t.totalDue)}</span></div>
+    </div></div>
+
+    <div class="sec">
+      <div class="sec-h">Payment Instructions</div>
+      <p>M-Pesa Paybill No: <b style="color:var(--ink)">247247</b><br>
+         Account Number: <b style="color:var(--ink)">745021</b><br>
+         ${payHtml}</p>
+    </div>
+    <div class="sec notes">
+      <div class="sec-h">Notes</div>
+      <p>${notesHtml}</p>
+    </div>
+  </div>
+
+  <div class="ft">
+    <b>Smartious Homeschool Global</b><br>
+    Diamond Plaza I, Parklands, Nairobi, Kenya<br>
+    +254 745 021 212 &nbsp;|&nbsp; hellosmartious@gmail.com &nbsp;|&nbsp; smartioushomeschool.com
+  </div>
+</div>
+</body></html>`
+}
+
+// ── RECEIPT GENERATOR ──────────────────────────────────────
 function ReceiptGenerator({ toast, onBack }) {
   const now = new Date()
   const today = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -5837,230 +5932,6 @@ function CRMForm({ toast, onBack, onSaved }) {
   )
 }
 
-
-// ═══════════════════════════════════════════════════════════
-// SalesPerformanceModule
-// Shows sales officer's own invoices, receipts, cycle totals
-// and earnings (3% commission + KES 40,000 retainer).
-// Visible in: sales portal (My Performance), admin/ops can
-// view any officer by passing ?userId.
-// ═══════════════════════════════════════════════════════════
-function SalesPerformanceModule({ toast, refreshKey }) {
-  const { user } = useAuth()
-  const [data,    setData]    = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [cycle,   setCycle]   = useState('')   // '' = current
-  const [cycles,  setCycles]  = useState([])
-
-  const load = useCallback((c) => {
-    setLoading(true)
-    const params = c ? { cycle: c } : {}
-    api.get('/invoices/sales-performance', { params })
-      .then(r => {
-        setData(r.data?.data)
-        setCycles(r.data?.data?.availableCycles || [])
-      })
-      .catch(() => toast?.error?.('Failed to load sales performance.'))
-      .finally(() => setLoading(false))
-  }, [])
-
-  useEffect(() => { load(cycle) }, [cycle, refreshKey])
-
-  const money = (n, cur='') => {
-    const v = Number(n||0).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 })
-    return cur ? `${cur} ${v}` : v
-  }
-  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
-
-  const STATUS_COLOURS = {
-    draft:     { bg:'#F3F4F6', fg:'#374151' },
-    sent:      { bg:'#DBEAFE', fg:'#1E40AF' },
-    paid:      { bg:'#D1FAE5', fg:'#065F46' },
-    overdue:   { bg:'#FEE2E2', fg:'#991B1B' },
-    cancelled: { bg:'#F3F4F6', fg:'#6B7280' },
-  }
-
-  const viewReceipt = async (inv) => {
-    try {
-      const { data: rd } = await api.get('/invoices/'+inv._id+'/receipt-html')
-      if (rd.success) {
-        const w = window.open('','_blank')
-        if (!w) { toast?.error?.('Allow pop-ups to view receipt.'); return }
-        w.document.write(rd.data.html); w.document.close()
-      }
-    } catch { toast?.error?.('Could not load receipt.') }
-  }
-
-  if (loading) return (
-    <div style={{padding:'60px 0',textAlign:'center'}}>
-      <div style={{width:40,height:40,border:'3px solid #F0EBE6',borderTopColor:TOKENS.crimson,borderRadius:'50%',animation:'spin .75s linear infinite',margin:'0 auto 14px'}}/>
-      <div style={{fontSize:13,color:TOKENS.s500}}>Loading your performance data...</div>
-    </div>
-  )
-
-  if (!data) return null
-
-  const { summary, earnings, invoices, trend, cycle: cycleInfo } = data
-
-  const maxBar = Math.max(...(trend||[]).map(t=>t.sales), 1)
-
-  return (
-    <>
-      <PSection tag="Sales" title="My" em="Performance" sub={`Cycle: ${cycleInfo?.label || '—'} · Commission 3% + KES 40,000 retainer`}/>
-
-      {/* Cycle picker */}
-      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:20,flexWrap:'wrap'}}>
-        <div style={{fontSize:12.5,fontWeight:700,color:TOKENS.s700}}>Billing cycle:</div>
-        <select value={cycle} onChange={e=>setCycle(e.target.value)}
-          style={{padding:'8px 12px',borderRadius:7,border:'1.5px solid '+TOKENS.line,fontSize:13,background:'#fff',minWidth:280}}>
-          <option value="">Current cycle</option>
-          {cycles.map(c=><option key={c.key} value={c.key}>{c.label}</option>)}
-        </select>
-      </div>
-
-      {/* KPI strip */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:12,marginBottom:20}}>
-        {[
-          { label:'Invoices Issued',   val:summary.totalInvoiced,  color:TOKENS.crimson,      sub:'This cycle' },
-          { label:'Paid',              val:summary.totalPaid,       color:'#065F46',            sub:'Invoices confirmed' },
-          { label:'Pending',           val:summary.totalPending,    color:'#D97706',            sub:'Awaiting payment' },
-          { label:'Sales Volume',      val:'USD '+money(summary.salesVolume), color:TOKENS.crimson, sub:'Paid invoices only', big:true },
-        ].map(k=>(
-          <div key={k.label} className="card" style={{padding:'16px 18px'}}>
-            <div style={{fontSize:11,fontWeight:700,color:TOKENS.s400,textTransform:'uppercase',letterSpacing:'.05em',marginBottom:6}}>{k.label}</div>
-            <div style={{fontSize:k.big?16:26,fontWeight:800,color:k.color,lineHeight:1.1}}>{k.val}</div>
-            <div style={{fontSize:11,color:TOKENS.s500,marginTop:4}}>{k.sub}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Earnings card */}
-      <div className="card" style={{padding:24,marginBottom:20,background:'linear-gradient(135deg,#7D1025,#5A0B1B)',color:'#fff',position:'relative',overflow:'hidden'}}>
-        <div style={{position:'absolute',top:-20,right:-20,width:120,height:120,borderRadius:'50%',background:'rgba(201,160,48,.12)'}}/>
-        <div style={{position:'absolute',bottom:-30,left:-10,width:80,height:80,borderRadius:'50%',background:'rgba(201,160,48,.08)'}}/>
-        <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:'rgba(255,255,255,.6)',marginBottom:10}}>
-          Your earnings this cycle
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:16,position:'relative'}}>
-          <div>
-            <div style={{fontSize:11,color:'rgba(255,255,255,.55)',marginBottom:4}}>Retainer (fixed)</div>
-            <div style={{fontSize:28,fontWeight:800,color:'#C9A030'}}>KES 40,000</div>
-            <div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>Paid monthly</div>
-          </div>
-          <div>
-            <div style={{fontSize:11,color:'rgba(255,255,255,.55)',marginBottom:4}}>Commission (3% of sales)</div>
-            <div style={{fontSize:28,fontWeight:800,color:'#C9A030'}}>
-              USD {money(earnings.commissionUSD)}
-            </div>
-            <div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>
-              3% × USD {money(earnings.salesVolume)} sales
-            </div>
-          </div>
-          {Object.entries(summary.byCurrency||{}).filter(([k])=>k!=='USD').map(([cur,amt])=>(
-            <div key={cur}>
-              <div style={{fontSize:11,color:'rgba(255,255,255,.55)',marginBottom:4}}>Commission ({cur} sales)</div>
-              <div style={{fontSize:22,fontWeight:800,color:'#C9A030'}}>
-                {cur} {money(amt*0.03)}
-              </div>
-              <div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>3% × {cur} {money(amt)}</div>
-            </div>
-          ))}
-          <div style={{borderLeft:'1px solid rgba(255,255,255,.15)',paddingLeft:16}}>
-            <div style={{fontSize:11,color:'rgba(255,255,255,.55)',marginBottom:4}}>Total this cycle</div>
-            <div style={{fontSize:24,fontWeight:800,color:'#fff'}}>
-              KES 40,000 + {Object.entries(summary.byCurrency||{}).map(([c,a])=>`${c} ${money(a*0.03)}`).join(' + ') || 'USD 0.00'}
-            </div>
-            <div style={{fontSize:11,color:'rgba(255,255,255,.45)',marginTop:4}}>Retainer + 3% commission on all currencies</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Trend bar chart */}
-      {trend && trend.length > 1 && (
-        <div className="card" style={{padding:20,marginBottom:20}}>
-          <div style={{fontSize:13,fontWeight:800,color:TOKENS.s900,marginBottom:16}}>Sales trend (last 7 cycles)</div>
-          <div style={{display:'flex',alignItems:'flex-end',gap:8,height:80}}>
-            {[...trend].reverse().map((t,i)=>(
-              <div key={t.key||i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
-                <div style={{fontSize:9,color:TOKENS.s500,fontWeight:600}}>
-                  {t.sales>0?'$'+money(t.sales):'—'}
-                </div>
-                <div style={{
-                  width:'100%',
-                  height: Math.max(4, (t.sales/maxBar)*60),
-                  background: t.key === cycle || (!cycle && i===trend.length-1)
-                    ? TOKENS.crimson : TOKENS.crimson+'40',
-                  borderRadius:'3px 3px 0 0',
-                  transition:'height .3s',
-                }}/>
-                <div style={{fontSize:8,color:TOKENS.s500,textAlign:'center',lineHeight:1.2}}>
-                  {(t.cycle||'').split('–')[0]?.trim().slice(0,6)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Invoice list */}
-      <div className="card" style={{overflow:'hidden'}}>
-        <div style={{padding:'14px 18px',borderBottom:'1px solid '+TOKENS.line,fontWeight:800,fontSize:13,color:TOKENS.s900}}>
-          Invoices this cycle
-          <span style={{fontWeight:400,color:TOKENS.s500,marginLeft:8,fontSize:12}}>({invoices.length})</span>
-        </div>
-        {invoices.length === 0 ? (
-          <div style={{padding:32,textAlign:'center',color:TOKENS.s500,fontSize:13}}>No invoices issued this cycle yet.</div>
-        ) : (
-          <table className="tbl" style={{width:'100%',borderCollapse:'collapse'}}>
-            <thead>
-              <tr>{['Invoice No.','Bill To','Student','Amount','Status','Date',''].map(h=>(
-                <th key={h} style={{padding:'9px 14px',textAlign:'left',fontSize:11}}>{h}</th>
-              ))}</tr>
-            </thead>
-            <tbody>
-              {invoices.map(inv=>{
-                const sc = STATUS_COLOURS[inv.status]||STATUS_COLOURS.sent
-                return (
-                  <tr key={inv._id} style={{borderTop:'1px solid '+TOKENS.line}}>
-                    <td style={{padding:'10px 14px',fontFamily:'monospace',fontSize:12,fontWeight:700,color:TOKENS.crimson}}>{inv.invoiceNo}</td>
-                    <td style={{padding:'10px 14px'}}>
-                      <div style={{fontSize:13,fontWeight:600,color:TOKENS.s900}}>{inv.billedToName}</div>
-                      {inv.billedToEmail&&<div style={{fontSize:11,color:TOKENS.s500}}>{inv.billedToEmail}</div>}
-                    </td>
-                    <td style={{padding:'10px 14px',fontSize:12.5,color:TOKENS.s700}}>{inv.studentName||'—'}</td>
-                    <td style={{padding:'10px 14px',fontSize:13,fontWeight:700,color:TOKENS.s900,whiteSpace:'nowrap'}}>
-                      {inv.currency} {money(inv.totalDue)}
-                    </td>
-                    <td style={{padding:'10px 14px'}}>
-                      <span style={{padding:'3px 10px',borderRadius:99,background:sc.bg,color:sc.fg,fontSize:11,fontWeight:700}}>
-                        {inv.status.charAt(0).toUpperCase()+inv.status.slice(1)}
-                      </span>
-                    </td>
-                    <td style={{padding:'10px 14px',fontSize:11.5,color:TOKENS.s500,whiteSpace:'nowrap'}}>{fmtDate(inv.createdAt)}</td>
-                    <td style={{padding:'10px 14px'}}>
-                      {inv.status==='paid'&&(
-                        <button onClick={()=>viewReceipt(inv)} style={{fontSize:11,background:'#065F46',color:'#fff',border:'none',padding:'4px 8px',borderRadius:5,cursor:'pointer',fontWeight:700}}>
-                          🧾 Receipt
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {/* Note */}
-      <div style={{fontSize:12,color:TOKENS.s500,marginTop:12,lineHeight:1.6}}>
-        Cycle runs from the <strong>15th of each month</strong> to the <strong>14th of the following month</strong>.
-        Commission is calculated on <strong>paid invoices only</strong> at <strong>3%</strong> of the total invoice value.
-        Retainer of <strong>KES 40,000</strong> is paid monthly regardless of sales volume.
-      </div>
-    </>
-  )
-}
 
 function CommunicationModule({ refreshKey, toast }) {
   const [view, setView] = useState('compose')   // compose | history
@@ -10043,7 +9914,7 @@ function CurriculumModule({ refreshKey, toast }) {
 
   const tabBtn = (id, label) => (
     <button onClick={() => setTab(id)} style={{
-      padding: '9px 18px', border: 'none', borderRadius: 8,
+      padding: '9px 18px', borderRadius: 8,
       background: tab === id ? TOKENS.crimson : '#fff',
       color: tab === id ? '#fff' : TOKENS.s700,
       border: '1.5px solid ' + (tab === id ? TOKENS.crimson : TOKENS.line),
@@ -10098,490 +9969,11 @@ function CurriculumModule({ refreshKey, toast }) {
   )
 }
 
-function buildInvoiceHTML(f, t) {
-  const esc   = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-  const money = n => Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
-  const cur   = esc(f.currency||'USD')
-  const isUSD = (f.currency||'USD') !== 'KES'
-  const items = (f.items||[]).filter(it=>(it.description||'').trim())
-  const totalHours = items.reduce((s,it)=>{const n=parseInt(String(it.sessions||'').match(/\d+/)?.[0]||'0');return s+n},0)
-
-  const itemRows = items.map(it=>`<tr>
-    <td class="desc">${esc(it.description).replace(/\n/g,'<br>')}</td>
-    <td class="c">${esc(it.sessions)}</td>
-    <td class="c">${esc(it.duration)}</td>
-    <td class="r">${it.ratePerHr?'$'+money(parseFloat(it.ratePerHr)||0):''}</td>
-    <td class="r">$${money(parseFloat(it.amount)||0)}</td>
-  </tr>`).join('')
-
-  const fmtDate = d => { try { return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) } catch { return String(d||'') } }
-
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>Invoice ${esc(f.invoiceNo)} — Smartious</title>
-<style>
-  :root{--cr:#7D1025;--crD:#5A0B1B;--gold:#C9A030;--ink:#1A1A1A;--mute:#6B6B6B;--line:#E8E2D6;--cream:#FBFAF5;}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#ddd;color:var(--ink)}
-  .page{width:210mm;min-height:297mm;background:#fff;margin:60px auto 20px;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.15);page-break-after:always}
-  .page-body{padding:0 20mm;flex:1}
-  .topbar{height:6mm;background:linear-gradient(90deg,var(--crD),var(--cr))}
-  .hd{display:flex;justify-content:space-between;align-items:flex-start;padding:10mm 20mm 0}
-  .brand{display:flex;align-items:center;gap:10px}
-  .shield{width:46px;height:52px;flex-shrink:0}
-  .brand-tx .name{font-size:22px;font-weight:800;letter-spacing:-.5px;line-height:1}
-  .brand-tx .name em{font-style:italic;color:var(--cr)}
-  .brand-tx .sub{font-size:7px;letter-spacing:3px;color:var(--mute);margin-top:3px;font-weight:600}
-  .hd-r{text-align:right}
-  .doc-eyebrow{font-size:9px;letter-spacing:2px;color:var(--mute);text-transform:uppercase;margin-bottom:4px}
-  .doc-title{font-size:36px;font-weight:800;color:var(--cr);line-height:1}
-  .doc-rule{height:2.5px;background:var(--gold);margin-top:5px}
-  .inv-meta{margin-top:5mm;display:flex;justify-content:flex-end}
-  .inv-tbl{font-size:10.5px;min-width:68mm}
-  .inv-tbl tr td{padding:3px 0}
-  .inv-tbl td:first-child{color:var(--mute);padding-right:20px;font-weight:600;text-transform:uppercase;font-size:9px;letter-spacing:.5px}
-  .inv-tbl td:last-child{font-weight:700;color:var(--ink);text-align:right}
-  .bill-row{display:flex;justify-content:space-between;margin-top:7mm;gap:20px;padding-bottom:6mm;border-bottom:1px solid var(--line)}
-  .bill-lbl{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:5px}
-  .bill-name{font-size:17px;font-weight:800;color:var(--ink)}
-  .bill-sub{font-size:11px;color:var(--mute);margin-top:2px}
-  .prog-banner{background:#FBFAF5;border-left:3px solid var(--gold);padding:8px 14px;margin:6mm 0;font-size:11px;font-weight:700;color:var(--ink);letter-spacing:.3px}
-  .prog-banner em{color:var(--gold);font-style:normal}
-  .items{border-collapse:collapse;width:100%;margin-top:2mm}
-  .items thead td{background:var(--cr);color:#fff;font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:8px 11px}
-  .items thead td.r{text-align:right}.items thead td.c{text-align:center}
-  .items tbody tr:nth-child(even){background:#FAFAFA}
-  .items tbody td{border-bottom:1px solid var(--line);padding:9px 11px;font-size:11px;vertical-align:top}
-  .items tbody td.r{text-align:right}.items tbody td.c{text-align:center}
-  .desc{font-weight:600}
-  .totals{margin-top:5mm;display:flex;justify-content:flex-end}
-  .totals-box{width:76mm}
-  .tr{display:flex;justify-content:space-between;padding:5px 11px;font-size:11px}
-  .tr .tk{color:var(--mute)}.tr .tv{font-weight:600}
-  .tr.total{background:var(--cr);color:#fff;padding:10px 11px;margin-top:4px;border-radius:3px}
-  .tr.total .tk,.tr.total .tv{color:#fff;font-weight:800;font-size:13px}
-  .note-italic{font-size:9.5px;font-style:italic;color:var(--mute);margin-top:5mm;line-height:1.6}
-  .ft{margin-top:auto;border-top:1px solid var(--line);padding:4mm 20mm;display:flex;justify-content:space-between;align-items:center;font-size:8.5px;color:var(--mute)}
-  /* Page 2 */
-  .p2-sec-h{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin:7mm 0 4mm}
-  .p2-title{font-size:22px;font-weight:300;color:var(--ink);margin-bottom:6mm}
-  .p2-title em{font-style:italic;color:var(--cr)}
-  .pay-tbl{border-collapse:collapse;width:100%;margin-bottom:7mm}
-  .pay-tbl th{background:var(--cr);color:#fff;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:9px 12px;text-align:left}
-  .pay-tbl td{border:1px solid var(--line);padding:9px 12px;font-size:11px;vertical-align:top}
-  .pay-tbl tr:nth-child(even) td{background:#FAFAFA}
-  .pay-tbl td:first-child{font-weight:700;color:var(--ink)}
-  .bank-h{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:4mm}
-  .bank-tbl{border-collapse:collapse;width:100%}
-  .bank-tbl td{border:1px solid var(--line);padding:8px 12px;font-size:11px;vertical-align:top}
-  .bank-tbl td:first-child{background:#FAFAFA;font-weight:700;color:var(--cr);width:38%}
-  .closing{font-size:11px;color:var(--ink);line-height:1.7;margin-top:7mm}
-  .closing .ref-note{font-style:italic;color:var(--mute);font-size:10px;margin-bottom:5mm}
-  .toolbar{position:fixed;top:0;left:0;right:0;background:#7D1025;color:#fff;padding:10px 24px;display:flex;justify-content:space-between;align-items:center;z-index:99;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-  .toolbar .hint{font-size:12px;opacity:.8}
-  .toolbar button{background:#C9A030;color:#7D1025;border:none;padding:9px 22px;border-radius:6px;font-weight:800;font-size:13px;cursor:pointer}
-  @media print{body{background:#fff}.toolbar{display:none}.page{margin:0;box-shadow:none;width:100%}@page{size:A4;margin:0}}
-<' + '/style><' + '/head><body>
-
-<div class="toolbar">
-  <span class="hint">Review then click Download PDF — set destination to "Save as PDF" in the print dialog.</span>
-  <button onclick="window.print()">⬇ Download PDF</button>
-</div>
-
-<!-- PAGE 1 -->
-<div class="page">
-  <div class="topbar"></div>
-  <div class="hd">
-    <div class="brand">
-      <svg class="shield" viewBox="0 0 60 66">
-        <path d="M30 2 L56 9 V32 C56 47 44 58 30 63 C16 58 4 47 4 32 V9 Z" fill="#8A1228" stroke="#C9A030" stroke-width="1.5"/>
-        <path d="M30 13 l2.3 4.7 5.2 .75 -3.75 3.65 .9 5.15 -4.65 -2.45 -4.65 2.45 .9 -5.15 -3.75 -3.65 5.2 -.75 Z" fill="#C9A030"/>
-        <g transform="translate(30 42)">
-          <path d="M0 -7 C-4 -10 -11 -10 -14 -8 L-14 9 C-11 7 -4 7 0 10 Z" fill="#fff" stroke="#E3D9C4" stroke-width="0.5"/>
-          <path d="M0 -7 C4 -10 11 -10 14 -8 L14 9 C11 7 4 7 0 10 Z" fill="#fff" stroke="#E3D9C4" stroke-width="0.5"/>
-        </g>
-      </svg>
-      <div class="brand-tx">
-        <div class="name">Smart<em>ious</em></div>
-        <div class="sub">HOMESCHOOL&nbsp;·&nbsp;GLOBAL</div>
-        <div style="font-size:8px;color:var(--mute);margin-top:2px">EST. 2018</div>
-      </div>
-    </div>
-    <div class="hd-r">
-      <div class="doc-eyebrow">INVOICE</div>
-      <div class="doc-title">INVOICE</div>
-      <div class="doc-rule"></div>
-      <div style="margin-top:8px">
-        <table class="inv-tbl">
-          <tr><td>Invoice No.</td><td>${esc(f.invoiceNo)}</td></tr>
-          <tr><td>Issue Date</td><td>${esc(fmtDate(f.issueDate))}</td></tr>
-          ${f.dueDate?`<tr><td>Due Date</td><td style="color:var(--cr)">${esc(fmtDate(f.dueDate))}</td></tr>`:''}
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="page-body">
-    <div style="font-size:9px;color:var(--mute);margin-top:4mm;margin-bottom:2mm">Smartious Homeschool Global · Diamond Plaza, 4th Avenue, Parklands, Nairobi · hellosmartious@gmail.com · +254 745 021 212</div>
-    <div class="bill-row">
-      <div>
-        <div class="bill-lbl">Bill To</div>
-        <div class="bill-name">${esc(f.billedToName)}</div>
-        ${f.billedToAddress?`<div class="bill-sub">${esc(f.billedToAddress)}</div>`:''}
-      </div>
-      ${f.studentName?`<div>
-        <div class="bill-lbl">Student</div>
-        <div class="bill-name">${esc(f.studentName)}</div>
-        <div class="bill-sub">${[f.studentGrade,f.subject].filter(Boolean).map(s=>`<span>${esc(s)}</span>`).join(' &nbsp;·&nbsp; ')}</div>
-      </div>`:''}
-    </div>
-
-    ${f.programmeLabel?`<div class="prog-banner">${esc(f.programmeLabel)}</div>`:'<div style="margin-top:6mm"></div>'}
-
-    <table class="items">
-      <thead><tr>
-        <td>Description</td>
-        <td class="c">Sessions</td>
-        <td class="c">Duration</td>
-        <td class="r">Rate / hr</td>
-        <td class="r">Amount</td>
-      </tr></thead>
-      <tbody>${itemRows}</tbody>
-    </table>
-
-    <div class="totals"><div class="totals-box">
-      <div class="tr"><span class="tk">Subtotal${totalHours?' ('+totalHours+' hours)':''}</span><span class="tv">$${money(t.subtotal)}</span></div>
-      <div class="tr"><span class="tk">Discount</span><span class="tv">${t.discount>0?'$'+money(t.discount):'—'}</span></div>
-      <div class="tr total"><span class="tk">TOTAL DUE (${cur})</span><span class="tv">$${money(t.totalDue)}</span></div>
-    </div></div>
-
-    <p class="note-italic">Amount payable in ${cur}, or the KES equivalent at the prevailing exchange rate. No Smartious markup is applied to currency conversion.</p>
-  </div>
-
-  <div class="ft">
-    <span>smartioushomeschool.com · hellosmartious@gmail.com · +254 745 021 212</span>
-    <span>Page 1</span>
-  </div>
-</div>
-
-<!-- PAGE 2: Payment methods -->
-<div class="page">
-  <div class="topbar"></div>
-  <div class="hd" style="padding-bottom:0">
-    <div class="brand">
-      <svg class="shield" viewBox="0 0 60 66">
-        <path d="M30 2 L56 9 V32 C56 47 44 58 30 63 C16 58 4 47 4 32 V9 Z" fill="#8A1228" stroke="#C9A030" stroke-width="1.5"/>
-        <path d="M30 13 l2.3 4.7 5.2 .75 -3.75 3.65 .9 5.15 -4.65 -2.45 -4.65 2.45 .9 -5.15 -3.75 -3.65 5.2 -.75 Z" fill="#C9A030"/>
-      </svg>
-      <div class="brand-tx"><div class="name">Smart<em>ious</em></div><div class="sub">HOMESCHOOL&nbsp;·&nbsp;GLOBAL</div></div>
-    </div>
-    <div class="hd-r doc-eyebrow" style="align-self:flex-end">INVOICE</div>
-  </div>
-
-  <div class="page-body" style="padding-top:0">
-    <div class="p2-sec-h">HOW TO PAY</div>
-    <div class="p2-title">Payment <em>methods</em></div>
-
-    <table class="pay-tbl">
-      <thead><tr><th>Method</th><th>Via</th><th>Notes</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>M-Pesa</td>
-          <td>Paybill 247247</td>
-          <td>Account Number: 745021. Quote invoice number ${esc(f.invoiceNo)}.</td>
-        </tr>
-        <tr>
-          <td>Bank Transfer / SWIFT</td>
-          <td>Equity Bank Kenya</td>
-          <td>See full beneficiary details below.</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="bank-h">BANK TRANSFER — FULL BENEFICIARY DETAILS</div>
-    <table class="bank-tbl">
-      <tr><td>Beneficiary Name</td><td>Smartious Edtech</td></tr>
-      <tr><td>Bank Name</td><td>Equity Bank Kenya Limited</td></tr>
-      <tr><td>Account Number</td><td>0910186607556</td></tr>
-      <tr><td>Account Type</td><td>Savings Account</td></tr>
-      <tr><td>Branch</td><td>Tea Room Branch, Nairobi, Kenya</td></tr>
-      <tr><td>SWIFT / BIC Code</td><td>EQBLKENA (use EQBLKENAXXX if an 11-character code is required)</td></tr>
-      <tr><td>Bank Head Office</td><td>Equity Bank Kenya Limited, Equity Centre, 9th Floor, Hospital Road, Upper Hill, P.O. Box 75104-00200, Nairobi, Kenya</td></tr>
-      <tr><td>Central Bank</td><td>Central Bank of Kenya</td></tr>
-    </table>
-
-    <div class="closing">
-      <p class="ref-note">Please share the payment confirmation (M-Pesa message or SWIFT copy) with hellosmartious@gmail.com, quoting invoice number ${esc(f.invoiceNo)}, so it can be matched and receipted promptly.</p>
-      <p>Thank you for choosing Smartious Homeschool Global${f.studentName?' for '+esc(f.studentName)+"'s learning journey":''}.</p>
-    </div>
-  </div>
-
-  <div class="ft">
-    <span>smartioushomeschool.com · hellosmartious@gmail.com · +254 745 021 212</span>
-    <span>Page 2</span>
-  </div>
-</div>
-
-</body></html>`
-}
-
-// ═══════════════════════════════════════════════════════════
-// InvoicesTab — inside BillingModule
-// Shows invoice list + stats + generator
-// ═══════════════════════════════════════════════════════════
-function InvoicesTab({ toast, refreshKey }) {
-  const [view, setView]             = useState('list')  // list | create
-  const [invoices, setInvoices]     = useState([])
-  const [stats, setStats]           = useState({})
-  const [loading, setLoading]       = useState(true)
-  const [statusF, setStatusF]       = useState('all')
-  const [search, setSearch]         = useState('')
-  const [page, setPage]             = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [paidModal, setPaidModal]   = useState(null)   // invoice to mark paid
-  const [paidAmount, setPaidAmount] = useState('')
-  const [paidDate, setPaidDate]     = useState(new Date().toISOString().split('T')[0])
-  const [markingPaid, setMarkingPaid] = useState(false)
-
-  const load = useCallback(() => {
-    setLoading(true)
-    const params = { page, limit:30 }
-    if (statusF !== 'all') params.status = statusF
-    if (search.trim()) params.search = search.trim()
-    Promise.all([
-      api.get('/invoices', { params }),
-      api.get('/invoices/stats'),
-    ]).then(([r, sr]) => {
-      setInvoices(r.data?.data?.invoices || [])
-      setTotalPages(r.data?.data?.totalPages || 1)
-      setStats(sr.data?.data || {})
-    }).catch(() => toast?.error?.('Failed to load invoices.'))
-    .finally(() => setLoading(false))
-  }, [statusF, search, page])
-
-  useEffect(() => { load() }, [load, refreshKey])
-  useEffect(() => { setPage(1) }, [statusF, search])
-
-  const money = (n, cur='USD') => Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ' + cur
-
-  const STATUS_COLOURS = {
-    draft:     { bg:'#F3F4F6', fg:'#374151' },
-    sent:      { bg:'#DBEAFE', fg:'#1E40AF' },
-    paid:      { bg:'#D1FAE5', fg:'#065F46' },
-    overdue:   { bg:'#FEE2E2', fg:'#991B1B' },
-    cancelled: { bg:'#F3F4F6', fg:'#6B7280' },
-  }
-  const StatusBadge = ({ s }) => {
-    const c = STATUS_COLOURS[s] || STATUS_COLOURS.sent
-    return <span style={{ padding:'3px 10px', borderRadius:99, background:c.bg, color:c.fg, fontSize:11, fontWeight:700 }}>{s.charAt(0).toUpperCase()+s.slice(1)}</span>
-  }
-
-  const openMarkPaid = (inv) => {
-    setPaidAmount(String(inv.totalDue || ''))
-    setPaidDate(new Date().toISOString().split('T')[0])
-    setPaidModal(inv)
-  }
-
-  const confirmMarkPaid = async () => {
-    if (!paidModal) return
-    setMarkingPaid(true)
-    try {
-      await api.patch('/invoices/'+paidModal._id+'/status', {
-        status: 'paid',
-        paidAmount: parseFloat(paidAmount) || paidModal.totalDue,
-        paidAt: paidDate,
-      })
-      toast?.ok?.('Invoice marked paid — receipt emailed to ' + (paidModal.billedToEmail || 'parent') + '.')
-      setPaidModal(null)
-      load()
-    } catch { toast?.error?.('Could not mark as paid.') }
-    finally { setMarkingPaid(false) }
-  }
-
-  const viewReceipt = async (inv) => {
-    try {
-      const { data } = await api.get('/invoices/'+inv._id+'/receipt-html')
-      if (data.success) {
-        const w = window.open('','_blank')
-        if (!w) { toast?.error?.('Please allow pop-ups to view the receipt.'); return }
-        w.document.write(data.data.html); w.document.close()
-      }
-    } catch { toast?.error?.('Could not load receipt.') }
-  }
-
-  const resend = async (inv) => {
-    try {
-      await api.post('/invoices/'+inv._id+'/resend', { email: inv.billedToEmail })
-      toast?.ok?.('Invoice resent to '+inv.billedToEmail)
-    } catch { toast?.error?.('Could not resend.') }
-  }
-
-  if (view === 'create') return <InvoiceGenerator toast={toast} onBack={() => { setView('list'); load() }}/>
-
-  // KPI strip from stats
-  const byCurrency = stats.byCurrency || []
-  const statusMap  = stats.statusMap  || {}
-
-  return (
-    <>
-      {/* KPI strip */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))', gap:10, marginBottom:20 }}>
-        {byCurrency.map(c => (
-          <div key={c._id} className="card" style={{ padding:'14px 16px' }}>
-            <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', marginBottom:4 }}>Total Issued ({c._id})</div>
-            <div style={{ fontSize:18, fontWeight:800, color:TOKENS.crimson }}>{c._id} {Number(c.total).toLocaleString('en-US',{minimumFractionDigits:2})}</div>
-            <div style={{ fontSize:11, color:TOKENS.s500, marginTop:2 }}>{c.count} invoice{c.count!==1?'s':''}</div>
-          </div>
-        ))}
-        {[['sent','Awaiting Payment'],['paid','Paid'],['overdue','Overdue']].map(([k,l])=>(
-          <div key={k} className="card" style={{ padding:'14px 16px' }}>
-            <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', marginBottom:4 }}>{l}</div>
-            <div style={{ fontSize:22, fontWeight:800, color:k==='paid'?'#065F46':k==='overdue'?'#991B1B':TOKENS.crimson }}>{statusMap[k]||0}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Issued by */}
-      {(stats.recentIssuers||[]).length > 0 && (
-        <div className="card" style={{ padding:16, marginBottom:16 }}>
-          <div style={{ fontSize:12, fontWeight:700, color:TOKENS.s900, marginBottom:10 }}>Invoices by staff member</div>
-          <div style={{ display:'flex', gap:16, flexWrap:'wrap' }}>
-            {(stats.recentIssuers||[]).map(is => (
-              <div key={is._id} style={{ fontSize:12.5, color:TOKENS.s700 }}>
-                <strong style={{ color:TOKENS.s900 }}>{is.name}</strong>
-                <span style={{ color:TOKENS.s500, marginLeft:6 }}>({is.count} invoice{is.count!==1?'s':''})</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Toolbar */}
-      <div style={{ display:'flex', gap:10, marginBottom:12, flexWrap:'wrap', alignItems:'center' }}>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name, invoice no, email..."
-          style={{ flex:'1 1 220px', padding:'8px 12px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13 }}/>
-        <select value={statusF} onChange={e=>setStatusF(e.target.value)} style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5 }}>
-          <option value="all">All statuses</option>
-          {Object.keys(STATUS_COLOURS).map(s=><option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}
-        </select>
-        <button onClick={() => setView('create')} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
-          + New invoice
-        </button>
-      </div>
-
-      {/* Table */}
-      <div className="card" style={{ overflow:'hidden' }}>
-        {loading ? (
-          <div style={{ padding:28, textAlign:'center', color:TOKENS.s500, fontSize:13 }}>Loading invoices...</div>
-        ) : invoices.length === 0 ? (
-          <div style={{ padding:40, textAlign:'center' }}>
-            <div style={{ fontSize:28, marginBottom:10 }}>🧾</div>
-            <div style={{ fontSize:14, fontWeight:700, color:TOKENS.s900, marginBottom:4 }}>No invoices yet</div>
-            <div style={{ fontSize:12.5, color:TOKENS.s500 }}>Click "+ New invoice" to create your first.</div>
-          </div>
-        ) : (
-          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
-            <thead>
-              <tr>{['Invoice No.','Bill To','Student','Amount','Status','Issued By','Date','Actions'].map(h=>(
-                <th key={h} style={{ padding:'10px 14px', textAlign:'left', fontSize:11 }}>{h}</th>
-              ))}</tr>
-            </thead>
-            <tbody>
-              {invoices.map(inv => (
-                <tr key={inv._id} style={{ borderTop:'1px solid '+TOKENS.line }}>
-                  <td style={{ padding:'11px 14px', fontFamily:'monospace', fontSize:12, fontWeight:700, color:TOKENS.crimson }}>{inv.invoiceNo}</td>
-                  <td style={{ padding:'11px 14px' }}>
-                    <div style={{ fontSize:13, fontWeight:600, color:TOKENS.s900 }}>{inv.billedToName}</div>
-                    {inv.billedToEmail && <div style={{ fontSize:11, color:TOKENS.s500 }}>{inv.billedToEmail}</div>}
-                  </td>
-                  <td style={{ padding:'11px 14px', fontSize:12.5, color:TOKENS.s700 }}>{inv.studentName||'—'}</td>
-                  <td style={{ padding:'11px 14px', fontSize:13, fontWeight:700, color:TOKENS.s900, whiteSpace:'nowrap' }}>
-                    {inv.currency} {Number(inv.totalDue).toLocaleString('en-US',{minimumFractionDigits:2})}
-                  </td>
-                  <td style={{ padding:'11px 14px' }}><StatusBadge s={inv.status}/></td>
-                  <td style={{ padding:'11px 14px', fontSize:12, color:TOKENS.s500 }}>
-                    {inv.issuedBy ? `${inv.issuedBy.firstName} ${inv.issuedBy.lastName}` : '—'}
-                    {inv.issuedBy?.role && <div style={{ fontSize:10 }}>{inv.issuedBy.role.replace('_',' ')}</div>}
-                  </td>
-                  <td style={{ padding:'11px 14px', fontSize:11.5, color:TOKENS.s500, whiteSpace:'nowrap' }}>
-                    {new Date(inv.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
-                    {inv.emailSentAt && <div style={{ fontSize:10, color:'#059669' }}>✉ emailed</div>}
-                  </td>
-                  <td style={{ padding:'11px 14px' }}>
-                    <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-                      {inv.status === 'sent' && (
-                        <button onClick={() => openMarkPaid(inv)} style={{ fontSize:11, background:'#D1FAE5', color:'#065F46', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Mark paid</button>
-                      )}
-                      {inv.status === 'paid' && (
-                        <button onClick={() => viewReceipt(inv)} style={{ fontSize:11, background:'#065F46', color:'#fff', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>🧾 Receipt</button>
-                      )}
-                      {inv.billedToEmail && inv.status !== 'cancelled' && (
-                        <button onClick={() => resend(inv)} style={{ fontSize:11, background:TOKENS.cream, color:TOKENS.crimson, border:'1px solid '+TOKENS.line, padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Resend</button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {totalPages > 1 && (
-        <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:12 }}>
-          <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page<=1} style={{ padding:'6px 13px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page<=1?'not-allowed':'pointer', opacity:page<=1?.5:1 }}>‹</button>
-          <span style={{ padding:'6px 12px', fontSize:12.5, color:TOKENS.s700 }}>Page {page} / {totalPages}</span>
-          <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages} style={{ padding:'6px 13px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page>=totalPages?'not-allowed':'pointer', opacity:page>=totalPages?.5:1 }}>›</button>
-        </div>
-      )}
-
-      {/* Mark Paid modal */}
-      {paidModal && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
-          onClick={() => setPaidModal(null)}>
-          <div style={{ background:'#fff', borderRadius:14, padding:26, maxWidth:380, width:'100%', boxShadow:'0 20px 60px rgba(0,0,0,.25)' }}
-            onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize:15, fontWeight:800, color:TOKENS.s900, marginBottom:4 }}>Confirm Payment</div>
-            <div style={{ fontSize:12.5, color:TOKENS.s500, marginBottom:18 }}>{paidModal.invoiceNo} · {paidModal.billedToName}</div>
-            <div style={{ marginBottom:14 }}>
-              <div style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:5 }}>Amount received ({paidModal.currency})</div>
-              <input type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)}
-                style={{ width:'100%', padding:'9px 12px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:14, fontWeight:700 }}/>
-            </div>
-            <div style={{ marginBottom:20 }}>
-              <div style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:5 }}>Date paid</div>
-              <input type="date" value={paidDate} onChange={e => setPaidDate(e.target.value)}
-                style={{ width:'100%', padding:'9px 12px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13 }}/>
-            </div>
-            {paidModal.billedToEmail && (
-              <div style={{ background:'#F0FDF4', border:'1px solid #6EE7B7', borderRadius:8, padding:'10px 12px', fontSize:12, color:'#065F46', marginBottom:16, lineHeight:1.5 }}>
-                ✓ Receipt will be auto-emailed to <strong>{paidModal.billedToEmail}</strong>
-              </div>
-            )}
-            <div style={{ display:'flex', gap:10 }}>
-              <button onClick={confirmMarkPaid} disabled={markingPaid} style={{
-                flex:1, background:markingPaid?TOKENS.s300:'#065F46', color:'#fff', border:'none',
-                padding:'11px 0', borderRadius:8, fontSize:13, fontWeight:700,
-                cursor:markingPaid?'not-allowed':'pointer',
-              }}>{markingPaid ? 'Processing...' : 'Confirm & send receipt'}</button>
-              <button onClick={() => setPaidModal(null)} style={{
-                background:'transparent', border:'1.5px solid '+TOKENS.line, color:TOKENS.s500,
-                padding:'11px 16px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer',
-              }}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  )
-}
-
 // ═══════════════════════════════════════════════════════════
 // 12. BILLING MODULE
 // ═══════════════════════════════════════════════════════════
-
 function BillingModule({ refreshKey, toast }) {
   const store = useStore()
-  const [billingTab, setBillingTab] = useState('payments')  // payments | invoices
 
   // ── Real payment data from backend ───────────────────
   const [payments,       setPayments]       = useState([])
@@ -10693,21 +10085,6 @@ function BillingModule({ refreshKey, toast }) {
   return (
     <>
       <PSection tag="Finance" title="Billing &" em="Payments" sub="All student payments, Paystack transactions and revenue analytics"/>
-
-      {/* Tab switcher */}
-      <div style={{ display:'flex', gap:5, marginBottom:20, borderBottom:'1.5px solid '+TOKENS.line, paddingBottom:0 }}>
-        {[['payments','Paystack Payments'],['invoices','Invoices']].map(([k,l])=>(
-          <button key={k} onClick={()=>setBillingTab(k)} style={{
-            padding:'9px 18px', border:'none', background:'transparent',
-            borderBottom:billingTab===k?'2.5px solid '+TOKENS.crimson:'2.5px solid transparent',
-            color:billingTab===k?TOKENS.crimson:TOKENS.s500,
-            fontSize:13, fontWeight:billingTab===k?700:500, cursor:'pointer', marginBottom:-1.5,
-          }}>{l}</button>
-        ))}
-      </div>
-
-      {billingTab === 'invoices' && <InvoicesTab toast={toast} refreshKey={refreshKey}/>}
-      {billingTab === 'payments' && (<>
 
       {/* ── KPI row ── */}
       <div style={{ display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap' }}>
@@ -10948,8 +10325,6 @@ function BillingModule({ refreshKey, toast }) {
           </div>
         </div>
       )}
-      </>
-      )}
     </>
   )
 }
@@ -11012,39 +10387,20 @@ function WebsiteModule({ refreshKey, toast }) {
 function SettingsModule({ refreshKey, toast }) {
   const auth = useAuth()
   const user = auth?.user
-  const role = user?.role || 'admin'
   const [activeTab, setActiveTab] = useState('profile')
-
-  // Non-admin staff can only edit personal details — no system/school settings
-  const STAFF_ROLES = ['sales', 'ops_manager', 'accountant']
-  const isStaff = STAFF_ROLES.includes(role)
-
-  const tabs = isStaff
-    ? [
-        { id: 'profile',  label: 'My Profile' },
-        { id: 'password', label: 'Change Password' },
-      ]
-    : [
-        { id: 'profile',  label: 'Profile' },
-        { id: 'password', label: 'Change Password' },
-        { id: 'email',    label: 'Email Settings' },
-        { id: 'school',   label: 'School Settings' },
-      ]
 
   return (
     <>
-      <PSection
-        tag="Personal"
-        title="Account"
-        em="Settings"
-        sub={isStaff
-          ? 'Update your personal profile and password.'
-          : 'Manage your profile, password, and notification preferences'}
-      />
+      <PSection tag="Personal" title="Account" em="Settings" sub="Manage your profile, password, and notification preferences"/>
 
       {/* Tab bar */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 20, borderBottom: '1.5px solid ' + TOKENS.line, paddingBottom: 0 }}>
-        {tabs.map(t => (
+        {[
+          { id: 'profile',  label: 'Profile' },
+          { id: 'password', label: 'Change Password' },
+          { id: 'email',    label: 'Email Settings' },
+          { id: 'school',   label: 'School Settings' },
+        ].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
             padding: '10px 18px', border: 'none', background: 'transparent',
             borderBottom: activeTab === t.id ? '2.5px solid ' + TOKENS.crimson : '2.5px solid transparent',
@@ -11057,91 +10413,39 @@ function SettingsModule({ refreshKey, toast }) {
 
       {activeTab === 'profile'  && <SettingsProfileTab  user={user} toast={toast}/>}
       {activeTab === 'password' && <SettingsPasswordTab toast={toast}/>}
-      {!isStaff && activeTab === 'email'  && <SettingsEmailTab  toast={toast}/>}
-      {!isStaff && activeTab === 'school' && <SettingsSchoolTab toast={toast}/>}
+      {activeTab === 'email'    && <SettingsEmailTab    toast={toast}/>}
+      {activeTab === 'school'   && <SettingsSchoolTab   toast={toast}/>}
     </>
   )
 }
 
 // ── Profile tab ───────────────────────────────────────────
 function SettingsProfileTab({ user, toast }) {
-  const [firstName,  setFirstName]  = useState(user?.firstName || '')
-  const [lastName,   setLastName]   = useState(user?.lastName  || '')
-  const [phone,      setPhone]      = useState(user?.phone     || '')
-  const [saving,     setSaving]     = useState(false)
-  const [avatarUrl,  setAvatarUrl]  = useState(user?.avatar    || '')
-  const [uploading,  setUploading]  = useState(false)
+  const [firstName, setFirstName] = useState(user?.firstName || '')
+  const [lastName,  setLastName]  = useState(user?.lastName  || '')
+  const [phone,     setPhone]     = useState(user?.phone     || '')
+  const [saving,    setSaving]    = useState(false)
 
   const save = async () => {
     if (!firstName.trim() || !lastName.trim()) { toast?.error?.('First and last name are required.'); return }
     setSaving(true)
     try {
-      const { data } = await api.patch('/users/me', {
-        firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim(),
-      })
+      const { data } = await api.patch('/users/me', { firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim() })
       if (data?.success) toast?.ok?.('Profile updated.')
       else toast?.error?.(data?.message || 'Could not update profile.')
     } catch (e) {
       toast?.error?.(e?.response?.data?.message || 'Could not update profile.')
-    } finally { setSaving(false) }
-  }
-
-  const uploadAvatar = async (file) => {
-    if (!file) return
-    if (file.size > 3 * 1024 * 1024) { toast?.error?.('Image must be under 3 MB.'); return }
-    setUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append('avatar', file)
-      const { data } = await api.post('/users/me/avatar', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      if (data?.success) {
-        setAvatarUrl(data.data?.avatarUrl || '')
-        toast?.ok?.('Profile photo updated.')
-      } else {
-        toast?.error?.(data?.message || 'Could not upload photo.')
-      }
-    } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Could not upload photo.')
-    } finally { setUploading(false) }
+    } finally {
+      setSaving(false)
+    }
   }
 
   const inp = { width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: 7, border: '1.5px solid ' + TOKENS.line, fontSize: 13, fontFamily: 'inherit' }
   const lbl = { display: 'block', fontSize: 11, fontWeight: 700, color: TOKENS.crimson, letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 5 }
-  const initials = (firstName[0] || '') + (lastName[0] || '')
 
   return (
     <div className="card" style={{ padding: 26, maxWidth: 520 }}>
-      <div style={{ fontSize: 14, fontWeight: 800, color: TOKENS.s900, marginBottom: 20 }}>Your profile</div>
-
-      {/* Avatar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 24 }}>
-        <div style={{ position: 'relative', flexShrink: 0 }}>
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="Profile" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '2px solid ' + TOKENS.line }}/>
-          ) : (
-            <div style={{ width: 72, height: 72, borderRadius: '50%', background: TOKENS.crimson, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 700, color: '#fff' }}>
-              {initials || '?'}
-            </div>
-          )}
-          {uploading && (
-            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: 20, height: 20, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }}/>
-            </div>
-          )}
-        </div>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: TOKENS.s900, marginBottom: 6 }}>Profile photo</div>
-          <label style={{ display: 'inline-block', background: TOKENS.cream, border: '1.5px solid ' + TOKENS.line, borderRadius: 7, padding: '7px 14px', fontSize: 12.5, fontWeight: 700, color: TOKENS.s700, cursor: uploading ? 'not-allowed' : 'pointer' }}>
-            {uploading ? 'Uploading...' : 'Upload photo'}
-            <input type="file" accept="image/*" style={{ display: 'none' }} disabled={uploading}
-              onChange={e => e.target.files?.[0] && uploadAvatar(e.target.files[0])}/>
-          </label>
-          <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 5 }}>JPG or PNG, max 3 MB</div>
-        </div>
-      </div>
-
+      <div style={{ fontSize: 14, fontWeight: 800, color: TOKENS.s900, marginBottom: 18 }}>Your profile</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
         <div>
           <label style={lbl}>First name</label>
@@ -11159,7 +10463,7 @@ function SettingsProfileTab({ user, toast }) {
       <div style={{ marginBottom: 20 }}>
         <label style={lbl}>Email address</label>
         <div style={{ ...inp, background: TOKENS.cream, color: TOKENS.s500 }}>{user?.email || '—'}</div>
-        <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>To change your email contact your administrator.</div>
+        <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>Email cannot be changed here. Contact your system administrator.</div>
       </div>
       <button onClick={save} disabled={saving} style={{
         background: saving ? TOKENS.s300 : TOKENS.crimson, color: '#fff', border: 'none',
