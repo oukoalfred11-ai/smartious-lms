@@ -47,6 +47,7 @@ const userSchema = new mongoose.Schema({
   // Renamed from old `subjects` field to avoid collision
   subjectRefs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
   // ── Password reset ───────────────────────────────────────
+  avatar: { type: String, default: '' },   // profile photo URL (R2 or base64)
   passwordResetToken:   { type: String, default: undefined },
   passwordResetExpires: { type: Date,   default: undefined },
 
