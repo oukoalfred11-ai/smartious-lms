@@ -7,18 +7,10 @@ const mongoose   = require('mongoose');
 
 const app = express();
 
-// Render sits behind a reverse proxy — trust the X-Forwarded-For
-// header so express-rate-limit identifies clients by their real IP
-// instead of Render's proxy IP. Required for accurate rate limiting.
-app.set('trust proxy', 1);
-
 // ── Security headers ─────────────────────────────────────
 // Disable CSP in development — Vite uses inline scripts for HMR
 app.use(helmet({
   contentSecurityPolicy: process.env.NODE_ENV === 'production',
-  // Disable global frameguard — the /library/:id/stream endpoint
-  // sets its own X-Frame-Options to allow PDF iframe embedding.
-  frameguard: false,
 }));
 
 // ── CORS ─────────────────────────────────────────────────
@@ -89,8 +81,10 @@ app.use('/api/status',         require('./routes/status-management'));
 app.use('/api/frontdesk', require('./routes/frontdesk'));
 app.use('/api/library', require('./routes/library'));
 app.use('/api/leave-requests', require('./routes/status-management'));
-app.use('/api/assessment', require('./routes/assessment'));
+
+app.use('/api/invoices',   require('./routes/invoices'));
 app.use('/api/inquiries',  require('./routes/inquiries'));
+app.use('/api/assessment', require('./routes/assessment'));
 
 // ── Health check ──────────────────────────────────────────
 app.get('/api/health', (_, res) =>
