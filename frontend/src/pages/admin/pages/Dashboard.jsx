@@ -10103,14 +10103,18 @@ function buildInvoiceHTML(f, t) {
 // Shows invoice list + stats + generator
 // ═══════════════════════════════════════════════════════════
 function InvoicesTab({ toast, refreshKey }) {
-  const [view, setView]           = useState('list')  // list | create
-  const [invoices, setInvoices]   = useState([])
-  const [stats, setStats]         = useState({})
-  const [loading, setLoading]     = useState(true)
-  const [statusF, setStatusF]     = useState('all')
-  const [search, setSearch]       = useState('')
-  const [page, setPage]           = useState(1)
+  const [view, setView]             = useState('list')  // list | create
+  const [invoices, setInvoices]     = useState([])
+  const [stats, setStats]           = useState({})
+  const [loading, setLoading]       = useState(true)
+  const [statusF, setStatusF]       = useState('all')
+  const [search, setSearch]         = useState('')
+  const [page, setPage]             = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const [paidModal, setPaidModal]   = useState(null)   // invoice to mark paid
+  const [paidAmount, setPaidAmount] = useState('')
+  const [paidDate, setPaidDate]     = useState(new Date().toISOString().split('T')[0])
+  const [markingPaid, setMarkingPaid] = useState(false)
 
   const load = useCallback(() => {
     setLoading(true)
@@ -10145,12 +10149,37 @@ function InvoicesTab({ toast, refreshKey }) {
     return <span style={{ padding:'3px 10px', borderRadius:99, background:c.bg, color:c.fg, fontSize:11, fontWeight:700 }}>{s.charAt(0).toUpperCase()+s.slice(1)}</span>
   }
 
-  const markPaid = async (id) => {
+  const openMarkPaid = (inv) => {
+    setPaidAmount(String(inv.totalDue || ''))
+    setPaidDate(new Date().toISOString().split('T')[0])
+    setPaidModal(inv)
+  }
+
+  const confirmMarkPaid = async () => {
+    if (!paidModal) return
+    setMarkingPaid(true)
     try {
-      await api.patch('/invoices/'+id+'/status', { status:'paid', paidAmount:0 })
-      toast?.ok?.('Marked as paid.')
+      await api.patch('/invoices/'+paidModal._id+'/status', {
+        status: 'paid',
+        paidAmount: parseFloat(paidAmount) || paidModal.totalDue,
+        paidAt: paidDate,
+      })
+      toast?.ok?.('Invoice marked paid — receipt emailed to ' + (paidModal.billedToEmail || 'parent') + '.')
+      setPaidModal(null)
       load()
-    } catch { toast?.error?.('Could not update status.') }
+    } catch { toast?.error?.('Could not mark as paid.') }
+    finally { setMarkingPaid(false) }
+  }
+
+  const viewReceipt = async (inv) => {
+    try {
+      const { data } = await api.get('/invoices/'+inv._id+'/receipt-html')
+      if (data.success) {
+        const w = window.open('','_blank')
+        if (!w) { toast?.error?.('Please allow pop-ups to view the receipt.'); return }
+        w.document.write(data.data.html); w.document.close()
+      }
+    } catch { toast?.error?.('Could not load receipt.') }
   }
 
   const resend = async (inv) => {
@@ -10252,9 +10281,12 @@ function InvoicesTab({ toast, refreshKey }) {
                     {inv.emailSentAt && <div style={{ fontSize:10, color:'#059669' }}>✉ emailed</div>}
                   </td>
                   <td style={{ padding:'11px 14px' }}>
-                    <div style={{ display:'flex', gap:6 }}>
+                    <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
                       {inv.status === 'sent' && (
-                        <button onClick={() => markPaid(inv._id)} style={{ fontSize:11, background:'#D1FAE5', color:'#065F46', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Mark paid</button>
+                        <button onClick={() => openMarkPaid(inv)} style={{ fontSize:11, background:'#D1FAE5', color:'#065F46', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Mark paid</button>
+                      )}
+                      {inv.status === 'paid' && (
+                        <button onClick={() => viewReceipt(inv)} style={{ fontSize:11, background:'#065F46', color:'#fff', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>🧾 Receipt</button>
                       )}
                       {inv.billedToEmail && inv.status !== 'cancelled' && (
                         <button onClick={() => resend(inv)} style={{ fontSize:11, background:TOKENS.cream, color:TOKENS.crimson, border:'1px solid '+TOKENS.line, padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Resend</button>
@@ -10273,6 +10305,44 @@ function InvoicesTab({ toast, refreshKey }) {
           <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page<=1} style={{ padding:'6px 13px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page<=1?'not-allowed':'pointer', opacity:page<=1?.5:1 }}>‹</button>
           <span style={{ padding:'6px 12px', fontSize:12.5, color:TOKENS.s700 }}>Page {page} / {totalPages}</span>
           <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages} style={{ padding:'6px 13px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page>=totalPages?'not-allowed':'pointer', opacity:page>=totalPages?.5:1 }}>›</button>
+        </div>
+      )}
+
+      {/* Mark Paid modal */}
+      {paidModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
+          onClick={() => setPaidModal(null)}>
+          <div style={{ background:'#fff', borderRadius:14, padding:26, maxWidth:380, width:'100%', boxShadow:'0 20px 60px rgba(0,0,0,.25)' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize:15, fontWeight:800, color:TOKENS.s900, marginBottom:4 }}>Confirm Payment</div>
+            <div style={{ fontSize:12.5, color:TOKENS.s500, marginBottom:18 }}>{paidModal.invoiceNo} · {paidModal.billedToName}</div>
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:5 }}>Amount received ({paidModal.currency})</div>
+              <input type="number" value={paidAmount} onChange={e => setPaidAmount(e.target.value)}
+                style={{ width:'100%', padding:'9px 12px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:14, fontWeight:700 }}/>
+            </div>
+            <div style={{ marginBottom:20 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:5 }}>Date paid</div>
+              <input type="date" value={paidDate} onChange={e => setPaidDate(e.target.value)}
+                style={{ width:'100%', padding:'9px 12px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13 }}/>
+            </div>
+            {paidModal.billedToEmail && (
+              <div style={{ background:'#F0FDF4', border:'1px solid #6EE7B7', borderRadius:8, padding:'10px 12px', fontSize:12, color:'#065F46', marginBottom:16, lineHeight:1.5 }}>
+                ✓ Receipt will be auto-emailed to <strong>{paidModal.billedToEmail}</strong>
+              </div>
+            )}
+            <div style={{ display:'flex', gap:10 }}>
+              <button onClick={confirmMarkPaid} disabled={markingPaid} style={{
+                flex:1, background:markingPaid?TOKENS.s300:'#065F46', color:'#fff', border:'none',
+                padding:'11px 0', borderRadius:8, fontSize:13, fontWeight:700,
+                cursor:markingPaid?'not-allowed':'pointer',
+              }}>{markingPaid ? 'Processing...' : 'Confirm & send receipt'}</button>
+              <button onClick={() => setPaidModal(null)} style={{
+                background:'transparent', border:'1.5px solid '+TOKENS.line, color:TOKENS.s500,
+                padding:'11px 16px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer',
+              }}>Cancel</button>
+            </div>
+          </div>
         </div>
       )}
     </>
