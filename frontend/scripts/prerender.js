@@ -1,325 +1,960 @@
-/* ═══════════════════════════════════════════════════════════════════
-   prerender.js — Build-time static HTML generator for SEO routes.
-   ───────────────────────────────────────────────────────────────────
-   Runs after `vite build` completes (as `npm run postbuild`).
-   
-   For each public-facing route, headless Chrome:
-     1. Loads dist/index.html in a virtual server
-     2. Navigates to the route (React Router renders the matching page)
-     3. Waits for React to mount + usePageMeta to set title/canonical
-     4. Captures the full rendered HTML
-     5. Writes it to dist/<route>/index.html
-   
-   Netlify serves the prerendered HTML directly when crawlers (or users)
-   request that URL. The SPA fallback /* → /index.html in netlify.toml
-   only fires for routes that have no prerendered file.
-   
-   ── Performance optimisations (vs. v1) ──────────────────────────────
-   v1 timed out on Netlify's 18-minute build limit. v2 fixes this:
-     · Concurrency=4 → 4 pages render in parallel (~4x speedup)
-     · Request blocking → drop GTM/analytics/fonts/CDN images that
-       slow render but don't affect output HTML
-     · waitUntil='domcontentloaded' → skip networkidle0 (which never
-       fires cleanly with GTM/gtag.js continuous pings)
-     · Per-page timeout 15s (was 45s) → fail fast on broken routes
-     · MAX_URLS cap → discovery can't run away
-   
-   Adding a new public route: drop it into ROUTES_TO_PRERENDER.
-═══════════════════════════════════════════════════════════════════ */
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-import { createServer } from 'node:http'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { mkdirSync, writeFileSync, existsSync } from 'node:fs'
-import handler from 'serve-handler'
-import puppeteer from 'puppeteer'
+  <!-- ═══════════════════════════════════════════════════════════
+       CORE PAGES
+       ═══════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://smartioushomeschool.com/</loc>
+    <priority>1.0</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/about</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/services</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/programs</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/teachers</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/pricing</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/assessment</loc>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/contact</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/faq</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/curricula</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog</loc>
+    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/gallery</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/events</loc>
+    <priority>0.5</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/calendar</loc>
+    <priority>0.5</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/activities</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const ROOT = join(__dirname, '..')
-const DIST = join(ROOT, 'dist')
-const PORT = 5051
+  <!-- ═══════════════════════════════════════════════════════════
+       SERVICE PAGES
+       ═══════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://smartioushomeschool.com/test-prep</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/languages</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/study-abroad</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-nairobi</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uae</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/pre-university</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/iufp</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/alberta-home-ed-funding</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/bc-distributed-learning-funding</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/saskatchewan-homeschool-funding</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
 
-const CONCURRENCY = 2
-const PAGE_TIMEOUT_MS = 15_000
-const WAIT_AFTER_MOUNT_MS = 250
-const MAX_URLS = 300
+  <!-- ═══════════════════════════════════════════════════════════
+       COUNTRY HUBS (v2 DEPTH — with city pages)
+       ═══════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/kenya</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ke" href="https://smartioushomeschool.com/online-school/kenya"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/japan</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-jp" href="https://smartioushomeschool.com/online-school/japan"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/vietnam</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-vn" href="https://smartioushomeschool.com/online-school/vietnam"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/thailand</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-th" href="https://smartioushomeschool.com/online-school/thailand"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/malaysia</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-my" href="https://smartioushomeschool.com/online-school/malaysia"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/turkey</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-tr" href="https://smartioushomeschool.com/online-school/turkey"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/kuwait</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-kw" href="https://smartioushomeschool.com/online-school/kuwait"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/oman</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-om" href="https://smartioushomeschool.com/online-school/oman"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/taiwan</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-tw" href="https://smartioushomeschool.com/online-school/taiwan"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/ireland</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ie" href="https://smartioushomeschool.com/online-school/ireland"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/united-kingdom</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-gb" href="https://smartioushomeschool.com/online-school/united-kingdom"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/india</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-in" href="https://smartioushomeschool.com/online-school/india"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/germany</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-de" href="https://smartioushomeschool.com/online-school/germany"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/romania</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-17</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ro" href="https://smartioushomeschool.com/online-school/romania"/>
+  </url>
+  <!-- ═══════════════════════════════════════════════════════════
+       COUNTRY HUBS (v1 depth — country-level, no city pages yet)
+       ═══════════════════════════════════════════════════════════ -->
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/ethiopia</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/rwanda</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/south-africa</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/uae</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/qatar</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/saudi-arabia</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/egypt</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/morocco</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/south-korea</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/usa</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/canada</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
 
-/* Third-party domains blocked during render — they don't change the
-   output HTML but slow each page substantially. GTM and Google Ads
-   never resolve cleanly because they send heartbeat pings, which is
-   why v1's networkidle0 wait stalled forever. */
-const BLOCKED_DOMAINS = [
-  'googletagmanager.com',
-  'google-analytics.com',
-  'googleadservices.com',
-  'googlesyndication.com',
-  'doubleclick.net',
-  'fonts.googleapis.com',
-  'fonts.gstatic.com',
-  'res.cloudinary.com',
-  'images.unsplash.com',
-  'formsubmit.co',
-  'connect.facebook.net',
-  'snap.licdn.com',
-  'analytics.tiktok.com',
-]
+  <!-- ═══════════════════════════════════════════════════════════
+       CITY PAGES — v2 country hubs
+       ═══════════════════════════════════════════════════════════ -->
+  <!-- Japan cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-tokyo-jp</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-yokohama-jp</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-osaka-jp</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kobe-jp</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-nagoya-jp</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-okinawa-jp</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <!-- Vietnam cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-ho-chi-minh-city-vn</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-hanoi-vn</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-da-nang-vn</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-bac-ninh-vn</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-binh-duong-vn</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-vung-tau-vn</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <!-- Thailand cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-bangkok-th</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-chiang-mai-th</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-phuket-th</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-pattaya-th</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-hua-hin-th</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-khon-kaen-th</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <!-- Malaysia cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kuala-lumpur-my</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-petaling-jaya-my</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-subang-jaya-my</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-cyberjaya-my</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-johor-bahru-my</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-penang-my</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kota-kinabalu-my</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <!-- Türkiye cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-istanbul-tr</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-ankara-tr</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-izmir-tr</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-antalya-tr</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-bursa-tr</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-adana-tr</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <!-- Kuwait cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kuwait-city-kw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-salmiya-kw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-hawally-kw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-salwa-kw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-bayan-kw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-ahmadi-kw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <!-- Oman cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-muscat-om</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-seeb-om</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-sohar-om</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-salalah-om</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-nizwa-om</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-sur-om</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
 
-/* Routes to prerender. SEO-critical public pages only.
-   City pages and other dynamic routes auto-discover via internal links
-   from country hubs (see CRAWL_FROM_HUBS_PATTERN). */
-const ROUTES_TO_PRERENDER = [
-  '/',
-  '/about', '/curricula', '/services', '/programs', '/pricing', '/teachers',
-  '/global', '/contact', '/faq', '/enroll', '/consult',
-  '/calendar', '/events', '/gallery', '/activities',
-  '/blog', '/test-prep', '/languages', '/study-abroad',
-  '/homeschool', '/tuition', '/tuition-nairobi', '/tuition-uae',
-  '/tuition-uk',
-  '/iufp', '/pre-university',
-  '/alberta-home-ed-funding',
-  '/bc-distributed-learning-funding',
-  '/saskatchewan-homeschool-funding',
-  '/privacy', '/terms', '/cookies', '/gdpr',
+  <!-- Taiwan cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-taipei-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-new-taipei-city-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-hsinchu-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-taichung-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kaohsiung-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-taoyuan-tw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-06</lastmod>
+  </url>
 
-  /* v2-depth country hubs (full <CountryHub> rendering) */
-  '/online-school/kenya',
-  '/online-school/ethiopia',
-  '/online-school/rwanda',
-  '/online-school/south-africa',
-  '/online-school/qatar',
-  '/online-school/saudi-arabia',
-  '/online-school/uae',
-  '/online-school/egypt',
-  '/online-school/morocco',
-  '/online-school/south-korea',
-  '/online-school/japan',
-  '/online-school/vietnam',
-  '/online-school/thailand',
-  '/online-school/malaysia',
-  '/online-school/turkey',
-  '/online-school/kuwait',
-  '/online-school/oman',
-  '/online-school/taiwan',
-  '/online-school/ireland',
-  '/online-school/united-kingdom',
-  '/online-school/india',
-  '/online-school/germany',
+  <!-- Ireland cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-dublin-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-cork-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-galway-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-limerick-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-waterford-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kildare-ie</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
 
-  /* Topical cluster articles (Malaysia — will scale to other countries) */
-  '/online-igcse-malaysia',
-  '/ossd-malaysia',
-  '/international-school-alternative-malaysia',
-  '/branch-campus-universities-malaysia',
+  <!-- United Kingdom cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-london-uk</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-manchester-uk</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-birmingham-uk</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-leeds-uk</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-bristol-uk</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-edinburgh-uk</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-09</lastmod>
+  </url>
 
-  /* Country detail pages (lighter template, from COUNTRIES list) */
-  '/online-school/usa',
-  '/online-school/canada',
-  '/online-school/uk',
-  '/online-school/australia',
-  '/online-school/nigeria',
-  '/online-school/tanzania',
-  '/online-school/uganda',
-  '/online-school/pakistan',
-  '/online-school/bahrain',
-  '/online-school/somalia',
+  <!-- Tuition UK hub -->
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
 
-  /* Test prep details */
-  '/test-prep/ielts',
-  '/test-prep/toefl',
-  '/test-prep/pte',
-  '/test-prep/gre',
-  '/test-prep/gmat',
-  '/test-prep/sat',
-]
+  <!-- Tuition UK city/street areas -->
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/kensington-london</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/chelsea-london</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/notting-hill-london</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/hampstead-london</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/wimbledon-london</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/dulwich-london</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/didsbury-manchester</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/altrincham-manchester</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/salford-manchester</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/edgbaston-birmingham</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/solihull-birmingham</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/harborne-birmingham</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/roundhay-leeds</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/alwoodley-leeds</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/clifton-bristol</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/redland-bristol</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/morningside-edinburgh</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/tuition-uk/new-town-edinburgh</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-10</lastmod>
+  </url>
 
-/* Only crawl internal links from the 13 v2-depth country hubs.
-   Excluding /online-school/usa etc. because their pages list ~120
-   US city links each, which would blow past MAX_URLS instantly.
-   US/Canada city pages fall back to SPA rendering (Google's JS
-   second-pass crawl will still index them via sitemap.xml). */
-const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany)$/
-const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)[a-z0-9-]+$/
+  <!-- India cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-mumbai-in</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-delhi-ncr-in</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-bangalore-in</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-hyderabad-in</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-chennai-in</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-pune-in</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-11</lastmod>
+  </url>
 
-/* ────────────────────────────────────────────────────────────────
-   Local static server — serves dist/ with SPA fallback that matches
-   netlify.toml's /* → /index.html redirect.
-   ──────────────────────────────────────────────────────────────── */
-function startServer() {
-  return new Promise((resolve, reject) => {
-    const server = createServer((req, res) => {
-      return handler(req, res, {
-        public: DIST,
-        rewrites: [{ source: '**', destination: '/index.html' }],
-        cleanUrls: false,
-      })
-    })
-    server.on('error', reject)
-    server.listen(PORT, () => resolve(server))
-  })
-}
+  <!-- India cities -->
+  <!-- Germany cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-berlin-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-munich-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-frankfurt-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-hamburg-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-stuttgart-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-dusseldorf-de</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-13</lastmod>
+  </url>
 
-function routeToOutputPath(route) {
-  if (route === '/' || route === '') return join(DIST, 'index.html')
-  const clean = route.replace(/^\/+|\/+$/g, '')
-  return join(DIST, clean, 'index.html')
-}
-
-function sanitize(html) {
-  return html.replace(new RegExp(`http://localhost:${PORT}`, 'g'), 'https://smartioushomeschool.com')
-}
-
-/* ────────────────────────────────────────────────────────────────
-   Render one route. Returns { success, html?, links?, error? }.
-   Each call gets its own page (Puppeteer best practice for parallel
-   rendering — tab reuse across concurrent renders causes flakiness).
-   ──────────────────────────────────────────────────────────────── */
-async function renderRoute(browser, route) {
-  let page
-  
-  try {
-    /* newPage() must be inside try — if Chromium has crashed on
-       Netlify (memory pressure with large bundle), this throws and
-       we want to catch it per-route, not let it kill the build. */
-    page = await browser.newPage()
-    
-    /* Block third-party requests — don't affect output, slow render. */
-    await page.setRequestInterception(true)
-    page.on('request', req => {
-      const url = req.url()
-      if (BLOCKED_DOMAINS.some(d => url.includes(d))) {
-        return req.abort()
-      }
-      return req.continue()
-    })
-    
-    /* Silently absorb console errors — they're often analytics-related
-       and don't affect the rendered HTML. */
-    page.on('pageerror', () => {})
-    
-    const url = `http://localhost:${PORT}${route}`
-    await page.goto(url, {
-      waitUntil: 'domcontentloaded',
-      timeout: PAGE_TIMEOUT_MS,
-    })
-    
-    /* Wait for React to mount. */
-    await page.waitForFunction(
-      () => document.getElementById('root')?.childElementCount > 0,
-      { timeout: PAGE_TIMEOUT_MS },
-    )
-    
-    /* Brief pause for usePageMeta to write canonical/title into <head>. */
-    await new Promise(r => setTimeout(r, WAIT_AFTER_MOUNT_MS))
-    
-    const html = sanitize(await page.content())
-    
-    /* Discover internal links from v2-depth country hubs only. */
-    let links = []
-    if (CRAWL_FROM_HUBS_PATTERN.test(route)) {
-      links = await page.evaluate(() => {
-        return Array.from(document.querySelectorAll('a[href]'))
-          .map(a => a.getAttribute('href'))
-          .filter(Boolean)
-      })
-    }
-    
-    return { success: true, html, links }
-  } catch (err) {
-    return { success: false, error: err.message }
-  } finally {
-    if (page) await page.close().catch(() => {})
-  }
-}
-
-/* ────────────────────────────────────────────────────────────────
-   Main — set up server + browser, run worker pool, write outputs.
-   ──────────────────────────────────────────────────────────────── */
-async function prerender() {
-  if (!existsSync(DIST)) {
-    console.error(`[prerender] dist/ not found — run \`vite build\` first.`)
-    process.exit(1)
-  }
-
-  const startTime = Date.now()
-  console.log(`[prerender] Starting local server on port ${PORT}`)
-  const server = await startServer()
-
-  console.log('[prerender] Launching headless Chrome')
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--disable-background-timer-throttling',
-      '--disable-renderer-backgrounding',
-      '--disable-backgrounding-occluded-windows',
-    ],
-  })
-
-  const discovered = new Set(ROUTES_TO_PRERENDER)
-  const queue = [...ROUTES_TO_PRERENDER]
-  let successCount = 0
-  let failCount = 0
-  
-  console.log(`[prerender] Rendering ${queue.length} initial routes (concurrency=${CONCURRENCY}, max=${MAX_URLS})`)
-
-  const queueLink = (href) => {
-    if (discovered.size >= MAX_URLS) return
-    if (!CRAWL_LINK_PATTERN.test(href)) return
-    if (discovered.has(href)) return
-    discovered.add(href)
-    queue.push(href)
-  }
-
-  /* Worker: pull from queue, render, write, queue any discovered links.
-     Run CONCURRENCY workers in parallel. Each shares the browser but
-     uses its own page. */
-  const runWorker = async (workerId) => {
-    while (queue.length > 0) {
-      const route = queue.shift()
-      if (!route) return
-      
-      const result = await renderRoute(browser, route)
-      
-      if (result.success) {
-        const outPath = routeToOutputPath(route)
-        mkdirSync(dirname(outPath), { recursive: true })
-        writeFileSync(outPath, result.html)
-        const sizeKB = (result.html.length / 1024).toFixed(0)
-        console.log(`[prerender] ✓ ${route} (${sizeKB} KB)`)
-        successCount++
-        
-        for (const href of result.links || []) queueLink(href)
-      } else {
-        console.warn(`[prerender] ✗ ${route} — ${result.error}`)
-        failCount++
-      }
-    }
-  }
-
-  try {
-    await Promise.all(
-      Array.from({ length: CONCURRENCY }, (_, i) => runWorker(i))
-    )
-  } finally {
-    await browser.close()
-    server.close()
-  }
-
-  const elapsedSec = ((Date.now() - startTime) / 1000).toFixed(1)
-  console.log(`[prerender] Done in ${elapsedSec}s. ${successCount} succeeded, ${failCount} failed, ${discovered.size} total discovered`)
-  
-  /* Only fail the build if EVERY route failed — partial failures shouldn't
-     block deploy because Netlify SPA fallback still serves the failed routes. */
-  if (successCount === 0 && failCount > 0) {
-    console.error('[prerender] All routes failed — likely a config issue')
-    process.exit(1)
-  }
-}
-
-prerender().catch(err => {
-  console.error('[prerender] Fatal error:', err)
-  process.exit(1)
-})
+  <!-- Romania cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-bucharest-ro</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-17</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-cluj-napoca-ro</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-17</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-timisoara-ro</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-17</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-iasi-ro</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-17</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-brasov-ro</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-17</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-constanta-ro</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-17</lastmod>
+  </url>
+</urlset>
