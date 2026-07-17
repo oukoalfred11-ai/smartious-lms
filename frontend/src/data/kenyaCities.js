@@ -609,7 +609,7 @@ export const KENYA_COUNTRY = {
       name: 'Smartious (live online)',
       city: 'All 47 Kenyan counties',
       curriculum: 'Cambridge IGCSE & A-Level · Edexcel · IB · American AP · CBC',
-      feesAed: 'KES 280K – 836K / year (~USD 2,160 – 6,480)',
+      feesAed: 'KES 280K – 836K / year (~from USD 4,800+ per year)',
       feesUsd: '2,160 – 6,480',
       rating: 'Live online · PGCE specialists · Nairobi HQ',
       capacityNote: 'Immediate enrolment — accessible from any county',
@@ -656,7 +656,7 @@ export const KENYA_COUNTRY = {
     },
     {
       h: 'Brookhouse / Braeburn / Aga Khan Academy alternative pricing',
-      p: 'Brookhouse KES 1.6M-2.4M/year, Braeburn KES 1.4M-2.2M/year, Aga Khan Academy KES 1.8M-2.6M/year, GEMS Cambridge KES 1.4M-2.0M/year, Hillcrest KES 1.5M-2.2M/year. Smartious KES 280K-836K/year (~USD 2,160-6,480) — delivers Cambridge curriculum at meaningfully lower cost.',
+      p: 'Brookhouse KES 1.6M-2.4M/year, Braeburn KES 1.4M-2.2M/year, Aga Khan Academy KES 1.8M-2.6M/year, GEMS Cambridge KES 1.4M-2.0M/year, Hillcrest KES 1.5M-2.2M/year. Smartious KES 280K-836K/year (~from USD 4,800+ per year) — delivers Cambridge curriculum at meaningfully lower cost.',
     },
     {
       h: 'Accessible from any of Kenya\'s 47 counties',
@@ -683,7 +683,7 @@ export const KENYA_COUNTRY = {
   faqs: [
     {
       q: 'How does Smartious compare to Brookhouse, Braeburn, Aga Khan Academy, GEMS Cambridge, Hillcrest, Strathmore?',
-      a: 'Top Cambridge schools in Kenya — Brookhouse (KES 1.6M-2.4M/year), Braeburn (KES 1.4M-2.2M/year), Aga Khan Academy (KES 1.8M-2.6M/year — IB), GEMS Cambridge International School (KES 1.4M-2.0M/year), Hillcrest International (KES 1.5M-2.2M/year), Strathmore School (KES 800K-1.4M/year) — provide physical campus education with established sports, arts, and pastoral programmes. Smartious provides live online Cambridge, IB, American, or CBC curriculum at KES 280K-836K/year (~USD 2,160-6,480). Trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment, smaller class sizes (4-6 students vs typical 20-30), accessibility from any Kenyan county.',
+      a: 'Top Cambridge schools in Kenya — Brookhouse (KES 1.6M-2.4M/year), Braeburn (KES 1.4M-2.2M/year), Aga Khan Academy (KES 1.8M-2.6M/year — IB), GEMS Cambridge International School (KES 1.4M-2.0M/year), Hillcrest International (KES 1.5M-2.2M/year), Strathmore School (KES 800K-1.4M/year) — provide physical campus education with established sports, arts, and pastoral programmes. Smartious provides live online Cambridge, IB, American, or CBC curriculum at KES 280K-836K/year (~from USD 4,800+ per year). Trade-off: no physical campus, but the same internationally recognised academic qualifications, immediate enrolment, smaller class sizes (4-6 students vs typical 20-30), accessibility from any Kenyan county.',
     },
     {
       q: 'My family lives outside Nairobi (Mombasa / Kisumu / Eldoret / Kakamega / Meru / Nyeri / rural Kenya). How does Smartious work?',
@@ -715,7 +715,7 @@ export const KENYA_COUNTRY = {
     },
     {
       q: 'How does payment work — KES or USD?',
-      a: 'Smartious tuition is denominated in USD (USD 180/295/540 per month — approximately KES 23,000/38,000/70,000 at typical 2026 ~KES 129/USD range). Payments accepted via M-Pesa Paybill 247247 Account 745021, Paystack, international card (Visa, Mastercard, Amex), PayPal, or bank transfer. USD denomination provides stability against KES-USD volatility for multi-year planning. M-Pesa makes Kenya-based payments simple.',
+      a: 'Smartious tuition is denominated in USD (from USD 400/month (personalized pricing) — approximately from KES 52,000/month at typical 2026 ~KES 129/USD range). Payments accepted via M-Pesa Paybill 247247 Account 745021, Paystack, international card (Visa, Mastercard, Amex), PayPal, or bank transfer. USD denomination provides stability against KES-USD volatility for multi-year planning. M-Pesa makes Kenya-based payments simple.',
     },
     {
       q: 'How reliable is internet connectivity for live online learning in Kenya?',
