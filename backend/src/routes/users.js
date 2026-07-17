@@ -1146,4 +1146,69 @@ router.get('/teachers/:id/availability', auth, requireRole('admin', 'teacher', '
   }
 });
 
+
+// ─────────────────────────────────────────────────────────
+// POST /api/users/me/avatar — upload profile photo
+// Accepts multipart/form-data with field 'avatar'
+// Uses R2 if configured, otherwise stores as base64 data URL
+// ─────────────────────────────────────────────────────────
+router.post('/me/avatar', auth, async (req, res) => {
+  try {
+    const multer = require('multer')
+    const upload = multer({
+      storage: multer.memoryStorage(),
+      limits: { fileSize: 3 * 1024 * 1024 },
+      fileFilter: (_, file, cb) => {
+        if (file.mimetype.startsWith('image/')) cb(null, true)
+        else cb(new Error('Only image files are allowed.'))
+      },
+    }).single('avatar')
+
+    upload(req, res, async (err) => {
+      if (err) return res.status(400).json({ success: false, message: err.message })
+      if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded.' })
+
+      let avatarUrl = ''
+
+      // Try R2 first, fall back to base64 data URL
+      try {
+        const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
+        const { v4: uuid } = require('uuid')
+        const s3 = new S3Client({
+          region: 'auto',
+          endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+          credentials: {
+            accessKeyId: process.env.R2_ACCESS_KEY_ID,
+            secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+          },
+        })
+        const ext = req.file.mimetype.split('/')[1] || 'jpg'
+        const key = `avatars/${req.user._id}/${uuid()}.${ext}`
+        await s3.send(new PutObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME,
+          Key: key,
+          Body: req.file.buffer,
+          ContentType: req.file.mimetype,
+        }))
+        avatarUrl = `${(process.env.R2_PUBLIC_URL || '').replace(/\/$/, '')}/${key}`
+      } catch (r2Err) {
+        // R2 not configured or failed — store as base64 data URL
+        console.log('[avatar] R2 not available, using base64:', r2Err.message)
+        avatarUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
+      }
+
+      const user = await User.findByIdAndUpdate(
+        req.user._id,
+        { $set: { avatar: avatarUrl } },
+        { new: true }
+      ).select('-password')
+
+      return res.json({ success: true, message: 'Avatar updated.', data: { avatarUrl, user } })
+    })
+  } catch (e) {
+    console.error('[avatar upload]', e.message)
+    return res.status(500).json({ success: false, message: e.message })
+  }
+})
+
 module.exports = router;
