@@ -10247,8 +10247,9 @@ function BillingModule({ refreshKey, toast }) {
           </div>
         </div>
       )}
+      </>
+      )}
     </>
-    )}
   )
 }
 
