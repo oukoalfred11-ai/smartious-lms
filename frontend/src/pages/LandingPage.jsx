@@ -1375,43 +1375,43 @@ const PAGE_META = {
   },
   'homeschooling-malaysia': {
     title: 'Online School & Homeschool Malaysia | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Malaysian families across Kuala Lumpur, Petaling Jaya, Subang Jaya, Cyberjaya, Johor Bahru + Iskandar Puteri, Penang, Kota Kinabalu. British Council KL + Penang exam centres. From USD 180/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Malaysian families across Kuala Lumpur, Petaling Jaya, Subang Jaya, Cyberjaya, Johor Bahru + Iskandar Puteri, Penang, Kota Kinabalu. British Council KL + Penang exam centres. From USD 400/month.',
   },
   'homeschooling-turkey': {
     title: 'Online School & Homeschool Türkiye | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Turkish and expat families across Istanbul (Bebek, Etiler, Nişantaşı, Kadıköy, Ataşehir), Ankara (Çankaya, Bilkent), Izmir, Antalya (post-2022 Russian and Ukrainian community), Bursa, Adana. British Council Istanbul + Ankara + BESA exam centres. TRT time zone exactly matching Nairobi teaching hours. From USD 180/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Turkish and expat families across Istanbul (Bebek, Etiler, Nişantaşı, Kadıköy, Ataşehir), Ankara (Çankaya, Bilkent), Izmir, Antalya (post-2022 Russian and Ukrainian community), Bursa, Adana. British Council Istanbul + Ankara + BESA exam centres. TRT time zone exactly matching Nairobi teaching hours. From USD 400/month.',
   },
   'homeschooling-kuwait': {
     title: 'Online School & Homeschool Kuwait | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Kuwaiti and expat families across Kuwait City, Salmiya (densest expat district), Hawally (Cambridge English School catchment), Salwa (premium coastal), Bayan (embassy district), and Ahmadi (KOC oil town). British Council Kuwait exam centre. AST time zone exactly matching Nairobi teaching hours. MOHE scholarship pathway alignment. From USD 180/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Kuwaiti and expat families across Kuwait City, Salmiya (densest expat district), Hawally (Cambridge English School catchment), Salwa (premium coastal), Bayan (embassy district), and Ahmadi (KOC oil town). British Council Kuwait exam centre. AST time zone exactly matching Nairobi teaching hours. MOHE scholarship pathway alignment. From USD 400/month.',
   },
   'homeschooling-oman': {
     title: 'Online School & Homeschool Oman | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Omani and expat families across Muscat (MSQ, Al Bandar, Al Khuwair — BSM, Cheltenham, TAISM catchment), Seeb (Sultan\'s School, RGSG Muscat, Downe House), Sohar (Al Batinah North industrial, ABIS), Salalah (Dhofar southern coast), Nizwa (interior cultural capital), and Sur (Ash Sharqiyah North coastal). British Council Muscat exam centre. Immediate enrolment — no BSM/ABA waiting list. From USD 180/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Omani and expat families across Muscat (MSQ, Al Bandar, Al Khuwair — BSM, Cheltenham, TAISM catchment), Seeb (Sultan\'s School, RGSG Muscat, Downe House), Sohar (Al Batinah North industrial, ABIS), Salalah (Dhofar southern coast), Nizwa (interior cultural capital), and Sur (Ash Sharqiyah North coastal). British Council Muscat exam centre. Immediate enrolment — no BSM/ABA waiting list. From USD 400/month.',
   },
   'homeschooling-taiwan': {
     title: 'Online School & Homeschool Taiwan | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Taiwanese and expat families across Taipei (Tianmu — TAS catchment, Shilin — TES catchment), New Taipei City (Linkou — Morrison Academy + TCS), Hsinchu (TSMC ecosystem — HAS, IBSH), Taichung (Morrison Academy, Hong Wen IS Cambridge centre), Kaohsiung (KAS, I-Shou IB), and Taoyuan (TYAS). TES Taipei + HWIS Taichung Cambridge exam centres. Serves Taiwanese-national families that Taiwan physical international schools legally cannot accept. From USD 180/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Taiwanese and expat families across Taipei (Tianmu — TAS catchment, Shilin — TES catchment), New Taipei City (Linkou — Morrison Academy + TCS), Hsinchu (TSMC ecosystem — HAS, IBSH), Taichung (Morrison Academy, Hong Wen IS Cambridge centre), Kaohsiung (KAS, I-Shou IB), and Taoyuan (TYAS). TES Taipei + HWIS Taichung Cambridge exam centres. Serves Taiwanese-national families that Taiwan physical international schools legally cannot accept. From USD 400/month.',
   },
   'homeschooling-ireland': {
     title: 'Online School & Homeschool Ireland | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Irish and expat families across Dublin (South Dublin D4/6/14/18 — NAISD Leopardstown, SEK Kilternan, St. Andrew\'s catchment plus Silicon Docks Google/Meta/LinkedIn corporate), Cork (Apple European HQ + pharma cluster), Galway (Ireland\'s medtech capital — Medtronic + Boston Scientific), Limerick (Analog Devices, Dell), Waterford (South East biotech), and Kildare (Intel Leixlip Fab 34 semiconductor). Post-Brexit UK family continuity + multinational corporate rotation + Túsla-compatible homeschool. From USD 180/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Irish and expat families across Dublin (South Dublin D4/6/14/18 — NAISD Leopardstown, SEK Kilternan, St. Andrew\'s catchment plus Silicon Docks Google/Meta/LinkedIn corporate), Cork (Apple European HQ + pharma cluster), Galway (Ireland\'s medtech capital — Medtronic + Boston Scientific), Limerick (Analog Devices, Dell), Waterford (South East biotech), and Kildare (Intel Leixlip Fab 34 semiconductor). Post-Brexit UK family continuity + multinational corporate rotation + Túsla-compatible homeschool. From USD 400/month.',
   },
   'homeschooling-united-kingdom': {
     title: 'Online School & Homeschool UK | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) at USD 180/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 180/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) at USD 400/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 400/month.',
   },
   'homeschooling-india': {
     title: 'Online School & Homeschool India | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs INR 1.8-5.4 lakh/year Smartious (4-11× cheaper). Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 180/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs INR 1.8-5.4 lakh/year Smartious (4-11× cheaper). Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 400/month.',
   },
   'homeschooling-germany': {
     title: 'Online School & Homeschool Germany | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Germany-resident families across Berlin (BIS Charlottenburg + BBS + BBIS Kleinmachnow + Berlin Metropolitan School alternative), Munich (MIS Starnberg + BIS Haimhausen + European School alternative), Frankfurt (FIS Oberursel + European School + ISF Wiesbaden alternative), Hamburg (ISH Blankenese alternative), Stuttgart (ISS Sindelfingen alternative), and Düsseldorf (ISD Kaiserswerth alternative). Homeschool is illegal in Germany for German citizen children under Schulpflicht — Smartious serves expat families with foreign passports, Sixth Form 16+ students post-Schulpflicht, supplementary tuition alongside German Gymnasium, and international corporate rotational families. From USD 180/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Germany-resident families across Berlin (BIS Charlottenburg + BBS + BBIS Kleinmachnow + Berlin Metropolitan School alternative), Munich (MIS Starnberg + BIS Haimhausen + European School alternative), Frankfurt (FIS Oberursel + European School + ISF Wiesbaden alternative), Hamburg (ISH Blankenese alternative), Stuttgart (ISS Sindelfingen alternative), and Düsseldorf (ISD Kaiserswerth alternative). Homeschool is illegal in Germany for German citizen children under Schulpflicht — Smartious serves expat families with foreign passports, Sixth Form 16+ students post-Schulpflicht, supplementary tuition alongside German Gymnasium, and international corporate rotational families. From USD 400/month.',
   },
   'homeschooling-romania': {
     title: 'Online School & Homeschool Romania | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Romania-resident families across Bucharest (AISB Pipera + BSB Herăstrău + Cambridge School CSB Voluntari + ISB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School alternative), Iași (Amazon Development Center corporate + International School alternative), Brașov (Continental Automotive + Schaeffler + International British School alternative), and Constanța (Port of Constanța + OMV Petrom). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023. 2-12× fee arbitrage. From USD 180/month.',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Romania-resident families across Bucharest (AISB Pipera + BSB Herăstrău + Cambridge School CSB Voluntari + ISB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School alternative), Iași (Amazon Development Center corporate + International School alternative), Brașov (Continental Automotive + Schaeffler + International British School alternative), and Constanța (Port of Constanța + OMV Petrom). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023. 2-12× fee arbitrage. From USD 400/month.',
   },
   assessment: {
     title: 'Book Academic Assessment | Admissions Request — Smartious',
@@ -1842,6 +1842,61 @@ export default function LandingPage() {
   const [currentIndiaCity, setCurrentIndiaCity] = useState(null)
   const [currentGermanyCity, setCurrentGermanyCity] = useState(null)
   const [currentRomaniaCity, setCurrentRomaniaCity] = useState(null)
+
+  // ── Pricing request form state ──────────────────────
+  const [pricingParentName,   setPricingParentName]   = useState('')
+  const [pricingParentEmail,  setPricingParentEmail]  = useState('')
+  const [pricingParentPhone,  setPricingParentPhone]  = useState('')
+  const [pricingCountry,      setPricingCountry]      = useState('')
+  const [pricingCurriculum,   setPricingCurriculum]   = useState('')
+  const [pricingProgramme,    setPricingProgramme]    = useState('')
+  const [pricingStudentInfo,  setPricingStudentInfo]  = useState('')
+  const [pricingMessage,      setPricingMessage]      = useState('')
+  const [pricingRequestSending, setPricingRequestSending] = useState(false)
+  const [pricingRequestSent,  setPricingRequestSent]  = useState(false)
+  const [pricingRequestId,    setPricingRequestId]    = useState('')
+  const [pricingRequestEmail, setPricingRequestEmail] = useState('')
+  const [pricingRequestError, setPricingRequestError] = useState('')
+
+  const submitPricingRequest = async () => {
+    setPricingRequestError('')
+    if (!pricingParentName.trim())  { setPricingRequestError('Please enter your name.'); return }
+    if (!pricingParentEmail.trim()) { setPricingRequestError('Please enter your email address.'); return }
+    if (!pricingCountry.trim())     { setPricingRequestError('Please enter your country of residence.'); return }
+
+    setPricingRequestSending(true)
+    try {
+      const API_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || ''
+      const res = await fetch(`${API_URL}/api/inquiries/public`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parentName:   pricingParentName,
+          parentEmail:  pricingParentEmail,
+          parentPhone:  pricingParentPhone,
+          country:      pricingCountry,
+          studentName:  pricingStudentInfo,
+          curriculum:   pricingCurriculum,
+          source:       'website',
+          campaignTag:  'pricing-request',
+          sourcePage:   '/pricing',
+          consultFormat: pricingProgramme,
+          message:      pricingMessage,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setPricingRequestSent(true)
+        setPricingRequestEmail(pricingParentEmail)
+        setPricingRequestId(String(data.inquiryId || '').slice(-8).toUpperCase())
+      } else {
+        setPricingRequestError(data.message || 'Could not send your request. Please try again.')
+      }
+    } catch (e) {
+      setPricingRequestError('Could not reach our server. Please try again in a moment.')
+    }
+    setPricingRequestSending(false)
+  }
   const [currentVietnamCity, setCurrentVietnamCity] = useState(null)
   const [currentThailandCity, setCurrentThailandCity] = useState(null)
   const [currentTestPrep, setCurrentTestPrep] = useState(null)
@@ -2838,7 +2893,7 @@ export default function LandingPage() {
     metaDesc  = 'Live online Cambridge IGCSE and A-Level for Canadian families. UofT, Waterloo, McGill, UBC, McMaster pipeline. Provincial homeschool compliance support. From $245 CAD/month.'
   } else if (page === 'homeschooling-ethiopia') {
     metaTitle = 'Online Homeschool for Ethiopian Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Ethiopian families across Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar. ICS Addis / Sandford alternative. From USD 180/month.'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Ethiopian families across Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar. ICS Addis / Sandford alternative. From USD 400/month.'
   } else if (page === 'ethiopia-city' && currentEthiopiaCity) {
     const c = ETHIOPIA_CITIES.find(x => x.slug === currentEthiopiaCity)
     if (c) {
@@ -2847,7 +2902,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-rwanda') {
     metaTitle = 'Online Homeschool for Rwandan Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Rwandan families across Kigali, Huye, Musanze, Rubavu. Green Hills Academy / ICS Kigali alternative. Kigali Smart City infrastructure. From USD 180/month.'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Rwandan families across Kigali, Huye, Musanze, Rubavu. Green Hills Academy / ICS Kigali alternative. Kigali Smart City infrastructure. From USD 400/month.'
   } else if (page === 'rwanda-city' && currentRwandaCity) {
     const c = RWANDA_CITIES.find(x => x.slug === currentRwandaCity)
     if (c) {
@@ -2856,7 +2911,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-south-africa') {
     metaTitle = 'Online Homeschool for South African Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for South African families across Johannesburg, Cape Town, Pretoria, Durban, Gqeberha, Stellenbosch. Lower than Brainline, Cambridge Home School Online. BELA Act 2024 compliant. From USD 180/month (~ZAR 3,400).'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level for South African families across Johannesburg, Cape Town, Pretoria, Durban, Gqeberha, Stellenbosch. Lower than Brainline, Cambridge Home School Online. BELA Act 2024 compliant. From USD 400/month (~ZAR 3,400).'
   } else if (page === 'sa-city' && currentSaCity) {
     const c = SOUTH_AFRICA_CITIES.find(x => x.slug === currentSaCity)
     if (c) {
@@ -2865,7 +2920,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-qatar') {
     metaTitle = 'Online Homeschool for Doha & Qatar Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Qatari families across Doha, Al Wakrah, Al Khor, Lusail. Doha College / ASD / Sherborne Qatar alternative. Immediate enrolment, no waiting lists. From USD 180/month (~QAR 655).'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Qatari families across Doha, Al Wakrah, Al Khor, Lusail. Doha College / ASD / Sherborne Qatar alternative. Immediate enrolment, no waiting lists. From USD 400/month (~QAR 655).'
   } else if (page === 'qatar-city' && currentQatarCity) {
     const c = QATAR_CITIES.find(x => x.slug === currentQatarCity)
     if (c) {
@@ -2874,7 +2929,7 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-saudi-arabia') {
     metaTitle = 'Online Homeschool for Saudi Arabian Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 180/month (~SAR 675).'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 400/month (~SAR 675).'
   } else if (page === 'saudi-city' && currentSaudiCity) {
     const c = SAUDI_ARABIA_CITIES.find(x => x.slug === currentSaudiCity)
     if (c) {
@@ -2883,26 +2938,26 @@ export default function LandingPage() {
     }
   } else if (page === 'homeschooling-uae') {
     metaTitle = 'Online Homeschool for UAE Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 180/month (~AED 660).'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 400/month (~AED 660).'
   
   } else if (page === 'homeschooling-egypt') {
     metaTitle = 'Online Homeschool for Egyptian Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Egyptian families across Cairo, New Cairo, Sheikh Zayed, Alexandria, New Administrative Capital, Sharm El Sheikh. Cairo American College / MES / BISC / NCBIS / Hayah / El Alsson / Schutz alternative. Immediate enrolment. From USD 180/month. USD pricing protects against EGP volatility.'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Egyptian families across Cairo, New Cairo, Sheikh Zayed, Alexandria, New Administrative Capital, Sharm El Sheikh. Cairo American College / MES / BISC / NCBIS / Hayah / El Alsson / Schutz alternative. Immediate enrolment. From USD 400/month. USD pricing protects against EGP volatility.'
   } else if (page === 'homeschooling-morocco') {
     metaTitle = 'Online Homeschool for Moroccan Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Moroccan families across Casablanca, Rabat, Marrakech, Tangier, Fes, Agadir. Casablanca American School / George Washington Academy / BISC / Rabat American School / Lycée Lyautey / Lycée Descartes alternative. Immediate enrolment. CET live classes matching Moroccan school hours. From USD 180/month.'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Moroccan families across Casablanca, Rabat, Marrakech, Tangier, Fes, Agadir. Casablanca American School / George Washington Academy / BISC / Rabat American School / Lycée Lyautey / Lycée Descartes alternative. Immediate enrolment. CET live classes matching Moroccan school hours. From USD 400/month.'
   } else if (page === 'homeschooling-south-korea') {
     metaTitle = 'Online Homeschool for Korean Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Korean families across Seoul, Songdo (Incheon IBD), Busan, Pyeongtaek (USAG Camp Humphreys), Daejeon (KAIST), Jeju (Jeju Global Education City). Seoul Foreign School / KIS / Dwight / Chadwick International / NLCS Jeju alternative. KST afternoon/evening live classes matching Korean post-school and hagwon hours. From USD 180/month.'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Korean families across Seoul, Songdo (Incheon IBD), Busan, Pyeongtaek (USAG Camp Humphreys), Daejeon (KAIST), Jeju (Jeju Global Education City). Seoul Foreign School / KIS / Dwight / Chadwick International / NLCS Jeju alternative. KST afternoon/evening live classes matching Korean post-school and hagwon hours. From USD 400/month.'
   } else if (page === 'homeschooling-japan') {
     metaTitle = 'Online Homeschool for Japanese Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Japanese families across Tokyo, Yokohama, Osaka, Kobe, Nagoya (Toyota automotive), Okinawa (USMC + USAF US military bases). ASIJ / BST / KIST / YIS / Saint Maur / Canadian Academy / OIS / NIS alternative. JST afternoon/evening live classes matching Japanese post-school and juku hours. From USD 180/month.'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Japanese families across Tokyo, Yokohama, Osaka, Kobe, Nagoya (Toyota automotive), Okinawa (USMC + USAF US military bases). ASIJ / BST / KIST / YIS / Saint Maur / Canadian Academy / OIS / NIS alternative. JST afternoon/evening live classes matching Japanese post-school and juku hours. From USD 400/month.'
   } else if (page === 'homeschooling-vietnam') {
     metaTitle = 'Online Homeschool for Vietnamese Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Vietnamese families across Ho Chi Minh City (Thao Dien, Phu My Hung), Hanoi (Tay Ho), Da Nang, Bac Ninh (Samsung Vietnam Korean expat hub), Binh Duong (manufacturing), Vung Tau (oil & gas). ISHCMC / BIS HCMC / SSIS / UNIS Hanoi / BIS Hanoi / Concordia alternative. ICT afternoon/evening live classes matching Vietnamese post-school and học thêm hours. From USD 180/month.'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Vietnamese families across Ho Chi Minh City (Thao Dien, Phu My Hung), Hanoi (Tay Ho), Da Nang, Bac Ninh (Samsung Vietnam Korean expat hub), Binh Duong (manufacturing), Vung Tau (oil & gas). ISHCMC / BIS HCMC / SSIS / UNIS Hanoi / BIS Hanoi / Concordia alternative. ICT afternoon/evening live classes matching Vietnamese post-school and học thêm hours. From USD 400/month.'
   } else if (page === 'homeschooling-thailand') {
     metaTitle = 'Online Homeschool for Thai Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Thai families across Bangkok (Sukhumvit), Chiang Mai (digital nomad capital), Phuket (resort island, marine/yacht industry), Pattaya (Eastern Seaboard Japanese manufacturing hub), Hua Hin (royal seaside), Khon Kaen (Isaan regional). ISB / Bangkok Patana / Harrow / Shrewsbury / NIST / Brighton College / BISP / UWC Thailand / Prem / ISE alternative. ICT afternoon/evening live classes matching Thai post-school and kuad wicha hours. From USD 180/month.'
+    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Thai families across Bangkok (Sukhumvit), Chiang Mai (digital nomad capital), Phuket (resort island, marine/yacht industry), Pattaya (Eastern Seaboard Japanese manufacturing hub), Hua Hin (royal seaside), Khon Kaen (Isaan regional). ISB / Bangkok Patana / Harrow / Shrewsbury / NIST / Brighton College / BISP / UWC Thailand / Prem / ISE alternative. ICT afternoon/evening live classes matching Thai post-school and kuad wicha hours. From USD 400/month.'
   } else if (page === 'uae-city' && currentUaeCity) {
     const c = UAE_CITIES.find(x => x.slug === currentUaeCity)
     if (c) {
@@ -4347,11 +4402,11 @@ export default function LandingPage() {
               margin:'36px auto 0',
             }}>
               {[
-                {label:'Cambridge International', detail:'IGCSE · AS · A-Level', from:'USD 8/hour', monthly:'From USD 423/mo'},
-                {label:'Pearson Edexcel', detail:'IGCSE · International A-Level', from:'USD 8/hour', monthly:'From USD 423/mo'},
-                {label:'International Baccalaureate', detail:'PYP · MYP · Diploma (HL/SL)', from:'USD 25/hour (DP HL)', monthly:'From USD 920/mo'},
-                {label:'Kenya CBC', detail:'KICD-aligned · KCSE-eligible', from:'KSh 1,300/hour', monthly:'From KSh 55,000/mo'},
-                {label:'American Curriculum', detail:'Elementary · Middle · High · AP', from:'USD 10/hour', monthly:'From USD 520/mo'},
+                {label:'Cambridge International', detail:'IGCSE · AS · A-Level', from:'Live small-group classes', monthly:'From USD 400/mo · Personalized'},
+                {label:'Pearson Edexcel', detail:'IGCSE · International A-Level', from:'Live small-group classes', monthly:'From USD 400/mo · Personalized'},
+                {label:'International Baccalaureate', detail:'PYP · MYP · Diploma (HL/SL)', from:'Live small-group classes', monthly:'Personalized pricing on request'},
+                {label:'Kenya CBC', detail:'KICD-aligned · KCSE-eligible', from:'Live small-group classes', monthly:'Personalized pricing on request'},
+                {label:'American Curriculum', detail:'Elementary · Middle · High · AP', from:'Live small-group classes', monthly:'From USD 400/mo · Personalized'},
               ].map(c => (
                 <div key={c.label} className="reveal" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',cursor:'pointer',transition:'all .2s'}}
                   onClick={() => P('curricula')}
@@ -4368,7 +4423,7 @@ export default function LandingPage() {
               ))}
             </div>
             <div style={{textAlign:'center',marginTop:24}}>
-              <button onClick={() => P('pricing')} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 24px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer'}}>View full pricing →</button>
+              <button onClick={() => P('pricing')} style={{background:'transparent',color:V.cr,border:`1.5px solid ${V.cr}`,padding:'10px 24px',borderRadius:6,fontSize:13,fontWeight:700,cursor:'pointer'}}>Request personalized pricing →</button>
             </div>
           </div></section>
 
@@ -8942,9 +8997,10 @@ export default function LandingPage() {
       {page === 'pricing' && (
         <>
           {/* ══════════════════════════════════════════
-              PRICING PAGE — Complete fee structure 2026
-              USD only · 3 product tiers × 3 billing cycles
-              + Comprehensive ancillary fees
+              PRICING PAGE — Personalized quote model
+              Starting anchor: $400/month
+              Form submits to POST /api/inquiries/public
+              with campaignTag='pricing-request'
           ══════════════════════════════════════════ */}
 
           {/* HERO */}
@@ -8953,787 +9009,182 @@ export default function LandingPage() {
             background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
             color:'#fff',padding:'72px 0 56px',
           }}>
-            <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
-              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Fee Structure · 2026 Academic Year</div>
+            <div className="wrap" style={{maxWidth:920,margin:'0 auto',textAlign:'center'}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Personalized fees for every family</div>
               <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                Transparent fees, <em style={{color:V.gold3,fontStyle:'italic'}}>no surprises</em>
+                Fees <em style={{color:V.gold3,fontStyle:'italic'}}>calibrated</em> to your family
               </h1>
-              <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:18}}>
-                Per student. All fees displayed in USD. Pay monthly, termly (save 5%), or annually (save 12%). External examination fees are pass-through to Cambridge, Edexcel and IBO with no markup. Sibling discounts available.
+              <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720,margin:'0 auto 24px'}}>
+                Every Smartious family receives pricing tailored to their specific needs — country, curriculum, grade level, and enrolment period. Starting from <strong style={{color:V.gold3}}>USD 400/month</strong> for our online school and homeschool programmes.
               </p>
-
-              {/* Download PDF button */}
-              <div style={{display:'flex',gap:12,flexWrap:'wrap',alignItems:'center',marginBottom:6}}>
-                <a href="/Smartious_Fee_Structure_2026%20(2).pdf"
-                  download
-                  style={{
-                    display:'inline-flex',alignItems:'center',gap:10,
-                    background:V.gold3,color:V.ink,
-                    padding:'13px 22px',borderRadius:8,
-                    textDecoration:'none',fontWeight:800,fontSize:13.5,
-                    letterSpacing:'.02em',
-                    boxShadow:'0 4px 14px rgba(201,151,58,.25)',
-                  }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  Download full fee structure (PDF)
-                </a>
-                <span style={{fontSize:11.5,color:'rgba(255,255,255,.55)'}}>22 pages · ~100 KB</span>
-              </div>
-
-              <div style={{display:'flex',gap:24,flexWrap:'wrap',marginTop:24}}>
-                {[
-                  {h:'Application',v:'$30',sub:'Refundable if not enrolled'},
-                  {h:'Registration',v:'$120',sub:'One-time, on enrolment'},
-                  {h:'Annual discount',v:'12%',sub:'Pay full year, save more'},
-                  {h:'Sibling discount',v:'15–25%',sub:'From 2nd child onwards'},
-                ].map(s => (
-                  <div key={s.h} style={{flex:'1 1 160px'}}>
-                    <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{s.h}</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:'#fff',marginBottom:4}}>{s.v}</div>
-                    <div style={{fontSize:11.5,color:'rgba(255,255,255,.65)'}}>{s.sub}</div>
-                  </div>
-                ))}
+              <div style={{fontSize:13,color:'rgba(255,255,255,.65)',fontStyle:'italic'}}>
+                Personalized quotes delivered within 24 hours · Free consultation call included · Sibling discounts 15-25%
               </div>
             </div>
           </section>
 
-          {/* TUITION TABS */}
-          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:32}}><div className="wrap">
-            <div style={{maxWidth:1200,margin:'0 auto'}}>
-
-              {/* Product tier tabs */}
-              <div style={{display:'flex',justifyContent:'center',marginBottom:32}}>
-                <div style={{display:'inline-flex',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:4,gap:2,boxShadow:'0 2px 10px rgba(8,12,20,.05)',flexWrap:'wrap'}}>
-                  {[
-                    ['inperson','Homeschool · In-Person'],
-                    ['online','Online / Virtual School'],
-                    ['tuition','Private Tuition'],
-                  ].map(([id,lbl]) => (
-                    <button key={id} onClick={() => setPriceTab(id)}
-                      style={{padding:'12px 22px',border:'none',borderRadius:7,background:priceTabs===id?V.cr:'transparent',color:priceTabs===id?V.white:V.ink2,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",transition:'all .2s',whiteSpace:'nowrap'}}>
-                      {lbl}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Billing cycle toggle (hidden on private tuition - that's hourly) */}
-              {priceTabs !== 'tuition' && (
-                <>
-                  <div style={{display:'flex',justifyContent:'center',marginBottom:8}}>
-                    <div style={{display:'inline-flex',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:99,padding:4,gap:2,boxShadow:'0 2px 10px rgba(8,12,20,.05)'}}>
-                      {[
-                        ['monthly','Monthly',''],
-                        ['termly','Termly','Save 5%'],
-                        ['annually','Annually','Save 12%'],
-                      ].map(([id,lbl,save]) => (
-                        <button key={id} onClick={() => setBillingCycle(id)}
-                          style={{padding:'10px 18px',border:'none',borderRadius:99,background:billingCycle===id?V.cr:'transparent',color:billingCycle===id?V.white:V.ink2,fontWeight:700,fontSize:13,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",transition:'all .2s',display:'inline-flex',alignItems:'center',gap:6}}>
-                          {lbl}
-                          {save && <span style={{fontSize:10,fontWeight:700,background:billingCycle===id?'rgba(255,255,255,.18)':'rgba(139,26,46,.1)',color:billingCycle===id?'#fff':V.cr,padding:'2px 7px',borderRadius:99}}>{save}</span>}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div style={{textAlign:'center',fontSize:12,color:V.sl2,marginTop:8,marginBottom:24,fontStyle:'italic'}}>
-                    {billingCycle === 'monthly' && 'Billed monthly · Cancel anytime'}
-                    {billingCycle === 'termly' && 'Billed every 3 months · Save 5% vs monthly'}
-                    {billingCycle === 'annually' && 'Billed annually · Save 12% vs monthly'}
-                  </div>
-                </>
-              )}
-
-              {/* HOMESCHOOL IN-PERSON CARDS */}
-              {priceTabs === 'inperson' && (() => {
-                const cycle = billingCycle
-                const tiers = [
-                  {
-                    cat:'Homeschool · At Home',
-                    name:'Primary',
-                    sub:'CBC · British · American',
-                    years:'Grades 1-6',
-                    monthly:400, termly:1140, annual:4224, termSaving:60, annualSaving:576,
-                    feats:['Full CBC, British or American curriculum','TSC-registered class teacher','Tutor visits your home in Nairobi','All textbooks, workbooks and materials included','Weekly lesson reports to parents','Smartious LMS + Mshauri AI tutor access','Termly progress reports with grades','Parent-teacher consultations every term'],
-                    gold:false,
-                  },
-                  {
-                    cat:'Homeschool · At Home',
-                    name:'High School (IGCSE · Edexcel)',
-                    sub:'Year 7-11',
-                    years:'Year 7-11',
-                    monthly:423, termly:1206, annual:4467, termSaving:63, annualSaving:609,
-                    feats:['Full IGCSE programme (Cambridge or Edexcel)','Specialist subject tutors per subject','Tutor visits your home in Nairobi','All examination past papers and mark schemes','Mock examinations with detailed feedback','Smartious LMS + unlimited Mshauri AI','Exam technique coaching','University pathway guidance from Year 10'],
-                    gold:true,
-                    badge:'Most Popular',
-                  },
-                  {
-                    cat:'Homeschool · At Home',
-                    name:'A-Level / IB Diploma',
-                    sub:'Year 12-13',
-                    years:'Year 12-13',
-                    monthly:515, termly:1468, annual:5438, termSaving:77, annualSaving:742,
-                    feats:['Cambridge A-Level or IB Diploma','Specialist subject teachers','Tutor visits your home in Nairobi','University counselling included','UCAS / Common App / direct application support','Full past paper library + examiner feedback','Smartious Study Abroad consultation included','Free university application support'],
-                    gold:false,
-                  },
-                ]
-                const priceField = cycle==='monthly'?'monthly':cycle==='termly'?'termly':'annual'
-                const savingField = cycle==='termly'?'termSaving':cycle==='annually'?'annualSaving':null
-                const periodLabel = cycle==='monthly'?'per month':cycle==='termly'?'per term':'per year'
-                return (
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-                    {tiers.map(t => (
-                      <div key={t.name} style={{background: t.gold ? V.ink : V.white, border: t.gold ? `1.5px solid ${V.gold3}` : `1px solid ${V.bone3}`, borderRadius:14, padding:'24px 26px', position:'relative', boxShadow: t.gold ? '0 8px 30px rgba(122,84,22,.18)' : 'none'}}>
-                        {t.badge && (
-                          <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',padding:'5px 14px',borderRadius:99}}>{t.badge}</div>
-                        )}
-                        <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.16em',textTransform:'uppercase',color: t.gold ? V.gold3 : V.sl2, marginBottom:10, marginTop: t.badge ? 8 : 0}}>{t.cat}</div>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color: t.gold ? '#fff' : V.ink, lineHeight:1.15, marginBottom:18}}>{t.name}</h3>
-                        <div style={{display:'flex',alignItems:'flex-start',gap:4,marginBottom:6}}>
-                          <span style={{fontSize:18,fontWeight:600,color: t.gold ? V.gold3 : V.cr, marginTop:8}}>$</span>
-                          <span style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'3.2rem',fontWeight:400,color: t.gold ? V.gold3 : V.cr, lineHeight:1}}>{t[priceField].toLocaleString()}</span>
-                        </div>
-                        <div style={{fontSize:12.5,color: t.gold ? 'rgba(255,255,255,.7)' : V.sl, marginBottom:6}}>{periodLabel} · {t.years}</div>
-                        {savingField && t[savingField] && (
-                          <div style={{display:'inline-block',background: t.gold ? 'rgba(201,151,58,.15)' : 'rgba(139,26,46,.08)', color: t.gold ? V.gold3 : V.cr, fontSize:11.5, fontWeight:700, padding:'4px 10px', borderRadius:99, marginBottom:16}}>You save ${t[savingField]}</div>
-                        )}
-                        {!savingField && <div style={{height:16}}/>}
-                        <div style={{borderTop: t.gold ? '1px solid rgba(255,255,255,.1)' : `1px solid ${V.bone3}`, paddingTop:14, marginTop:6}}>
-                          {t.feats.map((f, i) => (
-                            <div key={i} style={{display:'flex',gap:8,marginBottom:8,fontSize:12.5,color: t.gold ? 'rgba(255,255,255,.85)' : V.sl, lineHeight:1.5}}>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.gold ? V.gold3 : V.cr} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:2}}><path d="M20 6L9 17l-5-5"/></svg>
-                              {f}
-                            </div>
-                          ))}
-                        </div>
-                        <button onClick={() => nav('/assessment')} style={{marginTop:20,width:'100%',padding:'12px 16px',background: t.gold ? V.gold3 : V.cr, color: t.gold ? V.ink : '#fff', border:'none', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>Book assessment</button>
-                      </div>
-                    ))}
-                  </div>
-                )
-              })()}
-
-              {/* ONLINE / VIRTUAL SCHOOL CARDS */}
-              {priceTabs === 'online' && (() => {
-                const cycle = billingCycle
-                const tiers = [
-                  {
-                    cat:'Online / Virtual School',
-                    name:'Basic Online',
-                    sub:'All ages',
-                    monthly:180, termly:513, annual:1901, termSaving:27, annualSaving:259,
-                    feats:['Full recorded video lesson library','Interactive practice quizzes and worksheets','Auto-graded assignments and feedback','Mshauri AI tutor (basic — 50 prompts/day)','Smartious LMS access','Termly written progress reports','Email support · 48-hour response','Self-paced learning across CBC, IGCSE, American'],
-                    gold:false,
-                  },
-                  {
-                    cat:'Online / Virtual School',
-                    name:'Premium Online',
-                    sub:'All ages',
-                    monthly:260, termly:741, annual:2746, termSaving:39, annualSaving:374,
-                    feats:['Everything in Basic, plus:','Weekly live group classes (small group format)','Bi-weekly 1-on-1 tutor consultations (30 min)','Mshauri AI Pro (unlimited prompts)','Personalised learning paths','Mock examinations with examiner feedback','WhatsApp support · same-day response','University pathway guidance from Year 10'],
-                    gold:true,
-                    badge:'Best Value',
-                  },
-                  {
-                    cat:'Online / Virtual School',
-                    name:'IGCSE Full Pack',
-                    sub:'Year 9-11',
-                    monthly:360, termly:1026, annual:3802, termSaving:54, annualSaving:518,
-                    feats:['Complete IGCSE curriculum across all subjects','All Cambridge past papers 2015-2025','All Edexcel past papers 2015-2025','Daily live group classes with subject teachers','Weekly 1-on-1 tutor sessions','Full mock examination series (3 mocks/year)','Examination technique masterclasses','Dedicated WhatsApp support line'],
-                    gold:false,
-                  },
-                ]
-                const priceField = cycle==='monthly'?'monthly':cycle==='termly'?'termly':'annual'
-                const savingField = cycle==='termly'?'termSaving':cycle==='annually'?'annualSaving':null
-                const periodLabel = cycle==='monthly'?'per month':cycle==='termly'?'per term':'per year'
-                return (
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
-                    {tiers.map(t => (
-                      <div key={t.name} style={{background: t.gold ? V.ink : V.white, border: t.gold ? `1.5px solid ${V.gold3}` : `1px solid ${V.bone3}`, borderRadius:14, padding:'24px 26px', position:'relative', boxShadow: t.gold ? '0 8px 30px rgba(122,84,22,.18)' : 'none'}}>
-                        {t.badge && (
-                          <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',padding:'5px 14px',borderRadius:99}}>{t.badge}</div>
-                        )}
-                        <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.16em',textTransform:'uppercase',color: t.gold ? V.gold3 : V.sl2, marginBottom:10, marginTop: t.badge ? 8 : 0}}>{t.cat}</div>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color: t.gold ? '#fff' : V.ink, lineHeight:1.15, marginBottom:18}}>{t.name}</h3>
-                        <div style={{display:'flex',alignItems:'flex-start',gap:4,marginBottom:6}}>
-                          <span style={{fontSize:18,fontWeight:600,color: t.gold ? V.gold3 : V.cr, marginTop:8}}>$</span>
-                          <span style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'3.2rem',fontWeight:400,color: t.gold ? V.gold3 : V.cr, lineHeight:1}}>{t[priceField].toLocaleString()}</span>
-                        </div>
-                        <div style={{fontSize:12.5,color: t.gold ? 'rgba(255,255,255,.7)' : V.sl, marginBottom:6}}>{periodLabel} · {t.sub}</div>
-                        {savingField && t[savingField] && (
-                          <div style={{display:'inline-block',background: t.gold ? 'rgba(201,151,58,.15)' : 'rgba(139,26,46,.08)', color: t.gold ? V.gold3 : V.cr, fontSize:11.5, fontWeight:700, padding:'4px 10px', borderRadius:99, marginBottom:16}}>You save ${t[savingField]}</div>
-                        )}
-                        {!savingField && <div style={{height:16}}/>}
-                        <div style={{borderTop: t.gold ? '1px solid rgba(255,255,255,.1)' : `1px solid ${V.bone3}`, paddingTop:14, marginTop:6}}>
-                          {t.feats.map((f, i) => (
-                            <div key={i} style={{display:'flex',gap:8,marginBottom:8,fontSize:12.5,color: t.gold ? 'rgba(255,255,255,.85)' : V.sl, lineHeight:1.5}}>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.gold ? V.gold3 : V.cr} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:2}}><path d="M20 6L9 17l-5-5"/></svg>
-                              {f}
-                            </div>
-                          ))}
-                        </div>
-                        <button onClick={() => nav('/assessment')} style={{marginTop:20,width:'100%',padding:'12px 16px',background: t.gold ? V.gold3 : V.cr, color: t.gold ? V.ink : '#fff', border:'none', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>Book assessment</button>
-                      </div>
-                    ))}
-                  </div>
-                )
-              })()}
-
-              {/* PRIVATE TUITION (hourly) */}
-              {priceTabs === 'tuition' && (
-                <>
-                  <div style={{textAlign:'center',marginBottom:28,fontSize:13.5,color:V.sl,maxWidth:760,margin:'0 auto 28px',lineHeight:1.7}}>
-                    One-on-one private tuition. In-person at your home (Nairobi) or online worldwide. Hourly rates apply. Minimum 4 hours per month.
-                  </div>
-                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14}}>
-                    {[
-                      { lvl:'Primary', sub:'Grades 1-6', rate:15, feats:['One-on-one in-centre or online','Qualified primary teachers','All materials provided','Lesson notes after each session'] },
-                      { lvl:'Junior Secondary', sub:'Year 7-9', rate:18, feats:['Subject-specialist tutors','Curriculum-aligned sessions','Homework support included','Mock tests on request'] },
-                      { lvl:'IGCSE', sub:'Year 10-11', rate:22, feats:['Cambridge/Edexcel specialists','Past paper-focused','Exam technique training','Mock examinations'], gold:true, badge:'Popular' },
-                      { lvl:'A-Level / IB', sub:'Year 12-13', rate:28, feats:['Expert subject tutors','University-level prep','IA / EE / TOK support (IB)','UCAS / Common App guidance'] },
-                    ].map(t => (
-                      <div key={t.lvl} style={{background: t.gold ? V.ink : V.white, border: t.gold ? `1.5px solid ${V.gold3}` : `1px solid ${V.bone3}`, borderRadius:14, padding:'22px 24px', position:'relative'}}>
-                        {t.badge && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',padding:'5px 14px',borderRadius:99}}>{t.badge}</div>}
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:400,color: t.gold ? '#fff' : V.ink, marginBottom:4, marginTop: t.badge ? 6 : 0}}>{t.lvl}</h3>
-                        <div style={{fontSize:11.5,color: t.gold ? 'rgba(255,255,255,.6)' : V.sl2, marginBottom:14}}>{t.sub}</div>
-                        <div style={{display:'flex',alignItems:'baseline',gap:4,marginBottom:14}}>
-                          <span style={{fontSize:16,fontWeight:600,color: t.gold ? V.gold3 : V.cr}}>$</span>
-                          <span style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.4rem',fontWeight:400,color: t.gold ? V.gold3 : V.cr, lineHeight:1}}>{t.rate}</span>
-                          <span style={{fontSize:12,color: t.gold ? 'rgba(255,255,255,.6)' : V.sl, marginLeft:4}}>/hour</span>
-                        </div>
-                        <div style={{borderTop: t.gold ? '1px solid rgba(255,255,255,.1)' : `1px solid ${V.bone3}`, paddingTop:12}}>
-                          {t.feats.map((f, i) => (
-                            <div key={i} style={{display:'flex',gap:7,marginBottom:6,fontSize:12,color: t.gold ? 'rgba(255,255,255,.85)' : V.sl, lineHeight:1.5}}>
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={t.gold ? V.gold3 : V.cr} strokeWidth="3" strokeLinecap="round" style={{flexShrink:0,marginTop:3}}><path d="M20 6L9 17l-5-5"/></svg>
-                              {f}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Hour package bundles */}
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:V.ink,margin:'48px 0 18px',textAlign:'center'}}>Hour Bundles · Save up to 15%</h3>
-                  <div style={{maxWidth:900,margin:'0 auto',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
-                    {[
-                      ['Trial · 4 hours','Single subject · ideal for first-time families','Standard rate · no discount'],
-                      ['Casual · 10 hours','Spread across 1-2 months','Save 5% vs hourly rate'],
-                      ['Standard · 20 hours','Sustained tutoring across a term','Save 10% vs hourly rate'],
-                      ['Intensive · 40 hours','Exam preparation or accelerated study','Save 12% vs hourly rate'],
-                      ['Year-long · 80 hours','Full academic year support','Save 15% vs hourly rate'],
-                    ].map(([h,sub,saving],i,a) => (
-                      <div key={h} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 20px',borderBottom:i<a.length-1?`1px solid ${V.bone2}`:'none',flexWrap:'wrap'}}>
-                        <div style={{flex:1,minWidth:200}}>
-                          <div style={{fontWeight:700,fontSize:14,color:V.ink}}>{h}</div>
-                          <div style={{fontSize:12,color:V.sl2,marginTop:2}}>{sub}</div>
-                        </div>
-                        <div style={{fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",fontWeight:700,fontSize:13,color:V.cr,whiteSpace:'nowrap'}}>{saving}</div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-
-            </div>
-          </div></section>
-
-          {/* ============================================
-              ADDITIONAL FEES — Complete breakdown
-              All fees in USD. Transparent and well-explained.
-          ============================================ */}
-
-          {/* ONE-TIME FEES */}
-          <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:32}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>One-time fees</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Onboarding <em style={{color:V.cr,fontStyle:'italic'}}>fees</em>
-                </h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
-                  Paid once when joining Smartious. Covers placement, system setup and family onboarding.
-                </p>
-              </div>
-              <div style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
+          {/* PRICING ANCHOR TILES */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:40}}><div className="wrap">
+            <div style={{maxWidth:1080,margin:'0 auto'}}>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:20}}>
                 {[
-                  { fee:'Application Fee', amount:'$30', desc:'Paid at time of application. Covers initial review of student profile, family consultation, and curriculum recommendation. Refundable if you choose not to enrol.' },
-                  { fee:'Academic Placement Assessment', amount:'$40', desc:'Diagnostic assessment to determine the appropriate grade, curriculum and tutor match. Waived for students transferring from a recognised school with recent academic transcripts.' },
-                  { fee:'Registration Fee', amount:'$120', desc:'One-time, non-refundable fee paid upon confirmation of enrolment. Covers LMS account setup, family portal access, ID card, welcome pack, initial textbook allocation, and registration with the relevant examination board where applicable.' },
-                ].map((row, i, a) => (
-                  <div key={row.fee} style={{padding:'18px 22px',borderBottom:i<a.length-1?`1px solid ${V.bone3}`:'none'}}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:14,flexWrap:'wrap',marginBottom:6}}>
-                      <h3 style={{fontSize:14.5,fontWeight:700,color:V.ink,margin:0}}>{row.fee}</h3>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.cr,whiteSpace:'nowrap'}}>{row.amount}</div>
-                    </div>
-                    <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{row.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div></section>
-
-          {/* ANNUAL SERVICE FEES */}
-          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:32}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Annual service fees</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Annual <em style={{color:V.cr,fontStyle:'italic'}}>services</em>
-                </h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
-                  Paid once per academic year. Covers ongoing platform access, digital resources and co-curricular activities.
-                </p>
-              </div>
-              <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
-                {[
-                  { fee:'Smartious LMS & Technology Fee', amount:'$180', desc:'Annual access to the Smartious Learning Management System — live class platform, attendance tracking, assignment submission, grade portal, parent dashboard, and student progress analytics. Maintained and updated continuously.' },
-                  { fee:'Digital Library & Resource Access', amount:'$90', desc:'Access to the Smartious digital library — 2,000+ e-books, video lessons, examination archives (Cambridge & Edexcel past papers from 2015), curated educational videos, and approved external resources (Khan Academy Premium, IXL, etc.).' },
-                  { fee:'Mshauri AI Tutor Pro', amount:'$120', desc:'24/7 AI homework helper trained on Cambridge, Edexcel, IB and American curricula. Unlimited prompts, voice mode, image upload for problem-solving. INCLUDED FREE in Online Premium and IGCSE Full Pack tiers.', note:'Free in Premium tiers' },
-                  { fee:'Sports & Co-Curricular Activities', amount:'$200', desc:'Annual fee for participation in Smartious co-curricular programmes: sports (football, basketball, athletics, swimming where available), arts (music, drama, art clubs), STEM clubs (robotics, coding), debate society, and inter-school competitions. Required for in-person students; optional for online students.', note:'Optional for online students' },
-                  { fee:'Examination Centre Registration', amount:'$50', desc:'Annual administrative fee to coordinate external examination registration with British Council Nairobi, KNEC, IB schools, or designated centres in your home country. Covers timing coordination, candidate registration management, and centre liaison.' },
-                ].map((row, i, a) => (
-                  <div key={row.fee} style={{padding:'18px 22px',borderBottom:i<a.length-1?`1px solid ${V.bone3}`:'none'}}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:14,flexWrap:'wrap',marginBottom:6}}>
-                      <div style={{flex:'1 1 auto'}}>
-                        <h3 style={{fontSize:14.5,fontWeight:700,color:V.ink,margin:0,marginBottom:row.note?4:0}}>{row.fee}</h3>
-                        {row.note && <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.06em',textTransform:'uppercase'}}>{row.note}</div>}
-                      </div>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.cr,whiteSpace:'nowrap'}}>{row.amount}<span style={{fontSize:11,color:V.sl2,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",fontWeight:400}}> / year</span></div>
-                    </div>
-                    <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{row.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div></section>
-
-          {/* EXTERNAL EXAMINATION FEES — Pass-through */}
-          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:32}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>External examination fees</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Examination <em style={{color:V.cr,fontStyle:'italic'}}>fees</em>
-                </h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:720,margin:'14px auto 0',lineHeight:1.7}}>
-                  Per subject, paid only when the student sits external examinations. <strong style={{color:V.ink}}>Pass-through to Cambridge, Edexcel, IBO or College Board — no Smartious markup.</strong> Smartious only charges a $25 administration fee for registration coordination per examination series.
-                </p>
-              </div>
-              <div style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
-                <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
-                  <thead style={{background:V.ink,color:'#fff'}}>
-                    <tr>
-                      <th style={{padding:'12px 16px',textAlign:'left',fontSize:11,letterSpacing:'.06em',textTransform:'uppercase'}}>Examination</th>
-                      <th style={{padding:'12px 16px',textAlign:'left',fontSize:11,letterSpacing:'.06em',textTransform:'uppercase'}}>Per subject</th>
-                      <th style={{padding:'12px 16px',textAlign:'left',fontSize:11,letterSpacing:'.06em',textTransform:'uppercase'}}>Typical total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      ['Cambridge IGCSE','$115','8 subjects ≈ $920'],
-                      ['Pearson Edexcel IGCSE','$110','8 subjects ≈ $880'],
-                      ['Cambridge A-Level (AS + A2)','$140','3-4 subjects ≈ $420-560'],
-                      ['Pearson Edexcel A-Level','$135','3-4 subjects ≈ $405-540'],
-                      ['IB Diploma (full programme)','$990 flat','One-time IBO charge for the full Diploma'],
-                      ['Advanced Placement (AP)','$150','5-7 exams ≈ $750-1,050'],
-                      ['SAT (one sitting)','$70','Plus $35 international fee'],
-                      ['IELTS / TOEFL','$220-260','Per sitting'],
-                      ['Smartious Admin Fee (per series)','$25','Once per examination series'],
-                    ].map(([exam, perSub, total], i, a) => (
-                      <tr key={exam} style={{background: i % 2 ? V.white : 'transparent', borderTop:`1px solid ${V.bone3}`}}>
-                        <td style={{padding:'13px 16px',fontWeight:700,color:V.ink}}>{exam}</td>
-                        <td style={{padding:'13px 16px',color:V.cr,fontWeight:700}}>{perSub}</td>
-                        <td style={{padding:'13px 16px',color:V.sl}}>{total}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <p style={{fontSize:12,color:V.sl2,marginTop:16,lineHeight:1.7,textAlign:'center',maxWidth:760,marginLeft:'auto',marginRight:'auto'}}>
-                Examination fees are set annually by the respective examination boards and may change. Smartious will invoice the exact published board fee plus the $25 administration fee. Late entries (after the normal closing date) attract additional late entry penalties charged by the board.
-              </p>
-            </div>
-          </div></section>
-
-          {/* LAB & PRACTICAL FEES */}
-          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:32}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Laboratory & practical fees</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Lab <em style={{color:V.cr,fontStyle:'italic'}}>fees</em>
-                </h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:720,margin:'14px auto 0',lineHeight:1.7}}>
-                  Per subject per academic year. Applies to subjects with practical/laboratory components. Covers consumables, equipment use, lab assistants, and safety materials. Online students access virtual labs (PhET, Labster) at the same fee.
-                </p>
-              </div>
-              <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
-                {[
-                  { fee:'Biology Laboratory Fee', amount:'$90', desc:'Microscopy, dissection materials, specimens, biological consumables, lab coats and safety equipment. Required for Cambridge IGCSE/A-Level Biology, IB Biology, AP Biology.' },
-                  { fee:'Chemistry Laboratory Fee', amount:'$90', desc:'Reagents, chemicals, glassware allocation, fume hood use, safety goggles, lab coats. Required for Cambridge IGCSE/A-Level Chemistry, IB Chemistry, AP Chemistry.' },
-                  { fee:'Physics Laboratory Fee', amount:'$90', desc:'Apparatus access (electronics, optics, mechanics kits), instrumentation, consumables. Required for Cambridge IGCSE/A-Level Physics, IB Physics, AP Physics.' },
-                  { fee:'ICT / Computing Lab Fee', amount:'$70', desc:'Software licences (Adobe, Microsoft Office), programming environments (PyCharm, VS Code), cloud computing credits, project hosting. Required for Cambridge IGCSE/A-Level Computer Science, IB Computer Science, AP Computer Science.' },
-                  { fee:'Art & Design Materials Fee', amount:'$80', desc:'Art supplies, canvases, paints, digital design software access (Procreate, Adobe Creative Suite). Required for IGCSE/A-Level Art & Design, IB Visual Arts.' },
-                  { fee:'Combined Sciences Bundle', amount:'$240', desc:'Bundle pricing for students taking 3 sciences (Biology + Chemistry + Physics). Save $30 vs paying individually.', note:'Save $30' },
-                ].map((row, i, a) => (
-                  <div key={row.fee} style={{padding:'18px 22px',borderBottom:i<a.length-1?`1px solid ${V.bone3}`:'none'}}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:14,flexWrap:'wrap',marginBottom:6}}>
-                      <div style={{flex:'1 1 auto'}}>
-                        <h3 style={{fontSize:14.5,fontWeight:700,color:V.ink,margin:0,marginBottom:row.note?4:0}}>{row.fee}</h3>
-                        {row.note && <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.06em',textTransform:'uppercase'}}>{row.note}</div>}
-                      </div>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.cr,whiteSpace:'nowrap'}}>{row.amount}<span style={{fontSize:11,color:V.sl2,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",fontWeight:400}}> / year</span></div>
-                    </div>
-                    <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{row.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div></section>
-
-          {/* OPTIONAL SERVICES */}
-          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:32}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Optional services</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Optional <em style={{color:V.cr,fontStyle:'italic'}}>add-ons</em>
-                </h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
-                  Choose what your family needs. Most are billed only when used.
-                </p>
-              </div>
-              <div style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
-                {[
-                  { fee:'University Application Support — UK (UCAS)', amount:'$250', desc:'Complete UCAS application support: 5 university shortlist, personal statement coaching (3 rounds of feedback), reference letter coordination, application submission, interview preparation. For Year 13 students.' },
-                  { fee:'University Application Support — USA', amount:'$400', desc:'Complete Common App support: 8-10 university shortlist (target + reach + safety), SAT/ACT preparation guidance, essay coaching (Common App essay + supplementals), recommendation coordination, interview preparation.' },
-                  { fee:'University Application Support — Canada/Australia/Europe', amount:'$200', desc:'Direct university application support for Canadian (OUAC), Australian, German, Dutch, Irish universities. Includes shortlisting, application submission, scholarship search, and visa guidance.' },
-                  { fee:'Additional 1-on-1 Tutoring (top-up)', amount:'$25/hour', desc:'Extra 1-on-1 sessions beyond your programme allocation. Useful for exam crunch periods, weak subject areas, or accelerated study. Booked in 4-hour blocks minimum.' },
-                  { fee:'Holiday Catch-Up Programme', amount:'$400', desc:'4-week intensive catch-up programme during school holidays. For students transitioning to Smartious mid-year or those needing to bridge curricular gaps. Up to 30 hours of tutoring.' },
-                  { fee:'Special Educational Needs (SEN) Support', amount:'$50/session', desc:'1-on-1 specialist coaching for students with diagnosed learning differences (dyslexia, ADHD, autism spectrum). Sessions delivered by SEN-qualified teachers. Initial assessment $80.' },
-                  { fee:'Summer Enrichment Programme', amount:'$300-500', desc:'Summer holiday programmes: STEM camps, creative writing workshops, robotics intensive, language immersion. Pricing varies by programme depth (2-4 weeks).' },
-                  { fee:'Mock Examination Series (extra)', amount:'$80', desc:'Additional mock examination series beyond what is included in your programme. 3 mocks per subject with detailed examiner-style feedback. Useful before high-stakes external exams.' },
-                  { fee:'Revision Intensive Pack (final 6 weeks)', amount:'$120', desc:'6-week intensive revision programme leading up to external examinations. Daily live revision sessions, past paper drilling, examination technique masterclasses, and individual weak-area diagnostics.' },
-                ].map((row, i, a) => (
-                  <div key={row.fee} style={{padding:'18px 22px',borderBottom:i<a.length-1?`1px solid ${V.bone3}`:'none'}}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:14,flexWrap:'wrap',marginBottom:6}}>
-                      <h3 style={{fontSize:14.5,fontWeight:700,color:V.ink,margin:0}}>{row.fee}</h3>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.cr,whiteSpace:'nowrap'}}>{row.amount}</div>
-                    </div>
-                    <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{row.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div></section>
-
-          {/* ADMINISTRATIVE / OTHER FEES */}
-          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:32}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Administrative fees</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Administrative <em style={{color:V.cr,fontStyle:'italic'}}>charges</em>
-                </h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
-                  Charged only when applicable. Most families never pay these.
-                </p>
-              </div>
-              <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,overflow:'hidden'}}>
-                <table style={{width:'100%',borderCollapse:'collapse',fontSize:13}}>
-                  <thead style={{background:V.ink,color:'#fff'}}>
-                    <tr>
-                      <th style={{padding:'12px 16px',textAlign:'left',fontSize:11,letterSpacing:'.06em',textTransform:'uppercase'}}>Charge</th>
-                      <th style={{padding:'12px 16px',textAlign:'left',fontSize:11,letterSpacing:'.06em',textTransform:'uppercase'}}>Amount</th>
-                      <th style={{padding:'12px 16px',textAlign:'left',fontSize:11,letterSpacing:'.06em',textTransform:'uppercase'}}>When charged</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      ['Late Payment Fee','$25','If payment is not received by the 7th of the month'],
-                      ['Returned Payment / Failed Transaction','$15','If a payment is reversed, bounced or declined'],
-                      ['Re-sit / Re-assessment Fee','$50','For students re-sitting internal Smartious assessments'],
-                      ['Additional Transcript or Report','$20','Per additional copy beyond the included annual report'],
-                      ['Verification Letter (visa / immigration)','$35','Official letter on Smartious letterhead for embassy, visa, or immigration use'],
-                      ['Custom Certificate or Award','$25','Personalised certificate beyond standard end-of-term awards'],
-                      ['Express Document Delivery (international)','$50','International courier for physical certificates or transcripts'],
-                      ['Replacement ID Card','$15','If the student ID card is lost or damaged'],
-                      ['Mid-Term Withdrawal Processing','$80','Administrative fee if a student withdraws mid-term (in addition to standard refund terms)'],
-                    ].map(([charge, amount, when], i) => (
-                      <tr key={charge} style={{background: i % 2 ? V.bone : 'transparent', borderTop:`1px solid ${V.bone3}`}}>
-                        <td style={{padding:'13px 16px',fontWeight:700,color:V.ink}}>{charge}</td>
-                        <td style={{padding:'13px 16px',color:V.cr,fontWeight:700}}>{amount}</td>
-                        <td style={{padding:'13px 16px',color:V.sl}}>{when}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div></section>
-
-          {/* SAMPLE TOTAL ANNUAL COST */}
-          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:32}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Sample annual costs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  What a <em style={{color:V.cr,fontStyle:'italic'}}>typical year</em> costs
-                </h2>
-                <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
-                  Real examples showing tuition + all applicable fees for the most common student profiles.
-                </p>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:14}}>
-                {[
-                  {
-                    title:'Year 10 IGCSE Student',
-                    sub:'Online Premium · 8 IGCSE subjects · 3 sciences',
-                    items:[
-                      ['Online Premium tier (annual)', '$2,746'],
-                      ['Registration fee (one-time)', '$120'],
-                      ['LMS & Technology fee', '$180'],
-                      ['Digital Library access', '$90'],
-                      ['Mshauri AI Pro', 'Included'],
-                      ['Sciences Lab fee (3 sciences bundle)', '$240'],
-                      ['Sports & Co-curricular', 'Optional'],
-                      ['IGCSE Exam fees (Year 11 only — not Year 10)', '$0 this year'],
-                    ],
-                    total:'$3,376',
-                    note:'Year 11 will add ~$945 in IGCSE exam fees',
-                  },
-                  {
-                    title:'Year 11 IGCSE Student',
-                    sub:'Online IGCSE Full Pack · 8 subjects · 3 sciences · exam year',
-                    items:[
-                      ['IGCSE Full Pack tier (annual)', '$3,802'],
-                      ['LMS & Technology fee', '$180'],
-                      ['Digital Library access', '$90'],
-                      ['Sciences Lab fee (3 sciences bundle)', '$240'],
-                      ['IGCSE Exam fees (8 subjects)', '$920'],
-                      ['Admin fee (exam coordination)', '$25'],
-                      ['Mock examination extra', '$80'],
-                      ['Revision Intensive Pack', '$120'],
-                    ],
-                    total:'$5,457',
-                    note:'Most common spend year — exam year',
-                    gold:true,
-                  },
-                  {
-                    title:'Year 12 A-Level Student',
-                    sub:'In-Person at home · 4 A-Levels including 2 sciences',
-                    items:[
-                      ['A-Level In-Person tier (annual)', '$5,438'],
-                      ['LMS & Technology fee', '$180'],
-                      ['Digital Library access', '$90'],
-                      ['Sciences Lab fee (2 sciences)', '$180'],
-                      ['Sports & Co-curricular (in-person required)', '$200'],
-                      ['A-Level AS Exam fees (4 subjects)', '$560'],
-                      ['UCAS / University Application Support — UK', '$250'],
-                    ],
-                    total:'$6,898',
-                    note:'University-bound · all support included',
-                  },
+                  {h:'Online School & Homeschool',v:'From USD 400/month',sub:'Live small-group classes 4-6 students. Cambridge, Edexcel, IB, American, Ontario OSSD, Kenya CBC.'},
+                  {h:'Private Tuition (1:1)',v:'From USD 25/hour',sub:'One-on-one live online sessions. Custom-scheduled to your family time zone.'},
+                  {h:'Study Abroad & IUFP',v:'Custom pricing',sub:'International University Foundation Programme + university placement support.'},
+                  {h:'Application & Registration',v:'USD 30 + 120',sub:'Application (refundable if not enrolled) + one-time registration on enrolment.'},
                 ].map(s => (
-                  <div key={s.title} style={{background: s.gold ? V.ink : V.bone, border: s.gold ? `1.5px solid ${V.gold3}` : `1px solid ${V.bone3}`, borderRadius:14, padding:'22px 24px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:400,color: s.gold ? '#fff' : V.ink, marginBottom:4, lineHeight:1.2}}>{s.title}</h3>
-                    <div style={{fontSize:11.5,color: s.gold ? 'rgba(255,255,255,.7)' : V.sl2, marginBottom:16,fontStyle:'italic'}}>{s.sub}</div>
-                    {s.items.map(([k, v], i) => (
-                      <div key={i} style={{display:'flex',justifyContent:'space-between',gap:10,padding:'5px 0',fontSize:12.5, borderBottom: i<s.items.length-1?(s.gold?'1px solid rgba(255,255,255,.08)':'1px solid rgba(8,12,20,.06)'):'none'}}>
-                        <span style={{color: s.gold ? 'rgba(255,255,255,.85)' : V.sl, flex:1}}>{k}</span>
-                        <span style={{color: s.gold ? '#fff' : V.ink, fontWeight: v==='Included' || v==='Optional' || v.startsWith('$0') ? 400 : 700, fontSize: v==='Included' || v==='Optional' || v.startsWith('$0') ? 11.5 : 12.5, fontStyle: v==='Included' || v==='Optional' || v.startsWith('$0') ? 'italic' : 'normal'}}>{v}</span>
-                      </div>
-                    ))}
-                    <div style={{display:'flex',justifyContent:'space-between',gap:10,padding:'12px 0 0',marginTop:8,borderTop: s.gold ? `2px solid ${V.gold3}` : `2px solid ${V.cr}`}}>
-                      <span style={{fontSize:13,fontWeight:700,color: s.gold ? '#fff' : V.ink}}>Annual total</span>
-                      <span style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color: s.gold ? V.gold3 : V.cr}}>{s.total}</span>
-                    </div>
-                    {s.note && <div style={{fontSize:11,color: s.gold ? 'rgba(255,255,255,.55)' : V.sl2, marginTop:8, fontStyle:'italic',lineHeight:1.5}}>{s.note}</div>}
+                  <div key={s.h} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'24px 22px',boxShadow:'0 2px 10px rgba(8,12,20,.04)'}}>
+                    <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>{s.h}</div>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color:V.ink,marginBottom:8,lineHeight:1.15}}>{s.v}</div>
+                    <div style={{fontSize:13,color:V.sl2,lineHeight:1.55}}>{s.sub}</div>
                   </div>
                 ))}
+              </div>
+
+              <div style={{textAlign:'center',marginTop:32,fontSize:13,color:V.sl2,fontStyle:'italic',maxWidth:720,margin:'32px auto 0'}}>
+                Final fees depend on your country, curriculum choice, grade level, class-size preference, and enrolment period. Request a personalized quote below and our admissions team will respond within 24 hours.
               </div>
             </div>
           </div></section>
 
-          {/* DISCOUNTS & SAVINGS */}
-          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:32}}><div className="wrap">
-            <div style={{maxWidth:1000,margin:'0 auto'}}>
+          {/* REQUEST PRICING FORM */}
+          <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:72}}><div className="wrap">
+            <div style={{maxWidth:720,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Discounts & savings</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Ways to <em style={{color:V.cr,fontStyle:'italic'}}>save</em>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Request Personalized Pricing</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.1,marginBottom:14,letterSpacing:'-.01em'}}>
+                  Tell us about your family
                 </h2>
+                <p style={{fontSize:15,color:V.sl2,lineHeight:1.6,maxWidth:560,margin:'0 auto'}}>
+                  A five-minute form. We\'ll email a personalized quote within 24 hours and follow up with a free consultation call to walk through the options.
+                </p>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14}}>
-                {[
-                  { name:'Annual Payment Discount', save:'12%', desc:'Pay the full year upfront and save 12% on all tuition fees.' },
-                  { name:'Termly Payment Discount', save:'5%', desc:'Pay each term in advance (3 terms) and save 5% on tuition.' },
-                  { name:'Sibling Discount — 2nd Child', save:'15%', desc:'15% off tuition for your second child enrolled in any full programme.' },
-                  { name:'Sibling Discount — 3rd+ Child', save:'25%', desc:'25% off tuition for your third (and any additional) child.' },
-                  { name:'Early Bird Discount', save:'5%', desc:'Additional 5% off if you enrol before 30 May for the September intake.' },
-                  { name:'Referral Reward', save:'$100', desc:'Receive a $100 credit when a family you refer enrols (applied to your next billing cycle).' },
-                ].map(d => (
-                  <div key={d.name} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',color:V.gold3,marginBottom:6,fontWeight:400}}>{d.save}</div>
-                    <h3 style={{fontSize:13.5,fontWeight:700,color:V.ink,marginBottom:6,lineHeight:1.3}}>{d.name}</h3>
-                    <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,margin:0}}>{d.desc}</p>
+
+              {pricingRequestSent ? (
+                <div style={{background:V.bone,border:`1px solid ${V.gold3}`,borderRadius:12,padding:'36px 28px',textAlign:'center'}}>
+                  <div style={{fontSize:44,marginBottom:12}}>✓</div>
+                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginBottom:10}}>Request received</h3>
+                  <p style={{fontSize:14,color:V.sl2,lineHeight:1.6,maxWidth:480,margin:'0 auto'}}>
+                    Thank you. Our admissions team has received your request and will email a personalized quote to <strong>{pricingRequestEmail}</strong> within 24 hours (usually much sooner).
+                  </p>
+                  <div style={{marginTop:20,fontSize:13,color:V.sl2}}>
+                    Reference ID: <code style={{background:'#fff',padding:'2px 8px',borderRadius:4,fontSize:12,color:V.cr}}>{pricingRequestId}</code>
                   </div>
-                ))}
-              </div>
-              <p style={{fontSize:12,color:V.sl2,marginTop:18,lineHeight:1.7,textAlign:'center',maxWidth:760,marginLeft:'auto',marginRight:'auto',fontStyle:'italic'}}>
-                Discounts can be combined. For example: paying annually + a 2nd sibling = 12% + 15% off that child's tuition.
-              </p>
-            </div>
-          </div></section>
-
-          {/* PAYMENT METHODS */}
-          <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:32}}><div className="wrap">
-            <div style={{maxWidth:900,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:36}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>How to pay</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Payment <em style={{color:V.cr,fontStyle:'italic'}}>methods</em>
-                </h2>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14}}>
-                {[
-                  { method:'Card (Visa / Mastercard)', via:'Paystack', notes:'Instant. International cards accepted. Saved card for recurring billing.' },
-                  { method:'M-Pesa', via:'Paybill 247247', notes:'Account: 745021. Account Name: Smartious Edtech. Quote invoice number.' },
-                  { method:'Bank Transfer (Kenya)', via:'KCB / Equity Bank', notes:'Account details provided on invoice. Allow 24-48 hours for clearance.' },
-                  { method:'International Wire Transfer', via:'SWIFT', notes:'For families paying in USD/GBP/EUR. Beneficiary details on invoice.' },
-                  { method:'PayPal', via:'invoice@smartioushomeschool.com', notes:'Available for international families. 4% processing fee may apply.' },
-                  { method:'Crypto (USDC/USDT)', via:'On request', notes:'Available for diaspora families. Stablecoin only. Address provided per transaction.' },
-                ].map(p => (
-                  <div key={p.method} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'16px 20px'}}>
-                    <h3 style={{fontSize:14,fontWeight:700,color:V.ink,marginBottom:4}}>{p.method}</h3>
-                    <div style={{fontSize:12,fontWeight:700,color:V.gold3,marginBottom:8,letterSpacing:'.04em'}}>{p.via}</div>
-                    <p style={{fontSize:12,color:V.sl,lineHeight:1.6,margin:0}}>{p.notes}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div></section>
-
-          {/* FEE FAQ */}
-          <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:56}}><div className="wrap">
-            <div style={{maxWidth:820,margin:'0 auto'}}>
-              <div style={{textAlign:'center',marginBottom:28}}>
-                <div className="eyebrow" style={{justifyContent:'center'}}>Fee questions</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
-                  Common <em style={{color:V.cr,fontStyle:'italic'}}>fee questions</em>
-                </h2>
-              </div>
-              {[
-                { q:'Why do you charge in USD?', a:'Smartious serves families across 14 countries. USD pricing keeps fees stable regardless of local currency fluctuations. Families paying in KES, AED, GBP or other currencies are converted at the prevailing rate at the time of payment, with no Smartious markup.' },
-                { q:'Are the external examination fees marked up?', a:'No. Cambridge, Edexcel, IBO and College Board examination fees are pass-through at exactly the published board rate. Smartious adds only a $25 administration fee per examination series to cover registration coordination, candidate management and centre liaison.' },
-                { q:'Can I pay in Kenyan Shillings (KES)?', a:'Yes. All USD fees are convertible to KES at the prevailing exchange rate. We provide a KES-denominated invoice on request. Payment is accepted via M-Pesa Paybill (247247), bank transfer to our Kenyan account, or card payment via Paystack.' },
-                { q:'What happens if I miss a payment?', a:'A 7-day grace period applies. After this, a $25 late payment fee is added. After 14 days of non-payment, the student\'s LMS access is suspended until the account is brought current. After 30 days, the place may be released. We always prefer to discuss payment difficulties — please reach out before things escalate.' },
-                { q:'Are textbooks and materials included?', a:'Digital textbooks and resources are included in all tiers via the Digital Library subscription. Physical textbooks for In-Person students are included in the registration fee for Year 1. Subsequent years\' textbook refreshes are charged at cost ($40-80 per subject) when curriculum books change.' },
-                { q:'Can I get a refund if my child withdraws mid-year?', a:'Yes, partially. Tuition for unused weeks is refundable pro-rata with 14 days\' written notice. Registration fees are non-refundable. Examination fees, once paid to the board, are non-refundable. A $80 mid-term withdrawal processing fee applies.' },
-                { q:'Do you offer financial aid or scholarships?', a:'Yes. Smartious operates a need-based bursary programme covering up to 50% of tuition for families demonstrating financial need. Apply via the admissions office with supporting financial documentation. Decisions are made within 14 days.' },
-                { q:'Can I freeze my payments during school holidays?', a:'Online and In-Person tier fees are charged for 11 months of the year (with August holiday) on monthly billing; or 3 terms on termly billing. The annual billing cycle covers the full academic year. There is no payment freeze option mid-year.' },
-                { q:'Are fees tax-deductible?', a:'For Kenyan taxpayers: school fees are not currently deductible from personal income tax. For families paying from corporate accounts or via employer education benefits, please consult your tax advisor. We provide official receipts for all payments.' },
-                { q:'Can I get a printable fee schedule?', a:'Yes. Send a request to hellosmartious@gmail.com and we will email you a PDF copy of the complete fee schedule with your family\'s applicable discounts and total annual cost calculated.' },
-              ].map((f, i) => (
-                <details key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:10,overflow:'hidden'}}>
-                  <summary style={{cursor:'pointer',padding:'14px 18px',fontWeight:600,color:V.ink,fontSize:14,listStyle:'none'}}>{f.q}</summary>
-                  <div style={{padding:'0 18px 14px',fontSize:13.5,color:V.sl,lineHeight:1.7,borderTop:`1px solid ${V.bone3}`,paddingTop:12}}>{f.a}</div>
-                </details>
-              ))}
-            </div>
-          </div></section>
-
-          {/* ═══════════════════════════════════════════
-              DOWNLOAD CARD — Full fee structure PDF
-          ═══════════════════════════════════════════ */}
-          <section className="sec" style={{background:V.bone2,paddingTop:56,paddingBottom:56}}>
-            <div className="wrap">
-              <div style={{maxWidth:880,margin:'0 auto'}}>
-                <div style={{
-                  background:V.white,
-                  border:`1px solid ${V.bone3}`,
-                  borderRadius:16,
-                  padding:'40px 44px',
-                  display:'flex',gap:32,flexWrap:'wrap',alignItems:'center',
-                  boxShadow:'0 4px 24px rgba(8,12,20,.04)',
-                }}>
-                  {/* Document icon mock */}
-                  <div style={{
-                    flex:'0 0 auto',
-                    width:108,height:140,
-                    background:V.ink,
-                    borderRadius:6,
-                    position:'relative',
-                    display:'flex',flexDirection:'column',justifyContent:'space-between',
-                    padding:'14px 12px',
-                    boxShadow:'0 8px 22px rgba(8,12,20,.18)',
-                  }}>
-                    <div style={{fontSize:8.5,fontWeight:700,letterSpacing:'.14em',color:V.gold3,lineHeight:1.3}}>
-                      SMARTIOUS
+                </div>
+              ) : (
+                <div style={{background:V.bone,borderRadius:12,padding:'32px 28px',border:`1px solid ${V.bone3}`}}>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:16,marginBottom:16}}>
+                    <div>
+                      <label style={{display:'block',fontSize:12,fontWeight:700,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Parent/Guardian Name *</label>
+                      <input type="text" value={pricingParentName} onChange={e => setPricingParentName(e.target.value)}
+                        style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:'inherit',background:'#fff',color:V.ink,boxSizing:'border-box'}}
+                        placeholder="Jane Wanjiku" />
                     </div>
                     <div>
-                      <div style={{width:30,height:2,background:V.cr,marginBottom:8}}/>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:10,color:'#fff',lineHeight:1.2,fontStyle:'italic'}}>
-                        Fee<br/>Structure<br/><span style={{color:V.gold3}}>2026</span>
-                      </div>
+                      <label style={{display:'block',fontSize:12,fontWeight:700,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Email *</label>
+                      <input type="email" value={pricingParentEmail} onChange={e => setPricingParentEmail(e.target.value)}
+                        style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:'inherit',background:'#fff',color:V.ink,boxSizing:'border-box'}}
+                        placeholder="jane@example.com" />
+                    </div>
+                    <div>
+                      <label style={{display:'block',fontSize:12,fontWeight:700,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Phone (with WhatsApp)</label>
+                      <input type="tel" value={pricingParentPhone} onChange={e => setPricingParentPhone(e.target.value)}
+                        style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:'inherit',background:'#fff',color:V.ink,boxSizing:'border-box'}}
+                        placeholder="+254 745 021 212" />
+                    </div>
+                    <div>
+                      <label style={{display:'block',fontSize:12,fontWeight:700,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Country of residence *</label>
+                      <input type="text" value={pricingCountry} onChange={e => setPricingCountry(e.target.value)}
+                        style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:'inherit',background:'#fff',color:V.ink,boxSizing:'border-box'}}
+                        placeholder="Kenya" />
+                    </div>
+                    <div>
+                      <label style={{display:'block',fontSize:12,fontWeight:700,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Curriculum interest</label>
+                      <select value={pricingCurriculum} onChange={e => setPricingCurriculum(e.target.value)}
+                        style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:'inherit',background:'#fff',color:V.ink,boxSizing:'border-box',cursor:'pointer'}}>
+                        <option value="">Not sure yet</option>
+                        <option value="Cambridge">Cambridge IGCSE / A-Level</option>
+                        <option value="Edexcel">Pearson Edexcel IGCSE / A-Level</option>
+                        <option value="IB">IB Diploma Programme</option>
+                        <option value="American">American Curriculum + AP</option>
+                        <option value="Ontario OSSD">Ontario Secondary School Diploma</option>
+                        <option value="Kenya CBC">Kenya CBC</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{display:'block',fontSize:12,fontWeight:700,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Programme type</label>
+                      <select value={pricingProgramme} onChange={e => setPricingProgramme(e.target.value)}
+                        style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:'inherit',background:'#fff',color:V.ink,boxSizing:'border-box',cursor:'pointer'}}>
+                        <option value="">Please select</option>
+                        <option value="Online School">Online School (live classes)</option>
+                        <option value="Homeschool In-Person">Homeschool (in-person at centre)</option>
+                        <option value="Private Tuition">Private Tuition (1:1)</option>
+                        <option value="Study Abroad / IUFP">Study Abroad / IUFP</option>
+                        <option value="Not sure">Not sure — please advise</option>
+                      </select>
                     </div>
                   </div>
 
-                  {/* Text + CTA */}
-                  <div style={{flex:'1 1 280px'}}>
-                    <div className="eyebrow" style={{color:V.gold3,marginBottom:8}}>Take it with you</div>
-                    <h2 style={{
-                      fontFamily:"'DM Serif Display',Georgia,serif",
-                      fontSize:'clamp(1.5rem, 3vw, 2rem)',
-                      fontWeight:400,color:V.ink,lineHeight:1.15,marginBottom:12,
-                    }}>
-                      Download the full <em style={{color:V.cr,fontStyle:'italic'}}>Fee Structure 2026</em>
-                    </h2>
-                    <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginBottom:18}}>
-                      The complete 22-page document. Everything you need to plan your child's education with Smartious — every fee explained, every discount listed, every common pathway costed out from Year 1 to Year 13.
-                    </p>
-                    <div style={{display:'flex',gap:14,flexWrap:'wrap',alignItems:'center'}}>
-                      <a href="/Smartious_Fee_Structure_2026%20(2).pdf"
-                        download
-                        style={{
-                          display:'inline-flex',alignItems:'center',gap:10,
-                          background:V.cr,color:'#fff',
-                          padding:'13px 24px',borderRadius:8,
-                          textDecoration:'none',fontWeight:800,fontSize:13.5,
-                          boxShadow:'0 4px 14px rgba(139,26,46,.25)',
-                        }}>
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        Download PDF
-                      </a>
-                      <div style={{fontSize:11.5,color:V.sl2,fontWeight:600}}>
-                        22 pages · ~100 KB · A4 · No email required
-                      </div>
+                  <div style={{marginBottom:16}}>
+                    <label style={{display:'block',fontSize:12,fontWeight:700,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Child/children — names, ages, current grade</label>
+                    <input type="text" value={pricingStudentInfo} onChange={e => setPricingStudentInfo(e.target.value)}
+                      style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:'inherit',background:'#fff',color:V.ink,boxSizing:'border-box'}}
+                      placeholder="e.g. Amina, age 12, currently in Year 8" />
+                  </div>
+
+                  <div style={{marginBottom:22}}>
+                    <label style={{display:'block',fontSize:12,fontWeight:700,color:V.ink,marginBottom:6,letterSpacing:'.02em'}}>Anything specific we should know? (optional)</label>
+                    <textarea value={pricingMessage} onChange={e => setPricingMessage(e.target.value)}
+                      rows={3}
+                      style={{width:'100%',padding:'12px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:8,fontSize:14,fontFamily:'inherit',background:'#fff',color:V.ink,boxSizing:'border-box',resize:'vertical'}}
+                      placeholder="Preferred start date, specific subjects, learning needs, sibling enrolment, etc." />
+                  </div>
+
+                  {pricingRequestError && (
+                    <div style={{background:'#FEE2E2',border:'1px solid #FCA5A5',borderRadius:8,padding:'12px 14px',marginBottom:16,fontSize:13,color:'#991B1B'}}>
+                      {pricingRequestError}
                     </div>
+                  )}
+
+                  <button onClick={submitPricingRequest} disabled={pricingRequestSending}
+                    style={{width:'100%',background:V.gold3,color:V.ink,border:'none',padding:'16px 28px',borderRadius:10,fontSize:15,fontWeight:800,cursor:pricingRequestSending?'not-allowed':'pointer',opacity:pricingRequestSending?0.65:1,letterSpacing:'.01em',boxShadow:'0 6px 18px rgba(201,151,58,.28)',transition:'all .18s ease'}}>
+                    {pricingRequestSending ? 'Sending your request...' : 'Request personalized pricing →'}
+                  </button>
+
+                  <div style={{textAlign:'center',marginTop:14,fontSize:12,color:V.sl2}}>
+                    We respect your privacy. Your information is used only to prepare your quote and consultation.
                   </div>
                 </div>
-              </div>
-            </div>
-          </section>
-
-          {/* CTA */}
-          <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
-            <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
-                Ready to <em style={{color:V.gold3,fontStyle:'italic'}}>begin?</em>
-              </h2>
-              <p style={{fontSize:14.5,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:22,maxWidth:560,margin:'0 auto 22px'}}>
-                Book a free 30-minute consultation. We'll walk through pricing for your specific situation, including all discounts that apply to your family.
-              </p>
-              <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center'}}>
-                <button onClick={() => nav('/assessment')}
-                  style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer'}}>Book assessment</button>
-</div>
-              <p style={{fontSize:11,color:'rgba(255,255,255,.5)',marginTop:24,lineHeight:1.7,maxWidth:560,margin:'24px auto 0'}}>
-                Fees may be revised annually with 30 days&apos; written notice to existing families. Sibling discount applied per child. Examination fees are pass-through to the relevant board.
-              </p>
+              )}
             </div>
           </div></section>
-          <Footer P={P}/>
+
+          {/* WHAT'S INCLUDED */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:920,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:32}}>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>What every family gets</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3.5vw,2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                  Included in every Smartious enrolment
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:22}}>
+                {[
+                  {h:'Live small-group classes',p:'4-6 students per class. No recorded-only content. Every session is live with a qualified teacher.'},
+                  {h:'Cambridge-registered examinations',p:'Smartious registers students as private candidates at Cambridge Assessment authorised centres worldwide.'},
+                  {h:'University placement support',p:'Personalised guidance for UK Russell Group (UCAS), US Ivy League (Common App), Canadian U15 (OUAC), and more.'},
+                  {h:'24/7 recorded catch-up',p:'Missed a class? Every session is recorded. Watch anytime through the Smartious LMS.'},
+                  {h:'Sibling discounts',p:'15-25% off for each additional child from the same family.'},
+                  {h:'Two operational teaching centres',p:'Diamond Plaza Parklands (Nairobi HQ) and Karen Hardy provide in-person option for East African families.'},
+                ].map(f => (
+                  <div key={f.h} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:10,padding:'22px 20px'}}>
+                    <div style={{fontSize:14.5,fontWeight:700,color:V.ink,marginBottom:8}}>{f.h}</div>
+                    <div style={{fontSize:13,color:V.sl2,lineHeight:1.55}}>{f.p}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
         </>
       )}
 
