@@ -1,805 +1,576 @@
-/* ═══════════════════════════════════════════════════════════════════
-   CountryHub — Shared v2-depth country hub renderer.
-   ───────────────────────────────────────────────────────────────────
-   Replaces the 6 duplicated country hub blocks (Egypt, Morocco, South
-   Korea, Japan, Vietnam, Thailand) that previously lived inside
-   LandingPage.jsx. Fully data-driven from the country and cities props.
-   
-   This refactor ALSO fixes several substitution-leftover bugs that were
-   live in production:
-     · "In Egypt, established examination centres serve..." appearing
-       in Morocco/Korea/Japan/Vietnam/Thailand hubs
-     · "CAS coordination through local Egyptian community partnerships"
-       appearing in IB Diploma delivery cards across all non-Egypt hubs
-     · "Egyptian universities including AUC, GUC and BUE" appearing in
-       Alfred's founder bio specialism line across all non-Egypt hubs
-   
-   All country-specific text now lives in the country data file (see
-   the "v2-hub fields" section of each *_COUNTRY export). To add a new
-   country with v2-depth content, populate the 16 v2-hub fields in the
-   data file and Smartious renders the full hub automatically.
-═══════════════════════════════════════════════════════════════════ */
+// ═══════════════════════════════════════════════════════════════════
+// ROMANIA — Smartious city-level + country-level data
+// Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma,
+// American AP, and Ontario OSSD (via CCIS partnership) for Romanian
+// families across Bucharest (capital + AISB + BSB + Cambridge School
+// + ISB + IBSB + MISB), Cluj-Napoca (Silicon Valley of Romania +
+// Transylvania College + KEY International + Bosch/Endava/Emerson),
+// Timișoara (western hub + Continental AG), Iași (Amazon Development
+// Center + Continental + Ubisoft), Brașov (Continental automotive
+// + Schaeffler + Transylvania), and Constanța (Black Sea port + oil
+// and gas + shipping).
+//
+// LEGAL POSITIONING: Under Law 198/2023 (România Educată education
+// reform), homeschool is NOT formally recognized as an educational
+// pathway in Romania. Compulsory education (ages 6-16) requires
+// enrolment at accredited or provisionally authorized institutions.
+// In 2024, Romanian courts issued the first criminal sentences
+// against parents homeschooling illegally.
+//
+// HOWEVER — Romanian families CAN legally enrol their children with
+// ACCREDITED SCHOOLS BASED OUTSIDE ROMANIA. This is the well-
+// established "umbrella school" pathway used by thousands of
+// Romanian families. Smartious as a Kenya-based online school
+// accredited via Cambridge Assessment International Education,
+// Pearson Edexcel, and Ontario OSSD (CCIS partnership) fits this
+// pathway exactly. Romanian families enrol with Smartious and
+// satisfy compulsory education requirements legally.
+// ═══════════════════════════════════════════════════════════════════
 
-import { useEffect } from 'react'
+export const ROMANIA_CITIES = [
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'bucharest-ro',
+    name: 'Bucharest',
+    county: 'Municipality of Bucharest',
+    region: 'National capital · 1.8M city (2.5M metro) · UiPath HQ (RPA global leader, Nasdaq-listed) + Bitdefender HQ (cybersecurity global leader) + ING Romania + Raiffeisen Bank + Deloitte / PwC / EY / KPMG Romania + Adobe Bucharest + Oracle Bucharest',
+    primaryKeyword: 'Online school and homeschool in Bucharest',
+    heroTagline: 'For Bucharest families across Voluntari (Cambridge School of Bucharest + MISB), Herăstrău (British School of Bucharest — 700 pupils 65 nations COBIS + BSO accredited), Pipera (American International School of Bucharest — AISB 1000+ students 60 nationalities founded 1962 by US Embassy), Tunari (International School of Bucharest — ISB Amber Forest campus 2026-2027), Bragadiru (International British School of Bucharest — IBSB), plus UiPath / Bitdefender / Deloitte / PwC / EY / KPMG / Adobe / Oracle corporate rotational families and diplomatic corps concentration.',
+    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel International, IB Diploma Programme, American Curriculum with Advanced Placement (AP), and Ontario Secondary School Diploma (OSSD via Canadian Cross International School partnership) for Bucharest families across Romania\'s capital and largest metropolitan area (~1.8 million city, ~2.5 million metropolitan region). Bucharest\'s international school landscape is Romania\'s densest — American International School of Bucharest (AISB Pipera, founded 1962 by US Embassy, 10-hectare campus opened 2001, ~1,000+ students from 60+ nationalities, IB PYP + MYP + DP + US High School Diploma via NEASC accreditation, elite tier EUR 11,150-23,830/year), British School of Bucharest (BSB northern Bucharest Herăstrău, ~700+ pupils from 65 nations, English National Curriculum + IGCSE + A-Level, COBIS + BSO accredited, ISI rated Excellent in all areas 2018/2022/2025, EUR 14,000-22,000/year), Cambridge School of Bucharest (CSB Voluntari, BSO accredited, Fundația Mateas foundation, Cambridge Primary + IGCSE + A-Level, EUR 12,000-20,000/year), International School of Bucharest (ISB main + Amber Forest campus planned 2026-2027, British-style + IB Diploma, EUR 12,000-20,000/year), International British School of Bucharest (IBSB, British curriculum EYFS + Primary + Secondary, EUR 10,000-16,000/year), MISB Maarif International School Bucharest (Voluntari, three streams — Romanian National Curriculum + Cambridge IGCSE/A-Level + International Maarif Programme, ARACIP authorized), Mark Twain International School (long-established Bucharest), Noblesse School (bilingual Romanian-English premium). Smartious serves fee-sensitive families switching from AISB/BSB/CSB/ISB premium schools to Smartious USD 2,160-6,480/year (~EUR 2,000-6,000/year — dramatic 2-12× fee arbitrage), Romanian homeschool families operating under the accredited foreign school pathway (Smartious as Kenya-based accredited online school satisfies Romanian compulsory education requirements legally), UiPath / Bitdefender / Adobe / Oracle / Deloitte / PwC / EY / KPMG corporate rotational families, diplomatic corps British / American / European / Israeli / Turkish embassy families, plus Romanian returnee families from UK / US / Germany maintaining Cambridge / IB continuity.',
+    heroImg: 'https://images.unsplash.com/photo-1602942190020-2f97dcbe4c93?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Bucharest Romania Palace of Parliament and central Bucharest' },
+    seoDesc: 'Live online school for Bucharest families in Pipera, Herăstrău, Voluntari, Tunari. Cambridge IGCSE, A-Level, IB, AP, Ontario OSSD via CCIS. American International School Bucharest (AISB), British School (BSB), Cambridge School (CSB), ISB, IBSB alternative. UiPath + Bitdefender + Deloitte corporate families. Accredited foreign school pathway satisfying Romanian compulsory education. From USD 180/month.',
+    challenges: [
+      'Bucharest premium international school fees: American International School of Bucharest (AISB Pipera, IB continuum + US Diploma, EUR 11,150-23,830/year — Romania\'s most established international school since 1962), British School of Bucharest (BSB Herăstrău, English National + IGCSE + A-Level, EUR 14,000-22,000/year — COBIS + BSO rated Excellent 2025), Cambridge School of Bucharest (CSB Voluntari, EUR 12,000-20,000/year — BSO accredited), International School of Bucharest (ISB, EUR 12,000-20,000/year), IBSB (EUR 10,000-16,000/year), MISB Maarif (three-stream Romanian + Cambridge + Maarif). Smartious USD 2,160-6,480/year (~EUR 2,000-6,000/year) provides 2-12× fee arbitrage.',
+      'ROMANIAN LEGAL FRAMEWORK: Under Law 198/2023 (România Educată education reform), compulsory education (ages 6-16) requires enrolment at accredited or provisionally authorized institutions. Homeschooling is NOT formally recognized as an educational pathway. In 2024, Romanian courts issued the FIRST criminal sentences against parents homeschooling illegally without proper legal framework.',
+      'ROMANIAN LEGAL PATHWAY FOR SMARTIOUS FAMILIES: Romanian families CAN legally enrol children with ACCREDITED SCHOOLS BASED OUTSIDE ROMANIA (the well-established "umbrella school" pathway used by thousands of Romanian families). Smartious as Kenya-based online school accredited via Cambridge Assessment International Education, Pearson Edexcel, and Ontario OSSD (CCIS partnership) fits this pathway exactly — Romanian families enrolled with Smartious satisfy compulsory education requirements legally.',
+      'UiPath (Nasdaq: PATH — Bucharest-founded RPA global leader), Bitdefender (Bucharest-founded cybersecurity global leader), Adobe Bucharest, Oracle Bucharest, plus Big 4 consulting (Deloitte, PwC, EY, KPMG Romania) corporate rotational families.',
+      'ING Romania + Raiffeisen Bank + BCR (Banca Comercială Română) + Banca Transilvania Bucharest operations — banking corporate concentration.',
+      'Time zone: EET UTC+2 (EEST UTC+3 summer) — same as Nairobi EAT in winter, 1 hour behind in summer. Smartious morning delivery 9 AM – 12 PM Nairobi = 9 AM – 12 PM Bucharest (winter) or 8 AM – 11 AM Bucharest (summer) — perfect time zone match.',
+    ],
+    familySituations: [
+      'Pipera families — AISB catchment, northern Bucharest premium residential.',
+      'Herăstrău families — BSB catchment, park-adjacent premium residential.',
+      'Voluntari families — Cambridge School of Bucharest + MISB catchment, north-east Ilfov.',
+      'Tunari families — International School of Bucharest Amber Forest catchment (2026-2027 campus).',
+      'Bragadiru families — IBSB catchment.',
+      'Cotroceni families — diplomatic + presidential residential.',
+      'Aviatorilor families — central premium residential.',
+      'Primăverii families — historic diplomatic quarter.',
+      'Dorobanți families — established premium residential.',
+      'UiPath (Nasdaq: PATH — global RPA leader) corporate families.',
+      'Bitdefender (cybersecurity global leader) corporate families.',
+      'Adobe Bucharest corporate families.',
+      'Oracle Bucharest corporate families.',
+      'IBM Romania corporate families.',
+      'Microsoft Bucharest corporate families.',
+      'Deloitte / PwC / EY / KPMG Romania corporate families.',
+      'ING Romania + Raiffeisen + BCR + Banca Transilvania banking families.',
+      'Diplomatic corps families — US Embassy, British Embassy, French Embassy, German Embassy, Israeli Embassy, Turkish Embassy Bucharest.',
+      'Romanian homeschool families operating via accredited foreign school pathway.',
+      'Romanian returnee families from UK / US / Germany / Canada.',
+      'Sixth Form students (16+) beyond Romanian compulsory school age.',
+    ],
+    nearbyAreas: ['Pipera (AISB)', 'Herăstrău (BSB)', 'Voluntari (Cambridge School + MISB)', 'Tunari (ISB Amber Forest)', 'Bragadiru (IBSB)', 'Cotroceni', 'Aviatorilor', 'Primăverii', 'Dorobanți', 'Floreasca', 'Băneasa', 'Cișmigiu', 'Rosetti', 'Sector 1', 'Sector 2', 'Sector 3', 'Sector 6', 'Otopeni (adjacent Ilfov)', 'Snagov (adjacent Ilfov)', 'Corbeanca (adjacent Ilfov)'],
+    subjects: [
+      'Cambridge IGCSE Mathematics, Additional Mathematics, English Language, English Literature',
+      'Cambridge IGCSE Sciences (Biology, Chemistry, Physics, Combined Science)',
+      'Cambridge IGCSE Humanities (Geography, History, Global Perspectives, Economics, Business)',
+      'Cambridge IGCSE Romanian First Language, French, German, Spanish, Russian — language options',
+      'Cambridge A-Level Mathematics + Further Mathematics + Physics + Computer Science — Bucharest tech (UiPath / Bitdefender / Adobe / Oracle) family alignment for Politehnica București / TU Cluj / international STEM',
+      'Cambridge A-Level Sciences for medicine pathway',
+      'Cambridge A-Level Economics + Business + Accounting — Bucharest banking + Big 4 corporate India + international finance',
+      'Pearson Edexcel International GCSE and A-Level',
+      'IB Diploma Programme — all six groups',
+      'American AP — for US Ivy League + UC system pathway',
+      'Ontario Secondary School Diploma (OSSD) via Canadian Cross International School partnership',
+      'SAT, ACT, TOEFL, IELTS, UCAT for UK Medicine',
+      'University application support — UCAS (UK), Common Application (US), OUAC (Ontario Canada), plus Romanian universities via bacalaureat equivalency for international qualifications',
+    ],
+    whyChoose: [
+      ['AISB / BSB / CSB / ISB / IBSB / MISB fee arbitrage', 'Smartious USD 2,160-6,480/year (~EUR 2,000-6,000/year) vs Bucharest premium international schools EUR 10,000-23,830/year — dramatic 2-12× fee arbitrage with identical Cambridge IGCSE, A-Level, IB Diploma qualifications and UK Russell Group + US Ivy League + Canadian U15 pathway.'],
+      ['Accredited foreign school pathway satisfying Romanian compulsory education', 'Smartious as Kenya-based online school accredited via Cambridge Assessment International Education, Pearson Edexcel, and Ontario OSSD (CCIS partnership) fits Romania\'s legal "umbrella school" pathway. Romanian families enrolled with Smartious satisfy compulsory education requirements (ages 6-16) legally — the same model thousands of Romanian homeschool families already use.'],
+      ['AISB / BSB / CSB / ISB waiting-list bypass', 'Bucharest premium international schools operate competitive admissions with waiting lists. Smartious immediate enrolment.'],
+      ['Bucharest tech corporate rotation portability', 'UiPath (Nasdaq: PATH), Bitdefender, Adobe Bucharest, Oracle Bucharest, IBM, Microsoft rotational cycles supported without curriculum switching across Bucharest → San Francisco → New York → London → Zurich postings.'],
+      ['Diplomatic family portability', 'US / British / European / Israeli / Turkish diplomatic families continue Cambridge / IB / American / OSSD curriculum through Bucharest posting and onward postings globally.'],
+      ['Romanian returnee curriculum continuity', 'Families returning from UK / US / Germany / Canada with children in Cambridge / IB / American continue seamlessly without conversion to Romanian bacalaureat.'],
+      ['Perfect time zone alignment', 'EET UTC+2 delivery 9 AM – 12 PM Bucharest (winter) = 9 AM – 12 PM Nairobi teaching. Same time zone in winter, 1 hour behind in summer — perfect match with no scheduling friction.'],
+      ['International university pathway alignment', 'For families targeting UK Russell Group (Oxbridge, Imperial, LSE, UCL), US Ivy League + UC system, Canadian U15, Australian G8 — Cambridge / IB Diploma is natural pathway.'],
+    ],
+    growingReason: 'Bucharest (~1.8 million city, ~2.5 million metropolitan region) is Romania\'s national capital and largest metropolitan area. Bucharest hosts UiPath (Nasdaq: PATH — global RPA leader, Bucharest-founded), Bitdefender (cybersecurity global leader, Bucharest-founded), Adobe Bucharest, Oracle Bucharest, IBM Romania, Microsoft Bucharest, plus Big 4 consulting (Deloitte, PwC, EY, KPMG Romania headquarters), ING Romania, Raiffeisen Bank, BCR (Banca Comercială Română), Banca Transilvania Bucharest operations. Bucharest\'s international school landscape includes American International School of Bucharest (AISB Pipera, founded 1962 by US Embassy, 10-hectare campus, 1000+ students, elite tier EUR 11,150-23,830/year), British School of Bucharest (BSB Herăstrău, 700+ pupils from 65 nations, COBIS + BSO accredited, ISI Excellent 2025), Cambridge School of Bucharest (CSB Voluntari, BSO accredited), International School of Bucharest (ISB main + Amber Forest 2026-2027), International British School of Bucharest (IBSB), MISB Maarif International, Mark Twain International, Noblesse School. Smartious extends at fraction of premium school fees.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and Cambridge A-Level — Smartious\'s primary offer for Romania. Bucharest has multiple Cambridge Assessment International Education authorised examination centres (BSB, Cambridge School of Bucharest, plus British Council Bucharest). Pathway accepted by Romanian universities via bacalaureat equivalency, UK Russell Group via UCAS, US Ivy League via Common Application.',
+      cbc: 'Kenya CBC available for Bucharest families with East African ties.',
+      ib: 'IB Diploma Programme — AISB, ISB, plus growing Bucharest IB Diploma family choice for holistic university breadth.',
+      american: 'American Curriculum with AP — AISB alternative for families targeting US universities via Common Application.',
+    },
+    homeschoolDetail: 'ROMANIAN LEGAL PATHWAY: Under Law 198/2023, homeschool is NOT formally recognized as an educational pathway. Compulsory education (ages 6-16) requires enrolment at accredited or provisionally authorized institutions. HOWEVER, Romanian families CAN legally enrol children with ACCREDITED SCHOOLS BASED OUTSIDE ROMANIA — the well-established "umbrella school" pathway. Smartious as Kenya-based online school accredited via Cambridge Assessment International Education, Pearson Edexcel, and Ontario OSSD (CCIS partnership) fits this pathway exactly. Romanian families enrolled with Smartious satisfy compulsory education requirements legally.',
+    homeTuitionDetail: 'Premium tier (USD 540/month) includes optional in-person supplementary tuition for Bucharest Pipera, Herăstrău, Voluntari, Tunari families during Cambridge IGCSE, A-Level, IB Diploma, and AP examination preparation periods via our Bucharest associate teacher network.',
+    onlineLearningDetail: 'Live online via Smartious LMS. Classes scheduled 9 AM – 12 PM EET (matching 9 AM – 12 PM Nairobi EAT teaching hours in winter — perfect time zone alignment) or afternoon 2 PM – 5 PM EET slot. Recorded sessions 24/7. Works across Digi Fiber (RCS & RDS), Orange Fiber, Vodafone Romania Fiber — Bucharest has strong residential fibre infrastructure with fastest average internet speeds in EU.',
+    faqs: [
+      { q: 'Is homeschool legal in Romania?',                                                                                                                                                                                                                          a: 'Under Law 198/2023 (România Educată education reform), homeschool is NOT formally recognized as an educational pathway. Compulsory education (ages 6-16) requires enrolment at accredited or provisionally authorized institutions. In 2024, Romanian courts issued the first criminal sentences against parents homeschooling illegally without proper legal framework. HOWEVER, Romanian families CAN legally enrol children with ACCREDITED SCHOOLS BASED OUTSIDE ROMANIA (the well-established "umbrella school" pathway). Smartious as Kenya-based accredited online school fits this pathway exactly.' },
+      { q: 'How does Smartious enable legal homeschooling for Romanian families?',                                                                                                                                                                                    a: 'Smartious is a Kenya-based online school accredited via Cambridge Assessment International Education, Pearson Edexcel, and Ontario OSSD (Canadian Cross International School partnership). Romanian families enrol their child with Smartious (an accredited school based OUTSIDE Romania). Since Romanian law permits enrolment with accredited foreign schools, this satisfies compulsory education requirements. Thousands of Romanian families already use this "umbrella school" model with foreign online schools. Smartious operates on the same legal basis, with fee point 2-12× lower than existing alternatives.' },
+      { q: 'How does Smartious compare to American International School of Bucharest (AISB) or British School of Bucharest (BSB)?',                                                                                                                                    a: 'AISB Pipera (founded 1962 by US Embassy, 10-hectare campus, 1,000+ students from 60+ nationalities, IB PYP + MYP + DP + US High School Diploma via NEASC accreditation, elite tier EUR 11,150-23,830/year) and BSB Herăstrău (~700+ pupils from 65 nations, English National Curriculum + IGCSE + A-Level, COBIS + BSO accredited, ISI rated Excellent 2018/2022/2025, EUR 14,000-22,000/year) provide physical campus premium international education with elite facilities and networks. Smartious provides live online Cambridge / IB / American / OSSD at USD 2,160-6,480/year (~EUR 2,000-6,000/year) with identical qualifications, immediate enrolment, small class sizes (4-6 vs typical 15-22), and cross-country cohort. Fee arbitrage substantial (2-12× cheaper); qualifications and international university pathway identical.' },
+      { q: 'We\'re UiPath / Bitdefender / Adobe / Oracle Bucharest tech family. How does Smartious support our rotation?',                                                                                                                                            a: 'UiPath (Nasdaq: PATH — global RPA leader), Bitdefender (cybersecurity global leader), Adobe Bucharest, Oracle Bucharest tech corporate rotational cycles (2-4 years typical) supported without curriculum switching across Bucharest → San Francisco → New York → London → Zurich postings. Cross-country tech-family cohort provides social continuity. Cambridge A-Level Computer Science + Mathematics + Further Mathematics aligns with Silicon Valley / MIT / Stanford / Carnegie Mellon / Politehnica București engineering pathway.' },
+      { q: 'Where do Bucharest students sit Cambridge IGCSE and A-Level examinations?',                                                                                                                                                                                a: 'Bucharest has multiple Cambridge Assessment International Education authorised examination centres including British School of Bucharest (BSB Herăstrău), Cambridge School of Bucharest (CSB Voluntari), plus British Council Bucharest. Smartious handles examination registration logistics.' },
+      { q: 'How does live class scheduling work given EET and Nairobi teaching hours?',                                                                                                                                                                                a: 'Eastern European Time (EET UTC+2, EEST UTC+3 summer) is the same as East Africa Time (EAT UTC+3) in winter — no time difference. In summer, EET is 1 hour behind EAT. Smartious live classes 9 AM – 12 PM Nairobi = 9 AM – 12 PM Bucharest (winter) or 8 AM – 11 AM Bucharest (summer). Perfect time zone match — natural teaching hours for both delivery centres and receiving families. Recorded sessions 24/7.' },
+      { q: 'Can Cambridge A-Level or IB Diploma be used to apply to Romanian universities?',                                                                                                                                                                            a: 'Yes. Romanian universities (Universitatea din București, Universitatea Politehnica București, Universitatea de Medicină și Farmacie Carol Davila, Academia de Studii Economice — ASE, plus Universitatea Babeș-Bolyai Cluj, Universitatea Alexandru Ioan Cuza Iași) accept Cambridge A-Level and IB Diploma via bacalaureat equivalency through CNRED (Centrul Național de Recunoaștere și Echivalare a Diplomelor). Public Romanian university tuition is free for EU citizens including Romanian citizens.' },
+      { q: 'What Bucharest districts does Smartious serve?',                                                                                                                                                                                                          a: 'Pipera (AISB), Herăstrău (BSB), Voluntari (Cambridge School of Bucharest + MISB Ilfov), Tunari (ISB Amber Forest 2026-2027 Ilfov), Bragadiru (IBSB), Cotroceni, Aviatorilor, Primăverii, Dorobanți, Floreasca, Băneasa, Sector 1, Sector 2, Sector 3, Sector 6, plus adjacent Otopeni, Snagov, Corbeanca (Ilfov). Also broader Bucharest-Ilfov metropolitan region via live online delivery.' },
+    ],
+  },
 
-/* ────────────────────────────────────────────────────────────────
-   Country-awareness helpers for cross-market content cleanup.
-   
-   EAST_AFRICA_HUBS: hubs where Nairobi-specific content (Diamond
-   Plaza Parklands / Karen Hardy centre names, Kenya CBC in the
-   curricula list) is genuinely locally relevant. On all other
-   hubs (Gulf, North Africa, East Asia, Southeast Asia, Southern
-   Africa) that content is replaced with country-neutral operational
-   language to avoid diluting local search intent.
-   
-   REGION_LABELS: used in the "14+ countries served" trust card to
-   frame the geographic distribution around the current country's
-   region rather than always leading with East Africa.
-   ──────────────────────────────────────────────────────────────── */
-const EAST_AFRICA_HUBS = new Set(['kenya', 'ethiopia', 'rwanda'])
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'cluj-napoca-ro',
+    name: 'Cluj-Napoca',
+    county: 'Cluj County · Transylvania',
+    region: 'Silicon Valley of Romania · 325K city (~500K metro) · Bosch Engineering Center Cluj + Endava + Emerson + Nokia Cluj + Betfair Romania + eMag + UiPath Cluj + Bitdefender Cluj · Transylvania College + KEY International School',
+    primaryKeyword: 'Online school and homeschool in Cluj-Napoca',
+    heroTagline: 'For Cluj-Napoca families at Transylvania College (Romania\'s premier Cambridge international school in Transylvania), KEY International School (only IB PYP candidate school in Transylvania), International School Cluj (ISC), plus Bosch Engineering Center Cluj + Endava + Emerson + Nokia + Betfair + UiPath Cluj + Bitdefender Cluj tech corporate rotational families across Grigorescu, Zorilor, Andrei Mureșanu, and Bună Ziua premium residential districts.',
+    intro: 'Live online Cambridge IGCSE, Cambridge A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD via CCIS partnership for Cluj-Napoca families across Romania\'s "Silicon Valley" (~325K city, ~500K metropolitan region, Transylvania). Cluj-Napoca hosts Bosch Engineering Center Cluj (~2,500+ engineers), Endava (Bucharest-founded IT services), Emerson Cluj, Nokia Cluj, Betfair Romania Cluj, eMag Cluj (Romania\'s largest online retailer HQ), plus UiPath Cluj operations and Bitdefender Cluj operations — Cluj is Romania\'s densest tech corporate concentration outside Bucharest. Cluj-Napoca\'s international school landscape includes Transylvania College (Romania\'s premier Cambridge international school in Transylvania, IB DP + Cambridge IGCSE + A-Level, ~EUR 10,000-16,000/year), International School Cluj (ISC, British curriculum + IGCSE + A-Level, ~EUR 9,000-14,000/year), KEY International School (only IB PYP candidate school in Transylvania, nursery through primary, lowest fees among Cluj international schools).',
+    heroImg: 'https://images.unsplash.com/photo-1602942190020-2f97dcbe4c93?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Cluj-Napoca Romania central square' },
+    seoDesc: 'Live online school for Cluj-Napoca families in Grigorescu, Zorilor, Andrei Mureșanu, Bună Ziua. Cambridge IGCSE, A-Level, IB, AP, Ontario OSSD via CCIS. Transylvania College, International School Cluj (ISC), KEY International School alternative. Bosch + Endava + Emerson + Nokia tech corporate families. Silicon Valley of Romania. From USD 180/month.',
+    challenges: [
+      'Cluj-Napoca international school fees: Transylvania College (Cambridge + IB DP, EUR 10,000-16,000/year), International School Cluj (ISC, EUR 9,000-14,000/year), KEY International School (nursery through primary IB PYP candidate). Smartious USD 2,160-6,480/year provides 2-8× fee arbitrage.',
+      'ROMANIAN LEGAL FRAMEWORK: Homeschool not formally recognized under Law 198/2023. Legal pathway is enrolment with accredited school BASED OUTSIDE ROMANIA — Smartious fits this exactly.',
+      'Bosch Engineering Center Cluj (~2,500+ engineers) tech corporate rotational families — international automotive R&D concentration.',
+      'Endava (multinational IT services), Emerson Cluj, Nokia Cluj, Betfair Romania Cluj, eMag Cluj, UiPath Cluj, Bitdefender Cluj tech corporate rotational.',
+      'Cluj-Napoca is Romania\'s "Silicon Valley" outside Bucharest, driving substantial international corporate expat family concentration.',
+      'Time zone: EET UTC+2 delivery 9 AM – 12 PM Cluj-Napoca matches Nairobi teaching hours perfectly (winter).',
+    ],
+    familySituations: [
+      'Grigorescu families — premium central-west residential.',
+      'Zorilor families — southern premium residential.',
+      'Andrei Mureșanu families — established central residential.',
+      'Bună Ziua families — south-east premium residential.',
+      'Mărăști families — northern residential.',
+      'Bosch Engineering Center Cluj corporate families.',
+      'Endava corporate families.',
+      'Emerson Cluj corporate families.',
+      'Nokia Cluj corporate families.',
+      'Betfair Romania Cluj corporate families.',
+      'eMag Cluj (Romania\'s largest online retailer) corporate families.',
+      'UiPath Cluj corporate families.',
+      'Bitdefender Cluj corporate families.',
+      'Universitatea Babeș-Bolyai academic families.',
+      'Universitatea Tehnică Cluj-Napoca engineering families.',
+      'Universitatea de Medicină și Farmacie Iuliu Hațieganu medical families.',
+      'Romanian homeschool families operating via accredited foreign school pathway.',
+    ],
+    nearbyAreas: ['Grigorescu', 'Zorilor', 'Andrei Mureșanu', 'Bună Ziua', 'Mărăști', 'Gheorgheni', 'Mănăștur', 'Centru (central Cluj)', 'Baciu (adjacent)', 'Florești (adjacent)', 'Apahida (adjacent)', 'Turda (adjacent)'],
+    subjects: [
+      'Cambridge IGCSE Mathematics, Sciences, English, Romanian, French',
+      'Cambridge IGCSE Computer Science (Cluj tech-family relevant)',
+      'Cambridge A-Level Computer Science + Mathematics + Further Mathematics — Cluj tech corporate family alignment',
+      'Cambridge A-Level Sciences for medicine (UMF Cluj pathway) + IIT-style engineering',
+      'Cambridge A-Level Economics + Business',
+      'Pearson Edexcel International GCSE and A-Level',
+      'IB Diploma Programme',
+      'American AP',
+      'Ontario Secondary School Diploma',
+    ],
+    whyChoose: [
+      ['Transylvania College / ISC / KEY International fee arbitrage', 'Smartious ~EUR 2,000-6,000/year vs Cluj international schools EUR 9,000-16,000/year — 2-8× fee arbitrage.'],
+      ['Accredited foreign school pathway satisfying Romanian compulsory education', 'Smartious as Kenya-based accredited online school fits Romania\'s legal "umbrella school" pathway.'],
+      ['Silicon Valley of Romania tech corporate rotation portability', 'Bosch, Endava, Emerson, Nokia, Betfair, eMag, UiPath Cluj, Bitdefender Cluj rotational cycles supported without curriculum switching.'],
+      ['Cluj engineering pathway alignment', 'Cambridge A-Level Mathematics + Computer Science + Physics for UT Cluj (Universitatea Tehnică Cluj-Napoca) + international engineering.'],
+      ['Perfect time zone alignment', 'EET UTC+2 delivery matches Nairobi teaching hours exactly in winter.'],
+    ],
+    growingReason: 'Cluj-Napoca (~325K city, ~500K metropolitan region, Transylvania) is Romania\'s "Silicon Valley" outside Bucharest — hosting Bosch Engineering Center Cluj (~2,500+ engineers, one of Bosch\'s largest R&D centres in Europe), Endava (multinational IT services), Emerson Cluj, Nokia Cluj, Betfair Romania Cluj, eMag Cluj (Romania\'s largest online retailer HQ), plus UiPath Cluj operations and Bitdefender Cluj operations. Cluj-Napoca\'s international school landscape includes Transylvania College (Cambridge international school in Transylvania), International School Cluj (ISC), KEY International School (only IB PYP candidate in Transylvania). Universitatea Babeș-Bolyai + Universitatea Tehnică Cluj-Napoca + Universitatea de Medicină și Farmacie Iuliu Hațieganu anchor Cluj\'s academic sector.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and Cambridge A-Level.',
+      cbc: 'Kenya CBC available.',
+      ib: 'IB Diploma Programme — Transylvania College alternative.',
+      american: 'American Curriculum with AP.',
+    },
+    homeschoolDetail: 'Romanian legal framework — accredited foreign school pathway (Smartious fits exactly).',
+    homeTuitionDetail: 'Premium tier optional in-person supplementation for Cluj-Napoca Grigorescu, Zorilor, Andrei Mureșanu, Bună Ziua families.',
+    onlineLearningDetail: 'Live online 9 AM – 12 PM EET (perfect Nairobi match winter). Works across Digi Fiber, Orange, Vodafone Romania.',
+    faqs: [
+      { q: 'How does Smartious compare to Transylvania College or International School Cluj (ISC)?', a: 'Transylvania College (Romania\'s premier Cambridge international school in Transylvania, IB DP + Cambridge IGCSE + A-Level, EUR 10,000-16,000/year) and ISC (British curriculum + IGCSE + A-Level, EUR 9,000-14,000/year) provide physical campus premium international education. Smartious provides live online at USD 2,160-6,480/year — 2-8× fee arbitrage.' },
+      { q: 'We\'re Bosch Engineering Center Cluj tech corporate family. How does Smartious support us?', a: 'Bosch Cluj tech corporate rotational cycles (2-4 years typical) supported without curriculum switching across Cluj-Napoca → Stuttgart → Renningen (Bosch Research) → Shanghai → São Paulo postings.' },
+    ],
+  },
 
-const REGION_LABELS = {
-  kenya:         'East Africa, the Gulf and Asia',
-  ethiopia:      'East Africa, the Gulf and Asia',
-  rwanda:        'East Africa, the Gulf and Asia',
-  'south-africa':'Africa, the Gulf and Asia',
-  egypt:         'North Africa, the Gulf and East Asia',
-  morocco:       'North Africa, Europe, the Gulf and Asia',
-  uae:           'the Gulf, North Africa and Asia',
-  qatar:         'the Gulf, North Africa and Asia',
-  'saudi-arabia':'the Gulf, North Africa and Asia',
-  japan:         'East Asia, the Gulf and Africa',
-  'south-korea': 'East Asia, the Gulf and Africa',
-  vietnam:       'Southeast Asia, the Gulf and Africa',
-  thailand:      'Southeast Asia, the Gulf and Africa',
-  malaysia:      'Southeast Asia, the Gulf and East Asia',
-  turkey:        'the Middle East, Europe, and East Africa',
-  kuwait:        'the Middle East, the Gulf, and East Africa',
-  oman:          'the Gulf, East Africa, and Southeast Asia',
-  taiwan:        'East Asia, Southeast Asia, and East Africa',
-  ireland:       'Europe, North America, and East Africa',
-  'united-kingdom': 'Europe, North America, and East Africa',
-  india:         'South Asia, East Africa, and the Gulf',
-  germany:       'Central Europe, North America, and East Africa',
-}
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'timisoara-ro',
+    name: 'Timișoara',
+    county: 'Timiș County · Banat',
+    region: 'Western Romania · 320K city (~380K metro) · Continental AG Timișoara + Nokia + Flextronics + Alcatel-Lucent + Vodafone + Deutsche Telekom · European Capital of Culture 2023',
+    primaryKeyword: 'Online school and homeschool in Timișoara',
+    heroTagline: 'For Timișoara families at International British School Timișoara + International Kids Academy, plus Continental AG Timișoara (automotive) + Nokia + Flextronics + Alcatel-Lucent + Vodafone Timișoara + Deutsche Telekom Timișoara corporate rotational families across Iosefin, Fabric, Cetate, and Elisabetin premium residential districts.',
+    intro: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD via CCIS partnership for Timișoara families across western Romania (~320K city, Banat region — European Capital of Culture 2023). Timișoara hosts Continental AG Timișoara (automotive tier-1 supplier), Nokia Timișoara, Flextronics Timișoara, Alcatel-Lucent, Vodafone Romania Timișoara operations, Deutsche Telekom, plus proximity to Hungarian and Serbian borders (Szeged 90 km, Belgrade 150 km) driving multicultural community. International British School of Timișoara + International Kids Academy serve international community.',
+    heroImg: 'https://images.unsplash.com/photo-1602942190020-2f97dcbe4c93?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Timișoara Romania Piața Unirii' },
+    seoDesc: 'Live online school for Timișoara families in Iosefin, Fabric, Cetate, Elisabetin. Cambridge IGCSE, A-Level, IB, AP, Ontario OSSD. International British School Timișoara alternative. Continental AG + Nokia + Flextronics corporate families. Western Romania. From USD 180/month.',
+    challenges: [
+      'Timișoara international school fees: International British School Timișoara, International Kids Academy — mid-tier EUR 7,000-12,000/year. Smartious ~EUR 2,000-6,000/year provides 2-6× fee arbitrage.',
+      'Romanian legal framework — accredited foreign school pathway (Smartious fits).',
+      'Continental AG Timișoara automotive tier-1 supplier corporate rotational families.',
+      'Nokia + Flextronics + Alcatel-Lucent + Vodafone + Deutsche Telekom telecom corporate rotational.',
+      'Multicultural western Romania — proximity to Hungary and Serbia.',
+      'Time zone: EET UTC+2 perfect Nairobi match winter.',
+    ],
+    familySituations: [
+      'Iosefin families — premium western residential.',
+      'Fabric families — historic eastern residential.',
+      'Cetate families — central residential.',
+      'Elisabetin families — southern premium residential.',
+      'Girocului families — south residential.',
+      'Continental AG Timișoara automotive corporate families.',
+      'Nokia Timișoara corporate families.',
+      'Flextronics corporate families.',
+      'Alcatel-Lucent + Vodafone + Deutsche Telekom telecom corporate families.',
+      'Universitatea de Vest Timișoara academic families.',
+      'Universitatea Politehnica Timișoara engineering families.',
+      'Hungarian + Serbian expatriate community families.',
+    ],
+    nearbyAreas: ['Iosefin', 'Fabric', 'Cetate', 'Elisabetin', 'Girocului', 'Aradului', 'Complex Studențesc', 'Dumbrăvița (adjacent)', 'Ghiroda (adjacent)'],
+    subjects: [
+      'Cambridge IGCSE Mathematics, Sciences, English, German, Hungarian',
+      'Cambridge A-Level Mathematics + Physics — Continental AG automotive engineering pathway',
+      'Cambridge A-Level Computer Science + Engineering',
+      'IB Diploma Programme',
+      'American AP',
+      'Ontario Secondary School Diploma',
+    ],
+    whyChoose: [
+      ['International British School Timișoara fee arbitrage', 'Smartious ~EUR 2,000-6,000/year vs Timișoara international schools EUR 7,000-12,000/year.'],
+      ['Accredited foreign school pathway'],
+      ['Continental AG automotive rotation portability'],
+      ['Perfect time zone alignment with Nairobi'],
+    ],
+    growingReason: 'Timișoara (~320K city, Banat region — European Capital of Culture 2023) is western Romania\'s largest city. Hosts Continental AG Timișoara (automotive tier-1), Nokia Timișoara, Flextronics Timișoara, Alcatel-Lucent, Vodafone Romania, Deutsche Telekom. Universitatea de Vest Timișoara + Universitatea Politehnica Timișoara anchor academic sector. International British School Timișoara + International Kids Academy serve international community.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and Cambridge A-Level.',
+      cbc: 'Kenya CBC available.',
+      ib: 'IB Diploma Programme.',
+      american: 'American Curriculum with AP.',
+    },
+    homeschoolDetail: 'Romanian legal framework — accredited foreign school pathway (Smartious fits).',
+    homeTuitionDetail: 'Premium tier optional in-person supplementation for Timișoara families.',
+    onlineLearningDetail: 'Live online 9 AM – 12 PM EET.',
+    faqs: [
+      { q: 'How does Smartious compare to International British School Timișoara?', a: 'Smartious provides live online at USD 2,160-6,480/year — 2-6× fee arbitrage vs Timișoara premium international schools.' },
+    ],
+  },
 
-/* ISO country codes for hreflang. Format: en-<CC> tells Google
-   the page is English-language content targeting a specific
-   country. Improves regional search indexation. */
-const HREFLANG_MAP = {
-  kenya:'en-ke', ethiopia:'en-et', rwanda:'en-rw',
-  'south-africa':'en-za',
-  egypt:'en-eg', morocco:'en-ma',
-  uae:'en-ae', qatar:'en-qa', 'saudi-arabia':'en-sa',
-  japan:'en-jp', 'south-korea':'en-kr',
-  vietnam:'en-vn', thailand:'en-th',
-  malaysia:'en-my',
-  turkey:'en-tr',
-  kuwait:'en-kw',
-  oman:'en-om',
-  taiwan:'en-tw',
-  ireland:'en-ie',
-  'united-kingdom':'en-gb',
-  india:'en-in',
-  germany:'en-de',
-}
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'iasi-ro',
+    name: 'Iași',
+    county: 'Iași County · Moldova region',
+    region: 'North-eastern Romania · 290K city (~500K metro) · Amazon Development Center Iași + Continental Iași + Endava Iași + Ubisoft Iași · Universitatea Alexandru Ioan Cuza + Universitatea Tehnică Gheorghe Asachi',
+    primaryKeyword: 'Online school and homeschool in Iași',
+    heroTagline: 'For Iași families at International School of Iași + growing English-medium schools, plus Amazon Development Center Iași + Continental Iași + Endava Iași + Ubisoft Iași + Bosch Iași tech corporate rotational families across Copou, Tătărași, Nicolina, and Alexandru cel Bun premium residential districts.',
+    intro: 'Live online Cambridge IGCSE, A-Level, IB Diploma, American AP, and Ontario OSSD for Iași families across north-eastern Romania (~290K city, ~500K metropolitan region, Moldova region). Iași hosts Amazon Development Center Iași (one of Amazon\'s largest development centres in Eastern Europe), Continental Iași (automotive tier-1), Endava Iași (multinational IT services), Ubisoft Iași (game development), Bosch Iași, plus growing tech startup ecosystem. Iași is Romania\'s historical academic capital hosting Universitatea Alexandru Ioan Cuza (Romania\'s oldest university, 1860) and Universitatea Tehnică Gheorghe Asachi.',
+    heroImg: 'https://images.unsplash.com/photo-1602942190020-2f97dcbe4c93?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Iași Romania Palace of Culture' },
+    seoDesc: 'Live online school for Iași families. Cambridge IGCSE, A-Level, IB, AP, Ontario OSSD. Amazon Development Center + Continental + Endava + Ubisoft corporate families. North-eastern Romania. From USD 180/month.',
+    challenges: [
+      'Iași international schools limited — International School of Iași primary provider. Smartious extends premium international curriculum access.',
+      'Romanian legal framework — accredited foreign school pathway (Smartious fits).',
+      'Amazon Development Center Iași (~1,000+ employees) tech corporate rotational.',
+      'Continental Iași + Endava Iași + Ubisoft Iași + Bosch Iași tech and automotive corporate rotational.',
+      'Iași is Romania\'s historical academic capital — Universitatea Alexandru Ioan Cuza (Romania\'s oldest, 1860).',
+    ],
+    familySituations: [
+      'Copou families — premium northern residential.',
+      'Tătărași families — eastern residential.',
+      'Nicolina families — southern residential.',
+      'Alexandru cel Bun families — central residential.',
+      'Amazon Development Center Iași corporate families.',
+      'Continental Iași corporate families.',
+      'Endava Iași corporate families.',
+      'Ubisoft Iași corporate families.',
+      'Bosch Iași corporate families.',
+      'Universitatea Alexandru Ioan Cuza academic families.',
+      'Universitatea Tehnică Gheorghe Asachi engineering families.',
+    ],
+    nearbyAreas: ['Copou', 'Tătărași', 'Nicolina', 'Alexandru cel Bun', 'Păcurari', 'Bularga', 'Centru', 'Miroslava (adjacent)'],
+    subjects: [
+      'Cambridge IGCSE Mathematics, Sciences, English, Romanian, French',
+      'Cambridge IGCSE Computer Science (Iași tech-family relevant)',
+      'Cambridge A-Level Computer Science + Mathematics — Amazon / Ubisoft / Endava tech pathway',
+      'Cambridge A-Level Sciences + Mathematics for UMF Iași medical + engineering',
+      'IB Diploma Programme',
+      'American AP',
+      'Ontario Secondary School Diploma',
+    ],
+    whyChoose: [
+      ['International school access in academic city', 'Iași\'s international school landscape is limited compared to Bucharest/Cluj — Smartious extends premium international curriculum access.'],
+      ['Accredited foreign school pathway'],
+      ['Amazon Development Center + Ubisoft tech corporate rotation portability'],
+      ['Universitatea Alexandru Ioan Cuza (Romania\'s oldest university 1860) academic community fit'],
+    ],
+    growingReason: 'Iași (~290K city, ~500K metropolitan region, Moldova region) is Romania\'s historical academic capital and second-largest north-eastern city. Hosts Amazon Development Center Iași (one of Amazon\'s largest development centres in Eastern Europe), Continental Iași (automotive tier-1), Endava Iași, Ubisoft Iași (game development), Bosch Iași. Universitatea Alexandru Ioan Cuza (Romania\'s oldest university, founded 1860) + Universitatea Tehnică Gheorghe Asachi + Universitatea de Medicină și Farmacie Grigore T. Popa anchor academic sector.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and Cambridge A-Level.',
+      cbc: 'Kenya CBC available.',
+      ib: 'IB Diploma Programme.',
+      american: 'American Curriculum with AP.',
+    },
+    homeschoolDetail: 'Romanian legal framework — accredited foreign school pathway.',
+    homeTuitionDetail: 'Premium tier optional in-person supplementation.',
+    onlineLearningDetail: 'Live online 9 AM – 12 PM EET.',
+    faqs: [
+      { q: 'We\'re Amazon Development Center Iași tech family. How does Smartious support our rotation?', a: 'Amazon Iași is one of Amazon\'s largest development centres in Eastern Europe. Rotational cycles supported without curriculum switching across Iași → Seattle → Dublin → London → Cape Town postings.' },
+    ],
+  },
 
-/* Idempotent hreflang tag injection. Adds one rel=alternate tag for
-   the current country's en-<CC>, one for the general en fallback,
-   and one x-default pointing to the homepage. Cleanup removes any
-   Smartious hreflang tags this instance created, so navigating to
-   another hub doesn't leave stale tags in the head. */
-function useHreflang(countrySlug) {
-  useEffect(() => {
-    if (typeof document === 'undefined') return
-    const hreflangCC = HREFLANG_MAP[countrySlug]
-    if (!hreflangCC) return
-    
-    const url = `https://smartioushomeschool.com/online-school/${countrySlug}`
-    const tags = [
-      { rel: 'alternate', hreflang: hreflangCC, href: url },
-      { rel: 'alternate', hreflang: 'en',       href: url },
-      { rel: 'alternate', hreflang: 'x-default', href: 'https://smartioushomeschool.com/' },
-    ]
-    
-    const created = tags.map(({ rel, hreflang, href }) => {
-      const el = document.createElement('link')
-      el.setAttribute('rel', rel)
-      el.setAttribute('hreflang', hreflang)
-      el.setAttribute('href', href)
-      el.setAttribute('data-smartious-hreflang', '1')
-      document.head.appendChild(el)
-      return el
-    })
-    
-    return () => {
-      created.forEach(el => { try { el.remove() } catch (_) {} })
-    }
-  }, [countrySlug])
-}
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'brasov-ro',
+    name: 'Brașov',
+    county: 'Brașov County · Transylvania',
+    region: 'Central Transylvania · 250K city (~350K metro) · Continental Automotive Brașov + Schaeffler + Autoliv + INA Schaeffler + Preh Brașov · Poiana Brașov ski resort',
+    primaryKeyword: 'Online school and homeschool in Brașov',
+    heroTagline: 'For Brașov families at International British School Brașov, plus Continental Automotive Brașov + Schaeffler + Autoliv + INA Schaeffler + Preh Brașov automotive corporate rotational families across Astra, Racadau, Noua, and Centru premium residential districts.',
+    intro: 'Live online Cambridge IGCSE, A-Level, IB Diploma, American AP, and Ontario OSSD for Brașov families across central Transylvania (~250K city, ~350K metropolitan region). Brașov hosts substantial automotive tier-1 supplier concentration — Continental Automotive Brașov, Schaeffler Brașov (INA Schaeffler), Autoliv Brașov, Preh Brașov, plus Draexlmaier — driving international automotive corporate expat community. Also home to Poiana Brașov (Romania\'s premier ski resort) and Universitatea Transilvania din Brașov.',
+    heroImg: 'https://images.unsplash.com/photo-1602942190020-2f97dcbe4c93?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Brașov Romania Black Church and Council Square' },
+    seoDesc: 'Live online school for Brașov families. Cambridge IGCSE, A-Level, IB, AP, Ontario OSSD. Continental Automotive + Schaeffler + Autoliv corporate rotational families. Central Transylvania. From USD 180/month.',
+    challenges: [
+      'Brașov international school access limited — International British School Brașov primary provider. Smartious extends.',
+      'Romanian legal framework — accredited foreign school pathway.',
+      'Continental Automotive Brașov + Schaeffler + Autoliv + Preh automotive tier-1 supplier corporate rotational families.',
+      'Draexlmaier automotive families.',
+      'Time zone: EET UTC+2 perfect Nairobi match winter.',
+    ],
+    familySituations: [
+      'Astra families — premium central-east residential.',
+      'Racadau families — southern residential.',
+      'Noua families — southern residential.',
+      'Centru families — historic central residential.',
+      'Bartolomeu families — western residential.',
+      'Continental Automotive Brașov corporate families.',
+      'Schaeffler Brașov (INA Schaeffler) corporate families.',
+      'Autoliv Brașov corporate families.',
+      'Preh Brașov corporate families.',
+      'Draexlmaier corporate families.',
+      'Universitatea Transilvania din Brașov academic families.',
+    ],
+    nearbyAreas: ['Astra', 'Racadau', 'Noua', 'Centru', 'Bartolomeu', 'Tractorul', 'Poiana Brașov (ski resort)', 'Cristian (adjacent)', 'Ghimbav (adjacent)', 'Râșnov (adjacent)'],
+    subjects: [
+      'Cambridge IGCSE Mathematics, Sciences, English, German',
+      'Cambridge A-Level Mathematics + Physics — automotive engineering pathway',
+      'Cambridge A-Level Computer Science + Engineering',
+      'IB Diploma Programme',
+      'American AP',
+      'Ontario Secondary School Diploma',
+    ],
+    whyChoose: [
+      ['International school access in automotive corporate city'],
+      ['Accredited foreign school pathway'],
+      ['Continental / Schaeffler / Autoliv / Preh automotive rotation portability'],
+      ['Automotive engineering pathway alignment via Cambridge A-Level Mathematics + Physics'],
+    ],
+    growingReason: 'Brașov (~250K city, ~350K metropolitan region, central Transylvania) is Romania\'s automotive tier-1 supplier concentration city. Hosts Continental Automotive Brașov, Schaeffler Brașov (INA Schaeffler), Autoliv Brașov, Preh Brașov, Draexlmaier. Universitatea Transilvania din Brașov anchors academic sector. Poiana Brașov (Romania\'s premier ski resort) drives tourism.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and Cambridge A-Level.',
+      cbc: 'Kenya CBC available.',
+      ib: 'IB Diploma Programme.',
+      american: 'American Curriculum with AP.',
+    },
+    homeschoolDetail: 'Romanian legal framework — accredited foreign school pathway.',
+    homeTuitionDetail: 'Premium tier optional in-person supplementation.',
+    onlineLearningDetail: 'Live online 9 AM – 12 PM EET.',
+    faqs: [
+      { q: 'We\'re Continental Automotive / Schaeffler Brașov automotive family. Does Smartious support engineering pathway?', a: 'Yes. Cambridge A-Level Mathematics + Physics + Chemistry directly aligns with automotive engineering university pathway. Rotational cycles supported globally.' },
+    ],
+  },
 
-export default function CountryHub({
-  country, cities, setCurrentCity,
-  P, V, nav,
-  SMARTIOUS_RATING, SMARTIOUS_REVIEWS,
-  GOOGLE_REVIEWS_URL, LEAVE_REVIEW_URL,
-}) {
-  useHreflang(country.slug)
-  return (
-    <>
-      {/* Schema */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        '@context':'https://schema.org','@type':'EducationalOrganization',
-        '@id':'https://smartioushomeschool.com' + country.hub + '#org',
-        'name':'Smartious — Online Homeschooling Across ' + country.name,
-        'url':'https://smartioushomeschool.com' + country.hub,
-        'aggregateRating': {
-          '@type':'AggregateRating',
-          'ratingValue': SMARTIOUS_RATING.stars,
-          'reviewCount': SMARTIOUS_RATING.count,
-          'bestRating': 5,
-          'worstRating': 1,
-        },
-        'description': country.heroSubhead + ' ' + country.heroValueProp,
-        'areaServed': cities.map(c => ({ '@type':'Place','name': c.name + ', ' + c.county })),
-        'offers': country.competitors.filter(c => c.isUs).map(c => ({
-          '@type':'Offer', 'price': c.feesUsd, 'priceCurrency':'USD',
-          'description': 'Annual tuition range for ' + c.curriculum,
-        })),
-      })}}/>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        '@context':'https://schema.org','@type':'BreadcrumbList',
-        'itemListElement':[
-          {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
-          {'@type':'ListItem','position':2,'name':'Homeschooling ' + country.name,'item':'https://smartioushomeschool.com' + country.hub},
-        ],
-      })}}/>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        '@context':'https://schema.org','@type':'FAQPage',
-        'mainEntity': country.faqs.map(f => ({
-          '@type':'Question','name': f.q,
-          'acceptedAnswer':{'@type':'Answer','text': f.a},
-        })),
-      })}}/>
+  // ─────────────────────────────────────────────────────────────────
+  {
+    slug: 'constanta-ro',
+    name: 'Constanța',
+    county: 'Constanța County · Dobrogea',
+    region: 'Black Sea coast · 260K city (~430K metro) · Port of Constanța (largest Black Sea port) + OMV Petrom + Rompetrol + Lukoil Romania + Alexion + Damen Shipyards',
+    primaryKeyword: 'Online school and homeschool in Constanța',
+    heroTagline: 'For Constanța families across Mamaia (resort district), Faleză Nord (premium residential), Boemia, Tomis, plus Port of Constanța shipping corporate families + OMV Petrom + Rompetrol + Lukoil oil & gas corporate rotational families + Damen Shipyards.',
+    intro: 'Live online Cambridge IGCSE, A-Level, IB Diploma, American AP, and Ontario OSSD for Constanța families across Romania\'s Black Sea coast (~260K city, ~430K metropolitan region, Dobrogea region). Constanța hosts the Port of Constanța (largest Black Sea port and Europe\'s 4th largest maritime port), plus OMV Petrom operations (Romania\'s largest oil & gas company), Rompetrol, Lukoil Romania, Alexion pharmaceutical, Damen Shipyards Mangalia, driving substantial shipping, oil & gas, and pharmaceutical corporate expat community. Also home to Mamaia beach resort district and Universitatea Ovidius Constanța + Academia Navală Mircea cel Bătrân.',
+    heroImg: 'https://images.unsplash.com/photo-1602942190020-2f97dcbe4c93?w=1600&q=80&auto=format&fit=crop',
+    altTexts: { hero: 'Constanța Romania Black Sea coast' },
+    seoDesc: 'Live online school for Constanța families in Mamaia, Faleză Nord, Boemia, Tomis. Cambridge IGCSE, A-Level, IB, AP, Ontario OSSD. Port of Constanța + OMV Petrom + Rompetrol + Damen Shipyards corporate families. Black Sea coast. From USD 180/month.',
+    challenges: [
+      'Constanța international school access limited. Smartious extends international curriculum access.',
+      'Romanian legal framework — accredited foreign school pathway.',
+      'Port of Constanța shipping corporate families — Europe\'s 4th largest maritime port.',
+      'OMV Petrom (Romania\'s largest oil & gas company) + Rompetrol + Lukoil Romania oil & gas rotational.',
+      'Damen Shipyards Mangalia shipbuilding families.',
+      'Time zone: EET UTC+2 perfect Nairobi match winter.',
+    ],
+    familySituations: [
+      'Mamaia families — Black Sea beach resort residential.',
+      'Faleză Nord families — premium north residential.',
+      'Boemia families — central premium residential.',
+      'Tomis families — historic central residential.',
+      'Palas families — commercial-central residential.',
+      'Port of Constanța shipping corporate families.',
+      'OMV Petrom corporate families.',
+      'Rompetrol corporate families.',
+      'Lukoil Romania corporate families.',
+      'Alexion Constanța pharmaceutical families.',
+      'Damen Shipyards Mangalia (adjacent) families.',
+      'Universitatea Ovidius academic families.',
+      'Academia Navală Mircea cel Bătrân naval academy families.',
+    ],
+    nearboritas: ['Mamaia', 'Faleză Nord', 'Boemia', 'Tomis', 'Palas', 'Coiciu', 'Peninsula', 'Năvodari (adjacent)', 'Ovidiu (adjacent)', 'Mangalia (adjacent — Damen Shipyards)'],
+    subjects: [
+      'Cambridge IGCSE Mathematics, Sciences, English, Romanian, French',
+      'Cambridge A-Level Mathematics + Chemistry — oil & gas / marine engineering pathway',
+      'Cambridge A-Level Sciences for medicine (UMF pathway)',
+      'IB Diploma Programme',
+      'American AP',
+      'Ontario Secondary School Diploma',
+    ],
+    whyChoose: [
+      ['International school access on Black Sea coast'],
+      ['Accredited foreign school pathway'],
+      ['Port + oil & gas + shipbuilding corporate rotation portability'],
+      ['Marine + petroleum engineering pathway alignment'],
+    ],
+    growingReason: 'Constanța (~260K city, ~430K metropolitan region, Dobrogea region) is Romania\'s Black Sea coast. Hosts Port of Constanța (largest Black Sea port and Europe\'s 4th largest maritime port), OMV Petrom (Romania\'s largest oil & gas company) operations, Rompetrol, Lukoil Romania, Alexion pharmaceutical, Damen Shipyards Mangalia (adjacent). Mamaia beach resort district drives tourism. Universitatea Ovidius + Academia Navală Mircea cel Bătrân anchor academic sector.',
+    curricula: {
+      cambridge: 'Cambridge IGCSE and Cambridge A-Level.',
+      cbc: 'Kenya CBC available.',
+      ib: 'IB Diploma Programme.',
+      american: 'American Curriculum with AP.',
+    },
+    homeschoolDetail: 'Romanian legal framework — accredited foreign school pathway.',
+    homeTuitionDetail: 'Premium tier optional in-person supplementation.',
+    onlineLearningDetail: 'Live online 9 AM – 12 PM EET.',
+    faqs: [
+      { q: 'We\'re Port of Constanța / OMV Petrom / Damen Shipyards family. How does Smartious support us?', a: 'Constanța shipping, oil & gas, and shipbuilding rotational cycles supported. Smartious enrolment continues seamlessly through Constanța → Rotterdam → Singapore → Houston → Dubai postings.' },
+    ],
+  },
+]
 
-      {/* ─── HERO ─── */}
-      <section className="sec" style={{
-        position:'relative',
-        background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-        color:'#fff', padding:'72px 0 56px', overflow:'hidden',
-      }}>
-        <img src={country.heroImage} alt="" aria-hidden="true"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          onError={e => { e.currentTarget.style.display='none' }}
-          style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
-        <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-        <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-          <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-          <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-            Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
-          </h1>
-          <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
-          <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
-          <div style={{display:'flex',gap:14,flexWrap:'wrap',alignItems:'center'}}>
-            <button onClick={() => nav('/assessment?from=' + country.slug)}
-              style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
-              Book assessment
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button onClick={() => nav('/consult')}
-              style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',transition:'all .18s ease'}}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
-              Book Free Consultation
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <span style={{fontSize:12.5,color:'rgba(255,255,255,.62)',letterSpacing:'.01em',width:'100%'}}>
-              Admissions reviews every request &middot; assessment fee billed only on acceptance
-            </span>
-          </div>
-        </div>
-      </section>
+export const ROMANIA_CITIES_LIST = ROMANIA_CITIES.map(c => ({
+  slug: c.slug,
+  name: c.name,
+  county: c.county,
+}))
 
-      {/* ─── TRUST BAR ─── */}
-      <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>
-        <div className="wrap">
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
-            {country.trustSignals.map((t,i) => (
-              <div key={i}>
-                <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
-                <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
-                <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+// ═══════════════════════════════════════════════════════════════════
+// ROMANIA COUNTRY-LEVEL OBJECT
+// Consumed by CountryHub.jsx for /online-school/romania
+// ═══════════════════════════════════════════════════════════════════
+export const ROMANIA_COUNTRY = {
+  slug: 'romania',
+  name: 'Romania',
+  longName: 'Romania (România)',
+  adjective: 'Romanian',
+  flag: '🇷🇴',
+  hub: '/online-school/romania',
+  hubPageId: 'homeschooling-romania',
+  cityPageId: 'romania-city',
 
-      {/* ─── CITIES GRID ─── */}
-      <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
-        <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
-          <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-            {country.citiesSectionTitle}
-          </h2>
-          <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14,maxWidth:1100,margin:'0 auto'}}>
-          {cities.map(c => (
-            <a key={c.slug} href={'/homeschool-' + c.slug}
-              onClick={(e) => { e.preventDefault(); setCurrentCity(c.slug); nav('/homeschool-' + c.slug); P(country.cityPageId) }}
-              style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px',textDecoration:'none',color:'inherit',transition:'all .2s',cursor:'pointer'}}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-              <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-              <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
-              <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
-              <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
-                View {c.name} details
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </div>
-            </a>
-          ))}
-        </div>
-      </div></section>
+  currency: 'RON',
+  currencyName: 'Romanian Leu',
+  currencyPeg: 'Approximate RON conversion at ~RON 4.5 per USD (2026 indicative rate; final invoicing in USD).',
 
-      {/* ─── COMPETITOR ANALYSIS ─── */}
-      <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-        <div style={{maxWidth:1100,margin:'0 auto'}}>
-          <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
-            <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
-              How Smartious compares to top {country.name} schools
-            </h2>
-            <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
-          </div>
-          <div style={{background:V.white,borderRadius:12,border:`1px solid ${V.bone3}`,overflow:'auto'}}>
-            <table style={{width:'100%',borderCollapse:'collapse',fontSize:13,minWidth:760}}>
-              <thead>
-                <tr style={{background:V.ink,color:'#fff'}}>
-                  <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>School</th>
-                  <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Curriculum</th>
-                  <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Fees ({country.currency}/year)</th>
-                  <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Status / Rating</th>
-                  <th style={{padding:'14px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase'}}>Reality check</th>
-                </tr>
-              </thead>
-              <tbody>
-                {country.competitors.map((c, i) => (
-                  <tr key={i} style={{
-                    background: c.isUs ? `rgba(139,26,46,.06)` : (i % 2 === 0 ? V.white : V.bone),
-                    borderTop: c.isUs ? `2px solid ${V.cr}` : `1px solid ${V.bone3}`,
-                  }}>
-                    <td style={{padding:'14px 16px',verticalAlign:'top'}}>
-                      <div style={{fontWeight:700,color:c.isUs?V.cr:V.ink,marginBottom:2,fontSize:13.5}}>{c.name}{c.isUs && <span style={{marginLeft:8,fontSize:9.5,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,fontWeight:700}}>← us</span>}</div>
-                      <div style={{fontSize:11.5,color:V.sl}}>{c.city}</div>
-                    </td>
-                    <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12.5}}>{c.curriculum}</td>
-                    <td style={{padding:'14px 16px',verticalAlign:'top',color:V.ink,fontSize:12.5,fontWeight:600,whiteSpace:'nowrap'}}>{c.feesAed}</td>
-                    <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12}}>{c.rating}</td>
-                    <td style={{padding:'14px 16px',verticalAlign:'top',color:V.sl,fontSize:12,fontStyle:c.isUs?'normal':'italic'}}>{c.capacityNote}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p style={{fontSize:11.5,color:V.sl,textAlign:'center',marginTop:14,fontStyle:'italic'}}>
-            Fee ranges reflect published 2026 tuition for Year 7-13 across the school's tier structure. Specific fees vary by year group and additional school charges (registration, capital fee, books, transport, uniforms). Smartious USD pricing translates to fixed {country.currency} via the {country.currencyPeg.rate} peg.
-          </p>
-        </div>
-      </div></section>
+  timezone: {
+    code: 'EET / EEST',
+    name: 'Eastern European Time / Summer Time',
+    utcOffset: '+2 winter / +3 summer',
+    offsetFromEAT: 'Same as EAT winter / -1 hour summer',
+  },
 
-      {/* ─── HOMESCHOOL LEGAL FRAMEWORK ─── */}
-      <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
-        <div style={{maxWidth:880,margin:'0 auto'}}>
-          <div className="eyebrow">Regulatory framework</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
-            Homeschool laws &amp; regulatory framework in the {country.name}
-          </h2>
-          <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
-          <div style={{display:'flex',flexDirection:'column',gap:14}}>
-            {country.legalFramework.map((item, i) => (
-              <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
-                <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div></section>
+  examCentres: ['Cambridge Assessment International Education authorised centres across Romania (British Council Bucharest + international schools nationwide)'],
+  examCentreTiles: [
+    { city: 'Bucharest', centre: 'BSB Herăstrău + CSB Voluntari + British Council Bucharest', area: 'British School of Bucharest + Cambridge School of Bucharest + British Council Bucharest — Bucharest authorised Cambridge examination venues' },
+    { city: 'Cluj-Napoca', centre: 'Transylvania College',                                       area: 'Transylvania College Cluj-Napoca — Transylvania Cambridge examination venue' },
+    { city: 'Timișoara',  centre: 'International British School Timișoara',                      area: 'IBST Timișoara — western Romania Cambridge examination venue' },
+  ],
+  examLogisticsProse: 'Cambridge IGCSE and A-Level examinations for Romanian-resident students sit at Cambridge Assessment International Education authorised centres across Romania — British Council Bucharest plus major international schools accepting external private candidates (British School of Bucharest, Cambridge School of Bucharest, Transylvania College Cluj-Napoca, International British School Timișoara). Smartious handles examination registration logistics. Pearson Edexcel International GCSE and International A-Level offer three examination series each year.',
+  secondaryProgrammeExamRef: 'Cambridge Assessment International Education authorised centres',
+  finalCTABadgeExamRef: 'Romania Cambridge exam centres nationwide',
 
-      {/* ─── WHY SMARTIOUS — EXPANDED ─── */}
-      <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-        <div style={{maxWidth:1100,margin:'0 auto'}}>
-          <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
-            <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-              Why {country.name} families choose Smartious
-            </h2>
-            <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Reasons grounded in the realities of {country.name} education — local school capacity constraints, corporate transfer and diplomatic timing, commute and logistics, currency stability, and the curriculum portability that mobile expat and dual-nationality families need.</p>
-          </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(310px,1fr))',gap:14}}>
-            {country.whySmartious.map((r, i) => (
-              <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
-                <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
-                <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div></section>
+  heroImage: 'https://images.unsplash.com/photo-1602942190020-2f97dcbe4c93?w=1600&q=80&auto=format&fit=crop',
+  heroEyebrow: 'Online school for Romania-resident families',
+  heroH1Suffix: 'Romania',
+  heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario Secondary School Diploma (OSSD via Canadian Cross International School partnership) for Romania-resident families — Bucharest (American International School AISB Pipera + British School BSB Herăstrău + Cambridge School CSB Voluntari + ISB + IBSB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School Timișoara alternative), Iași (International School of Iași alternative), Brașov (International British School Brașov alternative), and Constanța (Black Sea coast). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023.',
+  heroValueProp: 'From USD 180/month (~EUR 165/month). Small live classes 4-6 students, meaningfully more affordable than Romanian premium international schools (AISB / BSB / CSB / ISB EUR 10,000-23,830/year — 2-12× fee arbitrage). CRITICAL LEGAL NOTE: Under Law 198/2023 (România Educată education reform), homeschool is NOT formally recognized in Romania. In 2024, courts issued the first criminal sentences against parents homeschooling illegally. HOWEVER, Romanian families CAN legally enrol children with ACCREDITED SCHOOLS BASED OUTSIDE ROMANIA — the well-established "umbrella school" pathway. Smartious as Kenya-based online school accredited via Cambridge Assessment International Education, Pearson Edexcel, and Ontario OSSD (CCIS partnership) fits this pathway exactly. Serves Romanian families seeking legal homeschool alternative, international school fee arbitrage, tech corporate rotational families (UiPath, Bitdefender, Bosch Cluj, Endava, Continental, Amazon Iași, Ubisoft), and Sixth Form students 16+ beyond compulsory education.',
+  whatsappTrigger: 'Hi, I would like to enquire about Smartious for our family in Romania',
 
-      {/* ─── TRUST / SOCIAL PROOF ─── */}
-      <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
-        <div style={{maxWidth:980,margin:'0 auto'}}>
-          <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
-            <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
-              What you can verify about Smartious
-            </h2>
-            <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
-          </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:14,marginBottom:32}}>
-            {[
-              {h:'Founder-led education company', p: EAST_AFRICA_HUBS.has(country.slug)
-                ? 'Founded 2019 by Alfred Ouko (BEd Mathematics & Physics, University of Nairobi). Smartious is a registered education company operating two physical centres (Diamond Plaza Parklands HQ established 2022, Karen Hardy centre established 2023) alongside the online platform.'
-                : 'Founded 2019 by Alfred Ouko (BEd Mathematics & Physics). Smartious operates a full teaching team of 11 with two international-standard operational centres established 2022 and 2023. Not a marketplace, not a freelance network.'},
-              {h: EAST_AFRICA_HUBS.has(country.slug) ? 'Two physical Nairobi centres' : 'Two operational centres',
-                p: EAST_AFRICA_HUBS.has(country.slug)
-                  ? 'Diamond Plaza Parklands HQ (established 2022) and Karen Hardy centre (established 2023). Online tutors operate from these centres, providing accountability and infrastructure beyond pure-online models.'
-                  : `Live teaching is delivered to ${country.name} families from two international-standard operational centres, established 2022 and 2023. Teachers work from professional academic facilities with accountability and infrastructure beyond marketplace or freelance models.`},
-              {h:'Cambridge-trained PGCE specialists', p:'Teachers are PGCE-qualified subject specialists with Cambridge International training. Subject specialism means a Chemistry teacher teaches only Chemistry — not generalist primary-style teaching.'},
-              {h:'14+ countries served', p: `Active students in ${country.name} and 13 other markets across ${REGION_LABELS[country.slug] || 'Africa, the Gulf, Europe and Asia'}. Verifiable through cross-country cohort interaction in live classes.`},
-              {h:'Ontario Diploma (OSSD) partnership', p:'Smartious students can earn the Ontario Secondary School Diploma through our partnership with Canadian Cross International School (Ontario-inspected private school). The OSSD is recognised by Canadian universities (OUAC), US universities (Common Application), UK universities (UCAS) and globally — particularly valuable for Canadian U15 applications.'},
-              {h: EAST_AFRICA_HUBS.has(country.slug) ? '6 international curricula' : '5 international curricula',
-                p: EAST_AFRICA_HUBS.has(country.slug)
-                  ? 'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Ontario Secondary School Diploma (OSSD) via Canadian Cross International School partnership, Kenya CBC. Multiple credential pathways per family.'
-                  : 'Cambridge IGCSE & A-Level (primary offering), Pearson Edexcel International GCSE & A-Level, IB Diploma Programme, American Curriculum with AP, Ontario Secondary School Diploma (OSSD) via Canadian Cross International School partnership. Multiple credential pathways per family.'},
-              {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
-            ].map((t, i) => (
-              <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
-                <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
-              </div>
-            ))}
-          </div>
-          {/* ─── REAL GOOGLE REVIEWS ─── */}
-          <div style={{marginTop:32,paddingTop:32,borderTop:`1px solid ${V.bone3}`}}>
-            <div style={{textAlign:'center',marginBottom:28}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>What parents say</div>
-              <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
-                {SMARTIOUS_RATING.stars} from {SMARTIOUS_RATING.count}+ verified Google reviews
-              </h3>
-              <div style={{display:'inline-flex',alignItems:'center',gap:10,padding:'8px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:24,fontSize:12.5,color:V.sl}}>
-                <span style={{color:V.gold3,fontSize:16,letterSpacing:'.05em'}}>{'\u2605\u2605\u2605\u2605\u2605'}</span>
-                <span style={{fontWeight:700,color:V.ink}}>{SMARTIOUS_RATING.stars} / 5</span>
-                <span>·</span>
-                <span>{SMARTIOUS_RATING.count}+ Google reviews</span>
-              </div>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
-              {SMARTIOUS_REVIEWS.map((r, i) => (
-                <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
-                  <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
-                  <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
-                  <div style={{fontSize:11,color:V.sl,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginTop:4}}>[+] {r.source}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginTop:8}}>
-              <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className="btn-o" style={{textDecoration:'none'}}>
-                Read all reviews on Google &raquo;
-              </a>
-              <a href={LEAVE_REVIEW_URL} target="_blank" rel="noopener noreferrer" className="btn-p" style={{textDecoration:'none'}}>
-                Leave us a review &raquo;
-              </a>
-            </div>
-            <p style={{fontSize:11.5,color:V.sl,lineHeight:1.6,textAlign:'center',marginTop:18,fontStyle:'italic',maxWidth:680,margin:'18px auto 0'}}>
-              Reviews above are from our verified Google Business Profile. For {country.name}-specific parent references during your decision-making, request these during your free assessment — we can introduce you to current {country.name} families happy to share their experience directly.
-            </p>
-          </div>
-        </div>
-      </div></section>
+  citiesSectionTitle: 'Where our Romania-resident families are',
+  citiesSectionBody: 'Smartious Romania-resident families concentrate across Bucharest (capital — Pipera AISB, Herăstrău BSB, Voluntari Cambridge School + MISB, Tunari ISB Amber Forest 2026-2027, Bragadiru IBSB, plus UiPath Nasdaq PATH + Bitdefender + Adobe + Oracle + Deloitte / PwC / EY / KPMG + diplomatic corps), Cluj-Napoca (Silicon Valley of Romania — Transylvania College + International School Cluj ISC + KEY International, plus Bosch Engineering Center Cluj + Endava + Emerson + Nokia + Betfair + eMag + UiPath Cluj + Bitdefender Cluj), Timișoara (western Romania — International British School + International Kids Academy, plus Continental AG + Nokia + Flextronics + Alcatel-Lucent + Vodafone + Deutsche Telekom), Iași (north-east Romania academic capital — International School of Iași, plus Amazon Development Center Iași + Continental + Endava + Ubisoft + Bosch), Brașov (central Transylvania — International British School Brașov, plus Continental Automotive + Schaeffler + Autoliv + Preh + Draexlmaier automotive tier-1 suppliers), and Constanța (Black Sea coast — Port of Constanța Europe\'s 4th largest maritime port + OMV Petrom + Rompetrol + Lukoil + Damen Shipyards Mangalia). Each city has its own local context — Bucharest Big Tech + banking + diplomatic, Cluj-Napoca Silicon Valley of Romania, Timișoara Continental automotive + telecom, Iași Amazon Development Center + Ubisoft, Brașov automotive tier-1 + ski resort, Constanța shipping + oil & gas — but all share the same accredited foreign school pathway satisfying Romanian compulsory education requirements legally, plus live online delivery infrastructure in EET UTC+2 with perfect Nairobi time zone alignment in winter.',
 
-      {/* ─── ACCREDITATION, RECOGNITION & UNIVERSITY PATHWAYS ─── */}
-      <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64,borderTop:`1px solid ${V.bone3}`}}><div className="wrap">
-        <div style={{maxWidth:1100,margin:'0 auto'}}>
-          <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
-            <div className="eyebrow" style={{justifyContent:'center'}}>Accreditation &amp; Recognition</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
-              Accreditation, Recognition &amp; University Pathways
-            </h2>
-            <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
-              Smartious students earn qualifications administered by independent international examination boards. Recognition flows from the board itself &mdash; not from the school that delivered the curriculum. Below is the accreditation, examination and verification framework that connects {country.adjective} Smartious students to universities worldwide.
-            </p>
-          </div>
+  trustSignals: [
+    { h: 'Kenya-based accredited online school',                p: 'Smartious operates from Nairobi with two operational teaching centres established 2022 and 2023. Kenya-based location makes Smartious an "accredited school based outside Romania" — satisfying Romania\'s legal "umbrella school" pathway.' },
+    { h: 'Perfect EET / EAT time zone alignment',                p: 'EET UTC+2 (EEST UTC+3 summer) — SAME as Nairobi EAT in winter, 1 hour behind in summer. Smartious morning delivery 9 AM – 12 PM Nairobi = 9 AM – 12 PM Bucharest (winter) — no scheduling friction, natural teaching hours for both delivery centres and receiving families.' },
+    { h: 'Cambridge Assessment International Education',         p: 'Smartious registers students as private candidates at Cambridge Assessment authorised centres across Romania — British Council Bucharest + BSB Bucharest + CSB Bucharest + Transylvania College Cluj-Napoca + IBST Timișoara.' },
+    { h: 'Legal umbrella school pathway',                        p: 'Under Law 198/2023, Romanian families enrolled with Smartious as accredited school based OUTSIDE Romania satisfy compulsory education requirements legally. Thousands of Romanian families use this exact model — Smartious operates on the same legal basis at fee point 2-12× lower than alternatives.' },
+  ],
 
-          {/* Five curriculum pathways */}
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))',gap:18,marginBottom:40}}>
-            {[
-              {h:'Cambridge International',sub:'Cambridge Assessment International Education · University of Cambridge',p:country.cambridgeCardDescription},
-              {h:'Pearson Edexcel International',sub:'Pearson · UK Edexcel curriculum adapted for international delivery',p:'International GCSE and International A-Level qualifications, administered by Pearson. Three examination series annually (January, May/June, October/November) providing additional flexibility versus the Cambridge twice-yearly schedule.'},
-              {h:'International Baccalaureate Organisation',sub:'IB Diploma Programme · IBO Geneva',p:'IB Diploma administered by the International Baccalaureate Organisation in Geneva. Recognised by leading universities globally with particularly strong weighting at US Ivy League, US selective liberal arts colleges, Canadian U15 and top European universities.'},
-              {h:'College Board',sub:'American Curriculum with Advanced Placement (AP)',p:'AP courses and examinations administered by the College Board, the US non-profit responsible for the SAT and AP programmes. AP scores are widely recognised by US universities for university credit, plus by Canadian, UK, Australian and many universities worldwide.'},
-              {h:'Ontario Secondary School Diploma (OSSD)',sub:'Canadian Cross International School · Ontario Ministry of Education',p:'OSSD earned through Smartious\'s partnership with Canadian Cross International School, an Ontario-inspected private school. Smartious students enrol concurrently with CCIS to complete the OSSD curriculum and credit requirements alongside Cambridge or other pathways. OSSD is one of the most recognised secondary credentials worldwide — particularly strong for Canadian U15 admissions via OUAC, US universities via Common Application, and UK universities via UCAS.'},
-            ].map((c,i) => (
-              <div key={i} style={{padding:'22px 22px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,borderLeft:`3px solid ${V.cr}`}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,margin:'0 0 4px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
-                <p style={{fontSize:11.5,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:'0 0 10px'}}>{c.sub}</p>
-                <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.p}</p>
-              </div>
-            ))}
-          </div>
+  universitiesInCountry: 'Romanian universities: Universitatea din București (Bucharest University — top-ranked Romania), Universitatea Politehnica București (engineering), Universitatea de Medicină și Farmacie Carol Davila (medicine), Academia de Studii Economice — ASE (business/economics), Universitatea Babeș-Bolyai Cluj-Napoca (Romania\'s largest university), Universitatea Tehnică Cluj-Napoca (engineering), Universitatea de Medicină și Farmacie Iuliu Hațieganu Cluj, Universitatea Alexandru Ioan Cuza Iași (Romania\'s oldest university, 1860), Universitatea Tehnică Gheorghe Asachi Iași, Universitatea de Vest Timișoara, Universitatea Politehnica Timișoara, Universitatea Transilvania Brașov, Universitatea Ovidius Constanța. Romanian public universities are TUITION FREE for EU citizens (including Romanian citizens) — only administrative fees. Also international destinations — UK Russell Group (Oxbridge, Imperial, LSE, UCL, Warwick), US Ivy League + MIT + Stanford + CMU, Canadian U15, Australian Group of Eight.',
+  universityChannels: 'Romanian universities accept Cambridge A-Level and IB Diploma via bacalaureat equivalency through CNRED (Centrul Național de Recunoaștere și Echivalare a Diplomelor). Cambridge A-Level Mathematics + Physics + Chemistry directly supports Politehnica București / TU Cluj / UMF medicine pathway. UK Russell Group accepts Cambridge A-Level or IB Diploma via UCAS with October 15 Oxbridge early deadline. US Ivy League + UC system via Common Application with SAT/ACT + AP portfolio. Canadian U15 via OUAC. Personalised university guidance sessions with the Head of Academics including UCAS personal statement coaching + Oxbridge admissions test preparation (MAT, PAT, ENGAA, TSA, HAT), Common App essay coaching, and CNRED bacalaureat equivalency support for Romanian universities.',
+  cambridgeCardDescription: 'Smartious\'s primary offer for Romania-resident families. Cambridge IGCSE (Years 10-11) and Cambridge A-Level (Years 12-13) delivered as live online classes with perfect EET / EAT time zone alignment (Nairobi morning teaching = Bucharest morning delivery in winter). Private candidate examination registration at Cambridge Assessment International Education authorised centres across Romania (BSB Bucharest, CSB Bucharest, Transylvania College Cluj-Napoca, IBST Timișoara). Pathway accepted by Romanian universities via CNRED bacalaureat equivalency, UK Russell Group via UCAS, US Ivy League via Common Application, Canadian U15, Australian G8.',
+  britishCurriculumSuits: 'Romania-resident families targeting Cambridge IGCSE + A-Level pathway. Best fit for: (1) Romanian homeschool families seeking legal "umbrella school" pathway (Smartious as Kenya-based accredited online school satisfies Law 198/2023 requirements); (2) fee-sensitive families switching from Bucharest AISB/BSB/CSB/ISB, Cluj-Napoca Transylvania College/ISC, Timișoara IBST, Iași ISI, Brașov IBSB, Constanța international — fee arbitrage vs EUR 10,000-23,830/year; (3) Sixth Form students 16+ beyond compulsory education; (4) international corporate rotational families (UiPath, Bitdefender, Bosch Cluj, Endava, Continental, Amazon Iași, Ubisoft, ING, Raiffeisen); (5) Romanian returnee families from UK / US / Germany / Canada.',
+  britishCurriculumDelivery: 'Live online classes EET 9 AM – 12 PM (matching Nairobi 9 AM – 12 PM teaching in winter — perfect time zone alignment), small groups 4-6 students. Cambridge examinations at Romania-wide authorised centres.',
+  ibDiplomaSuits: 'Romania-resident families targeting IB Diploma\'s breadth. Bucharest AISB + ISB, Cluj-Napoca Transylvania College alternative. Best fit for families targeting US Ivy League + Canadian U15 + holistic university applications.',
+  ibDiplomaDelivery: 'Live online IB DP classes across all six subject groups plus Theory of Knowledge and Extended Essay supervision.',
+  americanCurriculumSuits: 'Romania-resident families targeting US universities via Common Application. Bucharest AISB alternative. Best fit for: American diplomatic corps families, US-pathway-focused expat families, corporate rotational families (Adobe Bucharest, Oracle Bucharest, Amazon Iași).',
+  americanCurriculumDelivery: 'American Curriculum with AP courses Grades 9-12, SAT/ACT preparation, Common App essay coaching.',
+  founderBioCountrySpecific: 'Alfred Ouko founded Smartious in 2019 to make international qualifications (Cambridge, IB, American, Ontario OSSD) accessible to families across emerging markets and international corporate rotational communities at online-delivery fees below traditional international school and existing UK online school competitor pricing. Romania-resident families — homeschool via legal "umbrella school" pathway, expat corporate rotational, Sixth Form 16+, returnee families — join students in 22 other countries — from Bucharest Pipera to Cluj-Napoca Grigorescu, Delhi Chanakyapuri to Dubai Downtown, Berlin Charlottenburg to Kuala Lumpur Mont Kiara.',
+  founderUniversitySpecialism: 'Alfred holds a BEd in Mathematics and Physics — Smartious\'s Cambridge A-Level and IB Diploma STEM subjects are led personally when needed. Head of Academics supervises curriculum delivery and university placement strategy per family across Romanian universities (Politehnica București, Universitatea din București, UMF Carol Davila, ASE, Babeș-Bolyai Cluj, UMF Iași via CNRED bacalaureat equivalency), UK Russell Group (UCAS + Oxbridge coaching), US Ivy League (Common App + SAT/ACT), Canadian U15, and Australian G8 destinations.',
 
-          {/* Examination centre arrangements */}
-          <div style={{padding:'28px 30px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:32}}>
-            <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,margin:'0 0 12px',lineHeight:1.3,fontWeight:400}}>Examination centre arrangements in {country.name}</h3>
-            <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:'0 0 14px'}}>
-              International examinations require attendance at authorised examination centres on specific dates. In {country.name}, established examination centres serve Cambridge International, Pearson Edexcel and other major international qualifications.
-            </p>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))',gap:12}}>
-              {country.examCentreTiles.map((c,i) => (
-                <div key={i} style={{padding:'12px 14px',background:V.white,borderRadius:8,border:`1px solid ${V.bone3}`}}>
-                  <div style={{fontSize:11,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:4}}>{c.city}</div>
-                  <div style={{fontSize:13.5,color:V.ink,fontWeight:600,marginBottom:2}}>{c.centre}</div>
-                  <div style={{fontSize:12,color:V.sl}}>{c.area}</div>
-                </div>
-              ))}
-            </div>
-            <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:'14px 0 0',fontStyle:'italic'}}>
-              Smartious manages examination registration logistics including centre selection, registration paperwork and deadline compliance. {country.examLogisticsProse}
-            </p>
-          </div>
+  competitorsIntro: 'Romania international school fees span EUR 7,000-23,830/year at premium tier: American International School of Bucharest AISB Pipera (EUR 11,150-23,830 — Romania\'s most established international school since 1962), British School of Bucharest BSB Herăstrău (EUR 14,000-22,000 — COBIS + BSO accredited ISI Excellent 2025), Cambridge School of Bucharest CSB Voluntari (EUR 12,000-20,000 — BSO accredited), International School of Bucharest ISB (EUR 12,000-20,000 — Amber Forest campus 2026-2027), IBSB (EUR 10,000-16,000), MISB Maarif (three-stream Romanian + Cambridge + Maarif ARACIP authorized), Cluj-Napoca Transylvania College (EUR 10,000-16,000 — Cambridge + IB DP), International School Cluj ISC (EUR 9,000-14,000), Timișoara + Iași + Brașov international schools EUR 7,000-12,000. Smartious USD 2,160-6,480/year (~EUR 2,000-6,000/year) provides dramatic 2-12× fee arbitrage vs Romanian premium international schools. Under Romanian Law 198/2023, Smartious as Kenya-based accredited online school fits the legal "umbrella school" pathway satisfying compulsory education requirements.',
+  competitors: [
+    { name: 'American International School of Bucharest (AISB)', city: 'Pipera Bucharest',       curriculum: 'IB PYP + MYP + DP + US High School Diploma (NEASC)',                    feesUsd: 'EUR 11,150-23,830/year',      feesAed: '~USD 12,100-25,900',           rating: 4.8, capacityNote: 'Founded 1962 by US Embassy — Romania\'s most established international school, 10-hectare campus opened 2001, 1,000+ students from 60+ nationalities' },
+    { name: 'British School of Bucharest (BSB)',                 city: 'Herăstrău Bucharest',    curriculum: 'English National + IGCSE + A-Level',                                    feesUsd: 'EUR 14,000-22,000/year',      feesAed: '~USD 15,200-23,900',           rating: 4.7, capacityNote: '~700+ pupils from 65 nations, COBIS + BSO accredited, ISI rated Excellent 2018/2022/2025' },
+    { name: 'Cambridge School of Bucharest (CSB)',               city: 'Voluntari Bucharest',    curriculum: 'Cambridge Primary + IGCSE + A-Level',                                   feesUsd: 'EUR 12,000-20,000/year',      feesAed: '~USD 13,000-21,700',           rating: 4.6, capacityNote: 'BSO accredited, Fundația Mateas foundation, ISI inspected May 2025' },
+    { name: 'International School of Bucharest (ISB)',           city: 'Bucharest',              curriculum: 'British-style + IB Diploma',                                            feesUsd: 'EUR 12,000-20,000/year',      feesAed: '~USD 13,000-21,700',           rating: 4.6, capacityNote: 'Main campus + Amber Forest campus planned 2026-2027 (15,000 sqm, 80% green space)' },
+    { name: 'MISB Maarif International School Bucharest',        city: 'Voluntari Bucharest',    curriculum: 'Romanian National + Cambridge IGCSE/A-Level + International Maarif',    feesUsd: 'EUR 8,000-14,000/year',       feesAed: '~USD 8,700-15,200',            rating: 4.4, capacityNote: 'Three-stream, ARACIP authorized by Romanian Ministry of Education' },
+    { name: 'IBSB International British School of Bucharest',    city: 'Bragadiru Bucharest',    curriculum: 'British curriculum EYFS + Primary + Secondary',                         feesUsd: 'EUR 10,000-16,000/year',      feesAed: '~USD 10,900-17,400',           rating: 4.4, capacityNote: 'British curriculum specialist Bucharest' },
+    { name: 'Transylvania College Cluj-Napoca',                  city: 'Cluj-Napoca',            curriculum: 'Cambridge + IB DP',                                                     feesUsd: 'EUR 10,000-16,000/year',      feesAed: '~USD 10,900-17,400',           rating: 4.6, capacityNote: 'Romania\'s premier Cambridge international school in Transylvania' },
+    { name: 'International School Cluj (ISC)',                   city: 'Cluj-Napoca',            curriculum: 'British curriculum + IGCSE + A-Level',                                  feesUsd: 'EUR 9,000-14,000/year',       feesAed: '~USD 9,800-15,200',            rating: 4.5, capacityNote: 'Cluj-Napoca established international' },
+    { name: 'KEY International School Cluj',                     city: 'Cluj-Napoca',            curriculum: 'IB PYP (candidate) — nursery to primary only',                           feesUsd: 'EUR 5,000-9,000/year',        feesAed: '~USD 5,400-9,800',             rating: 4.4, capacityNote: 'Only IB PYP candidate school in Transylvania, lowest fees among Cluj international' },
+    { name: 'International British School Timișoara',            city: 'Timișoara',              curriculum: 'British curriculum',                                                    feesUsd: 'EUR 7,000-12,000/year',       feesAed: '~USD 7,600-13,000',            rating: 4.4, capacityNote: 'Western Romania primary international provider' },
+    { name: 'Cambridge Home School Online (CHS Online, UK-based)', city: 'Online (UK-based)',     curriculum: 'Cambridge + Edexcel IGCSE + A-Level',                                   feesUsd: '£10,950/year (~EUR 12,600)',  feesAed: '~USD 13,860',                   rating: 4.7, capacityNote: 'UK online school market leader, live ≤10 pupils, ISI accredited' },
+    { name: 'Wolsey Hall Oxford (self-paced)',                   city: 'Online (UK-based)',      curriculum: 'Cambridge (self-paced only)',                                           feesUsd: '£4,000-£7,000/year',          feesAed: '~USD 5,060-8,860',              rating: 4.0, capacityNote: 'Self-paced only — no live classes' },
+    { name: 'Crimson Global Academy (CGA)',                      city: 'Online (New Zealand-based)', curriculum: 'Cambridge + AP + IB',                                              feesUsd: 'USD 15,000-25,000/year',      feesAed: '~EUR 13,750-22,900',           rating: 4.5, capacityNote: 'Premium tier competitor targeting European homeschool market including Romania' },
+    { name: 'Smartious Online School (Romania via online delivery)', city: 'Delivered to all Romania', curriculum: 'Cambridge IGCSE, A-Level, IB DP, AP, Ontario OSSD',                feesUsd: 'USD 2,160-6,480/year',        feesAed: '~EUR 2,000-6,000/year',        rating: 4.8, capacityNote: 'Live small-group 4-6 pupils, 2-12× fee arbitrage vs Romanian premium international schools, Ontario OSSD via CCIS partnership + Kenya-based accredited online school satisfies Romania Law 198/2023 legal "umbrella school" pathway for homeschool families + perfect EET / EAT time zone alignment' },
+  ],
 
-          {/* University recognition worldwide */}
-          <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,marginTop:24,marginBottom:14,lineHeight:1.3,fontWeight:400,textAlign:'center'}}>University recognition worldwide</h3>
-          <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginBottom:20,textAlign:'center',maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
-            Cambridge International, Pearson Edexcel, IB Diploma and American AP qualifications are recognised across the major university systems globally.
-          </p>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:14,marginBottom:32}}>
-            {[
-              {region: country.name, unis: country.universitiesInCountry},
-              {region:'United Kingdom',unis:'Cambridge · Oxford · Imperial College London · UCL · LSE · King\'s College London · Edinburgh · Manchester · Bristol · Birmingham · Warwick · Durham · the Russell Group · the broader UK system via UCAS'},
-              {region:'United States',unis:'Harvard · Yale · Princeton · Columbia · Penn · Brown · Dartmouth · Cornell · Amherst · Williams · Pomona · UC Berkeley · UCLA · Michigan · Virginia · top liberal arts and public research universities via the Common Application'},
-              {region:'Canada',unis:'Toronto · McGill · UBC · McMaster · Waterloo · Western · Queen\'s · the U15 research universities · OUAC for Ontario applications'},
-              {region:'Australia',unis:'Melbourne · Sydney · ANU · Monash · Queensland · UWA · Adelaide · UNSW · the Group of Eight via UAC'},
-              {region:'Gulf & Saudi Arabia',unis:'NYU Abu Dhabi · Sorbonne Abu Dhabi · Khalifa · AUS · AUD · UAE branch campuses · KFUPM · KAUST · KSU · KAU · Saudi national universities · Education City Doha (Georgetown · Northwestern · CMU · Cornell · Texas A&M · HEC Paris · UCL)'},
-              {region:'Europe',unis:'Berlin Humboldt · Munich LMU · Heidelberg · RWTH Aachen · TU Munich · French Grandes Écoles · Amsterdam · Leiden · Utrecht · Bologna · Sapienza · ETH Zurich · EPFL'},
-            ].map((r,i) => (
-              <div key={i} style={{padding:'18px 20px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                <div style={{fontSize:11,color:V.gold3,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>{r.region}</div>
-                <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{r.unis}</p>
-              </div>
-            ))}
-          </div>
+  legalFrameworkIntro: 'ROMANIAN LEGAL FRAMEWORK: Under Law 198/2023 (România Educată education reform), homeschool is NOT formally recognized as an educational pathway. Compulsory education (ages 6-16) requires enrolment at accredited or provisionally authorized institutions. In 2024, Romanian courts issued the FIRST criminal sentences against parents homeschooling illegally. HOWEVER, Romanian families CAN legally enrol children with ACCREDITED SCHOOLS BASED OUTSIDE ROMANIA — the well-established "umbrella school" pathway used by thousands of Romanian families. Smartious as Kenya-based online school accredited via Cambridge Assessment International Education, Pearson Edexcel, and Ontario OSSD (Canadian Cross International School partnership) fits this pathway exactly.',
+  legalFramework: [
+    { h: 'Law 198/2023 România Educată education reform',       p: 'Romania\'s Law 198/2023 (România Educată education reform) defines the education system as comprising accredited or provisionally authorized institutions. Compulsory education applies to children ages 6-16. Homeschooling is NOT formally recognized as an educational pathway within Romanian law.' },
+    { h: '2024 criminal sentences for illegal homeschool',       p: 'In 2024, Romanian courts issued the first criminal sentences against parents who withdrew children from state schools to homeschool without proper legal framework. Under Article 380 of the Romanian Penal Code, preventing access to education is a criminal offence.' },
+    { h: 'Accredited foreign school pathway (LEGAL)',            p: 'Romanian parents CAN legally enrol their children with SCHOOLS BASED OUTSIDE ROMANIA. When the external school is accredited, the student\'s education is recognised by Romanian authorities via CNRED (Centrul Național de Recunoaștere și Echivalare a Diplomelor) equivalency. This is the well-established "umbrella school" pathway used by thousands of Romanian homeschool families.' },
+    { h: 'Smartious fits the accredited foreign school pathway', p: 'Smartious is a Kenya-based online school accredited via Cambridge Assessment International Education, Pearson Edexcel, and Ontario Secondary School Diploma (Canadian Cross International School partnership). Romanian families enrolled with Smartious satisfy compulsory education requirements legally — the same model thousands of Romanian families already use with other foreign online schools, at fee point 2-12× lower than existing alternatives.' },
+    { h: 'Sixth Form 16+ post-compulsory flexibility',           p: 'Romanian compulsory education ends at 16. Sixth Form students (Years 12-13, ages 16-18) may pursue full Cambridge A-Level or IB Diploma via Smartious as primary Sixth Form pathway without compulsory education framework restrictions.' },
+    { h: 'CNRED bacalaureat equivalency',                        p: 'Cambridge A-Level, IB Diploma, and American High School Diploma are recognized by CNRED (Centrul Național de Recunoaștere și Echivalare a Diplomelor) as equivalent to Romanian bacalaureat for Romanian university admission. Smartious graduates apply to Politehnica București / Universitatea din București / UMF Carol Davila / ASE / Babeș-Bolyai Cluj / UMF Iași / Politehnica Timișoara using CNRED equivalency.' },
+  ],
 
-          {/* How universities verify */}
-          <div style={{padding:'24px 28px',background:`linear-gradient(135deg, ${V.bone} 0%, ${V.white} 100%)`,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.gold3}`,borderRadius:10}}>
-            <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 10px',lineHeight:1.3,fontWeight:400}}>How universities verify qualifications</h3>
-            <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>
-              Universities verify Cambridge International, Pearson Edexcel, IB Diploma and American AP qualifications directly with the issuing examination boards through standard verification services &mdash; Cambridge International Verification of Awards, Pearson's Verification of Results, the IB Organisation's verification service, and the College Board AP Score Reporting service. The qualification's credibility comes from the examination board itself, which is why these qualifications are equally valid whether earned at a physical school or through Smartious.
-            </p>
-          </div>
-        </div>
-      </div></section>
+  whySmartious: [
+    { h: 'Legal "umbrella school" pathway for Romanian homeschool families',         p: 'Smartious as Kenya-based online school accredited via Cambridge Assessment International Education, Pearson Edexcel, and Ontario OSSD (CCIS partnership) fits Romania\'s legal "umbrella school" pathway under Law 198/2023. Romanian families enrolled with Smartious satisfy compulsory education requirements legally — the same model thousands of Romanian families already use with other foreign online schools, at fee point 2-12× lower.' },
+    { h: '2-12× fee arbitrage vs Romanian premium international schools',            p: 'Smartious USD 2,160-6,480/year (~EUR 2,000-6,000/year) vs Bucharest AISB EUR 11,150-23,830, BSB EUR 14,000-22,000, CSB EUR 12,000-20,000, ISB EUR 12,000-20,000, Cluj Transylvania College EUR 10,000-16,000 — identical Cambridge / IB / American / OSSD qualifications and university pathway.' },
+    { h: 'Perfect EET / EAT time zone alignment',                                    p: 'Romania (EET UTC+2, EEST UTC+3 summer) is the same time zone as Nairobi EAT in winter, 1 hour behind in summer. Smartious morning delivery 9 AM – 12 PM Bucharest = 9 AM – 12 PM Nairobi teaching (winter) — no scheduling friction, natural teaching hours.' },
+    { h: 'Sixth Form 16+ post-compulsory Cambridge A-Level pathway',                 p: 'Romanian compulsory education ends at 16. Sixth Form students (Years 12-13, ages 16-18) may pursue full Cambridge A-Level or IB Diploma via Smartious as primary Sixth Form pathway. UCAS applications to UK Russell Group (Oxbridge, Imperial, LSE, UCL) or Common App to US Ivy League + UC system continue seamlessly.' },
+    { h: 'Bucharest tech corporate rotation portability',                            p: 'UiPath (Nasdaq: PATH — Bucharest-founded global RPA leader), Bitdefender (Bucharest-founded cybersecurity global leader), Adobe Bucharest, Oracle Bucharest, IBM Romania, Microsoft Bucharest rotational cycles supported without curriculum switching across Bucharest → San Francisco → New York → London postings.' },
+    { h: 'Cluj-Napoca "Silicon Valley of Romania" rotation portability',            p: 'Bosch Engineering Center Cluj (~2,500+ engineers), Endava, Emerson, Nokia, Betfair, eMag, UiPath Cluj, Bitdefender Cluj rotational cycles supported.' },
+    { h: 'Automotive tier-1 supplier corporate rotation portability',                p: 'Timișoara Continental AG + Nokia + Flextronics, Iași Amazon Development Center + Continental + Ubisoft, Brașov Continental Automotive + Schaeffler + Autoliv + Preh + Draexlmaier, Constanța OMV Petrom + Damen Shipyards corporate rotational cycles supported.' },
+    { h: 'Diplomatic corps portability across Bucharest embassies',                  p: 'US / British / European / Israeli / Turkish diplomatic families in Bucharest continue Cambridge / IB / American / OSSD curriculum through Romania posting and onward postings globally.' },
+    { h: 'Romanian returnee curriculum continuity',                                  p: 'Romanian families returning from UK / US / Germany / Canada with children in Cambridge / IB / American continue seamlessly without conversion to Romanian bacalaureat.' },
+    { h: 'Ontario OSSD pathway for Canadian universities',                           p: 'Romanian families targeting Canadian U15 (Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s) complete Ontario Secondary School Diploma via CCIS partnership — apply via OUAC as Ontario secondary graduate.' },
+    { h: 'CNRED bacalaureat equivalency for Romanian universities',                  p: 'Cambridge A-Level and IB Diploma recognized by CNRED as equivalent to Romanian bacalaureat for Romanian university admission (Politehnica București / Universitatea din București / UMF Carol Davila / ASE / Babeș-Bolyai Cluj — free public universities for EU citizens including Romanian citizens).' },
+  ],
 
-      {/* ─── CURRICULUM DEEP DIVES ─── */}
-      <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}><div className="wrap">
-        <div style={{maxWidth:1100,margin:'0 auto'}}>
-          <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
-            <div className="eyebrow" style={{justifyContent:'center'}}>Curriculum pathways</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
-              Curriculum approaches we offer {country.adjective} families
-            </h2>
-          </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))',gap:18}}>
-            {[
-              {
-                h:'British Curriculum',
-                sub:'Cambridge IGCSE & A-Level · Pearson Edexcel',
-                structure:'Cambridge IGCSE: Years 10-11, eight to ten subjects. Cambridge A-Level: Years 12-13, three or four subjects in depth. Pearson Edexcel as British alternative with three examination series annually.',
-                suits: country.britishCurriculumSuits,
-                delivery: country.britishCurriculumDelivery,
-              },
-              {
-                h:'IB Diploma Programme',
-                sub:'International Baccalaureate Organisation',
-                structure:'Grades 11-12. Six subjects (three Higher Level, three Standard Level), plus Theory of Knowledge, the Extended Essay (4,000-word independent research paper), and Creativity, Activity and Service (CAS).',
-                suits: country.ibDiplomaSuits,
-                delivery: country.ibDiplomaDelivery,
-              },
-              {
-                h:'American Curriculum',
-                sub:'College Board · AP · SAT & ACT',
-                structure:'US high school curriculum through Grade 12. Advanced Placement courses Grades 9-12 with college-level subject specialisation. SAT or ACT preparation integrated alongside curriculum delivery.',
-                suits: country.americanCurriculumSuits,
-                delivery: country.americanCurriculumDelivery,
-              },
-              {
-                h:'Ontario Secondary School Diploma',
-                sub:'OSSD · via Canadian Cross International School partnership',
-                structure:'Grades 9-12 Ontario curriculum delivered through Smartious\'s partnership with Canadian Cross International School (Ontario-inspected private secondary school). Students complete the 30 credits required for OSSD including the Ontario Secondary School Literacy Test (OSSLT) and 40 community involvement hours.',
-                suits:`${country.adjective} families targeting Canadian U15 universities (Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen's) via OUAC, US universities via the Common Application, UK universities via UCAS, and Australian universities. The OSSD is particularly strong for direct Canadian university applications because students apply as Ontario secondary graduates rather than international students.`,
-                delivery:'Live online instruction by qualified subject teachers, concurrent enrolment with Canadian Cross International School for official OSSD transcripting, Ontario course codes (ENG4U, MHF4U, SCH4U etc.) recorded against each student. CCIS issues the official Ontario diploma and transcript on successful completion of the OSSD requirements.',
-              },
-            ].map((c,i) => (
-              <div key={i} style={{padding:'24px 24px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:14}}>
-                <div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 4px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
-                  <p style={{fontSize:11,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:0}}>{c.sub}</p>
-                </div>
-                <div>
-                  <div style={{fontSize:11,color:V.ink,fontWeight:700,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:4}}>Structure</div>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.structure}</p>
-                </div>
-                <div>
-                  <div style={{fontSize:11,color:V.ink,fontWeight:700,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:4}}>Suits families targeting</div>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.suits}</p>
-                </div>
-                <div>
-                  <div style={{fontSize:11,color:V.ink,fontWeight:700,letterSpacing:'.04em',textTransform:'uppercase',marginBottom:4}}>Smartious delivery</div>
-                  <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.delivery}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div></section>
+  faqs: [
+    { q: 'Is homeschool legal in Romania?', a: 'Under Law 198/2023 (România Educată education reform), homeschool is NOT formally recognized as an educational pathway. Compulsory education (ages 6-16) requires enrolment at accredited or provisionally authorized institutions. In 2024, Romanian courts issued the first criminal sentences against parents homeschooling illegally without proper legal framework. HOWEVER, Romanian families CAN legally enrol children with ACCREDITED SCHOOLS BASED OUTSIDE ROMANIA — the well-established "umbrella school" pathway used by thousands of Romanian families. Smartious as Kenya-based accredited online school fits this pathway exactly.' },
+    { q: 'How does Smartious enable legal homeschooling for Romanian families?', a: 'Smartious is a Kenya-based online school accredited via Cambridge Assessment International Education, Pearson Edexcel, and Ontario OSSD (Canadian Cross International School partnership). Romanian families enrol their child with Smartious (an accredited school based OUTSIDE Romania). Since Romanian law permits enrolment with accredited foreign schools, this satisfies compulsory education requirements. Thousands of Romanian families already use this "umbrella school" model with foreign online schools. Smartious operates on the same legal basis at fee point 2-12× lower.' },
+    { q: 'How does Smartious compare to American International School of Bucharest (AISB) or British School of Bucharest (BSB)?', a: 'AISB Pipera (founded 1962 by US Embassy, 1,000+ students from 60+ nationalities, IB PYP + MYP + DP + US Diploma via NEASC, EUR 11,150-23,830/year) and BSB Herăstrău (~700+ pupils from 65 nations, COBIS + BSO accredited, ISI rated Excellent 2025, EUR 14,000-22,000/year) provide physical campus premium international education. Smartious provides live online Cambridge / IB / American / OSSD at USD 2,160-6,480/year — 2-12× fee arbitrage with identical qualifications, immediate enrolment, small class sizes.' },
+    { q: 'We\'re UiPath / Bitdefender / Bosch Cluj / Endava tech corporate family. How does Smartious support our rotation?', a: 'Romanian tech corporate rotational cycles (2-4 years typical). Smartious enrolment continues seamlessly through Bucharest / Cluj-Napoca / Iași → San Francisco → New York → London → Zurich postings without curriculum switching. Cross-country tech-family cohort provides social continuity.' },
+    { q: 'Can Cambridge A-Level or IB Diploma be used to apply to Romanian universities?', a: 'Yes. Romanian universities (Politehnica București, Universitatea din București, UMF Carol Davila, ASE Bucharest, Babeș-Bolyai Cluj, UMF Cluj, UMF Iași, Politehnica Timișoara, Transilvania Brașov) accept Cambridge A-Level and IB Diploma via bacalaureat equivalency through CNRED (Centrul Național de Recunoaștere și Echivalare a Diplomelor). Public Romanian university tuition is FREE for EU citizens including Romanian citizens.' },
+    { q: 'How does live class scheduling work given EET and Nairobi teaching hours?', a: 'Eastern European Time (EET UTC+2, EEST UTC+3 summer) is the SAME as East Africa Time (EAT UTC+3) in winter — no time difference. In summer, EET is 1 hour behind EAT. Smartious live classes 9 AM – 12 PM Nairobi = 9 AM – 12 PM Bucharest (winter) or 8 AM – 11 AM Bucharest (summer). Perfect time zone match — natural teaching hours for both delivery centres and receiving families. Recorded sessions 24/7.' },
+    { q: 'Where do Romanian students sit Cambridge IGCSE and A-Level examinations?', a: 'Cambridge Assessment International Education has authorised centres across Romania — British Council Bucharest plus British School of Bucharest (BSB Herăstrău), Cambridge School of Bucharest (CSB Voluntari), Transylvania College Cluj-Napoca, International British School Timișoara. Smartious handles examination registration logistics.' },
+    { q: 'What Romanian cities does Smartious serve?', a: 'Bucharest (Pipera, Herăstrău, Voluntari, Tunari, Bragadiru + all Sectors 1-6 + Ilfov), Cluj-Napoca (Grigorescu, Zorilor, Andrei Mureșanu, Bună Ziua), Timișoara (Iosefin, Fabric, Cetate, Elisabetin), Iași (Copou, Tătărași, Nicolina, Alexandru cel Bun), Brașov (Astra, Racadau, Noua, Centru), and Constanța (Mamaia, Faleză Nord, Boemia, Tomis + adjacent Mangalia). Also broader Romania via live online delivery — Sibiu, Arad, Oradea, Ploiești, Craiova, Galați.' },
+  ],
 
-      {/* ─── PRIMARY / SECONDARY / SIXTH FORM PROGRAMMES ─── */}
-      <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
-        <div style={{maxWidth:1100,margin:'0 auto'}}>
-          <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
-            <div className="eyebrow" style={{justifyContent:'center'}}>School programmes</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
-              Primary, Secondary &amp; Sixth Form
-            </h2>
-          </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:18}}>
-            {[
-              {
-                h:'Primary Programmes',
-                age:'Ages 5-11 · Years 1-6 · Grades 1-5 · IB PYP',
-                p:`Cambridge Primary, Common Core or IB Primary Years Programme. Live classes are age-appropriate in length (40-50 minutes), scheduled in your local ${country.timezone?.code || 'EAT'} time zone to suit Primary-age attention spans. Small group sizes support individual attention. Weekly parent dashboards and monthly written reports cover academic and developmental progress.`,
-              },
-              {
-                h:'Secondary Programmes',
-                age:'Years 7-11 · Grades 6-11',
-                p:`Lower Secondary (Years 7-9) builds the foundations for IGCSE entry. IGCSE Years (10-11) cover eight to ten subjects with examination registration at ${country.secondaryProgrammeExamRef}. One-on-one subject choice consultation at IGCSE entry aligns subjects with university targets. Mid-year arrivals accepted with academic catch-up support.`,
-              },
-              {
-                h:'Sixth Form & University Preparation',
-                age:'Years 12-13 · Grades 11-12',
-                p: country.universityChannels,
-              },
-            ].map((c,i) => (
-              <div key={i} style={{padding:'24px 24px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
-                <p style={{fontSize:11,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:'0 0 12px'}}>{c.age}</p>
-                <p style={{fontSize:13,color:V.sl,lineHeight:1.7,margin:0}}>{c.p}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div></section>
-
-      {/* ─── WHY FAMILIES TRUST SMARTIOUS — 8 PILLARS ─── */}
-      <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}><div className="wrap">
-        <div style={{maxWidth:1100,margin:'0 auto'}}>
-          <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
-            <div className="eyebrow" style={{justifyContent:'center'}}>Why families trust Smartious</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
-              Eight reasons {country.adjective} families choose Smartious
-            </h2>
-            <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
-              Each reason is grounded in something verifiable &mdash; not in marketing claims.
-            </p>
-          </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:14}}>
-            {[
-              {h:'Experienced international educators',p:'Subject-specific degree-qualified teaching staff with cumulative experience across Cambridge International, Pearson Edexcel, IB Diploma and American Curriculum. Many hold advanced teaching credentials including PGCE, Cambridge PDT certification, or national teaching registration in their home jurisdiction.'},
-              {h:'Personalised learning plans',p:'Every student begins with an initial assessment. The learning plan that follows is tailored to academic level, subject preferences, target universities and family situation &mdash; not a one-size-fits-all schedule.'},
-              {h:'Academic assessments',p:'Initial diagnostic assessment. Weekly informal assessment within classes. Monthly formal assessments. Mock examinations under timed conditions during IGCSE and A-Level years. Results inform teaching adjustments.'},
-              {h:'Small class sizes',p:'Online tier classes have four to six students. Online Plus has smaller groups. Premium is one-on-one. Class size affects individual attention, question response time, and student speaking time during class.'},
-              {h:'Progress monitoring',p:'Weekly parent dashboards showing attendance and assessment results. Monthly written subject reports from each teacher. Termly comprehensive reports covering academic progress, study habits and university preparation.'},
-              {h:'Parent communication',p:'Direct communication with subject teachers and form tutors via the parent portal. Email for admissions and pastoral matters, with response within one business day. Scheduled parent-teacher meetings each term.'},
-              {h:'Global student community',p:'Live classes bring together students from across 14 countries. Wednesday afternoon enrichment programmes &mdash; coding, robotics, debate, Model UN, chess, journalism, leadership &mdash; develop collaborative learning across geographies.'},
-              {h:'University admissions guidance',p:'Progressive guidance from Year 10 onwards. UCAS, Common Application, OUAC, UAC and direct university application support. Personal statement coaching, interview preparation and offer-management guidance.'},
-            ].map((c,i) => (
-              <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,borderTop:`3px solid ${V.gold3}`}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,margin:'0 0 8px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
-                <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.p}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div></section>
-
-      {/* ─── ABOUT THE FOUNDER — Alfred Ouko ─── */}
-      <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64,borderTop:`1px solid ${V.bone3}`}}><div className="wrap">
-        <div style={{maxWidth:1100,margin:'0 auto'}}>
-          <div style={{display:'grid',gridTemplateColumns:'auto 1fr',gap:36,alignItems:'start'}}>
-            <div style={{width:180,height:180,borderRadius:'50%',overflow:'hidden',flexShrink:0,boxShadow:'0 8px 24px rgba(139,26,46,.25)',border:`3px solid ${V.gold3}`,background:V.bone}}>
-              <img src="/alfred-ouko-founder.jpg"
-                alt="Alfred Ouko, founder and CEO of Smartious Homeschool"
-                loading="lazy"
-                style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
-            </div>
-            <div>
-              <div className="eyebrow">About the founder</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:6,lineHeight:1.2}}>Alfred Ouko</h2>
-              <p style={{fontSize:13.5,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:'0 0 18px'}}>Founder, Smartious Homeschool &amp; eSchool</p>
-
-              <p style={{fontSize:14.5,color:V.sl,lineHeight:1.75,margin:'0 0 16px'}}>
-                Alfred Ouko is the founder of Smartious Homeschool &amp; eSchool, established in 2019 while studying at the University of Nairobi. He has grown the organisation from a tuition support service into an international online school serving families across 14 countries, including {country.founderBioCountrySpecific}.
-              </p>
-
-              <div style={{marginBottom:18}}>
-                <div style={{fontSize:11,color:V.ink,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>Qualifications</div>
-                <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>
-                  Bachelor of Education (Science) &mdash; Mathematics and Physics, University of Nairobi (2022)
-                </p>
-              </div>
-
-              <div style={{marginBottom:18}}>
-                <div style={{fontSize:11,color:V.ink,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>Experience</div>
-                <ul style={{fontSize:13.5,color:V.sl,lineHeight:1.75,margin:0,paddingLeft:20}}>
-                  <li style={{marginBottom:6}}>Over six years supporting students through international curriculum pathways &mdash; Cambridge International (IGCSE and A-Level), Pearson Edexcel International, IB Diploma Programme, American Curriculum with AP, and homeschooling pathways.</li>
-                  <li style={{marginBottom:6}}>Direct teaching experience in secondary-level Mathematics and Physics across multiple international curriculum boards.</li>
-                  <li style={{marginBottom:6}}>{ EAST_AFRICA_HUBS.has(country.slug)
-                    ? "Leadership of curriculum development, teacher recruitment and academic standards across Smartious's two Nairobi-based physical centres (Diamond Plaza Parklands HQ and Karen Hardy) and online programmes."
-                    : "Leadership of curriculum development, teacher recruitment and academic standards across Smartious's two international-standard operational centres and online programmes serving " + country.name + " families." }</li>
-                  <li>Specialism in supporting students through university admissions to {country.founderUniversitySpecialism}.</li>
-                </ul>
-              </div>
-
-              <div style={{padding:'16px 18px',background:V.bone,borderLeft:`3px solid ${V.cr}`,borderRadius:6}}>
-                <p style={{fontSize:13,color:V.sl,lineHeight:1.7,margin:0,fontStyle:'italic'}}>
-                  &ldquo;International curriculum mastery is achievable for students from any background when subject specialists, small class sizes, and individual academic plans are combined with the discipline and structure good schools provide.&rdquo;
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div></section>
-
-      {/* ─── COMPREHENSIVE FAQ ─── */}
-      <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
-        <div style={{maxWidth:880,margin:'0 auto'}}>
-          <div className="eyebrow">FAQs</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
-            Common questions from {country.name} families
-          </h2>
-          <div style={{display:'flex',flexDirection:'column',gap:12}}>
-            {country.faqs.map((f, i) => (
-              <details key={i} style={{background:V.white,padding:'16px 22px',borderRadius:10,cursor:'pointer',border:`1px solid ${V.bone3}`}}>
-                <summary style={{fontWeight:600,color:V.ink,fontSize:14.5,listStyle:'none',display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12}}>
-                  <span>{f.q}</span>
-                  <span style={{color:V.cr,fontSize:18,lineHeight:1,flexShrink:0,marginTop:2}}>+</span>
-                </summary>
-                <p style={{color:V.sl,fontSize:14,lineHeight:1.75,margin:'14px 0 0'}}>{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </div></section>
-
-
-      {/* ─── SMARTIOUS WORLDWIDE — internal linking + global cohort signal ─── */}
-      <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64,borderTop:`1px solid ${V.bone3}`}}><div className="wrap">
-        <div style={{maxWidth:1100,margin:'0 auto'}}>
-          <div style={{textAlign:'center',marginBottom:40,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
-            <div className="eyebrow" style={{justifyContent:'center'}}>Smartious worldwide</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
-              {country.adjective} students join a 14+ country global cohort
-            </h2>
-            <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
-              Live classes bring together students from across Africa, the Gulf, Europe and Asia. A {country.name} student in our Year 11 IGCSE Mathematics class will be alongside peers in Cairo, Dubai, Bangkok, Seoul, Casablanca and Kigali. The Wednesday enrichment programmes (debate, Model UN, robotics, journalism) operate as one global classroom rather than thirteen separate national ones.
-            </p>
-          </div>
-          {[
-            {region:'East & Southern Africa', hubs:[
-              {slug:'kenya', name:'Kenya', note:'Nairobi HQ · founding market'},
-              {slug:'ethiopia', name:'Ethiopia', note:'Addis Ababa diplomatic + AU corporate'},
-              {slug:'rwanda', name:'Rwanda', note:'Kigali tech + East African Community'},
-              {slug:'south-africa', name:'South Africa', note:'Johannesburg + Cape Town expat'},
-            ]},
-            {region:'North Africa', hubs:[
-              {slug:'egypt', name:'Egypt', note:'Cairo · Alexandria · New Capital'},
-              {slug:'morocco', name:'Morocco', note:'Casablanca · Rabat · Marrakech'},
-            ]},
-            {region:'Gulf & Middle East', hubs:[
-              {slug:'uae', name:'UAE', note:'Dubai · Abu Dhabi · Sharjah'},
-              {slug:'qatar', name:'Qatar', note:'Doha · Education City'},
-              {slug:'saudi-arabia', name:'Saudi Arabia', note:'Riyadh · Jeddah · Dammam'},
-            ]},
-            {region:'East & Southeast Asia', hubs:[
-              {slug:'japan', name:'Japan', note:'Tokyo · Yokohama · Osaka · Kobe'},
-              {slug:'south-korea', name:'South Korea', note:'Seoul · Songdo · Busan'},
-              {slug:'vietnam', name:'Vietnam', note:'HCMC · Hanoi · Da Nang'},
-              {slug:'thailand', name:'Thailand', note:'Bangkok · Chiang Mai · Phuket'},
-            ]},
-          ].map((group, gi) => (
-            <div key={gi} style={{marginBottom:24}}>
-              <div style={{fontSize:11,color:V.gold3,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',marginBottom:12}}>{group.region}</div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))',gap:10}}>
-                {group.hubs.map((h, i) => {
-                  const isCurrent = country.slug === h.slug
-                  const href = `/online-school/${h.slug}`
-                  return isCurrent ? (
-                    <div key={i} style={{padding:'14px 16px',background:`rgba(139,26,46,.06)`,border:`1px solid ${V.cr}`,borderRadius:8}}>
-                      <div style={{fontSize:13.5,fontWeight:700,color:V.cr,marginBottom:2}}>{h.name} <span style={{fontSize:10,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold3,fontWeight:700,marginLeft:6}}>← you are here</span></div>
-                      <div style={{fontSize:11.5,color:V.sl}}>{h.note}</div>
-                    </div>
-                  ) : (
-                    <a key={i} href={href}
-                      onClick={(e)=>{e.preventDefault(); nav(href)}}
-                      style={{display:'block',padding:'14px 16px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:8,textDecoration:'none',color:'inherit',transition:'all .15s'}}
-                      onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.background = '#fff' }}
-                      onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.background = V.bone }}>
-                      <div style={{fontSize:13.5,fontWeight:700,color:V.ink,marginBottom:2}}>{h.name} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="3" strokeLinecap="round" style={{marginLeft:4,verticalAlign:'middle'}}><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-                      <div style={{fontSize:11.5,color:V.sl}}>{h.note}</div>
-                    </a>
-                  )
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div></section>
-
-      {/* ─── FINAL CTA ─── */}
-      <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:64,paddingBottom:64,position:'relative',overflow:'hidden'}}>
-        <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
-        <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
-          <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
-          <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
-          {/* SINGLE primary CTA: Book Assessment.
-              Two-gate funnel: form submission → admissions review → fee invoice on
-              acceptance → assessment → enrolment decision. No other CTAs anywhere. */}
-          <div style={{display:'flex',justifyContent:'center',marginBottom:18,gap:14,flexWrap:'wrap'}}>
-            <button onClick={() => nav('/assessment?from=' + country.slug)} style={{background:V.gold3,color:V.ink,border:'none',padding:'20px 40px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',boxShadow:'0 10px 28px rgba(201,151,58,.4)',transition:'all .18s ease'}}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 36px rgba(201,151,58,.55)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(201,151,58,.4)' }}>
-              Book assessment
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-            <button onClick={() => nav('/consult')}
-              style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,letterSpacing:'.01em',transition:'all .18s ease'}}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(0)' }}>
-              Book Free Consultation
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-          </div>
-
-          {/* Process explanation — replaces the old fee-transparency paragraph */}
-          <div style={{maxWidth:680,margin:'0 auto 24px',background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.12)',borderRadius:8,padding:'18px 22px'}}>
-            <div style={{fontSize:11,color:V.gold3,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',marginBottom:10,textAlign:'center'}}>How the process works</div>
-            <ol style={{margin:0,paddingLeft:20,fontSize:13,color:'rgba(255,255,255,.82)',lineHeight:1.75}}>
-              <li><strong style={{color:'#fff'}}>Submit the assessment request form.</strong> Full student and family details, curriculum interest, target universities. No payment at this stage.</li>
-              <li><strong style={{color:'#fff'}}>Admissions reviews the request.</strong> Our Head of Admissions evaluates fit against current cohort, year-group capacity, and curriculum alignment. We respond to every request within three business days regardless of decision.</li>
-              <li><strong style={{color:'#fff'}}>Assessment fee invoiced on acceptance.</strong> If the request is accepted, the family receives an invoice for the assessment fee. The fee is required before the diagnostic is scheduled, and is credited against the first month's tuition if the family proceeds to enrolment.</li>
-              <li><strong style={{color:'#fff'}}>Diagnostic assessment and curriculum recommendation.</strong> Structured testing across English, Mathematics and Science, written report, and a 30-minute consultation with the Head of Academics.</li>
-              <li><strong style={{color:'#fff'}}>Enrolment decision.</strong> Admission is determined on the basis of the assessment results, not the form alone. Families that are a good fit receive a formal enrolment offer; families that aren't receive an honest recommendation of better-suited alternatives.</li>
-            </ol>
-          </div>
-
-          <div style={{display:'flex',gap:16,justifyContent:'center',flexWrap:'wrap',fontSize:12,color:'rgba(255,255,255,.55)'}}>
-            <span>[+] Immediate enrolment</span>
-            <span>[+] No school waiting lists</span>
-            <span>[+] USD pricing stability</span>
-            <span>[+] Ontario OSSD pathway via CCIS partnership</span>
-            <span>[+] {country.finalCTABadgeExamRef}</span>
-          </div>
-        </div>
-      </section>
-    </>
-  )
+  ctaH: 'Book an assessment for your child',
+  ctaSubhead: 'Two-gate admissions process. Submit the assessment request form — our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled.',
 }
