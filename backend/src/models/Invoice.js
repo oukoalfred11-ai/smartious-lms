@@ -1,0 +1,69 @@
+/**
+ * models/Invoice.js
+ * Persistent invoice records — one per issued invoice.
+ */
+const mongoose = require('mongoose')
+
+const lineItemSchema = new mongoose.Schema({
+  description: { type: String, required: true },
+  sessions:    { type: String, default: '' },   // e.g. "3 sessions"
+  duration:    { type: String, default: '' },   // e.g. "1 hr"
+  ratePerHr:   { type: Number, default: 0 },
+  amount:      { type: Number, required: true },
+}, { _id: false })
+
+const invoiceSchema = new mongoose.Schema({
+  invoiceNo:    { type: String, required: true, unique: true, index: true },
+  issueDate:    { type: Date,   required: true },
+  dueDate:      { type: Date,   default: null },
+
+  // ── Bill To ──────────────────────────────────────────────
+  billedToName:    { type: String, required: true },
+  billedToAddress: { type: String, default: '' },
+  billedToEmail:   { type: String, default: '' },
+
+  // ── Student ───────────────────────────────────────────────
+  studentName:  { type: String, default: '' },
+  studentGrade: { type: String, default: '' },
+  subject:      { type: String, default: '' },
+
+  // ── Programme ─────────────────────────────────────────────
+  programmeLabel: { type: String, default: '' },  // e.g. "HOME TUITION PROGRAMME · 13 July – 21 August 2026 (6 weeks)"
+
+  // ── Line items ────────────────────────────────────────────
+  lineItems: [lineItemSchema],
+  currency:  { type: String, enum: ['USD','KES','GBP','EUR','AED'], default: 'USD' },
+
+  // ── Totals ────────────────────────────────────────────────
+  subtotal:    { type: Number, default: 0 },
+  discount:    { type: Number, default: 0 },
+  vatPct:      { type: Number, default: 0 },
+  vatAmount:   { type: Number, default: 0 },
+  totalDue:    { type: Number, required: true },
+
+  // ── Status ───────────────────────────────────────────────
+  status: {
+    type: String,
+    enum: ['draft', 'sent', 'paid', 'overdue', 'cancelled'],
+    default: 'sent',
+    index: true,
+  },
+  paidAt:     { type: Date, default: null },
+  paidAmount: { type: Number, default: 0 },
+
+  // ── Notes ────────────────────────────────────────────────
+  paymentNote: { type: String, default: '' },
+  notes:       { type: String, default: '' },
+
+  // ── Meta ─────────────────────────────────────────────────
+  issuedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  emailSentTo: { type: String, default: '' },
+  emailSentAt: { type: Date, default: null },
+
+}, { timestamps: true })
+
+invoiceSchema.index({ status: 1, createdAt: -1 })
+invoiceSchema.index({ billedToEmail: 1 })
+invoiceSchema.index({ issueDate: -1 })
+
+module.exports = mongoose.model('Invoice', invoiceSchema)
