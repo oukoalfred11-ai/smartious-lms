@@ -3615,11 +3615,10 @@ function InvoiceGenerator({ toast, onBack }) {
   const money = n=>n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
 
   // Auto-calc amount when sessions+rate change
-  const calcAmount = (i) => {
-    const it = f.items[i]
-    const sessions = parseInt(String(it.sessions).match(/\d+/)?.[0]||'0')
-    const rate = parseFloat(it.ratePerHr)||0
-    if (sessions && rate) itemSet(i,'amount',String(sessions*rate))
+  const calcAmount = (i, sessions, rate) => {
+    const s = parseInt(String(sessions||'').match(/\d+/)?.[0]||'0')
+    const r = parseFloat(rate)||0
+    if (s && r) itemSet(i,'amount',String(s*r))
   }
 
   const generate = () => {
@@ -3739,13 +3738,13 @@ function InvoiceGenerator({ toast, onBack }) {
                   <input value={it.description} onChange={e=>itemSet(i,'description',e.target.value)} placeholder="e.g. Week 1 — 13 to 17 July" style={{...inp,padding:'6px 8px'}}/>
                 </td>
                 <td style={{ padding:'8px 10px', width:'14%' }}>
-                  <input value={it.sessions} onChange={e=>{ itemSet(i,'sessions',e.target.value); setTimeout(()=>calcAmount(i),50) }} placeholder="3 sessions" style={{...inp,padding:'6px 8px'}}/>
+                  <input value={it.sessions} onChange={e=>{ itemSet(i,'sessions',e.target.value); calcAmount(i,e.target.value,it.ratePerHr) }} placeholder="3 sessions" style={{...inp,padding:'6px 8px'}}/>
                 </td>
                 <td style={{ padding:'8px 10px', width:'10%' }}>
                   <input value={it.duration} onChange={e=>itemSet(i,'duration',e.target.value)} placeholder="1 hr" style={{...inp,padding:'6px 8px'}}/>
                 </td>
                 <td style={{ padding:'8px 10px', width:'12%' }}>
-                  <input type="number" value={it.ratePerHr} onChange={e=>{ itemSet(i,'ratePerHr',e.target.value); setTimeout(()=>calcAmount(i),50) }} placeholder="15" style={{...inp,padding:'6px 8px',textAlign:'right'}}/>
+                  <input type="number" value={it.ratePerHr} onChange={e=>{ itemSet(i,'ratePerHr',e.target.value); calcAmount(i,it.sessions,e.target.value) }} placeholder="15" style={{...inp,padding:'6px 8px',textAlign:'right'}}/>
                 </td>
                 <td style={{ padding:'8px 10px', width:'14%' }}>
                   <input type="number" value={it.amount} onChange={e=>itemSet(i,'amount',e.target.value)} placeholder="45" style={{...inp,padding:'6px 8px',textAlign:'right'}}/>
