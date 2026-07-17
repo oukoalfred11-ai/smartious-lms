@@ -3585,306 +3585,210 @@ function DocumentsModule({ toast }) {
 
 // ── INVOICE GENERATOR ──────────────────────────────────────
 function InvoiceGenerator({ toast, onBack }) {
-  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
-  const [f, setF] = useState({
-    billedTo: '', studentName: '',
-    invoiceNo: '', dateIssued: today, dueDate: '', period: '',
-    currency: 'KES',
-    items: [{ desc: '', period: '', amount: '' }],
-    discount: '', vatPct: '0',
-    paymentNote: 'Please use the invoice number as the payment reference.',
-    notes: 'This invoice is computer-generated and valid without a signature.\nLate payment may result in suspension of tuition sessions.',
-  })
-  const set = (k, v) => setF(p => ({ ...p, [k]: v }))
-  const itemAdd = () => setF(p => ({ ...p, items: [...p.items, { desc: '', period: '', amount: '' }] }))
-  const itemSet = (i, key, v) => setF(p => ({ ...p, items: p.items.map((r, idx) => idx === i ? { ...r, [key]: v } : r) }))
-  const itemDel = (i) => setF(p => {
-    const next = p.items.filter((_, idx) => idx !== i)
-    return { ...p, items: next.length ? next : [{ desc: '', period: '', amount: '' }] }
-  })
+  const today = new Date().toISOString().split('T')[0]
+  const auth  = useAuth()
 
-  // ── live totals ──
-  const subTotal = f.items.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0)
-  const discount = parseFloat(f.discount) || 0
-  const vatPct = parseFloat(f.vatPct) || 0
-  const vatAmount = (subTotal - discount) * (vatPct / 100)
-  const totalDue = subTotal - discount + vatAmount
+  const [f, setF] = useState({
+    billedToName:'', billedToAddress:'', billedToEmail:'',
+    studentName:'', studentGrade:'', subject:'', programmeLabel:'',
+    invoiceNo:'', issueDate:today, dueDate:'',
+    currency:'USD',
+    items:[{ description:'', sessions:'', duration:'1 hr', ratePerHr:'15', amount:'' }],
+    discount:'', vatPct:'0',
+    paymentNote:'', notes:'',
+    sendEmail:true,
+  })
+  const [saving, setSaving]   = useState(false)
+  const [saved,  setSaved]    = useState(null)  // saved invoice doc
+
+  const set = (k,v) => setF(p => ({...p,[k]:v}))
+  const itemSet = (i,k,v) => setF(p => ({...p, items:p.items.map((r,idx)=>idx===i?{...r,[k]:v}:r)}))
+  const itemAdd = () => setF(p => ({...p, items:[...p.items,{description:'',sessions:'',duration:'1 hr',ratePerHr:'15',amount:''}]}))
+  const itemDel = i  => setF(p => { const n=p.items.filter((_,idx)=>idx!==i); return{...p,items:n.length?n:[{description:'',sessions:'',duration:'1 hr',ratePerHr:'15',amount:''}]} })
+
+  const subtotal = f.items.reduce((s,it)=>s+(parseFloat(it.amount)||0),0)
+  const discount = parseFloat(f.discount)||0
+  const vatPct   = parseFloat(f.vatPct)||0
+  const vatAmount = (subtotal-discount)*(vatPct/100)
+  const totalDue  = subtotal-discount+vatAmount
+  const money = n=>n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
+
+  // Auto-calc amount when sessions+rate change
+  const calcAmount = (i) => {
+    const it = f.items[i]
+    const sessions = parseInt(String(it.sessions).match(/\d+/)?.[0]||'0')
+    const rate = parseFloat(it.ratePerHr)||0
+    if (sessions && rate) itemSet(i,'amount',String(sessions*rate))
+  }
 
   const generate = () => {
-    if (!f.billedTo.trim())  { toast?.error?.('Billed-to name is required.'); return }
-    if (!f.invoiceNo.trim()) { toast?.error?.('Invoice number is required.'); return }
-    if (!f.items.some(it => (it.desc || '').trim() && (parseFloat(it.amount) || 0) > 0)) {
-      toast?.error?.('Add at least one line item with an amount.'); return
-    }
-    const html = buildInvoiceHTML(f, { subTotal, discount, vatAmount, vatPct, totalDue })
-    const w = window.open('', '_blank')
-    if (!w) { toast?.error?.('Please allow pop-ups to generate the invoice.'); return }
+    if (!f.billedToName.trim()) { toast?.error?.('Billed-to name is required.'); return }
+    const html = buildInvoiceHTML(f, { subtotal, discount, vatAmount, vatPct, totalDue })
+    const w = window.open('','_blank')
+    if (!w) { toast?.error?.('Please allow pop-ups to preview the invoice.'); return }
     w.document.write(html); w.document.close()
   }
 
-  const lbl = { display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
-    textTransform: 'uppercase', color: TOKENS.crimson, marginBottom: 5 }
-  const inp = { width: '100%', boxSizing: 'border-box', padding: '8px 11px',
-    borderRadius: 7, border: '1.5px solid ' + TOKENS.line, fontSize: 13, fontFamily: 'inherit' }
-  const card = { background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 12,
-    padding: 18, marginBottom: 14 }
-  const addBtn = { background: 'transparent', border: '1.5px dashed ' + TOKENS.gold,
-    color: '#9A7B16', borderRadius: 7, padding: '6px 12px', fontSize: 12,
-    fontWeight: 700, cursor: 'pointer', marginTop: 6 }
-  const delBtn = { background: 'transparent', border: 'none', color: '#B91C1C',
-    cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '0 4px', flexShrink: 0 }
-  const money = (n) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const saveAndSend = async () => {
+    if (!f.billedToName.trim()) { toast?.error?.('Billed-to name is required.'); return }
+    if (!f.items.some(it=>it.description?.trim())) { toast?.error?.('Add at least one line item.'); return }
+    setSaving(true)
+    try {
+      const { data } = await api.post('/invoices', {
+        ...f, lineItems: f.items, discount, vatPct, sendEmail: f.sendEmail,
+      })
+      if (data.success) {
+        setSaved(data.data.invoice)
+        toast?.ok?.('Invoice saved' + (f.sendEmail && f.billedToEmail ? ' and emailed to ' + f.billedToEmail : '') + '.')
+      } else {
+        toast?.error?.(data.message || 'Could not save invoice.')
+      }
+    } catch(e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not save invoice.')
+    } finally { setSaving(false) }
+  }
+
+  const lbl = { display:'block', fontSize:11, fontWeight:700, letterSpacing:'.04em', textTransform:'uppercase', color:TOKENS.crimson, marginBottom:5 }
+  const inp = { width:'100%', boxSizing:'border-box', padding:'8px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }
+  const card = { background:'#fff', border:'1px solid '+TOKENS.line, borderRadius:12, padding:18, marginBottom:14 }
+
+  if (saved) return (
+    <div style={card}>
+      <div style={{ fontSize:14, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>✅ Invoice saved</div>
+      <div style={{ fontSize:13, color:TOKENS.s700, marginBottom:16, lineHeight:1.7 }}>
+        <strong>{saved.invoiceNo}</strong> · {saved.currency} {money(saved.totalDue)} · {saved.billedToName}
+        {saved.emailSentTo && <div style={{ fontSize:12, color:TOKENS.s500, marginTop:4 }}>Email sent to {saved.emailSentTo}</div>}
+      </div>
+      <div style={{ display:'flex', gap:10 }}>
+        <button onClick={generate} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>
+          Preview & Download PDF
+        </button>
+        <button onClick={() => { setSaved(null) }} style={{ background:'transparent', border:'1.5px solid '+TOKENS.line, color:TOKENS.s700, padding:'9px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>
+          New invoice
+        </button>
+        <button onClick={onBack} style={{ background:'transparent', border:'none', color:TOKENS.s500, padding:'9px 0', fontSize:12.5, cursor:'pointer' }}>← Back</button>
+      </div>
+    </div>
+  )
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-        <button onClick={onBack} style={{
-          background: '#fff', border: '1.5px solid ' + TOKENS.line, borderRadius: 8,
-          padding: '7px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: TOKENS.crimson,
-        }}>← Documents</button>
-        <div>
-          <h1 style={{ fontSize: 21, fontWeight: 800, color: TOKENS.s900, margin: 0 }}>Invoice</h1>
-          <div style={{ fontSize: 12, color: TOKENS.s500 }}>Fill the invoice, then generate the branded PDF.</div>
+      <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:18 }}>
+        <button onClick={onBack} style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:5, padding:0 }}>← All invoices</button>
+        <div style={{ flex:1 }}/>
+        <button onClick={generate} style={{ background:'transparent', border:'1.5px solid '+TOKENS.crimson, color:TOKENS.crimson, padding:'8px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>Preview PDF</button>
+        <button onClick={saveAndSend} disabled={saving} style={{ background:saving?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:saving?'not-allowed':'pointer' }}>
+          {saving ? 'Saving...' : 'Save & send'}
+        </button>
+      </div>
+
+      {/* Header */}
+      <div style={card}>
+        <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:14 }}>Invoice details</div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:12 }}>
+          <div><label style={lbl}>Invoice no.</label><input value={f.invoiceNo} onChange={e=>set('invoiceNo',e.target.value)} placeholder="Auto-generated" style={inp}/></div>
+          <div><label style={lbl}>Issue date</label><input type="date" value={f.issueDate} onChange={e=>set('issueDate',e.target.value)} style={inp}/></div>
+          <div><label style={lbl}>Due date</label><input type="date" value={f.dueDate} onChange={e=>set('dueDate',e.target.value)} style={inp}/></div>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <div><label style={lbl}>Currency</label>
+            <select value={f.currency} onChange={e=>set('currency',e.target.value)} style={inp}>
+              {['USD','KES','GBP','EUR','AED'].map(c=><option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div><label style={lbl}>Programme label</label><input value={f.programmeLabel} onChange={e=>set('programmeLabel',e.target.value)} placeholder="e.g. HOME TUITION PROGRAMME · 13 July – 21 August 2026" style={inp}/></div>
         </div>
       </div>
 
-      {/* Billed-to + meta */}
-      <div style={card}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-          <div><label style={lbl}>Billed To *</label>
-            <input value={f.billedTo} onChange={e => set('billedTo', e.target.value)} placeholder="Client / parent name" style={inp}/></div>
-          <div><label style={lbl}>Student Name</label>
-            <input value={f.studentName} onChange={e => set('studentName', e.target.value)} placeholder="Student name" style={inp}/></div>
-          <div><label style={lbl}>Invoice No. *</label>
-            <input value={f.invoiceNo} onChange={e => set('invoiceNo', e.target.value)} placeholder="e.g. SMT-2026-0515" style={inp}/></div>
-          <div><label style={lbl}>Date Issued</label>
-            <input value={f.dateIssued} onChange={e => set('dateIssued', e.target.value)} style={inp}/></div>
-          <div><label style={lbl}>Due Date</label>
-            <input value={f.dueDate} onChange={e => set('dueDate', e.target.value)} placeholder="e.g. 16 May 2026" style={inp}/></div>
-          <div><label style={lbl}>Period</label>
-            <input value={f.period} onChange={e => set('period', e.target.value)} placeholder="e.g. May 2026" style={inp}/></div>
-          <div><label style={lbl}>Currency</label>
-            <select value={f.currency} onChange={e => set('currency', e.target.value)} style={inp}>
-              <option value="KES">KES</option><option value="USD">USD</option>
-            </select></div>
+      {/* Bill To + Student */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:14 }}>
+        <div style={card}>
+          <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Bill to</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            <div><label style={lbl}>Full name *</label><input value={f.billedToName} onChange={e=>set('billedToName',e.target.value)} placeholder="e.g. Lola Coker" style={inp}/></div>
+            <div><label style={lbl}>Address</label><input value={f.billedToAddress} onChange={e=>set('billedToAddress',e.target.value)} placeholder="e.g. Lavington, Nairobi, Kenya" style={inp}/></div>
+            <div><label style={lbl}>Email</label><input type="email" value={f.billedToEmail} onChange={e=>set('billedToEmail',e.target.value)} placeholder="parent@email.com" style={inp}/></div>
+          </div>
+        </div>
+        <div style={card}>
+          <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Student</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            <div><label style={lbl}>Student name</label><input value={f.studentName} onChange={e=>set('studentName',e.target.value)} placeholder="e.g. Fikayomi Adewakun" style={inp}/></div>
+            <div><label style={lbl}>Grade</label><input value={f.studentGrade} onChange={e=>set('studentGrade',e.target.value)} placeholder="e.g. Grade 4" style={inp}/></div>
+            <div><label style={lbl}>Subject</label><input value={f.subject} onChange={e=>set('subject',e.target.value)} placeholder="e.g. English (Literacy — Writing & Spelling)" style={inp}/></div>
+          </div>
         </div>
       </div>
 
       {/* Line items */}
       <div style={card}>
-        <label style={lbl}>Line Items</label>
-        <div style={{ fontSize: 11, color: TOKENS.s500, marginBottom: 8 }}>
-          Sub-total and total are calculated automatically from the amounts below.
-        </div>
-        {f.items.map((row, i) => (
-          <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-            <input value={row.desc} onChange={e => itemSet(i, 'desc', e.target.value)}
-              placeholder="Description" style={{ ...inp, flex: '1 1 240px' }}/>
-            <input value={row.period} onChange={e => itemSet(i, 'period', e.target.value)}
-              placeholder="Period" style={{ ...inp, width: 120, flex: '0 0 120px' }}/>
-            <input value={row.amount} onChange={e => itemSet(i, 'amount', e.target.value.replace(/[^0-9.]/g, ''))}
-              placeholder="Amount" style={{ ...inp, width: 110, flex: '0 0 110px', textAlign: 'right' }}/>
-            <button onClick={() => itemDel(i)} style={delBtn} title="Remove">×</button>
+        <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Line items</div>
+        <table style={{ width:'100%', borderCollapse:'collapse', marginBottom:10 }}>
+          <thead>
+            <tr style={{ background:TOKENS.cream }}>
+              {['Description','Sessions','Duration','Rate / hr',f.currency+' Amount',''].map((h,i)=>(
+                <th key={i} style={{ padding:'8px 10px', textAlign:i>=3?'right':'left', fontSize:11, fontWeight:700, color:TOKENS.s700, letterSpacing:'.04em', whiteSpace:'nowrap' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {f.items.map((it,i)=>(
+              <tr key={i} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                <td style={{ padding:'8px 10px', width:'36%' }}>
+                  <input value={it.description} onChange={e=>itemSet(i,'description',e.target.value)} placeholder="e.g. Week 1 — 13 to 17 July" style={{...inp,padding:'6px 8px'}}/>
+                </td>
+                <td style={{ padding:'8px 10px', width:'14%' }}>
+                  <input value={it.sessions} onChange={e=>{ itemSet(i,'sessions',e.target.value); setTimeout(()=>calcAmount(i),50) }} placeholder="3 sessions" style={{...inp,padding:'6px 8px'}}/>
+                </td>
+                <td style={{ padding:'8px 10px', width:'10%' }}>
+                  <input value={it.duration} onChange={e=>itemSet(i,'duration',e.target.value)} placeholder="1 hr" style={{...inp,padding:'6px 8px'}}/>
+                </td>
+                <td style={{ padding:'8px 10px', width:'12%' }}>
+                  <input type="number" value={it.ratePerHr} onChange={e=>{ itemSet(i,'ratePerHr',e.target.value); setTimeout(()=>calcAmount(i),50) }} placeholder="15" style={{...inp,padding:'6px 8px',textAlign:'right'}}/>
+                </td>
+                <td style={{ padding:'8px 10px', width:'14%' }}>
+                  <input type="number" value={it.amount} onChange={e=>itemSet(i,'amount',e.target.value)} placeholder="45" style={{...inp,padding:'6px 8px',textAlign:'right'}}/>
+                </td>
+                <td style={{ padding:'8px 6px', textAlign:'center' }}>
+                  <button onClick={()=>itemDel(i)} style={{ background:'transparent', border:'none', color:'#B91C1C', cursor:'pointer', fontSize:16, lineHeight:1 }}>×</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <button onClick={itemAdd} style={{ background:'transparent', border:'1.5px dashed '+TOKENS.gold, color:'#9A7B16', borderRadius:7, padding:'6px 14px', fontSize:12, fontWeight:700, cursor:'pointer' }}>+ Add line</button>
+
+        {/* Totals */}
+        <div style={{ display:'flex', justifyContent:'flex-end', marginTop:16 }}>
+          <div style={{ width:280 }}>
+            {[
+              ['Subtotal ('+f.items.reduce((s,it)=>{ const n=parseInt(String(it.sessions).match(/\d+/)?.[0]||'0'); return s+n },0)+' hours)', money(subtotal)],
+              ['Discount', discount>0?money(discount):'—'],
+            ].map(([k,v])=>(
+              <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'5px 0', fontSize:12.5, color:TOKENS.s700 }}>
+                <span>{k}</span><span>{v}</span>
+              </div>
+            ))}
+            <div style={{ display:'flex', justifyContent:'space-between', padding:'10px 14px', background:TOKENS.crimson, borderRadius:8, marginTop:6 }}>
+              <span style={{ color:'#fff', fontWeight:800, fontSize:13 }}>TOTAL DUE ({f.currency})</span>
+              <span style={{ color:'#fff', fontWeight:800, fontSize:15 }}>{money(totalDue)}</span>
+            </div>
           </div>
-        ))}
-        <button onClick={itemAdd} style={addBtn}>+ Add Line Item</button>
-      </div>
-
-      {/* Discount / VAT + live totals */}
-      <div style={card}>
-        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <div style={{ flex: '0 0 150px' }}><label style={lbl}>Discount ({f.currency})</label>
-            <input value={f.discount} onChange={e => set('discount', e.target.value.replace(/[^0-9.]/g, ''))}
-              placeholder="0.00" style={inp}/></div>
-          <div style={{ flex: '0 0 110px' }}><label style={lbl}>VAT %</label>
-            <input value={f.vatPct} onChange={e => set('vatPct', e.target.value.replace(/[^0-9.]/g, ''))}
-              placeholder="0" style={inp}/></div>
-          <div style={{ flex: 1, minWidth: 200, background: TOKENS.cream, borderRadius: 8, padding: '10px 14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: TOKENS.s500, padding: '2px 0' }}>
-              <span>Sub-total</span><span>{f.currency} {money(subTotal)}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: TOKENS.s500, padding: '2px 0' }}>
-              <span>Discount</span><span>− {money(discount)}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: TOKENS.s500, padding: '2px 0' }}>
-              <span>VAT ({vatPct}%)</span><span>{money(vatAmount)}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, fontWeight: 800, color: TOKENS.crimson, padding: '4px 0 0', borderTop: '1px solid ' + TOKENS.line, marginTop: 4 }}>
-              <span>TOTAL DUE</span><span>{f.currency} {money(totalDue)}</span></div>
-          </div>
         </div>
       </div>
 
-      {/* Payment + notes */}
+      {/* Email option */}
       <div style={card}>
-        <div style={{ marginBottom: 12 }}><label style={lbl}>Payment Note</label>
-          <textarea value={f.paymentNote} onChange={e => set('paymentNote', e.target.value)} rows={2}
-            style={{ ...inp, resize: 'vertical' }}/></div>
-        <div><label style={lbl}>Notes</label>
-          <textarea value={f.notes} onChange={e => set('notes', e.target.value)} rows={3}
-            style={{ ...inp, resize: 'vertical' }}/></div>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 30 }}>
-        <button onClick={generate} style={{
-          background: TOKENS.crimson, color: '#fff', border: 'none', borderRadius: 8,
-          padding: '12px 26px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
-        }}>Generate Invoice</button>
+        <label style={{ display:'flex', alignItems:'center', gap:10, cursor:'pointer', fontSize:13 }}>
+          <input type="checkbox" checked={f.sendEmail} onChange={e=>set('sendEmail',e.target.checked)} style={{ width:16, height:16, accentColor:TOKENS.crimson }}/>
+          <span>Auto-email invoice to <strong>{f.billedToEmail || 'parent email above'}</strong> when saved</span>
+        </label>
       </div>
     </div>
   )
 }
 
-// ── Build the branded invoice HTML ─────────────────────────
-function buildInvoiceHTML(f, t) {
-  const esc = (s) => String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  const money = (n) => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  const cur = esc(f.currency || 'KES')
-  const items = (f.items || []).filter(it => (it.desc || '').trim())
 
-  const itemRows = items.map(it => `<tr>
-    <td class="desc">${esc(it.desc).replace(/\n/g, '<br>')}</td>
-    <td>${esc(it.period)}</td>
-    <td class="r">${money(parseFloat(it.amount) || 0)}</td>
-  </tr>`).join('')
-
-  const notesHtml = esc(f.notes).split('\n').map(l => l.trim()).filter(Boolean)
-    .map(l => `${l}<br>`).join('')
-  const payHtml = esc(f.paymentNote).split('\n').map(l => l.trim()).filter(Boolean)
-    .map(l => `${l}<br>`).join('')
-
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>Invoice ${esc(f.invoiceNo)} — Smartious</title>
-<style>
-  :root{--crimson:#7D1025;--crimsonD:#5A0B1B;--gold:#C9A030;--ink:#1A1A1A;--mute:#6B6B6B;--line:#E8E2D6;--cream:#FBFAF5;}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#e9e6df;color:var(--ink)}
-  .page{width:210mm;min-height:297mm;background:#fff;margin:18px auto;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.13)}
-  .page-body{padding:0 22mm;flex:1}
-  .topbar{height:8mm;background:linear-gradient(90deg,var(--crimsonD),var(--crimson))}
-  .hd{display:flex;justify-content:space-between;align-items:flex-start;padding:11mm 22mm 0}
-  .brand{display:flex;align-items:center;gap:10px}
-  .shield{width:50px;height:55px;flex-shrink:0}
-  .brand-tx .name{font-size:22px;font-weight:800;letter-spacing:-.5px;line-height:1}
-  .brand-tx .name em{font-style:italic;color:var(--crimson)}
-  .brand-tx .tag{font-size:7px;letter-spacing:3px;color:var(--mute);margin-top:3px;font-weight:600}
-  .hd-r{text-align:right}
-  .doc-title{font-size:32px;font-weight:800;letter-spacing:1px;color:var(--ink);line-height:1}
-  .doc-underline{height:3px;width:100%;background:var(--gold);margin-top:5px}
-  .meta-row{display:flex;justify-content:space-between;margin-top:9mm;gap:20px}
-  .billed .lbl{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--mute);text-transform:uppercase}
-  .billed .who{font-size:17px;font-weight:800;color:var(--ink);margin-top:5px}
-  .billed .sub{font-size:11px;color:var(--mute);margin-top:2px}
-  .inv-meta{font-size:10.5px;min-width:62mm}
-  .inv-meta .mr{display:flex;justify-content:space-between;padding:3px 0}
-  .inv-meta .mk{color:var(--mute)}
-  .inv-meta .mv{font-weight:700;color:var(--ink)}
-  .items{margin-top:8mm;border-collapse:collapse;width:100%}
-  .items thead td{background:var(--crimson);color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:9px 12px}
-  .items thead td.r{text-align:right}
-  .items tbody td{border-bottom:1px solid var(--line);padding:11px 12px;font-size:11px;vertical-align:top}
-  .items tbody td.r{text-align:right}
-  .items .desc{font-weight:600;color:var(--ink)}
-  .totals{margin-top:6mm;display:flex;justify-content:flex-end}
-  .totals-box{width:72mm}
-  .tr{display:flex;justify-content:space-between;padding:6px 12px;font-size:11px}
-  .tr .tk{color:var(--mute)}
-  .tr .tv{font-weight:600}
-  .tr.total{background:var(--crimson);color:#fff;padding:11px 12px;margin-top:5px}
-  .tr.total .tk{color:#fff;font-weight:700;font-size:11px;letter-spacing:.5px}
-  .tr.total .tv{color:#fff;font-weight:800;font-size:15px}
-  .sec{margin-top:9mm}
-  .sec-h{font-size:9.5px;font-weight:700;letter-spacing:1px;color:var(--mute);text-transform:uppercase;margin-bottom:6px}
-  .sec p{font-size:10.5px;line-height:1.7;color:#2c2c2c}
-  .notes p{font-style:italic;color:var(--mute)}
-  .ft{margin-top:auto;border-top:1px solid var(--line);padding:5mm 22mm;text-align:center;font-size:8.5px;color:var(--mute);line-height:1.6}
-  .ft b{color:var(--crimson);font-size:9.5px;letter-spacing:.5px}
-  .toolbar{position:fixed;top:0;left:0;right:0;background:#7D1025;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:99}
-  .toolbar button{background:#fff;color:#7D1025;border:none;padding:8px 18px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer}
-  .toolbar .hint{font-size:12px;opacity:.85}
-  @media print{
-    body{background:#fff}.toolbar{display:none}
-    .page{margin:0;box-shadow:none;width:100%;min-height:auto}
-    @page{size:A4;margin:0}
-  }
-</style></head><body>
-<div class="toolbar">
-  <span class="hint">Review the invoice, then download. Use "Save as PDF" as the destination.</span>
-  <button onclick="window.print()">Download PDF</button>
-</div>
-<div style="height:48px"></div>
-
-<div class="page">
-  <div class="topbar"></div>
-  <div class="hd">
-    <div class="brand">
-      <svg class="shield" viewBox="0 0 60 66">
-        <path d="M30 2 L56 9 V32 C56 47 44 58 30 63 C16 58 4 47 4 32 V9 Z" fill="#8A1228" stroke="#C9A030" stroke-width="2"/>
-        <path d="M30 13 l2.3 4.7 5.2 .75 -3.75 3.65 .9 5.15 -4.65 -2.45 -4.65 2.45 .9 -5.15 -3.75 -3.65 5.2 -.75 Z" fill="#C9A030"/>
-        <g transform="translate(30 40)">
-          <path d="M0 -6 C-4 -9 -11 -9 -14 -7 L-14 9 C-11 7 -4 7 0 10 Z" fill="#FFFFFF" stroke="#E3D9C4" stroke-width="0.6"/>
-          <path d="M0 -6 C4 -9 11 -9 14 -7 L14 9 C11 7 4 7 0 10 Z" fill="#FFFFFF" stroke="#E3D9C4" stroke-width="0.6"/>
-          <line x1="-10" y1="-3.5" x2="-3.5" y2="-2" stroke="#E7B7C0" stroke-width="0.8"/>
-          <line x1="-10" y1="0" x2="-3.5" y2="1.5" stroke="#E7B7C0" stroke-width="0.8"/>
-          <line x1="-10" y1="3.5" x2="-3.5" y2="5" stroke="#E7B7C0" stroke-width="0.8"/>
-          <line x1="3.5" y1="-2" x2="10" y2="-3.5" stroke="#E7B7C0" stroke-width="0.8"/>
-          <line x1="3.5" y1="1.5" x2="10" y2="0" stroke="#E7B7C0" stroke-width="0.8"/>
-          <line x1="3.5" y1="5" x2="10" y2="3.5" stroke="#E7B7C0" stroke-width="0.8"/>
-        </g>
-      </svg>
-      <div class="brand-tx"><div class="name">Smart<em>ious</em></div>
-        <div class="tag">HOMESCHOOL&nbsp;·&nbsp;GLOBAL</div></div>
-    </div>
-    <div class="hd-r"><div class="doc-title">INVOICE</div><div class="doc-underline"></div></div>
-  </div>
-
-  <div class="page-body">
-    <div class="meta-row">
-      <div class="billed">
-        <div class="lbl">Billed To</div>
-        <div class="who">${esc(f.billedTo)}</div>
-        ${f.studentName ? `<div class="sub">Student: ${esc(f.studentName)}</div>` : ''}
-      </div>
-      <div class="inv-meta">
-        <div class="mr"><span class="mk">Invoice No.</span><span class="mv">${esc(f.invoiceNo)}</span></div>
-        <div class="mr"><span class="mk">Date Issued</span><span class="mv">${esc(f.dateIssued)}</span></div>
-        <div class="mr"><span class="mk">Due Date</span><span class="mv">${esc(f.dueDate) || '—'}</span></div>
-        <div class="mr"><span class="mk">Period</span><span class="mv">${esc(f.period) || '—'}</span></div>
-      </div>
-    </div>
-
-    <table class="items">
-      <thead><tr><td>Description</td><td>Period</td><td class="r">Amount (${cur})</td></tr></thead>
-      <tbody>${itemRows}</tbody>
-    </table>
-
-    <div class="totals"><div class="totals-box">
-      <div class="tr"><span class="tk">Sub-total</span><span class="tv">${cur} ${money(t.subTotal)}</span></div>
-      <div class="tr"><span class="tk">Discount</span><span class="tv">${money(t.discount)}</span></div>
-      <div class="tr"><span class="tk">VAT (${t.vatPct}%)</span><span class="tv">${money(t.vatAmount)}</span></div>
-      <div class="tr total"><span class="tk">TOTAL DUE</span><span class="tv">${cur} ${money(t.totalDue)}</span></div>
-    </div></div>
-
-    <div class="sec">
-      <div class="sec-h">Payment Instructions</div>
-      <p>M-Pesa Paybill No: <b style="color:var(--ink)">247247</b><br>
-         Account Number: <b style="color:var(--ink)">745021</b><br>
-         ${payHtml}</p>
-    </div>
-    <div class="sec notes">
-      <div class="sec-h">Notes</div>
-      <p>${notesHtml}</p>
-    </div>
-  </div>
-
-  <div class="ft">
-    <b>Smartious Homeschool Global</b><br>
-    Diamond Plaza I, Parklands, Nairobi, Kenya<br>
-    +254 745 021 212 &nbsp;|&nbsp; hellosmartious@gmail.com &nbsp;|&nbsp; smartioushomeschool.com
-  </div>
-</div>
-</body></html>`
-}
-
-// ── RECEIPT GENERATOR ──────────────────────────────────────
 function ReceiptGenerator({ toast, onBack }) {
   const now = new Date()
   const today = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
@@ -9972,8 +9876,416 @@ function CurriculumModule({ refreshKey, toast }) {
 // ═══════════════════════════════════════════════════════════
 // 12. BILLING MODULE
 // ═══════════════════════════════════════════════════════════
+function buildInvoiceHTML(f, t) {
+  const esc   = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  const money = n => Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
+  const cur   = esc(f.currency||'USD')
+  const isUSD = (f.currency||'USD') !== 'KES'
+  const items = (f.items||[]).filter(it=>(it.description||'').trim())
+  const totalHours = items.reduce((s,it)=>{const n=parseInt(String(it.sessions||'').match(/\d+/)?.[0]||'0');return s+n},0)
+
+  const itemRows = items.map(it=>`<tr>
+    <td class="desc">${esc(it.description).replace(/\n/g,'<br>')}</td>
+    <td class="c">${esc(it.sessions)}</td>
+    <td class="c">${esc(it.duration)}</td>
+    <td class="r">${it.ratePerHr?'$'+money(parseFloat(it.ratePerHr)||0):''}</td>
+    <td class="r">$${money(parseFloat(it.amount)||0)}</td>
+  </tr>`).join('')
+
+  const fmtDate = d => { try { return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) } catch { return String(d||'') } }
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Invoice ${esc(f.invoiceNo)} — Smartious</title>
+<style>
+  :root{--cr:#7D1025;--crD:#5A0B1B;--gold:#C9A030;--ink:#1A1A1A;--mute:#6B6B6B;--line:#E8E2D6;--cream:#FBFAF5;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#ddd;color:var(--ink)}
+  .page{width:210mm;min-height:297mm;background:#fff;margin:60px auto 20px;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.15);page-break-after:always}
+  .page-body{padding:0 20mm;flex:1}
+  .topbar{height:6mm;background:linear-gradient(90deg,var(--crD),var(--cr))}
+  .hd{display:flex;justify-content:space-between;align-items:flex-start;padding:10mm 20mm 0}
+  .brand{display:flex;align-items:center;gap:10px}
+  .shield{width:46px;height:52px;flex-shrink:0}
+  .brand-tx .name{font-size:22px;font-weight:800;letter-spacing:-.5px;line-height:1}
+  .brand-tx .name em{font-style:italic;color:var(--cr)}
+  .brand-tx .sub{font-size:7px;letter-spacing:3px;color:var(--mute);margin-top:3px;font-weight:600}
+  .hd-r{text-align:right}
+  .doc-eyebrow{font-size:9px;letter-spacing:2px;color:var(--mute);text-transform:uppercase;margin-bottom:4px}
+  .doc-title{font-size:36px;font-weight:800;color:var(--cr);line-height:1}
+  .doc-rule{height:2.5px;background:var(--gold);margin-top:5px}
+  .inv-meta{margin-top:5mm;display:flex;justify-content:flex-end}
+  .inv-tbl{font-size:10.5px;min-width:68mm}
+  .inv-tbl tr td{padding:3px 0}
+  .inv-tbl td:first-child{color:var(--mute);padding-right:20px;font-weight:600;text-transform:uppercase;font-size:9px;letter-spacing:.5px}
+  .inv-tbl td:last-child{font-weight:700;color:var(--ink);text-align:right}
+  .bill-row{display:flex;justify-content:space-between;margin-top:7mm;gap:20px;padding-bottom:6mm;border-bottom:1px solid var(--line)}
+  .bill-lbl{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:5px}
+  .bill-name{font-size:17px;font-weight:800;color:var(--ink)}
+  .bill-sub{font-size:11px;color:var(--mute);margin-top:2px}
+  .prog-banner{background:#FBFAF5;border-left:3px solid var(--gold);padding:8px 14px;margin:6mm 0;font-size:11px;font-weight:700;color:var(--ink);letter-spacing:.3px}
+  .prog-banner em{color:var(--gold);font-style:normal}
+  .items{border-collapse:collapse;width:100%;margin-top:2mm}
+  .items thead td{background:var(--cr);color:#fff;font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:8px 11px}
+  .items thead td.r{text-align:right}.items thead td.c{text-align:center}
+  .items tbody tr:nth-child(even){background:#FAFAFA}
+  .items tbody td{border-bottom:1px solid var(--line);padding:9px 11px;font-size:11px;vertical-align:top}
+  .items tbody td.r{text-align:right}.items tbody td.c{text-align:center}
+  .desc{font-weight:600}
+  .totals{margin-top:5mm;display:flex;justify-content:flex-end}
+  .totals-box{width:76mm}
+  .tr{display:flex;justify-content:space-between;padding:5px 11px;font-size:11px}
+  .tr .tk{color:var(--mute)}.tr .tv{font-weight:600}
+  .tr.total{background:var(--cr);color:#fff;padding:10px 11px;margin-top:4px;border-radius:3px}
+  .tr.total .tk,.tr.total .tv{color:#fff;font-weight:800;font-size:13px}
+  .note-italic{font-size:9.5px;font-style:italic;color:var(--mute);margin-top:5mm;line-height:1.6}
+  .ft{margin-top:auto;border-top:1px solid var(--line);padding:4mm 20mm;display:flex;justify-content:space-between;align-items:center;font-size:8.5px;color:var(--mute)}
+  /* Page 2 */
+  .p2-sec-h{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin:7mm 0 4mm}
+  .p2-title{font-size:22px;font-weight:300;color:var(--ink);margin-bottom:6mm}
+  .p2-title em{font-style:italic;color:var(--cr)}
+  .pay-tbl{border-collapse:collapse;width:100%;margin-bottom:7mm}
+  .pay-tbl th{background:var(--cr);color:#fff;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:9px 12px;text-align:left}
+  .pay-tbl td{border:1px solid var(--line);padding:9px 12px;font-size:11px;vertical-align:top}
+  .pay-tbl tr:nth-child(even) td{background:#FAFAFA}
+  .pay-tbl td:first-child{font-weight:700;color:var(--ink)}
+  .bank-h{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:4mm}
+  .bank-tbl{border-collapse:collapse;width:100%}
+  .bank-tbl td{border:1px solid var(--line);padding:8px 12px;font-size:11px;vertical-align:top}
+  .bank-tbl td:first-child{background:#FAFAFA;font-weight:700;color:var(--cr);width:38%}
+  .closing{font-size:11px;color:var(--ink);line-height:1.7;margin-top:7mm}
+  .closing .ref-note{font-style:italic;color:var(--mute);font-size:10px;margin-bottom:5mm}
+  .toolbar{position:fixed;top:0;left:0;right:0;background:#7D1025;color:#fff;padding:10px 24px;display:flex;justify-content:space-between;align-items:center;z-index:99;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+  .toolbar .hint{font-size:12px;opacity:.8}
+  .toolbar button{background:#C9A030;color:#7D1025;border:none;padding:9px 22px;border-radius:6px;font-weight:800;font-size:13px;cursor:pointer}
+  @media print{body{background:#fff}.toolbar{display:none}.page{margin:0;box-shadow:none;width:100%}@page{size:A4;margin:0}}
+</style></head><body>
+
+<div class="toolbar">
+  <span class="hint">Review then click Download PDF — set destination to "Save as PDF" in the print dialog.</span>
+  <button onclick="window.print()">⬇ Download PDF</button>
+</div>
+
+<!-- PAGE 1 -->
+<div class="page">
+  <div class="topbar"></div>
+  <div class="hd">
+    <div class="brand">
+      <svg class="shield" viewBox="0 0 60 66">
+        <path d="M30 2 L56 9 V32 C56 47 44 58 30 63 C16 58 4 47 4 32 V9 Z" fill="#8A1228" stroke="#C9A030" stroke-width="1.5"/>
+        <path d="M30 13 l2.3 4.7 5.2 .75 -3.75 3.65 .9 5.15 -4.65 -2.45 -4.65 2.45 .9 -5.15 -3.75 -3.65 5.2 -.75 Z" fill="#C9A030"/>
+        <g transform="translate(30 42)">
+          <path d="M0 -7 C-4 -10 -11 -10 -14 -8 L-14 9 C-11 7 -4 7 0 10 Z" fill="#fff" stroke="#E3D9C4" stroke-width="0.5"/>
+          <path d="M0 -7 C4 -10 11 -10 14 -8 L14 9 C11 7 4 7 0 10 Z" fill="#fff" stroke="#E3D9C4" stroke-width="0.5"/>
+        </g>
+      </svg>
+      <div class="brand-tx">
+        <div class="name">Smart<em>ious</em></div>
+        <div class="sub">HOMESCHOOL&nbsp;·&nbsp;GLOBAL</div>
+        <div style="font-size:8px;color:var(--mute);margin-top:2px">EST. 2018</div>
+      </div>
+    </div>
+    <div class="hd-r">
+      <div class="doc-eyebrow">INVOICE</div>
+      <div class="doc-title">INVOICE</div>
+      <div class="doc-rule"></div>
+      <div style="margin-top:8px">
+        <table class="inv-tbl">
+          <tr><td>Invoice No.</td><td>${esc(f.invoiceNo)}</td></tr>
+          <tr><td>Issue Date</td><td>${esc(fmtDate(f.issueDate))}</td></tr>
+          ${f.dueDate?`<tr><td>Due Date</td><td style="color:var(--cr)">${esc(fmtDate(f.dueDate))}</td></tr>`:''}
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div style="font-size:9px;color:var(--mute);margin-top:4mm;margin-bottom:2mm">Smartious Homeschool Global · Diamond Plaza, 4th Avenue, Parklands, Nairobi · hellosmartious@gmail.com · +254 745 021 212</div>
+    <div class="bill-row">
+      <div>
+        <div class="bill-lbl">Bill To</div>
+        <div class="bill-name">${esc(f.billedToName)}</div>
+        ${f.billedToAddress?`<div class="bill-sub">${esc(f.billedToAddress)}</div>`:''}
+      </div>
+      ${f.studentName?`<div>
+        <div class="bill-lbl">Student</div>
+        <div class="bill-name">${esc(f.studentName)}</div>
+        <div class="bill-sub">${[f.studentGrade,f.subject].filter(Boolean).map(s=>`<span>${esc(s)}</span>`).join(' &nbsp;·&nbsp; ')}</div>
+      </div>`:''}
+    </div>
+
+    ${f.programmeLabel?`<div class="prog-banner">${esc(f.programmeLabel)}</div>`:'<div style="margin-top:6mm"></div>'}
+
+    <table class="items">
+      <thead><tr>
+        <td>Description</td>
+        <td class="c">Sessions</td>
+        <td class="c">Duration</td>
+        <td class="r">Rate / hr</td>
+        <td class="r">Amount</td>
+      </tr></thead>
+      <tbody>${itemRows}</tbody>
+    </table>
+
+    <div class="totals"><div class="totals-box">
+      <div class="tr"><span class="tk">Subtotal${totalHours?' ('+totalHours+' hours)':''}</span><span class="tv">$${money(t.subtotal)}</span></div>
+      <div class="tr"><span class="tk">Discount</span><span class="tv">${t.discount>0?'$'+money(t.discount):'—'}</span></div>
+      <div class="tr total"><span class="tk">TOTAL DUE (${cur})</span><span class="tv">$${money(t.totalDue)}</span></div>
+    </div></div>
+
+    <p class="note-italic">Amount payable in ${cur}, or the KES equivalent at the prevailing exchange rate. No Smartious markup is applied to currency conversion.</p>
+  </div>
+
+  <div class="ft">
+    <span>smartioushomeschool.com · hellosmartious@gmail.com · +254 745 021 212</span>
+    <span>Page 1</span>
+  </div>
+</div>
+
+<!-- PAGE 2: Payment methods -->
+<div class="page">
+  <div class="topbar"></div>
+  <div class="hd" style="padding-bottom:0">
+    <div class="brand">
+      <svg class="shield" viewBox="0 0 60 66">
+        <path d="M30 2 L56 9 V32 C56 47 44 58 30 63 C16 58 4 47 4 32 V9 Z" fill="#8A1228" stroke="#C9A030" stroke-width="1.5"/>
+        <path d="M30 13 l2.3 4.7 5.2 .75 -3.75 3.65 .9 5.15 -4.65 -2.45 -4.65 2.45 .9 -5.15 -3.75 -3.65 5.2 -.75 Z" fill="#C9A030"/>
+      </svg>
+      <div class="brand-tx"><div class="name">Smart<em>ious</em></div><div class="sub">HOMESCHOOL&nbsp;·&nbsp;GLOBAL</div></div>
+    </div>
+    <div class="hd-r doc-eyebrow" style="align-self:flex-end">INVOICE</div>
+  </div>
+
+  <div class="page-body" style="padding-top:0">
+    <div class="p2-sec-h">HOW TO PAY</div>
+    <div class="p2-title">Payment <em>methods</em></div>
+
+    <table class="pay-tbl">
+      <thead><tr><th>Method</th><th>Via</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>M-Pesa</td>
+          <td>Paybill 247247</td>
+          <td>Account Number: 745021. Quote invoice number ${esc(f.invoiceNo)}.</td>
+        </tr>
+        <tr>
+          <td>Bank Transfer / SWIFT</td>
+          <td>Equity Bank Kenya</td>
+          <td>See full beneficiary details below.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="bank-h">BANK TRANSFER — FULL BENEFICIARY DETAILS</div>
+    <table class="bank-tbl">
+      <tr><td>Beneficiary Name</td><td>Smartious Edtech</td></tr>
+      <tr><td>Bank Name</td><td>Equity Bank Kenya Limited</td></tr>
+      <tr><td>Account Number</td><td>0910186607556</td></tr>
+      <tr><td>Account Type</td><td>Savings Account</td></tr>
+      <tr><td>Branch</td><td>Tea Room Branch, Nairobi, Kenya</td></tr>
+      <tr><td>SWIFT / BIC Code</td><td>EQBLKENA (use EQBLKENAXXX if an 11-character code is required)</td></tr>
+      <tr><td>Bank Head Office</td><td>Equity Bank Kenya Limited, Equity Centre, 9th Floor, Hospital Road, Upper Hill, P.O. Box 75104-00200, Nairobi, Kenya</td></tr>
+      <tr><td>Central Bank</td><td>Central Bank of Kenya</td></tr>
+    </table>
+
+    <div class="closing">
+      <p class="ref-note">Please share the payment confirmation (M-Pesa message or SWIFT copy) with hellosmartious@gmail.com, quoting invoice number ${esc(f.invoiceNo)}, so it can be matched and receipted promptly.</p>
+      <p>Thank you for choosing Smartious Homeschool Global${f.studentName?' for '+esc(f.studentName)+"'s learning journey":''}.</p>
+    </div>
+  </div>
+
+  <div class="ft">
+    <span>smartioushomeschool.com · hellosmartious@gmail.com · +254 745 021 212</span>
+    <span>Page 2</span>
+  </div>
+</div>
+
+</body></html>`
+}
+
+// ═══════════════════════════════════════════════════════════
+// InvoicesTab — inside BillingModule
+// Shows invoice list + stats + generator
+// ═══════════════════════════════════════════════════════════
+function InvoicesTab({ toast, refreshKey }) {
+  const [view, setView]           = useState('list')  // list | create
+  const [invoices, setInvoices]   = useState([])
+  const [stats, setStats]         = useState({})
+  const [loading, setLoading]     = useState(true)
+  const [statusF, setStatusF]     = useState('all')
+  const [search, setSearch]       = useState('')
+  const [page, setPage]           = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+
+  const load = useCallback(() => {
+    setLoading(true)
+    const params = { page, limit:30 }
+    if (statusF !== 'all') params.status = statusF
+    if (search.trim()) params.search = search.trim()
+    Promise.all([
+      api.get('/invoices', { params }),
+      api.get('/invoices/stats'),
+    ]).then(([r, sr]) => {
+      setInvoices(r.data?.data?.invoices || [])
+      setTotalPages(r.data?.data?.totalPages || 1)
+      setStats(sr.data?.data || {})
+    }).catch(() => toast?.error?.('Failed to load invoices.'))
+    .finally(() => setLoading(false))
+  }, [statusF, search, page])
+
+  useEffect(() => { load() }, [load, refreshKey])
+  useEffect(() => { setPage(1) }, [statusF, search])
+
+  const money = (n, cur='USD') => Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ' + cur
+
+  const STATUS_COLOURS = {
+    draft:     { bg:'#F3F4F6', fg:'#374151' },
+    sent:      { bg:'#DBEAFE', fg:'#1E40AF' },
+    paid:      { bg:'#D1FAE5', fg:'#065F46' },
+    overdue:   { bg:'#FEE2E2', fg:'#991B1B' },
+    cancelled: { bg:'#F3F4F6', fg:'#6B7280' },
+  }
+  const StatusBadge = ({ s }) => {
+    const c = STATUS_COLOURS[s] || STATUS_COLOURS.sent
+    return <span style={{ padding:'3px 10px', borderRadius:99, background:c.bg, color:c.fg, fontSize:11, fontWeight:700 }}>{s.charAt(0).toUpperCase()+s.slice(1)}</span>
+  }
+
+  const markPaid = async (id) => {
+    try {
+      await api.patch('/invoices/'+id+'/status', { status:'paid', paidAmount:0 })
+      toast?.ok?.('Marked as paid.')
+      load()
+    } catch { toast?.error?.('Could not update status.') }
+  }
+
+  const resend = async (inv) => {
+    try {
+      await api.post('/invoices/'+inv._id+'/resend', { email: inv.billedToEmail })
+      toast?.ok?.('Invoice resent to '+inv.billedToEmail)
+    } catch { toast?.error?.('Could not resend.') }
+  }
+
+  if (view === 'create') return <InvoiceGenerator toast={toast} onBack={() => { setView('list'); load() }}/>
+
+  // KPI strip from stats
+  const byCurrency = stats.byCurrency || []
+  const statusMap  = stats.statusMap  || {}
+
+  return (
+    <>
+      {/* KPI strip */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))', gap:10, marginBottom:20 }}>
+        {byCurrency.map(c => (
+          <div key={c._id} className="card" style={{ padding:'14px 16px' }}>
+            <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', marginBottom:4 }}>Total Issued ({c._id})</div>
+            <div style={{ fontSize:18, fontWeight:800, color:TOKENS.crimson }}>{c._id} {Number(c.total).toLocaleString('en-US',{minimumFractionDigits:2})}</div>
+            <div style={{ fontSize:11, color:TOKENS.s500, marginTop:2 }}>{c.count} invoice{c.count!==1?'s':''}</div>
+          </div>
+        ))}
+        {[['sent','Awaiting Payment'],['paid','Paid'],['overdue','Overdue']].map(([k,l])=>(
+          <div key={k} className="card" style={{ padding:'14px 16px' }}>
+            <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', marginBottom:4 }}>{l}</div>
+            <div style={{ fontSize:22, fontWeight:800, color:k==='paid'?'#065F46':k==='overdue'?'#991B1B':TOKENS.crimson }}>{statusMap[k]||0}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Issued by */}
+      {(stats.recentIssuers||[]).length > 0 && (
+        <div className="card" style={{ padding:16, marginBottom:16 }}>
+          <div style={{ fontSize:12, fontWeight:700, color:TOKENS.s900, marginBottom:10 }}>Invoices by staff member</div>
+          <div style={{ display:'flex', gap:16, flexWrap:'wrap' }}>
+            {(stats.recentIssuers||[]).map(is => (
+              <div key={is._id} style={{ fontSize:12.5, color:TOKENS.s700 }}>
+                <strong style={{ color:TOKENS.s900 }}>{is.name}</strong>
+                <span style={{ color:TOKENS.s500, marginLeft:6 }}>({is.count} invoice{is.count!==1?'s':''})</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Toolbar */}
+      <div style={{ display:'flex', gap:10, marginBottom:12, flexWrap:'wrap', alignItems:'center' }}>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name, invoice no, email..."
+          style={{ flex:'1 1 220px', padding:'8px 12px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13 }}/>
+        <select value={statusF} onChange={e=>setStatusF(e.target.value)} style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5 }}>
+          <option value="all">All statuses</option>
+          {Object.keys(STATUS_COLOURS).map(s=><option key={s} value={s}>{s.charAt(0).toUpperCase()+s.slice(1)}</option>)}
+        </select>
+        <button onClick={() => setView('create')} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
+          + New invoice
+        </button>
+      </div>
+
+      {/* Table */}
+      <div className="card" style={{ overflow:'hidden' }}>
+        {loading ? (
+          <div style={{ padding:28, textAlign:'center', color:TOKENS.s500, fontSize:13 }}>Loading invoices...</div>
+        ) : invoices.length === 0 ? (
+          <div style={{ padding:40, textAlign:'center' }}>
+            <div style={{ fontSize:28, marginBottom:10 }}>🧾</div>
+            <div style={{ fontSize:14, fontWeight:700, color:TOKENS.s900, marginBottom:4 }}>No invoices yet</div>
+            <div style={{ fontSize:12.5, color:TOKENS.s500 }}>Click "+ New invoice" to create your first.</div>
+          </div>
+        ) : (
+          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
+            <thead>
+              <tr>{['Invoice No.','Bill To','Student','Amount','Status','Issued By','Date','Actions'].map(h=>(
+                <th key={h} style={{ padding:'10px 14px', textAlign:'left', fontSize:11 }}>{h}</th>
+              ))}</tr>
+            </thead>
+            <tbody>
+              {invoices.map(inv => (
+                <tr key={inv._id} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                  <td style={{ padding:'11px 14px', fontFamily:'monospace', fontSize:12, fontWeight:700, color:TOKENS.crimson }}>{inv.invoiceNo}</td>
+                  <td style={{ padding:'11px 14px' }}>
+                    <div style={{ fontSize:13, fontWeight:600, color:TOKENS.s900 }}>{inv.billedToName}</div>
+                    {inv.billedToEmail && <div style={{ fontSize:11, color:TOKENS.s500 }}>{inv.billedToEmail}</div>}
+                  </td>
+                  <td style={{ padding:'11px 14px', fontSize:12.5, color:TOKENS.s700 }}>{inv.studentName||'—'}</td>
+                  <td style={{ padding:'11px 14px', fontSize:13, fontWeight:700, color:TOKENS.s900, whiteSpace:'nowrap' }}>
+                    {inv.currency} {Number(inv.totalDue).toLocaleString('en-US',{minimumFractionDigits:2})}
+                  </td>
+                  <td style={{ padding:'11px 14px' }}><StatusBadge s={inv.status}/></td>
+                  <td style={{ padding:'11px 14px', fontSize:12, color:TOKENS.s500 }}>
+                    {inv.issuedBy ? `${inv.issuedBy.firstName} ${inv.issuedBy.lastName}` : '—'}
+                    {inv.issuedBy?.role && <div style={{ fontSize:10 }}>{inv.issuedBy.role.replace('_',' ')}</div>}
+                  </td>
+                  <td style={{ padding:'11px 14px', fontSize:11.5, color:TOKENS.s500, whiteSpace:'nowrap' }}>
+                    {new Date(inv.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
+                    {inv.emailSentAt && <div style={{ fontSize:10, color:'#059669' }}>✉ emailed</div>}
+                  </td>
+                  <td style={{ padding:'11px 14px' }}>
+                    <div style={{ display:'flex', gap:6 }}>
+                      {inv.status === 'sent' && (
+                        <button onClick={() => markPaid(inv._id)} style={{ fontSize:11, background:'#D1FAE5', color:'#065F46', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Mark paid</button>
+                      )}
+                      {inv.billedToEmail && inv.status !== 'cancelled' && (
+                        <button onClick={() => resend(inv)} style={{ fontSize:11, background:TOKENS.cream, color:TOKENS.crimson, border:'1px solid '+TOKENS.line, padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Resend</button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {totalPages > 1 && (
+        <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:12 }}>
+          <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page<=1} style={{ padding:'6px 13px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page<=1?'not-allowed':'pointer', opacity:page<=1?.5:1 }}>‹</button>
+          <span style={{ padding:'6px 12px', fontSize:12.5, color:TOKENS.s700 }}>Page {page} / {totalPages}</span>
+          <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages} style={{ padding:'6px 13px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page>=totalPages?'not-allowed':'pointer', opacity:page>=totalPages?.5:1 }}>›</button>
+        </div>
+      )}
+    </>
+  )
+}
+
 function BillingModule({ refreshKey, toast }) {
   const store = useStore()
+  const [billingTab, setBillingTab] = useState('payments')  // payments | invoices
 
   // ── Real payment data from backend ───────────────────
   const [payments,       setPayments]       = useState([])
@@ -10085,6 +10397,21 @@ function BillingModule({ refreshKey, toast }) {
   return (
     <>
       <PSection tag="Finance" title="Billing &" em="Payments" sub="All student payments, Paystack transactions and revenue analytics"/>
+
+      {/* Tab switcher */}
+      <div style={{ display:'flex', gap:5, marginBottom:20, borderBottom:'1.5px solid '+TOKENS.line, paddingBottom:0 }}>
+        {[['payments','Paystack Payments'],['invoices','Invoices']].map(([k,l])=>(
+          <button key={k} onClick={()=>setBillingTab(k)} style={{
+            padding:'9px 18px', border:'none', background:'transparent',
+            borderBottom:billingTab===k?'2.5px solid '+TOKENS.crimson:'2.5px solid transparent',
+            color:billingTab===k?TOKENS.crimson:TOKENS.s500,
+            fontSize:13, fontWeight:billingTab===k?700:500, cursor:'pointer', marginBottom:-1.5,
+          }}>{l}</button>
+        ))}
+      </div>
+
+      {billingTab === 'invoices' && <InvoicesTab toast={toast} refreshKey={refreshKey}/>}
+      {billingTab === 'payments' && (<>
 
       {/* ── KPI row ── */}
       <div style={{ display: 'flex', gap: 14, marginBottom: 28, flexWrap: 'wrap' }}>
@@ -10326,6 +10653,7 @@ function BillingModule({ refreshKey, toast }) {
         </div>
       )}
     </>
+    )}
   )
 }
 
