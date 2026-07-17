@@ -64,6 +64,7 @@ const MODULES = {
   documents:   { label: 'Documents',    accent: TOKENS.gold,        icon: 'documents' },
   assessment:  { label: 'Assessments', accent: TOKENS.accentAmber, icon: 'frontdesk' },
   crm:         { label: 'CRM',         accent: TOKENS.accentNavy,  icon: 'frontdesk' },
+  salesperf:   { label: 'My Performance', accent: TOKENS.gold,      icon: 'frontdesk' },
   livelessons: { label: 'Live Classes', accent: TOKENS.accentRose,  icon: 'live' },
   grouprooms:  { label: 'Group Rooms',  accent: TOKENS.accentOcean, icon: 'rooms' },
   curriculum:  { label: 'Curriculum',   accent: TOKENS.gold,        icon: 'curriculum' },
@@ -545,7 +546,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'System',      items: ['settings'] },
     ],
     sales: [
-      { label: 'Overview',    items: ['dashboard'] },
+      { label: 'Overview',    items: ['dashboard', 'salesperf'] },
       { label: 'CRM',         items: ['crm'] },
       { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
       { label: 'Content',     items: ['documents'] },
@@ -813,7 +814,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       { items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','billing','website','settings','ai'] },
     ],
     accountant:  [{ items: ['dashboard','analytics','billing','payroll','settings'] }],
-    sales:       [{ items: ['dashboard','crm','assessment','frontdesk','communication','documents','settings'] }],
+    sales:       [{ items: ['dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
     ops_manager: [{ items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','assessment','documents','payroll','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
@@ -843,6 +844,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
         {safePage === 'assessment' && <AssessmentModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'crm' && <CRMModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'salesperf' && <SalesPerformanceModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'payroll'     && <PayrollModule    refreshKey={refreshKey} toast={toast} />}
         {safePage === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
         {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
@@ -5835,6 +5837,230 @@ function CRMForm({ toast, onBack, onSaved }) {
   )
 }
 
+
+// ═══════════════════════════════════════════════════════════
+// SalesPerformanceModule
+// Shows sales officer's own invoices, receipts, cycle totals
+// and earnings (3% commission + KES 40,000 retainer).
+// Visible in: sales portal (My Performance), admin/ops can
+// view any officer by passing ?userId.
+// ═══════════════════════════════════════════════════════════
+function SalesPerformanceModule({ toast, refreshKey }) {
+  const { user } = useAuth()
+  const [data,    setData]    = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [cycle,   setCycle]   = useState('')   // '' = current
+  const [cycles,  setCycles]  = useState([])
+
+  const load = useCallback((c) => {
+    setLoading(true)
+    const params = c ? { cycle: c } : {}
+    api.get('/invoices/sales-performance', { params })
+      .then(r => {
+        setData(r.data?.data)
+        setCycles(r.data?.data?.availableCycles || [])
+      })
+      .catch(() => toast?.error?.('Failed to load sales performance.'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => { load(cycle) }, [cycle, refreshKey])
+
+  const money = (n, cur='') => {
+    const v = Number(n||0).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 })
+    return cur ? `${cur} ${v}` : v
+  }
+  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
+
+  const STATUS_COLOURS = {
+    draft:     { bg:'#F3F4F6', fg:'#374151' },
+    sent:      { bg:'#DBEAFE', fg:'#1E40AF' },
+    paid:      { bg:'#D1FAE5', fg:'#065F46' },
+    overdue:   { bg:'#FEE2E2', fg:'#991B1B' },
+    cancelled: { bg:'#F3F4F6', fg:'#6B7280' },
+  }
+
+  const viewReceipt = async (inv) => {
+    try {
+      const { data: rd } = await api.get('/invoices/'+inv._id+'/receipt-html')
+      if (rd.success) {
+        const w = window.open('','_blank')
+        if (!w) { toast?.error?.('Allow pop-ups to view receipt.'); return }
+        w.document.write(rd.data.html); w.document.close()
+      }
+    } catch { toast?.error?.('Could not load receipt.') }
+  }
+
+  if (loading) return (
+    <div style={{padding:'60px 0',textAlign:'center'}}>
+      <div style={{width:40,height:40,border:'3px solid #F0EBE6',borderTopColor:TOKENS.crimson,borderRadius:'50%',animation:'spin .75s linear infinite',margin:'0 auto 14px'}}/>
+      <div style={{fontSize:13,color:TOKENS.s500}}>Loading your performance data...</div>
+    </div>
+  )
+
+  if (!data) return null
+
+  const { summary, earnings, invoices, trend, cycle: cycleInfo } = data
+
+  const maxBar = Math.max(...(trend||[]).map(t=>t.sales), 1)
+
+  return (
+    <>
+      <PSection tag="Sales" title="My" em="Performance" sub={`Cycle: ${cycleInfo?.label || '—'} · Commission 3% + KES 40,000 retainer`}/>
+
+      {/* Cycle picker */}
+      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:20,flexWrap:'wrap'}}>
+        <div style={{fontSize:12.5,fontWeight:700,color:TOKENS.s700}}>Billing cycle:</div>
+        <select value={cycle} onChange={e=>setCycle(e.target.value)}
+          style={{padding:'8px 12px',borderRadius:7,border:'1.5px solid '+TOKENS.line,fontSize:13,background:'#fff',minWidth:280}}>
+          <option value="">Current cycle</option>
+          {cycles.map(c=><option key={c.key} value={c.key}>{c.label}</option>)}
+        </select>
+      </div>
+
+      {/* KPI strip */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:12,marginBottom:20}}>
+        {[
+          { label:'Invoices Issued',   val:summary.totalInvoiced,  color:TOKENS.crimson,      sub:'This cycle' },
+          { label:'Paid',              val:summary.totalPaid,       color:'#065F46',            sub:'Invoices confirmed' },
+          { label:'Pending',           val:summary.totalPending,    color:'#D97706',            sub:'Awaiting payment' },
+          { label:'Sales Volume',      val:'USD '+money(summary.salesVolume), color:TOKENS.crimson, sub:'Paid invoices only', big:true },
+        ].map(k=>(
+          <div key={k.label} className="card" style={{padding:'16px 18px'}}>
+            <div style={{fontSize:11,fontWeight:700,color:TOKENS.s400,textTransform:'uppercase',letterSpacing:'.05em',marginBottom:6}}>{k.label}</div>
+            <div style={{fontSize:k.big?16:26,fontWeight:800,color:k.color,lineHeight:1.1}}>{k.val}</div>
+            <div style={{fontSize:11,color:TOKENS.s500,marginTop:4}}>{k.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Earnings card */}
+      <div className="card" style={{padding:24,marginBottom:20,background:'linear-gradient(135deg,#7D1025,#5A0B1B)',color:'#fff',position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',top:-20,right:-20,width:120,height:120,borderRadius:'50%',background:'rgba(201,160,48,.12)'}}/>
+        <div style={{position:'absolute',bottom:-30,left:-10,width:80,height:80,borderRadius:'50%',background:'rgba(201,160,48,.08)'}}/>
+        <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:'rgba(255,255,255,.6)',marginBottom:10}}>
+          Your earnings this cycle
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))',gap:16,position:'relative'}}>
+          <div>
+            <div style={{fontSize:11,color:'rgba(255,255,255,.55)',marginBottom:4}}>Retainer (fixed)</div>
+            <div style={{fontSize:28,fontWeight:800,color:'#C9A030'}}>KES 40,000</div>
+            <div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>Paid monthly</div>
+          </div>
+          <div>
+            <div style={{fontSize:11,color:'rgba(255,255,255,.55)',marginBottom:4}}>Commission (3% of sales)</div>
+            <div style={{fontSize:28,fontWeight:800,color:'#C9A030'}}>
+              USD {money(earnings.commissionUSD)}
+            </div>
+            <div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>
+              3% × USD {money(earnings.salesVolume)} sales
+            </div>
+          </div>
+          {Object.entries(summary.byCurrency||{}).filter(([k])=>k!=='USD').map(([cur,amt])=>(
+            <div key={cur}>
+              <div style={{fontSize:11,color:'rgba(255,255,255,.55)',marginBottom:4}}>Commission ({cur} sales)</div>
+              <div style={{fontSize:22,fontWeight:800,color:'#C9A030'}}>
+                {cur} {money(amt*0.03)}
+              </div>
+              <div style={{fontSize:11,color:'rgba(255,255,255,.45)'}}>3% × {cur} {money(amt)}</div>
+            </div>
+          ))}
+          <div style={{borderLeft:'1px solid rgba(255,255,255,.15)',paddingLeft:16}}>
+            <div style={{fontSize:11,color:'rgba(255,255,255,.55)',marginBottom:4}}>Total this cycle</div>
+            <div style={{fontSize:24,fontWeight:800,color:'#fff'}}>
+              KES 40,000 + {Object.entries(summary.byCurrency||{}).map(([c,a])=>`${c} ${money(a*0.03)}`).join(' + ') || 'USD 0.00'}
+            </div>
+            <div style={{fontSize:11,color:'rgba(255,255,255,.45)',marginTop:4}}>Retainer + 3% commission on all currencies</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Trend bar chart */}
+      {trend && trend.length > 1 && (
+        <div className="card" style={{padding:20,marginBottom:20}}>
+          <div style={{fontSize:13,fontWeight:800,color:TOKENS.s900,marginBottom:16}}>Sales trend (last 7 cycles)</div>
+          <div style={{display:'flex',alignItems:'flex-end',gap:8,height:80}}>
+            {[...trend].reverse().map((t,i)=>(
+              <div key={t.key||i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
+                <div style={{fontSize:9,color:TOKENS.s500,fontWeight:600}}>
+                  {t.sales>0?'$'+money(t.sales):'—'}
+                </div>
+                <div style={{
+                  width:'100%',
+                  height: Math.max(4, (t.sales/maxBar)*60),
+                  background: t.key === cycle || (!cycle && i===trend.length-1)
+                    ? TOKENS.crimson : TOKENS.crimson+'40',
+                  borderRadius:'3px 3px 0 0',
+                  transition:'height .3s',
+                }}/>
+                <div style={{fontSize:8,color:TOKENS.s500,textAlign:'center',lineHeight:1.2}}>
+                  {(t.cycle||'').split('–')[0]?.trim().slice(0,6)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Invoice list */}
+      <div className="card" style={{overflow:'hidden'}}>
+        <div style={{padding:'14px 18px',borderBottom:'1px solid '+TOKENS.line,fontWeight:800,fontSize:13,color:TOKENS.s900}}>
+          Invoices this cycle
+          <span style={{fontWeight:400,color:TOKENS.s500,marginLeft:8,fontSize:12}}>({invoices.length})</span>
+        </div>
+        {invoices.length === 0 ? (
+          <div style={{padding:32,textAlign:'center',color:TOKENS.s500,fontSize:13}}>No invoices issued this cycle yet.</div>
+        ) : (
+          <table className="tbl" style={{width:'100%',borderCollapse:'collapse'}}>
+            <thead>
+              <tr>{['Invoice No.','Bill To','Student','Amount','Status','Date',''].map(h=>(
+                <th key={h} style={{padding:'9px 14px',textAlign:'left',fontSize:11}}>{h}</th>
+              ))}</tr>
+            </thead>
+            <tbody>
+              {invoices.map(inv=>{
+                const sc = STATUS_COLOURS[inv.status]||STATUS_COLOURS.sent
+                return (
+                  <tr key={inv._id} style={{borderTop:'1px solid '+TOKENS.line}}>
+                    <td style={{padding:'10px 14px',fontFamily:'monospace',fontSize:12,fontWeight:700,color:TOKENS.crimson}}>{inv.invoiceNo}</td>
+                    <td style={{padding:'10px 14px'}}>
+                      <div style={{fontSize:13,fontWeight:600,color:TOKENS.s900}}>{inv.billedToName}</div>
+                      {inv.billedToEmail&&<div style={{fontSize:11,color:TOKENS.s500}}>{inv.billedToEmail}</div>}
+                    </td>
+                    <td style={{padding:'10px 14px',fontSize:12.5,color:TOKENS.s700}}>{inv.studentName||'—'}</td>
+                    <td style={{padding:'10px 14px',fontSize:13,fontWeight:700,color:TOKENS.s900,whiteSpace:'nowrap'}}>
+                      {inv.currency} {money(inv.totalDue)}
+                    </td>
+                    <td style={{padding:'10px 14px'}}>
+                      <span style={{padding:'3px 10px',borderRadius:99,background:sc.bg,color:sc.fg,fontSize:11,fontWeight:700}}>
+                        {inv.status.charAt(0).toUpperCase()+inv.status.slice(1)}
+                      </span>
+                    </td>
+                    <td style={{padding:'10px 14px',fontSize:11.5,color:TOKENS.s500,whiteSpace:'nowrap'}}>{fmtDate(inv.createdAt)}</td>
+                    <td style={{padding:'10px 14px'}}>
+                      {inv.status==='paid'&&(
+                        <button onClick={()=>viewReceipt(inv)} style={{fontSize:11,background:'#065F46',color:'#fff',border:'none',padding:'4px 8px',borderRadius:5,cursor:'pointer',fontWeight:700}}>
+                          🧾 Receipt
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Note */}
+      <div style={{fontSize:12,color:TOKENS.s500,marginTop:12,lineHeight:1.6}}>
+        Cycle runs from the <strong>15th of each month</strong> to the <strong>14th of the following month</strong>.
+        Commission is calculated on <strong>paid invoices only</strong> at <strong>3%</strong> of the total invoice value.
+        Retainer of <strong>KES 40,000</strong> is paid monthly regardless of sales volume.
+      </div>
+    </>
+  )
+}
 
 function CommunicationModule({ refreshKey, toast }) {
   const [view, setView] = useState('compose')   // compose | history
