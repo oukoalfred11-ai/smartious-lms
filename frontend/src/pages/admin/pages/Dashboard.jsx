@@ -548,7 +548,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Overview',    items: ['dashboard'] },
       { label: 'CRM',         items: ['crm'] },
       { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
-      { label: 'Content',     items: ['documents', 'website'] },
+      { label: 'Content',     items: ['documents'] },
       { label: 'System',      items: ['settings'] },
     ],
     ops_manager: [
@@ -813,7 +813,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       { items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','billing','website','settings','ai'] },
     ],
     accountant:  [{ items: ['dashboard','analytics','billing','payroll','settings'] }],
-    sales:       [{ items: ['dashboard','crm','assessment','frontdesk','communication','documents','website','settings'] }],
+    sales:       [{ items: ['dashboard','crm','assessment','frontdesk','communication','documents','settings'] }],
     ops_manager: [{ items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','assessment','documents','payroll','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
@@ -10387,20 +10387,39 @@ function WebsiteModule({ refreshKey, toast }) {
 function SettingsModule({ refreshKey, toast }) {
   const auth = useAuth()
   const user = auth?.user
+  const role = user?.role || 'admin'
   const [activeTab, setActiveTab] = useState('profile')
+
+  // Non-admin staff can only edit personal details — no system/school settings
+  const STAFF_ROLES = ['sales', 'ops_manager', 'accountant']
+  const isStaff = STAFF_ROLES.includes(role)
+
+  const tabs = isStaff
+    ? [
+        { id: 'profile',  label: 'My Profile' },
+        { id: 'password', label: 'Change Password' },
+      ]
+    : [
+        { id: 'profile',  label: 'Profile' },
+        { id: 'password', label: 'Change Password' },
+        { id: 'email',    label: 'Email Settings' },
+        { id: 'school',   label: 'School Settings' },
+      ]
 
   return (
     <>
-      <PSection tag="Personal" title="Account" em="Settings" sub="Manage your profile, password, and notification preferences"/>
+      <PSection
+        tag="Personal"
+        title="Account"
+        em="Settings"
+        sub={isStaff
+          ? 'Update your personal profile and password.'
+          : 'Manage your profile, password, and notification preferences'}
+      />
 
       {/* Tab bar */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 20, borderBottom: '1.5px solid ' + TOKENS.line, paddingBottom: 0 }}>
-        {[
-          { id: 'profile',  label: 'Profile' },
-          { id: 'password', label: 'Change Password' },
-          { id: 'email',    label: 'Email Settings' },
-          { id: 'school',   label: 'School Settings' },
-        ].map(t => (
+        {tabs.map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)} style={{
             padding: '10px 18px', border: 'none', background: 'transparent',
             borderBottom: activeTab === t.id ? '2.5px solid ' + TOKENS.crimson : '2.5px solid transparent',
@@ -10413,39 +10432,91 @@ function SettingsModule({ refreshKey, toast }) {
 
       {activeTab === 'profile'  && <SettingsProfileTab  user={user} toast={toast}/>}
       {activeTab === 'password' && <SettingsPasswordTab toast={toast}/>}
-      {activeTab === 'email'    && <SettingsEmailTab    toast={toast}/>}
-      {activeTab === 'school'   && <SettingsSchoolTab   toast={toast}/>}
+      {!isStaff && activeTab === 'email'  && <SettingsEmailTab  toast={toast}/>}
+      {!isStaff && activeTab === 'school' && <SettingsSchoolTab toast={toast}/>}
     </>
   )
 }
 
 // ── Profile tab ───────────────────────────────────────────
 function SettingsProfileTab({ user, toast }) {
-  const [firstName, setFirstName] = useState(user?.firstName || '')
-  const [lastName,  setLastName]  = useState(user?.lastName  || '')
-  const [phone,     setPhone]     = useState(user?.phone     || '')
-  const [saving,    setSaving]    = useState(false)
+  const [firstName,  setFirstName]  = useState(user?.firstName || '')
+  const [lastName,   setLastName]   = useState(user?.lastName  || '')
+  const [phone,      setPhone]      = useState(user?.phone     || '')
+  const [saving,     setSaving]     = useState(false)
+  const [avatarUrl,  setAvatarUrl]  = useState(user?.avatar    || '')
+  const [uploading,  setUploading]  = useState(false)
 
   const save = async () => {
     if (!firstName.trim() || !lastName.trim()) { toast?.error?.('First and last name are required.'); return }
     setSaving(true)
     try {
-      const { data } = await api.patch('/users/me', { firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim() })
+      const { data } = await api.patch('/users/me', {
+        firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim(),
+      })
       if (data?.success) toast?.ok?.('Profile updated.')
       else toast?.error?.(data?.message || 'Could not update profile.')
     } catch (e) {
       toast?.error?.(e?.response?.data?.message || 'Could not update profile.')
-    } finally {
-      setSaving(false)
-    }
+    } finally { setSaving(false) }
+  }
+
+  const uploadAvatar = async (file) => {
+    if (!file) return
+    if (file.size > 3 * 1024 * 1024) { toast?.error?.('Image must be under 3 MB.'); return }
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      const { data } = await api.post('/users/me/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      if (data?.success) {
+        setAvatarUrl(data.data?.avatarUrl || '')
+        toast?.ok?.('Profile photo updated.')
+      } else {
+        toast?.error?.(data?.message || 'Could not upload photo.')
+      }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not upload photo.')
+    } finally { setUploading(false) }
   }
 
   const inp = { width: '100%', boxSizing: 'border-box', padding: '9px 12px', borderRadius: 7, border: '1.5px solid ' + TOKENS.line, fontSize: 13, fontFamily: 'inherit' }
   const lbl = { display: 'block', fontSize: 11, fontWeight: 700, color: TOKENS.crimson, letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 5 }
+  const initials = (firstName[0] || '') + (lastName[0] || '')
 
   return (
     <div className="card" style={{ padding: 26, maxWidth: 520 }}>
-      <div style={{ fontSize: 14, fontWeight: 800, color: TOKENS.s900, marginBottom: 18 }}>Your profile</div>
+      <div style={{ fontSize: 14, fontWeight: 800, color: TOKENS.s900, marginBottom: 20 }}>Your profile</div>
+
+      {/* Avatar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 24 }}>
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Profile" style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '2px solid ' + TOKENS.line }}/>
+          ) : (
+            <div style={{ width: 72, height: 72, borderRadius: '50%', background: TOKENS.crimson, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 700, color: '#fff' }}>
+              {initials || '?'}
+            </div>
+          )}
+          {uploading && (
+            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(0,0,0,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 20, height: 20, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }}/>
+            </div>
+          )}
+        </div>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: TOKENS.s900, marginBottom: 6 }}>Profile photo</div>
+          <label style={{ display: 'inline-block', background: TOKENS.cream, border: '1.5px solid ' + TOKENS.line, borderRadius: 7, padding: '7px 14px', fontSize: 12.5, fontWeight: 700, color: TOKENS.s700, cursor: uploading ? 'not-allowed' : 'pointer' }}>
+            {uploading ? 'Uploading...' : 'Upload photo'}
+            <input type="file" accept="image/*" style={{ display: 'none' }} disabled={uploading}
+              onChange={e => e.target.files?.[0] && uploadAvatar(e.target.files[0])}/>
+          </label>
+          <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 5 }}>JPG or PNG, max 3 MB</div>
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
         <div>
           <label style={lbl}>First name</label>
@@ -10463,7 +10534,7 @@ function SettingsProfileTab({ user, toast }) {
       <div style={{ marginBottom: 20 }}>
         <label style={lbl}>Email address</label>
         <div style={{ ...inp, background: TOKENS.cream, color: TOKENS.s500 }}>{user?.email || '—'}</div>
-        <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>Email cannot be changed here. Contact your system administrator.</div>
+        <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>To change your email contact your administrator.</div>
       </div>
       <button onClick={save} disabled={saving} style={{
         background: saving ? TOKENS.s300 : TOKENS.crimson, color: '#fff', border: 'none',
