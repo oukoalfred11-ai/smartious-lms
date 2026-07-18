@@ -272,6 +272,13 @@
     <lastmod>2026-07-17</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ro" href="https://smartioushomeschool.com/online-school/romania"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/ukraine</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-18</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ua" href="https://smartioushomeschool.com/online-school/ukraine"/>
+  </url>
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
        ═══════════════════════════════════════════════════════════ -->
@@ -961,6 +968,50 @@
     <loc>https://smartioushomeschool.com/virtual-school-kenya</loc>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
+    <lastmod>2026-07-18</lastmod>
+  </url>
+
+  <!-- Ukraine cities + virtual school landing -->
+  <url>
+    <loc>https://smartioushomeschool.com/virtual-school-ukraine</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-07-18</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kyiv-ua</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-18</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-lviv-ua</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-18</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kharkiv-ua</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-18</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-dnipro-ua</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-18</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-odesa-ua</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-07-18</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-ivano-frankivsk-ua</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
     <lastmod>2026-07-18</lastmod>
   </url>
 </urlset>
