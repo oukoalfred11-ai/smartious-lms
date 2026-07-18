@@ -8,7 +8,6 @@ const mongoose   = require('mongoose');
 const app = express();
 
 // ── Security headers ─────────────────────────────────────
-// Disable CSP in development — Vite uses inline scripts for HMR
 app.use(helmet({
   contentSecurityPolicy: process.env.NODE_ENV === 'production',
 }));
@@ -17,12 +16,11 @@ app.use(helmet({
 const ALLOWED_ORIGINS = [
   'https://smartioushomeschool.com',
   'https://www.smartioushomeschool.com',
-  process.env.CLIENT_URL,           // set in .env for each environment
+  process.env.CLIENT_URL,
 ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, cb) => {
-    // Allow requests with no origin (mobile apps, curl, Render health checks)
     if (!origin) return cb(null, true);
     if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
     cb(new Error(`CORS blocked: ${origin}`));
@@ -41,7 +39,6 @@ const authLimiter = rateLimit({
   message: { success: false, message: 'Too many login attempts — please wait 15 minutes.' },
 });
 
-// Global limiter: 1000 req / 15 min per IP
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000,
@@ -106,10 +103,6 @@ app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
 });
 
 // ── Timetable roll-forward promotion job ──────────────────
-// Promotes near-term timetable sessions into LiveClass records.
-// Best-effort daily interval (not a precise cron). On Render's
-// free tier the timer pauses while the instance sleeps and
-// catches up on wake — the 14-day window absorbs that lag.
 const { promoteUpcomingSessions } = require('./services/timetableSync');
 
 const runTimetablePromotion = () => {
@@ -130,12 +123,15 @@ if (!MONGODB_URI) {
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('✅  MongoDB connected');
+
+    // ── One-time migration: clear mustChangePassword for staff ──
+    // Remove this block after first successful deploy
+    require('./fix-must-change-password');
+
     app.listen(PORT, () =>
       console.log(`🚀  API running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`)
     );
 
-    // Start the timetable promotion job: first run 60s after boot
-    // (let the DB settle), then every 24 hours.
     setTimeout(runTimetablePromotion, 60 * 1000);
     setInterval(runTimetablePromotion, 24 * 60 * 60 * 1000);
   })
