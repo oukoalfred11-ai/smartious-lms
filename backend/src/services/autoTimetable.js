@@ -1,23 +1,24 @@
 /**
  * services/autoTimetable.js
- * Auto-generates TimetableEntry records on student allocation.
  *
- * If the teacher has no availability set, falls back to a default
- * Mon 09:00-10:00 slot (admin/teacher can adjust it afterwards).
+ * Called after every allocation (new or reallocation).
+ * On reallocation: deactivates the OLD timetable entry for this
+ * student+subject, then creates a fresh one for the new teacher.
  */
 
-const toMins = h => { if (!h) return 0; const [hh,mm] = h.split(':').map(Number); return hh*60+mm }
+const toMins  = h => { if (!h) return 0; const [hh,mm] = h.split(':').map(Number); return hh*60+mm }
 const overlaps = (s1,e1,s2,e2) => s1 < e2 && e1 > s2
 
-// Default fallback slots — used when teacher has no availability set
 const DEFAULT_SLOTS = [
   { dayOfWeek:'Mon', startTime:'09:00', endTime:'10:00' },
   { dayOfWeek:'Mon', startTime:'10:00', endTime:'11:00' },
   { dayOfWeek:'Tue', startTime:'09:00', endTime:'10:00' },
   { dayOfWeek:'Tue', startTime:'10:00', endTime:'11:00' },
   { dayOfWeek:'Wed', startTime:'09:00', endTime:'10:00' },
+  { dayOfWeek:'Wed', startTime:'10:00', endTime:'11:00' },
   { dayOfWeek:'Thu', startTime:'09:00', endTime:'10:00' },
   { dayOfWeek:'Fri', startTime:'09:00', endTime:'10:00' },
+  { dayOfWeek:'Fri', startTime:'10:00', endTime:'11:00' },
 ]
 
 async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdBy, canBeGrouped = false }) {
@@ -26,7 +27,6 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
     const TimetableEntry = require('../models/TimetableEntry')
     const Subject        = require('../models/Subject')
 
-    // Load all three in parallel
     const [teacher, subject, student] = await Promise.all([
       User.findById(teacherId).select('firstName lastName availability').lean(),
       Subject.findById(subjectId).lean(),
@@ -38,31 +38,43 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
     if (!student) { console.error('[autoTimetable] Student not found:', studentId); return { created: false, reason: 'Student not found.' } }
 
     console.log('[autoTimetable] Starting for', student.firstName, '-', subject.subjectName,
-      '| availability slots:', (teacher.availability || []).length,
-      '| canBeGrouped:', canBeGrouped)
+      '| teacher:', teacher.firstName, '| availability:', (teacher.availability || []).length, 'slots')
 
-    // Already timetabled for this student+subject+teacher?
-    const alreadyExists = await TimetableEntry.findOne({
-      teacherId, assignedStudents: studentId,
-      subject: subject.subjectName, isActive: true,
+    // ── Step 1: Deactivate any old timetable entries for this
+    //    student+subject (regardless of which teacher they were with).
+    //    This handles reallocation cleanly.
+    const oldEntries = await TimetableEntry.find({
+      assignedStudents: studentId,
+      subject: subject.subjectName,
+      isActive: true,
     })
-    if (alreadyExists) {
-      console.log('[autoTimetable] Entry already exists:', alreadyExists._id)
-      return { created: false, reason: 'Entry already exists.', entry: alreadyExists }
+
+    for (const old of oldEntries) {
+      if (old.assignedStudents.length === 1) {
+        // Only this student — deactivate the whole entry
+        old.isActive = false
+        await old.save()
+        console.log('[autoTimetable] Deactivated old entry:', old._id)
+      } else {
+        // Group entry — just remove this student from it
+        old.assignedStudents = old.assignedStudents.filter(id => String(id) !== String(studentId))
+        old.title = subject.subjectName + ' — Group (' + old.assignedStudents.length + ' students)'
+        await old.save()
+        console.log('[autoTimetable] Removed student from group entry:', old._id)
+      }
     }
 
-    // Try joining an existing group
+    // ── Step 2: Try joining an existing groupable entry with new teacher
     if (canBeGrouped) {
       const existingGroup = await TimetableEntry.findOne({
-        teacherId, subject: subject.subjectName,
-        isActive: true, canBeGrouped: true,
+        teacherId, subject: subject.subjectName, isActive: true, canBeGrouped: true,
       })
       if (existingGroup) {
         const alreadyIn = existingGroup.assignedStudents.some(id => String(id) === String(studentId))
         if (!alreadyIn) {
           const studentEntries = await TimetableEntry.find({ assignedStudents: studentId, isActive: true })
             .select('dayOfWeek startTime endTime').lean()
-          const clash = (studentEntries || []).some(e =>
+          const clash = studentEntries.some(e =>
             e.dayOfWeek === existingGroup.dayOfWeek &&
             overlaps(toMins(existingGroup.startTime), toMins(existingGroup.endTime), toMins(e.startTime), toMins(e.endTime))
           )
@@ -70,24 +82,23 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
             existingGroup.assignedStudents.push(studentId)
             existingGroup.title = subject.subjectName + ' — Group (' + existingGroup.assignedStudents.length + ' students)'
             await existingGroup.save()
-            console.log('[autoTimetable] Added', student.firstName, 'to group entry', existingGroup._id)
+            console.log('[autoTimetable] Added', student.firstName, 'to existing group', existingGroup._id)
             return { created: true, grouped: true, entry: existingGroup, reason: 'Added to existing group class.' }
           }
         }
       }
     }
 
-    // Use teacher's availability or fall back to defaults
+    // ── Step 3: Find a free slot ──────────────────────────────
     const availability = (teacher.availability && teacher.availability.length > 0)
       ? teacher.availability
       : DEFAULT_SLOTS
 
-    const usingDefaults = !(teacher.availability && teacher.availability.length > 0)
-    if (usingDefaults) {
-      console.log('[autoTimetable] Teacher has no availability set — using default slots')
+    if (!(teacher.availability && teacher.availability.length > 0)) {
+      console.log('[autoTimetable] No availability set — using default slots')
     }
 
-    // Load existing entries to detect clashes
+    // Load current busy slots for teacher and student
     const [teacherEntries, studentEntries] = await Promise.all([
       TimetableEntry.find({ teacherId, isActive: true }).select('dayOfWeek startTime endTime').lean(),
       TimetableEntry.find({ assignedStudents: studentId, isActive: true }).select('dayOfWeek startTime endTime').lean(),
@@ -103,7 +114,6 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
       studentBusy[e.dayOfWeek].push([toMins(e.startTime), toMins(e.endTime)])
     })
 
-    // Pick first free slot
     let chosenSlot = null
     for (const slot of availability) {
       const ss = toMins(slot.startTime), se = toMins(slot.endTime), d = slot.dayOfWeek
@@ -113,43 +123,41 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
     }
 
     if (!chosenSlot) {
-      console.log('[autoTimetable] No free slot found for', student.firstName, '-', subject.subjectName)
-      return { created: false, reason: 'No free slot found. Please set the timetable manually in the Teacher Portal.' }
+      // All default slots are busy — just use Mon 09:00 anyway, admin can adjust
+      chosenSlot = DEFAULT_SLOTS[0]
+      console.log('[autoTimetable] All slots busy — using Mon 09:00 fallback')
     }
 
+    // ── Step 4: Create the entry ──────────────────────────────
     const title = canBeGrouped
       ? subject.subjectName + ' — Group (1 student)'
       : subject.subjectName + ' — ' + student.firstName + ' ' + student.lastName
 
-    const entryData = {
+    const entry = await TimetableEntry.create({
       title,
-      subject:     subject.subjectName,
-      curriculum:  subject.curriculum || student.curriculum || '',
-      grade:       student.grade || '',
+      subject:      subject.subjectName,
+      curriculum:   subject.curriculum || student.curriculum || '',
+      grade:        student.grade || '',
       subjectId,
-      dayOfWeek:   chosenSlot.dayOfWeek,
-      startTime:   chosenSlot.startTime,
-      endTime:     chosenSlot.endTime,
+      dayOfWeek:    chosenSlot.dayOfWeek,
+      startTime:    chosenSlot.startTime,
+      endTime:      chosenSlot.endTime,
       deliveryMode: 'virtual',
       teacherId,
       assignedStudents: [studentId],
-      isActive: true,
+      canBeGrouped:  !!canBeGrouped,
+      isActive:      true,
       createdBy,
-    }
+    })
 
-    // Only add canBeGrouped if the field exists in the model
-    try { entryData.canBeGrouped = !!canBeGrouped } catch(e) {}
-
-    const entry = await TimetableEntry.create(entryData)
-
-    console.log('[autoTimetable] Created', canBeGrouped ? 'group' : '1:1', 'entry', entry._id,
-      '—', subject.subjectName, chosenSlot.dayOfWeek, chosenSlot.startTime + '-' + chosenSlot.endTime,
-      usingDefaults ? '(default slot — teacher should set availability)' : '')
+    console.log('[autoTimetable] ✅ Created', canBeGrouped ? 'group' : '1:1', 'entry', entry._id,
+      '—', subject.subjectName, chosenSlot.dayOfWeek, chosenSlot.startTime + '-' + chosenSlot.endTime)
 
     return { created: true, grouped: false, entry, reason: 'Timetable entry auto-generated.' }
 
   } catch (err) {
-    console.error('[autoTimetable] Error:', err.message, err.stack)
+    console.error('[autoTimetable] ❌ Error:', err.message)
+    console.error(err.stack)
     return { created: false, reason: 'Auto-timetable error: ' + err.message }
   }
 }
