@@ -4,7 +4,6 @@ import Modal from '../../../components/ui/Modal.jsx'
 
 // ── Shared ───────────────────────────────────────────────────
 import { TOKENS, ModuleIcon, PCard, PSection, PTile, PKpi, PlanBadge, PNavigation } from './modules/SharedDashboard.jsx'
-import { ParentLinkSection, UserFormFields } from './modules/ModalsShared.jsx'
 
 // ── Page modules ─────────────────────────────────────────────
 import { DashboardModule }          from './modules/DashboardModule.jsx'
