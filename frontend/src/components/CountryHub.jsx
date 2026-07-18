@@ -62,6 +62,7 @@ const REGION_LABELS = {
   india:         'South Asia, East Africa, and the Gulf',
   germany:       'Central Europe, North America, and East Africa',
   romania:       'Eastern Europe, the Gulf, and East Africa',
+  ukraine:       'Eastern Europe, the diaspora, and East Africa',
 }
 
 /* ISO country codes for hreflang. Format: en-<CC> tells Google
@@ -84,6 +85,7 @@ const HREFLANG_MAP = {
   india:'en-in',
   germany:'en-de',
   romania:'en-ro',
+  ukraine:'en-ua',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
