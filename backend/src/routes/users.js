@@ -117,9 +117,6 @@ function validateRoleFields(user, role) {
       if (!user.plan) user.plan = 'Basic';
       break;
     case 'admin':
-    case 'accountant':
-    case 'sales':
-    case 'ops_manager':
       if (!user.plan) user.plan = 'Staff';
       break;
   }
@@ -128,7 +125,7 @@ function validateRoleFields(user, role) {
 }
 
 // GET /stats — Get total user count for sidebar badge
-router.get('/stats', auth, requireRole('admin', 'ops_manager', 'accountant'), async (req, res) => {
+router.get('/stats', auth, requireRole('admin'), async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     res.json({ success: true, totalUsers });
@@ -138,76 +135,7 @@ router.get('/stats', auth, requireRole('admin', 'ops_manager', 'accountant'), as
 });
 
 // GET all users (admin only) with advanced search and filtering
-// ─────────────────────────────────────────────────────────
-// GET /api/users/me — current logged-in user's own profile
-// ─────────────────────────────────────────────────────────
-router.get('/me', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select('-password').lean();
-    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
-    return res.json({ success: true, data: { user } });
-  } catch (e) {
-    console.error('[users/me]', e.message);
-    return res.status(500).json({ success: false, message: e.message });
-  }
-});
-
-// ─────────────────────────────────────────────────────────
-// PATCH /api/users/me — update own profile (name, phone)
-// ─────────────────────────────────────────────────────────
-router.patch('/me', auth, async (req, res) => {
-  try {
-    const { firstName, lastName, phone } = req.body || {};
-    const update = {};
-    if (firstName?.trim()) update.firstName = firstName.trim();
-    if (lastName?.trim())  update.lastName  = lastName.trim();
-    if (phone !== undefined) update.phone   = String(phone).trim();
-
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { $set: update },
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
-    return res.json({ success: true, message: 'Profile updated.', data: { user } });
-  } catch (e) {
-    console.error('[users patch/me]', e.message);
-    return res.status(500).json({ success: false, message: e.message });
-  }
-});
-
-// ─────────────────────────────────────────────────────────
-// POST /api/users/change-password — change own password
-// Body: { currentPassword, newPassword }
-// ─────────────────────────────────────────────────────────
-router.post('/change-password', auth, async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body || {};
-    if (!currentPassword) return res.status(400).json({ success: false, message: 'Current password is required.' });
-    if (!newPassword || newPassword.length < 8)
-      return res.status(400).json({ success: false, message: 'New password must be at least 8 characters.' });
-
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
-
-    const bcrypt = require('bcryptjs');
-    const valid  = await bcrypt.compare(currentPassword, user.password);
-    if (!valid) return res.status(401).json({ success: false, message: 'Current password is incorrect.' });
-
-    user.password = await bcrypt.hash(newPassword, 12);
-    await user.save();
-
-    console.log('[users change-password] password changed for', user.email);
-    return res.json({ success: true, message: 'Password changed successfully.' });
-  } catch (e) {
-    console.error('[users change-password]', e.message);
-    return res.status(500).json({ success: false, message: e.message });
-  }
-});
-
-
-router.get('/', auth, requireRole('admin', 'teacher', 'ops_manager', 'sales'), async (req, res) => {
+router.get('/', auth, requireRole('admin', 'teacher'), async (req, res) => {
   try {
     const { search, role, curriculum } = req.query;
     let query = {};
@@ -263,7 +191,7 @@ router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin')
 });
 
 // GET all students (for parent selection)
-router.get('/students/list', auth, requireRole('admin', 'ops_manager', 'sales'), async (req, res) => {
+router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
   try {
     const students = await User.find({ role: 'student' })
       .select('_id firstName lastName email curriculum grade gradeLevel subjects admissionNumber programme deliveryMode isActive status')
@@ -276,7 +204,7 @@ router.get('/students/list', auth, requireRole('admin', 'ops_manager', 'sales'),
 });
 
 // GET all teachers (for allocations)
-router.get('/teachers/list', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
   try {
     const teachers = await User.find({ role: 'teacher' })
       .select('_id firstName lastName email phone curriculum subjects createdAt status isActive isOnLeave leaveStartDate leaveEndDate jobTitle avatar bio yearsOfExperience teachingSpecialties statusReason sentEmails')
@@ -332,7 +260,7 @@ router.post('/:id/avatar', auth, requireRole('admin'), (req, res) => {
 // subject+curriculum pair. Used by the admin Manage Students module
 // to populate the teacher-allocation dropdown after the admin has
 // chosen a (student, subject) pair to allocate.
-router.get('/teachers/qualified', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+router.get('/teachers/qualified', auth, requireRole('admin'), async (req, res) => {
   try {
     const mongoose = require('mongoose');
     const { subjectId, curriculum } = req.query;
@@ -413,7 +341,7 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin'), async (req
 });
 
 // CREATE user (admin only) with role-specific logic and auto-generated temp password
-router.post('/', auth, requireRole('admin', 'ops_manager', 'sales'), async (req, res) => {
+router.post('/', auth, requireRole('admin'), async (req, res) => {
   try {
     validateRoleFields(req.body, req.body.role);
 
@@ -427,7 +355,10 @@ router.post('/', auth, requireRole('admin', 'ops_manager', 'sales'), async (req,
     const tempPassword = User.generateTempPassword();
     req.body.password = tempPassword;
     req.body.isActive = true;
-    req.body.mustChangePassword = true;
+    // Staff accounts (admin/sales/ops_manager/accountant/teacher) don't need to
+    // force-change on first login — they use the forgot password flow instead
+    const STAFF_ROLES = ['admin','teacher','ops_manager','accountant','sales'];
+    req.body.mustChangePassword = !STAFF_ROLES.includes(req.body.role);
 
     const user = await User.create(req.body);
 
@@ -761,7 +692,7 @@ router.delete('/:id/parent', auth, requireRole('admin'), async (req, res) => {
 });
 
 // UPDATE user (admin only) — demo users cannot be deleted or have role/isDemo changed
-router.patch('/:id', auth, requireRole('admin', 'ops_manager', 'sales'), async (req, res) => {
+router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
     if (!target) return res.status(404).json({ success: false, message: 'User not found' });
@@ -1095,120 +1026,5 @@ router.get('/public-teachers', async (req, res) => {
     res.status(500).json({ success: false, message: e.message });
   }
 });
-
-
-// ─────────────────────────────────────────────────────────
-// PATCH /api/users/teachers/:id/availability
-// ─────────────────────────────────────────────────────────
-router.patch('/teachers/:id/availability', auth, requireRole('admin', 'teacher', 'ops_manager'), async (req, res) => {
-  try {
-    const { availability } = req.body || {};
-    if (!Array.isArray(availability))
-      return res.status(400).json({ success: false, message: 'availability must be an array.' });
-
-    const VALID_DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    const TIME_RE    = /^([01]\d|2[0-3]):[0-5]\d$/;
-    const cleaned = [];
-    for (const slot of availability) {
-      if (!VALID_DAYS.includes(slot.dayOfWeek))
-        return res.status(400).json({ success: false, message: 'Invalid dayOfWeek: ' + slot.dayOfWeek });
-      if (!TIME_RE.test(slot.startTime) || !TIME_RE.test(slot.endTime))
-        return res.status(400).json({ success: false, message: 'Times must be HH:MM format.' });
-      cleaned.push({ dayOfWeek: slot.dayOfWeek, startTime: slot.startTime, endTime: slot.endTime });
-    }
-
-    const teacher = await User.findById(req.params.id);
-    if (!teacher || teacher.role !== 'teacher')
-      return res.status(404).json({ success: false, message: 'Teacher not found.' });
-    if (req.user.role === 'teacher' && String(teacher._id) !== String(req.user._id))
-      return res.status(403).json({ success: false, message: 'You can only update your own availability.' });
-
-    teacher.availability = cleaned;
-    await teacher.save();
-    console.log('[availability] saved', cleaned.length, 'slots for teacher', teacher._id);
-    return res.json({ success: true, message: 'Saved ' + cleaned.length + ' availability slot(s).', data: { availability: teacher.availability } });
-  } catch (e) {
-    console.error('[availability patch]', e.message);
-    return res.status(500).json({ success: false, message: e.message });
-  }
-});
-
-// ─────────────────────────────────────────────────────────
-// GET /api/users/teachers/:id/availability
-// ─────────────────────────────────────────────────────────
-router.get('/teachers/:id/availability', auth, requireRole('admin', 'teacher', 'ops_manager'), async (req, res) => {
-  try {
-    const teacher = await User.findById(req.params.id).select('firstName lastName availability').lean();
-    if (!teacher) return res.status(404).json({ success: false, message: 'Teacher not found.' });
-    return res.json({ success: true, data: { availability: teacher.availability || [] } });
-  } catch (e) {
-    return res.status(500).json({ success: false, message: e.message });
-  }
-});
-
-
-// ─────────────────────────────────────────────────────────
-// POST /api/users/me/avatar — upload profile photo
-// Accepts multipart/form-data with field 'avatar'
-// Uses R2 if configured, otherwise stores as base64 data URL
-// ─────────────────────────────────────────────────────────
-router.post('/me/avatar', auth, async (req, res) => {
-  try {
-    const multer = require('multer')
-    const upload = multer({
-      storage: multer.memoryStorage(),
-      limits: { fileSize: 3 * 1024 * 1024 },
-      fileFilter: (_, file, cb) => {
-        if (file.mimetype.startsWith('image/')) cb(null, true)
-        else cb(new Error('Only image files are allowed.'))
-      },
-    }).single('avatar')
-
-    upload(req, res, async (err) => {
-      if (err) return res.status(400).json({ success: false, message: err.message })
-      if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded.' })
-
-      let avatarUrl = ''
-
-      // Try R2 first, fall back to base64 data URL
-      try {
-        const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
-        const { v4: uuid } = require('uuid')
-        const s3 = new S3Client({
-          region: 'auto',
-          endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-          credentials: {
-            accessKeyId: process.env.R2_ACCESS_KEY_ID,
-            secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-          },
-        })
-        const ext = req.file.mimetype.split('/')[1] || 'jpg'
-        const key = `avatars/${req.user._id}/${uuid()}.${ext}`
-        await s3.send(new PutObjectCommand({
-          Bucket: process.env.R2_BUCKET_NAME,
-          Key: key,
-          Body: req.file.buffer,
-          ContentType: req.file.mimetype,
-        }))
-        avatarUrl = `${(process.env.R2_PUBLIC_URL || '').replace(/\/$/, '')}/${key}`
-      } catch (r2Err) {
-        // R2 not configured or failed — store as base64 data URL
-        console.log('[avatar] R2 not available, using base64:', r2Err.message)
-        avatarUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`
-      }
-
-      const user = await User.findByIdAndUpdate(
-        req.user._id,
-        { $set: { avatar: avatarUrl } },
-        { new: true }
-      ).select('-password')
-
-      return res.json({ success: true, message: 'Avatar updated.', data: { avatarUrl, user } })
-    })
-  } catch (e) {
-    console.error('[avatar upload]', e.message)
-    return res.status(500).json({ success: false, message: e.message })
-  }
-})
 
 module.exports = router;
