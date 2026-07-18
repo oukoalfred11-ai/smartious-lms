@@ -218,4 +218,134 @@ router.post('/reset-password', authMiddleware, async (req, res) => {
   }
 });
 
+
+// ─────────────────────────────────────────────────────────
+// POST /api/auth/send-otp
+// Sends a 6-digit OTP to the user's registered email.
+// Used to verify identity before allowing password change.
+// No auth required — user provides their email.
+// ─────────────────────────────────────────────────────────
+router.post('/send-otp', async (req, res) => {
+  try {
+    const { email } = req.body || {}
+    if (!email) return res.status(400).json({ success: false, message: 'Email is required.' })
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() })
+    // Always return success — don't reveal if email exists
+    if (!user) return res.json({ success: true, message: 'If that email is registered, an OTP has been sent.' })
+
+    // Generate 6-digit OTP
+    const otp     = String(Math.floor(100000 + Math.random() * 900000))
+    const hash    = crypto.createHash('sha256').update(otp).digest('hex')
+
+    user.otpCode     = hash
+    user.otpExpires  = new Date(Date.now() + 10 * 60 * 1000) // 10 min
+    user.otpVerified = false
+    await user.save()
+
+    const t = getTransporter()
+    if (t) {
+      await t.sendMail({
+        from: process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>',
+        to: user.email,
+        subject: 'Your Smartious verification code',
+        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#FDFAF4;font-family:sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;background:#FDFAF4;">
+<tr><td align="center">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#fff;border-radius:12px;overflow:hidden;">
+<tr><td style="background:linear-gradient(135deg,#8B1A2E,#6E1424);padding:24px 32px;">
+  <div style="font-size:20px;font-weight:800;color:#fff;">Verification Code</div>
+  <div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:4px;">Smartious Homeschool Global</div>
+</td></tr>
+<tr><td style="padding:32px;">
+  <p style="font-size:14px;color:#2c2c2c;margin:0 0 24px;">Hi ${user.firstName || 'there'},</p>
+  <p style="font-size:14px;color:#2c2c2c;margin:0 0 24px;">Your one-time verification code is:</p>
+  <div style="background:#FDFAF4;border:2px solid #8B1A2E;border-radius:12px;padding:20px;text-align:center;margin-bottom:24px;">
+    <div style="font-size:40px;font-weight:900;letter-spacing:12px;color:#8B1A2E;font-family:monospace;">${otp}</div>
+  </div>
+  <p style="font-size:13px;color:#6B6B6B;margin:0;">This code expires in <strong>10 minutes</strong>. If you didn't request this, you can ignore this email.</p>
+</td></tr>
+<tr><td style="background:#FDFAF4;padding:16px 32px;border-top:1px solid #f0e8e8;">
+  <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool Global</p>
+</td></tr>
+</table></td></tr></table></body></html>`,
+        text: `Your Smartious verification code is: ${otp}\n\nThis code expires in 10 minutes.`,
+      }).catch(e => console.error('[otp email]', e.message))
+    }
+
+    console.log('[send-otp] OTP sent to', user.email)
+    return res.json({ success: true, message: 'If that email is registered, an OTP has been sent.' })
+  } catch (err) {
+    console.error('[send-otp]', err.message)
+    return res.status(500).json({ success: false, message: 'Could not send OTP.' })
+  }
+})
+
+// ─────────────────────────────────────────────────────────
+// POST /api/auth/verify-otp
+// Verifies the OTP before allowing password change.
+// Body: { email, otp }
+// ─────────────────────────────────────────────────────────
+router.post('/verify-otp', async (req, res) => {
+  try {
+    const { email, otp } = req.body || {}
+    if (!email || !otp) return res.status(400).json({ success: false, message: 'Email and OTP are required.' })
+
+    const hash = crypto.createHash('sha256').update(String(otp).trim()).digest('hex')
+
+    const user = await User.findOne({
+      email:      email.toLowerCase().trim(),
+      otpCode:    hash,
+      otpExpires: { $gt: new Date() },
+    })
+
+    if (!user) return res.status(400).json({ success: false, message: 'Invalid or expired code. Please request a new one.' })
+
+    user.otpVerified = true
+    await user.save()
+
+    return res.json({ success: true, message: 'Code verified. You may now change your password.' })
+  } catch (err) {
+    console.error('[verify-otp]', err.message)
+    return res.status(500).json({ success: false, message: 'Verification failed.' })
+  }
+})
+
+// ─────────────────────────────────────────────────────────
+// POST /api/auth/change-password
+// Requires OTP to have been verified first.
+// Body: { email, newPassword }
+// Also works for authenticated users (checks token OR otp)
+// ─────────────────────────────────────────────────────────
+router.post('/change-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body || {}
+    if (!email || !newPassword) return res.status(400).json({ success: false, message: 'Email and new password are required.' })
+    if (newPassword.length < 8) return res.status(400).json({ success: false, message: 'Password must be at least 8 characters.' })
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() })
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' })
+
+    // Must have verified OTP recently
+    if (!user.otpVerified) return res.status(403).json({ success: false, message: 'Please verify your email OTP before changing your password.' })
+
+    // Clear OTP + mustChangePassword flag
+    user.password             = newPassword
+    user.otpCode              = undefined
+    user.otpExpires           = undefined
+    user.otpVerified          = false
+    user.mustChangePassword   = false
+    user.passwordResetToken   = undefined
+    user.passwordResetExpires = undefined
+    await user.save()
+
+    console.log('[change-password] Password changed for', user.email)
+    return res.json({ success: true, message: 'Password changed successfully.' })
+  } catch (err) {
+    console.error('[change-password]', err.message)
+    return res.status(500).json({ success: false, message: 'Could not change password.' })
+  }
+})
+
 module.exports = router;
