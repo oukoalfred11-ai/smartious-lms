@@ -28,7 +28,6 @@ import { BillingModule, InvoicesTab } from './modules/BillingModule.jsx'
 import { WebsiteModule }            from './modules/WebsiteModule.jsx'
 import { SettingsModule }           from './modules/SettingsModule.jsx'
 import { MshauriModule }            from './modules/MshauriModule.jsx'
-import { UserFormFields, ParentLinkSection } from './modules/ModalsShared.jsx'
 
 export default function AdminDashboard({ page, setPage, userStats, pendingAllocations, refreshKey, onUserSaved, forcedRole = undefined }) {
   const toast = useToast()
