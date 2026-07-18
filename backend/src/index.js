@@ -7,12 +7,10 @@ const mongoose   = require('mongoose');
 
 const app = express();
 
-// ── Security headers ─────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: process.env.NODE_ENV === 'production',
 }));
 
-// ── CORS ─────────────────────────────────────────────────
 const ALLOWED_ORIGINS = [
   'https://smartioushomeschool.com',
   'https://www.smartioushomeschool.com',
@@ -28,11 +26,9 @@ app.use(cors({
   credentials: true,
 }));
 
-// ── Body parsing ─────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// ── Rate limiting ─────────────────────────────────────────
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -47,7 +43,6 @@ app.use(rateLimit({
   message: { success: false, message: 'Too many requests — please try again later.' },
 }));
 
-// ── Routes ────────────────────────────────────────────────
 app.use('/api/auth',           authLimiter, require('./routes/auth'));
 app.use('/api/users',          require('./routes/users'));
 app.use('/api/communication', require('./routes/communication'));
@@ -72,28 +67,23 @@ app.use('/api/grouprooms',     require('./routes/grouprooms'));
 app.use('/api/liveclasses', require('./routes/liveclasses'));
 app.use('/api/questions', require('./routes/questions'));
 app.use('/api/homework', require('./routes/homework'));
-app.use('/api/curriculum', require('./routes/curriculum'));
 app.use('/api/exams', require('./routes/exams'));
 app.use('/api/status',         require('./routes/status-management'));
 app.use('/api/frontdesk', require('./routes/frontdesk'));
 app.use('/api/library', require('./routes/library'));
 app.use('/api/leave-requests', require('./routes/status-management'));
-
 app.use('/api/invoices',   require('./routes/invoices'));
 app.use('/api/inquiries',  require('./routes/inquiries'));
 app.use('/api/assessment', require('./routes/assessment'));
 
-// ── Health check ──────────────────────────────────────────
 app.get('/api/health', (_, res) =>
   res.json({ status: 'ok', env: process.env.NODE_ENV, ts: new Date().toISOString() })
 );
 
-// ── 404 ───────────────────────────────────────────────────
 app.use((req, res) =>
   res.status(404).json({ success: false, message: `Route not found: ${req.method} ${req.path}` })
 );
 
-// ── Error handler ─────────────────────────────────────────
 app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
   console.error('[ERROR]', err.message);
   res.status(err.status || 500).json({
@@ -102,16 +92,13 @@ app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
   });
 });
 
-// ── Timetable roll-forward promotion job ──────────────────
 const { promoteUpcomingSessions } = require('./services/timetableSync');
-
 const runTimetablePromotion = () => {
   promoteUpcomingSessions(14)
     .then(r => console.log('[timetable promotion]', JSON.stringify(r)))
     .catch(e => console.error('[timetable promotion] failed:', e.message));
 };
 
-// ── Database + start ──────────────────────────────────────
 const PORT        = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -123,15 +110,9 @@ if (!MONGODB_URI) {
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('✅  MongoDB connected');
-
-    // ── One-time migration: clear mustChangePassword for staff ──
-    // Remove this block after first successful deploy
-    require('./fix-must-change-password');
-
     app.listen(PORT, () =>
       console.log(`🚀  API running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`)
     );
-
     setTimeout(runTimetablePromotion, 60 * 1000);
     setInterval(runTimetablePromotion, 24 * 60 * 60 * 1000);
   })
