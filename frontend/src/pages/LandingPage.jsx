@@ -35,6 +35,7 @@ import { UK_CITIES, UK_COUNTRY } from '../data/ukCities.js'
 import { INDIA_CITIES, INDIA_COUNTRY } from '../data/indiaCities.js'
 import { GERMANY_CITIES, GERMANY_COUNTRY } from '../data/germanyCities.js'
 import { ROMANIA_CITIES, ROMANIA_COUNTRY } from '../data/romaniaCities.js'
+import { UKRAINE_CITIES, UKRAINE_COUNTRY } from '../data/ukraineCities.js'
 import { VIETNAM_CITIES, VIETNAM_COUNTRY } from '../data/vietnamCities.js'
 import { THAILAND_CITIES, THAILAND_COUNTRY } from '../data/thailandCities.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
@@ -943,7 +944,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1413,6 +1414,10 @@ const PAGE_META = {
     title: 'Online School & Homeschool Romania | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Romania-resident families across Bucharest (AISB Pipera + BSB Herăstrău + Cambridge School CSB Voluntari + ISB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School alternative), Iași (Amazon Development Center corporate + International School alternative), Brașov (Continental Automotive + Schaeffler + International British School alternative), and Constanța (Port of Constanța + OMV Petrom). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023. 2-12× fee arbitrage. From USD 400/month.',
   },
+  'homeschooling-ukraine': {
+    title: 'Online School & Homeschool Ukraine | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS) for Ukrainian families in-country and diaspora — Kyiv (Grammarly + GitLab + MacPaw + Preply + PSI/KIS/BISU alternative), Lviv (SoftServe HQ + EPAM Ukraine + Intellias + N-iX + Ukrainian Catholic University), Kharkiv (NIX Solutions + GlobalLogic + EPAM tech), Dnipro (Interpipe + Metinvest industrial), Odesa (Luxoft + Port of Odesa maritime), Ivano-Frankivsk (western Ukraine safe haven). Distance learning fully legal under 2020 Law on Complete General Secondary Education. Refugee family discounted rates. From USD 400/month personalized.',
+  },
   assessment: {
     title: 'Book Academic Assessment | Admissions Request — Smartious',
     desc: 'Request an academic assessment for your child. Our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled. Admission is determined on assessment results.',
@@ -1842,6 +1847,7 @@ export default function LandingPage() {
   const [currentIndiaCity, setCurrentIndiaCity] = useState(null)
   const [currentGermanyCity, setCurrentGermanyCity] = useState(null)
   const [currentRomaniaCity, setCurrentRomaniaCity] = useState(null)
+  const [currentUkraineCity, setCurrentUkraineCity] = useState(null)
 
   // ── Pricing request form state ──────────────────────
   const [pricingParentName,   setPricingParentName]   = useState('')
@@ -2327,6 +2333,7 @@ export default function LandingPage() {
     if (id === 'ca-families') return '/online-school/canada'
     if (id === 'homeschooling-kenya') return '/online-school/kenya'
     if (id === 'virtual-school-kenya') return '/virtual-school-kenya'
+    if (id === 'virtual-school-ukraine') return '/virtual-school-ukraine'
     if (id === 'homeschooling-ethiopia') return '/online-school/ethiopia'
     if (id === 'homeschooling-rwanda') return '/online-school/rwanda'
     if (id === 'homeschooling-south-africa') return '/online-school/south-africa'
@@ -2527,6 +2534,12 @@ export default function LandingPage() {
           setPage('romania-city')
           return
         }
+        const ukraineCity = UKRAINE_CITIES.find(c => c.slug === slug)
+        if (ukraineCity) {
+          setCurrentUkraineCity(slug)
+          setPage('ukraine-city')
+          return
+        }
       }
       // Fall back to US state (slug like "texas", "california", "north-carolina")
       if (slug && US_STATES[slug]) {
@@ -2570,6 +2583,10 @@ export default function LandingPage() {
     }
     if (path === '/virtual-school-kenya') {
       setPage('virtual-school-kenya')
+      return
+    }
+    if (path === '/virtual-school-ukraine') {
+      setPage('virtual-school-ukraine')
       return
     }
     if (path.startsWith('/online-school/')) {
@@ -2676,6 +2693,10 @@ export default function LandingPage() {
       }
       if (slug === 'romania') {
         setPage('homeschooling-romania')
+        return
+      }
+      if (slug === 'ukraine') {
+        setPage('homeschooling-ukraine')
         return
       }
       const country = COUNTRIES.find(c => c.slug === slug)
@@ -2853,6 +2874,11 @@ export default function LandingPage() {
   if (page === 'virtual-school-kenya') {
     metaTitle = 'Smartious — Leading Online & Virtual School for IB, IGCSE, Cambridge & Edexcel | Kenya 2026'
     metaDesc  = 'Kenya\'s leading virtual school: live small-group Cambridge IGCSE, A-Level, Edexcel, IB Diploma, American AP, Ontario OSSD, CBC. 2-8x cheaper than CHS Online, King\'s InterHigh, Crimson. Kenya time zones, CBC available, two Nairobi centres. From USD 400/month personalized.'
+  }
+
+  if (page === 'virtual-school-ukraine') {
+    metaTitle = 'Smartious — Online & Virtual School for Ukrainian Families | IB, IGCSE, Cambridge, Edexcel, OSSD 2026'
+    metaDesc  = 'Virtual school for Ukrainian families in-country and diaspora. Cambridge IGCSE, A-Level, Edexcel, IB Diploma, AP, Ontario OSSD via CCIS. Education continuity through displacement. Perfect EET/EAT time zones. Cambridge exams at Warsaw/Berlin/London. Polish + German university pathway with Ukrainian student scholarships. Discounted rates for refugee families. From USD 400/month.'
   }
   if (page === 'curriculum-detail' && currentCurriculum) {
     const c = CURRICULA.find(x => x.slug === currentCurriculum)
@@ -3053,6 +3079,12 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'ukraine-city' && currentUkraineCity) {
+    const c = UKRAINE_CITIES.find(x => x.slug === currentUkraineCity)
+    if (c) {
+      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
+    }
   } else if (page === 'japan-city' && currentJapanCity) {
     const c = JAPAN_CITIES.find(x => x.slug === currentJapanCity)
     if (c) {
@@ -3084,6 +3116,7 @@ export default function LandingPage() {
   if (page === 'ca-families') canonicalOverride = '/online-school/canada'
   if (page === 'homeschooling-kenya') canonicalOverride = '/online-school/kenya'
   if (page === 'virtual-school-kenya') canonicalOverride = '/virtual-school-kenya'
+  if (page === 'virtual-school-ukraine') canonicalOverride = '/virtual-school-ukraine'
   if (page === 'homeschooling-ethiopia') canonicalOverride = '/online-school/ethiopia'
   if (page === 'homeschooling-rwanda') canonicalOverride = '/online-school/rwanda'
   if (page === 'homeschooling-south-africa') canonicalOverride = '/online-school/south-africa'
@@ -3104,6 +3137,7 @@ export default function LandingPage() {
   if (page === 'homeschooling-india') canonicalOverride = '/online-school/india'
   if (page === 'homeschooling-germany') canonicalOverride = '/online-school/germany'
   if (page === 'homeschooling-romania') canonicalOverride = '/online-school/romania'
+  if (page === 'homeschooling-ukraine') canonicalOverride = '/online-school/ukraine'
   if (page === 'tuition-uk') canonicalOverride = '/tuition-uk'
   if (page === 'homeschooling-vietnam') canonicalOverride = '/online-school/vietnam'
   if (page === 'homeschooling-thailand') canonicalOverride = '/online-school/thailand'
@@ -12004,6 +12038,239 @@ export default function LandingPage() {
       )}
 
       {/* ══════════════════════════════════════════
+          VIRTUAL SCHOOL UKRAINE — Dedicated landing page
+          Positioning for Ukrainian families in-country + diaspora
+          Serves refugee families, internally displaced, tech corporate
+          Sensitive war-context handling
+      ══════════════════════════════════════════ */}
+      {page === 'virtual-school-ukraine' && (
+        <>
+          {/* HERO */}
+          <section className="sec" style={{position:'relative',background:`linear-gradient(135deg, ${V.ink} 0%, #0057B8 100%)`,color:'#fff',padding:'80px 0 64px',overflow:'hidden'}}>
+            <div className="wrap" style={{maxWidth:1080,margin:'0 auto',position:'relative',zIndex:2}}>
+              <div className="eyebrow" style={{color:'#FFDD00',marginBottom:12,letterSpacing:'.14em'}}>For Ukrainian families &middot; In-country &amp; diaspora</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:22,letterSpacing:'-.01em',maxWidth:920}}>
+                Smartious &mdash; Online &amp; Virtual School for <em style={{color:'#FFDD00',fontStyle:'italic'}}>Ukrainian Families</em> &mdash; IB, IGCSE, Cambridge, Edexcel
+              </h1>
+              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:820,marginBottom:32}}>
+                Live small-group classes for Ukrainian families in-country (Kyiv, Lviv, Kharkiv, Dnipro, Odesa, Ivano-Frankivsk) and diaspora (Poland, Germany, UK, Czech Republic, Canada, USA). Education continuity through displacement. Cambridge, IB, American, and Ontario OSSD curriculum. Pathway to UK Russell Group, US Ivy League, Canadian U15, German uni-assist, and Polish public universities with Ukrainian student scholarships. Discounted rates for refugee and internally displaced families.
+              </p>
+              <div style={{display:'flex',gap:14,flexWrap:'wrap',marginBottom:24}}>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:'#FFDD00',color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(255,221,0,.35)',transition:'all .18s ease'}}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)' }}>
+                  Book assessment
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <button onClick={() => nav('/consult')}
+                  style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#FFDD00'; e.currentTarget.style.color = '#FFDD00' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
+                  Book Free Consultation
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+              <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
+                Distance learning fully legal &middot; Perfect EET/EAT time zones &middot; Discounted rates for refugee &amp; displaced families &middot; From USD 400/month personalized
+              </div>
+            </div>
+          </section>
+
+          {/* WHO WE SERVE — 4 clear family situations */}
+          <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1080,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:40}}>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Who Smartious serves in Ukraine</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                  Four Ukrainian family situations
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:22}}>
+                {[
+                  {h:'Ukrainian families in-country',p:'Kyiv, Lviv, Kharkiv, Dnipro, Odesa, Ivano-Frankivsk families adding international curriculum (Cambridge, IB, American, OSSD) alongside free state All-Ukrainian Online School. International pathway opens UK/US/Canadian/German/Polish universities.'},
+                  {h:'Ukrainian refugee families abroad',p:'Poland (~1.5M refugees), Germany (~1M), UK (~200K), Czech Republic (~350K), Canada (~250K), USA (~200K) — consistent curriculum through host country moves. Same live classes, same teachers, same cohort regardless of location.'},
+                  {h:'Internally displaced families',p:'Ukrainian families displaced from Kharkiv, Dnipro, Odesa, Mariupol to Lviv, Ivano-Frankivsk, Chernivtsi, Uzhhorod maintain consistent Cambridge/IB curriculum through relocations. Discounted rates available.'},
+                  {h:'Tech corporate rotational families',p:'Grammarly, GitLab Ukraine, MacPaw, Preply, Ajax Systems (Kyiv), SoftServe HQ, EPAM Ukraine, Intellias, N-iX (Lviv), NIX Solutions, GlobalLogic (Kharkiv), Luxoft (Odesa) rotational families supported through international postings.'},
+                ].map(item => (
+                  <div key={item.h} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'24px 22px',boxShadow:'0 2px 10px rgba(8,12,20,.04)'}}>
+                    <div style={{fontSize:15,fontWeight:700,color:V.ink,marginBottom:10}}>{item.h}</div>
+                    <div style={{fontSize:13.5,color:V.sl2,lineHeight:1.65}}>{item.p}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* KEY UNIVERSITY PATHWAYS */}
+          <section className="sec" style={{background:'#fff',paddingTop:64,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1080,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>University pathways for Ukrainian students</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                  Where Cambridge A-Level and IB Diploma take Ukrainian students
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:20}}>
+                {[
+                  {flag:'🇵🇱', h:'Polish public universities', p:'Substantial scholarships for Ukrainian students (partial or full tuition). Warsaw University, Jagiellonian Krakow (1364, Poland\'s oldest), AGH Krakow, Warsaw University of Technology, Wroclaw University. Cambridge A-Level and IB Diploma accepted.'},
+                  {flag:'🇩🇪', h:'German public universities', p:'Free tuition for Ukrainians on temporary protection status via uni-assist. TU Munich, LMU Munich, Heidelberg, Humboldt Berlin, RWTH Aachen, TU Berlin, KIT Karlsruhe. Only administrative semester fees EUR 100-350 apply.'},
+                  {flag:'🇬🇧', h:'UK Russell Group', p:'Oxford, Cambridge, Imperial, LSE, UCL, Warwick, Edinburgh via UCAS (Oct 15 Oxbridge early deadline). Cambridge A-Level Further Mathematics + Physics + Chemistry pathway to Oxbridge STEM particularly valued.'},
+                  {flag:'🇺🇸', h:'US Ivy League + UC system', p:'Common Application with SAT/ACT + AP portfolio. Harvard, Yale, MIT, Stanford, Berkeley, UCLA — competitive pathway with strong scholarship options for Ukrainian students.'},
+                  {flag:'🇨🇦', h:'Canadian U15', p:'Toronto, McGill, UBC, McMaster, Waterloo, Western, Queen\'s via OUAC. Ontario Secondary School Diploma pathway via CCIS partnership particularly relevant.'},
+                  {flag:'🇺🇦', h:'Ukrainian universities', p:'Cambridge A-Level and IB Diploma accepted directly by Ukrainian universities via Bologna process alignment. Taras Shevchenko Kyiv, KPI Kyiv, Ivan Franko Lviv, V.N. Karazin Kharkiv.'},
+                ].map(item => (
+                  <div key={item.h} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 22px'}}>
+                    <div style={{fontSize:32,marginBottom:8}}>{item.flag}</div>
+                    <div style={{fontSize:15,fontWeight:700,color:V.ink,marginBottom:8}}>{item.h}</div>
+                    <div style={{fontSize:13,color:V.sl2,lineHeight:1.6}}>{item.p}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* WHY SMARTIOUS - KEY DIFFERENTIATORS */}
+          <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div style={{maxWidth:1080,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:40}}>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Why Ukrainian families choose Smartious</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                  Built for education continuity through displacement
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:22}}>
+                {[
+                  {n:'01', h:'Consistent curriculum across borders', p:'Family moving Kharkiv → Lviv → Warsaw → Berlin continues same Cambridge/IB curriculum with same teachers and cohort. Cross-country social continuity through repeated relocations.'},
+                  {n:'02', h:'Perfect EET / EAT time zone alignment', p:'Ukraine (EET UTC+2) and Nairobi (EAT UTC+3) same time zone in winter. Smartious 9 AM Kyiv delivery = 9 AM Nairobi teaching. Natural morning school-day timing.'},
+                  {n:'03', h:'Complements free state VOS', p:'Smartious does NOT compete with free All-Ukrainian Online School (Всеукраїнська школа онлайн). Adds international pathway alongside free Ukrainian state curriculum. Many families use both.'},
+                  {n:'04', h:'Distance learning fully legal', p:'Ukrainian Law "On Complete General Secondary Education" (2020) explicitly permits family education (сімейна освіта) and distance learning (дистанційне навчання). Martial law provisions expanded acceptance. No legal barriers.'},
+                  {n:'05', h:'Polish + German scholarship pathway', p:'Cambridge A-Level opens Polish public universities with Ukrainian student scholarships (partial or full tuition) and German public universities (free for Ukrainians on temporary protection status).'},
+                  {n:'06', h:'Cambridge exams at diaspora centres', p:'British Council Warsaw (primary for Polish diaspora), Berlin, London, Prague, Rome, Madrid, Toronto, US centres. Kyiv when conditions permit. Smartious handles all registration.'},
+                  {n:'07', h:'Discounted rates for refugee families', p:'Discounted rates for Ukrainian refugee and internally displaced families handled through consultation on case-by-case basis. Sibling discounts 15-25%.'},
+                  {n:'08', h:'Ukrainian language + English bilingual', p:'Cambridge IGCSE Ukrainian as Foreign Language available. Curriculum in English (Cambridge/IB/American) with Ukrainian identity support. Multi-language families welcome.'},
+                  {n:'09', h:'Tech corporate rotation portability', p:'Grammarly, GitLab Ukraine, MacPaw, Preply, SoftServe, EPAM Ukraine rotational families supported through international postings without curriculum switching.'},
+                  {n:'10', h:'Post-war planning portability', p:'Cambridge, IB, American qualifications internationally portable — valid regardless of how post-war Ukrainian education system evolves. Ukrainian returnee planning families maintain international mobility options.'},
+                ].map(item => (
+                  <div key={item.n} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'24px 22px',boxShadow:'0 2px 10px rgba(8,12,20,.04)'}}>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',color:'#0057B8',marginBottom:8,lineHeight:1,fontWeight:400}}>{item.n}</div>
+                    <div style={{fontSize:15,fontWeight:700,color:V.ink,marginBottom:8}}>{item.h}</div>
+                    <div style={{fontSize:13.5,color:V.sl2,lineHeight:1.6}}>{item.p}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* FAQ */}
+          <section className="sec" style={{background:'#fff',paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div style={{maxWidth:820,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Common questions</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                  What Ukrainian families ask most
+                </h2>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                {[
+                  {q:'Is online school and homeschool legal in Ukraine?', a:'Yes. Ukrainian Law "On Complete General Secondary Education" (2020) explicitly permits family education (сімейна освіта) and distance learning (дистанційне навчання). Martial law provisions since 2022 have further expanded acceptance. No legal barriers.'},
+                  {q:'How does Smartious complement the free All-Ukrainian Online School?', a:'The state VOS provides free Ukrainian curriculum online. Smartious does NOT compete with this — Smartious adds international pathway (Cambridge, IB, American, OSSD) in English opening UK/US/Canadian/German/Polish university destinations. Many families use both.'},
+                  {q:'We are Ukrainian refugee family in Poland — can Cambridge A-Level open Polish university scholarships?', a:'Yes. Polish public universities accept Cambridge A-Level and IB Diploma. Many offer substantial scholarships for Ukrainian students (partial or full tuition covered under current programmes). Highly relevant pathway.'},
+                  {q:'We are Ukrainian refugee family in Germany — how does the uni-assist pathway work?', a:'German public universities are free for Ukrainians on temporary protection status. Cambridge A-Level and IB Diploma are accepted via uni-assist for TU Munich, LMU Munich, Heidelberg, Humboldt Berlin, RWTH Aachen, TU Berlin, KIT Karlsruhe, Freiburg, and others.'},
+                  {q:'Where do Ukrainian students sit Cambridge examinations?', a:'British Council Warsaw (primary for Polish diaspora), Berlin, London, Prague, Rome, Madrid, Toronto, plus US cities. British Council Kyiv when conditions permit. Smartious handles all registration logistics regardless of family location.'},
+                  {q:'Are there discounts for Ukrainian refugee and internally displaced families?', a:'Yes. Discounted rates handled through consultation on case-by-case basis. Request via pricing page or consultation. Sibling discounts 15-25% apply for multiple children.'},
+                  {q:'How does time zone work for Ukrainian families?', a:'Ukraine (EET UTC+2, EEST UTC+3 summer) and Kenya (EAT UTC+3) same time zone in winter, 1 hour apart summer. Smartious 9 AM-12 PM Kyiv delivery = 9 AM-12 PM Nairobi teaching. Perfect timing.'},
+                  {q:'We are Grammarly / GitLab Ukraine / SoftServe / EPAM Ukraine tech family. Does Smartious support us?', a:'Yes. Ukrainian tech corporate rotational cycles supported through international postings without curriculum switching. Cross-country cohort provides social continuity through repeated moves.'},
+                ].map((f, i) => (
+                  <details key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'0',overflow:'hidden'}}>
+                    <summary style={{padding:'18px 22px',cursor:'pointer',fontSize:15,fontWeight:700,color:V.ink,listStyle:'none',display:'flex',alignItems:'center',justifyContent:'space-between',gap:16}}>
+                      <span>{f.q}</span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0057B8" strokeWidth="2.5" strokeLinecap="round" style={{flexShrink:0}}><path d="M6 9l6 6 6-6"/></svg>
+                    </summary>
+                    <div style={{padding:'0 22px 20px 22px',fontSize:14,color:V.sl2,lineHeight:1.7}}>
+                      {f.a}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* LINKED ARTICLES */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:1080,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Further reading</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                  Full guides for Ukrainian families
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:20}}>
+                <a href="/blog/virtual-school-ukraine-2026"
+                  onClick={(e) => { e.preventDefault(); openArticle('virtual-school-ukraine-2026') }}
+                  style={{display:'block',background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 26px',textDecoration:'none',transition:'all .18s ease'}}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#0057B8'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(8,12,20,.08)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                  <div style={{fontSize:12,fontWeight:700,color:'#0057B8',letterSpacing:'.12em',textTransform:'uppercase',marginBottom:12}}>Article &middot; 11 min read</div>
+                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',color:V.ink,lineHeight:1.25,marginBottom:12,fontWeight:400}}>
+                    Virtual School for Ukrainian Families in 2026: A Guide for Displaced Children
+                  </div>
+                  <div style={{fontSize:14,color:V.sl2,lineHeight:1.6,marginBottom:16}}>
+                    Full comparative analysis for Ukrainian families needing international curriculum pathway. VOS, CHS Online, Crimson Global, and Smartious compared. Polish and German university pathways with Ukrainian student scholarships.
+                  </div>
+                  <div style={{fontSize:13,color:'#0057B8',fontWeight:700}}>Read the guide →</div>
+                </a>
+
+                <a href="/blog/online-homeschool-ukraine-2026"
+                  onClick={(e) => { e.preventDefault(); openArticle('online-homeschool-ukraine-2026') }}
+                  style={{display:'block',background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 26px',textDecoration:'none',transition:'all .18s ease'}}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#0057B8'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(8,12,20,.08)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                  <div style={{fontSize:12,fontWeight:700,color:'#0057B8',letterSpacing:'.12em',textTransform:'uppercase',marginBottom:12}}>Article &middot; 10 min read</div>
+                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',color:V.ink,lineHeight:1.25,marginBottom:12,fontWeight:400}}>
+                    Online Homeschool in Ukraine 2026: Legal Framework and Practical Guide
+                  </div>
+                  <div style={{fontSize:14,color:V.sl2,lineHeight:1.6,marginBottom:16}}>
+                    Complete legal framework guide — сімейна освіта (family education), дистанційне навчання (distance learning), and екстернат (external examination). Practical delivery options for Ukrainian families in-country and diaspora.
+                  </div>
+                  <div style={{fontSize:13,color:'#0057B8',fontWeight:700}}>Read the guide →</div>
+                </a>
+              </div>
+            </div>
+          </div></section>
+
+          {/* FINAL CTA */}
+          <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, #0057B8 100%)`,color:'#fff',paddingTop:72,paddingBottom:80}}><div className="wrap">
+            <div style={{maxWidth:820,margin:'0 auto',textAlign:'center'}}>
+              <div className="eyebrow" style={{color:'#FFDD00',marginBottom:12}}>Ready to explore</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:20,letterSpacing:'-.01em'}}>
+                Education continuity for your <em style={{color:'#FFDD00',fontStyle:'italic'}}>Ukrainian family</em>
+              </h2>
+              <p style={{fontSize:16,color:'rgba(255,255,255,.9)',lineHeight:1.6,marginBottom:32,maxWidth:640,margin:'0 auto 32px'}}>
+                Book a free consultation to discuss your family situation — in-country, refugee, internally displaced, or tech corporate rotational. Personalized quotes reflecting your circumstances. Discounted rates available.
+              </p>
+              <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:'#FFDD00',color:V.ink,border:'none',padding:'18px 40px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 10px 28px rgba(255,221,0,.4)',transition:'all .18s ease'}}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)' }}>
+                  Book assessment
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <button onClick={() => nav('/consult')}
+                  style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 36px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#FFDD00'; e.currentTarget.style.color = '#FFDD00' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
+                  Book Free Consultation
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
+
+      {/* ══════════════════════════════════════════
           PROGRAMS
       ══════════════════════════════════════════ */}
 
@@ -13481,6 +13748,13 @@ export default function LandingPage() {
                 SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
                 GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
             )}
+            {page === 'homeschooling-ukraine' && (
+              <CountryHub country={UKRAINE_COUNTRY} cities={UKRAINE_CITIES}
+                setCurrentCity={setCurrentUkraineCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
             {page === 'homeschooling-united-kingdom' && (
               <CountryHub country={UK_COUNTRY} cities={UK_CITIES}
                 setCurrentCity={setCurrentUkCity}
@@ -13628,6 +13902,14 @@ export default function LandingPage() {
           country={ROMANIA_COUNTRY}
           cities={ROMANIA_CITIES}
           currentCitySlug={currentRomaniaCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
+      {page === 'ukraine-city' && currentUkraineCity && (
+        <CountryCityPage
+          country={UKRAINE_COUNTRY}
+          cities={UKRAINE_CITIES}
+          currentCitySlug={currentUkraineCity}
           P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
