@@ -943,7 +943,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -2326,6 +2326,7 @@ export default function LandingPage() {
     if (id === 'us-families') return '/online-school/usa'
     if (id === 'ca-families') return '/online-school/canada'
     if (id === 'homeschooling-kenya') return '/online-school/kenya'
+    if (id === 'virtual-school-kenya') return '/virtual-school-kenya'
     if (id === 'homeschooling-ethiopia') return '/online-school/ethiopia'
     if (id === 'homeschooling-rwanda') return '/online-school/rwanda'
     if (id === 'homeschooling-south-africa') return '/online-school/south-africa'
@@ -2565,6 +2566,10 @@ export default function LandingPage() {
         // Unknown service slug — fall back to the services index
         setPage('services')
       }
+      return
+    }
+    if (path === '/virtual-school-kenya') {
+      setPage('virtual-school-kenya')
       return
     }
     if (path.startsWith('/online-school/')) {
@@ -2844,6 +2849,11 @@ export default function LandingPage() {
   // own seoTitle/seoDesc; other pages use PAGE_META.
   let metaTitle = PAGE_META.home.title
   let metaDesc  = PAGE_META.home.desc
+
+  if (page === 'virtual-school-kenya') {
+    metaTitle = 'Smartious — Leading Online & Virtual School for IB, IGCSE, Cambridge & Edexcel | Kenya 2026'
+    metaDesc  = 'Kenya\'s leading virtual school: live small-group Cambridge IGCSE, A-Level, Edexcel, IB Diploma, American AP, Ontario OSSD, CBC. 2-8x cheaper than CHS Online, King\'s InterHigh, Crimson. Kenya time zones, CBC available, two Nairobi centres. From USD 400/month personalized.'
+  }
   if (page === 'curriculum-detail' && currentCurriculum) {
     const c = CURRICULA.find(x => x.slug === currentCurriculum)
     if (c) {
@@ -3073,6 +3083,7 @@ export default function LandingPage() {
   if (page === 'us-families') canonicalOverride = '/online-school/usa'
   if (page === 'ca-families') canonicalOverride = '/online-school/canada'
   if (page === 'homeschooling-kenya') canonicalOverride = '/online-school/kenya'
+  if (page === 'virtual-school-kenya') canonicalOverride = '/virtual-school-kenya'
   if (page === 'homeschooling-ethiopia') canonicalOverride = '/online-school/ethiopia'
   if (page === 'homeschooling-rwanda') canonicalOverride = '/online-school/rwanda'
   if (page === 'homeschooling-south-africa') canonicalOverride = '/online-school/south-africa'
@@ -11683,6 +11694,217 @@ export default function LandingPage() {
         </>
         )
       })()}
+
+      {/* ══════════════════════════════════════════
+          VIRTUAL SCHOOL KENYA — Dedicated landing page
+          Positioning for "virtual school Kenya" keyword cluster
+          Rigorous competitive analysis vs CHS Online, King's InterHigh,
+          Wolsey Hall, Crimson Global Academy, Braeburn online, ISK online
+      ══════════════════════════════════════════ */}
+      {page === 'virtual-school-kenya' && (
+        <>
+          {/* HERO */}
+          <section className="sec" style={{position:'relative',background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff',padding:'80px 0 64px',overflow:'hidden'}}>
+            <div className="wrap" style={{maxWidth:1080,margin:'0 auto',position:'relative',zIndex:2}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:12,letterSpacing:'.14em'}}>Kenya's leading virtual school &middot; Online school &middot; Since 2019</div>
+              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:22,letterSpacing:'-.01em',maxWidth:920}}>
+                Smartious &mdash; Leading <em style={{color:V.gold3,fontStyle:'italic'}}>Online &amp; Virtual School</em> for <em style={{color:V.gold3,fontStyle:'italic'}}>IB, IGCSE, Cambridge &amp; Edexcel</em>
+              </h1>
+              <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:820,marginBottom:32}}>
+                Kenya-based, Kenya-founded, Kenya-operating. Live small-group classes 4-6 students. Cambridge IGCSE, A-Level, Pearson Edexcel International, IB Diploma, American AP, Ontario OSSD, and Kenya CBC. Two Nairobi centres for in-person supplementation. 2-8&times; cheaper than CHS Online, King's InterHigh, and Crimson Global Academy.
+              </p>
+              <div style={{display:'flex',gap:14,flexWrap:'wrap',marginBottom:24}}>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 36px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
+                  Book assessment
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <button onClick={() => nav('/consult')}
+                  style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 32px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3 }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
+                  Book Free Consultation
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+              <div style={{fontSize:13,color:'rgba(255,255,255,.7)',letterSpacing:'.02em'}}>
+                Est. 2019 &middot; 400+ students in 22 countries &middot; Two Nairobi centres (Diamond Plaza Parklands &amp; Karen Hardy) &middot; From USD 400/month personalized
+              </div>
+            </div>
+          </section>
+
+          {/* THE 10 WAYS SMARTIOUS WINS */}
+          <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:48}}><div className="wrap">
+            <div style={{maxWidth:1080,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:40}}>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Why we beat the competition 10-0</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                  Ten reasons Kenyan families choose Smartious
+                </h2>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:22}}>
+                {[
+                  {n:'01',h:'2-8&times; lower fees',p:'Smartious from USD 400/month vs CHS Online \u00a310,950/year (USD 13,860), Crimson Global Academy USD 15-25K/year, King\'s InterHigh \u00a38-15K/year. Same live small-group Cambridge/IB curriculum.'},
+                  {n:'02',h:'Live small groups of 4-6',p:'Smartious classes 4-6 students. CHS Online up to 10. Crimson variable. Braeburn online 12-15. Physical international schools 15-22. Smaller = more teacher attention, faster feedback, stronger relationships.'},
+                  {n:'03',h:'Kenya-friendly time zones',p:'EAT UTC+3 delivery matches Kenya school-day rhythm. UK-based schools (CHS Online, King\'s InterHigh) mean UK morning = Kenya afternoon, disrupting family routine. Smartious 9 AM-12 PM Nairobi = natural school day.'},
+                  {n:'04',h:'Kenya CBC available',p:'Smartious offers full Kenya CBC (Grade 1-12, KICD-aligned, KCSE-eligible) alongside international curricula. NO UK, US, or NZ virtual school offers CBC. Kenya-domestic by definition.'},
+                  {n:'05',h:'Six curricula, one provider',p:'Cambridge IGCSE + A-Level, Pearson Edexcel International, IB Diploma, American AP, Ontario Secondary School Diploma (via CCIS), plus CBC. Multi-curriculum families (CBC + Cambridge) welcome.'},
+                  {n:'06',h:'Two Nairobi physical centres',p:'Diamond Plaza Parklands (HQ, Est. 2022) and Karen Hardy (Est. 2023). In-person supplementation, examination invigilation, holiday intensives. UK/US/NZ competitors have zero Kenya physical presence.'},
+                  {n:'07',h:'Kenya founder, Kenya operations',p:'Founded 2019 by Alfred Ouko, BEd Mathematics &amp; Physics UoN 2022. Local admissions team, local support. Understanding of Kenya families\' needs, not a distant UK head office.'},
+                  {n:'08',h:'Kenya examination centres handled',p:'Cambridge exam registration at British Council Nairobi, Braeburn Group centres, Peponi, Brookhouse, ISK, plus Mombasa/Kisumu/Nakuru. Edexcel three series per year. IB Diploma via authorised centres. All logistics managed by Smartious.'},
+                  {n:'09',h:'Sibling discounts 15-25%',p:'Families with multiple children get meaningful sibling discounts. Not available at CHS Online, Crimson, King\'s InterHigh — Smartious specifically designs for Kenyan family sizes.'},
+                  {n:'10',h:'Personalized pricing (fair-play)',p:'Every family gets a quote calibrated to grade level, curriculum choice, enrolment period, and specific needs. No one-size-fits-all pricing. Free consultation call included. Response within 24 hours.'},
+                ].map(item => (
+                  <div key={item.n} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'26px 24px',boxShadow:'0 2px 10px rgba(8,12,20,.04)',transition:'all .18s ease'}}>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',color:V.gold3,marginBottom:8,lineHeight:1,fontWeight:400}}>{item.n}</div>
+                    <div style={{fontSize:16,fontWeight:700,color:V.ink,marginBottom:8}} dangerouslySetInnerHTML={{__html:item.h}}/>
+                    <div style={{fontSize:13.5,color:V.sl2,lineHeight:1.6}} dangerouslySetInnerHTML={{__html:item.p}}/>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* COMPETITIVE COMPARISON TABLE */}
+          <section className="sec" style={{background:'#fff',paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div style={{maxWidth:1200,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Head-to-head comparison</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                  Smartious vs the alternatives
+                </h2>
+              </div>
+
+              <div style={{overflowX:'auto',border:`1px solid ${V.bone3}`,borderRadius:12,background:'#fff'}}>
+                <table style={{width:'100%',borderCollapse:'collapse',fontSize:13,minWidth:900}}>
+                  <thead>
+                    <tr style={{background:V.ink,color:'#fff'}}>
+                      <th style={{padding:'14px 12px',textAlign:'left',fontWeight:700,fontSize:12,letterSpacing:'.06em',textTransform:'uppercase'}}>Criterion</th>
+                      <th style={{padding:'14px 12px',textAlign:'center',fontWeight:800,fontSize:12,letterSpacing:'.06em',textTransform:'uppercase',background:V.cr,color:'#fff'}}>Smartious</th>
+                      <th style={{padding:'14px 12px',textAlign:'center',fontWeight:700,fontSize:12,letterSpacing:'.06em',textTransform:'uppercase'}}>CHS Online (UK)</th>
+                      <th style={{padding:'14px 12px',textAlign:'center',fontWeight:700,fontSize:12,letterSpacing:'.06em',textTransform:'uppercase'}}>King's InterHigh (UK)</th>
+                      <th style={{padding:'14px 12px',textAlign:'center',fontWeight:700,fontSize:12,letterSpacing:'.06em',textTransform:'uppercase'}}>Wolsey Hall (UK)</th>
+                      <th style={{padding:'14px 12px',textAlign:'center',fontWeight:700,fontSize:12,letterSpacing:'.06em',textTransform:'uppercase'}}>Crimson Global (NZ)</th>
+                      <th style={{padding:'14px 12px',textAlign:'center',fontWeight:700,fontSize:12,letterSpacing:'.06em',textTransform:'uppercase'}}>Braeburn Online (KE)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      {c:'Annual fees',   sm:'From USD 4,800 (personalized)', chs:'\u00a310,950 (USD 13,860)', kih:'\u00a38,000-15,000', wh:'\u00a34,000-7,000', cga:'USD 15,000-25,000', bra:'KES 800K-1.5M (~USD 6,000-11,000)'},
+                      {c:'Live small-group classes', sm:'\u2713 Yes (4-6)', chs:'\u2713 Yes (up to 10)', kih:'\u2713 Yes', wh:'\u2717 Self-paced only', cga:'\u2713 Yes (variable size)', bra:'\u2713 Yes (12-15)'},
+                      {c:'Kenya time-zone-friendly', sm:'\u2713 EAT UTC+3', chs:'\u2717 UK GMT (Kenya lunch)', kih:'\u2717 UK GMT', wh:'N/A (self-paced)', cga:'\u2717 Mixed global', bra:'\u2713 EAT UTC+3'},
+                      {c:'Kenya CBC available',      sm:'\u2713 Yes', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Yes'},
+                      {c:'Cambridge IGCSE',          sm:'\u2713 Yes', chs:'\u2713 Yes', kih:'\u2713 Yes', wh:'\u2713 Yes', cga:'\u2713 Yes', bra:'\u2713 Yes'},
+                      {c:'IB Diploma',               sm:'\u2713 Yes', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2713 Yes', bra:'\u2717 No'},
+                      {c:'Ontario OSSD',             sm:'\u2713 Yes (via CCIS)', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2717 No'},
+                      {c:'Kenya physical centre',    sm:'\u2713 Two Nairobi centres', chs:'\u2717 No', kih:'\u2717 No', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Multiple KE'},
+                      {c:'Kenya exam registration',  sm:'\u2713 Managed by us', chs:'\u2717 Family handles', kih:'\u2717 Family handles', wh:'\u2717 Family handles', cga:'\u2717 Family handles', bra:'\u2713 On-campus'},
+                      {c:'Sibling discounts',        sm:'\u2713 15-25%', chs:'\u2717 Limited', kih:'\u2717 Varies', wh:'\u2717 No', cga:'\u2717 No', bra:'\u2713 Limited'},
+                    ].map((row, i) => (
+                      <tr key={row.c} style={{background: i%2 === 0 ? '#fff' : V.bone,borderBottom:`1px solid ${V.bone3}`}}>
+                        <td style={{padding:'11px 12px',fontWeight:700,color:V.ink,fontSize:13}}>{row.c}</td>
+                        <td style={{padding:'11px 12px',textAlign:'center',color:V.cr,fontWeight:700,background:'rgba(139,26,46,.04)'}}>{row.sm}</td>
+                        <td style={{padding:'11px 12px',textAlign:'center',color:V.sl2}}>{row.chs}</td>
+                        <td style={{padding:'11px 12px',textAlign:'center',color:V.sl2}}>{row.kih}</td>
+                        <td style={{padding:'11px 12px',textAlign:'center',color:V.sl2}}>{row.wh}</td>
+                        <td style={{padding:'11px 12px',textAlign:'center',color:V.sl2}}>{row.cga}</td>
+                        <td style={{padding:'11px 12px',textAlign:'center',color:V.sl2}}>{row.bra}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{textAlign:'center',marginTop:24,fontSize:12,color:V.sl2,fontStyle:'italic',maxWidth:820,margin:'24px auto 0'}}>
+                Fees indicative and based on publicly available 2026 information from provider websites. Smartious personalized quotes may vary from anchor rates based on curriculum, class size preference, and enrolment period.
+              </div>
+            </div>
+          </div></section>
+
+          {/* SOCIAL PROOF */}
+          <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:920,margin:'0 auto',textAlign:'center'}}>
+              <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Trusted by 400+ families in 22 countries</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginBottom:24,letterSpacing:'-.01em'}}>
+                Real results from real families
+              </h2>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:20,marginTop:32}}>
+                {[
+                  {n:'400+', l:'Active students across 22 countries'},
+                  {n:'96%',  l:'Cambridge IGCSE pass rate (2024/25)'},
+                  {n:'78+',  l:'Qualified subject specialist teachers'},
+                  {n:'7 yr', l:'Teaching since 2019 &middot; Nairobi HQ 2022'},
+                ].map(s => (
+                  <div key={s.n} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'28px 20px'}}>
+                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.4rem',color:V.cr,lineHeight:1,marginBottom:10,fontWeight:400}}>{s.n}</div>
+                    <div style={{fontSize:12.5,color:V.sl2,lineHeight:1.5}} dangerouslySetInnerHTML={{__html:s.l}}/>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div></section>
+
+          {/* LINKED ARTICLE */}
+          <section className="sec" style={{background:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
+            <div style={{maxWidth:820,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:28}}>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Read the full analysis</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3.5vw,2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                  The complete Kenya virtual school guide
+                </h2>
+              </div>
+              <a href="/article/virtual-school-kenya-2026"
+                onClick={(e) => { e.preventDefault(); nav('/article/virtual-school-kenya-2026') }}
+                style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'32px 30px',textDecoration:'none',transition:'all .18s ease'}}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(8,12,20,.08)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                <div style={{fontSize:12,fontWeight:700,color:V.cr,letterSpacing:'.12em',textTransform:'uppercase',marginBottom:12}}>Article &middot; 10 min read</div>
+                <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color:V.ink,lineHeight:1.25,marginBottom:12,fontWeight:400}}>
+                  Virtual School in Kenya 2026: Smartious vs Every Other Option
+                </div>
+                <div style={{fontSize:14,color:V.sl2,lineHeight:1.6,marginBottom:18}}>
+                  A full comparative analysis of Smartious against Cambridge Home School Online, King's InterHigh, Wolsey Hall, Crimson Global Academy, and Kenya physical international schools offering virtual options. Fees, class sizes, curricula, time zones, exam centres.
+                </div>
+                <div style={{fontSize:13,color:V.gold3,fontWeight:700,display:'inline-flex',alignItems:'center',gap:8}}>
+                  Read the analysis
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+              </a>
+            </div>
+          </div></section>
+
+          {/* FINAL CTA */}
+          <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff',paddingTop:72,paddingBottom:80}}><div className="wrap">
+            <div style={{maxWidth:820,margin:'0 auto',textAlign:'center'}}>
+              <div className="eyebrow" style={{color:V.gold3,marginBottom:12}}>Ready to switch?</div>
+              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:20,letterSpacing:'-.01em'}}>
+                Join the Kenyan families choosing <em style={{color:V.gold3,fontStyle:'italic'}}>Smartious</em>
+              </h2>
+              <p style={{fontSize:16,color:'rgba(255,255,255,.9)',lineHeight:1.6,marginBottom:32,maxWidth:640,margin:'0 auto 32px'}}>
+                Book an assessment to get started, or book a free consultation call to discuss your family's specific needs. Response within 24 hours.
+              </p>
+              <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
+                <button onClick={() => nav('/assessment')}
+                  style={{background:V.gold3,color:V.ink,border:'none',padding:'18px 40px',borderRadius:10,fontSize:16,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,boxShadow:'0 10px 28px rgba(201,151,58,.4)',transition:'all .18s ease'}}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 14px 36px rgba(201,151,58,.55)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 10px 28px rgba(201,151,58,.4)' }}>
+                  Book assessment
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <button onClick={() => nav('/consult')}
+                  style={{background:'transparent',color:'#fff',border:'2px solid rgba(255,255,255,.55)',padding:'16px 36px',borderRadius:10,fontSize:16,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:10,transition:'all .18s ease'}}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.color = V.gold3 }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.55)'; e.currentTarget.style.color = '#fff' }}>
+                  Book Free Consultation
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+            </div>
+          </div></section>
+        </>
+      )}
 
       {/* ══════════════════════════════════════════
           PROGRAMS
