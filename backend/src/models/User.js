@@ -48,6 +48,11 @@ const userSchema = new mongoose.Schema({
   subjectRefs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Subject' }],
   // ── Password reset ───────────────────────────────────────
   avatar: { type: String, default: '' },   // profile photo URL (R2 or base64)
+  // 2FA — email OTP for password change verification
+  otpCode:      { type: String,  default: undefined },
+  otpExpires:   { type: Date,    default: undefined },
+  otpVerified:  { type: Boolean, default: false },
+
   passwordResetToken:   { type: String, default: undefined },
   passwordResetExpires: { type: Date,   default: undefined },
 
@@ -152,7 +157,7 @@ const userSchema = new mongoose.Schema({
   verificationToken: { type: String },
   verificationTokenExpiry: { type: Date },
   isEmailVerified: { type: Boolean, default: false },
-  mustChangePassword: { type: Boolean, default: true }, // PHASE 3-5: RENAMED from forcePasswordChange for clarity
+  mustChangePassword: { type: Boolean, default: false }, // Only true for student/parent accounts created by admin
   credentialsSentCount: { type: Number, default: 0 },
   lastCredentialsSentAt: { type: Date },
 }, { timestamps: true });
