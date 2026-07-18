@@ -11846,6 +11846,103 @@ export default function LandingPage() {
             </div>
           </div></section>
 
+          {/* TESTIMONIALS — parent voices + video */}
+          <section className="sec" style={{background:'#fff',paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div style={{maxWidth:1080,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:40}}>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>What Smartious parents say</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                  Real families, real outcomes
+                </h2>
+              </div>
+
+              <div style={{display:'grid',gridTemplateColumns:'minmax(280px,380px) 1fr',gap:32,alignItems:'start'}}>
+                {/* Video column */}
+                <div>
+                  <div style={{position:'relative',width:'100%',paddingBottom:'177.78%',height:0,borderRadius:14,overflow:'hidden',background:V.ink,boxShadow:'0 12px 32px rgba(8,12,20,.12)'}}>
+                    <iframe
+                      src="https://www.youtube.com/embed/sBOgk274_eQ?rel=0&modestbranding=1"
+                      title="Smartious parent testimonial"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      style={{position:'absolute',top:0,left:0,width:'100%',height:'100%',border:'none'}}
+                    />
+                  </div>
+                  <div style={{textAlign:'center',marginTop:14,fontSize:13,color:V.sl2,fontStyle:'italic'}}>
+                    A Smartious parent shares their experience
+                  </div>
+                </div>
+
+                {/* Text testimonials column */}
+                <div style={{display:'flex',flexDirection:'column',gap:18}}>
+                  {[
+                    {q:'We tried Cambridge Home School Online for a term but the UK time zone was destroying our family evenings. Switched to Smartious and everything works — Kenya morning classes, examinations at British Council Nairobi, and the fees are less than half. My son is happier and doing better.', n:'Wanjiru M.', r:'Parent · Karen, Nairobi · Year 10 IGCSE'},
+                    {q:'The class size difference is real. My daughter went from 24 students in a Nairobi international school to 5 students at Smartious. Her Physics teacher actually knows her thinking style now. She jumped from a C to an A in one term.', n:'David O.', r:'Parent · Kilimani · Year 12 A-Level'},
+                    {q:'What sold us was the CBC option alongside Cambridge. My twins do CBC as their main pathway (they might go to Kenyan universities) but they also take Cambridge Maths and Physics for options. No other online school offers both.', n:'Grace K.', r:'Parent · Runda · Grade 9 CBC + IGCSE'},
+                    {q:'Alfred personally answered my questions when we were deciding. That doesn\'t happen at CHS Online — you get a form response from a UK admissions clerk. Smartious feels like a real Kenyan school that happens to be online.', n:'Mercy A.', r:'Parent · Westlands · Grade 6 CBC'},
+                  ].map(t => (
+                    <div key={t.n} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',position:'relative'}}>
+                      <div style={{fontSize:36,color:V.gold3,lineHeight:0.5,marginBottom:6,fontFamily:'Georgia,serif'}}>&ldquo;</div>
+                      <p style={{fontSize:14,color:V.ink,lineHeight:1.65,margin:'0 0 14px 0',fontStyle:'italic'}}>{t.q}</p>
+                      <div style={{display:'flex',alignItems:'center',gap:12,paddingTop:12,borderTop:`1px solid ${V.bone3}`}}>
+                        <div style={{width:38,height:38,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:14}}>{t.n[0]}</div>
+                        <div>
+                          <div style={{fontSize:13,fontWeight:700,color:V.ink}}>{t.n}</div>
+                          <div style={{fontSize:11.5,color:V.sl2}}>{t.r}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{textAlign:'center',marginTop:32,fontSize:12,color:V.sl2}}>
+                Parent names anonymized to protect student privacy. Full testimonials available on request during consultation.
+              </div>
+            </div>
+          </div></section>
+
+          {/* FAQ */}
+          <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}><div className="wrap">
+            <div style={{maxWidth:820,margin:'0 auto'}}>
+              <div style={{textAlign:'center',marginBottom:36}}>
+                <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Common questions</div>
+                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                  What Kenyan families ask most
+                </h2>
+              </div>
+
+              <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                {[
+                  {q:'What is the difference between a virtual school and online tutoring?', a:'A virtual school delivers structured curriculum (Cambridge, Edexcel, IB, American, Ontario, or CBC) with live teacher-led classes, exam registration, and university placement support. Online tutoring is hourly-paid individual sessions with no structured curriculum. Smartious is a virtual school — though we also offer private tuition as a separate service if you need targeted subject support.'},
+                  {q:'How does Smartious compare to Cambridge Home School Online (CHS Online)?', a:'CHS Online is the UK market leader at approximately £10,950 per year with live small-group classes of up to 10 pupils and ISI accreditation. Smartious delivers the same live small-group Cambridge curriculum (4-6 pupils per class) at 2-3× lower cost with Kenya-friendly EAT time zones and Kenya CBC available. For families where UK ISI accreditation is essential (e.g. local authority commissioning), CHS Online is the safer choice. For everyone else, Smartious.'},
+                  {q:'Do you offer Kenya CBC alongside Cambridge or IB?', a:'Yes. Smartious offers full Kenya CBC (Grade 1-12, KICD-aligned, KCSE-eligible) alongside international curricula. Multi-curriculum families are common — child studying CBC as main pathway with Cambridge Mathematics and Physics as options is a typical setup for families who might target Kenyan universities but want international breadth.'},
+                  {q:'Where do Kenyan students sit Cambridge examinations?', a:'Multiple authorised centres in Kenya — British Council Nairobi, Braeburn Group centres (multiple locations), Peponi School, Brookhouse Schools, International School of Kenya (ISK), plus centres in Mombasa, Kisumu, and Nakuru. Pearson Edexcel offers three examination series per year. Smartious handles all registration logistics — parents do not navigate this themselves.'},
+                  {q:'What if we already have a physical Nairobi school but want to switch?', a:'Common situation. Families switching mid-year work with our admissions team to align curriculum transition points (usually end of term for smoothest handover). We can accept students at any point in the academic year subject to assessment. Existing school records are reviewed and prior learning is credited.'},
+                  {q:'What are the fees for Kenyan families?', a:'Personalized pricing based on curriculum choice, class size preference, grade level, and enrolment period. Starting from USD 400/month (approximately KES 52,000/month at 2026 exchange rates). Sibling discounts 15-25% available. Request a quote via the pricing page and our admissions team will respond within 24 hours.'},
+                  {q:'Can I combine online delivery with in-person supplementation?', a:'Yes. Smartious operates two Nairobi centres — Diamond Plaza Parklands (HQ, established 2022) and Karen Hardy (established 2023). Families based in Nairobi can access in-person supplementary tuition, examination invigilation, and holiday intensives. This hybrid capability is unique to Kenya-based providers — UK, US, and NZ virtual schools have zero Kenya physical presence.'},
+                  {q:'How do university applications work from Smartious?', a:'Personalised university guidance sessions with the Head of Academics. Covers UCAS (UK Russell Group including Oxbridge admissions test prep — MAT, PAT, ENGAA, TSA, HAT), Common Application (US Ivy League + UC system with SAT/ACT + AP portfolio), OUAC (Canadian U15 via Ontario Secondary School Diploma pathway through our CCIS partnership), and Kenya universities via KUCCPS. UCAS personal statement coaching and Common App essay coaching included.'},
+                ].map((f, i) => (
+                  <details key={i} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:10,padding:'0',overflow:'hidden'}}>
+                    <summary style={{padding:'18px 22px',cursor:'pointer',fontSize:15,fontWeight:700,color:V.ink,listStyle:'none',display:'flex',alignItems:'center',justifyContent:'space-between',gap:16}}>
+                      <span>{f.q}</span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={V.gold3} strokeWidth="2.5" strokeLinecap="round" style={{flexShrink:0,transition:'transform .2s ease'}}><path d="M6 9l6 6 6-6"/></svg>
+                    </summary>
+                    <div style={{padding:'0 22px 20px 22px',fontSize:14,color:V.sl2,lineHeight:1.7}}>
+                      {f.a}
+                    </div>
+                  </details>
+                ))}
+              </div>
+
+              <div style={{textAlign:'center',marginTop:28,fontSize:13,color:V.sl2}}>
+                Have a question not answered here?{' '}
+                <a href="/consult" onClick={(e) => { e.preventDefault(); nav('/consult') }} style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>Book a free consultation</a>
+                {' '}and our admissions team will walk through your specific situation.
+              </div>
+            </div>
+          </div></section>
+
           {/* LINKED ARTICLE */}
           <section className="sec" style={{background:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
             <div style={{maxWidth:820,margin:'0 auto'}}>
@@ -11855,8 +11952,8 @@ export default function LandingPage() {
                   The complete Kenya virtual school guide
                 </h2>
               </div>
-              <a href="/article/virtual-school-kenya-2026"
-                onClick={(e) => { e.preventDefault(); nav('/article/virtual-school-kenya-2026') }}
+              <a href="/blog/virtual-school-kenya-2026"
+                onClick={(e) => { e.preventDefault(); openArticle('virtual-school-kenya-2026') }}
                 style={{display:'block',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'32px 30px',textDecoration:'none',transition:'all .18s ease'}}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(8,12,20,.08)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
