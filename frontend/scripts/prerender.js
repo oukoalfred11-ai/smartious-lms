@@ -83,6 +83,7 @@ const ROUTES_TO_PRERENDER = [
 
   /* v2-depth country hubs (full <CountryHub> rendering) */
   '/online-school/kenya',
+  '/virtual-school-kenya',
   '/online-school/ethiopia',
   '/online-school/rwanda',
   '/online-school/south-africa',
