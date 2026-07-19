@@ -13055,230 +13055,365 @@ function StudentAttendancePage({ user, toast }) {
 // (students must use the Communication module to reach teachers).
 // ═══════════════════════════════════════════════════════════
 function RealTimetableTab({ user, setPage, toast }) {
-  const [entries, setEntries]           = useState([])
-  const [loading, setLoading]           = useState(true)
-  const [error, setError]               = useState(null)
-  const [tick, setTick]                 = useState(0)
-  const [selectedEntry, setSelectedEntry] = useState(null)
+  const [entries,  setEntries]  = useState([])
+  const [loading,  setLoading]  = useState(true)
+  const [error,    setError]    = useState(null)
+  const [view,     setView]     = useState('grid')
+  const [tick,     setTick]     = useState(0)
+  const [teacherModal, setTeacherModal] = useState(null)
 
-  useEffect(() => { const id = setInterval(() => setTick(t => t+1), 30_000); return () => clearInterval(id) }, [])
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 30000)
+    return () => clearInterval(id)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
     setLoading(true); setError(null)
     api.get('/timetable/me')
       .then(res => { if (!cancelled) setEntries(res.data?.data?.entries || []) })
-      .catch(e  => { if (!cancelled) setError(e?.response?.data?.message || e.message) })
-      .finally(()=> { if (!cancelled) setLoading(false) })
+      .catch(e => { if (!cancelled) { setError(e?.response?.data?.message || 'Failed to load.'); setEntries([]) } })
+      .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [user?._id])
 
-  const DAYS     = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
-  const DAYS_LONG = { Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday' }
-  const toMins = h => { if (!h) return 0; const [hh,mm]=h.split(':').map(Number); return hh*60+mm }
-  const fmt    = h => { if (!h) return ''; const [hh,mm]=h.split(':').map(Number); const m=hh>=12?'PM':'AM'; let hr=hh%12; if(!hr)hr=12; return `${hr}${mm===0?'':':'+String(mm).padStart(2,'0')} ${m}` }
+  // ── Helpers ──
+  const DAYS      = ['Mon','Tue','Wed','Thu','Fri']
+  const DAYS_LONG = { Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday' }
+  const DAY_TYPE  = { Mon:'Lessons', Tue:'Lessons', Wed:'Lessons', Thu:'Lessons', Fri:'Assessment & Activities' }
+  const FRI_COLOR = '#6D28D9'
 
-  const now      = new Date()
-  const todayIdx = (now.getDay()+6)%7
-  const nowMins  = now.getHours()*60+now.getMinutes()
-  const isLive = e => DAYS.indexOf(e.dayOfWeek)===todayIdx && nowMins>=toMins(e.startTime) && nowMins<toMins(e.endTime)
-  const isPast = e => DAYS.indexOf(e.dayOfWeek)===todayIdx && nowMins>=toMins(e.endTime)
-
-  const PALETTES = [
-    ['#7D1025','#FDE7EC'],['#1E3A8A','#DBEAFE'],['#166534','#DCFCE7'],
-    ['#7C2D12','#FEF3C7'],['#6B21A8','#F3E8FF'],['#0F766E','#CCFBF1'],
-    ['#92400E','#FEF9C3'],['#1F2937','#F3F4F6'],['#9F1239','#FFE4E6'],
-    ['#0369A1','#E0F2FE'],['#7E22CE','#EDE9FE'],
+  // School slots 09:00–15:00, lunch 13:00–14:00
+  const SLOTS = [
+    { label:'9 AM',  start:'09:00', end:'10:00' },
+    { label:'10 AM', start:'10:00', end:'11:00' },
+    { label:'11 AM', start:'11:00', end:'12:00' },
+    { label:'12 PM', start:'12:00', end:'13:00' },
+    { label:'Lunch', start:'13:00', end:'14:00', isBreak:true },
+    { label:'2 PM',  start:'14:00', end:'15:00' },
   ]
-  const paletteMap = {}
-  ;[...new Set(entries.map(e => e.subject))].forEach((s,i) => { paletteMap[s] = PALETTES[i%PALETTES.length] })
-  const pal = s => paletteMap[s] || PALETTES[0]
 
-  const HOUR_START = 6; const HOUR_END = 22; const TOTAL_MINS = (HOUR_END-HOUR_START)*60
-  const GRID_H = 820; const COL_W = 124; const TIME_COL_W = 52
-  const minToY = m => ((m - HOUR_START*60) / TOTAL_MINS) * GRID_H
-  const entryH = e => Math.max(28, minToY(toMins(e.endTime)) - minToY(toMins(e.startTime)))
+  const toMins = hhmm => { if (!hhmm) return 0; const [h,m]=hhmm.split(':').map(Number); return h*60+m }
+  const fmt    = hhmm => { if (!hhmm) return ''; const [h,m]=hhmm.split(':').map(Number); const mer=h>=12?'PM':'AM'; let hr=h%12; if(hr===0)hr=12; return `${hr}${m===0?'':':'+String(m).padStart(2,'0')} ${mer}` }
+  const now    = new Date()
+  const todayDayIdx = (now.getDay()+6)%7   // Mon=0
+  const todayDay    = DAYS[todayDayIdx] || null
+  const nowMins     = now.getHours()*60+now.getMinutes()
+  const isLive  = e => e.dayOfWeek===todayDay && nowMins>=toMins(e.startTime) && nowMins<toMins(e.endTime)
+  const isPast  = e => e.dayOfWeek===todayDay && nowMins>=toMins(e.endTime)
 
-  const byDay = {}; DAYS.forEach(d => { byDay[d]=[] })
+  // Colour per subject
+  const SUBJ_COLS = {
+    'Mathematics':'#8B1A2E','Maths':'#8B1A2E','Physics':'#1E3A8A','Chemistry':'#166534',
+    'Biology':'#7C2D12','English':'#6B21A8','English Language':'#6B21A8','Literature':'#A21CAF',
+    'History':'#92400E','Geography':'#0F766E','Computer Science':'#1F2937',
+    'Business Studies':'#7E22CE','Economics':'#9F1239','French':'#1D4ED8','Kiswahili':'#065F46',
+  }
+  const colFor = s => SUBJ_COLS[s] || '#8B1A2E'
+
+  // Group by day
+  const byDay = {}
+  DAYS.forEach(d => { byDay[d] = [] })
   entries.forEach(e => { if (byDay[e.dayOfWeek]) byDay[e.dayOfWeek].push(e) })
-  const todayEntries = [...(byDay[DAYS[todayIdx]]||[])].sort((a,b)=>toMins(a.startTime)-toMins(b.startTime))
-  const uniqueSubjects = [...new Set(entries.map(e=>e.subject))]
+  DAYS.forEach(d => byDay[d].sort((a,b) => toMins(a.startTime)-toMins(b.startTime)))
 
-  if (loading) return (
-    <div style={{padding:'60px 0',textAlign:'center'}}>
-      <div style={{width:40,height:40,border:'3px solid #F0EBE6',borderTopColor:'#7D1025',borderRadius:'50%',animation:'sppn .75s linear infinite',margin:'0 auto 14px'}}/>
-      <div style={{fontSize:13,color:'#9A9A9A'}}>Loading your timetable...</div>
-      <style>{'@keyframes sppn{to{transform:rotate(360deg)}}'}</style>
-    </div>
+  // Find entries that fit a grid slot
+  const entryForSlot = (day, slot) => byDay[day].filter(e =>
+    toMins(e.startTime) >= toMins(slot.start) && toMins(e.startTime) < toMins(slot.end)
   )
-  if (error) return <div style={{background:'#FDE7EC',border:'1px solid #F8B4C0',borderRadius:8,padding:'14px 18px',fontSize:13,color:'#7D1025'}}>Could not load timetable: {error}</div>
 
-  return (
-    <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"}}>
-      <div style={{marginBottom:20}}>
-        <div className="sec-tag">Weekly schedule</div>
-        <h2 className="serif" style={{fontSize:26,color:'var(--s900)',margin:'6px 0 4px'}}>My Timetable</h2>
-        <div style={{fontSize:13,color:'#6B6B6B'}}>Your recurring weekly classes — click any class for details.</div>
-      </div>
-
-      {entries.length === 0 ? (
-        <div style={{padding:36,background:'#FBFAF5',border:'1px solid #E8E2D6',borderRadius:12,textAlign:'center'}}>
-          <div style={{fontSize:32,marginBottom:12}}>📅</div>
-          <div style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#1A0F0E',marginBottom:6}}>No timetable yet</div>
-          <div style={{fontSize:13,color:'#857973',lineHeight:1.6,maxWidth:400,margin:'0 auto'}}>Your classes will appear here once your teacher sets up your weekly schedule.</div>
-        </div>
-      ) : (
-        <>
-          {/* Today strip */}
-          <div style={{background:'linear-gradient(135deg,#7D1025,#5A0B1B)',borderRadius:12,padding:'14px 18px',marginBottom:14,color:'#fff'}}>
-            <div style={{fontSize:10,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:'rgba(255,255,255,.55)',marginBottom:8}}>
-              {DAYS_LONG[DAYS[todayIdx]]} · Today
-            </div>
-            {todayEntries.length===0
-              ? <div style={{fontSize:13,color:'rgba(255,255,255,.5)'}}>No classes scheduled today</div>
-              : <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-                  {todayEntries.map(e => {
-                    const live=isLive(e); const past=isPast(e); const [fg]=pal(e.subject)
-                    return (
-                      <div key={e._id} onClick={()=>setSelectedEntry(e)} style={{
-                        background:live?'#fff':'rgba(255,255,255,.1)',
-                        border:'1px solid '+(live?'transparent':'rgba(255,255,255,.18)'),
-                        borderRadius:8,padding:'8px 14px',cursor:'pointer',opacity:past?.5:1,transition:'transform .12s',
-                      }} onMouseEnter={el=>el.currentTarget.style.transform='scale(1.04)'}
-                         onMouseLeave={el=>el.currentTarget.style.transform='scale(1)'}>
-                        {live && <div style={{fontSize:9,fontWeight:800,color:'#7D1025',marginBottom:3,display:'flex',alignItems:'center',gap:4}}>
-                          <span style={{width:6,height:6,borderRadius:'50%',background:'#DC2626',display:'inline-block'}}/>LIVE NOW
-                        </div>}
-                        <div style={{fontSize:12.5,fontWeight:700,color:live?fg:'#fff'}}>{e.subject}</div>
-                        <div style={{fontSize:11,color:live?'#9A2434':'rgba(255,255,255,.65)',marginTop:2}}>{fmt(e.startTime)} – {fmt(e.endTime)}</div>
-                      </div>
-                    )
-                  })}
-                </div>
-            }
+  // ── Premium student header (matches attached image) ──
+  const StudentHeader = () => {
+    const isFT  = /full.?time|centre|in.?person/i.test(user?.programme||user?.deliveryMode||'')
+    const prog  = user?.programme || (isFT ? 'Full-Time Student' : 'Tuition Student')
+    return (
+      <div style={{
+        background: 'linear-gradient(135deg, #7D1025 0%, #5A0B1B 60%, #3D0712 100%)',
+        borderRadius: 16, overflow: 'hidden', marginBottom: 24,
+        boxShadow: '0 8px 32px rgba(125,16,37,.25)',
+      }}>
+        <div style={{ display:'flex', alignItems:'stretch', gap:0 }}>
+          {/* Photo section */}
+          <div style={{ width:160, flexShrink:0, position:'relative', overflow:'hidden' }}>
+            {user?.avatar ? (
+              <img src={user.avatar} alt={user.firstName}
+                style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', minHeight:160 }}/>
+            ) : (
+              <div style={{ width:'100%', minHeight:160, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.4)" strokeWidth="1.5">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+            )}
+            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, transparent 70%, #7D1025)' }}/>
           </div>
 
-          {/* Time-grid */}
-          <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden',boxShadow:'0 2px 12px rgba(0,0,0,.05)'}}>
-            {/* Day headers */}
-            <div style={{display:'grid',gridTemplateColumns:TIME_COL_W+'px repeat(7,'+COL_W+'px)',borderBottom:'1.5px solid #E8E2D6',background:'#FBFAF5',position:'sticky',top:0,zIndex:10}}>
-              <div style={{padding:'10px 0'}}/>
-              {DAYS.map((d,i) => {
-                const isToday=i===todayIdx
-                return (
-                  <div key={d} style={{padding:'10px 8px',textAlign:'center',borderLeft:'1px solid #F0EBE6',background:isToday?'#7D1025':'transparent',color:isToday?'#fff':'#564844'}}>
-                    <div style={{fontSize:10,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase'}}>{d}</div>
-                    {isToday && <div style={{fontSize:8,marginTop:2,fontWeight:600,color:'rgba(255,255,255,.7)'}}>TODAY</div>}
-                  </div>
-                )
-              })}
+          {/* Student info */}
+          <div style={{ flex:1, padding:'22px 24px', display:'flex', flexDirection:'column', justifyContent:'center' }}>
+            <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.18em', textTransform:'uppercase', color:'#C9A030', marginBottom:8 }}>
+              Weekly Timetable
             </div>
+            <h2 style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:28, fontWeight:400, color:'#fff', margin:'0 0 6px', letterSpacing:'-.3px' }}>
+              {user?.firstName} {user?.lastName}
+            </h2>
+            <div style={{ display:'flex', gap:16, flexWrap:'wrap', marginBottom:10 }}>
+              <span style={{ fontSize:12, fontWeight:700, color:'rgba(255,255,255,.7)', textTransform:'uppercase', letterSpacing:'.08em' }}>
+                {user?.curriculum || 'Cambridge IGCSE'}
+              </span>
+              {user?.gradeLevel && (
+                <span style={{ fontSize:12, fontWeight:600, color:'rgba(255,255,255,.5)' }}>
+                  {user.gradeLevel}
+                </span>
+              )}
+              <span style={{ fontSize:12, fontWeight:600, color:'rgba(255,255,255,.5)', textTransform:'uppercase', letterSpacing:'.08em' }}>
+                {prog}
+              </span>
+            </div>
+            {/* Legend */}
+            <div style={{ display:'flex', gap:14, flexWrap:'wrap', marginTop:4 }}>
+              {[
+                { label:'Lesson', color:'#8B1A2E' },
+                { label:'Assessment/Activities (Fri)', color:FRI_COLOR },
+                { label:'Live now', color:'#C9A030' },
+              ].map(l=>(
+                <div key={l.label} style={{ display:'flex', alignItems:'center', gap:5, fontSize:11, color:'rgba(255,255,255,.6)' }}>
+                  <div style={{ width:10, height:10, borderRadius:2, background:l.color, flexShrink:0 }}/>
+                  {l.label}
+                </div>
+              ))}
+            </div>
+          </div>
 
-            {/* Grid body */}
-            <div style={{overflowX:'auto',overflowY:'auto',maxHeight:500}}>
-              <div style={{position:'relative',width:TIME_COL_W+COL_W*7,height:GRID_H}}>
+          {/* Today highlight box */}
+          <div style={{ width:130, flexShrink:0, background:'rgba(0,0,0,.2)', padding:'20px 16px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', textAlign:'center', borderLeft:'1px solid rgba(255,255,255,.1)' }}>
+            <div style={{ fontSize:9.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'rgba(255,255,255,.5)', marginBottom:6 }}>Today</div>
+            <div style={{ fontSize:20, fontWeight:800, color:todayDay?'#C9A030':'rgba(255,255,255,.3)' }}>
+              {todayDay ? DAYS_LONG[todayDay] : 'Weekend'}
+            </div>
+            {todayDay && (
+              <div style={{ fontSize:10.5, color:'rgba(255,255,255,.5)', marginTop:4 }}>
+                {DAY_TYPE[todayDay]}
+              </div>
+            )}
+            <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', marginTop:8 }}>
+              {byDay[todayDay||'']?.length||0} class{byDay[todayDay||'']?.length===1?'':'es'} today
+            </div>
+            <div style={{ marginTop:10, fontSize:11, fontWeight:600, color:'rgba(255,255,255,.55)' }}>
+              {fmt(now.getHours()+':'+String(now.getMinutes()).padStart(2,'0'))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
-                {/* Hour lines */}
-                {Array.from({length:HOUR_END-HOUR_START+1},(_,i) => {
-                  const h=HOUR_START+i; const y=(i/(HOUR_END-HOUR_START))*GRID_H; const is12=h===12
-                  return (
-                    <div key={h} style={{position:'absolute',top:y,left:0,right:0,display:'flex',alignItems:'flex-start'}}>
-                      <div style={{width:TIME_COL_W,paddingRight:8,textAlign:'right',fontSize:9.5,color:is12?'#7D1025':'#BBBBBB',fontWeight:is12?700:400,transform:'translateY(-50%)',flexShrink:0}}>
-                        {h===12?'12 PM':h>12?(h-12)+' PM':h+' AM'}
+  if (loading) return (
+    <div>
+      <StudentHeader/>
+      <div style={{ padding:'40px 0', textAlign:'center', color:'#9A9A9A', fontSize:13 }}>Loading timetable...</div>
+    </div>
+  )
+  if (error) return (
+    <div>
+      <StudentHeader/>
+      <div style={{ background:'#FDE7EC', border:'1px solid #F8B4C0', borderRadius:8, padding:'14px 18px', fontSize:13, color:'#7D1025' }}>
+        Could not load timetable: {error}
+      </div>
+    </div>
+  )
+
+  return (
+    <div>
+      <StudentHeader/>
+
+      {/* View switcher */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+        <div style={{ fontSize:12.5, color:'#857973' }}>
+          School hours: <strong style={{ color:'#1A0F0E' }}>9 AM – 3 PM</strong> &nbsp;·&nbsp; Lunch: <strong style={{ color:'#1A0F0E' }}>1 – 2 PM</strong> &nbsp;·&nbsp; Fri: <strong style={{ color:FRI_COLOR }}>Assessment / Activities</strong>
+        </div>
+        <div style={{ display:'flex', gap:6 }}>
+          {[['grid','Grid'],['list','List']].map(([k,l])=>(
+            <button key={k} onClick={()=>setView(k)} style={{
+              background:view===k?'#7D1025':'transparent', color:view===k?'#fff':'#564844',
+              border:'1.5px solid '+(view===k?'#7D1025':'#E8E2D6'),
+              padding:'6px 14px', borderRadius:6, fontSize:12.5, fontWeight:700, cursor:'pointer',
+            }}>{l}</button>
+          ))}
+        </div>
+      </div>
+
+      {entries.length===0 ? (
+        <div style={{ padding:28, background:'#FBFAF5', border:'1px solid #E8E2D6', borderRadius:10, textAlign:'center' }}>
+          <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:20, color:'#1A0F0E', marginBottom:6 }}>No timetable entries yet</div>
+          <div style={{ fontSize:13, color:'#857973', lineHeight:1.6, maxWidth:460, margin:'0 auto' }}>
+            Your teachers haven't added you to any class slots yet. Once they do, your weekly schedule will appear here.
+          </div>
+        </div>
+      ) : view==='grid' ? (
+        /* ── PREMIUM GRID VIEW ── */
+        <div style={{ background:'#fff', border:'1px solid #E8E2D6', borderRadius:12, overflow:'hidden', boxShadow:'0 2px 12px rgba(0,0,0,.06)' }}>
+          <table style={{ width:'100%', borderCollapse:'collapse' }}>
+            <thead>
+              <tr>
+                <th style={{ width:60, padding:'10px 12px', background:'#1A0F0E', fontSize:10.5, fontWeight:700, color:'rgba(255,255,255,.5)', textAlign:'center', borderRight:'1px solid rgba(255,255,255,.1)' }}>Time</th>
+                {DAYS.map(d=>(
+                  <th key={d} style={{
+                    padding:'10px 12px',
+                    background: d==='Fri' ? '#3D0A4A' : '#1A0F0E',
+                    fontSize:11, fontWeight:800, color:d===todayDay?'#C9A030':'rgba(255,255,255,.85)',
+                    textAlign:'center', borderRight:'1px solid rgba(255,255,255,.08)',
+                    letterSpacing:'.05em',
+                  }}>
+                    <div>{DAYS_LONG[d]}</div>
+                    <div style={{ fontSize:9, fontWeight:500, color:d==='Fri'?'rgba(180,150,220,.7)':'rgba(255,255,255,.4)', marginTop:2 }}>{DAY_TYPE[d]}</div>
+                    {d===todayDay&&<div style={{ fontSize:8, fontWeight:800, color:'#C9A030', marginTop:2, letterSpacing:'.1em' }}>TODAY</div>}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {SLOTS.map((slot,si)=>(
+                <tr key={slot.label} style={{ borderBottom:'1px solid #F4EFEB' }}>
+                  {/* Time label */}
+                  <td style={{
+                    padding:'6px 10px', textAlign:'center', verticalAlign:'middle',
+                    background: slot.isBreak?'#FAFAF8':'#FBFAF5',
+                    borderRight:'1px solid #E8E2D6',
+                    fontSize:11, fontWeight:700,
+                    color: slot.isBreak?'#C9A030':'#857973',
+                    whiteSpace:'nowrap',
+                  }}>
+                    {slot.isBreak ? (
+                      <div>
+                        <div style={{ fontSize:9.5, letterSpacing:'.08em', color:'#C9A030' }}>LUNCH</div>
+                        <div style={{ fontSize:9, color:'#C9A030', opacity:.7 }}>1–2 PM</div>
                       </div>
-                      <div style={{flex:1,height:is12?1.5:1,background:is12?'#FECDD3':'#F4EFEB'}}/>
+                    ) : slot.label}
+                  </td>
+                  {/* Day cells */}
+                  {DAYS.map(day=>{
+                    if (slot.isBreak) return (
+                      <td key={day} style={{ background:'#FFFBF0', borderRight:'1px solid #F4EFEB', padding:4, textAlign:'center' }}>
+                        <div style={{ fontSize:9.5, color:'#D97706', fontWeight:600, letterSpacing:'.08em' }}>Lunch break</div>
+                      </td>
+                    )
+                    const cellEntries = entryForSlot(day, slot)
+                    const isFriday    = day==='Fri'
+                    return (
+                      <td key={day} style={{
+                        padding:4, verticalAlign:'top',
+                        background: isFriday ? '#FAF5FF' : day===todayDay?'#FDFAF5':'#fff',
+                        borderRight:'1px solid #F4EFEB',
+                        minWidth:120, minHeight:56,
+                      }}>
+                        {cellEntries.map(entry=>{
+                          const live = isLive(entry)
+                          const past = isPast(entry)
+                          const col  = isFriday ? FRI_COLOR : colFor(entry.subject)
+                          return (
+                            <div key={entry._id} onClick={()=>setTeacherModal(entry.teacherId)}
+                              style={{
+                                background: live ? `linear-gradient(135deg,${col},${col}CC)` : col+'12',
+                                border: `1.5px solid ${col}${live?'':isFriday?'50':'30'}`,
+                                borderLeft: `3px solid ${col}`,
+                                borderRadius:7, padding:'7px 9px', cursor:'pointer',
+                                opacity:past?.6:1, marginBottom:3,
+                                boxShadow: live?`0 3px 10px ${col}40`:'none',
+                                transition:'transform .12s, box-shadow .12s',
+                              }}
+                              onMouseEnter={e=>{ e.currentTarget.style.transform='translateY(-1px)'; e.currentTarget.style.boxShadow=`0 4px 12px ${col}30` }}
+                              onMouseLeave={e=>{ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow=live?`0 3px 10px ${col}40`:'none' }}>
+                              {live&&(
+                                <div style={{ fontSize:8.5, fontWeight:800, letterSpacing:'.1em', textTransform:'uppercase', color:col, marginBottom:3, display:'flex', alignItems:'center', gap:3 }}>
+                                  <span style={{ width:5, height:5, borderRadius:'50%', background:col, display:'inline-block', boxShadow:`0 0 4px ${col}` }}/>
+                                  Live
+                                </div>
+                              )}
+                              <div style={{ fontSize:12, fontWeight:700, color:live?'#fff':col, lineHeight:1.25, marginBottom:2 }}>{entry.subject}</div>
+                              <div style={{ fontSize:10, color:live?'rgba(255,255,255,.8)':col+'99' }}>{fmt(entry.startTime)}–{fmt(entry.endTime)}</div>
+                              {entry.teacherId&&(
+                                <div style={{ fontSize:9.5, color:live?'rgba(255,255,255,.65)':col+'80', marginTop:2 }}>
+                                  {entry.teacherId.firstName} {(entry.teacherId.lastName||'')[0]}.
+                                </div>
+                              )}
+                              {entry.deliveryMode&&(
+                                <div style={{ fontSize:9, color:live?'rgba(255,255,255,.5)':col+'60', marginTop:1, textTransform:'capitalize' }}>
+                                  {entry.deliveryMode}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        /* ── LIST VIEW ── */
+        <div>
+          {DAYS.map((d,idx)=>{
+            const items = byDay[d]
+            if (!items.length) return null
+            return (
+              <div key={d} style={{ marginBottom:18 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8, paddingBottom:6, borderBottom:'1px solid #F4EFEB' }}>
+                  <div style={{ fontSize:11, fontWeight:800, letterSpacing:'.1em', textTransform:'uppercase', color:d===todayDay?'#7D1025':d==='Fri'?FRI_COLOR:'#564844' }}>
+                    {DAYS_LONG[d]}
+                  </div>
+                  <div style={{ fontSize:10, color:'#9A9A9A' }}>— {DAY_TYPE[d]}</div>
+                  {d===todayDay&&<span style={{ fontSize:9, fontWeight:800, letterSpacing:'.08em', color:'#C9A030', background:'#FDF7E2', padding:'2px 8px', borderRadius:99 }}>TODAY</span>}
+                </div>
+                {items.map(entry=>{
+                  const live = isLive(entry)
+                  const col  = d==='Fri'?FRI_COLOR:colFor(entry.subject)
+                  return (
+                    <div key={entry._id} onClick={()=>setTeacherModal(entry.teacherId)}
+                      style={{ display:'flex', gap:12, alignItems:'center', padding:'10px 14px', background:live?col+'10':'#fff', border:`1px solid ${col}${live?'30':'20'}`, borderLeft:`3px solid ${col}`, borderRadius:8, marginBottom:7, cursor:'pointer' }}>
+                      <div style={{ fontSize:11, fontWeight:700, color:col, minWidth:90, whiteSpace:'nowrap' }}>
+                        {fmt(entry.startTime)} – {fmt(entry.endTime)}
+                      </div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ fontSize:13, fontWeight:700, color:'#1A0F0E' }}>{entry.subject}</div>
+                        {entry.teacherId&&<div style={{ fontSize:11.5, color:'#857973', marginTop:1 }}>{entry.teacherId.firstName} {entry.teacherId.lastName}</div>}
+                      </div>
+                      {live&&<span style={{ fontSize:10, fontWeight:800, letterSpacing:'.08em', color:'#fff', background:col, padding:'3px 9px', borderRadius:99 }}>LIVE</span>}
+                      <span style={{ fontSize:10, color:col+'80', textTransform:'capitalize' }}>{entry.deliveryMode}</span>
                     </div>
                   )
                 })}
-
-                {/* Now indicator */}
-                {nowMins>=HOUR_START*60 && nowMins<HOUR_END*60 && (
-                  <div style={{position:'absolute',top:minToY(nowMins),left:TIME_COL_W+COL_W*todayIdx,width:COL_W,height:2,background:'#DC2626',zIndex:8}}>
-                    <div style={{width:8,height:8,borderRadius:'50%',background:'#DC2626',position:'absolute',left:-4,top:-3}}/>
-                  </div>
-                )}
-
-                {/* Day columns */}
-                {DAYS.map((d,dIdx) => (
-                  <div key={d} style={{position:'absolute',top:0,bottom:0,left:TIME_COL_W+COL_W*dIdx,width:COL_W,borderLeft:'1px solid #F4EFEB',background:dIdx===todayIdx?'rgba(125,16,37,.025)':'transparent'}}>
-                    {(byDay[d]||[]).map(e => {
-                      const y=minToY(toMins(e.startTime)); const h=entryH(e)
-                      const live=isLive(e); const past=isPast(e)&&dIdx===todayIdx
-                      const [fg,bg]=pal(e.subject)
-                      return (
-                        <div key={e._id} onClick={()=>setSelectedEntry(e)} style={{
-                          position:'absolute',top:y+1,left:3,right:3,height:h-2,
-                          background:live?fg:bg,
-                          border:'1.5px solid '+(live?fg:fg+'55'),
-                          borderLeft:'3px solid '+fg,
-                          borderRadius:6,padding:'4px 6px',cursor:'pointer',overflow:'hidden',
-                          opacity:past?.4:1,
-                          boxShadow:live?'0 2px 10px '+fg+'45':'0 1px 3px rgba(0,0,0,.06)',
-                          zIndex:live?4:2,transition:'transform .1s,box-shadow .1s',
-                        }}
-                          onMouseEnter={el=>{el.currentTarget.style.transform='scale(1.02)';el.currentTarget.style.zIndex='10'}}
-                          onMouseLeave={el=>{el.currentTarget.style.transform='scale(1)';el.currentTarget.style.zIndex=live?'4':'2'}}
-                        >
-                          {live && <div style={{display:'flex',alignItems:'center',gap:3,marginBottom:1}}>
-                            <span style={{width:5,height:5,borderRadius:'50%',background:'#fff',display:'inline-block',flexShrink:0,animation:'pulse 1.5s infinite'}}/>
-                            <span style={{fontSize:8,fontWeight:800,color:'#fff',letterSpacing:'.06em'}}>LIVE</span>
-                            <style>{'@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}'}</style>
-                          </div>}
-                          <div style={{fontSize:h>46?11.5:9.5,fontWeight:700,color:live?'#fff':fg,lineHeight:1.2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:h>46?'normal':'nowrap'}}>
-                            {e.subject}
-                          </div>
-                          {h>42 && <div style={{fontSize:9,color:live?'rgba(255,255,255,.8)':'#6B6B6B',marginTop:1,lineHeight:1.2}}>
-                            {fmt(e.startTime)}–{fmt(e.endTime)}
-                          </div>}
-                          {h>58 && e.teacherId && <div style={{fontSize:8.5,color:live?'rgba(255,255,255,.65)':'#9A9A9A',marginTop:2}}>
-                            {e.teacherId.firstName} {(e.teacherId.lastName||'')[0]}.
-                          </div>}
-                        </div>
-                      )
-                    })}
-                  </div>
-                ))}
               </div>
-            </div>
-          </div>
-
-          {/* Subject legend */}
-          <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:12}}>
-            {uniqueSubjects.map(s => {
-              const [fg,bg]=pal(s)
-              return <div key={s} style={{display:'flex',alignItems:'center',gap:5,padding:'3px 10px',background:bg,borderRadius:99,border:'1px solid '+fg+'35'}}>
-                <span style={{width:7,height:7,borderRadius:'50%',background:fg,flexShrink:0}}/>
-                <span style={{fontSize:10.5,fontWeight:600,color:fg}}>{s}</span>
-              </div>
-            })}
-          </div>
-        </>
+            )
+          })}
+        </div>
       )}
 
-      {/* Detail modal */}
-      {selectedEntry && (
-        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.5)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:16}}
-          onClick={()=>setSelectedEntry(null)}>
-          <div style={{background:'#fff',borderRadius:14,padding:24,maxWidth:340,width:'100%',boxShadow:'0 20px 60px rgba(0,0,0,.25)'}}
-            onClick={ev=>ev.stopPropagation()}>
-            {(() => {
-              const e=selectedEntry; const [fg,bg]=pal(e.subject); const live=isLive(e)
-              return <>
-                <div style={{background:live?fg:bg,borderRadius:8,padding:'14px 16px',marginBottom:16}}>
-                  {live && <div style={{fontSize:10,fontWeight:800,color:'#fff',letterSpacing:'.1em',marginBottom:4}}>● LIVE NOW</div>}
-                  <div style={{fontSize:18,fontWeight:800,color:live?'#fff':fg}}>{e.subject}</div>
-                  <div style={{fontSize:12,color:live?'rgba(255,255,255,.7)':'#6B6B6B',marginTop:2}}>{e.curriculum}</div>
+      {/* Teacher preview modal */}
+      {teacherModal&&(
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
+          onClick={()=>setTeacherModal(null)}>
+          <div style={{ background:'#fff', borderRadius:14, padding:24, maxWidth:340, width:'100%', boxShadow:'0 20px 60px rgba(0,0,0,.25)' }}
+            onClick={e=>e.stopPropagation()}>
+            <div style={{ display:'flex', gap:14, alignItems:'center', marginBottom:16 }}>
+              {teacherModal.avatar?(
+                <img src={teacherModal.avatar} alt="" style={{ width:56, height:56, borderRadius:'50%', objectFit:'cover' }}/>
+              ):(
+                <div style={{ width:56, height:56, borderRadius:'50%', background:'#F4EFEB', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#857973" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </div>
-                <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                  <TRow icon="📅" label="Day"    val={DAYS_LONG[e.dayOfWeek]}/>
-                  <TRow icon="🕐" label="Time"   val={fmt(e.startTime)+' – '+fmt(e.endTime)}/>
-                  {e.teacherId && <TRow icon="👩‍🏫" label="Teacher" val={e.teacherId.firstName+' '+(e.teacherId.lastName||'')}/>}
-                  <TRow icon={e.deliveryMode==='virtual'?'💻':'🏫'} label="Mode" val={e.deliveryMode==='virtual'?'Online class':'In-person'}/>
-                  {e.meetingLink && <a href={e.meetingLink} target="_blank" rel="noopener noreferrer" style={{display:'block',background:fg,color:'#fff',textAlign:'center',padding:'9px 0',borderRadius:7,fontSize:13,fontWeight:700,textDecoration:'none',marginTop:4}}>Join class →</a>}
-                </div>
-                <button onClick={()=>setSelectedEntry(null)} style={{marginTop:16,width:'100%',background:'transparent',border:'1px solid #E8E2D6',color:'#6B6B6B',padding:'8px 0',borderRadius:7,fontSize:12.5,fontWeight:700,cursor:'pointer'}}>Close</button>
-              </>
-            })()}
+              )}
+              <div>
+                <div style={{ fontSize:15, fontWeight:800, color:'#1A0F0E' }}>{teacherModal.firstName} {teacherModal.lastName}</div>
+                <div style={{ fontSize:12, color:'#857973', marginTop:2 }}>Teacher</div>
+              </div>
+            </div>
+            <div style={{ fontSize:12.5, color:'#857973', lineHeight:1.6 }}>
+              To contact this teacher, use the <strong>Communication</strong> module in your student portal.
+            </div>
+            <button onClick={()=>setTeacherModal(null)} style={{ width:'100%', marginTop:16, background:'#7D1025', color:'#fff', border:'none', padding:10, borderRadius:8, fontWeight:700, cursor:'pointer', fontSize:13 }}>Close</button>
           </div>
         </div>
       )}
@@ -13286,17 +13421,6 @@ function RealTimetableTab({ user, setPage, toast }) {
   )
 }
 
-function TRow({ icon, label, val }) {
-  return (
-    <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
-      <span style={{fontSize:14,flexShrink:0,marginTop:1}}>{icon}</span>
-      <div>
-        <div style={{fontSize:10,fontWeight:700,color:'#9A9A9A',letterSpacing:'.05em',textTransform:'uppercase'}}>{label}</div>
-        <div style={{fontSize:13,color:'#1A0F0E',fontWeight:500}}>{val}</div>
-      </div>
-    </div>
-  )
-}
 
 // ═══════════════════════════════════════════════════════════
 // TeacherProfilePreview
