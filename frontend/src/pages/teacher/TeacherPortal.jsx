@@ -81,6 +81,8 @@ function PageHeader({ tag, title, subtitle }) {
       {subtitle && (
         <div style={{ fontSize: 13, color: TOKENS.s500, marginTop: 4 }}>{subtitle}</div>
       )}
+        </div>
+      </main>
     </div>
   )
 }
@@ -810,35 +812,41 @@ export default function TeacherPortal() {
   ]
 
   return (
-    <div className="app">
-      {/* SIDEBAR */}
-      <aside className={`sidebar${collapsed?' col':''}`}>
-        <div className="sb-logo">
-          <div className="sb-mark" style={{ background: 'transparent', padding: 0, width: 36, height: 40 }}>
-            {/* Smartious shield mark — crimson shield with gold star above an open book.
-                Matches the official brand mark exactly. Inline SVG so it scales crisply
-                at any sidebar size and respects the collapsed state. */}
-            <svg viewBox="0 0 64 72" width="36" height="40" xmlns="http://www.w3.org/2000/svg">
-              {/* Gold outer trim */}
-              <path d="M4 4 L60 4 L60 44 Q60 56 32 68 Q4 56 4 44 Z"
-                fill="#C9A030"/>
-              {/* Crimson shield body */}
-              <path d="M7 7 L57 7 L57 44 Q57 54 32 65 Q7 54 7 44 Z"
-                fill="#7D1025"/>
-              {/* Inner gold pinstripe (subtle) */}
-              <path d="M11 11 L53 11 L53 44 Q53 52 32 61 Q11 52 11 44 Z"
-                fill="none" stroke="#C9A030" strokeWidth="0.5" opacity="0.4"/>
-              {/* Gold star */}
-              <polygon points="32,16 33.6,20.8 38.7,20.8 34.6,23.8 36.2,28.6 32,25.6 27.8,28.6 29.4,23.8 25.3,20.8 30.4,20.8"
-                fill="#C9A030"/>
-              {/* Open book — white pages */}
-              <path d="M16 36 Q24 32 32 34 L32 52 Q24 50 16 54 Z"
-                fill="#FFFFFF"/>
-              <path d="M48 36 Q40 32 32 34 L32 52 Q40 50 48 54 Z"
-                fill="#FFFFFF"/>
-              {/* Book spine */}
+    <div style={{
+      display:'flex', height:'100vh', overflow:'hidden',
+      background:TOKENS.cream,
+      fontFamily:"Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      color:TOKENS.ink,
+    }}>
+      {/* ══ SIDEBAR — matches admin/student portal ══ */}
+      <aside style={{
+        width: collapsed ? 76 : 248,
+        flexShrink:0,
+        background:TOKENS.cream,
+        borderRight:`1px solid ${TOKENS.s100}`,
+        display:'flex', flexDirection:'column',
+        height:'100vh', overflowY:'auto', overflowX:'hidden',
+        transition:'width .25s cubic-bezier(.22,.61,.36,1)',
+        position:'relative', zIndex:50,
+        scrollbarWidth:'none',
+      }}>
+        {/* Logo */}
+        <div style={{
+          display:'flex', alignItems:'center', gap:12,
+          padding: collapsed ? '20px 0' : '20px 22px',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          borderBottom:`1px solid ${TOKENS.lineSoft||TOKENS.s100}`,
+          minHeight:72, flexShrink:0,
+        }}>
+          <div style={{ width:42, height:46, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+            <svg viewBox="0 0 64 72" width="38" height="42" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 4 L60 4 L60 44 Q60 56 32 68 Q4 56 4 44 Z" fill="#C9A030"/>
+              <path d="M7 7 L57 7 L57 44 Q57 54 32 65 Q7 54 7 44 Z" fill="#7D1025"/>
+              <path d="M11 11 L53 11 L53 44 Q53 52 32 61 Q11 52 11 44 Z" fill="none" stroke="#C9A030" strokeWidth="0.5" opacity="0.4"/>
+              <polygon points="32,16 33.6,20.8 38.7,20.8 34.6,23.8 36.2,28.6 32,25.6 27.8,28.6 29.4,23.8 25.3,20.8 30.4,20.8" fill="#C9A030"/>
+              <path d="M16 36 Q24 32 32 34 L32 52 Q24 50 16 54 Z" fill="#FFFFFF"/>
+              <path d="M48 36 Q40 32 32 34 L32 52 Q40 50 48 54 Z" fill="#FFFFFF"/>
               <line x1="32" y1="34" x2="32" y2="52" stroke="#E8D58F" strokeWidth="0.5"/>
-              {/* Text lines on pages */}
               <line x1="20" y1="40" x2="29" y2="39" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
               <line x1="20" y1="43" x2="29" y2="42" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
               <line x1="20" y1="46" x2="29" y2="45" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
@@ -847,75 +855,207 @@ export default function TeacherPortal() {
               <line x1="35" y1="45" x2="44" y2="46" stroke="#E8D58F" strokeWidth="0.7" strokeLinecap="round"/>
             </svg>
           </div>
-          <div>
-            <div className="sb-text">Smart<span style={{ fontStyle: 'italic', color: 'var(--crimson)' }}>ious</span></div>
-            <div className="sb-sub">Teacher Portal</div>
-          </div>
+          {!collapsed && (
+            <div style={{ minWidth:0 }}>
+              <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:22, fontWeight:400, color:TOKENS.ink, lineHeight:1 }}>
+                Smart<em style={{ fontStyle:'italic', color:TOKENS.crimson }}>ious</em>
+              </div>
+              <div style={{ fontSize:9.5, color:TOKENS.crimson, letterSpacing:'.14em', textTransform:'uppercase', marginTop:4, fontWeight:700 }}>
+                Teacher Portal
+              </div>
+            </div>
+          )}
         </div>
-        <button onClick={() => setSidebarCollapsed(c=>!c)} style={{ position:'absolute',top:22,right:-13,width:26,height:26,background:'var(--s700)',border:'2px solid var(--s600)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',zIndex:10 }}>
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,.7)" strokeWidth="2.5" strokeLinecap="round" style={{transform:collapsed?'rotate(180deg)':'none',transition:'transform .25s'}}><path d="M15 18l-6-6 6-6"/></svg>
+
+        {/* Collapse toggle */}
+        <button onClick={()=>setSidebarCollapsed(c=>!c)} style={{
+          position:'absolute', top:24, right:-13, width:26, height:26,
+          borderRadius:'50%', background:TOKENS.white,
+          border:`1px solid ${TOKENS.s200}`,
+          boxShadow:'0 2px 8px rgba(0,0,0,.06)',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          cursor:'pointer', zIndex:60, transition:'all .2s',
+        }}
+          onMouseEnter={e=>{ e.currentTarget.style.borderColor=TOKENS.gold; e.currentTarget.style.boxShadow=`0 2px 10px ${TOKENS.gold}40` }}
+          onMouseLeave={e=>{ e.currentTarget.style.borderColor=TOKENS.s200; e.currentTarget.style.boxShadow='0 2px 8px rgba(0,0,0,.06)' }}>
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke={TOKENS.s500} strokeWidth="2.5" strokeLinecap="round"
+            style={{ transform:collapsed?'rotate(180deg)':'none', transition:'transform .25s' }}>
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
         </button>
-        <nav style={{ flex:1, paddingTop:8 }}>
-          {nav.map((s,si) => (
-            <div key={si}>
-              <div className="sb-sec">{s.section}</div>
-              {s.items.map(item => (
-                <div key={item.id} className={`nav-item${page===item.id?' active':''}`} onClick={() => setPage(item.id)}>
-                  <div className="nav-icon" style={{ width:26, height:26, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <NavIcon name={item.iconName} active={page===item.id}/>
-                  </div>
-                  <span className="sb-lbl">{item.label}</span>
-                  {item.badge && <span className="sb-badge" style={item.badgeCol?{background:item.badgeCol}:{}}>{item.badge}</span>}
-                  {item.live && <div className="sb-live-dot"/>}
+
+        {/* Nav */}
+        <nav style={{ flex:1, paddingTop:14, paddingBottom:14, overflowY:'auto', overflowX:'hidden', scrollbarWidth:'thin', scrollbarColor:`${TOKENS.s200} transparent` }}>
+          {nav.map((s, si) => (
+            <div key={si} style={{ marginBottom:18 }}>
+              {!collapsed && (
+                <div style={{ fontSize:10, fontWeight:700, color:TOKENS.crimson, letterSpacing:'.14em', textTransform:'uppercase', padding:'0 22px 8px' }}>
+                  {s.section}
                 </div>
-              ))}
+              )}
+              {s.items.map(item => {
+                const active = page === item.id
+                return (
+                  <div key={item.id} onClick={()=>setPage(item.id)} title={collapsed?item.label:undefined}
+                    style={{
+                      position:'relative', display:'flex', alignItems:'center',
+                      gap: collapsed?0:12,
+                      padding: collapsed?'11px 0':'10px 22px',
+                      margin:'2px 12px',
+                      borderRadius:8, cursor:'pointer',
+                      background: active ? TOKENS.goldPale||'#FBF6E3' : 'transparent',
+                      color: active ? TOKENS.crimson : TOKENS.s700,
+                      fontWeight: active ? 600 : 500, fontSize:13.5,
+                      transition:'background .15s, color .15s',
+                      justifyContent: collapsed ? 'center' : 'flex-start',
+                    }}
+                    onMouseEnter={e=>{ if(!active) e.currentTarget.style.background=TOKENS.s50||'#FAF7F4' }}
+                    onMouseLeave={e=>{ if(!active) e.currentTarget.style.background='transparent' }}>
+                    {/* Active gold rail */}
+                    {active && !collapsed && (
+                      <div style={{ position:'absolute', left:-12, top:8, bottom:8, width:3, borderRadius:'0 3px 3px 0', background:TOKENS.gold, boxShadow:`0 0 8px ${TOKENS.gold}60` }}/>
+                    )}
+                    <div style={{ width:26, height:26, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <NavIcon name={item.iconName} active={active}/>
+                    </div>
+                    {!collapsed && (
+                      <>
+                        <span style={{ flex:1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{item.label}</span>
+                        {item.badge && <span style={{ background:TOKENS.crimson, color:'#fff', fontSize:10, fontWeight:700, padding:'2px 7px', borderRadius:10 }}>{item.badge}</span>}
+                        {item.live && <span style={{ width:6, height:6, borderRadius:'50%', background:'#22C55E', boxShadow:'0 0 0 0 #22C55E', animation:'pulseDot 1.5s ease-out infinite', display:'inline-block' }}/>}
+                      </>
+                    )}
+                    {collapsed && item.badge && <span style={{ position:'absolute', top:6, right:6, width:7, height:7, borderRadius:'50%', background:TOKENS.crimson }}/>}
+                  </div>
+                )
+              })}
             </div>
           ))}
         </nav>
-        <div className="sb-user">
-          <Av
-            init={((currentUser?.firstName?.[0] || 'T') + (currentUser?.lastName?.[0] || '')).toUpperCase()}
-            col="#3B82F6"
-            size={36}
-          />
-          <div className="sb-uinfo">
-            <div className="sb-uname">{teacherName}</div>
-            <div className="sb-urole">{currentUser?.subject || 'Teacher'}</div>
+
+        {/* User card */}
+        <div style={{ flexShrink:0, padding: collapsed?'12px 0 0':'12px 14px 0', borderTop:`1px solid ${TOKENS.s100}` }}>
+          <div style={{
+            display:'flex', alignItems:'center', gap:10,
+            padding: collapsed?'8px 0':'8px 8px',
+            borderRadius:10, background:TOKENS.cream,
+            border:`1px solid ${TOKENS.s200}`,
+            justifyContent: collapsed?'center':'flex-start',
+          }}>
+            <div style={{
+              width:34, height:34, borderRadius:'50%', flexShrink:0,
+              background: currentUser?.avatar ? 'transparent' : `linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`,
+              display:'flex', alignItems:'center', justifyContent:'center',
+              overflow:'hidden',
+            }}>
+              {currentUser?.avatar
+                ? <img src={currentUser.avatar} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                : <span style={{ color:'#F0CC5A', fontSize:11, fontWeight:700, fontFamily:"JetBrains Mono,monospace" }}>
+                    {((currentUser?.firstName?.[0]||'T')+(currentUser?.lastName?.[0]||'')).toUpperCase()}
+                  </span>
+              }
+            </div>
+            {!collapsed && (
+              <div style={{ minWidth:0, flex:1 }}>
+                <div style={{ fontSize:12.5, fontWeight:700, color:TOKENS.ink, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                  {currentUser?.firstName} {currentUser?.lastName}
+                </div>
+                <div style={{ fontSize:10.5, color:TOKENS.s500, marginTop:2 }}>Teacher</div>
+              </div>
+            )}
+          </div>
+          <div onClick={()=>{ localStorage.removeItem('sm_token'); localStorage.removeItem('sm_user'); window.location.href='/login' }}
+            style={{
+              marginTop:4, padding: collapsed?'10px 0':'9px 12px',
+              borderRadius:8, cursor:'pointer', display:'flex', alignItems:'center',
+              gap: collapsed?0:10, fontSize:12, color:TOKENS.s500, fontWeight:500,
+              justifyContent: collapsed?'center':'flex-start',
+              transition:'background .15s, color .15s', marginBottom:10,
+            }}
+            onMouseEnter={e=>{ e.currentTarget.style.background=TOKENS.s50||'#FAF7F4'; e.currentTarget.style.color=TOKENS.crimson }}
+            onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; e.currentTarget.style.color=TOKENS.s500 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            {!collapsed && <span>Log out</span>}
           </div>
         </div>
-        <div className="sb-back" onClick={() => window.location.href='/'}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-          <span className="sb-lbl">Back to Website</span>
-        </div>
+
+        <style>{`
+          @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.85)} }
+          @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+          .card{background:#fff;border:1px solid #E8E2D6;border-radius:12px;}
+          .card:hover{box-shadow:0 8px 24px rgba(125,16,37,.06);}
+          .kpi{background:#fff;border:1px solid #E8E2D6;border-radius:12px;padding:16px 18px;transition:all .18s;}
+          .kpi:hover{border-color:#7D1025;transform:translateY(-2px);box-shadow:0 12px 28px rgba(125,16,37,.08);}
+          .tbl{width:100%;border-collapse:collapse;}
+          .tbl thead{background:#FBFAF5;}
+          .tbl thead th{padding:9px 14px;text-align:left;font-size:10.5px;font-weight:700;color:#7D1025;text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid #E8E2D6;}
+          .tbl tbody tr{border-top:1px solid #E8E2D6;}
+          .tbl tbody tr:hover{background:#FBFAF5;}
+          .tbl td{padding:10px 14px;}
+          .btn-p{background:#7D1025;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;}
+          .btn-p:hover{background:#5A0B1B;}
+          .sec-tag{font-size:10px;font-weight:700;color:#7D1025;text-transform:uppercase;letter-spacing:.14em;margin-bottom:4px;}
+          .serif{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:-.01em;}
+          .fi{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #E8DDD5;font-size:13px;font-family:inherit;box-sizing:border-box;transition:border-color .15s;}
+          .fi:focus{border-color:#7D1025;box-shadow:0 0 0 3px rgba(125,16,37,.08);outline:none;}
+          .fsel{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #E8DDD5;font-size:13px;font-family:inherit;box-sizing:border-box;background:#fff;}
+          .fsel:focus{border-color:#7D1025;outline:none;}
+          .fta{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #E8DDD5;font-size:13px;font-family:inherit;box-sizing:border-box;resize:vertical;}
+          .fg{margin-bottom:14px;}
+          .fl{font-size:11px;font-weight:700;color:#7D1025;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block;}
+        `}</style>
       </aside>
 
-      {/* MAIN */}
-      <main className="main">
-        <div className="topbar">
-          <div className="tb-title">{pageTitles[page]}</div>
-          <div className="tb-right">
-            <button className="btn btn-s btn-sm" onClick={() => { setMsgSubject(''); setMsgBody(''); setMsgModal(true) }}>
+      {/* ══ MAIN ══ */}
+      <main style={{
+        flex:1, display:'flex', flexDirection:'column',
+        minWidth:0, overflow:'hidden', background:TOKENS.cream,
+      }}>
+        {/* Frosted top bar */}
+        <div style={{
+          position:'sticky', top:0, zIndex:30,
+          background:'rgba(251,250,245,.9)',
+          backdropFilter:'saturate(180%) blur(20px)',
+          WebkitBackdropFilter:'saturate(180%) blur(20px)',
+          borderBottom:`1px solid ${TOKENS.s100}`,
+          padding:'13px 28px',
+          display:'flex', alignItems:'center', gap:20, minHeight:60, flexShrink:0,
+        }}>
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontSize:10, fontWeight:700, color:TOKENS.crimson, letterSpacing:'.14em', textTransform:'uppercase', marginBottom:3 }}>
+              Teacher Portal
+            </div>
+            <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:22, fontWeight:400, color:TOKENS.ink, lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+              {pageTitles[page] || 'Dashboard'}
+            </div>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            {/* Message button */}
+            <button onClick={()=>{ setMsgSubject(''); setMsgBody(''); setMsgModal(true) }}
+              style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:8, border:`1px solid ${TOKENS.s200}`, background:TOKENS.cream, color:TOKENS.s700, fontSize:12.5, fontWeight:600, cursor:'pointer', transition:'all .15s' }}
+              onMouseEnter={e=>{ e.currentTarget.style.borderColor=TOKENS.crimson; e.currentTarget.style.color=TOKENS.crimson }}
+              onMouseLeave={e=>{ e.currentTarget.style.borderColor=TOKENS.s200; e.currentTarget.style.color=TOKENS.s700 }}>
               <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               Message
             </button>
-            {page === 'liveclass' && (
-              <div className="tb-chip live" onClick={() => setPage('liveclass')}>
-                <div style={{width:7,height:7,borderRadius:'50%',background:'var(--r500)',animation:'pulse 2s infinite'}}/>
-                Live Classes
-              </div>
-            )}
-            <div className="tb-chip">
-              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span className="mono">{new Date().toLocaleTimeString('en-GB')}</span>
+            {/* Clock */}
+            <div style={{ display:'flex', alignItems:'center', gap:5, padding:'7px 12px', borderRadius:8, border:`1px solid ${TOKENS.s200}`, background:TOKENS.cream, fontSize:12, color:TOKENS.s500, fontWeight:500, fontFamily:'JetBrains Mono,monospace' }}>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              {new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}
             </div>
-            <button className="tb-chip" onClick={() => { localStorage.clear(); window.location.href='/login' }}>
-              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-              Logout
-            </button>
+            {/* User avatar */}
+            <div style={{ width:36, height:36, borderRadius:'50%', flexShrink:0, overflow:'hidden', background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`, display:'flex', alignItems:'center', justifyContent:'center', border:`2px solid ${TOKENS.gold}40` }}>
+              {currentUser?.avatar
+                ? <img src={currentUser.avatar} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                : <span style={{ color:'#F0CC5A', fontSize:12, fontWeight:700 }}>{((currentUser?.firstName?.[0]||'T')+(currentUser?.lastName?.[0]||'')).toUpperCase()}</span>
+              }
+            </div>
           </div>
         </div>
 
-        <div className="content" style={{animation:'fadeIn .25s ease'}}>
+        {/* Content area */}
+        <div style={{ flex:1, overflowY:'auto', padding:'24px 28px', maxWidth:1400, margin:'0 auto', width:'100%', boxSizing:'border-box', animation:'fadeIn .25s ease' }}>
+
 
           {/* ── DASHBOARD ── */}
           {page === 'dashboard' && <TeacherDashboardTab user={currentUser} store={store} setPage={setPage} toast={toast} setMsgModal={setMsgModal} setUploadModal={setUploadModal} />}
