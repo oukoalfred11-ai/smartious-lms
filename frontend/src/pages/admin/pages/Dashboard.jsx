@@ -69,7 +69,9 @@ const MODULES = {
   students:    { label: 'Students',             accent: TOKENS.accentNavy,  icon: 'users' },
   doshomework:  { label: 'Homework',              accent: TOKENS.accentAmber, icon: 'frontdesk' },
   dosanalytics: { label: 'Performance Analytics', accent: TOKENS.crimson,    icon: 'chart' },
-  dosattend:    { label: 'Attendance',             accent: TOKENS.accentTeal, icon: 'frontdesk' },
+  dosattend:    { label: 'Attendance',             accent: TOKENS.accentTeal,    icon: 'frontdesk' },
+  checkin:      { label: 'Check In',              accent: TOKENS.accentEmerald||'#065F46', icon: 'frontdesk' },
+  dosbreaks:    { label: 'Manage Breaks',          accent: TOKENS.crimson,       icon: 'frontdesk' },
   dostimetable: { label: 'Timetables',             accent: TOKENS.accentNavy, icon: 'rooms' },
   salesperf:   { label: 'My Performance', accent: TOKENS.gold,      icon: 'frontdesk' },
   livelessons: { label: 'Live Classes', accent: TOKENS.accentRose,  icon: 'live' },
@@ -550,28 +552,28 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'System',      items: ['billing', 'website', 'settings', 'ai'] },
     ],
     accountant: [
-      { label: 'Overview',    items: ['dashboard', 'analytics'] },
+      { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
       { label: 'Finance',     items: ['billing', 'payroll'] },
       { label: 'System',      items: ['settings'] },
     ],
     dos: [
-      { label: 'Overview',    items: ['dosanalytics'] },
+      { label: 'Overview',    items: ['checkin', 'dosanalytics'] },
       { label: 'Exams',       items: ['exams'] },
       { label: 'Homework',    items: ['doshomework'] },
-      { label: 'Attendance',  items: ['dosattend'] },
+      { label: 'Attendance',  items: ['dosattend', 'dosbreaks'] },
       { label: 'Timetables',  items: ['dostimetable'] },
       { label: 'Reports',     items: ['reports'] },
       { label: 'System',      items: ['settings'] },
     ],
     sales: [
-      { label: 'Overview',    items: ['dashboard', 'salesperf'] },
+      { label: 'Overview',    items: ['checkin', 'dashboard', 'salesperf'] },
       { label: 'CRM',         items: ['crm'] },
       { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
       { label: 'Content',     items: ['documents'] },
       { label: 'System',      items: ['settings'] },
     ],
     ops_manager: [
-      { label: 'Overview',    items: ['dashboard', 'analytics'] },
+      { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
       { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication'] },
       { label: 'Reports',     items: ['reports'] },
       { label: 'Operations',  items: ['crm', 'frontdesk', 'assessment', 'documents', 'leave', 'programmes'] },
@@ -834,8 +836,9 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       { items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','billing','website','settings','ai'] },
     ],
     accountant:  [{ items: ['dashboard','analytics','billing','payroll','settings'] }],
-    sales:       [{ items: ['dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
-    dos:         [{ items: ['dosanalytics','exams','doshomework','dosattend','dostimetable','reports','settings'] }],
+    sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
+    dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','dosbreaks','dostimetable','reports','settings'] }],
+    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','communication','reports','crm','frontdesk','assessment','documents','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
     ops_manager: [{ items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','assessment','documents','payroll','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
@@ -871,6 +874,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'exams'         && <DOSExamsModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'doshomework'   && <DOSHomeworkModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'dosattend'     && <DOSAttendanceModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'checkin'       && <CheckInModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'dosbreaks'     && <DOSBreakModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'dostimetable'  && <DOSTimetableModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'payroll'     && <PayrollModule    refreshKey={refreshKey} toast={toast} />}
         {safePage === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
@@ -7865,6 +7870,470 @@ function ReportDetail({ toast, report: initialReport, onBack }) {
       <div style={{ fontSize:12, color:TOKENS.s400, textAlign:'center', marginTop:8 }}>
         Generated {fmtDate(report.createdAt)} · {report.status==='published'?'Published':'Draft'}
       </div>
+    </>
+  )
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// CheckInModule — Self check-in for students and all staff
+// Shown on: student, teacher, sales, ops_manager, accountant, dos portals
+// NOT shown on: admin portal
+//
+// Add to Dashboard.jsx:
+//   1. MODULES: checkin: { label:'Check In', accent:TOKENS.accentEmerald, icon:'frontdesk' }
+//   2. All non-admin ROLE_SECTIONS: add 'checkin' to Overview items
+//   3. Render: {safePage==='checkin' && <CheckInModule toast={toast}/>}
+// ═══════════════════════════════════════════════════════════
+function CheckInModule({ toast, refreshKey }) {
+  const { user } = useAuth()
+  const today = new Date().toLocaleDateString('en-GB',{ weekday:'long', day:'numeric', month:'long', year:'numeric' })
+  const dayOfWeek = new Date().getDay() // 0=Sun, 6=Sat
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+
+  const [status,    setStatus]    = useState(null)   // today's check-in from API
+  const [loading,   setLoading]   = useState(true)
+  const [saving,    setSaving]    = useState(false)
+  const [history,   setHistory]   = useState([])
+  const [histLoad,  setHistLoad]  = useState(true)
+
+  // Form state
+  const [pick,      setPick]      = useState('present')  // what user picks
+  const [lateTime,  setLateTime]  = useState('')
+  const [reason,    setReason]    = useState('')
+
+  const load = useCallback(() => {
+    setLoading(true)
+    api.get('/checkin/today')
+      .then(r => { setStatus(r.data?.data) })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [refreshKey])
+
+  const loadHistory = useCallback(() => {
+    setHistLoad(true)
+    api.get('/checkin/history')
+      .then(r => setHistory(r.data?.data?.records || []))
+      .catch(() => {})
+      .finally(() => setHistLoad(false))
+  }, [])
+
+  useEffect(() => { load(); loadHistory() }, [load, loadHistory])
+
+  const submit = async () => {
+    if (pick === 'late' && !lateTime.trim()) { toast?.error?.('Enter your arrival time.'); return }
+    if (pick === 'absent' && !reason.trim()) { toast?.error?.('Enter a reason for absence.'); return }
+    setSaving(true)
+    try {
+      await api.post('/checkin', { status:pick, lateTime, reason })
+      toast?.ok?.('Check-in recorded.')
+      load(); loadHistory()
+    } catch(e) {
+      toast?.error?.(e?.response?.data?.message || 'Check-in failed.')
+    } finally { setSaving(false) }
+  }
+
+  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}) : '—'
+  const fmtTime = d => d ? new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—'
+
+  const STATUS_STYLE = {
+    present: { bg:'#D1FAE5', fg:'#065F46', label:'Present' },
+    late:    { bg:'#FEF3C7', fg:'#92400E', label:'Late' },
+    absent:  { bg:'#FEE2E2', fg:'#991B1B', label:'Absent' },
+  }
+
+  // On break
+  if (!loading && status?.onBreak) {
+    const BREAK_LABELS = {
+      mid_term_break:'Mid-term break', end_term_break:'End-term break',
+      summer_break:'Summer break', medical_leave:'Medical leave', other:'Break',
+    }
+    return (
+      <>
+        <PSection tag="Daily" title="Check" em="In" sub={today}/>
+        <div className="card" style={{ padding:32, textAlign:'center', maxWidth:480, margin:'0 auto' }}>
+          <div style={{ width:64, height:64, borderRadius:'50%', background:'#FEF3C7', border:'2px solid #FDE68A', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round">
+              <path d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"/>
+            </svg>
+          </div>
+          <div style={{ fontSize:18, fontWeight:800, color:TOKENS.s900, marginBottom:8 }}>
+            {BREAK_LABELS[status.breakType] || 'On Break'}
+          </div>
+          <div style={{ fontSize:13, color:TOKENS.s500, lineHeight:1.65, marginBottom:status.breakNote?12:0 }}>
+            Your account is currently on a break. Check-in and daily reminders are paused.
+          </div>
+          {status.breakNote && (
+            <div style={{ fontSize:12.5, color:TOKENS.s600, background:TOKENS.cream, borderRadius:8, padding:'10px 14px', marginTop:8, fontStyle:'italic' }}>
+              "{status.breakNote}"
+            </div>
+          )}
+          <div style={{ fontSize:12, color:TOKENS.s400, marginTop:16 }}>
+            Contact your DOS or admin to return from break.
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  const alreadyCheckedIn = !loading && status?.checkedIn
+  const todaySS = alreadyCheckedIn ? STATUS_STYLE[status.checkInStatus] || STATUS_STYLE.present : null
+
+  return (
+    <>
+      <PSection tag="Daily" title="Check" em="In" sub={today}/>
+
+      {/* Main check-in card */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 380px', gap:20, alignItems:'start' }}>
+
+        {/* Left — check in form or confirmed */}
+        <div className="card" style={{ padding:0, overflow:'hidden' }}>
+          {/* Card header */}
+          <div style={{ background:'linear-gradient(135deg,#7D1025,#5A0B1B)', padding:'24px 28px' }}>
+            <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.16em', textTransform:'uppercase', color:'rgba(255,255,255,.5)', marginBottom:8 }}>
+              {new Date().toLocaleDateString('en-GB',{weekday:'long'})} · {new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}
+            </div>
+            <div style={{ fontSize:22, fontWeight:800, color:'#fff', marginBottom:4 }}>
+              Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, {user?.firstName}
+            </div>
+            <div style={{ fontSize:13, color:'rgba(255,255,255,.6)' }}>
+              {alreadyCheckedIn ? 'You have checked in for today.' : isWeekend ? 'No check-in required on weekends.' : 'Please mark your attendance for today.'}
+            </div>
+          </div>
+
+          <div style={{ padding:'24px 28px' }}>
+            {loading ? (
+              <div style={{ padding:'30px 0', textAlign:'center', color:TOKENS.s400 }}>Loading...</div>
+            ) : isWeekend ? (
+              <div style={{ textAlign:'center', padding:'20px 0', color:TOKENS.s400, fontSize:13 }}>
+                Enjoy your weekend! Check-in resumes on Monday.
+              </div>
+            ) : alreadyCheckedIn ? (
+              /* Already checked in */
+              <div style={{ textAlign:'center' }}>
+                <div style={{ width:72, height:72, borderRadius:'50%', background:todaySS.bg, border:'3px solid '+todaySS.fg+'40', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px' }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={todaySS.fg} strokeWidth="2.5" strokeLinecap="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <div style={{ fontSize:22, fontWeight:800, color:todaySS.fg, marginBottom:4 }}>
+                  {todaySS.label}
+                </div>
+                <div style={{ fontSize:13, color:TOKENS.s500, marginBottom:12 }}>
+                  Checked in at {fmtTime(status?.record?.checkInTime)}
+                </div>
+                {status?.checkInStatus==='late' && status?.record?.lateTime && (
+                  <div style={{ fontSize:13, color:'#92400E', background:'#FEF3C7', borderRadius:7, padding:'8px 14px', display:'inline-block', marginBottom:12 }}>
+                    Arrival time: {status.record.lateTime}
+                  </div>
+                )}
+                {status?.checkInStatus==='absent' && status?.record?.reason && (
+                  <div style={{ fontSize:13, color:'#991B1B', background:'#FEE2E2', borderRadius:7, padding:'8px 14px', display:'inline-block', marginBottom:12 }}>
+                    Reason: {status.record.reason}
+                  </div>
+                )}
+                <div style={{ fontSize:12, color:TOKENS.s400, marginTop:8 }}>
+                  Need to correct this? Contact your admin.
+                </div>
+              </div>
+            ) : (
+              /* Check-in form */
+              <>
+                {/* Status picker */}
+                <div style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:12 }}>
+                  I am
+                </div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10, marginBottom:20 }}>
+                  {[
+                    { val:'present', label:'Present', icon:'check', bg:'#D1FAE5', fg:'#065F46', desc:'On time' },
+                    { val:'late',    label:'Late',    icon:'clock', bg:'#FEF3C7', fg:'#D97706', desc:'Running late' },
+                    { val:'absent',  label:'Absent',  icon:'x',     bg:'#FEE2E2', fg:'#991B1B', desc:'Not attending' },
+                  ].map(opt=>(
+                    <button key={opt.val} onClick={()=>{ setPick(opt.val); if(opt.val!=='late')setLateTime(''); if(opt.val!=='absent')setReason('') }}
+                      style={{
+                        padding:'16px 12px', borderRadius:10, cursor:'pointer', textAlign:'center',
+                        border:'2px solid '+(pick===opt.val?opt.fg:TOKENS.line),
+                        background:pick===opt.val?opt.bg:'#fff',
+                        transition:'all .15s',
+                      }}>
+                      <div style={{ fontSize:13, fontWeight:800, color:pick===opt.val?opt.fg:TOKENS.s600, marginBottom:4 }}>{opt.label}</div>
+                      <div style={{ fontSize:11, color:pick===opt.val?opt.fg:TOKENS.s400 }}>{opt.desc}</div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Late time input */}
+                {pick==='late' && (
+                  <div style={{ marginBottom:16 }}>
+                    <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:6, display:'block' }}>
+                      What time did you arrive?
+                    </label>
+                    <input type="time" value={lateTime} onChange={e=>setLateTime(e.target.value)}
+                      style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid '+(lateTime?TOKENS.line:'#FDE68A'), fontSize:15, fontFamily:'inherit', boxSizing:'border-box' }}/>
+                  </div>
+                )}
+
+                {/* Absence reason */}
+                {pick==='absent' && (
+                  <div style={{ marginBottom:16 }}>
+                    <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:6, display:'block' }}>
+                      Reason for absence
+                    </label>
+                    <textarea value={reason} onChange={e=>setReason(e.target.value)} rows={3}
+                      placeholder="Please explain your absence..."
+                      style={{ width:'100%', padding:'10px 12px', borderRadius:8, border:'1.5px solid '+(reason?TOKENS.line:'#FCA5A5'), fontSize:13, fontFamily:'inherit', resize:'vertical', boxSizing:'border-box' }}/>
+                  </div>
+                )}
+
+                <button onClick={submit} disabled={saving} style={{
+                  width:'100%', padding:'13px', borderRadius:9,
+                  background:saving?TOKENS.s300:pick==='absent'?'#991B1B':pick==='late'?'#D97706':TOKENS.accentEmerald||'#065F46',
+                  color:'#fff', border:'none', fontSize:14, fontWeight:800,
+                  cursor:saving?'not-allowed':'pointer', letterSpacing:'.03em',
+                }}>
+                  {saving ? 'Submitting...' : `Mark myself as ${pick}`}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Right — history */}
+        <div className="card" style={{ padding:0, overflow:'hidden' }}>
+          <div style={{ padding:'14px 18px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>
+            My attendance (last 30 days)
+          </div>
+          {histLoad ? (
+            <div style={{ padding:24, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>Loading...</div>
+          ) : history.length === 0 ? (
+            <div style={{ padding:24, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No records yet.</div>
+          ) : (
+            <>
+              {/* Mini stats */}
+              {(() => {
+                const p = history.filter(r=>r.checkInStatus==='present').length
+                const l = history.filter(r=>r.checkInStatus==='late').length
+                const a = history.filter(r=>r.checkInStatus==='absent').length
+                const total = history.length
+                return (
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:0, borderBottom:'1px solid '+TOKENS.line }}>
+                    {[{ label:'Present',val:p,color:'#065F46',bg:'#D1FAE5' },{ label:'Late',val:l,color:'#D97706',bg:'#FEF3C7' },{ label:'Absent',val:a,color:'#991B1B',bg:'#FEE2E2' }].map((s,i)=>(
+                      <div key={s.label} style={{ padding:'12px 10px', textAlign:'center', background:s.bg+'40', borderRight:i<2?'1px solid '+TOKENS.line:'none' }}>
+                        <div style={{ fontSize:20, fontWeight:800, color:s.color }}>{s.val}</div>
+                        <div style={{ fontSize:10, color:s.color, fontWeight:600, marginTop:2 }}>{s.label}</div>
+                        <div style={{ fontSize:9, color:s.color, opacity:.6 }}>{total?Math.round(s.val/total*100)+'%':''}</div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+              {/* Record list */}
+              <div style={{ maxHeight:320, overflowY:'auto' }}>
+                {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((r,i)=>{
+                  const s = STATUS_STYLE[r.checkInStatus||r.status] || { bg:'#F3F4F6',fg:'#6B7280',label:r.status }
+                  return (
+                    <div key={r._id||i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'9px 16px', borderBottom:'1px solid '+TOKENS.line }}>
+                      <div>
+                        <div style={{ fontSize:12.5, fontWeight:600, color:TOKENS.s900 }}>{fmtDate(r.date)}</div>
+                        {(r.lateTime||r.reason) && <div style={{ fontSize:11, color:TOKENS.s500, marginTop:1 }}>{r.lateTime?'Arrived: '+r.lateTime:r.reason}</div>}
+                      </div>
+                      <span style={{ padding:'3px 10px', borderRadius:99, fontSize:11, fontWeight:700, background:s.bg, color:s.fg }}>
+                        {r.checkInStatus==='late'?'Late':s.label}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </>
+  )
+}
+
+
+
+// ═══════════════════════════════════════════════════════════
+// DOSBreakModule — DOS puts students/staff on break
+// Deactivates check-in reminders and marks account as on break
+// ═══════════════════════════════════════════════════════════
+function DOSBreakModule({ toast, refreshKey }) {
+  const [users,   setUsers]   = useState([])
+  const [loading, setLoading] = useState(true)
+  const [saving,  setSaving]  = useState(null)  // userId being saved
+  const [search,  setSearch]  = useState('')
+  const [roleF,   setRoleF]   = useState('student')
+  const [modal,   setModal]   = useState(null)   // user to put on break
+  const [form,    setForm]    = useState({ breakType:'mid_term_break', breakNote:'', breakStart:'', breakEnd:'' })
+
+  const BREAK_LABELS = {
+    mid_term_break:'Mid-term break', end_term_break:'End-term break',
+    summer_break:'Summer break', medical_leave:'Medical leave', other:'Other',
+  }
+
+  const load = useCallback(() => {
+    setLoading(true)
+    api.get('/users', { params:{ role:roleF, limit:200 } })
+      .then(r => setUsers(r.data?.users || r.data?.data?.users || []))
+      .catch(() => toast?.error?.('Failed to load users.'))
+      .finally(() => setLoading(false))
+  }, [roleF, refreshKey])
+
+  useEffect(() => { load() }, [load])
+
+  const putOnBreak = async () => {
+    if (!modal) return
+    setSaving(modal._id)
+    try {
+      await api.post('/checkin/break', { userId:modal._id, ...form })
+      toast?.ok?.(modal.firstName+' placed on break. Their account is deactivated.')
+      setModal(null); load()
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
+    finally { setSaving(null) }
+  }
+
+  const removeBreak = async (u) => {
+    setSaving(u._id)
+    try {
+      await api.delete('/checkin/break/'+u._id)
+      toast?.ok?.(u.firstName+' is back from break. Account reactivated.')
+      load()
+    } catch(e) { toast?.error?.('Failed to remove break.') }
+    finally { setSaving(null) }
+  }
+
+  const onBreak    = users.filter(u=>u.onBreak)
+  const active     = users.filter(u=>!u.onBreak)
+  const filtActive = active.filter(u=>!search||(u.firstName+' '+u.lastName).toLowerCase().includes(search.toLowerCase()))
+
+  return (
+    <>
+      <PSection tag="Dean of Studies" title="Manage" em="Breaks"
+        sub="Place students or staff on break to pause check-in reminders and deactivate their account temporarily."/>
+
+      <div style={{ display:'flex', gap:8, marginBottom:16, alignItems:'center' }}>
+        <div style={{ display:'flex', border:'1.5px solid '+TOKENS.line, borderRadius:7, overflow:'hidden' }}>
+          {['student','teacher','sales','ops_manager','accountant','dos'].map(role=>(
+            <button key={role} onClick={()=>setRoleF(role)} style={{
+              padding:'8px 12px', border:'none', cursor:'pointer', fontSize:11.5, fontWeight:600,
+              background:roleF===role?TOKENS.crimson:'#fff', color:roleF===role?'#fff':TOKENS.s500,
+              borderRight:'1px solid '+TOKENS.line,
+            }}>{role==='ops_manager'?'Ops':role==='accountant'?'Accounts':role.charAt(0).toUpperCase()+role.slice(1)}</button>
+          ))}
+        </div>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name..."
+          style={{ flex:1, padding:'8px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
+      </div>
+
+      {/* On break section */}
+      {onBreak.length > 0 && (
+        <div className="card" style={{ overflow:'hidden', marginBottom:16 }}>
+          <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, background:'#FEF9C3', display:'flex', justifyContent:'space-between' }}>
+            <span style={{ fontWeight:800, fontSize:13, color:'#92400E' }}>Currently on break ({onBreak.length})</span>
+            <span style={{ fontSize:12, color:'#92400E' }}>Accounts deactivated — no reminders</span>
+          </div>
+          {onBreak.map(u=>(
+            <div key={u._id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line }}>
+              <div>
+                <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
+                <div style={{ fontSize:11.5, color:TOKENS.s500 }}>{u.role} · {BREAK_LABELS[u.breakType]||'Break'}{u.breakNote?' · '+u.breakNote:''}</div>
+              </div>
+              <button onClick={()=>removeBreak(u)} disabled={saving===u._id} style={{
+                background:'#065F46', color:'#fff', border:'none', padding:'7px 14px',
+                borderRadius:7, fontSize:12, fontWeight:700, cursor:saving===u._id?'not-allowed':'pointer',
+                opacity:saving===u._id?.6:1,
+              }}>{saving===u._id?'Removing...':'Return from break'}</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Active users table */}
+      <div className="card" style={{ overflow:'hidden' }}>
+        <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>
+          Active {roleF}s ({filtActive.length})
+        </div>
+        {loading ? (
+          <div style={{ padding:30,textAlign:'center',color:TOKENS.s400 }}>Loading...</div>
+        ) : filtActive.length===0 ? (
+          <div style={{ padding:30,textAlign:'center',color:TOKENS.s400,fontSize:13 }}>No active {roleF}s found.</div>
+        ) : (
+          <table className="tbl" style={{ width:'100%',borderCollapse:'collapse' }}>
+            <thead><tr>
+              {['Name',roleF==='student'?'Grade / Curriculum':'Role','Email',''].map(h=>(
+                <th key={h} style={{ padding:'9px 14px',textAlign:'left',fontSize:10.5 }}>{h}</th>
+              ))}
+            </tr></thead>
+            <tbody>
+              {filtActive.map(u=>(
+                <tr key={u._id} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                  <td style={{ padding:'10px 14px',fontWeight:700,fontSize:13 }}>{u.firstName} {u.lastName}</td>
+                  <td style={{ padding:'10px 14px',fontSize:12.5,color:TOKENS.s600 }}>{roleF==='student'?(u.gradeLevel||u.grade||'—')+' · '+(u.curriculum||'—'):u.role}</td>
+                  <td style={{ padding:'10px 14px',fontSize:12,color:TOKENS.s500 }}>{u.email}</td>
+                  <td style={{ padding:'10px 14px' }}>
+                    <button onClick={()=>{ setModal(u); setForm({ breakType:'mid_term_break', breakNote:'', breakStart:'', breakEnd:'' }) }}
+                      style={{ background:'#FEF3C7',color:'#92400E',border:'1px solid #FDE68A',padding:'5px 12px',borderRadius:6,fontSize:12,fontWeight:700,cursor:'pointer' }}>
+                      Place on break
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Break modal */}
+      {modal && (
+        <div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,.5)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:16 }}
+          onClick={()=>setModal(null)}>
+          <div style={{ background:'#fff',borderRadius:14,padding:26,maxWidth:420,width:'100%',boxShadow:'0 20px 60px rgba(0,0,0,.25)' }}
+            onClick={e=>e.stopPropagation()}>
+            <div style={{ fontSize:15,fontWeight:800,color:TOKENS.s900,marginBottom:4 }}>Place on break</div>
+            <div style={{ fontSize:12.5,color:TOKENS.s500,marginBottom:20 }}>{modal.firstName} {modal.lastName} · {modal.role}</div>
+
+            <div style={{ display:'grid',gap:14 }}>
+              <div>
+                <label style={{ fontSize:11,fontWeight:700,color:TOKENS.crimson,textTransform:'uppercase',letterSpacing:'.05em',marginBottom:4,display:'block' }}>Break type</label>
+                <select value={form.breakType} onChange={e=>setForm(p=>({...p,breakType:e.target.value}))}
+                  style={{ width:'100%',padding:'9px 11px',borderRadius:7,border:'1.5px solid '+TOKENS.line,fontSize:13,fontFamily:'inherit' }}>
+                  {Object.entries(BREAK_LABELS).map(([v,l])=><option key={v} value={v}>{l}</option>)}
+                </select>
+              </div>
+              <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:10 }}>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:TOKENS.crimson,textTransform:'uppercase',letterSpacing:'.05em',marginBottom:4,display:'block' }}>Start date</label>
+                  <input type="date" value={form.breakStart} onChange={e=>setForm(p=>({...p,breakStart:e.target.value}))}
+                    style={{ width:'100%',padding:'9px 11px',borderRadius:7,border:'1.5px solid '+TOKENS.line,fontSize:13,fontFamily:'inherit',boxSizing:'border-box' }}/>
+                </div>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:TOKENS.crimson,textTransform:'uppercase',letterSpacing:'.05em',marginBottom:4,display:'block' }}>End date (optional)</label>
+                  <input type="date" value={form.breakEnd} onChange={e=>setForm(p=>({...p,breakEnd:e.target.value}))}
+                    style={{ width:'100%',padding:'9px 11px',borderRadius:7,border:'1.5px solid '+TOKENS.line,fontSize:13,fontFamily:'inherit',boxSizing:'border-box' }}/>
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize:11,fontWeight:700,color:TOKENS.crimson,textTransform:'uppercase',letterSpacing:'.05em',marginBottom:4,display:'block' }}>Note (optional)</label>
+                <input value={form.breakNote} onChange={e=>setForm(p=>({...p,breakNote:e.target.value}))}
+                  placeholder="e.g. Medical leave for surgery"
+                  style={{ width:'100%',padding:'9px 11px',borderRadius:7,border:'1.5px solid '+TOKENS.line,fontSize:13,fontFamily:'inherit',boxSizing:'border-box' }}/>
+              </div>
+            </div>
+
+            <div style={{ background:'#FEF9C3',borderRadius:8,padding:'10px 14px',marginTop:16,fontSize:12,color:'#92400E',lineHeight:1.5 }}>
+              This will deactivate {modal.firstName}'s account and stop daily check-in reminders until you remove the break.
+            </div>
+
+            <div style={{ display:'flex',gap:10,marginTop:18 }}>
+              <button onClick={putOnBreak} disabled={!!saving} style={{ flex:1,background:'#D97706',color:'#fff',border:'none',padding:'11px 0',borderRadius:8,fontSize:13,fontWeight:700,cursor:saving?'not-allowed':'pointer' }}>
+                {saving?'Saving...':'Confirm — place on break'}
+              </button>
+              <button onClick={()=>setModal(null)} style={{ background:'transparent',border:'1.5px solid '+TOKENS.line,color:TOKENS.s500,padding:'11px 16px',borderRadius:8,fontSize:13,cursor:'pointer' }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
