@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['admin','accountant','sales','ops_manager','teacher','student','parent','demo'], default: 'student' },
+  role: { type: String, enum: ['admin','accountant','sales','ops_manager','dos','teacher','student','parent','demo'], default: 'student' },
   grade: String,
 
   // ── PROGRAMME ENROLMENT (students) ──
