@@ -295,4 +295,45 @@ router.delete('/:attendanceId', auth, requireRole('teacher', 'admin', 'dos'), as
   }
 });
 
+
+// ── GET /api/attendance/summary ──────────────────────────
+// DOS: attendance rate per user over a date range
+router.get('/summary', auth, requireRole('admin', 'dos', 'ops_manager'), async (req, res) => {
+  try {
+    const { from, to, role } = req.query
+    const dateFilter = {}
+    if (from) dateFilter.$gte = normaliseDate(from)
+    if (to)   dateFilter.$lte = normaliseDate(to)
+
+    const match = Object.keys(dateFilter).length ? { date: dateFilter } : {}
+
+    const agg = await Attendance.aggregate([
+      { $match: match },
+      { $group: {
+        _id: '$studentId',
+        total:   { $sum: 1 },
+        present: { $sum: { $cond: [{ $eq: ['$status','present'] }, 1, 0] } },
+        absent:  { $sum: { $cond: [{ $eq: ['$status','absent']  }, 1, 0] } },
+        late:    { $sum: { $cond: [{ $eq: ['$checkInStatus','late'] }, 1, 0] } },
+      }},
+      { $lookup: { from:'users', localField:'_id', foreignField:'_id', as:'user' } },
+      { $unwind: '$user' },
+      { $match: role ? { 'user.role': role } : {} },
+      { $project: {
+        name:       { $concat: ['$user.firstName',' ','$user.lastName'] },
+        role:       '$user.role',
+        curriculum: '$user.curriculum',
+        grade:      '$user.gradeLevel',
+        total: 1, present: 1, absent: 1, late: 1,
+        rate: { $cond: [{ $gt: ['$total',0] }, { $multiply: [{ $divide: ['$present','$total'] }, 100] }, 0] },
+      }},
+      { $sort: { rate: 1 } },
+    ])
+
+    return res.json({ success: true, data: { records: agg } })
+  } catch(e) {
+    return res.status(500).json({ success: false, message: e.message })
+  }
+});
+
 module.exports = router;
