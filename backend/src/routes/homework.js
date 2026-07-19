@@ -81,7 +81,7 @@ function autoGradeMCQ(snapshotQuestion, answer) {
 //         questions: [{questionId or full snapshot}], saveCustomToBank: bool,
 //         assignedRoom, assignedStudents, releaseAt, dueAt, status }
 // ─────────────────────────────────────────────────────────
-router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const {
       title, description,
@@ -334,7 +334,7 @@ router.get('/:id', auth, async (req, res) => {
 // ─────────────────────────────────────────────────────────
 // PATCH /api/homework/:id  — update (creator/admin only)
 // ─────────────────────────────────────────────────────────
-router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     if (!isObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'Invalid homework ID.' });
@@ -361,7 +361,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
 // ─────────────────────────────────────────────────────────
 // DELETE /api/homework/:id  — soft-delete (creator/admin only)
 // ─────────────────────────────────────────────────────────
-router.delete('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     if (!isObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'Invalid homework ID.' });
@@ -527,7 +527,7 @@ router.get('/:id/my-submission', auth, async (req, res) => {
 // ─────────────────────────────────────────────────────────
 // GET /api/homework/:id/submissions — teacher views all submissions
 // ─────────────────────────────────────────────────────────
-router.get('/:id/submissions', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.get('/:id/submissions', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     if (!isObjectId(req.params.id)) {
       return res.status(400).json({ success: false, message: 'Invalid homework ID.' });
@@ -553,7 +553,7 @@ router.get('/:id/submissions', auth, requireRole('teacher', 'admin'), async (req
 // PATCH /api/homework/:hwId/submissions/:subId/grade  — teacher grades
 // Body: { answers: [{questionIndex, marksAwarded, feedback}], overallFeedback, release }
 // ─────────────────────────────────────────────────────────
-router.patch('/:hwId/submissions/:subId/grade', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.patch('/:hwId/submissions/:subId/grade', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const { hwId, subId } = req.params;
     if (!isObjectId(hwId) || !isObjectId(subId)) {
