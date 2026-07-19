@@ -106,7 +106,7 @@ router.get('/student/:id', auth, async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid studentId.');
 
     const isOwn = String(req.user._id) === String(req.params.id);
-    if (!isOwn && !['teacher', 'admin'].includes(req.user.role)) {
+    if (!isOwn && !['teacher', 'admin', 'dos'].includes(req.user.role)) {
       return fail(res, 403, 'Not allowed.');
     }
 
@@ -138,7 +138,7 @@ router.get('/teacher/:id', auth, async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid teacherId.');
 
     const isOwn = String(req.user._id) === String(req.params.id);
-    if (!isOwn && req.user.role !== 'admin') {
+    if (!isOwn && !['admin','dos'].includes(req.user.role)) {
       return fail(res, 403, 'Not allowed.');
     }
 
