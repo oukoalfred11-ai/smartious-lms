@@ -6376,12 +6376,8 @@ function DOSTimetableModule({ toast, refreshKey }) {
   useEffect(() => {
     setLoading(true)
     api.get('/timetables', { params: { limit:200 } })
-      .then(r => setEntries(r.data?.entries || r.data?.data?.entries || r.data?.timetableEntries || []))
-      .catch(() => { toast?.error?.('Failed to load timetable.'); setLoading(false) })
-    // remove duplicate
-        .then(r => setEntries(r.data?.entries || r.data?.data?.entries || r.data?.timetableEntries || []))
-        .catch(() => toast?.error?.('Failed to load timetable.'))
-      )
+      .then(r => setEntries(r.data?.data?.timetables || r.data?.timetables || []))
+      .catch(() => toast?.error?.('Failed to load timetable.'))
       .finally(() => setLoading(false))
   }, [refreshKey])
 
