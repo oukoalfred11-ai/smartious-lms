@@ -161,7 +161,7 @@ router.get('/teacher/:id', auth, async (req, res) => {
 // audienceCurriculum, audienceGrade, deliveryMode, meetingLink,
 // location, description
 // ═══════════════════════════════════════════════════════════
-router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const b = req.body || {};
     const teacherId = b.teacherId && mongoose.isValidObjectId(b.teacherId)
@@ -209,7 +209,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
 // PATCH /:id — Edit a timetable slot
 // Allowed for the creator or an admin.
 // ═══════════════════════════════════════════════════════════
-router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid entry id.');
     const entry = await TimetableEntry.findById(req.params.id);
@@ -249,7 +249,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
 // DELETE /:id — Delete a timetable slot
 // Allowed for the creator or an admin.
 // ═══════════════════════════════════════════════════════════
-router.delete('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid entry id.');
     const entry = await TimetableEntry.findById(req.params.id);
