@@ -67,8 +67,10 @@ const MODULES = {
   reports:     { label: 'Reports',     accent: TOKENS.crimson,     icon: 'frontdesk' },
   exams:       { label: 'Exams & Assessments', accent: TOKENS.crimson,     icon: 'frontdesk' },
   students:    { label: 'Students',             accent: TOKENS.accentNavy,  icon: 'users' },
-  doshomework: { label: 'Homework',             accent: TOKENS.accentAmber, icon: 'frontdesk' },
-  dosanalytics:{ label: 'Performance Analytics',accent: TOKENS.crimson,     icon: 'chart' },
+  doshomework:  { label: 'Homework',              accent: TOKENS.accentAmber, icon: 'frontdesk' },
+  dosanalytics: { label: 'Performance Analytics', accent: TOKENS.crimson,    icon: 'chart' },
+  dosattend:    { label: 'Attendance',             accent: TOKENS.accentTeal, icon: 'frontdesk' },
+  dostimetable: { label: 'Timetables',             accent: TOKENS.accentNavy, icon: 'rooms' },
   salesperf:   { label: 'My Performance', accent: TOKENS.gold,      icon: 'frontdesk' },
   livelessons: { label: 'Live Classes', accent: TOKENS.accentRose,  icon: 'live' },
   grouprooms:  { label: 'Group Rooms',  accent: TOKENS.accentOcean, icon: 'rooms' },
@@ -556,6 +558,8 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Overview',    items: ['dosanalytics'] },
       { label: 'Exams',       items: ['exams'] },
       { label: 'Homework',    items: ['doshomework'] },
+      { label: 'Attendance',  items: ['dosattend'] },
+      { label: 'Timetables',  items: ['dostimetable'] },
       { label: 'Reports',     items: ['reports'] },
       { label: 'System',      items: ['settings'] },
     ],
@@ -831,7 +835,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
     ],
     accountant:  [{ items: ['dashboard','analytics','billing','payroll','settings'] }],
     sales:       [{ items: ['dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
-    dos:         [{ items: ['dosanalytics','exams','doshomework','reports','settings'] }],
+    dos:         [{ items: ['dosanalytics','exams','doshomework','dosattend','dostimetable','reports','settings'] }],
     ops_manager: [{ items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','assessment','documents','payroll','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
@@ -863,9 +867,11 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'crm' && <CRMModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'salesperf' && <SalesPerformanceModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'reports'      && <ReportsModule toast={toast} refreshKey={refreshKey}/>}
-        {safePage === 'dosanalytics' && <DOSAnalyticsModule toast={toast} refreshKey={refreshKey}/>}
-        {safePage === 'exams'        && <DOSExamsModule toast={toast} refreshKey={refreshKey}/>}
-        {safePage === 'doshomework'  && <DOSHomeworkModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'dosanalytics'  && <DOSAnalyticsModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'exams'         && <DOSExamsModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'doshomework'   && <DOSHomeworkModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'dosattend'     && <DOSAttendanceModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'dostimetable'  && <DOSTimetableModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'payroll'     && <PayrollModule    refreshKey={refreshKey} toast={toast} />}
         {safePage === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
         {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
@@ -6095,6 +6101,571 @@ function SalesPerformanceModule({ toast, refreshKey }) {
 //   2. ops_manager/admin ROLE_SECTIONS: items: [..., 'reports']
 //   3. Render: {safePage==='reports' && <ReportsModule toast={toast} refreshKey={refreshKey}/>}
 // ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// DOS MODULE 4: Attendance Manager
+// Mark and view attendance for ALL students and staff.
+// DOS can mark/edit any record for any date.
+// ═══════════════════════════════════════════════════════════
+function DOSAttendanceModule({ toast, refreshKey }) {
+  const today = new Date().toISOString().split('T')[0]
+  const [date,      setDate]      = useState(today)
+  const [userType,  setUserType]  = useState('student')
+  const [users,     setUsers]     = useState([])
+  const [records,   setRecords]   = useState({})   // userId -> status
+  const [loading,   setLoading]   = useState(false)
+  const [saving,    setSaving]    = useState(false)
+  const [search,    setSearch]    = useState('')
+  const [history,   setHistory]   = useState(null)  // student history view
+  const [histUser,  setHistUser]  = useState(null)
+
+  // Load users for the selected type
+  useEffect(() => {
+    setUsers([])
+    setRecords({})
+    api.get('/users', { params: { role: userType, limit: 200, isActive: true } })
+      .then(r => {
+        const list = r.data?.data?.users || r.data?.users || []
+        setUsers(list)
+        loadAttendance(list, date)
+      })
+      .catch(() => toast?.error?.('Failed to load users.'))
+  }, [userType, refreshKey])
+
+  const loadAttendance = (userList, d) => {
+    if (!userList.length) return
+    setLoading(true)
+    api.get('/attendance/day', { params: { date: d } })
+      .then(r => {
+        const dayRecs = r.data?.data?.records || r.data?.records || []
+        const map = {}
+        userList.forEach(u => {
+          const rec = dayRecs.find(a => String(a.studentId) === String(u._id) || String(a.userId) === String(u._id))
+          map[String(u._id)] = rec?.status || 'absent'
+        })
+        setRecords(map)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    if (users.length) loadAttendance(users, date)
+  }, [date])
+
+  const setStatus = (uid, status) => setRecords(p => ({ ...p, [uid]: status }))
+
+  const save = async () => {
+    setSaving(true)
+    try {
+      const payload = Object.entries(records).map(([userId, status]) => ({ userId, studentId: userId, date, status }))
+      await api.post('/attendance/bulk', { records: payload })
+      toast?.ok?.('Attendance saved for ' + date + '.')
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Failed to save attendance.')
+    } finally { setSaving(false) }
+  }
+
+  const openHistory = async (u) => {
+    setHistUser(u)
+    setHistory(null)
+    try {
+      const { data } = await api.get('/attendance/student/'+u._id)
+      setHistory(data?.data?.records || data?.records || [])
+    } catch { toast?.error?.('Could not load history.') }
+  }
+
+  const STATUS_OPTIONS = [
+    { val:'present',  label:'Present',   bg:'#D1FAE5', fg:'#065F46' },
+    { val:'absent',   label:'Absent',    bg:'#FEE2E2', fg:'#991B1B' },
+    { val:'late',     label:'Late',      bg:'#FEF3C7', fg:'#92400E' },
+    { val:'half_day', label:'Half day',  bg:'#DBEAFE', fg:'#1E40AF' },
+    { val:'excused',  label:'Excused',   bg:'#F3E8FF', fg:'#6B21A8' },
+  ]
+
+  const filtered = users.filter(u => {
+    if (!search) return true
+    const name = (u.firstName+' '+u.lastName).toLowerCase()
+    return name.includes(search.toLowerCase()) || (u.admissionNo||'').toLowerCase().includes(search.toLowerCase())
+  })
+
+  const counts = STATUS_OPTIONS.map(s => ({ ...s, count: Object.values(records).filter(v=>v===s.val).length }))
+  const total  = users.length
+
+  // History modal
+  if (histUser && history !== null) {
+    const present = history.filter(r=>r.status==='present').length
+    const rate    = history.length ? Math.round((present/history.length)*100) : 0
+    return (
+      <>
+        <button onClick={()=>{ setHistUser(null); setHistory(null) }}
+          style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:5, padding:0, marginBottom:16 }}>
+          ← Back to attendance
+        </button>
+        <div className="card" style={{ padding:20, marginBottom:14 }}>
+          <div style={{ fontSize:14, fontWeight:800, color:TOKENS.s900, marginBottom:4 }}>{histUser.firstName} {histUser.lastName}</div>
+          <div style={{ fontSize:12, color:TOKENS.s500, marginBottom:14 }}>{histUser.curriculum} · {histUser.gradeLevel} · Adm: {histUser.admissionNo}</div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:16 }}>
+            {[
+              { label:'Total records', val:history.length },
+              { label:'Present',       val:present,          color:'#065F46' },
+              { label:'Absent',        val:history.filter(r=>r.status==='absent').length, color:'#991B1B' },
+              { label:'Attendance rate', val:rate+'%',       color:rate>=80?'#065F46':rate>=60?'#D97706':'#991B1B' },
+            ].map(k=>(
+              <div key={k.label} style={{ textAlign:'center', padding:'10px 0' }}>
+                <div style={{ fontSize:24, fontWeight:800, color:k.color||TOKENS.s900 }}>{k.val}</div>
+                <div style={{ fontSize:11, color:TOKENS.s400, marginTop:2 }}>{k.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="card" style={{ overflow:'hidden' }}>
+          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
+            <thead><tr>
+              {['Date','Status','Day','Marked by'].map(h=>(
+                <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>
+              ))}
+            </tr></thead>
+            <tbody>
+              {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((r,i) => {
+                const s = STATUS_OPTIONS.find(x=>x.val===r.status) || STATUS_OPTIONS[1]
+                return (
+                  <tr key={i} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                    <td style={{ padding:'8px 12px', fontSize:13 }}>{new Date(r.date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}</td>
+                    <td style={{ padding:'8px 12px' }}>
+                      <span style={{ padding:'2px 9px', borderRadius:99, fontSize:11.5, fontWeight:700, background:s.bg, color:s.fg }}>{s.label}</span>
+                    </td>
+                    <td style={{ padding:'8px 12px', fontSize:12, color:TOKENS.s500 }}>{new Date(r.date).toLocaleDateString('en-GB',{weekday:'long'})}</td>
+                    <td style={{ padding:'8px 12px', fontSize:12, color:TOKENS.s500 }}>{r.markedBy||'—'}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <PSection tag="Dean of Studies" title="Attendance" em="Manager"
+        sub="Mark and review attendance for all students and staff. Changes are saved per day."/>
+
+      {/* Controls */}
+      <div style={{ display:'grid', gridTemplateColumns:'auto auto 1fr auto', gap:10, marginBottom:16, alignItems:'center' }}>
+        <input type="date" value={date} onChange={e=>setDate(e.target.value)}
+          style={{ padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
+        <div style={{ display:'flex', border:'1.5px solid '+TOKENS.line, borderRadius:7, overflow:'hidden' }}>
+          {['student','teacher','admin','ops_manager','accountant','sales','dos'].map(role => (
+            <button key={role} onClick={()=>setUserType(role)} style={{
+              padding:'8px 14px', border:'none', cursor:'pointer', fontSize:12, fontWeight:600,
+              background: userType===role ? TOKENS.crimson : '#fff',
+              color: userType===role ? '#fff' : TOKENS.s500,
+              borderRight: role!=='dos'?'1px solid '+TOKENS.line:'none',
+              whiteSpace:'nowrap',
+            }}>{role==='ops_manager'?'Ops':role==='accountant'?'Accounts':role.charAt(0).toUpperCase()+role.slice(1)}</button>
+          ))}
+        </div>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or admission no..."
+          style={{ padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
+        <button onClick={save} disabled={saving} style={{
+          background:saving?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none',
+          padding:'9px 22px', borderRadius:7, fontSize:13, fontWeight:700,
+          cursor:saving?'not-allowed':'pointer', whiteSpace:'nowrap',
+        }}>{saving?'Saving...':'Save attendance'}</button>
+      </div>
+
+      {/* KPI strip */}
+      <div style={{ display:'flex', gap:10, marginBottom:14, flexWrap:'wrap' }}>
+        {counts.map(s=>(
+          <div key={s.val} style={{ padding:'8px 14px', borderRadius:8, background:s.bg, border:'1px solid '+s.fg+'30', display:'flex', gap:10, alignItems:'center' }}>
+            <span style={{ fontSize:18, fontWeight:800, color:s.fg }}>{s.count}</span>
+            <span style={{ fontSize:11.5, fontWeight:600, color:s.fg }}>{s.label}</span>
+            {total>0&&<span style={{ fontSize:10, color:s.fg, opacity:.7 }}>({Math.round((s.count/total)*100)}%)</span>}
+          </div>
+        ))}
+        <div style={{ padding:'8px 14px', borderRadius:8, background:TOKENS.cream, border:'1px solid '+TOKENS.line, display:'flex', gap:10, alignItems:'center' }}>
+          <span style={{ fontSize:18, fontWeight:800, color:TOKENS.s900 }}>{total}</span>
+          <span style={{ fontSize:11.5, fontWeight:600, color:TOKENS.s500 }}>Total</span>
+        </div>
+      </div>
+
+      {/* Attendance grid */}
+      <div className="card" style={{ overflow:'hidden' }}>
+        {loading ? (
+          <div style={{ padding:30, textAlign:'center', color:TOKENS.s400 }}>Loading...</div>
+        ) : filtered.length === 0 ? (
+          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No {userType}s found.</div>
+        ) : (
+          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
+            <thead><tr>
+              {['Name', userType==='student'?'Adm / Grade':'Role', 'Status', 'Quick mark', ''].map(h=>(
+                <th key={h} style={{ padding:'9px 14px', textAlign:'left', fontSize:10.5 }}>{h}</th>
+              ))}
+            </tr></thead>
+            <tbody>
+              {filtered.map(u => {
+                const status = records[String(u._id)] || 'absent'
+                const so = STATUS_OPTIONS.find(s=>s.val===status) || STATUS_OPTIONS[1]
+                return (
+                  <tr key={u._id} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                    <td style={{ padding:'10px 14px' }}>
+                      <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
+                      <div style={{ fontSize:11, color:TOKENS.s500 }}>{u.email}</div>
+                    </td>
+                    <td style={{ padding:'10px 14px', fontSize:12.5, color:TOKENS.s600 }}>
+                      {userType==='student' ? (u.admissionNo||'—')+' · '+(u.gradeLevel||'—') : u.role}
+                    </td>
+                    <td style={{ padding:'10px 14px' }}>
+                      <span style={{ padding:'4px 12px', borderRadius:99, fontSize:12, fontWeight:700, background:so.bg, color:so.fg }}>
+                        {so.label}
+                      </span>
+                    </td>
+                    <td style={{ padding:'10px 14px' }}>
+                      <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+                        {STATUS_OPTIONS.map(s => (
+                          <button key={s.val} onClick={()=>setStatus(String(u._id), s.val)} style={{
+                            padding:'4px 9px', borderRadius:6, border:'1.5px solid '+(status===s.val?s.fg:TOKENS.line),
+                            background:status===s.val?s.bg:'#fff', color:status===s.val?s.fg:TOKENS.s500,
+                            fontSize:11, fontWeight:status===s.val?700:500, cursor:'pointer',
+                          }}>{s.label}</button>
+                        ))}
+                      </div>
+                    </td>
+                    <td style={{ padding:'10px 14px' }}>
+                      {userType==='student' && (
+                        <button onClick={()=>openHistory(u)} style={{ fontSize:11, color:TOKENS.crimson, background:'transparent', border:'none', cursor:'pointer', fontWeight:700, textDecoration:'underline' }}>
+                          History
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// DOS MODULE 5: Timetable Manager
+// View all teacher and student timetables.
+// DOS can edit (reschedule) any entry.
+// ═══════════════════════════════════════════════════════════
+function DOSTimetableModule({ toast, refreshKey }) {
+  const [view,     setView]     = useState('list')   // list | teacher | student | edit
+  const [entries,  setEntries]  = useState([])
+  const [loading,  setLoading]  = useState(true)
+  const [selected, setSelected] = useState(null)
+  const [editData, setEditData] = useState(null)
+  const [saving,   setSaving]   = useState(false)
+  const [filterBy, setFilterBy] = useState('all')    // all | teacher | student
+  const [search,   setSearch]   = useState('')
+  const [users,    setUsers]    = useState([])
+  const [chosenUser, setChosenUser] = useState(null)
+  const [userEntries, setUserEntries] = useState([])
+  const [userLoading, setUserLoading] = useState(false)
+
+  const DAYS  = ['Mon','Tue','Wed','Thu','Fri','Sat']
+  const TIMES = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00']
+
+  useEffect(() => {
+    setLoading(true)
+    api.get('/api/timetables', { params: { limit:200 } })
+      .then(r => setEntries(r.data?.data?.entries || r.data?.entries || []))
+      .catch(() => api.get('/timetables', { params: { limit:200 } })
+        .then(r => setEntries(r.data?.data?.entries || r.data?.entries || []))
+        .catch(() => toast?.error?.('Failed to load timetable.'))
+      )
+      .finally(() => setLoading(false))
+  }, [refreshKey])
+
+  useEffect(() => {
+    api.get('/users', { params: { limit:200 } })
+      .then(r => setUsers(r.data?.data?.users || r.data?.users || []))
+      .catch(() => {})
+  }, [])
+
+  const loadUserTimetable = async (u) => {
+    setChosenUser(u)
+    setUserEntries([])
+    setUserLoading(true)
+    try {
+      const path = u.role === 'teacher' ? '/timetables/mine' : '/timetables/student/'+u._id
+      const { data } = await api.get(path, u.role==='teacher' ? { params:{ teacherId:u._id } } : {})
+      setUserEntries(data?.data?.entries || data?.entries || [])
+      setView('user')
+    } catch { toast?.error?.('Could not load timetable.') }
+    finally { setUserLoading(false) }
+  }
+
+  const openEdit = (entry) => {
+    setSelected(entry)
+    setEditData({
+      title:       entry.title || '',
+      subject:     entry.subject || '',
+      dayOfWeek:   entry.dayOfWeek || 'Mon',
+      startTime:   entry.startTime || '09:00',
+      endTime:     entry.endTime   || '10:00',
+      deliveryMode: entry.deliveryMode || 'virtual',
+      notes:       entry.notes || '',
+    })
+    setView('edit')
+  }
+
+  const saveEdit = async () => {
+    if (!selected) return
+    setSaving(true)
+    try {
+      await api.patch('/timetables/'+selected._id, editData)
+      toast?.ok?.('Timetable entry updated.')
+      setView(chosenUser ? 'user' : 'list')
+      // Reload
+      if (chosenUser) {
+        loadUserTimetable(chosenUser)
+      } else {
+        const r = await api.get('/timetables', { params:{ limit:200 } })
+        setEntries(r.data?.data?.entries || r.data?.entries || [])
+      }
+    } catch (e) { toast?.error?.(e?.response?.data?.message||'Could not update.') }
+    finally { setSaving(false) }
+  }
+
+  const filtered = entries.filter(e => {
+    if (!search) return true
+    const t = (e.title+e.subject+e.teacherName).toLowerCase()
+    return t.includes(search.toLowerCase())
+  })
+
+  // ── Edit form ──────────────────────────────────────────
+  if (view === 'edit' && editData) {
+    const set = (k,v) => setEditData(p=>({...p,[k]:v}))
+    const inp2 = { width:'100%', padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit', boxSizing:'border-box' }
+    return (
+      <>
+        <button onClick={()=>{ setView(chosenUser?'user':'list') }}
+          style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:5, padding:0, marginBottom:16 }}>
+          ← Back
+        </button>
+        <h2 style={{ fontSize:20, fontWeight:800, color:TOKENS.s900, marginBottom:18 }}>Edit Timetable Entry</h2>
+        <div className="card" style={{ padding:22, maxWidth:600 }}>
+          <div style={{ display:'grid', gap:14 }}>
+            <div>
+              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Title</label>
+              <input value={editData.title} onChange={e=>set('title',e.target.value)} style={inp2}/>
+            </div>
+            <div>
+              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Subject</label>
+              <input value={editData.subject} onChange={e=>set('subject',e.target.value)} style={inp2}/>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+              <div>
+                <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Day</label>
+                <select value={editData.dayOfWeek} onChange={e=>set('dayOfWeek',e.target.value)} style={inp2}>
+                  {DAYS.map(d=><option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Start time</label>
+                <select value={editData.startTime} onChange={e=>set('startTime',e.target.value)} style={inp2}>
+                  {TIMES.map(t=><option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>End time</label>
+                <select value={editData.endTime} onChange={e=>set('endTime',e.target.value)} style={inp2}>
+                  {TIMES.map(t=><option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Delivery mode</label>
+              <select value={editData.deliveryMode} onChange={e=>set('deliveryMode',e.target.value)} style={inp2}>
+                {['virtual','in-person','hybrid'].map(m=><option key={m} value={m}>{m.charAt(0).toUpperCase()+m.slice(1)}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Notes</label>
+              <textarea value={editData.notes} onChange={e=>set('notes',e.target.value)} rows={2}
+                style={{ ...inp2, resize:'vertical' }}/>
+            </div>
+          </div>
+          <div style={{ display:'flex', gap:10, marginTop:18 }}>
+            <button onClick={saveEdit} disabled={saving} style={{
+              background:saving?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none',
+              padding:'10px 24px', borderRadius:8, fontSize:13, fontWeight:700,
+              cursor:saving?'not-allowed':'pointer',
+            }}>{saving?'Saving...':'Save changes'}</button>
+            <button onClick={()=>setView(chosenUser?'user':'list')} style={{
+              background:'transparent', border:'1.5px solid '+TOKENS.line, color:TOKENS.s500,
+              padding:'10px 18px', borderRadius:8, fontSize:13, cursor:'pointer',
+            }}>Cancel</button>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  // ── Individual user timetable (grid) ──────────────────
+  if (view === 'user' && chosenUser) {
+    // Build weekly grid
+    const grid = {}
+    DAYS.forEach(d => { grid[d] = [] })
+    userEntries.forEach(e => { if (grid[e.dayOfWeek]) grid[e.dayOfWeek].push(e) })
+
+    return (
+      <>
+        <button onClick={()=>{ setView('list'); setChosenUser(null); setUserEntries([]) }}
+          style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:5, padding:0, marginBottom:16 }}>
+          ← Back to timetable list
+        </button>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:18 }}>
+          <div>
+            <h2 style={{ fontSize:20, fontWeight:800, color:TOKENS.s900, margin:'0 0 4px' }}>
+              {chosenUser.firstName} {chosenUser.lastName}
+            </h2>
+            <div style={{ fontSize:12.5, color:TOKENS.s500 }}>
+              {chosenUser.role.charAt(0).toUpperCase()+chosenUser.role.slice(1)} · {chosenUser.curriculum||''} {chosenUser.gradeLevel||''}
+            </div>
+          </div>
+          <div style={{ fontSize:12.5, color:TOKENS.s500 }}>{userEntries.length} entries</div>
+        </div>
+
+        {userLoading ? (
+          <div style={{ padding:30, textAlign:'center', color:TOKENS.s400 }}>Loading timetable...</div>
+        ) : userEntries.length === 0 ? (
+          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No timetable entries found.</div>
+        ) : (
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:10 }}>
+            {DAYS.map(day => (
+              <div key={day}>
+                <div style={{ fontSize:11, fontWeight:800, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:8, textAlign:'center', padding:'6px 0', background:TOKENS.cream, borderRadius:6 }}>
+                  {day}
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                  {(grid[day]||[]).sort((a,b)=>a.startTime.localeCompare(b.startTime)).map(e => (
+                    <div key={e._id} style={{ background:'#fff', border:'1.5px solid '+TOKENS.line, borderRadius:8, padding:'8px 10px', borderLeft:'3px solid '+TOKENS.crimson }}>
+                      <div style={{ fontSize:11.5, fontWeight:700, color:TOKENS.s900, marginBottom:2 }}>{e.subject||e.title}</div>
+                      <div style={{ fontSize:10.5, color:TOKENS.s500 }}>{e.startTime} – {e.endTime}</div>
+                      {e.deliveryMode && <div style={{ fontSize:10, color:TOKENS.s400, marginTop:2, textTransform:'capitalize' }}>{e.deliveryMode}</div>}
+                      <button onClick={()=>openEdit(e)} style={{ marginTop:6, fontSize:10.5, color:TOKENS.crimson, background:'transparent', border:'none', cursor:'pointer', fontWeight:700, padding:0, textDecoration:'underline' }}>
+                        Edit
+                      </button>
+                    </div>
+                  ))}
+                  {!(grid[day]||[]).length && <div style={{ fontSize:10.5, color:TOKENS.s300, textAlign:'center', padding:'8px 0' }}>Free</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </>
+    )
+  }
+
+  // ── Master list + user picker ─────────────────────────
+  const teacherList = users.filter(u => u.role === 'teacher')
+  const studentList = users.filter(u => u.role === 'student')
+
+  return (
+    <>
+      <PSection tag="Dean of Studies" title="Timetable" em="Manager"
+        sub="View and edit timetables for all teachers and students. Click a name to see their weekly schedule."/>
+
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:22 }}>
+        {/* Teacher picker */}
+        <div className="card" style={{ padding:18 }}>
+          <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Teacher timetables</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:6, maxHeight:280, overflowY:'auto' }}>
+            {teacherList.map(u => (
+              <button key={u._id} onClick={()=>loadUserTimetable(u)} style={{
+                display:'flex', justifyContent:'space-between', alignItems:'center',
+                padding:'8px 12px', borderRadius:8, border:'1px solid '+TOKENS.line,
+                background:'#fff', cursor:'pointer', textAlign:'left',
+              }}
+                onMouseEnter={e=>e.currentTarget.style.background=TOKENS.cream}
+                onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
+                <div>
+                  <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
+                  <div style={{ fontSize:11, color:TOKENS.s500 }}>{u.email}</div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.crimson} strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            ))}
+            {!teacherList.length && <div style={{ fontSize:12.5, color:TOKENS.s400, textAlign:'center', padding:'12px 0' }}>No teachers found.</div>}
+          </div>
+        </div>
+
+        {/* Student picker */}
+        <div className="card" style={{ padding:18 }}>
+          <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Student timetables</div>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search student..."
+            style={{ width:'100%', padding:'7px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, marginBottom:10, fontFamily:'inherit', boxSizing:'border-box' }}/>
+          <div style={{ display:'flex', flexDirection:'column', gap:6, maxHeight:240, overflowY:'auto' }}>
+            {studentList.filter(u=>!search||(u.firstName+' '+u.lastName).toLowerCase().includes(search.toLowerCase())).map(u => (
+              <button key={u._id} onClick={()=>loadUserTimetable(u)} style={{
+                display:'flex', justifyContent:'space-between', alignItems:'center',
+                padding:'8px 12px', borderRadius:8, border:'1px solid '+TOKENS.line,
+                background:'#fff', cursor:'pointer', textAlign:'left',
+              }}
+                onMouseEnter={e=>e.currentTarget.style.background=TOKENS.cream}
+                onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
+                <div>
+                  <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
+                  <div style={{ fontSize:11, color:TOKENS.s500 }}>{u.curriculum} · {u.gradeLevel} · {u.admissionNo||'—'}</div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.crimson} strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* All entries table */}
+      <div className="card" style={{ overflow:'hidden' }}>
+        <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>
+          All timetable entries ({filtered.length})
+        </div>
+        {loading ? (
+          <div style={{ padding:30, textAlign:'center', color:TOKENS.s400 }}>Loading...</div>
+        ) : filtered.length === 0 ? (
+          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No entries found.</div>
+        ) : (
+          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
+            <thead><tr>
+              {['Subject','Day','Time','Mode','Teacher','Students',''].map(h=>(
+                <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>
+              ))}
+            </tr></thead>
+            <tbody>
+              {filtered.map(e => (
+                <tr key={e._id} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                  <td style={{ padding:'9px 12px', fontWeight:700, fontSize:13 }}>{e.subject||e.title}</td>
+                  <td style={{ padding:'9px 12px', fontSize:12.5 }}>{e.dayOfWeek}</td>
+                  <td style={{ padding:'9px 12px', fontSize:12.5, whiteSpace:'nowrap' }}>{e.startTime} – {e.endTime}</td>
+                  <td style={{ padding:'9px 12px', fontSize:12, color:TOKENS.s500, textTransform:'capitalize' }}>{e.deliveryMode}</td>
+                  <td style={{ padding:'9px 12px', fontSize:12.5, color:TOKENS.s600 }}>{e.teacherName||e.teacherId?.firstName||'—'}</td>
+                  <td style={{ padding:'9px 12px', fontSize:12, color:TOKENS.s500 }}>{(e.assignedStudents||[]).length}</td>
+                  <td style={{ padding:'9px 12px' }}>
+                    <button onClick={()=>openEdit(e)} style={{
+                      fontSize:11.5, color:TOKENS.crimson, background:'transparent', border:'1px solid '+TOKENS.crimson+'40',
+                      padding:'4px 10px', borderRadius:5, cursor:'pointer', fontWeight:700,
+                    }}>Edit</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
+  )
+}
+
 
 // ═══════════════════════════════════════════════════════════
 // DOS MODULE 1: Performance Analytics
