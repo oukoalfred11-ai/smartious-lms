@@ -366,7 +366,6 @@ const NAV_SECTIONS = [
     { id:'exams',        label:'Exams',           icon:'exams',        svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',  badge:'1' },
     { id:'results',      label:'My Results',      icon:'results',      svg:'<circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>' },
     { id:'live',         label:'Live Classes',    icon:'live',         svg:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>', live:true },
-    { id:'checkin',     label:'Check In',        icon:'checkin',      svg:'<polyline points="20 6 9 17 4 12"/>' },
     { id:'timetable',    label:'Timetable',       icon:'timetable',    svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
     { id:'attendance',   label:'My Attendance',   icon:'attendance',   svg:'<rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 12.5l2 2 4-4.5"/>' },
     { id:'library',      label:'Library',         icon:'library',      svg:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/>' },
@@ -878,7 +877,7 @@ export default function StudentPortal() {
     page === 'results'      ? 'My Results' :
     page === 'live'         ? 'Live Classes' :
     page === 'timetable'    ? 'Timetable' :
-    page === 'attendance'   ? 'My Attendance' :
+    page === 'attendance'   ? 'Attendance & Check-in' :
     page === 'library'      ? 'Library' :
     page === 'resources'    ? 'Resources' :
     page === 'profile'      ? 'My Profile' :
@@ -904,7 +903,7 @@ export default function StudentPortal() {
     page === 'results'      ? 'Grades & feedback' :
     page === 'live'         ? 'Scheduled sessions' :
     page === 'timetable'    ? 'Weekly schedule' :
-    page === 'attendance'   ? 'Daily attendance record' :
+    page === 'attendance'   ? 'Mark today and view your history' :
     page === 'library'      ? 'Coursebook PDFs' :
     page === 'resources'    ? 'Learning library' :
     page === 'profile'      ? 'Account details' :
@@ -1944,7 +1943,6 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               TIMETABLE
           ════════════════════════════════════════════ */}
-          {page === 'checkin'   && <StudentCheckInTab user={user} toast={toast} />}
           {page === 'timetable' && <RealTimetableTab user={user} setPage={setPage} toast={toast} />}
 
           {page === 'attendance' && <StudentAttendancePage user={user} toast={toast} />}
@@ -12658,385 +12656,244 @@ export { LessonPracticeTab }
 //   - Returns `items` array sorted by date desc
 // ═══════════════════════════════════════════════════════════
 function StudentAttendancePage({ user, toast }) {
-  // Month state — defaults to current month
+  const todayStr = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+  const isWeekend = [0,6].includes(new Date().getDay())
+
+  // ── Check-in state ──
+  const [ciStatus, setCiStatus] = useState(null)
+  const [ciLoading,setCiLoading]= useState(true)
+  const [saving,   setSaving]   = useState(false)
+  const [pick,     setPick]     = useState('present')
+  const [lateTime, setLateTime] = useState('')
+  const [reason,   setReason]   = useState('')
+
+  // ── Calendar state ──
   const today = new Date()
-  const [year, setYear]   = useState(today.getFullYear())
-  const [month, setMonth] = useState(today.getMonth()) // 0..11
+  const [year,  setYear]  = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth())
   const [records, setRecords] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError]   = useState(null)
+  const [calLoad, setCalLoad] = useState(true)
+  const [error,   setError]   = useState(null)
 
-  // Compute the from/to bounds for the selected month
-  const firstDay = new Date(year, month, 1)
-  const lastDay  = new Date(year, month + 1, 0)
-  const fromKey  = `${year}-${String(month + 1).padStart(2, '0')}-01`
-  const toKey    = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`
-  const monthLabel = firstDay.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+  const firstDay  = new Date(year, month, 1)
+  const lastDay   = new Date(year, month+1, 0)
+  const fromKey   = `${year}-${String(month+1).padStart(2,'0')}-01`
+  const toKey     = `${year}-${String(month+1).padStart(2,'0')}-${String(lastDay.getDate()).padStart(2,'0')}`
+  const monthLabel= firstDay.toLocaleDateString('en-GB',{month:'long',year:'numeric'})
 
-  // Load attendance for the chosen month
-  useEffect(() => {
+  const loadCI = () => {
+    setCiLoading(true)
+    api.get('/checkin/today').then(r=>setCiStatus(r.data?.data)).catch(()=>{}).finally(()=>setCiLoading(false))
+  }
+  const loadCal = () => {
     if (!user?._id) return
-    let cancelled = false
-    setLoading(true)
-    setError(null)
-    api.get(`/attendance/student/${user._id}`, { params: { from: fromKey, to: toKey } })
-      .then(res => {
-        if (cancelled) return
-        setRecords(res.data?.data?.items || [])
-      })
-      .catch(e => {
-        if (cancelled) return
-        setError(e?.response?.data?.message || e.message || 'Failed to load attendance.')
-        setRecords([])
-      })
-      .finally(() => { if (!cancelled) setLoading(false) })
-    return () => { cancelled = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?._id, fromKey, toKey])
-
-  // Index records by date key (YYYY-MM-DD) for fast cell lookup
-  const byDateKey = (() => {
-    const map = {}
-    for (const r of records) {
-      // Server returns date as an ISO string; normalise to YYYY-MM-DD
-      const d = new Date(r.date)
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-      map[key] = r
-    }
-    return map
-  })()
-
-  // Stats for the month
-  const counts = { present: 0, absent: 0, half_day: 0 }
-  for (const r of records) {
-    if (counts[r.status] !== undefined) counts[r.status]++
-  }
-  const totalMarked = counts.present + counts.absent + counts.half_day
-  // Treat half-day as 0.5 toward "attended"
-  const attendedScore = counts.present + counts.half_day * 0.5
-  const pct = totalMarked > 0 ? Math.round((attendedScore / totalMarked) * 100) : null
-
-  // Navigation
-  const prevMonth = () => {
-    if (month === 0) { setMonth(11); setYear(y => y - 1) }
-    else setMonth(m => m - 1)
-  }
-  const nextMonth = () => {
-    if (month === 11) { setMonth(0); setYear(y => y + 1) }
-    else setMonth(m => m + 1)
-  }
-  const goToday = () => { setYear(today.getFullYear()); setMonth(today.getMonth()) }
-
-  // Build a 6-week grid (always 42 cells) — pad with blanks before
-  // and after the actual month so the calendar always lays out clean.
-  const buildGrid = () => {
-    const cells = []
-    // Day-of-week for the 1st (0=Sun..6=Sat). Convert to Mon-first index.
-    const firstDow = firstDay.getDay()       // 0..6 Sun-first
-    const padFront = (firstDow + 6) % 7       // Convert to Mon-first padding
-    for (let i = 0; i < padFront; i++) cells.push({ blank: true, key: 'b' + i })
-
-    for (let d = 1; d <= lastDay.getDate(); d++) {
-      const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-      const dt = new Date(year, month, d)
-      const dow = dt.getDay() // 0..6
-      cells.push({
-        blank: false,
-        day: d,
-        dateKey: key,
-        record: byDateKey[key] || null,
-        isWeekend: dow === 0 || dow === 6,
-        isToday: dt.toDateString() === today.toDateString(),
-        isFuture: dt.getTime() > today.setHours(23, 59, 59, 999),
-      })
-      // Reset today's clock since we mutated it above
-      today.setHours(0, 0, 0, 0)
-    }
-    // Pad end to nearest week boundary
-    while (cells.length % 7 !== 0) cells.push({ blank: true, key: 'be' + cells.length })
-    // Pad to 6 weeks if needed (some months only need 5)
-    while (cells.length < 42) cells.push({ blank: true, key: 'be' + cells.length })
-    return cells
-  }
-  const grid = buildGrid()
-
-  // Status -> colour
-  const statusColour = (st) => {
-    if (st === 'present')  return { bg: '#DCFCE7', border: '#15803D', text: '#15803D', label: 'Present' }
-    if (st === 'half_day') return { bg: '#FDF7E2', border: '#C9A030', text: '#7D5A0F', label: 'Half day' }
-    if (st === 'absent')   return { bg: '#FDE7EC', border: '#7D1025', text: '#7D1025', label: 'Absent' }
-    return { bg: '#F4EFEB', border: '#CFC7C2', text: '#857973', label: '—' }
+    setCalLoad(true); setError(null)
+    api.get(`/attendance/student/${user._id}`,{params:{from:fromKey,to:toKey}})
+      .then(r=>setRecords(r.data?.data?.items||[]))
+      .catch(e=>setError(e?.response?.data?.message||'Failed.'))
+      .finally(()=>setCalLoad(false))
   }
 
-  // List of absent days (with reasons) — useful for parent conversations
-  const absentDays = records
-    .filter(r => r.status === 'absent')
-    .map(r => {
-      const d = new Date(r.date)
-      return {
-        date: d,
-        reason: r.reason || '',
-        markedBy: r.markedBy
-          ? `${r.markedBy.firstName || ''} ${r.markedBy.lastName || ''}`.trim()
-          : '',
-      }
-    })
-    .sort((a, b) => b.date - a.date)
+  useEffect(()=>{loadCI()},[ ])
+  useEffect(()=>{loadCal()},[user?._id,fromKey,toKey])
+
+  const submit = async () => {
+    if(pick==='late'&&!lateTime.trim()){toast?.error?.('Enter your arrival time.');return}
+    if(pick==='absent'&&!reason.trim()){toast?.error?.('Enter a reason for absence.');return}
+    setSaving(true)
+    try { await api.post('/checkin',{status:pick,lateTime,reason}); toast?.ok?.('Check-in recorded.'); loadCI(); loadCal() }
+    catch(e){toast?.error?.(e?.response?.data?.message||'Check-in failed.')}
+    finally{setSaving(false)}
+  }
+
+  const SS = {
+    present:{bg:'#D1FAE5',fg:'#065F46',label:'Present'},
+    late:   {bg:'#FEF3C7',fg:'#D97706',label:'Late'},
+    absent: {bg:'#FEE2E2',fg:'#991B1B',label:'Absent'},
+    half_day:{bg:'#DBEAFE',fg:'#1E40AF',label:'Half day'},
+  }
+  const alreadyIn = !ciLoading&&ciStatus?.checkedIn
+  const todaySS   = alreadyIn ? SS[ciStatus.checkInStatus]||SS.present : null
+
+  // Calendar helpers
+  const byDateKey = {}
+  records.forEach(r=>{
+    const d=new Date(r.date)
+    byDateKey[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`]=r
+  })
+  const counts={present:0,absent:0,half_day:0,late:0}
+  records.forEach(r=>{if(counts[r.status]!==undefined)counts[r.status]++;else if(r.checkInStatus==='late')counts.late++})
+  const totalMarked = records.length
+  const attendedScore = counts.present + (counts.half_day||0)*0.5
+  const pct = totalMarked>0?Math.round((attendedScore/totalMarked)*100):null
+
+  const calDays=[]
+  const startPad=(firstDay.getDay()+6)%7
+  for(let i=0;i<startPad;i++) calDays.push(null)
+  for(let d=1;d<=lastDay.getDate();d++) calDays.push(d)
+
+  const prevMonth=()=>{ if(month===0){setYear(y=>y-1);setMonth(11)}else setMonth(m=>m-1) }
+  const nextMonth=()=>{ if(month===11){setYear(y=>y+1);setMonth(0)}else setMonth(m=>m+1) }
+
+  const DAY_LABELS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+
+  // On break
+  if(!ciLoading&&ciStatus?.onBreak) return (
+    <div>
+      <div style={{marginBottom:20}}>
+        <div className="sec-tag">Attendance</div>
+        <h2 className="serif" style={{fontSize:26,color:'var(--s900)',margin:'6px 0 4px'}}>My Attendance</h2>
+      </div>
+      <div style={{padding:'40px 20px',textAlign:'center',background:'#fff',border:'1px solid #E8E2D6',borderRadius:12}}>
+        <div style={{fontFamily:"'Instrument Serif',serif",fontSize:22,color:'#1A0F0E',marginBottom:8}}>You are on a break</div>
+        <div style={{fontSize:13,color:'#857973',lineHeight:1.65}}>Check-in is paused. Contact your DOS or admin to return.{ciStatus.breakNote?' Note: '+ciStatus.breakNote:''}</div>
+      </div>
+    </div>
+  )
 
   return (
     <div>
-      {/* Hero header */}
-      <div style={{
-        padding: 0, marginBottom: 18, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #8B1A2E 0%, #6B0F1E 100%)',
-        color: '#fff', borderRadius: 'var(--rxl, 14px)',
-      }}>
-        <div style={{ padding: '22px 30px' }}>
-          <div style={{
-            fontSize: 11, fontWeight: 700,
-            letterSpacing: '.12em', textTransform: 'uppercase',
-            opacity: .75, marginBottom: 6,
-          }}>My attendance</div>
-          <h2 style={{
-            fontFamily: "'Instrument Serif', serif", fontSize: 26,
-            fontWeight: 400, margin: 0, lineHeight: 1.2,
-          }}>
-            {monthLabel}
-          </h2>
-          <div style={{ fontSize: 13.5, opacity: .85, marginTop: 6 }}>
-            Your daily attendance, recorded by your teachers.
-          </div>
-        </div>
+      {/* Page header */}
+      <div style={{marginBottom:20}}>
+        <div className="sec-tag">Attendance</div>
+        <h2 className="serif" style={{fontSize:26,color:'var(--s900)',margin:'6px 0 4px'}}>My Attendance</h2>
+        <div style={{fontSize:13,color:'#6B6B6B'}}>{todayStr}</div>
+      </div>
 
-        {/* Month nav */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '10px 24px',
-          background: 'rgba(0,0,0,.18)',
-        }}>
-          <button onClick={prevMonth}
-            style={{
-              background: 'rgba(255,255,255,.12)', color: '#fff',
-              border: '1px solid rgba(255,255,255,.18)',
-              padding: '6px 14px', borderRadius: 6,
-              fontSize: 12, fontWeight: 700, cursor: 'pointer',
-            }}>‹ Previous</button>
-          <button onClick={goToday}
-            style={{
-              background: '#C9A030', color: '#5A0B1B',
-              border: 'none',
-              padding: '6px 14px', borderRadius: 6,
-              fontSize: 12, fontWeight: 800, cursor: 'pointer',
-            }}>This month</button>
-          <button onClick={nextMonth}
-            style={{
-              background: 'rgba(255,255,255,.12)', color: '#fff',
-              border: '1px solid rgba(255,255,255,.18)',
-              padding: '6px 14px', borderRadius: 6,
-              fontSize: 12, fontWeight: 700, cursor: 'pointer',
-            }}>Next ›</button>
-        </div>
-
-        {/* KPI strip */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-          background: 'rgba(0,0,0,.18)',
-          borderTop: '1px solid rgba(255,255,255,.08)',
-        }}>
-          {[
-            ['Attendance', pct === null ? '—' : pct + '%'],
-            ['Present',    counts.present],
-            ['Half days',  counts.half_day],
-            ['Absent',     counts.absent],
-            ['Days marked', totalMarked],
-          ].map(([l, v]) => (
-            <div key={l} style={{ padding: '12px 18px', borderRight: '1px solid rgba(255,255,255,.08)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', opacity: .6, marginBottom: 2 }}>
-                {l}
-              </div>
-              <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{v}</div>
+      {/* ── Daily check-in card ── */}
+      <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden',marginBottom:20}}>
+        <div style={{background:'linear-gradient(135deg,#8B1A2E,#5A0B1B)',padding:'20px 24px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div>
+            <div style={{fontSize:13,fontWeight:800,color:'#C9A030',letterSpacing:'.06em',textTransform:'uppercase',marginBottom:4}}>Daily check-in</div>
+            <div style={{fontSize:16,fontWeight:700,color:'#fff'}}>
+              {alreadyIn ? 'Checked in' : isWeekend ? 'No check-in today' : 'Mark your attendance'}
             </div>
-          ))}
+          </div>
+          {alreadyIn && todaySS && (
+            <span style={{padding:'6px 16px',borderRadius:99,background:todaySS.fg,color:'#fff',fontSize:13,fontWeight:700}}>
+              {todaySS.label}
+            </span>
+          )}
+        </div>
+
+        <div style={{padding:'20px 24px'}}>
+          {ciLoading ? (
+            <div style={{textAlign:'center',color:'#9A9A9A',fontSize:13}}>Loading...</div>
+          ) : isWeekend ? (
+            <div style={{textAlign:'center',color:'#9A9A9A',fontSize:13,padding:'8px 0'}}>Enjoy your weekend! Check-in resumes Monday.</div>
+          ) : alreadyIn ? (
+            <div style={{display:'flex',alignItems:'center',gap:16}}>
+              <div style={{width:52,height:52,borderRadius:'50%',background:todaySS.bg,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={todaySS.fg} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <div style={{fontSize:15,fontWeight:800,color:todaySS.fg}}>{todaySS.label} today</div>
+                <div style={{fontSize:12.5,color:'#857973',marginTop:2}}>
+                  {ciStatus.record?.checkInTime ? 'Checked in at '+new Date(ciStatus.record.checkInTime).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : ''}
+                  {ciStatus.checkInStatus==='late'&&ciStatus.record?.lateTime ? ' · Arrived: '+ciStatus.record.lateTime : ''}
+                  {ciStatus.checkInStatus==='absent'&&ciStatus.record?.reason ? ' · '+ciStatus.record.reason : ''}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,marginBottom:14}}>
+                {[{val:'present',label:'Present',bg:'#D1FAE5',fg:'#065F46',desc:'On time'},{val:'late',label:'Late',bg:'#FEF3C7',fg:'#D97706',desc:'Running late'},{val:'absent',label:'Absent',bg:'#FEE2E2',fg:'#991B1B',desc:'Not attending'}].map(opt=>(
+                  <button key={opt.val} onClick={()=>{setPick(opt.val);if(opt.val!=='late')setLateTime('');if(opt.val!=='absent')setReason('')}}
+                    style={{padding:'12px 8px',borderRadius:9,cursor:'pointer',textAlign:'center',border:'2px solid '+(pick===opt.val?opt.fg:'#E8E2D6'),background:pick===opt.val?opt.bg:'#fff',transition:'all .15s'}}>
+                    <div style={{fontSize:13,fontWeight:800,color:pick===opt.val?opt.fg:'#564844',marginBottom:2}}>{opt.label}</div>
+                    <div style={{fontSize:10.5,color:pick===opt.val?opt.fg:'#9A9A9A'}}>{opt.desc}</div>
+                  </button>
+                ))}
+              </div>
+              {pick==='late'&&(
+                <div style={{marginBottom:12}}>
+                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:4,display:'block'}}>Arrival time</label>
+                  <input type="time" value={lateTime} onChange={e=>setLateTime(e.target.value)} style={{width:'100%',padding:'9px 12px',borderRadius:8,border:'1.5px solid #E8E2D6',fontSize:15,fontFamily:'inherit',boxSizing:'border-box'}}/>
+                </div>
+              )}
+              {pick==='absent'&&(
+                <div style={{marginBottom:12}}>
+                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:4,display:'block'}}>Reason for absence</label>
+                  <textarea value={reason} onChange={e=>setReason(e.target.value)} rows={2} placeholder="Please explain your absence..."
+                    style={{width:'100%',padding:'9px 12px',borderRadius:8,border:'1.5px solid #E8E2D6',fontSize:13,fontFamily:'inherit',resize:'vertical',boxSizing:'border-box'}}/>
+                </div>
+              )}
+              <button onClick={submit} disabled={saving} style={{
+                width:'100%',padding:'11px',borderRadius:9,
+                background:saving?'#9A9A9A':pick==='absent'?'#991B1B':pick==='late'?'#D97706':'#065F46',
+                color:'#fff',border:'none',fontSize:13,fontWeight:800,cursor:saving?'not-allowed':'pointer',
+              }}>{saving?'Submitting...':'Mark myself as '+pick}</button>
+            </div>
+          )}
         </div>
       </div>
 
-      {loading && (
-        <div style={{ padding: '40px 20px', textAlign: 'center', color: '#9A9A9A', fontSize: 13 }}>
-          Loading attendance...
-        </div>
-      )}
-
-      {error && !loading && (
-        <div style={{
-          background: '#FDE7EC',
-          border: '1px solid #F8B4C0',
-          borderRadius: 8, padding: '14px 18px', marginBottom: 16,
-          fontSize: 13, color: '#7D1025',
-        }}>
-          Could not load attendance: {error}
-        </div>
-      )}
-
-      {!loading && !error && (
-        <>
-          {/* Calendar grid */}
-          <div style={{
-            background: '#fff',
-            border: '1px solid #E8E2D6',
-            borderRadius: 10,
-            padding: 18, marginBottom: 18,
-          }}>
-            {/* Day-of-week header (Mon-first) */}
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: 6, marginBottom: 8,
-            }}>
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => (
-                <div key={d} style={{
-                  fontSize: 10, fontWeight: 700,
-                  letterSpacing: '.1em', textTransform: 'uppercase',
-                  color: '#857973', textAlign: 'center',
-                  paddingBottom: 6,
-                }}>{d}</div>
-              ))}
-            </div>
-
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: 6,
-            }}>
-              {grid.map((c, i) => {
-                if (c.blank) {
-                  return <div key={c.key} style={{ aspectRatio: '1', minHeight: 56 }}/>
-                }
-                const colour = c.record ? statusColour(c.record.status) : null
-                return (
-                  <div key={c.dateKey}
-                    title={c.record
-                      ? `${c.dateKey} — ${statusColour(c.record.status).label}${c.record.reason ? ': ' + c.record.reason : ''}`
-                      : c.isFuture ? `${c.dateKey} — Future date` : `${c.dateKey} — Not marked`}
-                    style={{
-                      aspectRatio: '1', minHeight: 56,
-                      borderRadius: 7,
-                      background: colour ? colour.bg
-                        : c.isFuture ? '#FAF7F4'
-                        : c.isWeekend ? '#FAF7F4' : '#FFF',
-                      border: '1.5px solid ' + (colour ? colour.border
-                        : c.isToday ? '#C9A030' : '#E8E2D6'),
-                      padding: 6,
-                      display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-                      transition: 'transform .12s, box-shadow .12s',
-                      cursor: c.record ? 'help' : 'default',
-                    }}
-                  >
-                    <div style={{
-                      fontSize: 13, fontWeight: c.isToday ? 800 : 600,
-                      color: c.isFuture ? '#CFC7C2'
-                        : colour ? colour.text
-                        : c.isWeekend ? '#A89E99' : '#1A0F0E',
-                      fontFamily: c.isToday ? "'Instrument Serif', serif" : 'inherit',
-                    }}>{c.day}</div>
-                    {colour && (
-                      <div style={{
-                        fontSize: 9, fontWeight: 700,
-                        color: colour.text,
-                        textTransform: 'uppercase',
-                        letterSpacing: '.05em',
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>{colour.label}</div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Legend */}
-            <div style={{
-              display: 'flex', flexWrap: 'wrap', gap: 14,
-              marginTop: 14, paddingTop: 14,
-              borderTop: '1px solid #F4EFEB',
-              fontSize: 11, color: '#857973',
-            }}>
-              {[
-                { label: 'Present',  bg: '#DCFCE7', border: '#15803D' },
-                { label: 'Half day', bg: '#FDF7E2', border: '#C9A030' },
-                { label: 'Absent',   bg: '#FDE7EC', border: '#7D1025' },
-                { label: 'Not marked', bg: '#FFF', border: '#E8E2D6' },
-                { label: 'Weekend',  bg: '#FAF7F4', border: '#E8E2D6' },
-              ].map(item => (
-                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{
-                    width: 14, height: 14, borderRadius: 3,
-                    background: item.bg,
-                    border: '1.5px solid ' + item.border,
-                  }}/>
-                  <span>{item.label}</span>
-                </div>
-              ))}
-            </div>
+      {/* ── Attendance stats + calendar ── */}
+      <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden'}}>
+        {/* Month nav + stats */}
+        <div style={{padding:'16px 20px',borderBottom:'1px solid #E8E2D6',display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12}}>
+          <div style={{display:'flex',alignItems:'center',gap:12}}>
+            <button onClick={prevMonth} style={{background:'transparent',border:'1.5px solid #E8E2D6',borderRadius:7,padding:'5px 10px',cursor:'pointer',fontSize:14,fontWeight:700,color:'#564844'}}>‹</button>
+            <span style={{fontWeight:800,fontSize:14,color:'#1A0F0E',minWidth:160,textAlign:'center'}}>{monthLabel}</span>
+            <button onClick={nextMonth} style={{background:'transparent',border:'1.5px solid #E8E2D6',borderRadius:7,padding:'5px 10px',cursor:'pointer',fontSize:14,fontWeight:700,color:'#564844'}}>›</button>
           </div>
-
-          {/* Absence detail list */}
-          {absentDays.length > 0 && (
-            <div style={{
-              background: '#fff',
-              border: '1px solid #E8E2D6',
-              borderRadius: 10,
-              padding: 18, marginBottom: 18,
-            }}>
-              <div style={{
-                fontSize: 11, fontWeight: 800, color: '#7D1025',
-                letterSpacing: '.12em', textTransform: 'uppercase',
-                marginBottom: 12,
-              }}>
-                Absences this month
+          <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+            {[{label:'Present',val:counts.present,color:'#065F46',bg:'#D1FAE5'},{label:'Late',val:counts.late,color:'#D97706',bg:'#FEF3C7'},{label:'Absent',val:counts.absent,color:'#991B1B',bg:'#FEE2E2'},{label:'Rate',val:pct!==null?pct+'%':'—',color:'#1A0F0E',bg:'#FBFAF5'}].map(s=>(
+              <div key={s.label} style={{padding:'6px 14px',borderRadius:8,background:s.bg,textAlign:'center'}}>
+                <div style={{fontSize:16,fontWeight:800,color:s.color}}>{s.val}</div>
+                <div style={{fontSize:10,color:s.color,fontWeight:600,marginTop:1}}>{s.label}</div>
               </div>
-              {absentDays.map((a, i) => (
-                <div key={i} style={{
-                  padding: '10px 0',
-                  borderBottom: i < absentDays.length - 1 ? '1px solid #F4EFEB' : 'none',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 8 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1A0F0E' }}>
-                      {a.date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+            ))}
+          </div>
+        </div>
+
+        {/* Calendar grid */}
+        <div style={{padding:'16px 20px'}}>
+          {calLoad ? (
+            <div style={{textAlign:'center',color:'#9A9A9A',padding:'30px 0',fontSize:13}}>Loading...</div>
+          ) : error ? (
+            <div style={{color:'#7D1025',fontSize:13}}>{error}</div>
+          ) : (
+            <>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:4,marginBottom:6}}>
+                {DAY_LABELS.map(d=><div key={d} style={{textAlign:'center',fontSize:10.5,fontWeight:700,color:'#857973',padding:'4px 0',letterSpacing:'.06em'}}>{d}</div>)}
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:4}}>
+                {calDays.map((d,i)=>{
+                  if(!d) return <div key={'pad-'+i}/>
+                  const key=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+                  const rec=byDateKey[key]
+                  const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear()
+                  const st=rec?SS[rec.checkInStatus||rec.status]:null
+                  return (
+                    <div key={key} title={rec?`${st?.label||rec.status}${rec.reason?' — '+rec.reason:''}`:''} style={{
+                      aspectRatio:'1',display:'flex',alignItems:'center',justifyContent:'center',
+                      borderRadius:8,fontSize:12.5,fontWeight:isToday?800:500,
+                      background:st?st.bg:isToday?'#FDF2F4':'#FBFAF5',
+                      color:st?st.fg:isToday?'#8B1A2E':'#564844',
+                      border:isToday?'2px solid #C9A030':'1px solid transparent',
+                      cursor:rec?'help':'default',
+                      position:'relative',
+                    }}>
+                      {d}
+                      {rec&&<div style={{position:'absolute',bottom:3,left:'50%',transform:'translateX(-50%)',width:4,height:4,borderRadius:'50%',background:st?.fg||'#9A9A9A'}}/>}
                     </div>
-                    {a.markedBy && (
-                      <div style={{ fontSize: 11, color: '#857973' }}>
-                        Marked by {a.markedBy}
-                      </div>
-                    )}
+                  )
+                })}
+              </div>
+              <div style={{display:'flex',gap:12,marginTop:12,flexWrap:'wrap'}}>
+                {Object.entries(SS).map(([k,s])=>(
+                  <div key={k} style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'#857973'}}>
+                    <div style={{width:10,height:10,borderRadius:2,background:s.bg,border:'1px solid '+s.fg+'40'}}/>
+                    {s.label}
                   </div>
-                  {a.reason && (
-                    <div style={{ fontSize: 12.5, color: '#564844', marginTop: 4, lineHeight: 1.5 }}>
-                      {a.reason}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {totalMarked === 0 && (
-            <div style={{
-              padding: 28, background: '#FBFAF5',
-              border: '1px solid #E8E2D6', borderRadius: 10,
-              textAlign: 'center',
-            }}>
-              <div style={{
-                fontFamily: "'Instrument Serif', serif",
-                fontSize: 20, color: '#1A0F0E', marginBottom: 6,
-              }}>
-                No attendance marked yet
+                ))}
               </div>
-              <div style={{ fontSize: 13, color: '#857973', lineHeight: 1.6, maxWidth: 460, margin: '0 auto' }}>
-                Your teachers haven't marked any attendance for {monthLabel} yet.
-                Check back after your next class.
-              </div>
-            </div>
+            </>
           )}
-        </>
-      )}
+        </div>
+      </div>
     </div>
   )
 }
