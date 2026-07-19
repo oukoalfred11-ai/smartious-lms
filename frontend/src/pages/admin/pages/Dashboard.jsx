@@ -69,7 +69,7 @@ const MODULES = {
   students:    { label: 'Students',             accent: TOKENS.accentNavy,  icon: 'users' },
   doshomework:  { label: 'Homework',              accent: TOKENS.accentAmber, icon: 'frontdesk' },
   dosanalytics: { label: 'Performance Analytics', accent: TOKENS.crimson,    icon: 'chart' },
-  dosattend:    { label: 'Attendance',             accent: TOKENS.accentTeal,    icon: 'frontdesk' },
+  dosattend:    { label: 'Attendance Analytics',   accent: TOKENS.accentTeal,    icon: 'frontdesk' },
   checkin:      { label: 'Check In',              accent: TOKENS.accentEmerald||'#065F46', icon: 'frontdesk' },
   dosbreaks:    { label: 'Manage Breaks',          accent: TOKENS.crimson,       icon: 'frontdesk' },
   dostimetable: { label: 'Timetables',             accent: TOKENS.accentNavy, icon: 'rooms' },
@@ -560,7 +560,8 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Overview',    items: ['checkin', 'dosanalytics'] },
       { label: 'Exams',       items: ['exams'] },
       { label: 'Homework',    items: ['doshomework'] },
-      { label: 'Attendance',  items: ['dosattend', 'dosbreaks'] },
+      { label: 'Attendance',  items: ['dosattend'] },
+      { label: 'Breaks',      items: ['dosbreaks'] },
       { label: 'Timetables',  items: ['dostimetable'] },
       { label: 'Reports',     items: ['reports'] },
       { label: 'System',      items: ['settings'] },
@@ -6585,250 +6586,204 @@ function DOSHomeworkModule({ toast, refreshKey }) {
 const BREAK_TYPES = ['mid_term_break','end_term_break','summer_break','public_holiday','sick_leave']
 const BREAK_LABELS = { mid_term_break:'Mid-term break', end_term_break:'End-term break', summer_break:'Summer break', public_holiday:'Public holiday', sick_leave:'Sick leave' }
 
+// ═══════════════════════════════════════════════════════════
+// DOSAttendanceModule — ANALYTICS ONLY
+// DOS sees who checked in, rates, trends. No manual marking.
+// Break management moved to DOSBreakModule.
+// ═══════════════════════════════════════════════════════════
 function DOSAttendanceModule({ toast, refreshKey }) {
-  const today = new Date().toISOString().split('T')[0]
-  const [date,      setDate]      = useState(today)
-  const [userType,  setUserType]  = useState('student')
-  const [users,     setUsers]     = useState([])
-  const [records,   setRecords]   = useState({})   // userId -> { status, reason }
-  const [loading,   setLoading]   = useState(false)
-  const [saving,    setSaving]    = useState(false)
-  const [search,    setSearch]    = useState('')
-  const [history,   setHistory]   = useState(null)
-  const [histUser,  setHistUser]  = useState(null)
+  const [data,    setData]    = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [roleF,   setRoleF]   = useState('all')
+  const [date,    setDate]    = useState(new Date().toISOString().split('T')[0])
+  const [history, setHistory] = useState([])
+  const [histLoad,setHistLoad]= useState(false)
+  const [showHist,setShowHist]= useState(false)
 
-  const STATUS_OPTIONS = [
-    { val:'present',        label:'Present',          bg:'#D1FAE5', fg:'#065F46' },
-    { val:'absent',         label:'Absent',           bg:'#FEE2E2', fg:'#991B1B', needsReason:true },
-    { val:'late',           label:'Late',             bg:'#FEF3C7', fg:'#92400E' },
-    { val:'half_day',       label:'Half day',         bg:'#DBEAFE', fg:'#1E40AF' },
-    { val:'excused',        label:'Excused',          bg:'#F3E8FF', fg:'#6B21A8' },
-    { val:'mid_term_break', label:'Mid-term break',   bg:'#FEF9C3', fg:'#713F12' },
-    { val:'end_term_break', label:'End-term break',   bg:'#FEF9C3', fg:'#713F12' },
-    { val:'summer_break',   label:'Summer break',     bg:'#FFEDD5', fg:'#9A3412' },
-  ]
-
-  useEffect(() => {
-    setUsers([]); setRecords({})
+  const load = useCallback(() => {
     setLoading(true)
-    api.get('/users', { params: { role: userType, limit:200 } })
-      .then(r => {
-        const list = r.data?.users || r.data?.data?.users || []
-        setUsers(list)
-        return list
-      })
-      .then(list => {
-        if (!list.length) { setLoading(false); return }
-        return api.get('/attendance/day', { params: { date } })
-          .then(r => {
-            const items = r.data?.data?.items || r.data?.items || []
-            const map = {}
-            list.forEach(u => {
-              const rec = items.find(a => String(a.studentId?._id||a.studentId) === String(u._id))
-              map[String(u._id)] = { status: rec?.status || 'present', reason: rec?.reason || '' }
-            })
-            setRecords(map)
-          })
-          .catch(() => {
-            const map = {}
-            list.forEach(u => { map[String(u._id)] = { status:'present', reason:'' } })
-            setRecords(map)
-          })
-      })
-      .catch(() => toast?.error?.('Failed to load users.'))
+    const params = {}
+    if (roleF !== 'all') params.role = roleF
+    api.get('/checkin/status', { params })
+      .then(r => setData(r.data?.data))
+      .catch(e => toast?.error?.('Failed to load attendance: '+(e?.response?.data?.message||e.message)))
       .finally(() => setLoading(false))
-  }, [userType, refreshKey])
+  }, [roleF, refreshKey])
 
-  useEffect(() => {
-    if (!users.length) return
-    api.get('/attendance/day', { params: { date } })
-      .then(r => {
-        const items = r.data?.data?.items || r.data?.items || []
-        setRecords(prev => {
-          const map = { ...prev }
-          users.forEach(u => {
-            const rec = items.find(a => String(a.studentId?._id||a.studentId) === String(u._id))
-            map[String(u._id)] = { status: rec?.status || 'present', reason: rec?.reason || '' }
-          })
-          return map
-        })
-      })
-      .catch(() => {})
-  }, [date])
+  useEffect(() => { load() }, [load])
 
-  const setStatus = (uid, status) => setRecords(p => ({ ...p, [uid]: { ...p[uid], status, reason: status!=='absent'?'':p[uid]?.reason||'' } }))
-  const setReason = (uid, reason) => setRecords(p => ({ ...p, [uid]: { ...p[uid], reason } }))
-
-  // Save: use individual POST for each user (bulk only supports one status at a time)
-  const save = async () => {
-    setSaving(true)
-    let saved=0, errors=0
-    const entries = Object.entries(records)
-    for (const [userId, rec] of entries) {
-      if (userType==='student') {
-        try {
-          await api.post('/attendance', { studentId:userId, date, status:rec.status, reason:rec.reason||'' })
-          saved++
-        } catch { errors++ }
-      }
+  const loadHistory = () => {
+    setHistLoad(true); setShowHist(true)
+    // Get last 7 days check-in stats
+    const days = []
+    for (let i=6; i>=0; i--) {
+      const d = new Date(); d.setDate(d.getDate()-i)
+      days.push(d.toISOString().split('T')[0])
     }
-    setSaving(false)
-    if (errors===0) toast?.ok?.(`Attendance saved for ${saved} ${userType}s on ${date}.`)
-    else toast?.error?.(`Saved ${saved}, failed ${errors}.`)
+    Promise.allSettled(days.map(d => api.get('/attendance/day', { params:{ date:d } })))
+      .then(results => {
+        const hist = results.map((r,i) => ({
+          date:    days[i],
+          label:   new Date(days[i]).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}),
+          present: r.status==='fulfilled' ? (r.value.data?.data?.items||[]).filter(x=>x.status==='present').length : 0,
+          total:   r.status==='fulfilled' ? (r.value.data?.data?.items||[]).length : 0,
+        }))
+        setHistory(hist)
+      })
+      .finally(() => setHistLoad(false))
   }
 
-  const openHistory = async (u) => {
-    setHistUser(u); setHistory(null)
-    try {
-      const { data } = await api.get('/attendance/student/'+u._id)
-      setHistory(data?.data?.records || data?.records || [])
-    } catch { toast?.error?.('Could not load history.') }
+  const users   = data?.users || []
+  const summary = data?.summary || {}
+
+  const STATUS_S = {
+    present: { bg:'#D1FAE5', fg:'#065F46', label:'Present' },
+    late:    { bg:'#FEF3C7', fg:'#D97706', label:'Late' },
+    absent:  { bg:'#FEE2E2', fg:'#991B1B', label:'Absent' },
   }
 
-  const filtered = users.filter(u => {
-    if (!search) return true
-    const name = (u.firstName+' '+u.lastName).toLowerCase()
-    return name.includes(search.toLowerCase())||(u.admissionNo||u.admissionNumber||'').toLowerCase().includes(search.toLowerCase())
+  const fmtTime = d => d ? new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—'
+
+  // Group by role for display
+  const byRole = {}
+  users.forEach(u => {
+    if (!byRole[u.role]) byRole[u.role] = []
+    byRole[u.role].push(u)
   })
 
-  const counts = STATUS_OPTIONS.map(s => ({ ...s, count: Object.values(records).filter(v=>v.status===s.val).length }))
-
-  // History view
-  if (histUser&&history!==null) {
-    const present = history.filter(r=>r.status==='present').length
-    const rate = history.length?Math.round((present/history.length)*100):0
-    return (
-      <>
-        <button onClick={()=>{setHistUser(null);setHistory(null)}} style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, padding:0, marginBottom:16 }}>← Back to attendance</button>
-        <div className="card" style={{ padding:20, marginBottom:14 }}>
-          <div style={{ fontSize:15, fontWeight:800, color:TOKENS.s900, marginBottom:4 }}>{histUser.firstName} {histUser.lastName}</div>
-          <div style={{ fontSize:12, color:TOKENS.s500, marginBottom:14 }}>{histUser.curriculum} · {histUser.gradeLevel} · Adm: {histUser.admissionNo||histUser.admissionNumber||'—'}</div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
-            {[{ label:'Total records',val:history.length },{ label:'Present',val:present,color:'#065F46' },{ label:'Absent',val:history.filter(r=>r.status==='absent').length,color:'#991B1B' },{ label:'Attendance rate',val:rate+'%',color:rate>=80?'#065F46':rate>=60?'#D97706':'#991B1B' }].map(k=>(
-              <div key={k.label} style={{ textAlign:'center',padding:'10px 0' }}>
-                <div style={{ fontSize:24, fontWeight:800, color:k.color||TOKENS.s900 }}>{k.val}</div>
-                <div style={{ fontSize:11, color:TOKENS.s400, marginTop:2 }}>{k.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="card" style={{ overflow:'hidden' }}>
-          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
-            <thead><tr>{['Date','Day','Status','Reason','Marked by'].map(h=><th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>)}</tr></thead>
-            <tbody>
-              {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((r,i)=>{
-                const s=STATUS_OPTIONS.find(x=>x.val===r.status)||STATUS_OPTIONS[0]
-                return (
-                  <tr key={i} style={{ borderTop:'1px solid '+TOKENS.line }}>
-                    <td style={{ padding:'8px 12px', fontSize:13 }}>{new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
-                    <td style={{ padding:'8px 12px', fontSize:12, color:TOKENS.s500 }}>{new Date(r.date).toLocaleDateString('en-GB',{weekday:'short'})}</td>
-                    <td style={{ padding:'8px 12px' }}><span style={{ padding:'2px 9px', borderRadius:99, fontSize:11.5, fontWeight:700, background:s.bg, color:s.fg }}>{s.label}</span></td>
-                    <td style={{ padding:'8px 12px', fontSize:12, color:TOKENS.s500 }}>{r.reason||'—'}</td>
-                    <td style={{ padding:'8px 12px', fontSize:12, color:TOKENS.s500 }}>{r.markedBy?.firstName||'—'}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </>
-    )
-  }
+  const maxBar = Math.max(...(history.map(h=>h.total)||[1]), 1)
 
   return (
     <>
-      <PSection tag="Dean of Studies" title="Attendance" em="Manager" sub="Mark attendance for all students and staff. Supports breaks and leave statuses."/>
+      <PSection tag="Dean of Studies" title="Attendance" em="Analytics"
+        sub="Daily check-in overview. Students and staff self-report. Use Manage Breaks to deactivate accounts."/>
+
       {/* Controls */}
-      <div style={{ display:'flex', gap:8, marginBottom:12, flexWrap:'wrap', alignItems:'center' }}>
-        <input type="date" value={date} onChange={e=>setDate(e.target.value)}
-          style={{ padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
+      <div style={{ display:'flex', gap:10, marginBottom:18, flexWrap:'wrap', alignItems:'center' }}>
         <div style={{ display:'flex', border:'1.5px solid '+TOKENS.line, borderRadius:7, overflow:'hidden' }}>
-          {[['student','Students'],['teacher','Teachers'],['admin','Admin'],['ops_manager','Ops'],['accountant','Accounts'],['sales','Sales'],['dos','DOS']].map(([role,label])=>(
-            <button key={role} onClick={()=>setUserType(role)} style={{
+          {[['all','All'],['student','Students'],['teacher','Teachers'],['sales','Sales'],['ops_manager','Ops'],['accountant','Accounts'],['dos','DOS']].map(([val,label])=>(
+            <button key={val} onClick={()=>setRoleF(val)} style={{
               padding:'8px 12px', border:'none', cursor:'pointer', fontSize:12, fontWeight:600,
-              background:userType===role?TOKENS.crimson:'#fff', color:userType===role?'#fff':TOKENS.s500,
+              background:roleF===val?TOKENS.crimson:'#fff', color:roleF===val?'#fff':TOKENS.s500,
               borderRight:'1px solid '+TOKENS.line,
             }}>{label}</button>
           ))}
         </div>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or admission no..."
-          style={{ flex:1, padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
-        <button onClick={save} disabled={saving||userType!=='student'} title={userType!=='student'?'Attendance tracking is for students only':'Save'}
-          style={{ background:saving||userType!=='student'?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 22px', borderRadius:7, fontSize:13, fontWeight:700, cursor:saving||userType!=='student'?'not-allowed':'pointer', whiteSpace:'nowrap' }}>
-          {saving?'Saving...':'Save attendance'}
+        <button onClick={load} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'8px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>Refresh</button>
+        <button onClick={loadHistory} style={{ background:TOKENS.cream, color:TOKENS.crimson, border:'1px solid '+TOKENS.line, padding:'8px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>
+          {showHist ? 'Hide 7-day trend' : 'Show 7-day trend'}
         </button>
-      </div>
-      {/* Summary */}
-      <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
-        {counts.filter(s=>s.count>0).map(s=>(
-          <div key={s.val} style={{ padding:'6px 12px', borderRadius:8, background:s.bg, border:'1px solid '+s.fg+'30', display:'flex', gap:8, alignItems:'center' }}>
-            <span style={{ fontSize:16, fontWeight:800, color:s.fg }}>{s.count}</span>
-            <span style={{ fontSize:11, fontWeight:600, color:s.fg }}>{s.label}</span>
-          </div>
-        ))}
-        <div style={{ padding:'6px 12px', borderRadius:8, background:TOKENS.cream, border:'1px solid '+TOKENS.line, display:'flex', gap:8, alignItems:'center' }}>
-          <span style={{ fontSize:16, fontWeight:800, color:TOKENS.s900 }}>{users.length}</span>
-          <span style={{ fontSize:11, fontWeight:600, color:TOKENS.s500 }}>Total</span>
+        <div style={{ fontSize:12, color:TOKENS.s400, marginLeft:'auto' }}>
+          Today: {new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}
         </div>
       </div>
-      {/* Table */}
-      <div className="card" style={{ overflow:'hidden' }}>
-        {loading?<div style={{ padding:30,textAlign:'center',color:TOKENS.s400 }}>Loading users...</div>:filtered.length===0?<div style={{ padding:40,textAlign:'center',color:TOKENS.s400,fontSize:13 }}>No {userType}s found.</div>:(
-          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
-            <thead><tr>
-              {['Name',userType==='student'?'Adm / Grade':'Role','Current status','Mark as',userType==='student'?'Reason':'',''].map(h=>(
-                <th key={h} style={{ padding:'9px 14px', textAlign:'left', fontSize:10.5 }}>{h}</th>
-              ))}
-            </tr></thead>
-            <tbody>
-              {filtered.map(u=>{
-                const rec = records[String(u._id)] || { status:'present', reason:'' }
-                const so  = STATUS_OPTIONS.find(s=>s.val===rec.status)||STATUS_OPTIONS[0]
-                return (
-                  <tr key={u._id} style={{ borderTop:'1px solid '+TOKENS.line }}>
-                    <td style={{ padding:'10px 14px' }}>
-                      <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
-                      <div style={{ fontSize:11, color:TOKENS.s500 }}>{u.email}</div>
-                    </td>
-                    <td style={{ padding:'10px 14px', fontSize:12.5, color:TOKENS.s600 }}>
-                      {userType==='student'?(u.admissionNo||u.admissionNumber||'—')+' · '+(u.gradeLevel||u.grade||'—'):u.role}
-                    </td>
-                    <td style={{ padding:'10px 14px' }}>
-                      <span style={{ padding:'4px 12px', borderRadius:99, fontSize:12, fontWeight:700, background:so.bg, color:so.fg }}>{so.label}</span>
-                    </td>
-                    <td style={{ padding:'10px 14px' }}>
-                      <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
-                        {STATUS_OPTIONS.map(s=>(
-                          <button key={s.val} onClick={()=>setStatus(String(u._id),s.val)} style={{
-                            padding:'3px 8px', borderRadius:5, border:'1.5px solid '+(rec.status===s.val?s.fg:TOKENS.line),
-                            background:rec.status===s.val?s.bg:'#fff', color:rec.status===s.val?s.fg:TOKENS.s500,
-                            fontSize:10.5, fontWeight:rec.status===s.val?700:500, cursor:'pointer', whiteSpace:'nowrap',
-                          }}>{s.label}</button>
-                        ))}
+
+      {loading ? <DOSSpinner/> : (
+        <>
+          {/* Summary KPIs */}
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(130px,1fr))', gap:12, marginBottom:20 }}>
+            {[
+              { label:'Total',        val:summary.total||0,            color:TOKENS.s900 },
+              { label:'Present',      val:summary.present||0,          color:'#065F46' },
+              { label:'Late',         val:summary.late||0,             color:'#D97706' },
+              { label:'Absent',       val:summary.absent||0,           color:'#991B1B' },
+              { label:'Not checked in', val:summary.notCheckedIn||0,   color:TOKENS.crimson },
+              { label:'On break',     val:summary.onBreak||0,          color:'#6B21A8' },
+            ].map(k=>(
+              <div key={k.label} className="card" style={{ padding:'14px 16px' }}>
+                <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:5 }}>{k.label}</div>
+                <div style={{ fontSize:24, fontWeight:800, color:k.color, lineHeight:1 }}>{k.val}</div>
+                {summary.total>0 && k.label!=='Total' && (
+                  <div style={{ fontSize:10, color:TOKENS.s400, marginTop:3 }}>{Math.round((k.val/summary.total)*100)}%</div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* 7-day trend chart */}
+          {showHist && (
+            <div className="card" style={{ padding:18, marginBottom:18 }}>
+              <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:14 }}>7-day attendance trend</div>
+              {histLoad ? <div style={{ textAlign:'center', color:TOKENS.s400, padding:'20px 0', fontSize:13 }}>Loading...</div> : (
+                <div style={{ display:'flex', alignItems:'flex-end', gap:10, height:80 }}>
+                  {history.map((h,i) => {
+                    const pct = h.total>0 ? Math.round((h.present/h.total)*100) : 0
+                    const barH = Math.max(4, (pct/100)*80)
+                    return (
+                      <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
+                        <div style={{ fontSize:10, fontWeight:700, color:pct>=80?'#065F46':pct>=60?'#D97706':'#991B1B' }}>{pct}%</div>
+                        <div style={{ width:'100%', height:barH, background:pct>=80?'#065F46':pct>=60?'#D97706':'#991B1B', borderRadius:'3px 3px 0 0', transition:'height .3s' }}/>
+                        <div style={{ fontSize:9.5, color:TOKENS.s500, textAlign:'center', lineHeight:1.2 }}>{h.label}</div>
                       </div>
-                    </td>
-                    <td style={{ padding:'10px 14px', minWidth:140 }}>
-                      {(rec.status==='absent'||rec.status==='excused') && (
-                        <input value={rec.reason} onChange={e=>setReason(String(u._id),e.target.value)}
-                          placeholder="Reason required for absent/excused"
-                          style={{ width:'100%', padding:'5px 8px', borderRadius:6, border:'1.5px solid '+(rec.status==='absent'&&!rec.reason?'#FCA5A5':TOKENS.line), fontSize:12, fontFamily:'inherit' }}/>
-                      )}
-                    </td>
-                    <td style={{ padding:'10px 14px' }}>
-                      {userType==='student'&&(
-                        <button onClick={()=>openHistory(u)} style={{ fontSize:11, color:TOKENS.crimson, background:'transparent', border:'none', cursor:'pointer', fontWeight:700, textDecoration:'underline' }}>History</button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Attendance table by role */}
+          {Object.keys(byRole).length === 0 ? (
+            <div style={{ padding:'40px 0', textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No users found.</div>
+          ) : (
+            Object.entries(byRole).map(([role, roleUsers]) => (
+              <div key={role} className="card" style={{ overflow:'hidden', marginBottom:14 }}>
+                <div style={{ padding:'11px 16px', borderBottom:'1px solid '+TOKENS.line, background:TOKENS.cream, display:'flex', justifyContent:'space-between' }}>
+                  <span style={{ fontWeight:800, fontSize:12.5, color:TOKENS.s900, textTransform:'capitalize' }}>
+                    {role==='ops_manager'?'Operations Manager':role.charAt(0).toUpperCase()+role.slice(1)}s
+                  </span>
+                  <span style={{ fontSize:12, color:TOKENS.s500 }}>
+                    {roleUsers.filter(u=>u.checkInStatus==='present').length} present · {roleUsers.filter(u=>!u.checkedIn&&!u.onBreak).length} not checked in
+                  </span>
+                </div>
+                <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
+                  <thead><tr>
+                    {['Name','Status','Time','Late arrival / Reason','Break'].map(h=>(
+                      <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {roleUsers.map(u => {
+                      const ss = u.onBreak ? { bg:'#F3E8FF', fg:'#6B21A8', label:'On break' }
+                                 : u.checkedIn ? STATUS_S[u.checkInStatus]||STATUS_S.present
+                                 : { bg:'#F3F4F6', fg:'#6B7280', label:'Not checked in' }
+                      return (
+                        <tr key={String(u.userId)} style={{ borderTop:'1px solid '+TOKENS.line, opacity:u.onBreak?.6:1 }}>
+                          <td style={{ padding:'9px 12px', fontWeight:700, fontSize:13, color:TOKENS.s900 }}>
+                            {u.name}
+                            <div style={{ fontSize:11, color:TOKENS.s500, fontWeight:400 }}>{u.email}</div>
+                          </td>
+                          <td style={{ padding:'9px 12px' }}>
+                            <span style={{ padding:'3px 10px', borderRadius:99, fontSize:11, fontWeight:700, background:ss.bg, color:ss.fg }}>
+                              {ss.label}
+                            </span>
+                          </td>
+                          <td style={{ padding:'9px 12px', fontSize:12, color:TOKENS.s500, whiteSpace:'nowrap' }}>
+                            {u.checkInTime ? fmtTime(u.checkInTime) : '—'}
+                          </td>
+                          <td style={{ padding:'9px 12px', fontSize:12, color:TOKENS.s600 }}>
+                            {u.lateTime ? 'Arrived: '+u.lateTime : u.reason || '—'}
+                          </td>
+                          <td style={{ padding:'9px 12px', fontSize:11.5, color:'#6B21A8' }}>
+                            {u.onBreak ? u.breakType?.replace(/_/g,' ')||'On break' : ''}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ))
+          )}
+        </>
+      )}
     </>
   )
 }
+
+// ═══════════════════════════════════════════════════════════
+// DOSBreakModule — unchanged, already works well
+// ═══════════════════════════════════════════════════════════
 
 // ── DOS MODULE 5: Timetable Manager ───────────────────────
 // Smartious schedule: 9am-3pm, Lunch 1pm-2pm
