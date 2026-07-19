@@ -13114,7 +13114,7 @@ function StudentCheckInTab({ user, toast }) {
               Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, {user?.firstName}
             </div>
             <div style={{fontSize:13,color:'rgba(255,255,255,.6)'}}>
-              {alreadyIn?'You're checked in for today.':isWeekend?'No check-in on weekends.':'Please mark your attendance.'}
+              {alreadyIn?'You are checked in for today.':isWeekend?'No check-in on weekends.':'Please mark your attendance.'}
             </div>
           </div>
           <div style={{padding:'24px'}}>
