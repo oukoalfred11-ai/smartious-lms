@@ -86,6 +86,7 @@ app.use('/api/inquiries',  require('./routes/inquiries'));
 app.use('/api/assessment', require('./routes/assessment'));
 app.use('/api/reports',    require('./routes/reports'));
 app.use('/api/dos',        require('./routes/dos-analytics'));
+app.use('/api/checkin',    require('./routes/checkin'));
 
 // ── Health check ──────────────────────────────────────────
 app.get('/api/health', (_, res) =>
@@ -119,6 +120,20 @@ const runTimetablePromotion = () => {
     .catch(e => console.error('[timetable promotion] failed:', e.message));
 };
 
+// ── Daily 7 AM check-in reminder ─────────────────────────────
+// Fires every weekday at 07:00 school local time (EAT = UTC+3).
+// Sends email to every active user who hasn't checked in yet.
+const { sendDailyReminders } = require('./routes/checkin');
+
+const runCheckinReminder = () => {
+  const now = new Date();
+  const eat = new Date(now.getTime() + 3*60*60*1000); // UTC+3
+  if (eat.getDay() === 0 || eat.getDay() === 6) return; // skip weekends
+  sendDailyReminders()
+    .then(n => console.log('[checkin reminder] Sent', n, 'reminders'))
+    .catch(e => console.error('[checkin reminder] Error:', e.message));
+};
+
 // ── Database + start ──────────────────────────────────────
 const PORT        = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -139,6 +154,19 @@ mongoose.connect(MONGODB_URI)
     // (let the DB settle), then every 24 hours.
     setTimeout(runTimetablePromotion, 60 * 1000);
     setInterval(runTimetablePromotion, 24 * 60 * 60 * 1000);
+
+    // Schedule daily 7 AM EAT reminder
+    const scheduleReminder = () => {
+      const now = new Date();
+      const eat = new Date(now.getTime() + 3*60*60*1000);
+      const next7am = new Date(eat);
+      next7am.setHours(7, 0, 0, 0);
+      if (next7am <= eat) next7am.setDate(next7am.getDate() + 1);
+      const msUntil = next7am.getTime() - eat.getTime();
+      console.log('[checkin] Next reminder in', Math.round(msUntil/60000), 'minutes');
+      setTimeout(() => { runCheckinReminder(); setInterval(runCheckinReminder, 24*60*60*1000); }, msUntil);
+    };
+    scheduleReminder();
   })
   .catch(err => {
     console.error('❌  MongoDB connection error:', err.message);
