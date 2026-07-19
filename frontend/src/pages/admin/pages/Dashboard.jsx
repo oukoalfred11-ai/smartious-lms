@@ -6123,9 +6123,9 @@ function DOSAttendanceModule({ toast, refreshKey }) {
   useEffect(() => {
     setUsers([])
     setRecords({})
-    api.get('/users', { params: { role: userType, limit: 200, isActive: true } })
+    api.get('/users', { params: { role: userType, limit: 200 } })
       .then(r => {
-        const list = r.data?.data?.users || r.data?.users || []
+        const list = r.data?.users || r.data?.data?.users || []
         setUsers(list)
         loadAttendance(list, date)
       })
@@ -6158,8 +6158,8 @@ function DOSAttendanceModule({ toast, refreshKey }) {
   const save = async () => {
     setSaving(true)
     try {
-      const payload = Object.entries(records).map(([userId, status]) => ({ userId, studentId: userId, date, status }))
-      await api.post('/attendance/bulk', { records: payload })
+      const payload = Object.entries(records).map(([userId, status]) => ({ studentId: userId, date, status }))
+      await api.post('/attendance/bulk', { records: payload, date })
       toast?.ok?.('Attendance saved for ' + date + '.')
     } catch (e) {
       toast?.error?.(e?.response?.data?.message || 'Failed to save attendance.')
@@ -6171,7 +6171,7 @@ function DOSAttendanceModule({ toast, refreshKey }) {
     setHistory(null)
     try {
       const { data } = await api.get('/attendance/student/'+u._id)
-      setHistory(data?.data?.records || data?.records || [])
+      setHistory(data?.records || data?.data?.records || [])
     } catch { toast?.error?.('Could not load history.') }
   }
 
@@ -6375,10 +6375,11 @@ function DOSTimetableModule({ toast, refreshKey }) {
 
   useEffect(() => {
     setLoading(true)
-    api.get('/api/timetables', { params: { limit:200 } })
-      .then(r => setEntries(r.data?.data?.entries || r.data?.entries || []))
-      .catch(() => api.get('/timetables', { params: { limit:200 } })
-        .then(r => setEntries(r.data?.data?.entries || r.data?.entries || []))
+    api.get('/timetables', { params: { limit:200 } })
+      .then(r => setEntries(r.data?.entries || r.data?.data?.entries || r.data?.timetableEntries || []))
+      .catch(() => { toast?.error?.('Failed to load timetable.'); setLoading(false) })
+    // remove duplicate
+        .then(r => setEntries(r.data?.entries || r.data?.data?.entries || r.data?.timetableEntries || []))
         .catch(() => toast?.error?.('Failed to load timetable.'))
       )
       .finally(() => setLoading(false))
@@ -6386,7 +6387,7 @@ function DOSTimetableModule({ toast, refreshKey }) {
 
   useEffect(() => {
     api.get('/users', { params: { limit:200 } })
-      .then(r => setUsers(r.data?.data?.users || r.data?.users || []))
+      .then(r => setUsers(r.data?.users || r.data?.data?.users || []))
       .catch(() => {})
   }, [])
 
@@ -6395,8 +6396,8 @@ function DOSTimetableModule({ toast, refreshKey }) {
     setUserEntries([])
     setUserLoading(true)
     try {
-      const path = u.role === 'teacher' ? '/timetables/mine' : '/timetables/student/'+u._id
-      const { data } = await api.get(path, u.role==='teacher' ? { params:{ teacherId:u._id } } : {})
+      const path = u.role === 'teacher' ? '/timetable/teacher/'+u._id : '/timetable/student/'+u._id
+      const { data } = await api.get(path)
       setUserEntries(data?.data?.entries || data?.entries || [])
       setView('user')
     } catch { toast?.error?.('Could not load timetable.') }
@@ -6421,7 +6422,7 @@ function DOSTimetableModule({ toast, refreshKey }) {
     if (!selected) return
     setSaving(true)
     try {
-      await api.patch('/timetables/'+selected._id, editData)
+      await api.patch('/timetable/'+selected._id, editData)
       toast?.ok?.('Timetable entry updated.')
       setView(chosenUser ? 'user' : 'list')
       // Reload
@@ -6429,7 +6430,7 @@ function DOSTimetableModule({ toast, refreshKey }) {
         loadUserTimetable(chosenUser)
       } else {
         const r = await api.get('/timetables', { params:{ limit:200 } })
-        setEntries(r.data?.data?.entries || r.data?.entries || [])
+        setEntries(r.data?.data?.timetables || r.data?.timetables || [])
       }
     } catch (e) { toast?.error?.(e?.response?.data?.message||'Could not update.') }
     finally { setSaving(false) }
@@ -6682,16 +6683,16 @@ function DOSAnalyticsModule({ toast, refreshKey }) {
   const load = useCallback(() => {
     setLoading(true)
     const p = { params: filters }
-    Promise.all([
-      api.get('/dos/overview').catch(() => ({ data: null })),
-      api.get('/dos/exam-analytics', p).catch(() => ({ data: null })),
-      api.get('/dos/homework-compliance', p).catch(() => ({ data: null })),
-      api.get('/dos/at-risk').catch(() => ({ data: null })),
+    Promise.allSettled([
+      api.get('/dos/overview'),
+      api.get('/dos/exam-analytics', p),
+      api.get('/dos/homework-compliance', p),
+      api.get('/dos/at-risk'),
     ]).then(([ov, ex, hw, ar]) => {
-      setOverview(ov.data?.data || null)
-      setExamData(ex.data?.data || null)
-      setHwData(hw.data?.data || null)
-      setAtRisk(ar.data?.data || null)
+      setOverview(ov.status==='fulfilled' ? ov.value.data?.data : null)
+      setExamData(ex.status==='fulfilled' ? ex.value.data?.data : null)
+      setHwData(hw.status==='fulfilled'   ? hw.value.data?.data : null)
+      setAtRisk(ar.status==='fulfilled'   ? ar.value.data?.data : null)
     }).finally(() => setLoading(false))
   }, [filters, refreshKey])
 
@@ -6893,7 +6894,7 @@ function DOSExamsModule({ toast, refreshKey }) {
     if (filters.curriculum) params.curriculum = filters.curriculum
     api.get('/exams', { params })
       .then(r => {
-        let list = r.data?.data?.exams || r.data?.exams || []
+        let list = r.data?.exams || r.data?.data?.exams || []
         if (filters.type === 'weekly')  list = list.filter(e => !/end.?term|final|terminal/i.test(e.title))
         if (filters.type === 'endterm') list = list.filter(e => /end.?term|final|terminal/i.test(e.title))
         if (filters.search) list = list.filter(e => e.title?.toLowerCase().includes(filters.search.toLowerCase()) || e.subject?.toLowerCase().includes(filters.search.toLowerCase()))
@@ -6912,7 +6913,7 @@ function DOSExamsModule({ toast, refreshKey }) {
     setSubLoading(true)
     try {
       const { data } = await api.get('/exams/'+exam._id+'/submissions')
-      setSubs(data?.data?.submissions || data?.submissions || [])
+      setSubs(data?.submissions || data?.data?.submissions || [])
     } catch { toast?.error?.('Could not load submissions.') }
     finally { setSubLoading(false) }
   }
