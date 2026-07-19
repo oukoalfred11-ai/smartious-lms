@@ -6840,16 +6840,34 @@ const SCHOOL_DAYS = ['Mon','Tue','Wed','Thu','Fri']
 const DAY_TYPES   = { Mon:'Lessons', Tue:'Lessons', Wed:'Lessons', Thu:'Lessons', Fri:'Assessment / Activities' }
 
 function DOSTimetableModule({ toast, refreshKey }) {
-  const [view,        setView]        = useState('picker')
-  const [entries,     setEntries]     = useState([])
-  const [loading,     setLoading]     = useState(false)
-  const [selected,    setSelected]    = useState(null)
-  const [editData,    setEditData]    = useState(null)
-  const [saving,      setSaving]      = useState(false)
-  const [teachers,    setTeachers]    = useState([])
-  const [students,    setStudents]    = useState([])
-  const [chosenUser,  setChosenUser]  = useState(null)
-  const [search,      setSearch]      = useState('')
+  const [view,       setView]       = useState('picker')   // picker | grid | edit
+  const [entries,    setEntries]    = useState([])
+  const [loading,    setLoading]    = useState(false)
+  const [selected,   setSelected]   = useState(null)
+  const [editData,   setEditData]   = useState(null)
+  const [saving,     setSaving]     = useState(false)
+  const [teachers,   setTeachers]   = useState([])
+  const [students,   setStudents]   = useState([])
+  const [chosenUser, setChosenUser] = useState(null)
+  const [search,     setSearch]     = useState('')
+
+  // ── School schedule constants (mirrors StudentPortal) ──
+  const DAYS     = ['Mon','Tue','Wed','Thu','Fri']
+  const DAY_LONG = { Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday' }
+  const DAY_TYPE = { Mon:'Lessons', Tue:'Lessons', Wed:'Lessons', Thu:'Lessons', Fri:'Assessment & Activities' }
+  const FRI_COL  = '#6D28D9'
+  const SLOTS    = [
+    { label:'9 AM',  start:'09:00', end:'10:00' },
+    { label:'10 AM', start:'10:00', end:'11:00' },
+    { label:'11 AM', start:'11:00', end:'12:00' },
+    { label:'12 PM', start:'12:00', end:'13:00' },
+    { label:'Lunch', start:'13:00', end:'14:00', isBreak:true },
+    { label:'2 PM',  start:'14:00', end:'15:00' },
+  ]
+
+  const toMins   = hhmm => { if (!hhmm) return 0; const [h,m]=hhmm.split(':').map(Number); return h*60+m }
+  const fmt      = hhmm => { if (!hhmm) return ''; const [h,m]=hhmm.split(':').map(Number); const mer=h>=12?'PM':'AM'; let hr=h%12; if(!hr)hr=12; return `${hr}${m?':'+String(m).padStart(2,'0'):''} ${mer}` }
+  const colFor   = s => ({ Mathematics:'#8B1A2E',Maths:'#8B1A2E',Physics:'#1E3A8A',Chemistry:'#166534',Biology:'#7C2D12',English:'#6B21A8','English Language':'#6B21A8',Literature:'#A21CAF',History:'#92400E',Geography:'#0F766E','Computer Science':'#1F2937','Business Studies':'#7E22CE',Economics:'#9F1239',French:'#1D4ED8',Kiswahili:'#065F46' })[s] || '#8B1A2E'
 
   useEffect(() => {
     api.get('/users', { params:{ limit:200 } })
@@ -6858,7 +6876,7 @@ function DOSTimetableModule({ toast, refreshKey }) {
         setTeachers(all.filter(u=>u.role==='teacher'))
         setStudents(all.filter(u=>u.role==='student'))
       })
-      .catch(()=>{})
+      .catch(() => {})
   }, [refreshKey])
 
   const loadUserTimetable = async (u) => {
@@ -6873,66 +6891,75 @@ function DOSTimetableModule({ toast, refreshKey }) {
 
   const openEdit = (entry) => {
     setSelected(entry)
-    const [start,end] = (entry.startTime&&entry.endTime) ? [entry.startTime,entry.endTime] : ['09:00','10:00']
-    setEditData({ title:entry.title||'', subject:entry.subject||'', dayOfWeek:entry.dayOfWeek||'Mon', startTime:start, endTime:end, deliveryMode:entry.deliveryMode||'virtual', notes:entry.notes||'' })
+    setEditData({ title:entry.title||'', subject:entry.subject||'', dayOfWeek:entry.dayOfWeek||'Mon', startTime:entry.startTime||'09:00', endTime:entry.endTime||'10:00', deliveryMode:entry.deliveryMode||'virtual', notes:entry.notes||'' })
     setView('edit')
   }
 
   const saveEdit = async () => {
-    if (!selected) return
     setSaving(true)
     try {
       await api.patch('/timetable/'+selected._id, editData)
-      toast?.ok?.('Timetable entry updated.')
+      toast?.ok?.('Timetable updated.')
       loadUserTimetable(chosenUser)
     } catch(e) { toast?.error?.(e?.response?.data?.message||'Could not update.') }
     finally { setSaving(false) }
   }
 
-  // Build grid from entries
-  const grid = {}
-  SCHOOL_DAYS.forEach(d=>{ grid[d]={} })
-  entries.forEach(e=>{
-    if (!grid[e.dayOfWeek]) return
-    const slot = e.startTime+'-'+e.endTime
-    if (!grid[e.dayOfWeek][slot]) grid[e.dayOfWeek][slot]=[]
-    grid[e.dayOfWeek][slot].push(e)
-  })
+  // Build slot grid from entries
+  const byDay = {}
+  DAYS.forEach(d => { byDay[d] = [] })
+  entries.forEach(e => { if (byDay[e.dayOfWeek]) byDay[e.dayOfWeek].push(e) })
+  DAYS.forEach(d => byDay[d].sort((a,b)=>toMins(a.startTime)-toMins(b.startTime)))
+  const entryForSlot = (day, slot) => byDay[day].filter(e => toMins(e.startTime)>=toMins(slot.start) && toMins(e.startTime)<toMins(slot.end))
 
   const inp2 = { width:'100%', padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit', boxSizing:'border-box' }
-  const filtStudents = students.filter(u=>!search||(u.firstName+' '+u.lastName).toLowerCase().includes(search.toLowerCase()))
 
-  if (view==='edit'&&editData) {
+  // ── Edit view ────────────────────────────────────────────
+  if (view==='edit' && editData) {
     return (
       <>
         <button onClick={()=>setView('grid')} style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, padding:0, marginBottom:16 }}>← Back to timetable</button>
         <h2 style={{ fontSize:20, fontWeight:800, color:TOKENS.s900, marginBottom:18 }}>Edit Timetable Entry</h2>
-        <div className="card" style={{ padding:22, maxWidth:560 }}>
+        <div className="card" style={{ padding:22, maxWidth:540 }}>
           <div style={{ display:'grid', gap:14 }}>
-            <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Title</label>
-              <input value={editData.title} onChange={e=>setEditData(p=>({...p,title:e.target.value}))} style={inp2}/></div>
-            <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Subject</label>
-              <input value={editData.subject} onChange={e=>setEditData(p=>({...p,subject:e.target.value}))} style={inp2}/></div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
-              <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Day</label>
-                <select value={editData.dayOfWeek} onChange={e=>setEditData(p=>({...p,dayOfWeek:e.target.value}))} style={inp2}>
-                  {SCHOOL_DAYS.map(d=><option key={d} value={d}>{d} — {DAY_TYPES[d]}</option>)}
-                </select></div>
-              <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Start time</label>
-                <select value={editData.startTime} onChange={e=>setEditData(p=>({...p,startTime:e.target.value}))} style={inp2}>
-                  {['09:00','10:00','11:00','12:00','14:00','15:00'].map(t=><option key={t} value={t}>{t}</option>)}
-                </select></div>
-              <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>End time</label>
-                <select value={editData.endTime} onChange={e=>setEditData(p=>({...p,endTime:e.target.value}))} style={inp2}>
-                  {['10:00','11:00','12:00','13:00','15:00','16:00'].map(t=><option key={t} value={t}>{t}</option>)}
-                </select></div>
+            <div>
+              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Title</label>
+              <input value={editData.title} onChange={e=>setEditData(p=>({...p,title:e.target.value}))} style={inp2}/>
             </div>
-            <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Delivery mode</label>
+            <div>
+              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Subject</label>
+              <input value={editData.subject} onChange={e=>setEditData(p=>({...p,subject:e.target.value}))} style={inp2}/>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+              <div>
+                <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Day</label>
+                <select value={editData.dayOfWeek} onChange={e=>setEditData(p=>({...p,dayOfWeek:e.target.value}))} style={inp2}>
+                  {DAYS.map(d=><option key={d} value={d}>{d} — {DAY_TYPE[d]}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Start time</label>
+                <select value={editData.startTime} onChange={e=>setEditData(p=>({...p,startTime:e.target.value}))} style={inp2}>
+                  {['09:00','10:00','11:00','12:00','14:00','15:00'].map(t=><option key={t} value={t}>{fmt(t)}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>End time</label>
+                <select value={editData.endTime} onChange={e=>setEditData(p=>({...p,endTime:e.target.value}))} style={inp2}>
+                  {['10:00','11:00','12:00','13:00','15:00','16:00'].map(t=><option key={t} value={t}>{fmt(t)}</option>)}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Delivery mode</label>
               <select value={editData.deliveryMode} onChange={e=>setEditData(p=>({...p,deliveryMode:e.target.value}))} style={inp2}>
                 {['virtual','in-person','hybrid'].map(m=><option key={m} value={m}>{m.charAt(0).toUpperCase()+m.slice(1)}</option>)}
-              </select></div>
-            <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Notes</label>
-              <textarea value={editData.notes} onChange={e=>setEditData(p=>({...p,notes:e.target.value}))} rows={2} style={{ ...inp2, resize:'vertical' }}/></div>
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Notes</label>
+              <textarea value={editData.notes} onChange={e=>setEditData(p=>({...p,notes:e.target.value}))} rows={2} style={{ ...inp2, resize:'vertical' }}/>
+            </div>
           </div>
           <div style={{ display:'flex', gap:10, marginTop:18 }}>
             <button onClick={saveEdit} disabled={saving} style={{ background:saving?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', padding:'10px 24px', borderRadius:8, fontSize:13, fontWeight:700, cursor:saving?'not-allowed':'pointer' }}>{saving?'Saving...':'Save changes'}</button>
@@ -6943,53 +6970,168 @@ function DOSTimetableModule({ toast, refreshKey }) {
     )
   }
 
-  if (view==='grid'&&chosenUser) {
-    const dayColor = d => d==='Fri'?'#6B21A8':TOKENS.crimson
+  // ── Grid view — premium timetable matching student portal ─
+  if (view==='grid' && chosenUser) {
+    const isTeacher = chosenUser.role==='teacher'
+    const prog      = chosenUser.programme || (isTeacher ? 'Teacher' : chosenUser.deliveryMode || 'Student')
+    const totalClasses = entries.length
+
     return (
       <>
         <button onClick={()=>{ setView('picker'); setChosenUser(null); setEntries([]) }}
-          style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, padding:0, marginBottom:16 }}>← Back</button>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:18 }}>
-          <div>
-            <h2 style={{ fontSize:20, fontWeight:800, color:TOKENS.s900, margin:'0 0 4px' }}>{chosenUser.firstName} {chosenUser.lastName}</h2>
-            <div style={{ fontSize:12.5, color:TOKENS.s500 }}>{chosenUser.role==='teacher'?'Teacher':'Student'} · {chosenUser.curriculum||''} {chosenUser.gradeLevel||chosenUser.grade||''}</div>
+          style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, padding:0, marginBottom:16 }}>
+          ← Back to picker
+        </button>
+
+        {/* Premium header — mirrors student portal */}
+        <div style={{
+          background:'linear-gradient(135deg,#7D1025 0%,#5A0B1B 60%,#3D0712 100%)',
+          borderRadius:16, overflow:'hidden', marginBottom:20,
+          boxShadow:'0 8px 32px rgba(125,16,37,.25)',
+        }}>
+          <div style={{ display:'flex', alignItems:'stretch' }}>
+            {/* Photo */}
+            <div style={{ width:150, flexShrink:0, position:'relative', overflow:'hidden' }}>
+              {chosenUser.avatar ? (
+                <img src={chosenUser.avatar} alt={chosenUser.firstName}
+                  style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', minHeight:150 }}/>
+              ) : (
+                <div style={{ width:'100%', minHeight:150, background:'rgba(255,255,255,.1)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="1.5">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
+              )}
+              <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, transparent 60%, #7D1025)' }}/>
+            </div>
+
+            {/* Info */}
+            <div style={{ flex:1, padding:'20px 22px', display:'flex', flexDirection:'column', justifyContent:'center' }}>
+              <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.18em', textTransform:'uppercase', color:'#C9A030', marginBottom:6 }}>
+                {isTeacher ? 'Teacher' : 'Student'} Timetable
+              </div>
+              <h2 style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:26, fontWeight:400, color:'#fff', margin:'0 0 6px', letterSpacing:'-.3px' }}>
+                {chosenUser.firstName} {chosenUser.lastName}
+              </h2>
+              <div style={{ display:'flex', gap:14, flexWrap:'wrap', marginBottom:8 }}>
+                {chosenUser.curriculum && <span style={{ fontSize:12, fontWeight:700, color:'rgba(255,255,255,.7)', textTransform:'uppercase', letterSpacing:'.08em' }}>{chosenUser.curriculum}</span>}
+                {(chosenUser.gradeLevel||chosenUser.grade) && <span style={{ fontSize:12, color:'rgba(255,255,255,.5)' }}>{chosenUser.gradeLevel||chosenUser.grade}</span>}
+                <span style={{ fontSize:12, color:'rgba(255,255,255,.45)', textTransform:'capitalize' }}>{prog}</span>
+              </div>
+              {/* Legend */}
+              <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+                {[{ label:'Lesson', color:'#8B1A2E' },{ label:'Fri: Assessment/Activities', color:FRI_COL }].map(l=>(
+                  <div key={l.label} style={{ display:'flex', alignItems:'center', gap:5, fontSize:11, color:'rgba(255,255,255,.55)' }}>
+                    <div style={{ width:10, height:10, borderRadius:2, background:l.color }}/>
+                    {l.label}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div style={{ width:120, flexShrink:0, background:'rgba(0,0,0,.2)', padding:'18px 14px', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', textAlign:'center', borderLeft:'1px solid rgba(255,255,255,.1)' }}>
+              <div style={{ fontSize:9.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'rgba(255,255,255,.45)', marginBottom:6 }}>Weekly slots</div>
+              <div style={{ fontSize:28, fontWeight:800, color:'#C9A030' }}>{totalClasses}</div>
+              <div style={{ fontSize:10, color:'rgba(255,255,255,.4)', marginTop:6 }}>9 AM – 3 PM</div>
+              <div style={{ fontSize:9.5, color:'rgba(255,255,255,.35)', marginTop:2 }}>Lunch 1–2 PM</div>
+            </div>
           </div>
         </div>
-        {loading?<DOSSpinner/>:(
-          <div style={{ overflowX:'auto' }}>
-            <table style={{ width:'100%', borderCollapse:'collapse', minWidth:700 }}>
+
+        {loading ? <DOSSpinner/> : entries.length===0 ? (
+          <div style={{ padding:32, background:TOKENS.cream, border:'1px solid '+TOKENS.line, borderRadius:10, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>
+            No timetable entries found for {chosenUser.firstName}.
+          </div>
+        ) : (
+          <div style={{ background:'#fff', border:'1px solid #E8E2D6', borderRadius:12, overflow:'hidden', boxShadow:'0 2px 12px rgba(0,0,0,.06)' }}>
+            <table style={{ width:'100%', borderCollapse:'collapse' }}>
               <thead>
                 <tr>
-                  <th style={{ width:100, padding:'8px 12px', background:TOKENS.cream, border:'1px solid '+TOKENS.line, fontSize:11, fontWeight:700, color:TOKENS.s500, textAlign:'left' }}>Time</th>
-                  {SCHOOL_DAYS.map(d=>(
-                    <th key={d} style={{ padding:'8px 12px', background:d==='Fri'?'#F3E8FF':TOKENS.cream, border:'1px solid '+TOKENS.line, fontSize:11, fontWeight:800, color:dayColor(d), textAlign:'center' }}>
-                      <div>{d}</div>
-                      <div style={{ fontSize:9.5, fontWeight:500, color:TOKENS.s400 }}>{DAY_TYPES[d]}</div>
+                  <th style={{ width:64, padding:'10px 12px', background:'#1A0F0E', fontSize:10.5, fontWeight:700, color:'rgba(255,255,255,.5)', textAlign:'center', borderRight:'1px solid rgba(255,255,255,.1)' }}>Time</th>
+                  {DAYS.map(d=>(
+                    <th key={d} style={{
+                      padding:'10px 12px',
+                      background: d==='Fri'?'#3D0A4A':'#1A0F0E',
+                      fontSize:11, fontWeight:800,
+                      color:'rgba(255,255,255,.85)',
+                      textAlign:'center', borderRight:'1px solid rgba(255,255,255,.08)',
+                      letterSpacing:'.05em',
+                    }}>
+                      <div>{DAY_LONG[d]}</div>
+                      <div style={{ fontSize:9, fontWeight:500, color:d==='Fri'?'rgba(180,150,220,.7)':'rgba(255,255,255,.4)', marginTop:2 }}>{DAY_TYPE[d]}</div>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {SCHOOL_SLOTS.map(slot=>(
-                  <tr key={slot.time}>
-                    <td style={{ padding:'8px 12px', border:'1px solid '+TOKENS.line, fontSize:11.5, fontWeight:600, color:slot.isBreak?TOKENS.s300:TOKENS.s600, background:slot.isBreak?'#FAFAFA':undefined, whiteSpace:'nowrap' }}>
-                      {slot.label}
+                {SLOTS.map(slot=>(
+                  <tr key={slot.label} style={{ borderBottom:'1px solid #F4EFEB' }}>
+                    <td style={{
+                      padding:'6px 10px', textAlign:'center', verticalAlign:'middle',
+                      background:slot.isBreak?'#FFFBF0':TOKENS.cream,
+                      borderRight:'1px solid #E8E2D6',
+                      fontSize:11, fontWeight:700,
+                      color:slot.isBreak?'#D97706':'#857973',
+                      whiteSpace:'nowrap',
+                    }}>
+                      {slot.isBreak ? (
+                        <div>
+                          <div style={{ fontSize:9.5, letterSpacing:'.08em', color:'#D97706' }}>LUNCH</div>
+                          <div style={{ fontSize:9, color:'#D97706', opacity:.7 }}>1–2 PM</div>
+                        </div>
+                      ) : slot.label}
                     </td>
-                    {SCHOOL_DAYS.map(day=>{
-                      if (slot.isBreak) return <td key={day} style={{ border:'1px solid '+TOKENS.line, background:'#FAFAFA', textAlign:'center' }}><span style={{ fontSize:10.5, color:TOKENS.s300 }}>Lunch</span></td>
-                      const [s,e] = slot.time.split('-')
-                      const cellEntries = (grid[day]||{})[s+'-'+e] || []
+                    {DAYS.map(day=>{
+                      if (slot.isBreak) return (
+                        <td key={day} style={{ background:'#FFFBF0', borderRight:'1px solid #F4EFEB', padding:'6px', textAlign:'center' }}>
+                          <span style={{ fontSize:9.5, color:'#D97706', fontWeight:600 }}>Lunch break</span>
+                        </td>
+                      )
+                      const cellEntries = entryForSlot(day, slot)
+                      const isFri = day==='Fri'
                       return (
-                        <td key={day} style={{ border:'1px solid '+TOKENS.line, padding:4, verticalAlign:'top', background:day==='Fri'?'#FAF5FF':'#fff', minWidth:120 }}>
-                          {cellEntries.map(en=>(
-                            <div key={en._id} style={{ background:day==='Fri'?'#F3E8FF':'#FDE7EC', border:'1px solid '+(day==='Fri'?'#C4B5FD':'#F8B4C0'), borderRadius:6, padding:'5px 7px', marginBottom:3 }}>
-                              <div style={{ fontSize:12, fontWeight:700, color:dayColor(day) }}>{en.subject||en.title}</div>
-                              {en.teacherId&&<div style={{ fontSize:10, color:TOKENS.s500 }}>{en.teacherId?.firstName||''} {en.teacherId?.lastName||''}</div>}
-                              <div style={{ fontSize:10, color:TOKENS.s400, textTransform:'capitalize' }}>{en.deliveryMode}</div>
-                              <button onClick={()=>openEdit(en)} style={{ fontSize:10, color:dayColor(day), background:'transparent', border:'none', cursor:'pointer', fontWeight:700, padding:0, textDecoration:'underline', marginTop:2 }}>Edit</button>
-                            </div>
-                          ))}
-                          {!cellEntries.length&&<div style={{ fontSize:10, color:TOKENS.s200, textAlign:'center', padding:'8px 0' }}>—</div>}
+                        <td key={day} style={{
+                          padding:4, verticalAlign:'top',
+                          background:isFri?'#FAF5FF':'#fff',
+                          borderRight:'1px solid #F4EFEB',
+                          minWidth:120, minHeight:60,
+                        }}>
+                          {cellEntries.map(e=>{
+                            const col = isFri ? FRI_COL : colFor(e.subject)
+                            return (
+                              <div key={e._id} style={{
+                                background:col+'12', border:`1.5px solid ${col}30`,
+                                borderLeft:`3px solid ${col}`,
+                                borderRadius:7, padding:'7px 9px', marginBottom:3,
+                                cursor:'pointer',
+                                transition:'transform .12s, box-shadow .12s',
+                              }}
+                                onMouseEnter={ev=>{ ev.currentTarget.style.transform='translateY(-1px)'; ev.currentTarget.style.boxShadow=`0 4px 12px ${col}25` }}
+                                onMouseLeave={ev=>{ ev.currentTarget.style.transform='translateY(0)'; ev.currentTarget.style.boxShadow='none' }}>
+                                <div style={{ fontSize:12, fontWeight:700, color:col, lineHeight:1.25, marginBottom:2 }}>{e.subject||e.title}</div>
+                                <div style={{ fontSize:10, color:col+'99' }}>{fmt(e.startTime)}–{fmt(e.endTime)}</div>
+                                {!isTeacher && e.teacherId && (
+                                  <div style={{ fontSize:9.5, color:col+'80', marginTop:1 }}>
+                                    {e.teacherId?.firstName||''} {(e.teacherId?.lastName||'')[0]||''}.
+                                  </div>
+                                )}
+                                {isTeacher && e.assignedStudents?.length > 0 && (
+                                  <div style={{ fontSize:9.5, color:col+'70', marginTop:1 }}>
+                                    {e.assignedStudents.length} student{e.assignedStudents.length>1?'s':''}
+                                  </div>
+                                )}
+                                <div style={{ fontSize:9, color:col+'60', marginTop:1, textTransform:'capitalize' }}>{e.deliveryMode}</div>
+                                <button onClick={()=>openEdit(e)} style={{
+                                  marginTop:4, fontSize:9.5, color:col, background:'transparent', border:'none',
+                                  cursor:'pointer', fontWeight:700, padding:0, textDecoration:'underline',
+                                }}>Edit</button>
+                              </div>
+                            )
+                          })}
+                          {!cellEntries.length && (
+                            <div style={{ fontSize:10, color:TOKENS.s200, textAlign:'center', paddingTop:10 }}>—</div>
+                          )}
                         </td>
                       )
                     })}
@@ -7003,53 +7145,94 @@ function DOSTimetableModule({ toast, refreshKey }) {
     )
   }
 
+  // ── Picker view ──────────────────────────────────────────
+  const filtStudents = students.filter(u=>!search||(u.firstName+' '+u.lastName).toLowerCase().includes(search.toLowerCase())||(u.admissionNo||u.admissionNumber||'').includes(search))
+
   return (
     <>
-      <PSection tag="Dean of Studies" title="Timetable" em="Manager" sub="View and edit weekly timetables. Mon–Thu: lessons. Fri: assessments or activities. School hours 09:00–15:00 with lunch 13:00–14:00."/>
+      <PSection tag="Dean of Studies" title="Timetable" em="Manager"
+        sub="Click any teacher or student to view their weekly schedule. School hours 9 AM–3 PM, lunch 1–2 PM. Mon–Thu: Lessons. Fri: Assessment & Activities."/>
+
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+        {/* Teachers */}
         <div className="card" style={{ padding:18 }}>
           <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Teacher timetables</div>
-          <div style={{ display:'flex', flexDirection:'column', gap:5, maxHeight:340, overflowY:'auto' }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:5, maxHeight:360, overflowY:'auto' }}>
             {teachers.map(u=>(
-              <button key={u._id} onClick={()=>loadUserTimetable(u)} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'9px 12px', borderRadius:8, border:'1px solid '+TOKENS.line, background:'#fff', cursor:'pointer', textAlign:'left' }}
+              <button key={u._id} onClick={()=>loadUserTimetable(u)}
+                style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 12px', borderRadius:8, border:'1px solid '+TOKENS.line, background:'#fff', cursor:'pointer', textAlign:'left' }}
                 onMouseEnter={e=>e.currentTarget.style.background=TOKENS.cream}
                 onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
-                <div>
-                  <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
-                  <div style={{ fontSize:11, color:TOKENS.s500 }}>{(u.teachingSpecialties||[]).map(s=>s.subject||s.subjectId?.subjectName||'').filter(Boolean).slice(0,3).join(', ')||u.email}</div>
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  {u.avatar ? (
+                    <img src={u.avatar} alt="" style={{ width:36, height:36, borderRadius:'50%', objectFit:'cover', flexShrink:0 }}/>
+                  ) : (
+                    <div style={{ width:36, height:36, borderRadius:'50%', background:TOKENS.cream, border:'1px solid '+TOKENS.line, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={TOKENS.s400} strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                  )}
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
+                    <div style={{ fontSize:11, color:TOKENS.s500 }}>{(u.teachingSpecialties||[]).map(s=>s.subject||s.subjectId?.subjectName||'').filter(Boolean).slice(0,2).join(', ')||u.email}</div>
+                  </div>
                 </div>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.crimson} strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             ))}
-            {!teachers.length&&<div style={{ fontSize:12.5, color:TOKENS.s400, textAlign:'center', padding:'16px 0' }}>No teachers found.</div>}
+            {!teachers.length && <div style={{ fontSize:12.5, color:TOKENS.s400, textAlign:'center', padding:'16px 0' }}>No teachers found.</div>}
           </div>
         </div>
+
+        {/* Students */}
         <div className="card" style={{ padding:18 }}>
           <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:8 }}>Student timetables</div>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search student..."
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or admission no..."
             style={{ width:'100%', padding:'7px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, marginBottom:10, fontFamily:'inherit', boxSizing:'border-box' }}/>
           <div style={{ display:'flex', flexDirection:'column', gap:5, maxHeight:300, overflowY:'auto' }}>
             {filtStudents.map(u=>(
-              <button key={u._id} onClick={()=>loadUserTimetable(u)} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'9px 12px', borderRadius:8, border:'1px solid '+TOKENS.line, background:'#fff', cursor:'pointer', textAlign:'left' }}
+              <button key={u._id} onClick={()=>loadUserTimetable(u)}
+                style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 12px', borderRadius:8, border:'1px solid '+TOKENS.line, background:'#fff', cursor:'pointer', textAlign:'left' }}
                 onMouseEnter={e=>e.currentTarget.style.background=TOKENS.cream}
                 onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
-                <div>
-                  <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
-                  <div style={{ fontSize:11, color:TOKENS.s500 }}>{u.curriculum} · {u.gradeLevel||u.grade} · {u.admissionNo||u.admissionNumber||'—'}</div>
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  {u.avatar ? (
+                    <img src={u.avatar} alt="" style={{ width:36, height:36, borderRadius:'50%', objectFit:'cover', flexShrink:0 }}/>
+                  ) : (
+                    <div style={{ width:36, height:36, borderRadius:'50%', background:TOKENS.cream, border:'1px solid '+TOKENS.line, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={TOKENS.s400} strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                  )}
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
+                    <div style={{ fontSize:11, color:TOKENS.s500 }}>{u.curriculum} · {u.gradeLevel||u.grade} · {u.admissionNo||u.admissionNumber||'—'}</div>
+                  </div>
                 </div>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.crimson} strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             ))}
-            {!filtStudents.length&&<div style={{ fontSize:12.5, color:TOKENS.s400, textAlign:'center', padding:'16px 0' }}>No students found.</div>}
+            {!filtStudents.length && <div style={{ fontSize:12.5, color:TOKENS.s400, textAlign:'center', padding:'16px 0' }}>No students found.</div>}
           </div>
         </div>
       </div>
-      <div style={{ marginTop:14, padding:'12px 16px', background:TOKENS.cream, borderRadius:8, border:'1px solid '+TOKENS.line, fontSize:12.5, color:TOKENS.s600 }}>
-        School hours: <strong>09:00 – 15:00</strong> · Lunch break: <strong>13:00 – 14:00</strong> · Mon–Thu: <strong>Lessons</strong> · Fri: <strong>Assessment or Activities</strong>
+
+      {/* Schedule info */}
+      <div style={{ marginTop:14, display:'flex', gap:16, flexWrap:'wrap', padding:'10px 16px', background:TOKENS.cream, borderRadius:8, border:'1px solid '+TOKENS.line, fontSize:12.5, color:TOKENS.s600 }}>
+        {[
+          { label:'School hours', val:'9:00 AM – 3:00 PM' },
+          { label:'Lunch break', val:'1:00 – 2:00 PM' },
+          { label:'Mon – Thu', val:'Lessons' },
+          { label:'Friday', val:'Assessment & Activities', color:FRI_COL },
+        ].map(k=>(
+          <div key={k.label} style={{ display:'flex', gap:6, alignItems:'center' }}>
+            <span style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.06em' }}>{k.label}</span>
+            <span style={{ color:k.color||TOKENS.s700, fontWeight:600 }}>{k.val}</span>
+          </div>
+        ))}
       </div>
     </>
   )
 }
+
 
 function ReportsModule({ toast, refreshKey }) {
   const [view, setView] = useState('list') // list | generate | detail
