@@ -145,6 +145,20 @@ const userSchema = new mongoose.Schema({
   
   isActive:       { type: Boolean, default: true },
 
+  // ── Fee / Billing ────────────────────────────────────────
+  // Agreed monthly fee for this student's programme
+  agreedFee:      { type: Number, default: 0 },          // e.g. 400 (USD)
+  feeCurrency:    { type: String, enum: ['USD','KES','GBP','EUR','AED'], default: 'USD' },
+  // Billing cycle: day of month fees are due (1-28)
+  billingDay:     { type: Number, default: 15, min: 1, max: 28 },
+  // Last payment date and next due date (auto-computed but stored for quick access)
+  lastPaidDate:   { type: Date, default: null },
+  nextDueDate:    { type: Date, default: null },
+  // Billing note (e.g. "Pays via M-Pesa", "Discount applied")
+  billingNote:    { type: String, default: '' },
+  // Reminder preference
+  feeReminderSent:{ type: Date, default: null }, // last reminder sent
+
   // ── Break / Leave ──────────────────────────────────────
   // DOS sets onBreak=true to deactivate reminders & check-in for a student.
   // Admin can do the same for staff.
