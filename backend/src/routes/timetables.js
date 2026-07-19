@@ -33,7 +33,7 @@ router.get('/student/:studentId', auth, async (req, res) => {
 
 // ── GET /api/timetables/mine ───────────────────────────────
 // Timetables created by the logged-in teacher.
-router.get('/mine', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.get('/mine', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const tts = await Timetable.find({ teacherId: req.user._id, isActive: true })
       .sort({ updatedAt: -1 })
@@ -58,7 +58,7 @@ router.get('/:id', auth, async (req, res) => {
 // ── POST /api/timetables ───────────────────────────────────
 // Create a timetable and generate its sessions upfront.
 // Body: { studentId, subjectId, weeklySlots:[{dayOfWeek,time}], startDate }
-router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const { studentId, subjectId, weeklySlots, startDate } = req.body;
 
@@ -109,7 +109,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
 // status (deliver / cancel). Body may contain:
 //   weeklySlots, startDate         → regenerate
 //   sessionUpdate:{sessionId,status} → mark one session
-router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.patch('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const tt = await Timetable.findById(req.params.id);
     if (!tt) return res.status(404).json({ success: false, message: 'Timetable not found.' });
@@ -164,7 +164,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
 
 // ── POST /api/timetables/:id/regenerate ────────────────────
 // Manually recompute from the current lesson list.
-router.post('/:id/regenerate', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/:id/regenerate', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const tt = await Timetable.findById(req.params.id);
     if (!tt) return res.status(404).json({ success: false, message: 'Timetable not found.' });
@@ -182,7 +182,7 @@ router.post('/:id/regenerate', auth, requireRole('teacher', 'admin'), async (req
 // ── POST /api/timetables/:id/promote-session ───────────────
 // Manually turn one timetable session into a LiveClass now,
 // without waiting for the roll-forward window. Body: { sessionId }
-router.post('/:id/promote-session', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/:id/promote-session', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const tt = await Timetable.findById(req.params.id);
     if (!tt) return res.status(404).json({ success: false, message: 'Timetable not found.' });
@@ -221,7 +221,7 @@ router.post('/:id/promote-session', auth, requireRole('teacher', 'admin'), async
 });
 
 // ── DELETE /api/timetables/:id ─────────────────────────────
-router.delete('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.delete('/:id', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const tt = await Timetable.findByIdAndDelete(req.params.id);
     if (!tt) return res.status(404).json({ success: false, message: 'Timetable not found.' });
