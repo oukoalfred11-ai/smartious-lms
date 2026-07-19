@@ -102,7 +102,7 @@ function normaliseDate(input) {
 // POST / — Mark or update one student's attendance for a date
 // Body: { studentId, date, status, reason? }
 // ═══════════════════════════════════════════════════════════
-router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const { studentId, date, status, reason = '' } = req.body || {};
 
@@ -155,7 +155,7 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
 // POST /bulk — Mark same status for multiple students on one date
 // Body: { studentIds: [...], date, status, reason? }
 // ═══════════════════════════════════════════════════════════
-router.post('/bulk', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/bulk', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const { studentIds, date, status, reason = '' } = req.body || {};
 
@@ -259,7 +259,7 @@ router.get('/student/:studentId', auth, async (req, res) => {
 // GET /day — List attendance for a specific date (all students)
 // Query: ?date=YYYY-MM-DD (defaults to today)
 // ═══════════════════════════════════════════════════════════
-router.get('/day', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.get('/day', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const dateNorm = normaliseDate(req.query.date || new Date());
     if (!dateNorm) return fail(res, 400, 'Invalid date.');
@@ -279,7 +279,7 @@ router.get('/day', auth, requireRole('teacher', 'admin'), async (req, res) => {
 // ═══════════════════════════════════════════════════════════
 // DELETE /:attendanceId — Remove an attendance record (correction)
 // ═══════════════════════════════════════════════════════════
-router.delete('/:attendanceId', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.delete('/:attendanceId', auth, requireRole('teacher', 'admin', 'dos'), async (req, res) => {
   try {
     const { attendanceId } = req.params;
     if (!mongoose.isValidObjectId(attendanceId))
