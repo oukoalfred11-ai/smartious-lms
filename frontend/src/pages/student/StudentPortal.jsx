@@ -366,6 +366,7 @@ const NAV_SECTIONS = [
     { id:'exams',        label:'Exams',           icon:'exams',        svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',  badge:'1' },
     { id:'results',      label:'My Results',      icon:'results',      svg:'<circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>' },
     { id:'live',         label:'Live Classes',    icon:'live',         svg:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>', live:true },
+    { id:'checkin',     label:'Check In',        icon:'checkin',      svg:'<polyline points="20 6 9 17 4 12"/>' },
     { id:'timetable',    label:'Timetable',       icon:'timetable',    svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>' },
     { id:'attendance',   label:'My Attendance',   icon:'attendance',   svg:'<rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 12.5l2 2 4-4.5"/>' },
     { id:'library',      label:'Library',         icon:'library',      svg:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/>' },
@@ -1943,6 +1944,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               TIMETABLE
           ════════════════════════════════════════════ */}
+          {page === 'checkin'   && <StudentCheckInTab user={user} toast={toast} />}
           {page === 'timetable' && <RealTimetableTab user={user} setPage={setPage} toast={toast} />}
 
           {page === 'attendance' && <StudentAttendancePage user={user} toast={toast} />}
@@ -13040,6 +13042,150 @@ function StudentAttendancePage({ user, toast }) {
 }
 
 // ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// StudentCheckInTab — self check-in for student portal
+// ═══════════════════════════════════════════════════════════
+function StudentCheckInTab({ user, toast }) {
+  const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+  const dayOfWeek = new Date().getDay()
+  const isWeekend = dayOfWeek===0||dayOfWeek===6
+
+  const [status,  setStatus]  = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [saving,  setSaving]  = useState(false)
+  const [history, setHistory] = useState([])
+  const [pick,    setPick]    = useState('present')
+  const [lateTime,setLateTime]= useState('')
+  const [reason,  setReason]  = useState('')
+
+  const load = () => {
+    setLoading(true)
+    api.get('/checkin/today')
+      .then(r=>setStatus(r.data?.data))
+      .catch(()=>{})
+      .finally(()=>setLoading(false))
+    api.get('/checkin/history')
+      .then(r=>setHistory(r.data?.data?.records||[]))
+      .catch(()=>{})
+  }
+
+  useEffect(()=>{load()},[])
+
+  const submit = async () => {
+    if(pick==='late'&&!lateTime.trim()){toast?.error?.('Enter your arrival time.');return}
+    if(pick==='absent'&&!reason.trim()){toast?.error?.('Enter a reason.');return}
+    setSaving(true)
+    try {
+      await api.post('/checkin',{status:pick,lateTime,reason})
+      toast?.ok?.('Check-in recorded.')
+      load()
+    } catch(e){toast?.error?.(e?.response?.data?.message||'Check-in failed.')}
+    finally{setSaving(false)}
+  }
+
+  const fmtDate = d=>d?new Date(d).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}):'—'
+  const fmtTime = d=>d?new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'—'
+  const SS = { present:{bg:'#D1FAE5',fg:'#065F46',label:'Present'}, late:{bg:'#FEF3C7',fg:'#D97706',label:'Late'}, absent:{bg:'#FEE2E2',fg:'#991B1B',label:'Absent'} }
+
+  if(!loading&&status?.onBreak) return (
+    <div style={{padding:'40px 20px',textAlign:'center'}}>
+      <div style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#1A0F0E',marginBottom:8}}>You are on a break</div>
+      <div style={{fontSize:13,color:'#857973',lineHeight:1.65}}>Your account is temporarily paused. Contact your DOS or admin to return.</div>
+      {status.breakNote&&<div style={{fontSize:12.5,color:'#564844',background:'#FDFAF5',borderRadius:8,padding:'10px 14px',marginTop:12,display:'inline-block',fontStyle:'italic'}}>"{status.breakNote}"</div>}
+    </div>
+  )
+
+  const alreadyIn = !loading&&status?.checkedIn
+  const todaySS   = alreadyIn?SS[status.checkInStatus]||SS.present:null
+
+  return (
+    <div>
+      <div style={{marginBottom:20}}>
+        <div className="sec-tag">Daily attendance</div>
+        <h2 className="serif" style={{fontSize:26,color:'var(--s900)',margin:'6px 0 4px'}}>Check In</h2>
+        <div style={{fontSize:13,color:'#6B6B6B'}}>{today}</div>
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'1fr 360px',gap:20,alignItems:'start'}}>
+        <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden'}}>
+          <div style={{background:'linear-gradient(135deg,#8B1A2E,#5A0B1B)',padding:'22px 24px'}}>
+            <div style={{fontSize:20,fontWeight:800,color:'#fff',marginBottom:4}}>
+              Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, {user?.firstName}
+            </div>
+            <div style={{fontSize:13,color:'rgba(255,255,255,.6)'}}>
+              {alreadyIn?'You're checked in for today.':isWeekend?'No check-in on weekends.':'Please mark your attendance.'}
+            </div>
+          </div>
+          <div style={{padding:'24px'}}>
+            {loading?<div style={{textAlign:'center',color:'#9A9A9A',padding:'20px 0'}}>Loading...</div>
+            :isWeekend?<div style={{textAlign:'center',color:'#9A9A9A',padding:'20px 0'}}>Enjoy your weekend!</div>
+            :alreadyIn?(
+              <div style={{textAlign:'center'}}>
+                <div style={{width:68,height:68,borderRadius:'50%',background:todaySS.bg,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 14px'}}>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={todaySS.fg} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div style={{fontSize:22,fontWeight:800,color:todaySS.fg,marginBottom:4}}>{todaySS.label}</div>
+                <div style={{fontSize:13,color:'#857973'}}>Checked in at {fmtTime(status?.record?.checkInTime)}</div>
+                {status?.checkInStatus==='late'&&<div style={{fontSize:13,color:'#D97706',marginTop:8}}>Arrival: {status.record?.lateTime}</div>}
+                {status?.checkInStatus==='absent'&&<div style={{fontSize:13,color:'#991B1B',marginTop:8}}>{status.record?.reason}</div>}
+              </div>
+            ):(
+              <>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:18}}>
+                  {[{val:'present',label:'Present',bg:'#D1FAE5',fg:'#065F46',desc:'On time'},{val:'late',label:'Late',bg:'#FEF3C7',fg:'#D97706',desc:'Running late'},{val:'absent',label:'Absent',bg:'#FEE2E2',fg:'#991B1B',desc:'Not attending'}].map(opt=>(
+                    <button key={opt.val} onClick={()=>{setPick(opt.val);if(opt.val!=='late')setLateTime('');if(opt.val!=='absent')setReason('')}}
+                      style={{padding:'14px 10px',borderRadius:10,cursor:'pointer',textAlign:'center',border:'2px solid '+(pick===opt.val?opt.fg:'#E8E2D6'),background:pick===opt.val?opt.bg:'#fff'}}>
+                      <div style={{fontSize:13,fontWeight:800,color:pick===opt.val?opt.fg:'#564844',marginBottom:3}}>{opt.label}</div>
+                      <div style={{fontSize:11,color:pick===opt.val?opt.fg:'#9A9A9A'}}>{opt.desc}</div>
+                    </button>
+                  ))}
+                </div>
+                {pick==='late'&&<div style={{marginBottom:14}}>
+                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:5,display:'block'}}>Arrival time</label>
+                  <input type="time" value={lateTime} onChange={e=>setLateTime(e.target.value)}
+                    style={{width:'100%',padding:'10px 12px',borderRadius:8,border:'1.5px solid #E8E2D6',fontSize:15,fontFamily:'inherit',boxSizing:'border-box'}}/>
+                </div>}
+                {pick==='absent'&&<div style={{marginBottom:14}}>
+                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:5,display:'block'}}>Reason for absence</label>
+                  <textarea value={reason} onChange={e=>setReason(e.target.value)} rows={3} placeholder="Please explain your absence..."
+                    style={{width:'100%',padding:'10px 12px',borderRadius:8,border:'1.5px solid #E8E2D6',fontSize:13,fontFamily:'inherit',resize:'vertical',boxSizing:'border-box'}}/>
+                </div>}
+                <button onClick={submit} disabled={saving}
+                  style={{width:'100%',padding:'12px',borderRadius:9,background:saving?'#9A9A9A':pick==='absent'?'#991B1B':pick==='late'?'#D97706':'#065F46',color:'#fff',border:'none',fontSize:14,fontWeight:800,cursor:saving?'not-allowed':'pointer'}}>
+                  {saving?'Submitting...':'Mark myself as '+pick}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* History */}
+        <div style={{background:'#fff',border:'1px solid #E8E2D6',borderRadius:12,overflow:'hidden'}}>
+          <div style={{padding:'12px 16px',borderBottom:'1px solid #E8E2D6',fontWeight:800,fontSize:13,color:'#1A0F0E'}}>My attendance (30 days)</div>
+          {history.length===0?<div style={{padding:24,textAlign:'center',color:'#9A9A9A',fontSize:13}}>No records yet.</div>:(
+            <div style={{maxHeight:400,overflowY:'auto'}}>
+              {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((r,i)=>{
+                const s=SS[r.checkInStatus||r.status]||{bg:'#F3F4F6',fg:'#6B7280',label:r.status||'—'}
+                return(
+                  <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'9px 14px',borderBottom:'1px solid #F4EFEB'}}>
+                    <div>
+                      <div style={{fontSize:12.5,fontWeight:600,color:'#1A0F0E'}}>{fmtDate(r.date)}</div>
+                      {(r.lateTime||r.reason)&&<div style={{fontSize:11,color:'#857973',marginTop:1}}>{r.lateTime?'Arrived: '+r.lateTime:r.reason}</div>}
+                    </div>
+                    <span style={{padding:'3px 10px',borderRadius:99,fontSize:11,fontWeight:700,background:s.bg,color:s.fg}}>{r.checkInStatus==='late'?'Late':s.label}</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
 // RealTimetableTab
 // ═══════════════════════════════════════════════════════════
 // Backend-driven student timetable. Reads recurring weekly slots
