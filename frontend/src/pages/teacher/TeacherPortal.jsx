@@ -786,7 +786,7 @@ export default function TeacherPortal() {
       {id:'attendance',    label:'Attendance',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
       {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
       {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
-      {id:'availability',  label:'My Availability', iconName:'availability', icon:'circle:12:12:4|line:12:8:12:12|line:12:12:16:12'},
+      {id:'checkin',       label:'Check In',         iconName:'checkin',       icon:'M20 6 9 17 4 12'},
       {id:'timetable',     label:'Timetable',        iconName:'timetable',     icon:'rect:3:4:18:18:2|line:8:2:8:6|line:16:2:16:6|line:3:10:21:10'},
       {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
     ]},
@@ -937,8 +937,8 @@ export default function TeacherPortal() {
 
           {page === 'library' && <TeacherLibraryTab user={currentUser} toast={toast} />}
 
+          {page === 'checkin' && <TeacherCheckInTab user={currentUser} toast={toast}/>}
           {page === 'timetable' && <TeacherTimetableTab user={currentUser} toast={toast} />}
-          {page === 'availability' && <TeacherAvailabilityTab user={currentUser} toast={toast} />}
 
 
           {/* ── QUESTION BANK ── */}
@@ -14181,109 +14181,131 @@ function BookCard({ book, onView, onDelete, canDelete }) {
 // represents "Maths every Monday 09:00–10:00 for these students."
 // The Student Portal reads from the same source.
 // ═══════════════════════════════════════════════════════════
-// ─────────────────────────────────────────────────────────
-// TeacherAvailabilityTab
-// Teacher sets weekly available slots used for auto-timetabling.
-// ─────────────────────────────────────────────────────────
-function TeacherAvailabilityTab({ user, toast }) {
-  const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
-  const DAYS_LONG = { Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday',Sat:'Saturday',Sun:'Sunday' }
-  const [slots, setSlots]     = useState([])
+// ── TeacherCheckInTab — self check-in for teacher portal ──
+function TeacherCheckInTab({ user, toast }) {
+  const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+  const isWeekend = [0,6].includes(new Date().getDay())
+
+  const [status,  setStatus]  = useState(null)
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving]   = useState(false)
+  const [saving,  setSaving]  = useState(false)
+  const [history, setHistory] = useState([])
+  const [pick,    setPick]    = useState('present')
+  const [lateTime,setLateTime]= useState('')
+  const [reason,  setReason]  = useState('')
 
-  useEffect(() => {
-    api.get('/users/teachers/' + user._id + '/availability')
-      .then(r => setSlots(r.data?.data?.availability || []))
-      .catch(() => toast?.error?.('Could not load availability.'))
-      .finally(() => setLoading(false))
-  }, [user._id])
+  const load = () => {
+    setLoading(true)
+    api.get('/checkin/today').then(r=>setStatus(r.data?.data)).catch(()=>{}).finally(()=>setLoading(false))
+    api.get('/checkin/history').then(r=>setHistory(r.data?.data?.records||[])).catch(()=>{})
+  }
+  useEffect(()=>{load()},[])
 
-  const addSlot  = () => setSlots(s => [...s, { dayOfWeek:'Mon', startTime:'09:00', endTime:'10:00' }])
-  const upd      = (i, k, v) => setSlots(s => s.map((sl,idx) => idx===i ? {...sl,[k]:v} : sl))
-  const remove   = i => setSlots(s => s.filter((_,idx) => idx!==i))
-
-  const save = async () => {
-    for (const sl of slots) {
-      const sm = sl.startTime.split(':').map(Number); const em = sl.endTime.split(':').map(Number)
-      if (em[0]*60+em[1] <= sm[0]*60+sm[1]) { toast?.error?.('End time must be after start time on ' + sl.dayOfWeek); return }
-    }
+  const submit = async () => {
+    if(pick==='late'&&!lateTime.trim()){toast?.error?.('Enter arrival time.');return}
+    if(pick==='absent'&&!reason.trim()){toast?.error?.('Enter a reason.');return}
     setSaving(true)
-    try {
-      const { data } = await api.patch('/users/teachers/' + user._id + '/availability', { availability: slots })
-      if (data?.success) toast?.ok?.('Availability saved. New allocations will auto-schedule within these slots.')
-      else toast?.error?.(data?.message || 'Could not save.')
-    } catch(e) {
-      toast?.error?.(e?.response?.data?.message || 'Could not save.')
-    } finally { setSaving(false) }
+    try { await api.post('/checkin',{status:pick,lateTime,reason}); toast?.ok?.('Checked in.'); load() }
+    catch(e){toast?.error?.(e?.response?.data?.message||'Failed.')}
+    finally{setSaving(false)}
   }
 
-  const DC = { Mon:'#7D1025',Tue:'#1E3A8A',Wed:'#166534',Thu:'#92400E',Fri:'#6B21A8',Sat:'#0F766E',Sun:'#374151' }
-  const inp = { padding:'7px 10px', borderRadius:6, border:'1.5px solid #E8E2D6', fontSize:12.5, fontFamily:'inherit', background:'#FBFAF5' }
+  const SS={present:{bg:'#D1FAE5',fg:'#065F46',label:'Present'},late:{bg:'#FEF3C7',fg:'#D97706',label:'Late'},absent:{bg:'#FEE2E2',fg:'#991B1B',label:'Absent'}}
+  const fmtDate=d=>d?new Date(d).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}):'—'
+  const fmtTime=d=>d?new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'—'
+  const alreadyIn=!loading&&status?.checkedIn
+  const todaySS=alreadyIn?SS[status.checkInStatus]||SS.present:null
+
+  if(!loading&&status?.onBreak) return (
+    <div style={{padding:'60px 20px',textAlign:'center'}}>
+      <div style={{fontSize:20,fontWeight:800,color:'#231715',marginBottom:8}}>You are on a break</div>
+      <div style={{fontSize:13,color:'#7A6652',lineHeight:1.65}}>Contact your admin to return from break.{status.breakNote?' Note: '+status.breakNote:''}</div>
+    </div>
+  )
 
   return (
     <div>
-      <div className="sec-tag">Schedule</div>
-      <h2 className="serif" style={{fontSize:24,color:'var(--s900)',margin:'6px 0 4px'}}>My Availability</h2>
-      <div style={{fontSize:13,color:'#6B6B6B',marginBottom:20,lineHeight:1.6}}>
-        Set the time slots when you can teach. When admin allocates you to a new student, the system picks the first free slot from this list to auto-generate a timetable entry.
+      <div style={{marginBottom:20}}>
+        <div style={{fontSize:10,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:'#8B1A2E',marginBottom:4}}>Daily attendance</div>
+        <h2 style={{fontFamily:"'Instrument Serif',serif",fontSize:26,color:'#231715',margin:'0 0 4px'}}>Check In</h2>
+        <div style={{fontSize:13,color:'#7A6652'}}>{today}</div>
       </div>
-      {loading ? <div style={{fontSize:13,color:'#9A9A9A',fontStyle:'italic'}}>Loading...</div> : (<>
-        <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16}}>
-          {slots.length===0 && (
-            <div style={{padding:20,background:'#FBFAF5',border:'1px dashed #E8E2D6',borderRadius:8,textAlign:'center',fontSize:13,color:'#9A9A9A'}}>
-              No slots set. Add your available times below.
+
+      <div style={{display:'grid',gridTemplateColumns:'1fr 340px',gap:20,alignItems:'start'}}>
+        <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,overflow:'hidden'}}>
+          <div style={{background:'linear-gradient(135deg,#8B1A2E,#5A0B1B)',padding:'22px 24px'}}>
+            <div style={{fontSize:20,fontWeight:800,color:'#fff',marginBottom:4}}>
+              Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, {user?.firstName}
             </div>
-          )}
-          {slots.map((sl,i) => (
-            <div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',background:'#fff',border:'1.5px solid #E8E2D6',borderLeft:'4px solid '+(DC[sl.dayOfWeek]||'#7D1025'),borderRadius:8}}>
-              <select value={sl.dayOfWeek} onChange={e=>upd(i,'dayOfWeek',e.target.value)} style={{...inp,fontWeight:700,color:DC[sl.dayOfWeek]||'#7D1025',minWidth:110}}>
-                {DAYS.map(d=><option key={d} value={d}>{DAYS_LONG[d]}</option>)}
-              </select>
-              <input type="time" value={sl.startTime} onChange={e=>upd(i,'startTime',e.target.value)} style={{...inp,minWidth:100}}/>
-              <span style={{fontSize:12,color:'#9A9A9A',fontWeight:600}}>to</span>
-              <input type="time" value={sl.endTime} onChange={e=>upd(i,'endTime',e.target.value)} style={{...inp,minWidth:100}}/>
-              <div style={{flex:1}}/>
-              <button onClick={()=>remove(i)} style={{background:'transparent',border:'none',color:'#B91C1C',cursor:'pointer',fontSize:20,lineHeight:1,padding:'0 4px'}}>×</button>
+            <div style={{fontSize:13,color:'rgba(255,255,255,.6)'}}>
+              {alreadyIn?'Attendance recorded for today.':isWeekend?'No check-in on weekends.':'Please mark your attendance.'}
             </div>
-          ))}
+          </div>
+          <div style={{padding:'24px'}}>
+            {loading?<div style={{textAlign:'center',color:'#7A6652',padding:'20px 0'}}>Loading...</div>
+            :isWeekend?<div style={{textAlign:'center',color:'#7A6652',padding:'20px 0',fontSize:13}}>Enjoy your weekend!</div>
+            :alreadyIn?(
+              <div style={{textAlign:'center'}}>
+                <div style={{width:68,height:68,borderRadius:'50%',background:todaySS.bg,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 14px'}}>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={todaySS.fg} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div style={{fontSize:22,fontWeight:800,color:todaySS.fg,marginBottom:4}}>{todaySS.label}</div>
+                <div style={{fontSize:13,color:'#7A6652'}}>Checked in at {fmtTime(status?.record?.checkInTime)}</div>
+                {status?.checkInStatus==='late'&&<div style={{fontSize:13,color:'#D97706',marginTop:8}}>Arrival: {status.record?.lateTime}</div>}
+                {status?.checkInStatus==='absent'&&<div style={{fontSize:13,color:'#991B1B',marginTop:8}}>{status.record?.reason}</div>}
+              </div>
+            ):(
+              <>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:18}}>
+                  {[{val:'present',label:'Present',bg:'#D1FAE5',fg:'#065F46',desc:'On time'},{val:'late',label:'Late',bg:'#FEF3C7',fg:'#D97706',desc:'Running late'},{val:'absent',label:'Absent',bg:'#FEE2E2',fg:'#991B1B',desc:'Not attending'}].map(opt=>(
+                    <button key={opt.val} onClick={()=>{setPick(opt.val);if(opt.val!=='late')setLateTime('');if(opt.val!=='absent')setReason('')}}
+                      style={{padding:'14px 10px',borderRadius:10,cursor:'pointer',textAlign:'center',border:'2px solid '+(pick===opt.val?opt.fg:'#E8DDD5'),background:pick===opt.val?opt.bg:'#fff'}}>
+                      <div style={{fontSize:13,fontWeight:800,color:pick===opt.val?opt.fg:'#564844',marginBottom:3}}>{opt.label}</div>
+                      <div style={{fontSize:11,color:pick===opt.val?opt.fg:'#9A9A9A'}}>{opt.desc}</div>
+                    </button>
+                  ))}
+                </div>
+                {pick==='late'&&<div style={{marginBottom:14}}>
+                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:5,display:'block'}}>Arrival time</label>
+                  <input type="time" value={lateTime} onChange={e=>setLateTime(e.target.value)} style={{width:'100%',padding:'10px 12px',borderRadius:8,border:'1.5px solid #E8DDD5',fontSize:15,fontFamily:'inherit',boxSizing:'border-box'}}/>
+                </div>}
+                {pick==='absent'&&<div style={{marginBottom:14}}>
+                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:5,display:'block'}}>Reason</label>
+                  <textarea value={reason} onChange={e=>setReason(e.target.value)} rows={3} placeholder="Please explain your absence..." style={{width:'100%',padding:'10px 12px',borderRadius:8,border:'1.5px solid #E8DDD5',fontSize:13,fontFamily:'inherit',resize:'vertical',boxSizing:'border-box'}}/>
+                </div>}
+                <button onClick={submit} disabled={saving}
+                  style={{width:'100%',padding:'12px',borderRadius:9,background:saving?'#9A9A9A':pick==='absent'?'#991B1B':pick==='late'?'#D97706':'#065F46',color:'#fff',border:'none',fontSize:14,fontWeight:800,cursor:saving?'not-allowed':'pointer'}}>
+                  {saving?'Submitting...':'Mark myself as '+pick}
+                </button>
+              </>
+            )}
+          </div>
         </div>
-        <div style={{display:'flex',gap:10}}>
-          <button onClick={addSlot} style={{background:'transparent',border:'1.5px solid #7D1025',color:'#7D1025',padding:'9px 18px',borderRadius:7,fontSize:12.5,fontWeight:700,cursor:'pointer'}}>+ Add slot</button>
-          <button onClick={save} disabled={saving} style={{background:saving?'#9A9A9A':'#7D1025',color:'#fff',border:'none',padding:'9px 22px',borderRadius:7,fontSize:12.5,fontWeight:700,cursor:saving?'not-allowed':'pointer'}}>
-            {saving?'Saving...':'Save availability'}
-          </button>
-        </div>
-        {slots.length>0 && (
-          <div style={{marginTop:24}}>
-            <div style={{fontSize:12,fontWeight:700,color:'#6B6B6B',letterSpacing:'.06em',textTransform:'uppercase',marginBottom:10}}>Preview</div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:6}}>
-              {DAYS.map(d => {
-                const ds=slots.filter(s=>s.dayOfWeek===d)
-                return (
-                  <div key={d}>
-                    <div style={{fontSize:10,fontWeight:800,letterSpacing:'.08em',textTransform:'uppercase',color:ds.length>0?DC[d]:'#CCC',textAlign:'center',marginBottom:4}}>{d}</div>
-                    {ds.length===0
-                      ? <div style={{height:28,background:'#F9F6F4',borderRadius:4,border:'1px dashed #E8E2D6'}}/>
-                      : ds.map((sl,i)=>{
-                          const [hh]=sl.startTime.split(':').map(Number)
-                          const [eh]=sl.endTime.split(':').map(Number)
-                          const f=h=>{ const m=h>=12?'PM':'AM';let hr=h%12;if(!hr)hr=12;return hr+' '+m }
-                          return <div key={i} style={{background:DC[d]+'15',border:'1.5px solid '+DC[d]+'40',borderRadius:4,padding:'4px 6px',fontSize:9,color:DC[d],fontWeight:700,textAlign:'center',marginBottom:3}}>
-                            {f(hh)}–{f(eh)}
-                          </div>
-                        })
-                    }
+
+        <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,overflow:'hidden'}}>
+          <div style={{padding:'12px 16px',borderBottom:'1px solid #E8DDD5',fontWeight:800,fontSize:13,color:'#231715'}}>My attendance (30 days)</div>
+          {history.length===0?<div style={{padding:24,textAlign:'center',color:'#9A9A9A',fontSize:13}}>No records yet.</div>:(
+            <div style={{maxHeight:400,overflowY:'auto'}}>
+              {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((r,i)=>{
+                const s=SS[r.checkInStatus||r.status]||{bg:'#F3F4F6',fg:'#6B7280',label:r.status||'—'}
+                return(
+                  <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'9px 14px',borderBottom:'1px solid #F4EFEB'}}>
+                    <div>
+                      <div style={{fontSize:12.5,fontWeight:600,color:'#231715'}}>{fmtDate(r.date)}</div>
+                      {(r.lateTime||r.reason)&&<div style={{fontSize:11,color:'#7A6652',marginTop:1}}>{r.lateTime?'Arrived: '+r.lateTime:r.reason}</div>}
+                    </div>
+                    <span style={{padding:'3px 10px',borderRadius:99,fontSize:11,fontWeight:700,background:s.bg,color:s.fg}}>{r.checkInStatus==='late'?'Late':s.label}</span>
                   </div>
                 )
               })}
             </div>
-          </div>
-        )}
-      </>)}
+          )}
+        </div>
+      </div>
     </div>
   )
 }
+
 
 function TeacherTimetableTab({ user, toast }) {
   const [entries, setEntries] = useState([])
