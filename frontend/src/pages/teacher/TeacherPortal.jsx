@@ -783,10 +783,9 @@ export default function TeacherPortal() {
     { section:'Teaching', items:[
       {id:'dashboard',     label:'Dashboard',        iconName:'dashboard',     icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
       {id:'students',      label:'My Students',      iconName:'students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
-      {id:'attendance',    label:'Attendance',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
+      {id:'attendance',    label:'Attendance & Check-in',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
       {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
       {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
-      {id:'checkin',       label:'Check In',         iconName:'checkin',       icon:'M20 6 9 17 4 12'},
       {id:'timetable',     label:'Timetable',        iconName:'timetable',     icon:'rect:3:4:18:18:2|line:8:2:8:6|line:16:2:16:6|line:3:10:21:10'},
       {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
     ]},
@@ -937,7 +936,6 @@ export default function TeacherPortal() {
 
           {page === 'library' && <TeacherLibraryTab user={currentUser} toast={toast} />}
 
-          {page === 'checkin' && <TeacherCheckInTab user={currentUser} toast={toast}/>}
           {page === 'timetable' && <TeacherTimetableTab user={currentUser} toast={toast} />}
 
 
@@ -2130,6 +2128,137 @@ const msSeedIfEmpty = () => {
   ]
   msSaveStudents(seeded)
   return seeded
+}
+
+function StudentAttendanceDetail({ student, onBack, toast }) {
+  const today = new Date()
+  const [year,    setYear]    = useState(today.getFullYear())
+  const [month,   setMonth]   = useState(today.getMonth())
+  const [records, setRecords] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [marking, setMarking] = useState({}) // date -> status being saved
+
+  const firstDay = new Date(year, month, 1)
+  const lastDay  = new Date(year, month+1, 0)
+  const fromKey  = `${year}-${String(month+1).padStart(2,'0')}-01`
+  const toKey    = `${year}-${String(month+1).padStart(2,'0')}-${String(lastDay.getDate()).padStart(2,'0')}`
+  const monthLabel = firstDay.toLocaleDateString('en-GB',{month:'long',year:'numeric'})
+
+  useEffect(() => {
+    setLoading(true)
+    api.get(`/attendance/student/${student._id}`,{params:{from:fromKey,to:toKey}})
+      .then(r=>setRecords(r.data?.data?.items||[]))
+      .catch(()=>{})
+      .finally(()=>setLoading(false))
+  }, [student._id, fromKey, toKey])
+
+  const markAttendance = async (date, status) => {
+    const key = date
+    setMarking(p=>({...p,[key]:status}))
+    try {
+      await api.post('/attendance',{studentId:student._id,date,status})
+      toast?.ok?.(`Marked ${status} for ${new Date(date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}`)
+      // Refresh
+      const r = await api.get(`/attendance/student/${student._id}`,{params:{from:fromKey,to:toKey}})
+      setRecords(r.data?.data?.items||[])
+    } catch(e){toast?.error?.(e?.response?.data?.message||'Failed.')}
+    finally{setMarking(p=>{const n={...p};delete n[key];return n})}
+  }
+
+  const byDate = {}
+  records.forEach(r=>{
+    const d=new Date(r.date)
+    byDate[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`]=r
+  })
+
+  const present = records.filter(r=>r.status==='present').length
+  const absent  = records.filter(r=>r.status==='absent').length
+  const rate    = records.length?Math.round((present/records.length)*100):null
+
+  const SS={present:{bg:'#D1FAE5',fg:'#065F46',label:'P'},late:{bg:'#FEF3C7',fg:'#D97706',label:'L'},absent:{bg:'#FEE2E2',fg:'#991B1B',label:'A'},half_day:{bg:'#DBEAFE',fg:'#1E40AF',label:'H'}}
+  const calDays=[]; const pad=(firstDay.getDay()+6)%7
+  for(let i=0;i<pad;i++)calDays.push(null)
+  for(let d=1;d<=lastDay.getDate();d++)calDays.push(d)
+
+  const prevMonth=()=>{ if(month===0){setYear(y=>y-1);setMonth(11)}else setMonth(m=>m-1) }
+  const nextMonth=()=>{ if(month===11){setYear(y=>y+1);setMonth(0)}else setMonth(m=>m+1) }
+
+  return (
+    <div>
+      <button onClick={onBack} style={{background:'transparent',border:'none',cursor:'pointer',color:'#8B1A2E',fontSize:12.5,fontWeight:700,padding:0,marginBottom:16}}>← Back to students</button>
+      <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,overflow:'hidden'}}>
+        <div style={{padding:'14px 20px',borderBottom:'1px solid #E8DDD5',display:'flex',justifyContent:'space-between',alignItems:'center',background:'#FBFAF5'}}>
+          <div>
+            <div style={{fontSize:15,fontWeight:800,color:'#231715'}}>{student.firstName} {student.lastName}</div>
+            <div style={{fontSize:12,color:'#7A6652'}}>{student.curriculum} · {student.gradeLevel} · {student.admissionNo||'—'}</div>
+          </div>
+          <div style={{display:'flex',gap:12}}>
+            {[{label:'Present',val:present,color:'#065F46',bg:'#D1FAE5'},{label:'Absent',val:absent,color:'#991B1B',bg:'#FEE2E2'},{label:'Rate',val:rate!==null?rate+'%':'—',color:'#1A0F0E',bg:'#FBFAF5'}].map(s=>(
+              <div key={s.label} style={{padding:'6px 12px',borderRadius:7,background:s.bg,textAlign:'center'}}>
+                <div style={{fontSize:16,fontWeight:800,color:s.color}}>{s.val}</div>
+                <div style={{fontSize:9.5,color:s.color,fontWeight:600}}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{padding:'16px 20px'}}>
+          {/* Month nav */}
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+            <button onClick={prevMonth} style={{background:'transparent',border:'1.5px solid #E8DDD5',borderRadius:6,padding:'4px 10px',cursor:'pointer',fontSize:13,fontWeight:700}}>‹</button>
+            <span style={{fontWeight:700,fontSize:14,color:'#231715',minWidth:150,textAlign:'center'}}>{monthLabel}</span>
+            <button onClick={nextMonth} style={{background:'transparent',border:'1.5px solid #E8DDD5',borderRadius:6,padding:'4px 10px',cursor:'pointer',fontSize:13,fontWeight:700}}>›</button>
+          </div>
+
+          {loading?<div style={{textAlign:'center',color:'#9A9A9A',padding:'20px 0',fontSize:13}}>Loading...</div>:(
+            <>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:3,marginBottom:4}}>
+                {['M','T','W','T','F','S','S'].map((d,i)=><div key={i} style={{textAlign:'center',fontSize:10,fontWeight:700,color:'#9A9A9A',padding:'3px 0'}}>{d}</div>)}
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:3}}>
+                {calDays.map((d,i)=>{
+                  if(!d) return <div key={'p'+i}/>
+                  const key=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+                  const rec=byDate[key]; const st=rec?SS[rec.status]:null
+                  const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear()
+                  const isSaving=!!marking[key]
+                  return(
+                    <div key={key} style={{position:'relative'}}>
+                      <div style={{aspectRatio:'1',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',borderRadius:7,background:st?st.bg:isToday?'#FDF2F4':'#FBFAF5',border:isToday?'2px solid #C9A030':'1px solid transparent',fontSize:11.5,fontWeight:700,color:st?st.fg:isToday?'#8B1A2E':'#564844'}}>
+                        {d}
+                        {st&&<div style={{fontSize:9,fontWeight:800,color:st.fg,lineHeight:1}}>{st.label}</div>}
+                      </div>
+                      {/* Mark buttons on hover */}
+                      {!isSaving&&(
+                        <div className="att-hover" style={{position:'absolute',inset:0,display:'none',flexDirection:'column',gap:1,padding:1,zIndex:10,background:'rgba(255,255,255,.95)',borderRadius:7,border:'1px solid #E8DDD5'}}>
+                          {Object.entries(SS).map(([s,sv])=>(
+                            <button key={s} onClick={()=>markAttendance(key,s)}
+                              style={{flex:1,background:sv.bg,color:sv.fg,border:'none',borderRadius:4,cursor:'pointer',fontSize:9,fontWeight:700,padding:0}}>
+                              {sv.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              <style>{'.att-hover:hover{display:flex!important}'}</style>
+              <div style={{display:'flex',gap:12,marginTop:10,flexWrap:'wrap'}}>
+                {Object.entries(SS).map(([k,s])=>(
+                  <div key={k} style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'#7A6652'}}>
+                    <div style={{width:10,height:10,borderRadius:2,background:s.bg,border:'1px solid '+s.fg+'40'}}/>
+                    {s.label==='P'?'Present':s.label==='L'?'Late':s.label==='A'?'Absent':'Half day'}
+                  </div>
+                ))}
+                <div style={{fontSize:11,color:'#9A9A9A'}}>Hover a cell to mark attendance</div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, setMsgBody, setMsgModal }) {
@@ -13283,93 +13412,162 @@ function MshauriFloatingButton({ user, setPage, toast, currentPage }) {
 // 'absent' per the backend Attendance model's pre-validate hook.
 // ═══════════════════════════════════════════════════════════
 function AttendanceTab({ user, toast }) {
-  // ── List of teacher's students (from existing allocations endpoint) ──
-  const [students, setStudents] = useState([])
-  const [studentsLoading, setStudentsLoading] = useState(true)
-  const [selectedStudent, setSelectedStudent] = useState(null)
+  const todayStr = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+  const isWeekend = [0,6].includes(new Date().getDay())
+
+  // ── Self check-in state ──
+  const [ciStatus,  setCiStatus]  = useState(null)
+  const [ciLoading, setCiLoading] = useState(true)
+  const [saving,    setSaving]    = useState(false)
+  const [pick,      setPick]      = useState('present')
+  const [lateTime,  setLateTime]  = useState('')
+  const [reason,    setReason]    = useState('')
+
+  // ── Student attendance state ──
+  const [students,         setStudents]         = useState([])
+  const [studentsLoading,  setStudentsLoading]  = useState(true)
+  const [selectedStudent,  setSelectedStudent]  = useState(null)
+
+  const loadCI = () => {
+    setCiLoading(true)
+    api.get('/checkin/today').then(r=>setCiStatus(r.data?.data)).catch(()=>{}).finally(()=>setCiLoading(false))
+  }
+  useEffect(()=>{loadCI()},[])
 
   useEffect(() => {
     let cancelled = false
     setStudentsLoading(true)
     ;(async () => {
       try {
-        // Use the existing /allocations/teacher endpoint — returns
-        // populated student objects we can deduplicate.
         const { data } = await api.get('/allocations/teacher')
         if (cancelled) return
         const allocs = data?.allocations || []
-        // Deduplicate by studentId (a student may appear under multiple subjects)
         const byId = new Map()
         for (const a of allocs) {
           const s = a.studentId
           if (!s || !s._id) continue
           if (!byId.has(String(s._id))) {
-            const fn = s.firstName || ''
-            const ln = s.lastName || ''
             byId.set(String(s._id), {
               _id: s._id,
-              firstName: fn,
-              lastName: ln,
-              fullName: (fn + ' ' + ln).trim() || s.email || '(student)',
-              email: s.email || '',
+              firstName: s.firstName || '',
+              lastName:  s.lastName  || '',
               curriculum: s.curriculum || '',
+              gradeLevel: s.gradeLevel || '',
+              admissionNo: s.admissionNo || s.admissionNumber || '',
             })
           }
         }
-        const list = Array.from(byId.values()).sort((a,b) => a.fullName.localeCompare(b.fullName))
-        setStudents(list)
-      } catch (e) {
-        if (!cancelled) toast?.error?.('Failed to load students: ' + (e?.response?.data?.message || e.message))
+        if (!cancelled) setStudents([...byId.values()])
+      } catch(e) {
+        if (!cancelled) toast?.error?.(e?.response?.data?.message || 'Failed to load students.')
       } finally {
         if (!cancelled) setStudentsLoading(false)
       }
     })()
     return () => { cancelled = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [user?._id])
+
+  const submitCI = async () => {
+    if(pick==='late'&&!lateTime.trim()){toast?.error?.('Enter your arrival time.');return}
+    if(pick==='absent'&&!reason.trim()){toast?.error?.('Enter a reason.');return}
+    setSaving(true)
+    try { await api.post('/checkin',{status:pick,lateTime,reason}); toast?.ok?.('Checked in.'); loadCI() }
+    catch(e){toast?.error?.(e?.response?.data?.message||'Failed.')}
+    finally{setSaving(false)}
+  }
+
+  const SS={present:{bg:'#D1FAE5',fg:'#065F46',label:'Present'},late:{bg:'#FEF3C7',fg:'#D97706',label:'Late'},absent:{bg:'#FEE2E2',fg:'#991B1B',label:'Absent'}}
+  const alreadyIn = !ciLoading&&ciStatus?.checkedIn
+  const todaySS   = alreadyIn?SS[ciStatus.checkInStatus]||SS.present:null
 
   return (
     <div>
-      <div style={{ marginBottom: 20 }}>
-        <div className="sec-tag">Daily attendance</div>
-        <h2 className="serif" style={{ fontSize: 26, color: 'var(--s900)', margin: '6px 0 4px' }}>
-          Attendance
-        </h2>
-        <div style={{ fontSize: 13, color: '#6B6B6B' }}>
-          Mark daily attendance for your students. Other teachers allocated to the same student will see your marks.
+      {/* ── My Check-in ── */}
+      <div style={{marginBottom:24}}>
+        <h3 style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#231715',margin:'0 0 12px'}}>My Daily Check-in</h3>
+        <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,overflow:'hidden'}}>
+          <div style={{background:'linear-gradient(135deg,#8B1A2E,#5A0B1B)',padding:'16px 20px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:'#C9A030',letterSpacing:'.08em',textTransform:'uppercase',marginBottom:3}}>Daily attendance — {todayStr}</div>
+              <div style={{fontSize:15,fontWeight:700,color:'#fff'}}>{alreadyIn?'Attendance recorded':isWeekend?'No check-in on weekends':'Mark your attendance for today'}</div>
+            </div>
+            {alreadyIn&&todaySS&&<span style={{padding:'5px 14px',borderRadius:99,background:todaySS.fg,color:'#fff',fontSize:12,fontWeight:700}}>{todaySS.label}</span>}
+          </div>
+          <div style={{padding:'16px 20px'}}>
+            {ciLoading?<div style={{color:'#9A9A9A',fontSize:13}}>Loading...</div>
+            :ciStatus?.onBreak?<div style={{fontSize:13,color:'#7A6652'}}>You are on a break. Contact admin to return.</div>
+            :isWeekend?<div style={{fontSize:13,color:'#9A9A9A'}}>Enjoy your weekend!</div>
+            :alreadyIn?(
+              <div style={{display:'flex',alignItems:'center',gap:12}}>
+                <div style={{width:44,height:44,borderRadius:'50%',background:todaySS.bg,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={todaySS.fg} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div>
+                  <div style={{fontSize:14,fontWeight:800,color:todaySS.fg}}>{todaySS.label}</div>
+                  <div style={{fontSize:12,color:'#7A6652',marginTop:1}}>
+                    {ciStatus.record?.checkInTime?new Date(ciStatus.record.checkInTime).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):''}
+                    {ciStatus.checkInStatus==='late'&&ciStatus.record?.lateTime?' · Arrived: '+ciStatus.record.lateTime:''}
+                    {ciStatus.checkInStatus==='absent'&&ciStatus.record?.reason?' · '+ciStatus.record.reason:''}
+                  </div>
+                </div>
+              </div>
+            ):(
+              <div style={{display:'flex',gap:10,alignItems:'flex-end',flexWrap:'wrap'}}>
+                <div style={{display:'flex',gap:8}}>
+                  {[{val:'present',label:'Present',bg:'#D1FAE5',fg:'#065F46'},{val:'late',label:'Late',bg:'#FEF3C7',fg:'#D97706'},{val:'absent',label:'Absent',bg:'#FEE2E2',fg:'#991B1B'}].map(opt=>(
+                    <button key={opt.val} onClick={()=>{setPick(opt.val);if(opt.val!=='late')setLateTime('');if(opt.val!=='absent')setReason('')}}
+                      style={{padding:'8px 14px',borderRadius:8,cursor:'pointer',border:'2px solid '+(pick===opt.val?opt.fg:'#E8DDD5'),background:pick===opt.val?opt.bg:'#fff',fontSize:12.5,fontWeight:700,color:pick===opt.val?opt.fg:'#564844'}}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                {pick==='late'&&<input type="time" value={lateTime} onChange={e=>setLateTime(e.target.value)} placeholder="Arrival time" style={{padding:'8px 10px',borderRadius:7,border:'1.5px solid #E8DDD5',fontSize:13,fontFamily:'inherit'}}/>}
+                {pick==='absent'&&<input value={reason} onChange={e=>setReason(e.target.value)} placeholder="Reason for absence" style={{flex:1,padding:'8px 10px',borderRadius:7,border:'1.5px solid #E8DDD5',fontSize:13,fontFamily:'inherit',minWidth:180}}/>}
+                <button onClick={submitCI} disabled={saving} style={{padding:'9px 20px',borderRadius:8,background:saving?'#9A9A9A':pick==='absent'?'#991B1B':pick==='late'?'#D97706':'#065F46',color:'#fff',border:'none',fontSize:13,fontWeight:700,cursor:saving?'not-allowed':'pointer',whiteSpace:'nowrap'}}>
+                  {saving?'Saving...':'Submit'}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Student picker */}
-      <div className="card" style={{ padding: 18, marginBottom: 18 }}>
-        <div className="fl" style={{ marginBottom: 8 }}>Select student</div>
-        {studentsLoading ? (
-          <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic' }}>Loading students...</div>
-        ) : students.length === 0 ? (
-          <div style={{ fontSize: 13, color: '#9A9A9A', fontStyle: 'italic' }}>
-            No students allocated to you yet.
-          </div>
+      {/* ── Student attendance marking ── */}
+      <div>
+        <h3 style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#231715',margin:'0 0 12px'}}>Mark Student Attendance</h3>
+        {selectedStudent ? (
+          <StudentAttendanceDetail student={selectedStudent} onBack={()=>setSelectedStudent(null)} toast={toast}/>
         ) : (
-          <select className="fsel" value={selectedStudent?._id || ''}
-            onChange={e => {
-              const id = e.target.value
-              setSelectedStudent(students.find(s => s._id === id) || null)
-            }}
-          >
-            <option value="">Select a student...</option>
-            {students.map(s => (
-              <option key={s._id} value={s._id}>
-                {s.fullName}{s.curriculum ? ' · ' + s.curriculum : ''}
-              </option>
-            ))}
-          </select>
+          <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,overflow:'hidden'}}>
+            {studentsLoading ? (
+              <div style={{padding:30,textAlign:'center',color:'#9A9A9A',fontSize:13}}>Loading your students...</div>
+            ) : students.length === 0 ? (
+              <div style={{padding:40,textAlign:'center',color:'#9A9A9A',fontSize:13}}>No students assigned yet.</div>
+            ) : (
+              <table style={{width:'100%',borderCollapse:'collapse'}}>
+                <thead><tr style={{background:'#FBFAF5'}}>
+                  {['Student','Curriculum / Grade','Adm No.',''].map(h=><th key={h} style={{padding:'9px 14px',textAlign:'left',fontSize:10.5,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',borderBottom:'1.5px solid #E8DDD5'}}>{h}</th>)}
+                </tr></thead>
+                <tbody>
+                  {students.map(s=>(
+                    <tr key={String(s._id)} style={{borderTop:'1px solid #E8DDD5',cursor:'pointer'}}
+                      onMouseEnter={e=>e.currentTarget.style.background='#FBFAF5'}
+                      onMouseLeave={e=>e.currentTarget.style.background='transparent'}
+                      onClick={()=>setSelectedStudent(s)}>
+                      <td style={{padding:'10px 14px',fontWeight:700,fontSize:13,color:'#231715'}}>{s.firstName} {s.lastName}</td>
+                      <td style={{padding:'10px 14px',fontSize:12.5,color:'#7A6652'}}>{s.curriculum} · {s.gradeLevel}</td>
+                      <td style={{padding:'10px 14px',fontSize:12,color:'#9A9A9A'}}>{s.admissionNo||'—'}</td>
+                      <td style={{padding:'10px 14px'}}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8B1A2E" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         )}
       </div>
-
-      {/* 30-day attendance grid for selected student */}
-      {selectedStudent && (
-        <AttendanceGrid student={selectedStudent} markedByUser={user} toast={toast} />
-      )}
     </div>
   )
 }
@@ -14182,129 +14380,7 @@ function BookCard({ book, onView, onDelete, canDelete }) {
 // The Student Portal reads from the same source.
 // ═══════════════════════════════════════════════════════════
 // ── TeacherCheckInTab — self check-in for teacher portal ──
-function TeacherCheckInTab({ user, toast }) {
-  const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
-  const isWeekend = [0,6].includes(new Date().getDay())
 
-  const [status,  setStatus]  = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [saving,  setSaving]  = useState(false)
-  const [history, setHistory] = useState([])
-  const [pick,    setPick]    = useState('present')
-  const [lateTime,setLateTime]= useState('')
-  const [reason,  setReason]  = useState('')
-
-  const load = () => {
-    setLoading(true)
-    api.get('/checkin/today').then(r=>setStatus(r.data?.data)).catch(()=>{}).finally(()=>setLoading(false))
-    api.get('/checkin/history').then(r=>setHistory(r.data?.data?.records||[])).catch(()=>{})
-  }
-  useEffect(()=>{load()},[])
-
-  const submit = async () => {
-    if(pick==='late'&&!lateTime.trim()){toast?.error?.('Enter arrival time.');return}
-    if(pick==='absent'&&!reason.trim()){toast?.error?.('Enter a reason.');return}
-    setSaving(true)
-    try { await api.post('/checkin',{status:pick,lateTime,reason}); toast?.ok?.('Checked in.'); load() }
-    catch(e){toast?.error?.(e?.response?.data?.message||'Failed.')}
-    finally{setSaving(false)}
-  }
-
-  const SS={present:{bg:'#D1FAE5',fg:'#065F46',label:'Present'},late:{bg:'#FEF3C7',fg:'#D97706',label:'Late'},absent:{bg:'#FEE2E2',fg:'#991B1B',label:'Absent'}}
-  const fmtDate=d=>d?new Date(d).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}):'—'
-  const fmtTime=d=>d?new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'—'
-  const alreadyIn=!loading&&status?.checkedIn
-  const todaySS=alreadyIn?SS[status.checkInStatus]||SS.present:null
-
-  if(!loading&&status?.onBreak) return (
-    <div style={{padding:'60px 20px',textAlign:'center'}}>
-      <div style={{fontSize:20,fontWeight:800,color:'#231715',marginBottom:8}}>You are on a break</div>
-      <div style={{fontSize:13,color:'#7A6652',lineHeight:1.65}}>Contact your admin to return from break.{status.breakNote?' Note: '+status.breakNote:''}</div>
-    </div>
-  )
-
-  return (
-    <div>
-      <div style={{marginBottom:20}}>
-        <div style={{fontSize:10,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:'#8B1A2E',marginBottom:4}}>Daily attendance</div>
-        <h2 style={{fontFamily:"'Instrument Serif',serif",fontSize:26,color:'#231715',margin:'0 0 4px'}}>Check In</h2>
-        <div style={{fontSize:13,color:'#7A6652'}}>{today}</div>
-      </div>
-
-      <div style={{display:'grid',gridTemplateColumns:'1fr 340px',gap:20,alignItems:'start'}}>
-        <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,overflow:'hidden'}}>
-          <div style={{background:'linear-gradient(135deg,#8B1A2E,#5A0B1B)',padding:'22px 24px'}}>
-            <div style={{fontSize:20,fontWeight:800,color:'#fff',marginBottom:4}}>
-              Good {new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, {user?.firstName}
-            </div>
-            <div style={{fontSize:13,color:'rgba(255,255,255,.6)'}}>
-              {alreadyIn?'Attendance recorded for today.':isWeekend?'No check-in on weekends.':'Please mark your attendance.'}
-            </div>
-          </div>
-          <div style={{padding:'24px'}}>
-            {loading?<div style={{textAlign:'center',color:'#7A6652',padding:'20px 0'}}>Loading...</div>
-            :isWeekend?<div style={{textAlign:'center',color:'#7A6652',padding:'20px 0',fontSize:13}}>Enjoy your weekend!</div>
-            :alreadyIn?(
-              <div style={{textAlign:'center'}}>
-                <div style={{width:68,height:68,borderRadius:'50%',background:todaySS.bg,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 14px'}}>
-                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={todaySS.fg} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                <div style={{fontSize:22,fontWeight:800,color:todaySS.fg,marginBottom:4}}>{todaySS.label}</div>
-                <div style={{fontSize:13,color:'#7A6652'}}>Checked in at {fmtTime(status?.record?.checkInTime)}</div>
-                {status?.checkInStatus==='late'&&<div style={{fontSize:13,color:'#D97706',marginTop:8}}>Arrival: {status.record?.lateTime}</div>}
-                {status?.checkInStatus==='absent'&&<div style={{fontSize:13,color:'#991B1B',marginTop:8}}>{status.record?.reason}</div>}
-              </div>
-            ):(
-              <>
-                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:18}}>
-                  {[{val:'present',label:'Present',bg:'#D1FAE5',fg:'#065F46',desc:'On time'},{val:'late',label:'Late',bg:'#FEF3C7',fg:'#D97706',desc:'Running late'},{val:'absent',label:'Absent',bg:'#FEE2E2',fg:'#991B1B',desc:'Not attending'}].map(opt=>(
-                    <button key={opt.val} onClick={()=>{setPick(opt.val);if(opt.val!=='late')setLateTime('');if(opt.val!=='absent')setReason('')}}
-                      style={{padding:'14px 10px',borderRadius:10,cursor:'pointer',textAlign:'center',border:'2px solid '+(pick===opt.val?opt.fg:'#E8DDD5'),background:pick===opt.val?opt.bg:'#fff'}}>
-                      <div style={{fontSize:13,fontWeight:800,color:pick===opt.val?opt.fg:'#564844',marginBottom:3}}>{opt.label}</div>
-                      <div style={{fontSize:11,color:pick===opt.val?opt.fg:'#9A9A9A'}}>{opt.desc}</div>
-                    </button>
-                  ))}
-                </div>
-                {pick==='late'&&<div style={{marginBottom:14}}>
-                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:5,display:'block'}}>Arrival time</label>
-                  <input type="time" value={lateTime} onChange={e=>setLateTime(e.target.value)} style={{width:'100%',padding:'10px 12px',borderRadius:8,border:'1.5px solid #E8DDD5',fontSize:15,fontFamily:'inherit',boxSizing:'border-box'}}/>
-                </div>}
-                {pick==='absent'&&<div style={{marginBottom:14}}>
-                  <label style={{fontSize:11,fontWeight:700,color:'#8B1A2E',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:5,display:'block'}}>Reason</label>
-                  <textarea value={reason} onChange={e=>setReason(e.target.value)} rows={3} placeholder="Please explain your absence..." style={{width:'100%',padding:'10px 12px',borderRadius:8,border:'1.5px solid #E8DDD5',fontSize:13,fontFamily:'inherit',resize:'vertical',boxSizing:'border-box'}}/>
-                </div>}
-                <button onClick={submit} disabled={saving}
-                  style={{width:'100%',padding:'12px',borderRadius:9,background:saving?'#9A9A9A':pick==='absent'?'#991B1B':pick==='late'?'#D97706':'#065F46',color:'#fff',border:'none',fontSize:14,fontWeight:800,cursor:saving?'not-allowed':'pointer'}}>
-                  {saving?'Submitting...':'Mark myself as '+pick}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,overflow:'hidden'}}>
-          <div style={{padding:'12px 16px',borderBottom:'1px solid #E8DDD5',fontWeight:800,fontSize:13,color:'#231715'}}>My attendance (30 days)</div>
-          {history.length===0?<div style={{padding:24,textAlign:'center',color:'#9A9A9A',fontSize:13}}>No records yet.</div>:(
-            <div style={{maxHeight:400,overflowY:'auto'}}>
-              {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((r,i)=>{
-                const s=SS[r.checkInStatus||r.status]||{bg:'#F3F4F6',fg:'#6B7280',label:r.status||'—'}
-                return(
-                  <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'9px 14px',borderBottom:'1px solid #F4EFEB'}}>
-                    <div>
-                      <div style={{fontSize:12.5,fontWeight:600,color:'#231715'}}>{fmtDate(r.date)}</div>
-                      {(r.lateTime||r.reason)&&<div style={{fontSize:11,color:'#7A6652',marginTop:1}}>{r.lateTime?'Arrived: '+r.lateTime:r.reason}</div>}
-                    </div>
-                    <span style={{padding:'3px 10px',borderRadius:99,fontSize:11,fontWeight:700,background:s.bg,color:s.fg}}>{r.checkInStatus==='late'?'Late':s.label}</span>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 
 function TeacherTimetableTab({ user, toast }) {
