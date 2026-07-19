@@ -77,7 +77,8 @@ const MODULES = {
   livelessons: { label: 'Live Classes', accent: TOKENS.accentRose,  icon: 'live' },
   grouprooms:  { label: 'Group Rooms',  accent: TOKENS.accentOcean, icon: 'rooms' },
   curriculum:  { label: 'Curriculum',   accent: TOKENS.gold,        icon: 'curriculum' },
-  billing:     { label: 'Billing',      accent: TOKENS.accentEmerald, icon: 'billing' },
+  billing:      { label: 'Billing',          accent: TOKENS.accentEmerald, icon: 'billing' },
+  feecollection:{ label: 'Fee Collection',   accent: TOKENS.accentEmerald, icon: 'billing' },
   website:     { label: 'Website',      accent: TOKENS.accentNavy,  icon: 'website' },
   settings:    { label: 'Settings',     accent: TOKENS.s500,        icon: 'settings' },
   ai:          { label: 'Mshauri AI',   accent: TOKENS.crimson,     icon: 'ai' },
@@ -553,7 +554,8 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
     ],
     accountant: [
       { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
-      { label: 'Finance',     items: ['billing', 'payroll'] },
+      { label: 'Fee Management', items: ['feecollection', 'billing'] },
+      { label: 'Finance',     items: ['payroll'] },
       { label: 'System',      items: ['settings'] },
     ],
     dos: [
@@ -836,7 +838,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
     admin:       [
       { items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','billing','website','settings','ai'] },
     ],
-    accountant:  [{ items: ['dashboard','analytics','billing','payroll','settings'] }],
+    accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','payroll','settings'] }],
     sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
     dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','dosbreaks','dostimetable','reports','settings'] }],
     ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','communication','reports','crm','frontdesk','assessment','documents','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
@@ -884,7 +886,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'livelessons' && <LiveLessonsModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'grouprooms'  && <GroupRoomsModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'curriculum'  && <CurriculumModule refreshKey={refreshKey} toast={toast} />}
-        {safePage === 'billing'     && <BillingModule    refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'billing'        && <BillingModule       refreshKey={refreshKey} toast={toast}/>}
+        {safePage === 'feecollection' && <FeeCollectionModule refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'website'     && <WebsiteModule    refreshKey={refreshKey} toast={toast} />}
         {safePage === 'settings'    && <SettingsModule   refreshKey={refreshKey} toast={toast} />}
         {safePage === 'ai'          && <MshauriModule    refreshKey={refreshKey} toast={toast} />}
@@ -12810,6 +12813,395 @@ function InvoicesTab({ toast, refreshKey }) {
 // ═══════════════════════════════════════════════════════════
 // 12. BILLING MODULE
 // ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// FeeCollectionModule — Accountant portal
+// Shows all students, their billing cycle, status, and last
+// invoice. Accountant can edit billing settings, record payments,
+// and send fee reminders manually. Auto-reminders fire 3 days
+// before due date via backend cron.
+// ═══════════════════════════════════════════════════════════
+function FeeCollectionModule({ toast, refreshKey }) {
+  const [students,  setStudents]  = useState([])
+  const [summary,   setSummary]   = useState(null)
+  const [loading,   setLoading]   = useState(true)
+  const [search,    setSearch]    = useState('')
+  const [searchQ,   setSearchQ]   = useState('')
+  const [statusF,   setStatusF]   = useState('all')
+  const [currF,     setCurrF]     = useState('')
+  const [page,      setPage]      = useState(1)
+  const [total,     setTotal]     = useState(0)
+  const LIMIT = 30
+
+  // Modals
+  const [editModal,    setEditModal]    = useState(null)  // student being edited
+  const [payModal,     setPayModal]     = useState(null)  // student recording payment for
+  const [detailModal,  setDetailModal]  = useState(null)  // student detail view
+  const [editForm,     setEditForm]     = useState({})
+  const [payForm,      setPayForm]      = useState({ amount:'', currency:'USD', paidAt:'', paymentMethod:'Bank transfer', note:'', periodLabel:'' })
+  const [saving,       setSaving]       = useState(false)
+  const [reminding,    setReminding]    = useState(null)  // studentId being reminded
+  const [remindingAll, setRemindingAll] = useState(false)
+
+  const load = useCallback(() => {
+    setLoading(true)
+    const params = { limit:LIMIT, page }
+    if (searchQ)          params.search   = searchQ
+    if (statusF !== 'all') params.status  = statusF
+    if (currF)            params.currency = currF
+    api.get('/fees', { params })
+      .then(r => {
+        setStudents(r.data?.data?.students || [])
+        setSummary(r.data?.data?.summary   || null)
+        setTotal(r.data?.data?.total       || 0)
+      })
+      .catch(e => toast?.error?.('Failed to load: '+(e?.response?.data?.message||e.message)))
+      .finally(() => setLoading(false))
+  }, [searchQ, statusF, currF, page, refreshKey])
+
+  useEffect(() => { load() }, [load])
+
+  const fmtDate  = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
+  const money    = (n,cur='USD') => ({ USD:'$',KES:'KES ',GBP:'£',EUR:'€',AED:'AED ' }[cur]||'')+(n||0).toLocaleString()
+
+  const STATUS_S = {
+    overdue:  { bg:'#FEE2E2', fg:'#991B1B', label:'Overdue' },
+    'due-soon':{ bg:'#FEF3C7', fg:'#D97706', label:'Due soon' },
+    current:  { bg:'#D1FAE5', fg:'#065F46', label:'Current' },
+    'no-fee': { bg:'#F3F4F6', fg:'#6B7280', label:'No fee set' },
+  }
+
+  const INV_S = {
+    paid:    { bg:'#D1FAE5', fg:'#065F46' },
+    sent:    { bg:'#DBEAFE', fg:'#1E40AF' },
+    overdue: { bg:'#FEE2E2', fg:'#991B1B' },
+    draft:   { bg:'#F3F4F6', fg:'#6B7280' },
+  }
+
+  // Open edit modal
+  const openEdit = (s) => {
+    setEditForm({
+      agreedFee:   s.agreedFee || '',
+      feeCurrency: s.feeCurrency || 'USD',
+      billingDay:  s.billingDay || 15,
+      billingNote: s.billingNote || '',
+      nextDueDate: s.nextDueDate ? new Date(s.nextDueDate).toISOString().split('T')[0] : '',
+    })
+    setEditModal(s)
+  }
+
+  const saveEdit = async () => {
+    setSaving(true)
+    try {
+      await api.patch('/fees/'+editModal._id, editForm)
+      toast?.ok?.('Billing updated for '+editModal.name+'.')
+      setEditModal(null); load()
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Save failed.') }
+    finally { setSaving(false) }
+  }
+
+  // Open payment modal
+  const openPay = (s) => {
+    setPayForm({ amount: s.agreedFee||'', currency: s.feeCurrency||'USD', paidAt: new Date().toISOString().split('T')[0], paymentMethod:'Bank transfer', note:'', periodLabel: new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'}) })
+    setPayModal(s)
+  }
+
+  const savePay = async () => {
+    if (!payForm.amount) { toast?.error?.('Enter payment amount.'); return }
+    setSaving(true)
+    try {
+      await api.post('/fees/'+payModal._id+'/record-payment', payForm)
+      toast?.ok?.('Payment recorded. Invoice created.')
+      setPayModal(null); load()
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
+    finally { setSaving(false) }
+  }
+
+  // Send reminder
+  const sendReminder = async (s) => {
+    setReminding(s._id)
+    try {
+      const r = await api.post('/fees/'+s._id+'/remind')
+      toast?.ok?.(r.data?.message || 'Reminder sent.')
+      load()
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
+    finally { setReminding(null) }
+  }
+
+  const remindAll = async () => {
+    setRemindingAll(true)
+    try {
+      const r = await api.post('/fees/remind-all')
+      toast?.ok?.(r.data?.message || 'Reminders sent.')
+      load()
+    } catch(e) { toast?.error?.('Failed.') }
+    finally { setRemindingAll(false) }
+  }
+
+  const inp = { width:'100%', padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit', boxSizing:'border-box' }
+  const totalPages = Math.ceil(total/LIMIT)
+
+  return (
+    <>
+      <PSection tag="Accountant" title="Fee" em="Collection"
+        sub="All students, their billing cycles, outstanding balances, and payment history. Reminders are sent automatically 3 days before each due date."/>
+
+      {/* Summary KPIs */}
+      {summary && (
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(140px,1fr))', gap:12, marginBottom:22 }}>
+          {[
+            { label:'Total students',  val:summary.total,       color:TOKENS.s900 },
+            { label:'Overdue',         val:summary.overdue,     color:'#991B1B' },
+            { label:'Due within 3d',   val:summary.dueSoon,     color:'#D97706' },
+            { label:'Current',         val:summary.current,     color:'#065F46' },
+            { label:'No fee set',      val:summary.noFee,       color:TOKENS.s400 },
+            { label:'Monthly revenue', val:money(summary.totalMonthly,'USD'), color:TOKENS.crimson, wide:true },
+          ].map(k=>(
+            <div key={k.label} className="kpi" style={{ gridColumn:k.wide?'span 2':undefined }}>
+              <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.07em', marginBottom:5 }}>{k.label}</div>
+              <div style={{ fontSize:k.wide?20:24, fontWeight:800, color:k.color, lineHeight:1 }}>{k.val}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Controls */}
+      <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap', alignItems:'center' }}>
+        <input value={search} onChange={e=>setSearch(e.target.value)}
+          onKeyDown={e=>{ if(e.key==='Enter'){setSearchQ(search);setPage(1)} }}
+          placeholder="Search name, email, admission no..."
+          style={{ flex:'1 1 220px', padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
+        <button onClick={()=>{setSearchQ(search);setPage(1)}} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 18px', borderRadius:7, fontSize:13, fontWeight:700, cursor:'pointer' }}>Search</button>
+
+        {/* Status filter tabs */}
+        <div style={{ display:'flex', border:'1.5px solid '+TOKENS.line, borderRadius:7, overflow:'hidden' }}>
+          {[['all','All'],['overdue','Overdue'],['due-soon','Due soon'],['current','Current'],['no-fee','No fee']].map(([val,label])=>(
+            <button key={val} onClick={()=>{setStatusF(val);setPage(1)}} style={{
+              padding:'8px 12px', border:'none', cursor:'pointer', fontSize:12, fontWeight:600,
+              background:statusF===val?TOKENS.crimson:'#fff', color:statusF===val?'#fff':TOKENS.s500,
+              borderRight:'1px solid '+TOKENS.line,
+            }}>{label}{summary&&val==='overdue'&&summary.overdue>0?` (${summary.overdue})`:''}{summary&&val==='due-soon'&&summary.dueSoon>0?` (${summary.dueSoon})`:''}</button>
+          ))}
+        </div>
+
+        <select value={currF} onChange={e=>setCurrF(e.target.value)}
+          style={{ padding:'9px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}>
+          <option value="">All currencies</option>
+          {['USD','KES','GBP','EUR','AED'].map(c=><option key={c} value={c}>{c}</option>)}
+        </select>
+
+        <button onClick={remindAll} disabled={remindingAll} style={{
+          marginLeft:'auto', background:remindingAll?TOKENS.s300:'#D97706', color:'#fff',
+          border:'none', padding:'9px 16px', borderRadius:7, fontSize:12.5, fontWeight:700,
+          cursor:remindingAll?'not-allowed':'pointer', whiteSpace:'nowrap',
+        }}>
+          {remindingAll ? 'Sending...' : 'Send all due reminders'}
+        </button>
+      </div>
+
+      {/* Students table */}
+      <div className="card" style={{ overflow:'hidden' }}>
+        {loading ? (
+          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>Loading students...</div>
+        ) : students.length===0 ? (
+          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No students found.</div>
+        ) : (
+          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
+            <thead><tr>
+              {['Student','Curriculum / Grade','Agreed fee','Billing day','Next due','Status','Last invoice',''].map(h=>(
+                <th key={h} style={{ padding:'9px 14px', textAlign:'left', fontSize:10.5 }}>{h}</th>
+              ))}
+            </tr></thead>
+            <tbody>
+              {students.map(s => {
+                const ss   = STATUS_S[s.billingStatus] || STATUS_S['no-fee']
+                const inv  = s.lastInvoice
+                const iSS  = inv ? INV_S[inv.status]||INV_S.draft : null
+                const days = s.daysUntilDue
+                return (
+                  <tr key={String(s._id)} style={{ borderTop:'1px solid '+TOKENS.line, background:s.billingStatus==='overdue'?'#FFF5F5':undefined }}>
+                    <td style={{ padding:'10px 14px' }}>
+                      <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{s.name}</div>
+                      <div style={{ fontSize:11, color:TOKENS.s500, marginTop:1 }}>{s.admissionNo||s.email}</div>
+                    </td>
+                    <td style={{ padding:'10px 14px', fontSize:12.5, color:TOKENS.s600 }}>
+                      {s.curriculum}{s.grade?' · '+s.grade:''}
+                      {s.programme&&<div style={{ fontSize:11, color:TOKENS.s400, marginTop:1 }}>{s.programme}</div>}
+                    </td>
+                    <td style={{ padding:'10px 14px', fontWeight:800, fontSize:14, color:s.agreedFee?TOKENS.crimson:TOKENS.s400 }}>
+                      {s.agreedFee ? money(s.agreedFee, s.feeCurrency) : '—'}
+                      {s.billingNote&&<div style={{ fontSize:10.5, color:TOKENS.s400, fontWeight:400, marginTop:1, maxWidth:140 }}>{s.billingNote}</div>}
+                    </td>
+                    <td style={{ padding:'10px 14px', fontSize:13, color:TOKENS.s600 }}>
+                      {s.agreedFee ? `${s.billingDay}th` : '—'}
+                    </td>
+                    <td style={{ padding:'10px 14px' }}>
+                      <div style={{ fontSize:13, color:TOKENS.s700 }}>{fmtDate(s.nextDueDate)}</div>
+                      {days !== null && s.agreedFee > 0 && (
+                        <div style={{ fontSize:11, fontWeight:700, marginTop:2, color:days<0?'#991B1B':days<=3?'#D97706':'#065F46' }}>
+                          {days<0?Math.abs(days)+' days overdue':days===0?'Today':days===1?'Tomorrow':days+' days'}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding:'10px 14px' }}>
+                      <span style={{ padding:'3px 10px', borderRadius:99, fontSize:11, fontWeight:700, background:ss.bg, color:ss.fg }}>
+                        {ss.label}
+                      </span>
+                      {s.feeReminderSent && (
+                        <div style={{ fontSize:10, color:TOKENS.s400, marginTop:3 }}>Reminded {fmtDate(s.feeReminderSent)}</div>
+                      )}
+                    </td>
+                    <td style={{ padding:'10px 14px' }}>
+                      {inv ? (
+                        <>
+                          <div style={{ fontSize:11.5, fontWeight:700, color:TOKENS.s900 }}>{inv.invoiceNo}</div>
+                          <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:3 }}>
+                            <span style={{ padding:'1px 7px', borderRadius:99, fontSize:10, fontWeight:700, background:iSS.bg, color:iSS.fg }}>{inv.status}</span>
+                            <span style={{ fontSize:11, color:TOKENS.s500 }}>{money(inv.amount, s.feeCurrency)}</span>
+                          </div>
+                        </>
+                      ) : <span style={{ fontSize:12, color:TOKENS.s400 }}>No invoice yet</span>}
+                    </td>
+                    <td style={{ padding:'10px 14px' }}>
+                      <div style={{ display:'flex', gap:5, flexWrap:'nowrap' }}>
+                        <button onClick={()=>openEdit(s)} style={{ padding:'5px 10px', borderRadius:6, border:'1px solid '+TOKENS.line, background:'#fff', color:TOKENS.s700, fontSize:11.5, fontWeight:600, cursor:'pointer', whiteSpace:'nowrap' }}>Edit</button>
+                        <button onClick={()=>openPay(s)} style={{ padding:'5px 10px', borderRadius:6, border:'none', background:TOKENS.accentEmerald, color:'#fff', fontSize:11.5, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>Record payment</button>
+                        <button onClick={()=>sendReminder(s)} disabled={reminding===s._id||!s.agreedFee}
+                          style={{ padding:'5px 9px', borderRadius:6, border:'1px solid #FDE68A', background:reminding===s._id?TOKENS.s200:'#FFFBEB', color:'#D97706', fontSize:11.5, fontWeight:600, cursor:reminding===s._id||!s.agreedFee?'not-allowed':'pointer', opacity:!s.agreedFee?.5:1 }}>
+                          {reminding===s._id?'Sending...':'Remind'}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:8, marginTop:14 }}>
+          <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page<=1}
+            style={{ padding:'6px 14px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page<=1?'not-allowed':'pointer', opacity:page<=1?.5:1 }}>‹ Prev</button>
+          <span style={{ fontSize:12.5, color:TOKENS.s600 }}>Page {page} of {totalPages} · {total} students</span>
+          <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages}
+            style={{ padding:'6px 14px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page>=totalPages?'not-allowed':'pointer', opacity:page>=totalPages?.5:1 }}>Next ›</button>
+        </div>
+      )}
+
+      {/* ── Edit billing modal ── */}
+      {editModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
+          onClick={()=>setEditModal(null)}>
+          <div style={{ background:'#fff', borderRadius:14, padding:26, maxWidth:460, width:'100%', boxShadow:'0 20px 60px rgba(0,0,0,.25)' }}
+            onClick={e=>e.stopPropagation()}>
+            <div style={{ fontSize:15, fontWeight:800, color:TOKENS.s900, marginBottom:2 }}>Edit billing — {editModal.name}</div>
+            <div style={{ fontSize:12, color:TOKENS.s500, marginBottom:20 }}>{editModal.curriculum} · {editModal.grade} · {editModal.admissionNo}</div>
+
+            <div style={{ display:'grid', gap:14 }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div>
+                  <label className="fl">Agreed monthly fee</label>
+                  <input type="number" value={editForm.agreedFee} onChange={e=>setEditForm(p=>({...p,agreedFee:e.target.value}))} className="fi" placeholder="e.g. 400"/>
+                </div>
+                <div>
+                  <label className="fl">Currency</label>
+                  <select value={editForm.feeCurrency} onChange={e=>setEditForm(p=>({...p,feeCurrency:e.target.value}))} className="fsel">
+                    {['USD','KES','GBP','EUR','AED'].map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div>
+                  <label className="fl">Billing day of month</label>
+                  <select value={editForm.billingDay} onChange={e=>setEditForm(p=>({...p,billingDay:e.target.value}))} className="fsel">
+                    {Array.from({length:28},(_,i)=>i+1).map(d=><option key={d} value={d}>{d}{d===1?'st':d===2?'nd':d===3?'rd':'th'} of month</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="fl">Override next due date</label>
+                  <input type="date" value={editForm.nextDueDate} onChange={e=>setEditForm(p=>({...p,nextDueDate:e.target.value}))} className="fi"/>
+                </div>
+              </div>
+              <div>
+                <label className="fl">Billing note</label>
+                <input value={editForm.billingNote} onChange={e=>setEditForm(p=>({...p,billingNote:e.target.value}))} className="fi" placeholder="e.g. Pays via M-Pesa, Discount applied"/>
+              </div>
+            </div>
+
+            <div style={{ display:'flex', gap:10, marginTop:20 }}>
+              <button onClick={saveEdit} disabled={saving} style={{ flex:1, background:saving?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', padding:'11px 0', borderRadius:8, fontSize:13, fontWeight:700, cursor:saving?'not-allowed':'pointer' }}>
+                {saving?'Saving...':'Save billing settings'}
+              </button>
+              <button onClick={()=>setEditModal(null)} style={{ background:'transparent', border:'1.5px solid '+TOKENS.line, color:TOKENS.s500, padding:'11px 18px', borderRadius:8, fontSize:13, cursor:'pointer' }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Record payment modal ── */}
+      {payModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
+          onClick={()=>setPayModal(null)}>
+          <div style={{ background:'#fff', borderRadius:14, padding:26, maxWidth:460, width:'100%', boxShadow:'0 20px 60px rgba(0,0,0,.25)' }}
+            onClick={e=>e.stopPropagation()}>
+            <div style={{ fontSize:15, fontWeight:800, color:TOKENS.s900, marginBottom:2 }}>Record payment — {payModal.name}</div>
+            <div style={{ fontSize:12, color:TOKENS.s500, marginBottom:20 }}>Agreed fee: {payModal.agreedFee?({ USD:'$',KES:'KES ',GBP:'£',EUR:'€',AED:'AED ' }[payModal.feeCurrency]||'')+payModal.agreedFee:'Not set'}</div>
+
+            <div style={{ display:'grid', gap:14 }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div>
+                  <label className="fl">Amount received</label>
+                  <input type="number" value={payForm.amount} onChange={e=>setPayForm(p=>({...p,amount:e.target.value}))} className="fi" placeholder={payModal.agreedFee||'0'}/>
+                </div>
+                <div>
+                  <label className="fl">Currency</label>
+                  <select value={payForm.currency} onChange={e=>setPayForm(p=>({...p,currency:e.target.value}))} className="fsel">
+                    {['USD','KES','GBP','EUR','AED'].map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div>
+                  <label className="fl">Date received</label>
+                  <input type="date" value={payForm.paidAt} onChange={e=>setPayForm(p=>({...p,paidAt:e.target.value}))} className="fi"/>
+                </div>
+                <div>
+                  <label className="fl">Payment method</label>
+                  <select value={payForm.paymentMethod} onChange={e=>setPayForm(p=>({...p,paymentMethod:e.target.value}))} className="fsel">
+                    {['Bank transfer','M-Pesa','Paystack','Cash','Cheque','Wire transfer','Other'].map(m=><option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="fl">Period label</label>
+                <input value={payForm.periodLabel} onChange={e=>setPayForm(p=>({...p,periodLabel:e.target.value}))} className="fi" placeholder="e.g. July 2026"/>
+              </div>
+              <div>
+                <label className="fl">Note (optional)</label>
+                <input value={payForm.note} onChange={e=>setPayForm(p=>({...p,note:e.target.value}))} className="fi" placeholder="Transaction ID, reference, etc."/>
+              </div>
+            </div>
+
+            <div style={{ background:'#F0FDF4', borderRadius:8, padding:'10px 14px', marginTop:14, fontSize:12, color:'#065F46' }}>
+              A paid invoice will be created automatically. The next due date will be recalculated.
+            </div>
+
+            <div style={{ display:'flex', gap:10, marginTop:18 }}>
+              <button onClick={savePay} disabled={saving} style={{ flex:1, background:saving?TOKENS.s300:TOKENS.accentEmerald, color:'#fff', border:'none', padding:'11px 0', borderRadius:8, fontSize:13, fontWeight:700, cursor:saving?'not-allowed':'pointer' }}>
+                {saving?'Saving...':'Record payment & create invoice'}
+              </button>
+              <button onClick={()=>setPayModal(null)} style={{ background:'transparent', border:'1.5px solid '+TOKENS.line, color:TOKENS.s500, padding:'11px 18px', borderRadius:8, fontSize:13, cursor:'pointer' }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
 
 function BillingModule({ refreshKey, toast }) {
   const store = useStore()
