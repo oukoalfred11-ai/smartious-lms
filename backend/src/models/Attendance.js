@@ -18,7 +18,7 @@
 
 const mongoose = require('mongoose');
 
-const ATTENDANCE_STATUS = ['present', 'absent', 'half_day'];
+const ATTENDANCE_STATUS = ['present', 'absent', 'half_day', 'late'];
 
 const attendanceSchema = new mongoose.Schema({
   // ── Identity ────────────────────────────────────
@@ -56,6 +56,12 @@ const attendanceSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  // ── Self check-in fields ──────────────────────────
+  checkedIn:     { type: Boolean, default: false },
+  checkInStatus: { type: String, enum:['present','absent','late',''], default:'' },
+  lateTime:      { type: String, default: '' },
+  checkInTime:   { type: Date,   default: null },
+
   markedAt: {
     type: Date,
     default: Date.now,
