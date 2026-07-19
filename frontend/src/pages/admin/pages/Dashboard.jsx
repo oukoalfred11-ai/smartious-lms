@@ -548,6 +548,14 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Finance',     items: ['billing', 'payroll'] },
       { label: 'System',      items: ['settings'] },
     ],
+    dos: [
+      { label: 'Overview',    items: ['dashboard'] },
+      { label: 'Analytics',   items: ['analytics'] },
+      { label: 'Assessments', items: ['exams', 'curriculum'] },
+      { label: 'Students',    items: ['students', 'reports'] },
+      { label: 'Teaching',    items: ['teachers', 'livelessons', 'grouprooms'] },
+      { label: 'System',      items: ['settings'] },
+    ],
     sales: [
       { label: 'Overview',    items: ['dashboard', 'salesperf'] },
       { label: 'CRM',         items: ['crm'] },
@@ -820,6 +828,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
     ],
     accountant:  [{ items: ['dashboard','analytics','billing','payroll','settings'] }],
     sales:       [{ items: ['dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
+    dos:         [{ items: ['dashboard','analytics','exams','curriculum','students','reports','teachers','livelessons','grouprooms','settings'] }],
     ops_manager: [{ items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','assessment','documents','payroll','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
