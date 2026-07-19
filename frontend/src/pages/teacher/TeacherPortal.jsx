@@ -66,752 +66,6 @@ const SERIF = "'Playfair Display', Georgia, serif"
 // top of any new tab/page to match admin's header treatment.
 function PageHeader({ tag, title, subtitle }) {
   return (
-    <div style={{ marginBottom: 22 }}>
-      {tag && (
-        <div style={{
-          fontSize: 11, fontWeight: 700,
-          letterSpacing: '.12em', textTransform: 'uppercase',
-          color: TOKENS.crimson, marginBottom: 6,
-        }}>{tag}</div>
-      )}
-      <h2 style={{
-        fontFamily: SERIF, fontSize: 28, fontWeight: 500,
-        color: TOKENS.s900, margin: 0, letterSpacing: '-.01em',
-      }}>{title}</h2>
-      {subtitle && (
-        <div style={{ fontSize: 13, color: TOKENS.s500, marginTop: 4 }}>{subtitle}</div>
-      )}
-        </div>
-      </main>
-    </div>
-  )
-}
-
-// KPI card — small stat tile. Used in dashboards.
-function PKpi({ label, value, delta, accent = TOKENS.crimson, deltaColor }) {
-  return (
-    <div style={{
-      background: TOKENS.white,
-      borderRadius: 14,
-      padding: '18px 20px',
-      border: '1px solid ' + TOKENS.s100,
-      flex: 1, minWidth: 160,
-    }}>
-      <div style={{
-        fontSize: 11, fontWeight: 700,
-        letterSpacing: '.12em', textTransform: 'uppercase',
-        color: TOKENS.s500, marginBottom: 8,
-      }}>{label}</div>
-      <div style={{
-        fontFamily: SERIF, fontSize: 30, fontWeight: 500,
-        color: TOKENS.s900, lineHeight: 1, marginBottom: 4,
-        letterSpacing: '-.01em',
-      }}>{value}</div>
-      {delta && (
-        <div style={{ fontSize: 12, color: deltaColor || TOKENS.s500, fontWeight: 500 }}>{delta}</div>
-      )}
-    </div>
-  )
-}
-
-// Full-bleed white panel matching admin's content panels.
-function Panel({ children, padding = 22, style }) {
-  return (
-    <div style={{
-      background: TOKENS.white,
-      border: '1px solid ' + TOKENS.s100,
-      borderRadius: 14,
-      padding,
-      ...(style || {}),
-    }}>{children}</div>
-  )
-}
-
-// Primary button — crimson background, white text.
-function PrimaryBtn({ children, onClick, disabled, style, type = 'button' }) {
-  return (
-    <button type={type} onClick={onClick} disabled={disabled}
-      style={{
-        background: TOKENS.crimson, color: TOKENS.white,
-        border: 'none', padding: '10px 18px', borderRadius: 8,
-        fontSize: 13, fontWeight: 700,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        ...(style || {}),
-      }}>{children}</button>
-  )
-}
-
-// Secondary button — outlined, neutral.
-function SecondaryBtn({ children, onClick, disabled, style, type = 'button' }) {
-  return (
-    <button type={type} onClick={onClick} disabled={disabled}
-      style={{
-        background: 'transparent', color: TOKENS.s700,
-        border: '1.5px solid ' + TOKENS.s200,
-        padding: '10px 18px', borderRadius: 8,
-        fontSize: 13, fontWeight: 700,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        ...(style || {}),
-      }}>{children}</button>
-  )
-}
-
-// ──────────────────────────────────────────────────────
-// GoldenPie — branded gold percentage pie chart
-// Used for any "X out of Y" statistic across the teacher
-// portal. Renders as an SVG donut chart with a centered
-// percent label. Always gold (#C9A030) so visual
-// consistency holds wherever it appears.
-// ──────────────────────────────────────────────────────
-function GoldenPie({ value, total, size = 110, label, sublabel, color = TOKENS.gold, trackColor = TOKENS.s100 }) {
-  const safeTotal = Number.isFinite(total) && total > 0 ? total : 0
-  const safeValue = Number.isFinite(value) ? Math.max(0, Math.min(value, safeTotal)) : 0
-  const pct = safeTotal > 0 ? safeValue / safeTotal : 0
-  const pctText = safeTotal > 0 ? Math.round(pct * 100) : 0
-
-  const r = size / 2 - 8
-  const cx = size / 2
-  const cy = size / 2
-  const circumference = 2 * Math.PI * r
-  const filled = circumference * pct
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-      <div style={{ position: 'relative', width: size, height: size }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          {/* Track */}
-          <circle cx={cx} cy={cy} r={r}
-            fill="none" stroke={trackColor} strokeWidth="10"/>
-          {/* Filled arc — starts from top (rotate -90°) */}
-          <circle cx={cx} cy={cy} r={r}
-            fill="none" stroke={color} strokeWidth="10"
-            strokeLinecap="round"
-            strokeDasharray={`${filled} ${circumference}`}
-            transform={`rotate(-90 ${cx} ${cy})`}
-            style={{ transition: 'stroke-dasharray 400ms ease' }}/>
-        </svg>
-        {/* Percent label centered */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          pointerEvents: 'none',
-        }}>
-          <div style={{
-            fontFamily: SERIF,
-            fontSize: size * 0.28, fontWeight: 500,
-            color: TOKENS.s900, lineHeight: 1,
-          }}>{pctText}%</div>
-          {safeTotal > 0 && (
-            <div style={{ fontSize: size * 0.085, color: TOKENS.s500, marginTop: 2 }}>
-              {safeValue} / {safeTotal}
-            </div>
-          )}
-        </div>
-      </div>
-      {label && (
-        <div style={{
-          fontSize: 11, fontWeight: 700,
-          letterSpacing: '.08em', textTransform: 'uppercase',
-          color: TOKENS.s700, textAlign: 'center',
-        }}>{label}</div>
-      )}
-      {sublabel && (
-        <div style={{ fontSize: 11.5, color: TOKENS.s500, textAlign: 'center' }}>{sublabel}</div>
-      )}
-    </div>
-  )
-}
-
-// ── SVG icon helper ──────────────────────────────────────
-const Ico = ({ d, w = 18, col = 'currentColor', sw = 2 }) => (
-  <svg width={w} height={w} fill="none" viewBox="0 0 24 24" stroke={col} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
-    {d.split('|').map((p, i) => {
-      if (p.startsWith('rect:')) { const [,x,y,W,H,rx] = p.split(':'); return <rect key={i} x={x} y={y} width={W} height={H} rx={rx||0}/> }
-      if (p.startsWith('circle:')) { const [,cx,cy,r] = p.split(':'); return <circle key={i} cx={cx} cy={cy} r={r}/> }
-      if (p.startsWith('line:')) { const [,x1,y1,x2,y2] = p.split(':'); return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}/> }
-      if (p.startsWith('poly:')) { return <polygon key={i} points={p.slice(5)}/> }
-      if (p.startsWith('pline:')) { return <polyline key={i} points={p.slice(6)}/> }
-      return <path key={i} d={p}/>
-    })}
-  </svg>
-)
-
-// ═════════════════════════════════════════════════════════
-// APPLE-STYLE COLOURED NAV ICONS — matches Student Portal
-// Each module renders as a 26×26 squircle tile with its own
-// signature gradient and a white pictogram, like iOS Settings.
-// ═════════════════════════════════════════════════════════
-const NAV_ICON_PALETTE = {
-  dashboard:     ['#FF6B6B', '#EE5253'], // coral red
-  students:      ['#0EA5E9', '#0369A1'], // sky blue
-  liveclass:     ['#EF4444', '#B91C1C'], // signal red
-  questionbank:  ['#5E8CFF', '#3D6FE8'], // bright blue
-  exambuilder:   ['#D97706', '#B45309'], // amber
-  marking:       ['#22C55E', '#15803D'], // green
-  documents:     ['#C9A030', '#9A7B16'], // gold
-  communication: ['#8B5CF6', '#6D28D9'], // royal purple
-  mshauri:       ['#7C3AED', '#5B21B6'], // violet
-  profile:       ['#64748B', '#334155'], // slate
-}
-
-const NavIcon = ({ name, active }) => {
-  const [c1, c2] = NAV_ICON_PALETTE[name] || ['#94A3B8', '#475569']
-  const size = 26
-  const r = 7 // squircle-ish corner radius
-
-  const renderGlyph = () => {
-    switch (name) {
-      case 'dashboard': // tile grid
-        return (
-          <g fill="#fff">
-            <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.5"/>
-            <rect x="13" y="3.5" width="7.5" height="7.5" rx="1.5"/>
-            <rect x="3.5" y="13" width="7.5" height="7.5" rx="1.5"/>
-            <rect x="13" y="13" width="7.5" height="7.5" rx="1.5"/>
-          </g>
-        )
-      case 'students': // students with graduation cap — distinctly "students" not just "people"
-        return (
-          <g fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            {/* Mortarboard cap above the central figure */}
-            <path d="M5 7.5 L12 4.5 L19 7.5 L12 10.5 Z" fill="#fff" fillOpacity=".9" stroke="#fff"/>
-            <line x1="12" y1="10.5" x2="12" y2="13"/>
-            <path d="M8 8.5 L8 11 Q8 12.5 12 12.5 Q16 12.5 16 11 L16 8.5" stroke="#fff" strokeWidth="1.4"/>
-            {/* Tassel */}
-            <line x1="18.5" y1="7.5" x2="18.5" y2="11.2"/>
-            <circle cx="18.5" cy="11.6" r="0.7" fill="#fff" stroke="none"/>
-            {/* Three student heads + shoulders below */}
-            <circle cx="7" cy="16.5" r="1.6" fill="#fff" fillOpacity=".25"/>
-            <circle cx="12" cy="16.5" r="1.6" fill="#fff" fillOpacity=".25"/>
-            <circle cx="17" cy="16.5" r="1.6" fill="#fff" fillOpacity=".25"/>
-            <path d="M4.5 21 Q4.5 19 7 19 Q9.5 19 9.5 21" strokeWidth="1.5"/>
-            <path d="M9.5 21 Q9.5 19 12 19 Q14.5 19 14.5 21" strokeWidth="1.5"/>
-            <path d="M14.5 21 Q14.5 19 17 19 Q19.5 19 19.5 21" strokeWidth="1.5"/>
-          </g>
-        )
-      case 'attendance': // clipboard with checkmark
-        return (
-          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="5" y="4" width="14" height="17" rx="2" fill="#fff" fillOpacity=".25"/>
-            <rect x="9" y="2" width="6" height="3" rx="1" fill="#fff" stroke="#fff" strokeWidth="1.6"/>
-            <path d="M8.5 12.5l2 2 4-4.5"/>
-          </g>
-        )
-      case 'library': // stack of books
-        return (
-          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" fill="#fff" fillOpacity=".25"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" fill="#fff" fillOpacity=".25"/>
-            <line x1="8" y1="7" x2="16" y2="7"/>
-            <line x1="8" y1="11" x2="16" y2="11"/>
-          </g>
-        )
-      case 'liveclass': // video camera with live dot
-        return (
-          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="7" width="13" height="10" rx="2" fill="#fff" fillOpacity=".25"/>
-            <path d="M16 10.5L21 7v10l-5-3.5z" fill="#fff"/>
-            <circle cx="6.5" cy="10.5" r="1" fill="#fff" stroke="none"/>
-          </g>
-        )
-      case 'questionbank': // book with question mark
-        return (
-          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 5a2 2 0 0 1 2-2h11a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5z" fill="#fff" fillOpacity=".25"/>
-            <path d="M4 17a2 2 0 0 1 2-2h12" />
-            <path d="M10.5 8.5a1.5 1.5 0 1 1 2.5 1.1c-.7.5-1 .9-1 1.9" stroke="#fff" strokeWidth="1.8"/>
-            <circle cx="12" cy="13.5" r="0.8" fill="#fff" stroke="none"/>
-          </g>
-        )
-      case 'exambuilder': // clipboard with star
-        return (
-          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="5" y="5" width="14" height="16" rx="2" fill="#fff" fillOpacity=".25"/>
-            <rect x="8.5" y="3" width="7" height="4" rx="1" fill="#fff"/>
-            <path d="M12 10l1.2 2.4 2.6.4-1.9 1.8.4 2.6L12 16l-2.3 1.2.4-2.6L7.2 12.8l2.6-.4L12 10z" fill="#fff" stroke="none"/>
-          </g>
-        )
-      case 'marking': // clipboard with check (homework)
-        return (
-          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="5" y="5" width="14" height="16" rx="2" fill="#fff" fillOpacity=".25"/>
-            <rect x="8.5" y="3" width="7" height="4" rx="1" fill="#fff"/>
-            <path d="M8 13.5l2.5 2.5 5-5"/>
-          </g>
-        )
-      case 'communication': // chat bubble
-        return (
-          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v4a5 5 0 0 1-5 5h-5l-4 3v-3a5 5 0 0 1-4-5V9z" fill="#fff" fillOpacity=".25"/>
-            <circle cx="9" cy="11" r="1" fill="#fff" stroke="none"/>
-            <circle cx="12" cy="11" r="1" fill="#fff" stroke="none"/>
-            <circle cx="15" cy="11" r="1" fill="#fff" stroke="none"/>
-          </g>
-        )
-      case 'mshauri': // chat bubble with sparkle (AI)
-        return (
-          <g>
-            <path d="M3 9a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v4a5 5 0 0 1-5 5h-5l-4 3v-3a5 5 0 0 1-4-5V9z" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.6" strokeLinejoin="round"/>
-            <path d="M12 7.5l.9 1.9 2 .3-1.5 1.4.4 2L12 12.2l-1.8 1 .4-2-1.5-1.4 2-.3L12 7.5z" fill="#fff"/>
-          </g>
-        )
-      case 'profile': // person
-        return (
-          <g>
-            <circle cx="12" cy="8" r="3.8" fill="#fff" fillOpacity=".25" stroke="#fff" strokeWidth="1.8"/>
-            <path d="M4.5 20c.6-4 3.8-6.5 7.5-6.5s6.9 2.5 7.5 6.5" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"/>
-          </g>
-        )
-      case 'documents': // document with lines
-        return (
-          <g fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z" fill="#fff" fillOpacity=".25"/>
-            <path d="M13 3v6h6"/>
-            <line x1="15" y1="13" x2="9" y2="13"/>
-            <line x1="15" y1="16.5" x2="9" y2="16.5"/>
-          </g>
-        )
-      case 'scheduleclasses': // calendar with clock overlay — schedule + time
-        return (
-          <g fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            {/* Calendar body */}
-            <rect x="3" y="5" width="14" height="14" rx="2" fill="#fff" fillOpacity=".25"/>
-            {/* Calendar binding rings on top */}
-            <line x1="7" y1="3" x2="7" y2="6"/>
-            <line x1="13" y1="3" x2="13" y2="6"/>
-            {/* Header bar of calendar */}
-            <line x1="3" y1="9" x2="17" y2="9" strokeWidth="1.4"/>
-            {/* Dotted day cells */}
-            <circle cx="6.5" cy="12.5" r="0.7" fill="#fff" stroke="none"/>
-            <circle cx="10" cy="12.5" r="0.7" fill="#fff" stroke="none"/>
-            <circle cx="6.5" cy="15.5" r="0.7" fill="#fff" stroke="none"/>
-            {/* Clock overlay at bottom-right indicating "scheduled time" */}
-            <circle cx="17.5" cy="16" r="4.5" fill="#7D1025" stroke="#fff" strokeWidth="1.4"/>
-            <path d="M17.5 13.5 L17.5 16 L19.5 17" stroke="#fff" strokeWidth="1.4" strokeLinecap="round"/>
-          </g>
-        )
-      case 'timetable': // calendar with weekly grid pattern — recurring slots
-        return (
-          <g fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="5" width="18" height="16" rx="2" fill="#fff" fillOpacity=".25"/>
-            <line x1="8" y1="3" x2="8" y2="6"/>
-            <line x1="16" y1="3" x2="16" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10" strokeWidth="1.4"/>
-            {/* Vertical grid lines for weekly columns */}
-            <line x1="9" y1="10" x2="9" y2="21" strokeWidth="1.1" opacity=".7"/>
-            <line x1="15" y1="10" x2="15" y2="21" strokeWidth="1.1" opacity=".7"/>
-            {/* Filled slot blocks showing recurrence */}
-            <rect x="4" y="12" width="4" height="2.5" rx=".4" fill="#fff" stroke="none"/>
-            <rect x="10" y="12" width="4" height="2.5" rx=".4" fill="#fff" stroke="none"/>
-            <rect x="4" y="17" width="4" height="2.5" rx=".4" fill="#fff" stroke="none"/>
-            <rect x="16" y="14.5" width="4" height="2.5" rx=".4" fill="#fff" stroke="none"/>
-          </g>
-        )
-      default:
-        return <circle cx="12" cy="12" r="4" fill="#fff"/>
-    }
-  }
-
-  return (
-    <div style={{
-      width:size, height:size,
-      borderRadius: r,
-      background:`linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`,
-      display:'flex', alignItems:'center', justifyContent:'center',
-      flexShrink:0,
-      boxShadow: active
-        ? `0 4px 10px ${c2}55, inset 0 1px 0 rgba(255,255,255,.35)`
-        : `0 1px 3px ${c2}40, inset 0 1px 0 rgba(255,255,255,.25)`,
-      transition:'box-shadow .15s, transform .15s',
-      transform: active ? 'scale(1.04)' : 'scale(1)',
-    }}>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        {renderGlyph()}
-      </svg>
-    </div>
-  )
-}
-
-const Av = ({ init, col, size = 36 }) => (
-  <div style={{ width:size, height:size, borderRadius:'50%', background:col+'20', color:col, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'JetBrains Mono,monospace', fontSize:Math.round(size*.32), fontWeight:700, flexShrink:0 }}>{init}</div>
-)
-
-const ScoreBar = ({ pct }) => {
-  const col = pct>=75?'var(--g600)':pct>=60?'var(--a600)':'var(--r500)'
-  return <div className="prog-bar"><div className="prog-fill" style={{ width:pct+'%', background:col }}/></div>
-}
-
-const STUDENTS = [
-  {name:'Amara Osei',   init:'AO',col:'#3B82F6',score:72,trend:'up',att:88,status:'Good'},
-  {name:'Kofi Mensah',  init:'KM',col:'#22C55E',score:88,trend:'up',att:96,status:'Excellent'},
-  {name:'Zara Kamau',   init:'ZK',col:'#8B5CF6',score:65,trend:'down',att:82,status:'Good'},
-  {name:'Brian Otieno', init:'BO',col:'#F59E0B',score:79,trend:'up',att:90,status:'Good'},
-  {name:'Faith Wanjiru',init:'FW',col:'#EC4899',score:91,trend:'up',att:98,status:'Excellent'},
-  {name:'David Mwangi', init:'DM',col:'#14B8A6',score:58,trend:'down',att:74,status:'At Risk'},
-  {name:'Lydia Achieng',init:'LA',col:'#F97316',score:76,trend:'up',att:85,status:'Good'},
-  {name:'Peter Kamau',  init:'PK',col:'#06B6D4',score:62,trend:'down',att:78,status:'At Risk'},
-]
-
-const RESOURCES = [
-  {t:'Pythagoras Theorem Worksheet',   type:'PDF',  sub:'Mathematics',cls:'Form 3',size:'1.2 MB', dl:34, colBg:'var(--r50)',colSt:'var(--r600)', ai:'Concise worksheet covering Pythagorean triples and word problems. 12 questions.'},
-  {t:'Trigonometry Lecture Slides',    type:'Slides',sub:'Mathematics',cls:'Form 3',size:'4.8 MB', dl:28, colBg:'var(--a50)',colSt:'var(--a600)', ai:'14-slide deck introducing SOHCAHTOA with worked examples.'},
-  {t:'Cambridge Past Papers 2018–2023',type:'PDF',  sub:'Mathematics',cls:'Form 4',size:'18.3 MB',dl:67, colBg:'var(--r50)',colSt:'var(--r600)', ai:'6 years of Cambridge IGCSE Maths Papers 1 & 2.'},
-  {t:'Algebra Video Lesson',           type:'Video',sub:'Mathematics',cls:'Form 2',size:'280 MB', dl:22, colBg:'var(--p50)',colSt:'var(--p600)', ai:'45-minute recorded lesson on factorisation.'},
-  {t:'Number Theory Reference Sheet',  type:'PDF',  sub:'Mathematics',cls:'Form 1',size:'0.8 MB', dl:41, colBg:'var(--r50)',colSt:'var(--r600)', ai:'Quick-reference for prime numbers, LCM, HCF.'},
-  {t:'Khan Academy — Pythagoras',      type:'Link', sub:'Mathematics',cls:'All',   size:'—',      dl:15, colBg:'var(--b50)',colSt:'var(--b600)', ai:'Curated external resource for interactive Pythagoras practice.'},
-]
-
-const EXAM_QS = [
-  {type:'MCQ',text:'In a right-angled triangle with legs 3 cm and 4 cm, the hypotenuse is:',marks:5},
-  {type:'MCQ',text:'If c = 13 and a = 5 in a right-angled triangle, then b equals:',marks:5},
-  {type:'Short Answer',text:'A ladder is 10 m long and its base is 6 m from a wall. How high up the wall does it reach? Show all working.',marks:10},
-  {type:'Essay',text:'Explain three real-world applications of Pythagoras Theorem and demonstrate each with a worked example.',marks:20},
-  {type:'MCQ',text:'Which set of numbers forms a Pythagorean triple?',marks:5},
-]
-
-const MARK_STU = [
-  {name:'Amara Osei', init:'AO',col:'#3B82F6',scores:[18,15,8,16,10],ai:8, plag:3, copy:12},
-  {name:'Kofi Mensah', init:'KM',col:'#22C55E',scores:[20,18,10,18,12],ai:5, plag:1, copy:6},
-  {name:'Zara Kamau',  init:'ZK',col:'#8B5CF6',scores:[15,12,6,12,8], ai:6, plag:4, copy:9},
-  {name:'Faith Wanjiru',init:'FW',col:'#EC4899',scores:[20,19,10,20,14],ai:4,plag:0, copy:3},
-  {name:'David Mwangi',init:'DM',col:'#14B8A6',scores:[12,10,5,10,7], ai:15,plag:22,copy:38,flagged:true},
-]
-
-const ALLOCS = [
-  {student:'Amara Osei',  curriculum:'IGCSE',  subject:'Mathematics',slot:'Mon/Wed 10:00–11:00 AM', fee:'KES 1,500/session',status:'Active'},
-  {student:'Kofi Mensah', curriculum:'A-Level', subject:'Mathematics',slot:'Tue/Thu 2:00–3:00 PM',  fee:'KES 1,500/session',status:'Active'},
-  {student:'Zara Kamau',  curriculum:'IGCSE',  subject:'Mathematics',slot:'Mon/Fri 9:00–10:00 AM',  fee:'KES 1,500/session',status:'Active'},
-  {student:'Grace Mutua', curriculum:'British', subject:'Mathematics',slot:'Wed/Sat 11:00 AM–12 PM',fee:'KES 1,500/session',status:'Pending'},
-]
-
-const PAYSLIPS = [
-  {month:'January 2026',att:22,offhrs:8,reads:142,videos:3,gross:'KES 40,126',tax:'KES 4,013',net:'KES 36,113',status:'Paid'},
-  {month:'December 2025',att:20,offhrs:5,reads:89, videos:2,gross:'KES 34,267',tax:'KES 3,427',net:'KES 30,840',status:'Paid'},
-  {month:'November 2025',att:21,offhrs:11,reads:201,videos:4,gross:'KES 37,903',tax:'KES 3,790',net:'KES 34,113',status:'Paid'},
-]
-
-const BLOG_POSTS = [
-  {title:'5 Ways to Make Quadratic Equations Fun for IGCSE Students',reads:1847,earnings:'KES 5,541',date:'Feb 28',status:'Published'},
-  {title:'Why Pythagoras Theorem Appears in Every IGCSE Exam',reads:3204,earnings:'KES 9,612',date:'Feb 14',status:'Published'},
-  {title:'How I Use AI to Give Better Exam Feedback',reads:892,earnings:'KES 2,676',date:'Jan 30',status:'Published'},
-  {title:'Teaching Trigonometry: From SOHCAHTOA to Applications',reads:0,earnings:'KES 0',date:'Draft',status:'Draft'},
-]
-
-export default function TeacherPortal() {
-  const toast  = useToast()
-  const store  = useStore()
-
-  // Load logged-in user from localStorage (set during login)
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem('sm_user')
-      return stored ? JSON.parse(stored) : null
-    } catch { return null }
-  })
-
-  // Refresh user from backend on mount (in case localStorage is stale)
-  useEffect(() => {
-    const token = localStorage.getItem('sm_token')
-    if (!token) return
-    api.get('/auth/me')
-      .then(res => {
-        if (res.data?.user) {
-          setCurrentUser(res.data.user)
-          try { localStorage.setItem('sm_user', JSON.stringify(res.data.user)) } catch {}
-        }
-      })
-      .catch(() => { /* keep localStorage version */ })
-  }, [])
-
-  // Computed display name (used throughout the portal)
-  const teacherName = currentUser
-    ? ('Mr. ' + (currentUser.firstName || '') + ' ' + (currentUser.lastName || '')).trim()
-    : 'Teacher'
-
-  const [page, setPage] = useState('dashboard')
-  const [collapsed, setSidebarCollapsed] = useState(false)
-  const [uploadModal, setUploadModal] = useState(false)
-  const [uploadStep, setUploadStep] = useState(1)
-  const [markDetail, setMarkDetail] = useState(null)
-  const [ebStep, setEbStep] = useState(1)
-  const [chatMsgs, setChatMsgs] = useState([
-    { role:'ai', text:'24 papers marked. Class average 73%. David Mwangi\'s paper requires review — 3 integrity flags detected.' }
-  ])
-  const [chatInp, setChatInp] = useState('')
-
-  // ── Blog editor state ────────────────────────────────
-  const [blogEditor, setBlogEditor] = useState(false)
-  const [blogTitle, setBlogTitle]   = useState('')
-  const [blogBody,  setBlogBody]    = useState('')
-  const [blogSubject, setBlogSubject] = useState('Mathematics')
-  const [blogCat,   setBlogCat]     = useState('igcse')
-  const [editingArticle, setEditingArticle] = useState(null)
-
-  // ── Resource upload form state ───────────────────────
-  const [uploadTitle,   setUploadTitle]   = useState('')
-  const [uploadSubject, setUploadSubject] = useState('Mathematics')
-  const [uploadGrade,   setUploadGrade]   = useState('Form 3')
-  const [uploadType,    setUploadType]    = useState('PDF')
-  const [uploadYouTube, setUploadYouTube] = useState('')
-  const [uploadTopic,   setUploadTopic]   = useState('')
-
-  // ── Message compose state ────────────────────────────
-  const [msgModal,     setMsgModal]     = useState(false)
-  const [msgTo,        setMsgTo]        = useState('')
-  const [msgToRole,    setMsgToRole]    = useState('parent')
-  const [msgSubject,   setMsgSubject]   = useState('')
-  const [msgBody,      setMsgBody]      = useState('')
-  const [activeThread, setActiveThread] = useState(null)
-  const [replyText,    setReplyText]    = useState('')
-
-  // ── Exam result post state ────────────────────────────
-  const [resultModal,    setResultModal]    = useState(false)
-  const [resultStudent,  setResultStudent]  = useState('')
-  const [resultExam,     setResultExam]     = useState('Pythagoras Theorem Mock')
-  const [resultScore,    setResultScore]    = useState('')
-  const [resultTotal,    setResultTotal]    = useState('100')
-  const [resultFeedback, setResultFeedback] = useState('')
-  // Real students fetched from backend (used by Send Message + Post Exam Result modals)
-  const [allStudents, setAllStudents] = useState([])
-  useEffect(() => {
-    const token = localStorage.getItem('sm_token')
-    if (!token) return
-    api.get('/users?role=student')
-      .then(res => {
-        if (res.data?.users) {
-          setAllStudents(res.data.users)
-        }
-      })
-      .catch(err => console.error('[teacher] failed to load students:', err))
-  }, [])
-
-  // ── Derived from store ───────────────────────────────
-  const myArticles = store.articles.filter(a => a.author === teacherName)
-  const totalReads = myArticles.reduce((s, a) => s + (a.reads || 0), 0)
-  const totalEarnings = myArticles.reduce((s, a) => s + (a.earnings || 0), 0)
-  const myThreads  = store.getThreads('teacher', teacherName)
-  const unreadCount = myThreads.reduce((s, t) => s + t.unread, 0)
-
-  // ── Blog publish ─────────────────────────────────────
-  const handlePublish = (asDraft) => {
-    if (!blogTitle.trim()) { toast.error('Title is required'); return }
-    if (!asDraft && !blogBody.trim()) { toast.error('Write something before publishing'); return }
-    const draft = {
-      title:      blogTitle,
-      body:       blogBody,
-      subject:    blogSubject,
-      cat:        blogCat,
-      author:     teacherName,
-      authorInit: ((currentUser?.firstName?.[0] || 'T') + (currentUser?.lastName?.[0] || '')).toUpperCase(),
-      authorCol:  '#3B82F6',
-      img:        blogCat === 'igcse' ? 'linear-gradient(135deg,#0D1525,#1B3060)' : 'linear-gradient(135deg,#0D1A0D,#1A3D1A)',
-    }
-    if (editingArticle) {
-      if (asDraft) {
-        store.updateArticle(editingArticle.id, { ...draft, status:'Draft', url:'', date:'Draft' })
-        toast.ok('Draft saved')
-      } else {
-        const slug = blogTitle.toLowerCase().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-')
-        store.updateArticle(editingArticle.id, { ...draft, status:'Published', url:'/blog/'+slug,
-          date: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
-          reads: editingArticle.reads || 0, earnings: editingArticle.earnings || 0 })
-        toast.ok('Article updated and published!')
-      }
-    } else {
-      if (asDraft) {
-        store.saveDraft(draft)
-        toast.ok('Draft saved')
-      } else {
-        const art = store.publishArticle(draft)
-        toast.ok('Published! URL: ' + art.url)
-      }
-    }
-    setBlogEditor(false); setBlogTitle(''); setBlogBody(''); setEditingArticle(null)
-  }
-
-  const openEditor = (article) => {
-    setEditingArticle(article)
-    setBlogTitle(article.title)
-    setBlogBody(article.body || '')
-    setBlogSubject(article.subject || 'Mathematics')
-    setBlogCat(article.cat || 'igcse')
-    setBlogEditor(true)
-  }
-
-  // ── Resource publish ─────────────────────────────────
-  const handlePublishResource = () => {
-    if (!uploadTitle.trim()) { toast.error('Resource title is required'); return }
-    store.addResource({
-      title:    uploadTitle,
-      type:     uploadYouTube ? 'Video' : uploadType,
-      subject:  uploadSubject,
-      grade:    uploadGrade,
-      size:     '—',
-      addedBy:  teacherName,
-    })
-    // If a YouTube URL was provided, also save as a lesson
-    if (uploadYouTube.trim()) {
-      // Convert watch URL to embed URL
-      let embedUrl = uploadYouTube.trim()
-      if (embedUrl.includes('youtube.com/watch?v=')) {
-        embedUrl = 'https://www.youtube.com/embed/' + embedUrl.split('v=')[1].split('&')[0]
-      } else if (embedUrl.includes('youtu.be/')) {
-        embedUrl = 'https://www.youtube.com/embed/' + embedUrl.split('youtu.be/')[1].split('?')[0]
-      }
-      store.addLesson({
-        title:      uploadTitle,
-        subject:    uploadSubject,
-        grade:      uploadGrade,
-        youtubeUrl: embedUrl,
-        topic:      uploadTopic || uploadTitle,
-        addedBy:    teacherName,
-        description: 'Lesson video for ' + uploadSubject + ' — ' + uploadGrade,
-      })
-      toast.ok('Video lesson published! Students can watch it in the Lesson Player.')
-    } else {
-      toast.ok('Resource published to student library!')
-    }
-    setUploadModal(false); setUploadStep(1); setUploadTitle(''); setUploadYouTube(''); setUploadTopic('')
-  }
-
-  // ── Send message ─────────────────────────────────────
-  const handleSendMsg = () => {
-    if (!msgSubject.trim() || !msgBody.trim()) { toast.error('Subject and message are required'); return }
-    store.sendMessage({
-      from:     'Mr. James Muthomi',
-      fromRole: 'teacher',
-      to:       msgTo,
-      toRole:   msgToRole,
-      avatar:   'JM',
-      avatarCol:'#22C55E',
-      subject:  msgSubject,
-      body:     msgBody,
-    })
-    toast.ok('Message sent to ' + msgTo)
-    setMsgModal(false); setMsgSubject(''); setMsgBody('')
-  }
-
-  const handleReply = (thread) => {
-    if (!replyText.trim()) return
-    const last = thread.messages[0]
-    store.sendMessage({
-      from:     'Mr. James Muthomi',
-      fromRole: 'teacher',
-      to:       last.from === 'Mr. James Muthomi' ? last.to : last.from,
-      toRole:   last.from === 'Mr. James Muthomi' ? last.toRole : last.fromRole,
-      avatar:   'JM',
-      avatarCol:'#22C55E',
-      subject:  'Re: ' + (last.subject || '').replace(/^Re: /,''),
-      body:     replyText,
-      thread:   thread.id,
-    })
-    toast.ok('Reply sent')
-    setReplyText('')
-  }
-
-  // ── Post exam result ─────────────────────────────────
-  const handlePostResult = () => {
-    if (!resultScore || !resultFeedback.trim()) { toast.error('Score and feedback are required'); return }
-    const score = parseInt(resultScore)
-    const total = parseInt(resultTotal)
-    const pct   = Math.round((score / total) * 100)
-    const grade = pct >= 80 ? 'A' : pct >= 70 ? 'B' : pct >= 60 ? 'C' : pct >= 50 ? 'D' : 'F'
-    store.postResult({
-      student:       resultStudent,
-      studentParent: 'Janet Osei',
-      exam:          resultExam,
-      subject:       'Mathematics',
-      score,
-      total,
-      grade,
-      feedback:      resultFeedback,
-      teacher:       'Mr. James Muthomi',
-    })
-    toast.ok('Results released to ' + resultStudent + ' and parent!')
-    setResultModal(false); setResultScore(''); setResultFeedback('')
-  }
-
-  // ── Mastery heatmap state ────────────────────────────
-  const [heatmapStudent, setHeatmapStudent] = useState(null)
-  const [heatmapData,    setHeatmapData]    = useState(null)
-  const [heatmapLoading, setHeatmapLoading] = useState(false)
-
-  const loadHeatmap = async (studentId, studentName) => {
-    if (!studentId) return
-    setHeatmapLoading(true)
-    setHeatmapStudent(studentName)
-    try {
-      const { data } = await api.get(`/mastery/heatmap/${studentId}`)
-      if (data.success) setHeatmapData(data.heatmap)
-    } catch { setHeatmapData(null) }
-    setHeatmapLoading(false)
-  }
-
-  // ── Mastery colour helper ──────────────────────────
-  const mCol = (pct) => pct >= 80 ? 'var(--g600)' : pct >= 60 ? 'var(--b600)' : pct >= 40 ? 'var(--a600)' : pct > 0 ? 'var(--r500)' : 'var(--s300)'
-  const mLabel = (pct) => pct >= 80 ? 'Mastered' : pct >= 60 ? 'Progressing' : pct >= 40 ? 'Building' : pct > 0 ? 'Needs Help' : 'Not Started'
-  const [wbColor, setWbColor] = useState('#fff')
-  const [wbTool, setWbTool] = useState('pen')
-  const canvasRef = useRef(null)
-  const drawingRef = useRef(false)
-
-  const pageTitles = {
-    dashboard: 'Dashboard',
-    students: 'My Students',
-    liveclass: 'Live Classes',
-    classroom: 'Live Studio',
-    questionbank: 'Question Bank',
-    exambuilder: 'Exams',
-    marking: 'Homework',
-    communication: 'Messages',
-    mshauri: 'Mshauri AI',
-    profile: 'My Profile',
-  }
-
-  const sendChat = () => {
-    if (!chatInp.trim()) return
-    const q = chatInp
-    setChatInp('')
-    setChatMsgs(m => [...m, { role:'user', text:q }])
-    setTimeout(() => {
-      setChatMsgs(m => [...m, { role:'ai', text: q.toLowerCase().includes('david') ? 'David Mwangi shows 22% plagiarism and 38% unusual copy-paste patterns. Recommend 1-to-1 review before releasing marks.' : 'Class average is 73%, above school average of 69%. Faith Wanjiru leads with 91%. Additional support recommended for David Mwangi and Peter Kamau.' }])
-    }, 800)
-  }
-
-  const nav = [
-    { section:'Teaching', items:[
-      {id:'dashboard',     label:'Dashboard',        iconName:'dashboard',     icon:'rect:3:3:7:7:1|rect:14:3:7:7:1|rect:14:14:7:7:1|rect:3:14:7:7:1'},
-      {id:'students',      label:'My Students',      iconName:'students',      icon:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2|circle:9:7:4|M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'},
-      {id:'attendance',    label:'Attendance & Check-in',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
-      {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
-      {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
-      {id:'earnings',      label:'My Earnings',       iconName:'earnings',      icon:'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'},
-      {id:'timetable',     label:'Timetable',        iconName:'timetable',     icon:'rect:3:4:18:18:2|line:8:2:8:6|line:16:2:16:6|line:3:10:21:10'},
-      {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
-    ]},
-    { section:'Assessment', items:[
-      {id:'questionbank',  label:'Question Bank',    iconName:'questionbank',  icon:'M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13|M4 19a2 2 0 0 0 2 2h14|M8 10h8M8 14h6|circle:18:18:3'},
-      {id:'exambuilder',   label:'Exams',            iconName:'exambuilder',   icon:'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2|rect:9:3:6:4:1.5|line:9:12:15:12|line:9:16:12:16'},
-      {id:'marking',       label:'Homework',         iconName:'marking',       icon:'M9 11l3 3L22 4|M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'},
-    ]},
-    { section:'Documents', items:[
-      {id:'documents',     label:'Reports & Documents', iconName:'documents',  icon:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z|M14 2v6h6|line:16:13:8:13|line:16:17:8:17|line:10:9:8:9'},
-    ]},
-    { section:'Communication', items:[
-      {id:'communication', label:'Messages',         iconName:'communication', icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'},
-    ]},
-    { section:'Assistant', items:[
-      {id:'mshauri',       label:'Mshauri AI',       iconName:'mshauri',       icon:'M12 2L2 7l10 5 10-5-10-5z|M2 17l10 5 10-5|M2 12l10 5 10-5'},
-    ]},
-    { section:'Account', items:[
-      {id:'profile',       label:'My Profile',       iconName:'profile',       icon:'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2|circle:12:7:4'},
-    ]},
-  ]
-
-  return (
     <div style={{
       display:'flex', height:'100vh', overflow:'hidden',
       background:TOKENS.cream,
@@ -1057,7 +311,6 @@ export default function TeacherPortal() {
         <div style={{ flex:1, overflowY:'auto', padding:'24px 28px', maxWidth:1400, margin:'0 auto', width:'100%', boxSizing:'border-box', animation:'fadeIn .25s ease' }}>
 
 
-          {/* ── DASHBOARD ── */}
           {page === 'dashboard' && <TeacherDashboardTab user={currentUser} store={store} setPage={setPage} toast={toast} setMsgModal={setMsgModal} setUploadModal={setUploadModal} />}
 
 
@@ -1073,6 +326,7 @@ export default function TeacherPortal() {
           {/* ── MY STUDENTS ── */}
           {page === 'students' && <MyStudentsTab user={currentUser} store={store} setPage={setPage} toast={toast} setMsgTo={setMsgTo} setMsgSubject={setMsgSubject} setMsgBody={setMsgBody} setMsgModal={setMsgModal} />}
 
+          {page === 'earnings' && <EarningsTab user={currentUser} toast={toast}/>}
           {page === 'attendance' && <AttendanceTab user={currentUser} toast={toast} />}
 
           {page === 'library' && <TeacherLibraryTab user={currentUser} toast={toast} />}
@@ -1303,6 +557,8 @@ export default function TeacherPortal() {
           </div>
         )}
       </Modal>
+        </div>
+      </main>
     </div>
   )
 }
@@ -2269,137 +1525,6 @@ const msSeedIfEmpty = () => {
   ]
   msSaveStudents(seeded)
   return seeded
-}
-
-function StudentAttendanceDetail({ student, onBack, toast }) {
-  const today = new Date()
-  const [year,    setYear]    = useState(today.getFullYear())
-  const [month,   setMonth]   = useState(today.getMonth())
-  const [records, setRecords] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [marking, setMarking] = useState({}) // date -> status being saved
-
-  const firstDay = new Date(year, month, 1)
-  const lastDay  = new Date(year, month+1, 0)
-  const fromKey  = `${year}-${String(month+1).padStart(2,'0')}-01`
-  const toKey    = `${year}-${String(month+1).padStart(2,'0')}-${String(lastDay.getDate()).padStart(2,'0')}`
-  const monthLabel = firstDay.toLocaleDateString('en-GB',{month:'long',year:'numeric'})
-
-  useEffect(() => {
-    setLoading(true)
-    api.get(`/attendance/student/${student._id}`,{params:{from:fromKey,to:toKey}})
-      .then(r=>setRecords(r.data?.data?.items||[]))
-      .catch(()=>{})
-      .finally(()=>setLoading(false))
-  }, [student._id, fromKey, toKey])
-
-  const markAttendance = async (date, status) => {
-    const key = date
-    setMarking(p=>({...p,[key]:status}))
-    try {
-      await api.post('/attendance',{studentId:student._id,date,status})
-      toast?.ok?.(`Marked ${status} for ${new Date(date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}`)
-      // Refresh
-      const r = await api.get(`/attendance/student/${student._id}`,{params:{from:fromKey,to:toKey}})
-      setRecords(r.data?.data?.items||[])
-    } catch(e){toast?.error?.(e?.response?.data?.message||'Failed.')}
-    finally{setMarking(p=>{const n={...p};delete n[key];return n})}
-  }
-
-  const byDate = {}
-  records.forEach(r=>{
-    const d=new Date(r.date)
-    byDate[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`]=r
-  })
-
-  const present = records.filter(r=>r.status==='present').length
-  const absent  = records.filter(r=>r.status==='absent').length
-  const rate    = records.length?Math.round((present/records.length)*100):null
-
-  const SS={present:{bg:'#D1FAE5',fg:'#065F46',label:'P'},late:{bg:'#FEF3C7',fg:'#D97706',label:'L'},absent:{bg:'#FEE2E2',fg:'#991B1B',label:'A'},half_day:{bg:'#DBEAFE',fg:'#1E40AF',label:'H'}}
-  const calDays=[]; const pad=(firstDay.getDay()+6)%7
-  for(let i=0;i<pad;i++)calDays.push(null)
-  for(let d=1;d<=lastDay.getDate();d++)calDays.push(d)
-
-  const prevMonth=()=>{ if(month===0){setYear(y=>y-1);setMonth(11)}else setMonth(m=>m-1) }
-  const nextMonth=()=>{ if(month===11){setYear(y=>y+1);setMonth(0)}else setMonth(m=>m+1) }
-
-  return (
-    <div>
-      <button onClick={onBack} style={{background:'transparent',border:'none',cursor:'pointer',color:'#8B1A2E',fontSize:12.5,fontWeight:700,padding:0,marginBottom:16}}>← Back to students</button>
-      <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,overflow:'hidden'}}>
-        <div style={{padding:'14px 20px',borderBottom:'1px solid #E8DDD5',display:'flex',justifyContent:'space-between',alignItems:'center',background:'#FBFAF5'}}>
-          <div>
-            <div style={{fontSize:15,fontWeight:800,color:'#231715'}}>{student.firstName} {student.lastName}</div>
-            <div style={{fontSize:12,color:'#7A6652'}}>{student.curriculum} · {student.gradeLevel} · {student.admissionNo||'—'}</div>
-          </div>
-          <div style={{display:'flex',gap:12}}>
-            {[{label:'Present',val:present,color:'#065F46',bg:'#D1FAE5'},{label:'Absent',val:absent,color:'#991B1B',bg:'#FEE2E2'},{label:'Rate',val:rate!==null?rate+'%':'—',color:'#1A0F0E',bg:'#FBFAF5'}].map(s=>(
-              <div key={s.label} style={{padding:'6px 12px',borderRadius:7,background:s.bg,textAlign:'center'}}>
-                <div style={{fontSize:16,fontWeight:800,color:s.color}}>{s.val}</div>
-                <div style={{fontSize:9.5,color:s.color,fontWeight:600}}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{padding:'16px 20px'}}>
-          {/* Month nav */}
-          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
-            <button onClick={prevMonth} style={{background:'transparent',border:'1.5px solid #E8DDD5',borderRadius:6,padding:'4px 10px',cursor:'pointer',fontSize:13,fontWeight:700}}>‹</button>
-            <span style={{fontWeight:700,fontSize:14,color:'#231715',minWidth:150,textAlign:'center'}}>{monthLabel}</span>
-            <button onClick={nextMonth} style={{background:'transparent',border:'1.5px solid #E8DDD5',borderRadius:6,padding:'4px 10px',cursor:'pointer',fontSize:13,fontWeight:700}}>›</button>
-          </div>
-
-          {loading?<div style={{textAlign:'center',color:'#9A9A9A',padding:'20px 0',fontSize:13}}>Loading...</div>:(
-            <>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:3,marginBottom:4}}>
-                {['M','T','W','T','F','S','S'].map((d,i)=><div key={i} style={{textAlign:'center',fontSize:10,fontWeight:700,color:'#9A9A9A',padding:'3px 0'}}>{d}</div>)}
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:3}}>
-                {calDays.map((d,i)=>{
-                  if(!d) return <div key={'p'+i}/>
-                  const key=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
-                  const rec=byDate[key]; const st=rec?SS[rec.status]:null
-                  const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear()
-                  const isSaving=!!marking[key]
-                  return(
-                    <div key={key} style={{position:'relative'}}>
-                      <div style={{aspectRatio:'1',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',borderRadius:7,background:st?st.bg:isToday?'#FDF2F4':'#FBFAF5',border:isToday?'2px solid #C9A030':'1px solid transparent',fontSize:11.5,fontWeight:700,color:st?st.fg:isToday?'#8B1A2E':'#564844'}}>
-                        {d}
-                        {st&&<div style={{fontSize:9,fontWeight:800,color:st.fg,lineHeight:1}}>{st.label}</div>}
-                      </div>
-                      {/* Mark buttons on hover */}
-                      {!isSaving&&(
-                        <div className="att-hover" style={{position:'absolute',inset:0,display:'none',flexDirection:'column',gap:1,padding:1,zIndex:10,background:'rgba(255,255,255,.95)',borderRadius:7,border:'1px solid #E8DDD5'}}>
-                          {Object.entries(SS).map(([s,sv])=>(
-                            <button key={s} onClick={()=>markAttendance(key,s)}
-                              style={{flex:1,background:sv.bg,color:sv.fg,border:'none',borderRadius:4,cursor:'pointer',fontSize:9,fontWeight:700,padding:0}}>
-                              {sv.label}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-              <style>{'.att-hover:hover{display:flex!important}'}</style>
-              <div style={{display:'flex',gap:12,marginTop:10,flexWrap:'wrap'}}>
-                {Object.entries(SS).map(([k,s])=>(
-                  <div key={k} style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'#7A6652'}}>
-                    <div style={{width:10,height:10,borderRadius:2,background:s.bg,border:'1px solid '+s.fg+'40'}}/>
-                    {s.label==='P'?'Present':s.label==='L'?'Late':s.label==='A'?'Absent':'Half day'}
-                  </div>
-                ))}
-                <div style={{fontSize:11,color:'#9A9A9A'}}>Hover a cell to mark attendance</div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  )
 }
 
 function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, setMsgBody, setMsgModal }) {
@@ -13552,10 +12677,7 @@ function MshauriFloatingButton({ user, setPage, toast, currentPage }) {
 // Statuses: 'present', 'absent', 'half_day'. Reason required when
 // 'absent' per the backend Attendance model's pre-validate hook.
 // ═══════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════
-// EarningsTab — Teacher portal
-// Teachers view payslips, submit tuition extras for approval.
-// ═══════════════════════════════════════════════════════════
+
 function EarningsTab({ user, toast }) {
   const [records,  setRecords]  = useState([])
   const [loading,  setLoading]  = useState(true)
@@ -13809,6 +12931,138 @@ function EarningsTab({ user, toast }) {
     </div>
   )
 }
+
+function StudentAttendanceDetail({ student, onBack, toast }) {
+  const today = new Date()
+  const [year,    setYear]    = useState(today.getFullYear())
+  const [month,   setMonth]   = useState(today.getMonth())
+  const [records, setRecords] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [marking, setMarking] = useState({}) // date -> status being saved
+
+  const firstDay = new Date(year, month, 1)
+  const lastDay  = new Date(year, month+1, 0)
+  const fromKey  = `${year}-${String(month+1).padStart(2,'0')}-01`
+  const toKey    = `${year}-${String(month+1).padStart(2,'0')}-${String(lastDay.getDate()).padStart(2,'0')}`
+  const monthLabel = firstDay.toLocaleDateString('en-GB',{month:'long',year:'numeric'})
+
+  useEffect(() => {
+    setLoading(true)
+    api.get(`/attendance/student/${student._id}`,{params:{from:fromKey,to:toKey}})
+      .then(r=>setRecords(r.data?.data?.items||[]))
+      .catch(()=>{})
+      .finally(()=>setLoading(false))
+  }, [student._id, fromKey, toKey])
+
+  const markAttendance = async (date, status) => {
+    const key = date
+    setMarking(p=>({...p,[key]:status}))
+    try {
+      await api.post('/attendance',{studentId:student._id,date,status})
+      toast?.ok?.(`Marked ${status} for ${new Date(date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}`)
+      // Refresh
+      const r = await api.get(`/attendance/student/${student._id}`,{params:{from:fromKey,to:toKey}})
+      setRecords(r.data?.data?.items||[])
+    } catch(e){toast?.error?.(e?.response?.data?.message||'Failed.')}
+    finally{setMarking(p=>{const n={...p};delete n[key];return n})}
+  }
+
+  const byDate = {}
+  records.forEach(r=>{
+    const d=new Date(r.date)
+    byDate[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`]=r
+  })
+
+  const present = records.filter(r=>r.status==='present').length
+  const absent  = records.filter(r=>r.status==='absent').length
+  const rate    = records.length?Math.round((present/records.length)*100):null
+
+  const SS={present:{bg:'#D1FAE5',fg:'#065F46',label:'P'},late:{bg:'#FEF3C7',fg:'#D97706',label:'L'},absent:{bg:'#FEE2E2',fg:'#991B1B',label:'A'},half_day:{bg:'#DBEAFE',fg:'#1E40AF',label:'H'}}
+  const calDays=[]; const pad=(firstDay.getDay()+6)%7
+  for(let i=0;i<pad;i++)calDays.push(null)
+  for(let d=1;d<=lastDay.getDate();d++)calDays.push(d)
+
+  const prevMonth=()=>{ if(month===0){setYear(y=>y-1);setMonth(11)}else setMonth(m=>m-1) }
+  const nextMonth=()=>{ if(month===11){setYear(y=>y+1);setMonth(0)}else setMonth(m=>m+1) }
+
+  return (
+    <div>
+      <button onClick={onBack} style={{background:'transparent',border:'none',cursor:'pointer',color:'#8B1A2E',fontSize:12.5,fontWeight:700,padding:0,marginBottom:16}}>← Back to students</button>
+      <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,overflow:'hidden'}}>
+        <div style={{padding:'14px 20px',borderBottom:'1px solid #E8DDD5',display:'flex',justifyContent:'space-between',alignItems:'center',background:'#FBFAF5'}}>
+          <div>
+            <div style={{fontSize:15,fontWeight:800,color:'#231715'}}>{student.firstName} {student.lastName}</div>
+            <div style={{fontSize:12,color:'#7A6652'}}>{student.curriculum} · {student.gradeLevel} · {student.admissionNo||'—'}</div>
+          </div>
+          <div style={{display:'flex',gap:12}}>
+            {[{label:'Present',val:present,color:'#065F46',bg:'#D1FAE5'},{label:'Absent',val:absent,color:'#991B1B',bg:'#FEE2E2'},{label:'Rate',val:rate!==null?rate+'%':'—',color:'#1A0F0E',bg:'#FBFAF5'}].map(s=>(
+              <div key={s.label} style={{padding:'6px 12px',borderRadius:7,background:s.bg,textAlign:'center'}}>
+                <div style={{fontSize:16,fontWeight:800,color:s.color}}>{s.val}</div>
+                <div style={{fontSize:9.5,color:s.color,fontWeight:600}}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{padding:'16px 20px'}}>
+          {/* Month nav */}
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+            <button onClick={prevMonth} style={{background:'transparent',border:'1.5px solid #E8DDD5',borderRadius:6,padding:'4px 10px',cursor:'pointer',fontSize:13,fontWeight:700}}>‹</button>
+            <span style={{fontWeight:700,fontSize:14,color:'#231715',minWidth:150,textAlign:'center'}}>{monthLabel}</span>
+            <button onClick={nextMonth} style={{background:'transparent',border:'1.5px solid #E8DDD5',borderRadius:6,padding:'4px 10px',cursor:'pointer',fontSize:13,fontWeight:700}}>›</button>
+          </div>
+
+          {loading?<div style={{textAlign:'center',color:'#9A9A9A',padding:'20px 0',fontSize:13}}>Loading...</div>:(
+            <>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:3,marginBottom:4}}>
+                {['M','T','W','T','F','S','S'].map((d,i)=><div key={i} style={{textAlign:'center',fontSize:10,fontWeight:700,color:'#9A9A9A',padding:'3px 0'}}>{d}</div>)}
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:3}}>
+                {calDays.map((d,i)=>{
+                  if(!d) return <div key={'p'+i}/>
+                  const key=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+                  const rec=byDate[key]; const st=rec?SS[rec.status]:null
+                  const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear()
+                  const isSaving=!!marking[key]
+                  return(
+                    <div key={key} style={{position:'relative'}}>
+                      <div style={{aspectRatio:'1',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',borderRadius:7,background:st?st.bg:isToday?'#FDF2F4':'#FBFAF5',border:isToday?'2px solid #C9A030':'1px solid transparent',fontSize:11.5,fontWeight:700,color:st?st.fg:isToday?'#8B1A2E':'#564844'}}>
+                        {d}
+                        {st&&<div style={{fontSize:9,fontWeight:800,color:st.fg,lineHeight:1}}>{st.label}</div>}
+                      </div>
+                      {/* Mark buttons on hover */}
+                      {!isSaving&&(
+                        <div className="att-hover" style={{position:'absolute',inset:0,display:'none',flexDirection:'column',gap:1,padding:1,zIndex:10,background:'rgba(255,255,255,.95)',borderRadius:7,border:'1px solid #E8DDD5'}}>
+                          {Object.entries(SS).map(([s,sv])=>(
+                            <button key={s} onClick={()=>markAttendance(key,s)}
+                              style={{flex:1,background:sv.bg,color:sv.fg,border:'none',borderRadius:4,cursor:'pointer',fontSize:9,fontWeight:700,padding:0}}>
+                              {sv.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              <style>{'.att-hover:hover{display:flex!important}'}</style>
+              <div style={{display:'flex',gap:12,marginTop:10,flexWrap:'wrap'}}>
+                {Object.entries(SS).map(([k,s])=>(
+                  <div key={k} style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'#7A6652'}}>
+                    <div style={{width:10,height:10,borderRadius:2,background:s.bg,border:'1px solid '+s.fg+'40'}}/>
+                    {s.label==='P'?'Present':s.label==='L'?'Late':s.label==='A'?'Absent':'Half day'}
+                  </div>
+                ))}
+                <div style={{fontSize:11,color:'#9A9A9A'}}>Hover a cell to mark attendance</div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 
 function AttendanceTab({ user, toast }) {
   const todayStr = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
@@ -14778,10 +14032,6 @@ function BookCard({ book, onView, onDelete, canDelete }) {
 // represents "Maths every Monday 09:00–10:00 for these students."
 // The Student Portal reads from the same source.
 // ═══════════════════════════════════════════════════════════
-// ── TeacherCheckInTab — self check-in for teacher portal ──
-
-
-
 function TeacherTimetableTab({ user, toast }) {
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
