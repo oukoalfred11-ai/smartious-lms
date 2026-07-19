@@ -65,6 +65,8 @@ const MODULES = {
   assessment:  { label: 'Assessments', accent: TOKENS.accentAmber, icon: 'frontdesk' },
   crm:         { label: 'CRM',         accent: TOKENS.accentNavy,  icon: 'frontdesk' },
   reports:     { label: 'Reports',     accent: TOKENS.crimson,     icon: 'frontdesk' },
+  exams:       { label: 'Exams',       accent: TOKENS.crimson,     icon: 'frontdesk' },
+  students:    { label: 'Students',    accent: TOKENS.accentNavy,  icon: 'users' },
   salesperf:   { label: 'My Performance', accent: TOKENS.gold,      icon: 'frontdesk' },
   livelessons: { label: 'Live Classes', accent: TOKENS.accentRose,  icon: 'live' },
   grouprooms:  { label: 'Group Rooms',  accent: TOKENS.accentOcean, icon: 'rooms' },
