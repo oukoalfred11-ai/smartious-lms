@@ -131,6 +131,24 @@ router.post('/', auth, requireRole('teacher','admin', 'dos'), async (req, res) =
   }
 });
 
+
+router.get('/all', auth, requireRole('admin', 'dos'), async (req, res) => {
+  try {
+    const filter = {}
+    if (req.query.subject)    filter.subject    = req.query.subject
+    if (req.query.curriculum) filter.curriculum = req.query.curriculum
+    if (req.query.grade)      filter.grade      = req.query.grade
+    if (req.query.status)     filter.status     = req.query.status
+    const exams = await Exam.find(filter)
+      .sort({ startAt: -1 })
+      .limit(200)
+      .lean()
+    return res.json({ success: true, data: { exams: withComputedStatus(exams), total: exams.length } })
+  } catch(e) {
+    return res.status(500).json({ success: false, message: e.message })
+  }
+})
+
 router.get('/teacher/list', auth, requireRole('teacher','admin', 'dos'), async (req, res) => {
   try {
     const exams = await Exam.find({ teacherId: req.user._id })
