@@ -143,7 +143,16 @@ const userSchema = new mongoose.Schema({
     default: 'Active'
   },
   
-  isActive: { type: Boolean, default: true },
+  isActive:       { type: Boolean, default: true },
+
+  // ── Break / Leave ──────────────────────────────────────
+  // DOS sets onBreak=true to deactivate reminders & check-in for a student.
+  // Admin can do the same for staff.
+  onBreak:        { type: Boolean, default: false },
+  breakType:      { type: String, enum: ['mid_term_break','end_term_break','summer_break','medical_leave','other',''], default: '' },
+  breakStart:     { type: Date, default: null },
+  breakEnd:       { type: Date, default: null },
+  breakNote:      { type: String, default: '' },
   isDemo: { type: Boolean, default: false }, // PHASE 3: Protect main admin from deletion
   isMainAdmin: { type: Boolean, default: false }, // PHASE 3: Protect main admin from deletion
   isOnLeave: { type: Boolean, default: false }, // Teacher on leave - invalidates their allocations
