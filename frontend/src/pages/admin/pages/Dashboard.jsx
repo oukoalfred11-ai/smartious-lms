@@ -65,8 +65,10 @@ const MODULES = {
   assessment:  { label: 'Assessments', accent: TOKENS.accentAmber, icon: 'frontdesk' },
   crm:         { label: 'CRM',         accent: TOKENS.accentNavy,  icon: 'frontdesk' },
   reports:     { label: 'Reports',     accent: TOKENS.crimson,     icon: 'frontdesk' },
-  exams:       { label: 'Exams',       accent: TOKENS.crimson,     icon: 'frontdesk' },
-  students:    { label: 'Students',    accent: TOKENS.accentNavy,  icon: 'users' },
+  exams:       { label: 'Exams & Assessments', accent: TOKENS.crimson,     icon: 'frontdesk' },
+  students:    { label: 'Students',             accent: TOKENS.accentNavy,  icon: 'users' },
+  doshomework: { label: 'Homework',             accent: TOKENS.accentAmber, icon: 'frontdesk' },
+  dosanalytics:{ label: 'Performance Analytics',accent: TOKENS.crimson,     icon: 'chart' },
   salesperf:   { label: 'My Performance', accent: TOKENS.gold,      icon: 'frontdesk' },
   livelessons: { label: 'Live Classes', accent: TOKENS.accentRose,  icon: 'live' },
   grouprooms:  { label: 'Group Rooms',  accent: TOKENS.accentOcean, icon: 'rooms' },
@@ -551,11 +553,10 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'System',      items: ['settings'] },
     ],
     dos: [
-      { label: 'Overview',    items: ['dashboard'] },
-      { label: 'Analytics',   items: ['analytics'] },
-      { label: 'Assessments', items: ['exams', 'curriculum'] },
-      { label: 'Students',    items: ['students', 'reports'] },
-      { label: 'Teaching',    items: ['teachers', 'livelessons', 'grouprooms'] },
+      { label: 'Overview',    items: ['dosanalytics'] },
+      { label: 'Exams',       items: ['exams'] },
+      { label: 'Homework',    items: ['doshomework'] },
+      { label: 'Reports',     items: ['reports'] },
       { label: 'System',      items: ['settings'] },
     ],
     sales: [
@@ -830,7 +831,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
     ],
     accountant:  [{ items: ['dashboard','analytics','billing','payroll','settings'] }],
     sales:       [{ items: ['dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
-    dos:         [{ items: ['dashboard','analytics','exams','curriculum','students','reports','teachers','livelessons','grouprooms','settings'] }],
+    dos:         [{ items: ['dosanalytics','exams','doshomework','reports','settings'] }],
     ops_manager: [{ items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','assessment','documents','payroll','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
@@ -861,7 +862,10 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'assessment' && <AssessmentModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'crm' && <CRMModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'salesperf' && <SalesPerformanceModule toast={toast} refreshKey={refreshKey}/>}
-        {safePage === 'reports' && <ReportsModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'reports'      && <ReportsModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'dosanalytics' && <DOSAnalyticsModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'exams'        && <DOSExamsModule toast={toast} refreshKey={refreshKey}/>}
+        {safePage === 'doshomework'  && <DOSHomeworkModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'payroll'     && <PayrollModule    refreshKey={refreshKey} toast={toast} />}
         {safePage === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
         {safePage === 'programmes'  && <ProgrammesModule refreshKey={refreshKey} toast={toast} />}
@@ -6091,6 +6095,636 @@ function SalesPerformanceModule({ toast, refreshKey }) {
 //   2. ops_manager/admin ROLE_SECTIONS: items: [..., 'reports']
 //   3. Render: {safePage==='reports' && <ReportsModule toast={toast} refreshKey={refreshKey}/>}
 // ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// DOS MODULE 1: Performance Analytics
+// Exam trends, class averages, at-risk students, HW compliance
+// ═══════════════════════════════════════════════════════════
+function DOSAnalyticsModule({ toast, refreshKey }) {
+  const [overview, setOverview]   = useState(null)
+  const [examData, setExamData]   = useState(null)
+  const [hwData,   setHwData]     = useState(null)
+  const [atRisk,   setAtRisk]     = useState(null)
+  const [loading,  setLoading]    = useState(true)
+  const [filters,  setFilters]    = useState({ termStart:'', termEnd:'', curriculum:'', subject:'' })
+
+  const load = useCallback(() => {
+    setLoading(true)
+    const p = { params: filters }
+    Promise.all([
+      api.get('/dos/overview').catch(() => ({ data: null })),
+      api.get('/dos/exam-analytics', p).catch(() => ({ data: null })),
+      api.get('/dos/homework-compliance', p).catch(() => ({ data: null })),
+      api.get('/dos/at-risk').catch(() => ({ data: null })),
+    ]).then(([ov, ex, hw, ar]) => {
+      setOverview(ov.data?.data || null)
+      setExamData(ex.data?.data || null)
+      setHwData(hw.data?.data || null)
+      setAtRisk(ar.data?.data || null)
+    }).finally(() => setLoading(false))
+  }, [filters, refreshKey])
+
+  useEffect(() => { load() }, [load])
+
+  const gc = s => s===null?TOKENS.s400:s>=80?'#065F46':s>=70?'#1E40AF':s>=60?'#92400E':s>=50?'#6B21A8':s>=40?'#9A3412':'#991B1B'
+  const gl = s => s===null?'—':s>=80?'A*':s>=70?'B':s>=60?'C':s>=50?'D':s>=40?'E':'U'
+
+  return (
+    <>
+      <PSection tag="Dean of Studies" title="Performance" em="Analytics"
+        sub="Live overview of student performance, exam results, homework tracking and at-risk flags."/>
+
+      {/* Date / curriculum filter */}
+      <div style={{ display:'flex', gap:8, marginBottom:20, flexWrap:'wrap', alignItems:'center',
+        background:'#fff', border:'1px solid '+TOKENS.line, borderRadius:10, padding:'12px 14px' }}>
+        <input type="date" value={filters.termStart} onChange={e=>setFilters(p=>({...p,termStart:e.target.value}))}
+          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }} title="Term start"/>
+        <span style={{ fontSize:12, color:TOKENS.s400 }}>to</span>
+        <input type="date" value={filters.termEnd} onChange={e=>setFilters(p=>({...p,termEnd:e.target.value}))}
+          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }} title="Term end"/>
+        <select value={filters.curriculum} onChange={e=>setFilters(p=>({...p,curriculum:e.target.value}))}
+          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}>
+          <option value="">All curricula</option>
+          {['Cambridge IGCSE','Edexcel','A-Level','IB','CBC','American','BNC'].map(c=><option key={c} value={c}>{c}</option>)}
+        </select>
+        <input value={filters.subject} onChange={e=>setFilters(p=>({...p,subject:e.target.value}))}
+          placeholder="Subject filter" style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, width:140, fontFamily:'inherit' }}/>
+        <button onClick={load} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'8px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>Apply</button>
+        <button onClick={()=>{ setFilters({ termStart:'', termEnd:'', curriculum:'', subject:'' }); setTimeout(load,50) }}
+          style={{ background:'transparent', border:'1px solid '+TOKENS.line, color:TOKENS.s500, padding:'8px 12px', borderRadius:7, fontSize:12, cursor:'pointer' }}>Reset</button>
+      </div>
+
+      {loading ? (
+        <div style={{ padding:'60px 0', textAlign:'center' }}>
+          <div style={{ width:36, height:36, border:'3px solid #F0EBE6', borderTopColor:TOKENS.crimson,
+            borderRadius:'50%', animation:'spin .75s linear infinite', margin:'0 auto' }}/>
+        </div>
+      ) : (
+        <>
+          {/* KPI strip */}
+          {overview && (
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))', gap:12, marginBottom:24 }}>
+              {[
+                { label:'Active students',  val:overview.totalStudents,        color:TOKENS.crimson },
+                { label:'Teachers',         val:overview.totalTeachers,        color:'#1E40AF' },
+                { label:'Exams this month', val:overview.examsThisMonth,       color:'#6B21A8' },
+                { label:'Avg exam score',   val:overview.avgExamScore!==null?overview.avgExamScore+'%':'—', color:gc(overview.avgExamScore) },
+                { label:'HW compliance',    val:overview.hwComplianceRate!==null?overview.hwComplianceRate+'%':'—', color:overview.hwComplianceRate>=80?'#065F46':overview.hwComplianceRate>=60?'#D97706':'#991B1B' },
+                { label:'Attendance (7d)',  val:overview.attendanceRate!==null?overview.attendanceRate+'%':'—', color:overview.attendanceRate>=80?'#065F46':overview.attendanceRate>=60?'#D97706':'#991B1B' },
+              ].map(k=>(
+                <div key={k.label} className="card" style={{ padding:'14px 16px' }}>
+                  <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:6 }}>{k.label}</div>
+                  <div style={{ fontSize:22, fontWeight:800, color:k.color, lineHeight:1 }}>{k.val}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Subject performance table */}
+          {examData?.subjects?.length > 0 && (
+            <div className="card" style={{ overflow:'hidden', marginBottom:18 }}>
+              <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>
+                Subject Performance
+              </div>
+              <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
+                <thead><tr>
+                  {['Subject','Curriculum','Class avg','Grade','Pass rate','Highest','Lowest','Exams'].map(h=>(
+                    <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>
+                  ))}
+                </tr></thead>
+                <tbody>
+                  {examData.subjects.map(s => (
+                    <tr key={s.subject} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                      <td style={{ padding:'9px 12px', fontWeight:700, fontSize:13 }}>{s.subject}</td>
+                      <td style={{ padding:'9px 12px', fontSize:12, color:TOKENS.s500 }}>{s.curriculum}</td>
+                      <td style={{ padding:'9px 12px', fontWeight:800, fontSize:14, color:gc(s.avgScore) }}>{s.avgScore!==null?s.avgScore+'%':'—'}</td>
+                      <td style={{ padding:'9px 12px' }}>
+                        <span style={{ padding:'2px 8px', borderRadius:99, fontSize:11, fontWeight:800, background:gc(s.avgScore)+'18', color:gc(s.avgScore) }}>{gl(s.avgScore)}</span>
+                      </td>
+                      <td style={{ padding:'9px 12px', fontWeight:700, color:s.passRate>=60?'#065F46':'#991B1B' }}>{s.passRate!==null?s.passRate+'%':'—'}</td>
+                      <td style={{ padding:'9px 12px', color:'#065F46', fontWeight:600 }}>{s.highest!==null?s.highest+'%':'—'}</td>
+                      <td style={{ padding:'9px 12px', color:'#991B1B', fontWeight:600 }}>{s.lowest!==null?s.lowest+'%':'—'}</td>
+                      <td style={{ padding:'9px 12px', color:TOKENS.s500 }}>{s.exams?.length||0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+            {/* Homework compliance */}
+            {hwData?.teachers?.length > 0 && (
+              <div className="card" style={{ overflow:'hidden' }}>
+                <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>
+                  Teacher Homework Compliance
+                </div>
+                <table style={{ width:'100%', borderCollapse:'collapse' }}>
+                  <thead><tr>
+                    {['Teacher','Lessons','HW set','Missing','Mark rate','Score'].map(h=>(
+                      <th key={h} style={{ padding:'7px 10px', textAlign:'left', fontSize:10, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', background:TOKENS.cream, borderBottom:'1px solid '+TOKENS.line }}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {hwData.teachers.map(t => {
+                      const cs = t.complianceScore
+                      const cc = cs>=90?'#065F46':cs>=70?'#D97706':'#991B1B'
+                      return (
+                        <tr key={String(t.teacherId)} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                          <td style={{ padding:'8px 10px', fontWeight:600, fontSize:12 }}>{t.teacherName}</td>
+                          <td style={{ padding:'8px 10px', textAlign:'center', fontSize:12 }}>{t.totalLessons}</td>
+                          <td style={{ padding:'8px 10px', textAlign:'center', fontSize:12 }}>{t.homeworkSet}</td>
+                          <td style={{ padding:'8px 10px', textAlign:'center', fontSize:12, color:t.lessonsWithoutHW>0?'#991B1B':TOKENS.s400, fontWeight:t.lessonsWithoutHW>0?700:400 }}>
+                            {t.lessonsWithoutHW>0 ? t.lessonsWithoutHW+' missing' : 'All covered'}
+                          </td>
+                          <td style={{ padding:'8px 10px', textAlign:'center', fontSize:12, fontWeight:700, color:t.markingRate>=80?'#065F46':t.markingRate>=60?'#D97706':'#991B1B' }}>
+                            {t.markingRate!==null?t.markingRate+'%':'—'}
+                          </td>
+                          <td style={{ padding:'8px 10px' }}>
+                            <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+                              <div style={{ flex:1, height:6, background:'#F3F4F6', borderRadius:99 }}>
+                                <div style={{ width:(cs||0)+'%', height:'100%', background:cc, borderRadius:99 }}/>
+                              </div>
+                              <span style={{ fontSize:11, fontWeight:700, color:cc, minWidth:30 }}>{cs!==null?cs+'%':'—'}</span>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* At-risk students */}
+            {atRisk?.students?.length > 0 && (
+              <div className="card" style={{ overflow:'hidden' }}>
+                <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                  <span style={{ fontWeight:800, fontSize:13, color:TOKENS.s900 }}>At-Risk Students</span>
+                  <span style={{ fontSize:11.5, fontWeight:700, color:'#991B1B' }}>{atRisk.totalAtRisk} flagged</span>
+                </div>
+                <div style={{ maxHeight:320, overflowY:'auto' }}>
+                  {atRisk.students.map(s => (
+                    <div key={String(s.studentId)} style={{ padding:'10px 14px', borderBottom:'1px solid '+TOKENS.line }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+                        <div>
+                          <div style={{ fontSize:12.5, fontWeight:700, color:TOKENS.s900 }}>{s.studentName}</div>
+                          <div style={{ fontSize:11, color:TOKENS.s500 }}>{s.curriculum} · {s.grade}</div>
+                        </div>
+                        <span style={{ fontSize:10.5, fontWeight:700, padding:'2px 8px', borderRadius:99,
+                          background:s.riskLevel==='high'?'#FEE2E2':'#FEF9C3',
+                          color:s.riskLevel==='high'?'#991B1B':'#92400E' }}>
+                          {s.riskLevel==='high'?'High risk':'At risk'}
+                        </span>
+                      </div>
+                      <div style={{ display:'flex', gap:12, marginTop:6, flexWrap:'wrap' }}>
+                        {s.avg!==null&&<span style={{ fontSize:11, color:gc(s.avg), fontWeight:700 }}>Score: {s.avg}%</span>}
+                        {s.attRate!==null&&<span style={{ fontSize:11, color:s.attRate<60?'#991B1B':'#D97706', fontWeight:700 }}>Attendance: {s.attRate}%</span>}
+                        {s.flags.map((f,i)=><span key={i} style={{ fontSize:10.5, color:TOKENS.s500 }}>{f.msg}</span>)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {!examData?.subjects?.length && !hwData?.teachers?.length && !atRisk?.students?.length && (
+            <div style={{ padding:'40px 0', textAlign:'center', color:TOKENS.s400, fontSize:13 }}>
+              No data found for the selected filters. Try broadening the date range.
+            </div>
+          )}
+        </>
+      )}
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// DOS MODULE 2: Exams & Assessments
+// View all exams, weekly + end-term, per subject/curriculum
+// Grade distribution, individual student scores
+// ═══════════════════════════════════════════════════════════
+function DOSExamsModule({ toast, refreshKey }) {
+  const [exams,    setExams]    = useState([])
+  const [selected, setSelected] = useState(null)
+  const [subs,     setSubs]     = useState([])
+  const [loading,  setLoading]  = useState(true)
+  const [subLoading, setSubLoading] = useState(false)
+  const [filters, setFilters] = useState({ subject:'', curriculum:'', type:'all', search:'' })
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+
+  const load = useCallback(() => {
+    setLoading(true)
+    const params = { limit:30, page, populate:'questions' }
+    if (filters.subject)    params.subject    = filters.subject
+    if (filters.curriculum) params.curriculum = filters.curriculum
+    api.get('/exams', { params })
+      .then(r => {
+        let list = r.data?.data?.exams || r.data?.exams || []
+        if (filters.type === 'weekly')  list = list.filter(e => !/end.?term|final|terminal/i.test(e.title))
+        if (filters.type === 'endterm') list = list.filter(e => /end.?term|final|terminal/i.test(e.title))
+        if (filters.search) list = list.filter(e => e.title?.toLowerCase().includes(filters.search.toLowerCase()) || e.subject?.toLowerCase().includes(filters.search.toLowerCase()))
+        setExams(list)
+        setTotalPages(r.data?.data?.totalPages || 1)
+      })
+      .catch(() => toast?.error?.('Failed to load exams.'))
+      .finally(() => setLoading(false))
+  }, [filters, page, refreshKey])
+
+  useEffect(() => { load() }, [load])
+
+  const openExam = async (exam) => {
+    setSelected(exam)
+    setSubs([])
+    setSubLoading(true)
+    try {
+      const { data } = await api.get('/exams/'+exam._id+'/submissions')
+      setSubs(data?.data?.submissions || data?.submissions || [])
+    } catch { toast?.error?.('Could not load submissions.') }
+    finally { setSubLoading(false) }
+  }
+
+  const gc = s => s===null?TOKENS.s400:s>=80?'#065F46':s>=70?'#1E40AF':s>=60?'#92400E':s>=50?'#6B21A8':s>=40?'#9A3412':'#991B1B'
+  const gl = s => s===null?'—':s>=80?'A*':s>=70?'B':s>=60?'C':s>=50?'D':s>=40?'E':'U'
+  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
+  const isEndTerm = e => /end.?term|final|terminal/i.test(e.title||'')
+
+  if (selected) {
+    // Compute scores per student
+    const scores = subs.filter(s=>s.status==='graded').map(s => {
+      const awarded = (s.answers||[]).reduce((t,a)=>t+(a.marksAwarded||0),0)
+      const pct = selected.totalMarks>0 ? Math.round((awarded/selected.totalMarks)*100) : 0
+      return { ...s, awarded, pct }
+    }).sort((a,b)=>b.pct-a.pct)
+
+    const allScores  = scores.map(s=>s.pct)
+    const avg        = allScores.length ? Math.round(allScores.reduce((a,b)=>a+b,0)/allScores.length) : null
+    const highest    = allScores.length ? Math.max(...allScores) : null
+    const lowest     = allScores.length ? Math.min(...allScores) : null
+    const passRate   = allScores.length ? Math.round((allScores.filter(x=>x>=50).length/allScores.length)*100) : null
+    const GRADE_KEYS = ['A*','B','C','D','E','U']
+    const GRADE_COLS = {'A*':'#065F46',B:'#1E40AF',C:'#92400E',D:'#6B21A8',E:'#9A3412',U:'#991B1B'}
+    const gradeDist  = allScores.reduce((acc,sc)=>{
+      const g = sc>=80?'A*':sc>=70?'B':sc>=60?'C':sc>=50?'D':sc>=40?'E':'U'
+      acc[g] = (acc[g]||0)+1; return acc
+    }, {})
+
+    return (
+      <>
+        <button onClick={()=>setSelected(null)} style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:5, padding:0, marginBottom:16 }}>
+          ← Back to exams
+        </button>
+        <div className="card" style={{ padding:22, marginBottom:16, background:'linear-gradient(135deg,#7D1025,#5A0B1B)', color:'#fff' }}>
+          <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'rgba(255,255,255,.5)', marginBottom:8 }}>
+            {isEndTerm(selected) ? 'End-of-Term Exam' : 'Weekly Assessment'} · {fmtDate(selected.startAt)}
+          </div>
+          <h2 style={{ fontSize:22, fontWeight:800, color:'#fff', margin:'0 0 4px' }}>{selected.title}</h2>
+          <div style={{ fontSize:13, color:'rgba(255,255,255,.65)' }}>{selected.subject} · {selected.curriculum} · {selected.grade} · {selected.totalMarks} marks</div>
+          <div style={{ display:'flex', gap:20, marginTop:16, flexWrap:'wrap' }}>
+            {[
+              { label:'Submissions', val:subs.length },
+              { label:'Graded',      val:scores.length },
+              { label:'Class avg',   val:avg!==null?avg+'%':'—', color:'#C9A030' },
+              { label:'Pass rate',   val:passRate!==null?passRate+'%':'—', color:passRate>=60?'#6EE7B7':'#FCA5A5' },
+              { label:'Highest',     val:highest!==null?highest+'%':'—', color:'#6EE7B7' },
+              { label:'Lowest',      val:lowest!==null?lowest+'%':'—',   color:'#FCA5A5' },
+            ].map(k=>(
+              <div key={k.label} style={{ textAlign:'center' }}>
+                <div style={{ fontSize:20, fontWeight:800, color:k.color||'#fff' }}>{k.val}</div>
+                <div style={{ fontSize:10, color:'rgba(255,255,255,.5)', marginTop:2 }}>{k.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Grade distribution */}
+        {allScores.length > 0 && (
+          <div className="card" style={{ padding:16, marginBottom:14 }}>
+            <div style={{ fontSize:12, fontWeight:700, color:TOKENS.s900, marginBottom:10 }}>Grade distribution</div>
+            <div style={{ display:'flex', gap:8, alignItems:'flex-end', height:60 }}>
+              {GRADE_KEYS.map(g => {
+                const count = gradeDist[g]||0
+                const h = allScores.length>0 ? Math.max(4,(count/allScores.length)*60) : 0
+                return (
+                  <div key={g} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
+                    <div style={{ fontSize:11, fontWeight:700, color:GRADE_COLS[g] }}>{count}</div>
+                    <div style={{ width:'100%', height:h, background:GRADE_COLS[g], borderRadius:'3px 3px 0 0' }}/>
+                    <div style={{ fontSize:10.5, fontWeight:800, color:GRADE_COLS[g] }}>{g}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Student scores */}
+        <div className="card" style={{ overflow:'hidden' }}>
+          <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>
+            Student Results ({scores.length})
+          </div>
+          {subLoading ? (
+            <div style={{ padding:30, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>Loading submissions...</div>
+          ) : scores.length === 0 ? (
+            <div style={{ padding:30, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No graded submissions yet.</div>
+          ) : (
+            <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
+              <thead><tr>
+                {['Rank','Student','Score','%','Grade','Time taken'].map(h=>(
+                  <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {scores.map((s,i) => (
+                  <tr key={String(s._id)} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                    <td style={{ padding:'9px 12px', fontWeight:700, color:i===0?'#C9A030':i<3?TOKENS.s900:TOKENS.s400, fontSize:i===0?15:13 }}>
+                      {i===0?'1st':i===1?'2nd':i===2?'3rd':i+1}
+                    </td>
+                    <td style={{ padding:'9px 12px' }}>
+                      <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{s.student?.firstName||''} {s.student?.lastName||''}</div>
+                      <div style={{ fontSize:11, color:TOKENS.s500 }}>{s.student?.curriculum||''}</div>
+                    </td>
+                    <td style={{ padding:'9px 12px', fontWeight:700, fontSize:13 }}>{s.awarded} / {selected.totalMarks}</td>
+                    <td style={{ padding:'9px 12px', fontWeight:800, fontSize:15, color:gc(s.pct) }}>{s.pct}%</td>
+                    <td style={{ padding:'9px 12px' }}>
+                      <span style={{ padding:'2px 8px', borderRadius:99, fontSize:11, fontWeight:800, background:gc(s.pct)+'18', color:gc(s.pct) }}>{gl(s.pct)}</span>
+                    </td>
+                    <td style={{ padding:'9px 12px', fontSize:12, color:TOKENS.s500 }}>
+                      {s.timeTakenMinutes ? s.timeTakenMinutes+'m' : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <PSection tag="Dean of Studies" title="Exams &" em="Assessments"
+        sub="All weekly assessments and end-of-term exams. Click any exam to see individual student scores and grade distribution."/>
+
+      <div style={{ display:'flex', gap:8, marginBottom:16, flexWrap:'wrap', alignItems:'center' }}>
+        <input value={filters.search} onChange={e=>setFilters(p=>({...p,search:e.target.value}))}
+          placeholder="Search exam title or subject..."
+          style={{ flex:'1 1 200px', padding:'8px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
+        <select value={filters.curriculum} onChange={e=>setFilters(p=>({...p,curriculum:e.target.value}))}
+          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}>
+          <option value="">All curricula</option>
+          {['Cambridge IGCSE','Edexcel','A-Level','IB','CBC','American','BNC'].map(c=><option key={c} value={c}>{c}</option>)}
+        </select>
+        <select value={filters.type} onChange={e=>setFilters(p=>({...p,type:e.target.value}))}
+          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}>
+          <option value="all">All types</option>
+          <option value="weekly">Weekly assessments</option>
+          <option value="endterm">End-of-term only</option>
+        </select>
+        <button onClick={load} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>Search</button>
+      </div>
+
+      {/* Type legend */}
+      <div style={{ display:'flex', gap:12, marginBottom:16 }}>
+        {[
+          { label:'Weekly assessment', color:'#1E40AF', bg:'#DBEAFE' },
+          { label:'End-of-term exam',  color:'#7D1025', bg:'#FDE7EC' },
+        ].map(t=>(
+          <div key={t.label} style={{ display:'flex', alignItems:'center', gap:5, fontSize:12, color:TOKENS.s600 }}>
+            <div style={{ width:10, height:10, borderRadius:2, background:t.bg, border:'1.5px solid '+t.color }}/>
+            {t.label}
+          </div>
+        ))}
+      </div>
+
+      <div className="card" style={{ overflow:'hidden' }}>
+        {loading ? (
+          <div style={{ padding:30, textAlign:'center', color:TOKENS.s400 }}>Loading exams...</div>
+        ) : exams.length === 0 ? (
+          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No exams found.</div>
+        ) : (
+          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
+            <thead><tr>
+              {['Title','Type','Subject','Curriculum','Grade','Date','Marks','Status'].map(h=>(
+                <th key={h} style={{ padding:'9px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>
+              ))}
+            </tr></thead>
+            <tbody>
+              {exams.map(e => {
+                const end = isEndTerm(e)
+                return (
+                  <tr key={e._id} style={{ borderTop:'1px solid '+TOKENS.line, cursor:'pointer' }}
+                    onMouseEnter={ev=>ev.currentTarget.style.background=TOKENS.cream}
+                    onMouseLeave={ev=>ev.currentTarget.style.background='transparent'}
+                    onClick={()=>openExam(e)}>
+                    <td style={{ padding:'10px 12px', fontWeight:700, fontSize:13, color:TOKENS.s900 }}>{e.title}</td>
+                    <td style={{ padding:'10px 12px' }}>
+                      <span style={{ padding:'2px 9px', borderRadius:99, fontSize:10.5, fontWeight:700,
+                        background:end?'#FDE7EC':'#DBEAFE', color:end?'#7D1025':'#1E40AF' }}>
+                        {end?'End-term':'Weekly'}
+                      </span>
+                    </td>
+                    <td style={{ padding:'10px 12px', fontSize:12.5, color:TOKENS.s700 }}>{e.subject||'—'}</td>
+                    <td style={{ padding:'10px 12px', fontSize:12, color:TOKENS.s500 }}>{e.curriculum||'—'}</td>
+                    <td style={{ padding:'10px 12px', fontSize:12, color:TOKENS.s500 }}>{e.grade||'—'}</td>
+                    <td style={{ padding:'10px 12px', fontSize:12, color:TOKENS.s500, whiteSpace:'nowrap' }}>{fmtDate(e.startAt)}</td>
+                    <td style={{ padding:'10px 12px', fontSize:12.5 }}>{e.totalMarks||'—'}</td>
+                    <td style={{ padding:'10px 12px' }}>
+                      <span style={{ padding:'2px 8px', borderRadius:99, fontSize:10.5, fontWeight:700,
+                        background:e.status==='ended'?'#D1FAE5':e.status==='live'?'#FEF3C7':'#F3F4F6',
+                        color:e.status==='ended'?'#065F46':e.status==='live'?'#92400E':'#6B7280' }}>
+                        {e.status||'draft'}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+      {totalPages>1 && (
+        <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:12 }}>
+          <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page<=1}
+            style={{ padding:'6px 13px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page<=1?'not-allowed':'pointer', opacity:page<=1?.5:1 }}>‹</button>
+          <span style={{ padding:'6px 12px', fontSize:12.5, color:TOKENS.s700 }}>Page {page} / {totalPages}</span>
+          <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages}
+            style={{ padding:'6px 13px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page>=totalPages?'not-allowed':'pointer', opacity:page>=totalPages?.5:1 }}>›</button>
+        </div>
+      )}
+    </>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// DOS MODULE 3: Homework Tracker
+// Per-teacher: every lesson taught, homework set, submissions,
+// marking rate. Flags lessons with no homework.
+// ═══════════════════════════════════════════════════════════
+function DOSHomeworkModule({ toast, refreshKey }) {
+  const [data,    setData]    = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState({ termStart:'', termEnd:'', subject:'', curriculum:'' })
+  const [expanded, setExpanded] = useState({}) // teacherId -> bool
+
+  const load = useCallback(() => {
+    setLoading(true)
+    api.get('/dos/homework-compliance', { params: filters })
+      .then(r => setData(r.data?.data))
+      .catch(() => toast?.error?.('Failed to load homework data.'))
+      .finally(() => setLoading(false))
+  }, [filters, refreshKey])
+
+  useEffect(() => { load() }, [load])
+
+  const teachers = data?.teachers || []
+  const totalLessons = teachers.reduce((s,t)=>s+t.totalLessons,0)
+  const totalHW      = teachers.reduce((s,t)=>s+t.homeworkSet,0)
+  const totalMissing = teachers.reduce((s,t)=>s+t.lessonsWithoutHW,0)
+  const totalGraded  = teachers.reduce((s,t)=>s+t.gradedSubmissions,0)
+  const totalSubs    = teachers.reduce((s,t)=>s+t.totalSubmissions,0)
+
+  return (
+    <>
+      <PSection tag="Dean of Studies" title="Homework" em="Tracker"
+        sub="Every lesson taught must have homework set, submitted and marked. Red rows need attention."/>
+
+      <div style={{ display:'flex', gap:8, marginBottom:16, flexWrap:'wrap', alignItems:'center',
+        background:'#fff', border:'1px solid '+TOKENS.line, borderRadius:10, padding:'12px 14px' }}>
+        <input type="date" value={filters.termStart} onChange={e=>setFilters(p=>({...p,termStart:e.target.value}))}
+          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}/>
+        <span style={{ fontSize:12, color:TOKENS.s400 }}>to</span>
+        <input type="date" value={filters.termEnd} onChange={e=>setFilters(p=>({...p,termEnd:e.target.value}))}
+          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}/>
+        <input value={filters.subject} onChange={e=>setFilters(p=>({...p,subject:e.target.value}))}
+          placeholder="Subject" style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, width:130, fontFamily:'inherit' }}/>
+        <select value={filters.curriculum} onChange={e=>setFilters(p=>({...p,curriculum:e.target.value}))}
+          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}>
+          <option value="">All curricula</option>
+          {['Cambridge IGCSE','Edexcel','A-Level','IB','CBC','American','BNC'].map(c=><option key={c} value={c}>{c}</option>)}
+        </select>
+        <button onClick={load} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'8px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>Apply</button>
+      </div>
+
+      {/* KPI strip */}
+      {!loading && data && (
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(140px,1fr))', gap:12, marginBottom:20 }}>
+          {[
+            { label:'Lessons taught',     val:totalLessons,   color:TOKENS.s900 },
+            { label:'Homework sets',       val:totalHW,        color:TOKENS.s900 },
+            { label:'Lessons missing HW',  val:totalMissing,   color:totalMissing>0?'#991B1B':'#065F46' },
+            { label:'Submissions',         val:totalSubs,      color:TOKENS.s900 },
+            { label:'Graded',             val:totalGraded,    color:'#065F46' },
+            { label:'Marking rate',        val:totalSubs>0?Math.round((totalGraded/totalSubs)*100)+'%':'—', color:totalSubs>0&&totalGraded/totalSubs>=0.8?'#065F46':'#D97706' },
+          ].map(k=>(
+            <div key={k.label} className="card" style={{ padding:'12px 14px' }}>
+              <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:5 }}>{k.label}</div>
+              <div style={{ fontSize:22, fontWeight:800, color:k.color }}>{k.val}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {loading ? (
+        <div style={{ padding:'50px 0', textAlign:'center' }}>
+          <div style={{ width:34, height:34, border:'3px solid #F0EBE6', borderTopColor:TOKENS.crimson, borderRadius:'50%', animation:'spin .75s linear infinite', margin:'0 auto' }}/>
+        </div>
+      ) : teachers.length === 0 ? (
+        <div style={{ padding:'40px 0', textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No data found for selected filters.</div>
+      ) : (
+        <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+          {teachers.map(t => {
+            const cs = t.complianceScore
+            const cc = cs>=90?'#065F46':cs>=70?'#D97706':'#991B1B'
+            const bg = cs<70?'#FFF5F5':cs<90?'#FFFBF0':'#F0FDF4'
+            const isOpen = expanded[String(t.teacherId)]
+            return (
+              <div key={String(t.teacherId)} style={{ background:'#fff', border:'1.5px solid '+(cs<70?'#FCA5A5':cs<90?'#FDE68A':TOKENS.line), borderRadius:12, overflow:'hidden' }}>
+                {/* Teacher header row */}
+                <div style={{ padding:'14px 18px', background:bg, display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer' }}
+                  onClick={()=>setExpanded(p=>({...p,[String(t.teacherId)]:!p[String(t.teacherId)]}))}>
+                  <div>
+                    <div style={{ fontSize:14, fontWeight:800, color:TOKENS.s900 }}>{t.teacherName}</div>
+                    <div style={{ fontSize:11.5, color:TOKENS.s500, marginTop:2 }}>
+                      {t.totalLessons} lessons taught · {t.homeworkSet} HW sets · {t.totalSubmissions} submissions
+                    </div>
+                  </div>
+                  <div style={{ display:'flex', gap:16, alignItems:'center' }}>
+                    {t.lessonsWithoutHW > 0 && (
+                      <span style={{ fontSize:12, fontWeight:700, color:'#991B1B', background:'#FEE2E2', padding:'3px 10px', borderRadius:99 }}>
+                        {t.lessonsWithoutHW} lesson{t.lessonsWithoutHW>1?'s':''} missing HW
+                      </span>
+                    )}
+                    <div style={{ textAlign:'center' }}>
+                      <div style={{ fontSize:18, fontWeight:800, color:cc }}>{cs!==null?cs+'%':'—'}</div>
+                      <div style={{ fontSize:9.5, color:TOKENS.s400 }}>Compliance</div>
+                    </div>
+                    <div style={{ textAlign:'center' }}>
+                      <div style={{ fontSize:16, fontWeight:700, color:t.markingRate>=80?'#065F46':'#D97706' }}>{t.markingRate!==null?t.markingRate+'%':'—'}</div>
+                      <div style={{ fontSize:9.5, color:TOKENS.s400 }}>Marked</div>
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.s400} strokeWidth="2" strokeLinecap="round"
+                      style={{ transform:isOpen?'rotate(90deg)':'rotate(0deg)', transition:'transform .2s' }}>
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Compliance bar */}
+                <div style={{ height:4, background:'#F3F4F6' }}>
+                  <div style={{ width:(cs||0)+'%', height:'100%', background:cc, transition:'width .4s' }}/>
+                </div>
+
+                {/* Lessons without HW detail */}
+                {isOpen && (
+                  <div style={{ padding:'12px 18px', borderTop:'1px solid '+TOKENS.line }}>
+                    {t.lessonsWithoutHW > 0 ? (
+                      <>
+                        <div style={{ fontSize:11, fontWeight:700, color:'#991B1B', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>
+                          Lessons without homework assigned
+                        </div>
+                        <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+                          {t.missingHWLessons.map((l,i) => (
+                            <div key={String(l.id)||i} style={{ display:'flex', alignItems:'center', gap:10, padding:'6px 10px', background:'#FFF5F5', borderRadius:7, border:'1px solid #FCA5A5' }}>
+                              <div style={{ width:6, height:6, borderRadius:'50%', background:'#991B1B', flexShrink:0 }}/>
+                              <div>
+                                <div style={{ fontSize:12.5, fontWeight:600, color:TOKENS.s900 }}>{l.title}</div>
+                                <div style={{ fontSize:11, color:TOKENS.s500 }}>{l.subject}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ fontSize:12.5, color:'#065F46', fontWeight:600 }}>All lessons have homework assigned.</div>
+                    )}
+
+                    <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10, marginTop:14, paddingTop:12, borderTop:'1px solid '+TOKENS.line }}>
+                      {[
+                        { label:'Lessons', val:t.totalLessons },
+                        { label:'HW with lessons', val:t.lessonsWithHW+' / '+t.totalLessons },
+                        { label:'Submissions', val:t.totalSubmissions },
+                        { label:'Graded', val:t.gradedSubmissions+' / '+t.totalSubmissions },
+                      ].map(k=>(
+                        <div key={k.label} style={{ textAlign:'center' }}>
+                          <div style={{ fontSize:18, fontWeight:800, color:TOKENS.s900 }}>{k.val}</div>
+                          <div style={{ fontSize:10, color:TOKENS.s400, marginTop:2 }}>{k.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </>
+  )
+}
+
 
 function ReportsModule({ toast, refreshKey }) {
   const [view, setView] = useState('list') // list | generate | detail
