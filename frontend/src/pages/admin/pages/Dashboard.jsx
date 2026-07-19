@@ -6115,567 +6115,11 @@ function DOSSpinner() {
 // Mark and view attendance for ALL students and staff.
 // DOS can mark/edit any record for any date.
 // ═══════════════════════════════════════════════════════════
-function DOSAttendanceModule({ toast, refreshKey }) {
-  const today = new Date().toISOString().split('T')[0]
-  const [date,      setDate]      = useState(today)
-  const [userType,  setUserType]  = useState('student')
-  const [users,     setUsers]     = useState([])
-  const [records,   setRecords]   = useState({})   // userId -> status
-  const [loading,   setLoading]   = useState(false)
-  const [saving,    setSaving]    = useState(false)
-  const [search,    setSearch]    = useState('')
-  const [history,   setHistory]   = useState(null)  // student history view
-  const [histUser,  setHistUser]  = useState(null)
-
-  // Load users for the selected type
-  useEffect(() => {
-    setUsers([])
-    setRecords({})
-    api.get('/users', { params: { role: userType, limit: 200 } })
-      .then(r => {
-        const list = r.data?.users || r.data?.data?.users || []
-        setUsers(list)
-        loadAttendance(list, date)
-      })
-      .catch(() => toast?.error?.('Failed to load users.'))
-  }, [userType, refreshKey])
-
-  const loadAttendance = (userList, d) => {
-    if (!userList.length) return
-    setLoading(true)
-    api.get('/attendance/day', { params: { date: d } })
-      .then(r => {
-        const dayRecs = r.data?.data?.records || r.data?.records || []
-        const map = {}
-        userList.forEach(u => {
-          const rec = dayRecs.find(a => String(a.studentId) === String(u._id) || String(a.userId) === String(u._id))
-          map[String(u._id)] = rec?.status || 'absent'
-        })
-        setRecords(map)
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => {
-    if (users.length) loadAttendance(users, date)
-  }, [date])
-
-  const setStatus = (uid, status) => setRecords(p => ({ ...p, [uid]: status }))
-
-  const save = async () => {
-    setSaving(true)
-    try {
-      const payload = Object.entries(records).map(([userId, status]) => ({ studentId: userId, date, status }))
-      await api.post('/attendance/bulk', { records: payload, date })
-      toast?.ok?.('Attendance saved for ' + date + '.')
-    } catch (e) {
-      toast?.error?.(e?.response?.data?.message || 'Failed to save attendance.')
-    } finally { setSaving(false) }
-  }
-
-  const openHistory = async (u) => {
-    setHistUser(u)
-    setHistory(null)
-    try {
-      const { data } = await api.get('/attendance/student/'+u._id)
-      setHistory(data?.records || data?.data?.records || [])
-    } catch { toast?.error?.('Could not load history.') }
-  }
-
-  const STATUS_OPTIONS = [
-    { val:'present',  label:'Present',   bg:'#D1FAE5', fg:'#065F46' },
-    { val:'absent',   label:'Absent',    bg:'#FEE2E2', fg:'#991B1B' },
-    { val:'late',     label:'Late',      bg:'#FEF3C7', fg:'#92400E' },
-    { val:'half_day', label:'Half day',  bg:'#DBEAFE', fg:'#1E40AF' },
-    { val:'excused',  label:'Excused',   bg:'#F3E8FF', fg:'#6B21A8' },
-  ]
-
-  const filtered = users.filter(u => {
-    if (!search) return true
-    const name = (u.firstName+' '+u.lastName).toLowerCase()
-    return name.includes(search.toLowerCase()) || (u.admissionNo||'').toLowerCase().includes(search.toLowerCase())
-  })
-
-  const counts = STATUS_OPTIONS.map(s => ({ ...s, count: Object.values(records).filter(v=>v===s.val).length }))
-  const total  = users.length
-
-  // History modal
-  if (histUser && history !== null) {
-    const present = history.filter(r=>r.status==='present').length
-    const rate    = history.length ? Math.round((present/history.length)*100) : 0
-    return (
-      <>
-        <button onClick={()=>{ setHistUser(null); setHistory(null) }}
-          style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:5, padding:0, marginBottom:16 }}>
-          ← Back to attendance
-        </button>
-        <div className="card" style={{ padding:20, marginBottom:14 }}>
-          <div style={{ fontSize:14, fontWeight:800, color:TOKENS.s900, marginBottom:4 }}>{histUser.firstName} {histUser.lastName}</div>
-          <div style={{ fontSize:12, color:TOKENS.s500, marginBottom:14 }}>{histUser.curriculum} · {histUser.gradeLevel} · Adm: {histUser.admissionNo}</div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:16 }}>
-            {[
-              { label:'Total records', val:history.length },
-              { label:'Present',       val:present,          color:'#065F46' },
-              { label:'Absent',        val:history.filter(r=>r.status==='absent').length, color:'#991B1B' },
-              { label:'Attendance rate', val:rate+'%',       color:rate>=80?'#065F46':rate>=60?'#D97706':'#991B1B' },
-            ].map(k=>(
-              <div key={k.label} style={{ textAlign:'center', padding:'10px 0' }}>
-                <div style={{ fontSize:24, fontWeight:800, color:k.color||TOKENS.s900 }}>{k.val}</div>
-                <div style={{ fontSize:11, color:TOKENS.s400, marginTop:2 }}>{k.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="card" style={{ overflow:'hidden' }}>
-          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
-            <thead><tr>
-              {['Date','Status','Day','Marked by'].map(h=>(
-                <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>
-              ))}
-            </tr></thead>
-            <tbody>
-              {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((r,i) => {
-                const s = STATUS_OPTIONS.find(x=>x.val===r.status) || STATUS_OPTIONS[1]
-                return (
-                  <tr key={i} style={{ borderTop:'1px solid '+TOKENS.line }}>
-                    <td style={{ padding:'8px 12px', fontSize:13 }}>{new Date(r.date).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}</td>
-                    <td style={{ padding:'8px 12px' }}>
-                      <span style={{ padding:'2px 9px', borderRadius:99, fontSize:11.5, fontWeight:700, background:s.bg, color:s.fg }}>{s.label}</span>
-                    </td>
-                    <td style={{ padding:'8px 12px', fontSize:12, color:TOKENS.s500 }}>{new Date(r.date).toLocaleDateString('en-GB',{weekday:'long'})}</td>
-                    <td style={{ padding:'8px 12px', fontSize:12, color:TOKENS.s500 }}>{r.markedBy||'—'}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </>
-    )
-  }
-
-  return (
-    <>
-      <PSection tag="Dean of Studies" title="Attendance" em="Manager"
-        sub="Mark and review attendance for all students and staff. Changes are saved per day."/>
-
-      {/* Controls */}
-      <div style={{ display:'grid', gridTemplateColumns:'auto auto 1fr auto', gap:10, marginBottom:16, alignItems:'center' }}>
-        <input type="date" value={date} onChange={e=>setDate(e.target.value)}
-          style={{ padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
-        <div style={{ display:'flex', border:'1.5px solid '+TOKENS.line, borderRadius:7, overflow:'hidden' }}>
-          {['student','teacher','admin','ops_manager','accountant','sales','dos'].map(role => (
-            <button key={role} onClick={()=>setUserType(role)} style={{
-              padding:'8px 14px', border:'none', cursor:'pointer', fontSize:12, fontWeight:600,
-              background: userType===role ? TOKENS.crimson : '#fff',
-              color: userType===role ? '#fff' : TOKENS.s500,
-              borderRight: role!=='dos'?'1px solid '+TOKENS.line:'none',
-              whiteSpace:'nowrap',
-            }}>{role==='ops_manager'?'Ops':role==='accountant'?'Accounts':role.charAt(0).toUpperCase()+role.slice(1)}</button>
-          ))}
-        </div>
-        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or admission no..."
-          style={{ padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
-        <button onClick={save} disabled={saving} style={{
-          background:saving?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none',
-          padding:'9px 22px', borderRadius:7, fontSize:13, fontWeight:700,
-          cursor:saving?'not-allowed':'pointer', whiteSpace:'nowrap',
-        }}>{saving?'Saving...':'Save attendance'}</button>
-      </div>
-
-      {/* KPI strip */}
-      <div style={{ display:'flex', gap:10, marginBottom:14, flexWrap:'wrap' }}>
-        {counts.map(s=>(
-          <div key={s.val} style={{ padding:'8px 14px', borderRadius:8, background:s.bg, border:'1px solid '+s.fg+'30', display:'flex', gap:10, alignItems:'center' }}>
-            <span style={{ fontSize:18, fontWeight:800, color:s.fg }}>{s.count}</span>
-            <span style={{ fontSize:11.5, fontWeight:600, color:s.fg }}>{s.label}</span>
-            {total>0&&<span style={{ fontSize:10, color:s.fg, opacity:.7 }}>({Math.round((s.count/total)*100)}%)</span>}
-          </div>
-        ))}
-        <div style={{ padding:'8px 14px', borderRadius:8, background:TOKENS.cream, border:'1px solid '+TOKENS.line, display:'flex', gap:10, alignItems:'center' }}>
-          <span style={{ fontSize:18, fontWeight:800, color:TOKENS.s900 }}>{total}</span>
-          <span style={{ fontSize:11.5, fontWeight:600, color:TOKENS.s500 }}>Total</span>
-        </div>
-      </div>
-
-      {/* Attendance grid */}
-      <div className="card" style={{ overflow:'hidden' }}>
-        {loading ? (
-          <div style={{ padding:30, textAlign:'center', color:TOKENS.s400 }}>Loading...</div>
-        ) : filtered.length === 0 ? (
-          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No {userType}s found.</div>
-        ) : (
-          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
-            <thead><tr>
-              {['Name', userType==='student'?'Adm / Grade':'Role', 'Status', 'Quick mark', ''].map(h=>(
-                <th key={h} style={{ padding:'9px 14px', textAlign:'left', fontSize:10.5 }}>{h}</th>
-              ))}
-            </tr></thead>
-            <tbody>
-              {filtered.map(u => {
-                const status = records[String(u._id)] || 'absent'
-                const so = STATUS_OPTIONS.find(s=>s.val===status) || STATUS_OPTIONS[1]
-                return (
-                  <tr key={u._id} style={{ borderTop:'1px solid '+TOKENS.line }}>
-                    <td style={{ padding:'10px 14px' }}>
-                      <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
-                      <div style={{ fontSize:11, color:TOKENS.s500 }}>{u.email}</div>
-                    </td>
-                    <td style={{ padding:'10px 14px', fontSize:12.5, color:TOKENS.s600 }}>
-                      {userType==='student' ? (u.admissionNo||'—')+' · '+(u.gradeLevel||'—') : u.role}
-                    </td>
-                    <td style={{ padding:'10px 14px' }}>
-                      <span style={{ padding:'4px 12px', borderRadius:99, fontSize:12, fontWeight:700, background:so.bg, color:so.fg }}>
-                        {so.label}
-                      </span>
-                    </td>
-                    <td style={{ padding:'10px 14px' }}>
-                      <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-                        {STATUS_OPTIONS.map(s => (
-                          <button key={s.val} onClick={()=>setStatus(String(u._id), s.val)} style={{
-                            padding:'4px 9px', borderRadius:6, border:'1.5px solid '+(status===s.val?s.fg:TOKENS.line),
-                            background:status===s.val?s.bg:'#fff', color:status===s.val?s.fg:TOKENS.s500,
-                            fontSize:11, fontWeight:status===s.val?700:500, cursor:'pointer',
-                          }}>{s.label}</button>
-                        ))}
-                      </div>
-                    </td>
-                    <td style={{ padding:'10px 14px' }}>
-                      {userType==='student' && (
-                        <button onClick={()=>openHistory(u)} style={{ fontSize:11, color:TOKENS.crimson, background:'transparent', border:'none', cursor:'pointer', fontWeight:700, textDecoration:'underline' }}>
-                          History
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </>
-  )
-}
-
 // ═══════════════════════════════════════════════════════════
-// DOS MODULE 5: Timetable Manager
-// View all teacher and student timetables.
-// DOS can edit (reschedule) any entry.
+// DOS MODULES v2 — correct API shapes
 // ═══════════════════════════════════════════════════════════
-function DOSTimetableModule({ toast, refreshKey }) {
-  const [view,     setView]     = useState('list')   // list | teacher | student | edit
-  const [entries,  setEntries]  = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [selected, setSelected] = useState(null)
-  const [editData, setEditData] = useState(null)
-  const [saving,   setSaving]   = useState(false)
-  const [filterBy, setFilterBy] = useState('all')    // all | teacher | student
-  const [search,   setSearch]   = useState('')
-  const [users,    setUsers]    = useState([])
-  const [chosenUser, setChosenUser] = useState(null)
-  const [userEntries, setUserEntries] = useState([])
-  const [userLoading, setUserLoading] = useState(false)
 
-  const DAYS  = ['Mon','Tue','Wed','Thu','Fri','Sat']
-  const TIMES = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00']
-
-  useEffect(() => {
-    setLoading(true)
-    api.get('/timetables', { params: { limit:200 } })
-      .then(r => setEntries(r.data?.data?.timetables || r.data?.timetables || []))
-      .catch(() => toast?.error?.('Failed to load timetable.'))
-      .finally(() => setLoading(false))
-  }, [refreshKey])
-
-  useEffect(() => {
-    api.get('/users', { params: { limit:200 } })
-      .then(r => setUsers(r.data?.users || r.data?.data?.users || []))
-      .catch(() => {})
-  }, [])
-
-  const loadUserTimetable = async (u) => {
-    setChosenUser(u)
-    setUserEntries([])
-    setUserLoading(true)
-    try {
-      const path = u.role === 'teacher' ? '/timetable/teacher/'+u._id : '/timetable/student/'+u._id
-      const { data } = await api.get(path)
-      setUserEntries(data?.data?.entries || data?.entries || [])
-      setView('user')
-    } catch { toast?.error?.('Could not load timetable.') }
-    finally { setUserLoading(false) }
-  }
-
-  const openEdit = (entry) => {
-    setSelected(entry)
-    setEditData({
-      title:       entry.title || '',
-      subject:     entry.subject || '',
-      dayOfWeek:   entry.dayOfWeek || 'Mon',
-      startTime:   entry.startTime || '09:00',
-      endTime:     entry.endTime   || '10:00',
-      deliveryMode: entry.deliveryMode || 'virtual',
-      notes:       entry.notes || '',
-    })
-    setView('edit')
-  }
-
-  const saveEdit = async () => {
-    if (!selected) return
-    setSaving(true)
-    try {
-      await api.patch('/timetable/'+selected._id, editData)
-      toast?.ok?.('Timetable entry updated.')
-      setView(chosenUser ? 'user' : 'list')
-      // Reload
-      if (chosenUser) {
-        loadUserTimetable(chosenUser)
-      } else {
-        const r = await api.get('/timetables', { params:{ limit:200 } })
-        setEntries(r.data?.data?.timetables || r.data?.timetables || [])
-      }
-    } catch (e) { toast?.error?.(e?.response?.data?.message||'Could not update.') }
-    finally { setSaving(false) }
-  }
-
-  const filtered = entries.filter(e => {
-    if (!search) return true
-    const t = (e.title+e.subject+e.teacherName).toLowerCase()
-    return t.includes(search.toLowerCase())
-  })
-
-  // ── Edit form ──────────────────────────────────────────
-  if (view === 'edit' && editData) {
-    const set = (k,v) => setEditData(p=>({...p,[k]:v}))
-    const inp2 = { width:'100%', padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit', boxSizing:'border-box' }
-    return (
-      <>
-        <button onClick={()=>{ setView(chosenUser?'user':'list') }}
-          style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:5, padding:0, marginBottom:16 }}>
-          ← Back
-        </button>
-        <h2 style={{ fontSize:20, fontWeight:800, color:TOKENS.s900, marginBottom:18 }}>Edit Timetable Entry</h2>
-        <div className="card" style={{ padding:22, maxWidth:600 }}>
-          <div style={{ display:'grid', gap:14 }}>
-            <div>
-              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Title</label>
-              <input value={editData.title} onChange={e=>set('title',e.target.value)} style={inp2}/>
-            </div>
-            <div>
-              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Subject</label>
-              <input value={editData.subject} onChange={e=>set('subject',e.target.value)} style={inp2}/>
-            </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
-              <div>
-                <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Day</label>
-                <select value={editData.dayOfWeek} onChange={e=>set('dayOfWeek',e.target.value)} style={inp2}>
-                  {DAYS.map(d=><option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Start time</label>
-                <select value={editData.startTime} onChange={e=>set('startTime',e.target.value)} style={inp2}>
-                  {TIMES.map(t=><option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-              <div>
-                <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>End time</label>
-                <select value={editData.endTime} onChange={e=>set('endTime',e.target.value)} style={inp2}>
-                  {TIMES.map(t=><option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-            </div>
-            <div>
-              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Delivery mode</label>
-              <select value={editData.deliveryMode} onChange={e=>set('deliveryMode',e.target.value)} style={inp2}>
-                {['virtual','in-person','hybrid'].map(m=><option key={m} value={m}>{m.charAt(0).toUpperCase()+m.slice(1)}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Notes</label>
-              <textarea value={editData.notes} onChange={e=>set('notes',e.target.value)} rows={2}
-                style={{ ...inp2, resize:'vertical' }}/>
-            </div>
-          </div>
-          <div style={{ display:'flex', gap:10, marginTop:18 }}>
-            <button onClick={saveEdit} disabled={saving} style={{
-              background:saving?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none',
-              padding:'10px 24px', borderRadius:8, fontSize:13, fontWeight:700,
-              cursor:saving?'not-allowed':'pointer',
-            }}>{saving?'Saving...':'Save changes'}</button>
-            <button onClick={()=>setView(chosenUser?'user':'list')} style={{
-              background:'transparent', border:'1.5px solid '+TOKENS.line, color:TOKENS.s500,
-              padding:'10px 18px', borderRadius:8, fontSize:13, cursor:'pointer',
-            }}>Cancel</button>
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  // ── Individual user timetable (grid) ──────────────────
-  if (view === 'user' && chosenUser) {
-    // Build weekly grid
-    const grid = {}
-    DAYS.forEach(d => { grid[d] = [] })
-    userEntries.forEach(e => { if (grid[e.dayOfWeek]) grid[e.dayOfWeek].push(e) })
-
-    return (
-      <>
-        <button onClick={()=>{ setView('list'); setChosenUser(null); setUserEntries([]) }}
-          style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:5, padding:0, marginBottom:16 }}>
-          ← Back to timetable list
-        </button>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:18 }}>
-          <div>
-            <h2 style={{ fontSize:20, fontWeight:800, color:TOKENS.s900, margin:'0 0 4px' }}>
-              {chosenUser.firstName} {chosenUser.lastName}
-            </h2>
-            <div style={{ fontSize:12.5, color:TOKENS.s500 }}>
-              {chosenUser.role.charAt(0).toUpperCase()+chosenUser.role.slice(1)} · {chosenUser.curriculum||''} {chosenUser.gradeLevel||''}
-            </div>
-          </div>
-          <div style={{ fontSize:12.5, color:TOKENS.s500 }}>{userEntries.length} entries</div>
-        </div>
-
-        {userLoading ? (
-          <div style={{ padding:30, textAlign:'center', color:TOKENS.s400 }}>Loading timetable...</div>
-        ) : userEntries.length === 0 ? (
-          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No timetable entries found.</div>
-        ) : (
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:10 }}>
-            {DAYS.map(day => (
-              <div key={day}>
-                <div style={{ fontSize:11, fontWeight:800, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:8, textAlign:'center', padding:'6px 0', background:TOKENS.cream, borderRadius:6 }}>
-                  {day}
-                </div>
-                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                  {(grid[day]||[]).sort((a,b)=>a.startTime.localeCompare(b.startTime)).map(e => (
-                    <div key={e._id} style={{ background:'#fff', border:'1.5px solid '+TOKENS.line, borderRadius:8, padding:'8px 10px', borderLeft:'3px solid '+TOKENS.crimson }}>
-                      <div style={{ fontSize:11.5, fontWeight:700, color:TOKENS.s900, marginBottom:2 }}>{e.subject||e.title}</div>
-                      <div style={{ fontSize:10.5, color:TOKENS.s500 }}>{e.startTime} – {e.endTime}</div>
-                      {e.deliveryMode && <div style={{ fontSize:10, color:TOKENS.s400, marginTop:2, textTransform:'capitalize' }}>{e.deliveryMode}</div>}
-                      <button onClick={()=>openEdit(e)} style={{ marginTop:6, fontSize:10.5, color:TOKENS.crimson, background:'transparent', border:'none', cursor:'pointer', fontWeight:700, padding:0, textDecoration:'underline' }}>
-                        Edit
-                      </button>
-                    </div>
-                  ))}
-                  {!(grid[day]||[]).length && <div style={{ fontSize:10.5, color:TOKENS.s300, textAlign:'center', padding:'8px 0' }}>Free</div>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </>
-    )
-  }
-
-  // ── Master list + user picker ─────────────────────────
-  const teacherList = users.filter(u => u.role === 'teacher')
-  const studentList = users.filter(u => u.role === 'student')
-
-  return (
-    <>
-      <PSection tag="Dean of Studies" title="Timetable" em="Manager"
-        sub="View and edit timetables for all teachers and students. Click a name to see their weekly schedule."/>
-
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:22 }}>
-        {/* Teacher picker */}
-        <div className="card" style={{ padding:18 }}>
-          <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Teacher timetables</div>
-          <div style={{ display:'flex', flexDirection:'column', gap:6, maxHeight:280, overflowY:'auto' }}>
-            {teacherList.map(u => (
-              <button key={u._id} onClick={()=>loadUserTimetable(u)} style={{
-                display:'flex', justifyContent:'space-between', alignItems:'center',
-                padding:'8px 12px', borderRadius:8, border:'1px solid '+TOKENS.line,
-                background:'#fff', cursor:'pointer', textAlign:'left',
-              }}
-                onMouseEnter={e=>e.currentTarget.style.background=TOKENS.cream}
-                onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
-                <div>
-                  <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
-                  <div style={{ fontSize:11, color:TOKENS.s500 }}>{u.email}</div>
-                </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.crimson} strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-              </button>
-            ))}
-            {!teacherList.length && <div style={{ fontSize:12.5, color:TOKENS.s400, textAlign:'center', padding:'12px 0' }}>No teachers found.</div>}
-          </div>
-        </div>
-
-        {/* Student picker */}
-        <div className="card" style={{ padding:18 }}>
-          <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Student timetables</div>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search student..."
-            style={{ width:'100%', padding:'7px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, marginBottom:10, fontFamily:'inherit', boxSizing:'border-box' }}/>
-          <div style={{ display:'flex', flexDirection:'column', gap:6, maxHeight:240, overflowY:'auto' }}>
-            {studentList.filter(u=>!search||(u.firstName+' '+u.lastName).toLowerCase().includes(search.toLowerCase())).map(u => (
-              <button key={u._id} onClick={()=>loadUserTimetable(u)} style={{
-                display:'flex', justifyContent:'space-between', alignItems:'center',
-                padding:'8px 12px', borderRadius:8, border:'1px solid '+TOKENS.line,
-                background:'#fff', cursor:'pointer', textAlign:'left',
-              }}
-                onMouseEnter={e=>e.currentTarget.style.background=TOKENS.cream}
-                onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
-                <div>
-                  <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
-                  <div style={{ fontSize:11, color:TOKENS.s500 }}>{u.curriculum} · {u.gradeLevel} · {u.admissionNo||'—'}</div>
-                </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.crimson} strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* All entries table */}
-      <div className="card" style={{ overflow:'hidden' }}>
-        <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>
-          All timetable entries ({filtered.length})
-        </div>
-        {loading ? (
-          <div style={{ padding:30, textAlign:'center', color:TOKENS.s400 }}>Loading...</div>
-        ) : filtered.length === 0 ? (
-          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No entries found.</div>
-        ) : (
-          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
-            <thead><tr>
-              {['Subject','Day','Time','Mode','Teacher','Students',''].map(h=>(
-                <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>
-              ))}
-            </tr></thead>
-            <tbody>
-              {filtered.map(e => (
-                <tr key={e._id} style={{ borderTop:'1px solid '+TOKENS.line }}>
-                  <td style={{ padding:'9px 12px', fontWeight:700, fontSize:13 }}>{e.subject||e.title}</td>
-                  <td style={{ padding:'9px 12px', fontSize:12.5 }}>{e.dayOfWeek}</td>
-                  <td style={{ padding:'9px 12px', fontSize:12.5, whiteSpace:'nowrap' }}>{e.startTime} – {e.endTime}</td>
-                  <td style={{ padding:'9px 12px', fontSize:12, color:TOKENS.s500, textTransform:'capitalize' }}>{e.deliveryMode}</td>
-                  <td style={{ padding:'9px 12px', fontSize:12.5, color:TOKENS.s600 }}>{e.teacherName||e.teacherId?.firstName||'—'}</td>
-                  <td style={{ padding:'9px 12px', fontSize:12, color:TOKENS.s500 }}>{(e.assignedStudents||[]).length}</td>
-                  <td style={{ padding:'9px 12px' }}>
-                    <button onClick={()=>openEdit(e)} style={{
-                      fontSize:11.5, color:TOKENS.crimson, background:'transparent', border:'1px solid '+TOKENS.crimson+'40',
-                      padding:'4px 10px', borderRadius:5, cursor:'pointer', fontWeight:700,
-                    }}>Edit</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </>
-  )
-}
-
-
-// ═══════════════════════════════════════════════════════════
-// DOS MODULE 1: Performance Analytics
-// Exam trends, class averages, at-risk students, HW compliance
-// ═══════════════════════════════════════════════════════════
+// ── DOS MODULE 1: Performance Analytics ───────────────────
 function DOSAnalyticsModule({ toast, refreshKey }) {
   const [overview, setOverview]   = useState(null)
   const [examData, setExamData]   = useState(null)
@@ -6686,13 +6130,13 @@ function DOSAnalyticsModule({ toast, refreshKey }) {
 
   const load = useCallback(() => {
     setLoading(true)
-    const p = { params: filters }
+    const p = { params: Object.fromEntries(Object.entries(filters).filter(([,v])=>v)) }
     Promise.allSettled([
       api.get('/dos/overview'),
       api.get('/dos/exam-analytics', p),
       api.get('/dos/homework-compliance', p),
       api.get('/dos/at-risk'),
-    ]).then(([ov, ex, hw, ar]) => {
+    ]).then(([ov,ex,hw,ar]) => {
       setOverview(ov.status==='fulfilled' ? ov.value.data?.data : null)
       setExamData(ex.status==='fulfilled' ? ex.value.data?.data : null)
       setHwData(hw.status==='fulfilled'   ? hw.value.data?.data : null)
@@ -6709,35 +6153,25 @@ function DOSAnalyticsModule({ toast, refreshKey }) {
     <>
       <PSection tag="Dean of Studies" title="Performance" em="Analytics"
         sub="Live overview of student performance, exam results, homework tracking and at-risk flags."/>
-
-      {/* Date / curriculum filter */}
-      <div style={{ display:'flex', gap:8, marginBottom:20, flexWrap:'wrap', alignItems:'center',
-        background:'#fff', border:'1px solid '+TOKENS.line, borderRadius:10, padding:'12px 14px' }}>
+      <div style={{ display:'flex', gap:8, marginBottom:20, flexWrap:'wrap', alignItems:'center', background:'#fff', border:'1px solid '+TOKENS.line, borderRadius:10, padding:'12px 14px' }}>
         <input type="date" value={filters.termStart} onChange={e=>setFilters(p=>({...p,termStart:e.target.value}))}
-          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }} title="Term start"/>
+          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}/>
         <span style={{ fontSize:12, color:TOKENS.s400 }}>to</span>
         <input type="date" value={filters.termEnd} onChange={e=>setFilters(p=>({...p,termEnd:e.target.value}))}
-          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }} title="Term end"/>
+          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}/>
         <select value={filters.curriculum} onChange={e=>setFilters(p=>({...p,curriculum:e.target.value}))}
           style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}>
           <option value="">All curricula</option>
           {['Cambridge IGCSE','Edexcel','A-Level','IB','CBC','American','BNC'].map(c=><option key={c} value={c}>{c}</option>)}
         </select>
         <input value={filters.subject} onChange={e=>setFilters(p=>({...p,subject:e.target.value}))}
-          placeholder="Subject filter" style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, width:140, fontFamily:'inherit' }}/>
+          placeholder="Subject" style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, width:130, fontFamily:'inherit' }}/>
         <button onClick={load} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'8px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>Apply</button>
         <button onClick={()=>{ setFilters({ termStart:'', termEnd:'', curriculum:'', subject:'' }); setTimeout(load,50) }}
           style={{ background:'transparent', border:'1px solid '+TOKENS.line, color:TOKENS.s500, padding:'8px 12px', borderRadius:7, fontSize:12, cursor:'pointer' }}>Reset</button>
       </div>
-
-      {loading ? (
-        <div style={{ padding:'60px 0', textAlign:'center' }}>
-          <div style={{ width:36, height:36, border:'3px solid #F0EBE6', borderTopColor:TOKENS.crimson,
-            borderRadius:'50%', animation:'spin .75s linear infinite', margin:'0 auto' }}/>
-        </div>
-      ) : (
+      {loading ? <DOSSpinner/> : (
         <>
-          {/* KPI strip */}
           {overview && (
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))', gap:12, marginBottom:24 }}>
               {[
@@ -6755,13 +6189,9 @@ function DOSAnalyticsModule({ toast, refreshKey }) {
               ))}
             </div>
           )}
-
-          {/* Subject performance table */}
           {examData?.subjects?.length > 0 && (
             <div className="card" style={{ overflow:'hidden', marginBottom:18 }}>
-              <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>
-                Subject Performance
-              </div>
+              <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>Subject Performance</div>
               <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
                 <thead><tr>
                   {['Subject','Curriculum','Class avg','Grade','Pass rate','Highest','Lowest','Exams'].map(h=>(
@@ -6787,17 +6217,13 @@ function DOSAnalyticsModule({ toast, refreshKey }) {
               </table>
             </div>
           )}
-
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
-            {/* Homework compliance */}
             {hwData?.teachers?.length > 0 && (
               <div className="card" style={{ overflow:'hidden' }}>
-                <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>
-                  Teacher Homework Compliance
-                </div>
+                <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>Teacher HW Compliance</div>
                 <table style={{ width:'100%', borderCollapse:'collapse' }}>
                   <thead><tr>
-                    {['Teacher','Lessons','HW set','Missing','Mark rate','Score'].map(h=>(
+                    {['Teacher','Missing HW','Mark rate','Score'].map(h=>(
                       <th key={h} style={{ padding:'7px 10px', textAlign:'left', fontSize:10, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', background:TOKENS.cream, borderBottom:'1px solid '+TOKENS.line }}>{h}</th>
                     ))}
                   </tr></thead>
@@ -6808,10 +6234,8 @@ function DOSAnalyticsModule({ toast, refreshKey }) {
                       return (
                         <tr key={String(t.teacherId)} style={{ borderTop:'1px solid '+TOKENS.line }}>
                           <td style={{ padding:'8px 10px', fontWeight:600, fontSize:12 }}>{t.teacherName}</td>
-                          <td style={{ padding:'8px 10px', textAlign:'center', fontSize:12 }}>{t.totalLessons}</td>
-                          <td style={{ padding:'8px 10px', textAlign:'center', fontSize:12 }}>{t.homeworkSet}</td>
                           <td style={{ padding:'8px 10px', textAlign:'center', fontSize:12, color:t.lessonsWithoutHW>0?'#991B1B':TOKENS.s400, fontWeight:t.lessonsWithoutHW>0?700:400 }}>
-                            {t.lessonsWithoutHW>0 ? t.lessonsWithoutHW+' missing' : 'All covered'}
+                            {t.lessonsWithoutHW>0?t.lessonsWithoutHW+' missing':'All covered'}
                           </td>
                           <td style={{ padding:'8px 10px', textAlign:'center', fontSize:12, fontWeight:700, color:t.markingRate>=80?'#065F46':t.markingRate>=60?'#D97706':'#991B1B' }}>
                             {t.markingRate!==null?t.markingRate+'%':'—'}
@@ -6831,8 +6255,6 @@ function DOSAnalyticsModule({ toast, refreshKey }) {
                 </table>
               </div>
             )}
-
-            {/* At-risk students */}
             {atRisk?.students?.length > 0 && (
               <div className="card" style={{ overflow:'hidden' }}>
                 <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
@@ -6853,10 +6275,9 @@ function DOSAnalyticsModule({ toast, refreshKey }) {
                           {s.riskLevel==='high'?'High risk':'At risk'}
                         </span>
                       </div>
-                      <div style={{ display:'flex', gap:12, marginTop:6, flexWrap:'wrap' }}>
+                      <div style={{ display:'flex', gap:12, marginTop:5, flexWrap:'wrap' }}>
                         {s.avg!==null&&<span style={{ fontSize:11, color:gc(s.avg), fontWeight:700 }}>Score: {s.avg}%</span>}
                         {s.attRate!==null&&<span style={{ fontSize:11, color:s.attRate<60?'#991B1B':'#D97706', fontWeight:700 }}>Attendance: {s.attRate}%</span>}
-                        {s.flags.map((f,i)=><span key={i} style={{ fontSize:10.5, color:TOKENS.s500 }}>{f.msg}</span>)}
                       </div>
                     </div>
                   ))}
@@ -6864,10 +6285,9 @@ function DOSAnalyticsModule({ toast, refreshKey }) {
               </div>
             )}
           </div>
-
-          {!examData?.subjects?.length && !hwData?.teachers?.length && !atRisk?.students?.length && (
+          {!overview && !examData && !hwData && (
             <div style={{ padding:'40px 0', textAlign:'center', color:TOKENS.s400, fontSize:13 }}>
-              No data found for the selected filters. Try broadening the date range.
+              DOS analytics backend not yet deployed. Deploy <code>dos-analytics.js</code> and mount at <code>/api/dos</code>.
             </div>
           )}
         </>
@@ -6876,97 +6296,71 @@ function DOSAnalyticsModule({ toast, refreshKey }) {
   )
 }
 
-// ═══════════════════════════════════════════════════════════
-// DOS MODULE 2: Exams & Assessments
-// View all exams, weekly + end-term, per subject/curriculum
-// Grade distribution, individual student scores
-// ═══════════════════════════════════════════════════════════
+// ── DOS MODULE 2: Exams & Assessments ─────────────────────
 function DOSExamsModule({ toast, refreshKey }) {
   const [exams,    setExams]    = useState([])
   const [selected, setSelected] = useState(null)
   const [subs,     setSubs]     = useState([])
   const [loading,  setLoading]  = useState(true)
   const [subLoading, setSubLoading] = useState(false)
-  const [filters, setFilters] = useState({ subject:'', curriculum:'', type:'all', search:'' })
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
+  const [filters, setFilters]   = useState({ subject:'', curriculum:'', type:'all', search:'' })
 
   const load = useCallback(() => {
     setLoading(true)
-    const params = { limit:30, page, populate:'questions' }
+    const params = {}
     if (filters.subject)    params.subject    = filters.subject
     if (filters.curriculum) params.curriculum = filters.curriculum
-    api.get('/exams', { params })
+    api.get('/exams/all', { params })
       .then(r => {
-        let list = r.data?.exams || r.data?.data?.exams || []
-        if (filters.type === 'weekly')  list = list.filter(e => !/end.?term|final|terminal/i.test(e.title))
-        if (filters.type === 'endterm') list = list.filter(e => /end.?term|final|terminal/i.test(e.title))
-        if (filters.search) list = list.filter(e => e.title?.toLowerCase().includes(filters.search.toLowerCase()) || e.subject?.toLowerCase().includes(filters.search.toLowerCase()))
+        let list = r.data?.data?.exams || []
+        if (filters.type==='weekly')  list = list.filter(e=>/weekly|assessment|quiz/i.test(e.title)||!(/end.?term|final|terminal/i.test(e.title)))
+        if (filters.type==='endterm') list = list.filter(e=>/end.?term|final|terminal/i.test(e.title))
+        if (filters.search) {
+          const s = filters.search.toLowerCase()
+          list = list.filter(e=>(e.title||'').toLowerCase().includes(s)||(e.subject||'').toLowerCase().includes(s))
+        }
         setExams(list)
-        setTotalPages(r.data?.data?.totalPages || 1)
       })
-      .catch(() => toast?.error?.('Failed to load exams.'))
+      .catch(e => toast?.error?.('Failed to load exams: '+( e?.response?.data?.message||e.message)))
       .finally(() => setLoading(false))
-  }, [filters, page, refreshKey])
+  }, [filters, refreshKey])
 
   useEffect(() => { load() }, [load])
 
   const openExam = async (exam) => {
-    setSelected(exam)
-    setSubs([])
-    setSubLoading(true)
+    setSelected(exam); setSubs([]); setSubLoading(true)
     try {
       const { data } = await api.get('/exams/'+exam._id+'/submissions')
-      setSubs(data?.submissions || data?.data?.submissions || [])
+      setSubs(data?.data?.submissions || data?.submissions || [])
     } catch { toast?.error?.('Could not load submissions.') }
     finally { setSubLoading(false) }
   }
 
   const gc = s => s===null?TOKENS.s400:s>=80?'#065F46':s>=70?'#1E40AF':s>=60?'#92400E':s>=50?'#6B21A8':s>=40?'#9A3412':'#991B1B'
   const gl = s => s===null?'—':s>=80?'A*':s>=70?'B':s>=60?'C':s>=50?'D':s>=40?'E':'U'
-  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
+  const fmtDate = d => d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—'
   const isEndTerm = e => /end.?term|final|terminal/i.test(e.title||'')
 
   if (selected) {
-    // Compute scores per student
-    const scores = subs.filter(s=>s.status==='graded').map(s => {
+    const scores = subs.filter(s=>s.status==='graded').map(s=>{
       const awarded = (s.answers||[]).reduce((t,a)=>t+(a.marksAwarded||0),0)
-      const pct = selected.totalMarks>0 ? Math.round((awarded/selected.totalMarks)*100) : 0
+      const pct = selected.totalMarks>0?Math.round((awarded/selected.totalMarks)*100):0
       return { ...s, awarded, pct }
     }).sort((a,b)=>b.pct-a.pct)
-
-    const allScores  = scores.map(s=>s.pct)
-    const avg        = allScores.length ? Math.round(allScores.reduce((a,b)=>a+b,0)/allScores.length) : null
-    const highest    = allScores.length ? Math.max(...allScores) : null
-    const lowest     = allScores.length ? Math.min(...allScores) : null
-    const passRate   = allScores.length ? Math.round((allScores.filter(x=>x>=50).length/allScores.length)*100) : null
-    const GRADE_KEYS = ['A*','B','C','D','E','U']
-    const GRADE_COLS = {'A*':'#065F46',B:'#1E40AF',C:'#92400E',D:'#6B21A8',E:'#9A3412',U:'#991B1B'}
-    const gradeDist  = allScores.reduce((acc,sc)=>{
-      const g = sc>=80?'A*':sc>=70?'B':sc>=60?'C':sc>=50?'D':sc>=40?'E':'U'
-      acc[g] = (acc[g]||0)+1; return acc
-    }, {})
-
+    const all = scores.map(s=>s.pct)
+    const avg = all.length?Math.round(all.reduce((a,b)=>a+b,0)/all.length):null
+    const GKEYS = ['A*','B','C','D','E','U']
+    const GCOLS = {'A*':'#065F46',B:'#1E40AF',C:'#92400E',D:'#6B21A8',E:'#9A3412',U:'#991B1B'}
+    const dist = all.reduce((acc,sc)=>{ const g=sc>=80?'A*':sc>=70?'B':sc>=60?'C':sc>=50?'D':sc>=40?'E':'U'; acc[g]=(acc[g]||0)+1; return acc },{})
     return (
       <>
-        <button onClick={()=>setSelected(null)} style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:5, padding:0, marginBottom:16 }}>
-          ← Back to exams
-        </button>
+        <button onClick={()=>setSelected(null)} style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, padding:0, marginBottom:16 }}>← Back to exams</button>
         <div className="card" style={{ padding:22, marginBottom:16, background:'linear-gradient(135deg,#7D1025,#5A0B1B)', color:'#fff' }}>
-          <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'rgba(255,255,255,.5)', marginBottom:8 }}>
-            {isEndTerm(selected) ? 'End-of-Term Exam' : 'Weekly Assessment'} · {fmtDate(selected.startAt)}
-          </div>
+          <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'rgba(255,255,255,.5)', marginBottom:8 }}>{isEndTerm(selected)?'End-of-Term Exam':'Weekly Assessment'} · {fmtDate(selected.startAt)}</div>
           <h2 style={{ fontSize:22, fontWeight:800, color:'#fff', margin:'0 0 4px' }}>{selected.title}</h2>
           <div style={{ fontSize:13, color:'rgba(255,255,255,.65)' }}>{selected.subject} · {selected.curriculum} · {selected.grade} · {selected.totalMarks} marks</div>
           <div style={{ display:'flex', gap:20, marginTop:16, flexWrap:'wrap' }}>
-            {[
-              { label:'Submissions', val:subs.length },
-              { label:'Graded',      val:scores.length },
-              { label:'Class avg',   val:avg!==null?avg+'%':'—', color:'#C9A030' },
-              { label:'Pass rate',   val:passRate!==null?passRate+'%':'—', color:passRate>=60?'#6EE7B7':'#FCA5A5' },
-              { label:'Highest',     val:highest!==null?highest+'%':'—', color:'#6EE7B7' },
-              { label:'Lowest',      val:lowest!==null?lowest+'%':'—',   color:'#FCA5A5' },
-            ].map(k=>(
+            {[{ label:'Submissions',val:subs.length },{ label:'Graded',val:scores.length },{ label:'Class avg',val:avg!==null?avg+'%':'—',color:'#C9A030' },{ label:'Highest',val:all.length?Math.max(...all)+'%':'—',color:'#6EE7B7' },{ label:'Lowest',val:all.length?Math.min(...all)+'%':'—',color:'#FCA5A5' }].map(k=>(
               <div key={k.label} style={{ textAlign:'center' }}>
                 <div style={{ fontSize:20, fontWeight:800, color:k.color||'#fff' }}>{k.val}</div>
                 <div style={{ fontSize:10, color:'rgba(255,255,255,.5)', marginTop:2 }}>{k.label}</div>
@@ -6974,61 +6368,33 @@ function DOSExamsModule({ toast, refreshKey }) {
             ))}
           </div>
         </div>
-
-        {/* Grade distribution */}
-        {allScores.length > 0 && (
+        {all.length>0&&(
           <div className="card" style={{ padding:16, marginBottom:14 }}>
             <div style={{ fontSize:12, fontWeight:700, color:TOKENS.s900, marginBottom:10 }}>Grade distribution</div>
             <div style={{ display:'flex', gap:8, alignItems:'flex-end', height:60 }}>
-              {GRADE_KEYS.map(g => {
-                const count = gradeDist[g]||0
-                const h = allScores.length>0 ? Math.max(4,(count/allScores.length)*60) : 0
-                return (
-                  <div key={g} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
-                    <div style={{ fontSize:11, fontWeight:700, color:GRADE_COLS[g] }}>{count}</div>
-                    <div style={{ width:'100%', height:h, background:GRADE_COLS[g], borderRadius:'3px 3px 0 0' }}/>
-                    <div style={{ fontSize:10.5, fontWeight:800, color:GRADE_COLS[g] }}>{g}</div>
-                  </div>
-                )
-              })}
+              {GKEYS.map(g=>{ const c=dist[g]||0; const h=all.length?Math.max(4,(c/all.length)*60):0; return (
+                <div key={g} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
+                  <div style={{ fontSize:11, fontWeight:700, color:GCOLS[g] }}>{c}</div>
+                  <div style={{ width:'100%', height:h, background:GCOLS[g], borderRadius:'3px 3px 0 0' }}/>
+                  <div style={{ fontSize:10.5, fontWeight:800, color:GCOLS[g] }}>{g}</div>
+                </div>
+              )})}
             </div>
           </div>
         )}
-
-        {/* Student scores */}
         <div className="card" style={{ overflow:'hidden' }}>
-          <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>
-            Student Results ({scores.length})
-          </div>
-          {subLoading ? (
-            <div style={{ padding:30, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>Loading submissions...</div>
-          ) : scores.length === 0 ? (
-            <div style={{ padding:30, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No graded submissions yet.</div>
-          ) : (
+          <div style={{ padding:'12px 16px', borderBottom:'1px solid '+TOKENS.line, fontWeight:800, fontSize:13, color:TOKENS.s900 }}>Student Results ({scores.length})</div>
+          {subLoading?<div style={{ padding:30,textAlign:'center',color:TOKENS.s400 }}>Loading...</div>:scores.length===0?<div style={{ padding:30,textAlign:'center',color:TOKENS.s400 }}>No graded submissions yet.</div>:(
             <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
-              <thead><tr>
-                {['Rank','Student','Score','%','Grade','Time taken'].map(h=>(
-                  <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>
-                ))}
-              </tr></thead>
+              <thead><tr>{['Rank','Student','Score','%','Grade'].map(h=><th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>)}</tr></thead>
               <tbody>
-                {scores.map((s,i) => (
+                {scores.map((s,i)=>(
                   <tr key={String(s._id)} style={{ borderTop:'1px solid '+TOKENS.line }}>
-                    <td style={{ padding:'9px 12px', fontWeight:700, color:i===0?'#C9A030':i<3?TOKENS.s900:TOKENS.s400, fontSize:i===0?15:13 }}>
-                      {i===0?'1st':i===1?'2nd':i===2?'3rd':i+1}
-                    </td>
-                    <td style={{ padding:'9px 12px' }}>
-                      <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{s.student?.firstName||''} {s.student?.lastName||''}</div>
-                      <div style={{ fontSize:11, color:TOKENS.s500 }}>{s.student?.curriculum||''}</div>
-                    </td>
-                    <td style={{ padding:'9px 12px', fontWeight:700, fontSize:13 }}>{s.awarded} / {selected.totalMarks}</td>
+                    <td style={{ padding:'9px 12px', fontWeight:700, color:i===0?'#C9A030':i<3?TOKENS.s900:TOKENS.s400, fontSize:i===0?15:13 }}>{i===0?'1st':i===1?'2nd':i===2?'3rd':i+1}</td>
+                    <td style={{ padding:'9px 12px', fontWeight:700 }}>{s.student?.firstName||''} {s.student?.lastName||''}</td>
+                    <td style={{ padding:'9px 12px', fontWeight:700 }}>{s.awarded}/{selected.totalMarks}</td>
                     <td style={{ padding:'9px 12px', fontWeight:800, fontSize:15, color:gc(s.pct) }}>{s.pct}%</td>
-                    <td style={{ padding:'9px 12px' }}>
-                      <span style={{ padding:'2px 8px', borderRadius:99, fontSize:11, fontWeight:800, background:gc(s.pct)+'18', color:gc(s.pct) }}>{gl(s.pct)}</span>
-                    </td>
-                    <td style={{ padding:'9px 12px', fontSize:12, color:TOKENS.s500 }}>
-                      {s.timeTakenMinutes ? s.timeTakenMinutes+'m' : '—'}
-                    </td>
+                    <td style={{ padding:'9px 12px' }}><span style={{ padding:'2px 8px', borderRadius:99, fontSize:11, fontWeight:800, background:gc(s.pct)+'18', color:gc(s.pct) }}>{gl(s.pct)}</span></td>
                   </tr>
                 ))}
               </tbody>
@@ -7041,12 +6407,9 @@ function DOSExamsModule({ toast, refreshKey }) {
 
   return (
     <>
-      <PSection tag="Dean of Studies" title="Exams &" em="Assessments"
-        sub="All weekly assessments and end-of-term exams. Click any exam to see individual student scores and grade distribution."/>
-
-      <div style={{ display:'flex', gap:8, marginBottom:16, flexWrap:'wrap', alignItems:'center' }}>
-        <input value={filters.search} onChange={e=>setFilters(p=>({...p,search:e.target.value}))}
-          placeholder="Search exam title or subject..."
+      <PSection tag="Dean of Studies" title="Exams &" em="Assessments" sub="All weekly assessments and end-of-term exams. Click any exam to see student scores and grade distribution."/>
+      <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap', alignItems:'center' }}>
+        <input value={filters.search} onChange={e=>setFilters(p=>({...p,search:e.target.value}))} placeholder="Search exam or subject..."
           style={{ flex:'1 1 200px', padding:'8px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
         <select value={filters.curriculum} onChange={e=>setFilters(p=>({...p,curriculum:e.target.value}))}
           style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}>
@@ -7057,99 +6420,59 @@ function DOSExamsModule({ toast, refreshKey }) {
           style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}>
           <option value="all">All types</option>
           <option value="weekly">Weekly assessments</option>
-          <option value="endterm">End-of-term only</option>
+          <option value="endterm">End-of-term exams</option>
         </select>
         <button onClick={load} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>Search</button>
       </div>
-
-      {/* Type legend */}
-      <div style={{ display:'flex', gap:12, marginBottom:16 }}>
-        {[
-          { label:'Weekly assessment', color:'#1E40AF', bg:'#DBEAFE' },
-          { label:'End-of-term exam',  color:'#7D1025', bg:'#FDE7EC' },
-        ].map(t=>(
+      <div style={{ display:'flex', gap:10, marginBottom:14 }}>
+        {[{ label:'Weekly assessment', color:'#1E40AF', bg:'#DBEAFE' },{ label:'End-of-term exam', color:'#7D1025', bg:'#FDE7EC' }].map(t=>(
           <div key={t.label} style={{ display:'flex', alignItems:'center', gap:5, fontSize:12, color:TOKENS.s600 }}>
             <div style={{ width:10, height:10, borderRadius:2, background:t.bg, border:'1.5px solid '+t.color }}/>
             {t.label}
           </div>
         ))}
       </div>
-
       <div className="card" style={{ overflow:'hidden' }}>
-        {loading ? (
-          <div style={{ padding:30, textAlign:'center', color:TOKENS.s400 }}>Loading exams...</div>
-        ) : exams.length === 0 ? (
-          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No exams found.</div>
-        ) : (
+        {loading?<div style={{ padding:30,textAlign:'center',color:TOKENS.s400 }}>Loading exams...</div>:exams.length===0?<div style={{ padding:40,textAlign:'center',color:TOKENS.s400,fontSize:13 }}>No exams found.</div>:(
           <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
-            <thead><tr>
-              {['Title','Type','Subject','Curriculum','Grade','Date','Marks','Status'].map(h=>(
-                <th key={h} style={{ padding:'9px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>
-              ))}
-            </tr></thead>
+            <thead><tr>{['Title','Type','Subject','Curriculum','Grade','Date','Marks','Status'].map(h=><th key={h} style={{ padding:'9px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>)}</tr></thead>
             <tbody>
-              {exams.map(e => {
-                const end = isEndTerm(e)
-                return (
-                  <tr key={e._id} style={{ borderTop:'1px solid '+TOKENS.line, cursor:'pointer' }}
-                    onMouseEnter={ev=>ev.currentTarget.style.background=TOKENS.cream}
-                    onMouseLeave={ev=>ev.currentTarget.style.background='transparent'}
-                    onClick={()=>openExam(e)}>
-                    <td style={{ padding:'10px 12px', fontWeight:700, fontSize:13, color:TOKENS.s900 }}>{e.title}</td>
-                    <td style={{ padding:'10px 12px' }}>
-                      <span style={{ padding:'2px 9px', borderRadius:99, fontSize:10.5, fontWeight:700,
-                        background:end?'#FDE7EC':'#DBEAFE', color:end?'#7D1025':'#1E40AF' }}>
-                        {end?'End-term':'Weekly'}
-                      </span>
-                    </td>
-                    <td style={{ padding:'10px 12px', fontSize:12.5, color:TOKENS.s700 }}>{e.subject||'—'}</td>
-                    <td style={{ padding:'10px 12px', fontSize:12, color:TOKENS.s500 }}>{e.curriculum||'—'}</td>
-                    <td style={{ padding:'10px 12px', fontSize:12, color:TOKENS.s500 }}>{e.grade||'—'}</td>
-                    <td style={{ padding:'10px 12px', fontSize:12, color:TOKENS.s500, whiteSpace:'nowrap' }}>{fmtDate(e.startAt)}</td>
-                    <td style={{ padding:'10px 12px', fontSize:12.5 }}>{e.totalMarks||'—'}</td>
-                    <td style={{ padding:'10px 12px' }}>
-                      <span style={{ padding:'2px 8px', borderRadius:99, fontSize:10.5, fontWeight:700,
-                        background:e.status==='ended'?'#D1FAE5':e.status==='live'?'#FEF3C7':'#F3F4F6',
-                        color:e.status==='ended'?'#065F46':e.status==='live'?'#92400E':'#6B7280' }}>
-                        {e.status||'draft'}
-                      </span>
-                    </td>
-                  </tr>
-                )
-              })}
+              {exams.map(e=>{ const end=isEndTerm(e); return (
+                <tr key={e._id} style={{ borderTop:'1px solid '+TOKENS.line, cursor:'pointer' }}
+                  onMouseEnter={ev=>ev.currentTarget.style.background=TOKENS.cream}
+                  onMouseLeave={ev=>ev.currentTarget.style.background='transparent'}
+                  onClick={()=>openExam(e)}>
+                  <td style={{ padding:'10px 12px', fontWeight:700, fontSize:13, color:TOKENS.s900 }}>{e.title}</td>
+                  <td style={{ padding:'10px 12px' }}><span style={{ padding:'2px 9px', borderRadius:99, fontSize:10.5, fontWeight:700, background:end?'#FDE7EC':'#DBEAFE', color:end?'#7D1025':'#1E40AF' }}>{end?'End-term':'Weekly'}</span></td>
+                  <td style={{ padding:'10px 12px', fontSize:12.5, color:TOKENS.s700 }}>{e.subject||'—'}</td>
+                  <td style={{ padding:'10px 12px', fontSize:12, color:TOKENS.s500 }}>{e.curriculum||'—'}</td>
+                  <td style={{ padding:'10px 12px', fontSize:12, color:TOKENS.s500 }}>{e.grade||'—'}</td>
+                  <td style={{ padding:'10px 12px', fontSize:12, color:TOKENS.s500, whiteSpace:'nowrap' }}>{fmtDate(e.startAt)}</td>
+                  <td style={{ padding:'10px 12px', fontSize:12.5 }}>{e.totalMarks||'—'}</td>
+                  <td style={{ padding:'10px 12px' }}><span style={{ padding:'2px 8px', borderRadius:99, fontSize:10.5, fontWeight:700, background:e.status==='ended'?'#D1FAE5':e.status==='live'?'#FEF3C7':'#F3F4F6', color:e.status==='ended'?'#065F46':e.status==='live'?'#92400E':'#6B7280' }}>{e.status||'draft'}</span></td>
+                </tr>
+              )})}
             </tbody>
           </table>
         )}
       </div>
-      {totalPages>1 && (
-        <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:12 }}>
-          <button onClick={()=>setPage(p=>Math.max(1,p-1))} disabled={page<=1}
-            style={{ padding:'6px 13px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page<=1?'not-allowed':'pointer', opacity:page<=1?.5:1 }}>‹</button>
-          <span style={{ padding:'6px 12px', fontSize:12.5, color:TOKENS.s700 }}>Page {page} / {totalPages}</span>
-          <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages}
-            style={{ padding:'6px 13px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page>=totalPages?'not-allowed':'pointer', opacity:page>=totalPages?.5:1 }}>›</button>
-        </div>
-      )}
     </>
   )
 }
 
-// ═══════════════════════════════════════════════════════════
-// DOS MODULE 3: Homework Tracker
-// Per-teacher: every lesson taught, homework set, submissions,
-// marking rate. Flags lessons with no homework.
-// ═══════════════════════════════════════════════════════════
+// ── DOS MODULE 3: Homework Tracker ─────────────────────────
 function DOSHomeworkModule({ toast, refreshKey }) {
   const [data,    setData]    = useState(null)
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({ termStart:'', termEnd:'', subject:'', curriculum:'' })
-  const [expanded, setExpanded] = useState({}) // teacherId -> bool
+  const [expanded, setExpanded] = useState({})
 
   const load = useCallback(() => {
     setLoading(true)
-    api.get('/dos/homework-compliance', { params: filters })
+    const params = Object.fromEntries(Object.entries(filters).filter(([,v])=>v))
+    api.get('/dos/homework-compliance', { params })
       .then(r => setData(r.data?.data))
-      .catch(() => toast?.error?.('Failed to load homework data.'))
+      .catch(e => toast?.error?.('Failed to load: '+(e?.response?.data?.message||e.message)))
       .finally(() => setLoading(false))
   }, [filters, refreshKey])
 
@@ -7164,11 +6487,8 @@ function DOSHomeworkModule({ toast, refreshKey }) {
 
   return (
     <>
-      <PSection tag="Dean of Studies" title="Homework" em="Tracker"
-        sub="Every lesson taught must have homework set, submitted and marked. Red rows need attention."/>
-
-      <div style={{ display:'flex', gap:8, marginBottom:16, flexWrap:'wrap', alignItems:'center',
-        background:'#fff', border:'1px solid '+TOKENS.line, borderRadius:10, padding:'12px 14px' }}>
+      <PSection tag="Dean of Studies" title="Homework" em="Tracker" sub="Every lesson taught must have homework set, submitted and marked."/>
+      <div style={{ display:'flex', gap:8, marginBottom:16, flexWrap:'wrap', alignItems:'center', background:'#fff', border:'1px solid '+TOKENS.line, borderRadius:10, padding:'12px 14px' }}>
         <input type="date" value={filters.termStart} onChange={e=>setFilters(p=>({...p,termStart:e.target.value}))}
           style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}/>
         <span style={{ fontSize:12, color:TOKENS.s400 }}>to</span>
@@ -7176,24 +6496,17 @@ function DOSHomeworkModule({ toast, refreshKey }) {
           style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}/>
         <input value={filters.subject} onChange={e=>setFilters(p=>({...p,subject:e.target.value}))}
           placeholder="Subject" style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, width:130, fontFamily:'inherit' }}/>
-        <select value={filters.curriculum} onChange={e=>setFilters(p=>({...p,curriculum:e.target.value}))}
-          style={{ padding:'8px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, fontFamily:'inherit' }}>
-          <option value="">All curricula</option>
-          {['Cambridge IGCSE','Edexcel','A-Level','IB','CBC','American','BNC'].map(c=><option key={c} value={c}>{c}</option>)}
-        </select>
         <button onClick={load} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'8px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>Apply</button>
       </div>
-
-      {/* KPI strip */}
-      {!loading && data && (
+      {!loading&&data&&(
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(140px,1fr))', gap:12, marginBottom:20 }}>
           {[
-            { label:'Lessons taught',     val:totalLessons,   color:TOKENS.s900 },
-            { label:'Homework sets',       val:totalHW,        color:TOKENS.s900 },
-            { label:'Lessons missing HW',  val:totalMissing,   color:totalMissing>0?'#991B1B':'#065F46' },
-            { label:'Submissions',         val:totalSubs,      color:TOKENS.s900 },
-            { label:'Graded',             val:totalGraded,    color:'#065F46' },
-            { label:'Marking rate',        val:totalSubs>0?Math.round((totalGraded/totalSubs)*100)+'%':'—', color:totalSubs>0&&totalGraded/totalSubs>=0.8?'#065F46':'#D97706' },
+            { label:'Lessons taught',    val:totalLessons,   color:TOKENS.s900 },
+            { label:'HW sets',           val:totalHW,        color:TOKENS.s900 },
+            { label:'Missing HW',        val:totalMissing,   color:totalMissing>0?'#991B1B':'#065F46' },
+            { label:'Submissions',       val:totalSubs,      color:TOKENS.s900 },
+            { label:'Graded',            val:totalGraded,    color:'#065F46' },
+            { label:'Marking rate',      val:totalSubs>0?Math.round((totalGraded/totalSubs)*100)+'%':'—', color:totalSubs>0&&totalGraded/totalSubs>=0.8?'#065F46':'#D97706' },
           ].map(k=>(
             <div key={k.label} className="card" style={{ padding:'12px 14px' }}>
               <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:5 }}>{k.label}</div>
@@ -7202,88 +6515,49 @@ function DOSHomeworkModule({ toast, refreshKey }) {
           ))}
         </div>
       )}
-
-      {loading ? (
-        <div style={{ padding:'50px 0', textAlign:'center' }}>
-          <div style={{ width:34, height:34, border:'3px solid #F0EBE6', borderTopColor:TOKENS.crimson, borderRadius:'50%', animation:'spin .75s linear infinite', margin:'0 auto' }}/>
-        </div>
-      ) : teachers.length === 0 ? (
-        <div style={{ padding:'40px 0', textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No data found for selected filters.</div>
-      ) : (
+      {loading?<DOSSpinner/>:teachers.length===0?(
+        <div style={{ padding:'40px 0', textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No homework data found. Check that dos-analytics backend is deployed.</div>
+      ):(
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-          {teachers.map(t => {
-            const cs = t.complianceScore
-            const cc = cs>=90?'#065F46':cs>=70?'#D97706':'#991B1B'
-            const bg = cs<70?'#FFF5F5':cs<90?'#FFFBF0':'#F0FDF4'
-            const isOpen = expanded[String(t.teacherId)]
+          {teachers.map(t=>{
+            const cs=t.complianceScore; const cc=cs>=90?'#065F46':cs>=70?'#D97706':'#991B1B'
+            const bg=cs<70?'#FFF5F5':cs<90?'#FFFBF0':'#F0FDF4'
+            const isOpen=expanded[String(t.teacherId)]
             return (
               <div key={String(t.teacherId)} style={{ background:'#fff', border:'1.5px solid '+(cs<70?'#FCA5A5':cs<90?'#FDE68A':TOKENS.line), borderRadius:12, overflow:'hidden' }}>
-                {/* Teacher header row */}
                 <div style={{ padding:'14px 18px', background:bg, display:'flex', justifyContent:'space-between', alignItems:'center', cursor:'pointer' }}
                   onClick={()=>setExpanded(p=>({...p,[String(t.teacherId)]:!p[String(t.teacherId)]}))}>
                   <div>
                     <div style={{ fontSize:14, fontWeight:800, color:TOKENS.s900 }}>{t.teacherName}</div>
-                    <div style={{ fontSize:11.5, color:TOKENS.s500, marginTop:2 }}>
-                      {t.totalLessons} lessons taught · {t.homeworkSet} HW sets · {t.totalSubmissions} submissions
-                    </div>
+                    <div style={{ fontSize:11.5, color:TOKENS.s500, marginTop:2 }}>{t.totalLessons} lessons · {t.homeworkSet} HW sets · {t.totalSubmissions} submissions</div>
                   </div>
-                  <div style={{ display:'flex', gap:16, alignItems:'center' }}>
-                    {t.lessonsWithoutHW > 0 && (
-                      <span style={{ fontSize:12, fontWeight:700, color:'#991B1B', background:'#FEE2E2', padding:'3px 10px', borderRadius:99 }}>
-                        {t.lessonsWithoutHW} lesson{t.lessonsWithoutHW>1?'s':''} missing HW
-                      </span>
-                    )}
+                  <div style={{ display:'flex', gap:14, alignItems:'center' }}>
+                    {t.lessonsWithoutHW>0&&<span style={{ fontSize:12, fontWeight:700, color:'#991B1B', background:'#FEE2E2', padding:'3px 10px', borderRadius:99 }}>{t.lessonsWithoutHW} lesson{t.lessonsWithoutHW>1?'s':''} missing HW</span>}
                     <div style={{ textAlign:'center' }}>
                       <div style={{ fontSize:18, fontWeight:800, color:cc }}>{cs!==null?cs+'%':'—'}</div>
                       <div style={{ fontSize:9.5, color:TOKENS.s400 }}>Compliance</div>
                     </div>
-                    <div style={{ textAlign:'center' }}>
-                      <div style={{ fontSize:16, fontWeight:700, color:t.markingRate>=80?'#065F46':'#D97706' }}>{t.markingRate!==null?t.markingRate+'%':'—'}</div>
-                      <div style={{ fontSize:9.5, color:TOKENS.s400 }}>Marked</div>
-                    </div>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.s400} strokeWidth="2" strokeLinecap="round"
-                      style={{ transform:isOpen?'rotate(90deg)':'rotate(0deg)', transition:'transform .2s' }}>
-                      <polyline points="9 18 15 12 9 6"/>
-                    </svg>
+                    <div style={{ width:4, height:12, borderTop:'2px solid '+TOKENS.s400, borderRight:'2px solid '+TOKENS.s400, transform:isOpen?'rotate(135deg)':'rotate(45deg)', transition:'transform .2s', marginTop:isOpen?4:-4 }}/>
                   </div>
                 </div>
-
-                {/* Compliance bar */}
                 <div style={{ height:4, background:'#F3F4F6' }}>
                   <div style={{ width:(cs||0)+'%', height:'100%', background:cc, transition:'width .4s' }}/>
                 </div>
-
-                {/* Lessons without HW detail */}
-                {isOpen && (
-                  <div style={{ padding:'12px 18px', borderTop:'1px solid '+TOKENS.line }}>
-                    {t.lessonsWithoutHW > 0 ? (
+                {isOpen&&(
+                  <div style={{ padding:'14px 18px', borderTop:'1px solid '+TOKENS.line }}>
+                    {t.lessonsWithoutHW>0?(
                       <>
-                        <div style={{ fontSize:11, fontWeight:700, color:'#991B1B', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>
-                          Lessons without homework assigned
-                        </div>
-                        <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
-                          {t.missingHWLessons.map((l,i) => (
-                            <div key={String(l.id)||i} style={{ display:'flex', alignItems:'center', gap:10, padding:'6px 10px', background:'#FFF5F5', borderRadius:7, border:'1px solid #FCA5A5' }}>
-                              <div style={{ width:6, height:6, borderRadius:'50%', background:'#991B1B', flexShrink:0 }}/>
-                              <div>
-                                <div style={{ fontSize:12.5, fontWeight:600, color:TOKENS.s900 }}>{l.title}</div>
-                                <div style={{ fontSize:11, color:TOKENS.s500 }}>{l.subject}</div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                        <div style={{ fontSize:11, fontWeight:700, color:'#991B1B', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>Lessons without homework</div>
+                        {t.missingHWLessons.map((l,i)=>(
+                          <div key={i} style={{ display:'flex', alignItems:'center', gap:10, padding:'6px 10px', background:'#FFF5F5', borderRadius:7, border:'1px solid #FCA5A5', marginBottom:5 }}>
+                            <div style={{ width:6, height:6, borderRadius:'50%', background:'#991B1B', flexShrink:0 }}/>
+                            <div><div style={{ fontSize:12.5, fontWeight:600, color:TOKENS.s900 }}>{l.title}</div><div style={{ fontSize:11, color:TOKENS.s500 }}>{l.subject}</div></div>
+                          </div>
+                        ))}
                       </>
-                    ) : (
-                      <div style={{ fontSize:12.5, color:'#065F46', fontWeight:600 }}>All lessons have homework assigned.</div>
-                    )}
-
+                    ):<div style={{ fontSize:12.5, color:'#065F46', fontWeight:600 }}>All lessons have homework assigned.</div>}
                     <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10, marginTop:14, paddingTop:12, borderTop:'1px solid '+TOKENS.line }}>
-                      {[
-                        { label:'Lessons', val:t.totalLessons },
-                        { label:'HW with lessons', val:t.lessonsWithHW+' / '+t.totalLessons },
-                        { label:'Submissions', val:t.totalSubmissions },
-                        { label:'Graded', val:t.gradedSubmissions+' / '+t.totalSubmissions },
-                      ].map(k=>(
+                      {[{ label:'Lessons',val:t.totalLessons },{ label:'With HW',val:t.lessonsWithHW+' / '+t.totalLessons },{ label:'Submissions',val:t.totalSubmissions },{ label:'Graded',val:t.gradedSubmissions+' / '+t.totalSubmissions }].map(k=>(
                         <div key={k.label} style={{ textAlign:'center' }}>
                           <div style={{ fontSize:18, fontWeight:800, color:TOKENS.s900 }}>{k.val}</div>
                           <div style={{ fontSize:10, color:TOKENS.s400, marginTop:2 }}>{k.label}</div>
@@ -7301,6 +6575,481 @@ function DOSHomeworkModule({ toast, refreshKey }) {
   )
 }
 
+// ── DOS MODULE 4: Attendance Manager ──────────────────────
+// Supports student breaks: mid-term, end-term, summer
+const BREAK_TYPES = ['mid_term_break','end_term_break','summer_break','public_holiday','sick_leave']
+const BREAK_LABELS = { mid_term_break:'Mid-term break', end_term_break:'End-term break', summer_break:'Summer break', public_holiday:'Public holiday', sick_leave:'Sick leave' }
+
+function DOSAttendanceModule({ toast, refreshKey }) {
+  const today = new Date().toISOString().split('T')[0]
+  const [date,      setDate]      = useState(today)
+  const [userType,  setUserType]  = useState('student')
+  const [users,     setUsers]     = useState([])
+  const [records,   setRecords]   = useState({})   // userId -> { status, reason }
+  const [loading,   setLoading]   = useState(false)
+  const [saving,    setSaving]    = useState(false)
+  const [search,    setSearch]    = useState('')
+  const [history,   setHistory]   = useState(null)
+  const [histUser,  setHistUser]  = useState(null)
+
+  const STATUS_OPTIONS = [
+    { val:'present',        label:'Present',          bg:'#D1FAE5', fg:'#065F46' },
+    { val:'absent',         label:'Absent',           bg:'#FEE2E2', fg:'#991B1B', needsReason:true },
+    { val:'late',           label:'Late',             bg:'#FEF3C7', fg:'#92400E' },
+    { val:'half_day',       label:'Half day',         bg:'#DBEAFE', fg:'#1E40AF' },
+    { val:'excused',        label:'Excused',          bg:'#F3E8FF', fg:'#6B21A8' },
+    { val:'mid_term_break', label:'Mid-term break',   bg:'#FEF9C3', fg:'#713F12' },
+    { val:'end_term_break', label:'End-term break',   bg:'#FEF9C3', fg:'#713F12' },
+    { val:'summer_break',   label:'Summer break',     bg:'#FFEDD5', fg:'#9A3412' },
+  ]
+
+  useEffect(() => {
+    setUsers([]); setRecords({})
+    setLoading(true)
+    api.get('/users', { params: { role: userType, limit:200 } })
+      .then(r => {
+        const list = r.data?.users || r.data?.data?.users || []
+        setUsers(list)
+        return list
+      })
+      .then(list => {
+        if (!list.length) { setLoading(false); return }
+        return api.get('/attendance/day', { params: { date } })
+          .then(r => {
+            const items = r.data?.data?.items || r.data?.items || []
+            const map = {}
+            list.forEach(u => {
+              const rec = items.find(a => String(a.studentId?._id||a.studentId) === String(u._id))
+              map[String(u._id)] = { status: rec?.status || 'present', reason: rec?.reason || '' }
+            })
+            setRecords(map)
+          })
+          .catch(() => {
+            const map = {}
+            list.forEach(u => { map[String(u._id)] = { status:'present', reason:'' } })
+            setRecords(map)
+          })
+      })
+      .catch(() => toast?.error?.('Failed to load users.'))
+      .finally(() => setLoading(false))
+  }, [userType, refreshKey])
+
+  useEffect(() => {
+    if (!users.length) return
+    api.get('/attendance/day', { params: { date } })
+      .then(r => {
+        const items = r.data?.data?.items || r.data?.items || []
+        setRecords(prev => {
+          const map = { ...prev }
+          users.forEach(u => {
+            const rec = items.find(a => String(a.studentId?._id||a.studentId) === String(u._id))
+            map[String(u._id)] = { status: rec?.status || 'present', reason: rec?.reason || '' }
+          })
+          return map
+        })
+      })
+      .catch(() => {})
+  }, [date])
+
+  const setStatus = (uid, status) => setRecords(p => ({ ...p, [uid]: { ...p[uid], status, reason: status!=='absent'?'':p[uid]?.reason||'' } }))
+  const setReason = (uid, reason) => setRecords(p => ({ ...p, [uid]: { ...p[uid], reason } }))
+
+  // Save: use individual POST for each user (bulk only supports one status at a time)
+  const save = async () => {
+    setSaving(true)
+    let saved=0, errors=0
+    const entries = Object.entries(records)
+    for (const [userId, rec] of entries) {
+      if (userType==='student') {
+        try {
+          await api.post('/attendance', { studentId:userId, date, status:rec.status, reason:rec.reason||'' })
+          saved++
+        } catch { errors++ }
+      }
+    }
+    setSaving(false)
+    if (errors===0) toast?.ok?.(`Attendance saved for ${saved} ${userType}s on ${date}.`)
+    else toast?.error?.(`Saved ${saved}, failed ${errors}.`)
+  }
+
+  const openHistory = async (u) => {
+    setHistUser(u); setHistory(null)
+    try {
+      const { data } = await api.get('/attendance/student/'+u._id)
+      setHistory(data?.data?.records || data?.records || [])
+    } catch { toast?.error?.('Could not load history.') }
+  }
+
+  const filtered = users.filter(u => {
+    if (!search) return true
+    const name = (u.firstName+' '+u.lastName).toLowerCase()
+    return name.includes(search.toLowerCase())||(u.admissionNo||u.admissionNumber||'').toLowerCase().includes(search.toLowerCase())
+  })
+
+  const counts = STATUS_OPTIONS.map(s => ({ ...s, count: Object.values(records).filter(v=>v.status===s.val).length }))
+
+  // History view
+  if (histUser&&history!==null) {
+    const present = history.filter(r=>r.status==='present').length
+    const rate = history.length?Math.round((present/history.length)*100):0
+    return (
+      <>
+        <button onClick={()=>{setHistUser(null);setHistory(null)}} style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, padding:0, marginBottom:16 }}>← Back to attendance</button>
+        <div className="card" style={{ padding:20, marginBottom:14 }}>
+          <div style={{ fontSize:15, fontWeight:800, color:TOKENS.s900, marginBottom:4 }}>{histUser.firstName} {histUser.lastName}</div>
+          <div style={{ fontSize:12, color:TOKENS.s500, marginBottom:14 }}>{histUser.curriculum} · {histUser.gradeLevel} · Adm: {histUser.admissionNo||histUser.admissionNumber||'—'}</div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
+            {[{ label:'Total records',val:history.length },{ label:'Present',val:present,color:'#065F46' },{ label:'Absent',val:history.filter(r=>r.status==='absent').length,color:'#991B1B' },{ label:'Attendance rate',val:rate+'%',color:rate>=80?'#065F46':rate>=60?'#D97706':'#991B1B' }].map(k=>(
+              <div key={k.label} style={{ textAlign:'center',padding:'10px 0' }}>
+                <div style={{ fontSize:24, fontWeight:800, color:k.color||TOKENS.s900 }}>{k.val}</div>
+                <div style={{ fontSize:11, color:TOKENS.s400, marginTop:2 }}>{k.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="card" style={{ overflow:'hidden' }}>
+          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
+            <thead><tr>{['Date','Day','Status','Reason','Marked by'].map(h=><th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:10.5 }}>{h}</th>)}</tr></thead>
+            <tbody>
+              {[...history].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((r,i)=>{
+                const s=STATUS_OPTIONS.find(x=>x.val===r.status)||STATUS_OPTIONS[0]
+                return (
+                  <tr key={i} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                    <td style={{ padding:'8px 12px', fontSize:13 }}>{new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+                    <td style={{ padding:'8px 12px', fontSize:12, color:TOKENS.s500 }}>{new Date(r.date).toLocaleDateString('en-GB',{weekday:'short'})}</td>
+                    <td style={{ padding:'8px 12px' }}><span style={{ padding:'2px 9px', borderRadius:99, fontSize:11.5, fontWeight:700, background:s.bg, color:s.fg }}>{s.label}</span></td>
+                    <td style={{ padding:'8px 12px', fontSize:12, color:TOKENS.s500 }}>{r.reason||'—'}</td>
+                    <td style={{ padding:'8px 12px', fontSize:12, color:TOKENS.s500 }}>{r.markedBy?.firstName||'—'}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <PSection tag="Dean of Studies" title="Attendance" em="Manager" sub="Mark attendance for all students and staff. Supports breaks and leave statuses."/>
+      {/* Controls */}
+      <div style={{ display:'flex', gap:8, marginBottom:12, flexWrap:'wrap', alignItems:'center' }}>
+        <input type="date" value={date} onChange={e=>setDate(e.target.value)}
+          style={{ padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
+        <div style={{ display:'flex', border:'1.5px solid '+TOKENS.line, borderRadius:7, overflow:'hidden' }}>
+          {[['student','Students'],['teacher','Teachers'],['admin','Admin'],['ops_manager','Ops'],['accountant','Accounts'],['sales','Sales'],['dos','DOS']].map(([role,label])=>(
+            <button key={role} onClick={()=>setUserType(role)} style={{
+              padding:'8px 12px', border:'none', cursor:'pointer', fontSize:12, fontWeight:600,
+              background:userType===role?TOKENS.crimson:'#fff', color:userType===role?'#fff':TOKENS.s500,
+              borderRight:'1px solid '+TOKENS.line,
+            }}>{label}</button>
+          ))}
+        </div>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or admission no..."
+          style={{ flex:1, padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit' }}/>
+        <button onClick={save} disabled={saving||userType!=='student'} title={userType!=='student'?'Attendance tracking is for students only':'Save'}
+          style={{ background:saving||userType!=='student'?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 22px', borderRadius:7, fontSize:13, fontWeight:700, cursor:saving||userType!=='student'?'not-allowed':'pointer', whiteSpace:'nowrap' }}>
+          {saving?'Saving...':'Save attendance'}
+        </button>
+      </div>
+      {/* Summary */}
+      <div style={{ display:'flex', gap:8, marginBottom:14, flexWrap:'wrap' }}>
+        {counts.filter(s=>s.count>0).map(s=>(
+          <div key={s.val} style={{ padding:'6px 12px', borderRadius:8, background:s.bg, border:'1px solid '+s.fg+'30', display:'flex', gap:8, alignItems:'center' }}>
+            <span style={{ fontSize:16, fontWeight:800, color:s.fg }}>{s.count}</span>
+            <span style={{ fontSize:11, fontWeight:600, color:s.fg }}>{s.label}</span>
+          </div>
+        ))}
+        <div style={{ padding:'6px 12px', borderRadius:8, background:TOKENS.cream, border:'1px solid '+TOKENS.line, display:'flex', gap:8, alignItems:'center' }}>
+          <span style={{ fontSize:16, fontWeight:800, color:TOKENS.s900 }}>{users.length}</span>
+          <span style={{ fontSize:11, fontWeight:600, color:TOKENS.s500 }}>Total</span>
+        </div>
+      </div>
+      {/* Table */}
+      <div className="card" style={{ overflow:'hidden' }}>
+        {loading?<div style={{ padding:30,textAlign:'center',color:TOKENS.s400 }}>Loading users...</div>:filtered.length===0?<div style={{ padding:40,textAlign:'center',color:TOKENS.s400,fontSize:13 }}>No {userType}s found.</div>:(
+          <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
+            <thead><tr>
+              {['Name',userType==='student'?'Adm / Grade':'Role','Current status','Mark as',userType==='student'?'Reason':'',''].map(h=>(
+                <th key={h} style={{ padding:'9px 14px', textAlign:'left', fontSize:10.5 }}>{h}</th>
+              ))}
+            </tr></thead>
+            <tbody>
+              {filtered.map(u=>{
+                const rec = records[String(u._id)] || { status:'present', reason:'' }
+                const so  = STATUS_OPTIONS.find(s=>s.val===rec.status)||STATUS_OPTIONS[0]
+                return (
+                  <tr key={u._id} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                    <td style={{ padding:'10px 14px' }}>
+                      <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
+                      <div style={{ fontSize:11, color:TOKENS.s500 }}>{u.email}</div>
+                    </td>
+                    <td style={{ padding:'10px 14px', fontSize:12.5, color:TOKENS.s600 }}>
+                      {userType==='student'?(u.admissionNo||u.admissionNumber||'—')+' · '+(u.gradeLevel||u.grade||'—'):u.role}
+                    </td>
+                    <td style={{ padding:'10px 14px' }}>
+                      <span style={{ padding:'4px 12px', borderRadius:99, fontSize:12, fontWeight:700, background:so.bg, color:so.fg }}>{so.label}</span>
+                    </td>
+                    <td style={{ padding:'10px 14px' }}>
+                      <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
+                        {STATUS_OPTIONS.map(s=>(
+                          <button key={s.val} onClick={()=>setStatus(String(u._id),s.val)} style={{
+                            padding:'3px 8px', borderRadius:5, border:'1.5px solid '+(rec.status===s.val?s.fg:TOKENS.line),
+                            background:rec.status===s.val?s.bg:'#fff', color:rec.status===s.val?s.fg:TOKENS.s500,
+                            fontSize:10.5, fontWeight:rec.status===s.val?700:500, cursor:'pointer', whiteSpace:'nowrap',
+                          }}>{s.label}</button>
+                        ))}
+                      </div>
+                    </td>
+                    <td style={{ padding:'10px 14px', minWidth:140 }}>
+                      {(rec.status==='absent'||rec.status==='excused') && (
+                        <input value={rec.reason} onChange={e=>setReason(String(u._id),e.target.value)}
+                          placeholder="Reason required for absent/excused"
+                          style={{ width:'100%', padding:'5px 8px', borderRadius:6, border:'1.5px solid '+(rec.status==='absent'&&!rec.reason?'#FCA5A5':TOKENS.line), fontSize:12, fontFamily:'inherit' }}/>
+                      )}
+                    </td>
+                    <td style={{ padding:'10px 14px' }}>
+                      {userType==='student'&&(
+                        <button onClick={()=>openHistory(u)} style={{ fontSize:11, color:TOKENS.crimson, background:'transparent', border:'none', cursor:'pointer', fontWeight:700, textDecoration:'underline' }}>History</button>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
+  )
+}
+
+// ── DOS MODULE 5: Timetable Manager ───────────────────────
+// Smartious schedule: 9am-3pm, Lunch 1pm-2pm
+// Mon-Thu = lessons, Fri = assessment or activities
+const SCHOOL_SLOTS = [
+  { time:'09:00-10:00', label:'09:00 – 10:00' },
+  { time:'10:00-11:00', label:'10:00 – 11:00' },
+  { time:'11:00-12:00', label:'11:00 – 12:00' },
+  { time:'12:00-13:00', label:'12:00 – 13:00' },
+  { time:'13:00-14:00', label:'LUNCH BREAK',    isBreak:true },
+  { time:'14:00-15:00', label:'14:00 – 15:00' },
+]
+const SCHOOL_DAYS = ['Mon','Tue','Wed','Thu','Fri']
+const DAY_TYPES   = { Mon:'Lessons', Tue:'Lessons', Wed:'Lessons', Thu:'Lessons', Fri:'Assessment / Activities' }
+
+function DOSTimetableModule({ toast, refreshKey }) {
+  const [view,        setView]        = useState('picker')
+  const [entries,     setEntries]     = useState([])
+  const [loading,     setLoading]     = useState(false)
+  const [selected,    setSelected]    = useState(null)
+  const [editData,    setEditData]    = useState(null)
+  const [saving,      setSaving]      = useState(false)
+  const [teachers,    setTeachers]    = useState([])
+  const [students,    setStudents]    = useState([])
+  const [chosenUser,  setChosenUser]  = useState(null)
+  const [search,      setSearch]      = useState('')
+
+  useEffect(() => {
+    api.get('/users', { params:{ limit:200 } })
+      .then(r => {
+        const all = r.data?.users || r.data?.data?.users || []
+        setTeachers(all.filter(u=>u.role==='teacher'))
+        setStudents(all.filter(u=>u.role==='student'))
+      })
+      .catch(()=>{})
+  }, [refreshKey])
+
+  const loadUserTimetable = async (u) => {
+    setChosenUser(u); setEntries([]); setLoading(true); setView('grid')
+    try {
+      const path = u.role==='teacher' ? '/timetable/teacher/'+u._id : '/timetable/student/'+u._id
+      const { data } = await api.get(path)
+      setEntries(data?.data?.entries || data?.entries || [])
+    } catch(e) { toast?.error?.('Could not load timetable: '+(e?.response?.data?.message||e.message)) }
+    finally { setLoading(false) }
+  }
+
+  const openEdit = (entry) => {
+    setSelected(entry)
+    const [start,end] = (entry.startTime&&entry.endTime) ? [entry.startTime,entry.endTime] : ['09:00','10:00']
+    setEditData({ title:entry.title||'', subject:entry.subject||'', dayOfWeek:entry.dayOfWeek||'Mon', startTime:start, endTime:end, deliveryMode:entry.deliveryMode||'virtual', notes:entry.notes||'' })
+    setView('edit')
+  }
+
+  const saveEdit = async () => {
+    if (!selected) return
+    setSaving(true)
+    try {
+      await api.patch('/timetable/'+selected._id, editData)
+      toast?.ok?.('Timetable entry updated.')
+      loadUserTimetable(chosenUser)
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Could not update.') }
+    finally { setSaving(false) }
+  }
+
+  // Build grid from entries
+  const grid = {}
+  SCHOOL_DAYS.forEach(d=>{ grid[d]={} })
+  entries.forEach(e=>{
+    if (!grid[e.dayOfWeek]) return
+    const slot = e.startTime+'-'+e.endTime
+    if (!grid[e.dayOfWeek][slot]) grid[e.dayOfWeek][slot]=[]
+    grid[e.dayOfWeek][slot].push(e)
+  })
+
+  const inp2 = { width:'100%', padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit', boxSizing:'border-box' }
+  const filtStudents = students.filter(u=>!search||(u.firstName+' '+u.lastName).toLowerCase().includes(search.toLowerCase()))
+
+  if (view==='edit'&&editData) {
+    return (
+      <>
+        <button onClick={()=>setView('grid')} style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, padding:0, marginBottom:16 }}>← Back to timetable</button>
+        <h2 style={{ fontSize:20, fontWeight:800, color:TOKENS.s900, marginBottom:18 }}>Edit Timetable Entry</h2>
+        <div className="card" style={{ padding:22, maxWidth:560 }}>
+          <div style={{ display:'grid', gap:14 }}>
+            <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Title</label>
+              <input value={editData.title} onChange={e=>setEditData(p=>({...p,title:e.target.value}))} style={inp2}/></div>
+            <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Subject</label>
+              <input value={editData.subject} onChange={e=>setEditData(p=>({...p,subject:e.target.value}))} style={inp2}/></div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+              <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Day</label>
+                <select value={editData.dayOfWeek} onChange={e=>setEditData(p=>({...p,dayOfWeek:e.target.value}))} style={inp2}>
+                  {SCHOOL_DAYS.map(d=><option key={d} value={d}>{d} — {DAY_TYPES[d]}</option>)}
+                </select></div>
+              <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Start time</label>
+                <select value={editData.startTime} onChange={e=>setEditData(p=>({...p,startTime:e.target.value}))} style={inp2}>
+                  {['09:00','10:00','11:00','12:00','14:00','15:00'].map(t=><option key={t} value={t}>{t}</option>)}
+                </select></div>
+              <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>End time</label>
+                <select value={editData.endTime} onChange={e=>setEditData(p=>({...p,endTime:e.target.value}))} style={inp2}>
+                  {['10:00','11:00','12:00','13:00','15:00','16:00'].map(t=><option key={t} value={t}>{t}</option>)}
+                </select></div>
+            </div>
+            <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Delivery mode</label>
+              <select value={editData.deliveryMode} onChange={e=>setEditData(p=>({...p,deliveryMode:e.target.value}))} style={inp2}>
+                {['virtual','in-person','hybrid'].map(m=><option key={m} value={m}>{m.charAt(0).toUpperCase()+m.slice(1)}</option>)}
+              </select></div>
+            <div><label style={{ fontSize:11, fontWeight:700, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Notes</label>
+              <textarea value={editData.notes} onChange={e=>setEditData(p=>({...p,notes:e.target.value}))} rows={2} style={{ ...inp2, resize:'vertical' }}/></div>
+          </div>
+          <div style={{ display:'flex', gap:10, marginTop:18 }}>
+            <button onClick={saveEdit} disabled={saving} style={{ background:saving?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', padding:'10px 24px', borderRadius:8, fontSize:13, fontWeight:700, cursor:saving?'not-allowed':'pointer' }}>{saving?'Saving...':'Save changes'}</button>
+            <button onClick={()=>setView('grid')} style={{ background:'transparent', border:'1.5px solid '+TOKENS.line, color:TOKENS.s500, padding:'10px 18px', borderRadius:8, fontSize:13, cursor:'pointer' }}>Cancel</button>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  if (view==='grid'&&chosenUser) {
+    const dayColor = d => d==='Fri'?'#6B21A8':TOKENS.crimson
+    return (
+      <>
+        <button onClick={()=>{ setView('picker'); setChosenUser(null); setEntries([]) }}
+          style={{ background:'transparent', border:'none', cursor:'pointer', color:TOKENS.crimson, fontSize:12.5, fontWeight:700, padding:0, marginBottom:16 }}>← Back</button>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:18 }}>
+          <div>
+            <h2 style={{ fontSize:20, fontWeight:800, color:TOKENS.s900, margin:'0 0 4px' }}>{chosenUser.firstName} {chosenUser.lastName}</h2>
+            <div style={{ fontSize:12.5, color:TOKENS.s500 }}>{chosenUser.role==='teacher'?'Teacher':'Student'} · {chosenUser.curriculum||''} {chosenUser.gradeLevel||chosenUser.grade||''}</div>
+          </div>
+        </div>
+        {loading?<DOSSpinner/>:(
+          <div style={{ overflowX:'auto' }}>
+            <table style={{ width:'100%', borderCollapse:'collapse', minWidth:700 }}>
+              <thead>
+                <tr>
+                  <th style={{ width:100, padding:'8px 12px', background:TOKENS.cream, border:'1px solid '+TOKENS.line, fontSize:11, fontWeight:700, color:TOKENS.s500, textAlign:'left' }}>Time</th>
+                  {SCHOOL_DAYS.map(d=>(
+                    <th key={d} style={{ padding:'8px 12px', background:d==='Fri'?'#F3E8FF':TOKENS.cream, border:'1px solid '+TOKENS.line, fontSize:11, fontWeight:800, color:dayColor(d), textAlign:'center' }}>
+                      <div>{d}</div>
+                      <div style={{ fontSize:9.5, fontWeight:500, color:TOKENS.s400 }}>{DAY_TYPES[d]}</div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {SCHOOL_SLOTS.map(slot=>(
+                  <tr key={slot.time}>
+                    <td style={{ padding:'8px 12px', border:'1px solid '+TOKENS.line, fontSize:11.5, fontWeight:600, color:slot.isBreak?TOKENS.s300:TOKENS.s600, background:slot.isBreak?'#FAFAFA':undefined, whiteSpace:'nowrap' }}>
+                      {slot.label}
+                    </td>
+                    {SCHOOL_DAYS.map(day=>{
+                      if (slot.isBreak) return <td key={day} style={{ border:'1px solid '+TOKENS.line, background:'#FAFAFA', textAlign:'center' }}><span style={{ fontSize:10.5, color:TOKENS.s300 }}>Lunch</span></td>
+                      const [s,e] = slot.time.split('-')
+                      const cellEntries = (grid[day]||{})[s+'-'+e] || []
+                      return (
+                        <td key={day} style={{ border:'1px solid '+TOKENS.line, padding:4, verticalAlign:'top', background:day==='Fri'?'#FAF5FF':'#fff', minWidth:120 }}>
+                          {cellEntries.map(en=>(
+                            <div key={en._id} style={{ background:day==='Fri'?'#F3E8FF':'#FDE7EC', border:'1px solid '+(day==='Fri'?'#C4B5FD':'#F8B4C0'), borderRadius:6, padding:'5px 7px', marginBottom:3 }}>
+                              <div style={{ fontSize:12, fontWeight:700, color:dayColor(day) }}>{en.subject||en.title}</div>
+                              {en.teacherId&&<div style={{ fontSize:10, color:TOKENS.s500 }}>{en.teacherId?.firstName||''} {en.teacherId?.lastName||''}</div>}
+                              <div style={{ fontSize:10, color:TOKENS.s400, textTransform:'capitalize' }}>{en.deliveryMode}</div>
+                              <button onClick={()=>openEdit(en)} style={{ fontSize:10, color:dayColor(day), background:'transparent', border:'none', cursor:'pointer', fontWeight:700, padding:0, textDecoration:'underline', marginTop:2 }}>Edit</button>
+                            </div>
+                          ))}
+                          {!cellEntries.length&&<div style={{ fontSize:10, color:TOKENS.s200, textAlign:'center', padding:'8px 0' }}>—</div>}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </>
+    )
+  }
+
+  return (
+    <>
+      <PSection tag="Dean of Studies" title="Timetable" em="Manager" sub="View and edit weekly timetables. Mon–Thu: lessons. Fri: assessments or activities. School hours 09:00–15:00 with lunch 13:00–14:00."/>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+        <div className="card" style={{ padding:18 }}>
+          <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>Teacher timetables</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:5, maxHeight:340, overflowY:'auto' }}>
+            {teachers.map(u=>(
+              <button key={u._id} onClick={()=>loadUserTimetable(u)} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'9px 12px', borderRadius:8, border:'1px solid '+TOKENS.line, background:'#fff', cursor:'pointer', textAlign:'left' }}
+                onMouseEnter={e=>e.currentTarget.style.background=TOKENS.cream}
+                onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
+                <div>
+                  <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
+                  <div style={{ fontSize:11, color:TOKENS.s500 }}>{(u.teachingSpecialties||[]).map(s=>s.subject||s.subjectId?.subjectName||'').filter(Boolean).slice(0,3).join(', ')||u.email}</div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.crimson} strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            ))}
+            {!teachers.length&&<div style={{ fontSize:12.5, color:TOKENS.s400, textAlign:'center', padding:'16px 0' }}>No teachers found.</div>}
+          </div>
+        </div>
+        <div className="card" style={{ padding:18 }}>
+          <div style={{ fontSize:12, fontWeight:800, color:TOKENS.s900, marginBottom:8 }}>Student timetables</div>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search student..."
+            style={{ width:'100%', padding:'7px 10px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:12.5, marginBottom:10, fontFamily:'inherit', boxSizing:'border-box' }}/>
+          <div style={{ display:'flex', flexDirection:'column', gap:5, maxHeight:300, overflowY:'auto' }}>
+            {filtStudents.map(u=>(
+              <button key={u._id} onClick={()=>loadUserTimetable(u)} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'9px 12px', borderRadius:8, border:'1px solid '+TOKENS.line, background:'#fff', cursor:'pointer', textAlign:'left' }}
+                onMouseEnter={e=>e.currentTarget.style.background=TOKENS.cream}
+                onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
+                <div>
+                  <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{u.firstName} {u.lastName}</div>
+                  <div style={{ fontSize:11, color:TOKENS.s500 }}>{u.curriculum} · {u.gradeLevel||u.grade} · {u.admissionNo||u.admissionNumber||'—'}</div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.crimson} strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            ))}
+            {!filtStudents.length&&<div style={{ fontSize:12.5, color:TOKENS.s400, textAlign:'center', padding:'16px 0' }}>No students found.</div>}
+          </div>
+        </div>
+      </div>
+      <div style={{ marginTop:14, padding:'12px 16px', background:TOKENS.cream, borderRadius:8, border:'1px solid '+TOKENS.line, fontSize:12.5, color:TOKENS.s600 }}>
+        School hours: <strong>09:00 – 15:00</strong> · Lunch break: <strong>13:00 – 14:00</strong> · Mon–Thu: <strong>Lessons</strong> · Fri: <strong>Assessment or Activities</strong>
+      </div>
+    </>
+  )
+}
 
 function ReportsModule({ toast, refreshKey }) {
   const [view, setView] = useState('list') // list | generate | detail
