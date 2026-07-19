@@ -6090,6 +6090,14 @@ function SalesPerformanceModule({ toast, refreshKey }) {
   )
 }
 
+function DOSSpinner() {
+  return (
+    <div style={{ padding:'50px 0', textAlign:'center' }}>
+      <div style={{ width:34, height:34, border:'3px solid #F0EBE6', borderTopColor:TOKENS.crimson, borderRadius:'50%', animation:'spin .75s linear infinite', margin:'0 auto' }}/>
+    </div>
+  )
+}
+
 // ═══════════════════════════════════════════════════════════
 // ReportsModule — Admin / Ops Portal
 // Generate, edit and download student academic reports.
