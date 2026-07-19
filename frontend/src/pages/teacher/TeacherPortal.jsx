@@ -786,6 +786,7 @@ export default function TeacherPortal() {
       {id:'attendance',    label:'Attendance & Check-in',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
       {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
       {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
+      {id:'earnings',      label:'My Earnings',       iconName:'earnings',      icon:'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'},
       {id:'timetable',     label:'Timetable',        iconName:'timetable',     icon:'rect:3:4:18:18:2|line:8:2:8:6|line:16:2:16:6|line:3:10:21:10'},
       {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
     ]},
@@ -13411,6 +13412,264 @@ function MshauriFloatingButton({ user, setPage, toast, currentPage }) {
 // Statuses: 'present', 'absent', 'half_day'. Reason required when
 // 'absent' per the backend Attendance model's pre-validate hook.
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// EarningsTab — Teacher portal
+// Teachers view payslips, submit tuition extras for approval.
+// ═══════════════════════════════════════════════════════════
+function EarningsTab({ user, toast }) {
+  const [records,  setRecords]  = useState([])
+  const [loading,  setLoading]  = useState(true)
+  const [claimForm,setClaimForm]= useState(null)  // open claim modal
+  const [form,     setForm]     = useState({ description:'', studentName:'', subject:'', sessions:1, ratePerSession:'', totalAmount:'', date:new Date().toISOString().split('T')[0], periodMonth:new Date().getMonth()+1, periodYear:new Date().getFullYear() })
+  const [saving,   setSaving]   = useState(false)
+  const [deleting, setDeleting] = useState(null)
+
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
+  const money   = (n, c='KES') => ({KES:'KES ',USD:'$',GBP:'£'})[c]||''+(n||0).toLocaleString('en-US',{minimumFractionDigits:0})
+  const fmtDate = d => d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—'
+
+  const load = () => {
+    setLoading(true)
+    api.get('/payroll/my')
+      .then(r => setRecords(r.data?.data?.records||[]))
+      .catch(e => toast?.error?.('Could not load earnings.'))
+      .finally(() => setLoading(false))
+  }
+  useEffect(()=>{ load() },[])
+
+  const openPayslip = async (id) => {
+    try {
+      const r = await api.get('/payroll/'+id+'/payslip-html')
+      const w = window.open('','_blank'); w.document.write(r.data?.data?.html||''); w.document.close()
+    } catch { toast?.error?.('Payslip not available yet.') }
+  }
+
+  const submitClaim = async () => {
+    if (!form.description || !form.totalAmount) { toast?.error?.('Description and amount required.'); return }
+    setSaving(true)
+    try {
+      await api.post('/payroll/my/extras', form)
+      toast?.ok?.('Tuition claim submitted. Pending approval from DOS or Accountant.')
+      setClaimForm(null); load()
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
+    finally { setSaving(false) }
+  }
+
+  const deleteClaim = async (recordId, extraId) => {
+    setDeleting(extraId)
+    try {
+      await api.delete('/payroll/my/extras/'+extraId)
+      toast?.ok?.('Claim deleted.'); load()
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Cannot delete.') }
+    finally { setDeleting(null) }
+  }
+
+  const STATUS_S = {
+    draft:      { bg:'#F3F4F6', fg:'#6B7280', label:'Draft' },
+    processing: { bg:'#DBEAFE', fg:'#1E40AF', label:'Processing' },
+    paid:       { bg:'#D1FAE5', fg:'#065F46', label:'Paid' },
+  }
+  const EXTRA_S = {
+    pending:  { bg:'#FEF3C7', fg:'#D97706', label:'Pending approval' },
+    approved: { bg:'#D1FAE5', fg:'#065F46', label:'Approved' },
+    rejected: { bg:'#FEE2E2', fg:'#991B1B', label:'Rejected' },
+  }
+
+  // Compute total approved extras across all records
+  const allExtras = records.flatMap(r => (r.tuitionExtras||[]).map(e=>({...e,_period:r.periodLabel,_recordId:r._id})))
+  const pendingExtras = allExtras.filter(e=>e.status==='pending')
+
+  const inp = { padding:'9px 11px', borderRadius:7, border:'1.5px solid #E8DDD5', fontSize:13, fontFamily:'inherit', width:'100%', boxSizing:'border-box' }
+
+  return (
+    <div>
+      {/* Header */}
+      <div style={{ marginBottom:20, display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+        <div>
+          <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#8B1A2E', marginBottom:4 }}>Finance</div>
+          <h2 style={{ fontFamily:"'Instrument Serif',serif", fontSize:26, color:'#231715', margin:'0 0 4px' }}>My Earnings</h2>
+          <div style={{ fontSize:13, color:'#7A6652' }}>Payslips, salary history, and tuition extra claims.</div>
+        </div>
+        <button onClick={()=>setClaimForm(true)} style={{ background:'#7D1025', color:'#fff', border:'none', padding:'10px 20px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
+          + Submit tuition claim
+        </button>
+      </div>
+
+      {/* Pending claims alert */}
+      {pendingExtras.length > 0 && (
+        <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:10, padding:'12px 16px', marginBottom:16 }}>
+          <div style={{ fontSize:12, fontWeight:700, color:'#D97706', marginBottom:2 }}>{pendingExtras.length} claim{pendingExtras.length>1?'s':''} awaiting approval</div>
+          <div style={{ fontSize:12, color:'#92400E' }}>Your tuition extra claims are being reviewed by the DOS or Accountant.</div>
+        </div>
+      )}
+
+      {/* Payroll records */}
+      {loading ? <div style={{ padding:'40px 0', textAlign:'center', color:'#9A9A9A', fontSize:13 }}>Loading...</div>
+      : records.length===0 ? (
+        <div style={{ padding:'40px 0', textAlign:'center', background:'#fff', border:'1px solid #E8DDD5', borderRadius:12 }}>
+          <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:20, color:'#231715', marginBottom:6 }}>No payroll records yet</div>
+          <div style={{ fontSize:13, color:'#7A6652' }}>Your payslips will appear here once processed by the finance team.</div>
+        </div>
+      ) : (
+        <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+          {records.map(r => {
+            const ss    = STATUS_S[r.status]||STATUS_S.draft
+            const cur   = r.currency||'KES'
+            const deductions = r.deductions||[]
+            const extras = r.tuitionExtras||[]
+            return (
+              <div key={r._id} style={{ background:'#fff', border:'1px solid #E8DDD5', borderRadius:12, overflow:'hidden' }}>
+                {/* Record header */}
+                <div style={{ padding:'16px 20px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom:'1px solid #E8DDD5', background:'#FBFAF5' }}>
+                  <div>
+                    <div style={{ fontSize:16, fontWeight:800, color:'#231715' }}>{r.periodLabel}</div>
+                    <div style={{ display:'flex', gap:12, marginTop:4 }}>
+                      <span style={{ padding:'2px 10px', borderRadius:99, fontSize:11, fontWeight:700, background:ss.bg, color:ss.fg }}>{ss.label}</span>
+                      {r.status==='paid'&&r.paymentDate&&<span style={{ fontSize:12, color:'#7A6652' }}>Paid {fmtDate(r.paymentDate)} via {r.paymentMethod}</span>}
+                    </div>
+                  </div>
+                  <div style={{ textAlign:'right' }}>
+                    <div style={{ fontSize:10, color:'#7A6652', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:2 }}>Net pay</div>
+                    <div style={{ fontSize:22, fontWeight:800, color:'#065F46' }}>{money(r.netPay, cur)}</div>
+                  </div>
+                </div>
+
+                {/* Pay breakdown */}
+                <div style={{ padding:'14px 20px', display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:16, borderBottom:extras.length>0?'1px solid #E8DDD5':undefined }}>
+                  <div>
+                    <div style={{ fontSize:10, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:4 }}>Basic salary</div>
+                    <div style={{ fontSize:17, fontWeight:800, color:'#231715' }}>{money(r.basicSalary, cur)}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize:10, fontWeight:700, color:'#991B1B', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:4 }}>Deductions</div>
+                    <div style={{ fontSize:17, fontWeight:800, color:'#991B1B' }}>{deductions.length>0?'('+money(r.totalDeductions,cur)+')':'—'}</div>
+                    {deductions.map((d,i)=><div key={i} style={{ fontSize:11, color:'#7A6652', marginTop:2 }}>{d.label}: {money(d.amount,cur)}</div>)}
+                  </div>
+                  <div>
+                    <div style={{ fontSize:10, fontWeight:700, color:'#065F46', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:4 }}>Approved extras</div>
+                    <div style={{ fontSize:17, fontWeight:800, color:'#065F46' }}>{r.totalApprovedExtras>0?'+'+money(r.totalApprovedExtras,cur):'—'}</div>
+                  </div>
+                </div>
+
+                {/* Extras list */}
+                {extras.length > 0 && (
+                  <div style={{ padding:'12px 20px', borderTop:'1px solid #E8DDD5' }}>
+                    <div style={{ fontSize:11, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:8 }}>Tuition claims</div>
+                    {extras.map((e,i) => {
+                      const es = EXTRA_S[e.status]||EXTRA_S.pending
+                      return (
+                        <div key={e._id||i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'7px 0', borderBottom:i<extras.length-1?'1px solid #F4EFEB':undefined }}>
+                          <div>
+                            <div style={{ fontSize:12.5, fontWeight:600, color:'#231715' }}>{e.description}</div>
+                            <div style={{ fontSize:11, color:'#7A6652', marginTop:1 }}>
+                              {e.sessions} session{e.sessions>1?'s':''}{e.studentName?' · '+e.studentName:''}{e.subject?' · '+e.subject:''}
+                              {e.date&&' · '+fmtDate(e.date)}
+                            </div>
+                            {e.status==='rejected'&&e.rejectedNote&&<div style={{ fontSize:11, color:'#991B1B', marginTop:2 }}>Reason: {e.rejectedNote}</div>}
+                          </div>
+                          <div style={{ display:'flex', gap:8, alignItems:'center', flexShrink:0 }}>
+                            <span style={{ fontSize:13, fontWeight:800, color:e.status==='approved'?'#065F46':e.status==='rejected'?'#6B7280':'#231715' }}>{money(e.totalAmount,cur)}</span>
+                            <span style={{ padding:'2px 9px', borderRadius:99, fontSize:10.5, fontWeight:700, background:es.bg, color:es.fg }}>{es.label}</span>
+                            {e.status==='pending'&&(
+                              <button onClick={()=>deleteClaim(r._id,e._id)} disabled={deleting===e._id}
+                                style={{ fontSize:11, color:'#991B1B', background:'transparent', border:'1px solid #FCA5A5', padding:'3px 8px', borderRadius:5, cursor:'pointer', fontWeight:600 }}>
+                                {deleting===e._id?'…':'Remove'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Actions */}
+                {r.status==='paid' && (
+                  <div style={{ padding:'10px 20px', borderTop:'1px solid #E8DDD5', display:'flex', gap:10 }}>
+                    <button onClick={()=>openPayslip(r._id)} style={{ background:'#7D1025', color:'#fff', border:'none', padding:'8px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>
+                      Download / print payslip
+                    </button>
+                    {r.payslipEmailSentAt&&<span style={{ fontSize:12, color:'#7A6652', alignSelf:'center' }}>Payslip emailed {fmtDate(r.payslipEmailSentAt)}</span>}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* ── Claim modal ── */}
+      {claimForm && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:16, overflowY:'auto' }}
+          onClick={()=>setClaimForm(null)}>
+          <div style={{ background:'#fff', borderRadius:14, padding:26, maxWidth:480, width:'100%', boxShadow:'0 20px 60px rgba(0,0,0,.25)', maxHeight:'90vh', overflowY:'auto' }}
+            onClick={e=>e.stopPropagation()}>
+            <div style={{ fontSize:16, fontWeight:800, color:'#231715', marginBottom:4 }}>Submit tuition claim</div>
+            <div style={{ fontSize:12.5, color:'#7A6652', marginBottom:20, lineHeight:1.5 }}>
+              Claims for extra tuition sessions outside normal working hours. These require approval from the DOS or Accountant before being added to your payslip.
+            </div>
+            <div style={{ display:'grid', gap:14 }}>
+              <div>
+                <label style={{ fontSize:11, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Description *</label>
+                <input value={form.description} onChange={e=>setForm(p=>({...p,description:e.target.value}))} style={inp} placeholder="e.g. Extra tuition — Chemistry revision, 3 sessions"/>
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+                <div>
+                  <label style={{ fontSize:11, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Student name</label>
+                  <input value={form.studentName} onChange={e=>setForm(p=>({...p,studentName:e.target.value}))} style={inp} placeholder="Optional"/>
+                </div>
+                <div>
+                  <label style={{ fontSize:11, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Subject</label>
+                  <input value={form.subject} onChange={e=>setForm(p=>({...p,subject:e.target.value}))} style={inp} placeholder="e.g. Chemistry"/>
+                </div>
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+                <div>
+                  <label style={{ fontSize:11, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Sessions</label>
+                  <input type="number" min="1" value={form.sessions} onChange={e=>{ const s=parseInt(e.target.value,10)||1; const tot=s*(parseFloat(form.ratePerSession)||0); setForm(p=>({...p,sessions:s,totalAmount:tot||p.totalAmount})) }} style={inp}/>
+                </div>
+                <div>
+                  <label style={{ fontSize:11, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Rate / session (KES)</label>
+                  <input type="number" value={form.ratePerSession} onChange={e=>{ const r=parseFloat(e.target.value)||0; setForm(p=>({...p,ratePerSession:e.target.value,totalAmount:r*p.sessions})) }} style={inp} placeholder="0"/>
+                </div>
+                <div>
+                  <label style={{ fontSize:11, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Total amount *</label>
+                  <input type="number" value={form.totalAmount} onChange={e=>setForm(p=>({...p,totalAmount:e.target.value}))} style={inp}/>
+                </div>
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+                <div>
+                  <label style={{ fontSize:11, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Date of service</label>
+                  <input type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))} style={inp}/>
+                </div>
+                <div>
+                  <label style={{ fontSize:11, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Month</label>
+                  <select value={form.periodMonth} onChange={e=>setForm(p=>({...p,periodMonth:parseInt(e.target.value,10)}))} style={inp}>
+                    {MONTHS.map((m,i)=><option key={m} value={i+1}>{m}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize:11, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4, display:'block' }}>Year</label>
+                  <select value={form.periodYear} onChange={e=>setForm(p=>({...p,periodYear:parseInt(e.target.value,10)}))} style={inp}>
+                    {[2024,2025,2026,2027].map(y=><option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div style={{ background:'#FFFBEB', borderRadius:8, padding:'10px 14px', marginTop:14, fontSize:12, color:'#92400E', lineHeight:1.5 }}>
+              This claim will be reviewed by the DOS or Accountant. Once approved, it will be added to your payslip for the selected period.
+            </div>
+            <div style={{ display:'flex', gap:10, marginTop:18 }}>
+              <button onClick={submitClaim} disabled={saving} style={{ flex:1, background:saving?'#9A9A9A':'#7D1025', color:'#fff', border:'none', padding:'11px 0', borderRadius:8, fontSize:13, fontWeight:700, cursor:saving?'not-allowed':'pointer' }}>{saving?'Submitting...':'Submit claim'}</button>
+              <button onClick={()=>setClaimForm(null)} style={{ background:'transparent', border:'1.5px solid #E8DDD5', color:'#7A6652', padding:'11px 18px', borderRadius:8, fontSize:13, cursor:'pointer' }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function AttendanceTab({ user, toast }) {
   const todayStr = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
   const isWeekend = [0,6].includes(new Date().getDay())
