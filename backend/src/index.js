@@ -86,6 +86,7 @@ app.use('/api/inquiries',  require('./routes/inquiries'));
 app.use('/api/assessment', require('./routes/assessment'));
 app.use('/api/reports',    require('./routes/reports'));
 app.use('/api/dos',        require('./routes/dos-analytics'));
+app.use('/api/fees',       require('./routes/fee-collection'));
 app.use('/api/checkin',    require('./routes/checkin'));
 
 // ── Health check ──────────────────────────────────────────
@@ -124,6 +125,7 @@ const runTimetablePromotion = () => {
 // Fires every weekday at 07:00 school local time (EAT = UTC+3).
 // Sends email to every active user who hasn't checked in yet.
 const { sendDailyReminders } = require('./routes/checkin');
+const { sendDueReminders  } = require('./routes/fee-collection');
 
 const runCheckinReminder = () => {
   const now = new Date();
@@ -167,6 +169,28 @@ mongoose.connect(MONGODB_URI)
       setTimeout(() => { runCheckinReminder(); setInterval(runCheckinReminder, 24*60*60*1000); }, msUntil);
     };
     scheduleReminder();
+
+    // Fee payment reminders — daily at 8 AM EAT
+    const scheduleFeeReminder = () => {
+      const now = new Date();
+      const eat = new Date(now.getTime() + 3*60*60*1000);
+      const next8am = new Date(eat);
+      next8am.setHours(8, 0, 0, 0);
+      if (next8am <= eat) next8am.setDate(next8am.getDate() + 1);
+      const ms = next8am.getTime() - eat.getTime();
+      console.log('[fees] Next fee reminder in', Math.round(ms/60000), 'minutes');
+      setTimeout(() => {
+        sendDueReminders()
+          .then(r => console.log('[fees] Auto-reminders sent:', r.sent, 'skipped:', r.skipped))
+          .catch(e => console.error('[fees] Cron error:', e.message));
+        setInterval(() => {
+          sendDueReminders()
+            .then(r => console.log('[fees] Auto-reminders sent:', r.sent))
+            .catch(e => console.error('[fees] Cron error:', e.message));
+        }, 24*60*60*1000);
+      }, ms);
+    };
+    scheduleFeeReminder();
   })
   .catch(err => {
     console.error('❌  MongoDB connection error:', err.message);
