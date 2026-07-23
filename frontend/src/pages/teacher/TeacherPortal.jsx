@@ -812,7 +812,7 @@ export default function TeacherPortal() {
   return (
     <div className="app">
       <style>{`
-        :root{--ink0:#FBFAF5;--ink1:#FBFAF5;--ink2:#F4EFEB;--ink3:#F4EFEB;--ink4:#E8E2D6;--ink5:#E8E2D6;--par0:#1A0F0E;--gold2:#7D1025;--gold3:#C9A030;--gold4:#7D1025;--border:rgba(125,16,37,.15);}
+        :root{--ink0:#FBFAF5;--ink1:#FBFAF5;--ink2:#F4EFEB;--ink3:#F4EFEB;--ink4:#E8E2D6;--ink5:#E8E2D6;--par0:#1A0F0E;--par1:#1A0F0E;--par2:#564844;--par3:#857973;--gold2:#7D1025;--gold3:#C9A030;--gold4:#7D1025;--border:rgba(125,16,37,.15);}
         .app{background:#FBFAF5}
         .sidebar{background:#FBFAF5!important;border-right:1px solid #F4EFEB!important;}
         .sb-logo{border-bottom:1px solid #F4EFEB!important;}
@@ -836,6 +836,12 @@ export default function TeacherPortal() {
         .tb-chip{background:#FBFAF5!important;border-color:#E8E2D6!important;color:#564844!important;}
         .btn.btn-s{background:#FBFAF5!important;border-color:#E8E2D6!important;color:#564844!important;}
         .content{background:#FBFAF5!important;max-width:1400px;margin:0 auto;}
+        input,select,textarea,option{color:#1A0F0E!important;background:#fff!important;}
+        input::placeholder{color:#857973!important;}
+        select option{color:#1A0F0E!important;background:#fff!important;}
+        .filter-input,.filter-select,.search-input{color:#1A0F0E!important;background:#fff!important;}
+        [class*="select"],[class*="input"],[class*="dropdown"]{color:#1A0F0E!important;}
+        .fi,.fsel,.fta{color:#1A0F0E!important;background:#fff!important;}
         .card{background:#fff;border:1px solid #E8E2D6;border-radius:12px;}
         .kpi{background:#fff;border:1px solid #E8E2D6;border-radius:12px;padding:16px 18px;}
         .tbl{width:100%;border-collapse:collapse;}
