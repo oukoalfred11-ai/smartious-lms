@@ -4,17 +4,15 @@
 # so Netlify serves it at the site root.
 #
 # Rules are processed top-to-bottom; first match wins.
+#
+# TRAILING SLASH HANDLING:
+# We rely on prerender.js writing flat .html files
+# (dist/<route>.html instead of dist/<route>/index.html).
+# With flat files + Netlify Pretty URLs default, /foo serves
+# dist/foo.html at 200 without any trailing-slash redirect.
+# A force trailing-slash strip rule (/*/  /:splat  301!) caused
+# a redirect loop and was removed.
 # ═══════════════════════════════════════════════════════════════
-
-# ─── FORCE STRIP TRAILING SLASHES (SEO canonicalization) ─────────
-# Google Search Console reported /foo showing as 'Page with redirect'
-# and /foo/ showing as 'Alternative page with proper canonical tag'.
-# Root cause: Netlify was normalizing trailing slashes automatically
-# while our canonical tag stripped them, creating a conflict.
-# Combined with the prerender.js change (flat .html files instead of
-# folder/index.html), this ensures ONE canonical URL per page.
-# The '!' (force flag) makes this rule fire even when a file exists.
-/*/                      /:splat                     301!
 
 # ─── Country hub canonical consolidation (301s) ──────────────────
 /us-families             /online-school/usa          301
