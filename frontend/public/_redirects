@@ -3,14 +3,23 @@
 # Place this file in the build output (frontend/public/_redirects)
 # so Netlify serves it at the site root.
 #
-# 301 redirects consolidate SEO authority on the canonical URL
-# pattern: /online-school/<country>
+# Rules are processed top-to-bottom; first match wins.
 # ═══════════════════════════════════════════════════════════════
 
-# Country hub pages — 301 to canonical /online-school/<country>
-/us-families            /online-school/usa       301
-/ca-families            /online-school/canada    301
-/homeschooling-kenya    /online-school/kenya     301
+# ─── FORCE STRIP TRAILING SLASHES (SEO canonicalization) ─────────
+# Google Search Console reported /foo showing as 'Page with redirect'
+# and /foo/ showing as 'Alternative page with proper canonical tag'.
+# Root cause: Netlify was normalizing trailing slashes automatically
+# while our canonical tag stripped them, creating a conflict.
+# Combined with the prerender.js change (flat .html files instead of
+# folder/index.html), this ensures ONE canonical URL per page.
+# The '!' (force flag) makes this rule fire even when a file exists.
+/*/                      /:splat                     301!
 
-# SPA fallback — keep this last so it doesn't override the redirects above
-/*                      /index.html              200
+# ─── Country hub canonical consolidation (301s) ──────────────────
+/us-families             /online-school/usa          301
+/ca-families             /online-school/canada       301
+/homeschooling-kenya     /online-school/kenya        301
+
+# ─── SPA fallback — MUST be last so it doesn't override above ────
+/*                       /index.html                 200
