@@ -83,6 +83,13 @@ const userSchema = new mongoose.Schema({
   phone: String,
   bio: String,
   avatar: String,
+  // ── Parent contact (for students) ────────────────────────
+  // parentEmail is used for fee reminders and class notifications
+  // even if the parent doesn't have a portal account.
+  parentEmail:   { type: String, default: '' },
+  parentName:    { type: String, default: '' },
+  parentPhone:   { type: String, default: '' },
+
   parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   children: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   linkedStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // For parents: students they manage
