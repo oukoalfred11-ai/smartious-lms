@@ -108,6 +108,7 @@ const ROUTES_TO_PRERENDER = [
   '/online-school/germany',
   '/online-school/romania',
   '/online-school/ukraine',
+  '/online-school/netherlands',
 
   /* Topical cluster articles (Malaysia — will scale to other countries) */
   '/online-igcse-malaysia',
@@ -141,7 +142,7 @@ const ROUTES_TO_PRERENDER = [
    US city links each, which would blow past MAX_URLS instantly.
    US/Canada city pages fall back to SPA rendering (Google's JS
    second-pass crawl will still index them via sitemap.xml). */
-const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine)$/
+const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands)$/
 const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)[a-z0-9-]+$/
 
 /* ────────────────────────────────────────────────────────────────
@@ -165,7 +166,13 @@ function startServer() {
 function routeToOutputPath(route) {
   if (route === '/' || route === '') return join(DIST, 'index.html')
   const clean = route.replace(/^\/+|\/+$/g, '')
-  return join(DIST, clean, 'index.html')
+  // Write FLAT .html files (e.g. dist/online-school/kenya.html) instead of
+  // folder-based (dist/online-school/kenya/index.html) so Netlify serves
+  // /online-school/kenya at 200 without redirecting to /online-school/kenya/.
+  // This prevents Google Search Console 'Page with redirect' and
+  // 'Alternative page with proper canonical tag' issues that were caused
+  // by folder-based output triggering trailing slash normalization.
+  return join(DIST, clean + '.html')
 }
 
 function sanitize(html) {
