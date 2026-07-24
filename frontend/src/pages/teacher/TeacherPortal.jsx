@@ -6576,7 +6576,7 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
 
   // ── Form state ──
   const [f, setF] = useState({
-    studentName:'', studentId:'', classLevel:'', subject:'',
+    _id:'', studentName:'', studentId:'', classLevel:'', subject:'',
     teacher:teacherName, week:'', period:'Term 1',
     topics:[''], subTopics:[''], activities:[''],
     understanding:'', participation:'', generalPerf:'',
@@ -6595,7 +6595,7 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
 
   // ── Load saved reports + students ──
   useEffect(() => {
-    api.get('/reports/my-saved')
+    api.get('/weekly-reports/my')
       .then(r => setSaved(r.data?.data?.reports||[]))
       .catch(() => {})
       .finally(() => setLSaved(false))
@@ -6627,12 +6627,16 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
     if (!f.subject.trim())     { if (!silent) toast?.error?.('Subject is required.'); return }
     if (publish) setPublishing(true); else if (!silent) setSaving(true)
     try {
-      const payload = { ...f, publish }
-      const r = await api.post('/reports/teacher-save', payload)
+      const payload = { ...f, publish, _id: f._id||undefined }
+      const r = await api.post('/weekly-reports/save', payload)
       setLastSaved(new Date())
+      // Store the _id so subsequent auto-saves update the same record
+      if (r.data?.data?.report?._id && !f._id) {
+        setF(p => ({...p, _id: r.data.data.report._id}))
+      }
       if (!silent) toast?.ok?.(r.data?.message||'Saved.')
       // Refresh saved list
-      api.get('/reports/my-saved').then(r2=>setSaved(r2.data?.data?.reports||[])).catch(()=>{})
+      api.get('/weekly-reports/my').then(r2=>setSaved(r2.data?.data?.reports||[])).catch(()=>{})
       if (publish) { setTimeout(()=>setView('list'), 800) }
     } catch(e) {
       if (!silent) toast?.error?.(e?.response?.data?.message||'Save failed.')
@@ -6651,16 +6655,16 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
 
   const openReport = async (id) => {
     try {
-      const r = await api.get('/reports/'+id+'/pdf-html')
+      const r = await api.get('/weekly-reports/'+id+'/html')
       const w = window.open('','_blank'); w.document.write(r.data?.data?.html||''); w.document.close()
     } catch { toast?.error?.('Could not open report.') }
   }
 
   const publishExisting = async (id) => {
     try {
-      const r = await api.post('/reports/'+id+'/publish')
+      const r = await api.post('/weekly-reports/'+id+'/publish')
       toast?.ok?.(r.data?.message||'Published.')
-      api.get('/reports/my-saved').then(r2=>setSaved(r2.data?.data?.reports||[])).catch(()=>{})
+      api.get('/weekly-reports/my').then(r2=>setSaved(r2.data?.data?.reports||[])).catch(()=>{})
     } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
   }
 
