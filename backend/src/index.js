@@ -89,7 +89,8 @@ app.use('/api/dos',        require('./routes/dos-analytics'));
 app.use('/api/fees',       require('./routes/fee-collection'));
 app.use('/api/payroll',    require('./routes/payroll'));
 app.use('/api/parent',     require('./routes/parent-portal'));
-app.use('/api/ratings',    require('./routes/ratings'));
+app.use('/api/ratings',        require('./routes/ratings'));
+app.use('/api/weekly-reports', require('./routes/weekly-reports'));
 app.use('/api/checkin',    require('./routes/checkin'));
 
 // ── Health check ──────────────────────────────────────────
