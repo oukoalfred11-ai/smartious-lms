@@ -786,6 +786,7 @@ export default function TeacherPortal() {
       {id:'attendance',    label:'Attendance & Check-in',       iconName:'attendance',    icon:'rect:5:4:14:17:2|rect:9:2:6:3:1|M8.5 12.5l2 2 4-4.5'},
       {id:'library',       label:'Library',          iconName:'library',       icon:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20|M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'},
       {id:'scheduleclasses', label:'Schedule Classes', iconName:'scheduleclasses', icon:'rect:3:4:18:18:2|line:16:2:16:6|line:8:2:8:6|line:3:10:21:10'},
+      {id:'myratings',     label:'My Ratings',         iconName:'ratings',       icon:'M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'},
       {id:'earnings',      label:'My Earnings',       iconName:'earnings',      icon:'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'},
       {id:'timetable',     label:'Timetable',        iconName:'timetable',     icon:'rect:3:4:18:18:2|line:8:2:8:6|line:16:2:16:6|line:3:10:21:10'},
       {id:'managesubject',  label:'Manage My Subject', iconName:'managesubject', icon:'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z|M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'},
@@ -978,6 +979,7 @@ export default function TeacherPortal() {
           {/* ── MY STUDENTS ── */}
           {page === 'students' && <MyStudentsTab user={currentUser} store={store} setPage={setPage} toast={toast} setMsgTo={setMsgTo} setMsgSubject={setMsgSubject} setMsgBody={setMsgBody} setMsgModal={setMsgModal} />}
 
+          {page === 'myratings' && <TeacherMyRatingsTab user={currentUser} toast={toast}/>}
           {page === 'earnings' && <EarningsTab user={currentUser} toast={toast}/>}
           {page === 'attendance' && <AttendanceTab user={currentUser} toast={toast} />}
 
@@ -13461,6 +13463,111 @@ function MshauriFloatingButton({ user, setPage, toast, currentPage }) {
 // 'absent' per the backend Attendance model's pre-validate hook.
 // ═══════════════════════════════════════════════════════════
 
+
+function TeacherMyRatingsTab({ user, toast }) {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.get('/ratings/my')
+      .then(r => setData(r.data?.data))
+      .catch(() => toast?.error?.('Could not load ratings.'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const stars = (n,size=16) => (
+    <div style={{ display:'flex', gap:2 }}>
+      {[1,2,3,4,5].map(s=>(
+        <svg key={s} width={size} height={size} viewBox="0 0 24 24" fill={s<=Math.round(n||0)?'#C9A030':'#E8E2D6'} stroke={s<=Math.round(n||0)?'#C9A030':'#CFC7C2'} strokeWidth="1.5">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      ))}
+    </div>
+  )
+
+  const fmtD = d => d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—'
+
+  if (loading) return <div style={{ padding:'40px 0', textAlign:'center', color:'#9A9A9A' }}>Loading...</div>
+  if (!data) return null
+
+  const { summary, ratings=[] } = data
+
+  return (
+    <div>
+      <div style={{ marginBottom:20 }}>
+        <div style={{ fontSize:10, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.12em', marginBottom:4 }}>Performance</div>
+        <h2 style={{ fontFamily:"'Instrument Serif',serif", fontSize:26, color:'#231715', margin:'4px 0 6px' }}>My Ratings</h2>
+        <div style={{ fontSize:13, color:'#7A6652' }}>Ratings submitted by your students and their parents. Show-cause deductions reduce your adjusted rating.</div>
+      </div>
+
+      {/* Summary */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap:12, marginBottom:20 }}>
+        {[
+          { label:'Adjusted rating', val:summary?.avg!==null?summary.avg+'/5':'No ratings', big:true },
+          { label:'Raw rating',      val:summary?.rawAvg!==null?summary.rawAvg+'/5':'—' },
+          { label:'Total reviews',   val:summary?.count||0 },
+          { label:'Show-cause ded.', val:summary?.totalDeductions?'-'+summary.totalDeductions:'None', bad:summary?.totalDeductions>0 },
+        ].map(k=>(
+          <div key={k.label} style={{ background:'#fff', border:'1px solid #E8DDD5', borderRadius:12, padding:'16px 18px' }}>
+            <div style={{ fontSize:10, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:5 }}>{k.label}</div>
+            <div style={{ fontSize:k.big?28:22, fontWeight:800, color:k.bad?'#991B1B':'#231715', lineHeight:1 }}>{k.val}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Stars display */}
+      {summary?.avg!==null&&(
+        <div style={{ background:'#fff', border:'1px solid #E8DDD5', borderRadius:12, padding:'20px 24px', marginBottom:16, display:'flex', alignItems:'center', gap:20 }}>
+          <div>
+            <div style={{ fontSize:42, fontWeight:800, color:'#1A0F0E', lineHeight:1 }}>{summary.avg}</div>
+            <div style={{ fontSize:12, color:'#7A6652', marginTop:4 }}>out of 5.0</div>
+          </div>
+          <div>
+            {stars(summary.avg, 24)}
+            <div style={{ fontSize:12, color:'#7A6652', marginTop:6 }}>{summary.count} review{summary.count!==1?'s':''}</div>
+          </div>
+          {summary.totalDeductions>0&&(
+            <div style={{ marginLeft:'auto', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:8, padding:'10px 16px', textAlign:'center' }}>
+              <div style={{ fontSize:10, fontWeight:700, color:'#991B1B', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:4 }}>Show-cause deductions</div>
+              <div style={{ fontSize:18, fontWeight:800, color:'#991B1B' }}>-{summary.totalDeductions}</div>
+              <div style={{ fontSize:11, color:'#991B1B', marginTop:2 }}>Raw: {summary.rawAvg}</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Reviews list */}
+      <div style={{ background:'#fff', border:'1px solid #E8DDD5', borderRadius:12, overflow:'hidden' }}>
+        <div style={{ padding:'14px 18px', borderBottom:'1px solid #E8DDD5', fontWeight:800, fontSize:13, color:'#231715' }}>
+          All reviews ({ratings.length})
+        </div>
+        {ratings.length===0 ? (
+          <div style={{ padding:40, textAlign:'center', color:'#9A9A9A', fontSize:13 }}>No reviews yet. Ratings will appear here once students or parents submit them.</div>
+        ) : (
+          <div>
+            {ratings.map((r,i)=>(
+              <div key={i} style={{ padding:'14px 18px', borderBottom:i<ratings.length-1?'1px solid #F4EFEB':undefined }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:6 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                    {stars(r.score)}
+                    <span style={{ fontSize:11, fontWeight:700, color:'#7D1025', textTransform:'capitalize', background:'#FBF6E3', padding:'1px 8px', borderRadius:99 }}>{r.raterRole}</span>
+                  </div>
+                  <span style={{ fontSize:11, color:'#857973' }}>{fmtD(r.createdAt)}</span>
+                </div>
+                {r.comment&&<div style={{ fontSize:13, color:'#564844', lineHeight:1.6 }}>{r.comment}</div>}
+                {(r.showCauseDeductions||[]).map((d,j)=>(
+                  <div key={j} style={{ marginTop:6, fontSize:11.5, color:'#991B1B', background:'#FEF2F2', padding:'5px 12px', borderRadius:6 }}>
+                    Show cause deduction: -{d.amount} · {d.reason}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 function EarningsTab({ user, toast }) {
   const [records,  setRecords]  = useState([])
