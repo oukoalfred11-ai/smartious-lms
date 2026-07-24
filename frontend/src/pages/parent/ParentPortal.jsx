@@ -55,7 +55,175 @@ const PAGE_TITLES = {
 // ══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// MOBILE SHELL — shared across Student, Teacher, Parent portals
+// On mobile (<768px): bottom tab bar + full-width content
+// On desktop: existing sidebar layout
+// ═══════════════════════════════════════════════════════════
+
+// Hook: detects mobile screen
+function useIsMobile() {
+  const [mobile, setMobile] = useState(
+    typeof window !== 'undefined' && window.innerWidth < 768
+  )
+  useEffect(() => {
+    const fn = () => setMobile(window.innerWidth < 768)
+    window.addEventListener('resize', fn)
+    return () => window.removeEventListener('resize', fn)
+  }, [])
+  return mobile
+}
+
+// Mobile top bar — shown instead of sidebar on mobile
+function MobileTopBar({ title, eyebrow, onMenuToggle, menuOpen, user, initials }) {
+  return (
+    <div style={{
+      position:'sticky', top:0, zIndex:100,
+      background:'rgba(251,250,245,.96)',
+      backdropFilter:'blur(16px)',
+      WebkitBackdropFilter:'blur(16px)',
+      borderBottom:'1px solid #F4EFEB',
+      display:'flex', alignItems:'center',
+      padding:'0 16px', height:56, gap:12,
+      flexShrink:0,
+    }}>
+      <button onClick={onMenuToggle} style={{
+        width:36, height:36, borderRadius:8,
+        background:menuOpen?'#FBF6E3':'transparent',
+        border:'none', cursor:'pointer',
+        display:'flex', alignItems:'center', justifyContent:'center',
+        flexShrink:0,
+      }}>
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={menuOpen?'#7D1025':'#564844'} strokeWidth="2" strokeLinecap="round">
+          {menuOpen
+            ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
+            : <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>
+          }
+        </svg>
+      </button>
+      <div style={{ flex:1, minWidth:0 }}>
+        {eyebrow&&<div style={{ fontSize:9, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.12em' }}>{eyebrow}</div>}
+        <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:18, color:'#1A0F0E', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{title}</div>
+      </div>
+      <div style={{ width:34, height:34, borderRadius:'50%', background:'linear-gradient(135deg,#7D1025,#5A0B1B)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, border:'2px solid #C9A03030' }}>
+        <span style={{ color:'#F0CC5A', fontSize:11, fontWeight:700 }}>{initials}</span>
+      </div>
+    </div>
+  )
+}
+
+// Mobile drawer — slides in from left when menu is open
+function MobileDrawer({ open, onClose, sections, page, setPage, portalLabel, user, initials, onLogout, children }) {
+  if (!open) return null
+  return (
+    <>
+      {/* Backdrop */}
+      <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.4)', zIndex:200 }}/>
+      {/* Drawer */}
+      <div style={{
+        position:'fixed', top:0, left:0, bottom:0, width:280,
+        background:'#FBFAF5', zIndex:201, display:'flex', flexDirection:'column',
+        overflowY:'auto', boxShadow:'4px 0 24px rgba(0,0,0,.12)',
+        animation:'slideInLeft .2s ease',
+      }}>
+        <style>{`@keyframes slideInLeft{from{transform:translateX(-100%)}to{transform:translateX(0)}}`}</style>
+        {/* Logo */}
+        <div style={{ padding:'20px 20px 16px', borderBottom:'1px solid #F4EFEB' }}>
+          <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:24, color:'#1A0F0E' }}>
+            Smart<em style={{ fontStyle:'italic', color:'#7D1025' }}>ious</em>
+          </div>
+          <div style={{ fontSize:9.5, color:'#7D1025', fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', marginTop:3 }}>{portalLabel}</div>
+        </div>
+
+        {/* Nav sections */}
+        <nav style={{ flex:1, padding:'12px 0' }}>
+          {sections.map((s, si) => (
+            <div key={si} style={{ marginBottom:16 }}>
+              {s.section&&<div style={{ fontSize:10, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.12em', padding:'0 20px 6px' }}>{s.section}</div>}
+              {s.items.map(item => {
+                const active = page === item.id
+                return (
+                  <div key={item.id} onClick={() => { setPage(item.id); onClose() }}
+                    style={{ display:'flex', alignItems:'center', gap:14, padding:'11px 20px', cursor:'pointer', background:active?'#FBF6E3':'transparent', borderLeft:active?'3px solid #C9A030':'3px solid transparent', color:active?'#7D1025':'#564844', fontWeight:active?600:400, fontSize:15, transition:'all .15s' }}>
+                    <div style={{ width:28, height:28, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke={active?'#7D1025':'#857973'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d={item.icon||'M3 12h18M3 6h18M3 18h18'}/>
+                      </svg>
+                    </div>
+                    <span>{item.label}</span>
+                    {item.badge&&<span style={{ marginLeft:'auto', background:'#7D1025', color:'#fff', fontSize:10, fontWeight:700, padding:'2px 7px', borderRadius:99 }}>{item.badge}</span>}
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+        </nav>
+
+        {/* Extra content (child selector etc) */}
+        {children}
+
+        {/* User card */}
+        <div style={{ padding:'12px 16px', borderTop:'1px solid #F4EFEB' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+            <div style={{ width:38, height:38, borderRadius:'50%', background:'linear-gradient(135deg,#7D1025,#5A0B1B)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <span style={{ color:'#F0CC5A', fontSize:12, fontWeight:700 }}>{initials}</span>
+            </div>
+            <div>
+              <div style={{ fontSize:13, fontWeight:700, color:'#1A0F0E' }}>{user?.firstName} {user?.lastName}</div>
+              <div style={{ fontSize:11, color:'#857973' }}>{portalLabel?.replace(' Portal','')}</div>
+            </div>
+          </div>
+          <button onClick={onLogout} style={{ width:'100%', padding:'10px', borderRadius:8, border:'1px solid #E8E2D6', background:'transparent', color:'#564844', fontSize:13, fontWeight:600, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Log out
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}
+
+// Mobile bottom tab bar — shows 4-5 most important tabs
+function MobileBottomTabs({ tabs, page, setPage }) {
+  return (
+    <div style={{
+      position:'fixed', bottom:0, left:0, right:0, zIndex:100,
+      background:'rgba(251,250,245,.97)',
+      backdropFilter:'blur(16px)',
+      WebkitBackdropFilter:'blur(16px)',
+      borderTop:'1px solid #E8E2D6',
+      display:'flex',
+      paddingBottom:'env(safe-area-inset-bottom)',
+    }}>
+      {tabs.map(tab => {
+        const active = page === tab.id
+        return (
+          <button key={tab.id} onClick={() => setPage(tab.id)} style={{
+            flex:1, border:'none', background:'transparent', cursor:'pointer',
+            padding:'8px 4px 10px', display:'flex', flexDirection:'column',
+            alignItems:'center', gap:3, transition:'all .15s',
+          }}>
+            <div style={{ width:24, height:24, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <svg width="22" height="22" fill={active?'#7D1025':'none'} viewBox="0 0 24 24"
+                stroke={active?'#7D1025':'#9A9A9A'} strokeWidth={active?2:1.8} strokeLinecap="round" strokeLinejoin="round">
+                <path d={tab.icon||'M3 12h18'}/>
+              </svg>
+            </div>
+            <span style={{ fontSize:9.5, fontWeight:active?700:500, color:active?'#7D1025':'#9A9A9A', letterSpacing:'.01em' }}>
+              {tab.shortLabel||tab.label}
+            </span>
+            {active&&<div style={{ width:4, height:4, borderRadius:'50%', background:'#C9A030', marginTop:-2 }}/>}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+
 export default function ParentPortal() {
+  const isMobile = useIsMobile()
+  const [menuOpen, setMenuOpen] = useState(false)
   const [page,            setPage]            = useState('dashboard')
   const [user,            setUser]            = useState(null)
   const [children,        setChildren]        = useState([])
