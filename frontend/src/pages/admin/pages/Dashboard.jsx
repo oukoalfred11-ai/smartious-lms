@@ -796,8 +796,12 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         payload.avatar = userForm.avatar || ''
       } else if (userForm.role === 'teacher') {
         payload.curriculum = Array.isArray(userForm.curriculum) ? userForm.curriculum : (userForm.curriculum ? [userForm.curriculum] : [])
-        payload.subjects = userForm.subjects || []
-        payload.teachingSpecialties = userForm.teachingSpecialties || []
+        // subjects must be plain strings — backend Teacher record stores them as strings
+        const rawSubjects = userForm.subjects || []
+        payload.subjects = rawSubjects.filter(s => typeof s === 'string' && s.trim())
+        // Don't send teachingSpecialties — backend rebuilds them from subjectRefs (ObjectIds)
+        // Just ensure subjects strings are saved directly on User and Teacher records
+        payload.teachingSpecialties = []
         payload.plan = 'Staff'
         payload.bio = userForm.bio || ''
         payload.qualifications = userForm.qualifications || []
