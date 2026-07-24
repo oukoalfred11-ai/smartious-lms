@@ -12863,6 +12863,124 @@ function StudentCheckInTab({ user, toast }) {
 // shows display picture and basic info, NO contact details
 // (students must use the Communication module to reach teachers).
 // ═══════════════════════════════════════════════════════════
+
+function StudentRateTeacherTab({ user, toast }) {
+  const [entries,  setEntries]  = useState([])
+  const [loading,  setLoading]  = useState(true)
+  const [teachers, setTeachers] = useState([]) // unique teachers from timetable
+
+  useEffect(() => {
+    api.get('/timetable/student')
+      .then(r => {
+        const ents = r.data?.data?.entries || r.data?.entries || []
+        setEntries(ents)
+        // Extract unique teachers
+        const seen = {}
+        ents.forEach(e => {
+          if (e.teacherId && !seen[String(e.teacherId._id||e.teacherId)]) {
+            seen[String(e.teacherId._id||e.teacherId)] = e.teacherId
+          }
+        })
+        setTeachers(Object.values(seen))
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) return <div style={{ padding:'40px 0', textAlign:'center', color:TOKENS.s400, fontSize:13 }}>Loading...</div>
+
+  return (
+    <div>
+      <div style={{ marginBottom:20 }}>
+        <div className="sec-tag">Student Feedback</div>
+        <h2 className="serif" style={{ fontSize:26, color:TOKENS.ink, margin:'4px 0 6px' }}>Rate My <em style={{ fontStyle:'italic', color:TOKENS.crimson }}>Teachers</em></h2>
+        <div style={{ fontSize:13, color:TOKENS.s500 }}>Your feedback helps improve the quality of teaching at Smartious. Ratings are anonymous to teachers.</div>
+      </div>
+      {teachers.length === 0 ? (
+        <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>No teachers assigned yet.</div>
+      ) : (
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))', gap:16 }}>
+          {teachers.map(t => {
+            const tid = t._id||t
+            const tName = t.firstName ? t.firstName+' '+t.lastName : 'Teacher'
+            const subjects = entries.filter(e=>String(e.teacherId?._id||e.teacherId)===String(tid)).map(e=>e.subject).filter(Boolean)
+            const uniqueSubjects = [...new Set(subjects)]
+            return (
+              <div key={String(tid)} style={{ background:'#fff', border:`1px solid ${TOKENS.line}`, borderRadius:12, overflow:'hidden' }}>
+                <div style={{ padding:'14px 18px', borderBottom:`1px solid ${TOKENS.s100}`, display:'flex', alignItems:'center', gap:12 }}>
+                  <div style={{ width:40, height:40, borderRadius:'50%', background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <span style={{ color:'#F0CC5A', fontSize:12, fontWeight:700 }}>{tName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</span>
+                  </div>
+                  <div>
+                    <div style={{ fontSize:14, fontWeight:700, color:TOKENS.ink }}>{tName}</div>
+                    <div style={{ fontSize:12, color:TOKENS.s500 }}>{uniqueSubjects.join(', ')||'Teacher'}</div>
+                  </div>
+                </div>
+                <div style={{ padding:'14px 18px' }}>
+                  <RateTeacherWidget teacherId={String(tid)} teacherName={tName} userRole="student" toast={toast}/>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+
+function RateTeacherWidget({ teacherId, teacherName, userRole, toast }) {
+  const [score,   setScore]   = useState(0)
+  const [hover,   setHover]   = useState(0)
+  const [comment, setComment] = useState('')
+  const [saving,  setSaving]  = useState(false)
+  const [done,    setDone]    = useState(false)
+
+  const submit = async () => {
+    if (!score) { toast?.error?.('Select a star rating.'); return }
+    setSaving(true)
+    try {
+      const r = await api.post('/ratings', { teacherId, score, comment })
+      toast?.ok?.(r.data?.message||'Rating submitted!')
+      setDone(true)
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
+    finally { setSaving(false) }
+  }
+
+  if (done) return (
+    <div style={{ padding:'14px 18px', background:'#D1FAE5', borderRadius:10, textAlign:'center', fontSize:13, fontWeight:700, color:'#065F46' }}>
+      ✓ Rating submitted for {teacherName}. Thank you!
+    </div>
+  )
+
+  return (
+    <div style={{ background:'#fff', border:'1px solid #E8E2D6', borderRadius:12, padding:'18px 20px' }}>
+      <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900, marginBottom:10 }}>Rate {teacherName}</div>
+      <div style={{ display:'flex', gap:4, marginBottom:12 }}>
+        {[1,2,3,4,5].map(s=>(
+          <svg key={s} width="28" height="28" viewBox="0 0 24 24"
+            fill={s<=(hover||score)?'#C9A030':'#E8E2D6'}
+            stroke={s<=(hover||score)?'#C9A030':'#CFC7C2'}
+            strokeWidth="1.5" style={{ cursor:'pointer', transition:'fill .1s' }}
+            onMouseEnter={()=>setHover(s)} onMouseLeave={()=>setHover(0)}
+            onClick={()=>setScore(s)}>
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        ))}
+        {score>0&&<span style={{ fontSize:13, fontWeight:700, color:TOKENS.s700, marginLeft:8, alignSelf:'center' }}>
+          {['','Poor','Fair','Good','Very Good','Excellent'][score]}
+        </span>}
+      </div>
+      <textarea value={comment} onChange={e=>setComment(e.target.value)} rows={2}
+        placeholder="Optional comment about this teacher..."
+        style={{ width:'100%', padding:'8px 10px', borderRadius:7, border:`1.5px solid ${TOKENS.line}`, fontSize:13, fontFamily:'inherit', boxSizing:'border-box', resize:'vertical', color:TOKENS.ink, marginBottom:10 }}/>
+      <button onClick={submit} disabled={saving||!score} style={{ background:saving||!score?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', padding:'9px 20px', borderRadius:7, fontSize:13, fontWeight:700, cursor:saving||!score?'not-allowed':'pointer' }}>
+        {saving?'Submitting...':'Submit rating'}
+      </button>
+    </div>
+  )
+}
+
 function RealTimetableTab({ user, setPage, toast }) {
   const [entries,  setEntries]  = useState([])
   const [loading,  setLoading]  = useState(true)
