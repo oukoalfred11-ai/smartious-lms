@@ -37,6 +37,7 @@ const NAV_SECTIONS = [
     { id:'messages',   label:'Messages',          icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
   ]},
   { section:'Finance', items:[
+    { id:'rateteacher',label:'Rate Teachers',    icon:'M12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2' },
     { id:'fees',       label:'Fees & Invoices',   icon:'M2 5h20v14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5zM2 10h20' },
   ]},
   { section:'More', items:[
@@ -251,6 +252,7 @@ export default function ParentPortal() {
               {page==='dashboard'  && <ParentDashboard   child={selectedChild} showToast={showToast}/>}
               {page==='reports'    && <ParentReports      child={selectedChild} showToast={showToast}/>}
               {page==='timetable'  && <ParentTimetable    child={selectedChild}/>}
+              {page==='rateteacher'&& <ParentRateTeachers child={selectedChild} showToast={showToast}/>}
               {page==='fees'       && <ParentFees         child={selectedChild} showToast={showToast}/>}
               {page==='lessons'    && <ParentLessons      child={selectedChild}/>}
               {page==='messages'   && <ParentMessages     user={user} showToast={showToast}/>}
@@ -837,6 +839,104 @@ function ParentProgramme({ child }) {
 }
 function ParentTutor({ child }) {
   return <PSection tag="Parent Portal" title="Tutor &" em="Advisor" sub="Contact your child's assigned tutor or academic advisor."/>
+}
+
+
+function ParentRateTeachers({ child, showToast }) {
+  const [entries, setEntries] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!child?._id) return
+    api.get('/parent/children/'+child._id+'/timetable')
+      .then(r => setEntries(r.data?.data?.entries||[]))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [child?._id])
+
+  const teachers = Object.values(entries.reduce((acc,e) => {
+    if (e.teacherId) {
+      const tid = String(e.teacherId._id||e.teacherId)
+      if (!acc[tid]) acc[tid] = { ...e.teacherId, subjects:[] }
+      if (e.subject && !acc[tid].subjects.includes(e.subject)) acc[tid].subjects.push(e.subject)
+    }
+    return acc
+  }, {}))
+
+  if (loading) return <Spinner/>
+  return (
+    <>
+      <PSection tag="Parent Portal" title="Rate" em="Teachers" sub={`Rate the teachers working with ${child?.firstName}. Your feedback is valued.`}/>
+      {teachers.length===0 ? (
+        <div style={{ padding:40, textAlign:'center', color:C.s400, fontSize:13 }}>No teachers assigned yet.</div>
+      ) : (
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))', gap:16 }}>
+          {teachers.map(t => {
+            const tName = t.firstName ? t.firstName+' '+t.lastName : 'Teacher'
+            return (
+              <div key={String(t._id||t)} style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:12, overflow:'hidden' }}>
+                <div style={{ padding:'14px 18px', borderBottom:`1px solid ${C.s100}`, display:'flex', alignItems:'center', gap:12 }}>
+                  <div style={{ width:40, height:40, borderRadius:'50%', background:`linear-gradient(135deg,${C.crimson},${C.crimsonD})`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <span style={{ color:'#F0CC5A', fontSize:12, fontWeight:700 }}>{tName.split(' ').map(n=>n[0]).join('').slice(0,2)}</span>
+                  </div>
+                  <div>
+                    <div style={{ fontSize:14, fontWeight:700, color:C.ink }}>{tName}</div>
+                    <div style={{ fontSize:12, color:C.s500 }}>{(t.subjects||[]).join(', ')||'Teacher'}</div>
+                  </div>
+                </div>
+                <div style={{ padding:'14px 18px' }}>
+                  <ParentRateWidget teacherId={String(t._id||t)} teacherName={tName} showToast={showToast}/>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </>
+  )
+}
+
+function ParentRateWidget({ teacherId, teacherName, showToast }) {
+  const [score, setScore] = useState(0)
+  const [hover, setHover] = useState(0)
+  const [comment, setComment] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [done, setDone] = useState(false)
+
+  const submit = async () => {
+    if (!score) { showToast('Select a star rating.','err'); return }
+    setSaving(true)
+    try {
+      const r = await api.post('/ratings', { teacherId, score, comment })
+      showToast(r.data?.message||'Rating submitted!','ok')
+      setDone(true)
+    } catch(e) { showToast(e?.response?.data?.message||'Failed.','err') }
+    finally { setSaving(false) }
+  }
+
+  if (done) return <div style={{ padding:'12px 14px', background:'#D1FAE5', borderRadius:8, textAlign:'center', fontSize:13, fontWeight:700, color:'#065F46' }}>✓ Rating submitted!</div>
+
+  return (
+    <div>
+      <div style={{ display:'flex', gap:4, marginBottom:10 }}>
+        {[1,2,3,4,5].map(s=>(
+          <svg key={s} width="28" height="28" viewBox="0 0 24 24"
+            fill={s<=(hover||score)?'#C9A030':'#E8E2D6'} stroke={s<=(hover||score)?'#C9A030':'#CFC7C2'} strokeWidth="1.5"
+            style={{ cursor:'pointer' }}
+            onMouseEnter={()=>setHover(s)} onMouseLeave={()=>setHover(0)} onClick={()=>setScore(s)}>
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        ))}
+        {score>0&&<span style={{ fontSize:12, fontWeight:700, color:C.s700, alignSelf:'center', marginLeft:6 }}>{['','Poor','Fair','Good','Very Good','Excellent'][score]}</span>}
+      </div>
+      <textarea value={comment} onChange={e=>setComment(e.target.value)} rows={2}
+        placeholder="Optional comment..."
+        style={{ width:'100%', padding:'8px 10px', borderRadius:7, border:`1.5px solid ${C.line}`, fontSize:13, fontFamily:'inherit', boxSizing:'border-box', resize:'vertical', color:C.ink, marginBottom:10 }}/>
+      <button onClick={submit} disabled={saving||!score} style={{ background:saving||!score?C.s300:C.crimson, color:'#fff', border:'none', padding:'8px 18px', borderRadius:7, fontSize:13, fontWeight:700, cursor:saving||!score?'not-allowed':'pointer' }}>
+        {saving?'Submitting...':'Submit rating'}
+      </button>
+    </div>
+  )
 }
 
 function Spinner() {
