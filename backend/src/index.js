@@ -89,6 +89,7 @@ app.use('/api/dos',        require('./routes/dos-analytics'));
 app.use('/api/fees',       require('./routes/fee-collection'));
 app.use('/api/payroll',    require('./routes/payroll'));
 app.use('/api/parent',     require('./routes/parent-portal'));
+app.use('/api/ratings',    require('./routes/ratings'));
 app.use('/api/checkin',    require('./routes/checkin'));
 
 // ── Health check ──────────────────────────────────────────
@@ -129,6 +130,7 @@ const runTimetablePromotion = () => {
 const { sendDailyReminders } = require('./routes/checkin');
 const { sendDueReminders  } = require('./routes/fee-collection');
 const { sendClassReminders } = require('./routes/parent-portal');
+const { scheduleShowCauseCron } = require('./services/showCauseCron');
 
 const runCheckinReminder = () => {
   const now = new Date();
@@ -200,6 +202,9 @@ mongoose.connect(MONGODB_URI)
       sendClassReminders().catch(e => console.error('[class reminder]', e.message));
     }, 60 * 1000);
     console.log('[class reminder] Cron started — checks every minute');
+
+    // Show-cause cron — runs every Friday at 5PM EAT
+    scheduleShowCauseCron();
   })
   .catch(err => {
     console.error('❌  MongoDB connection error:', err.message);
