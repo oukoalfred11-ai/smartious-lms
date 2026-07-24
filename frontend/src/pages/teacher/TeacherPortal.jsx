@@ -6569,186 +6569,319 @@ function DocumentsTab({ user, store, setPage, toast }) {
 
 // ── WEEKLY REPORT GENERATOR ────────────────────────────────
 function WeeklyReportGenerator({ user, toast, onBack }) {
-  const teacherName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Teacher'
-  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
+  const teacherName = `${user?.firstName||''} ${user?.lastName||''}`.trim()||'Teacher'
+  const today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})
 
+  // ── Form state ──
   const [f, setF] = useState({
-    studentName: '', classLevel: '', subject: '',
-    teacher: teacherName, week: '', period: '',
-    topics: [''],
-    subTopics: [''],
-    activities: [''],
-    understanding: '', participation: '', generalPerf: '',
-    strengths: [''],
-    improvements: [''],
-    assessments: [{ desc: '', score: '', outOf: '' }],
-    homework: [''],
-    remarks: '',
-    teacherDate: today,
+    studentName:'', studentId:'', classLevel:'', subject:'',
+    teacher:teacherName, week:'', period:'Term 1',
+    topics:[''], subTopics:[''], activities:[''],
+    understanding:'', participation:'', generalPerf:'',
+    strengths:[''], improvements:[''],
+    assessments:[{ desc:'', score:'', outOf:'' }],
+    homework:[''], remarks:'', teacherDate:today,
   })
+  const [view, setView]           = useState('list')   // 'list' | 'form'
+  const [savedReports, setSaved]  = useState([])
+  const [loadingSaved, setLSaved] = useState(true)
+  const [saving,  setSaving]      = useState(false)
+  const [autoSaveTimer, setAST]   = useState(null)
+  const [lastSaved, setLastSaved] = useState(null)
+  const [students, setStudents]   = useState([])
+  const [publishing, setPublishing] = useState(false)
 
-  const set = (k, v) => setF(p => ({ ...p, [k]: v }))
+  // ── Load saved reports + students ──
+  useEffect(() => {
+    api.get('/reports/my-saved')
+      .then(r => setSaved(r.data?.data?.reports||[]))
+      .catch(() => {})
+      .finally(() => setLSaved(false))
+    api.get('/users', { params:{ role:'student', limit:200 } })
+      .then(r => setStudents(r.data?.users||r.data?.data?.users||[]))
+      .catch(() => {})
+  }, [])
 
-  // generic list-field helpers
-  const listAdd = (k) => setF(p => ({ ...p, [k]: [...p[k], ''] }))
-  const listSet = (k, i, v) => setF(p => ({ ...p, [k]: p[k].map((x, idx) => idx === i ? v : x) }))
-  const listDel = (k, i) => setF(p => ({ ...p, [k]: p[k].filter((_, idx) => idx !== i).length ? p[k].filter((_, idx) => idx !== i) : [''] }))
+  const set     = (k,v) => setF(p=>({ ...p, [k]:v }))
+  const lAdd    = k     => setF(p=>({ ...p, [k]:[...p[k],''] }))
+  const lSet    = (k,i,v)=>setF(p=>({ ...p, [k]:p[k].map((x,j)=>j===i?v:x) }))
+  const lDel    = (k,i) =>setF(p=>({ ...p, [k]:p[k].filter((_,j)=>j!==i).length?p[k].filter((_,j)=>j!==i):[''] }))
+  const aAdd    = ()    =>setF(p=>({ ...p, assessments:[...p.assessments,{desc:'',score:'',outOf:''}] }))
+  const aSet    = (i,k,v)=>setF(p=>({ ...p, assessments:p.assessments.map((r,j)=>j===i?{...r,[k]:v}:r) }))
+  const aDel    = i     =>setF(p=>({ ...p, assessments:(p.assessments.filter((_,j)=>j!==i).length?p.assessments.filter((_,j)=>j!==i):[{desc:'',score:'',outOf:''}]) }))
 
-  // assessment rows
-  const aAdd = () => setF(p => ({ ...p, assessments: [...p.assessments, { desc: '', score: '', outOf: '' }] }))
-  const aSet = (i, key, v) => setF(p => ({ ...p, assessments: p.assessments.map((r, idx) => idx === i ? { ...r, [key]: v } : r) }))
-  const aDel = (i) => setF(p => {
-    const next = p.assessments.filter((_, idx) => idx !== i)
-    return { ...p, assessments: next.length ? next : [{ desc: '', score: '', outOf: '' }] }
-  })
+  // ── Auto-save with debounce ──
+  useEffect(() => {
+    if (view !== 'form') return
+    if (!f.studentName.trim() || !f.subject.trim()) return
+    if (autoSaveTimer) clearTimeout(autoSaveTimer)
+    const t = setTimeout(() => { doSave(false, true) }, 3000)
+    setAST(t)
+    return () => clearTimeout(t)
+  }, [f, view])
+
+  const doSave = async (publish=false, silent=false) => {
+    if (!f.studentName.trim()) { if (!silent) toast?.error?.('Student name is required.'); return }
+    if (!f.subject.trim())     { if (!silent) toast?.error?.('Subject is required.'); return }
+    if (publish) setPublishing(true); else if (!silent) setSaving(true)
+    try {
+      const payload = { ...f, publish }
+      const r = await api.post('/reports/teacher-save', payload)
+      setLastSaved(new Date())
+      if (!silent) toast?.ok?.(r.data?.message||'Saved.')
+      // Refresh saved list
+      api.get('/reports/my-saved').then(r2=>setSaved(r2.data?.data?.reports||[])).catch(()=>{})
+      if (publish) { setTimeout(()=>setView('list'), 800) }
+    } catch(e) {
+      if (!silent) toast?.error?.(e?.response?.data?.message||'Save failed.')
+    } finally {
+      if (publish) setPublishing(false); else if (!silent) setSaving(false)
+    }
+  }
 
   const generate = () => {
     if (!f.studentName.trim()) { toast?.error?.('Student name is required.'); return }
-    if (!f.subject.trim())     { toast?.error?.('Subject is required.'); return }
     const html = buildWeeklyReportHTML(f)
-    const w = window.open('', '_blank')
-    if (!w) { toast?.error?.('Please allow pop-ups to generate the report.'); return }
-    w.document.write(html)
-    w.document.close()
+    const w = window.open('','_blank')
+    if (!w) { toast?.error?.('Allow pop-ups to preview.'); return }
+    w.document.write(html); w.document.close()
   }
 
-  // ── styles ──
-  const lbl = { display: 'block', fontSize: 11, fontWeight: 700, letterSpacing: '.04em',
-    textTransform: 'uppercase', color: '#7D1025', marginBottom: 5 }
-  const inp = { width: '100%', boxSizing: 'border-box', padding: '8px 11px',
-    borderRadius: 7, border: '1.5px solid #E8E2D6', fontSize: 13, fontFamily: 'inherit' }
-  const card = { background: '#fff', border: '1px solid #E8E2D6', borderRadius: 12,
-    padding: 18, marginBottom: 14 }
-  const addBtn = { background: 'transparent', border: '1.5px dashed #C9A030',
-    color: '#9A7B16', borderRadius: 7, padding: '6px 12px', fontSize: 12,
-    fontWeight: 700, cursor: 'pointer', marginTop: 6 }
-  const delBtn = { background: 'transparent', border: 'none', color: '#B91C1C',
-    cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '0 4px', flexShrink: 0 }
+  const openReport = async (id) => {
+    try {
+      const r = await api.get('/reports/'+id+'/pdf-html')
+      const w = window.open('','_blank'); w.document.write(r.data?.data?.html||''); w.document.close()
+    } catch { toast?.error?.('Could not open report.') }
+  }
 
-  // a reusable list editor
-  // ListEditor renders a labelled list of editable text inputs with
-  // add/remove buttons. Implemented as a PLAIN FUNCTION (not a React
-  // component) so it doesn't get a new identity on every parent
-  // re-render — that was causing inputs to lose focus after every
-  // keystroke. Called as {listEditor({label, k, placeholder})}, not
-  // <ListEditor .../>.
-  const listEditor = ({ label, k, placeholder }) => (
-    <div style={{ marginBottom: 14 }}>
-      <label style={lbl}>{label}</label>
-      {f[k].map((val, i) => (
-        <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 5, alignItems: 'center' }}>
-          <input value={val} onChange={e => listSet(k, i, e.target.value)}
-            placeholder={placeholder} style={inp}/>
-          <button onClick={() => listDel(k, i)} style={delBtn} title="Remove">×</button>
+  const publishExisting = async (id) => {
+    try {
+      const r = await api.post('/reports/'+id+'/publish')
+      toast?.ok?.(r.data?.message||'Published.')
+      api.get('/reports/my-saved').then(r2=>setSaved(r2.data?.data?.reports||[])).catch(()=>{})
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
+  }
+
+  // Styles
+  const lbl  = { display:'block', fontSize:11, fontWeight:700, letterSpacing:'.04em', textTransform:'uppercase', color:'#7D1025', marginBottom:5 }
+  const inp  = { width:'100%', boxSizing:'border-box', padding:'8px 11px', borderRadius:7, border:'1.5px solid #E8E2D6', fontSize:13, fontFamily:'inherit', color:'#1A0F0E' }
+  const card = { background:'#fff', border:'1px solid #E8E2D6', borderRadius:12, padding:'20px 22px', marginBottom:18 }
+
+  const STATUS_S = { draft:{ bg:'#FEF3C7', fg:'#D97706' }, published:{ bg:'#D1FAE5', fg:'#065F46' } }
+  const fmtD = d => d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—'
+
+  // ── LIST VIEW ──────────────────────────────────────────
+  if (view === 'list') {
+    return (
+      <div>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+          {onBack&&<button onClick={onBack} style={{ background:'transparent', border:'none', cursor:'pointer', color:'#7D1025', fontSize:12.5, fontWeight:700, padding:0 }}>← Back</button>}
+          <div>
+            <div style={{ fontSize:10, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.1em' }}>Teacher Reports</div>
+            <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:24, color:'#1A0F0E' }}>Weekly Reports</div>
+          </div>
+          <button onClick={()=>{ setF(p=>({...p,studentName:'',studentId:'',subject:'',week:'',topics:[''],subTopics:[''],activities:[''],understanding:'',participation:'',generalPerf:'',strengths:[''],improvements:[''],assessments:[{desc:'',score:'',outOf:''}],homework:[''],remarks:''})); setLastSaved(null); setView('form') }}
+            style={{ background:'#7D1025', color:'#fff', border:'none', padding:'10px 20px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer' }}>
+            + New report
+          </button>
         </div>
-      ))}
-      <button onClick={() => listAdd(k)} style={addBtn}>+ Add</button>
-    </div>
-  )
 
+        {loadingSaved ? (
+          <div style={{ textAlign:'center', color:'#9A9A9A', padding:'40px 0', fontSize:13 }}>Loading saved reports...</div>
+        ) : savedReports.length===0 ? (
+          <div style={{ ...card, textAlign:'center', padding:'40px 24px' }}>
+            <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:20, color:'#1A0F0E', marginBottom:8 }}>No reports yet</div>
+            <div style={{ fontSize:13, color:'#7A6652', marginBottom:20 }}>Create your first weekly report — it auto-saves as you type and notifies parents when you publish.</div>
+            <button onClick={()=>setView('form')} style={{ background:'#7D1025', color:'#fff', border:'none', padding:'10px 24px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer' }}>Create first report</button>
+          </div>
+        ) : (
+          <div style={{ ...card, padding:0, overflow:'hidden' }}>
+            <table style={{ width:'100%', borderCollapse:'collapse' }}>
+              <thead><tr style={{ background:'#FBFAF5' }}>
+                {['Student','Subject','Period','Score','Status','Last saved',''].map(h=>(
+                  <th key={h} style={{ padding:'9px 14px', textAlign:'left', fontSize:10.5, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.06em', borderBottom:'1.5px solid #E8E2D6' }}>{h}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {savedReports.map(r => {
+                  const ss = STATUS_S[r.status]||STATUS_S.draft
+                  return (
+                    <tr key={r._id} style={{ borderTop:'1px solid #E8E2D6' }}>
+                      <td style={{ padding:'10px 14px', fontWeight:700, fontSize:13, color:'#1A0F0E' }}>{r.studentName}</td>
+                      <td style={{ padding:'10px 14px', color:'#564844', fontSize:13 }}>{r.subject}</td>
+                      <td style={{ padding:'10px 14px', fontSize:12.5, color:'#857973' }}>Term {r.term} · {r.academicYear}</td>
+                      <td style={{ padding:'10px 14px', fontWeight:800, color:r.overallAverage!==null?'#7D1025':'#9A9A9A' }}>
+                        {r.overallAverage!==null?r.overallAverage+'% ('+r.meanGrade+')':'—'}
+                      </td>
+                      <td style={{ padding:'10px 14px' }}>
+                        <span style={{ padding:'3px 10px', borderRadius:99, fontSize:11, fontWeight:700, background:ss.bg, color:ss.fg }}>
+                          {r.status==='published'?'Published':'Draft'}
+                        </span>
+                      </td>
+                      <td style={{ padding:'10px 14px', fontSize:12, color:'#857973' }}>{fmtD(r.updatedAt)}</td>
+                      <td style={{ padding:'10px 14px' }}>
+                        <div style={{ display:'flex', gap:6 }}>
+                          <button onClick={()=>openReport(r._id)} style={{ padding:'5px 10px', borderRadius:6, border:'1px solid #E8E2D6', background:'#fff', color:'#564844', fontSize:11.5, cursor:'pointer', fontWeight:600 }}>View</button>
+                          {r.status==='draft'&&(
+                            <button onClick={()=>publishExisting(r._id)} style={{ padding:'5px 10px', borderRadius:6, border:'none', background:'#065F46', color:'#fff', fontSize:11.5, cursor:'pointer', fontWeight:700 }}>
+                              Publish & notify parent
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // ── FORM VIEW ─────────────────────────────────────────
   return (
     <div>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-        <button onClick={onBack} style={{
-          background: '#fff', border: '1.5px solid #E8E2D6', borderRadius: 8,
-          padding: '7px 13px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: '#7D1025',
-        }}>← Documents</button>
-        <div>
-          <h1 style={{ fontSize: 21, fontWeight: 800, color: '#1A1A1A', margin: 0 }}>
-            Weekly Academic Report
-          </h1>
-          <div style={{ fontSize: 12, color: '#6B6B6B' }}>Fill the report, then generate the branded PDF.</div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+        <button onClick={()=>setView('list')} style={{ background:'transparent', border:'none', cursor:'pointer', color:'#7D1025', fontSize:12.5, fontWeight:700, padding:0 }}>← All reports</button>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
+          <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:22, color:'#1A0F0E' }}>New Weekly Report</div>
+          {lastSaved&&<div style={{ fontSize:11, color:'#065F46', marginTop:2 }}>✓ Auto-saved {new Date(lastSaved).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</div>}
+        </div>
+        <div style={{ display:'flex', gap:8 }}>
+          <button onClick={()=>doSave(false)} disabled={saving} style={{ padding:'9px 16px', borderRadius:8, border:'1.5px solid #E8E2D6', background:'#fff', color:'#564844', fontSize:13, fontWeight:600, cursor:'pointer' }}>
+            {saving?'Saving...':'Save draft'}
+          </button>
+          <button onClick={generate} style={{ padding:'9px 16px', borderRadius:8, border:'1.5px solid #E8E2D6', background:'#fff', color:'#7D1025', fontSize:13, fontWeight:700, cursor:'pointer' }}>
+            Preview
+          </button>
+          <button onClick={()=>doSave(true)} disabled={publishing} style={{ padding:'9px 18px', borderRadius:8, border:'none', background:publishing?'#ccc':'#7D1025', color:'#fff', fontSize:13, fontWeight:700, cursor:publishing?'not-allowed':'pointer' }}>
+            {publishing?'Publishing...':'Publish & notify parent'}
+          </button>
         </div>
       </div>
 
-      {/* Basic info */}
-      <div style={card}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-          <div><label style={lbl}>Student Name *</label>
-            <input value={f.studentName} onChange={e => set('studentName', e.target.value)} placeholder="e.g. Jeremy" style={inp}/></div>
-          <div><label style={lbl}>Class / Level</label>
-            <input value={f.classLevel} onChange={e => set('classLevel', e.target.value)} placeholder="e.g. Year 8" style={inp}/></div>
-          <div><label style={lbl}>Subject *</label>
-            <input value={f.subject} onChange={e => set('subject', e.target.value)} placeholder="e.g. Mathematics" style={inp}/></div>
-          <div><label style={lbl}>Teacher</label>
-            <input value={f.teacher} onChange={e => set('teacher', e.target.value)} style={inp}/></div>
-          <div><label style={lbl}>Week</label>
-            <input value={f.week} onChange={e => set('week', e.target.value)} placeholder="e.g. Week of 11 – 14 May 2026" style={inp}/></div>
-          <div><label style={lbl}>Period</label>
-            <input value={f.period} onChange={e => set('period', e.target.value)} placeholder="e.g. 11/05/2026 – 14/05/2026" style={inp}/></div>
-        </div>
-      </div>
-
-      {/* Topics / sub-topics / activities */}
-      <div style={card}>
-        {listEditor({label:"Topics Covered", k:"topics", placeholder:"e.g. Integers"})}
-        {listEditor({label:"Sub-Topics Taught", k:"subTopics", placeholder:"e.g. Adding and subtracting integers"})}
-        {listEditor({label:"Class Activities", k:"activities", placeholder:"Describe a class activity"})}
-      </div>
-
-      {/* Performance */}
-      <div style={card}>
-        <div style={{ marginBottom: 12 }}><label style={lbl}>Understanding Concepts</label>
-          <textarea value={f.understanding} onChange={e => set('understanding', e.target.value)} rows={2}
-            placeholder="How well the student grasped the concepts" style={{ ...inp, resize: 'vertical' }}/></div>
-        <div style={{ marginBottom: 12 }}><label style={lbl}>Class Participation</label>
-          <textarea value={f.participation} onChange={e => set('participation', e.target.value)} rows={2}
-            placeholder="The student's participation and engagement" style={{ ...inp, resize: 'vertical' }}/></div>
-        <div><label style={lbl}>General Performance</label>
-          <textarea value={f.generalPerf} onChange={e => set('generalPerf', e.target.value)} rows={2}
-            placeholder="Overall performance summary" style={{ ...inp, resize: 'vertical' }}/></div>
-      </div>
-
-      {/* Strengths / improvements */}
-      <div style={card}>
-        {listEditor({label:"Strengths Observed", k:"strengths", placeholder:"A strength observed this week"})}
-        {listEditor({label:"Areas to Improve", k:"improvements", placeholder:"An area to work on"})}
-      </div>
-
-      {/* Assessment Done — with optional marks */}
-      <div style={card}>
-        <label style={lbl}>Assessment Done</label>
-        <div style={{ fontSize: 11, color: '#6B6B6B', marginBottom: 8 }}>
-          Leave score blank for informal assessment. Fill score &amp; total when the student sat an exam.
-        </div>
-        {f.assessments.map((row, i) => (
-          <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-            <input value={row.desc} onChange={e => aSet(i, 'desc', e.target.value)}
-              placeholder="Assessment description" style={{ ...inp, flex: '1 1 220px' }}/>
-            <input value={row.score} onChange={e => aSet(i, 'score', e.target.value.replace(/[^0-9.]/g, ''))}
-              placeholder="Score" style={{ ...inp, width: 80, flex: '0 0 80px' }}/>
-            <span style={{ fontSize: 13, color: '#6B6B6B' }}>/</span>
-            <input value={row.outOf} onChange={e => aSet(i, 'outOf', e.target.value.replace(/[^0-9.]/g, ''))}
-              placeholder="Out of" style={{ ...inp, width: 80, flex: '0 0 80px' }}/>
-            <button onClick={() => aDel(i)} style={delBtn} title="Remove">×</button>
+      <div style={{ display:'grid', gap:18 }}>
+        {/* Student + Meta */}
+        <div style={card}>
+          <div style={{ fontSize:12, fontWeight:800, color:'#1A0F0E', marginBottom:14 }}>Student details</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+            <div>
+              <label style={lbl}>Student</label>
+              <select value={f.studentId} onChange={e=>{
+                const s = students.find(s=>String(s._id)===e.target.value)
+                setF(p=>({...p, studentId:e.target.value, studentName:s?`${s.firstName} ${s.lastName}`:p.studentName, classLevel:s?.gradeLevel||p.classLevel }))
+              }} style={inp}>
+                <option value="">— Select student or type below —</option>
+                {students.map(s=><option key={s._id} value={s._id}>{s.firstName} {s.lastName} · {s.curriculum} {s.gradeLevel}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={lbl}>Student name (if not in list)</label>
+              <input value={f.studentName} onChange={e=>set('studentName',e.target.value)} style={inp} placeholder="Full name"/>
+            </div>
+            <div>
+              <label style={lbl}>Subject</label>
+              <input value={f.subject} onChange={e=>set('subject',e.target.value)} style={inp} placeholder="e.g. Mathematics"/>
+            </div>
+            <div>
+              <label style={lbl}>Class / Grade</label>
+              <input value={f.classLevel} onChange={e=>set('classLevel',e.target.value)} style={inp} placeholder="e.g. Year 10"/>
+            </div>
+            <div>
+              <label style={lbl}>Week</label>
+              <input value={f.week} onChange={e=>set('week',e.target.value)} style={inp} placeholder="e.g. Week 3"/>
+            </div>
+            <div>
+              <label style={lbl}>Term / Period</label>
+              <select value={f.period} onChange={e=>set('period',e.target.value)} style={inp}>
+                {['Term 1','Term 2','Term 3'].map(t=><option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
           </div>
-        ))}
-        <button onClick={aAdd} style={addBtn}>+ Add Assessment</button>
-      </div>
+        </div>
 
-      {/* Homework */}
-      <div style={card}>
-        {listEditor({label:"Homework / Follow-Up Work", k:"homework", placeholder:"A homework or follow-up task"})}
-      </div>
+        {/* Topics */}
+        <div style={card}>
+          <div style={{ fontSize:12, fontWeight:800, color:'#1A0F0E', marginBottom:14 }}>Topics covered</div>
+          {f.topics.map((t,i)=>(
+            <div key={i} style={{ display:'flex', gap:8, marginBottom:8 }}>
+              <input value={t} onChange={e=>lSet('topics',i,e.target.value)} style={{ ...inp, flex:1 }} placeholder={`Topic ${i+1}`}/>
+              <button onClick={()=>lDel('topics',i)} style={{ padding:'0 10px', borderRadius:6, border:'1px solid #FCA5A5', background:'#fff', color:'#991B1B', cursor:'pointer', fontSize:16 }}>×</button>
+            </div>
+          ))}
+          <button onClick={()=>lAdd('topics')} style={{ fontSize:12, color:'#7D1025', background:'transparent', border:'1px solid #E8E2D6', padding:'5px 12px', borderRadius:6, cursor:'pointer', fontWeight:600 }}>+ Add topic</button>
+        </div>
 
-      {/* Remarks + confirmation */}
-      <div style={card}>
-        <div style={{ marginBottom: 12 }}><label style={lbl}>Teacher's Remarks</label>
-          <textarea value={f.remarks} onChange={e => set('remarks', e.target.value)} rows={4}
-            placeholder="Closing remarks to the student and parent" style={{ ...inp, resize: 'vertical' }}/></div>
-        <div style={{ maxWidth: 220 }}><label style={lbl}>Confirmation Date</label>
-          <input value={f.teacherDate} onChange={e => set('teacherDate', e.target.value)} style={inp}/></div>
-      </div>
+        {/* Assessments */}
+        <div style={card}>
+          <div style={{ fontSize:12, fontWeight:800, color:'#1A0F0E', marginBottom:14 }}>Assessments & marks</div>
+          {f.assessments.map((a,i)=>(
+            <div key={i} style={{ display:'grid', gridTemplateColumns:'2fr 1fr 1fr auto', gap:8, marginBottom:8 }}>
+              <input value={a.desc} onChange={e=>aSet(i,'desc',e.target.value)} style={{ ...inp }} placeholder="Assessment description"/>
+              <input type="number" value={a.score} onChange={e=>aSet(i,'score',e.target.value)} style={{ ...inp }} placeholder="Score"/>
+              <input type="number" value={a.outOf} onChange={e=>aSet(i,'outOf',e.target.value)} style={{ ...inp }} placeholder="Out of"/>
+              <button onClick={()=>aDel(i)} style={{ padding:'0 10px', borderRadius:6, border:'1px solid #FCA5A5', background:'#fff', color:'#991B1B', cursor:'pointer', fontSize:16 }}>×</button>
+            </div>
+          ))}
+          <button onClick={aAdd} style={{ fontSize:12, color:'#7D1025', background:'transparent', border:'1px solid #E8E2D6', padding:'5px 12px', borderRadius:6, cursor:'pointer', fontWeight:600 }}>+ Add assessment</button>
+          {f.assessments.some(a=>a.score&&a.outOf)&&(
+            <div style={{ marginTop:12, padding:'10px 14px', background:'#FBFAF5', borderRadius:8, fontSize:13, color:'#7D1025', fontWeight:700 }}>
+              Average: {Math.round(f.assessments.filter(a=>a.score&&a.outOf).reduce((s,a)=>s+(parseFloat(a.score)/parseFloat(a.outOf))*100,0)/f.assessments.filter(a=>a.score&&a.outOf).length)}%
+            </div>
+          )}
+        </div>
 
-      {/* Generate */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginBottom: 30 }}>
-        <button onClick={generate} style={{
-          background: '#7D1025', color: '#fff', border: 'none', borderRadius: 8,
-          padding: '12px 26px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
-        }}>
-          Generate Report
-        </button>
+        {/* Performance */}
+        <div style={card}>
+          <div style={{ fontSize:12, fontWeight:800, color:'#1A0F0E', marginBottom:14 }}>Performance observations</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:14 }}>
+            {[['understanding','Understanding'],['participation','Participation'],['generalPerf','General Performance']].map(([k,l])=>(
+              <div key={k}>
+                <label style={lbl}>{l}</label>
+                <select value={f[k]} onChange={e=>set(k,e.target.value)} style={inp}>
+                  <option value="">Select...</option>
+                  {['Excellent','Very Good','Good','Satisfactory','Needs Improvement'].map(o=><option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Strengths & improvements */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+          {[['strengths','Strengths'],['improvements','Areas for improvement']].map(([k,l])=>(
+            <div key={k} style={card}>
+              <div style={{ fontSize:12, fontWeight:800, color:'#1A0F0E', marginBottom:12 }}>{l}</div>
+              {f[k].map((v,i)=>(
+                <div key={i} style={{ display:'flex', gap:8, marginBottom:7 }}>
+                  <input value={v} onChange={e=>lSet(k,i,e.target.value)} style={{ ...inp, flex:1 }} placeholder={l.slice(0,-1)+' '+(i+1)}/>
+                  <button onClick={()=>lDel(k,i)} style={{ padding:'0 10px', borderRadius:6, border:'1px solid #FCA5A5', background:'#fff', color:'#991B1B', cursor:'pointer', fontSize:16 }}>×</button>
+                </div>
+              ))}
+              <button onClick={()=>lAdd(k)} style={{ fontSize:12, color:'#7D1025', background:'transparent', border:'1px solid #E8E2D6', padding:'5px 12px', borderRadius:6, cursor:'pointer', fontWeight:600 }}>+ Add</button>
+            </div>
+          ))}
+        </div>
+
+        {/* Remarks */}
+        <div style={card}>
+          <label style={lbl}>Teacher remarks</label>
+          <textarea value={f.remarks} onChange={e=>set('remarks',e.target.value)} rows={4}
+            style={{ ...inp, resize:'vertical' }} placeholder="Overall remarks about the student's performance this week..."/>
+        </div>
+
+        {/* Action bar */}
+        <div style={{ display:'flex', gap:10, justifyContent:'flex-end', paddingBottom:32 }}>
+          <button onClick={()=>setView('list')} style={{ padding:'10px 18px', borderRadius:8, border:'1.5px solid #E8E2D6', background:'#fff', color:'#564844', fontSize:13, cursor:'pointer' }}>Cancel</button>
+          <button onClick={()=>doSave(false)} disabled={saving} style={{ padding:'10px 20px', borderRadius:8, border:'1.5px solid #E8E2D6', background:'#fff', color:'#564844', fontSize:13, fontWeight:600, cursor:'pointer' }}>{saving?'Saving...':'Save draft'}</button>
+          <button onClick={generate} style={{ padding:'10px 20px', borderRadius:8, border:'1.5px solid #7D1025', background:'#fff', color:'#7D1025', fontSize:13, fontWeight:700, cursor:'pointer' }}>Preview</button>
+          <button onClick={()=>doSave(true)} disabled={publishing} style={{ padding:'10px 24px', borderRadius:8, border:'none', background:publishing?'#ccc':'#7D1025', color:'#fff', fontSize:13, fontWeight:700, cursor:publishing?'not-allowed':'pointer' }}>
+            {publishing?'Publishing...':'Publish & notify parent'}
+          </button>
+        </div>
       </div>
     </div>
   )
