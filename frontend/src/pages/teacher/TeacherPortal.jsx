@@ -6817,6 +6817,30 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
           <button onClick={()=>lAdd('topics')} style={{ fontSize:12, color:'#7D1025', background:'transparent', border:'1px solid #E8E2D6', padding:'5px 12px', borderRadius:6, cursor:'pointer', fontWeight:600 }}>+ Add topic</button>
         </div>
 
+        {/* Sub-topics */}
+        <div style={card}>
+          <div style={{ fontSize:12, fontWeight:800, color:'#1A0F0E', marginBottom:14 }}>Sub-topics taught</div>
+          {f.subTopics.map((t,i)=>(
+            <div key={i} style={{ display:'flex', gap:8, marginBottom:8 }}>
+              <input value={t} onChange={e=>lSet('subTopics',i,e.target.value)} style={{ ...inp, flex:1 }} placeholder={`Sub-topic ${i+1}`}/>
+              <button onClick={()=>lDel('subTopics',i)} style={{ padding:'0 10px', borderRadius:6, border:'1px solid #FCA5A5', background:'#fff', color:'#991B1B', cursor:'pointer', fontSize:16 }}>×</button>
+            </div>
+          ))}
+          <button onClick={()=>lAdd('subTopics')} style={{ fontSize:12, color:'#7D1025', background:'transparent', border:'1px solid #E8E2D6', padding:'5px 12px', borderRadius:6, cursor:'pointer', fontWeight:600 }}>+ Add sub-topic</button>
+        </div>
+
+        {/* Class activities */}
+        <div style={card}>
+          <div style={{ fontSize:12, fontWeight:800, color:'#1A0F0E', marginBottom:14 }}>Class activities</div>
+          {f.activities.map((t,i)=>(
+            <div key={i} style={{ display:'flex', gap:8, marginBottom:8 }}>
+              <input value={t} onChange={e=>lSet('activities',i,e.target.value)} style={{ ...inp, flex:1 }} placeholder={`Activity ${i+1} (e.g. Group work, Quiz, Lab experiment)`}/>
+              <button onClick={()=>lDel('activities',i)} style={{ padding:'0 10px', borderRadius:6, border:'1px solid #FCA5A5', background:'#fff', color:'#991B1B', cursor:'pointer', fontSize:16 }}>×</button>
+            </div>
+          ))}
+          <button onClick={()=>lAdd('activities')} style={{ fontSize:12, color:'#7D1025', background:'transparent', border:'1px solid #E8E2D6', padding:'5px 12px', borderRadius:6, cursor:'pointer', fontWeight:600 }}>+ Add activity</button>
+        </div>
+
         {/* Assessments */}
         <div style={card}>
           <div style={{ fontSize:12, fontWeight:800, color:'#1A0F0E', marginBottom:14 }}>Assessments & marks</div>
@@ -6866,6 +6890,18 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
               <button onClick={()=>lAdd(k)} style={{ fontSize:12, color:'#7D1025', background:'transparent', border:'1px solid #E8E2D6', padding:'5px 12px', borderRadius:6, cursor:'pointer', fontWeight:600 }}>+ Add</button>
             </div>
           ))}
+        </div>
+
+        {/* Homework assigned */}
+        <div style={card}>
+          <div style={{ fontSize:12, fontWeight:800, color:'#1A0F0E', marginBottom:14 }}>Homework assigned</div>
+          {f.homework.map((h,i)=>(
+            <div key={i} style={{ display:'flex', gap:8, marginBottom:8 }}>
+              <input value={h} onChange={e=>lSet('homework',i,e.target.value)} style={{ ...inp, flex:1 }} placeholder={`Homework ${i+1} (e.g. Page 45 Ex 3, Essay on photosynthesis)`}/>
+              <button onClick={()=>lDel('homework',i)} style={{ padding:'0 10px', borderRadius:6, border:'1px solid #FCA5A5', background:'#fff', color:'#991B1B', cursor:'pointer', fontSize:16 }}>×</button>
+            </div>
+          ))}
+          <button onClick={()=>lAdd('homework')} style={{ fontSize:12, color:'#7D1025', background:'transparent', border:'1px solid #E8E2D6', padding:'5px 12px', borderRadius:6, cursor:'pointer', fontWeight:600 }}>+ Add homework</button>
         </div>
 
         {/* Remarks */}
