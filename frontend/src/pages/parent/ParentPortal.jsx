@@ -683,7 +683,7 @@ function ParentFees({ child, showToast }) {
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', borderTop:`1px solid ${C.line}` }}>
           {[
             { label:'Billing day', val:billing?.billingDay ? `${billing.billingDay}th of month` : '—' },
-            { label:'Next due', val:billing?.nextDueDate ? fmtD(billing.nextDueDate)+(billing.daysUntilDue!==null?' ('+Math.abs(billing.daysUntilDue)+(billing.daysUntilDue<0?' days overdue':billing.daysUntilDue===0?' today':' days')+')'):'') : '—' },
+              { label:'Next due', val:billing?.nextDueDate ? fmtD(billing.nextDueDate) : '—' },
             { label:'Last paid', val:fmtD(billing?.lastPaidDate) },
           ].map((k,i)=>(
             <div key={k.label} style={{ padding:'14px 18px', borderRight:i<2?`1px solid ${C.line}`:undefined }}>
