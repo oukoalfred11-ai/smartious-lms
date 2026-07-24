@@ -467,10 +467,15 @@ function ParentReports({ child, showToast }) {
     const params = {}
     if (filters.from) params.from = filters.from
     if (filters.to)   params.to   = filters.to
-    api.get('/parent/children/'+child._id+'/reports', { params })
-      .then(r=>setData(r.data?.data))
-      .catch(e=>showToast('Failed to load reports.','err'))
-      .finally(()=>setLoading(false))
+    Promise.allSettled([
+      api.get('/parent/children/'+child._id+'/reports', { params }),
+      api.get('/weekly-reports/student/'+child._id),
+    ]).then(([repRes, wkRes]) => {
+      const base    = repRes.status==='fulfilled' ? repRes.value.data?.data : null
+      const weekly  = wkRes.status==='fulfilled'  ? (wkRes.value.data?.data?.reports||[]) : []
+      setData(base ? { ...base, weeklyReports: weekly } : { weeklyReports: weekly })
+    }).catch(e=>showToast('Failed to load reports.','err'))
+    .finally(()=>setLoading(false))
   }, [child?._id, filters])
 
   useEffect(()=>{ load() },[load])
@@ -487,6 +492,13 @@ function ParentReports({ child, showToast }) {
   const openReport = async (id) => {
     try {
       const r = await api.get('/reports/'+id+'/pdf-html')
+      const w = window.open('','_blank'); w.document.write(r.data?.data?.html||''); w.document.close()
+    } catch { showToast('Could not open report.','err') }
+  }
+
+  const openWeeklyReport = async (id) => {
+    try {
+      const r = await api.get('/weekly-reports/'+id+'/html')
       const w = window.open('','_blank'); w.document.write(r.data?.data?.html||''); w.document.close()
     } catch { showToast('Could not open report.','err') }
   }
@@ -561,20 +573,51 @@ function ParentReports({ child, showToast }) {
 
       {tab==='exams'&&(
         <div className="card" style={{ overflow:'hidden' }}>
-          {!data.examResults?.length?<div style={{ padding:30, textAlign:'center', color:C.s400, fontSize:13 }}>No exam results yet.</div>:(
-            <table className="tbl"><thead><tr>{['Exam','Subject','Type','Score','Grade','Date'].map(h=><th key={h}>{h}</th>)}</tr></thead>
-            <tbody>
-              {data.examResults.map(e=>(
-                <tr key={e._id}>
-                  <td style={{ fontWeight:600 }}>{e.title}</td>
-                  <td style={{ color:C.s600 }}>{e.subject}</td>
-                  <td><span style={{ padding:'2px 8px', borderRadius:99, fontSize:10.5, fontWeight:700, background:e.type==='end-term'?'#FDE7EC':'#DBEAFE', color:e.type==='end-term'?C.crimson:'#1E40AF' }}>{e.type==='end-term'?'End-term':'Weekly'}</span></td>
-                  <td style={{ fontWeight:800, color:gc(e.score) }}>{e.score}%</td>
-                  <td><span style={{ padding:'2px 8px', borderRadius:99, fontSize:11, fontWeight:800, background:gc(e.score)+'15', color:gc(e.score) }}>{e.grade}</span></td>
-                  <td style={{ fontSize:12, color:C.s500 }}>{fmtD(e.date)}</td>
-                </tr>
-              ))}
-            </tbody></table>
+          {/* Weekly teacher reports */}
+          {(data.weeklyReports||[]).length>0&&(
+            <>
+              <div style={{ padding:'12px 18px', fontWeight:800, fontSize:12, color:C.s900, borderBottom:`1px solid ${C.s100}`, background:'#FBFAF5' }}>Weekly reports from teachers</div>
+              <table className="tbl"><thead><tr>{['Student','Subject','Week / Period','Score','Teacher','Date',''].map(h=><th key={h}>{h}</th>)}</tr></thead>
+              <tbody>
+                {(data.weeklyReports||[]).map(r=>(
+                  <tr key={r._id}>
+                    <td style={{ fontWeight:700 }}>{r.studentName}</td>
+                    <td>{r.subject}</td>
+                    <td style={{ fontSize:12, color:C.s500 }}>{r.week||'—'} · {r.period}</td>
+                    <td style={{ fontWeight:800, color:r.overallAverage!==null?gc(r.overallAverage):C.s400 }}>
+                      {r.overallAverage!==null?r.overallAverage+'% ('+r.meanGrade+')':'—'}
+                    </td>
+                    <td style={{ fontSize:12, color:C.s500 }}>{r.teacherName||'—'}</td>
+                    <td style={{ fontSize:12, color:C.s500 }}>{fmtD(r.updatedAt)}</td>
+                    <td>
+                      <button onClick={()=>openWeeklyReport(r._id)} style={{ background:C.crimson, color:'#fff', border:'none', padding:'5px 12px', borderRadius:6, fontSize:11.5, fontWeight:700, cursor:'pointer' }}>
+                        View / Print
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody></table>
+            </>
+          )}
+          {/* Exam results */}
+          {!data.examResults?.length&&!(data.weeklyReports||[]).length&&<div style={{ padding:30, textAlign:'center', color:C.s400, fontSize:13 }}>No reports yet.</div>}
+          {data.examResults?.length>0&&(
+            <>
+              <div style={{ padding:'12px 18px', fontWeight:800, fontSize:12, color:C.s900, borderBottom:`1px solid ${C.s100}`, background:'#FBFAF5', borderTop:`1px solid ${C.line}` }}>Exam results</div>
+              <table className="tbl"><thead><tr>{['Exam','Subject','Type','Score','Grade','Date'].map(h=><th key={h}>{h}</th>)}</tr></thead>
+              <tbody>
+                {data.examResults.map(e=>(
+                  <tr key={e._id}>
+                    <td style={{ fontWeight:600 }}>{e.title}</td>
+                    <td style={{ color:C.s600 }}>{e.subject}</td>
+                    <td><span style={{ padding:'2px 8px', borderRadius:99, fontSize:10.5, fontWeight:700, background:'#DBEAFE', color:'#1E40AF' }}>Weekly</span></td>
+                    <td style={{ fontWeight:800, color:gc(e.score) }}>{e.score}%</td>
+                    <td><span style={{ padding:'2px 8px', borderRadius:99, fontSize:11, fontWeight:800, background:gc(e.score)+'15', color:gc(e.score) }}>{e.grade}</span></td>
+                    <td style={{ fontSize:12, color:C.s500 }}>{fmtD(e.date)}</td>
+                  </tr>
+                ))}
+              </tbody></table>
+            </>
           )}
         </div>
       )}
