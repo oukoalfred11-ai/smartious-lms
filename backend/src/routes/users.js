@@ -7,20 +7,42 @@ const jwt = require('jsonwebtoken');
 const { sendVerificationEmail, sendTeacherMemoEmail } = require('../services/emailService');
 const { sendWelcomeEmail } = require('../lib/email');
 
-// ── Avatar upload — multer memory storage ─────────────────
+// ── Cloudinary avatar upload setup ────────────────────────
+// Wrapped defensively: if multer / multer-storage-cloudinary are not
+// installed, we must NOT throw at module load — that would crash the
+// entire server (index.js requires this file at boot). Instead the
+// avatar endpoint degrades to a clear 503 and every other /api/users
+// route keeps working.
 let uploadAvatar = null;
+let avatarUploadError = null;
 try {
   const multer = require('multer');
-  uploadAvatar = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 3 * 1024 * 1024 },
-    fileFilter: (_, file, cb) => {
-      file.mimetype.startsWith('image/') ? cb(null, true) : cb(new Error('Images only'));
+  const cloudinary = require('cloudinary').v2;
+  const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key:    process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+
+  const avatarStorage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: 'smartious/avatars',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+      transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
     },
   });
-} catch(e) {
-  console.log('[users] avatar upload disabled —', e.message);
+  uploadAvatar = multer({
+    storage: avatarStorage,
+    limits: { fileSize: 5 * 1024 * 1024 },   // 5 MB cap
+  });
+} catch (e) {
+  avatarUploadError = e.message;
+  console.error('[users] avatar upload disabled —', e.message);
 }
+
 // ─────────────────────────────────────────────────────────
 // HELPER: Sync a student's GroupRoom enrollments based on
 // their curriculum + gradeLevel + subjects.
@@ -103,7 +125,7 @@ function validateRoleFields(user, role) {
 }
 
 // GET /stats — Get total user count for sidebar badge
-router.get('/stats', auth, requireRole('admin', 'dos', 'ops_manager'), async (req, res) => {
+router.get('/stats', auth, requireRole('admin'), async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     res.json({ success: true, totalUsers });
@@ -113,7 +135,7 @@ router.get('/stats', auth, requireRole('admin', 'dos', 'ops_manager'), async (re
 });
 
 // GET all users (admin only) with advanced search and filtering
-router.get('/', auth, requireRole('admin', 'teacher', 'dos', 'ops_manager', 'accountant', 'sales'), async (req, res) => {
+router.get('/', auth, requireRole('admin', 'teacher'), async (req, res) => {
   try {
     const { search, role, curriculum } = req.query;
     let query = {};
@@ -319,7 +341,7 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin'), async (req
 });
 
 // CREATE user (admin only) with role-specific logic and auto-generated temp password
-router.post('/', auth, requireRole('admin'), async (req, res) => {
+router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
   try {
     validateRoleFields(req.body, req.body.role);
 
@@ -333,8 +355,7 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
     const tempPassword = User.generateTempPassword();
     req.body.password = tempPassword;
     req.body.isActive = true;
-    const STAFF_ROLES = ['admin','teacher','ops_manager','accountant','sales','dos'];
-    req.body.mustChangePassword = !STAFF_ROLES.includes(req.body.role);
+    req.body.mustChangePassword = true;
 
     const user = await User.create(req.body);
 
@@ -398,30 +419,17 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
       }
     }
 
-    // If user role is 'teacher', build teachingSpecialties from subjects and curriculum
+    // Save teacher subjects (plain strings) — teachingSpecialties uses ObjectId refs separately
     if (user.role === 'teacher') {
       try {
-        const teachingSpecialties = [];
-        const teachingCurricula = Array.isArray(req.body.curriculum) ? req.body.curriculum : (req.body.curriculum ? [req.body.curriculum] : []);
-        const teachingSubjects = Array.isArray(req.body.subjects) ? req.body.subjects : [];
-
-        for (const subjectId of teachingSubjects) {
-          for (const curr of teachingCurricula) {
-            teachingSpecialties.push({
-              subjectId: subjectId,
-              curriculum: curr
-            });
-          }
-        }
-
-        if (teachingSpecialties.length > 0) {
-          user.teachingSpecialties = teachingSpecialties;
+        const subjectStrings = (Array.isArray(req.body.subjects) ? req.body.subjects : []).filter(s => typeof s === 'string' && s.trim());
+        if (subjectStrings.length > 0) {
+          user.subjects = subjectStrings;
           await user.save();
         }
-
-        console.log(`✓ Teacher ${user.firstName} ${user.lastName} assigned ${teachingSpecialties.length} specialties`);
-      } catch (specialtyError) {
-        console.error('Failed to assign teaching specialties:', specialtyError.message);
+        console.log(`✓ Teacher ${user.firstName} ${user.lastName} subjects: ${subjectStrings.join(', ') || 'none'}`);
+      } catch (e) {
+        console.error('Failed to save teacher subjects:', e.message);
       }
     }
 
@@ -668,7 +676,7 @@ router.delete('/:id/parent', auth, requireRole('admin'), async (req, res) => {
 });
 
 // UPDATE user (admin only) — demo users cannot be deleted or have role/isDemo changed
-router.patch('/:id', auth, requireRole('admin', 'ops_manager', 'sales'), async (req, res) => {
+router.patch('/:id', auth, requireRole('admin','ops_manager'), async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
     if (!target) return res.status(404).json({ success: false, message: 'User not found' });
@@ -721,28 +729,13 @@ router.patch('/:id', auth, requireRole('admin', 'ops_manager', 'sales'), async (
 
     const safe = user.toObject();
 
-    // If user is a teacher and subjects or curriculum were updated, rebuild teachingSpecialties
-    if (user.role === 'teacher' && (req.body.subjects !== undefined || req.body.curriculum !== undefined)) {
+    // Subjects are already saved by findByIdAndUpdate above — just log
+    if (user.role === 'teacher' && req.body.subjects !== undefined) {
       try {
-        const teachingSpecialties = [];
-        const teachingCurricula = Array.isArray(user.curriculum) ? user.curriculum : (user.curriculum ? [user.curriculum] : []);
-        const teachingSubjects = Array.isArray(user.subjectRefs) ? user.subjectRefs : [];
-
-        for (const subject of teachingSubjects) {
-          const subjectId = subject._id || subject;
-          for (const curr of teachingCurricula) {
-            teachingSpecialties.push({
-              subjectId: subjectId,
-              curriculum: curr
-            });
-          }
-        }
-
-        user.teachingSpecialties = teachingSpecialties;
-        await user.save();
-        console.log(`✓ Teacher ${user.firstName} ${user.lastName} specialties updated to ${teachingSpecialties.length}`);
-      } catch (specialtyError) {
-        console.error('Failed to update teaching specialties:', specialtyError.message);
+        const subs = (Array.isArray(req.body.subjects) ? req.body.subjects : []).filter(s => typeof s === 'string');
+        console.log(`✓ Teacher ${user.firstName} ${user.lastName} subjects updated: ${subs.join(', ') || 'none'}`);
+      } catch (e) {
+        console.error('Teacher subjects update log error:', e.message);
       }
 
       try {
