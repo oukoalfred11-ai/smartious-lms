@@ -314,8 +314,39 @@ router.get('/coverage', auth, async (req, res) => {
 // Duplicates (same subject + questionText) are skipped, not errored.
 router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
   try {
-    const items = Array.isArray(req.body) ? req.body : (req.body.questions || [])
-    if (!Array.isArray(items) || !items.length) return fail(res, 400, 'Send { questions: [ ... ] } with at least one question.')
+    // Accepts EITHER shape:
+    //  A) { questions: [ {...}, ... ] }  — full JSON objects
+    //  B) { text, defaults }             — one question per line:
+    //     Question? | optA | optB | optC | optD | correctIndexOrText | explanation
+    let items = Array.isArray(req.body) ? req.body : (req.body.questions || [])
+
+    if ((!items || !items.length) && typeof req.body.text === 'string') {
+      const d = req.body.defaults || {}
+      items = req.body.text.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(line => {
+        const p = line.split('|').map(x => x.trim())
+        const [qt, a, b, cc, dd, ans, exp] = p
+        const options = [a, b, cc, dd].filter(x => x)
+        let correctAnswer = ans || ''
+        // allow 1-4 or A-D as the answer key
+        if (/^[1-4]$/.test(correctAnswer))      correctAnswer = options[parseInt(correctAnswer,10)-1] || ''
+        else if (/^[A-Da-d]$/.test(correctAnswer)) correctAnswer = options['abcd'.indexOf(correctAnswer.toLowerCase())] || ''
+        return {
+          subject:    d.subject,
+          curriculum: d.curriculum,
+          grade:      d.grade,
+          topic:      d.topic || '',
+          subtopic:   d.subtopic || '',
+          difficulty: d.difficulty || 'medium',
+          questionText: qt || '',
+          options,
+          correctAnswer,
+          explanation: exp || '',
+          marks: 1,
+        }
+      })
+    }
+
+    if (!Array.isArray(items) || !items.length) return fail(res, 400, 'Send { questions: [ ... ] } or { text, defaults }.')
     if (items.length > 2000) return fail(res, 400, 'Maximum 2000 questions per import.')
 
     let inserted = 0, skipped = 0
