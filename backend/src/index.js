@@ -97,7 +97,6 @@ app.use('/api/ratings',        require('./routes/ratings'));
 app.use('/api/weekly-reports', require('./routes/weekly-reports'));
 app.use('/api/seed-subjects',  require('./routes/seed-subjects'));
 app.use('/api/quiz',           require('./routes/quiz'));
-app.use('/api/auto-homework',  require('./routes/auto-homework'));
 app.use('/api/checkin',    require('./routes/checkin'));
 
 // ── Health check ──────────────────────────────────────────
