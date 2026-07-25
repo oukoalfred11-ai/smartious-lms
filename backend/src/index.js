@@ -139,6 +139,7 @@ const { sendDueReminders  } = require('./routes/fee-collection');
 const { sendClassReminders } = require('./routes/parent-portal');
 const { scheduleShowCauseCron } = require('./services/showCauseCron');
 try { require('./services/autoHomeworkCron').start(); } catch (e) { console.error('[auto-homework] start failed:', e.message); }
+try { require('./services/aiMarking').logStartupState(); } catch (e) { /* service optional */ }
 
 const runCheckinReminder = () => {
   const now = new Date();
