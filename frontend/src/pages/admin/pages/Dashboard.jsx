@@ -9748,8 +9748,6 @@ function QuestionBankModule({ toast }) {
   const [modal,     setModal]     = useState(false)
   const [editQ,     setEditQ]     = useState(null)
   const [seeding,   setSeeding]   = useState(false)
-  const [spines,    setSpines]    = useState([])
-  const [spineBusy, setSpineBusy] = useState('')
   const [filter,    setFilter]    = useState({ subject:'', curriculum:'', difficulty:'', search:'' })
 
   const SUBJECTS   = ['Mathematics','Physics','Chemistry','Biology','Business Studies','Computer Science','Economics','History','Geography','English Language','English Literature']
@@ -9772,21 +9770,7 @@ function QuestionBankModule({ toast }) {
 
   useEffect(() => { load(1) }, [filter])
 
-  useEffect(() => {
-    api.get('/spine-seed')
-      .then(r => setSpines(r.data?.data?.spines||[]))
-      .catch(() => setSpines([]))
-  }, [])
 
-  const buildSpine = async (key, label) => {
-    if (!confirm(`Rebuild the ${label} syllabus spine?\n\nThis replaces any existing topics for that subject. Lessons, live classes and questions already linked by topic NAME keep working.`)) return
-    setSpineBusy(key)
-    try {
-      const r = await api.post('/spine-seed/'+key)
-      toast?.ok?.(r.data?.message||'Spine rebuilt.')
-    } catch(e) { toast?.error?.(e?.response?.data?.message||'Spine rebuild failed.') }
-    setSpineBusy('')
-  }
 
   const seed = async () => {
     setSeeding(true)
@@ -9840,32 +9824,6 @@ function QuestionBankModule({ toast }) {
           </button>
         </div>
       </PCard>
-
-      {/* Syllabus spines */}
-      {spines.length > 0 && (
-        <PCard style={{ marginBottom:16 }}>
-          <div style={{ fontSize:11, fontWeight:800, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:4 }}>Syllabus Spine</div>
-          <div style={{ fontSize:12.5, color:TOKENS.s500, marginBottom:14, lineHeight:1.6 }}>
-            The spine organises each subject into topics and lesson-level subtopics. Lessons, live classes, questions and student progress all hang off it.
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:12 }}>
-            {spines.map(s => (
-              <div key={s.key} style={{ border:`1px solid ${TOKENS.s100}`, borderRadius:10, padding:'14px 16px', background:'#fff' }}>
-                <div style={{ fontSize:14, fontWeight:800, color:TOKENS.ink }}>{s.subjectName}</div>
-                <div style={{ fontSize:12, color:TOKENS.s500, marginTop:2 }}>{s.curricula.join(' · ')}</div>
-                <div style={{ display:'flex', gap:14, margin:'10px 0 12px' }}>
-                  <div><span style={{ fontSize:16, fontWeight:900, color:TOKENS.crimson }}>{s.topics}</span> <span style={{ fontSize:11, color:TOKENS.s400, fontWeight:600 }}>topics</span></div>
-                  <div><span style={{ fontSize:16, fontWeight:900, color:TOKENS.crimson }}>{s.lessons}</span> <span style={{ fontSize:11, color:TOKENS.s400, fontWeight:600 }}>lessons</span></div>
-                </div>
-                <button onClick={()=>buildSpine(s.key, s.subjectName)} disabled={spineBusy===s.key}
-                  style={{ width:'100%', background:spineBusy===s.key?TOKENS.s300:TOKENS.accentAmber, color:'#fff', border:'none', padding:'9px', borderRadius:7, fontWeight:700, fontSize:12.5, cursor:spineBusy===s.key?'not-allowed':'pointer' }}>
-                  {spineBusy===s.key ? 'Building...' : 'Rebuild spine'}
-                </button>
-              </div>
-            ))}
-          </div>
-        </PCard>
-      )}
 
       {/* Filters */}
       <PCard style={{ marginBottom:16 }}>
@@ -12205,135 +12163,183 @@ const LOWER_SEC_LIBRARY = [
 // Source: Cambridge IGCSE Biology 0610 Syllabus 2026-2028.
 // Extended (Supplement) content integrated into subtopic descriptions.
 const IGCSE_BIOLOGY_0610 = [
-  { topic: 'Characteristics and classification of living organisms (CCL)', code: 'CCL', subtopics: [
-    { name: 'Characteristics of living organisms (MRS GREN: movement, respiration, sensitivity, growth, reproduction, excretion, nutrition)', code: 'CCL1', suggestedLessons: 2 },
-    { name: 'Concept and uses of classification systems; binomial system', code: 'CCL2', suggestedLessons: 2 },
-    { name: 'Five-kingdom classification (animals, plants, fungi, prokaryotes, protoctists); main features', code: 'CCL3', suggestedLessons: 3 },
-    { name: 'Main groups of vertebrates and arthropods', code: 'CCL4', suggestedLessons: 2 },
-    { name: 'Features of plant kingdom (ferns, flowering plants — dicotyledons vs monocotyledons)', code: 'CCL5', suggestedLessons: 2 },
-    { name: 'Features of viruses (protein coat, genetic material); use of dichotomous keys', code: 'CCL6', suggestedLessons: 2 },
+  { topic: 'Unit 1 · Characteristics & Classification', code: '1.1', subtopics: [
+    { name: 'The 7 Characteristics of Living Organisms (MRS GREN)', code: '001', suggestedLessons: 1 },
+    { name: 'The Binomial Naming System & Species Concept', code: '002', suggestedLessons: 1 },
+    { name: 'Classification: The 5 Kingdoms & Their Features', code: '003', suggestedLessons: 1 },
+    { name: 'Classification of Vertebrates & Arthropods', code: '004', suggestedLessons: 1 },
+    { name: 'Constructing & Using Dichotomous Keys', code: '005', suggestedLessons: 1 },
   ]},
-  { topic: 'Organisation of the organism (ORG)', code: 'ORG', subtopics: [
-    { name: 'Cell structure: plant, animal, and bacterial cells (organelles)', code: 'ORG1', suggestedLessons: 3 },
-    { name: 'Specialised cells: ciliated, root hair, palisade mesophyll, neurones, red blood, sperm/egg', code: 'ORG2', suggestedLessons: 3 },
-    { name: 'Levels of organisation: cell → tissue → organ → organ system → organism', code: 'ORG3', suggestedLessons: 2 },
-    { name: 'Sizes of specimens: magnification formula and unit conversion', code: 'ORG4', suggestedLessons: 2 },
+  { topic: 'Unit 1 · Cell Structure & Organisation', code: '1.2', subtopics: [
+    { name: 'Animal & Plant Cell Structures & Organelles', code: '006', suggestedLessons: 1 },
+    { name: 'Bacterial Cells & Specialised Cells', code: '007', suggestedLessons: 1 },
+    { name: 'Levels of Organisation: Cells, Tissues, Organs & Systems', code: '008', suggestedLessons: 1 },
+    { name: 'Calculating Magnification & Image Size (M = I / A)', code: '009', suggestedLessons: 1 },
   ]},
-  { topic: 'Movement into and out of cells (MOV)', code: 'MOV', subtopics: [
-    { name: 'Diffusion: definition, factors affecting rate, examples in living organisms', code: 'MOV1', suggestedLessons: 3 },
-    { name: 'Osmosis: definition, effect on plant and animal cells (turgor, plasmolysis, haemolysis)', code: 'MOV2', suggestedLessons: 4 },
-    { name: 'Water potential and concentration gradient (Extended)', code: 'MOV3', suggestedLessons: 2 },
-    { name: 'Active transport: definition, role of protein carriers, examples (root hair uptake, glucose absorption)', code: 'MOV4', suggestedLessons: 3 },
+  { topic: 'Unit 1 · Movement In & Out of Cells', code: '1.3', subtopics: [
+    { name: 'Diffusion: Mechanism, Factors & Real-World Examples', code: '010', suggestedLessons: 1 },
+    { name: 'Osmosis: Water Potential & Plant/Animal Cell Responses', code: '011', suggestedLessons: 1 },
+    { name: 'Practical: Investigating Osmosis in Potato Tissues', code: '012', suggestedLessons: 1 },
+    { name: 'Active Transport & Protein Carriers', code: '013', suggestedLessons: 1 },
   ]},
-  { topic: 'Biological molecules (MOL)', code: 'MOL', subtopics: [
-    { name: 'Elements in carbohydrates, proteins, fats; chemical structure (simple sugars, amino acids, glycerol/fatty acids)', code: 'MOL1', suggestedLessons: 3 },
-    { name: "Food tests: Benedict's, iodine, biuret, ethanol emulsion, DCPIP", code: 'MOL2', suggestedLessons: 3 },
-    { name: 'Roles of water; structure of DNA (double helix, four bases)', code: 'MOL3', suggestedLessons: 2 },
+  { topic: 'Unit 1 · Biological Molecules', code: '1.4', subtopics: [
+    { name: 'Structure of Carbohydrates, Fats & Proteins', code: '014', suggestedLessons: 1 },
+    { name: 'DNA Structure: Double Helix & Base Pairing', code: '015', suggestedLessons: 1 },
+    { name: 'Practical: Food Tests (Benedict\'s, Iodine, Biuret, Ethanol)', code: '016', suggestedLessons: 1 },
   ]},
-  { topic: 'Enzymes (ENZ)', code: 'ENZ', subtopics: [
-    { name: 'Enzymes as biological catalysts; specificity; lock-and-key model', code: 'ENZ1', suggestedLessons: 3 },
-    { name: 'Effect of temperature and pH on enzyme activity; denaturation', code: 'ENZ2', suggestedLessons: 3 },
-    { name: 'Investigations into enzyme action', code: 'ENZ3', suggestedLessons: 2 },
+  { topic: 'Unit 1 · Enzymes', code: '1.5', subtopics: [
+    { name: 'Enzyme Action & The Lock-and-Key Model', code: '017', suggestedLessons: 1 },
+    { name: 'Factors Affecting Enzymes: Temperature & Denaturation', code: '018', suggestedLessons: 1 },
+    { name: 'Factors Affecting Enzymes: pH Effects', code: '019', suggestedLessons: 1 },
+    { name: 'Practical: Investigating Enzyme Activity & Catalase', code: '020', suggestedLessons: 1 },
   ]},
-  { topic: 'Plant nutrition (PNU)', code: 'PNU', subtopics: [
-    { name: 'Photosynthesis: word and balanced chemical equation; raw materials and products', code: 'PNU1', suggestedLessons: 3 },
-    { name: 'Investigating photosynthesis: testing leaves for starch, controlling variables', code: 'PNU2', suggestedLessons: 3 },
-    { name: 'Leaf structure: cellular adaptations for photosynthesis; gas exchange', code: 'PNU3', suggestedLessons: 3 },
-    { name: 'Limiting factors: light, CO2, temperature; glasshouse applications', code: 'PNU4', suggestedLessons: 2 },
-    { name: 'Mineral requirements: nitrogen for proteins, magnesium for chlorophyll', code: 'PNU5', suggestedLessons: 2 },
+  { topic: 'Unit 2 · Plant Nutrition & Photosynthesis', code: '2.1', subtopics: [
+    { name: 'Photosynthesis Equation & Energy Transfer', code: '021', suggestedLessons: 1 },
+    { name: 'Leaf Structure & Functional Adaptations', code: '022', suggestedLessons: 1 },
+    { name: 'Mineral Requirements: Nitrate & Magnesium Ions', code: '023', suggestedLessons: 1 },
+    { name: 'Limiting Factors in Photosynthesis (Light, CO2, Temperature)', code: '024', suggestedLessons: 1 },
+    { name: 'Practical: Investigating Light Intensity on Aquatic Plants', code: '025', suggestedLessons: 1 },
+    { name: 'Practical: Testing a Leaf for Starch', code: '026', suggestedLessons: 1 },
   ]},
-  { topic: 'Human nutrition (HNU)', code: 'HNU', subtopics: [
-    { name: 'Balanced diet: nutrients (carbohydrates, fats, proteins, vitamins C/D, minerals, fibre, water); deficiency diseases', code: 'HNU1', suggestedLessons: 3 },
-    { name: 'Alimentary canal: structure and functions (ingestion, digestion, absorption, assimilation, egestion)', code: 'HNU2', suggestedLessons: 3 },
-    { name: 'Mechanical and chemical digestion; role of teeth and enzymes (amylase, protease, lipase)', code: 'HNU3', suggestedLessons: 4 },
-    { name: 'Absorption in the small intestine; villi adaptations', code: 'HNU4', suggestedLessons: 3 },
-    { name: 'Role of the liver in assimilation; absorption of water in colon', code: 'HNU5', suggestedLessons: 2 },
+  { topic: 'Unit 2 · Transport in Plants', code: '2.2', subtopics: [
+    { name: 'Xylem & Phloem Structure and Function', code: '027', suggestedLessons: 1 },
+    { name: 'Water Uptake & Root Hair Cells', code: '028', suggestedLessons: 1 },
+    { name: 'The Transpiration Stream & Factors Affecting Transpiration', code: '029', suggestedLessons: 1 },
+    { name: 'Practical: Using a Potometer to Measure Transpiration', code: '030', suggestedLessons: 1 },
+    { name: 'Wilting & Turgor Pressure in Plants', code: '031', suggestedLessons: 1 },
+    { name: 'Translocation of Sucrose & Amino Acids in Phloem', code: '032', suggestedLessons: 1 },
   ]},
-  { topic: 'Transport in plants (TPL)', code: 'TPL', subtopics: [
-    { name: 'Xylem and phloem: structure, location, functions (water/mineral transport, translocation)', code: 'TPL1', suggestedLessons: 3 },
-    { name: 'Water uptake by root hair cells; pathway through plant', code: 'TPL2', suggestedLessons: 3 },
-    { name: 'Transpiration: definition, factors affecting rate, investigations', code: 'TPL3', suggestedLessons: 3 },
-    { name: 'Translocation of sucrose and amino acids (Extended)', code: 'TPL4', suggestedLessons: 2 },
+  { topic: 'Unit 3 · Human Nutrition & Digestion', code: '3.1', subtopics: [
+    { name: 'Balanced Diet: Nutrients, Roles & Energy Demands', code: '033', suggestedLessons: 1 },
+    { name: 'Nutrient Deficiency Diseases (Scurvy, Rickets, Anaemia, Kwashiorkor)', code: '034', suggestedLessons: 1 },
+    { name: 'Anatomy of the Human Alimentary Canal', code: '035', suggestedLessons: 1 },
+    { name: 'Mechanical Digestion & Teeth Types/Care', code: '036', suggestedLessons: 1 },
+    { name: 'Chemical Digestion: Amylase, Proteases & Lipases', code: '037', suggestedLessons: 1 },
+    { name: 'Functions of Bile & Stomach Acid', code: '038', suggestedLessons: 1 },
+    { name: 'Absorption in the Small Intestine: Villi Adaptations', code: '039', suggestedLessons: 1 },
+    { name: 'Assimilation & Egestion', code: '040', suggestedLessons: 1 },
   ]},
-  { topic: 'Transport in animals (TAN)', code: 'TAN', subtopics: [
-    { name: 'Circulatory systems: single (fish) vs double (mammals); pulmonary and systemic', code: 'TAN1', suggestedLessons: 2 },
-    { name: 'Heart structure: chambers, valves, vessels; coronary circulation', code: 'TAN2', suggestedLessons: 4 },
-    { name: 'Heart function: cardiac cycle, heart rate measurement; effect of exercise', code: 'TAN3', suggestedLessons: 3 },
-    { name: 'Blood vessels: arteries, veins, capillaries — structure and function', code: 'TAN4', suggestedLessons: 3 },
-    { name: 'Blood: composition (red and white cells, platelets, plasma); roles in transport and defence', code: 'TAN5', suggestedLessons: 3 },
+  { topic: 'Unit 3 · Transport in Animals', code: '3.2', subtopics: [
+    { name: 'Double vs. Single Circulatory Systems', code: '041', suggestedLessons: 1 },
+    { name: 'Heart Anatomy & Blood Flow Pathway', code: '042', suggestedLessons: 1 },
+    { name: 'The Cardiac Cycle & Heart Rate Control', code: '043', suggestedLessons: 1 },
+    { name: 'Coronary Heart Disease: Causes, Risk Factors & Prevention', code: '044', suggestedLessons: 1 },
+    { name: 'Blood Vessel Structure: Arteries, Veins & Capillaries', code: '045', suggestedLessons: 1 },
+    { name: 'Blood Components: Plasma & Red Blood Cells', code: '046', suggestedLessons: 1 },
+    { name: 'Blood Components: White Blood Cells & Platelets', code: '047', suggestedLessons: 1 },
+    { name: 'Lymphatic System & Tissue Fluid', code: '048', suggestedLessons: 1 },
   ]},
-  { topic: 'Diseases and immunity (DIS)', code: 'DIS', subtopics: [
-    { name: 'Pathogens and transmissible diseases; transmission methods', code: 'DIS1', suggestedLessons: 2 },
-    { name: 'Body defences: mechanical and chemical barriers; phagocytes', code: 'DIS2', suggestedLessons: 2 },
-    { name: 'Active and passive immunity; lymphocytes and antibody production', code: 'DIS3', suggestedLessons: 3 },
-    { name: 'Vaccination: principles, herd immunity, role in disease control', code: 'DIS4', suggestedLessons: 2 },
+  { topic: 'Unit 3 · Pathogens, Diseases & Immunity', code: '3.3', subtopics: [
+    { name: 'Pathogens & Transmissible Diseases', code: '049', suggestedLessons: 1 },
+    { name: 'Physical & Chemical Barriers to Infection', code: '050', suggestedLessons: 1 },
+    { name: 'Phagocytosis & Antibody Production by Lymphocytes', code: '051', suggestedLessons: 1 },
+    { name: 'Active vs. Passive Immunity & Memory Cells', code: '052', suggestedLessons: 1 },
+    { name: 'Vaccination Principles & Herd Immunity', code: '053', suggestedLessons: 1 },
+    { name: 'Case Study: Cholera, Toxin Mechanism & Oral Rehydration', code: '054', suggestedLessons: 1 },
   ]},
-  { topic: 'Gas exchange in humans (GAS)', code: 'GAS', subtopics: [
-    { name: 'Structure of the breathing system: trachea, bronchi, bronchioles, alveoli', code: 'GAS1', suggestedLessons: 2 },
-    { name: 'Adaptations of alveoli for gas exchange', code: 'GAS2', suggestedLessons: 2 },
-    { name: 'Inspiration and expiration: role of intercostal muscles and diaphragm', code: 'GAS3', suggestedLessons: 3 },
-    { name: 'Effects of physical activity and smoking on the breathing system', code: 'GAS4', suggestedLessons: 2 },
+  { topic: 'Unit 3 · Gas Exchange in Humans', code: '3.4', subtopics: [
+    { name: 'Structure of the Human Respiratory System', code: '055', suggestedLessons: 1 },
+    { name: 'Gas Exchange Surface Adaptations in Alveoli', code: '056', suggestedLessons: 1 },
+    { name: 'Mechanics of Breathing: Ventilation', code: '057', suggestedLessons: 1 },
+    { name: 'Effects of Exercise on Breathing Rate & Depth', code: '058', suggestedLessons: 1 },
   ]},
-  { topic: 'Respiration (RES)', code: 'RES', subtopics: [
-    { name: 'Aerobic respiration: word and balanced equation; uses of energy', code: 'RES1', suggestedLessons: 3 },
-    { name: 'Anaerobic respiration in muscles (lactic acid) and yeast (alcoholic fermentation)', code: 'RES2', suggestedLessons: 3 },
-    { name: 'Comparing energy released; oxygen debt (Extended)', code: 'RES3', suggestedLessons: 2 },
+  { topic: 'Unit 3 · Respiration', code: '3.5', subtopics: [
+    { name: 'Aerobic Respiration Equation & Uses of Energy', code: '059', suggestedLessons: 1 },
+    { name: 'Anaerobic Respiration in Humans & Oxygen Debt', code: '060', suggestedLessons: 1 },
+    { name: 'Anaerobic Respiration in Yeast & Industrial Fermentation', code: '061', suggestedLessons: 1 },
+    { name: 'Practical: Respirometers & Energy Release in Germinating Seeds', code: '062', suggestedLessons: 1 },
   ]},
-  { topic: 'Excretion in humans (EXC)', code: 'EXC', subtopics: [
-    { name: 'Excretory products: CO2 from lungs, urea from kidneys', code: 'EXC1', suggestedLessons: 2 },
-    { name: 'Kidney structure: cortex, medulla, ureter, bladder', code: 'EXC2', suggestedLessons: 2 },
-    { name: 'Filtration in the nephron; selective reabsorption; urine formation', code: 'EXC3', suggestedLessons: 3 },
-    { name: 'Dialysis and kidney transplant (Extended)', code: 'EXC4', suggestedLessons: 2 },
+  { topic: 'Unit 3 · Excretion in Humans', code: '3.6', subtopics: [
+    { name: 'Excretory Products & Deamination in the Liver', code: '063', suggestedLessons: 1 },
+    { name: 'Kidney Anatomy & The Urinary System', code: '064', suggestedLessons: 1 },
+    { name: 'Nephron Function: Ultrafiltration & Selective Reabsorption', code: '065', suggestedLessons: 1 },
+    { name: 'Kidney Dialysis vs. Organ Transplantation', code: '066', suggestedLessons: 1 },
   ]},
-  { topic: 'Coordination and response (COR)', code: 'COR', subtopics: [
-    { name: 'Nervous system: CNS and peripheral nerves; neurones (sensory, motor, relay)', code: 'COR1', suggestedLessons: 3 },
-    { name: 'Reflex arc; synapses (Extended)', code: 'COR2', suggestedLessons: 3 },
-    { name: 'Sense organs: structure and function of the eye; accommodation, pupil reflex', code: 'COR3', suggestedLessons: 3 },
-    { name: 'Hormones: definition; insulin and adrenaline; comparing nervous vs hormonal', code: 'COR4', suggestedLessons: 3 },
-    { name: 'Homeostasis: principle, body temperature control, blood glucose control', code: 'COR5', suggestedLessons: 3 },
-    { name: 'Tropisms in plants: phototropism, gravitropism; role of auxin', code: 'COR6', suggestedLessons: 2 },
+  { topic: 'Unit 3 · Coordination & Response', code: '3.7', subtopics: [
+    { name: 'Central Nervous System, Neurons & Nerve Impulses', code: '067', suggestedLessons: 1 },
+    { name: 'Reflex Arcs & Synaptic Transmission', code: '068', suggestedLessons: 1 },
+    { name: 'Structure & Function of the Human Eye', code: '069', suggestedLessons: 1 },
+    { name: 'Accommodation & Light Reflexes in the Eye', code: '070', suggestedLessons: 1 },
+    { name: 'Endocrine System: Hormones vs. Nervous Control', code: '071', suggestedLessons: 1 },
+    { name: 'Adrenaline, Insulin, Glucagon, Testosterone & Oestrogen', code: '072', suggestedLessons: 1 },
+    { name: 'Plant Tropisms: Phototropism & Gravitropism Mechanism (Auxins)', code: '073', suggestedLessons: 1 },
   ]},
-  { topic: 'Drugs (DRG)', code: 'DRG', subtopics: [
-    { name: 'Definition of a drug; medicinal drugs (antibiotics)', code: 'DRG1', suggestedLessons: 2 },
-    { name: 'Misused drugs: heroin (effects, addiction); alcohol and tobacco effects', code: 'DRG2', suggestedLessons: 2 },
+  { topic: 'Unit 3 · Homeostasis', code: '3.8', subtopics: [
+    { name: 'Principles of Homeostasis & Negative Feedback Loops', code: '074', suggestedLessons: 1 },
+    { name: 'Thermoregulation: Skin Mechanisms & Core Temperature Control', code: '075', suggestedLessons: 1 },
+    { name: 'Blood Glucose Regulation: Insulin, Glucagon & Diabetes', code: '076', suggestedLessons: 1 },
   ]},
-  { topic: 'Reproduction (REP)', code: 'REP', subtopics: [
-    { name: 'Asexual reproduction vs sexual reproduction; advantages and disadvantages', code: 'REP1', suggestedLessons: 2 },
-    { name: 'Sexual reproduction in plants: flower structure, pollination, fertilisation, seed and fruit', code: 'REP2', suggestedLessons: 4 },
-    { name: 'Sexual reproduction in humans: male and female reproductive systems', code: 'REP3', suggestedLessons: 3 },
-    { name: 'Menstrual cycle; hormones involved (FSH, LH, oestrogen, progesterone)', code: 'REP4', suggestedLessons: 3 },
-    { name: 'Development of the fetus; role of placenta and amniotic sac', code: 'REP5', suggestedLessons: 2 },
-    { name: 'Sexually transmitted infections (HIV/AIDS); contraception methods', code: 'REP6', suggestedLessons: 2 },
+  { topic: 'Unit 3 · Drugs', code: '3.9', subtopics: [
+    { name: 'Antibiotics, Resistance, Alcohol & Anabolic Steroids', code: '077', suggestedLessons: 1 },
   ]},
-  { topic: 'Inheritance (INH)', code: 'INH', subtopics: [
-    { name: 'Chromosomes, genes, alleles; mitosis and meiosis', code: 'INH1', suggestedLessons: 4 },
-    { name: 'Monohybrid inheritance: genotype, phenotype, homozygous, heterozygous; Punnett squares', code: 'INH2', suggestedLessons: 4 },
-    { name: 'Sex determination (XX/XY); sex-linked characteristics', code: 'INH3', suggestedLessons: 2 },
-    { name: 'Codominance (Extended); inherited disorders', code: 'INH4', suggestedLessons: 2 },
+  { topic: 'Unit 4 · Reproduction', code: '4.1', subtopics: [
+    { name: 'Asexual Reproduction Principles & Examples', code: '078', suggestedLessons: 1 },
+    { name: 'Sexual Reproduction Principles & Meiosis Overview', code: '079', suggestedLessons: 1 },
+    { name: 'Flower Anatomy & Insect vs. Wind Pollination', code: '080', suggestedLessons: 1 },
+    { name: 'Fertilisation & Seed/Fruit Formation', code: '081', suggestedLessons: 1 },
+    { name: 'Human Male & Female Reproductive Systems', code: '082', suggestedLessons: 1 },
+    { name: 'The Menstrual Cycle & Hormonal Control (FSH, LH, Oestrogen, Progesterone)', code: '083', suggestedLessons: 1 },
+    { name: 'Fertilisation, Pregnancy, Placenta Function & Antenatal Care', code: '084', suggestedLessons: 1 },
+    { name: 'Sexually Transmitted Infections (STIs) & HIV/AIDS', code: '085', suggestedLessons: 1 },
   ]},
-  { topic: 'Variation and selection (VAR)', code: 'VAR', subtopics: [
-    { name: 'Variation: continuous vs discontinuous; genetic and environmental causes', code: 'VAR1', suggestedLessons: 2 },
-    { name: 'Mutation as a source of variation; gene mutation and chromosome mutation', code: 'VAR2', suggestedLessons: 2 },
-    { name: 'Natural selection; evolution by natural selection (Darwin)', code: 'VAR3', suggestedLessons: 3 },
-    { name: 'Adaptive features; selective breeding (artificial selection)', code: 'VAR4', suggestedLessons: 2 },
+  { topic: 'Unit 4 · Inheritance & Genetics', code: '4.2', subtopics: [
+    { name: 'Chromosomes, Genes, Alleles & Genotype/Phenotype', code: '086', suggestedLessons: 1 },
+    { name: 'Mitosis & Cell Division Cycle', code: '087', suggestedLessons: 1 },
+    { name: 'Meiosis & Formation of Gametes', code: '088', suggestedLessons: 1 },
+    { name: 'Monohybrid Inheritance & Punnett Squares', code: '089', suggestedLessons: 1 },
+    { name: 'Codominance & Human ABO Blood Groups', code: '090', suggestedLessons: 1 },
+    { name: 'Sex Determination & Sex-Linked Genes (Colour Blindness)', code: '091', suggestedLessons: 1 },
+    { name: 'Protein Synthesis: mRNA, Codons & Ribosomes', code: '092', suggestedLessons: 1 },
   ]},
-  { topic: 'Organisms and their environment (ENV)', code: 'ENV', subtopics: [
-    { name: 'Energy flow: producers, consumers, decomposers; food chains and food webs', code: 'ENV1', suggestedLessons: 3 },
-    { name: 'Pyramids of number, biomass, energy', code: 'ENV2', suggestedLessons: 2 },
-    { name: 'Nutrient cycles: carbon cycle, nitrogen cycle (Extended)', code: 'ENV3', suggestedLessons: 3 },
-    { name: 'Population growth: factors affecting; lag, exponential, stationary, death phases', code: 'ENV4', suggestedLessons: 2 },
+  { topic: 'Unit 4 · Variation & Selection', code: '4.3', subtopics: [
+    { name: 'Continuous vs. Discontinuous Variation', code: '093', suggestedLessons: 1 },
+    { name: 'Gene Mutations & Causes (Radiation, Mutagens)', code: '094', suggestedLessons: 1 },
+    { name: 'Adaptive Features & Hydrophytes/Xerophytes', code: '095', suggestedLessons: 1 },
+    { name: 'Natural Selection Mechanism & Antibiotic Resistance Evolution', code: '096', suggestedLessons: 1 },
+    { name: 'Selective Breeding in Plants & Animals', code: '097', suggestedLessons: 1 },
+    { name: 'Comparing Natural vs. Artificial Selection', code: '098', suggestedLessons: 1 },
   ]},
-  { topic: 'Human influences on ecosystems (HIE)', code: 'HIE', subtopics: [
-    { name: 'Food supply: agriculture, monoculture, intensive farming impacts', code: 'HIE1', suggestedLessons: 2 },
-    { name: 'Habitat destruction; effects on biodiversity', code: 'HIE2', suggestedLessons: 2 },
-    { name: 'Pollution: air (sulfur dioxide, CO2, methane), water (sewage, fertilisers, eutrophication)', code: 'HIE3', suggestedLessons: 3 },
-    { name: 'Conservation: sustainable resources, captive breeding, seed banks', code: 'HIE4', suggestedLessons: 2 },
-    { name: 'Endangered species and extinction', code: 'HIE5', suggestedLessons: 2 },
+  { topic: 'Unit 5 · Organisms & Environment', code: '5.1', subtopics: [
+    { name: 'Ecosystem Terms: Population, Community, Ecosystem, Niche', code: '099', suggestedLessons: 1 },
+    { name: 'Food Chains, Food Webs & Trophic Levels', code: '100', suggestedLessons: 1 },
+    { name: 'Pyramids of Numbers, Biomass & Energy Efficiency', code: '101', suggestedLessons: 1 },
+    { name: 'Carbon Cycle & Role of Microorganisms', code: '102', suggestedLessons: 1 },
+    { name: 'Water Cycle Mechanisms', code: '103', suggestedLessons: 1 },
+    { name: 'Nitrogen Cycle & Nitrogen-Fixing Bacteria', code: '104', suggestedLessons: 1 },
+    { name: 'Population Growth Curves (Lag, Log, Stationary, Death)', code: '105', suggestedLessons: 1 },
   ]},
-  { topic: 'Biotechnology and genetic modification (BGM)', code: 'BGM', subtopics: [
-    { name: 'Biotechnology uses: yeast in bread/alcohol, lactobacillus in yoghurt, fungi for penicillin', code: 'BGM1', suggestedLessons: 2 },
-    { name: 'Genetic modification: principle, uses (insulin production, GM crops, bacterial transformation)', code: 'BGM2', suggestedLessons: 3 },
-    { name: 'Social, ethical and environmental implications', code: 'BGM3', suggestedLessons: 2 },
+  { topic: 'Unit 5 · Human Influences on Ecosystems', code: '5.2', subtopics: [
+    { name: 'Food Production, Monocultures & Habitat Destruction', code: '106', suggestedLessons: 1 },
+    { name: 'Deforestation Impacts & Soil Erosion', code: '107', suggestedLessons: 1 },
+    { name: 'Water Pollution: Eutrophication & Sewage Discharge', code: '108', suggestedLessons: 1 },
+    { name: 'Greenhouse Gases, Global Warming & Climate Change', code: '109', suggestedLessons: 1 },
+    { name: 'Conservation Efforts, Endangered Species & Recycling', code: '110', suggestedLessons: 1 },
+  ]},
+  { topic: 'Unit 5 · Biotechnology & Genetic Engineering', code: '5.3', subtopics: [
+    { name: 'Role of Bacteria & Fungi in Biotechnology', code: '111', suggestedLessons: 1 },
+    { name: 'Yeast in Breadmaking & Bioethanol Production', code: '112', suggestedLessons: 1 },
+    { name: 'Pectinase, Biological Washing Powders & Lactase', code: '113', suggestedLessons: 1 },
+    { name: 'Penicillin Production & Industrial Fermenters', code: '114', suggestedLessons: 1 },
+    { name: 'Recombinant DNA Technology & Insulin Production', code: '115', suggestedLessons: 1 },
+  ]},
+  { topic: 'Unit 6 · Practical Paper Skills', code: '6.1', subtopics: [
+    { name: 'Identifying Variables & Designing Controlled Experiments', code: '116', suggestedLessons: 1 },
+    { name: 'Data Collection, Table Formatting & Unit Precision', code: '117', suggestedLessons: 1 },
+    { name: 'Graph Drawing Rules (Axes, Scales, Line of Best Fit)', code: '118', suggestedLessons: 1 },
+    { name: 'Drawing Biological Specimens & Calculating Magnification', code: '119', suggestedLessons: 1 },
+    { name: 'Identifying Experimental Errors & Suggesting Improvements', code: '120', suggestedLessons: 1 },
+    { name: 'Testing Plan for Unknown Solutions & Gases', code: '121', suggestedLessons: 1 },
+    { name: 'Practical Skills Walkthrough (Paper 6)', code: '122', suggestedLessons: 1 },
+  ]},
+  { topic: 'Unit 6 · Exam Revision & Past Paper Strategy', code: '6.2', subtopics: [
+    { name: 'Multiple Choice Technique (Paper 1/2 Strategy)', code: '123', suggestedLessons: 1 },
+    { name: 'Command Words: Explain, Describe, Suggest (Paper 3/4 Strategy)', code: '124', suggestedLessons: 1 },
+    { name: 'Past Paper Revision: Cells, Molecules & Enzymes', code: '125', suggestedLessons: 1 },
+    { name: 'Past Paper Revision: Plant Physiology', code: '126', suggestedLessons: 1 },
+    { name: 'Past Paper Revision: Human Systems & Homeostasis', code: '127', suggestedLessons: 1 },
+    { name: 'Past Paper Revision: Genetics & Inheritance Calculations', code: '128', suggestedLessons: 1 },
+    { name: 'Past Paper Revision: Ecology & Biotechnology', code: '129', suggestedLessons: 1 },
+    { name: 'Mock Exam Review & Final Exam Tips', code: '130', suggestedLessons: 1 },
   ]},
 ]
 // ── IGCSE CHEMISTRY 0620 ───────────────────────────────────
@@ -12487,7 +12493,7 @@ const IGCSE_PHYSICS_0625 = [
 // pattern). All other IGCSE subjects are loaded via loadIgcseSpine,
 // using the IGCSE_LIBRARY below.
 const IGCSE_SCIENCES_LIBRARY = [
-  { match: /\bbiology\b/i,    const_: IGCSE_BIOLOGY_0610,   source: 'Cambridge IGCSE Biology 0610' },
+  { match: /\bbiology\b/i,    const_: IGCSE_BIOLOGY_0610,   source: 'IGCSE Biology — 130-lesson scheme (Cambridge 0610 & Edexcel 4BI1)' },
   { match: /\bchemistry\b/i,  const_: IGCSE_CHEMISTRY_0620, source: 'Cambridge IGCSE Chemistry 0620' },
   { match: /\bphysics\b/i,    const_: IGCSE_PHYSICS_0625,   source: 'Cambridge IGCSE Physics 0625' },
 ]
@@ -12844,7 +12850,7 @@ const IGCSE_ESL_0510 = [
 
 const IGCSE_LIBRARY = [
   // Sciences (also in IGCSE_SCIENCES_LIBRARY for legacy compat)
-  { match: /\bbiology\b/i,                       const_: IGCSE_BIOLOGY_0610,      source: 'Cambridge IGCSE Biology 0610' },
+  { match: /\bbiology\b/i,                       const_: IGCSE_BIOLOGY_0610,      source: 'IGCSE Biology — 130-lesson scheme (Cambridge 0610 & Edexcel 4BI1)' },
   { match: /\bchemistry\b/i,                     const_: IGCSE_CHEMISTRY_0620,    source: 'Cambridge IGCSE Chemistry 0620' },
   { match: /\bphysics\b/i,                       const_: IGCSE_PHYSICS_0625,      source: 'Cambridge IGCSE Physics 0625' },
   // English subjects — order matters: ESL and Literature must be matched
@@ -13397,8 +13403,8 @@ function SyllabusSpineTab({ toast }) {
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load Cambridge Lower Secondary spine</button>
             )}
-            {curriculum === 'CambridgeIGCSE' && (
-              <button onClick={loadIgcseSpine} disabled={busy} title="Auto-detects which IGCSE spine matches the selected subject (Biology, Chemistry, Physics, English Language, Literature in English, ESL, Business Studies, Economics, Geography, History, Sociology)" style={{
+            {(curriculum === 'CambridgeIGCSE' || curriculum === 'EdexcelIGCSE') && (
+              <button onClick={loadIgcseSpine} disabled={busy} title="Auto-detects which IGCSE spine matches the selected subject. Cambridge and Edexcel IGCSE share the same teaching content and lesson sequence — they differ only in exam papers." style={{
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load IGCSE spine</button>
