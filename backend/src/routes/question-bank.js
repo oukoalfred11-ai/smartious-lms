@@ -1,13 +1,10 @@
 /**
  * routes/question-bank.js
- * Question Bank API + seed data
  * Mounted at /api/questions
- * GET    /api/questions              — list/search questions
- * POST   /api/questions              — create question
- * PATCH  /api/questions/:id          — update question
- * DELETE /api/questions/:id          — delete question
- * POST   /api/questions/seed         — seed built-in questions (admin)
- * GET    /api/questions/topics       — list topics per subject/curriculum
+ *
+ * ROUTE ORDER MATTERS: every named route is declared BEFORE the
+ * /:id parameterised routes, otherwise Express captures names like
+ * "selftest" as an :id.
  */
 const express  = require('express')
 const router   = express.Router()
@@ -54,36 +51,6 @@ router.get('/topics', auth, async (req, res) => {
   } catch(e) { return fail(res,500,e.message) }
 })
 
-
-// ── GET /api/questions/spine ─────────────────────────
-// Returns the subject spine (SyllabusTopic tree) for a subject +
-// curriculum, with per-topic question counts so admins can see
-// coverage as they add questions.
-router.get('/spine', auth, async (req, res) => {
-  try {
-    const SyllabusTopic = require('../models/SyllabusTopic')
-    const { subject, curriculum } = req.query
-    const filter = {}
-    if (subject)    filter.subjectName = new RegExp('^'+subject+'$','i')
-    if (curriculum) filter.curriculum  = curriculum
-    const topics = await SyllabusTopic.find(filter).sort({ order:1 }).lean()
-
-    // Question counts per topic name
-    const counts = await Question.aggregate([
-      { $match: subject ? { subject:new RegExp('^'+subject+'$','i') } : {} },
-      { $group: { _id:'$topic', n:{ $sum:1 } } },
-    ])
-    const countMap = {}
-    counts.forEach(c => { if (c._id) countMap[c._id.toLowerCase()] = c.n })
-
-    const withCounts = topics.map(t => ({
-      ...t,
-      questionCount: countMap[(t.topic||'').toLowerCase()] || 0,
-    }))
-    return ok(res, { topics: withCounts })
-  } catch(e) { return fail(res,500,e.message) }
-})
-
 // ── GET /api/questions/spine ────────────────────────
 // Spine topics + subtopics for a subject name + curriculum.
 // Used by the quiz launcher and the question editor so questions
@@ -104,294 +71,6 @@ router.get('/spine', auth, async (req, res) => {
       .lean()
     return ok(res, { subjectId: subjectDoc._id, topics })
   } catch(e) { return fail(res,500,e.message) }
-})
-
-// ── POST /api/questions/bulk ────────────────────────
-// Bulk-import questions. Accepts either JSON array or TSV/CSV text.
-// Body: { questions: [...] }  OR  { text: "...", defaults: {...} }
-// Text format, one question per line, tab or | separated:
-//   questionText | optA | optB | optC | optD | correctLetterOrText | explanation | marks | difficulty
-router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
-  try {
-    const defaults = req.body.defaults || {}
-    let rows = []
-
-    if (Array.isArray(req.body.questions)) {
-      rows = req.body.questions
-    } else if (typeof req.body.text === 'string' && req.body.text.trim()) {
-      const lines = req.body.text.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
-      for (const line of lines) {
-        const parts = line.split(/\t|\s*\|\s*/).map(p => p.trim())
-        if (parts.length < 6) continue
-        const [qt, a, b, cc, d, correct, expl, marks, diff] = parts
-        const options = [a, b, cc, d].filter(Boolean)
-        // correct may be a letter (A-D) or the literal option text
-        let correctAnswer = correct
-        const letter = String(correct).trim().toUpperCase()
-        if (['A','B','C','D'].includes(letter)) correctAnswer = options['ABCD'.indexOf(letter)]
-        rows.push({
-          questionText: qt, options, correctAnswer,
-          explanation: expl || '',
-          marks: parseInt(marks, 10) || 2,
-          difficulty: ['easy','medium','hard'].includes((diff||'').toLowerCase()) ? diff.toLowerCase() : 'medium',
-        })
-      }
-    } else {
-      return fail(res, 400, 'Provide either a questions array or a text block.')
-    }
-
-    let inserted = 0, skipped = 0
-    const errors = []
-    for (const r of rows) {
-      const doc = {
-        subject:    r.subject    || defaults.subject,
-        curriculum: r.curriculum || defaults.curriculum,
-        grade:      r.grade      || defaults.grade,
-        topic:      r.topic      || defaults.topic    || '',
-        subtopic:   r.subtopic   || defaults.subtopic || '',
-        difficulty: r.difficulty || defaults.difficulty || 'medium',
-        questionText: r.questionText,
-        options:      r.options || [],
-        correctAnswer: r.correctAnswer,
-        explanation:  r.explanation || '',
-        marks:        r.marks || 2,
-        type: 'mcq', isActive: true,
-        createdBy: req.user._id,
-      }
-      if (!doc.questionText || !doc.correctAnswer || !doc.subject) { skipped++; continue }
-      if (!doc.options.includes(doc.correctAnswer)) {
-        errors.push(`"${String(doc.questionText).slice(0,40)}" — correct answer is not one of the options`)
-        continue
-      }
-      try {
-        const dup = await Question.findOne({ questionText: doc.questionText, subject: doc.subject, subtopic: doc.subtopic })
-        if (dup) { skipped++; continue }
-        await Question.create(doc)
-        inserted++
-      } catch (e) { errors.push(`${String(doc.questionText).slice(0,40)}: ${e.message}`) }
-    }
-    return ok(res, { inserted, skipped, errors: errors.slice(0,8) },
-      `Imported ${inserted} question${inserted===1?'':'s'} (${skipped} duplicate/incomplete, ${errors.length} error${errors.length===1?'':'s'}).`)
-  } catch(e) { return fail(res, 500, e.message) }
-})
-
-// ── GET /api/questions/coverage ─────────────────────
-// Per-subtopic question counts for a subject, so you can see at a glance
-// which lessons still need questions.
-router.get('/coverage', auth, async (req, res) => {
-  try {
-    const Subject       = require('../models/Subject')
-    const SyllabusTopic = require('../models/SyllabusTopic')
-    const { subject, curriculum } = req.query
-    if (!subject) return fail(res, 400, 'subject is required.')
-
-    const subjFilter = { subjectName: new RegExp('^'+String(subject).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$','i') }
-    if (curriculum) subjFilter.curriculum = curriculum
-    const subjectDoc = await Subject.findOne(subjFilter).lean()
-    if (!subjectDoc) return ok(res, { topics: [], totals: { lessons:0, withQuestions:0, questions:0 } })
-
-    const spine = await SyllabusTopic.find({ subjectId: subjectDoc._id }).sort({ topicOrder:1 }).lean()
-    const counts = await Question.aggregate([
-      { $match: { subject: new RegExp('^'+String(subject)+'$','i'), ...(curriculum ? { curriculum } : {}) } },
-      { $group: { _id: { topic:'$topic', subtopic:'$subtopic' }, n: { $sum:1 } } },
-    ])
-    const key = (t,s) => String(t||'').toLowerCase()+'||'+String(s||'').toLowerCase()
-    const map = new Map(counts.map(c => [key(c._id.topic, c._id.subtopic), c.n]))
-
-    let lessons = 0, withQ = 0, totalQ = 0
-    const topics = spine.map(t => {
-      const subs = (t.subtopics||[]).map(s => {
-        const n = map.get(key(t.topic, s.name)) || 0
-        lessons++; if (n > 0) withQ++; totalQ += n
-        return { name: s.name, code: s.code, questions: n }
-      })
-      return { topic: t.topic, code: t.code, subtopics: subs }
-    })
-    return ok(res, { topics, totals: { lessons, withQuestions: withQ, questions: totalQ } })
-  } catch(e) { return fail(res, 500, e.message) }
-})
-
-// ── POST /api/questions ─────────────────────────────
-router.post('/', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
-  try {
-    const q = await Question.create({ ...req.body, createdBy: req.body.createdBy || req.user._id })
-    return ok(res, { question:q }, 'Question created.')
-  } catch(e) { return fail(res,500,e.message) }
-})
-
-// ── PATCH /api/questions/:id ────────────────────────
-router.patch('/:id', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
-  try {
-    const q = await Question.findByIdAndUpdate(req.params.id, req.body, { new:true })
-    if (!q) return fail(res,404,'Not found.')
-    return ok(res, { question:q }, 'Question updated.')
-  } catch(e) { return fail(res,500,e.message) }
-})
-
-// ── DELETE /api/questions/:id ───────────────────────
-router.delete('/:id', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
-  try {
-    await Question.findByIdAndDelete(req.params.id)
-    return ok(res, {}, 'Question deleted.')
-  } catch(e) { return fail(res,500,e.message) }
-})
-
-// ── POST /api/questions/bulk ────────────────────────
-// Import many questions at once. Body: { questions: [...] }
-// Each item: { subject, topic, subtopic, curriculum, grade, difficulty,
-//              questionText, options[4], correctAnswer, explanation, marks }
-// Skips exact duplicates (same questionText + subject + curriculum).
-router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
-  try {
-    const items = Array.isArray(req.body?.questions) ? req.body.questions : null
-    if (!items) return fail(res, 400, 'Body must be { questions: [ ... ] }.')
-    if (items.length > 2000) return fail(res, 400, 'Max 2000 questions per import.')
-
-    let inserted = 0, skipped = 0
-    const errors = []
-    for (const [i, q] of items.entries()) {
-      try {
-        if (!q.questionText || !q.subject) { errors.push(`#${i+1}: questionText and subject are required`); continue }
-        const dupe = await Question.findOne({
-          questionText: q.questionText, subject: q.subject, curriculum: q.curriculum,
-        }).select('_id').lean()
-        if (dupe) { skipped++; continue }
-        await Question.create({
-          ...q,
-          type: q.type || 'mcq',
-          marks: q.marks || 1,
-          difficulty: q.difficulty || 'medium',
-          isActive: true,
-          createdBy: req.user._id,
-        })
-        inserted++
-      } catch (err) {
-        errors.push(`#${i+1} ${(q.questionText||'').slice(0,40)}: ${err.message}`)
-      }
-    }
-    return ok(res, { inserted, skipped, errors: errors.slice(0,10), errorCount: errors.length },
-      `Imported ${inserted} (${skipped} duplicates skipped, ${errors.length} errors).`)
-  } catch(e) { return fail(res,500,e.message) }
-})
-
-// ── GET /api/questions/coverage ─────────────────────
-// How many bank questions exist per spine subtopic for a subject.
-// Shows at a glance which lessons still need questions.
-router.get('/coverage', auth, async (req, res) => {
-  try {
-    const Subject       = require('../models/Subject')
-    const SyllabusTopic = require('../models/SyllabusTopic')
-    const { subject, curriculum } = req.query
-    if (!subject || !curriculum) return fail(res, 400, 'subject and curriculum are required.')
-
-    const esc = String(subject).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const subjectDoc = await Subject.findOne({ subjectName: new RegExp('^'+esc+'$','i'), curriculum }).lean()
-    if (!subjectDoc) return ok(res, { topics: [] })
-
-    const topics = await SyllabusTopic.find({ subjectId: subjectDoc._id }).sort({ topicOrder:1 }).lean()
-    const counts = await Question.aggregate([
-      { $match: { subject: new RegExp('^'+esc+'$','i'), curriculum, isActive: { $ne:false } } },
-      { $group: { _id: '$subtopic', n: { $sum: 1 } } },
-    ])
-    const byName = Object.fromEntries(counts.map(c => [c._id || '', c.n]))
-
-    const out = topics.map(t => ({
-      topic: t.topic, code: t.code,
-      subtopics: (t.subtopics||[]).map(s => ({ name: s.name, code: s.code, questions: byName[s.name] || 0 })),
-    }))
-    const totalLessons = out.reduce((n,t)=>n+t.subtopics.length,0)
-    const covered = out.reduce((n,t)=>n+t.subtopics.filter(s=>s.questions>0).length,0)
-    const totalQs = out.reduce((n,t)=>n+t.subtopics.reduce((a,s)=>a+s.questions,0),0)
-    return ok(res, { topics: out, totalLessons, covered, totalQuestions: totalQs })
-  } catch(e) { return fail(res,500,e.message) }
-})
-
-// ── POST /api/questions/bulk ────────────────────────
-// Bulk-add questions. Accepts { questions: [...] } or a bare array.
-// Each item needs: subject, questionText, options[], correctAnswer.
-// Optional: topic, subtopic (== spine lesson name), lessonCode,
-// curriculum, grade, difficulty, explanation, marks.
-// Duplicates (same subject + questionText) are skipped, not errored.
-router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
-  try {
-    // Accepts EITHER shape:
-    //  A) { questions: [ {...}, ... ] }  — full JSON objects
-    //  B) { text, defaults }             — one question per line:
-    //     Question? | optA | optB | optC | optD | correctIndexOrText | explanation
-    let items = Array.isArray(req.body) ? req.body : (req.body.questions || [])
-
-    if ((!items || !items.length) && typeof req.body.text === 'string') {
-      const d = req.body.defaults || {}
-      items = req.body.text.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(line => {
-        const p = line.split('|').map(x => x.trim())
-        const [qt, a, b, cc, dd, ans, exp] = p
-        const options = [a, b, cc, dd].filter(x => x)
-        let correctAnswer = ans || ''
-        // allow 1-4 or A-D as the answer key
-        if (/^[1-4]$/.test(correctAnswer))      correctAnswer = options[parseInt(correctAnswer,10)-1] || ''
-        else if (/^[A-Da-d]$/.test(correctAnswer)) correctAnswer = options['abcd'.indexOf(correctAnswer.toLowerCase())] || ''
-        return {
-          subject:    d.subject,
-          curriculum: d.curriculum,
-          grade:      d.grade,
-          topic:      d.topic || '',
-          subtopic:   d.subtopic || '',
-          difficulty: d.difficulty || 'medium',
-          questionText: qt || '',
-          options,
-          correctAnswer,
-          explanation: exp || '',
-          marks: 1,
-        }
-      })
-    }
-
-    if (!Array.isArray(items) || !items.length) return fail(res, 400, 'Send { questions: [ ... ] } or { text, defaults }.')
-    if (items.length > 2000) return fail(res, 400, 'Maximum 2000 questions per import.')
-
-    let inserted = 0, skipped = 0
-    const errors = []
-
-    for (let i = 0; i < items.length; i++) {
-      const q = items[i] || {}
-      const label = `#${i+1} ${(q.questionText||'(no text)').slice(0,50)}`
-      try {
-        if (!q.subject)       { errors.push(`${label}: missing subject`); continue }
-        if (!q.questionText)  { errors.push(`${label}: missing questionText`); continue }
-        const opts = Array.isArray(q.options) ? q.options.filter(o => String(o||'').trim()) : []
-        if (opts.length < 2)  { errors.push(`${label}: needs at least 2 options`); continue }
-        if (!q.correctAnswer) { errors.push(`${label}: missing correctAnswer`); continue }
-        if (!opts.includes(q.correctAnswer)) { errors.push(`${label}: correctAnswer is not one of the options`); continue }
-
-        const exists = await Question.findOne({ subject: q.subject, questionText: q.questionText }).select('_id').lean()
-        if (exists) { skipped++; continue }
-
-        await Question.create({
-          subject:      q.subject,
-          topic:        q.topic || '',
-          subtopic:     q.subtopic || '',
-          lessonCode:   q.lessonCode || '',
-          curriculum:   q.curriculum || 'CambridgeIGCSE',
-          grade:        q.grade || 'Year 10',
-          difficulty:   ['easy','medium','hard'].includes(q.difficulty) ? q.difficulty : 'medium',
-          type:         'mcq',
-          questionText: q.questionText,
-          options:      opts,
-          correctAnswer:q.correctAnswer,
-          explanation:  q.explanation || '',
-          marks:        Number(q.marks) > 0 ? Number(q.marks) : 1,
-          isActive:     true,
-          createdBy:    req.user._id,
-        })
-        inserted++
-      } catch (err) {
-        errors.push(`${label}: ${err.message}`)
-      }
-    }
-
-    return ok(res, { inserted, skipped, failed: errors.length, errors: errors.slice(0, 15) },
-      `Imported ${inserted} questions (${skipped} duplicates skipped, ${errors.length} failed).`)
-  } catch(e) { return fail(res, 500, e.message) }
 })
 
 // ── GET /api/questions/coverage ─────────────────────
@@ -591,6 +270,94 @@ router.get('/homework-debug', auth, requireRole('admin','ops_manager','dos'), as
   } catch(e) { return fail(res, 500, e.message) }
 })
 
+// ── POST /api/questions/bulk ────────────────────────
+// Bulk-add questions. Accepts { questions: [...] } or a bare array.
+// Each item needs: subject, questionText, options[], correctAnswer.
+// Optional: topic, subtopic (== spine lesson name), lessonCode,
+// curriculum, grade, difficulty, explanation, marks.
+// Duplicates (same subject + questionText) are skipped, not errored.
+router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
+  try {
+    // Accepts EITHER shape:
+    //  A) { questions: [ {...}, ... ] }  — full JSON objects
+    //  B) { text, defaults }             — one question per line:
+    //     Question? | optA | optB | optC | optD | correctIndexOrText | explanation
+    let items = Array.isArray(req.body) ? req.body : (req.body.questions || [])
+
+    if ((!items || !items.length) && typeof req.body.text === 'string') {
+      const d = req.body.defaults || {}
+      items = req.body.text.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(line => {
+        const p = line.split('|').map(x => x.trim())
+        const [qt, a, b, cc, dd, ans, exp] = p
+        const options = [a, b, cc, dd].filter(x => x)
+        let correctAnswer = ans || ''
+        // allow 1-4 or A-D as the answer key
+        if (/^[1-4]$/.test(correctAnswer))      correctAnswer = options[parseInt(correctAnswer,10)-1] || ''
+        else if (/^[A-Da-d]$/.test(correctAnswer)) correctAnswer = options['abcd'.indexOf(correctAnswer.toLowerCase())] || ''
+        return {
+          subject:    d.subject,
+          curriculum: d.curriculum,
+          grade:      d.grade,
+          topic:      d.topic || '',
+          subtopic:   d.subtopic || '',
+          difficulty: d.difficulty || 'medium',
+          questionText: qt || '',
+          options,
+          correctAnswer,
+          explanation: exp || '',
+          marks: 1,
+        }
+      })
+    }
+
+    if (!Array.isArray(items) || !items.length) return fail(res, 400, 'Send { questions: [ ... ] } or { text, defaults }.')
+    if (items.length > 2000) return fail(res, 400, 'Maximum 2000 questions per import.')
+
+    let inserted = 0, skipped = 0
+    const errors = []
+
+    for (let i = 0; i < items.length; i++) {
+      const q = items[i] || {}
+      const label = `#${i+1} ${(q.questionText||'(no text)').slice(0,50)}`
+      try {
+        if (!q.subject)       { errors.push(`${label}: missing subject`); continue }
+        if (!q.questionText)  { errors.push(`${label}: missing questionText`); continue }
+        const opts = Array.isArray(q.options) ? q.options.filter(o => String(o||'').trim()) : []
+        if (opts.length < 2)  { errors.push(`${label}: needs at least 2 options`); continue }
+        if (!q.correctAnswer) { errors.push(`${label}: missing correctAnswer`); continue }
+        if (!opts.includes(q.correctAnswer)) { errors.push(`${label}: correctAnswer is not one of the options`); continue }
+
+        const exists = await Question.findOne({ subject: q.subject, questionText: q.questionText }).select('_id').lean()
+        if (exists) { skipped++; continue }
+
+        await Question.create({
+          subject:      q.subject,
+          topic:        q.topic || '',
+          subtopic:     q.subtopic || '',
+          lessonCode:   q.lessonCode || '',
+          curriculum:   q.curriculum || 'CambridgeIGCSE',
+          grade:        q.grade || 'Year 10',
+          difficulty:   ['easy','medium','hard'].includes(q.difficulty) ? q.difficulty : 'medium',
+          type:         'mcq',
+          questionText: q.questionText,
+          options:      opts,
+          correctAnswer:q.correctAnswer,
+          explanation:  q.explanation || '',
+          marks:        Number(q.marks) > 0 ? Number(q.marks) : 1,
+          isActive:     true,
+          createdBy:    req.user._id,
+        })
+        inserted++
+      } catch (err) {
+        errors.push(`${label}: ${err.message}`)
+      }
+    }
+
+    return ok(res, { inserted, skipped, failed: errors.length, errors: errors.slice(0, 15) },
+      `Imported ${inserted} questions (${skipped} duplicates skipped, ${errors.length} failed).`)
+  } catch(e) { return fail(res, 500, e.message) }
+})
+
 // ── POST /api/questions/seed ────────────────────────
 router.post('/seed', auth, requireRole('admin','ops_manager'), async (req, res) => {
   try {
@@ -612,14 +379,33 @@ router.post('/seed', auth, requireRole('admin','ops_manager'), async (req, res) 
   } catch(e) { return fail(res,500,e.message) }
 })
 
+// ── POST /api/questions ─────────────────────────────
+router.post('/', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
+  try {
+    const q = await Question.create({ ...req.body, createdBy: req.body.createdBy || req.user._id })
+    return ok(res, { question:q }, 'Question created.')
+  } catch(e) { return fail(res,500,e.message) }
+})
+
+// ── PATCH /api/questions/:id ────────────────────────
+router.patch('/:id', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
+  try {
+    const q = await Question.findByIdAndUpdate(req.params.id, req.body, { new:true })
+    if (!q) return fail(res,404,'Not found.')
+    return ok(res, { question:q }, 'Question updated.')
+  } catch(e) { return fail(res,500,e.message) }
+})
+
+// ── DELETE /api/questions/:id ───────────────────────
+router.delete('/:id', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
+  try {
+    await Question.findByIdAndDelete(req.params.id)
+    return ok(res, {}, 'Question deleted.')
+  } catch(e) { return fail(res,500,e.message) }
+})
+
 module.exports = router
 
-// ════════════════════════════════════════════════════
-// BUILT-IN QUESTION BANK
-// Mathematics, Physics, Chemistry, Biology, Business, CS
-// Supports: CambridgeIGCSE, EdexcelIGCSE, CambridgeALevel, KenyaCBC, IB
-// Math notation: use ^ for powers, sqrt() for roots, fractions as a/b
-// ════════════════════════════════════════════════════
 const SEED_QUESTIONS = [
 
 // ══════════════════════════════════════════════════════
