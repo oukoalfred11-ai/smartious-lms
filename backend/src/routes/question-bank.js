@@ -404,12 +404,27 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
       const q = items[i] || {}
       const label = `#${i+1} ${(q.questionText||'(no text)').slice(0,50)}`
       try {
-        if (!q.subject)       { errors.push(`${label}: missing subject`); continue }
-        if (!q.questionText)  { errors.push(`${label}: missing questionText`); continue }
+        if (!q.subject)      { errors.push(`${label}: missing subject`); continue }
+        if (!q.questionText) { errors.push(`${label}: missing questionText`); continue }
+
+        const type = ['mcq','short','long','essay','drawing','upload'].includes(q.type) ? q.type : 'mcq'
         const opts = Array.isArray(q.options) ? q.options.filter(o => String(o||'').trim()) : []
-        if (opts.length < 2)  { errors.push(`${label}: needs at least 2 options`); continue }
-        if (!q.correctAnswer) { errors.push(`${label}: missing correctAnswer`); continue }
-        if (!opts.includes(q.correctAnswer)) { errors.push(`${label}: correctAnswer is not one of the options`); continue }
+        const ms   = q.markScheme || {}
+
+        if (type === 'mcq') {
+          if (opts.length < 2)  { errors.push(`${label}: MCQ needs at least 2 options`); continue }
+          if (!q.correctAnswer) { errors.push(`${label}: MCQ missing correctAnswer`); continue }
+          if (!opts.includes(q.correctAnswer)) { errors.push(`${label}: correctAnswer is not one of the options`); continue }
+        } else {
+          // Typed, drawn and essay answers cannot be auto-marked without
+          // a mark scheme, so refuse to import one that has none.
+          const hasPoints = Array.isArray(ms.points) && ms.points.length > 0
+          const hasAccept = Array.isArray(ms.acceptableAnswers) && ms.acceptableAnswers.length > 0
+          if (!ms.modelAnswer && !hasPoints && !hasAccept) {
+            errors.push(`${label}: "${type}" question needs a markScheme (modelAnswer, points or acceptableAnswers)`)
+            continue
+          }
+        }
 
         // O(1) duplicate check on a unique-sparse indexed hash.
         // Scanning unindexed questionText would be a full collection
@@ -420,7 +435,20 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
         const exists = await Question.findOne({ contentHash: hash }).select('_id').lean()
         if (exists) { skipped++; continue }
 
+        const schemeMarks = Array.isArray(ms.points)
+          ? ms.points.reduce((s,p)=>s+(Number(p.marks)||1),0) : 0
+
         await Question.create({
+          type,
+          markScheme: {
+            modelAnswer:       ms.modelAnswer || '',
+            points:            Array.isArray(ms.points) ? ms.points : [],
+            acceptableAnswers: (Array.isArray(ms.acceptableAnswers) ? ms.acceptableAnswers : []).map(a=>String(a).toLowerCase().trim()),
+            commonErrors:      Array.isArray(ms.commonErrors) ? ms.commonErrors : [],
+          },
+          imageUrl:        q.imageUrl || '',
+          imageCaption:    q.imageCaption || '',
+          requiresDrawing: type === 'drawing' || !!q.requiresDrawing,
           subject:      q.subject,
           topic:        q.topic || '',
           subtopic:     q.subtopic || '',
@@ -428,12 +456,11 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
           curriculum:   q.curriculum || 'CambridgeIGCSE',
           grade:        q.grade || 'Year 10',
           difficulty:   ['easy','medium','hard'].includes(q.difficulty) ? q.difficulty : 'medium',
-          type:         'mcq',
           questionText: q.questionText,
-          options:      opts,
-          correctAnswer:q.correctAnswer,
+          options:      type === 'mcq' ? opts : [],
+          correctAnswer:type === 'mcq' ? q.correctAnswer : '',
           explanation:  q.explanation || '',
-          marks:        Number(q.marks) > 0 ? Number(q.marks) : 1,
+          marks:        Number(q.marks) > 0 ? Number(q.marks) : (schemeMarks || 1),
           isActive:     true,
           contentHash:  hash,
           createdBy:    req.user._id,
