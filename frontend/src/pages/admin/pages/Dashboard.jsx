@@ -9801,7 +9801,7 @@ function QuestionBankModule({ toast }) {
   const CURRICULA  = ['EdexcelIGCSE','CambridgeIGCSE','CambridgeALevel','EdexcelALevel','IB','KenyaCBC','American','BNC']
   const DIFFICULTY = ['easy','medium','hard']
 
-  const BLANK = { subject:'Mathematics', topic:'', curriculum:'EdexcelIGCSE', grade:'Year 10', difficulty:'medium', questionText:'', options:['','','',''], correctAnswer:'', explanation:'', marks:2 }
+  const BLANK = { subject:'Mathematics', topic:'', subtopic:'', lessonCode:'', curriculum:'EdexcelIGCSE', grade:'Year 10', difficulty:'medium', type:'mcq', questionText:'', options:['','','',''], correctAnswer:'', explanation:'', marks:2, markScheme:{ modelAnswer:'', points:[], acceptableAnswers:[], commonErrors:[] }, imageUrl:'', imageCaption:'' }
 
   const load = async (p=1) => {
     setLoading(true)
@@ -9839,8 +9839,14 @@ function QuestionBankModule({ toast }) {
   const runDiagnose = async () => {
     setDiagBusy(true)
     try {
-      const r = await api.get('/questions/selftest')
-      setDiag(r.data?.data || null)
+      const [selfRes, aiRes] = await Promise.allSettled([
+        api.get('/questions/selftest'),
+        api.get('/questions/ai-marking/status'),
+      ])
+      const base = selfRes.status==='fulfilled' ? (selfRes.value.data?.data||null) : null
+      const ai   = aiRes.status==='fulfilled'   ? (aiRes.value.data?.data||null)   : null
+      setDiag(base ? { ...base, aiMarking: ai } : (ai ? { checks:[], classes:[], aiMarking:ai } : null))
+      const r = { data: selfRes.status==='fulfilled' ? selfRes.value.data : {} }
       toast?.ok?.(r.data?.message || 'Diagnosis complete.')
     } catch(e) {
       toast?.error?.(e?.response?.data?.message || 'Diagnose failed — is the backend deployed?')
@@ -9960,6 +9966,26 @@ function QuestionBankModule({ toast }) {
             </div>
           ))}
 
+          {diag.aiMarking && (
+            <div style={{ marginTop:14, padding:'11px 15px', borderRadius:8, display:'flex', alignItems:'center', gap:12,
+              background: diag.aiMarking.ready ? '#F0FDF4' : TOKENS.s100,
+              border:`1px solid ${diag.aiMarking.ready ? TOKENS.accentEmerald+'55' : TOKENS.line}` }}>
+              <div style={{ width:9, height:9, borderRadius:'50%', background: diag.aiMarking.ready?TOKENS.accentEmerald:TOKENS.s400, flexShrink:0 }}/>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:12.5, fontWeight:800, color:TOKENS.ink }}>
+                  AI marking: {diag.aiMarking.ready ? 'ACTIVE' : 'OFF — teachers mark by hand'}
+                </div>
+                <div style={{ fontSize:11.5, color:TOKENS.s500, marginTop:1 }}>{diag.aiMarking.note}</div>
+              </div>
+              {diag.aiMarking.ready && (
+                <div style={{ textAlign:'right', flexShrink:0 }}>
+                  <div style={{ fontSize:14, fontWeight:900, color:TOKENS.crimson }}>${(diag.aiMarking.stats?.estCostUSD||0).toFixed(2)}</div>
+                  <div style={{ fontSize:10, color:TOKENS.s400 }}>{diag.aiMarking.usedToday||0} / {diag.aiMarking.dailyCap} today</div>
+                </div>
+              )}
+            </div>
+          )}
+
           {(diag.classes||[]).length>0 && (
             <div style={{ marginTop:16, borderTop:`1.5px solid ${TOKENS.line}`, paddingTop:14 }}>
               <div style={{ fontSize:11, fontWeight:800, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:10 }}>Recent live classes</div>
@@ -10023,7 +10049,13 @@ function QuestionBankModule({ toast }) {
             <tbody>
               {questions.map(q=>(
                 <tr key={q._id}>
-                  <td style={{ fontWeight:700, color:TOKENS.ink, whiteSpace:'nowrap' }}>{q.subject}</td>
+                  <td style={{ whiteSpace:'nowrap' }}>
+                    <div style={{ fontWeight:700, color:TOKENS.ink }}>{q.subject}</div>
+                    {q.type && q.type!=='mcq' && (
+                      <span style={{ fontSize:9.5, fontWeight:800, textTransform:'uppercase', letterSpacing:'.05em',
+                        background:'#EEF2FF', color:'#4338CA', padding:'1px 6px', borderRadius:99 }}>{q.type}</span>
+                    )}
+                  </td>
                   <td style={{ fontSize:12, color:TOKENS.s500 }}>{q.topic||'—'}</td>
                   <td style={{ fontSize:12, color:TOKENS.s500 }}>{q.curriculum||'—'}</td>
                   <td><span style={{ background:diffColor(q.difficulty)+'22', color:diffColor(q.difficulty), fontWeight:700, fontSize:11, padding:'3px 8px', borderRadius:99, textTransform:'capitalize' }}>{q.difficulty}</span></td>
@@ -10232,112 +10264,196 @@ function BulkImportModal({ onClose, onDone, toast, subjects, curricula }) {
 
 
 function QuestionEditorModal({ q, onClose, onSave, subjects, curricula }) {
-  const [form, setForm] = useState({ ...q })
-  const [spineTopics, setSpineTopics] = useState([])
-  useEffect(() => {
-    if (!form.subject) { setSpineTopics([]); return }
-    api.get('/questions/spine', { params:{ subject:form.subject, curriculum:form.curriculum||'' } })
-      .then(r=>setSpineTopics(r.data?.data?.topics||[]))
-      .catch(()=>setSpineTopics([]))
-  }, [form.subject, form.curriculum])
-  const upd = (k,v) => setForm(f=>({...f,[k]:v}))
+  const [form, setForm] = useState(() => ({
+    type:'mcq', options:['','','',''],
+    markScheme:{ modelAnswer:'', points:[], acceptableAnswers:[], commonErrors:[] },
+    ...q,
+    markScheme: { modelAnswer:'', points:[], acceptableAnswers:[], commonErrors:[], ...(q.markScheme||{}) },
+  }))
+  const upd    = (k,v) => setForm(f=>({...f,[k]:v}))
   const updOpt = (i,v) => { const o=[...form.options]; o[i]=v; setForm(f=>({...f,options:o})) }
+  const updMS  = (k,v) => setForm(f=>({...f, markScheme:{...f.markScheme,[k]:v}}))
+
+  const isMCQ = form.type === 'mcq'
+  const pts   = form.markScheme.points || []
+  const schemeTotal = pts.reduce((s,p)=>s+(Number(p.marks)||0),0)
+
+  const addPoint = () => updMS('points', [...pts, { text:'', marks:1, keywords:[] }])
+  const setPoint = (i,k,v) => { const n=pts.map((p,j)=> j===i?{...p,[k]:v}:p); updMS('points', n) }
+  const delPoint = (i) => updMS('points', pts.filter((_,j)=>j!==i))
+
+  const TYPES = [
+    ['mcq',     'Multiple choice', 'Marks itself instantly'],
+    ['short',   'Short answer',    'Typed, 1-3 marks'],
+    ['long',    'Long answer',     'Typed, 4-8 marks'],
+    ['essay',   'Essay',           'Extended writing'],
+    ['drawing', 'Diagram',         'Student draws or labels'],
+  ]
+
+  const canSave = form.questionText && (
+    isMCQ ? (form.correctAnswer && form.options.filter(Boolean).length >= 2)
+          : (form.markScheme.modelAnswer || pts.length || (form.markScheme.acceptableAnswers||[]).length)
+  )
 
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.6)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}
       onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div style={{ background:'#fff', borderRadius:16, maxWidth:680, width:'100%', maxHeight:'90vh', overflow:'auto' }}>
+      <div style={{ background:'#fff', borderRadius:16, maxWidth:720, width:'100%', maxHeight:'92vh', overflow:'auto' }}>
         <div style={{ background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`, padding:'20px 28px', color:'#fff' }}>
           <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:22 }}>{form._id?'Edit Question':'New Question'}</div>
         </div>
-        <div style={{ padding:'24px 28px', display:'grid', gap:16 }}>
-          <div className="fr2">
-            <div className="fg"><label className="fl">Subject</label>
-              <select className="fsel" value={form.subject} onChange={e=>upd('subject',e.target.value)}>
-                {subjects.map(s=><option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            <div className="fg"><label className="fl">Topic {spineTopics.length>0?'(from syllabus spine)':''}</label>
-              {spineTopics.length > 0 ? (
-                <select className="fsel" value={form.topic||''} onChange={e=>{
-                  const t = spineTopics.find(x=>x.topic===e.target.value)
-                  upd('topic', e.target.value)
-                  if (t) upd('topicRef', t._id)
+        <div style={{ padding:'22px 28px', display:'grid', gap:16 }}>
+
+          {/* Type selector */}
+          <div className="fg"><label className="fl">Question type</label>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(120px,1fr))', gap:8 }}>
+              {TYPES.map(([id,label,hint])=>(
+                <button key={id} onClick={()=>upd('type',id)} style={{
+                  padding:'10px 8px', borderRadius:9, cursor:'pointer', textAlign:'center',
+                  border:`2px solid ${form.type===id?TOKENS.crimson:TOKENS.s100}`,
+                  background:form.type===id?'#FDE7EC':'#fff',
                 }}>
-                  <option value="">— pick a topic —</option>
-                  {spineTopics.map(t=><option key={t._id} value={t.topic}>{t.code?t.code+'. ':''}{t.topic} ({t.questionCount||0} qns)</option>)}
-                  <option value="__custom">Other (type below)</option>
-                </select>
-              ) : (
-                <input className="fi" value={form.topic||''} onChange={e=>upd('topic',e.target.value)} placeholder="e.g. Algebra, Forces"/>
-              )}
-              {form.topic==='__custom'&&<input className="fi" style={{marginTop:6}} onChange={e=>upd('topic',e.target.value)} placeholder="Custom topic name"/>}
+                  <div style={{ fontSize:12.5, fontWeight:700, color:form.type===id?TOKENS.crimson:TOKENS.ink }}>{label}</div>
+                  <div style={{ fontSize:10, color:TOKENS.s400, marginTop:2 }}>{hint}</div>
+                </button>
+              ))}
             </div>
           </div>
+
           <div className="fr2">
+            <div className="fg"><label className="fl">Subject</label>
+              <select className="fsel" value={form.subject||''} onChange={e=>upd('subject',e.target.value)}>
+                {(subjects||[]).map(s=><option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
             <div className="fg"><label className="fl">Curriculum</label>
               <select className="fsel" value={form.curriculum||''} onChange={e=>upd('curriculum',e.target.value)}>
                 <option value="">All curricula</option>
-                {curricula.map(c=><option key={c} value={c}>{c}</option>)}
+                {(curricula||[]).map(x=><option key={x} value={x}>{x}</option>)}
               </select>
             </div>
+          </div>
+
+          <div className="fr2">
+            <div className="fg"><label className="fl">Topic (spine unit)</label>
+              <input className="fi" value={form.topic||''} onChange={e=>upd('topic',e.target.value)} placeholder="e.g. Unit 1 · Enzymes"/>
+            </div>
+            <div className="fg"><label className="fl">Subtopic — must match the spine lesson exactly</label>
+              <input className="fi" value={form.subtopic||''} onChange={e=>upd('subtopic',e.target.value)} placeholder="e.g. Enzyme Action & The Lock-and-Key Model"/>
+            </div>
+          </div>
+
+          <div className="fr2">
             <div className="fg"><label className="fl">Grade / Year</label>
-              <input className="fi" value={form.grade||''} onChange={e=>upd('grade',e.target.value)} placeholder="e.g. Year 10, Grade 8"/>
+              <input className="fi" value={form.grade||''} onChange={e=>upd('grade',e.target.value)} placeholder="Year 10"/>
             </div>
-          </div>
-          <div className="fr2">
-            <div className="fg"><label className="fl">Sub-topic (optional)</label>
-              {(() => {
-                const selTopic = spineTopics.find(t=>t.topic===form.topic)
-                const subs = selTopic?.subtopics||[]
-                return subs.length > 0 ? (
-                  <select className="fsel" value={form.subtopic||''} onChange={e=>upd('subtopic',e.target.value)}>
-                    <option value="">— any —</option>
-                    {subs.map(s=><option key={s._id||s.name} value={s.name}>{s.code?s.code+' ':''}{s.name}</option>)}
-                  </select>
-                ) : (
-                  <input className="fi" value={form.subtopic||''} onChange={e=>upd('subtopic',e.target.value)} placeholder="e.g. HCF and LCM"/>
-                )
-              })()}
-            </div>
-          </div>
-          <div className="fr2">
             <div className="fg"><label className="fl">Difficulty</label>
-              <select className="fsel" value={form.difficulty} onChange={e=>upd('difficulty',e.target.value)}>
+              <select className="fsel" value={form.difficulty||'medium'} onChange={e=>upd('difficulty',e.target.value)}>
                 <option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option>
               </select>
             </div>
-            <div className="fg"><label className="fl">Marks</label>
-              <input className="fi" type="number" min="1" max="20" value={form.marks||2} onChange={e=>upd('marks',parseInt(e.target.value)||2)}/>
-            </div>
           </div>
 
-          <div className="fg"><label className="fl">Question Text (use ^ for powers, sqrt() for roots, × for multiply)</label>
-            <textarea className="fi" rows={3} value={form.questionText} onChange={e=>upd('questionText',e.target.value)} placeholder="e.g. Solve for x: 3x + 7 = 22. Use sqrt(144) for √144, 2^3 for 2³"/>
+          <div className="fg"><label className="fl">Question text</label>
+            <textarea className="fi" rows={3} value={form.questionText||''} onChange={e=>upd('questionText',e.target.value)}
+              placeholder="Use plain text: x^2, sqrt(50), 3/4, pi, 37 degrees Celsius"/>
           </div>
 
-          <div className="fg"><label className="fl">Answer Options (A, B, C, D)</label>
-            {[0,1,2,3].map(i=>(
-              <div key={i} style={{ display:'flex', gap:8, marginBottom:8, alignItems:'center' }}>
-                <div style={{ width:28, height:28, borderRadius:'50%', background: form.options[i]===form.correctAnswer ? TOKENS.accentEmerald : TOKENS.s100, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:12, color: form.options[i]===form.correctAnswer ? '#fff':TOKENS.s500, flexShrink:0 }}>
-                  {['A','B','C','D'][i]}
-                </div>
-                <input className="fi" value={form.options[i]||''} onChange={e=>updOpt(i,e.target.value)} placeholder={`Option ${['A','B','C','D'][i]}`} style={{ flex:1 }}/>
-                <button onClick={()=>upd('correctAnswer',form.options[i])} style={{ padding:'6px 12px', borderRadius:6, border:`1.5px solid ${form.options[i]===form.correctAnswer?TOKENS.accentEmerald:TOKENS.s100}`, background:form.options[i]===form.correctAnswer?TOKENS.accentEmerald+'20':'transparent', fontWeight:700, fontSize:11, cursor:'pointer', color:form.options[i]===form.correctAnswer?TOKENS.accentEmerald:TOKENS.s500, whiteSpace:'nowrap' }}>
-                  {form.options[i]===form.correctAnswer?'✓ Correct':'Set correct'}
-                </button>
+          {/* MCQ branch */}
+          {isMCQ && (
+            <>
+              <div className="fg"><label className="fl">Options — click Set correct on the right answer</label>
+                {[0,1,2,3].map(i=>(
+                  <div key={i} style={{ display:'flex', gap:8, marginBottom:8, alignItems:'center' }}>
+                    <div style={{ width:26, height:26, borderRadius:'50%', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:12,
+                      background: form.options[i] && form.options[i]===form.correctAnswer ? TOKENS.accentEmerald : TOKENS.s100,
+                      color: form.options[i] && form.options[i]===form.correctAnswer ? '#fff' : TOKENS.s500 }}>{['A','B','C','D'][i]}</div>
+                    <input className="fi" value={form.options[i]||''} onChange={e=>updOpt(i,e.target.value)} placeholder={`Option ${['A','B','C','D'][i]}`} style={{ flex:1 }}/>
+                    <button onClick={()=>upd('correctAnswer',form.options[i])} disabled={!form.options[i]} style={{ padding:'6px 12px', borderRadius:6, whiteSpace:'nowrap', fontSize:11, fontWeight:700, cursor:form.options[i]?'pointer':'not-allowed',
+                      border:`1.5px solid ${form.options[i]===form.correctAnswer?TOKENS.accentEmerald:TOKENS.s100}`,
+                      background:form.options[i]===form.correctAnswer?TOKENS.accentEmerald+'20':'transparent',
+                      color:form.options[i]===form.correctAnswer?TOKENS.accentEmerald:TOKENS.s500 }}>
+                      {form.options[i]===form.correctAnswer?'✓ Correct':'Set correct'}
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
+              <div className="fg"><label className="fl">Explanation shown after answering</label>
+                <textarea className="fi" rows={2} value={form.explanation||''} onChange={e=>upd('explanation',e.target.value)}
+                  placeholder="Why the answer is right, and why the tempting wrong option is wrong."/>
+              </div>
+            </>
+          )}
+
+          {/* Mark scheme branch */}
+          {!isMCQ && (
+            <>
+              <div style={{ background:TOKENS.goldPale, border:`1px solid ${TOKENS.gold}55`, borderRadius:8, padding:'11px 15px', fontSize:12.5, color:TOKENS.s700, lineHeight:1.6 }}>
+                This type cannot mark itself. The mark scheme below is what a teacher marks against — and what AI marking would use if you switch it on later. A question without one cannot be saved.
+              </div>
+
+              <div className="fg"><label className="fl">Model answer — full marks response</label>
+                <textarea className="fi" rows={3} value={form.markScheme.modelAnswer||''} onChange={e=>updMS('modelAnswer',e.target.value)}
+                  placeholder="Write the answer a student would give to earn every mark."/>
+              </div>
+
+              <div className="fg">
+                <label className="fl">Mark points — one per mark available</label>
+                {pts.map((p,i)=>(
+                  <div key={i} style={{ border:`1px solid ${TOKENS.s100}`, borderRadius:8, padding:'10px 12px', marginBottom:8, background:'#FBFAF5' }}>
+                    <div style={{ display:'flex', gap:8, marginBottom:6 }}>
+                      <input className="fi" value={p.text||''} onChange={e=>setPoint(i,'text',e.target.value)} placeholder={`Point ${i+1} — what earns this mark`} style={{ flex:1 }}/>
+                      <input className="fi" type="number" min="1" value={p.marks||1} onChange={e=>setPoint(i,'marks',parseInt(e.target.value)||1)} style={{ width:64 }}/>
+                      <button onClick={()=>delPoint(i)} style={{ padding:'0 11px', borderRadius:6, border:'1px solid #FCA5A5', background:'#fff', color:'#991B1B', cursor:'pointer' }}>×</button>
+                    </div>
+                    <input className="fi" value={(p.keywords||[]).join(', ')} onChange={e=>setPoint(i,'keywords',e.target.value.split(',').map(s=>s.trim()).filter(Boolean))}
+                      placeholder="Accept any of these words, comma separated — e.g. osmosis, water moves in"/>
+                  </div>
+                ))}
+                <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                  <button onClick={addPoint} style={{ fontSize:12, color:TOKENS.crimson, background:'transparent', border:`1px solid ${TOKENS.s100}`, padding:'6px 13px', borderRadius:6, cursor:'pointer', fontWeight:700 }}>+ Add mark point</button>
+                  <span style={{ fontSize:12, fontWeight:700, color: schemeTotal===form.marks?TOKENS.accentEmerald:TOKENS.s500 }}>
+                    Scheme totals {schemeTotal} / question worth {form.marks}
+                    {schemeTotal!==form.marks && schemeTotal>0 ? ' — these should match' : ''}
+                  </span>
+                </div>
+              </div>
+
+              {(form.type==='short') && (
+                <div className="fg"><label className="fl">Accepted alternative answers, comma separated</label>
+                  <input className="fi" value={(form.markScheme.acceptableAnswers||[]).join(', ')}
+                    onChange={e=>updMS('acceptableAnswers', e.target.value.split(',').map(s=>s.trim()).filter(Boolean))}
+                    placeholder="magnesium, magnesium ions, magnesium deficiency"/>
+                </div>
+              )}
+
+              <div className="fg"><label className="fl">Common errors not to credit, comma separated</label>
+                <input className="fi" value={(form.markScheme.commonErrors||[]).join(', ')}
+                  onChange={e=>updMS('commonErrors', e.target.value.split(',').map(s=>s.trim()).filter(Boolean))}
+                  placeholder="Saying the plant cell bursts, Confusing excretion with egestion"/>
+              </div>
+
+              {form.type==='drawing' && (
+                <div className="fr2">
+                  <div className="fg"><label className="fl">Image URL the student must read or label</label>
+                    <input className="fi" value={form.imageUrl||''} onChange={e=>upd('imageUrl',e.target.value)} placeholder="https://..."/>
+                  </div>
+                  <div className="fg"><label className="fl">Image caption</label>
+                    <input className="fi" value={form.imageCaption||''} onChange={e=>upd('imageCaption',e.target.value)} placeholder="Fig 1: cross-section of a leaf"/>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="fg" style={{ maxWidth:150 }}><label className="fl">Marks</label>
+            <input className="fi" type="number" min="1" max="30" value={form.marks||1} onChange={e=>upd('marks',parseInt(e.target.value)||1)}/>
           </div>
 
-          <div className="fg"><label className="fl">Explanation (shown after answer)</label>
-            <textarea className="fi" rows={3} value={form.explanation||''} onChange={e=>upd('explanation',e.target.value)} placeholder="Explain the working step-by-step..."/>
-          </div>
-
-          <div style={{ display:'flex', gap:12, justifyContent:'flex-end', paddingTop:8 }}>
+          <div style={{ display:'flex', gap:12, justifyContent:'flex-end', paddingTop:6 }}>
             <button onClick={onClose} style={{ padding:'10px 20px', borderRadius:8, border:`1px solid ${TOKENS.s100}`, background:'transparent', color:TOKENS.s700, fontWeight:600, cursor:'pointer' }}>Cancel</button>
-            <button onClick={()=>onSave(form)} disabled={!form.questionText||!form.correctAnswer} style={{ padding:'10px 24px', borderRadius:8, background:TOKENS.crimson, color:'#fff', border:'none', fontWeight:700, cursor:'pointer' }}>
-              {form._id ? 'Update Question' : 'Add Question'}
+            <button onClick={()=>onSave(form)} disabled={!canSave} style={{ padding:'10px 24px', borderRadius:8, background:canSave?TOKENS.crimson:TOKENS.s300, color:'#fff', border:'none', fontWeight:700, cursor:canSave?'pointer':'not-allowed' }}>
+              {form._id?'Update Question':'Add Question'}
             </button>
           </div>
         </div>
@@ -11594,86 +11710,59 @@ function GroupRoomsModule({ refreshKey, toast }) {
 // Verified IGCSE Mathematics 0580 structure (2025–2027), confirmed
 // by Smartious. Used by the "Load IGCSE Maths" action.
 const IGCSE_MATHS_0580 = [
-  { topic: 'Number', code: '1', subtopics: [
-    { name: 'Types of number (integers, primes, squares, cubes, factors, multiples, HCF, LCM)', code: '1.1', suggestedLessons: 2 },
-    { name: 'Sets and Venn diagrams', code: '1.2', suggestedLessons: 2 },
-    { name: 'Powers and roots', code: '1.3', suggestedLessons: 1 },
-    { name: 'Fractions, decimals and percentages', code: '1.4', suggestedLessons: 2 },
-    { name: 'Ordering and the four operations', code: '1.5', suggestedLessons: 1 },
-    { name: 'Indices, standard form and estimation', code: '1.6', suggestedLessons: 2 },
-    { name: 'Ratio, proportion and rates', code: '1.7', suggestedLessons: 2 },
-    { name: 'Percentages, money and finance (interest, exchange)', code: '1.8', suggestedLessons: 2 },
-    { name: 'Surds, bounds and exponential growth & decay', code: '1.9', suggestedLessons: 2 },
+  { topic: 'Unit 1 · Number & Arithmetic', code: 'U1', subtopics: [
+    { name: 'Types of Number, Factors, Multiples & Prime Factorization', code: '001', suggestedLessons: 1 },
+    { name: 'Sets, Set Notation & Venn Diagrams', code: '002', suggestedLessons: 1 },
+    { name: 'Operations with Fractions & Mixed Numbers', code: '003', suggestedLessons: 1 },
+    { name: 'Decimals, Recurring Decimals & Fraction Conversions', code: '004', suggestedLessons: 1 },
+    { name: 'Percentages, Percentage Changes & Reverse Percentages', code: '005', suggestedLessons: 1 },
+    { name: 'Simple & Compound Interest (Exponential Growth/Decay)', code: '006', suggestedLessons: 1 },
+    { name: 'Ratio, Direct & Inverse Proportion Applications', code: '007', suggestedLessons: 1 },
+    { name: 'Standard Form (Scientific Notation) & Calculations', code: '008', suggestedLessons: 1 },
+    { name: 'Estimation, Significant Figures & Upper/Lower Bounds', code: '009', suggestedLessons: 1 },
+    { name: 'Indices Laws & Surds Simplification', code: '010', suggestedLessons: 1 },
   ]},
-  { topic: 'Algebra and graphs', code: '2', subtopics: [
-    { name: 'Introduction to algebra (notation, substitution)', code: '2.1', suggestedLessons: 1 },
-    { name: 'Algebraic manipulation (simplifying, expanding, factorising)', code: '2.2', suggestedLessons: 3 },
-    { name: 'Algebraic fractions', code: '2.3', suggestedLessons: 2 },
-    { name: 'Indices II (rules of indices)', code: '2.4', suggestedLessons: 1 },
-    { name: 'Equations (linear, simultaneous, quadratic)', code: '2.5', suggestedLessons: 4 },
-    { name: 'Inequalities', code: '2.6', suggestedLessons: 2 },
-    { name: 'Sequences (linear, quadratic, geometric)', code: '2.7', suggestedLessons: 2 },
-    { name: 'Proportion (direct and inverse)', code: '2.8', suggestedLessons: 1 },
-    { name: 'Graphs in practical situations', code: '2.9', suggestedLessons: 1 },
-    { name: 'Graphs of functions', code: '2.10', suggestedLessons: 2 },
-    { name: 'Sketching curves', code: '2.11', suggestedLessons: 1 },
-    { name: 'Differentiation', code: '2.12', suggestedLessons: 1 },
-    { name: 'Functions (notation, composite, inverse)', code: '2.13', suggestedLessons: 1 },
+  { topic: 'Unit 2 · Algebra & Sequences', code: 'U2', subtopics: [
+    { name: 'Algebraic Expansion & Factorisation (Linear & Quadratic)', code: '011', suggestedLessons: 1 },
+    { name: 'Simplifying & Operating on Algebraic Fractions', code: '012', suggestedLessons: 1 },
+    { name: 'Solving Linear & Quadratic Equations', code: '013', suggestedLessons: 1 },
+    { name: 'The Quadratic Formula & Completing the Square', code: '014', suggestedLessons: 1 },
+    { name: 'Simultaneous Equations (Linear & Non-Linear)', code: '015', suggestedLessons: 1 },
+    { name: 'Linear Inequalities & Region Shading', code: '016', suggestedLessons: 1 },
+    { name: 'Sequences: Arithmetic, Quadratic & nth-Term Rules', code: '017', suggestedLessons: 1 },
+    { name: 'Direct & Inverse Variation Equations', code: '018', suggestedLessons: 1 },
+    { name: 'Functions Notation, Composite Functions & Inverse Functions', code: '019', suggestedLessons: 1 },
   ]},
-  { topic: 'Coordinate geometry', code: '3', subtopics: [
-    { name: 'Coordinates', code: '3.1', suggestedLessons: 1 },
-    { name: 'Drawing linear graphs', code: '3.2', suggestedLessons: 1 },
-    { name: 'Gradient of linear graphs', code: '3.3', suggestedLessons: 1 },
-    { name: 'Length and midpoint', code: '3.4', suggestedLessons: 1 },
-    { name: 'Equations of linear graphs', code: '3.5', suggestedLessons: 2 },
-    { name: 'Parallel lines', code: '3.6', suggestedLessons: 1 },
-    { name: 'Perpendicular lines', code: '3.7', suggestedLessons: 1 },
+  { topic: 'Unit 3 · Coordinate Geometry & Graphs', code: 'U3', subtopics: [
+    { name: 'Straight-Line Graphs, Gradient, Midpoints & Lengths', code: '020', suggestedLessons: 1 },
+    { name: 'Parallel & Perpendicular Lines (y = mx + c)', code: '021', suggestedLessons: 1 },
+    { name: 'Graphs of Functions (Quadratic, Cubic, Reciprocal, Exponential)', code: '022', suggestedLessons: 1 },
+    { name: 'Estimating Gradients of Curves & Area Under Graphs', code: '023', suggestedLessons: 1 },
+    { name: 'Introduction to Differentiation & Turning Points', code: '024', suggestedLessons: 1 },
   ]},
-  { topic: 'Geometry', code: '4', subtopics: [
-    { name: 'Geometrical terms', code: '4.1', suggestedLessons: 1 },
-    { name: 'Geometrical constructions', code: '4.2', suggestedLessons: 2 },
-    { name: 'Scale drawings', code: '4.3', suggestedLessons: 1 },
-    { name: 'Similarity', code: '4.4', suggestedLessons: 2 },
-    { name: 'Symmetry', code: '4.5', suggestedLessons: 1 },
-    { name: 'Angles', code: '4.6', suggestedLessons: 2 },
-    { name: 'Circle theorems I', code: '4.7', suggestedLessons: 2 },
-    { name: 'Circle theorems II', code: '4.8', suggestedLessons: 2 },
+  { topic: 'Unit 4 · Geometry & Mensuration', code: 'U4', subtopics: [
+    { name: 'Angles Facts, Parallel Lines & Polygons', code: '025', suggestedLessons: 1 },
+    { name: 'Geometrical Constructions, Scale Drawings & Bearings', code: '026', suggestedLessons: 1 },
+    { name: 'Perimeter & Area of 2D Compound Shapes', code: '027', suggestedLessons: 1 },
+    { name: 'Circles: Circumference, Area, Arcs & Sectors', code: '028', suggestedLessons: 1 },
+    { name: 'Surface Area & Volume of Prisms, Pyramids, Cones & Spheres', code: '029', suggestedLessons: 1 },
+    { name: 'Similarity & Congruence (Length, Area & Volume Scales)', code: '030', suggestedLessons: 1 },
+    { name: 'Circle Theorems & Geometric Proofs', code: '031', suggestedLessons: 1 },
   ]},
-  { topic: 'Mensuration', code: '5', subtopics: [
-    { name: 'Units of measure', code: '5.1', suggestedLessons: 1 },
-    { name: 'Area and perimeter', code: '5.2', suggestedLessons: 2 },
-    { name: 'Circles, arcs and sectors', code: '5.3', suggestedLessons: 2 },
-    { name: 'Surface area and volume', code: '5.4', suggestedLessons: 2 },
-    { name: 'Compound shapes and parts of shapes', code: '5.5', suggestedLessons: 2 },
+  { topic: 'Unit 5 · Trigonometry & Vectors', code: 'U5', subtopics: [
+    { name: 'Pythagoras\' Theorem & Basic Trigonometry (SOH CAH TOA)', code: '032', suggestedLessons: 1 },
+    { name: 'Sine Rule, Cosine Rule & Area of Any Triangle', code: '033', suggestedLessons: 1 },
+    { name: '3D Pythagoras & 3D Trigonometry', code: '034', suggestedLessons: 1 },
+    { name: 'Trigonometric Graphs & Exact Values', code: '035', suggestedLessons: 1 },
+    { name: 'Transformations (Reflection, Rotation, Translation, Enlargement)', code: '036', suggestedLessons: 1 },
+    { name: 'Vector Addition, Scalar Multiplication & Column Vectors', code: '037', suggestedLessons: 1 },
+    { name: 'Vector Geometry Proofs & Ratio Problems', code: '038', suggestedLessons: 1 },
   ]},
-  { topic: 'Trigonometry', code: '6', subtopics: [
-    { name: "Pythagoras' theorem", code: '6.1', suggestedLessons: 2 },
-    { name: 'Right-angled triangle trigonometry', code: '6.2', suggestedLessons: 3 },
-    { name: 'Exact trigonometric values', code: '6.3', suggestedLessons: 1 },
-    { name: 'Trigonometric functions (graphs)', code: '6.4', suggestedLessons: 1 },
-    { name: 'Non-right-angled trigonometry (sine & cosine rules)', code: '6.5', suggestedLessons: 2 },
-    { name: 'Three-dimensional trigonometry', code: '6.6', suggestedLessons: 2 },
-  ]},
-  { topic: 'Transformations and vectors', code: '7', subtopics: [
-    { name: 'Transformations (reflection, rotation, translation, enlargement)', code: '7.1', suggestedLessons: 3 },
-    { name: 'Vectors in two dimensions', code: '7.2', suggestedLessons: 2 },
-    { name: 'Magnitude of a vector', code: '7.3', suggestedLessons: 1 },
-    { name: 'Vector geometry', code: '7.4', suggestedLessons: 2 },
-  ]},
-  { topic: 'Probability', code: '8', subtopics: [
-    { name: 'Introduction to probability', code: '8.1', suggestedLessons: 1 },
-    { name: 'Relative and expected frequency', code: '8.2', suggestedLessons: 1 },
-    { name: 'Probability of combined events', code: '8.3', suggestedLessons: 2 },
-    { name: 'Conditional probability', code: '8.4', suggestedLessons: 2 },
-    { name: 'Tree diagrams and Venn diagrams in probability', code: '8.5', suggestedLessons: 2 },
-  ]},
-  { topic: 'Statistics', code: '9', subtopics: [
-    { name: 'Classifying statistical data', code: '9.1', suggestedLessons: 1 },
-    { name: 'Interpreting statistical data', code: '9.2', suggestedLessons: 1 },
-    { name: 'Averages and measures of spread', code: '9.3', suggestedLessons: 2 },
-    { name: 'Statistical charts and diagrams', code: '9.4', suggestedLessons: 2 },
-    { name: 'Scatter diagrams', code: '9.5', suggestedLessons: 2 },
-    { name: 'Cumulative frequency diagrams', code: '9.6', suggestedLessons: 3 },
+  { topic: 'Unit 6 · Probability & Statistics', code: 'U6', subtopics: [
+    { name: 'Single Event & Relative Frequency Probability', code: '039', suggestedLessons: 1 },
+    { name: 'Tree Diagrams, Venn Diagram Probability & Conditional Events', code: '040', suggestedLessons: 1 },
+    { name: 'Mean, Median, Mode & Range for Grouped/Ungrouped Data', code: '041', suggestedLessons: 1 },
+    { name: 'Histograms, Cumulative Frequency Curves & Scatter Diagrams', code: '042', suggestedLessons: 1 },
   ]},
 ]
 
@@ -13622,7 +13711,7 @@ function SyllabusSpineTab({ toast }) {
     try {
       const { data } = await api.post('/syllabus/bulk', {
         subjectId, topics: IGCSE_MATHS_0580,
-        sourceSyllabus: 'Cambridge IGCSE Mathematics 0580 (2025–2027)',
+        sourceSyllabus: 'IGCSE Mathematics — 42-lesson scheme (Cambridge 0580 & Edexcel A 4MA1)',
       })
       if (data?.success) { toast?.ok?.(data.message || 'Loaded.'); loadSpine(subjectId) }
       else toast?.error?.(data?.message || 'Failed.')
@@ -13715,7 +13804,7 @@ function SyllabusSpineTab({ toast }) {
             <button onClick={loadIgcseMaths} disabled={busy} style={{
               background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
               borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-            }}>Load IGCSE Maths 0580</button>
+            }}>Load IGCSE Maths spine</button>
             {curriculum === 'CambridgePrimary' && (
               <button onClick={loadPrimarySpine} disabled={busy} title="Auto-detects which Primary spine matches the selected subject" style={{
                 background: '#fff', color: '#9A7B16', border: '1.5px dashed ' + TOKENS.gold,
