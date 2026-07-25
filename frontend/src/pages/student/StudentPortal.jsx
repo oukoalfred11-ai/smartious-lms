@@ -13036,29 +13036,77 @@ function StudentCheckInTab({ user, toast }) {
 
 
 function QuizGameLauncher({ user, toast, setPage }) {
-  const [active, setActive] = useState(false)
-  const [config, setConfig] = useState({ subject:'Mathematics', curriculum:'', topic:'', grade:'' })
+  const [active,   setActive]   = useState(false)
+  const [config,   setConfig]   = useState({ subject:'', topic:'', subtopic:'' })
   const [subjects, setSubjects] = useState([])
+  const [spine,    setSpine]    = useState([])       // topics for chosen subject
+  const [spineLoading, setSpineLoading] = useState(false)
 
   useEffect(() => {
-    // Get student's enrolled subjects
-    const s = user?.subjects || []
-    setSubjects(s.length > 0 ? s : ['Mathematics','Physics','Chemistry','Biology','English Language','History','Geography','Economics','Business Studies','Computer Science'])
-    if (s.length > 0) setConfig(c=>({...c, subject:s[0], curriculum:user?.curriculum||''}))
+    const s = (user?.subjects||[]).filter(x=>typeof x==='string' && x.trim())
+    const list = s.length > 0 ? s : ['Mathematics','Physics','Chemistry','Biology','English Language','Business Studies','Computer Science','Economics']
+    setSubjects(list)
+    setConfig(c=>({ ...c, subject:list[0]||'' }))
   }, [user])
 
+  // Load spine topics whenever the subject changes
+  useEffect(() => {
+    if (!config.subject) { setSpine([]); return }
+    setSpineLoading(true)
+    api.get('/questions/spine', { params:{ subject:config.subject, curriculum:user?.curriculum||'' } })
+      .then(r => setSpine(r.data?.data?.topics||[]))
+      .catch(() => setSpine([]))
+      .finally(() => setSpineLoading(false))
+  }, [config.subject, user?.curriculum])
+
+  // Coloured SVG icon per subject
+  const SubjectIcon = ({ name, size=34 }) => {
+    const P = (d, extra={}) => <path d={d} fill="none" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" {...extra}/>
+    const key = (name||'').toLowerCase()
+    let stroke='#7D1025', bg='#FDE7EC', body=null
+    if (key.includes('math')) { stroke='#7C3AED'; bg='#EDE9FE'
+      body=<g stroke={stroke}>{P('M4 4h16v16H4z')}{P('M8 9h8M8 15h4')}<circle cx="16" cy="15" r="1.4" fill={stroke} stroke="none"/></g> }
+    else if (key.includes('physic')) { stroke='#2563EB'; bg='#DBEAFE'
+      body=<g stroke={stroke}><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)"/><circle cx="12" cy="12" r="1.6" fill={stroke} stroke="none"/></g> }
+    else if (key.includes('chem')) { stroke='#059669'; bg='#D1FAE5'
+      body=<g stroke={stroke}>{P('M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3')}{P('M7.5 15h9')}</g> }
+    else if (key.includes('bio')) { stroke='#16A34A'; bg='#DCFCE7'
+      body=<g stroke={stroke}>{P('M12 2c3 3 3 7 0 10c-3 3-3 7 0 10')}{P('M12 2c-3 3-3 7 0 10c3 3 3 7 0 10')}{P('M8.5 7h7M8.5 17h7M7.5 12h9')}</g> }
+    else if (key.includes('english') || key.includes('literature')) { stroke='#D97706'; bg='#FEF3C7'
+      body=<g stroke={stroke}>{P('M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z')}{P('M4 19.5A2.5 2.5 0 0 0 6.5 22H20')}{P('M9 7h7M9 11h5')}</g> }
+    else if (key.includes('business') || key.includes('account') || key.includes('commerce')) { stroke='#0891B2'; bg='#CFFAFE'
+      body=<g stroke={stroke}>{P('M4 20V10M10 20V4M16 20v-7M21 20H3')}<circle cx="16" cy="9" r="1.3" fill={stroke} stroke="none"/></g> }
+    else if (key.includes('computer') || key.includes('ict')) { stroke='#4F46E5'; bg='#E0E7FF'
+      body=<g stroke={stroke}>{P('M9 8l-4 4 4 4M15 8l4 4-4 4M13 5l-2 14')}</g> }
+    else if (key.includes('econom')) { stroke='#B45309'; bg='#FDE68A'
+      body=<g stroke={stroke}>{P('M3 17l5-5 4 3 6-7')}{P('M18 8h3v3')}</g> }
+    else if (key.includes('geo')) { stroke='#0D9488'; bg='#CCFBF1'
+      body=<g stroke={stroke}><circle cx="12" cy="12" r="9"/>{P('M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18')}</g> }
+    else if (key.includes('hist')) { stroke='#9F1239'; bg='#FFE4E6'
+      body=<g stroke={stroke}><circle cx="12" cy="12" r="9"/>{P('M12 7v5l3.5 2')}</g> }
+    else { body=<g stroke={stroke}>{P('M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z')}{P('M14 2v6h6M9 13h6M9 17h4')}</g> }
+    return (
+      <div style={{ width:size+22, height:size+22, borderRadius:14, background:bg, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto' }}>
+        <svg width={size} height={size} viewBox="0 0 24 24">{body}</svg>
+      </div>
+    )
+  }
+
   if (active) return (
-    <div style={{ position:'fixed', inset:0, zIndex:9999 }}>
+    <div style={{ position:'fixed', inset:0, zIndex:9999, overflowY:'auto', background:TOKENS.cream }}>
       <QuizGame
         subject={config.subject}
-        curriculum={config.curriculum}
+        curriculum={user?.curriculum||''}
         topic={config.topic}
-        grade={config.grade||user?.gradeLevel}
+        subtopic={config.subtopic}
+        grade={user?.gradeLevel||user?.grade||''}
         user={user}
         onClose={()=>setActive(false)}
       />
     </div>
   )
+
+  const chosenTopic = spine.find(t=>t.topic===config.topic)
 
   return (
     <div>
@@ -13067,57 +13115,93 @@ function QuizGameLauncher({ user, toast, setPage }) {
         <h2 className="serif" style={{ fontSize:26, color:TOKENS.ink, margin:'4px 0 6px' }}>
           Quiz <em style={{ fontStyle:'italic', color:TOKENS.crimson }}>Challenge</em>
         </h2>
-        <div style={{ fontSize:13, color:TOKENS.s500 }}>Test your knowledge, earn XP, and compete with classmates!</div>
+        <div style={{ fontSize:13, color:TOKENS.s500 }}>
+          Questions matched to your level{user?.gradeLevel?` (${user.gradeLevel})`:''} and your subject syllabus. Earn XP, collect badges, invite friends!
+        </div>
       </div>
 
-      {/* Subject selector cards */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))', gap:14, marginBottom:24 }}>
+      {/* Subject cards with coloured SVG icons */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))', gap:14, marginBottom:24 }}>
         {subjects.map(sub => {
-          const icons = { Mathematics:'📐', Physics:'⚡', Chemistry:'🧪', Biology:'🌿', 'English Language':'📖', 'English Literature':'📚', History:'🏛️', Geography:'🌍', Economics:'💹', 'Business Studies':'💼', 'Computer Science':'💻' }
           const selected = config.subject === sub
           return (
-            <button key={sub} onClick={()=>setConfig(c=>({...c,subject:sub}))} style={{
-              padding:'18px 12px', borderRadius:14, border:`2px solid ${selected?TOKENS.crimson:TOKENS.s100}`,
-              background:selected?'#FDE7EC':'#fff', cursor:'pointer', textAlign:'center',
-              transition:'all .15s',
+            <button key={sub} onClick={()=>setConfig({ subject:sub, topic:'', subtopic:'' })} style={{
+              padding:'18px 10px', borderRadius:14, border:`2px solid ${selected?TOKENS.crimson:TOKENS.s100}`,
+              background:selected?'#FDE7EC':'#fff', cursor:'pointer', textAlign:'center', transition:'all .15s',
             }}>
-              <div style={{ fontSize:32, marginBottom:8 }}>{icons[sub]||'📝'}</div>
-              <div style={{ fontSize:13, fontWeight:700, color:selected?TOKENS.crimson:TOKENS.ink, lineHeight:1.3 }}>{sub}</div>
+              <SubjectIcon name={sub}/>
+              <div style={{ fontSize:12.5, fontWeight:700, color:selected?TOKENS.crimson:TOKENS.ink, lineHeight:1.3, marginTop:10 }}>{sub}</div>
             </button>
           )
         })}
       </div>
 
-      {/* Quick start */}
-      <div style={{ background:'#fff', borderRadius:16, border:`1px solid ${TOKENS.s100}`, padding:'24px 28px', marginBottom:20 }}>
-        <div style={{ fontSize:13, fontWeight:800, color:TOKENS.ink, marginBottom:16, textTransform:'uppercase', letterSpacing:'.06em' }}>Quick Start — {config.subject}</div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:20 }}>
-          {[['easy','🟢 Easy','Warm up'],['medium','🟡 Medium','Challenge'],['hard','🔴 Hard','Expert']].map(([d,l,sub])=>(
-            <button key={d} onClick={()=>setActive(true)||setConfig(c=>({...c}))} style={{ padding:'16px 10px', borderRadius:12, border:`1.5px solid ${TOKENS.s100}`, background:'#fff', cursor:'pointer', textAlign:'center' }}
-              onMouseEnter={e=>{e.currentTarget.style.borderColor=TOKENS.crimson}} onMouseLeave={e=>{e.currentTarget.style.borderColor=TOKENS.s100}}>
-              <div style={{ fontSize:22, marginBottom:4 }}>{l.split(' ')[0]}</div>
-              <div style={{ fontSize:13, fontWeight:700, color:TOKENS.ink }}>{l.split(' ')[1]}</div>
-              <div style={{ fontSize:11, color:TOKENS.s400 }}>{sub}</div>
-            </button>
-          ))}
+      {/* Syllabus spine topic picker */}
+      <div style={{ background:'#fff', borderRadius:16, border:`1px solid ${TOKENS.s100}`, padding:'22px 26px', marginBottom:20 }}>
+        <div style={{ fontSize:12, fontWeight:800, color:TOKENS.ink, marginBottom:4, textTransform:'uppercase', letterSpacing:'.06em' }}>
+          {config.subject} — Choose a topic
         </div>
-        <button onClick={()=>setActive(true)} style={{
-          width:'100%', padding:'16px', borderRadius:12,
+        <div style={{ fontSize:12, color:TOKENS.s400, marginBottom:14 }}>
+          {spineLoading ? 'Loading your syllabus...' :
+           spine.length ? 'From your subject syllabus — the same spine your lessons and live classes follow.' :
+           'No syllabus spine loaded for this subject yet — the quiz will draw from all topics.'}
+        </div>
+
+        {spine.length > 0 && (
+          <div style={{ display:'flex', flexWrap:'wrap', gap:8, marginBottom:14 }}>
+            <button onClick={()=>setConfig(c=>({...c, topic:'', subtopic:''}))} style={{
+              padding:'8px 16px', borderRadius:99, fontSize:12.5, fontWeight:700, cursor:'pointer',
+              border:`1.5px solid ${!config.topic?TOKENS.crimson:TOKENS.s100}`,
+              background:!config.topic?TOKENS.crimson:'#fff', color:!config.topic?'#fff':TOKENS.s700,
+            }}>All topics</button>
+            {spine.map(t=>(
+              <button key={t._id} onClick={()=>setConfig(c=>({...c, topic:t.topic, subtopic:''}))} style={{
+                padding:'8px 16px', borderRadius:99, fontSize:12.5, fontWeight:600, cursor:'pointer',
+                border:`1.5px solid ${config.topic===t.topic?TOKENS.crimson:TOKENS.s100}`,
+                background:config.topic===t.topic?TOKENS.crimson:'#fff', color:config.topic===t.topic?'#fff':TOKENS.s700,
+              }}>{t.code?t.code+' · ':''}{t.topic}</button>
+            ))}
+          </div>
+        )}
+
+        {chosenTopic && (chosenTopic.subtopics||[]).length > 0 && (
+          <div style={{ borderTop:`1px solid ${TOKENS.s100}`, paddingTop:12 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:TOKENS.s500, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:8 }}>Narrow to a subtopic (optional)</div>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+              <button onClick={()=>setConfig(c=>({...c, subtopic:''}))} style={{
+                padding:'6px 12px', borderRadius:99, fontSize:11.5, fontWeight:600, cursor:'pointer',
+                border:`1px solid ${!config.subtopic?TOKENS.gold:TOKENS.s100}`,
+                background:!config.subtopic?TOKENS.goldPale:'#fff', color:TOKENS.s700,
+              }}>Whole topic</button>
+              {chosenTopic.subtopics.map((st,i)=>(
+                <button key={i} onClick={()=>setConfig(c=>({...c, subtopic:st.name}))} style={{
+                  padding:'6px 12px', borderRadius:99, fontSize:11.5, fontWeight:600, cursor:'pointer',
+                  border:`1px solid ${config.subtopic===st.name?TOKENS.gold:TOKENS.s100}`,
+                  background:config.subtopic===st.name?TOKENS.goldPale:'#fff', color:TOKENS.s700,
+                }}>{st.name}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button onClick={()=>setActive(true)} disabled={!config.subject} style={{
+          width:'100%', marginTop:18, padding:'16px', borderRadius:12,
           background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`,
-          color:'#fff', border:'none', fontSize:16, fontWeight:800, cursor:'pointer',
-          letterSpacing:'.02em',
+          color:'#fff', border:'none', fontSize:16, fontWeight:800, cursor:'pointer', letterSpacing:'.02em',
         }}>
-          🚀 Start {config.subject} Quiz
+          Start {config.subject} Quiz{config.topic?` — ${config.topic}`:''}
         </button>
       </div>
 
       {/* Achievement teaser */}
       <div style={{ background:`linear-gradient(135deg,${TOKENS.accentAmber}15,${TOKENS.goldPale})`, borderRadius:14, border:`1.5px solid ${TOKENS.gold}40`, padding:'16px 20px', display:'flex', alignItems:'center', gap:16, cursor:'pointer' }}
         onClick={()=>setPage('achievements')}>
-        <div style={{ fontSize:40 }}>🏆</div>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={TOKENS.gold} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21 1.18.54 2.03 2.03 2.03 4M18 2H6v7a6 6 0 0 0 12 0V2z"/>
+        </svg>
         <div>
           <div style={{ fontSize:14, fontWeight:800, color:TOKENS.ink }}>View Your Achievements</div>
-          <div style={{ fontSize:12, color:TOKENS.s500 }}>See XP, badges, and the class leaderboard</div>
+          <div style={{ fontSize:12, color:TOKENS.s500 }}>XP, badges, and the class leaderboard</div>
         </div>
         <div style={{ marginLeft:'auto', color:TOKENS.gold, fontWeight:800, fontSize:20 }}>→</div>
       </div>
