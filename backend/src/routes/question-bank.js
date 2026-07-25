@@ -119,6 +119,48 @@ router.get('/coverage', auth, async (req, res) => {
   } catch(e) { return fail(res, 500, e.message) }
 })
 
+// ── POST /api/questions/shuffle-options ─────────────
+// Repairs questions already in the bank whose correct answer sits in
+// the same position every time. Rotates each question's options so the
+// answer lands in a hash-determined slot: deterministic, evenly spread,
+// and safe to re-run. Optional body: { subject, curriculum }.
+router.post('/shuffle-options', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
+  try {
+    const crypto2 = require('crypto')
+    const filter = { type: 'mcq', isActive: { $ne: false } }
+    if (req.body?.subject)    filter.subject    = req.body.subject
+    if (req.body?.curriculum) filter.curriculum = req.body.curriculum
+
+    const before = { A:0, B:0, C:0, D:0 }
+    const after  = { A:0, B:0, C:0, D:0 }
+    let updated = 0, skipped = 0
+
+    const cursor = Question.find(filter)
+      .select('_id questionText options correctAnswer').cursor()
+
+    for (let q = await cursor.next(); q != null; q = await cursor.next()) {
+      const opts = Array.isArray(q.options) ? q.options.slice() : []
+      const cur  = opts.indexOf(q.correctAnswer)
+      if (opts.length < 2 || cur < 0) { skipped++; continue }
+      before['ABCD'[cur]] = (before['ABCD'[cur]] || 0) + 1
+
+      const h    = crypto2.createHash('sha1').update(String(q.questionText)).digest()
+      const want = h.readUInt32BE(0) % opts.length
+      const shift = ((cur - want) % opts.length + opts.length) % opts.length
+      const rotated = opts.slice(shift).concat(opts.slice(0, shift))
+      after['ABCD'[want]] = (after['ABCD'[want]] || 0) + 1
+
+      if (shift !== 0) {
+        await Question.updateOne({ _id: q._id }, { $set: { options: rotated } })
+        updated++
+      }
+    }
+
+    return ok(res, { updated, skipped, before, after },
+      `Rebalanced ${updated} question(s). Answer positions now A:${after.A} B:${after.B} C:${after.C} D:${after.D}.`)
+  } catch(e) { return fail(res, 500, e.message) }
+})
+
 // ── GET /api/questions/preview-paper ────────────────
 // Shows exactly what auto-homework WOULD generate for a lesson,
 // without scheduling a class. Run it repeatedly to confirm the
