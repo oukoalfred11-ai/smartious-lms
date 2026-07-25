@@ -6,6 +6,7 @@
  * /:id parameterised routes, otherwise Express captures names like
  * "selftest" as an :id.
  */
+const crypto   = require('crypto')
 const express  = require('express')
 const router   = express.Router()
 const { auth, requireRole } = require('../middleware/auth')
@@ -330,7 +331,13 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
         if (!q.correctAnswer) { errors.push(`${label}: missing correctAnswer`); continue }
         if (!opts.includes(q.correctAnswer)) { errors.push(`${label}: correctAnswer is not one of the options`); continue }
 
-        const exists = await Question.findOne({ subject: q.subject, questionText: q.questionText }).select('_id').lean()
+        // O(1) duplicate check on a unique-sparse indexed hash.
+        // Scanning unindexed questionText would be a full collection
+        // scan per row — unusable once the bank reaches millions.
+        const hash = crypto.createHash('sha1')
+          .update(String(q.subject) + '||' + String(q.questionText).trim().toLowerCase())
+          .digest('hex')
+        const exists = await Question.findOne({ contentHash: hash }).select('_id').lean()
         if (exists) { skipped++; continue }
 
         await Question.create({
@@ -348,6 +355,7 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
           explanation:  q.explanation || '',
           marks:        Number(q.marks) > 0 ? Number(q.marks) : 1,
           isActive:     true,
+          contentHash:  hash,
           createdBy:    req.user._id,
         })
         inserted++
