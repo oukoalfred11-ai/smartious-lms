@@ -78,6 +78,7 @@ const MODULES = {
   grouprooms:  { label: 'Group Rooms',  accent: TOKENS.accentOcean, icon: 'rooms' },
   curriculum:  { label: 'Curriculum',   accent: TOKENS.gold,        icon: 'curriculum' },
   billing:      { label: 'Billing',          accent: TOKENS.accentEmerald, icon: 'billing' },
+  questionbank:   { label: 'Question Bank',   accent: TOKENS.accentAmber,   icon: 'quiz' },
   feecollection:  { label: 'Fee Collection',   accent: TOKENS.accentEmerald, icon: 'billing' },
   cooreports:     { label: 'Report Overview',  accent: TOKENS.accentAmber,   icon: 'reports' },
   teacherratings: { label: 'Teacher Ratings',  accent: TOKENS.accentAmber,   icon: 'payroll' },
@@ -551,7 +552,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication'] },
       { label: 'Reports',     items: ['reports'] },
       { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
-      { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum'] },
+      { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum', 'questionbank'] },
       { label: 'System',      items: ['billing', 'website', 'settings', 'ai'] },
     ],
     accountant: [
@@ -886,6 +887,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'dosbreaks'     && <DOSBreakModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'dostimetable'  && <DOSTimetableModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'payroll'        && <PayrollModule         refreshKey={refreshKey} toast={toast}/>}
+        {safePage === 'questionbank'   && <QuestionBankModule   refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'cooreports'    && <COOReportOverviewModule refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'teacherratings'&& <TeacherRatingsModule    refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'leave'       && <LeaveModule      refreshKey={refreshKey} toast={toast} />}
@@ -9733,6 +9735,254 @@ function AllocateTeacherModal({ studentId, studentName, curriculum, subjectId, s
 // COO REPORT OVERVIEW MODULE
 // Shows all students × teachers × report status for the week
 // ════════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════
+// QuestionBankModule — Admin/Teacher question management
+// ══════════════════════════════════════════════════════════
+function QuestionBankModule({ toast }) {
+  const [questions, setQuestions] = useState([])
+  const [total,     setTotal]     = useState(0)
+  const [loading,   setLoading]   = useState(true)
+  const [page,      setPage]      = useState(1)
+  const [modal,     setModal]     = useState(false)
+  const [editQ,     setEditQ]     = useState(null)
+  const [seeding,   setSeeding]   = useState(false)
+  const [filter,    setFilter]    = useState({ subject:'', curriculum:'', difficulty:'', search:'' })
+
+  const SUBJECTS   = ['Mathematics','Physics','Chemistry','Biology','Business Studies','Computer Science','Economics','History','Geography','English Language','English Literature']
+  const CURRICULA  = ['EdexcelIGCSE','CambridgeIGCSE','CambridgeALevel','EdexcelALevel','IB','KenyaCBC','American','BNC']
+  const DIFFICULTY = ['easy','medium','hard']
+
+  const BLANK = { subject:'Mathematics', topic:'', curriculum:'EdexcelIGCSE', grade:'Year 10', difficulty:'medium', questionText:'', options:['','','',''], correctAnswer:'', explanation:'', marks:2 }
+
+  const load = async (p=1) => {
+    setLoading(true)
+    try {
+      const params = { page:p, limit:20, ...filter }
+      const r = await api.get('/questions', { params })
+      setQuestions(r.data?.data?.questions||[])
+      setTotal(r.data?.data?.total||0)
+      setPage(p)
+    } catch(e) { toast?.error?.('Failed to load questions.') }
+    setLoading(false)
+  }
+
+  useEffect(() => { load(1) }, [filter])
+
+  const seed = async () => {
+    setSeeding(true)
+    try {
+      const r = await api.post('/questions/seed')
+      toast?.ok?.(r.data?.message||'Seeded!')
+      load(1)
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Seed failed.') }
+    setSeeding(false)
+  }
+
+  const save = async (form) => {
+    try {
+      if (form._id) {
+        await api.patch('/questions/'+form._id, form)
+        toast?.ok?.('Question updated.')
+      } else {
+        await api.post('/questions', form)
+        toast?.ok?.('Question created.')
+      }
+      setModal(false); load(page)
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Save failed.') }
+  }
+
+  const del = async (id) => {
+    if (!confirm('Delete this question permanently?')) return
+    try { await api.delete('/questions/'+id); toast?.ok?.('Deleted.'); load(page) }
+    catch(e) { toast?.error?.('Delete failed.') }
+  }
+
+  const diffColor = d => d==='easy'?TOKENS.accentEmerald:d==='medium'?'#D97706':TOKENS.crimson
+
+  return (
+    <div>
+      {/* Header */}
+      <PCard style={{ marginBottom:20 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
+          <div style={{ flex:1 }}>
+            <div className="sec-tag">Admin</div>
+            <h2 className="serif" style={{ fontSize:26, color:TOKENS.ink, margin:'4px 0 2px' }}>
+              Question <em style={{ fontStyle:'italic', color:TOKENS.crimson }}>Bank</em>
+            </h2>
+            <div style={{ fontSize:13, color:TOKENS.s500 }}>{total.toLocaleString()} questions across all subjects and curricula</div>
+          </div>
+          <button onClick={seed} disabled={seeding} style={{ background:seeding?TOKENS.s300:TOKENS.accentEmerald, color:'#fff', border:'none', padding:'10px 18px', borderRadius:8, fontWeight:700, fontSize:13, cursor:seeding?'not-allowed':'pointer' }}>
+            {seeding?'Seeding...':'⬇ Load Built-in Questions'}
+          </button>
+          <button onClick={()=>{ setEditQ({...BLANK}); setModal(true) }}
+            style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'10px 20px', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer' }}>
+            + Add Question
+          </button>
+        </div>
+      </PCard>
+
+      {/* Filters */}
+      <PCard style={{ marginBottom:16 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))', gap:10 }}>
+          <input className="fi" placeholder="Search questions..." value={filter.search} onChange={e=>setFilter(f=>({...f,search:e.target.value}))} style={{ gridColumn:'1/-1' }}/>
+          <select className="fsel" value={filter.subject} onChange={e=>setFilter(f=>({...f,subject:e.target.value}))}>
+            <option value="">All subjects</option>
+            {SUBJECTS.map(s=><option key={s} value={s}>{s}</option>)}
+          </select>
+          <select className="fsel" value={filter.curriculum} onChange={e=>setFilter(f=>({...f,curriculum:e.target.value}))}>
+            <option value="">All curricula</option>
+            {CURRICULA.map(c=><option key={c} value={c}>{c}</option>)}
+          </select>
+          <select className="fsel" value={filter.difficulty} onChange={e=>setFilter(f=>({...f,difficulty:e.target.value}))}>
+            <option value="">Any difficulty</option>
+            {DIFFICULTY.map(d=><option key={d} value={d}>{d.charAt(0).toUpperCase()+d.slice(1)}</option>)}
+          </select>
+        </div>
+      </PCard>
+
+      {/* Table */}
+      <PCard style={{ overflow:'hidden', padding:0 }}>
+        {loading ? (
+          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>Loading...</div>
+        ) : questions.length === 0 ? (
+          <div style={{ padding:40, textAlign:'center', color:TOKENS.s400 }}>
+            <div style={{ fontSize:40, marginBottom:12 }}>📝</div>
+            <div style={{ fontSize:16, fontWeight:700, color:TOKENS.s700, marginBottom:8 }}>No questions yet</div>
+            <div style={{ fontSize:13, marginBottom:16 }}>Click "Load Built-in Questions" to seed 100+ questions, or add your own.</div>
+            <button onClick={seed} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'10px 20px', borderRadius:8, fontWeight:700, cursor:'pointer' }}>Load Built-in Questions</button>
+          </div>
+        ) : (
+          <table className="tbl">
+            <thead>
+              <tr>{['Subject','Topic','Curriculum','Difficulty','Marks','Question (preview)',''].map(h=><th key={h}>{h}</th>)}</tr>
+            </thead>
+            <tbody>
+              {questions.map(q=>(
+                <tr key={q._id}>
+                  <td style={{ fontWeight:700, color:TOKENS.ink, whiteSpace:'nowrap' }}>{q.subject}</td>
+                  <td style={{ fontSize:12, color:TOKENS.s500 }}>{q.topic||'—'}</td>
+                  <td style={{ fontSize:12, color:TOKENS.s500 }}>{q.curriculum||'—'}</td>
+                  <td><span style={{ background:diffColor(q.difficulty)+'22', color:diffColor(q.difficulty), fontWeight:700, fontSize:11, padding:'3px 8px', borderRadius:99, textTransform:'capitalize' }}>{q.difficulty}</span></td>
+                  <td style={{ textAlign:'center', fontWeight:700 }}>{q.marks}</td>
+                  <td style={{ fontSize:12, color:TOKENS.s700, maxWidth:280 }}>
+                    <div style={{ overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>{q.questionText}</div>
+                  </td>
+                  <td>
+                    <div style={{ display:'flex', gap:8 }}>
+                      <button onClick={()=>{ setEditQ({...q, options:[...q.options]}); setModal(true) }} style={{ background:TOKENS.s100, border:'none', padding:'5px 10px', borderRadius:6, fontSize:12, fontWeight:600, cursor:'pointer', color:TOKENS.s700 }}>Edit</button>
+                      <button onClick={()=>del(q._id)} style={{ background:'#FEE2E2', border:'none', padding:'5px 10px', borderRadius:6, fontSize:12, fontWeight:600, cursor:'pointer', color:'#991B1B' }}>Del</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {/* Pagination */}
+        {total > 20 && (
+          <div style={{ padding:'12px 20px', borderTop:`1px solid ${TOKENS.s100}`, display:'flex', gap:8, alignItems:'center', justifyContent:'center' }}>
+            <button onClick={()=>load(page-1)} disabled={page<=1} style={{ padding:'6px 14px', borderRadius:6, border:`1px solid ${TOKENS.s100}`, background:page<=1?TOKENS.s100:'#fff', cursor:page<=1?'not-allowed':'pointer', fontWeight:600, fontSize:13 }}>← Prev</button>
+            <span style={{ fontSize:13, color:TOKENS.s500 }}>Page {page} of {Math.ceil(total/20)}</span>
+            <button onClick={()=>load(page+1)} disabled={page>=Math.ceil(total/20)} style={{ padding:'6px 14px', borderRadius:6, border:`1px solid ${TOKENS.s100}`, background:page>=Math.ceil(total/20)?TOKENS.s100:'#fff', cursor:page>=Math.ceil(total/20)?'not-allowed':'pointer', fontWeight:600, fontSize:13 }}>Next →</button>
+          </div>
+        )}
+      </PCard>
+
+      {/* Question Editor Modal */}
+      {modal && editQ && (
+        <QuestionEditorModal
+          q={editQ}
+          onClose={()=>setModal(false)}
+          onSave={save}
+          subjects={SUBJECTS}
+          curricula={CURRICULA}
+        />
+      )}
+    </div>
+  )
+}
+
+function QuestionEditorModal({ q, onClose, onSave, subjects, curricula }) {
+  const [form, setForm] = useState({ ...q })
+  const upd = (k,v) => setForm(f=>({...f,[k]:v}))
+  const updOpt = (i,v) => { const o=[...form.options]; o[i]=v; setForm(f=>({...f,options:o})) }
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.6)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}
+      onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div style={{ background:'#fff', borderRadius:16, maxWidth:680, width:'100%', maxHeight:'90vh', overflow:'auto' }}>
+        <div style={{ background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`, padding:'20px 28px', color:'#fff' }}>
+          <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:22 }}>{form._id?'Edit Question':'New Question'}</div>
+        </div>
+        <div style={{ padding:'24px 28px', display:'grid', gap:16 }}>
+          <div className="fr2">
+            <div className="fg"><label className="fl">Subject</label>
+              <select className="fsel" value={form.subject} onChange={e=>upd('subject',e.target.value)}>
+                {subjects.map(s=><option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="fg"><label className="fl">Topic</label>
+              <input className="fi" value={form.topic||''} onChange={e=>upd('topic',e.target.value)} placeholder="e.g. Algebra, Forces"/>
+            </div>
+          </div>
+          <div className="fr2">
+            <div className="fg"><label className="fl">Curriculum</label>
+              <select className="fsel" value={form.curriculum||''} onChange={e=>upd('curriculum',e.target.value)}>
+                <option value="">All curricula</option>
+                {curricula.map(c=><option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="fg"><label className="fl">Grade / Year</label>
+              <input className="fi" value={form.grade||''} onChange={e=>upd('grade',e.target.value)} placeholder="e.g. Year 10, Grade 8"/>
+            </div>
+          </div>
+          <div className="fr2">
+            <div className="fg"><label className="fl">Difficulty</label>
+              <select className="fsel" value={form.difficulty} onChange={e=>upd('difficulty',e.target.value)}>
+                <option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option>
+              </select>
+            </div>
+            <div className="fg"><label className="fl">Marks</label>
+              <input className="fi" type="number" min="1" max="20" value={form.marks||2} onChange={e=>upd('marks',parseInt(e.target.value)||2)}/>
+            </div>
+          </div>
+
+          <div className="fg"><label className="fl">Question Text (use ^ for powers, sqrt() for roots, × for multiply)</label>
+            <textarea className="fi" rows={3} value={form.questionText} onChange={e=>upd('questionText',e.target.value)} placeholder="e.g. Solve for x: 3x + 7 = 22. Use sqrt(144) for √144, 2^3 for 2³"/>
+          </div>
+
+          <div className="fg"><label className="fl">Answer Options (A, B, C, D)</label>
+            {[0,1,2,3].map(i=>(
+              <div key={i} style={{ display:'flex', gap:8, marginBottom:8, alignItems:'center' }}>
+                <div style={{ width:28, height:28, borderRadius:'50%', background: form.options[i]===form.correctAnswer ? TOKENS.accentEmerald : TOKENS.s100, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:12, color: form.options[i]===form.correctAnswer ? '#fff':TOKENS.s500, flexShrink:0 }}>
+                  {['A','B','C','D'][i]}
+                </div>
+                <input className="fi" value={form.options[i]||''} onChange={e=>updOpt(i,e.target.value)} placeholder={`Option ${['A','B','C','D'][i]}`} style={{ flex:1 }}/>
+                <button onClick={()=>upd('correctAnswer',form.options[i])} style={{ padding:'6px 12px', borderRadius:6, border:`1.5px solid ${form.options[i]===form.correctAnswer?TOKENS.accentEmerald:TOKENS.s100}`, background:form.options[i]===form.correctAnswer?TOKENS.accentEmerald+'20':'transparent', fontWeight:700, fontSize:11, cursor:'pointer', color:form.options[i]===form.correctAnswer?TOKENS.accentEmerald:TOKENS.s500, whiteSpace:'nowrap' }}>
+                  {form.options[i]===form.correctAnswer?'✓ Correct':'Set correct'}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="fg"><label className="fl">Explanation (shown after answer)</label>
+            <textarea className="fi" rows={3} value={form.explanation||''} onChange={e=>upd('explanation',e.target.value)} placeholder="Explain the working step-by-step..."/>
+          </div>
+
+          <div style={{ display:'flex', gap:12, justifyContent:'flex-end', paddingTop:8 }}>
+            <button onClick={onClose} style={{ padding:'10px 20px', borderRadius:8, border:`1px solid ${TOKENS.s100}`, background:'transparent', color:TOKENS.s700, fontWeight:600, cursor:'pointer' }}>Cancel</button>
+            <button onClick={()=>onSave(form)} disabled={!form.questionText||!form.correctAnswer} style={{ padding:'10px 24px', borderRadius:8, background:TOKENS.crimson, color:'#fff', border:'none', fontWeight:700, cursor:'pointer' }}>
+              {form._id ? 'Update Question' : 'Add Question'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
 function COOReportOverviewModule({ toast, refreshKey }) {
   const [rows,    setRows]    = useState([])
   const [loading, setLoading] = useState(true)
