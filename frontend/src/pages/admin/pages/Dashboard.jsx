@@ -4236,6 +4236,45 @@ function FrontDeskLeads({ refreshKey, toast }) {
         ))}
       </div>
 
+      {/* Per-lesson coverage */}
+      <PCard style={{ marginBottom:16 }}>
+        <div style={{ display:'flex', gap:10, alignItems:'center', flexWrap:'wrap', marginBottom:cov?14:0 }}>
+          <div style={{ fontSize:11, fontWeight:800, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.08em' }}>Coverage per lesson</div>
+          <input className="fi" value={covSubj.subject} onChange={e=>setCovSubj(s=>({...s,subject:e.target.value}))} placeholder="Subject" style={{ width:150 }}/>
+          <select className="fsel" value={covSubj.curriculum} onChange={e=>setCovSubj(s=>({...s,curriculum:e.target.value}))} style={{ width:170 }}>
+            {CURRICULA.map(x=><option key={x} value={x}>{x}</option>)}
+          </select>
+          <button onClick={loadCoverage} style={{ background:TOKENS.s100, border:'none', padding:'8px 16px', borderRadius:7, fontWeight:700, fontSize:12.5, cursor:'pointer', color:TOKENS.s700 }}>Check</button>
+          {cov && <span style={{ fontSize:12.5, color:TOKENS.s500 }}>
+            <strong style={{ color:TOKENS.ink }}>{cov.totals.withQuestions}</strong> of <strong style={{ color:TOKENS.ink }}>{cov.totals.lessons}</strong> lessons have questions · {cov.totals.questions} total
+          </span>}
+        </div>
+        {cov && cov.topics.length>0 && (
+          <div style={{ maxHeight:260, overflowY:'auto', border:`1px solid ${TOKENS.s100}`, borderRadius:8 }}>
+            {cov.topics.map(t=>(
+              <div key={t.topic} style={{ borderBottom:`1px solid ${TOKENS.s100}` }}>
+                <div style={{ padding:'8px 14px', background:'#FBFAF5', fontSize:12, fontWeight:800, color:TOKENS.ink }}>
+                  {t.code?t.code+' · ':''}{t.topic}
+                </div>
+                <div style={{ display:'flex', flexWrap:'wrap', gap:5, padding:'8px 14px' }}>
+                  {t.subtopics.map(s=>{
+                    const good = s.questions>=20, some = s.questions>0
+                    return (
+                      <span key={s.code||s.name} title={`${s.name} — ${s.questions} question(s)`}
+                        style={{ fontSize:11, fontWeight:700, padding:'3px 8px', borderRadius:99,
+                          background: good?'#D1FAE5':some?'#FEF3C7':'#FEE2E2',
+                          color: good?'#065F46':some?'#92400E':'#991B1B' }}>
+                        {s.code||''} {s.questions}
+                      </span>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </PCard>
+
       {/* Filters */}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
         {['all', 'registration', 'consultation', 'contact'].map(t => (
@@ -9748,6 +9787,13 @@ function QuestionBankModule({ toast }) {
   const [modal,     setModal]     = useState(false)
   const [editQ,     setEditQ]     = useState(null)
   const [seeding,   setSeeding]   = useState(false)
+  const [bulkOpen,  setBulkOpen]  = useState(false)
+  const [importOpen,setImportOpen]= useState(false)
+  const [importTxt, setImportTxt] = useState('')
+  const [importing, setImporting] = useState(false)
+  const [bulkOpen,  setBulkOpen]  = useState(false)
+  const [cov,       setCov]       = useState(null)
+  const [covSubj,   setCovSubj]   = useState({ subject:'Biology', curriculum:'EdexcelIGCSE' })
   const [filter,    setFilter]    = useState({ subject:'', curriculum:'', difficulty:'', search:'' })
 
   const SUBJECTS   = ['Mathematics','Physics','Chemistry','Biology','Business Studies','Computer Science','Economics','History','Geography','English Language','English Literature']
@@ -9780,6 +9826,31 @@ function QuestionBankModule({ toast }) {
       load(1)
     } catch(e) { toast?.error?.(e?.response?.data?.message||'Seed failed.') }
     setSeeding(false)
+  }
+
+  const loadCoverage = async () => {
+    try {
+      const r = await api.get('/questions/coverage', { params: covSubj })
+      setCov(r.data?.data||null)
+    } catch(e) { toast?.error?.('Could not load coverage.') }
+  }
+
+  const runImport = async () => {
+    let payload
+    try {
+      const parsed = JSON.parse(importTxt)
+      payload = Array.isArray(parsed) ? parsed : parsed.questions
+      if (!Array.isArray(payload)) throw new Error('Expected an array, or { questions: [...] }')
+    } catch(e) { toast?.error?.('Invalid JSON: ' + e.message); return }
+    setImporting(true)
+    try {
+      const r = await api.post('/questions/bulk', { questions: payload })
+      toast?.ok?.(r.data?.message || 'Imported.')
+      const errs = r.data?.data?.errors || []
+      if (errs.length) console.warn('[import errors]', errs)
+      setImportOpen(false); setImportTxt(''); load(1)
+    } catch(e) { toast?.error?.(e?.response?.data?.message || 'Import failed.') }
+    setImporting(false)
   }
 
   const save = async (form) => {
@@ -9817,6 +9888,18 @@ function QuestionBankModule({ toast }) {
           </div>
           <button onClick={seed} disabled={seeding} style={{ background:seeding?TOKENS.s300:TOKENS.accentEmerald, color:'#fff', border:'none', padding:'10px 18px', borderRadius:8, fontWeight:700, fontSize:13, cursor:seeding?'not-allowed':'pointer' }}>
             {seeding?'Seeding...':'⬇ Load Built-in Questions'}
+          </button>
+          <button onClick={()=>setBulkOpen(true)}
+            style={{ background:'#fff', color:'#9A7B16', border:'1.5px dashed '+TOKENS.gold, padding:'10px 18px', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer' }}>
+            Bulk import
+          </button>
+          <button onClick={()=>setImportOpen(true)}
+            style={{ background:'#fff', color:TOKENS.crimson, border:`1.5px dashed ${TOKENS.crimson}`, padding:'10px 18px', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer' }}>
+            Bulk import (JSON)
+          </button>
+          <button onClick={()=>setBulkOpen(true)}
+            style={{ background:'#fff', color:'#9A7B16', border:'1.5px dashed '+TOKENS.gold, padding:'10px 18px', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer' }}>
+            Bulk Import
           </button>
           <button onClick={()=>{ setEditQ({...BLANK}); setModal(true) }}
             style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'10px 20px', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer' }}>
@@ -9892,6 +9975,61 @@ function QuestionBankModule({ toast }) {
         )}
       </PCard>
 
+      {/* Bulk import */}
+      {bulkOpen && (
+        <BulkImportModal
+          onClose={()=>setBulkOpen(false)}
+          onDone={()=>{ setBulkOpen(false); load(page); }}
+          toast={toast}
+          subjects={SUBJECTS} curricula={CURRICULA}
+        />
+      )}
+
+      {/* Bulk import modal */}
+      {importOpen && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.6)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}
+          onClick={e=>e.target===e.currentTarget&&setImportOpen(false)}>
+          <div style={{ background:'#fff', borderRadius:16, maxWidth:760, width:'100%', maxHeight:'90vh', overflow:'auto' }}>
+            <div style={{ background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`, padding:'20px 28px', color:'#fff' }}>
+              <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:22 }}>Bulk import questions</div>
+              <div style={{ fontSize:12.5, opacity:.8, marginTop:4 }}>Paste a JSON array. Duplicates (same text + subject + curriculum) are skipped.</div>
+            </div>
+            <div style={{ padding:'20px 28px' }}>
+              <div style={{ background:TOKENS.cream, border:`1px solid ${TOKENS.s100}`, borderRadius:8, padding:'12px 14px', marginBottom:14 }}>
+                <div style={{ fontSize:11, fontWeight:800, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:6 }}>Format — one object per question</div>
+                <pre style={{ margin:0, fontSize:11.5, lineHeight:1.65, color:TOKENS.s700, whiteSpace:'pre-wrap', fontFamily:'ui-monospace,monospace' }}>{`[{
+  "subject": "Biology",
+  "curriculum": "EdexcelIGCSE",
+  "grade": "Year 10",
+  "topic": "Unit 1 \u00b7 Enzymes",
+  "subtopic": "Enzyme Action & The Lock-and-Key Model",
+  "difficulty": "medium",
+  "questionText": "Which model best describes enzyme specificity?",
+  "options": ["Lock-and-key", "Random collision", "Osmotic", "Diffusion gradient"],
+  "correctAnswer": "Lock-and-key",
+  "explanation": "The active site is complementary in shape to the substrate.",
+  "marks": 2
+}]`}</pre>
+                <div style={{ fontSize:11.5, color:TOKENS.s500, marginTop:8, lineHeight:1.6 }}>
+                  <strong>subtopic</strong> must match a syllabus-spine lesson name exactly — that is what links the question to the lesson, the quiz game and auto-homework.
+                </div>
+              </div>
+              <textarea value={importTxt} onChange={e=>setImportTxt(e.target.value)} rows={14}
+                placeholder='[ { "subject": "Biology", ... } ]'
+                style={{ width:'100%', padding:'12px 14px', borderRadius:8, border:`1.5px solid ${TOKENS.s100}`, fontSize:12.5, fontFamily:'ui-monospace,monospace', boxSizing:'border-box', resize:'vertical', color:TOKENS.ink }}/>
+              <div style={{ display:'flex', gap:12, justifyContent:'flex-end', marginTop:14 }}>
+                <button onClick={()=>setImportOpen(false)} style={{ padding:'10px 20px', borderRadius:8, border:`1px solid ${TOKENS.s100}`, background:'transparent', color:TOKENS.s700, fontWeight:600, cursor:'pointer' }}>Cancel</button>
+                <button onClick={runImport} disabled={importing||!importTxt.trim()} style={{ padding:'10px 24px', borderRadius:8, background:importing||!importTxt.trim()?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', fontWeight:700, cursor:importing?'not-allowed':'pointer' }}>
+                  {importing ? 'Importing...' : 'Import questions'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {bulkOpen && <BulkImportModal onClose={()=>setBulkOpen(false)} onDone={()=>{ setBulkOpen(false); load(1) }} toast={toast}/>}
+
       {/* Question Editor Modal */}
       {modal && editQ && (
         <QuestionEditorModal
@@ -9902,6 +10040,202 @@ function QuestionBankModule({ toast }) {
           curricula={CURRICULA}
         />
       )}
+    </div>
+  )
+}
+
+function BulkImportModal({ onClose, onDone, toast, subjects, curricula }) {
+  const [defs, setDefs] = useState({ subject:'Biology', curriculum:'EdexcelIGCSE', grade:'Year 10', topic:'', subtopic:'', difficulty:'medium' })
+  const [text, setText] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [spine, setSpine] = useState([])
+
+  useEffect(() => {
+    if (!defs.subject) return
+    api.get('/questions/spine', { params:{ subject:defs.subject, curriculum:defs.curriculum } })
+      .then(r=>setSpine(r.data?.data?.topics||[])).catch(()=>setSpine([]))
+  }, [defs.subject, defs.curriculum])
+
+  const chosen = spine.find(t=>t.topic===defs.topic)
+  const lineCount = text.split(/\r?\n/).filter(l=>l.trim()).length
+
+  const submit = async () => {
+    if (!text.trim()) { toast?.error?.('Paste some questions first.'); return }
+    setBusy(true)
+    try {
+      const r = await api.post('/questions/bulk', { text, defaults: defs })
+      const d = r.data?.data
+      toast?.ok?.(r.data?.message || 'Imported.')
+      if (d?.errors?.length) console.warn('[bulk import] errors:', d.errors)
+      if (d?.inserted > 0) onDone()
+    } catch(e) { toast?.error?.(e?.response?.data?.message || 'Import failed.') }
+    setBusy(false)
+  }
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.6)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}
+      onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div style={{ background:'#fff', borderRadius:16, maxWidth:820, width:'100%', maxHeight:'92vh', overflow:'auto' }}>
+        <div style={{ background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`, padding:'20px 28px', color:'#fff' }}>
+          <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'rgba(255,255,255,.55)' }}>Question Bank</div>
+          <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:23, marginTop:2 }}>Bulk import questions</div>
+        </div>
+        <div style={{ padding:'22px 28px' }}>
+
+          <div style={{ background:'#FBFAF5', border:`1px solid ${TOKENS.s100}`, borderRadius:10, padding:'14px 16px', marginBottom:18 }}>
+            <div style={{ fontSize:12, fontWeight:800, color:TOKENS.ink, marginBottom:6 }}>Format — one question per line, fields separated by <code style={{ background:'#fff', padding:'1px 5px', borderRadius:4 }}>|</code> or a tab</div>
+            <div style={{ fontSize:12, color:TOKENS.s600, fontFamily:'monospace', lineHeight:1.7, whiteSpace:'pre-wrap' }}>
+{`Question text | Option A | Option B | Option C | Option D | Correct | Explanation | Marks | Difficulty`}
+            </div>
+            <div style={{ fontSize:12, color:TOKENS.s500, marginTop:8, lineHeight:1.6 }}>
+              <strong>Correct</strong> can be the letter (A/B/C/D) or the full option text. Marks and Difficulty are optional.
+              Spreadsheet users: copy straight from Excel/Sheets — tabs are handled.
+            </div>
+            <div style={{ fontSize:11.5, color:TOKENS.s500, marginTop:8, fontFamily:'monospace', background:'#fff', padding:'8px 10px', borderRadius:6, border:`1px solid ${TOKENS.s100}` }}>
+              Which organelle is the site of aerobic respiration? | Mitochondria | Ribosome | Nucleus | Chloroplast | A | Mitochondria carry out aerobic respiration, producing ATP. | 1 | easy
+            </div>
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))', gap:12, marginBottom:16 }}>
+            <div className="fg"><label className="fl">Subject</label>
+              <select className="fsel" value={defs.subject} onChange={e=>setDefs(d=>({...d,subject:e.target.value,topic:'',subtopic:''}))}>
+                {subjects.map(s=><option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="fg"><label className="fl">Curriculum</label>
+              <select className="fsel" value={defs.curriculum} onChange={e=>setDefs(d=>({...d,curriculum:e.target.value,topic:'',subtopic:''}))}>
+                {curricula.map(x=><option key={x} value={x}>{x}</option>)}
+              </select>
+            </div>
+            <div className="fg"><label className="fl">Grade / Year</label>
+              <input className="fi" value={defs.grade} onChange={e=>setDefs(d=>({...d,grade:e.target.value}))}/>
+            </div>
+            <div className="fg"><label className="fl">Default difficulty</label>
+              <select className="fsel" value={defs.difficulty} onChange={e=>setDefs(d=>({...d,difficulty:e.target.value}))}>
+                <option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:16 }}>
+            <div className="fg"><label className="fl">Topic {spine.length>0?'(from spine)':''}</label>
+              {spine.length>0 ? (
+                <select className="fsel" value={defs.topic} onChange={e=>setDefs(d=>({...d,topic:e.target.value,subtopic:''}))}>
+                  <option value="">— all / none —</option>
+                  {spine.map(t=><option key={t._id} value={t.topic}>{t.code?t.code+' · ':''}{t.topic}</option>)}
+                </select>
+              ) : <input className="fi" value={defs.topic} onChange={e=>setDefs(d=>({...d,topic:e.target.value}))} placeholder="Topic"/>}
+            </div>
+            <div className="fg"><label className="fl">Lesson / subtopic</label>
+              {chosen && (chosen.subtopics||[]).length>0 ? (
+                <select className="fsel" value={defs.subtopic} onChange={e=>setDefs(d=>({...d,subtopic:e.target.value}))}>
+                  <option value="">— whole topic —</option>
+                  {chosen.subtopics.map((s,i)=><option key={i} value={s.name}>{s.code?s.code+' · ':''}{s.name}</option>)}
+                </select>
+              ) : <input className="fi" value={defs.subtopic} onChange={e=>setDefs(d=>({...d,subtopic:e.target.value}))} placeholder="Subtopic (lesson)"/>}
+            </div>
+          </div>
+
+          <div className="fg"><label className="fl">Questions ({lineCount} line{lineCount===1?'':'s'})</label>
+            <textarea className="fi" rows={12} value={text} onChange={e=>setText(e.target.value)}
+              style={{ fontFamily:'monospace', fontSize:12.5, lineHeight:1.6 }}
+              placeholder="Paste your questions here, one per line..."/>
+          </div>
+
+          <div style={{ display:'flex', gap:12, justifyContent:'flex-end', paddingTop:10 }}>
+            <button onClick={onClose} style={{ padding:'10px 20px', borderRadius:8, border:`1px solid ${TOKENS.s100}`, background:'transparent', color:TOKENS.s700, fontWeight:600, cursor:'pointer' }}>Cancel</button>
+            <button onClick={submit} disabled={busy||!lineCount} style={{ padding:'10px 24px', borderRadius:8, background:busy||!lineCount?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', fontWeight:700, cursor:busy||!lineCount?'not-allowed':'pointer' }}>
+              {busy?'Importing...':`Import ${lineCount} question${lineCount===1?'':'s'}`}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BulkImportModal({ onClose, onDone, toast }) {
+  const [text, setText]   = useState('')
+  const [busy, setBusy]   = useState(false)
+  const [result, setResult] = useState(null)
+
+  const TEMPLATE = JSON.stringify([{
+    subject: 'Biology',
+    curriculum: 'EdexcelIGCSE',
+    grade: 'Year 10',
+    topic: 'Unit 1 · Characteristics & Classification',
+    subtopic: 'The 7 Characteristics of Living Organisms (MRS GREN)',
+    lessonCode: '001',
+    difficulty: 'easy',
+    questionText: 'Which characteristic of living organisms describes the removal of metabolic waste?',
+    options: ['Excretion','Egestion','Respiration','Nutrition'],
+    correctAnswer: 'Excretion',
+    explanation: 'Excretion removes toxic waste made by metabolism. Egestion removes undigested food, which was never part of a cell.',
+    marks: 1,
+  }], null, 2)
+
+  const run = async () => {
+    let parsed
+    try {
+      parsed = JSON.parse(text)
+      if (!Array.isArray(parsed)) parsed = parsed.questions
+      if (!Array.isArray(parsed)) throw new Error('Expected an array of questions')
+    } catch(e) { toast?.error?.('Invalid JSON: '+e.message); return }
+    setBusy(true)
+    try {
+      const r = await api.post('/questions/bulk', { questions: parsed })
+      setResult(r.data?.data)
+      toast?.ok?.(r.data?.message||'Imported.')
+      if ((r.data?.data?.inserted||0) > 0 && !(r.data?.data?.failed)) setTimeout(onDone, 1200)
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Import failed.') }
+    setBusy(false)
+  }
+
+  return (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.6)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}
+      onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div style={{ background:'#fff', borderRadius:16, maxWidth:760, width:'100%', maxHeight:'90vh', overflow:'auto' }}>
+        <div style={{ background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`, padding:'20px 28px', color:'#fff' }}>
+          <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:22 }}>Bulk Import Questions</div>
+          <div style={{ fontSize:12.5, color:'rgba(255,255,255,.7)', marginTop:3 }}>Paste a JSON array. Up to 2000 at a time. Duplicates are skipped automatically.</div>
+        </div>
+        <div style={{ padding:'22px 28px' }}>
+          <div style={{ background:TOKENS.goldPale, border:`1px solid ${TOKENS.gold}55`, borderRadius:8, padding:'12px 16px', marginBottom:16, fontSize:12.5, color:TOKENS.s700, lineHeight:1.7 }}>
+            <strong>subtopic</strong> must match a lesson name on the syllabus spine exactly — that is what binds a question to its lesson, so auto-homework and the quiz game can find it.
+            <button onClick={()=>setText(TEMPLATE)} style={{ display:'block', marginTop:8, background:'transparent', border:'none', color:TOKENS.crimson, fontWeight:700, fontSize:12.5, cursor:'pointer', padding:0, textDecoration:'underline' }}>
+              Insert example
+            </button>
+          </div>
+          <textarea value={text} onChange={e=>setText(e.target.value)} rows={14} spellCheck={false}
+            placeholder='[ { "subject": "Biology", "subtopic": "...", "questionText": "...", "options": ["A","B","C","D"], "correctAnswer": "A" } ]'
+            style={{ width:'100%', padding:'12px 14px', borderRadius:8, border:`1.5px solid ${TOKENS.line}`, fontSize:12.5, fontFamily:'ui-monospace,Menlo,Consolas,monospace', boxSizing:'border-box', resize:'vertical', color:TOKENS.ink, lineHeight:1.6 }}/>
+
+          {result && (
+            <div style={{ marginTop:14, borderRadius:8, overflow:'hidden', border:`1px solid ${TOKENS.line}` }}>
+              <div style={{ display:'flex', background:'#FBFAF5' }}>
+                {[['Imported',result.inserted,TOKENS.accentEmerald],['Duplicates',result.skipped,TOKENS.s500],['Failed',result.failed,result.failed?TOKENS.crimson:TOKENS.s500]].map(([l,v,col])=>(
+                  <div key={l} style={{ flex:1, padding:'12px', textAlign:'center', borderRight:`1px solid ${TOKENS.line}` }}>
+                    <div style={{ fontSize:20, fontWeight:900, color:col }}>{v}</div>
+                    <div style={{ fontSize:10.5, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.06em' }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              {(result.errors||[]).length>0 && (
+                <div style={{ padding:'12px 16px', background:'#FEF2F2', fontSize:12, color:'#991B1B', lineHeight:1.8, maxHeight:160, overflow:'auto' }}>
+                  {result.errors.map((er,i)=><div key={i}>• {er}</div>)}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div style={{ display:'flex', gap:12, justifyContent:'flex-end', marginTop:18 }}>
+            <button onClick={onClose} style={{ padding:'10px 20px', borderRadius:8, border:`1px solid ${TOKENS.s100}`, background:'transparent', color:TOKENS.s700, fontWeight:600, cursor:'pointer' }}>Close</button>
+            <button onClick={run} disabled={busy||!text.trim()} style={{ padding:'10px 24px', borderRadius:8, background:busy||!text.trim()?TOKENS.s300:TOKENS.crimson, color:'#fff', border:'none', fontWeight:700, cursor:busy||!text.trim()?'not-allowed':'pointer' }}>
+              {busy?'Importing...':'Import Questions'}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
