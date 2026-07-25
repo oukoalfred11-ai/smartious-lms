@@ -146,7 +146,7 @@ const questionSchema = new mongoose.Schema({
   contentHash: {
     type: String,
     default: null,
-    index: true,
+    // Index declared once at the foot of this file with unique+sparse.
   },
   lessonCode: {
     type: String,
