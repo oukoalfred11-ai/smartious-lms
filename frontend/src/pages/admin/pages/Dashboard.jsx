@@ -9789,6 +9789,8 @@ function QuestionBankModule({ toast }) {
   const [seeding,   setSeeding]   = useState(false)
   const [bulkOpen,  setBulkOpen]  = useState(false)
   const [importOpen,setImportOpen]= useState(false)
+  const [diag,      setDiag]      = useState(null)
+  const [diagBusy,  setDiagBusy]  = useState(false)
   const [importTxt, setImportTxt] = useState('')
   const [importing, setImporting] = useState(false)
   const [cov,       setCov]       = useState(null)
@@ -9832,6 +9834,33 @@ function QuestionBankModule({ toast }) {
       const r = await api.get('/questions/coverage', { params: covSubj })
       setCov(r.data?.data||null)
     } catch(e) { toast?.error?.('Could not load coverage.') }
+  }
+
+  const runDiagnose = async () => {
+    setDiagBusy(true)
+    try {
+      const r = await api.get('/questions/selftest')
+      setDiag(r.data?.data || null)
+      toast?.ok?.(r.data?.message || 'Diagnosis complete.')
+    } catch(e) {
+      toast?.error?.(e?.response?.data?.message || 'Diagnose failed — is the backend deployed?')
+      setDiag({ checks:[{ name:'Endpoint reachable', pass:false, detail:'GET /api/questions/selftest failed — the updated question-bank.js route is not deployed.' }], classes:[] })
+    }
+    setDiagBusy(false)
+  }
+
+  const runSweep = async () => {
+    setDiagBusy(true)
+    try {
+      const r = await api.post('/questions/run-auto-homework', { force:true })
+      const d = r.data?.data || {}
+      toast?.ok?.(r.data?.message || 'Sweep complete.')
+      if (d.skipped?.length) console.warn('[auto-homework skipped]', d.skipped)
+      await runDiagnose()
+    } catch(e) {
+      toast?.error?.(e?.response?.data?.message || 'Sweep failed.')
+    }
+    setDiagBusy(false)
   }
 
   const runImport = async () => {
@@ -9892,6 +9921,10 @@ function QuestionBankModule({ toast }) {
             style={{ background:'#fff', color:'#9A7B16', border:'1.5px dashed '+TOKENS.gold, padding:'10px 18px', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer' }}>
             Bulk import
           </button>
+          <button onClick={runDiagnose} disabled={diagBusy}
+            style={{ background:'#fff', color:'#1E40AF', border:'1.5px dashed #3B82F6', padding:'10px 18px', borderRadius:8, fontWeight:700, fontSize:13, cursor:diagBusy?'wait':'pointer' }}>
+            {diagBusy?'Checking...':'Diagnose auto-homework'}
+          </button>
           <button onClick={()=>setImportOpen(true)}
             style={{ background:'#fff', color:TOKENS.crimson, border:`1.5px dashed ${TOKENS.crimson}`, padding:'10px 18px', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer' }}>
             Bulk import (JSON)
@@ -9902,6 +9935,55 @@ function QuestionBankModule({ toast }) {
           </button>
         </div>
       </PCard>
+
+      {diag && (
+        <PCard style={{ marginBottom:16 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:14 }}>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:11, fontWeight:800, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.08em' }}>Auto-homework diagnosis</div>
+              <div style={{ fontSize:12.5, color:TOKENS.s500, marginTop:2 }}>Every precondition, checked in order. Red is what to fix.</div>
+            </div>
+            <button onClick={runSweep} disabled={diagBusy} style={{ background:TOKENS.accentEmerald, color:'#fff', border:'none', padding:'8px 16px', borderRadius:7, fontWeight:700, fontSize:12.5, cursor:diagBusy?'wait':'pointer' }}>
+              {diagBusy?'Running...':'Force run now'}
+            </button>
+            <button onClick={()=>setDiag(null)} style={{ background:'transparent', border:'none', color:TOKENS.s400, fontSize:20, cursor:'pointer', lineHeight:1 }}>×</button>
+          </div>
+
+          {(diag.checks||[]).map((ck,i)=>(
+            <div key={i} style={{ display:'flex', gap:10, alignItems:'flex-start', padding:'8px 0', borderTop:i?`1px solid ${TOKENS.s100}`:'none' }}>
+              <div style={{ width:20, height:20, borderRadius:'50%', flexShrink:0, marginTop:1, display:'flex', alignItems:'center', justifyContent:'center',
+                background: ck.pass?TOKENS.accentEmerald:'#DC2626', color:'#fff', fontSize:12, fontWeight:800 }}>{ck.pass?'✓':'!'}</div>
+              <div>
+                <div style={{ fontSize:13, fontWeight:700, color:ck.pass?TOKENS.ink:'#991B1B' }}>{ck.name}</div>
+                <div style={{ fontSize:12, color:TOKENS.s500, marginTop:1 }}>{ck.detail}</div>
+              </div>
+            </div>
+          ))}
+
+          {(diag.classes||[]).length>0 && (
+            <div style={{ marginTop:16, borderTop:`1.5px solid ${TOKENS.line}`, paddingTop:14 }}>
+              <div style={{ fontSize:11, fontWeight:800, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:10 }}>Recent live classes</div>
+              {diag.classes.map(cl=>(
+                <div key={cl._id} style={{ border:`1px solid ${cl.result==='OK'?TOKENS.accentEmerald+'55':'#FCA5A5'}`, background:cl.result==='OK'?'#F0FDF4':'#FEF2F2', borderRadius:8, padding:'11px 14px', marginBottom:8 }}>
+                  <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
+                    <span style={{ fontSize:13, fontWeight:800, color:TOKENS.ink }}>{cl.title}</span>
+                    <span style={{ fontSize:10.5, fontWeight:700, padding:'2px 7px', borderRadius:99, background:TOKENS.s100, color:TOKENS.s700 }}>{cl.status}</span>
+                    <span style={{ fontSize:11.5, color:TOKENS.s500 }}>{cl.subject} · {cl.curriculum}</span>
+                  </div>
+                  <div style={{ display:'flex', gap:16, marginTop:7, flexWrap:'wrap', fontSize:11.5, color:TOKENS.s600 }}>
+                    <span><strong>{cl.students}</strong> students</span>
+                    <span><strong>{cl.questionsForSubject}</strong> qns for subject</span>
+                    <span><strong>{cl.questionsForLesson===null?'—':cl.questionsForLesson}</strong> qns for lesson</span>
+                    <span><strong>{cl.homeworkCreated}</strong> homework created</span>
+                  </div>
+                  <div style={{ fontSize:11.5, color:TOKENS.s500, marginTop:5 }}>Lesson: {cl.lesson}</div>
+                  {cl.blocker && <div style={{ fontSize:12, fontWeight:700, color:'#991B1B', marginTop:6 }}>⚠ {cl.blocker}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </PCard>
+      )}
 
       {/* Filters */}
       <PCard style={{ marginBottom:16 }}>
