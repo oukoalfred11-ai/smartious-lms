@@ -10274,6 +10274,8 @@ function QuestionEditorModal({ q, onClose, onSave, subjects, curricula }) {
   const updOpt = (i,v) => { const o=[...form.options]; o[i]=v; setForm(f=>({...f,options:o})) }
   const updMS  = (k,v) => setForm(f=>({...f, markScheme:{...f.markScheme,[k]:v}}))
 
+  const [uploading, setUploading] = useState(false)
+  const [upErr,     setUpErr]     = useState('')
   const isMCQ = form.type === 'mcq'
   const pts   = form.markScheme.points || []
   const schemeTotal = pts.reduce((s,p)=>s+(Number(p.marks)||0),0)
@@ -10434,14 +10436,57 @@ function QuestionEditorModal({ q, onClose, onSave, subjects, curricula }) {
               </div>
 
               {form.type==='drawing' && (
-                <div className="fr2">
-                  <div className="fg"><label className="fl">Image URL the student must read or label</label>
-                    <input className="fi" value={form.imageUrl||''} onChange={e=>upd('imageUrl',e.target.value)} placeholder="https://..."/>
+                <>
+                  <div style={{ background:'#EEF2FF', border:'1px solid #C7D2FE', borderRadius:8, padding:'11px 15px', fontSize:12.5, color:'#3730A3', lineHeight:1.7 }}>
+                    <strong>No image needed</strong> if the student does the drawing. Only add one when the student must read a diagram you supply.
                   </div>
-                  <div className="fg"><label className="fl">Image caption</label>
-                    <input className="fi" value={form.imageCaption||''} onChange={e=>upd('imageCaption',e.target.value)} placeholder="Fig 1: cross-section of a leaf"/>
+                  <div className="fg"><label className="fl">Upload an image</label>
+                    <div style={{ display:'flex', gap:10, alignItems:'center', flexWrap:'wrap' }}>
+                      <input type="file" accept="image/*" onChange={async e=>{
+                        const f = e.target.files?.[0]; if(!f) return
+                        setUploading(true); setUpErr('')
+                        try {
+                          const fd = new FormData(); fd.append('file', f)
+                          const r = await api.post('/questions/upload', fd, { headers:{ 'Content-Type':'multipart/form-data' } })
+                          const url = r.data?.attachment?.url
+                          if (url) upd('imageUrl', url)
+                          else setUpErr('Upload succeeded but returned no URL.')
+                        } catch(err) {
+                          setUpErr(err?.response?.data?.message || 'Upload failed. Use the manual path below instead.')
+                        }
+                        setUploading(false)
+                      }} style={{ fontSize:12.5 }}/>
+                      {uploading && <span style={{ fontSize:12, color:TOKENS.s500 }}>Uploading...</span>}
+                    </div>
+                    {upErr && (
+                      <div style={{ marginTop:8, fontSize:12, color:'#991B1B', background:'#FEF2F2', border:'1px solid #FCA5A5', borderRadius:6, padding:'8px 11px', lineHeight:1.6 }}>
+                        {upErr}
+                        <br/>Fallback: commit the file to <code>frontend/public/question-images/</code> and type <code>/question-images/name.png</code> below.
+                      </div>
+                    )}
                   </div>
-                </div>
+                  <div className="fr2">
+                    <div className="fg"><label className="fl">Image path or URL</label>
+                      <input className="fi" value={form.imageUrl||''} onChange={e=>upd('imageUrl',e.target.value)} placeholder="/question-images/leaf-cross-section.png"/>
+                    </div>
+                    <div className="fg"><label className="fl">Caption</label>
+                      <input className="fi" value={form.imageCaption||''} onChange={e=>upd('imageCaption',e.target.value)} placeholder="Fig 1: cross-section through a leaf"/>
+                    </div>
+                  </div>
+                  {form.imageUrl && (
+                    <div className="fg"><label className="fl">Preview — if this is blank the path is wrong</label>
+                      <div style={{ border:`1.5px dashed ${TOKENS.line}`, borderRadius:8, padding:12, textAlign:'center', background:'#FBFAF5', minHeight:80 }}>
+                        <img src={form.imageUrl} alt="" style={{ maxWidth:'100%', maxHeight:220, borderRadius:4 }}
+                          onError={e=>{ e.currentTarget.style.display='none'; const n=e.currentTarget.nextSibling; if(n) n.style.display='block' }}
+                          onLoad={e=>{ e.currentTarget.style.display='block'; const n=e.currentTarget.nextSibling; if(n) n.style.display='none' }}/>
+                        <div style={{ display:'none', fontSize:12.5, color:'#991B1B', fontWeight:700, padding:'20px 0' }}>
+                          Image not found at this path — check the file is committed and the name matches exactly, including capitals.
+                        </div>
+                        {form.imageCaption && <div style={{ fontSize:11.5, color:TOKENS.s500, marginTop:8, fontStyle:'italic' }}>{form.imageCaption}</div>}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
