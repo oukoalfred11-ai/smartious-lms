@@ -436,6 +436,69 @@ router.get('/coverage', auth, async (req, res) => {
   } catch(e) { return fail(res, 500, e.message) }
 })
 
+// ── POST /api/questions/run-auto-homework ───────────
+// Manually fire the auto-homework sweep and return a diagnostic
+// report. Use this to test without waiting for the 60s tick.
+router.post('/run-auto-homework', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
+  try {
+    const { processEndedClasses } = require('../services/autoHomeworkCron')
+    const report = await processEndedClasses()
+    const msg = report.generated
+      ? `Generated ${report.generated} homework sets from ${report.checked} class(es); ${report.emailed} emailed.`
+      : `Checked ${report.checked} class(es); nothing generated.`
+    return ok(res, report, msg)
+  } catch(e) { return fail(res, 500, e.message) }
+})
+
+// ── GET /api/questions/homework-debug ───────────────
+// Explains, per recent live class, exactly why homework was or
+// was not generated — the fastest way to diagnose a silent no-op.
+router.get('/homework-debug', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
+  try {
+    const LiveClass = require('../models/LiveClass')
+    const Homework  = require('../models/Homework')
+    const since = new Date(Date.now() - 7*24*3600*1000)
+    const classes = await LiveClass.find({ scheduledAt: { $gte: since } })
+      .sort({ scheduledAt: -1 }).limit(25).lean()
+
+    const rows = []
+    for (const lc of classes) {
+      const endsAt = new Date(new Date(lc.scheduledAt).getTime() + (lc.durationMins||60)*60000)
+      const qFilter = { isActive:{ $ne:false }, type:'mcq' }
+      if (lc.subject)    qFilter.subject    = new RegExp('^'+String(lc.subject).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$','i')
+      if (lc.curriculum) qFilter.curriculum = lc.curriculum
+      const subjectPool = await Question.countDocuments(qFilter)
+      const lessonPool  = lc.syllabusSubtopicName
+        ? await Question.countDocuments({ ...qFilter, subtopic: new RegExp('^'+String(lc.syllabusSubtopicName).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$','i') })
+        : null
+      const hwCount = await Homework.countDocuments({ sourceLiveClass: lc._id })
+
+      let verdict
+      if (hwCount) verdict = `OK — ${hwCount} homework set(s) created`
+      else if (endsAt > new Date()) verdict = 'Waiting — class has not ended yet'
+      else if (!lc.assignedStudents?.length) verdict = 'BLOCKED — no students assigned to this class'
+      else if (!subjectPool) verdict = `BLOCKED — no questions for subject "${lc.subject}" + curriculum "${lc.curriculum}"`
+      else if (lc.autoHomeworkEnabled === false) verdict = 'BLOCKED — autoHomeworkEnabled is false'
+      else if (lc.autoHomeworkGeneratedAt) verdict = `Already processed: ${lc.autoHomeworkNote||''}`
+      else verdict = 'Pending — should generate on next sweep'
+
+      rows.push({
+        title: lc.title, subject: lc.subject, curriculum: lc.curriculum,
+        lesson: lc.syllabusSubtopicName || null,
+        scheduledAt: lc.scheduledAt, endsAt,
+        students: lc.assignedStudents?.length || 0,
+        questionsForSubject: subjectPool,
+        questionsForLesson: lessonPool,
+        homeworkCreated: hwCount,
+        generatedAt: lc.autoHomeworkGeneratedAt || null,
+        note: lc.autoHomeworkNote || '',
+        verdict,
+      })
+    }
+    return ok(res, { classes: rows, emailConfigured: !!(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) })
+  } catch(e) { return fail(res, 500, e.message) }
+})
+
 // ── POST /api/questions/seed ────────────────────────
 router.post('/seed', auth, requireRole('admin','ops_manager'), async (req, res) => {
   try {
