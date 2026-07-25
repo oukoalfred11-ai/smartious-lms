@@ -396,6 +396,7 @@ const NAV_SECTIONS = [
     { id:'dashboard',    label:'Dashboard',       icon:'dashboard',    svg:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>' },
     { id:'curriculum',   label:'My Curriculum',   icon:'curriculum',   svg:'<path d="M4 19V6a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v13"/><path d="M4 19a2 2 0 0 0 2 2h14"/><path d="M8 10h8M8 14h6"/>' },
     { id:'lessons',      label:'Lesson Player',   icon:'lessons',      svg:'<polygon points="5 3 19 12 5 21 5 3"/>' },
+    { id:'quiz',         label:'Quiz Game',       icon:'quiz',         svg:'<path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
     { id:'homework',     label:'Homework',        icon:'homework',     svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>' },
     { id:'exams',        label:'Exams',           icon:'exams',        svg:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',  badge:'1' },
     { id:'results',      label:'My Results',      icon:'results',      svg:'<circle cx="12" cy="8" r="6"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>' },
@@ -2120,6 +2121,7 @@ export default function StudentPortal() {
               LESSONS — player with adaptive flashcards
           ════════════════════════════════════════════ */}
           {page === 'lessons' && <LessonPlayerTab user={user} toast={toast} />}
+        {page === 'quiz' && <QuizGameLauncher user={user} toast={toast} setPage={setPage}/>}
 
           {/* ════════════════════════════════════════════
               ADAPTIVE PRACTICE — live questions from API
@@ -2195,7 +2197,7 @@ export default function StudentPortal() {
           {/* ════════════════════════════════════════════
               ACHIEVEMENTS — live badges + XP
           ════════════════════════════════════════════ */}
-          {page === 'achievements' && <AchievementsTab user={user} />}
+          {page === 'achievements' && <AchievementTab user={user}/>}
 
           {/* ════════════════════════════════════════════
               PROFILE & SUBSCRIPTION
