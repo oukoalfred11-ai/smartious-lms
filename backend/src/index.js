@@ -94,7 +94,6 @@ app.use('/api/weekly-reports', require('./routes/weekly-reports'));
 app.use('/api/seed-subjects',  require('./routes/seed-subjects'));
 app.use('/api/questions',      require('./routes/question-bank'));
 app.use('/api/quiz',           require('./routes/quiz'));
-app.use('/api/spine-seed',     require('./routes/spine-seed'));
 app.use('/api/checkin',    require('./routes/checkin'));
 
 // ── Health check ──────────────────────────────────────────
