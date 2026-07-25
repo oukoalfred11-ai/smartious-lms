@@ -199,6 +199,29 @@ router.get('/preview-paper', auth, requireRole('admin','ops_manager','dos','teac
   } catch(e) { return fail(res, 500, e.message) }
 })
 
+// ── PATCH /api/questions/:id/image ──────────────────
+// Attach artwork to a question that was imported awaiting one.
+// Registered here (mounted before routes/questions.js) and distinct
+// from /:id, so it does not collide with the CRUD routes there.
+router.patch('/:id/image', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
+  try {
+    const { imageUrl, imageCaption } = req.body || {}
+    if (!imageUrl) return fail(res, 400, 'imageUrl is required.')
+    const q = await Question.findByIdAndUpdate(
+      req.params.id,
+      { $set: {
+          imageUrl,
+          imageCaption: imageCaption || '',
+          imageNeeded: false,       // artwork supplied — clears the queue flag
+          isActive: true,           // safe to publish now
+      }},
+      { new: true }
+    ).select('subtopic lessonCode imageUrl imageCaption imageNeeded').lean()
+    if (!q) return fail(res, 404, 'Question not found.')
+    return ok(res, { question: q }, 'Artwork attached. This question can now be set as homework.')
+  } catch(e) { return fail(res, 500, e.message) }
+})
+
 // ── GET /api/questions/upload-status ────────────────
 // Reports whether image upload is actually working: the npm package,
 // the credentials, and the existing /api/questions/upload endpoint.
@@ -228,9 +251,7 @@ router.get('/upload-status', auth, requireRole('admin','ops_manager','dos','teac
 router.get('/awaiting-images', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
   try {
     const qs = await Question.find({
-      type: 'drawing',
-      isActive: { $ne: false },
-      $or: [ { imageNeeded: true }, { imageUrl: { $in: ['', null] }, requiresDrawing: false } ],
+      imageNeeded: true,
     }).select('subject subtopic lessonCode questionText imageDescription imageCaption marks').lean()
     return ok(res, { count: qs.length, questions: qs },
       qs.length ? `${qs.length} question(s) need artwork before they can be used.`
@@ -529,6 +550,8 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
           imageUrl:        q.imageUrl || '',
           imageCaption:    q.imageCaption || '',
           imageNeeded:      !!q.imageNeeded,
+          // Held back from homework until a diagram is attached.
+          isActive:         q.imageNeeded ? false : true,
           imageDescription: q.imageDescription || '',
           requiresDrawing: type === 'drawing' || !!q.requiresDrawing,
           subject:      q.subject,
