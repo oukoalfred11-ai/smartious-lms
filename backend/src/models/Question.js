@@ -78,7 +78,15 @@ const questionSchema = new mongoose.Schema({
   // ── Categorization ───────────────────────────────
   curriculum: {
     type: String,
-    enum: ['IGCSE', 'Edexcel', 'Cambridge', 'IB', 'BNC', 'American', 'Canadian'],
+    enum: [
+      // Canonical curriculum IDs
+      'CambridgePrimary','CambridgeLowerSec','CambridgeIGCSE','CambridgeALevel',
+      'EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel',
+      'AQALowerSec','AQAGCSE','AQAALevel',
+      'IB','KenyaCBC','BNC','American','Canadian',
+      // Legacy values — keep for existing questions
+      'IGCSE','Edexcel','Cambridge',
+    ],
     required: true,
     index: true,
   },
