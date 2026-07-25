@@ -35,7 +35,10 @@ router.get('/', auth, async (req, res) => {
       .skip((parseInt(page)-1)*parseInt(limit))
       .limit(parseInt(limit))
       .lean()
-    return ok(res, { questions, total, page:parseInt(page), pages: Math.ceil(total/parseInt(limit)) })
+    const payload = { questions, total, page: parseInt(page), pages: Math.ceil(total/parseInt(limit)) }
+    // Dual shape: nested for the Question Bank UI, top-level for
+    // older callers that expect routes/questions.js's format.
+    return res.json({ success: true, ...payload, limit: parseInt(limit), data: payload })
   } catch(e) { return fail(res,500,e.message) }
 })
 
@@ -379,30 +382,8 @@ router.post('/seed', auth, requireRole('admin','ops_manager'), async (req, res) 
   } catch(e) { return fail(res,500,e.message) }
 })
 
-// ── POST /api/questions ─────────────────────────────
-router.post('/', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
-  try {
-    const q = await Question.create({ ...req.body, createdBy: req.body.createdBy || req.user._id })
-    return ok(res, { question:q }, 'Question created.')
-  } catch(e) { return fail(res,500,e.message) }
-})
 
-// ── PATCH /api/questions/:id ────────────────────────
-router.patch('/:id', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
-  try {
-    const q = await Question.findByIdAndUpdate(req.params.id, req.body, { new:true })
-    if (!q) return fail(res,404,'Not found.')
-    return ok(res, { question:q }, 'Question updated.')
-  } catch(e) { return fail(res,500,e.message) }
-})
 
-// ── DELETE /api/questions/:id ───────────────────────
-router.delete('/:id', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
-  try {
-    await Question.findByIdAndDelete(req.params.id)
-    return ok(res, {}, 'Question deleted.')
-  } catch(e) { return fail(res,500,e.message) }
-})
 
 module.exports = router
 
