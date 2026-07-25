@@ -116,6 +116,33 @@ const questionSchema = new mongoose.Schema({
   // existing free-text `topic` field above is retained.
   // sha1 of (subject + questionText) — unique-sparse indexed so
   // duplicate detection stays O(1) at any collection size.
+  // ── Mark scheme for typed / drawn answers ────────────
+  // MCQs auto-mark against correctAnswer. Everything else needs a
+  // mark scheme so it can be marked by a teacher, or assessed
+  // automatically, without the marker having to know the subject.
+  markScheme: {
+    // Full-credit model answer, shown to the marker and the student
+    // after release.
+    modelAnswer: { type: String, default: '' },
+    // Each point a student can earn credit for.
+    points: [{
+      text:     { type: String, default: '' },   // what earns the mark
+      marks:    { type: Number, default: 1 },
+      keywords: [{ type: String }],              // any one of these = credit
+    }],
+    // Accepted alternative wordings for short answers, lower-cased.
+    acceptableAnswers: [{ type: String }],
+    // Common wrong answers worth flagging back to the student.
+    commonErrors: [{ type: String }],
+  },
+
+  // ── Media ────────────────────────────────────────────
+  // A diagram the student must read, label or interpret.
+  imageUrl:     { type: String, default: '' },
+  imageCaption: { type: String, default: '' },
+  // Set when the student must upload or draw their own answer.
+  requiresDrawing: { type: Boolean, default: false },
+
   contentHash: {
     type: String,
     default: null,
@@ -151,7 +178,7 @@ const questionSchema = new mongoose.Schema({
   // and top-level `marks` auto-recomputes to the sum of leaf marks.
   type: {
     type: String,
-    enum: ['mcq', 'short', 'long', 'drawing', 'handwriting', 'upload', 'nested'],
+    enum: ['mcq', 'short', 'long', 'essay', 'drawing', 'handwriting', 'upload', 'nested'],
     required: true,
     default: 'mcq',
   },
