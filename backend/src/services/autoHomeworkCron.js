@@ -91,11 +91,35 @@ function snapshot(q) {
   }
 }
 
+// ── Auto-end: flip lapsed classes to 'ended' ────────
+// A class no longer needs the teacher to close it manually.
+async function autoEndLapsedClasses() {
+  const now = new Date()
+  const open = await LiveClass.find({
+    status: { $in: ['scheduled', 'live'] },
+    scheduledAt: { $gte: new Date(now.getTime() - LOOKBACK_HOURS * 3600 * 1000) },
+  }).select('_id title scheduledAt durationMins status').lean()
+
+  let ended = 0
+  for (const lc of open) {
+    const endsAt = new Date(new Date(lc.scheduledAt).getTime() + (lc.durationMins || 60) * 60000)
+    if (endsAt <= now) {
+      await LiveClass.updateOne({ _id: lc._id }, { $set: { status: 'ended', endedAt: endsAt } })
+      ended++
+      console.log(`[autoEnd] "${lc.title}" auto-ended (was ${lc.status}, due to end ${endsAt.toISOString()})`)
+    }
+  }
+  return ended
+}
+
 // ── Main worker ─────────────────────────────────────
 async function processEndedClasses(opts = {}) {
   const { classId = null, force = false } = opts
   const now = new Date()
-  const report = { checked: 0, generated: 0, emailed: 0, skipped: [] }
+  const report = { autoEnded: 0, checked: 0, generated: 0, emailed: 0, skipped: [] }
+
+  try { report.autoEnded = await autoEndLapsedClasses() }
+  catch (e) { console.error('[autoEnd]', e.message) }
 
   // Classes whose scheduled end time has passed and that haven't
   // had homework generated yet. Look back 6h so a brief outage
@@ -126,6 +150,7 @@ async function processEndedClasses(opts = {}) {
   }
 
   report.checked = list.length
+  console.log(`[autoHomework] sweep: ${report.autoEnded} auto-ended, ${list.length} class(es) to consider`)
 
   for (const lc of list) {
     const endsAt = new Date(new Date(lc.scheduledAt).getTime() + (lc.durationMins || 60) * 60000)
@@ -190,6 +215,7 @@ async function processEndedClasses(opts = {}) {
         autoHomeworkNote: `${made} homework sets from a pool of ${pool.length} questions; ${mailed} emailed.`,
       }})
       report.generated += made
+      if (!mailed) console.warn(`[autoHomework] ${lc.title}: ${made} sets created but 0 emails sent — check EMAIL_USER / EMAIL_PASSWORD on Render`)
       report.emailed   += mailed
       console.log(`[autoHomework] ${lc.title}: ${made} sets (pool ${pool.length}), ${mailed} emails`)
     } catch (e) {
@@ -274,7 +300,14 @@ function startAutoHomeworkCron() {
     .catch(e => console.error('[autoHomework cron]', e.message))
   setTimeout(tick, 20 * 1000)          // first run shortly after boot
   setInterval(tick, 60 * 1000)         // then every minute
-  console.log('[autoHomework] scheduler started — checks every 60s')
+  const mail = !!(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD)
+  console.log('[autoHomework] ===================================')
+  console.log('[autoHomework] scheduler STARTED — every 60s')
+  console.log('[autoHomework] auto-end lapsed classes: ON')
+  console.log('[autoHomework] questions per homework : ' + QUESTIONS_PER_HOMEWORK)
+  console.log('[autoHomework] lookback window        : ' + LOOKBACK_HOURS + 'h')
+  console.log('[autoHomework] email configured       : ' + (mail ? 'YES' : 'NO — emails will NOT send'))
+  console.log('[autoHomework] ===================================')
 }
 
 // index.js calls: require('./services/autoHomeworkCron').start()
@@ -282,6 +315,7 @@ module.exports = {
   start: startAutoHomeworkCron,
   startAutoHomeworkCron,
   processEndedClasses,
+  autoEndLapsedClasses,
   pickForStudent,
   poolForClass,
 }
