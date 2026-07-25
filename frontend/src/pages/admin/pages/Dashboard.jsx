@@ -552,7 +552,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication'] },
       { label: 'Reports',     items: ['reports'] },
       { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
-      { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum', 'questionbank'] },
+      { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum'] },
       { label: 'System',      items: ['billing', 'website', 'settings', 'ai'] },
     ],
     accountant: [
@@ -562,14 +562,15 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'System',      items: ['settings'] },
     ],
     dos: [
-      { label: 'Overview',    items: ['checkin', 'dosanalytics'] },
-      { label: 'Exams',       items: ['exams'] },
-      { label: 'Homework',    items: ['doshomework'] },
-      { label: 'Attendance',  items: ['dosattend'] },
-      { label: 'Breaks',      items: ['dosbreaks'] },
-      { label: 'Timetables',  items: ['dostimetable'] },
-      { label: 'Reports',     items: ['reports'] },
-      { label: 'System',      items: ['settings'] },
+      { label: 'Overview',      items: ['checkin', 'dosanalytics'] },
+      { label: 'Exams',         items: ['exams'] },
+      { label: 'Homework',      items: ['doshomework'] },
+      { label: 'Attendance',    items: ['dosattend'] },
+      { label: 'Breaks',        items: ['dosbreaks'] },
+      { label: 'Timetables',    items: ['dostimetable'] },
+      { label: 'Question Bank', items: ['questionbank'] },
+      { label: 'Reports',       items: ['reports'] },
+      { label: 'System',        items: ['settings'] },
     ],
     sales: [
       { label: 'Overview',    items: ['checkin', 'dashboard', 'salesperf'] },
@@ -585,6 +586,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Performance', items: ['teacherratings'] },
       { label: 'Operations',  items: ['crm', 'frontdesk', 'assessment', 'documents', 'leave', 'programmes'] },
       { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum'] },
+      { label: 'Question Bank', items: ['questionbank'] },
       { label: 'System',      items: ['settings', 'ai'] },
     ],
   }
@@ -842,13 +844,12 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
   const role = auth?.user?.role || 'admin'
   const ROLE_SECTIONS_MAIN = {
     admin:       [
-      { items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','billing','website','settings','ai'] },
+      { items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','questionbank','cooreports','teacherratings','feecollection','crm','billing','website','settings','ai'] },
     ],
     accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','payroll','settings'] }],
     sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
-    dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','dosbreaks','dostimetable','reports','settings'] }],
-    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','communication','reports','crm','frontdesk','assessment','documents','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
-    ops_manager: [{ items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','assessment','documents','payroll','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
+    dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','dosbreaks','dostimetable','questionbank','reports','settings'] }],
+    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','communication','cooreports','reports','teacherratings','questionbank','crm','frontdesk','assessment','documents','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
@@ -9905,6 +9906,13 @@ function QuestionBankModule({ toast }) {
 
 function QuestionEditorModal({ q, onClose, onSave, subjects, curricula }) {
   const [form, setForm] = useState({ ...q })
+  const [spineTopics, setSpineTopics] = useState([])
+  useEffect(() => {
+    if (!form.subject) { setSpineTopics([]); return }
+    api.get('/questions/spine', { params:{ subject:form.subject, curriculum:form.curriculum||'' } })
+      .then(r=>setSpineTopics(r.data?.data?.topics||[]))
+      .catch(()=>setSpineTopics([]))
+  }, [form.subject, form.curriculum])
   const upd = (k,v) => setForm(f=>({...f,[k]:v}))
   const updOpt = (i,v) => { const o=[...form.options]; o[i]=v; setForm(f=>({...f,options:o})) }
 
@@ -9922,8 +9930,21 @@ function QuestionEditorModal({ q, onClose, onSave, subjects, curricula }) {
                 {subjects.map(s=><option key={s} value={s}>{s}</option>)}
               </select>
             </div>
-            <div className="fg"><label className="fl">Topic</label>
-              <input className="fi" value={form.topic||''} onChange={e=>upd('topic',e.target.value)} placeholder="e.g. Algebra, Forces"/>
+            <div className="fg"><label className="fl">Topic {spineTopics.length>0?'(from syllabus spine)':''}</label>
+              {spineTopics.length > 0 ? (
+                <select className="fsel" value={form.topic||''} onChange={e=>{
+                  const t = spineTopics.find(x=>x.topic===e.target.value)
+                  upd('topic', e.target.value)
+                  if (t) upd('topicRef', t._id)
+                }}>
+                  <option value="">— pick a topic —</option>
+                  {spineTopics.map(t=><option key={t._id} value={t.topic}>{t.code?t.code+'. ':''}{t.topic} ({t.questionCount||0} qns)</option>)}
+                  <option value="__custom">Other (type below)</option>
+                </select>
+              ) : (
+                <input className="fi" value={form.topic||''} onChange={e=>upd('topic',e.target.value)} placeholder="e.g. Algebra, Forces"/>
+              )}
+              {form.topic==='__custom'&&<input className="fi" style={{marginTop:6}} onChange={e=>upd('topic',e.target.value)} placeholder="Custom topic name"/>}
             </div>
           </div>
           <div className="fr2">
@@ -9935,6 +9956,22 @@ function QuestionEditorModal({ q, onClose, onSave, subjects, curricula }) {
             </div>
             <div className="fg"><label className="fl">Grade / Year</label>
               <input className="fi" value={form.grade||''} onChange={e=>upd('grade',e.target.value)} placeholder="e.g. Year 10, Grade 8"/>
+            </div>
+          </div>
+          <div className="fr2">
+            <div className="fg"><label className="fl">Sub-topic (optional)</label>
+              {(() => {
+                const selTopic = spineTopics.find(t=>t.topic===form.topic)
+                const subs = selTopic?.subtopics||[]
+                return subs.length > 0 ? (
+                  <select className="fsel" value={form.subtopic||''} onChange={e=>upd('subtopic',e.target.value)}>
+                    <option value="">— any —</option>
+                    {subs.map(s=><option key={s._id||s.name} value={s.name}>{s.code?s.code+' ':''}{s.name}</option>)}
+                  </select>
+                ) : (
+                  <input className="fi" value={form.subtopic||''} onChange={e=>upd('subtopic',e.target.value)} placeholder="e.g. HCF and LCM"/>
+                )
+              })()}
             </div>
           </div>
           <div className="fr2">
