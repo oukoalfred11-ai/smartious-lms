@@ -158,6 +158,7 @@ async function processEndedClasses(opts = {}) {
     if (!finished) { report.skipped.push({ title: lc.title, why: 'not finished yet, ends ' + endsAt.toISOString() }); continue }
     if (!lc.assignedStudents?.length) {
       report.skipped.push({ title: lc.title, why: 'no students assigned' })
+      console.log(`[autoHomework] ${lc.title}: no students assigned — skipped`)
       await LiveClass.updateOne({ _id: lc._id },
         { $set: { autoHomeworkGeneratedAt: now, autoHomeworkNote: 'No students assigned.' } })
       continue
@@ -166,6 +167,32 @@ async function processEndedClasses(opts = {}) {
     if (lc.autoHomeworkGeneratedAt && !force && !classId) {
       report.skipped.push({ title: lc.title, why: 'already processed at ' + lc.autoHomeworkGeneratedAt })
       continue
+    }
+
+    // Belt-and-braces: if homework already exists for this class, skip.
+    // This works even if LiveClass.autoHomeworkGeneratedAt was never
+    // persisted (e.g. the updated model was not deployed and Mongoose
+    // strict mode silently dropped the $set).
+    if (!force && !classId) {
+      const already = await Homework.countDocuments({ sourceLiveClass: lc._id })
+      if (already > 0) {
+        report.skipped.push({ title: lc.title, why: `${already} homework already exists for this class` })
+        continue
+      }
+      // Fallback when sourceLiveClass is not in the deployed schema:
+      // match on the exact auto-generated title + this class's students.
+      const lessonKeyProbe = lc.syllabusSubtopicName || lc.syllabusTopicName || lc.subject
+      const dupe = await Homework.countDocuments({
+        title: `${lc.subject}: ${lessonKeyProbe}`,
+        assignedStudents: { $in: lc.assignedStudents },
+        createdAt: { $gte: new Date(Date.now() - 14 * 24 * 3600 * 1000) },
+      })
+      if (dupe > 0) {
+        report.skipped.push({ title: lc.title, why: `${dupe} matching homework already issued in the last 14 days` })
+        await LiveClass.updateOne({ _id: lc._id },
+          { $set: { autoHomeworkGeneratedAt: now, autoHomeworkNote: 'Duplicate guard: homework already existed.' } })
+        continue
+      }
     }
 
     try {
@@ -214,6 +241,15 @@ async function processEndedClasses(opts = {}) {
         autoHomeworkGeneratedAt: now,
         autoHomeworkNote: `${made} homework sets from a pool of ${pool.length} questions; ${mailed} emailed.`,
       }})
+
+      // Read back — if the field did not persist, the updated LiveClass
+      // model is not deployed and this class would regenerate every 60s.
+      const check = await LiveClass.findById(lc._id).select('autoHomeworkGeneratedAt').lean()
+      if (!check?.autoHomeworkGeneratedAt) {
+        console.error('[autoHomework] *** CRITICAL: autoHomeworkGeneratedAt did NOT persist for "' +
+          lc.title + '". Deploy backend/src/models/LiveClass.js or homework will be regenerated every minute. ***')
+        report.skipped.push({ title: lc.title, why: 'STAMP FAILED — deploy the updated LiveClass.js model' })
+      }
       report.generated += made
       if (!mailed) console.warn(`[autoHomework] ${lc.title}: ${made} sets created but 0 emails sent — check EMAIL_USER / EMAIL_PASSWORD on Render`)
       report.emailed   += mailed
