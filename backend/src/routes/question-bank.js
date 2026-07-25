@@ -199,6 +199,47 @@ router.get('/preview-paper', auth, requireRole('admin','ops_manager','dos','teac
   } catch(e) { return fail(res, 500, e.message) }
 })
 
+// ── GET /api/questions/ai-marking/status ────────────
+// Shows whether AI marking is armed. Safe to call at any time.
+router.get('/ai-marking/status', auth, requireRole('admin','ops_manager','dos'), (req, res) => {
+  try {
+    const ai = require('../services/aiMarking')
+    return ok(res, ai.status())
+  } catch(e) {
+    return ok(res, { enabled:false, ready:false, note:'Service not deployed: '+e.message })
+  }
+})
+
+// ── POST /api/questions/ai-marking/test ─────────────
+// Dry-run one answer to check the setup before switching on for real.
+// Body: { questionId, answer }
+router.post('/ai-marking/test', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
+  try {
+    const ai = require('../services/aiMarking')
+    if (!ai.isEnabled()) return fail(res, 400, ai.status().note)
+    const { questionId, answer } = req.body || {}
+    if (!questionId) return fail(res, 400, 'questionId is required.')
+    const r = await ai.markAnswer(questionId, answer || '')
+    return r.ok
+      ? ok(res, r, `Suggested ${r.suggestion.marksAwarded}/${r.suggestion.outOf} (confidence: ${r.suggestion.confidence}).`)
+      : fail(res, 400, r.reason)
+  } catch(e) { return fail(res, 500, e.message) }
+})
+
+// ── POST /api/questions/ai-marking/submission ───────
+// Mark a whole submission. Returns SUGGESTIONS only — a teacher still
+// accepts or overrides each one before any mark reaches a student.
+router.post('/ai-marking/submission', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
+  try {
+    const ai = require('../services/aiMarking')
+    if (!ai.isEnabled()) return fail(res, 400, ai.status().note)
+    const answers = Array.isArray(req.body?.answers) ? req.body.answers : []
+    if (!answers.length) return fail(res, 400, 'Send { answers: [{ questionId, answer }] }.')
+    const r = await ai.markSubmission(answers)
+    return ok(res, r, `Marked ${r.marked} answer(s), ${r.lowConfidence} flagged low-confidence for review.`)
+  } catch(e) { return fail(res, 500, e.message) }
+})
+
 // ── GET /api/questions/selftest ─────────────────────
 // One call that checks EVERY precondition for auto-homework and
 // says exactly which one is failing. No guessing.
