@@ -199,6 +199,45 @@ router.get('/preview-paper', auth, requireRole('admin','ops_manager','dos','teac
   } catch(e) { return fail(res, 500, e.message) }
 })
 
+// ── GET /api/questions/upload-status ────────────────
+// Reports whether image upload is actually working: the npm package,
+// the credentials, and the existing /api/questions/upload endpoint.
+router.get('/upload-status', auth, requireRole('admin','ops_manager','dos','teacher'), (req, res) => {
+  const out = { module:false, configured:false, ready:false, cloudName:null, notes:[] }
+  try {
+    const cl = require('cloudinary').v2
+    out.module = true
+    const cfg = cl.config()
+    out.cloudName  = cfg.cloud_name || null
+    out.configured = !!(cfg.cloud_name && cfg.api_key && cfg.api_secret)
+    if (!out.configured) out.notes.push('Package installed but CLOUDINARY_CLOUD_NAME / API_KEY / API_SECRET are not all set.')
+  } catch (e) {
+    out.notes.push('npm package missing: ' + e.message + ' — add "cloudinary" and "multer-storage-cloudinary" to backend/package.json.')
+  }
+  try { require('multer-storage-cloudinary'); } catch (e) { out.notes.push('multer-storage-cloudinary missing: ' + e.message) }
+  out.ready = out.module && out.configured
+  out.endpoint = 'POST /api/questions/upload (field name: file)'
+  if (out.ready) out.notes.push('Upload is live. Images can be attached directly from the question editor.')
+  else out.notes.push('Fallback: commit files to frontend/public/question-images/ and reference /question-images/name.png')
+  return ok(res, out, out.ready ? 'Image upload is ready.' : 'Image upload is NOT ready — see notes.')
+})
+
+// ── GET /api/questions/awaiting-images ──────────────
+// Diagram questions that reference an image which has not been
+// supplied yet. These should not be set as homework until fixed.
+router.get('/awaiting-images', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
+  try {
+    const qs = await Question.find({
+      type: 'drawing',
+      isActive: { $ne: false },
+      $or: [ { imageNeeded: true }, { imageUrl: { $in: ['', null] }, requiresDrawing: false } ],
+    }).select('subject subtopic lessonCode questionText imageDescription imageCaption marks').lean()
+    return ok(res, { count: qs.length, questions: qs },
+      qs.length ? `${qs.length} question(s) need artwork before they can be used.`
+                : 'No questions are waiting on images.')
+  } catch(e) { return fail(res, 500, e.message) }
+})
+
 // ── GET /api/questions/ai-marking/status ────────────
 // Shows whether AI marking is armed. Safe to call at any time.
 router.get('/ai-marking/status', auth, requireRole('admin','ops_manager','dos'), (req, res) => {
@@ -489,6 +528,8 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
           },
           imageUrl:        q.imageUrl || '',
           imageCaption:    q.imageCaption || '',
+          imageNeeded:      !!q.imageNeeded,
+          imageDescription: q.imageDescription || '',
           requiresDrawing: type === 'drawing' || !!q.requiresDrawing,
           subject:      q.subject,
           topic:        q.topic || '',
