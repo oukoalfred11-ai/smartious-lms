@@ -22,6 +22,7 @@ const User      = require('../models/User')
 
 const QUESTIONS_PER_HOMEWORK = 15
 const DUE_AFTER_HOURS        = 48
+const REVIEW_QUESTIONS       = 3   // max harder questions from earlier lessons
 const LOOKBACK_HOURS         = 72
 
 function getTransporter() {
@@ -54,25 +55,105 @@ function pickForStudent(pool, studentId, lessonKey, n) {
 
 // ── Build the question pool for a live class ────────
 // Narrowest-first, widening until we have enough.
-async function poolForClass(lc) {
-  const base = { isActive: { $ne: false }, type: 'mcq' }
+// ── Build a student's question set ──────────────────
+// Uses $sample so MongoDB draws the random subset server-side.
+// Never loads the whole pool into memory: safe at millions of rows.
+//
+//   - CURRENT lesson : (n - review) questions, any difficulty
+//   - PRIOR lessons  : up to REVIEW_QUESTIONS harder questions,
+//                      for spaced retrieval practice
+//
+// Because each student is sampled independently, two students in the
+// same class get different papers without needing a large local pool.
+const PROJECTION = {
+  questionText:1, options:1, correctAnswer:1, explanation:1,
+  marks:1, difficulty:1, topic:1, subtopic:1, type:1,
+}
+
+async function sample(match, size) {
+  if (size <= 0) return []
+  return Question.aggregate([
+    { $match: match },
+    { $sample: { size } },
+    { $project: PROJECTION },
+  ]).allowDiskUse(false)
+}
+
+// Lesson names that come BEFORE this class's lesson on the spine.
+async function priorLessonNames(lc) {
+  if (!lc.syllabusSubtopicName) return []
+  try {
+    const Subject       = require('../models/Subject')
+    const SyllabusTopic = require('../models/SyllabusTopic')
+    const subj = await Subject.findOne({
+      subjectName: new RegExp('^' + escapeRe(lc.subject) + '$', 'i'),
+      curriculum:  lc.curriculum,
+    }).select('_id').lean()
+    if (!subj) return []
+
+    const topics = await SyllabusTopic.find({ subjectId: subj._id })
+      .sort({ topicOrder: 1 }).select('subtopics.name subtopics.subOrder').lean()
+
+    const ordered = []
+    topics.forEach(t => (t.subtopics || []).forEach(st => ordered.push(st.name)))
+    const idx = ordered.findIndex(n =>
+      String(n).toLowerCase() === String(lc.syllabusSubtopicName).toLowerCase())
+    return idx > 0 ? ordered.slice(0, idx) : []
+  } catch (e) {
+    console.error('[autoHomework priorLessons]', e.message)
+    return []
+  }
+}
+
+async function buildPaper(lc, priorNames, total) {
+  const base = { isActive: { $ne: false } }
   if (lc.subject)    base.subject    = new RegExp('^' + escapeRe(lc.subject) + '$', 'i')
   if (lc.curriculum) base.curriculum = lc.curriculum
 
+  // ── Review questions from earlier lessons (harder only) ──
+  let review = []
+  if (priorNames.length) {
+    review = await sample({
+      ...base,
+      subtopic:   { $in: priorNames.map(n => new RegExp('^' + escapeRe(n) + '$', 'i')) },
+      difficulty: { $in: ['medium', 'hard'] },
+    }, REVIEW_QUESTIONS)
+  }
+  review.forEach(q => { q.isReview = true })
+
+  // ── Current lesson, narrowest filter that yields enough ──
+  const want = total - review.length
   const tiers = []
-  if (lc.syllabusSubtopicName) tiers.push({ ...base, subtopic: new RegExp('^' + escapeRe(lc.syllabusSubtopicName) + '$', 'i') })
-  if (lc.syllabusTopicName)    tiers.push({ ...base, topic:    new RegExp('^' + escapeRe(lc.syllabusTopicName) + '$', 'i') })
-  if (lc.grade)                tiers.push({ ...base, grade: lc.grade })
+  if (lc.syllabusSubtopicName)
+    tiers.push({ ...base, subtopic: new RegExp('^' + escapeRe(lc.syllabusSubtopicName) + '$', 'i') })
+  if (lc.syllabusTopicName)
+    tiers.push({ ...base, topic: new RegExp('^' + escapeRe(lc.syllabusTopicName) + '$', 'i') })
+  if (lc.grade) tiers.push({ ...base, grade: lc.grade })
   tiers.push(base)
 
-  for (const filter of tiers) {
-    const found = await Question.find(filter)
-      .select('_id type questionText options correctAnswer explanation marks difficulty topic subtopic')
-      .lean()
-    if (found.length >= QUESTIONS_PER_HOMEWORK) return { pool: found, filter }
-    if (found.length > 0 && filter === tiers[tiers.length - 1]) return { pool: found, filter }
+  let main = []
+  for (const t of tiers) {
+    main = await sample(t, want)
+    if (main.length >= want) break
   }
-  return { pool: [], filter: null }
+
+  // Drop any review question that also came up in the main set
+  const seen = new Set(main.map(q => String(q._id)))
+  review = review.filter(q => !seen.has(String(q._id)))
+
+  return { paper: [...main, ...review], mainCount: main.length, reviewCount: review.length }
+}
+
+// Kept for the diagnostics endpoint: how big is the addressable pool?
+async function poolForClass(lc) {
+  const base = { isActive: { $ne: false } }
+  if (lc.subject)    base.subject    = new RegExp('^' + escapeRe(lc.subject) + '$', 'i')
+  if (lc.curriculum) base.curriculum = lc.curriculum
+  const filter = lc.syllabusSubtopicName
+    ? { ...base, subtopic: new RegExp('^' + escapeRe(lc.syllabusSubtopicName) + '$', 'i') }
+    : base
+  const n = await Question.countDocuments(filter)
+  return { pool: new Array(n > 0 ? n : 0), filter, count: n }
 }
 
 function escapeRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
@@ -81,6 +162,9 @@ function snapshot(q) {
   return {
     questionId:    q._id,
     type:          q.type || 'mcq',
+    // Non-MCQ answers cannot be auto-marked — the teacher grades these.
+    _needsManualGrading: (q.type && q.type !== 'mcq') || false,
+    _isReview:     !!q.isReview,
     questionText:  q.questionText,
     options:       q.options || [],
     correctAnswer: q.correctAnswer,
@@ -207,17 +291,25 @@ async function processEndedClasses(opts = {}) {
         continue
       }
 
-      const lessonKey = lc.syllabusSubtopicName || lc.syllabusTopicName || lc.subject
-      const dueAt     = new Date(now.getTime() + DUE_AFTER_HOURS * 3600 * 1000)
-      let made = 0, mailed = 0
+      const lessonKey  = lc.syllabusSubtopicName || lc.syllabusTopicName || lc.subject
+      const dueAt      = new Date(now.getTime() + DUE_AFTER_HOURS * 3600 * 1000)
+      const priorNames = await priorLessonNames(lc)
+      let made = 0, mailed = 0, reviewTotal = 0
 
       for (const studentId of lc.assignedStudents) {
-        const picked = pickForStudent(pool, studentId, lessonKey, QUESTIONS_PER_HOMEWORK)
-        const qs     = picked.map(snapshot)
+        // Sampled per student, server-side — two students in the same
+        // class receive different papers without a large local pool.
+        const { paper, reviewCount } = await buildPaper(lc, priorNames, QUESTIONS_PER_HOMEWORK)
+        if (!paper.length) continue
+        reviewTotal += reviewCount
+        const qs = paper.map(snapshot)
 
         const hw = await Homework.create({
           title:       `${lc.subject}: ${lessonKey}`,
-          description: `Auto-assigned after your live class "${lc.title}". ${qs.length} questions. Due in ${DUE_AFTER_HOURS} hours.`,
+          description: `Auto-assigned after your live class "${lc.title}". `
+            + `${qs.length} questions`
+            + (reviewCount ? ` (${qs.length - reviewCount} on this lesson, ${reviewCount} review from earlier lessons)` : '')
+            + `. Due in ${DUE_AFTER_HOURS} hours. Your teacher will mark and release your score.`,
           curriculum:  lc.curriculum,
           subject:     lc.subject,
           grade:       lc.grade,
@@ -232,6 +324,7 @@ async function processEndedClasses(opts = {}) {
           isActive:    true,
           sourceLiveClass: lc._id,
           isAutoGenerated: true,
+          requiresTeacherGrading: true,
         })
         made++
         if (await notifyStudent(studentId, hw, lc, lessonKey)) mailed++
@@ -253,7 +346,7 @@ async function processEndedClasses(opts = {}) {
       report.generated += made
       if (!mailed) console.warn(`[autoHomework] ${lc.title}: ${made} sets created but 0 emails sent — check EMAIL_USER / EMAIL_PASSWORD on Render`)
       report.emailed   += mailed
-      console.log(`[autoHomework] ${lc.title}: ${made} sets (pool ${pool.length}), ${mailed} emails`)
+      console.log(`[autoHomework] ${lc.title}: ${made} sets (${reviewTotal} review qns total, addressable pool ${pool.length}), ${mailed} emails`)
     } catch (e) {
       report.skipped.push({ title: lc.title, why: 'error: ' + e.message })
       console.error('[autoHomework]', lc.title, e.message)
@@ -413,4 +506,6 @@ module.exports = {
   autoEndLapsedClasses,
   pickForStudent,
   poolForClass,
+  buildPaper,
+  priorLessonNames,
 }
