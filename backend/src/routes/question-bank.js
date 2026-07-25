@@ -109,7 +109,7 @@ router.get('/spine', auth, async (req, res) => {
 // ── POST /api/questions ─────────────────────────────
 router.post('/', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
   try {
-    const q = await Question.create(req.body)
+    const q = await Question.create({ ...req.body, createdBy: req.body.createdBy || req.user._id })
     return ok(res, { question:q }, 'Question created.')
   } catch(e) { return fail(res,500,e.message) }
 })
@@ -140,7 +140,7 @@ router.post('/seed', auth, requireRole('admin','ops_manager'), async (req, res) 
       try {
         const exists = await Question.findOne({ questionText: q.questionText, subject: q.subject })
         if (exists) { skipped++; continue }
-        await Question.create({ ...q, type:'mcq', isActive:true })
+        await Question.create({ ...q, type:'mcq', isActive:true, createdBy:req.user._id })
         inserted++
       } catch(err) {
         errors.push(`${q.subject}/${(q.questionText||'').slice(0,40)}: ${err.message}`)
