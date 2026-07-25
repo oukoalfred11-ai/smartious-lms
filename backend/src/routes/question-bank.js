@@ -436,6 +436,91 @@ router.get('/coverage', auth, async (req, res) => {
   } catch(e) { return fail(res, 500, e.message) }
 })
 
+// ── GET /api/questions/selftest ─────────────────────
+// One call that checks EVERY precondition for auto-homework and
+// says exactly which one is failing. No guessing.
+router.get('/selftest', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
+  const checks = []
+  const add = (name, pass, detail) => checks.push({ name, pass, detail })
+
+  try {
+    // 1. Does the service module load at all?
+    let svc = null
+    try {
+      svc = require('../services/autoHomeworkCron')
+      add('Service module loads', true, 'backend/src/services/autoHomeworkCron.js found')
+      add('Exports start()', typeof svc.start === 'function', typeof svc.start)
+    } catch (e) {
+      add('Service module loads', false, 'REQUIRE FAILED: ' + e.message + ' — file missing or a dependency is not installed')
+    }
+
+    // 2. Email config
+    const mail = !!(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD)
+    add('Email configured', mail, mail ? 'EMAIL_USER + EMAIL_PASSWORD present' : 'MISSING — homework will generate but no email will send')
+
+    // 3. Model fields deployed?
+    const LiveClass = require('../models/LiveClass')
+    const Homework  = require('../models/Homework')
+    const lcPaths = Object.keys(LiveClass.schema.paths)
+    const hwPaths = Object.keys(Homework.schema.paths)
+    add('LiveClass.autoHomeworkGeneratedAt', lcPaths.includes('autoHomeworkGeneratedAt'),
+        lcPaths.includes('autoHomeworkGeneratedAt') ? 'present' : 'MISSING — deploy the updated LiveClass.js model')
+    add('Homework.sourceLiveClass', hwPaths.includes('sourceLiveClass'),
+        hwPaths.includes('sourceLiveClass') ? 'present' : 'MISSING — deploy the updated Homework.js model')
+
+    // 4. Questions in the bank
+    const totalQ = await Question.countDocuments({ isActive: { $ne: false }, type: 'mcq' })
+    add('MCQ questions exist', totalQ > 0, totalQ + ' active MCQ question(s) in the bank')
+
+    // 5. Recent classes and whether each can produce homework
+    const since = new Date(Date.now() - 7*24*3600*1000)
+    const classes = await LiveClass.find({ scheduledAt: { $gte: since } })
+      .sort({ scheduledAt: -1 }).limit(10).lean()
+    add('Recent live classes', classes.length > 0, classes.length + ' class(es) in the last 7 days')
+
+    const perClass = []
+    for (const lc of classes) {
+      const esc = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const f = { isActive:{ $ne:false }, type:'mcq' }
+      if (lc.subject)    f.subject    = new RegExp('^'+esc(lc.subject)+'$','i')
+      if (lc.curriculum) f.curriculum = lc.curriculum
+      const subjectPool = await Question.countDocuments(f)
+      const lessonPool  = lc.syllabusSubtopicName
+        ? await Question.countDocuments({ ...f, subtopic: new RegExp('^'+esc(lc.syllabusSubtopicName)+'$','i') })
+        : null
+      const hw = await Homework.countDocuments({ sourceLiveClass: lc._id })
+      const endsAt = new Date(new Date(lc.scheduledAt).getTime() + (lc.durationMins||60)*60000)
+
+      let blocker = null
+      if (hw > 0) blocker = null
+      else if (!lc.assignedStudents?.length) blocker = 'No students assigned to this class'
+      else if (!subjectPool) blocker = `No questions match subject "${lc.subject}" + curriculum "${lc.curriculum}"`
+      else if (lc.autoHomeworkGeneratedAt) blocker = `Already stamped as processed (${lc.autoHomeworkNote||'no note'}) — re-run with force:true`
+      else if (lc.status !== 'ended' && endsAt > new Date()) blocker = 'Class has not ended yet'
+      else blocker = 'Should generate on next sweep — check Render logs for [autoHomework]'
+
+      perClass.push({
+        _id: String(lc._id), title: lc.title, status: lc.status,
+        subject: lc.subject, curriculum: lc.curriculum,
+        lesson: lc.syllabusSubtopicName || '(none set)',
+        students: lc.assignedStudents?.length || 0,
+        questionsForSubject: subjectPool,
+        questionsForLesson: lessonPool,
+        homeworkCreated: hw,
+        result: hw > 0 ? 'OK' : 'BLOCKED',
+        blocker,
+      })
+    }
+
+    const failed = checks.filter(c => !c.pass)
+    return ok(res, { checks, classes: perClass },
+      failed.length ? `${failed.length} check(s) FAILED: ` + failed.map(f=>f.name).join(', ')
+                    : 'All system checks passed — see per-class blockers below.')
+  } catch(e) {
+    return fail(res, 500, e.message)
+  }
+})
+
 // ── POST /api/questions/run-auto-homework ───────────
 // Manually fire the auto-homework sweep and return a diagnostic
 // report. Use this to test without waiting for the 60s tick.
