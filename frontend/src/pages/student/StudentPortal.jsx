@@ -23,6 +23,8 @@ import {
   sumLeafMarks,
 } from '../../components/exam/NestedQuestion.jsx'
 import LessonPlayerTab from './LessonPlayerTab.jsx'
+import QuizGame from './QuizGame.jsx'
+import AchievementTab from './AchievementTab.jsx'
 import SubjectProgressCard from '../../components/SubjectProgressCard.jsx'
 import LibraryViewer from '../../components/LibraryViewer.jsx'
 
@@ -13029,6 +13031,97 @@ function StudentCheckInTab({ user, toast }) {
 // shows display picture and basic info, NO contact details
 // (students must use the Communication module to reach teachers).
 // ═══════════════════════════════════════════════════════════
+
+
+function QuizGameLauncher({ user, toast, setPage }) {
+  const [active, setActive] = useState(false)
+  const [config, setConfig] = useState({ subject:'Mathematics', curriculum:'', topic:'', grade:'' })
+  const [subjects, setSubjects] = useState([])
+
+  useEffect(() => {
+    // Get student's enrolled subjects
+    const s = user?.subjects || []
+    setSubjects(s.length > 0 ? s : ['Mathematics','Physics','Chemistry','Biology','English Language','History','Geography','Economics','Business Studies','Computer Science'])
+    if (s.length > 0) setConfig(c=>({...c, subject:s[0], curriculum:user?.curriculum||''}))
+  }, [user])
+
+  if (active) return (
+    <div style={{ position:'fixed', inset:0, zIndex:9999 }}>
+      <QuizGame
+        subject={config.subject}
+        curriculum={config.curriculum}
+        topic={config.topic}
+        grade={config.grade||user?.gradeLevel}
+        user={user}
+        onClose={()=>setActive(false)}
+      />
+    </div>
+  )
+
+  return (
+    <div>
+      <div style={{ marginBottom:20 }}>
+        <div className="sec-tag">Student Game</div>
+        <h2 className="serif" style={{ fontSize:26, color:TOKENS.ink, margin:'4px 0 6px' }}>
+          Quiz <em style={{ fontStyle:'italic', color:TOKENS.crimson }}>Challenge</em>
+        </h2>
+        <div style={{ fontSize:13, color:TOKENS.s500 }}>Test your knowledge, earn XP, and compete with classmates!</div>
+      </div>
+
+      {/* Subject selector cards */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))', gap:14, marginBottom:24 }}>
+        {subjects.map(sub => {
+          const icons = { Mathematics:'📐', Physics:'⚡', Chemistry:'🧪', Biology:'🌿', 'English Language':'📖', 'English Literature':'📚', History:'🏛️', Geography:'🌍', Economics:'💹', 'Business Studies':'💼', 'Computer Science':'💻' }
+          const selected = config.subject === sub
+          return (
+            <button key={sub} onClick={()=>setConfig(c=>({...c,subject:sub}))} style={{
+              padding:'18px 12px', borderRadius:14, border:`2px solid ${selected?TOKENS.crimson:TOKENS.s100}`,
+              background:selected?'#FDE7EC':'#fff', cursor:'pointer', textAlign:'center',
+              transition:'all .15s',
+            }}>
+              <div style={{ fontSize:32, marginBottom:8 }}>{icons[sub]||'📝'}</div>
+              <div style={{ fontSize:13, fontWeight:700, color:selected?TOKENS.crimson:TOKENS.ink, lineHeight:1.3 }}>{sub}</div>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Quick start */}
+      <div style={{ background:'#fff', borderRadius:16, border:`1px solid ${TOKENS.s100}`, padding:'24px 28px', marginBottom:20 }}>
+        <div style={{ fontSize:13, fontWeight:800, color:TOKENS.ink, marginBottom:16, textTransform:'uppercase', letterSpacing:'.06em' }}>Quick Start — {config.subject}</div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:20 }}>
+          {[['easy','🟢 Easy','Warm up'],['medium','🟡 Medium','Challenge'],['hard','🔴 Hard','Expert']].map(([d,l,sub])=>(
+            <button key={d} onClick={()=>setActive(true)||setConfig(c=>({...c}))} style={{ padding:'16px 10px', borderRadius:12, border:`1.5px solid ${TOKENS.s100}`, background:'#fff', cursor:'pointer', textAlign:'center' }}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor=TOKENS.crimson}} onMouseLeave={e=>{e.currentTarget.style.borderColor=TOKENS.s100}}>
+              <div style={{ fontSize:22, marginBottom:4 }}>{l.split(' ')[0]}</div>
+              <div style={{ fontSize:13, fontWeight:700, color:TOKENS.ink }}>{l.split(' ')[1]}</div>
+              <div style={{ fontSize:11, color:TOKENS.s400 }}>{sub}</div>
+            </button>
+          ))}
+        </div>
+        <button onClick={()=>setActive(true)} style={{
+          width:'100%', padding:'16px', borderRadius:12,
+          background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`,
+          color:'#fff', border:'none', fontSize:16, fontWeight:800, cursor:'pointer',
+          letterSpacing:'.02em',
+        }}>
+          🚀 Start {config.subject} Quiz
+        </button>
+      </div>
+
+      {/* Achievement teaser */}
+      <div style={{ background:`linear-gradient(135deg,${TOKENS.accentAmber}15,${TOKENS.goldPale})`, borderRadius:14, border:`1.5px solid ${TOKENS.gold}40`, padding:'16px 20px', display:'flex', alignItems:'center', gap:16, cursor:'pointer' }}
+        onClick={()=>setPage('achievements')}>
+        <div style={{ fontSize:40 }}>🏆</div>
+        <div>
+          <div style={{ fontSize:14, fontWeight:800, color:TOKENS.ink }}>View Your Achievements</div>
+          <div style={{ fontSize:12, color:TOKENS.s500 }}>See XP, badges, and the class leaderboard</div>
+        </div>
+        <div style={{ marginLeft:'auto', color:TOKENS.gold, fontWeight:800, fontSize:20 }}>→</div>
+      </div>
+    </div>
+  )
+}
 
 function StudentRateTeacherTab({ user, toast }) {
   const [entries,  setEntries]  = useState([])
