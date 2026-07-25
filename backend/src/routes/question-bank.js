@@ -119,6 +119,44 @@ router.get('/coverage', auth, async (req, res) => {
   } catch(e) { return fail(res, 500, e.message) }
 })
 
+// ── GET /api/questions/preview-paper ────────────────
+// Shows exactly what auto-homework WOULD generate for a lesson,
+// without scheduling a class. Run it repeatedly to confirm the
+// selection varies. Query: subject, curriculum, lesson, grade, n
+router.get('/preview-paper', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
+  try {
+    const { buildPaper, priorLessonNames } = require('../services/autoHomeworkCron')
+    const { subject, curriculum, lesson, topic, grade, n } = req.query
+    if (!subject) return fail(res, 400, 'subject is required.')
+
+    // Stand-in for a live class
+    const fake = {
+      subject, curriculum: curriculum || 'CambridgeIGCSE',
+      grade: grade || '',
+      syllabusSubtopicName: lesson || null,
+      syllabusTopicName:    topic  || null,
+    }
+    const prior = await priorLessonNames(fake)
+    const total = Math.max(1, Math.min(50, parseInt(n || '15', 10)))
+    const { paper, mainCount, reviewCount } = await buildPaper(fake, prior, total)
+
+    return ok(res, {
+      requested: total,
+      returned:  paper.length,
+      fromThisLesson: mainCount,
+      reviewFromEarlierLessons: reviewCount,
+      earlierLessonsAvailable: prior.length,
+      questions: paper.map(q => ({
+        review:     !!q.isReview,
+        difficulty: q.difficulty,
+        lesson:     q.subtopic || q.topic || '',
+        question:   q.questionText,
+        answer:     q.correctAnswer,
+      })),
+    }, `${paper.length} question(s): ${mainCount} from this lesson, ${reviewCount} review. Re-run to see a different selection.`)
+  } catch(e) { return fail(res, 500, e.message) }
+})
+
 // ── GET /api/questions/selftest ─────────────────────
 // One call that checks EVERY precondition for auto-homework and
 // says exactly which one is failing. No guessing.
