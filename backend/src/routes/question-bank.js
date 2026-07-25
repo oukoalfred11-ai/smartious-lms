@@ -54,6 +54,58 @@ router.get('/topics', auth, async (req, res) => {
   } catch(e) { return fail(res,500,e.message) }
 })
 
+
+// ── GET /api/questions/spine ─────────────────────────
+// Returns the subject spine (SyllabusTopic tree) for a subject +
+// curriculum, with per-topic question counts so admins can see
+// coverage as they add questions.
+router.get('/spine', auth, async (req, res) => {
+  try {
+    const SyllabusTopic = require('../models/SyllabusTopic')
+    const { subject, curriculum } = req.query
+    const filter = {}
+    if (subject)    filter.subjectName = new RegExp('^'+subject+'$','i')
+    if (curriculum) filter.curriculum  = curriculum
+    const topics = await SyllabusTopic.find(filter).sort({ order:1 }).lean()
+
+    // Question counts per topic name
+    const counts = await Question.aggregate([
+      { $match: subject ? { subject:new RegExp('^'+subject+'$','i') } : {} },
+      { $group: { _id:'$topic', n:{ $sum:1 } } },
+    ])
+    const countMap = {}
+    counts.forEach(c => { if (c._id) countMap[c._id.toLowerCase()] = c.n })
+
+    const withCounts = topics.map(t => ({
+      ...t,
+      questionCount: countMap[(t.topic||'').toLowerCase()] || 0,
+    }))
+    return ok(res, { topics: withCounts })
+  } catch(e) { return fail(res,500,e.message) }
+})
+
+// ── GET /api/questions/spine ────────────────────────
+// Spine topics + subtopics for a subject name + curriculum.
+// Used by the quiz launcher and the question editor so questions
+// attach to the same spine that lessons and live classes use.
+router.get('/spine', auth, async (req, res) => {
+  try {
+    const Subject       = require('../models/Subject')
+    const SyllabusTopic = require('../models/SyllabusTopic')
+    const { subject, curriculum } = req.query
+    if (!subject) return ok(res, { topics: [] })
+    const subjFilter = { subjectName: new RegExp('^'+subject.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$','i') }
+    if (curriculum) subjFilter.curriculum = curriculum
+    const subjectDoc = await Subject.findOne(subjFilter).lean()
+    if (!subjectDoc) return ok(res, { topics: [] })
+    const topics = await SyllabusTopic.find({ subjectId: subjectDoc._id, isActive: { $ne: false } })
+      .sort({ topicOrder: 1 })
+      .select('topic code subtopics.name subtopics.code')
+      .lean()
+    return ok(res, { subjectId: subjectDoc._id, topics })
+  } catch(e) { return fail(res,500,e.message) }
+})
+
 // ── POST /api/questions ─────────────────────────────
 router.post('/', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
   try {
@@ -83,13 +135,20 @@ router.delete('/:id', auth, requireRole('admin','ops_manager','dos'), async (req
 router.post('/seed', auth, requireRole('admin','ops_manager'), async (req, res) => {
   try {
     let inserted=0, skipped=0
+    const errors = []
     for (const q of SEED_QUESTIONS) {
-      const exists = await Question.findOne({ questionText: q.questionText, subject: q.subject })
-      if (exists) { skipped++; continue }
-      await Question.create({ ...q, isActive:true, source:'builtin' })
-      inserted++
+      try {
+        const exists = await Question.findOne({ questionText: q.questionText, subject: q.subject })
+        if (exists) { skipped++; continue }
+        await Question.create({ ...q, type:'mcq', isActive:true })
+        inserted++
+      } catch(err) {
+        errors.push(`${q.subject}/${(q.questionText||'').slice(0,40)}: ${err.message}`)
+      }
     }
-    return ok(res, { inserted, skipped }, `Seeded ${inserted} questions (${skipped} already existed).`)
+    const msg = `Seeded ${inserted} questions (${skipped} existed, ${errors.length} errors).`
+    if (errors.length) console.error('[questions seed]', errors.slice(0,5))
+    return ok(res, { inserted, skipped, errors: errors.slice(0,5) }, msg)
   } catch(e) { return fail(res,500,e.message) }
 })
 
