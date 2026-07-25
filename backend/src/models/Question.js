@@ -114,6 +114,19 @@ const questionSchema = new mongoose.Schema({
   // `topicRef` links to the SyllabusTopic document. Both optional —
   // existing questions leave them empty and keep working. The
   // existing free-text `topic` field above is retained.
+  // sha1 of (subject + questionText) — unique-sparse indexed so
+  // duplicate detection stays O(1) at any collection size.
+  contentHash: {
+    type: String,
+    default: null,
+    index: true,
+  },
+  lessonCode: {
+    type: String,
+    default: '',
+    trim: true,
+    index: true,
+  },
   subtopic: {
     type: String,
     trim: true,
@@ -202,6 +215,17 @@ const questionSchema = new mongoose.Schema({
 
 // Compound index for fast filtering
 questionSchema.index({ curriculum: 1, subject: 1, grade: 1, isActive: 1 });
+
+// ── Scale indexes (millions of questions) ────────────
+// Lesson-level pool: the hot path for auto-homework and the quiz game.
+questionSchema.index({ subject: 1, curriculum: 1, subtopic: 1, isActive: 1, difficulty: 1 });
+// Topic-level fallback pool.
+questionSchema.index({ subject: 1, curriculum: 1, topic: 1, isActive: 1, difficulty: 1 });
+// Spine lesson code lookups and prior-lesson review sampling.
+questionSchema.index({ subject: 1, curriculum: 1, lessonCode: 1, isActive: 1 });
+// O(1) duplicate detection on import. Without this, every imported
+// question triggers a collection scan on unindexed questionText.
+questionSchema.index({ contentHash: 1 }, { unique: true, sparse: true });
 
 // ── Helper: recursively sum leaf marks ──────────────
 // A "leaf" is a part with no children (or an empty parts array).
