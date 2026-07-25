@@ -109,6 +109,11 @@ const liveClassSchema = new mongoose.Schema({
 
   notes: { type: String, default: '', trim: true },
 
+  // ── Auto-homework (set when the scheduled end time passes) ──
+  autoHomeworkEnabled:     { type: Boolean, default: true },
+  autoHomeworkGeneratedAt: { type: Date,    default: null, index: true },
+  autoHomeworkNote:        { type: String,  default: '' },
+
 }, { timestamps: true });
 
 // Compound indexes for student/teacher dashboards
