@@ -9748,6 +9748,8 @@ function QuestionBankModule({ toast }) {
   const [modal,     setModal]     = useState(false)
   const [editQ,     setEditQ]     = useState(null)
   const [seeding,   setSeeding]   = useState(false)
+  const [spines,    setSpines]    = useState([])
+  const [spineBusy, setSpineBusy] = useState('')
   const [filter,    setFilter]    = useState({ subject:'', curriculum:'', difficulty:'', search:'' })
 
   const SUBJECTS   = ['Mathematics','Physics','Chemistry','Biology','Business Studies','Computer Science','Economics','History','Geography','English Language','English Literature']
@@ -9769,6 +9771,22 @@ function QuestionBankModule({ toast }) {
   }
 
   useEffect(() => { load(1) }, [filter])
+
+  useEffect(() => {
+    api.get('/spine-seed')
+      .then(r => setSpines(r.data?.data?.spines||[]))
+      .catch(() => setSpines([]))
+  }, [])
+
+  const buildSpine = async (key, label) => {
+    if (!confirm(`Rebuild the ${label} syllabus spine?\n\nThis replaces any existing topics for that subject. Lessons, live classes and questions already linked by topic NAME keep working.`)) return
+    setSpineBusy(key)
+    try {
+      const r = await api.post('/spine-seed/'+key)
+      toast?.ok?.(r.data?.message||'Spine rebuilt.')
+    } catch(e) { toast?.error?.(e?.response?.data?.message||'Spine rebuild failed.') }
+    setSpineBusy('')
+  }
 
   const seed = async () => {
     setSeeding(true)
@@ -9822,6 +9840,32 @@ function QuestionBankModule({ toast }) {
           </button>
         </div>
       </PCard>
+
+      {/* Syllabus spines */}
+      {spines.length > 0 && (
+        <PCard style={{ marginBottom:16 }}>
+          <div style={{ fontSize:11, fontWeight:800, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.08em', marginBottom:4 }}>Syllabus Spine</div>
+          <div style={{ fontSize:12.5, color:TOKENS.s500, marginBottom:14, lineHeight:1.6 }}>
+            The spine organises each subject into topics and lesson-level subtopics. Lessons, live classes, questions and student progress all hang off it.
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:12 }}>
+            {spines.map(s => (
+              <div key={s.key} style={{ border:`1px solid ${TOKENS.s100}`, borderRadius:10, padding:'14px 16px', background:'#fff' }}>
+                <div style={{ fontSize:14, fontWeight:800, color:TOKENS.ink }}>{s.subjectName}</div>
+                <div style={{ fontSize:12, color:TOKENS.s500, marginTop:2 }}>{s.curricula.join(' · ')}</div>
+                <div style={{ display:'flex', gap:14, margin:'10px 0 12px' }}>
+                  <div><span style={{ fontSize:16, fontWeight:900, color:TOKENS.crimson }}>{s.topics}</span> <span style={{ fontSize:11, color:TOKENS.s400, fontWeight:600 }}>topics</span></div>
+                  <div><span style={{ fontSize:16, fontWeight:900, color:TOKENS.crimson }}>{s.lessons}</span> <span style={{ fontSize:11, color:TOKENS.s400, fontWeight:600 }}>lessons</span></div>
+                </div>
+                <button onClick={()=>buildSpine(s.key, s.subjectName)} disabled={spineBusy===s.key}
+                  style={{ width:'100%', background:spineBusy===s.key?TOKENS.s300:TOKENS.accentAmber, color:'#fff', border:'none', padding:'9px', borderRadius:7, fontWeight:700, fontSize:12.5, cursor:spineBusy===s.key?'not-allowed':'pointer' }}>
+                  {spineBusy===s.key ? 'Building...' : 'Rebuild spine'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </PCard>
+      )}
 
       {/* Filters */}
       <PCard style={{ marginBottom:16 }}>
