@@ -442,7 +442,12 @@ router.get('/coverage', auth, async (req, res) => {
 router.post('/run-auto-homework', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
   try {
     const { processEndedClasses } = require('../services/autoHomeworkCron')
-    const report = await processEndedClasses()
+    // { classId } re-runs one class ignoring its processed stamp.
+    // { force:true } re-sweeps every class in the lookback window.
+    const report = await processEndedClasses({
+      classId: req.body?.classId || null,
+      force:   req.body?.force === true,
+    })
     const msg = report.generated
       ? `Generated ${report.generated} homework sets from ${report.checked} class(es); ${report.emailed} emailed.`
       : `Checked ${report.checked} class(es); nothing generated.`
@@ -483,6 +488,8 @@ router.get('/homework-debug', auth, requireRole('admin','ops_manager','dos'), as
       else verdict = 'Pending — should generate on next sweep'
 
       rows.push({
+        _id: String(lc._id),
+        status: lc.status,
         title: lc.title, subject: lc.subject, curriculum: lc.curriculum,
         lesson: lc.syllabusSubtopicName || null,
         scheduledAt: lc.scheduledAt, endsAt,
