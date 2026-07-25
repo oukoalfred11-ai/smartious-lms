@@ -6,44 +6,67 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { api } from '../../context/ctx.jsx'
 
+
+
 const C = {
   crimson:'#7D1025', crimsonD:'#5A0B1B', gold:'#C9A030', cream:'#FDFAF4',
   ink:'#1A0F0E', s100:'#F4EFEB', s400:'#9A8F8B', s500:'#857973', s700:'#564844',
   green:'#059669', greenL:'#D1FAE5', red:'#DC2626', redL:'#FEE2E2', blue:'#2563EB',
 }
 
-// ── Confetti ─────────────────────────────────────────
-function Confetti({ show }) {
+// ── Celebration: confetti + flowers spreading over screen ──
+const PRAISE = ['Brilliant!','Amazing!','Superb!','Fantastic!','Genius!','Excellent!','You star!','Hongera!','Perfect!','Outstanding!']
+
+function Celebration({ show, big }) {
   if (!show) return null
-  const particles = Array.from({ length: 60 }, (_, i) => ({
+  const confetti = Array.from({ length: big?90:50 }, (_, i) => ({
     id:i, x: Math.random()*100,
     color:['#C9A030','#7D1025','#22C55E','#3B82F6','#F59E0B','#EC4899','#8B5CF6','#06B6D4'][i%8],
     size: 6 + Math.random()*10, delay: Math.random()*0.5,
-    rot: Math.random()*360, shape: Math.random()>0.5 ? '50%' : '2px',
+    shape: Math.random()>0.5 ? '50%' : '2px',
   }))
+  // Flowers burst from centre and SPREAD outward across the whole screen
+  const flowers = Array.from({ length: big?26:14 }, (_, i) => {
+    const angle = (i / (big?26:14)) * Math.PI * 2
+    const dist  = 30 + Math.random()*45   // % of viewport to travel
+    return {
+      id:i,
+      emoji:['🌸','🌺','🌼','🌻','🌷','💐','🌹','✨','⭐','🎉'][i%10],
+      dx: Math.cos(angle)*dist, dy: Math.sin(angle)*dist,
+      size: 26+Math.random()*26, delay: Math.random()*0.25,
+      spin: (Math.random()>0.5?1:-1)*(360+Math.random()*360),
+    }
+  })
+  const praise = PRAISE[Math.floor(Math.random()*PRAISE.length)]
   return (
-    <div style={{ position:'fixed',inset:0,pointerEvents:'none',zIndex:9999,overflow:'hidden' }}>
+    <div style={{ position:'fixed', inset:0, pointerEvents:'none', zIndex:9999, overflow:'hidden' }}>
       <style>{`
         @keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
-        @keyframes flowerPop{0%{transform:scale(0) rotate(0deg);opacity:0}40%{opacity:1}60%{transform:scale(1.3) rotate(180deg);opacity:1}100%{transform:scale(0.8) rotate(360deg);opacity:0}}
+        @keyframes flowerSpread{0%{transform:translate(0,0) scale(0) rotate(0deg);opacity:0}15%{opacity:1;transform:translate(calc(var(--dx)*0.2),calc(var(--dy)*0.2)) scale(1.35) rotate(calc(var(--spin)*0.2))}100%{transform:translate(var(--dx),var(--dy)) scale(0.85) rotate(var(--spin));opacity:0}}
+        @keyframes praisePop{0%{transform:translate(-50%,-50%) scale(0.3);opacity:0}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-60%) scale(0.95)}}
         @keyframes streakFire{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
       `}</style>
-      {particles.map(p => (
+      {confetti.map(p => (
         <div key={p.id} style={{
           position:'absolute', left:`${p.x}%`, top:'-20px',
           width:p.size, height:p.size, background:p.color, borderRadius:p.shape,
           animation:`fall ${1.5+Math.random()}s ${p.delay}s ease-in forwards`,
-          transform:`rotate(${p.rot}deg)`,
         }}/>
       ))}
-      {/* Flower emojis */}
-      {['🌸','🌺','🌼','🌻','🎉','⭐','🏆','✨'].map((e,i) => (
-        <div key={'f'+i} style={{
-          position:'absolute', left:`${10+i*12}%`, top:'20%',
-          fontSize: 32+Math.random()*20,
-          animation:`flowerPop ${1.2+Math.random()*0.5}s ${i*0.1}s ease-in-out forwards`,
-        }}>{e}</div>
+      {flowers.map(f => (
+        <div key={'f'+f.id} style={{
+          position:'absolute', left:'50%', top:'45%',
+          fontSize:f.size,
+          '--dx':`${f.dx}vw`, '--dy':`${f.dy}vh`, '--spin':`${f.spin}deg`,
+          animation:`flowerSpread ${1.6+Math.random()*0.6}s ${f.delay}s ease-out forwards`,
+        }}>{f.emoji}</div>
       ))}
+      <div style={{
+        position:'absolute', left:'50%', top:'42%', transform:'translate(-50%,-50%)',
+        fontFamily:"'Instrument Serif',Georgia,serif", fontSize: big?52:38, fontWeight:400,
+        color:'#7D1025', textShadow:'0 2px 20px rgba(201,160,48,.5), 0 0 40px #fff',
+        animation:'praisePop 1.8s ease forwards', whiteSpace:'nowrap',
+      }}>{praise}</div>
     </div>
   )
 }
@@ -139,7 +162,7 @@ function TimerRing({ total, left }) {
 }
 
 // ── Main QuizGame ─────────────────────────────────────
-export default function QuizGame({ subject, topic, curriculum, grade, difficulty, onClose, user }) {
+export default function QuizGame({ subject, topic, subtopic, curriculum, grade, difficulty, onClose, user }) {
   const snd = useSounds()
 
   // ── Phase: setup | loading | playing | result
@@ -197,7 +220,7 @@ export default function QuizGame({ subject, topic, curriculum, grade, difficulty
     try {
       let res
       if (mode === 'host') {
-        res = await api.post('/quiz/competition', { subject, topic, curriculum, grade, difficulty:selDiff, count:qCount })
+        res = await api.post('/quiz/competition', { subject, topic, subtopic, curriculum, grade, difficulty:selDiff, count:qCount })
         setCompCode(res.data?.data?.code || '')
         setSession(res.data?.data?.session)
         setQns(res.data?.data?.questions || [])
@@ -206,7 +229,7 @@ export default function QuizGame({ subject, topic, curriculum, grade, difficulty
         setSession(res.data?.data?.session)
         setQns(res.data?.data?.questions || [])
       } else {
-        res = await api.post('/quiz/session', { subject, topic, curriculum, grade, difficulty:selDiff, count:qCount })
+        res = await api.post('/quiz/session', { subject, topic, subtopic, curriculum, grade, difficulty:selDiff, count:qCount })
         setSession(res.data?.data?.session)
         setQns(res.data?.data?.questions || [])
       }
@@ -236,7 +259,7 @@ export default function QuizGame({ subject, topic, curriculum, grade, difficulty
       setXpPop(earned)
       setConfetti(true)
       snd.correct()
-      setTimeout(() => { setConfetti(false); setXpPop(null) }, 2000)
+      setTimeout(() => { setConfetti(false); setXpPop(null) }, 2200)
     } else {
       snd.wrong()
     }
@@ -376,7 +399,7 @@ export default function QuizGame({ subject, topic, curriculum, grade, difficulty
   if (phase === 'playing' && q) {
     return (
       <div style={{ minHeight:'100vh', background:C.cream, display:'flex', flexDirection:'column', fontFamily:"Inter,sans-serif" }}>
-        <Confetti show={confetti}/>
+        <Celebration show={confetti} big={streak>=3}/>
         <XPPop xp={xpPop} show={!!xpPop}/>
 
         {/* Top bar */}
@@ -524,7 +547,7 @@ export default function QuizGame({ subject, topic, curriculum, grade, difficulty
   if (phase === 'result') {
     return (
       <div style={{ minHeight:'100vh', background:C.cream, padding:'24px 20px', fontFamily:"Inter,sans-serif" }}>
-        <Confetti show={pct >= 70}/>
+        <Celebration show={pct >= 70} big={pct>=90}/>
 
         <div style={{ maxWidth:600, margin:'0 auto' }}>
           {/* Hero card */}
