@@ -73,6 +73,10 @@ app.use('/api/parents', require('./routes/parents'));
 app.use('/api/dashboard',      require('./routes/dashboard'));
 app.use('/api/grouprooms',     require('./routes/grouprooms'));
 app.use('/api/liveclasses', require('./routes/liveclasses'));
+// question-bank MUST be mounted before routes/questions.js: that file
+// has GET /:id, which would otherwise capture named routes such as
+// /selftest and /spine and fail with "Invalid question ID".
+app.use('/api/questions', require('./routes/question-bank'));
 app.use('/api/questions', require('./routes/questions'));
 app.use('/api/homework', require('./routes/homework'));
 app.use('/api/curriculum', require('./routes/curriculum'));
@@ -92,8 +96,8 @@ app.use('/api/parent',     require('./routes/parent-portal'));
 app.use('/api/ratings',        require('./routes/ratings'));
 app.use('/api/weekly-reports', require('./routes/weekly-reports'));
 app.use('/api/seed-subjects',  require('./routes/seed-subjects'));
-app.use('/api/questions',      require('./routes/question-bank'));
 app.use('/api/quiz',           require('./routes/quiz'));
+app.use('/api/auto-homework',  require('./routes/auto-homework'));
 app.use('/api/checkin',    require('./routes/checkin'));
 
 // ── Health check ──────────────────────────────────────────
@@ -135,6 +139,7 @@ const { sendDailyReminders } = require('./routes/checkin');
 const { sendDueReminders  } = require('./routes/fee-collection');
 const { sendClassReminders } = require('./routes/parent-portal');
 const { scheduleShowCauseCron } = require('./services/showCauseCron');
+try { require('./services/autoHomeworkCron').start(); } catch (e) { console.error('[auto-homework] start failed:', e.message); }
 
 const runCheckinReminder = () => {
   const now = new Date();
