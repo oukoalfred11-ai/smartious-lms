@@ -24,6 +24,41 @@ const User          = require('../models/User')
 const ok   = (res, data, msg) => res.json({ success:true, data, message:msg||'' })
 const fail = (res, code, msg) => res.status(code).json({ success:false, message:msg })
 
+// ── Question fetcher with progressive filter relaxation ──
+// Tries strictest filter first, then relaxes: grade → difficulty →
+// curriculum, so students always get questions for their subject.
+// Supports spine filters: topicRef (SyllabusTopic id) and subtopic.
+async function fetchQuizQuestions({ subject, topic, subtopic, topicRef, curriculum, difficulty, grade, count }) {
+  const n = Math.min(parseInt(count,10)||10, 50)
+  const base = { isActive:{ $ne:false }, type:'mcq' }
+  if (subject)  base.subject = new RegExp('^'+subject.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$','i')
+  if (topic)    base.topic   = new RegExp(topic,'i')
+  if (subtopic) base.subtopic= new RegExp(subtopic,'i')
+  if (topicRef) base.topicRef= topicRef
+
+  // Filter attempts from strictest to loosest
+  const attempts = [
+    { ...base, curriculum, difficulty, grade },
+    { ...base, curriculum, difficulty },
+    { ...base, curriculum },
+    { ...base, difficulty },
+    { ...base },
+  ]
+
+  for (const raw of attempts) {
+    const filter = {}
+    for (const [k,v] of Object.entries(raw)) if (v !== undefined && v !== '' && v !== null) filter[k] = v
+    const questions = await Question.aggregate([
+      { $match: filter },
+      { $sample: { size: n } },
+      { $project: { questionText:1, options:1, correctAnswer:1, explanation:1, marks:1, topic:1, subtopic:1, difficulty:1, subject:1 } }
+    ])
+    if (questions.length >= Math.min(3, n)) return questions
+  }
+  return []
+}
+
+
 // XP awards
 const XP_CORRECT     = 10
 const XP_SPEED_BONUS = 5   // if answered in first 10 seconds
@@ -70,20 +105,8 @@ router.get('/questions', auth, async (req, res) => {
 router.post('/session', auth, async (req, res) => {
   try {
     const { subject, topic, curriculum, difficulty, count=10, grade, timePerQ=30 } = req.body
-    const filter = { isActive:true, type:'mcq' }
-    if (subject)    filter.subject    = new RegExp(subject,'i')
-    if (topic)      filter.topic      = new RegExp(topic,'i')
-    if (curriculum) filter.curriculum = curriculum
-    if (difficulty) filter.difficulty = difficulty
-    if (grade)      filter.grade      = grade
-
-    const questions = await Question.aggregate([
-      { $match: filter },
-      { $sample: { size: Math.min(parseInt(count,10)||10, 50) } },
-      { $project: { questionText:1, options:1, correctAnswer:1, explanation:1, marks:1, topic:1, difficulty:1, subject:1 } }
-    ])
-
-    if (!questions.length) return fail(res,404,'No questions found for those filters.')
+    const questions = await fetchQuizQuestions({ subject, topic, subtopic:req.body.subtopic, topicRef:req.body.topicRef, curriculum, difficulty, grade, count })
+    if (!questions.length) return fail(res,404,'No questions available for '+(subject||'this subject')+' yet. Ask your teacher to add questions to the Question Bank.')
 
     const session = await QuizSession.create({
       code:     QuizSession.generateCode(),
@@ -115,19 +138,8 @@ router.post('/session', auth, async (req, res) => {
 router.post('/competition', auth, async (req, res) => {
   try {
     const { subject, topic, curriculum, difficulty, count=10, grade, timePerQ=20 } = req.body
-    const filter = { isActive:true, type:'mcq' }
-    if (subject)    filter.subject    = new RegExp(subject,'i')
-    if (topic)      filter.topic      = new RegExp(topic,'i')
-    if (curriculum) filter.curriculum = curriculum
-    if (difficulty) filter.difficulty = difficulty
-    if (grade)      filter.grade      = grade
-
-    const questions = await Question.aggregate([
-      { $match: filter },
-      { $sample: { size: Math.min(parseInt(count,10)||10, 50) } },
-      { $project: { questionText:1, options:1, correctAnswer:1, explanation:1, marks:1, topic:1, difficulty:1 } }
-    ])
-    if (!questions.length) return fail(res,404,'No questions found.')
+    const questions = await fetchQuizQuestions({ subject, topic, subtopic:req.body.subtopic, topicRef:req.body.topicRef, curriculum, difficulty, grade, count })
+    if (!questions.length) return fail(res,404,'No questions available for '+(subject||'this subject')+' yet.')
 
     // Ensure unique code
     let code, attempts=0
