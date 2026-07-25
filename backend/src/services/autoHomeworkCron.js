@@ -12,7 +12,6 @@
  * Runs every minute. Idempotent: a class is only processed once,
  * guarded by liveClass.autoHomeworkGeneratedAt.
  */
-const cron       = require('node-cron')
 const crypto     = require('crypto')
 const nodemailer = require('nodemailer')
 
@@ -23,6 +22,7 @@ const User      = require('../models/User')
 
 const QUESTIONS_PER_HOMEWORK = 15
 const DUE_AFTER_HOURS        = 48
+const LOOKBACK_HOURS         = 36
 
 function getTransporter() {
   const u = process.env.EMAIL_USER, p = process.env.EMAIL_PASSWORD
@@ -94,11 +94,12 @@ function snapshot(q) {
 // ── Main worker ─────────────────────────────────────
 async function processEndedClasses() {
   const now = new Date()
+  const report = { checked: 0, generated: 0, emailed: 0, skipped: [] }
 
   // Classes whose scheduled end time has passed and that haven't
   // had homework generated yet. Look back 6h so a brief outage
   // doesn't permanently skip classes.
-  const lookback = new Date(now.getTime() - 6 * 60 * 60 * 1000)
+  const lookback = new Date(now.getTime() - LOOKBACK_HOURS * 60 * 60 * 1000)
 
   const candidates = await LiveClass.find({
     status: { $in: ['scheduled', 'live', 'ended'] },
@@ -107,10 +108,13 @@ async function processEndedClasses() {
     autoHomeworkEnabled: { $ne: false },
   }).lean()
 
+  report.checked = candidates.length
+
   for (const lc of candidates) {
     const endsAt = new Date(new Date(lc.scheduledAt).getTime() + (lc.durationMins || 60) * 60000)
-    if (endsAt > now) continue                    // not finished yet
+    if (endsAt > now) { report.skipped.push({ title: lc.title, why: 'not finished yet, ends ' + endsAt.toISOString() }); continue }
     if (!lc.assignedStudents?.length) {
+      report.skipped.push({ title: lc.title, why: 'no students assigned' })
       await LiveClass.updateOne({ _id: lc._id },
         { $set: { autoHomeworkGeneratedAt: now, autoHomeworkNote: 'No students assigned.' } })
       continue
@@ -123,6 +127,7 @@ async function processEndedClasses() {
           autoHomeworkGeneratedAt: now,
           autoHomeworkNote: `No questions found for ${lc.subject}${lc.syllabusSubtopicName ? ' / ' + lc.syllabusSubtopicName : ''}.`,
         }})
+        report.skipped.push({ title: lc.title, why: `no questions matched subject="${lc.subject}" curriculum="${lc.curriculum}" lesson="${lc.syllabusSubtopicName||'(none)'}"` })
         console.log(`[autoHomework] ${lc.title}: no questions in bank — skipped`)
         continue
       }
@@ -161,11 +166,15 @@ async function processEndedClasses() {
         autoHomeworkGeneratedAt: now,
         autoHomeworkNote: `${made} homework sets from a pool of ${pool.length} questions; ${mailed} emailed.`,
       }})
+      report.generated += made
+      report.emailed   += mailed
       console.log(`[autoHomework] ${lc.title}: ${made} sets (pool ${pool.length}), ${mailed} emails`)
     } catch (e) {
+      report.skipped.push({ title: lc.title, why: 'error: ' + e.message })
       console.error('[autoHomework]', lc.title, e.message)
     }
   }
+  return report
 }
 
 // ── Email ───────────────────────────────────────────
@@ -236,10 +245,13 @@ async function notifyStudent(studentId, hw, lc, lessonKey) {
 
 // ── Scheduler ───────────────────────────────────────
 function startAutoHomeworkCron() {
-  cron.schedule('* * * * *', () => {
-    processEndedClasses().catch(e => console.error('[autoHomework cron]', e.message))
-  }, { timezone: 'Africa/Nairobi' })
-  console.log('[autoHomework] cron started — checks every minute (Africa/Nairobi)')
+  // setInterval, not node-cron — node-cron is not a dependency of this
+  // backend and every other scheduled job here uses setInterval too.
+  const tick = () => processEndedClasses()
+    .catch(e => console.error('[autoHomework cron]', e.message))
+  setTimeout(tick, 20 * 1000)          // first run shortly after boot
+  setInterval(tick, 60 * 1000)         // then every minute
+  console.log('[autoHomework] scheduler started — checks every 60s')
 }
 
 // index.js calls: require('./services/autoHomeworkCron').start()
