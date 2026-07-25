@@ -9788,6 +9788,7 @@ function QuestionBankModule({ toast }) {
   const [editQ,     setEditQ]     = useState(null)
   const [seeding,   setSeeding]   = useState(false)
   const [bulkOpen,  setBulkOpen]  = useState(false)
+  const [artQueue,  setArtQueue]  = useState(null)
   const [importOpen,setImportOpen]= useState(false)
   const [diag,      setDiag]      = useState(null)
   const [diagBusy,  setDiagBusy]  = useState(false)
@@ -9834,6 +9835,13 @@ function QuestionBankModule({ toast }) {
       const r = await api.get('/questions/coverage', { params: covSubj })
       setCov(r.data?.data||null)
     } catch(e) { toast?.error?.('Could not load coverage.') }
+  }
+
+  const loadArtQueue = async () => {
+    try {
+      const r = await api.get('/questions/awaiting-images')
+      setArtQueue(r.data?.data?.questions || [])
+    } catch(e) { toast?.error?.('Could not load the artwork queue.'); setArtQueue([]) }
   }
 
   const runDiagnose = async () => {
@@ -9927,6 +9935,10 @@ function QuestionBankModule({ toast }) {
             style={{ background:'#fff', color:'#9A7B16', border:'1.5px dashed '+TOKENS.gold, padding:'10px 18px', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer' }}>
             Bulk import
           </button>
+          <button onClick={loadArtQueue}
+            style={{ background:'#fff', color:'#9A7B16', border:'1.5px dashed '+TOKENS.gold, padding:'10px 18px', borderRadius:8, fontWeight:700, fontSize:13, cursor:'pointer' }}>
+            Artwork queue
+          </button>
           <button onClick={runDiagnose} disabled={diagBusy}
             style={{ background:'#fff', color:'#1E40AF', border:'1.5px dashed #3B82F6', padding:'10px 18px', borderRadius:8, fontWeight:700, fontSize:13, cursor:diagBusy?'wait':'pointer' }}>
             {diagBusy?'Checking...':'Diagnose auto-homework'}
@@ -9941,6 +9953,26 @@ function QuestionBankModule({ toast }) {
           </button>
         </div>
       </PCard>
+
+      {artQueue && (
+        <PCard style={{ marginBottom:16 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:14 }}>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:11, fontWeight:800, color:TOKENS.crimson, textTransform:'uppercase', letterSpacing:'.08em' }}>Artwork queue</div>
+              <div style={{ fontSize:12.5, color:TOKENS.s500, marginTop:2 }}>
+                {artQueue.length
+                  ? `${artQueue.length} question(s) need a diagram. They are held back from homework until one is attached.`
+                  : 'Nothing waiting. Every diagram question has its artwork.'}
+              </div>
+            </div>
+            <button onClick={()=>setArtQueue(null)} style={{ background:'transparent', border:'none', color:TOKENS.s400, fontSize:20, cursor:'pointer', lineHeight:1 }}>×</button>
+          </div>
+
+          {artQueue.map(q => (
+            <ArtworkRow key={q._id} q={q} toast={toast} onDone={()=>{ loadArtQueue(); load(page) }}/>
+          ))}
+        </PCard>
+      )}
 
       {diag && (
         <PCard style={{ marginBottom:16 }}>
@@ -10148,6 +10180,78 @@ function QuestionBankModule({ toast }) {
           curricula={CURRICULA}
         />
       )}
+    </div>
+  )
+}
+
+function ArtworkRow({ q, toast, onDone }) {
+  const [busy, setBusy] = useState(false)
+  const [url,  setUrl]  = useState('')
+  const [cap,  setCap]  = useState(q.imageCaption || '')
+  const [err,  setErr]  = useState('')
+
+  const upload = async (file) => {
+    if (!file) return
+    setBusy(true); setErr('')
+    try {
+      const fd = new FormData(); fd.append('file', file)
+      const r = await api.post('/questions/upload', fd, { headers:{ 'Content-Type':'multipart/form-data' } })
+      const u = r.data?.attachment?.url
+      if (u) setUrl(u)
+      else setErr('Upload returned no URL.')
+    } catch(e) {
+      setErr(e?.response?.data?.message || 'Upload failed — paste a /question-images/... path instead.')
+    }
+    setBusy(false)
+  }
+
+  const attach = async () => {
+    if (!url) { setErr('Upload a file or type a path first.'); return }
+    setBusy(true)
+    try {
+      await api.patch('/questions/'+q._id+'/image', { imageUrl:url, imageCaption:cap })
+      toast?.ok?.('Artwork attached — question is now live.')
+      onDone?.()
+    } catch(e) { setErr(e?.response?.data?.message || 'Could not attach.') }
+    setBusy(false)
+  }
+
+  return (
+    <div style={{ border:`1px solid ${TOKENS.line}`, borderRadius:10, padding:'14px 16px', marginBottom:10, background:'#FBFAF5' }}>
+      <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap', marginBottom:6 }}>
+        <span style={{ fontSize:10, fontWeight:800, background:'#EEF2FF', color:'#4338CA', padding:'2px 7px', borderRadius:99 }}>
+          {q.lessonCode || '—'}
+        </span>
+        <span style={{ fontSize:12, fontWeight:700, color:TOKENS.ink }}>{q.subtopic || q.subject}</span>
+        <span style={{ fontSize:11.5, color:TOKENS.s400 }}>{q.marks} marks</span>
+      </div>
+      <div style={{ fontSize:13, color:TOKENS.s700, lineHeight:1.6, marginBottom:8 }}>{q.questionText}</div>
+
+      {q.imageDescription && (
+        <div style={{ background:'#fff', border:`1px dashed ${TOKENS.gold}`, borderRadius:7, padding:'10px 13px', marginBottom:10 }}>
+          <div style={{ fontSize:10, fontWeight:800, color:'#9A7B16', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:4 }}>Diagram needed</div>
+          <div style={{ fontSize:12.5, color:TOKENS.s700, lineHeight:1.65 }}>{q.imageDescription}</div>
+        </div>
+      )}
+
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:8 }}>
+        <input className="fi" value={url} onChange={e=>setUrl(e.target.value)} placeholder="Upload below, or type /question-images/name.png"/>
+        <input className="fi" value={cap} onChange={e=>setCap(e.target.value)} placeholder="Caption, e.g. Fig 1: leaf cross-section"/>
+      </div>
+
+      <div style={{ display:'flex', gap:10, alignItems:'center', flexWrap:'wrap' }}>
+        <input type="file" accept="image/*" disabled={busy}
+          onChange={e=>upload(e.target.files?.[0])} style={{ fontSize:12 }}/>
+        <button onClick={attach} disabled={busy||!url} style={{
+          background: busy||!url ? TOKENS.s300 : TOKENS.accentEmerald, color:'#fff', border:'none',
+          padding:'8px 16px', borderRadius:7, fontWeight:700, fontSize:12.5, cursor: busy||!url?'not-allowed':'pointer' }}>
+          {busy ? 'Working...' : 'Attach & publish'}
+        </button>
+        {url && <img src={url} alt="" style={{ height:44, borderRadius:4, border:`1px solid ${TOKENS.line}` }}
+          onError={e=>{ e.currentTarget.style.display='none' }}/>}
+      </div>
+
+      {err && <div style={{ marginTop:8, fontSize:12, color:'#991B1B' }}>{err}</div>}
     </div>
   )
 }
