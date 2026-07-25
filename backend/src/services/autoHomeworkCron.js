@@ -263,65 +263,124 @@ async function processEndedClasses(opts = {}) {
 }
 
 // ── Email ───────────────────────────────────────────
+// ── Shared email chrome ─────────────────────────────
+function shell({ eyebrow, heading, sub, body }) {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;background:#FDFAF4;font-family:sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;"><tr><td align="center">
+<table width="100%" style="max-width:560px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E8E2D6;">
+<tr><td style="background:linear-gradient(135deg,#7D1025,#5A0B1B);padding:24px 32px;">
+  <div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px">${eyebrow}</div>
+  <div style="font-size:20px;font-weight:800;color:#fff;">${heading}</div>
+  <div style="font-size:13px;color:rgba(255,255,255,.65);margin-top:4px;">${sub}</div>
+</td></tr>
+<tr><td style="padding:28px 32px;">${body}</td></tr>
+<tr><td style="background:#FDFAF4;padding:14px 32px;border-top:1px solid #E8E2D6;">
+  <p style="font-size:11px;color:#999;margin:0;">&copy; ${new Date().getFullYear()} Smartious Homeschool Global &middot; hellosmartious@gmail.com &middot; +254 745 021 212</p>
+</td></tr></table></td></tr></table></body></html>`
+}
+
+function factsTable(rows) {
+  return `<table width="100%" style="background:#FDFAF4;border-radius:8px;border:1px solid #E8E2D6;margin-bottom:20px;"><tr><td style="padding:16px 20px;">
+    <table width="100%">${rows.map(([k,v,bold]) => `
+      <tr><td style="font-size:12px;color:#6B6B6B;font-weight:700;text-transform:uppercase;padding-bottom:6px">${k}</td>
+          <td style="font-size:${bold?14:13}px;font-weight:${bold?800:700};color:${bold?'#7D1025':'#1A1A1A'};text-align:right;padding-bottom:6px">${v}</td></tr>`).join('')}
+    </table></td></tr></table>`
+}
+
+function cta(href, label) {
+  return `<a href="${href}" style="display:block;background:#7D1025;color:#fff;text-align:center;padding:13px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;">${label}</a>`
+}
+
+// ── Notify: separate templates for student and parent ──
 async function notifyStudent(studentId, hw, lc, lessonKey) {
   const t = getTransporter()
   if (!t) return false
   try {
     const student = await User.findById(studentId)
-      .select('firstName lastName email parentEmail linkedParents').lean()
+      .select('firstName lastName email parentEmail parentName linkedParents').lean()
     if (!student) return false
-
-    const to = new Set()
-    if (student.email) to.add(student.email)
-    if (student.parentEmail) to.add(student.parentEmail)
-    if (student.linkedParents?.length) {
-      const ps = await User.find({ _id: { $in: student.linkedParents } }).select('email').lean()
-      ps.forEach(p => p.email && to.add(p.email))
-    }
-    if (!to.size) return false
 
     const due = new Date(hw.dueAt).toLocaleString('en-GB', {
       weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
     })
+    const facts = [
+      ['Subject', lc.subject],
+      ['Lesson', lessonKey],
+      ['Questions', String(hw.questionCount), true],
+      ['Total marks', String(hw.totalMarks)],
+      ['Due', due],
+    ]
 
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
-<body style="margin:0;background:#FDFAF4;font-family:sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;"><tr><td align="center">
-<table width="100%" style="max-width:560px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E8E2D6;">
-<tr><td style="background:linear-gradient(135deg,#7D1025,#5A0B1B);padding:24px 32px;">
-  <div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px">Smartious Homeschool · Homework</div>
-  <div style="font-size:20px;font-weight:800;color:#fff;">New homework has been set</div>
-  <div style="font-size:13px;color:rgba(255,255,255,.65);margin-top:4px;">${lc.subject} · ${lessonKey}</div>
-</td></tr>
-<tr><td style="padding:28px 32px;">
-  <p style="font-size:14px;color:#2c2c2c;margin:0 0 20px;line-height:1.7;">
-    Hi ${student.firstName}, your live class <strong>${lc.title}</strong> has ended and your homework is now ready.
-  </p>
-  <table width="100%" style="background:#FDFAF4;border-radius:8px;border:1px solid #E8E2D6;margin-bottom:20px;"><tr><td style="padding:16px 20px;">
-    <table width="100%">
-      <tr><td style="font-size:12px;color:#6B6B6B;font-weight:700;text-transform:uppercase;padding-bottom:6px">Questions</td><td style="font-size:14px;font-weight:800;color:#7D1025;text-align:right;padding-bottom:6px">${hw.questionCount}</td></tr>
-      <tr><td style="font-size:12px;color:#6B6B6B;font-weight:700;text-transform:uppercase;padding-bottom:6px">Total marks</td><td style="font-size:14px;font-weight:700;color:#1A1A1A;text-align:right;padding-bottom:6px">${hw.totalMarks}</td></tr>
-      <tr><td style="font-size:12px;color:#6B6B6B;font-weight:700;text-transform:uppercase;">Due</td><td style="font-size:13px;font-weight:700;color:#1A1A1A;text-align:right;">${due}</td></tr>
-    </table>
-  </td></tr></table>
-  <p style="font-size:13px;color:#564844;line-height:1.7;margin:0 0 20px;">
-    Your question set is unique to you, so compare your working with classmates rather than your answers.
-  </p>
-  <a href="https://smartioushomeschool.com/student" style="display:block;background:#7D1025;color:#fff;text-align:center;padding:13px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;">Open my homework →</a>
-</td></tr>
-<tr><td style="background:#FDFAF4;padding:14px 32px;border-top:1px solid #E8E2D6;">
-  <p style="font-size:11px;color:#999;margin:0;">© ${new Date().getFullYear()} Smartious Homeschool Global · hellosmartious@gmail.com · +254 745 021 212</p>
-</td></tr></table></td></tr></table></body></html>`
-
-    for (const email of to) {
-      await t.sendMail({
-        from: process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>',
-        to: email,
-        subject: `Homework set — ${lc.subject}: ${lessonKey} · Smartious`,
-        html,
-      })
+    // Collect parent addresses
+    const parentEmails = new Set()
+    if (student.parentEmail) parentEmails.add(student.parentEmail)
+    if (student.linkedParents?.length) {
+      const ps = await User.find({ _id: { $in: student.linkedParents } }).select('email').lean()
+      ps.forEach(p => p.email && parentEmails.add(p.email))
     }
-    return true
+    // Never send the student version to a parent address
+    const studentEmail = student.email && !parentEmails.has(student.email) ? student.email : null
+
+    const from = process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>'
+    let sent = 0
+
+    // ── STUDENT ──
+    if (studentEmail) {
+      const html = shell({
+        eyebrow: 'Smartious Homeschool &middot; Homework',
+        heading: 'Your homework is ready',
+        sub: `${lc.subject} &middot; ${lessonKey}`,
+        body: `
+          <p style="font-size:14px;color:#2c2c2c;margin:0 0 20px;line-height:1.7;">
+            Hi ${student.firstName}, your live class <strong>${lc.title}</strong> has ended and your homework is now open.
+          </p>
+          ${factsTable(facts)}
+          <p style="font-size:13px;color:#564844;line-height:1.7;margin:0 0 20px;">
+            Your question set is unique to you, so compare your working with classmates rather than your answers.
+          </p>
+          ${cta('https://smartioushomeschool.com/student', 'Start my homework &rarr;')}`,
+      })
+      try {
+        await t.sendMail({ from, to: studentEmail,
+          subject: `Homework ready — ${lc.subject}: ${lessonKey}`, html })
+        sent++
+      } catch (e) { console.error('[autoHomework email/student]', e.message) }
+    }
+
+    // ── PARENT ──
+    const childName = `${student.firstName} ${student.lastName}`.trim()
+    if (parentEmails.size) {
+      const html = shell({
+        eyebrow: 'Smartious Homeschool &middot; Parent Update',
+        heading: 'Homework set for ' + student.firstName,
+        sub: `${lc.subject} &middot; ${lessonKey}`,
+        body: `
+          <p style="font-size:14px;color:#2c2c2c;margin:0 0 20px;line-height:1.7;">
+            Dear ${student.parentName || 'Parent'}, following today's live class
+            <strong>${lc.title}</strong>, homework has been set for <strong>${childName}</strong>.
+          </p>
+          ${factsTable(facts)}
+          <div style="background:#F9F2F3;border-radius:8px;padding:14px 18px;margin-bottom:20px;border-left:3px solid #7D1025;">
+            <p style="font-size:12px;font-weight:700;color:#7D1025;text-transform:uppercase;letter-spacing:.06em;margin:0 0 6px">How you can help</p>
+            <p style="font-size:13px;color:#2c2c2c;margin:0;line-height:1.65;">
+              Each learner receives a different selection of questions, so answers cannot be shared.
+              A quiet 30 minutes before the deadline is usually enough. You can follow ${student.firstName}'s
+              progress and marks in the parent portal once the work is submitted.
+            </p>
+          </div>
+          ${cta('https://smartioushomeschool.com/parent', 'View in parent portal &rarr;')}`,
+      })
+      for (const email of parentEmails) {
+        try {
+          await t.sendMail({ from, to: email,
+            subject: `Homework set for ${student.firstName} — ${lc.subject} &middot; due ${due}`, html })
+          sent++
+        } catch (e) { console.error('[autoHomework email/parent]', email, e.message) }
+      }
+    }
+
+    return sent > 0
   } catch (e) {
     console.error('[autoHomework email]', e.message)
     return false
