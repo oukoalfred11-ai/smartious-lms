@@ -22,7 +22,7 @@ const User      = require('../models/User')
 
 const QUESTIONS_PER_HOMEWORK = 15
 const DUE_AFTER_HOURS        = 48
-const LOOKBACK_HOURS         = 36
+const LOOKBACK_HOURS         = 72
 
 function getTransporter() {
   const u = process.env.EMAIL_USER, p = process.env.EMAIL_PASSWORD
@@ -92,7 +92,8 @@ function snapshot(q) {
 }
 
 // ── Main worker ─────────────────────────────────────
-async function processEndedClasses() {
+async function processEndedClasses(opts = {}) {
+  const { classId = null, force = false } = opts
   const now = new Date()
   const report = { checked: 0, generated: 0, emailed: 0, skipped: [] }
 
@@ -102,21 +103,43 @@ async function processEndedClasses() {
   const lookback = new Date(now.getTime() - LOOKBACK_HOURS * 60 * 60 * 1000)
 
   const candidates = await LiveClass.find({
-    status: { $in: ['scheduled', 'live', 'ended'] },
-    scheduledAt: { $gte: lookback, $lte: now },
     autoHomeworkGeneratedAt: { $in: [null, undefined] },
     autoHomeworkEnabled: { $ne: false },
+    scheduledAt: { $gte: lookback },
+    $or: [
+      // Teacher flipped it to ended — honour that even if the
+      // scheduled end time is still in the future.
+      { status: 'ended' },
+      // Otherwise wait for the scheduled end time to pass.
+      { status: { $in: ['scheduled', 'live'] }, scheduledAt: { $lte: now } },
+    ],
   }).lean()
 
-  report.checked = candidates.length
+  // Targeted re-run: ignore the processed stamp and the time window.
+  let list = candidates
+  if (classId) {
+    const one = await LiveClass.findById(classId).lean()
+    list = one ? [one] : []
+  } else if (force) {
+    const all = await LiveClass.find({ scheduledAt: { $gte: lookback } }).lean()
+    list = all
+  }
 
-  for (const lc of candidates) {
+  report.checked = list.length
+
+  for (const lc of list) {
     const endsAt = new Date(new Date(lc.scheduledAt).getTime() + (lc.durationMins || 60) * 60000)
-    if (endsAt > now) { report.skipped.push({ title: lc.title, why: 'not finished yet, ends ' + endsAt.toISOString() }); continue }
+    const finished = lc.status === 'ended' || endsAt <= now
+    if (!finished) { report.skipped.push({ title: lc.title, why: 'not finished yet, ends ' + endsAt.toISOString() }); continue }
     if (!lc.assignedStudents?.length) {
       report.skipped.push({ title: lc.title, why: 'no students assigned' })
       await LiveClass.updateOne({ _id: lc._id },
         { $set: { autoHomeworkGeneratedAt: now, autoHomeworkNote: 'No students assigned.' } })
+      continue
+    }
+
+    if (lc.autoHomeworkGeneratedAt && !force && !classId) {
+      report.skipped.push({ title: lc.title, why: 'already processed at ' + lc.autoHomeworkGeneratedAt })
       continue
     }
 
