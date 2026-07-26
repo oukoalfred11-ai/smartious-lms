@@ -12909,88 +12909,187 @@ const IGCSE_BIOLOGY_0610 = [
 // 12 topics covering full Cambridge IGCSE Chemistry syllabus.
 // Source: Cambridge IGCSE Chemistry 0620 Syllabus 2026-2028.
 // Extended (Supplement) content integrated into subtopic descriptions.
-const IGCSE_CHEMISTRY_0620 = [
-  { topic: 'States of matter (SOM)', code: 'SOM', subtopics: [
-    { name: 'Solids, liquids and gases: properties; arrangement and motion of particles', code: 'SOM1', suggestedLessons: 2 },
-    { name: 'Changes of state: melting, boiling, evaporation, freezing, condensation, sublimation', code: 'SOM2', suggestedLessons: 3 },
-    { name: 'Kinetic particle theory; effect of temperature and pressure on gases', code: 'SOM3', suggestedLessons: 3 },
-    { name: 'Diffusion in gases and liquids; effect of relative molecular mass on rate (Extended)', code: 'SOM4', suggestedLessons: 2 },
+const IGCSE_CHEMISTRY_CAM = [
+  { topic: 'Topic 1 · States of Matter', code: '1', subtopics: [
+    { name: 'Particle theory, solid, liquid and gas properties, and interconversions', code: '001', suggestedLessons: 1 },
+    { name: 'Diffusion experiments, factors affecting rate, and relative molecular mass', code: '002', suggestedLessons: 1 },
+    { name: 'Heating and cooling curves, state changes, and interpreting temperature data', code: '003', suggestedLessons: 1 },
   ]},
-  { topic: 'Atoms, elements and compounds (AEC)', code: 'AEC', subtopics: [
-    { name: 'Elements, compounds and mixtures; symbols and formulae', code: 'AEC1', suggestedLessons: 3 },
-    { name: 'Atomic structure: protons, neutrons, electrons; mass number and atomic number', code: 'AEC2', suggestedLessons: 3 },
-    { name: 'Isotopes; relative atomic mass', code: 'AEC3', suggestedLessons: 2 },
-    { name: 'Electronic configuration; relationship to periodic table position', code: 'AEC4', suggestedLessons: 3 },
-    { name: 'Ionic bonding: formation of ions; ionic structures (giant lattice)', code: 'AEC5', suggestedLessons: 4 },
-    { name: 'Covalent bonding: simple molecules; dot-and-cross diagrams; giant covalent structures (diamond, graphite, silicon dioxide)', code: 'AEC6', suggestedLessons: 4 },
-    { name: 'Metallic bonding; properties of metals (Extended)', code: 'AEC7', suggestedLessons: 2 },
+  { topic: 'Topic 2 · Atoms, Elements and Compounds', code: '2', subtopics: [
+    { name: 'Structure of the atom, subatomic particles, atomic number and mass number', code: '004', suggestedLessons: 1 },
+    { name: 'Isotopes, relative atomic mass calculations, and uses of radioactive isotopes', code: '005', suggestedLessons: 1 },
+    { name: 'Electronic configurations of the first 20 elements', code: '006', suggestedLessons: 1 },
+    { name: 'Ionic bonding: electron transfer, ion formation and dot-and-cross diagrams', code: '007', suggestedLessons: 1 },
+    { name: 'Properties of ionic compounds and giant ionic lattices', code: '008', suggestedLessons: 1 },
+    { name: 'Covalent bonding: simple molecular substances and dot-and-cross diagrams', code: '009', suggestedLessons: 1 },
+    { name: 'Giant covalent structures (diamond, graphite, silicon dioxide) and allotropes of carbon', code: '010', suggestedLessons: 1 },
+    { name: 'Metallic bonding structure and properties (malleability and electrical conductivity)', code: '011', suggestedLessons: 1 },
   ]},
-  { topic: 'Stoichiometry (STO)', code: 'STO', subtopics: [
-    { name: 'Chemical formulae and equations; balancing', code: 'STO1', suggestedLessons: 3 },
-    { name: 'Relative formula mass; percentage composition; empirical and molecular formulae', code: 'STO2', suggestedLessons: 3 },
-    { name: 'The mole concept; Avogadro constant; mole calculations (mass, gas volume, concentration)', code: 'STO3', suggestedLessons: 5 },
-    { name: 'Reacting masses; limiting reactant; percentage yield and atom economy (Extended)', code: 'STO4', suggestedLessons: 4 },
+  { topic: 'Topic 3 · Stoichiometry', code: '3', subtopics: [
+    { name: 'Writing chemical formulae for ionic and covalent compounds', code: '012', suggestedLessons: 1 },
+    { name: 'Balancing word and symbol equations (including state symbols)', code: '013', suggestedLessons: 1 },
+    { name: 'Relative formula masses (Mr) and percentage mass calculations', code: '014', suggestedLessons: 1 },
+    { name: 'The Mole concept and Avogadro\'s constant', code: '015', suggestedLessons: 1 },
+    { name: 'Reacting mass calculations and percentage yield', code: '016', suggestedLessons: 1 },
+    { name: 'Solution concentrations (mol/dm3) and gas volumes at room temperature', code: '017', suggestedLessons: 1 },
   ]},
-  { topic: 'Electrochemistry (ECH)', code: 'ECH', subtopics: [
-    { name: 'Electrolysis: principles; ions migration in molten/aqueous solutions', code: 'ECH1', suggestedLessons: 3 },
-    { name: 'Electrolysis examples: molten lead bromide, aqueous sodium chloride, aqueous copper sulfate', code: 'ECH2', suggestedLessons: 4 },
-    { name: 'Industrial electrolysis: aluminium extraction, chlor-alkali process', code: 'ECH3', suggestedLessons: 3 },
-    { name: 'Hydrogen-oxygen fuel cells; advantages (Extended)', code: 'ECH4', suggestedLessons: 2 },
+  { topic: 'Topic 4 · Electrochemistry', code: '4', subtopics: [
+    { name: 'Introduction to electrolysis: electrolytes, electrodes, oxidation and reduction at terminals', code: '018', suggestedLessons: 1 },
+    { name: 'Electrolysis of molten binary compounds such as lead(II) bromide', code: '019', suggestedLessons: 1 },
+    { name: 'Electrolysis of aqueous solutions and predicting preferential discharge of ions', code: '020', suggestedLessons: 1 },
+    { name: 'Electroplating, purification of copper, and hydrogen-oxygen fuel cells', code: '021', suggestedLessons: 1 },
   ]},
-  { topic: 'Chemical energetics (ENG)', code: 'ENG', subtopics: [
-    { name: 'Exothermic and endothermic reactions; temperature change and energy profile diagrams', code: 'ENG1', suggestedLessons: 3 },
-    { name: 'Bond breaking and bond making; calculating energy change from bond energies (Extended)', code: 'ENG2', suggestedLessons: 3 },
+  { topic: 'Topic 5 · Chemical Energetics', code: '5', subtopics: [
+    { name: 'Exothermic and endothermic reactions: temperature changes and energy profiles', code: '022', suggestedLessons: 1 },
+    { name: 'Energy level diagrams, activation energy and bond energy calculations', code: '023', suggestedLessons: 1 },
   ]},
-  { topic: 'Chemical reactions (RXN)', code: 'RXN', subtopics: [
-    { name: 'Physical and chemical changes', code: 'RXN1', suggestedLessons: 1 },
-    { name: 'Rate of reaction: factors affecting (concentration, temperature, surface area, catalyst)', code: 'RXN2', suggestedLessons: 4 },
-    { name: 'Investigations into rate of reaction; collision theory', code: 'RXN3', suggestedLessons: 3 },
-    { name: "Reversible reactions and dynamic equilibrium; Le Chatelier's principle (Extended)", code: 'RXN4', suggestedLessons: 3 },
-    { name: 'Redox reactions: oxidation and reduction; oxidation states (Extended)', code: 'RXN5', suggestedLessons: 3 },
+  { topic: 'Topic 6 · Chemical Reactions', code: '6', subtopics: [
+    { name: 'Rates of reaction: measuring rates and interpreting graphs', code: '024', suggestedLessons: 1 },
+    { name: 'Collision theory: effect of concentration, pressure and surface area', code: '025', suggestedLessons: 1 },
+    { name: 'Collision theory: effect of temperature and catalysts', code: '026', suggestedLessons: 1 },
+    { name: 'Reversible reactions and dynamic equilibrium conditions', code: '027', suggestedLessons: 1 },
+    { name: 'Shifting position of equilibrium: Le Chatelier\'s principle', code: '028', suggestedLessons: 1 },
+    { name: 'Industrial processes: the Haber process and the Contact process', code: '029', suggestedLessons: 1 },
+    { name: 'Redox reactions: oxidation numbers, oxidising agents and reducing agents', code: '030', suggestedLessons: 1 },
   ]},
-  { topic: 'Acids, bases and salts (ABS)', code: 'ABS', subtopics: [
-    { name: 'Properties of acids, alkalis and bases; pH scale and indicators', code: 'ABS1', suggestedLessons: 3 },
-    { name: 'Strong and weak acids (Extended); neutralisation reactions', code: 'ABS2', suggestedLessons: 3 },
-    { name: 'Oxides: acidic, basic, amphoteric, neutral', code: 'ABS3', suggestedLessons: 2 },
-    { name: 'Preparation of soluble and insoluble salts; titration; crystallisation', code: 'ABS4', suggestedLessons: 4 },
-    { name: 'Identification of ions: cations (flame tests, NaOH, ammonia) and anions (carbonate, halide, sulfate, nitrate)', code: 'ABS5', suggestedLessons: 3 },
-    { name: 'Identification of gases: H2, O2, CO2, NH3, Cl2', code: 'ABS6', suggestedLessons: 1 },
+  { topic: 'Topic 7 · Acids, Bases and Salts', code: '7', subtopics: [
+    { name: 'Properties of acids and bases, the pH scale and universal indicator', code: '031', suggestedLessons: 1 },
+    { name: 'Characteristic chemical reactions of acids with metals, bases and carbonates', code: '032', suggestedLessons: 1 },
+    { name: 'Classification of oxides: acidic, basic, amphoteric and neutral', code: '033', suggestedLessons: 1 },
+    { name: 'Preparation of soluble salts using excess reactant and filtration', code: '034', suggestedLessons: 1 },
+    { name: 'Preparation of insoluble salts via precipitation and ionic equations', code: '035', suggestedLessons: 1 },
+    { name: 'Titration technique: preparing soluble salts from acids and alkalis', code: '036', suggestedLessons: 1 },
+    { name: 'Water of crystallisation and hydrated versus anhydrous salts', code: '037', suggestedLessons: 1 },
   ]},
-  { topic: 'The Periodic Table (PTB)', code: 'PTB', subtopics: [
-    { name: 'Arrangement of elements: groups and periods; structure of periodic table', code: 'PTB1', suggestedLessons: 2 },
-    { name: 'Group I — alkali metals: properties, reactivity trend', code: 'PTB2', suggestedLessons: 3 },
-    { name: 'Group VII — halogens: properties, reactivity trend, displacement reactions', code: 'PTB3', suggestedLessons: 3 },
-    { name: 'Group VIII — noble gases: properties and uses', code: 'PTB4', suggestedLessons: 1 },
-    { name: 'Transition elements: properties and uses', code: 'PTB5', suggestedLessons: 2 },
+  { topic: 'Topic 8 · The Periodic Table', code: '8', subtopics: [
+    { name: 'Arrangement of the Periodic Table and trends down groups and across periods', code: '038', suggestedLessons: 1 },
+    { name: 'Group 1 alkali metals: physical properties and reactivity trends with water', code: '039', suggestedLessons: 1 },
+    { name: 'Group 7 halogens: physical properties, colour trends and displacement reactions', code: '040', suggestedLessons: 1 },
+    { name: 'Group 8 noble gases: electronic structure and chemical inertness', code: '041', suggestedLessons: 1 },
+    { name: 'Transition elements: properties, coloured compounds and use as catalysts', code: '042', suggestedLessons: 1 },
   ]},
-  { topic: 'Metals (MET)', code: 'MET', subtopics: [
-    { name: 'Physical properties of metals; alloys (brass, stainless steel) and their uses', code: 'MET1', suggestedLessons: 2 },
-    { name: 'Reactivity series; reactions of metals with water, acids, and oxygen', code: 'MET2', suggestedLessons: 4 },
-    { name: 'Displacement reactions of metals; redox in context (Extended)', code: 'MET3', suggestedLessons: 2 },
-    { name: 'Extraction of metals: iron in blast furnace; recycling', code: 'MET4', suggestedLessons: 4 },
-    { name: 'Aluminium: extraction by electrolysis; uses; corrosion of iron (rusting)', code: 'MET5', suggestedLessons: 2 },
+  { topic: 'Topic 9 · Metals', code: '9', subtopics: [
+    { name: 'Physical and chemical properties of metals and the metal reactivity series', code: '043', suggestedLessons: 1 },
+    { name: 'Displacement reactions of metals and metal oxides', code: '044', suggestedLessons: 1 },
+    { name: 'Extraction of iron in the Blast Furnace: raw materials and equations', code: '045', suggestedLessons: 1 },
+    { name: 'Extraction of aluminium using electrolysis with cryolite and bauxite', code: '046', suggestedLessons: 1 },
+    { name: 'Alloys and methods for preventing iron corrosion including sacrificial protection', code: '047', suggestedLessons: 1 },
   ]},
-  { topic: 'Chemistry of the environment (ENV)', code: 'ENV', subtopics: [
-    { name: 'Water: tests for purity; treatment of domestic water', code: 'ENV1', suggestedLessons: 2 },
-    { name: 'Fertilisers: NPK; ammonia production (Haber process)', code: 'ENV2', suggestedLessons: 3 },
-    { name: 'Air composition; air pollutants (CO, SO2, NOx, particulates); methods of reducing', code: 'ENV3', suggestedLessons: 3 },
-    { name: 'Greenhouse effect, global warming; climate change', code: 'ENV4', suggestedLessons: 2 },
+  { topic: 'Topic 10 · Chemistry of the Environment', code: '10', subtopics: [
+    { name: 'Water testing and water purification processes in treatment plants', code: '048', suggestedLessons: 1 },
+    { name: 'Air quality: atmospheric pollutants and their sources', code: '049', suggestedLessons: 1 },
+    { name: 'Greenhouse gases, climate change and catalytic converters', code: '050', suggestedLessons: 1 },
   ]},
-  { topic: 'Organic chemistry (ORG)', code: 'ORG', subtopics: [
-    { name: 'Fuels: petroleum (crude oil); fractional distillation; uses of fractions', code: 'ORG1', suggestedLessons: 3 },
-    { name: 'Naming organic compounds; functional groups; homologous series', code: 'ORG2', suggestedLessons: 3 },
-    { name: 'Alkanes: structure, properties, combustion reactions', code: 'ORG3', suggestedLessons: 3 },
-    { name: 'Alkenes: structure, properties; addition reactions (with bromine, hydrogen)', code: 'ORG4', suggestedLessons: 3 },
-    { name: 'Alcohols: structure, properties; combustion; production of ethanol (fermentation, hydration of ethene)', code: 'ORG5', suggestedLessons: 3 },
-    { name: 'Carboxylic acids: structure, properties; reactions with metals, carbonates, alkalis', code: 'ORG6', suggestedLessons: 2 },
-    { name: 'Polymers: addition polymerisation; uses; environmental issues (plastics)', code: 'ORG7', suggestedLessons: 3 },
-    { name: 'Condensation polymerisation; proteins, carbohydrates (Extended)', code: 'ORG8', suggestedLessons: 2 },
+  { topic: 'Topic 11 · Organic Chemistry', code: '11', subtopics: [
+    { name: 'Introduction to organic compounds: homologous series, functional groups and naming', code: '051', suggestedLessons: 1 },
+    { name: 'Petroleum: fractional distillation and uses of fractions', code: '052', suggestedLessons: 1 },
+    { name: 'Alkanes: general formula, saturated structure and physical trends', code: '053', suggestedLessons: 1 },
+    { name: 'Reactions of alkanes: combustion and substitution with halogens', code: '054', suggestedLessons: 1 },
+    { name: 'Alkenes: general formula, unsaturated structure and cracking', code: '055', suggestedLessons: 1 },
+    { name: 'Addition reactions of alkenes including the bromine water test', code: '056', suggestedLessons: 1 },
+    { name: 'Alcohols: functional group, structure and manufacture by hydration of ethene', code: '057', suggestedLessons: 1 },
+    { name: 'Fermentation of glucose to produce ethanol, and properties and uses of alcohols', code: '058', suggestedLessons: 1 },
+    { name: 'Carboxylic acids: functional group and reactions with metals and carbonates', code: '059', suggestedLessons: 1 },
+    { name: 'Esters: esterification, naming and sweet-smelling properties', code: '060', suggestedLessons: 1 },
+    { name: 'Polymers: macromolecules and addition polymerisation', code: '061', suggestedLessons: 1 },
+    { name: 'Condensation polymerisation: nylon and polyester formation', code: '062', suggestedLessons: 1 },
+    { name: 'Biological macromolecules: proteins and complex carbohydrates', code: '063', suggestedLessons: 1 },
+    { name: 'Plastics disposal problems and recycling challenges', code: '064', suggestedLessons: 1 },
   ]},
-  { topic: 'Experimental techniques and chemical analysis (EXP)', code: 'EXP', subtopics: [
-    { name: 'Measurement: mass, time, temperature, volume (liquids and gases)', code: 'EXP1', suggestedLessons: 2 },
-    { name: 'Methods of separation: filtration, crystallisation, simple/fractional distillation', code: 'EXP2', suggestedLessons: 3 },
-    { name: 'Chromatography: paper chromatography; Rf values; locating agents', code: 'EXP3', suggestedLessons: 3 },
-    { name: 'Criteria of purity: melting and boiling points', code: 'EXP4', suggestedLessons: 2 },
+  { topic: 'Topic 12 · Experimental Techniques and Chemical Analysis', code: '12', subtopics: [
+    { name: 'Choosing appropriate apparatus for measuring volume, mass and temperature', code: '065', suggestedLessons: 1 },
+    { name: 'Separation techniques: filtration, evaporation and crystallisation', code: '066', suggestedLessons: 1 },
+    { name: 'Separation techniques: simple and fractional distillation', code: '067', suggestedLessons: 1 },
+    { name: 'Paper chromatography and calculating Rf values', code: '068', suggestedLessons: 1 },
+    { name: 'Purity criteria: melting point and boiling point determinations', code: '069', suggestedLessons: 1 },
+    { name: 'Flame tests for metal cations', code: '070', suggestedLessons: 1 },
+    { name: 'Aqueous cation tests using sodium hydroxide and aqueous ammonia', code: '071', suggestedLessons: 1 },
+    { name: 'Anion tests: halides and sulfates', code: '072', suggestedLessons: 1 },
+    { name: 'Anion tests: carbonates and nitrate reduction', code: '073', suggestedLessons: 1 },
+    { name: 'Gas tests: hydrogen, oxygen, carbon dioxide, chlorine and ammonia', code: '074', suggestedLessons: 1 },
+  ]},
+]
+
+const IGCSE_CHEMISTRY_EDX = [
+  { topic: 'Section 1 · Principles of Chemistry', code: '1', subtopics: [
+    { name: 'States of matter, particle arrangements and interconversion energy changes', code: '001', suggestedLessons: 1 },
+    { name: 'Elements, compounds and mixtures', code: '002', suggestedLessons: 1 },
+    { name: 'Core practical: simple distillation and fractional distillation', code: '003', suggestedLessons: 1 },
+    { name: 'Core practical: filtration, crystallisation and paper chromatography', code: '004', suggestedLessons: 1 },
+    { name: 'Atomic structure, atomic number, mass number and standard notation', code: '005', suggestedLessons: 1 },
+    { name: 'Isotopes and relative atomic mass calculations', code: '006', suggestedLessons: 1 },
+    { name: 'The Periodic Table layout: periods, groups, metals and non-metals', code: '007', suggestedLessons: 1 },
+    { name: 'Electronic configurations and mapping electrons in shells', code: '008', suggestedLessons: 1 },
+    { name: 'Ionic bonding: electron transfer between metals and non-metals', code: '009', suggestedLessons: 1 },
+    { name: 'Properties of ionic compounds: melting points and electrical conductivity', code: '010', suggestedLessons: 1 },
+    { name: 'Covalent bonding: shared electron pairs in simple molecular structures', code: '011', suggestedLessons: 1 },
+    { name: 'Properties of simple molecular substances', code: '012', suggestedLessons: 1 },
+    { name: 'Giant covalent structures: diamond and graphite', code: '013', suggestedLessons: 1 },
+    { name: 'Giant covalent structures: C60 fullerene and silicon dioxide', code: '014', suggestedLessons: 1 },
+    { name: 'Metallic bonding: delocalised sea of electrons and properties', code: '015', suggestedLessons: 1 },
+    { name: 'Writing word equations and balanced chemical symbol equations', code: '016', suggestedLessons: 1 },
+    { name: 'Relative formula mass calculations', code: '017', suggestedLessons: 1 },
+    { name: 'The Mole concept: calculating moles from mass and molar mass', code: '018', suggestedLessons: 1 },
+    { name: 'Empirical and molecular formula calculations from experimental data', code: '019', suggestedLessons: 1 },
+    { name: 'Concentration calculations and reacting masses', code: '020', suggestedLessons: 1 },
+  ]},
+  { topic: 'Section 2 · Inorganic Chemistry', code: '2', subtopics: [
+    { name: 'Group 1 alkali metals: physical trends and reactions with water', code: '021', suggestedLessons: 1 },
+    { name: 'Group 1 reactivity trend explanation and storage safety', code: '022', suggestedLessons: 1 },
+    { name: 'Group 7 halogens: physical properties, colours and states', code: '023', suggestedLessons: 1 },
+    { name: 'Group 7 displacement reactions and reactivity trends', code: '024', suggestedLessons: 1 },
+    { name: 'Gases in the atmosphere and determining the percentage of oxygen', code: '025', suggestedLessons: 1 },
+    { name: 'Laboratory preparation of oxygen and carbon dioxide, and thermal decomposition', code: '026', suggestedLessons: 1 },
+    { name: 'The greenhouse effect, carbon dioxide and climate implications', code: '027', suggestedLessons: 1 },
+    { name: 'Reactivity series of metals using displacement reactions', code: '028', suggestedLessons: 1 },
+    { name: 'Conditions for iron rusting and methods of prevention', code: '029', suggestedLessons: 1 },
+    { name: 'Oxidation, reduction, oxidising agents and reducing agents', code: '030', suggestedLessons: 1 },
+    { name: 'Extraction of metals related to position in the reactivity series', code: '031', suggestedLessons: 1 },
+    { name: 'Extraction of aluminium by electrolysis with cryolite', code: '032', suggestedLessons: 1 },
+    { name: 'Extraction of iron in the Blast Furnace', code: '033', suggestedLessons: 1 },
+    { name: 'Alloys: definition, structure and why alloys are harder than pure metals', code: '034', suggestedLessons: 1 },
+    { name: 'Acids and alkalis: pH scale, indicators and hydrogen ion concentration', code: '035', suggestedLessons: 1 },
+    { name: 'Neutralisation reactions with metals, bases, alkalis and carbonates', code: '036', suggestedLessons: 1 },
+    { name: 'Core practical: preparing a soluble salt from an insoluble base or carbonate', code: '037', suggestedLessons: 1 },
+    { name: 'Core practical: acid-alkali titration using indicators', code: '038', suggestedLessons: 1 },
+    { name: 'Solubility rules and precipitation reactions for insoluble salts', code: '039', suggestedLessons: 1 },
+    { name: 'Flame tests and chemical tests for common gases and ions', code: '040', suggestedLessons: 1 },
+  ]},
+  { topic: 'Section 3 · Physical Chemistry', code: '3', subtopics: [
+    { name: 'Exothermic and endothermic reactions and sign conventions for enthalpy change', code: '041', suggestedLessons: 1 },
+    { name: 'Core practical: investigating temperature changes in neutralisation and displacement', code: '042', suggestedLessons: 1 },
+    { name: 'Energy level diagrams for exothermic and endothermic reactions', code: '043', suggestedLessons: 1 },
+    { name: 'Bond breaking and bond making calculations', code: '044', suggestedLessons: 1 },
+    { name: 'Rates of reaction: practical methods for measuring rate over time', code: '045', suggestedLessons: 1 },
+    { name: 'Collision theory: effect of concentration and pressure', code: '046', suggestedLessons: 1 },
+    { name: 'Collision theory: effect of temperature and surface area', code: '047', suggestedLessons: 1 },
+    { name: 'Catalysts: how they lower activation energy and provide alternative pathways', code: '048', suggestedLessons: 1 },
+    { name: 'Core practical: investigating factors that affect the speed of a reaction', code: '049', suggestedLessons: 1 },
+    { name: 'Reversible reactions and dynamic equilibrium characteristics', code: '050', suggestedLessons: 1 },
+    { name: 'Position of equilibrium: effects of changing temperature and pressure', code: '051', suggestedLessons: 1 },
+    { name: 'Industrial conditions for the Haber process', code: '052', suggestedLessons: 1 },
+  ]},
+  { topic: 'Section 4 · Organic Chemistry', code: '4', subtopics: [
+    { name: 'Introduction to crude oil: formation and separation by fractional distillation', code: '053', suggestedLessons: 1 },
+    { name: 'Properties of fractions: viscosity, volatility and boiling point trends', code: '054', suggestedLessons: 1 },
+    { name: 'Hydrocarbon cracking: thermal cracking, catalysts and why fractions are cracked', code: '055', suggestedLessons: 1 },
+    { name: 'Alkanes: general formula, saturated characteristics and molecular structure', code: '056', suggestedLessons: 1 },
+    { name: 'Halogenation of alkanes: substitution in the presence of ultraviolet light', code: '057', suggestedLessons: 1 },
+    { name: 'Alkenes: general formula, unsaturated characteristics and functional group', code: '058', suggestedLessons: 1 },
+    { name: 'Addition reactions of alkenes with bromine water: the test for unsaturation', code: '059', suggestedLessons: 1 },
+    { name: 'Addition reactions of alkenes with hydrogen, steam and halogens', code: '060', suggestedLessons: 1 },
+    { name: 'Alcohols: functional group, general formula and physical properties', code: '061', suggestedLessons: 1 },
+    { name: 'Manufacturing ethanol by hydration of ethene with steam', code: '062', suggestedLessons: 1 },
+    { name: 'Manufacturing ethanol by fermentation of glucose', code: '063', suggestedLessons: 1 },
+    { name: 'Oxidation of alcohols to form carboxylic acids', code: '064', suggestedLessons: 1 },
+    { name: 'Carboxylic acids: functional group and properties as weak acids', code: '065', suggestedLessons: 1 },
+    { name: 'Reactions of carboxylic acids with metals, carbonates and alkalis', code: '066', suggestedLessons: 1 },
+    { name: 'Esters: formation from a carboxylic acid and an alcohol', code: '067', suggestedLessons: 1 },
+    { name: 'Polymers: monomers, polymers and repeat units', code: '068', suggestedLessons: 1 },
+    { name: 'Addition polymerisation: polyethene, PVC and PTFE', code: '069', suggestedLessons: 1 },
+    { name: 'Disposal problems of addition polymers', code: '070', suggestedLessons: 1 },
+    { name: 'Condensation polymerisation: polyesters and polyamides', code: '071', suggestedLessons: 1 },
+    { name: 'Biodegradable polymers and condensation versus addition structures', code: '072', suggestedLessons: 1 },
   ]},
 ]
 // ── IGCSE PHYSICS 0625 ─────────────────────────────────────
@@ -13057,7 +13156,7 @@ const IGCSE_PHYSICS_0625 = [
 // using the IGCSE_LIBRARY below.
 const IGCSE_SCIENCES_LIBRARY = [
   { match: /\bbiology\b/i,    const_: IGCSE_BIOLOGY_0610,   source: 'IGCSE Biology — 130-lesson scheme (Cambridge 0610 & Edexcel 4BI1)' },
-  { match: /\bchemistry\b/i,  const_: IGCSE_CHEMISTRY_0620, source: 'Cambridge IGCSE Chemistry 0620' },
+  { match: /\bchemistry\b/i,  const_: IGCSE_CHEMISTRY_CAM,  source: 'Cambridge IGCSE Chemistry 0620 — 74-lesson scheme' },
   { match: /\bphysics\b/i,    const_: IGCSE_PHYSICS_0625,   source: 'Cambridge IGCSE Physics 0625' },
 ]
 
@@ -13414,7 +13513,15 @@ const IGCSE_ESL_0510 = [
 const IGCSE_LIBRARY = [
   // Sciences (also in IGCSE_SCIENCES_LIBRARY for legacy compat)
   { match: /\bbiology\b/i,                       const_: IGCSE_BIOLOGY_0610,      source: 'IGCSE Biology — 130-lesson scheme (Cambridge 0610 & Edexcel 4BI1)' },
-  { match: /\bchemistry\b/i,                     const_: IGCSE_CHEMISTRY_0620,    source: 'Cambridge IGCSE Chemistry 0620' },
+  // Chemistry is the first subject where the two boards genuinely differ:
+  // Cambridge 0620 runs 74 lessons in 12 topics, Edexcel 4CH1 runs 72 in 4
+  // sections. byCurriculum makes the loader pick the right one.
+  { match: /\bchemistry\b/i,
+    byCurriculum: {
+      CambridgeIGCSE: { const_: IGCSE_CHEMISTRY_CAM, source: 'Cambridge IGCSE Chemistry 0620 — 74-lesson scheme' },
+      EdexcelIGCSE:   { const_: IGCSE_CHEMISTRY_EDX, source: 'Edexcel International GCSE Chemistry 4CH1 — 72-lesson scheme' },
+    },
+    const_: IGCSE_CHEMISTRY_CAM, source: 'Cambridge IGCSE Chemistry 0620 — 74-lesson scheme' },
   { match: /\bphysics\b/i,                       const_: IGCSE_PHYSICS_0625,      source: 'Cambridge IGCSE Physics 0625' },
   // English subjects — order matters: ESL and Literature must be matched
   // BEFORE the broader English Language regex (otherwise "English Literature"
@@ -13909,7 +14016,10 @@ function SyllabusSpineTab({ toast }) {
 
   const loadIgcseSpine = async () => {
     if (!subjectId) { toast?.error?.('Pick a subject first.'); return }
-    const entry = IGCSE_LIBRARY.find(e => e.match.test(subjectName))
+    const found = IGCSE_LIBRARY.find(e => e.match.test(subjectName))
+    // Where a subject has different schemes per board, pick the one that
+    // matches the curriculum currently selected.
+    const entry = found?.byCurriculum?.[curriculum] || found
     if (!entry) {
       toast?.error?.('No IGCSE spine matches "' + subjectName + '". Available: Mathematics (use the IGCSE Maths 0580 button), Biology, Chemistry, Physics, English Language, Literature in English, ESL, Business Studies, Economics, Geography, History, Sociology.')
       return
