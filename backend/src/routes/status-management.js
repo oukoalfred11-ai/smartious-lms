@@ -11,7 +11,7 @@ const router = express.Router();
 // ─────────────────────────────────────────────────────────────────
 
 // PATCH /api/users/:id/student-status - Change student status (admin only)
-router.patch('/:id/student-status', auth, requireRole('admin'), async (req, res) => {
+router.patch('/:id/student-status', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { newStatus, reason } = req.body;
     const student = await User.findById(req.params.id);
@@ -91,7 +91,7 @@ router.patch('/:id/student-status', auth, requireRole('admin'), async (req, res)
 });
 
 // GET /api/users/students/status - Get all students by status
-router.get('/students/status', auth, requireRole('admin'), async (req, res) => {
+router.get('/students/status', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const status = req.query.status || 'Active';
     const students = await User.find({
@@ -173,7 +173,7 @@ router.post('/', auth, requireRole('teacher'), async (req, res) => {
 });
 
 // GET /api/leave-requests - Get all leave requests (admin only)
-router.get('/', auth, requireRole('admin'), async (req, res) => {
+router.get('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const status = req.query.status || 'Pending';
     const leaveRequests = await TeacherLeaveRequest.find({ status })
@@ -188,7 +188,7 @@ router.get('/', auth, requireRole('admin'), async (req, res) => {
 });
 
 // GET /api/leave-requests/pending-count - Get count of pending leave requests (admin only)
-router.get('/pending-count', auth, requireRole('admin'), async (req, res) => {
+router.get('/pending-count', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const pendingCount = await TeacherLeaveRequest.countDocuments({ status: 'Pending' });
     res.json({ success: true, pendingCount });
@@ -198,7 +198,7 @@ router.get('/pending-count', auth, requireRole('admin'), async (req, res) => {
 });
 
 // PATCH /api/leave-requests/:id/approve - Approve leave request (admin only)
-router.patch('/:id/approve', auth, requireRole('admin'), async (req, res) => {
+router.patch('/:id/approve', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const leaveRequest = await TeacherLeaveRequest.findById(req.params.id)
       .populate('teacherId', '_id firstName lastName email');
@@ -261,7 +261,7 @@ router.patch('/:id/approve', auth, requireRole('admin'), async (req, res) => {
 });
 
 // PATCH /api/leave-requests/:id/reject - Reject leave request (admin only)
-router.patch('/:id/reject', auth, requireRole('admin'), async (req, res) => {
+router.patch('/:id/reject', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { rejectionReason } = req.body;
     const leaveRequest = await TeacherLeaveRequest.findById(req.params.id);
@@ -347,4 +347,3 @@ router.patch('/:id/cancel', auth, async (req, res) => {
 });
 
 module.exports = router;
-
