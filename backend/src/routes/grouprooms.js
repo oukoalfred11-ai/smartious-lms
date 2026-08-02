@@ -44,7 +44,7 @@ router.get('/', auth, async (req, res) => {
 // Used by admin to push localStorage rooms to backend so they
 // can be looked up by ID for Zoom operations.
 // ─────────────────────────────────────────────────────────
-router.post('/sync', auth, requireRole('admin'), async (req, res) => {
+router.post('/sync', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { rooms } = req.body;
 
