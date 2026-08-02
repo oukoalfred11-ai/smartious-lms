@@ -292,7 +292,7 @@ router.post(
  * GET /api/payments/admin/all
  * Query: ?status=success|pending|failed  ?page=N  ?limit=N  ?search=<string>
  */
-router.get('/admin/all', auth, requireRole('admin'), async (req, res) => {
+router.get('/admin/all', auth, requireRole('admin', 'accountant'), async (req, res) => {
   try {
     const limit  = Math.min(parseInt(req.query.limit) || 30, 200)
     const page   = Math.max(parseInt(req.query.page)  || 1,  1)
@@ -343,7 +343,7 @@ router.get('/admin/all', auth, requireRole('admin'), async (req, res) => {
  * GET /api/payments/admin/:id
  * Full detail including raw Paystack data.
  */
-router.get('/admin/:id', auth, requireRole('admin'), async (req, res) => {
+router.get('/admin/:id', auth, requireRole('admin', 'accountant'), async (req, res) => {
   try {
     const payment = await Payment.findById(req.params.id)
       .populate('parentId',  'firstName lastName email phone')
@@ -363,7 +363,7 @@ router.get('/admin/:id', auth, requireRole('admin'), async (req, res) => {
  *
  * Manual override — use to confirm bank/M-Pesa transfers.
  */
-router.patch('/admin/:id/status', auth, requireRole('admin'), async (req, res) => {
+router.patch('/admin/:id/status', auth, requireRole('admin', 'accountant'), async (req, res) => {
   try {
     const { status, note } = req.body
     if (!['success', 'pending', 'failed'].includes(status))
@@ -392,7 +392,7 @@ router.patch('/admin/:id/status', auth, requireRole('admin'), async (req, res) =
  * Returns month-by-month confirmed revenue for the admin dashboard chart.
  * Query: ?months=12 (default)
  */
-router.get('/admin/revenue/monthly', auth, requireRole('admin'), async (req, res) => {
+router.get('/admin/revenue/monthly', auth, requireRole('admin', 'accountant'), async (req, res) => {
   try {
     const months = Math.min(parseInt(req.query.months) || 12, 36)
     const since  = new Date()
