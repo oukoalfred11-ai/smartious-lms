@@ -1,0 +1,50 @@
+export const TOKENS = {
+  // Brand
+  crimson: '#7D1025',
+  crimsonDeep: '#5A0B1B',
+  crimsonLight: '#A51C2E',
+  gold: '#C9A030',
+  goldLight: '#F0CC5A',
+  goldPale: '#FBF6E3',
+  cream: '#FBFAF5',
+  // Module accents (warm, refined Apple-style)
+  accentTeal: '#0F766E',
+  accentEmerald: '#15803D',
+  accentNavy: '#1E3A8A',
+  accentAmber: '#B45309',
+  accentPurple: '#6B21A8',
+  accentRose: '#BE123C',
+  accentSlate: '#475569',
+  accentOcean: '#0369A1',
+  // Neutrals
+  ink: '#1A0F0E',
+  s900: '#231715',
+  s700: '#564844',
+  s500: '#857973',
+  s400: '#A89E99',
+  s300: '#CFC7C2',
+  s200: '#E8E1DC',
+  s100: '#F4EFEB',
+  s50: '#FAF7F4',
+  white: '#FFFFFF',
+  // Spacing scale (premium = generous)
+  spacing: { xs: 4, sm: 8, md: 14, lg: 22, xl: 32, xxl: 48 },
+}
+
+export const SCHOOL_CURRICULA = [
+  { id: 'CambridgePrimary',   name: 'Cambridge Primary' },
+  { id: 'CambridgeLowerSec',  name: 'Cambridge Lower Secondary' },
+  { id: 'CambridgeIGCSE',     name: 'Cambridge IGCSE' },
+  { id: 'CambridgeALevel',    name: 'Cambridge A-Level' },
+  { id: 'EdexcelLowerSec',    name: 'Edexcel Lower Secondary' },
+  { id: 'EdexcelIGCSE',       name: 'Edexcel IGCSE' },
+  { id: 'EdexcelALevel',      name: 'Edexcel A-Level' },
+  { id: 'AQALowerSec',        name: 'AQA Lower Secondary' },
+  { id: 'AQAGCSE',            name: 'AQA GCSE' },
+  { id: 'AQAALevel',          name: 'AQA A-Level' },
+  { id: 'IB',                 name: 'International Baccalaureate (IB)' },
+  { id: 'BNC',                name: 'British National Curriculum' },
+  { id: 'American',           name: 'American Curriculum' },
+  { id: 'Canadian',           name: 'Canadian Curriculum' },
+  { id: 'KenyaCBC',           name: 'Kenya CBC' },
+]
