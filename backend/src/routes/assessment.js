@@ -751,7 +751,7 @@ router.get('/requests/:id', auth, requireRole('admin', 'sales', 'ops_manager'), 
 // email here — that's tied to the separate Paystack invoicing
 // workflow which is out of scope for this endpoint.
 // ═══════════════════════════════════════════════════════════
-router.patch('/requests/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+router.patch('/requests/:id', auth, requireRole('admin', 'ops_manager', 'sales'), async (req, res) => {
   try {
     const { status, internalNotes, message } = req.body || {};
     const doc = await AssessmentRequest.findById(req.params.id);
