@@ -107,7 +107,7 @@ async function resolveStudentSubjects(student) {
 }
 
 // GET /api/allocations - List all allocations
-router.get('/', auth, requireRole('admin'), async (req, res) => {
+router.get('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     let allocations = await Allocation.find()
       .populate('studentId', 'firstName lastName email curriculum')
@@ -127,7 +127,7 @@ router.get('/', auth, requireRole('admin'), async (req, res) => {
 });
 
 // GET /api/allocations/pending-count
-router.get('/pending-count', auth, requireRole('admin'), async (req, res) => {
+router.get('/pending-count', auth, requireRole('admin', 'ops_manager', 'dos', 'accountant', 'sales'), async (req, res) => {
   try {
     const students = await User.find({ role: 'student' })
       .select('_id curriculum subjects')
@@ -203,7 +203,7 @@ router.get('/student/:studentId', auth, async (req, res) => {
 });
 
 // GET /api/allocations/unallocated/:studentId
-router.get('/unallocated/:studentId', auth, requireRole('admin'), async (req, res) => {
+router.get('/unallocated/:studentId', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { studentId } = req.params;
 
@@ -255,7 +255,7 @@ router.get('/unallocated/:studentId', auth, requireRole('admin'), async (req, re
 });
 
 // GET /api/allocations/suggest-teachers/:studentId/:subjectId
-router.get('/suggest-teachers/:studentId/:subjectId', auth, requireRole('admin'), async (req, res) => {
+router.get('/suggest-teachers/:studentId/:subjectId', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { studentId, subjectId } = req.params;
 
@@ -312,7 +312,7 @@ router.get('/suggest-teachers/:studentId/:subjectId', auth, requireRole('admin')
 });
 
 // POST /api/allocations
-router.post('/', auth, requireRole('admin'), async (req, res) => {
+router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { studentId, subjectId, teacherId, sendEmails = true, canBeGrouped } = req.body;
 
@@ -488,7 +488,7 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
 });
 
 // PATCH /api/allocations/:id
-router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
+router.patch('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { teacherId, status } = req.body;
     const allocation = await Allocation.findById(req.params.id);
@@ -554,7 +554,7 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
 });
 
 // DELETE — disabled for audit trail
-router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
+router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   res.status(403).json({
     success: false,
     message: 'Allocation deletion is disabled. Use PATCH with status: Inactive to deactivate.'
@@ -562,7 +562,7 @@ router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
 });
 
 // GET /api/allocations/stats/summary
-router.get('/stats/summary', auth, requireRole('admin'), async (req, res) => {
+router.get('/stats/summary', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const totalAllocations = await Allocation.countDocuments({ status: 'Active' });
 
