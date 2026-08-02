@@ -6,7 +6,7 @@
 const express = require('express')
 const router  = express.Router()
 const { auth, requireRole } = require('../middleware/auth')
-const ALLOWED = requireRole('admin', 'ops_manager', 'accountant')
+const ALLOWED = requireRole('admin', 'ops_manager', 'accountant', 'dos')
 
 const Report   = require('../models/Report')
 const User     = require('../models/User')
