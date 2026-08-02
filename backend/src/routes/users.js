@@ -125,7 +125,7 @@ function validateRoleFields(user, role) {
 }
 
 // GET /stats — Get total user count for sidebar badge
-router.get('/stats', auth, requireRole('admin'), async (req, res) => {
+router.get('/stats', auth, requireRole('admin', 'ops_manager', 'dos', 'accountant', 'sales'), async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     res.json({ success: true, totalUsers });
@@ -135,7 +135,7 @@ router.get('/stats', auth, requireRole('admin'), async (req, res) => {
 });
 
 // GET all users (admin only) with advanced search and filtering
-router.get('/', auth, requireRole('admin', 'teacher'), async (req, res) => {
+router.get('/', auth, requireRole('admin', 'ops_manager', 'teacher'), async (req, res) => {
   try {
     const { search, role, curriculum } = req.query;
     let query = {};
@@ -170,7 +170,7 @@ router.get('/', auth, requireRole('admin', 'teacher'), async (req, res) => {
 });
 
 // GET student by admission number (for parent linking in admin form)
-router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin'), async (req, res) => {
+router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { admissionNumber } = req.params;
     if (!admissionNumber) {
@@ -191,7 +191,7 @@ router.get('/students/by-admission/:admissionNumber', auth, requireRole('admin')
 });
 
 // GET all students (for parent selection)
-router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
+router.get('/students/list', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const students = await User.find({ role: 'student' })
       .select('_id firstName lastName email curriculum grade gradeLevel subjects admissionNumber programme deliveryMode isActive status')
@@ -204,7 +204,7 @@ router.get('/students/list', auth, requireRole('admin'), async (req, res) => {
 });
 
 // GET all teachers (for allocations)
-router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
+router.get('/teachers/list', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const teachers = await User.find({ role: 'teacher' })
       .select('_id firstName lastName email phone curriculum subjects createdAt status isActive isOnLeave leaveStartDate leaveEndDate jobTitle avatar bio yearsOfExperience teachingSpecialties statusReason sentEmails')
@@ -219,7 +219,7 @@ router.get('/teachers/list', auth, requireRole('admin'), async (req, res) => {
 // POST /api/users/:id/avatar — admin uploads a profile image
 // for any user. Returns the Cloudinary URL and also saves it to
 // the user's avatar field.
-router.post('/:id/avatar', auth, requireRole('admin'), (req, res) => {
+router.post('/:id/avatar', auth, requireRole('admin', 'ops_manager'), (req, res) => {
   if (!uploadAvatar) {
     return res.status(503).json({
       success: false,
@@ -260,7 +260,7 @@ router.post('/:id/avatar', auth, requireRole('admin'), (req, res) => {
 // subject+curriculum pair. Used by the admin Manage Students module
 // to populate the teacher-allocation dropdown after the admin has
 // chosen a (student, subject) pair to allocate.
-router.get('/teachers/qualified', auth, requireRole('admin'), async (req, res) => {
+router.get('/teachers/qualified', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const mongoose = require('mongoose');
     const { subjectId, curriculum } = req.query;
@@ -295,7 +295,7 @@ router.get('/teachers/qualified', auth, requireRole('admin'), async (req, res) =
 // product, same shape the teacher self-service endpoint produces.
 // This is separate from PATCH /:id so the admin can manage specialties
 // without triggering the legacy subjectRefs-based rebuild.
-router.patch('/teachers/:id/specialties', auth, requireRole('admin'), async (req, res) => {
+router.patch('/teachers/:id/specialties', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const mongoose = require('mongoose');
     const Subject  = require('../models/Subject');
@@ -520,7 +520,7 @@ router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
 // POST /api/users/:id/link-parent
 // Links an EXISTING parent account to a student (both ways).
 // Body: { parentId }
-router.post('/:id/link-parent', auth, requireRole('admin'), async (req, res) => {
+router.post('/:id/link-parent', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const mongoose = require('mongoose');
     const { parentId } = req.body;
@@ -574,7 +574,7 @@ router.post('/:id/link-parent', auth, requireRole('admin'), async (req, res) => 
 // Body: { firstName, lastName, email, phone }
 // The parent gets a real account (temp password, welcome email)
 // via the same path as any admin-created parent.
-router.post('/:id/create-and-link-parent', auth, requireRole('admin'), async (req, res) => {
+router.post('/:id/create-and-link-parent', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { firstName, lastName, email, phone } = req.body;
 
@@ -658,7 +658,7 @@ router.post('/:id/create-and-link-parent', auth, requireRole('admin'), async (re
 });
 
 // DELETE /api/users/:id/parent — unlink a student's parent (both ways)
-router.delete('/:id/parent', auth, requireRole('admin'), async (req, res) => {
+router.delete('/:id/parent', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const student = await User.findById(req.params.id);
     if (!student || student.role !== 'student')
@@ -782,7 +782,7 @@ router.patch('/:id', auth, requireRole('admin','ops_manager'), async (req, res) 
 });
 
 // PATCH /api/users/:id/leave - Set teacher on leave or return from leave (admin only)
-router.patch('/:id/leave', auth, requireRole('admin'), async (req, res) => {
+router.patch('/:id/leave', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
@@ -820,7 +820,7 @@ router.patch('/:id/leave', auth, requireRole('admin'), async (req, res) => {
 // POST /api/users/:id/send-email — admin sends a branded email to a teacher
 // Body: { subject, body, kind }
 // Records the send in the teacher's sentEmails history.
-router.post('/:id/send-email', auth, requireRole('admin'), async (req, res) => {
+router.post('/:id/send-email', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { subject, body, kind = 'memo' } = req.body;
 
@@ -879,7 +879,7 @@ router.post('/:id/send-email', auth, requireRole('admin'), async (req, res) => {
 // MODEL A: lessons/questions belong to subjects and are NOT deleted.
 // Only the teacher's Allocations need handling. This endpoint reports
 // the counts so the admin can confirm with full information.
-router.get('/:id/delete-impact', auth, requireRole('admin'), async (req, res) => {
+router.get('/:id/delete-impact', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const mongoose = require('mongoose');
     const Allocation = require('../models/Allocation');
@@ -909,7 +909,7 @@ router.get('/:id/delete-impact', auth, requireRole('admin'), async (req, res) =>
   }
 });
 
-router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
+router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const Allocation = require('../models/Allocation');
     const target = await User.findById(req.params.id);
