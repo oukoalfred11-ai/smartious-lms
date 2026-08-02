@@ -66,7 +66,7 @@ router.get('/curriculum/:curriculum', async (req, res) => {
 });
 
 // CREATE new subject (admin only) — "Quick Add" feature
-router.post('/', auth, requireRole('admin'), async (req, res) => {
+router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { curriculum, subjectName, category, code } = req.body;
     
@@ -108,7 +108,7 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
 });
 
 // UPDATE subject (admin only)
-router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
+router.patch('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { subjectName, category, code, isActive } = req.body;
     
@@ -130,7 +130,7 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
 });
 
 // DELETE subject (admin only)
-router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
+router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   res.status(403).json({
     success: false,
     message: 'Subject deletion is disabled. Use PATCH with isActive: false to deactivate. ' +
