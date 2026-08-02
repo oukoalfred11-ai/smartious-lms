@@ -97,7 +97,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/teachers - Create teacher (admin only)
-router.post('/', auth, requireRole('admin'), async (req, res) => {
+router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     if (!req.body.firstName || !req.body.lastName || !req.body.email) {
       return res.status(400).json({
@@ -241,7 +241,7 @@ router.post('/', auth, requireRole('admin'), async (req, res) => {
 });
 
 // PATCH /api/teachers/:id - Update teacher (admin only)
-router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
+router.patch('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const teacher = await Teacher.findById(req.params.id);
     if (!teacher)
@@ -330,7 +330,7 @@ router.patch('/:id', auth, requireRole('admin'), async (req, res) => {
 });
 
 // DELETE /api/teachers/:id - Delete teacher (admin only)
-router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
+router.delete('/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const teacher = await Teacher.findById(req.params.id);
     if (!teacher)
