@@ -21,7 +21,7 @@ const User       = require('../models/User')
 const Attendance = require('../models/Attendance')
 
 const SELF_ROLES = ['student','teacher','sales','ops_manager','accountant','dos']
-const ADMIN_ROLES = ['admin','dos','ops_manager']
+const ADMIN_ROLES = ['admin','dos','ops_manager','accountant','sales']
 
 function getTransporter() {
   const u = process.env.EMAIL_USER, p = process.env.EMAIL_PASSWORD
