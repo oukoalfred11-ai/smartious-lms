@@ -38,7 +38,7 @@ router.get('/topic/:id', auth, async (req, res) => {
 // ── POST /api/syllabus/topic ───────────────────────────────
 // Create a topic. Body: subjectId, topic, code?, topicOrder?,
 // subtopics?, sourceSyllabus?
-router.post('/topic', auth, requireRole('admin'), async (req, res) => {
+router.post('/topic', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { subjectId, topic } = req.body;
     if (!subjectId || !topic || !topic.trim())
@@ -77,7 +77,7 @@ router.post('/topic', auth, requireRole('admin'), async (req, res) => {
 
 // ── PATCH /api/syllabus/topic/:id ──────────────────────────
 // Update a topic's own fields and/or replace its subtopics.
-router.patch('/topic/:id', auth, requireRole('admin'), async (req, res) => {
+router.patch('/topic/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const update = {};
     if (typeof req.body.topic === 'string')      update.topic = req.body.topic.trim();
@@ -101,7 +101,7 @@ router.patch('/topic/:id', auth, requireRole('admin'), async (req, res) => {
 });
 
 // ── DELETE /api/syllabus/topic/:id ─────────────────────────
-router.delete('/topic/:id', auth, requireRole('admin'), async (req, res) => {
+router.delete('/topic/:id', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const doc = await SyllabusTopic.findByIdAndDelete(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'Topic not found.' });
@@ -114,7 +114,7 @@ router.delete('/topic/:id', auth, requireRole('admin'), async (req, res) => {
 
 // ── PATCH /api/syllabus/reorder ────────────────────────────
 // Bulk-set topicOrder. Body: { order: [topicId, topicId, ...] }
-router.patch('/reorder', auth, requireRole('admin'), async (req, res) => {
+router.patch('/reorder', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { order } = req.body;
     if (!Array.isArray(order))
@@ -133,7 +133,7 @@ router.patch('/reorder', auth, requireRole('admin'), async (req, res) => {
 // Replace the ENTIRE spine for a subject in one call. Used to
 // load a verified syllabus structure. Body: { subjectId, topics }
 // where topics = [{ topic, code, subtopics:[...] }, ...]
-router.post('/bulk', auth, requireRole('admin'), async (req, res) => {
+router.post('/bulk', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
   try {
     const { subjectId, topics, sourceSyllabus } = req.body;
     if (!subjectId || !Array.isArray(topics))
