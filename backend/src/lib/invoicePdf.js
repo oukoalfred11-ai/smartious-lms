@@ -2,8 +2,8 @@
  * lib/invoicePdf.js
  * ============================================================
  * Server-side branded PDF generation for invoices and receipts.
- * Used to attach a PDF to the invoice / receipt emails sent from
- * routes/invoices.js.
+ * Attached to emails in routes/invoices.js and streamed by the
+ * /pdf, /receipt-pdf and /preview-pdf endpoints.
  *
  * Uses pdfkit (pure JavaScript, no headless browser) so it is
  * safe on Render: no Chrome download, no cold-start penalty.
@@ -12,7 +12,8 @@
  *   buildInvoicePdfBuffer(inv)             -> Promise<Buffer>
  *   buildReceiptPdfBuffer(inv, receiptNo)  -> Promise<Buffer>
  *
- * Brand: Crimson #7D1025, Gold #C9A030, Ink #080C14, Bone #FDFAF4
+ * Invoice theme: Crimson #7D1025 with Gold #C9A030 accents.
+ * Receipt theme: Deep Green #065F46 premium with PAID stamp.
  */
 const PDFDocument = require('pdfkit')
 const fs = require('fs')
@@ -22,6 +23,9 @@ const LOGO_PATH = path.join(__dirname, '..', 'assets', 'logo.jpg')
 
 const CRIMSON = '#7D1025'
 const CRIMSON_DEEP = '#5A0B1B'
+const GREEN = '#065F46'
+const GREEN_MID = '#047857'
+const GREEN_TINT = '#F0FDF4'
 const GOLD = '#C9A030'
 const INK = '#1A1A1A'
 const GREY = '#6B6B6B'
@@ -53,15 +57,13 @@ function docToBuffer(build) {
   })
 }
 
-// ── Shared layout pieces ────────────────────────────────────
-function header(doc, titleText, refNo, dateLabel, dateValue) {
+// ── Shared layout pieces (theme-aware via accent + tint) ────
+function header(doc, titleText, refNo, dateLabel, dateValue, accent = CRIMSON) {
   const W = doc.page.width
-  // Top brand band
-  doc.rect(0, 0, W, 8).fill(CRIMSON)
+  doc.rect(0, 0, W, 8).fill(accent)
   doc.rect(0, 8, W, 2).fill(GOLD)
 
   if (fs.existsSync(LOGO_PATH)) {
-    // Clean framed logo lockup (aspect ~2.95:1)
     doc.image(LOGO_PATH, 48, 24, { width: 200 })
     doc.fillColor(GREY).font('Helvetica').fontSize(8.5)
       .text('Diamond Plaza Parklands, Nairobi  \u00B7  Karen Hardy, Nairobi', 48, 98)
@@ -76,10 +78,9 @@ function header(doc, titleText, refNo, dateLabel, dateValue) {
       .text('hellosmartious@gmail.com  \u00B7  +254 745 021 212  \u00B7  smartioushomeschool.com', 48, 74)
   }
 
-  // Right block: document title + ref + date
-  doc.fillColor(INK).font('Times-Bold').fontSize(20)
+  doc.fillColor(accent === CRIMSON ? INK : accent).font('Times-Bold').fontSize(20)
     .text(titleText, 330, 34, { width: 217, align: 'right' })
-  doc.fillColor(CRIMSON).font('Helvetica-Bold').fontSize(10)
+  doc.fillColor(accent).font('Helvetica-Bold').fontSize(10)
     .text(refNo, 330, 60, { width: 217, align: 'right' })
   doc.fillColor(GREY).font('Helvetica').fontSize(9)
     .text(dateLabel + ': ' + dateValue, 330, 74, { width: 217, align: 'right' })
@@ -88,7 +89,7 @@ function header(doc, titleText, refNo, dateLabel, dateValue) {
   return 140
 }
 
-function billedToBlock(doc, inv, y) {
+function billedToBlock(doc, inv, y, accent = CRIMSON, tint = BONE) {
   doc.fillColor(GOLD).font('Helvetica-Bold').fontSize(8)
     .text('BILLED TO', 48, y, { characterSpacing: 1.2 })
   doc.fillColor(INK).font('Helvetica-Bold').fontSize(11).text(inv.billedToName || '', 48, y + 13)
@@ -96,7 +97,6 @@ function billedToBlock(doc, inv, y) {
   if (inv.billedToAddress) { doc.font('Helvetica').fontSize(9).fillColor(GREY).text(inv.billedToAddress, 48, yy, { width: 240 }); yy = doc.y + 2 }
   if (inv.billedToEmail)   { doc.font('Helvetica').fontSize(9).fillColor(GREY).text(inv.billedToEmail, 48, yy); yy = doc.y + 2 }
 
-  // Student block on the right
   let ry = y
   if (inv.studentName || inv.studentGrade || inv.subject) {
     doc.fillColor(GOLD).font('Helvetica-Bold').fontSize(8)
@@ -109,19 +109,18 @@ function billedToBlock(doc, inv, y) {
   }
   let out = Math.max(yy, ry + 40) + 6
   if (inv.programmeLabel) {
-    doc.rect(48, out, doc.page.width - 96, 20).fill(BONE)
-    doc.fillColor(CRIMSON_DEEP).font('Helvetica-Bold').fontSize(9)
+    doc.rect(48, out, doc.page.width - 96, 20).fill(tint)
+    doc.fillColor(accent === CRIMSON ? CRIMSON_DEEP : accent).font('Helvetica-Bold').fontSize(9)
       .text(inv.programmeLabel, 56, out + 6, { width: doc.page.width - 112 })
     out += 28
   }
   return out + 4
 }
 
-function itemsTable(doc, inv, y) {
+function itemsTable(doc, inv, y, accent = CRIMSON, tint = BONE) {
   const X = 48, W = doc.page.width - 96
   const cols = { desc: X + 8, sessions: X + W - 250, duration: X + W - 185, rate: X + W - 125, amount: X + W - 60 }
-  // Head
-  doc.rect(X, y, W, 22).fill(CRIMSON)
+  doc.rect(X, y, W, 22).fill(accent)
   doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(8)
   doc.text('DESCRIPTION', cols.desc, y + 7)
   doc.text('SESSIONS', cols.sessions, y + 7, { width: 60, align: 'right' })
@@ -132,7 +131,7 @@ function itemsTable(doc, inv, y) {
   const items = (inv.lineItems || []).filter(it => it && it.description)
   items.forEach((it, i) => {
     const rowH = 22
-    if (i % 2 === 1) doc.rect(X, yy, W, rowH).fill(BONE)
+    if (i % 2 === 1) doc.rect(X, yy, W, rowH).fill(tint)
     doc.fillColor(INK).font('Helvetica').fontSize(9)
     doc.text(String(it.description).slice(0, 70), cols.desc, yy + 7, { width: W - 270 })
     doc.fillColor(GREY)
@@ -158,9 +157,8 @@ function totals(doc, inv, y, { paid = false } = {}) {
   line('Subtotal', money(inv.subtotal, inv.currency))
   if (inv.discount) line('Discount', '\u2212 ' + money(inv.discount, inv.currency))
   if (inv.vatPct)   line('VAT (' + inv.vatPct + '%)', money(inv.vatAmount, inv.currency))
-  // Total band
-  doc.rect(X - 8, y, W + 8, 26).fill(paid ? GOLD : CRIMSON)
-  doc.fillColor(paid ? INK : '#FFFFFF').font('Helvetica-Bold').fontSize(11)
+  doc.rect(X - 8, y, W + 8, 26).fill(paid ? GREEN : CRIMSON)
+  doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(11)
   doc.text(paid ? 'TOTAL PAID' : 'TOTAL DUE', X, y + 8, { width: 120 })
   doc.text(money(paid ? (inv.paidAmount || inv.totalDue) : inv.totalDue, inv.currency), X + 110, y + 8, { width: 102, align: 'right' })
   return y + 36
@@ -181,7 +179,23 @@ function footerNotes(doc, inv, y, { receipt = false } = {}) {
   }
   doc.fillColor(GREY).font('Helvetica-Oblique').fontSize(8)
     .text('Thank you for learning with Smartious Homeschool Global.', X, doc.page.height - 70, { width: W, align: 'center' })
-  doc.rect(0, doc.page.height - 10, doc.page.width, 10).fill(CRIMSON)
+  doc.rect(0, doc.page.height - 10, doc.page.width, 10).fill(receipt ? GREEN : CRIMSON)
+}
+
+// ── Premium PAID stamp ──────────────────────────────────────
+function premiumPaidStamp(doc, cx, cy, dateText) {
+  const w = 150, h = 62
+  doc.save()
+  doc.translate(cx, cy).rotate(-11)
+  doc.opacity(0.92)
+  doc.roundedRect(-w / 2, -h / 2, w, h, 8).lineWidth(3).strokeColor(GREEN).stroke()
+  doc.roundedRect(-w / 2 + 5, -h / 2 + 5, w - 10, h - 10, 5).lineWidth(1).strokeColor(GREEN).stroke()
+  doc.fillColor(GREEN).font('Helvetica-Bold').fontSize(24)
+    .text('P A I D', -w / 2, -h / 2 + 13, { width: w, align: 'center' })
+  doc.fillColor(GREEN_MID).font('Helvetica-Bold').fontSize(7.5)
+    .text(String(dateText || '').toUpperCase(), -w / 2, h / 2 - 17, { width: w, align: 'center', characterSpacing: 1.5 })
+  doc.opacity(1)
+  doc.restore()
 }
 
 // ── Public builders ─────────────────────────────────────────
@@ -201,19 +215,21 @@ async function buildInvoicePdfBuffer(inv) {
 
 async function buildReceiptPdfBuffer(inv, receiptNo) {
   return docToBuffer(doc => {
-    let y = header(doc, 'RECEIPT', receiptNo, 'Paid', fmtDate(inv.paidAt || new Date()))
+    let y = header(doc, 'RECEIPT', receiptNo, 'Paid', fmtDate(inv.paidAt || new Date()), GREEN)
     doc.fillColor(GREY).font('Helvetica').fontSize(9)
       .text('For invoice: ' + inv.invoiceNo, 330, 88, { width: 217, align: 'right' })
-    y = billedToBlock(doc, inv, y)
-    y = itemsTable(doc, inv, y)
+    y = billedToBlock(doc, inv, y, GREEN, GREEN_TINT)
+    y = itemsTable(doc, inv, y, GREEN, GREEN_TINT)
+    const stampY = y + 30
     y = totals(doc, inv, y, { paid: true })
-    // PAID stamp
-    doc.save()
-    doc.rotate(-12, { origin: [130, y] })
-    doc.fillColor(GOLD).font('Helvetica-Bold').fontSize(34).opacity(0.55)
-      .text('PAID', 70, y - 20)
-    doc.opacity(1).restore()
-    footerNotes(doc, inv, y, { receipt: true })
+    // Amount received confirmation strip
+    doc.rect(48, y, 260, 36).fill(GREEN_TINT)
+    doc.fillColor(GREEN).font('Helvetica-Bold').fontSize(8)
+      .text('AMOUNT RECEIVED', 58, y + 8, { characterSpacing: 1.2 })
+    doc.fillColor(GREEN).font('Helvetica-Bold').fontSize(12)
+      .text(money(inv.paidAmount || inv.totalDue, inv.currency) + '  \u00B7  ' + fmtDate(inv.paidAt || new Date()), 58, y + 19)
+    premiumPaidStamp(doc, 155, stampY, fmtDate(inv.paidAt || new Date()))
+    footerNotes(doc, inv, y + 48, { receipt: true })
   })
 }
 
