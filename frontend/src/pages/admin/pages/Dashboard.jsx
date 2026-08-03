@@ -361,12 +361,12 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
   const role = auth?.user?.role || 'admin'
   const ROLE_SECTIONS_MAIN = {
     admin:       [
-      { items: ['dashboard','analytics','users','teachers','allocations','communication','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','questionbank','cooreports','teacherratings','feecollection','crm','billing','website','settings','ai'] },
+      { items: ['dashboard','analytics','users','teachers','allocations', 'sessions','communication','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','questionbank','cooreports','teacherratings','feecollection','crm','billing','website','settings','ai','suggestions'] },
     ],
-    accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','payroll','settings'] }],
+    accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','sessions','payroll','settings'] }],
     sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
-    dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','dosbreaks','dostimetable','questionbank','reports','settings'] }],
-    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','communication','cooreports','reports','teacherratings','questionbank','crm','frontdesk','assessment','documents','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
+    dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','sessions','dosbreaks','dostimetable','questionbank','reports','settings'] }],
+    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','teacherratings','questionbank','crm','frontdesk','assessment','documents','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
@@ -387,7 +387,8 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
       }}>
         <BirthdayBanner />
         <SuggestionBox />
-        {safePage === 'dashboard'   && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
+        {safePage === 'dashboard'   && forcedRole && <RoleOverview role={forcedRole} setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} auth={auth} />}
+        {safePage === 'dashboard'   && !forcedRole && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
         {safePage === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
         {safePage === 'users'       && <UsersModule      refreshKey={refreshKey} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} openAddUser={openAddUser} />}
         {safePage === 'teachers'    && <TeachersModule   refreshKey={refreshKey} toast={toast} openAddUser={openAddUser} />}
@@ -474,6 +475,54 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
           </div>
         </Modal>
       )}
+    </div>
+  )
+}
+
+// ── Role-specific overview dashboards for sub-admin portals ──
+function RoleOverview({ role, setPage, userStats, pendingAllocations, auth }) {
+  const META = {
+    accountant: { title: 'Finance Overview', sub: 'Fees, billing and payroll at a glance.',
+      tiles: [['feecollection','Fee Collection','Chase due and overdue fees'],['billing','Billing','Invoices, payments and revenue'],['sessions','Student Sessions','Fee holds and account pauses'],['payroll','Payroll','Staff salaries and payslips']] },
+    sales: { title: 'Sales Overview', sub: 'Your pipeline from first enquiry to enrolment.',
+      tiles: [['crm','CRM','Work your enquiry pipeline'],['assessment','Assessments','Move requests to paid and accepted'],['frontdesk','Front Desk','New leads and walk-ins'],['salesperf','My Performance','Your conversions and commissions']] },
+    dos: { title: 'Academics Overview', sub: 'Teaching quality, assessment and student progress.',
+      tiles: [['dosanalytics','Performance Analytics','School-wide academic trends'],['exams','Exams','Set and track assessments'],['sessions','Student Sessions','Holidays, breaks and report-backs'],['reports','Reports','Generate and publish term reports']] },
+    ops_manager: { title: 'Operations Overview', sub: 'People, allocations and day-to-day running.',
+      tiles: [['users','Users','Manage students, parents and staff'],['allocations','Manage Students','Match students with teachers'],['sessions','Student Sessions','Pause and restore student accounts'],['leave','Leave','Approve staff leave requests']] },
+  }
+  const meta = META[role] || META.ops_manager
+  const kpis = [
+    ['Students', userStats?.students ?? userStats?.byRole?.student ?? '—'],
+    ['Teachers', userStats?.teachers ?? userStats?.byRole?.teacher ?? '—'],
+    ['Parents', userStats?.parents ?? userStats?.byRole?.parent ?? '—'],
+    ['Pending allocations', pendingAllocations ?? '—'],
+  ]
+  return (
+    <div>
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ fontFamily: 'Georgia, serif', fontSize: 26, fontWeight: 700, color: TOKENS.ink || '#080C14' }}>{meta.title}</div>
+        <div style={{ fontSize: 13.5, color: '#6B7280', marginTop: 4 }}>Welcome back, {auth?.user?.firstName || ''}. {meta.sub}</div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12, marginBottom: 22 }}>
+        {kpis.map(([l, v]) => (
+          <div key={l} style={{ background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 12, padding: '14px 18px' }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em' }}>{l}</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: TOKENS.crimson, marginTop: 4 }}>{v}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10 }}>Quick actions</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 14 }}>
+        {meta.tiles.map(([id, label, desc]) => (
+          <button key={id} onClick={() => setPage(id)}
+            style={{ textAlign: 'left', background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 14, padding: '18px 20px', cursor: 'pointer' }}>
+            <div style={{ width: 34, height: 4, background: TOKENS.gold, borderRadius: 2, marginBottom: 12 }} />
+            <div style={{ fontWeight: 800, fontSize: 15, color: TOKENS.ink || '#080C14' }}>{label}</div>
+            <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4, lineHeight: 1.5 }}>{desc}</div>
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
