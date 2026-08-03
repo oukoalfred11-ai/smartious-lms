@@ -204,6 +204,74 @@ router.get('/children/:id/reports', auth, async (req, res) => {
   } catch(e) { return fail(res,500,e.message) }
 })
 
+// ── GET /api/parent/children/:id/homework ─────────────
+// Child homework with submission status and marks.
+router.get('/children/:id/homework', auth, async (req, res) => {
+  try {
+    const student = await User.findById(req.params.id).lean()
+    if (!student) return fail(res,404,'Student not found.')
+    await assertAccess(req.user, student)
+
+    const Homework = require('../models/Homework')
+    const HomeworkSubmission = require('../models/HomeworkSubmission')
+    const homeworks = await Homework.find({ assignedStudents: req.params.id, isActive: true })
+      .select('title subject curriculum dueAt releaseAt totalMarks questionCount createdAt status')
+      .sort({ createdAt: -1 }).limit(30).lean()
+    const subs = await HomeworkSubmission.find({ student: req.params.id, homework: { $in: homeworks.map(h => h._id) } })
+      .select('homework status submittedAt totalAwarded').lean()
+    const byHw = {}
+    subs.forEach(x => { byHw[String(x.homework)] = x })
+    return ok(res, { homeworks: homeworks.map(h => ({ ...h, submission: byHw[String(h._id)] || null })) })
+  } catch(e) { return fail(res, e.status||500, e.message) }
+})
+
+// ── GET /api/parent/children/:id/attendance ───────────
+router.get('/children/:id/attendance', auth, async (req, res) => {
+  try {
+    const student = await User.findById(req.params.id).lean()
+    if (!student) return fail(res,404,'Student not found.')
+    await assertAccess(req.user, student)
+
+    const Attendance = require('../models/Attendance')
+    const since = new Date(Date.now() - 90 * 24 * 3600 * 1000)
+    const records = await Attendance.find({ studentId: req.params.id, date: { $gte: since } })
+      .select('date status reason').sort({ date: -1 }).limit(60).lean()
+    const counts = {}
+    records.forEach(r2 => { counts[r2.status] = (counts[r2.status] || 0) + 1 })
+    return ok(res, { records, counts, since })
+  } catch(e) { return fail(res, e.status||500, e.message) }
+})
+
+// ── GET /api/parent/children/:id/results ──────────────
+// Recent assessment results drawn from published weekly reports
+// plus the latest term report summary.
+router.get('/children/:id/results', auth, async (req, res) => {
+  try {
+    const student = await User.findById(req.params.id).lean()
+    if (!student) return fail(res,404,'Student not found.')
+    await assertAccess(req.user, student)
+
+    const WeeklyReport = require('../models/WeeklyReport')
+    const Report = require('../models/Report')
+    const weeklies = await WeeklyReport.find({ studentId: req.params.id })
+      .select('subject week period assessments createdAt teacherName')
+      .sort({ createdAt: -1 }).limit(20).lean()
+    const assessments = []
+    weeklies.forEach(w => (w.assessments || []).forEach(a => {
+      if (a && (a.desc || a.score != null)) assessments.push({
+        subject: w.subject, week: w.week, period: w.period, teacherName: w.teacherName,
+        desc: a.desc, score: a.score, outOf: a.outOf,
+        percentage: a.percentage != null ? a.percentage : (a.score != null && a.outOf ? Math.round(a.score / a.outOf * 100) : null),
+        date: w.createdAt,
+      })
+    }))
+    const latestTerm = await Report.findOne({ studentId: req.params.id, status: 'published' })
+      .select('term termLabel academicYear overallAverage meanGrade subjects.subject subjects.weightedScore subjects.letterGrade dateIssued')
+      .sort({ dateIssued: -1 }).lean()
+    return ok(res, { assessments: assessments.slice(0, 40), latestTerm })
+  } catch(e) { return fail(res, e.status||500, e.message) }
+})
+
 // ── GET /api/parent/children/:id/fees ────────────────────
 router.get('/children/:id/fees', auth, async (req, res) => {
   try {
