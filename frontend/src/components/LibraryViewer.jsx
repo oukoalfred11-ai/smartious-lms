@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react'
 export default function LibraryViewer({ book, api, onClose, readOnly = false }) {
   const [url, setUrl] = useState(book?.url || book?.publicUrl || '')
   const [err, setErr] = useState('')
+  const [frameLoaded, setFrameLoaded] = useState(false)
 
   useEffect(() => {
     if (url || !book?._id || !api) return
@@ -44,9 +45,30 @@ export default function LibraryViewer({ book, api, onClose, readOnly = false }) 
       ) : !url ? (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F0CC5A', fontSize: 14, fontFamily: 'Arial, sans-serif' }}>Loading document...</div>
       ) : (
-        <iframe title={book.title || 'Document'} allow="fullscreen"
-          src={url + (readOnly ? '#toolbar=0&navpanes=0&view=FitH' : '#view=FitH')}
-          style={{ flex: 1, border: 'none', background: '#fff' }} />
+        <div style={{ flex: 1, position: 'relative' }}>
+          {!frameLoaded && (
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(150deg, #7D1025, #3E0712)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, zIndex: 1, fontFamily: 'Arial, sans-serif' }}>
+              {(book.coverUrl || book.cover || book.coverImage) && (
+                <img src={book.coverUrl || book.cover || book.coverImage} alt=""
+                  style={{ width: 120, borderRadius: 8, boxShadow: '0 10px 30px rgba(0,0,0,.45)', border: '2px solid #C9A030' }} />
+              )}
+              <div style={{ color: '#fff', fontFamily: 'Georgia, serif', fontSize: 17, fontWeight: 700, textAlign: 'center', padding: '0 24px' }}>
+                {book.title || 'Your book'}
+              </div>
+              <div style={{ color: '#F0CC5A', fontSize: 13.5, fontWeight: 700 }}>
+                Loading your book<span className="lv-dots"/>
+              </div>
+              <div style={{ color: 'rgba(255,255,255,.65)', fontSize: 11.5, textAlign: 'center', maxWidth: 300, lineHeight: 1.6 }}>
+                Larger coursebooks can take a few moments the first time. Your pages are on the way.
+              </div>
+              <style>{'@keyframes lvd{0%{content:\"\"}33%{content:\".\"}66%{content:\"..\"}100%{content:\"...\"}}.lv-dots::after{display:inline-block;width:18px;text-align:left;content:\"\";animation:lvd 1.2s steps(1) infinite}'}</style>
+            </div>
+          )}
+          <iframe title={book.title || 'Document'} allow="fullscreen"
+            onLoad={() => setFrameLoaded(true)}
+            src={url + (readOnly ? '#toolbar=0&navpanes=0&view=FitH' : '#view=FitH')}
+            style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }} />
+        </div>
       )}
     </div>
   )
