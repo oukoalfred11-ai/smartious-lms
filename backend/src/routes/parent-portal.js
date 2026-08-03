@@ -273,7 +273,7 @@ async function sendClassReminders() {
   // Find timetable entries starting in 30±2 minutes
   const entries = await TimetableEntry.find({ dayOfWeek:dayName, isActive:true })
     .populate('teacherId','firstName lastName')
-    .populate('assignedStudents','firstName lastName parentEmail linkedParents email parentName')
+    .populate('assignedStudents','firstName lastName parentEmail linkedParents email parentName onBreak')
     .lean()
 
   const upcoming = entries.filter(e => {
@@ -286,6 +286,7 @@ async function sendClassReminders() {
   let sent = 0
   for (const entry of upcoming) {
     for (const student of (entry.assignedStudents||[])) {
+      if (student.onBreak) continue // paused students receive no class reminders
       // Collect parent emails: parentEmail field + linked parent accounts
       const parentEmails = new Set()
       if (student.parentEmail) parentEmails.add(student.parentEmail)
