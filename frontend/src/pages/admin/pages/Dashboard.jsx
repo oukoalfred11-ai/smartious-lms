@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import BirthdayBanner from '../../../components/BirthdayBanner.jsx'
 import { useToast, useAuth, api } from '../../../context/ctx.jsx'
 import Modal from '../../../components/ui/Modal.jsx'
 import { TOKENS } from './shared/tokens.js'
@@ -18,6 +19,7 @@ import StudentsManagementModule from './modules/AllocationsModule.jsx'
 import QuestionBankModule from './modules/QuestionBankModule.jsx'
 import { COOReportOverviewModule, TeacherRatingsModule } from './modules/RatingsModule.jsx'
 import PayrollModule from './modules/PayrollModule.jsx'
+import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
 import CurriculumModule from './modules/CurriculumModule.jsx'
 import BillingModule, { FeeCollectionModule } from './modules/BillingModule.jsx'
 import SettingsModule from './modules/SettingsModule.jsx'
@@ -65,7 +67,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
   const ROLE_SECTIONS = {
     admin: [
       { label: 'Overview',    items: ['dashboard', 'analytics'] },
-      { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication'] },
+      { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication'] },
       { label: 'Reports',     items: ['reports'] },
       { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
       { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum'] },
@@ -73,7 +75,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
     ],
     accountant: [
       { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
-      { label: 'Fee Management', items: ['feecollection', 'billing'] },
+      { label: 'Fee Management', items: ['feecollection', 'billing', 'sessions'] },
       { label: 'Finance',     items: ['payroll'] },
       { label: 'System',      items: ['settings'] },
     ],
@@ -82,6 +84,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Exams',         items: ['exams'] },
       { label: 'Homework',      items: ['doshomework'] },
       { label: 'Attendance',    items: ['dosattend'] },
+      { label: 'Student Sessions', items: ['sessions'] },
       { label: 'Breaks',        items: ['dosbreaks'] },
       { label: 'Timetables',    items: ['dostimetable'] },
       { label: 'Question Bank', items: ['questionbank'] },
@@ -97,7 +100,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
     ],
     ops_manager: [
       { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
-      { label: 'People',      items: ['users', 'teachers', 'allocations', 'communication'] },
+      { label: 'People',      items: ['users', 'teachers', 'allocations', 'sessions', 'communication'] },
       { label: 'Reports',     items: ['cooreports', 'reports'] },
       { label: 'Performance', items: ['teacherratings'] },
       { label: 'Operations',  items: ['crm', 'frontdesk', 'assessment', 'documents', 'leave', 'programmes'] },
@@ -381,6 +384,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         maxWidth: 1400,
         transition: 'margin-left 0.25s',
       }}>
+        <BirthdayBanner />
         {safePage === 'dashboard'   && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
         {safePage === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
         {safePage === 'users'       && <UsersModule      refreshKey={refreshKey} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} openAddUser={openAddUser} />}
@@ -401,6 +405,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'dosbreaks'     && <DOSBreakModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'dostimetable'  && <DOSTimetableModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'payroll'        && <PayrollModule         refreshKey={refreshKey} toast={toast}/>}
+        {safePage === 'sessions'    && <StudentSessionsModule toast={toast} refreshKey={refreshKey} />}
         {safePage === 'questionbank'   && <QuestionBankModule   refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'cooreports'    && <COOReportOverviewModule refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'teacherratings'&& <TeacherRatingsModule    refreshKey={refreshKey} toast={toast}/>}
