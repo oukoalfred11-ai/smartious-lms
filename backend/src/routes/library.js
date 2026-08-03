@@ -42,6 +42,10 @@ const { auth, requireRole } = require('../middleware/auth');
 // ─────────────────────────────────────────────────────────
 // R2 client — S3-compatible, pointed at Cloudflare's endpoint
 // ─────────────────────────────────────────────────────────
+const R2_READY = !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET_NAME && process.env.R2_PUBLIC_URL)
+if (!R2_READY) console.warn('[library] R2 storage NOT configured - uploads and viewing will fail. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL on Render.')
+const r2Guard = (req, res, next) => R2_READY ? next() : res.status(503).json({ success:false, message:'Library storage (R2) is not configured on the server. Contact the administrator.' })
+
 const r2 = new S3Client({
   region: 'auto',
   endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -111,7 +115,7 @@ async function visibilityFilterFor(user) {
 // Returns: { uploadUrl, r2Key, publicUrl, expiresAt }
 // The client PUTs the file directly to uploadUrl.
 // ═══════════════════════════════════════════════════════════
-router.post('/presign', auth, requireRole('teacher', 'admin'), async (req, res) => {
+router.post('/presign', auth, r2Guard, requireRole('teacher', 'admin'), async (req, res) => {
   try {
     const { subjectId, fileName, fileSize, mimeType } = req.body || {};
 
@@ -133,6 +137,7 @@ router.post('/presign', auth, requireRole('teacher', 'admin'), async (req, res) 
       Bucket:      BUCKET,
       Key:         r2Key,
       ContentType: contentType,
+      ContentDisposition: 'inline',
     });
     const uploadUrl = await getSignedUrl(r2, command, { expiresIn: PRESIGN_EXPIRES });
     const publicUrl = `${PUBLIC_URL}/${r2Key}`;
@@ -298,7 +303,7 @@ router.get('/:id', auth, async (req, res) => {
 // Same interface as the old /view-url endpoint so LibraryViewer
 // needs no changes (just point it at /view instead of /view-url).
 // ═══════════════════════════════════════════════════════════
-router.get('/:id/view', auth, async (req, res) => {
+router.get('/:id/view', auth, r2Guard, async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 400, 'Invalid id.');
     const book = await LibraryBook.findById(req.params.id).lean();
