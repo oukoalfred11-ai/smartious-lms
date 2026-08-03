@@ -10,6 +10,7 @@
  *  - Study plan is personalised per student
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
+import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import { useAuth, useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
@@ -1442,6 +1443,7 @@ export default function StudentPortal() {
         background:TOKENS.cream,
         position:'relative',
       }}>
+        <div style={{ padding:'16px 24px 0' }}><BirthdayBanner /></div>
         {/* Frosted top-bar — matches admin portal */}
         <div style={{
           position:'sticky',
