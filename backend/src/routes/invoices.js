@@ -7,7 +7,15 @@ const router   = express.Router()
 const nodemailer = require('nodemailer')
 const { auth, requireRole } = require('../middleware/auth')
 const Invoice  = require('../models/Invoice')
-const { buildInvoicePdfBuffer, buildReceiptPdfBuffer } = require('../lib/invoicePdf')
+
+// Guarded require: if pdfkit is missing, emails still send without PDF
+// attachments instead of crashing the whole API on boot.
+let buildInvoicePdfBuffer = null, buildReceiptPdfBuffer = null
+try {
+  ({ buildInvoicePdfBuffer, buildReceiptPdfBuffer } = require('../lib/invoicePdf'))
+} catch (e) {
+  console.warn('[invoices] PDF attachments disabled -', e.message)
+}
 
 const ALLOWED = requireRole('admin', 'accountant', 'sales', 'ops_manager')
 
