@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import BirthdayBanner from '../../../components/BirthdayBanner.jsx'
+import SuggestionBox from '../../../components/SuggestionBox.jsx'
 import { useToast, useAuth, api } from '../../../context/ctx.jsx'
 import Modal from '../../../components/ui/Modal.jsx'
 import { TOKENS } from './shared/tokens.js'
@@ -23,7 +24,7 @@ import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
 import CurriculumModule from './modules/CurriculumModule.jsx'
 import BillingModule, { FeeCollectionModule } from './modules/BillingModule.jsx'
 import SettingsModule from './modules/SettingsModule.jsx'
-import { LeaveModule, ProgrammesModule, LiveLessonsModule, GroupRoomsModule, WebsiteModule, MshauriModule } from './modules/MiscModules.jsx'
+import { LeaveModule, ProgrammesModule, LiveLessonsModule, GroupRoomsModule, WebsiteModule, MshauriModule, SuggestionsModule } from './modules/MiscModules.jsx'
 
 // ═══════════════════════════════════════════════════════════
 // SMARTIOUS ADMIN DASHBOARD — PREMIUM REDESIGN
@@ -71,7 +72,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Reports',     items: ['reports'] },
       { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
       { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum'] },
-      { label: 'System',      items: ['billing', 'website', 'settings', 'ai'] },
+      { label: 'System',      items: ['billing', 'website', 'settings', 'ai', 'suggestions'] },
     ],
     accountant: [
       { label: 'Overview',    items: ['checkin', 'dashboard', 'analytics'] },
@@ -385,6 +386,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         transition: 'margin-left 0.25s',
       }}>
         <BirthdayBanner />
+        <SuggestionBox />
         {safePage === 'dashboard'   && <DashboardModule  setPage={setPage} userStats={userStats} pendingAllocations={pendingAllocations} refreshKey={refreshKey} auth={auth} toast={toast} openAddUser={openAddUser} adminFirst={adminFirst} />}
         {safePage === 'analytics'   && <AnalyticsModule  setPage={setPage} refreshKey={refreshKey} toast={toast} />}
         {safePage === 'users'       && <UsersModule      refreshKey={refreshKey} toast={toast} setUserForm={setUserForm} setUserModal={setUserModal} openAddUser={openAddUser} />}
@@ -406,6 +408,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'dostimetable'  && <DOSTimetableModule toast={toast} refreshKey={refreshKey}/>}
         {safePage === 'payroll'        && <PayrollModule         refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'sessions'    && <StudentSessionsModule toast={toast} refreshKey={refreshKey} />}
+        {safePage === 'suggestions' && <SuggestionsModule toast={toast} refreshKey={refreshKey} />}
         {safePage === 'questionbank'   && <QuestionBankModule   refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'cooreports'    && <COOReportOverviewModule refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'teacherratings'&& <TeacherRatingsModule    refreshKey={refreshKey} toast={toast}/>}
