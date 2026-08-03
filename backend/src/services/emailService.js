@@ -25,17 +25,17 @@ function initializeTransporter() {
 
   // Validate required fields
   if (!smtpHost) {
-    console.error('❌ SMTP_HOST / EMAIL_HOST not configured in environment');
+    console.error('[ERROR] SMTP_HOST / EMAIL_HOST not configured in environment');
     return null;
   }
 
   if (!smtpUser) {
-    console.error('❌ SMTP_USER / EMAIL_USER not configured in environment');
+    console.error('[ERROR] SMTP_USER / EMAIL_USER not configured in environment');
     return null;
   }
 
   if (!smtpPass) {
-    console.error('❌ SMTP_PASS / EMAIL_PASSWORD not configured in environment');
+    console.error('[ERROR] SMTP_PASS / EMAIL_PASSWORD not configured in environment');
     return null;
   }
 
@@ -53,7 +53,7 @@ function initializeTransporter() {
     console.log(`✓ Email service configured: ${smtpHost}:${smtpPort}`);
     return transporter;
   } catch (error) {
-    console.error('❌ Failed to initialize email transporter:', error.message);
+    console.error('[ERROR] Failed to initialize email transporter:', error.message);
     return null;
   }
 }
@@ -160,7 +160,7 @@ async function sendStudentAllocationNotification(options) {
       html: `
         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
-            <h1 style="margin: 0; font-size: 24px;">🎉 Your Tutor is Ready!</h1>
+            <h1 style="margin: 0; font-size: 24px;">Your Tutor is Ready!</h1>
           </div>
           
           <div style="background: #f8f9fa; padding: 24px; border-radius: 0 0 8px 8px;">
@@ -321,7 +321,7 @@ async function sendTeacherCredentialsEmail(options) {
     const transporterInstance = initializeTransporter();
     
     if (!transporterInstance) {
-      console.warn(`⚠️  Email not sent to ${teacherEmail} (SMTP not configured). Temp password: ${tempPassword}`);
+      console.warn(`[WARN] Email not sent to ${teacherEmail} (SMTP not configured). Temp password: ${tempPassword}`);
       return { success: false, error: 'Email service not configured', tempPassword };
     }
 
@@ -332,7 +332,7 @@ async function sendTeacherCredentialsEmail(options) {
       html: `
         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="margin: 0; font-size: 28px;">🎓 Welcome to Smartious Teacher Portal!</h1>
+            <h1 style="margin: 0; font-size: 28px;">♕ Welcome to Smartious Teacher Portal!</h1>
           </div>
           
           <div style="background: #f8f9fa; padding: 24px; border-radius: 0 0 8px 8px;">
@@ -341,7 +341,7 @@ async function sendTeacherCredentialsEmail(options) {
             <p>Your teacher account on the Smartious E-School platform has been created and is now active. Your login credentials are provided below.</p>
             
             <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 16px; margin: 20px 0; border-radius: 4px;">
-              <h3 style="margin-top: 0; color: #856404;">⚠️ Important Security Notice</h3>
+              <h3 style="margin-top: 0; color: #856404;">Important Security Notice</h3>
               <p><strong>Your account is active but requires an immediate password update for security purposes.</strong></p>
               <p>The temporary password below is valid for <strong>${expiresIn}</strong>. After logging in, you MUST change your password immediately.</p>
             </div>
@@ -416,11 +416,11 @@ async function sendAdminLeaveRequestNotification(options) {
     const mailOptions = {
       from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
       to: adminEmail,
-      subject: `🔔 New Leave Request from ${teacherName}`,
+      subject: `New Leave Request from ${teacherName}`,
       html: `
         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
-            <h1 style="margin: 0; font-size: 24px;">📋 New Leave Request</h1>
+            <h1 style="margin: 0; font-size: 24px;">▤ New Leave Request</h1>
           </div>
           
           <div style="background: #f8f9fa; padding: 24px; border-radius: 0 0 8px 8px;">
@@ -439,7 +439,7 @@ async function sendAdminLeaveRequestNotification(options) {
             </div>
 
             <div style="background: #fef3c7; border: 1px solid #fcd34d; padding: 16px; border-radius: 4px; margin: 20px 0;">
-              <p><strong>⚠ Action Required:</strong> Please review this leave request in the admin portal and approve or reject it as soon as possible.</p>
+              <p><strong>Action Required:</strong> Please review this leave request in the admin portal and approve or reject it as soon as possible.</p>
             </div>
 
             <div style="text-align: center; margin: 24px 0;">
@@ -488,11 +488,11 @@ async function sendLeaveRequestApprovedEmail(options) {
     const mailOptions = {
       from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
       to: teacherEmail,
-      subject: `✅ Your Leave Request Has Been Approved`,
+      subject: `✓ Your Leave Request Has Been Approved`,
       html: `
         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
-            <h1 style="margin: 0; font-size: 24px;">✅ Leave Approved</h1>
+            <h1 style="margin: 0; font-size: 24px;">✓ Leave Approved</h1>
           </div>
           
           <div style="background: #f8f9fa; padding: 24px; border-radius: 0 0 8px 8px;">
@@ -509,7 +509,7 @@ async function sendLeaveRequestApprovedEmail(options) {
             </div>
 
             <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; margin: 20px 0; border-radius: 4px;">
-              <p><strong>🎉 Important:</strong> You are all set for your leave. Your students and parents have been notified about their temporary teacher assignments.</p>
+              <p><strong>Important:</strong> You are all set for your leave. Your students and parents have been notified about their temporary teacher assignments.</p>
             </div>
 
             <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
@@ -554,11 +554,11 @@ async function sendLeaveRequestRejectedEmail(options) {
     const mailOptions = {
       from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
       to: teacherEmail,
-      subject: `❌ Your Leave Request Has Been Rejected`,
+      subject: `Your Leave Request Has Been Rejected`,
       html: `
         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
-            <h1 style="margin: 0; font-size: 24px;">❌ Leave Request Rejected</h1>
+            <h1 style="margin: 0; font-size: 24px;">Leave Request Rejected</h1>
           </div>
           
           <div style="background: #f8f9fa; padding: 24px; border-radius: 0 0 8px 8px;">
@@ -578,7 +578,7 @@ async function sendLeaveRequestRejectedEmail(options) {
             </div>
 
             <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 16px; margin: 20px 0; border-radius: 4px;">
-              <p><strong>💡 Next Steps:</strong> You may submit a new leave request for different dates or contact the admin team to discuss alternative options.</p>
+              <p><strong>Next Steps:</strong> You may submit a new leave request for different dates or contact the admin team to discuss alternative options.</p>
             </div>
 
             <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
@@ -624,11 +624,11 @@ async function sendLeaveRequestSubmittedEmail(options) {
     const mailOptions = {
       from: process.env.EMAIL_FROM || 'noreply@smartious.ac.ke',
       to: teacherEmail,
-      subject: `📋 Your Leave Request Has Been Submitted for Review`,
+      subject: `▤ Your Leave Request Has Been Submitted for Review`,
       html: `
         <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
-            <h1 style="margin: 0; font-size: 24px;">📋 Leave Request Submitted</h1>
+            <h1 style="margin: 0; font-size: 24px;">▤ Leave Request Submitted</h1>
           </div>
           
           <div style="background: #f8f9fa; padding: 24px; border-radius: 0 0 8px 8px;">
@@ -642,11 +642,11 @@ async function sendLeaveRequestSubmittedEmail(options) {
               <p><strong>Period:</strong> ${startDate} to ${endDate}</p>
               <p><strong>Duration:</strong> ${dayCount} days</p>
               <p><strong>Reason:</strong> ${leaveReason}</p>
-              <p><strong>Status:</strong> <span style="color: #f59e0b; font-weight: bold;">⏳ Pending Review</span></p>
+              <p><strong>Status:</strong> <span style="color: #f59e0b; font-weight: bold;">Pending Review</span></p>
             </div>
 
             <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 4px; margin: 20px 0;">
-              <p><strong>ℹ️ What Happens Next:</strong></p>
+              <p><strong>What Happens Next:</strong></p>
               <ul style="margin: 10px 0; padding-left: 20px;">
                 <li>The admin team will review your request</li>
                 <li>You'll receive an email notification when it's approved or rejected</li>
