@@ -153,7 +153,7 @@ function InvoicesTab({ toast, refreshKey }) {
           <div style={{ padding:28, textAlign:'center', color:TOKENS.s500, fontSize:13 }}>Loading invoices...</div>
         ) : invoices.length === 0 ? (
           <div style={{ padding:40, textAlign:'center' }}>
-            <div style={{ fontSize:28, marginBottom:10 }}>🧾</div>
+            <div style={{ fontSize:28, marginBottom:10 }}>▤</div>
             <div style={{ fontSize:14, fontWeight:700, color:TOKENS.s900, marginBottom:4 }}>No invoices yet</div>
             <div style={{ fontSize:12.5, color:TOKENS.s500 }}>Click "+ New invoice" to create your first.</div>
           </div>
@@ -191,7 +191,7 @@ function InvoicesTab({ toast, refreshKey }) {
                         <button onClick={() => openMarkPaid(inv)} style={{ fontSize:11, background:'#D1FAE5', color:'#065F46', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Mark paid</button>
                       )}
                       {inv.status === 'paid' && (
-                        <button onClick={() => viewReceipt(inv)} style={{ fontSize:11, background:'#065F46', color:'#fff', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>🧾 Receipt</button>
+                        <button onClick={() => viewReceipt(inv)} style={{ fontSize:11, background:'#065F46', color:'#fff', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>▤ Receipt</button>
                       )}
                       {inv.billedToEmail && inv.status !== 'cancelled' && (
                         <button onClick={() => resend(inv)} style={{ fontSize:11, background:TOKENS.cream, color:TOKENS.crimson, border:'1px solid '+TOKENS.line, padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Resend</button>
