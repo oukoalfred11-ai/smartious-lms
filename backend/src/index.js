@@ -155,15 +155,15 @@ const PORT        = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  console.error('❌  MONGODB_URI is not set. Exiting.');
+  console.error('[ERROR] MONGODB_URI is not set. Exiting.');
   process.exit(1);
 }
 
 mongoose.connect(MONGODB_URI)
   .then(() => {
-    console.log('✅  MongoDB connected');
+    console.log('[OK] MongoDB connected');
     app.listen(PORT, () =>
-      console.log(`🚀  API running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`)
+      console.log(`API running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`)
     );
 
     // Start the timetable promotion job: first run 60s after boot
@@ -216,7 +216,7 @@ mongoose.connect(MONGODB_URI)
     scheduleShowCauseCron();
   })
   .catch(err => {
-    console.error('❌  MongoDB connection error:', err.message);
+    console.error('[ERROR] MongoDB connection error:', err.message);
     process.exit(1);
   });
 
