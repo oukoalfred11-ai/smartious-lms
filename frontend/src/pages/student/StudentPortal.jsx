@@ -1876,7 +1876,7 @@ export default function StudentPortal() {
                     padding: '40px 28px', textAlign:'center',
                     background:'#FBFAF5', border:'1px dashed #E8E2D6',
                   }}>
-                    <div style={{ fontSize: 48, marginBottom: 12, opacity:.5 }}>📚</div>
+                    <div style={{ fontSize: 48, marginBottom: 12, opacity:.5 }}>▤</div>
                     <div style={{
                       fontFamily:"'Instrument Serif',serif", fontSize: 22,
                       color:'#1A1A1A', marginBottom: 8,
@@ -5130,9 +5130,9 @@ const buildProgressReport = (user) => {
  
   let report = `**Your progress so far, ${user?.firstName || ''}:**
  
-📊 Total XP: **${xp.toLocaleString()}**
-📝 Practice sessions: **${practiceHist.length}**
-🎓 Exams taken: **${examHist.length}**
+Total XP: **${xp.toLocaleString()}**
+✎ Practice sessions: **${practiceHist.length}**
+♕ Exams taken: **${examHist.length}**
  
 **By subject:**
 ${subjectLines}
@@ -5141,9 +5141,9 @@ ${subjectLines}
 ${recentSessions.map(s => `- ${s.topic} (${s.subject}): ${s.score}%`).join('\n')}`
  
   if (weakSubjects.length > 0) {
-    report += `\n\n💡 **My recommendation:** Focus on ${weakSubjects.join(' and ')}. These need more attention. Try a few practice sessions in those subjects today.`
+    report += `\n\n**My recommendation:** Focus on ${weakSubjects.join(' and ')}. These need more attention. Try a few practice sessions in those subjects today.`
   } else if (practiceHist.length >= 3) {
-    report += `\n\n🌟 You're doing well across all subjects. Keep up the steady work!`
+    report += `\n\n✧ You're doing well across all subjects. Keep up the steady work!`
   }
  
   return report
@@ -9641,7 +9641,7 @@ function HomeworkTab({ user, toast }) {
                         {hw.computedStatus === 'pending' && !hw.dueAt && <span className="badge badge-slate">Open</span>}
                         {hw.computedStatus === 'locked' && (
                           <span className="badge badge-slate">
-                            🔒 Opens {formatHomeworkDate(hw.releaseAt)}
+                            Opens {formatHomeworkDate(hw.releaseAt)}
                           </span>
                         )}
                       </div>
