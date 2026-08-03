@@ -204,6 +204,47 @@ router.get('/children/:id/reports', auth, async (req, res) => {
   } catch(e) { return fail(res,500,e.message) }
 })
 
+// ── GET /api/parent/children/:id/teachers ──────────────
+// Teachers allocated to this child (for viewing and rating).
+router.get('/children/:id/teachers', auth, async (req, res) => {
+  try {
+    const student = await User.findById(req.params.id).lean()
+    if (!student) return fail(res,404,'Student not found.')
+    await assertAccess(req.user, student)
+    const Allocation = require('../models/Allocation')
+    const allocs = await Allocation.find({ studentId: req.params.id })
+      .populate('teacherId','firstName lastName email avatar teachingSpecialties').lean()
+    const byTeacher = {}
+    allocs.forEach(a => {
+      if (!a.teacherId) return
+      const k = String(a.teacherId._id)
+      if (!byTeacher[k]) byTeacher[k] = { teacher: a.teacherId, subjects: [] }
+      const subj = a.subjectName || a.subject || (a.subjectId && a.subjectId.name) || ''
+      if (subj && !byTeacher[k].subjects.includes(subj)) byTeacher[k].subjects.push(subj)
+    })
+    return ok(res, { teachers: Object.values(byTeacher) })
+  } catch(e) { return fail(res, e.status||500, e.message) }
+})
+
+// ── GET /api/parent/children/:id/liveclasses ────────────
+// Upcoming and completed live classes with a done-count.
+router.get('/children/:id/liveclasses', auth, async (req, res) => {
+  try {
+    const student = await User.findById(req.params.id).lean()
+    if (!student) return fail(res,404,'Student not found.')
+    await assertAccess(req.user, student)
+    const LiveClass = require('../models/LiveClass')
+    const classes = await LiveClass.find({ assignedStudents: req.params.id })
+      .populate('teacherId','firstName lastName')
+      .sort({ startAt: -1, scheduledAt: -1, createdAt: -1 }).limit(120).lean()
+    const now = new Date()
+    const when = c => new Date(c.startAt || c.scheduledAt || c.date || c.createdAt)
+    const past = classes.filter(c => when(c) < now || c.status === 'completed' || c.status === 'ended')
+    const upcoming = classes.filter(c => !past.includes(c)).reverse()
+    return ok(res, { past, upcoming, doneCount: past.length, totalCount: classes.length })
+  } catch(e) { return fail(res, e.status||500, e.message) }
+})
+
 // ── GET /api/parent/children/:id/homework ─────────────
 // Child homework with submission status and marks.
 router.get('/children/:id/homework', auth, async (req, res) => {
