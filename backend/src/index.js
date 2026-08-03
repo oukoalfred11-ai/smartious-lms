@@ -71,6 +71,7 @@ app.use('/api/student-profile', require('./routes/student-profile'));
 app.use('/api/students',       require('./routes/students'));
 app.use('/api/student-sessions', require('./routes/student-sessions'));
 app.use('/api/birthdays', require('./routes/birthdays'));
+app.use('/api/suggestions', require('./routes/suggestions'));
 app.use('/api/parents', require('./routes/parents'));
 app.use('/api/dashboard',      require('./routes/dashboard'));
 app.use('/api/grouprooms',     require('./routes/grouprooms'));
