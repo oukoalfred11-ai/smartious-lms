@@ -149,6 +149,13 @@ router.get('/my', auth, requireRole('admin','ops_manager','dos','teacher'), asyn
 // ── GET /student/:id ──────────────────────────────────────
 router.get('/student/:id', auth, async (req, res) => {
   try {
+    const role = req.user.role
+    const staff = ['admin','ops_manager','dos','accountant','teacher'].includes(role)
+    const isSelf = role === 'student' && String(req.params.id) === String(req.user._id)
+    const isParent = role === 'parent' && [ ...(req.user.linkedStudents||[]), ...(req.user.children||[]) ]
+      .map(String).includes(String(req.params.id))
+    if (!staff && !isSelf && !isParent)
+      return fail(res,403,'Access denied.')
     const reports = await WeeklyReport.find({ studentId:req.params.id })
       .sort({ updatedAt:-1 }).lean()
     return ok(res, { reports })
@@ -176,6 +183,31 @@ router.get('/:id/html', auth, async (req, res) => {
 })
 
 // ── POST /:id/publish ─────────────────────────────────────
+// ── GET /api/weekly-reports/:id/pdf ─────────────────
+router.get('/:id/pdf', auth, async (req, res) => {
+  try {
+    const { buildWeeklyReportPdf } = require('../lib/reportPdf')
+    const report = await WeeklyReport.findById(req.params.id).lean()
+    if (!report) return res.status(404).json({ success:false, message:'Report not found.' })
+
+    const role = req.user.role
+    const staff = ['admin','ops_manager','dos','accountant'].includes(role)
+    const isOwnTeacher = role === 'teacher' && String(report.teacherId) === String(req.user._id)
+    const isStudent = role === 'student' && String(report.studentId||'') === String(req.user._id)
+    const isParent = role === 'parent' && (
+      [ ...(req.user.linkedStudents||[]), ...(req.user.children||[]) ].map(String).includes(String(report.studentId||'')) ||
+      (report.parentEmail && report.parentEmail.toLowerCase() === String(req.user.email||'').toLowerCase())
+    )
+    if (!staff && !isOwnTeacher && !isStudent && !isParent)
+      return res.status(403).json({ success:false, message:'Access denied.' })
+
+    const pdf = await buildWeeklyReportPdf(report)
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition', 'inline; filename="Weekly-' + String(report.studentName||'student').replace(/[^A-Za-z0-9-]/g,'-') + '-' + String(report.week||'').replace(/[^A-Za-z0-9-]/g,'-') + '.pdf"')
+    return res.send(pdf)
+  } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
+})
+
 router.post('/:id/publish', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
   try {
     const report = await WeeklyReport.findById(req.params.id)
