@@ -340,7 +340,8 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
     if (req.user.role !== 'admin' && !isOwner)
       return fail(res, 403, 'You can only edit books you uploaded.');
 
-    const { title, description, author, grades, isActive } = req.body || {};
+    const { title, description, author, grades, isActive, coverUrl } = req.body || {};
+    if (coverUrl !== undefined)    book.coverUrl = String(coverUrl).trim();
     if (title !== undefined)       book.title = String(title).trim() || book.title;
     if (description !== undefined) book.description = String(description).trim();
     if (author !== undefined)      book.author = String(author).trim();
