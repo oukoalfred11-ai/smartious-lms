@@ -31,7 +31,7 @@ function Celebration({ show, big }) {
     const dist  = 30 + Math.random()*45   // % of viewport to travel
     return {
       id:i,
-      emoji:['🌸','🌺','🌼','🌻','🌷','💐','🌹','✨','⭐','🎉'][i%10],
+      emoji:['✦','✧','★','☆','◆','◇','●','✦','★',''][i%10],
       dx: Math.cos(angle)*dist, dy: Math.sin(angle)*dist,
       size: 26+Math.random()*26, delay: Math.random()*0.25,
       spin: (Math.random()>0.5?1:-1)*(360+Math.random()*360),
@@ -83,7 +83,7 @@ function XPPop({ xp, show }) {
       animation:'xpPop 1.2s ease forwards',
     }}>
       <style>{`@keyframes xpPop{0%{transform:translateY(0) scale(0.5);opacity:0}20%{opacity:1;transform:translateY(-10px) scale(1.2)}80%{opacity:1;transform:translateY(-40px) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(0.8)}}`}</style>
-      +{xp} XP ⭐
+      +{xp} XP ★
     </div>
   )
 }
@@ -335,7 +335,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
           <div style={{ padding:'28px 32px' }}>
             {/* Mode selector */}
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10, marginBottom:24 }}>
-              {[['solo','🎯 Solo'],['host','🏆 Host Competition'],['join','🔗 Join']].map(([m,l]) => (
+              {[['solo','◎ Solo'],['host','♛ Host Competition'],['join','Join']].map(([m,l]) => (
                 <button key={m} onClick={()=>setMode(m)} style={{
                   padding:'12px 8px', borderRadius:10, border:`2px solid ${mode===m?C.crimson:C.s100}`,
                   background:mode===m?'#FDE7EC':'#fff', color:mode===m?C.crimson:C.s700,
@@ -381,7 +381,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
               border:'none', fontSize:16, fontWeight:800, cursor:loading?'not-allowed':'pointer',
               letterSpacing:'.02em',
             }}>
-              {loading ? '⏳ Loading questions...' : mode==='join' ? '🎮 Join Game!' : mode==='host' ? '🏆 Create Competition' : '🚀 Start Quiz!'}
+              {loading ? 'Loading questions...' : mode==='join' ? '▶ Join Game!' : mode==='host' ? '♛ Create Competition' : 'Start Quiz!'}
             </button>
 
             {onClose && (
@@ -412,7 +412,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
                 <span style={{ fontSize:18, fontWeight:900, color:'#F0CC5A' }}>{score}/{qIndex+1}</span>
               </div>
               <div style={{ display:'flex', alignItems:'center', gap:5 }}>
-                <span style={{ fontSize:16 }}>{streak>=3?'🔥':streak>=1?'⚡':'💫'}</span>
+                <span style={{ fontSize:16 }}>{streak>=3?'▲':streak>=1?'▶':'·'}</span>
                 <span style={{ fontSize:16, fontWeight:900, color:streak>=3?'#F59E0B':'rgba(255,255,255,.8)' }}>×{streak}</span>
               </div>
               <div style={{ display:'flex', alignItems:'center', gap:5 }}>
@@ -527,7 +527,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
               boxShadow:'0 8px 24px rgba(245,158,11,.4)',
               animation:'streakFire .5s ease infinite alternate',
             }}>
-              🔥 {streak} STREAK! Keep going!
+              ▲ {streak} STREAK! Keep going!
             </div>
           )}
 
@@ -556,7 +556,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
             borderRadius:20, padding:'32px 28px', textAlign:'center', marginBottom:20, color:'#fff',
           }}>
             <div style={{ fontSize:60 }}>
-              {pct>=90?'🏆':pct>=70?'🌟':pct>=50?'👍':'💪'}
+              {pct>=90?'♛':pct>=70?'✧':pct>=50?'✓':'·'}
             </div>
             <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:32, marginTop:8 }}>
               {pct>=90?'Outstanding!':pct>=70?'Great Job!':pct>=50?'Well Done!':'Keep Practising!'}
@@ -571,9 +571,9 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
           {/* Stats row */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:20 }}>
             {[
-              { label:'XP Earned', val:`+${xp}`, icon:'⭐' },
-              { label:'Best Streak', val:`🔥${streak}`, icon:'' },
-              { label:'Subject', val:subject, icon:'📚' },
+              { label:'XP Earned', val:`+${xp}`, icon:'★' },
+              { label:'Best Streak', val:`▲${streak}`, icon:'' },
+              { label:'Subject', val:subject, icon:'▤' },
             ].map(s => (
               <div key={s.label} style={{ background:'#fff', borderRadius:12, padding:'16px 12px', textAlign:'center', border:`1px solid ${C.s100}` }}>
                 <div style={{ fontSize:22 }}>{s.icon}</div>
@@ -585,7 +585,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
 
           {/* Question review */}
           <div style={{ background:'#fff', borderRadius:14, overflow:'hidden', border:`1px solid ${C.s100}`, marginBottom:20 }}>
-            <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}>📋 Review Answers</div>
+            <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}>▤ Review Answers</div>
             {questions.map((q,i) => {
               const given = answers[q._id]
               const correct = given === q.correctAnswer
@@ -613,11 +613,11 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
           {/* Leaderboard */}
           {leaderboard.length > 0 && (
             <div style={{ background:'#fff', borderRadius:14, overflow:'hidden', border:`1px solid ${C.s100}`, marginBottom:20 }}>
-              <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}>🏆 Class Leaderboard</div>
+              <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}>♛ Class Leaderboard</div>
               {leaderboard.slice(0,10).map((e,i) => (
                 <div key={e.studentId||i} style={{ padding:'12px 20px', borderBottom:`1px solid ${C.s100}`, display:'flex', alignItems:'center', gap:12 }}>
                   <div style={{ width:28, height:28, borderRadius:'50%', background:i===0?C.gold:i===1?'#C0C0C0':i===2?'#CD7F32':C.s100, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:12, color:i<3?'#fff':C.s500 }}>
-                    {i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}
+                    {i+1}
                   </div>
                   <div style={{ flex:1, fontSize:14, fontWeight:600, color:C.ink }}>{e.studentName}</div>
                   <div style={{ fontWeight:800, color:C.crimson }}>{e.totalXP} XP</div>
@@ -630,7 +630,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
             <button onClick={() => { setPhase('setup'); setQIndex(0); setAnswers({}); setScore(0); setStreak(0); setXp(0); setSelected(null); setRevealed(false) }}
               style={{ padding:'14px', borderRadius:12, background:C.crimson, color:'#fff', border:'none', fontSize:15, fontWeight:700, cursor:'pointer' }}>
-              🔄 Play Again
+              Play Again
             </button>
             {onClose && (
               <button onClick={onClose}
