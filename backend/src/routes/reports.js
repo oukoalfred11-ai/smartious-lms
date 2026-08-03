@@ -411,6 +411,32 @@ router.get('/:id/pdf-html', auth, requireRole('admin','ops_manager','accountant'
   } catch(e) { return res.status(500).json({ success: false, message: e.message }) }
 })
 
+// ── GET /api/reports/:id/pdf ────────────────────────
+// Premium branded PDF. Staff, teachers, the student, and linked
+// parents (published reports only for families).
+router.get('/:id/pdf', auth, async (req, res) => {
+  try {
+    const { buildTermReportPdf } = require('../lib/reportPdf')
+    const report = await Report.findById(req.params.id).lean()
+    if (!report) return res.status(404).json({ success:false, message:'Report not found.' })
+
+    const role = req.user.role
+    const staff = ['admin','ops_manager','dos','accountant','teacher'].includes(role)
+    const isStudent = role === 'student' && String(report.studentId) === String(req.user._id)
+    const isParent = role === 'parent' && [ ...(req.user.linkedStudents||[]), ...(req.user.children||[]) ]
+      .map(String).includes(String(report.studentId))
+    if (!staff && !isStudent && !isParent)
+      return res.status(403).json({ success:false, message:'Access denied.' })
+    if ((isStudent || isParent) && report.status !== 'published')
+      return res.status(403).json({ success:false, message:'This report has not been published yet.' })
+
+    const pdf = await buildTermReportPdf(report)
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition', 'inline; filename="Report-' + (report.admissionNo||report.studentName||'student').replace(/[^A-Za-z0-9-]/g,'-') + '-T' + report.term + '.pdf"')
+    return res.send(pdf)
+  } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
+})
+
 // ── DELETE /api/reports/:id ─────────────────────────────────
 router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
   try {
