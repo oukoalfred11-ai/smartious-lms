@@ -76,16 +76,18 @@ function InvoicesTab({ toast, refreshKey }) {
     finally { setMarkingPaid(false) }
   }
 
-  const viewReceipt = async (inv) => {
+  const openPdf = async (path, failMsg) => {
+    const w = window.open('', '_blank')
+    if (!w) { toast?.error?.('Please allow pop-ups to view the document.'); return }
     try {
-      const { data } = await api.get('/invoices/'+inv._id+'/receipt-html')
-      if (data.success) {
-        const w = window.open('','_blank')
-        if (!w) { toast?.error?.('Please allow pop-ups to view the receipt.'); return }
-        w.document.write(data.data.html); w.document.close()
-      }
-    } catch { toast?.error?.('Could not load receipt.') }
+      const res = await api.get(path, { responseType: 'blob' })
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+      w.location.href = url
+    } catch { w.close(); toast?.error?.(failMsg) }
   }
+
+  const viewReceipt = (inv) => openPdf('/invoices/'+inv._id+'/receipt-pdf', 'Could not load receipt.')
+  const viewInvoicePdf = (inv) => openPdf('/invoices/'+inv._id+'/pdf', 'Could not load invoice PDF.')
 
   const resend = async (inv) => {
     try {
@@ -193,6 +195,7 @@ function InvoicesTab({ toast, refreshKey }) {
                       {inv.status === 'paid' && (
                         <button onClick={() => viewReceipt(inv)} style={{ fontSize:11, background:'#065F46', color:'#fff', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>▤ Receipt</button>
                       )}
+                      <button onClick={() => viewInvoicePdf(inv)} style={{ fontSize:11, background:TOKENS.crimson, color:'#fff', border:'none', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>PDF</button>
                       {inv.billedToEmail && inv.status !== 'cancelled' && (
                         <button onClick={() => resend(inv)} style={{ fontSize:11, background:TOKENS.cream, color:TOKENS.crimson, border:'1px solid '+TOKENS.line, padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Resend</button>
                       )}
