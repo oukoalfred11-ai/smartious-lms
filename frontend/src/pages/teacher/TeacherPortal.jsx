@@ -14823,6 +14823,31 @@ function TeacherLibraryTab({ user, toast }) {
   }
 
   const [upCover, setUpCover] = useState(null)
+  const [editBook, setEditBook] = useState(null)
+  const [savingEdit, setSavingEdit] = useState(false)
+
+  const saveEdit = async () => {
+    if (!editBook) return
+    setSavingEdit(true)
+    try {
+      let coverUrl
+      if (editBook.newCover) {
+        const cp = await api.post('/library/presign-cover', { fileName: editBook.newCover.name, mimeType: editBook.newCover.type || 'image/jpeg' })
+        const cd = cp.data?.data || cp.data
+        if (cd?.uploadUrl) {
+          await fetch(cd.uploadUrl, { method: 'PUT', headers: { 'Content-Type': editBook.newCover.type || 'image/jpeg' }, body: editBook.newCover })
+          coverUrl = cd.publicUrl
+        }
+      }
+      const payload = { title: editBook.title, author: editBook.author, description: editBook.description, grades: editBook.gradesText }
+      if (coverUrl) payload.coverUrl = coverUrl
+      const { data } = await api.patch('/library/' + editBook._id, payload)
+      if (data?.success) { toast?.ok?.('Book updated.'); setEditBook(null); loadBooks() }
+      else toast?.error?.(data?.message || 'Update failed.')
+    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Update failed.') }
+    finally { setSavingEdit(false) }
+  }
+
 
   const submitUpload = async () => {
     if (!upSubjectId)         { toast?.error?.('Pick a subject.'); return }
@@ -15101,6 +15126,7 @@ function TeacherLibraryTab({ user, toast }) {
                 {booksBySubject[groupKey].map(book => (
                   <BookCard key={book._id} book={book}
                     onView={() => setViewerBook(book)}
+                    onEdit={() => setEditBook({ ...book, gradesText: (book.grades||[]).join(', ') })}
                     onDelete={() => removeBook(book)}
                     canDelete={String(book.uploadedBy) === String(user?._id) || user?.role === 'admin'}/>
                 ))}
@@ -15114,6 +15140,44 @@ function TeacherLibraryTab({ user, toast }) {
       {viewerBook && (
         <LibraryViewer book={viewerBook} api={api} onClose={() => setViewerBook(null)}/>
       )}
+
+      {/* Edit book modal */}
+      {editBook && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(8,12,20,.55)', zIndex:300, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
+          onClick={() => setEditBook(null)}>
+          <div style={{ background:'#fff', borderRadius:14, padding:'24px 26px', width:440, maxWidth:'94vw', maxHeight:'88vh', overflowY:'auto' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ fontFamily:'Georgia, serif', fontSize:18, fontWeight:700, color:'#7D1025', marginBottom:14 }}>Edit book</div>
+            {[['Title','title'],['Author','author'],['Grades (comma-separated)','gradesText']].map(([lab, key]) => (
+              <div key={key} style={{ marginBottom:12 }}>
+                <div style={{ fontSize:11, fontWeight:700, color:'#7D1025', marginBottom:4 }}>{lab.toUpperCase()}</div>
+                <input value={editBook[key]||''} onChange={e => setEditBook(b => ({ ...b, [key]: e.target.value }))}
+                  style={{ width:'100%', boxSizing:'border-box', padding:'9px 12px', border:'1px solid #E8E2D6', borderRadius:8, fontSize:13 }}/>
+              </div>
+            ))}
+            <div style={{ marginBottom:12 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#7D1025', marginBottom:4 }}>DESCRIPTION</div>
+              <textarea value={editBook.description||''} rows={2}
+                onChange={e => setEditBook(b => ({ ...b, description: e.target.value }))}
+                style={{ width:'100%', boxSizing:'border-box', padding:'9px 12px', border:'1px solid #E8E2D6', borderRadius:8, fontSize:13, resize:'vertical' }}/>
+            </div>
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#7D1025', marginBottom:4 }}>COVER IMAGE</div>
+              {(editBook.newCover || editBook.coverUrl) && (
+                <img src={editBook.newCover ? URL.createObjectURL(editBook.newCover) : editBook.coverUrl} alt=""
+                  style={{ width:80, borderRadius:6, border:'2px solid #C9A030', display:'block', marginBottom:8 }}/>
+              )}
+              <input type="file" accept="image/*" onChange={e => setEditBook(b => ({ ...b, newCover: e.target.files?.[0]||null }))} style={{ fontSize:12 }}/>
+            </div>
+            <div style={{ display:'flex', gap:8, justifyContent:'flex-end' }}>
+              <button onClick={() => setEditBook(null)} style={{ background:'#FDFAF4', border:'1px solid #E8E2D6', borderRadius:8, padding:'9px 16px', fontSize:13, fontWeight:700, cursor:'pointer' }}>Cancel</button>
+              <button disabled={savingEdit} onClick={saveEdit} style={{ background:'#7D1025', color:'#fff', border:'none', borderRadius:8, padding:'9px 18px', fontSize:13, fontWeight:700, cursor:'pointer' }}>
+                {savingEdit ? 'Saving...' : 'Save changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -15123,7 +15187,7 @@ function TeacherLibraryTab({ user, toast }) {
 // Compact card showing one library book with view / delete actions.
 // Used by both teacher and student library lists.
 // ─────────────────────────────────────────────────────────
-function BookCard({ book, onView, onDelete, canDelete }) {
+function BookCard({ book, onView, onDelete, onEdit, canDelete }) {
   const sizeMB = book.sizeBytes ? (book.sizeBytes / (1024 * 1024)).toFixed(1) + ' MB' : ''
   return (
     <div style={{
@@ -15131,13 +15195,20 @@ function BookCard({ book, onView, onDelete, canDelete }) {
       padding: 14, display: 'flex', flexDirection: 'column',
     }}>
       <div style={{ display:'flex', gap: 10, marginBottom: 10 }}>
-        <div style={{
-          width: 38, height: 48, borderRadius: 4,
-          background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
-          flexShrink: 0,
-          display:'flex', alignItems:'center', justifyContent:'center',
-          color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
-        }}>PDF</div>
+        {book.coverUrl ? (
+          <img src={book.coverUrl} alt="" loading="lazy" style={{
+            width: 38, height: 48, borderRadius: 4, objectFit: 'cover',
+            objectPosition: 'top', flexShrink: 0, border: '1px solid #C9A030',
+          }}/>
+        ) : (
+          <div style={{
+            width: 38, height: 48, borderRadius: 4,
+            background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
+            flexShrink: 0,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
+          }}>PDF</div>
+        )}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontWeight: 700, fontSize: 13, color: '#1A1A1A',
@@ -15168,6 +15239,13 @@ function BookCard({ book, onView, onDelete, canDelete }) {
       </div>
 
       <div style={{ display:'flex', gap: 6, marginTop: 'auto' }}>
+        {canDelete && onEdit && (
+          <button onClick={onEdit} style={{
+            flex: 1, background: '#FDFAF4', color: '#7D1025',
+            border: '1px solid #C9A030', borderRadius: 7, padding: '7px 0',
+            fontSize: 12, fontWeight: 700, cursor: 'pointer',
+          }}>Edit</button>
+        )}
         <button onClick={onView}
           style={{
             flex: 1,
