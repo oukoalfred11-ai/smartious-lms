@@ -70,8 +70,8 @@ async function runShowCauseCheck() {
       }).lean()
 
       if (!report) {
-        const student = await User.findById(studentId).select('firstName lastName').lean()
-        if (student) missingStudents.push(student)
+        const student = await User.findById(studentId).select('firstName lastName onBreak').lean()
+        if (student && !student.onBreak) missingStudents.push(student)
       }
     }
 
