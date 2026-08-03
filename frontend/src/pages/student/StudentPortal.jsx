@@ -12156,7 +12156,7 @@ function StudentLibraryPage({ user, toast }) {
       )}
 
       {viewerBook && (
-        <LibraryViewer book={viewerBook} api={api} onClose={() => setViewerBook(null)}/>
+        <LibraryViewer book={viewerBook} api={api} readOnly onClose={() => setViewerBook(null)}/>
       )}
     </div>
   )
