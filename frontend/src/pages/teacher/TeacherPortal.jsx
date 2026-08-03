@@ -1406,7 +1406,7 @@ export default function TeacherPortal() {
             </div>
             {markDetail.flagged && (
               <div style={{background:'var(--r50)',border:'1px solid var(--r100)',borderRadius:'var(--rmd)',padding:14,marginBottom:20}}>
-                <div style={{fontWeight:700,color:'var(--r600)',marginBottom:8}}>⚠ Integrity Flags Detected</div>
+                <div style={{fontWeight:700,color:'var(--r600)',marginBottom:8}}>Integrity Flags Detected</div>
                 <div style={{display:'flex',gap:20,fontSize:13}}>
                   <span>AI-generated: <span className="mono" style={{fontWeight:700,color:'var(--a600)'}}>{markDetail.ai}%</span></span>
                   <span>Plagiarism: <span className="mono" style={{fontWeight:700,color:'var(--r600)'}}>{markDetail.plag}%</span></span>
@@ -4575,7 +4575,7 @@ function ExamsTab({ user, store, setPage, toast }) {
                             background: '#FEE2E2', color: '#B91C1C',
                             fontSize: 9.5, fontWeight: 800, letterSpacing: '.08em',
                             padding: '2px 8px', borderRadius: 99,
-                          }} title={sub.flagReason}>⚠ FLAGGED</span>
+                          }} title={sub.flagReason}>FLAGGED</span>
                         )}
                       </div>
                       <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--s900)' }}>{studentName}</div>
@@ -4694,7 +4694,7 @@ function ExamsTab({ user, store, setPage, toast }) {
             color: '#B91C1C', padding: '10px 14px', borderRadius: 8,
             marginBottom: 14, fontSize: 12.5,
           }}>
-            <strong>⚠ Integrity flag:</strong> {sub.flagReason}
+            <strong>Integrity flag:</strong> {sub.flagReason}
           </div>
         )}
 
