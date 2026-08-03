@@ -191,7 +191,7 @@ router.post('/presign-cover', auth, requireRole('teacher', 'admin'), async (req,
 // ═══════════════════════════════════════════════════════════
 router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
-    const {
+    const { coverUrl,
       r2Key, publicUrl, subjectId, title, fileName,
       fileSize, description, author, grades, mimeType,
       coverImage, coverR2Key,
@@ -220,6 +220,7 @@ router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) 
     const uploaderName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim();
 
     const book = await LibraryBook.create({
+      coverUrl: coverUrl || '',
       title:          String(title).trim(),
       description:    description ? String(description).trim() : '',
       author:         author      ? String(author).trim()      : '',
