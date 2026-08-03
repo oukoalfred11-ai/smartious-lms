@@ -82,7 +82,7 @@ function ReportList({ toast, refreshKey, onOpen, onNew }) {
           <div style={{ padding:30, textAlign:'center', color:TOKENS.s500, fontSize:13 }}>Loading reports...</div>
         ) : filtered.length === 0 ? (
           <div style={{ padding:40, textAlign:'center' }}>
-            <div style={{ fontSize:28, marginBottom:10 }}>📋</div>
+            <div style={{ fontSize:28, marginBottom:10 }}>▤</div>
             <div style={{ fontSize:14, fontWeight:700, color:TOKENS.s900, marginBottom:4 }}>No reports yet</div>
             <div style={{ fontSize:12.5, color:TOKENS.s500 }}>Click "+ Generate report" to create your first.</div>
           </div>
