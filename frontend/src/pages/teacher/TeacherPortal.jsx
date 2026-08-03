@@ -9274,11 +9274,6 @@ function TeacherProfileTab({ user, setCurrentUser, store, setPage, toast }) {
               {/* Upload from device */}
               <input type="file" accept="image/*" ref={fileInputRef} style={{ display: 'none' }}
                 onChange={e => handlePhotoFile(e.target.files?.[0])}/>
-              <div style={{ marginTop: 10 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 5 }}>COVER IMAGE (OPTIONAL)</div>
-                <input type='file' accept='image/*' onChange={e => setUpCover(e.target.files?.[0] || null)} style={{ fontSize: 13 }} />
-                {upCover && <img src={URL.createObjectURL(upCover)} alt='' style={{ display: 'block', marginTop: 8, width: 80, borderRadius: 6, border: '2px solid #C9A030' }} />}
-              </div>
               <button onClick={() => fileInputRef.current?.click()}
                 style={{
                   width: '100%', background: '#7D1025', color: '#FBFAF5', border: 'none',
@@ -14998,7 +14993,7 @@ function TeacherLibraryTab({ user, toast }) {
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <label className="fl">PDF file * (max 10 MB)</label>
+            <label className="fl">PDF file * (max 300 MB)</label>
             <input ref={fileInputRef} type="file" accept="application/pdf"
               onChange={e => onFilePick(e.target.files?.[0])}
               disabled={uploading}
@@ -15013,11 +15008,19 @@ function TeacherLibraryTab({ user, toast }) {
               background: '#FDF7E2', border: '1px solid #E8D58F',
               borderRadius: 5, padding: '6px 10px', lineHeight: 1.5,
             }}>
-              <strong>Tip:</strong> If your PDF is larger than 10 MB,
-              compress it first using a free online tool like ilovepdf.com
-              or smallpdf.com. Most coursebooks shrink to under 10 MB
-              with no visible quality loss.
-            </div>
+              <strong>Tip:</strong> Large coursebooks upload directly to secure storage. Add a cover image so students see a book preview in their library.</div>
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label className="fl">Cover image (optional)</label>
+            <input type="file" accept="image/*"
+              onChange={e => setUpCover(e.target.files?.[0] || null)}
+              disabled={uploading}
+              style={{ fontSize: 12, marginTop: 4 }}/>
+            {upCover && (
+              <img src={URL.createObjectURL(upCover)} alt="Cover preview"
+                style={{ display: 'block', marginTop: 8, width: 84, borderRadius: 6, border: '2px solid #C9A030' }}/>
+            )}
           </div>
 
           {uploading && (
