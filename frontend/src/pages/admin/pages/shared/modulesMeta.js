@@ -23,6 +23,7 @@ export const MODULES = {
   checkin:      { label: 'Check In',              accent: TOKENS.accentEmerald||'#065F46', icon: 'frontdesk' },
   dosbreaks:    { label: 'Staff Breaks',           accent: TOKENS.crimson,       icon: 'frontdesk' },
   sessions:     { label: 'Student Sessions',       accent: TOKENS.accentAmber,   icon: 'users' },
+  suggestions:  { label: 'Suggestions',            accent: TOKENS.gold,          icon: 'mail' },
   dostimetable: { label: 'Timetables',             accent: TOKENS.accentNavy, icon: 'rooms' },
   salesperf:   { label: 'My Performance', accent: TOKENS.gold,      icon: 'frontdesk' },
   livelessons: { label: 'Live Classes', accent: TOKENS.accentRose,  icon: 'live' },
