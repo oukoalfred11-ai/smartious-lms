@@ -9274,6 +9274,11 @@ function TeacherProfileTab({ user, setCurrentUser, store, setPage, toast }) {
               {/* Upload from device */}
               <input type="file" accept="image/*" ref={fileInputRef} style={{ display: 'none' }}
                 onChange={e => handlePhotoFile(e.target.files?.[0])}/>
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#7D1025', marginBottom: 5 }}>COVER IMAGE (OPTIONAL)</div>
+                <input type='file' accept='image/*' onChange={e => setUpCover(e.target.files?.[0] || null)} style={{ fontSize: 13 }} />
+                {upCover && <img src={URL.createObjectURL(upCover)} alt='' style={{ display: 'block', marginTop: 8, width: 80, borderRadius: 6, border: '2px solid #C9A030' }} />}
+              </div>
               <button onClick={() => fileInputRef.current?.click()}
                 style={{
                   width: '100%', background: '#7D1025', color: '#FBFAF5', border: 'none',
@@ -14817,9 +14822,12 @@ function TeacherLibraryTab({ user, toast }) {
     setUpAuthor('')
     setUpGrades('')
     setUpFile(null)
+    setUpCover(null)
     setUploadProgress(0)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
+
+  const [upCover, setUpCover] = useState(null)
 
   const submitUpload = async () => {
     if (!upSubjectId)         { toast?.error?.('Pick a subject.'); return }
@@ -14829,22 +14837,40 @@ function TeacherLibraryTab({ user, toast }) {
     setUploading(true)
     setUploadProgress(0)
     try {
-      const fd = new FormData()
-      fd.append('file', upFile)
-      fd.append('subjectId', upSubjectId)
-      fd.append('title', upTitle.trim())
-      fd.append('description', upDescription.trim())
-      fd.append('author', upAuthor.trim())
-      fd.append('grades', upGrades.trim())
+      // 1. Presign, 2. direct browser-to-R2 PUT, 3. optional cover, 4. confirm
+      const pr = await api.post('/library/presign', { fileName: upFile.name, mimeType: upFile.type || 'application/pdf', fileSize: upFile.size })
+      const pd = pr.data?.data || pr.data
+      if (!pd?.uploadUrl) throw new Error(pd?.message || 'Could not prepare the upload.')
 
-      const { data } = await api.post('/library/upload', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        onUploadProgress: (evt) => {
-          if (evt.total) {
-            const pct = Math.round((evt.loaded / evt.total) * 100)
-            setUploadProgress(pct)
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('PUT', pd.uploadUrl)
+        xhr.setRequestHeader('Content-Type', upFile.type || 'application/pdf')
+        xhr.upload.onprogress = evt => { if (evt.total) setUploadProgress(Math.round((evt.loaded / evt.total) * 100)) }
+        xhr.onload = () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error('Storage upload failed (' + xhr.status + ').'))
+        xhr.onerror = () => reject(new Error('Storage upload failed. Check your connection.'))
+        xhr.send(upFile)
+      })
+
+      let coverUrl = ''
+      if (upCover) {
+        try {
+          const cp = await api.post('/library/presign-cover', { fileName: upCover.name, mimeType: upCover.type || 'image/jpeg' })
+          const cd = cp.data?.data || cp.data
+          if (cd?.uploadUrl) {
+            await fetch(cd.uploadUrl, { method: 'PUT', headers: { 'Content-Type': upCover.type || 'image/jpeg' }, body: upCover })
+            coverUrl = cd.publicUrl || ''
           }
-        },
+        } catch { /* cover optional */ }
+      }
+
+      const { data } = await api.post('/library/confirm', {
+        r2Key: pd.r2Key, publicUrl: pd.publicUrl, coverUrl,
+        subjectId: upSubjectId, title: upTitle.trim(),
+        description: upDescription.trim(), author: upAuthor.trim(),
+        grades: upGrades.trim(),
+        fileName: upFile.name, fileSize: upFile.size,
+        mimeType: upFile.type || 'application/pdf',
       })
       if (data?.success) {
         toast?.ok?.('Book uploaded.')
