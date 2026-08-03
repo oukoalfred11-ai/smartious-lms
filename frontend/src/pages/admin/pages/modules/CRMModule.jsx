@@ -41,7 +41,7 @@ const PRIORITY_META = {
 }
 
 const NOTE_TYPE_META = {
-  call:'📞', whatsapp:'💬', email:'✉️', meeting:'🤝', other:'📝',
+  call:'✆', whatsapp:'❍', email:'✉', meeting:'◈', other:'✎',
 }
 
 export const StatusBadge = ({ status }) => {
@@ -151,7 +151,7 @@ function CRMList({ toast, refreshKey, onOpen, onAdd }) {
           <div style={{ padding:30, textAlign:'center', color:TOKENS.s500, fontSize:13 }}>Loading inquiries...</div>
         ) : inquiries.length === 0 ? (
           <div style={{ padding:40, textAlign:'center' }}>
-            <div style={{ fontSize:28, marginBottom:10 }}>📋</div>
+            <div style={{ fontSize:28, marginBottom:10 }}>▤</div>
             <div style={{ fontSize:14, fontWeight:700, color:TOKENS.s900, marginBottom:4 }}>No inquiries found</div>
             <div style={{ fontSize:12.5, color:TOKENS.s500 }}>{search || statusF !== 'all' ? 'Try different filters.' : 'Click "+ New inquiry" to record your first lead.'}</div>
           </div>
@@ -192,7 +192,7 @@ function CRMList({ toast, refreshKey, onOpen, onAdd }) {
                       <span style={{ fontSize:11.5, fontWeight:700, color:pm.color }}>● {pm.label}</span>
                     </td>
                     <td style={{ padding:'12px 16px', fontSize:12.5, color:cbOverdue?'#DC2626':TOKENS.s700, fontWeight:cbOverdue?700:400 }}>
-                      {inq.nextCallbackDate ? (cbOverdue ? '⚠ ' : '') + fmtDate(inq.nextCallbackDate) : '—'}
+                      {inq.nextCallbackDate ? (cbOverdue ? '' : '') + fmtDate(inq.nextCallbackDate) : '—'}
                       {inq.nextCallbackDone && <span style={{ color:TOKENS.s400, fontWeight:400 }}> (done)</span>}
                     </td>
                     <td style={{ padding:'12px 16px', fontSize:11.5, color:TOKENS.s500, whiteSpace:'nowrap' }}>
@@ -297,8 +297,8 @@ function CRMDetail({ toast, id, onBack }) {
                 </div>
               </div>
               <div style={{ display:'flex', gap:8 }}>
-                {inq.parentPhone && <a href={'tel:'+inq.parentPhone} style={{ background:TOKENS.crimson, color:'#fff', padding:'7px 14px', borderRadius:7, fontSize:12, fontWeight:700, textDecoration:'none' }}>📞 Call</a>}
-                {inq.parentPhone && <a href={'https://wa.me/'+inq.parentPhone.replace(/\D/g,'')} target="_blank" rel="noopener" style={{ background:'#25D366', color:'#fff', padding:'7px 14px', borderRadius:7, fontSize:12, fontWeight:700, textDecoration:'none' }}>💬 WhatsApp</a>}
+                {inq.parentPhone && <a href={'tel:'+inq.parentPhone} style={{ background:TOKENS.crimson, color:'#fff', padding:'7px 14px', borderRadius:7, fontSize:12, fontWeight:700, textDecoration:'none' }}>✆ Call</a>}
+                {inq.parentPhone && <a href={'https://wa.me/'+inq.parentPhone.replace(/\D/g,'')} target="_blank" rel="noopener" style={{ background:'#25D366', color:'#fff', padding:'7px 14px', borderRadius:7, fontSize:12, fontWeight:700, textDecoration:'none' }}>❍ WhatsApp</a>}
               </div>
             </div>
 
@@ -369,7 +369,7 @@ function CRMDetail({ toast, id, onBack }) {
                   <div key={note._id} style={{ background:TOKENS.cream, borderRadius:8, padding:14, border:'1px solid '+TOKENS.line }}>
                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:6 }}>
                       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                        <span style={{ fontSize:16 }}>{NOTE_TYPE_META[note.type] || '📝'}</span>
+                        <span style={{ fontSize:16 }}>{NOTE_TYPE_META[note.type] || '✎'}</span>
                         <div>
                           <div style={{ fontSize:12, fontWeight:700, color:TOKENS.s900 }}>
                             {note.type?.charAt(0).toUpperCase() + note.type?.slice(1)}
@@ -384,7 +384,7 @@ function CRMDetail({ toast, id, onBack }) {
                     {note.callbackDate && (
                       <div style={{ marginTop:8, display:'flex', alignItems:'center', gap:8 }}>
                         <span style={{ fontSize:11.5, color:note.callbackDone?TOKENS.s400:'#D97706', fontWeight:600 }}>
-                          📅 Callback: {fmtDT(note.callbackDate)}
+                          ◆ Callback: {fmtDT(note.callbackDate)}
                         </span>
                         {!note.callbackDone ? (
                           <button onClick={() => markCallbackDone(note._id, true)} style={{ fontSize:11, background:'#D1FAE5', color:'#065F46', border:'none', padding:'2px 8px', borderRadius:4, cursor:'pointer', fontWeight:700 }}>Mark done</button>
@@ -420,7 +420,7 @@ function CRMDetail({ toast, id, onBack }) {
             <div style={{ fontSize:12, fontWeight:700, color:TOKENS.s900, marginBottom:10 }}>Callback</div>
             {inq.nextCallbackDate ? (
               <div style={{ fontSize:13, color: !inq.nextCallbackDone && new Date(inq.nextCallbackDate) < new Date() ? '#DC2626' : TOKENS.s700, fontWeight:600 }}>
-                📅 {new Date(inq.nextCallbackDate).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}
+                ◆ {new Date(inq.nextCallbackDate).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}
                 {inq.nextCallbackDone && <div style={{ fontSize:11, color:TOKENS.s400, fontWeight:400, marginTop:2 }}>✓ Completed</div>}
               </div>
             ) : (
@@ -744,7 +744,7 @@ export function SalesPerformanceModule({ toast, refreshKey }) {
                     <td style={{padding:'10px 14px'}}>
                       {inv.status==='paid'&&(
                         <button onClick={()=>viewReceipt(inv)} style={{fontSize:11,background:'#065F46',color:'#fff',border:'none',padding:'4px 8px',borderRadius:5,cursor:'pointer',fontWeight:700}}>
-                          🧾 Receipt
+                          ▤ Receipt
                         </button>
                       )}
                     </td>
