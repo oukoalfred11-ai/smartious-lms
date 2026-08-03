@@ -7,6 +7,7 @@ const router   = express.Router()
 const nodemailer = require('nodemailer')
 const { auth, requireRole } = require('../middleware/auth')
 const Invoice  = require('../models/Invoice')
+const { buildInvoicePdfBuffer, buildReceiptPdfBuffer } = require('../lib/invoicePdf')
 
 const ALLOWED = requireRole('admin', 'accountant', 'sales', 'ops_manager')
 
@@ -220,11 +221,19 @@ router.post('/', auth, ALLOWED, async (req, res) => {
       const t = getTransporter()
       if (t) {
         const from = process.env.EMAIL_FROM||'Smartious Billing <hellosmartious@gmail.com>'
-        t.sendMail({ from, to:billedToEmail,
-          subject:`Invoice ${invNo} — Smartious Homeschool Global`,
-          html:buildInvoiceEmailHTML(inv),
-        }).then(async()=>{ await Invoice.findByIdAndUpdate(inv._id,{ emailSentTo:billedToEmail, emailSentAt:new Date() }) })
-          .catch(e=>console.error('[invoice email]',e.message))
+        ;(async () => {
+          let attachments = []
+          try {
+            const pdf = await buildInvoicePdfBuffer(inv)
+            attachments = [{ filename: `${invNo}.pdf`, content: pdf, contentType: 'application/pdf' }]
+          } catch (e) { console.error('[invoice pdf]', e.message) }
+          await t.sendMail({ from, to:billedToEmail,
+            subject:`Invoice ${invNo} — Smartious Homeschool Global`,
+            html:buildInvoiceEmailHTML(inv),
+            attachments,
+          })
+          await Invoice.findByIdAndUpdate(inv._id,{ emailSentTo:billedToEmail, emailSentAt:new Date() })
+        })().catch(e=>console.error('[invoice email]',e.message))
       }
     }
 
@@ -249,11 +258,19 @@ router.patch('/:id/status', auth, ALLOWED, async (req, res) => {
       const t = getTransporter()
       if (t) {
         const receiptNo = 'SM-RCP-'+String(inv.invoiceNo).replace('SM-INV-','')
-        t.sendMail({ from:process.env.EMAIL_FROM||'Smartious Billing <hellosmartious@gmail.com>',
-          to:inv.billedToEmail,
-          subject:`Payment receipt ${receiptNo} — Smartious Homeschool Global`,
-          html:buildReceiptEmailHTML(inv, receiptNo),
-        }).catch(e=>console.error('[receipt email]',e.message))
+        ;(async () => {
+          let attachments = []
+          try {
+            const pdf = await buildReceiptPdfBuffer(inv, receiptNo)
+            attachments = [{ filename: `${receiptNo}.pdf`, content: pdf, contentType: 'application/pdf' }]
+          } catch (e) { console.error('[receipt pdf]', e.message) }
+          await t.sendMail({ from:process.env.EMAIL_FROM||'Smartious Billing <hellosmartious@gmail.com>',
+            to:inv.billedToEmail,
+            subject:`Payment receipt ${receiptNo} — Smartious Homeschool Global`,
+            html:buildReceiptEmailHTML(inv, receiptNo),
+            attachments,
+          })
+        })().catch(e=>console.error('[receipt email]',e.message))
       }
     }
     return res.json({ success:true, data:{ invoice:inv } })
@@ -279,9 +296,20 @@ router.post('/:id/resend', auth, ALLOWED, async (req, res) => {
     if (!email) return res.status(400).json({ success:false, message:'No email address.' })
     const t = getTransporter()
     if (!t) return res.status(500).json({ success:false, message:'Email not configured.' })
+    let attachments = []
+    try {
+      const pdf = await buildInvoicePdfBuffer(inv)
+      attachments.push({ filename: `${inv.invoiceNo}.pdf`, content: pdf, contentType: 'application/pdf' })
+      if (inv.status === 'paid') {
+        const receiptNo = 'SM-RCP-'+String(inv.invoiceNo).replace('SM-INV-','')
+        const rpdf = await buildReceiptPdfBuffer(inv, receiptNo)
+        attachments.push({ filename: `${receiptNo}.pdf`, content: rpdf, contentType: 'application/pdf' })
+      }
+    } catch (e) { console.error('[resend pdf]', e.message) }
     await t.sendMail({ from:process.env.EMAIL_FROM||'Smartious Billing <hellosmartious@gmail.com>',
       to:email, subject:`Invoice ${inv.invoiceNo} — Smartious Homeschool Global`,
       html:buildInvoiceEmailHTML(inv),
+      attachments,
     })
     await Invoice.findByIdAndUpdate(inv._id,{ emailSentTo:email, emailSentAt:new Date() })
     return res.json({ success:true, message:`Invoice resent to ${email}.` })
