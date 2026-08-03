@@ -262,9 +262,9 @@ export default function TeacherProfile() {
               Contact Information
             </div>
             {[
-              { label: 'Email', value: teacher.email, icon: '✉️' },
-              { label: 'Phone', value: teacher.phone, icon: '📱' },
-              { label: 'Joined', value: new Date(teacher.joinedDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }), icon: '📅' },
+              { label: 'Email', value: teacher.email, icon: '✉' },
+              { label: 'Phone', value: teacher.phone, icon: '☏' },
+              { label: 'Joined', value: new Date(teacher.joinedDate).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }), icon: '◆' },
             ].map((item, i) => (
               <div key={i} style={{ display: 'flex', gap: 12, marginBottom: i < 2 ? 14 : 0 }}>
                 <div style={{ fontSize: '18px', flexShrink: 0 }}>{item.icon}</div>
@@ -473,7 +473,7 @@ export default function TeacherProfile() {
       >
         <div>
           <div style={{ background: 'var(--a50)', border: '1px solid var(--a100)', borderRadius: 'var(--rmd)', padding: 12, marginBottom: 16, fontSize: 13, color: 'var(--a700)' }}>
-            ℹ️ A verification email will be sent to your new address. Click the link to confirm the change.
+            A verification email will be sent to your new address. Click the link to confirm the change.
           </div>
           <div className="fg">
             <label className="fl">Current Email</label>
@@ -502,4 +502,3 @@ export default function TeacherProfile() {
     </div>
   )
 }
-
