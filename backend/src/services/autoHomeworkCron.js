@@ -296,7 +296,18 @@ async function processEndedClasses(opts = {}) {
       const priorNames = await priorLessonNames(lc)
       let made = 0, mailed = 0, reviewTotal = 0
 
+      // Pause awareness: access-blocked students (e.g. fee hold) get no
+      // homework generated — it would fall due while they cannot access
+      // the portal. Soft-paused students (holiday/break) DO get homework
+      // so they can study at their own pace, but no notification email.
+      const pauseFlags = {}
+      const flagDocs = await User.find({ _id: { $in: lc.assignedStudents } })
+        .select('onBreak breakBlocksAccess').lean()
+      flagDocs.forEach(d => { pauseFlags[String(d._id)] = d })
+
       for (const studentId of lc.assignedStudents) {
+        const pf = pauseFlags[String(studentId)] || {}
+        if (pf.onBreak && pf.breakBlocksAccess) continue // no homework while access is blocked
         // Sampled per student, server-side — two students in the same
         // class receive different papers without a large local pool.
         const { paper, reviewCount } = await buildPaper(lc, priorNames, QUESTIONS_PER_HOMEWORK)
@@ -327,7 +338,7 @@ async function processEndedClasses(opts = {}) {
           requiresTeacherGrading: true,
         })
         made++
-        if (await notifyStudent(studentId, hw, lc, lessonKey)) mailed++
+        if (!pf.onBreak && await notifyStudent(studentId, hw, lc, lessonKey)) mailed++
       }
 
       await LiveClass.updateOne({ _id: lc._id }, { $set: {
