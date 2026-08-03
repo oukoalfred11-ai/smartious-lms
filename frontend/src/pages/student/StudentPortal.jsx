@@ -12174,21 +12174,30 @@ function StudentBookCard({ book, onOpen }) {
       background: '#fff', border: '1px solid #E8E2D6', borderRadius: 10,
       padding: 14, display: 'flex', flexDirection: 'column',
     }}>
-      <div style={{ display:'flex', gap: 10, marginBottom: 10 }}>
-        {book.coverUrl ? (
-          <img src={book.coverUrl} alt="" loading="lazy" style={{
-            width: 42, height: 52, borderRadius: 4, objectFit: 'cover',
-            flexShrink: 0, border: '1px solid #C9A030',
-          }} />
-        ) : (
+      {book.coverUrl ? (
+        <img src={book.coverUrl} alt="" loading="lazy" style={{
+          width: '100%', height: 150, borderRadius: 8, objectFit: 'cover',
+          objectPosition: 'top', marginBottom: 10, border: '1px solid #E8E2D6',
+        }} />
+      ) : (
+        <div style={{
+          width: '100%', height: 150, borderRadius: 8, marginBottom: 10,
+          background: 'linear-gradient(150deg, #7D1025 0%, #5C0B1B 60%, #3E0712 100%)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
+        }}>
           <div style={{
-            width: 42, height: 52, borderRadius: 4,
-            background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
-            flexShrink: 0,
-            display:'flex', alignItems:'center', justifyContent:'center',
-            color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
+            width: 44, height: 56, borderRadius: 4, border: '2px solid #C9A030',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#C9A030', fontSize: 10, fontWeight: 800, letterSpacing: '.05em',
           }}>PDF</div>
-        )}
+          <div style={{
+            color: '#F0CC5A', fontSize: 11, fontWeight: 700, textAlign: 'center',
+            padding: '0 14px', fontFamily: 'Georgia, serif', fontStyle: 'italic',
+            display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          }}>{book.subjectName || 'Coursebook'}</div>
+        </div>
+      )}
+      <div style={{ display:'flex', gap: 10, marginBottom: 10 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontWeight: 700, fontSize: 13.5, color: '#1A1A1A',
