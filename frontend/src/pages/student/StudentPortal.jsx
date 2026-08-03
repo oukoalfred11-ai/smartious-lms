@@ -12175,13 +12175,20 @@ function StudentBookCard({ book, onOpen }) {
       padding: 14, display: 'flex', flexDirection: 'column',
     }}>
       <div style={{ display:'flex', gap: 10, marginBottom: 10 }}>
-        <div style={{
-          width: 42, height: 52, borderRadius: 4,
-          background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
-          flexShrink: 0,
-          display:'flex', alignItems:'center', justifyContent:'center',
-          color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
-        }}>PDF</div>
+        {book.coverUrl ? (
+          <img src={book.coverUrl} alt="" loading="lazy" style={{
+            width: 42, height: 52, borderRadius: 4, objectFit: 'cover',
+            flexShrink: 0, border: '1px solid #C9A030',
+          }} />
+        ) : (
+          <div style={{
+            width: 42, height: 52, borderRadius: 4,
+            background: 'linear-gradient(135deg, #7D1025 0%, #5C0B1B 100%)',
+            flexShrink: 0,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            color: '#C9A030', fontSize: 9, fontWeight: 800, letterSpacing: '.05em',
+          }}>PDF</div>
+        )}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontWeight: 700, fontSize: 13.5, color: '#1A1A1A',
