@@ -260,7 +260,7 @@ function QuestionBankModule({ toast }) {
                     <span><strong>{cl.homeworkCreated}</strong> homework created</span>
                   </div>
                   <div style={{ fontSize:11.5, color:TOKENS.s500, marginTop:5 }}>Lesson: {cl.lesson}</div>
-                  {cl.blocker && <div style={{ fontSize:12, fontWeight:700, color:'#991B1B', marginTop:6 }}>⚠ {cl.blocker}</div>}
+                  {cl.blocker && <div style={{ fontSize:12, fontWeight:700, color:'#991B1B', marginTop:6 }}>{cl.blocker}</div>}
                 </div>
               ))}
             </div>
@@ -293,7 +293,7 @@ function QuestionBankModule({ toast }) {
           <div style={{ padding:40, textAlign:'center', color:TOKENS.s400, fontSize:13 }}>Loading...</div>
         ) : questions.length === 0 ? (
           <div style={{ padding:40, textAlign:'center', color:TOKENS.s400 }}>
-            <div style={{ fontSize:40, marginBottom:12 }}>📝</div>
+            <div style={{ fontSize:40, marginBottom:12 }}>✎</div>
             <div style={{ fontSize:16, fontWeight:700, color:TOKENS.s700, marginBottom:8 }}>No questions yet</div>
             <div style={{ fontSize:13, marginBottom:16 }}>Click "Load Built-in Questions" to seed 100+ questions, or add your own.</div>
             <button onClick={seed} style={{ background:TOKENS.crimson, color:'#fff', border:'none', padding:'10px 20px', borderRadius:8, fontWeight:700, cursor:'pointer' }}>Load Built-in Questions</button>
