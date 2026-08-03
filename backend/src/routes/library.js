@@ -191,7 +191,7 @@ router.post('/presign-cover', auth, requireRole('teacher', 'admin'), async (req,
 // ═══════════════════════════════════════════════════════════
 router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) => {
   try {
-    const { coverUrl,
+    const { coverUrl, section,
       r2Key, publicUrl, subjectId, title, fileName,
       fileSize, description, author, grades, mimeType,
       coverImage, coverR2Key,
@@ -221,6 +221,7 @@ router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) 
 
     const book = await LibraryBook.create({
       coverUrl: coverUrl || '',
+      section: ['coursebook','mock','past_paper'].includes(section) ? section : 'coursebook',
       title:          String(title).trim(),
       description:    description ? String(description).trim() : '',
       author:         author      ? String(author).trim()      : '',
@@ -342,6 +343,7 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
 
     const { title, description, author, grades, isActive, coverUrl } = req.body || {};
     if (coverUrl !== undefined)    book.coverUrl = String(coverUrl).trim();
+    if (req.body.section !== undefined && ['coursebook','mock','past_paper'].includes(req.body.section)) book.section = req.body.section;
     if (title !== undefined)       book.title = String(title).trim() || book.title;
     if (description !== undefined) book.description = String(description).trim();
     if (author !== undefined)      book.author = String(author).trim();
