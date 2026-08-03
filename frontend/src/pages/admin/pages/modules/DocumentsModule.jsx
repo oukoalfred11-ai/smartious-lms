@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useAuth, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
+import { fmtDate } from '../shared/helpers.js'
 
 function DocumentsModule({ toast }) {
   const [docType, setDocType] = useState(null)
@@ -130,7 +131,7 @@ export function InvoiceGenerator({ toast, onBack }) {
 
   if (saved) return (
     <div style={card}>
-      <div style={{ fontSize:14, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>✅ Invoice saved</div>
+      <div style={{ fontSize:14, fontWeight:800, color:TOKENS.s900, marginBottom:12 }}>✓ Invoice saved</div>
       <div style={{ fontSize:13, color:TOKENS.s700, marginBottom:16, lineHeight:1.7 }}>
         <strong>{saved.invoiceNo}</strong> · {saved.currency} {money(saved.totalDue)} · {saved.billedToName}
         {saved.emailSentTo && <div style={{ fontSize:12, color:TOKENS.s500, marginTop:4 }}>Email sent to {saved.emailSentTo}</div>}
