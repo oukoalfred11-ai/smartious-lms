@@ -43,6 +43,15 @@ api.interceptors.request.use(cfg => {
 api.interceptors.response.use(r => r, err => {
   const status = err.response?.status
   const url = err.config?.url || ''
+  // ── Paused account gate ──────────────────────────────────
+  // A paused student / parent is rejected everywhere with
+  // code ACCOUNT_PAUSED. Route them to the branded paused
+  // screen instead of a logout or silent failure.
+  if (status === 403 && err.response?.data?.code === 'ACCOUNT_PAUSED') {
+    try { sessionStorage.setItem('sm_paused', JSON.stringify(err.response.data.pause || {})) } catch {}
+    if (window.location.pathname !== '/paused') window.location.href = '/paused'
+    return Promise.reject(err)
+  }
   if (status === 401 || status === 403) {
     // Only auto-logout for genuine auth endpoint failures.
     // Random endpoints (e.g. /users/stats, /allocations/pending-count) returning
