@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import BirthdayBanner from '../../components/BirthdayBanner.jsx'
+import SuggestionBox from '../../components/SuggestionBox.jsx'
 import { api } from '../../context/ctx.jsx'
 
 // ── Tokens matching admin/student/teacher portals ──────────
@@ -106,7 +107,7 @@ function MobileTopBar({ title, eyebrow, onMenuToggle, menuOpen, user, initials }
         </svg>
       </button>
       <div style={{ flex:1, minWidth:0 }}>
-        <div style={{ padding:'16px 20px 0' }}><BirthdayBanner /></div>
+        <div style={{ padding:'16px 20px 0' }}><BirthdayBanner /><SuggestionBox /></div>
         {eyebrow&&<div style={{ fontSize:9, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.12em' }}>{eyebrow}</div>}
         <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:18, color:'#1A0F0E', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{title}</div>
       </div>
@@ -1035,7 +1036,48 @@ function ParentTimetable({ child }) {
 
 // ── Stub pages (kept from original) ──────────────────────
 function ParentLessons({ child }) {
-  return <PSection tag="Parent Portal" title="Live" em="Lessons" sub="Access live classroom sessions for your child."/>
+  const [data, setData] = useState(null)
+  useEffect(() => {
+    if (!child?._id) return
+    api.get('/parent/children/'+child._id+'/liveclasses')
+      .then(r => setData(r.data?.data||{}))
+      .catch(() => setData({}))
+  }, [child?._id])
+  if (data === null) return <Spinner/>
+  const { past=[], upcoming=[], doneCount=0, totalCount=0 } = data
+  const whenOf = c => new Date(c.startAt || c.scheduledAt || c.date || c.createdAt)
+  const fmt = d => whenOf(d).toLocaleString('en-GB',{ weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })
+  const Row = (c, done) => (
+    <div key={c._id} style={{ display:'flex', alignItems:'center', gap:14, padding:'12px 18px', borderBottom:`1px solid ${C.line}` }}>
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontWeight:700, fontSize:13.5, color:C.ink }}>{c.title||c.subject}</div>
+        <div style={{ fontSize:11.5, color:C.s500, marginTop:2 }}>{c.subject} \u00B7 {c.teacherId ? c.teacherId.firstName+' '+c.teacherId.lastName : ''} \u00B7 {fmt(c)}</div>
+      </div>
+      <span style={{ background:done?'#D1FAE5':'#FEF3C7', color:done?'#065F46':'#92400E', fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:999 }}>{done?'Completed':'Upcoming'}</span>
+    </div>
+  )
+  return (
+    <>
+      <PSection tag="Parent Portal" title="Live" em="Lessons"
+        sub={`${child.firstName}'s live classroom sessions: what is coming up and everything already covered.`}/>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))', gap:12, marginBottom:18 }}>
+        {[['Classes completed', doneCount, '#065F46'],['Upcoming classes', upcoming.length, C.crimson],['Total scheduled', totalCount, C.ink]].map(([l,v,col]) => (
+          <div key={l} style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:12, padding:'14px 16px' }}>
+            <div style={{ fontSize:10.5, fontWeight:700, color:C.s500, textTransform:'uppercase', letterSpacing:'.06em' }}>{l}</div>
+            <div style={{ fontSize:22, fontWeight:800, color:col, marginTop:4 }}>{v}</div>
+          </div>
+        ))}
+      </div>
+      {upcoming.length>0 && <div style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:14, overflow:'hidden', marginBottom:18 }}>
+        <div style={{ padding:'12px 18px', fontWeight:800, fontSize:12, color:C.crimson, textTransform:'uppercase', letterSpacing:'.08em', borderBottom:`1px solid ${C.line}` }}>Upcoming</div>
+        {upcoming.map(c => Row(c, false))}
+      </div>}
+      <div style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:14, overflow:'hidden' }}>
+        <div style={{ padding:'12px 18px', fontWeight:800, fontSize:12, color:'#065F46', textTransform:'uppercase', letterSpacing:'.08em', borderBottom:`1px solid ${C.line}` }}>Previously covered ({doneCount})</div>
+        {past.length===0 ? <div style={{ padding:30, textAlign:'center', color:C.s400, fontSize:13 }}>No classes completed yet.</div> : past.map(c => Row(c, true))}
+      </div>
+    </>
+  )
 }
 function ParentMessages({ user, showToast }) {
   return <PSection tag="Parent Portal" title="Messages" sub="Send and receive messages from teachers and administration."/>
@@ -1068,16 +1110,19 @@ function ParentRateTeachers({ child, showToast }) {
 
   useEffect(() => {
     if (!child?._id) return
-    api.get('/parent/children/'+child._id+'/timetable')
-      .then(r => setEntries(r.data?.data?.entries||[]))
+    // Allocation-based: shows every teacher assigned to the child,
+    // whether or not timetable entries exist yet.
+    api.get('/parent/children/'+child._id+'/teachers')
+      .then(r => setEntries(r.data?.data?.teachers||[]))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [child?._id])
 
   const teachers = Object.values(entries.reduce((acc,e) => {
-    if (e.teacherId) {
-      const tid = String(e.teacherId._id||e.teacherId)
-      if (!acc[tid]) acc[tid] = { ...e.teacherId, subjects:[] }
+    const t = e.teacher || e.teacherId
+    if (t) {
+      const tid = String(t._id||t)
+      if (!acc[tid]) acc[tid] = { ...t, subjects:[...(e.subjects||[])] }
       if (e.subject && !acc[tid].subjects.includes(e.subject)) acc[tid].subjects.push(e.subject)
     }
     return acc
