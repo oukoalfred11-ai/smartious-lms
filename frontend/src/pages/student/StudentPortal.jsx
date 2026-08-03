@@ -12082,9 +12082,10 @@ function StudentLibraryPage({ user, toast }) {
 
   // Group by subject
   const grouped = (() => {
+    const SEC = { coursebook: 'Coursebooks', mock: 'Past Papers \u00B7 Mock Exams', past_paper: 'Past Papers \u00B7 Exam Body' }
     const out = {}
     for (const b of filtered) {
-      const k = b.subjectName || 'Other'
+      const k = (SEC[b.section] || 'Coursebooks') + '  \u2014  ' + (b.subjectName || 'Other')
       if (!out[k]) out[k] = []
       out[k].push(b)
     }
@@ -12128,7 +12129,10 @@ function StudentLibraryPage({ user, toast }) {
         </div>
       ) : (
         <div style={{ display:'flex', flexDirection:'column', gap: 22 }}>
-          {Object.keys(grouped).sort().map(subj => (
+          {Object.keys(grouped).sort((a, b2) => {
+            const rank = k => k.startsWith('Coursebooks') ? 0 : k.includes('Mock') ? 1 : 2
+            return rank(a) - rank(b2) || a.localeCompare(b2)
+          }).map(subj => (
             <div key={subj}>
               <div style={{
                 fontSize: 11, fontWeight: 700, color: '#7D1025',
