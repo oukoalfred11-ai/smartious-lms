@@ -85,6 +85,7 @@ export default function LibraryUpload({ api, toast, subjects = [], onUploaded, o
       await axios.put(uploadUrl, file, {
         headers: {
           'Content-Type': file.type || 'application/pdf',
+          'Content-Disposition': 'inline',
         },
         onUploadProgress: (evt) => {
           if (evt.total) {
