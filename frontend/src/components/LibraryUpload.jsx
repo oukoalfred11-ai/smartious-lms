@@ -30,6 +30,8 @@ export default function LibraryUpload({ api, toast, subjects = [], onUploaded, o
   const [file,         setFile]         = useState(null)
   const [stage,        setStage]        = useState('idle') // idle | presigning | uploading | confirming | done | error
   const [progress,     setProgress]     = useState(0)      // 0–100
+  const [cover,        setCover]        = useState(null)   // optional cover image file
+  const [coverPreview, setCoverPreview] = useState('')
   const [errorMsg,     setErrorMsg]     = useState('')
   const fileInputRef = useRef(null)
 
@@ -93,6 +95,19 @@ export default function LibraryUpload({ api, toast, subjects = [], onUploaded, o
 
       setProgress(100)
 
+      // Optional cover image upload (small, direct to R2)
+      let uploadedCoverUrl = ''
+      if (cover) {
+        try {
+          const cp = await api.post('/library/presign-cover', { fileName: cover.name, mimeType: cover.type || 'image/jpeg' })
+          const cd = cp.data?.data || cp.data
+          if (cd?.uploadUrl) {
+            await fetch(cd.uploadUrl, { method: 'PUT', headers: { 'Content-Type': cover.type || 'image/jpeg' }, body: cover })
+            uploadedCoverUrl = cd.publicUrl || ''
+          }
+        } catch { /* cover is optional; book proceeds without it */ }
+      }
+
       // ── Step 3: confirm — save metadata to MongoDB ─────────
       setStage('confirming')
 
@@ -107,6 +122,7 @@ export default function LibraryUpload({ api, toast, subjects = [], onUploaded, o
         fileName:    file.name,
         fileSize:    file.size,
         mimeType:    file.type || 'application/pdf',
+        coverUrl:    uploadedCoverUrl,
       })
 
       setStage('done')
@@ -196,6 +212,19 @@ export default function LibraryUpload({ api, toast, subjects = [], onUploaded, o
           <input value={grades} onChange={e => setGrades(e.target.value)}
             placeholder='e.g. Year 10, Year 11'
             style={inp} disabled={busy}/>
+
+        <div>
+          <label style={lbl}>Cover image (optional)</label>
+          <input type='file' accept='image/*' onChange={e => {
+            const f = e.target.files?.[0] || null
+            setCover(f)
+            setCoverPreview(f ? URL.createObjectURL(f) : '')
+          }} style={{ fontSize: 13 }} />
+          {coverPreview && (
+            <img src={coverPreview} alt='Cover preview'
+              style={{ display: 'block', marginTop: 8, width: 90, borderRadius: 6, border: '2px solid #C9A030' }} />
+          )}
+        </div>
         </div>
       </div>
 
