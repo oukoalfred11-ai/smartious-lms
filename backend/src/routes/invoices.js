@@ -285,6 +285,64 @@ router.patch('/:id/status', auth, ALLOWED, async (req, res) => {
   } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
 })
 
+// ── POST /api/invoices/preview-pdf ─────────────────────
+// Streams a PDF preview of an UNSAVED invoice (used by the generator).
+router.post('/preview-pdf', auth, ALLOWED, async (req, res) => {
+  try {
+    if (!buildInvoicePdfBuffer) return res.status(503).json({ success:false, message:'PDF service unavailable.' })
+    const { invoiceNo, issueDate, dueDate, billedToName, billedToAddress, billedToEmail,
+      studentName, studentGrade, subject, programmeLabel, lineItems, currency,
+      discount, vatPct, notes, paymentNote } = req.body
+    const items    = (lineItems||[]).filter(it=>it.description?.trim())
+    const subtotal = items.reduce((t,it)=>t+(parseFloat(it.amount)||0),0)
+    const disc     = parseFloat(discount)||0
+    const vp       = parseFloat(vatPct)||0
+    const vatAmt   = (subtotal-disc)*(vp/100)
+    const inv = {
+      invoiceNo: invoiceNo?.trim() || 'DRAFT', issueDate: issueDate||new Date(), dueDate: dueDate||null,
+      billedToName: billedToName||'', billedToAddress: billedToAddress||'', billedToEmail: billedToEmail||'',
+      studentName: studentName||'', studentGrade: studentGrade||'', subject: subject||'',
+      programmeLabel: programmeLabel||'',
+      lineItems: items.map(it=>({ description:it.description, sessions:it.sessions||'',
+        duration:it.duration||'', ratePerHr:parseFloat(it.ratePerHr)||0, amount:parseFloat(it.amount)||0 })),
+      currency: currency||'USD', subtotal, discount:disc, vatPct:vp, vatAmount:vatAmt,
+      totalDue: subtotal-disc+vatAmt, notes: notes||'', paymentNote: paymentNote||'',
+    }
+    const pdf = await buildInvoicePdfBuffer(inv)
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition', 'inline; filename="'+inv.invoiceNo+'.pdf"')
+    return res.send(pdf)
+  } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
+})
+
+// ── GET /api/invoices/:id/pdf ──────────────────────────
+router.get('/:id/pdf', auth, ALLOWED, async (req, res) => {
+  try {
+    if (!buildInvoicePdfBuffer) return res.status(503).json({ success:false, message:'PDF service unavailable.' })
+    const inv = await Invoice.findById(req.params.id).lean()
+    if (!inv) return res.status(404).json({ success:false, message:'Invoice not found.' })
+    const pdf = await buildInvoicePdfBuffer(inv)
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition', 'inline; filename="'+inv.invoiceNo+'.pdf"')
+    return res.send(pdf)
+  } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
+})
+
+// ── GET /api/invoices/:id/receipt-pdf ──────────────────
+router.get('/:id/receipt-pdf', auth, ALLOWED, async (req, res) => {
+  try {
+    if (!buildReceiptPdfBuffer) return res.status(503).json({ success:false, message:'PDF service unavailable.' })
+    const inv = await Invoice.findById(req.params.id).lean()
+    if (!inv) return res.status(404).json({ success:false, message:'Invoice not found.' })
+    if (inv.status !== 'paid') return res.status(400).json({ success:false, message:'Receipt only available for paid invoices.' })
+    const receiptNo = 'SM-RCP-'+String(inv.invoiceNo).replace('SM-INV-','')
+    const pdf = await buildReceiptPdfBuffer(inv, receiptNo)
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition', 'inline; filename="'+receiptNo+'.pdf"')
+    return res.send(pdf)
+  } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
+})
+
 // ── GET /api/invoices/:id/receipt-html ────────────────────
 router.get('/:id/receipt-html', auth, ALLOWED, async (req, res) => {
   try {
