@@ -79,7 +79,7 @@ router.post('/', auth, async (req, res) => {
           reason:     status==='absent' ? reason.trim() : noteText,
           markedBy:   req.user._id,
           markedAt:   new Date(),
-          curriculum: user.curriculum || '',
+          curriculum: Array.isArray(user.curriculum) ? user.curriculum.join(', ') : (user.curriculum || ''),
           // Extra fields for check-in
           checkedIn:     true,
           checkInStatus: status,        // 'present'|'absent'|'late'
@@ -148,7 +148,7 @@ router.get('/status', auth, requireRole(...ADMIN_ROLES), async (req, res) => {
         name:          u.firstName+' '+u.lastName,
         email:         u.email,
         role:          u.role,
-        curriculum:    u.curriculum,
+        curriculum:    Array.isArray(u.curriculum) ? u.curriculum.join(', ') : u.curriculum,
         grade:         u.gradeLevel,
         onBreak:       u.onBreak,
         breakType:     u.breakType,
