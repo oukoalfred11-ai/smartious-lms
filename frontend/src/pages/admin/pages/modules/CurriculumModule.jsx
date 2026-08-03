@@ -541,6 +541,24 @@ function SyllabusSpineTab({ toast }) {
                 borderRadius: 7, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
               }}>Load IGCSE spine</button>
             )}
+            <button style={{ background:'#FDFAF4', color:'#7D1025', border:'1.5px solid #C9A030', borderRadius:8, padding:'8px 14px', fontSize:12.5, fontWeight:700, cursor:'pointer' }}
+              onClick={() => {
+                const inp = document.createElement('input')
+                inp.type = 'file'; inp.accept = 'application/json,.json'
+                inp.onchange = async (ev) => {
+                  const f = ev.target.files?.[0]; if (!f) return
+                  try {
+                    const parsed = JSON.parse(await f.text())
+                    const topics = Array.isArray(parsed) ? parsed : parsed.topics
+                    if (!Array.isArray(topics)) { toast?.error?.('JSON must contain a topics array.'); return }
+                    if (!window.confirm('This REPLACES the entire ' + (subjectName || 'subject') + ' spine with ' + topics.length + ' topics from the file. Continue?')) return
+                    const { data } = await api.post('/syllabus/bulk', { subjectId, topics, sourceSyllabus: parsed.sourceSyllabus || '' })
+                    if (data?.success) { toast?.ok?.(data.message || 'Spine loaded.'); loadSpine(subjectId) }
+                    else toast?.error?.(data?.message || 'Import failed.')
+                  } catch (e) { toast?.error?.(e?.response?.data?.message || 'Invalid JSON file.') }
+                }
+                inp.click()
+              }}>Import spine JSON</button>
           </>
         )}
       </div>
