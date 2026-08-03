@@ -14822,6 +14822,7 @@ function TeacherLibraryTab({ user, toast }) {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
+  const [upSection, setUpSection] = useState('coursebook')
   const [upCover, setUpCover] = useState(null)
   const [editBook, setEditBook] = useState(null)
   const [savingEdit, setSavingEdit] = useState(false)
@@ -14839,7 +14840,7 @@ function TeacherLibraryTab({ user, toast }) {
           coverUrl = cd.publicUrl
         }
       }
-      const payload = { title: editBook.title, author: editBook.author, description: editBook.description, grades: editBook.gradesText }
+      const payload = { title: editBook.title, author: editBook.author, description: editBook.description, grades: editBook.gradesText, section: editBook.section || 'coursebook' }
       if (coverUrl) payload.coverUrl = coverUrl
       const { data } = await api.patch('/library/' + editBook._id, payload)
       if (data?.success) { toast?.ok?.('Book updated.'); setEditBook(null); loadBooks() }
@@ -14889,7 +14890,7 @@ function TeacherLibraryTab({ user, toast }) {
         r2Key: pd.r2Key, publicUrl: pd.publicUrl, coverUrl,
         subjectId: upSubjectId, title: upTitle.trim(),
         description: upDescription.trim(), author: upAuthor.trim(),
-        grades: upGrades.trim(),
+        grades: upGrades.trim(), section: upSection,
         fileName: upFile.name, fileSize: upFile.size,
         mimeType: upFile.type || 'application/pdf',
       })
@@ -15038,6 +15039,15 @@ function TeacherLibraryTab({ user, toast }) {
           </div>
 
           <div style={{ marginBottom: 16 }}>
+            <label className="fl">Library section *</label>
+            <select className="fsel" value={upSection} onChange={e => setUpSection(e.target.value)} disabled={uploading} style={{ marginTop: 4 }}>
+              <option value="coursebook">Coursebook</option>
+              <option value="mock">Past Paper - Mock Exam</option>
+              <option value="past_paper">Past Paper - Exam Body</option>
+            </select>
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
             <label className="fl">Cover image (optional)</label>
             <input type="file" accept="image/*"
               onChange={e => setUpCover(e.target.files?.[0] || null)}
@@ -15155,6 +15165,15 @@ function TeacherLibraryTab({ user, toast }) {
                   style={{ width:'100%', boxSizing:'border-box', padding:'9px 12px', border:'1px solid #E8E2D6', borderRadius:8, fontSize:13 }}/>
               </div>
             ))}
+            <div style={{ marginBottom:12 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#7D1025', marginBottom:4 }}>SECTION</div>
+              <select value={editBook.section||'coursebook'} onChange={e => setEditBook(b => ({ ...b, section: e.target.value }))}
+                style={{ width:'100%', padding:'9px 12px', border:'1px solid #E8E2D6', borderRadius:8, fontSize:13 }}>
+                <option value="coursebook">Coursebook</option>
+                <option value="mock">Past Paper - Mock Exam</option>
+                <option value="past_paper">Past Paper - Exam Body</option>
+              </select>
+            </div>
             <div style={{ marginBottom:12 }}>
               <div style={{ fontSize:11, fontWeight:700, color:'#7D1025', marginBottom:4 }}>DESCRIPTION</div>
               <textarea value={editBook.description||''} rows={2}
