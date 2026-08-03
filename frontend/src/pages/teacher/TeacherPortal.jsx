@@ -14800,10 +14800,9 @@ function TeacherLibraryTab({ user, toast }) {
       toast?.error?.('Only PDF files are accepted.')
       return
     }
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 300 * 1024 * 1024) {
       toast?.error?.(
-        'File exceeds 10 MB limit. Please compress the PDF first ' +
-        '(most coursebooks compress to under 10 MB with no visible loss).'
+        'File exceeds the 300 MB limit. Please compress the PDF first.'
       )
       return
     }
