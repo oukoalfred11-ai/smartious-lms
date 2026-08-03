@@ -14841,6 +14841,7 @@ function TeacherLibraryTab({ user, toast }) {
         const xhr = new XMLHttpRequest()
         xhr.open('PUT', pd.uploadUrl)
         xhr.setRequestHeader('Content-Type', upFile.type || 'application/pdf')
+        xhr.setRequestHeader('Content-Disposition', 'inline')
         xhr.upload.onprogress = evt => { if (evt.total) setUploadProgress(Math.round((evt.loaded / evt.total) * 100)) }
         xhr.onload = () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error('Storage upload failed (' + xhr.status + ').'))
         xhr.onerror = () => reject(new Error('Storage upload failed. Check your connection.'))
