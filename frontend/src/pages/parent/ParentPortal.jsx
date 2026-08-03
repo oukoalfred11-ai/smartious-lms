@@ -33,6 +33,9 @@ const NAV_SECTIONS = [
   { section:'Child Overview', items:[
     { id:'dashboard',  label:'Dashboard',         icon:'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z' },
     { id:'reports',    label:'Academic Reports',  icon:'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11' },
+    { id:'homework',   label:'Homework',          icon:'M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z' },
+    { id:'results',    label:'Results',           icon:'M18 20V10M12 20V4M6 20v-6' },
+    { id:'attendance', label:'Attendance',        icon:'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11' },
     { id:'timetable',  label:'Timetable',         icon:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z' },
     { id:'lessons',    label:'Live Lessons',      icon:'M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z', live:true },
     { id:'messages',   label:'Messages',          icon:'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
@@ -421,6 +424,9 @@ export default function ParentPortal() {
             <>
               {page==='dashboard'  && <ParentDashboard   child={selectedChild} showToast={showToast}/>}
               {page==='reports'    && <ParentReports      child={selectedChild} showToast={showToast}/>}
+              {page==='homework'   && <ParentHomework     child={selectedChild} showToast={showToast}/>}
+              {page==='results'    && <ParentResults      child={selectedChild} showToast={showToast}/>}
+              {page==='attendance' && <ParentAttendance   child={selectedChild} showToast={showToast}/>}
               {page==='timetable'  && <ParentTimetable    child={selectedChild}/>}
               {page==='rateteacher'&& <ParentRateTeachers child={selectedChild} showToast={showToast}/>}
               {page==='fees'       && <ParentFees         child={selectedChild} showToast={showToast}/>}
@@ -486,6 +492,17 @@ function NoChildLinked({ onLink }) {
   )
 }
 
+// ── Shared premium PDF opener (blob, popup-safe) ────────
+async function openPdfBlob(path, showToast, failMsg) {
+  const w = window.open('', '_blank')
+  if (!w) { showToast?.('Please allow pop-ups to view the document.', 'err'); return }
+  try {
+    const res = await api.get(path, { responseType: 'blob' })
+    const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+    w.location.href = url
+  } catch { w.close(); showToast?.(failMsg, 'err') }
+}
+
 // ── Parent Dashboard ──────────────────────────────────────
 function ParentDashboard({ child, showToast }) {
   const [data, setData] = useState(null)
@@ -497,11 +514,13 @@ function ParentDashboard({ child, showToast }) {
       api.get('/parent/children/'+child._id+'/reports'),
       api.get('/parent/children/'+child._id+'/fees'),
       api.get('/parent/children/'+child._id+'/timetable'),
-    ]).then(([rep, fee, tt]) => {
+      api.get('/parent/children/'+child._id+'/homework'),
+    ]).then(([rep, fee, tt, hw]) => {
       setData({
         rep:  rep.status==='fulfilled'  ? rep.value.data?.data  : null,
         fee:  fee.status==='fulfilled'  ? fee.value.data?.data  : null,
         tt:   tt.status==='fulfilled'   ? tt.value.data?.data?.entries||[] : [],
+        hw:   hw.status==='fulfilled'   ? hw.value.data?.data?.homeworks||[] : [],
       })
     }).finally(()=>setLoading(false))
   }, [child?._id])
@@ -558,6 +577,7 @@ function ParentDashboard({ child, showToast }) {
           { label:'Overall average', val:overall!==null?overall+'%':'—', color:overall!==null?gc(overall):C.s400 },
           { label:'Attendance rate', val:att?.rate!==null?att.rate+'%':'—', color:att?.rate>=80?'#065F46':att?.rate>=60?'#D97706':'#991B1B' },
           { label:'Exams completed', val:data.rep?.examResults?.length||0, color:C.s900 },
+          { label:'Homework pending', val:(data.hw||[]).filter(h=>!h.submission||h.submission.status==='in_progress').length, color:C.crimson },
           { label:'Classes today',   val:todayClasses.length, color:C.crimson },
           { label:'Fee status', val:billing?.status==='overdue'?'Overdue':billing?.status==='due-soon'?'Due soon':billing?.status==='current'?'Current':'—',
             color:billing?.status==='overdue'?'#991B1B':billing?.status==='due-soon'?'#D97706':'#065F46' },
@@ -659,19 +679,9 @@ function ParentReports({ child, showToast }) {
   const SUBJ_COLS = {'Mathematics':'#8B1A2E','Maths':'#8B1A2E','Physics':'#1E3A8A','Chemistry':'#166534','Biology':'#7C2D12','English':'#6B21A8','English Language':'#6B21A8','History':'#92400E','Geography':'#0F766E','Computer Science':'#1F2937','Business Studies':'#7E22CE','Economics':'#9F1239'}
   const colFor = s => SUBJ_COLS[s]||'#8B1A2E'
 
-  const openReport = async (id) => {
-    try {
-      const r = await api.get('/reports/'+id+'/pdf-html')
-      const w = window.open('','_blank'); w.document.write(r.data?.data?.html||''); w.document.close()
-    } catch { showToast('Could not open report.','err') }
-  }
+  const openReport = (id) => openPdfBlob('/reports/'+id+'/pdf', showToast, 'Could not open the report PDF.')
 
-  const openWeeklyReport = async (id) => {
-    try {
-      const r = await api.get('/weekly-reports/'+id+'/html')
-      const w = window.open('','_blank'); w.document.write(r.data?.data?.html||''); w.document.close()
-    } catch { showToast('Could not open report.','err') }
-  }
+  const openWeeklyReport = (id) => openPdfBlob('/weekly-reports/'+id+'/pdf', showToast, 'Could not open the weekly report PDF.')
 
   return (
     <>
@@ -849,12 +859,9 @@ function ParentFees({ child, showToast }) {
       .finally(()=>setLoading(false))
   },[child?._id])
 
-  const openInvoice = async (inv) => {
-    try {
-      const r = await api.get('/invoices/'+inv._id+'/receipt-html')
-      const w = window.open('','_blank'); w.document.write(r.data?.data?.html||''); w.document.close()
-    } catch { showToast('Could not load invoice.','err') }
-  }
+  const openInvoice = (inv) => openPdfBlob(
+    '/invoices/'+inv._id+(inv.status==='paid'?'/receipt-pdf':'/pdf'),
+    showToast, 'Could not load the document.')
 
   if (loading) return <Spinner/>
   if (!data) return null
@@ -1158,5 +1165,153 @@ function Spinner() {
       <div style={{ width:36, height:36, border:'3px solid #F0EBE6', borderTopColor:C.crimson, borderRadius:'50%', animation:'spin .75s linear infinite', margin:'0 auto' }}/>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
+  )
+}
+
+// ── Parent Homework ─────────────────────────────────
+function ParentHomework({ child, showToast }) {
+  const [items, setItems] = useState(null)
+  useEffect(() => {
+    if (!child?._id) return
+    api.get('/parent/children/'+child._id+'/homework')
+      .then(r => setItems(r.data?.data?.homeworks||[]))
+      .catch(() => { showToast('Failed to load homework.','err'); setItems([]) })
+  }, [child?._id])
+  if (items === null) return <Spinner/>
+
+  const stPill = (h) => {
+    const sub = h.submission
+    const overdue = h.dueAt && new Date(h.dueAt) < new Date() && (!sub || sub.status==='in_progress')
+    const [bg, col, label] = !sub || sub.status==='in_progress'
+      ? (overdue ? ['#FEE2E2','#991B1B','Overdue'] : ['#FEF3C7','#92400E','Pending'])
+      : sub.status==='submitted' ? ['#DBEAFE','#1E40AF','Submitted']
+      : ['#D1FAE5','#065F46', sub.status==='released' ? 'Marked' : 'Grading']
+    return <span style={{ background:bg, color:col, fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:999 }}>{label}</span>
+  }
+
+  return (
+    <>
+      <PSection tag="Parent Portal" title="Homework" em="Tracker"
+        sub={`Every assignment set for ${child.firstName}, with submission status and marks as teachers release them.`}/>
+      <div style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:14, overflow:'hidden' }}>
+        {items.length===0 ? <div style={{ padding:36, textAlign:'center', color:C.s400, fontSize:13.5 }}>No homework assigned yet.</div> :
+        items.map(h => (
+          <div key={h._id} style={{ display:'flex', alignItems:'center', gap:14, padding:'14px 18px', borderBottom:`1px solid ${C.line}` }}>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontWeight:700, fontSize:13.5, color:C.ink }}>{h.title}</div>
+              <div style={{ fontSize:11.5, color:C.s500, marginTop:2 }}>
+                {h.subject} · {h.questionCount||'?'} questions · Due {h.dueAt ? new Date(h.dueAt).toLocaleString('en-GB',{ day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '—'}
+              </div>
+            </div>
+            {h.submission?.status==='released' && h.submission.totalAwarded != null && (
+              <div style={{ textAlign:'right' }}>
+                <div style={{ fontWeight:800, fontSize:15, color:C.crimson }}>{h.submission.totalAwarded}<span style={{ fontSize:11, color:C.s400 }}>/{h.totalMarks||'—'}</span></div>
+              </div>
+            )}
+            {stPill(h)}
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+// ── Parent Results ──────────────────────────────────
+function ParentResults({ child, showToast }) {
+  const [data, setData] = useState(null)
+  useEffect(() => {
+    if (!child?._id) return
+    api.get('/parent/children/'+child._id+'/results')
+      .then(r => setData(r.data?.data||{}))
+      .catch(() => { showToast('Failed to load results.','err'); setData({}) })
+  }, [child?._id])
+  if (data === null) return <Spinner/>
+  const { assessments=[], latestTerm } = data
+  const pc = p => p==null ? C.s400 : p>=70 ? '#065F46' : p>=50 ? '#B45309' : '#991B1B'
+
+  return (
+    <>
+      <PSection tag="Parent Portal" title="Assessment" em="Results"
+        sub={`${child.firstName}'s recent assessment scores from weekly teaching, plus the latest published term summary.`}/>
+      {latestTerm && (
+        <div style={{ background:`linear-gradient(135deg,${C.crimson},${C.crimsonD})`, borderRadius:14, padding:'18px 22px', marginBottom:18, display:'flex', gap:26, flexWrap:'wrap', alignItems:'center' }}>
+          <div>
+            <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.14em', color:'rgba(255,255,255,.55)', textTransform:'uppercase' }}>Latest term report</div>
+            <div style={{ color:'#fff', fontWeight:800, fontSize:16, marginTop:3 }}>{latestTerm.termLabel||('Term '+latestTerm.term)} · {latestTerm.academicYear}</div>
+          </div>
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontSize:10, color:'rgba(255,255,255,.55)', fontWeight:700, textTransform:'uppercase' }}>Overall</div>
+            <div style={{ fontSize:22, fontWeight:800, color:C.gold }}>{latestTerm.overallAverage!=null?latestTerm.overallAverage+'%':'—'}</div>
+          </div>
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontSize:10, color:'rgba(255,255,255,.55)', fontWeight:700, textTransform:'uppercase' }}>Mean grade</div>
+            <div style={{ fontSize:22, fontWeight:800, color:'#fff' }}>{latestTerm.meanGrade||'—'}</div>
+          </div>
+        </div>
+      )}
+      <div style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:14, overflow:'hidden' }}>
+        {assessments.length===0 ? <div style={{ padding:36, textAlign:'center', color:C.s400, fontSize:13.5 }}>No assessment results recorded yet.</div> :
+        assessments.map((a,i) => (
+          <div key={i} style={{ display:'flex', alignItems:'center', gap:14, padding:'12px 18px', borderBottom:`1px solid ${C.line}` }}>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontWeight:700, fontSize:13, color:C.ink }}>{a.desc||'Assessment'}</div>
+              <div style={{ fontSize:11.5, color:C.s500, marginTop:2 }}>{a.subject} · {a.week} {a.period} · {a.teacherName}</div>
+            </div>
+            <div style={{ fontSize:12.5, color:C.s500 }}>{a.score!=null?a.score:'—'}/{a.outOf!=null?a.outOf:'—'}</div>
+            <div style={{ fontWeight:800, fontSize:14, color:pc(a.percentage), minWidth:48, textAlign:'right' }}>{a.percentage!=null?a.percentage+'%':'—'}</div>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+// ── Parent Attendance ──────────────────────────────
+function ParentAttendance({ child, showToast }) {
+  const [data, setData] = useState(null)
+  useEffect(() => {
+    if (!child?._id) return
+    api.get('/parent/children/'+child._id+'/attendance')
+      .then(r => setData(r.data?.data||{}))
+      .catch(() => { showToast('Failed to load attendance.','err'); setData({}) })
+  }, [child?._id])
+  if (data === null) return <Spinner/>
+  const { records=[], counts={} } = data
+  const total = records.length || 1
+  const present = (counts.present||0)+(counts.late||0)
+  const rate = records.length ? Math.round(present/total*100) : null
+  const stMeta = s2 => s2==='present' ? ['#D1FAE5','#065F46','Present'] : s2==='late' ? ['#FEF3C7','#92400E','Late'] : s2==='excused' ? ['#E0E7FF','#3730A3','Excused'] : ['#FEE2E2','#991B1B','Absent']
+
+  return (
+    <>
+      <PSection tag="Parent Portal" title="Attendance" em="Record"
+        sub={`${child.firstName}'s attendance over the last 90 days of scheduled learning.`}/>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))', gap:12, marginBottom:18 }}>
+        {[['Attendance rate', rate!=null?rate+'%':'—', rate>=80?'#065F46':rate>=60?'#B45309':'#991B1B'],
+          ['Present', counts.present||0, '#065F46'],
+          ['Late', counts.late||0, '#B45309'],
+          ['Absent', counts.absent||0, '#991B1B']].map(([l,v,col]) => (
+          <div key={l} style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:12, padding:'14px 16px' }}>
+            <div style={{ fontSize:10.5, fontWeight:700, color:C.s500, textTransform:'uppercase', letterSpacing:'.06em' }}>{l}</div>
+            <div style={{ fontSize:22, fontWeight:800, color:col, marginTop:4 }}>{v}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ background:'#fff', border:`1px solid ${C.line}`, borderRadius:14, overflow:'hidden' }}>
+        {records.length===0 ? <div style={{ padding:36, textAlign:'center', color:C.s400, fontSize:13.5 }}>No attendance records in this period.</div> :
+        records.map((r2,i) => {
+          const [bg,col,label] = stMeta(r2.status)
+          return (
+            <div key={i} style={{ display:'flex', alignItems:'center', gap:14, padding:'11px 18px', borderBottom:`1px solid ${C.line}` }}>
+              <div style={{ flex:1, fontSize:13, fontWeight:600, color:C.ink }}>
+                {new Date(r2.date).toLocaleDateString('en-GB',{ weekday:'short', day:'numeric', month:'long', year:'numeric' })}
+              </div>
+              {r2.reason && <div style={{ fontSize:11.5, color:C.s500 }}>{r2.reason}</div>}
+              <span style={{ background:bg, color:col, fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:999 }}>{label}</span>
+            </div>
+          )
+        })}
+      </div>
+    </>
   )
 }
