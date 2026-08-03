@@ -69,6 +69,8 @@ app.use('/api/syllabus', require('./routes/syllabus'));
 app.use('/api/timetable', require('./routes/timetable'));
 app.use('/api/student-profile', require('./routes/student-profile'));
 app.use('/api/students',       require('./routes/students'));
+app.use('/api/student-sessions', require('./routes/student-sessions'));
+app.use('/api/birthdays', require('./routes/birthdays'));
 app.use('/api/parents', require('./routes/parents'));
 app.use('/api/dashboard',      require('./routes/dashboard'));
 app.use('/api/grouprooms',     require('./routes/grouprooms'));
@@ -139,6 +141,8 @@ const { sendDueReminders  } = require('./routes/fee-collection');
 const { sendClassReminders } = require('./routes/parent-portal');
 const { scheduleShowCauseCron } = require('./services/showCauseCron');
 try { require('./services/autoHomeworkCron').start(); } catch (e) { console.error('[auto-homework] start failed:', e.message); }
+try { require('./services/pauseAutoResume').startPauseAutoResumeCron(); } catch (e) { console.error('[pause-cron] start failed:', e.message); }
+try { require('./services/birthdayCron').startBirthdayCron(); } catch (e) { console.error('[birthday-cron] start failed:', e.message); }
 try { require('./services/aiMarking').logStartupState(); } catch (e) { /* service optional */ }
 
 const runCheckinReminder = () => {
