@@ -315,8 +315,18 @@ router.post('/preview-pdf', auth, ALLOWED, async (req, res) => {
   } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
 })
 
+const parentOrStaff = async (req, res, next) => {
+  if (['admin','accountant','sales','ops_manager'].includes(req.user.role)) return next()
+  if (req.user.role === 'parent') {
+    const Invoice2 = require('../models/Invoice')
+    const inv = await Invoice2.findById(req.params.id).select('billedToEmail').lean()
+    if (inv && inv.billedToEmail && inv.billedToEmail.toLowerCase() === String(req.user.email||'').toLowerCase()) return next()
+  }
+  return res.status(403).json({ success:false, message:'Access denied.' })
+}
+
 // ── GET /api/invoices/:id/pdf ──────────────────────────
-router.get('/:id/pdf', auth, ALLOWED, async (req, res) => {
+router.get('/:id/pdf', auth, parentOrStaff, async (req, res) => {
   try {
     if (!buildInvoicePdfBuffer) return res.status(503).json({ success:false, message:'PDF service unavailable.' })
     const inv = await Invoice.findById(req.params.id).lean()
@@ -329,7 +339,7 @@ router.get('/:id/pdf', auth, ALLOWED, async (req, res) => {
 })
 
 // ── GET /api/invoices/:id/receipt-pdf ──────────────────
-router.get('/:id/receipt-pdf', auth, ALLOWED, async (req, res) => {
+router.get('/:id/receipt-pdf', auth, parentOrStaff, async (req, res) => {
   try {
     if (!buildReceiptPdfBuffer) return res.status(503).json({ success:false, message:'PDF service unavailable.' })
     const inv = await Invoice.findById(req.params.id).lean()
