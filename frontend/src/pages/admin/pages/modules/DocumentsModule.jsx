@@ -98,12 +98,19 @@ export function InvoiceGenerator({ toast, onBack }) {
     if (s && r) itemSet(i,'amount',String(s*r))
   }
 
-  const generate = () => {
+  const generate = async () => {
     if (!f.billedToName.trim()) { toast?.error?.('Billed-to name is required.'); return }
-    const html = buildInvoiceHTML(f, { subtotal, discount, vatAmount, vatPct, totalDue })
-    const w = window.open('','_blank')
+    const w = window.open('', '_blank')
     if (!w) { toast?.error?.('Please allow pop-ups to preview the invoice.'); return }
-    w.document.write(html); w.document.close()
+    try {
+      const res = await api.post('/invoices/preview-pdf', {
+        ...f, lineItems: f.items, discount, vatPct,
+      }, { responseType: 'blob' })
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+      w.location.href = url
+    } catch {
+      w.close(); toast?.error?.('Could not generate the preview PDF.')
+    }
   }
 
   const saveAndSend = async () => {
