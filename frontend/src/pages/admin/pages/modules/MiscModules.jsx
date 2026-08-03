@@ -416,3 +416,55 @@ export function MshauriModule({ refreshKey, toast }) {
     </>
   )
 }
+
+export function SuggestionsModule({ toast, refreshKey }) {
+  const [data, setData] = useState(null)
+  const [statusF, setStatusF] = useState('all')
+  const load = useCallback(() => {
+    api.get('/suggestions', { params: { status: statusF } })
+      .then(r => setData(r.data?.data || { suggestions: [], newCount: 0 }))
+      .catch(() => toast?.error?.('Failed to load suggestions.'))
+  }, [statusF, refreshKey])
+  useEffect(() => { load() }, [load])
+  if (data === null) return <div style={{ padding: 40, textAlign: 'center', color: '#6B7280' }}>Loading suggestions...</div>
+  const CAT = { academics: 'Academics', teaching: 'Teaching', portal: 'Portal', fees: 'Fees', wellbeing: 'Wellbeing', other: 'Other' }
+  const markReviewed = async (id) => {
+    try { await api.patch('/suggestions/' + id + '/reviewed'); load() }
+    catch { toast?.error?.('Failed to update.') }
+  }
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <div style={{ background: TOKENS.crimson, color: '#fff', fontWeight: 800, fontSize: 13, padding: '6px 14px', borderRadius: 999 }}>
+          {data.newCount} new
+        </div>
+        <select value={statusF} onChange={e => setStatusF(e.target.value)}
+          style={{ padding: '8px 12px', border: '1px solid ' + TOKENS.line, borderRadius: 8, fontSize: 13 }}>
+          <option value="all">All suggestions</option>
+          <option value="new">New only</option>
+          <option value="reviewed">Reviewed</option>
+        </select>
+      </div>
+      <div style={{ background: '#fff', border: '1px solid ' + TOKENS.line, borderRadius: 14, overflow: 'hidden' }}>
+        {data.suggestions.length === 0 ? (
+          <div style={{ padding: 36, textAlign: 'center', color: '#6B7280', fontSize: 13.5 }}>No suggestions in this view.</div>
+        ) : data.suggestions.map(sug => (
+          <div key={sug._id} style={{ padding: '14px 18px', borderBottom: '1px solid ' + TOKENS.line, background: sug.status === 'new' ? '#FFFBF5' : '#fff' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 700, fontSize: 13 }}>{sug.fromName || 'Anonymous'}</span>
+              <span style={{ fontSize: 11, color: '#6B7280' }}>{sug.fromRole}</span>
+              <span style={{ background: '#F3E7CB', color: '#7D1025', fontSize: 10.5, fontWeight: 700, padding: '2px 9px', borderRadius: 999 }}>{CAT[sug.category] || 'Other'}</span>
+              <span style={{ fontSize: 11, color: '#9CA3AF', marginLeft: 'auto' }}>
+                {new Date(sug.createdAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+              </span>
+              {sug.status === 'new'
+                ? <button onClick={() => markReviewed(sug._id)} style={{ fontSize: 11, background: '#065F46', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: 5, cursor: 'pointer', fontWeight: 700 }}>Mark reviewed</button>
+                : <span style={{ fontSize: 11, color: '#065F46', fontWeight: 700 }}>Reviewed</span>}
+            </div>
+            <div style={{ fontSize: 13, color: '#374151', marginTop: 8, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{sug.message}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
