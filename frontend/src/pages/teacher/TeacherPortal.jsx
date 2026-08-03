@@ -14833,7 +14833,7 @@ function TeacherLibraryTab({ user, toast }) {
     setUploadProgress(0)
     try {
       // 1. Presign, 2. direct browser-to-R2 PUT, 3. optional cover, 4. confirm
-      const pr = await api.post('/library/presign', { fileName: upFile.name, mimeType: upFile.type || 'application/pdf', fileSize: upFile.size })
+      const pr = await api.post('/library/presign', { subjectId: upSubjectId, fileName: upFile.name, mimeType: upFile.type || 'application/pdf', fileSize: upFile.size })
       const pd = pr.data?.data || pr.data
       if (!pd?.uploadUrl) throw new Error(pd?.message || 'Could not prepare the upload.')
 
