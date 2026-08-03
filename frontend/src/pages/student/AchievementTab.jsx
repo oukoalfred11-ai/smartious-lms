@@ -12,18 +12,18 @@ const C = {
 }
 
 const BADGES = [
-  { id:'first_quiz',    name:'First Step',      icon:'🎯', desc:'Completed your first quiz' },
-  { id:'streak_3',      name:'On Fire',          icon:'🔥', desc:'3 correct answers in a row' },
-  { id:'streak_5',      name:'Unstoppable',      icon:'⚡', desc:'5 correct answers in a row' },
-  { id:'perfect_10',    name:'Perfect Ten',      icon:'💎', desc:'100% score on a 10-question quiz' },
-  { id:'century',       name:'Century',          icon:'💯', desc:'100 correct answers total' },
-  { id:'math_master',   name:'Math Master',      icon:'📐', desc:'Top score in Mathematics' },
-  { id:'science_star',  name:'Science Star',     icon:'🔬', desc:'Top score in Sciences' },
-  { id:'speed_demon',   name:'Speed Demon',      icon:'⚡', desc:'Answered 5 questions in under 5 seconds each' },
-  { id:'xp_1000',       name:'XP Hunter',        icon:'⭐', desc:'Earned 1000 XP' },
-  { id:'level_5',       name:'Rising Star',      icon:'🌟', desc:'Reached Level 5' },
-  { id:'level_10',      name:'Scholar',          icon:'🎓', desc:'Reached Level 10' },
-  { id:'consistent',    name:'Consistent',       icon:'📅', desc:'Played quizzes 5 days in a row' },
+  { id:'first_quiz',    name:'First Step',      icon:'◎', desc:'Completed your first quiz' },
+  { id:'streak_3',      name:'On Fire',          icon:'▲', desc:'3 correct answers in a row' },
+  { id:'streak_5',      name:'Unstoppable',      icon:'▶', desc:'5 correct answers in a row' },
+  { id:'perfect_10',    name:'Perfect Ten',      icon:'◇', desc:'100% score on a 10-question quiz' },
+  { id:'century',       name:'Century',          icon:'★', desc:'100 correct answers total' },
+  { id:'math_master',   name:'Math Master',      icon:'∠', desc:'Top score in Mathematics' },
+  { id:'science_star',  name:'Science Star',     icon:'✦', desc:'Top score in Sciences' },
+  { id:'speed_demon',   name:'Speed Demon',      icon:'▶', desc:'Answered 5 questions in under 5 seconds each' },
+  { id:'xp_1000',       name:'XP Hunter',        icon:'★', desc:'Earned 1000 XP' },
+  { id:'level_5',       name:'Rising Star',      icon:'✧', desc:'Reached Level 5' },
+  { id:'level_10',      name:'Scholar',          icon:'♕', desc:'Reached Level 10' },
+  { id:'consistent',    name:'Consistent',       icon:'◆', desc:'Played quizzes 5 days in a row' },
 ]
 
 const LEVEL_NAMES = ['Beginner','Explorer','Learner','Scholar','Achiever','Expert','Champion','Master','Legend','Elite']
@@ -78,7 +78,7 @@ export default function AchievementTab({ user }) {
       <div style={{ background:`linear-gradient(135deg,${C.crimson},${C.crimsonD})`, borderRadius:16, padding:'24px 28px', marginBottom:20, color:'#fff' }}>
         <div style={{ display:'flex', gap:20, alignItems:'center', flexWrap:'wrap' }}>
           <div style={{ width:70, height:70, borderRadius:'50%', background:'rgba(255,255,255,.15)', border:'3px solid rgba(255,255,255,.3)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-            <span style={{ fontSize:28 }}>{level>=10?'🏆':level>=7?'🌟':level>=5?'🎓':level>=3?'📚':'🎯'}</span>
+            <span style={{ fontSize:28 }}>{level>=10?'♛':level>=7?'✧':level>=5?'♕':level>=3?'▤':'◎'}</span>
           </div>
           <div style={{ flex:1 }}>
             <div style={{ fontSize:11, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'rgba(255,255,255,.6)', marginBottom:4 }}>
@@ -98,10 +98,10 @@ export default function AchievementTab({ user }) {
         {/* Stats row */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginTop:20 }}>
           {[
-            { label:'Quizzes', val:ach?.quizzesTaken||0, icon:'🎮' },
-            { label:'Correct', val:ach?.totalCorrect||0, icon:'✅' },
-            { label:'Best Streak', val:ach?.bestStreak||0, icon:'🔥' },
-            { label:'Rank', val:myRank>=0 ? '#'+(myRank+1) : '—', icon:'🏅' },
+            { label:'Quizzes', val:ach?.quizzesTaken||0, icon:'▶' },
+            { label:'Correct', val:ach?.totalCorrect||0, icon:'✓' },
+            { label:'Best Streak', val:ach?.bestStreak||0, icon:'▲' },
+            { label:'Rank', val:myRank>=0 ? '#'+(myRank+1) : '—', icon:'✦' },
           ].map(s=>(
             <div key={s.label} style={{ textAlign:'center', background:'rgba(255,255,255,.12)', borderRadius:10, padding:'10px 8px' }}>
               <div style={{ fontSize:22 }}>{s.icon}</div>
@@ -128,7 +128,7 @@ export default function AchievementTab({ user }) {
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:16 }}>
           {/* Subject breakdown */}
           <div style={{ background:'#fff', borderRadius:14, border:`1px solid ${C.s100}`, overflow:'hidden' }}>
-            <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}>📊 Subject Performance</div>
+            <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}>Subject Performance</div>
             {(ach?.subjectStats||[]).length === 0 ? (
               <div style={{ padding:'24px 20px', fontSize:13, color:C.s400, textAlign:'center' }}>Play quizzes to see your subject breakdown!</div>
             ) : (
@@ -152,10 +152,10 @@ export default function AchievementTab({ user }) {
 
           {/* Recent badges */}
           <div style={{ background:'#fff', borderRadius:14, border:`1px solid ${C.s100}`, overflow:'hidden' }}>
-            <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}>🏅 Recent Badges</div>
+            <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}> Recent Badges</div>
             <div style={{ padding:'16px 20px', display:'flex', flexWrap:'wrap', gap:10 }}>
               {(ach?.badges||[]).slice(0,8).map(b => {
-                const def = BADGES.find(x=>x.id===b.id)||{ icon:'🏅', name:b.id, desc:'' }
+                const def = BADGES.find(x=>x.id===b.id)||{ icon:'✦', name:b.id, desc:'' }
                 return (
                   <div key={b.id} title={def.desc} style={{ width:52, height:52, borderRadius:12, background:`linear-gradient(135deg,${C.gold}30,${C.gold}15)`, border:`2px solid ${C.gold}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:26, cursor:'default' }}>
                     {def.icon}
@@ -163,7 +163,7 @@ export default function AchievementTab({ user }) {
                 )
               })}
               {(ach?.badges||[]).length === 0 && (
-                <div style={{ fontSize:13, color:C.s400 }}>Complete quizzes to earn badges! 🎖️</div>
+                <div style={{ fontSize:13, color:C.s400 }}>Complete quizzes to earn badges!</div>
               )}
             </div>
           </div>
@@ -195,13 +195,13 @@ export default function AchievementTab({ user }) {
       {/* Leaderboard */}
       {tab==='leaderboard' && (
         <div style={{ background:'#fff', borderRadius:14, border:`1px solid ${C.s100}`, overflow:'hidden' }}>
-          <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}>🏆 Class Leaderboard</div>
+          <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}>♛ Class Leaderboard</div>
           {lb.length === 0 ? (
             <div style={{ padding:40, textAlign:'center', fontSize:13, color:C.s400 }}>No leaderboard data yet. Be the first to play!</div>
           ) : (
             lb.slice(0,20).map((e,i) => {
               const isMe = String(e.studentId) === String(user?._id)
-              const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':null
+              const medal = i===0?'1st':i===1?'2nd':i===2?'3rd':null
               return (
                 <div key={e.studentId||i} style={{
                   padding:'14px 20px', borderBottom:`1px solid ${C.s100}`,
@@ -233,14 +233,14 @@ export default function AchievementTab({ user }) {
       {/* History */}
       {tab==='history' && (
         <div style={{ background:'#fff', borderRadius:14, border:`1px solid ${C.s100}`, overflow:'hidden' }}>
-          <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}>📜 Quiz History</div>
+          <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, fontWeight:800, fontSize:14, color:C.ink }}> Quiz History</div>
           {(data?.recentSessions||[]).length===0 ? (
             <div style={{ padding:40, textAlign:'center', fontSize:13, color:C.s400 }}>No quiz history yet. Start playing!</div>
           ) : (
             (data?.recentSessions||[]).map((s,i)=>(
               <div key={i} style={{ padding:'14px 20px', borderBottom:`1px solid ${C.s100}`, display:'flex', gap:14, alignItems:'center' }}>
                 <div style={{ width:42, height:42, borderRadius:10, background: s.score/s.total>=0.7?C.greenL:C.s100, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20 }}>
-                  {s.score/s.total>=0.9?'🏆':s.score/s.total>=0.7?'🌟':'📚'}
+                  {s.score/s.total>=0.9?'♛':s.score/s.total>=0.7?'✧':'▤'}
                 </div>
                 <div style={{ flex:1 }}>
                   <div style={{ fontSize:14, fontWeight:700, color:C.ink }}>{s.subject}</div>
