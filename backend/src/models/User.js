@@ -130,6 +130,7 @@ const userSchema = new mongoose.Schema({
     index: true,
   },
   dateOfBirth: { type: Date, default: null },
+  lastBirthdayEmailYear: { type: Number, default: null }, // year the community birthday email was last sent
   homeAddress: { type: String, trim: true, maxlength: 500 },
   medicalNotes: { type: String, trim: true, maxlength: 500 },
   
@@ -170,10 +171,11 @@ const userSchema = new mongoose.Schema({
   // DOS sets onBreak=true to deactivate reminders & check-in for a student.
   // Admin can do the same for staff.
   onBreak:        { type: Boolean, default: false },
-  breakType:      { type: String, enum: ['mid_term_break','end_term_break','summer_break','medical_leave','other',''], default: '' },
+  breakType:      { type: String, enum: ['holiday','mid_term_break','end_term_break','summer_break','medical_leave','fee_hold','other',''], default: '' },
   breakStart:     { type: Date, default: null },
   breakEnd:       { type: Date, default: null },
   breakNote:      { type: String, default: '' },
+  breakBlocksAccess: { type: Boolean, default: false }, // true only when the pause suspends portal access (e.g. fee hold)
   isDemo: { type: Boolean, default: false }, // PHASE 3: Protect main admin from deletion
   isMainAdmin: { type: Boolean, default: false }, // PHASE 3: Protect main admin from deletion
   isOnLeave: { type: Boolean, default: false }, // Teacher on leave - invalidates their allocations
