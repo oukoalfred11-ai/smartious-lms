@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const libraryBookSchema = new mongoose.Schema({
   title:       { type: String, required: true, trim: true, maxlength: 200 },
   coverUrl:    { type: String, default: '' },
+  section:     { type: String, enum: ['coursebook','mock','past_paper'], default: 'coursebook' },
   description: { type: String, default: '', trim: true, maxlength: 1000 },
   author:      { type: String, default: '', trim: true, maxlength: 200 },
 
