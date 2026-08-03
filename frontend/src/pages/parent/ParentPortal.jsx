@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import { api } from '../../context/ctx.jsx'
 
 // ── Tokens matching admin/student/teacher portals ──────────
@@ -102,6 +103,7 @@ function MobileTopBar({ title, eyebrow, onMenuToggle, menuOpen, user, initials }
         </svg>
       </button>
       <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ padding:'16px 20px 0' }}><BirthdayBanner /></div>
         {eyebrow&&<div style={{ fontSize:9, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.12em' }}>{eyebrow}</div>}
         <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:18, color:'#1A0F0E', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{title}</div>
       </div>
