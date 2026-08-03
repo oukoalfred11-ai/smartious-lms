@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import BirthdayBanner from '../../components/BirthdayBanner.jsx'
 import { useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
@@ -1151,6 +1152,7 @@ export default function TeacherPortal() {
 
       {/* MAIN */}
       <main className="main">
+        <div style={{ padding:'16px 20px 0' }}><BirthdayBanner /></div>
         <div className="topbar">
           <div className="tb-title">{pageTitles[page]}</div>
           <div className="tb-right">
