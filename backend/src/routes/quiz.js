@@ -293,12 +293,12 @@ router.post('/complete', auth, async (req, res) => {
     // Badges
     const newBadges = []
     const hasBadge  = (id) => ach.badges.some(b=>b.id===id)
-    if (!hasBadge('first_quiz')) { newBadges.push({ id:'first_quiz',name:'First Quiz!',icon:'🎯',reason:'Completed your first quiz' }); }
-    if (accuracy===100&&!hasBadge('perfect')) { newBadges.push({ id:'perfect',name:'Perfect Score',icon:'💯',reason:'100% accuracy' }) }
-    if (p.maxStreak>=5&&!hasBadge('streak5')) { newBadges.push({ id:'streak5',name:'On Fire!',icon:'🔥',reason:'5 correct in a row' }) }
-    if (ach.quizzesTaken>=10&&!hasBadge('quiz10')) { newBadges.push({ id:'quiz10',name:'Quiz Master',icon:'🏆',reason:'Completed 10 quizzes' }) }
-    if (ach.totalXP>=1000&&!hasBadge('xp1000')) { newBadges.push({ id:'xp1000',name:'1K Club',icon:'⭐',reason:'Earned 1,000 XP' }) }
-    if (ach.currentStreak>=7&&!hasBadge('week')) { newBadges.push({ id:'week',name:'Week Warrior',icon:'📅',reason:'7-day streak' }) }
+    if (!hasBadge('first_quiz')) { newBadges.push({ id:'first_quiz',name:'First Quiz!',icon:'◎',reason:'Completed your first quiz' }); }
+    if (accuracy===100&&!hasBadge('perfect')) { newBadges.push({ id:'perfect',name:'Perfect Score',icon:'★',reason:'100% accuracy' }) }
+    if (p.maxStreak>=5&&!hasBadge('streak5')) { newBadges.push({ id:'streak5',name:'On Fire!',icon:'▲',reason:'5 correct in a row' }) }
+    if (ach.quizzesTaken>=10&&!hasBadge('quiz10')) { newBadges.push({ id:'quiz10',name:'Quiz Master',icon:'♛',reason:'Completed 10 quizzes' }) }
+    if (ach.totalXP>=1000&&!hasBadge('xp1000')) { newBadges.push({ id:'xp1000',name:'1K Club',icon:'★',reason:'Earned 1,000 XP' }) }
+    if (ach.currentStreak>=7&&!hasBadge('week')) { newBadges.push({ id:'week',name:'Week Warrior',icon:'◆',reason:'7-day streak' }) }
 
     ach.badges.push(...newBadges)
 
