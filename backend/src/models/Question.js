@@ -121,6 +121,33 @@ const questionSchema = new mongoose.Schema({
   // MCQs auto-mark against correctAnswer. Everything else needs a
   // mark scheme so it can be marked by a teacher, or assessed
   // automatically, without the marker having to know the subject.
+  // ── ARTWORK REQUEST (additive, optional) ─────────────
+  // Some questions need a diagram, graph or illustration that does
+  // not exist yet. The question is authored with a written brief
+  // describing exactly what is required; a teacher later produces
+  // the image (by hand or with an AI generator) and uploads it.
+  // Questions with artwork.required === false behave exactly as
+  // before, so existing questions are unaffected.
+  artwork: {
+    required:    { type: Boolean, default: false, index: true },
+    status:      { type: String, enum: ['pending', 'uploaded'], default: 'pending', index: true },
+    // What kind of image is needed — drives grouping in the UI.
+    kind:        { type: String, enum: ['diagram','graph','chart','illustration','photo','map','circuit','other'], default: 'diagram' },
+    // Short label for lists, e.g. "Forces on an inclined plane".
+    title:       { type: String, default: '', trim: true },
+    // Full brief: what must be shown, labelled, and to what scale.
+    // Written so a teacher can produce the image without having to
+    // interpret the question themselves.
+    description: { type: String, default: '' },
+    // Ready-to-paste prompt for an AI image generator.
+    aiPrompt:    { type: String, default: '' },
+    // Constraints the image must satisfy (labels, units, style).
+    requirements:{ type: [String], default: [] },
+    // Set when a teacher uploads the artwork.
+    uploadedBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    uploadedAt:  { type: Date, default: null },
+  },
+
   markScheme: {
     // Full-credit model answer, shown to the marker and the student
     // after release.
