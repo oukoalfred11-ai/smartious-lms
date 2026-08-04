@@ -312,9 +312,10 @@ router.patch('/teachers/:id/specialties', auth, requireRole('admin', 'ops_manage
       'CambridgePrimary','CambridgeLowerSec','CambridgeIGCSE','CambridgeALevel',
       'EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel',
       'AQALowerSec','AQAGCSE','AQAALevel',
-      'IB','KenyaCBC','BNC','American','Canadian',
+      'IBPYP','IBMYP','IBDP',
+      'KenyaCBC','BNC','American','Canadian',
       // Legacy IDs — keep for backwards compatibility
-      'IGCSE','A-Level','IB Diploma','IB MYP','Kenya CBC',
+      'IB','IGCSE','A-Level','IB Diploma','IB MYP','Kenya CBC',
     ];
     const cleanCurricula = curricula.filter(c => VALID.includes(c));
     const cleanIds = subjectIds.filter(id => mongoose.isValidObjectId(id));
