@@ -627,7 +627,9 @@ function buildAcceptedHTML(r, payUrl) {
             Once payment is confirmed, our Head of Admissions will contact you within one business day to schedule the assessment at a time that suits your timezone.
           </p>
           <p style="font-size:13.5px;line-height:1.65;color:#2c2c2c;margin:0;">
-            Warm regards,<br><strong>Alfred Ouko</strong><br>Founder &amp; Head of Academics<br>Smartious Homeschool and eSchool
+            Warm regards,<br>
+            <span style="font-size:11px;color:#6B6B6B;">Issued by</span><br>
+            <strong style="color:#8B1A2E;font-size:15px;">Manuela Murithi</strong><br>Head of Admission Team<br>Smartious Edtech
           </p>
         </td></tr>
         <tr><td style="background:#FDFAF4;padding:22px 36px;border-top:1px solid #f0e8e8;">
@@ -656,9 +658,11 @@ function buildAcceptedText(r, payUrl) {
     "The fee is credited against your first month's tuition on enrolment.",
     '',
     'Warm regards,',
-    'Alfred Ouko',
-    'Founder & Head of Academics',
-    'Smartious Homeschool and eSchool',
+    '',
+    'Issued by',
+    'Manuela Murithi',
+    'Head of Admission Team',
+    'Smartious Edtech',
   ].join('\n');
 }
 
