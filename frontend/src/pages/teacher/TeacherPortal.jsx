@@ -9667,7 +9667,7 @@ function WeeklyTimetableTab({ user, toast }) {
     'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
     'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
     'AQALowerSec', 'AQAGCSE', 'AQAALevel',
-    'IB', 'BNC', 'American', 'Canadian', 'KenyaCBC',
+    'IBPYP', 'IBMYP', 'IBDP', 'BNC', 'American', 'Canadian', 'KenyaCBC',
   ])
 
   const loadMine = useCallback(() => {
@@ -15485,7 +15485,9 @@ function TeacherTimetableTab({ user, toast }) {
     { id: 'AQALowerSec',        name: 'AQA Lower Secondary' },
     { id: 'AQAGCSE',            name: 'AQA GCSE' },
     { id: 'AQAALevel',          name: 'AQA A-Level' },
-    { id: 'IB',                 name: 'International Baccalaureate (IB)' },
+    { id: 'IBPYP',              name: 'IB Primary Years (PYP)' },
+    { id: 'IBMYP',              name: 'IB Middle Years (MYP)' },
+    { id: 'IBDP',               name: 'IB Diploma (DP)' },
     { id: 'BNC',                name: 'British National Curriculum' },
     { id: 'American',           name: 'American Curriculum' },
     { id: 'Canadian',           name: 'Canadian Curriculum' },
