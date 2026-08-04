@@ -72,6 +72,30 @@ function safeFileName(name) {
   return (name || 'file').replace(/[^a-zA-Z0-9._\-]/g, '_').slice(0, 100);
 }
 
+// Parse and validate the past-paper folder fields (examYear,
+// paperNumber, session). Returns { error } on invalid input,
+// otherwise { examYear, paperNumber, session } normalised.
+// All three are optional; they only carry meaning for the
+// 'mock' and 'past_paper' sections.
+function parsePaperFields(body) {
+  let examYear = null, paperNumber = null, session = '';
+
+  if (body.examYear !== undefined && body.examYear !== null && body.examYear !== '') {
+    examYear = parseInt(body.examYear, 10);
+    if (!Number.isInteger(examYear) || examYear < 2000 || examYear > 2100)
+      return { error: 'examYear must be a year between 2000 and 2100.' };
+  }
+  if (body.paperNumber !== undefined && body.paperNumber !== null && body.paperNumber !== '') {
+    paperNumber = parseInt(body.paperNumber, 10);
+    if (!Number.isInteger(paperNumber) || paperNumber < 1 || paperNumber > 6)
+      return { error: 'paperNumber must be between 1 and 6.' };
+  }
+  if (body.session !== undefined && body.session !== null) {
+    session = String(body.session).trim().slice(0, 40);
+  }
+  return { examYear, paperNumber, session };
+}
+
 async function visibilityFilterFor(user) {
   if (user.role === 'admin') return { isActive: true };
 
@@ -197,6 +221,10 @@ router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) 
       coverImage, coverR2Key,
     } = req.body || {};
 
+    // Past-paper folder fields (optional, validated)
+    const paper = parsePaperFields(req.body || {});
+    if (paper.error) return fail(res, 400, paper.error);
+
     if (!r2Key)    return fail(res, 400, 'r2Key is required.');
     if (!publicUrl) return fail(res, 400, 'publicUrl is required.');
     if (!subjectId || !mongoose.isValidObjectId(subjectId))
@@ -222,6 +250,9 @@ router.post('/confirm', auth, requireRole('teacher', 'admin'), async (req, res) 
     const book = await LibraryBook.create({
       coverUrl: coverUrl || '',
       section: ['coursebook','mock','past_paper'].includes(section) ? section : 'coursebook',
+      examYear:       paper.examYear,
+      paperNumber:    paper.paperNumber,
+      session:        paper.session,
       title:          String(title).trim(),
       description:    description ? String(description).trim() : '',
       author:         author      ? String(author).trim()      : '',
@@ -260,6 +291,12 @@ router.get('/', auth, async (req, res) => {
       filter.subjectId = req.query.subjectId;
     if (req.query.curriculum)
       filter.curriculum = String(req.query.curriculum).trim();
+    if (req.query.section && ['coursebook','mock','past_paper'].includes(req.query.section))
+      filter.section = req.query.section;
+    if (req.query.examYear && /^\d{4}$/.test(String(req.query.examYear)))
+      filter.examYear = parseInt(req.query.examYear, 10);
+    if (req.query.paperNumber && /^[1-6]$/.test(String(req.query.paperNumber)))
+      filter.paperNumber = parseInt(req.query.paperNumber, 10);
     if (req.query.q && String(req.query.q).trim()) {
       const term = String(req.query.q).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.$or = [
@@ -344,6 +381,14 @@ router.patch('/:id', auth, requireRole('teacher', 'admin'), async (req, res) => 
     const { title, description, author, grades, isActive, coverUrl } = req.body || {};
     if (coverUrl !== undefined)    book.coverUrl = String(coverUrl).trim();
     if (req.body.section !== undefined && ['coursebook','mock','past_paper'].includes(req.body.section)) book.section = req.body.section;
+    // Past-paper folder fields: pass '' or null to clear, or a valid value to set
+    if (req.body.examYear !== undefined || req.body.paperNumber !== undefined || req.body.session !== undefined) {
+      const paper = parsePaperFields(req.body);
+      if (paper.error) return fail(res, 400, paper.error);
+      if (req.body.examYear    !== undefined) book.examYear    = paper.examYear;
+      if (req.body.paperNumber !== undefined) book.paperNumber = paper.paperNumber;
+      if (req.body.session     !== undefined) book.session     = paper.session;
+    }
     if (title !== undefined)       book.title = String(title).trim() || book.title;
     if (description !== undefined) book.description = String(description).trim();
     if (author !== undefined)      book.author = String(author).trim();
