@@ -83,9 +83,10 @@ const questionSchema = new mongoose.Schema({
       'CambridgePrimary','CambridgeLowerSec','CambridgeIGCSE','CambridgeALevel',
       'EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel',
       'AQALowerSec','AQAGCSE','AQAALevel',
-      'IB','KenyaCBC','BNC','American','Canadian',
+      'IBPYP','IBMYP','IBDP',
+      'KenyaCBC','BNC','American','Canadian',
       // Legacy values — keep for existing questions
-      'IGCSE','Edexcel','Cambridge',
+      'IB','IGCSE','Edexcel','Cambridge',
     ],
     required: true,
     index: true,
