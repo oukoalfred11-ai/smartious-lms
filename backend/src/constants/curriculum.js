@@ -5,7 +5,8 @@
  *   Cambridge: Primary, Lower Secondary, IGCSE, A-Level
  *   Edexcel:   Lower Secondary, IGCSE, A-Level
  *   AQA:       Lower Secondary, GCSE, A-Level
- *   Other:     IB, BNC, American, Canadian, Kenya CBC
+ *   IB:        PYP, MYP, DP (split 2026-08-04)
+ *   Other:     BNC, American, Canadian, Kenya CBC
  *
  * Each curriculum has its own grade naming convention.
  * Subjects are organized by category and tagged with which
@@ -30,7 +31,9 @@ const CURRICULA = [
   { id: 'AQAGCSE',            name: 'AQA GCSE',                   region: 'United Kingdom' },
   { id: 'AQAALevel',          name: 'AQA A-Level',                region: 'United Kingdom' },
   // ── OTHER ──
-  { id: 'IB',                 name: 'International Baccalaureate (IB)', region: 'International' },
+  { id: 'IBPYP',              name: 'IB Primary Years (PYP)',           region: 'International' },
+  { id: 'IBMYP',              name: 'IB Middle Years (MYP)',            region: 'International' },
+  { id: 'IBDP',               name: 'IB Diploma (DP)',                  region: 'International' },
   { id: 'BNC',                name: 'British National Curriculum',      region: 'United Kingdom' },
   { id: 'American',           name: 'American Curriculum',              region: 'USA' },
   { id: 'Canadian',           name: 'Canadian Curriculum',              region: 'Canada' },
@@ -63,6 +66,12 @@ const GRADES_BY_CURRICULUM = {
     'Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11',
     'Year 12 (Sixth Form)', 'Year 13 (Sixth Form)',
   ],
+  IBPYP: ['PYP Grade 1', 'PYP Grade 2', 'PYP Grade 3', 'PYP Grade 4', 'PYP Grade 5'],
+  IBMYP: ['MYP Grade 6', 'MYP Grade 7', 'MYP Grade 8', 'MYP Grade 9', 'MYP Grade 10'],
+  IBDP:  ['DP Year 1 (Grade 11)', 'DP Year 2 (Grade 12)'],
+  // Legacy alias — existing records tagged 'IB' before the
+  // 2026-08-04 PYP/MYP/DP split. Kept so stale values still
+  // resolve to a sensible grade list. Do not use for new writes.
   IB: [
     'PYP Grade 1', 'PYP Grade 2', 'PYP Grade 3', 'PYP Grade 4', 'PYP Grade 5',
     'MYP Grade 6', 'MYP Grade 7', 'MYP Grade 8', 'MYP Grade 9', 'MYP Grade 10',
@@ -112,13 +121,13 @@ const SUBJECTS = [
   { id: 'further_math',        name: 'Further Mathematics',        category: 'Mathematics', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'BNC'] },
   { id: 'ap_calculus',         name: 'AP Calculus',                category: 'Mathematics', availableIn: ['American'] },
   { id: 'ap_statistics',       name: 'AP Statistics',              category: 'Mathematics', availableIn: ['American'] },
-  { id: 'ib_math_aa',          name: 'IB Mathematics: Analysis & Approaches', category: 'Mathematics', availableIn: ['IB'] },
-  { id: 'ib_math_ai',          name: 'IB Mathematics: Applications & Interpretation', category: 'Mathematics', availableIn: ['IB'] },
+  { id: 'ib_math_aa',          name: 'IB Mathematics: Analysis & Approaches', category: 'Mathematics', availableIn: ['IBDP'] },
+  { id: 'ib_math_ai',          name: 'IB Mathematics: Applications & Interpretation', category: 'Mathematics', availableIn: ['IBDP'] },
 
   // ── CORE: ENGLISH ─────────────────────────────────────
   { id: 'english_language',    name: 'English Language',           category: 'English', availableIn: 'all' },
   { id: 'english_literature',  name: 'English Literature',         category: 'English', availableIn: 'all' },
-  { id: 'esl',                 name: 'English as a Second Language (ESL)', category: 'English', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IB'] },
+  { id: 'esl',                 name: 'English as a Second Language (ESL)', category: 'English', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IBDP'] },
   { id: 'world_literature',    name: 'World Literature',           category: 'English', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE'] },
   { id: 'ap_english_lang',     name: 'AP English Language & Composition', category: 'English', availableIn: ['American'] },
   { id: 'ap_english_lit',      name: 'AP English Literature & Composition', category: 'English', availableIn: ['American'] },
@@ -129,7 +138,7 @@ const SUBJECTS = [
   { id: 'biology',             name: 'Biology',                    category: 'Sciences', availableIn: 'all' },
   { id: 'combined_science',    name: 'Combined Science',           category: 'Sciences', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'BNC'] },
   { id: 'general_science',     name: 'General Science',            category: 'Sciences', availableIn: ['American', 'Canadian'] },
-  { id: 'environmental_sci',   name: 'Environmental Science',      category: 'Sciences', availableIn: ['IB', 'American', 'Canadian'] },
+  { id: 'environmental_sci',   name: 'Environmental Science',      category: 'Sciences', availableIn: ['IBDP', 'American', 'Canadian'] },
   { id: 'earth_science',       name: 'Earth & Space Science',      category: 'Sciences', availableIn: ['American', 'Canadian'] },
   { id: 'ap_physics',          name: 'AP Physics',                 category: 'Sciences', availableIn: ['American'] },
   { id: 'ap_chemistry',        name: 'AP Chemistry',               category: 'Sciences', availableIn: ['American'] },
@@ -139,8 +148,8 @@ const SUBJECTS = [
   { id: 'history',             name: 'History',                    category: 'Humanities', availableIn: 'all' },
   { id: 'geography',           name: 'Geography',                  category: 'Humanities', availableIn: 'all' },
   { id: 'religious_studies',   name: 'Religious Studies',          category: 'Humanities', availableIn: 'all' },
-  { id: 'global_perspectives', name: 'Global Perspectives',        category: 'Humanities', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IB'] },
-  { id: 'world_history',       name: 'World History',              category: 'Humanities', availableIn: ['IB', 'American', 'Canadian'] },
+  { id: 'global_perspectives', name: 'Global Perspectives',        category: 'Humanities', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IBDP'] },
+  { id: 'world_history',       name: 'World History',              category: 'Humanities', availableIn: ['IBDP', 'American', 'Canadian'] },
   { id: 'ap_world_history',    name: 'AP World History',           category: 'Humanities', availableIn: ['American'] },
   { id: 'ap_us_history',       name: 'AP US History',              category: 'Humanities', availableIn: ['American'] },
   { id: 'civics',              name: 'Civics & Government',        category: 'Humanities', availableIn: ['American', 'Canadian'] },
@@ -158,16 +167,16 @@ const SUBJECTS = [
   // ── TECHNOLOGY ────────────────────────────────────────
   { id: 'computer_science',    name: 'Computer Science',           category: 'Technology', availableIn: 'all' },
   { id: 'ict',                 name: 'Information & Communications Technology (ICT)', category: 'Technology', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'BNC'] },
-  { id: 'design_technology',   name: 'Design & Technology',        category: 'Technology', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IB', 'BNC'] },
+  { id: 'design_technology',   name: 'Design & Technology',        category: 'Technology', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IBDP', 'BNC'] },
   { id: 'ap_computer_science', name: 'AP Computer Science',        category: 'Technology', availableIn: ['American'] },
 
   // ── ARTS ──────────────────────────────────────────────
   { id: 'art_design',          name: 'Art & Design',               category: 'Arts', availableIn: 'all' },
-  { id: 'visual_arts',         name: 'Visual Arts',                category: 'Arts', availableIn: ['IB', 'American', 'Canadian'] },
+  { id: 'visual_arts',         name: 'Visual Arts',                category: 'Arts', availableIn: ['IBDP', 'American', 'Canadian'] },
   { id: 'music',               name: 'Music',                      category: 'Arts', availableIn: 'all' },
-  { id: 'drama',               name: 'Drama',                      category: 'Arts', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IB', 'BNC'] },
-  { id: 'theatre_studies',     name: 'Theatre Studies',            category: 'Arts', availableIn: ['IB', 'BNC', 'American'] },
-  { id: 'film_studies',        name: 'Film Studies',               category: 'Arts', availableIn: ['CambridgeIGCSE', 'EdexcelIGCSE', 'AQAGCSE', 'IB', 'BNC', 'American'] },
+  { id: 'drama',               name: 'Drama',                      category: 'Arts', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IBDP', 'BNC'] },
+  { id: 'theatre_studies',     name: 'Theatre Studies',            category: 'Arts', availableIn: ['IBDP', 'BNC', 'American'] },
+  { id: 'film_studies',        name: 'Film Studies',               category: 'Arts', availableIn: ['CambridgeIGCSE', 'EdexcelIGCSE', 'AQAGCSE', 'IBDP', 'BNC', 'American'] },
   { id: 'media_studies',       name: 'Media Studies',              category: 'Arts', availableIn: ['CambridgeIGCSE', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'BNC'] },
 
   // ── PHYSICAL EDUCATION ────────────────────────────────
@@ -185,22 +194,43 @@ const SUBJECTS = [
   { id: 'japanese',            name: 'Japanese',                   category: 'Modern Languages', availableIn: 'all' },
   { id: 'korean',              name: 'Korean',                     category: 'Modern Languages', availableIn: 'all' },
   { id: 'arabic',              name: 'Arabic',                     category: 'Modern Languages', availableIn: 'all' },
-  { id: 'russian',             name: 'Russian',                    category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IB', 'American'] },
+  { id: 'russian',             name: 'Russian',                    category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IBDP', 'American'] },
   { id: 'swahili',             name: 'Swahili (Kiswahili)',        category: 'Modern Languages', availableIn: 'all' },
-  { id: 'hindi',               name: 'Hindi',                      category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'AQAGCSE', 'IB'] },
+  { id: 'hindi',               name: 'Hindi',                      category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'AQAGCSE', 'IBDP'] },
   { id: 'urdu',                name: 'Urdu',                       category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'AQAGCSE'] },
   { id: 'turkish',             name: 'Turkish',                    category: 'Modern Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'AQAGCSE'] },
   { id: 'ap_spanish',          name: 'AP Spanish Language',        category: 'Modern Languages', availableIn: ['American'] },
   { id: 'ap_french',           name: 'AP French Language',         category: 'Modern Languages', availableIn: ['American'] },
 
   // ── CLASSICAL LANGUAGES ───────────────────────────────
-  { id: 'latin',               name: 'Latin',                      category: 'Classical Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IB', 'BNC', 'American'] },
-  { id: 'ancient_greek',       name: 'Ancient Greek',              category: 'Classical Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'AQAGCSE', 'IB', 'BNC'] },
+  { id: 'latin',               name: 'Latin',                      category: 'Classical Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel', 'AQAGCSE', 'IBDP', 'BNC', 'American'] },
+  { id: 'ancient_greek',       name: 'Ancient Greek',              category: 'Classical Languages', availableIn: ['CambridgeIGCSE', 'CambridgeALevel', 'EdexcelIGCSE', 'AQAGCSE', 'IBDP', 'BNC'] },
+
+
+  // ── IB PYP (Primary Years, Grade 1-5) ─────────────────
+  // Transdisciplinary programme; six subject areas.
+  { id: 'pyp_language',        name: 'PYP Language',                category: 'English',     availableIn: ['IBPYP'] },
+  { id: 'pyp_mathematics',     name: 'PYP Mathematics',             category: 'Mathematics', availableIn: ['IBPYP'] },
+  { id: 'pyp_science',         name: 'PYP Science',                 category: 'Sciences',    availableIn: ['IBPYP'] },
+  { id: 'pyp_social_studies',  name: 'PYP Social Studies',          category: 'Humanities',  availableIn: ['IBPYP'] },
+  { id: 'pyp_arts',            name: 'PYP Arts',                    category: 'Arts',        availableIn: ['IBPYP'] },
+  { id: 'pyp_pspe',            name: 'PYP Personal, Social & Physical Education', category: 'Physical Education', availableIn: ['IBPYP'] },
+
+  // ── IB MYP (Middle Years, Grade 6-10) ─────────────────
+  // Eight subject groups.
+  { id: 'myp_lang_lit',        name: 'MYP Language & Literature (English)', category: 'English',     availableIn: ['IBMYP'] },
+  { id: 'myp_lang_acq',        name: 'MYP Language Acquisition',    category: 'Modern Languages', availableIn: ['IBMYP'] },
+  { id: 'myp_individuals_soc', name: 'MYP Individuals & Societies', category: 'Humanities',  availableIn: ['IBMYP'] },
+  { id: 'myp_sciences',        name: 'MYP Sciences',                category: 'Sciences',    availableIn: ['IBMYP'] },
+  { id: 'myp_mathematics',     name: 'MYP Mathematics',             category: 'Mathematics', availableIn: ['IBMYP'] },
+  { id: 'myp_design',          name: 'MYP Design',                  category: 'Technology',  availableIn: ['IBMYP'] },
+  { id: 'myp_arts',            name: 'MYP Arts',                    category: 'Arts',        availableIn: ['IBMYP'] },
+  { id: 'myp_pe_health',       name: 'MYP Physical & Health Education', category: 'Physical Education', availableIn: ['IBMYP'] },
 
   // ── IB-SPECIFIC CORE ──────────────────────────────────
-  { id: 'tok',                 name: 'Theory of Knowledge (TOK)',  category: 'IB Core', availableIn: ['IB'] },
-  { id: 'extended_essay',      name: 'Extended Essay',             category: 'IB Core', availableIn: ['IB'] },
-  { id: 'cas',                 name: 'Creativity, Activity, Service (CAS)', category: 'IB Core', availableIn: ['IB'] },
+  { id: 'tok',                 name: 'Theory of Knowledge (TOK)',  category: 'IB Core', availableIn: ['IBDP'] },
+  { id: 'extended_essay',      name: 'Extended Essay',             category: 'IB Core', availableIn: ['IBDP'] },
+  { id: 'cas',                 name: 'Creativity, Activity, Service (CAS)', category: 'IB Core', availableIn: ['IBDP'] },
 ]
 
 // ─────────────────────────────────────────────────────────
@@ -215,10 +245,15 @@ const getSubjectsForCurriculum = (curriculumId) => {
   // NOTE: `availableIn: 'all'` means all SECONDARY curricula — it
   // predates the Primary curriculum and must NOT auto-include it
   // (a Year 3 child does not take Economics or separate sciences).
-  // Primary only gets subjects that explicitly list 'CambridgePrimary'.
+  // Explicit-only curricula get ONLY subjects that list them by id:
+  //   - CambridgePrimary: its own age-appropriate primary set
+  //   - IBPYP: the six PYP transdisciplinary subject areas
+  //   - IBMYP: the eight MYP subject groups (their own framework
+  //     names — an MYP student takes 'MYP Sciences', not 'Physics')
+  const EXPLICIT_ONLY = ['CambridgePrimary', 'IBPYP', 'IBMYP']
   const filtered = SUBJECTS.filter(s => {
-    if (curriculumId === 'CambridgePrimary') {
-      return Array.isArray(s.availableIn) && s.availableIn.includes('CambridgePrimary')
+    if (EXPLICIT_ONLY.includes(curriculumId)) {
+      return Array.isArray(s.availableIn) && s.availableIn.includes(curriculumId)
     }
     return s.availableIn === 'all' || s.availableIn.includes(curriculumId)
   })
@@ -244,10 +279,10 @@ const getGradesForCurriculum = (curriculumId) => {
 const isSubjectValidForCurriculum = (subjectId, curriculumId) => {
   const subject = SUBJECTS.find(s => s.id === subjectId)
   if (!subject) return false
-  // Primary only matches subjects that explicitly list 'CambridgePrimary'
+  // Explicit-only curricula match only subjects that list them by id
   // ('all' means all secondary curricula — see getSubjectsForCurriculum).
-  if (curriculumId === 'CambridgePrimary') {
-    return Array.isArray(subject.availableIn) && subject.availableIn.includes('CambridgePrimary')
+  if (['CambridgePrimary', 'IBPYP', 'IBMYP'].includes(curriculumId)) {
+    return Array.isArray(subject.availableIn) && subject.availableIn.includes(curriculumId)
   }
   return subject.availableIn === 'all' || subject.availableIn.includes(curriculumId)
 }
