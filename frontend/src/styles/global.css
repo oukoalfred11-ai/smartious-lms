@@ -631,6 +631,11 @@ img { display: block; max-width: 100% }
 /* ── CARDS ───────────────────────────────────────────────── */
 .card {
   background: var(--surface);
+  /* Explicit ink colour. Without this a card placed inside any
+     container that sets a light colour (crimson gradient panels,
+     dark hero blocks) inherits it, producing white text on the
+     card's white background. */
+  color: var(--ink1);
   border: 1px solid var(--border);
   border-radius: var(--r5);
   padding: 24px;
@@ -640,6 +645,7 @@ img { display: block; max-width: 100% }
 .card:hover { box-shadow: var(--shadow-md) }
 .card-sm {
   background: var(--surface);
+  color: var(--ink1);
   border: 1px solid var(--border);
   border-radius: var(--r4);
   padding: 18px;
