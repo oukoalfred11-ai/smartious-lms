@@ -23,6 +23,9 @@ const rateLimit = require('express-rate-limit');
 const nodemailer = require('nodemailer');
 
 const AssessmentRequest = require('../models/AssessmentRequest');
+// Assessment fees are invoiced like every other one-off charge.
+// Paystack is reserved for recurring subscriptions (e.g. Mshauri AI).
+const { issueInvoice } = require('../lib/issueInvoice');
 const { auth, requireRole } = require('../middleware/auth');
 const axios = require('axios');
 
@@ -580,7 +583,7 @@ function buildDeclinedText(r, message) {
 // ═══════════════════════════════════════════════════════════
 // EMAIL E — Acceptance + payment invoice to parent
 // ═══════════════════════════════════════════════════════════
-function buildAcceptedHTML(r, payUrl) {
+function buildAcceptedHTML(r, invoice) {
   return `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#FDFAF4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#080C14;">
@@ -597,7 +600,7 @@ function buildAcceptedHTML(r, payUrl) {
             Dear ${r.parent1FirstName},
           </p>
           <p style="font-size:14.5px;line-height:1.7;color:#2c2c2c;margin:0 0 18px;">
-            We're pleased to accept your assessment request for <strong>${r.studentFirstName}</strong>. To schedule the diagnostic assessment, please pay the assessment fee of <strong>KES ${ASSESSMENT_AMOUNT_KES.toLocaleString()}</strong> using the button below.
+            We're pleased to accept your assessment request for <strong>${r.studentFirstName}</strong>. Invoice <strong>${invoice.invoiceNo}</strong> for the assessment fee of <strong>USD ${ASSESSMENT_FEE_USD}</strong> (approx KES ${ASSESSMENT_FEE_KES.toLocaleString()}) is attached to this email. Payment details are below.
           </p>
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F0FDF4;border-left:4px solid #166534;border-radius:6px;padding:16px 20px;margin-bottom:26px;">
             <tr><td>
@@ -613,18 +616,51 @@ function buildAcceptedHTML(r, payUrl) {
               </p>
             </td></tr>
           </table>
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:26px;">
-            <tr><td align="center">
-              <a href="${payUrl}" style="display:inline-block;background:#166534;color:#fff;padding:16px 40px;border-radius:8px;text-decoration:none;font-weight:800;font-size:15px;letter-spacing:.01em;">
-                Pay KES ${ASSESSMENT_AMOUNT_KES.toLocaleString()} — Secure Payment
-              </a>
-            </td></tr>
-            <tr><td align="center" style="padding-top:10px;">
-              <p style="font-size:11px;color:#9CA3AF;margin:0;">Powered by Paystack · Secure · Encrypted</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">
+            <tr>
+              <td width="50%" valign="top" style="padding-right:8px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #f0e8e8;border-radius:8px;overflow:hidden;">
+                  <tr><td style="background:#8B1A2E;padding:8px 14px;">
+                    <div style="font-size:11px;font-weight:800;color:#fff;letter-spacing:.06em;text-transform:uppercase;">M-Pesa</div>
+                    <div style="font-size:10px;color:#F7CED4;">Paying from Kenya</div>
+                  </td></tr>
+                  <tr><td style="padding:12px 14px;">
+                    <div style="font-size:10px;color:#6B6B6B;text-transform:uppercase;letter-spacing:.05em;">Paybill</div>
+                    <div style="font-size:15px;font-weight:800;color:#1a1a1a;margin-bottom:8px;">247247</div>
+                    <div style="font-size:10px;color:#6B6B6B;text-transform:uppercase;letter-spacing:.05em;">Account</div>
+                    <div style="font-size:15px;font-weight:800;color:#1a1a1a;margin-bottom:8px;">745021</div>
+                    <div style="font-size:10px;color:#6B6B6B;text-transform:uppercase;letter-spacing:.05em;">Reference</div>
+                    <div style="font-size:13px;font-weight:700;color:#8B1A2E;">${invoice.invoiceNo}</div>
+                  </td></tr>
+                </table>
+              </td>
+              <td width="50%" valign="top" style="padding-left:8px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #f0e8e8;border-radius:8px;overflow:hidden;">
+                  <tr><td style="background:#C9973A;padding:8px 14px;">
+                    <div style="font-size:11px;font-weight:800;color:#fff;letter-spacing:.06em;text-transform:uppercase;">Bank Transfer</div>
+                    <div style="font-size:10px;color:#FDFAF4;">Paying from outside Kenya</div>
+                  </td></tr>
+                  <tr><td style="padding:12px 14px;">
+                    <div style="font-size:10px;color:#6B6B6B;text-transform:uppercase;letter-spacing:.05em;">Bank</div>
+                    <div style="font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:8px;">Equity Bank Kenya</div>
+                    <div style="font-size:10px;color:#6B6B6B;text-transform:uppercase;letter-spacing:.05em;">Account</div>
+                    <div style="font-size:14px;font-weight:800;color:#1a1a1a;margin-bottom:8px;">0910186607556</div>
+                    <div style="font-size:10px;color:#6B6B6B;text-transform:uppercase;letter-spacing:.05em;">SWIFT</div>
+                    <div style="font-size:13px;font-weight:700;color:#1a1a1a;">EQBLKENA</div>
+                  </td></tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;border-left:3px solid #C9973A;border-radius:4px;margin-bottom:24px;">
+            <tr><td style="padding:12px 16px;">
+              <p style="margin:0;font-size:12.5px;color:#2c2c2c;line-height:1.6;">
+                Please quote <strong>${invoice.invoiceNo}</strong> as the payment reference, and send the confirmation message to <a href="mailto:hellosmartious@gmail.com" style="color:#8B1A2E;">hellosmartious@gmail.com</a> so we can allocate it promptly.
+              </p>
             </td></tr>
           </table>
           <p style="font-size:13px;line-height:1.6;color:#6B6B6B;margin:0 0 22px;">
-            Once payment is confirmed, our Head of Admissions will contact you within one business day to schedule the assessment at a time that suits your timezone.
+            Once payment is received, our Head of Admissions will contact you within one business day to schedule the assessment at a time that suits your timezone.
           </p>
           <p style="font-size:13.5px;line-height:1.65;color:#2c2c2c;margin:0;">
             Warm regards,<br>
@@ -641,14 +677,25 @@ function buildAcceptedHTML(r, payUrl) {
 </body></html>`;
 }
 
-function buildAcceptedText(r, payUrl) {
+function buildAcceptedText(r, invoice) {
   return [
     `Dear ${r.parent1FirstName},`,
     '',
     `Great news — we've accepted your assessment request for ${r.studentFirstName}.`,
     '',
-    `To schedule the assessment, please pay the KES ${ASSESSMENT_AMOUNT_KES.toLocaleString()} assessment fee:`,
-    payUrl,
+    `Invoice ${invoice.invoiceNo} for the assessment fee of USD ${ASSESSMENT_FEE_USD} (approx KES ${ASSESSMENT_FEE_KES.toLocaleString()}) is attached to this email.`,
+    '',
+    'PAYING FROM KENYA (M-Pesa):',
+    '  Paybill:   247247',
+    '  Account:   745021',
+    `  Reference: ${invoice.invoiceNo}`,
+    '',
+    'PAYING FROM OUTSIDE KENYA (Bank transfer):',
+    '  Bank:    Equity Bank Kenya',
+    '  Account: 0910186607556',
+    '  SWIFT:   EQBLKENA',
+    '',
+    `Please quote ${invoice.invoiceNo} as the payment reference and send the confirmation to hellosmartious@gmail.com.`,
     '',
     'This covers:',
     '- Structured diagnostic across English, Mathematics and Science (~90 minutes)',
@@ -789,52 +836,71 @@ router.patch('/requests/:id', auth, requireRole('admin', 'ops_manager', 'sales')
       const from = process.env.EMAIL_FROM || 'Smartious E-School <hellosmartious@gmail.com>';
 
       if (status === 'accepted') {
-        // ── Generate Paystack payment link ────────────────────
+        // ── Issue an assessment fee invoice ───────────────────
+        // The parent receives a normal Smartious invoice with both
+        // payment panels (M-Pesa paybill and bank transfer), exactly
+        // as for tuition. No card checkout is created here.
         try {
-          const reference = `ASS-${doc.requestRef}-${Date.now()}`;
-          const psRes = await axios.post(`${PS_BASE}/transaction/initialize`, {
-            email:        doc.parent1Email,
-            amount:       ASSESSMENT_AMOUNT_KOBO,
-            currency:     'KES',
-            reference,
-            callback_url: paystackCallbackUrl(),
-            metadata: {
-              requestRef:       doc.requestRef,
-              studentName:      `${doc.studentFirstName} ${doc.studentLastName}`,
-              parentName:       `${doc.parent1FirstName} ${doc.parent1LastName}`,
-              assessmentRequest: String(doc._id),
-            },
-          }, { headers: psHeaders() });
+          const studentFullName = `${doc.studentFirstName} ${doc.studentLastName}`.trim();
+          const parentFullName  = `${doc.parent1FirstName} ${doc.parent1LastName}`.trim();
 
-          const payUrl = psRes.data?.data?.authorization_url;
-          if (!payUrl) throw new Error('No authorization_url from Paystack');
+          const dueDate = new Date();
+          dueDate.setDate(dueDate.getDate() + 7);
 
-          // Save payment reference + link + bump status to payment_pending
-          doc.paystackReference  = reference;
-          doc.paystackAuthUrl    = payUrl;
-          doc.paystackAmountKobo = ASSESSMENT_AMOUNT_KOBO;
-          doc.status             = 'payment_pending';
-          doc.invoiceSentAt      = new Date();
-          doc.reviewedAt         = new Date();
-          doc.reviewedBy         = req.user._id;
+          const invoice = await issueInvoice({
+            billedToName:  parentFullName,
+            billedToEmail: doc.parent1Email,
+            studentName:   studentFullName,
+            studentGrade:  doc.gradeApplyingFor || '',
+            programmeLabel: 'Diagnostic Assessment',
+            dueDate,
+            currency: 'USD',
+            lineItems: [{
+              // Kept short so it renders on one line in the PDF table.
+              description: `Diagnostic assessment fee — ${studentFullName}`,
+              amount: ASSESSMENT_FEE_USD,
+            }],
+            notes: `Assessment reference ${doc.requestRef}. This fee is credited against your first month\u2019s tuition if the student proceeds to enrolment.`,
+            // Assessment acceptances are handled by the admissions team,
+            // so the invoice is signed by the Head of Admission Team.
+            issuedByRole: 'sales',
+            issuedBy: req.user._id,
+            sendEmail: false,   // the acceptance email below carries the detail
+          });
+
+          doc.invoiceId     = invoice._id;
+          doc.invoiceNo     = invoice.invoiceNo;
+          doc.status        = 'payment_pending';
+          doc.invoiceSentAt = new Date();
+          doc.reviewedAt    = new Date();
+          doc.reviewedBy    = req.user._id;
           await doc.save();
-          console.log('[assessment] Status updated to payment_pending for', doc.requestRef);
+          console.log(`[assessment] Invoice ${invoice.invoiceNo} issued for ${doc.requestRef}`);
 
           if (t) {
+            // Attach the invoice PDF so the parent has the same document
+            // they would receive from the billing screen.
+            let attachments = [];
+            try {
+              const { buildInvoicePdfBuffer } = require('../lib/invoicePdf');
+              const pdf = await buildInvoicePdfBuffer(invoice);
+              attachments = [{ filename: `${invoice.invoiceNo}.pdf`, content: pdf, contentType: 'application/pdf' }];
+            } catch (pdfErr) {
+              console.error('[assessment] invoice PDF failed:', pdfErr.message);
+            }
             t.sendMail({
               from, to: doc.parent1Email,
-              subject: `Your Smartious assessment request is accepted — pay to confirm — ${doc.requestRef}`,
-              html: buildAcceptedHTML(doc, payUrl),
-              text: buildAcceptedText(doc, payUrl),
+              subject: `Your Smartious assessment request is accepted — invoice ${invoice.invoiceNo}`,
+              html: buildAcceptedHTML(doc, invoice),
+              text: buildAcceptedText(doc, invoice),
+              attachments,
             })
               .then(() => console.log(`[assessment] Sent acceptance+invoice email for ${doc.requestRef}`))
               .catch(e => console.error(`[assessment] Failed to send acceptance email for ${doc.requestRef}:`, e.message));
           }
-          console.log(`[assessment] Paystack link created for ${doc.requestRef}: ${payUrl}`);
-        } catch (psErr) {
-          console.error(`[assessment] Paystack init failed for ${doc.requestRef}:`, psErr?.response?.data || psErr.message);
-          // Don't fail the whole request — just log. Admin can retry.
-          return res.status(502).json({ ok: false, error: 'Request accepted but could not generate payment link. Check PAYSTACK_SECRET_KEY env var and try again.' });
+        } catch (invErr) {
+          console.error(`[assessment] Invoice creation failed for ${doc.requestRef}:`, invErr.message);
+          return res.status(500).json({ ok: false, error: 'Request accepted but the invoice could not be created: ' + invErr.message });
         }
 
       } else if (status === 'info_requested' || status === 'declined') {
@@ -875,6 +941,9 @@ router.patch('/requests/:id', auth, requireRole('admin', 'ops_manager', 'sales')
 // Verifies the transaction with Paystack API, updates status
 // to 'payment_received', then redirects parent to a result page.
 // ═══════════════════════════════════════════════════════════
+// LEGACY: assessment fees are now invoiced rather than collected by
+// card, so no new Paystack links are created. This route remains so
+// that any link issued before the change still resolves correctly.
 router.get('/payment-callback', async (req, res) => {
   const { reference, trxref } = req.query;
   const ref = reference || trxref;
