@@ -1469,6 +1469,17 @@ function QuestionBankTab({ user, store, setPage, toast }) {
   const [searchQ, setSearchQ] = useState('')
   const [showOnlyMine, setShowOnlyMine] = useState(false)
  
+  // ── ARTWORK QUEUE ──
+  // Questions authored with a brief for a diagram or illustration
+  // that has not yet been produced.
+  const [artworkOpen, setArtworkOpen]       = useState(false)
+  const [artworkList, setArtworkList]       = useState([])
+  const [artworkCounts, setArtworkCounts]   = useState({})
+  const [artworkLoading, setArtworkLoading] = useState(false)
+  const [artworkBrief, setArtworkBrief]     = useState(null)   // question whose brief is open
+  const [artworkUploading, setArtworkUploading] = useState(false)
+  const [copiedPrompt, setCopiedPrompt]     = useState(false)
+
   // ── DETAIL MODAL ──
   const [detailQ, setDetailQ] = useState(null)
  
@@ -1818,6 +1829,79 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     }
   }
  
+  // ── ARTWORK QUEUE HANDLERS ──────────────────────────
+  const loadArtwork = async () => {
+    setArtworkLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (filterSubject)    params.set('subject', filterSubject)
+      if (filterCurriculum) params.set('curriculum', filterCurriculum)
+      if (filterGrade)      params.set('grade', filterGrade)
+      const { data } = await api.get('/questions/artwork/pending?' + params.toString())
+      if (data?.success) {
+        setArtworkList(data.questions || [])
+        setArtworkCounts(data.bySubject || {})
+      }
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || 'Could not load the artwork queue.')
+    } finally {
+      setArtworkLoading(false)
+    }
+  }
+
+  const openArtworkQueue = () => {
+    setArtworkOpen(true)
+    loadArtwork()
+  }
+
+  const copyPrompt = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text || '')
+      setCopiedPrompt(true)
+      setTimeout(() => setCopiedPrompt(false), 1800)
+    } catch {
+      toast?.error?.('Could not copy. Select the text and copy manually.')
+    }
+  }
+
+  // Two steps: upload the file, then attach it to the question.
+  const uploadArtwork = async (question, file) => {
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast?.error?.('Please choose an image file.')
+      return
+    }
+    setArtworkUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const up = await api.post('/questions/upload', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      if (!up.data?.success) throw new Error(up.data?.message || 'Upload failed.')
+
+      const res = await api.post('/questions/' + question._id + '/artwork', {
+        attachment: up.data.attachment,
+      })
+      if (!res.data?.success) throw new Error(res.data?.message || 'Could not attach artwork.')
+
+      toast?.success?.('Artwork attached.')
+      setArtworkBrief(null)
+      // Remove the completed item without a full reload.
+      setArtworkList(prev => prev.filter(q => q._id !== question._id))
+      setArtworkCounts(prev => {
+        const next = { ...prev }
+        if (next[question.subject]) next[question.subject] -= 1
+        if (next[question.subject] <= 0) delete next[question.subject]
+        return next
+      })
+    } catch (e) {
+      toast?.error?.(e.response?.data?.message || e.message || 'Upload failed.')
+    } finally {
+      setArtworkUploading(false)
+    }
+  }
+
   return (
     <div>
       {/* Header */}
@@ -1833,6 +1917,13 @@ function QuestionBankTab({ user, store, setPage, toast }) {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button onClick={openArtworkQueue} className="btn btn-sm"
+            style={{ background: '#FFF', color: '#7D1025', border: '1.5px solid #E8A4AD' }}>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+            </svg>
+            Artwork queue
+          </button>
           <button onClick={openCreate} className="btn btn-p btn-sm">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -1932,13 +2023,14 @@ function QuestionBankTab({ user, store, setPage, toast }) {
             const hasAttachments = (q.attachments || []).length > 0
             return (
               <div key={q._id} className="card" onClick={() => setDetailQ(q)}
-                style={{ padding: 14, cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: 12, transition: 'all .15s' }}
+                style={{ padding: 14, cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: 12, transition: 'all .15s',
+                         background: '#FFFFFF', color: '#0D1220' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#7D1025' }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)' }}>
                 <div style={{ width: 36, height: 36, borderRadius: 8, background: typeMeta.color + '15', color: typeMeta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{typeMeta.letter}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, color: 'var(--s900)', marginBottom: 4, fontWeight: 500, lineHeight: 1.5 }}>{q.questionText}</div>
-                  <div style={{ fontSize: 11.5, color: 'var(--s400)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div style={{ fontSize: 14, color: '#0D1220', marginBottom: 4, fontWeight: 500, lineHeight: 1.5 }}>{q.questionText}</div>
+                  <div style={{ fontSize: 11.5, color: '#6B7280', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                     <span>{q.curriculum} · {q.subject} {q.grade ? '· ' + q.grade : ''}</span>
                     {q.topic && <span>· {q.topic}</span>}
                     <span style={{ background: diffMeta.bg, color: diffMeta.color, padding: '1px 7px', borderRadius: 99, fontSize: 10, fontWeight: 700 }}>{diffMeta.label}</span>
@@ -1960,6 +2052,152 @@ function QuestionBankTab({ user, store, setPage, toast }) {
         </div>
       )}
  
+      {/* ── ARTWORK QUEUE PANEL ── */}
+      {artworkOpen && (
+        <div onClick={() => setArtworkOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#FFFFFF', color: '#0D1220', borderRadius: 12, maxWidth: 900, width: '100%', maxHeight: '88vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
+
+            <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5', borderRadius: '12px 12px 0 0', flexShrink: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .85, color: '#F0CC5A', marginBottom: 4 }}>
+                Questions awaiting a diagram or illustration
+              </div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>Artwork Queue</div>
+              {!artworkLoading && (
+                <div style={{ fontSize: 12.5, opacity: .9, marginTop: 6 }}>
+                  {artworkList.length} question{artworkList.length === 1 ? '' : 's'} pending
+                  {Object.keys(artworkCounts).length > 0 && (
+                    <span> &middot; {Object.entries(artworkCounts).map(([sub, n]) => sub + ' (' + n + ')').join(', ')}</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div style={{ padding: '18px 28px', overflowY: 'auto', flex: 1, background: '#FFFFFF', color: '#0D1220' }}>
+              {artworkLoading && (
+                <div style={{ padding: 32, textAlign: 'center', color: '#6B7280', fontSize: 13.5 }}>Loading the artwork queue...</div>
+              )}
+
+              {!artworkLoading && artworkList.length === 0 && (
+                <div style={{ padding: 40, textAlign: 'center' }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: '#0D1220', marginBottom: 6 }}>Nothing pending</div>
+                  <div style={{ fontSize: 13, color: '#6B7280' }}>
+                    Every question that needs artwork already has it. New requests will appear here automatically.
+                  </div>
+                </div>
+              )}
+
+              {!artworkLoading && artworkList.map(q => (
+                <div key={q._id} style={{ border: '1px solid #E8E0D0', borderRadius: 9, padding: 14, marginBottom: 10, background: '#FFFFFF', color: '#0D1220' }}>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ background: '#FBE9EC', color: '#8B1A2E', padding: '2px 8px', borderRadius: 99, fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em' }}>
+                          {q.artwork?.kind || 'diagram'}
+                        </span>
+                        <span style={{ fontSize: 11.5, color: '#6B7280' }}>
+                          {q.subject} &middot; {q.grade}{q.topic ? ' \u00b7 ' + q.topic : ''}
+                        </span>
+                      </div>
+                      {q.artwork?.title && (
+                        <div style={{ fontSize: 14, fontWeight: 600, color: '#0D1220', marginBottom: 3 }}>{q.artwork.title}</div>
+                      )}
+                      <div style={{ fontSize: 12.5, color: '#4B5563', lineHeight: 1.5 }}>
+                        {(q.questionText || '').slice(0, 160)}{(q.questionText || '').length > 160 ? '...' : ''}
+                      </div>
+                    </div>
+                    <button onClick={() => setArtworkBrief(q)}
+                      style={{ flexShrink: 0, background: '#7D1025', color: '#FBFAF5', border: 'none', padding: '8px 14px', borderRadius: 7, fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}>
+                      View brief
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ padding: '14px 28px', borderTop: '1px solid #E8E0D0', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0, background: '#FFFFFF' }}>
+              <button onClick={loadArtwork} style={{ padding: '9px 16px', borderRadius: 7, border: '1.5px solid #E8E0D0', background: '#FFF', color: '#2E3D55', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Refresh</button>
+              <button onClick={() => setArtworkOpen(false)} style={{ padding: '9px 18px', borderRadius: 7, border: 'none', background: '#7D1025', color: '#FBFAF5', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── ARTWORK BRIEF + UPLOAD ── */}
+      {artworkBrief && (
+        <div onClick={() => !artworkUploading && setArtworkBrief(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#FFFFFF', color: '#0D1220', borderRadius: 12, maxWidth: 760, width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,.35)' }}>
+
+            <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5', borderRadius: '12px 12px 0 0', flexShrink: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .85, color: '#F0CC5A', marginBottom: 4 }}>
+                {artworkBrief.subject} &middot; {artworkBrief.grade} &middot; {artworkBrief.artwork?.kind || 'diagram'}
+              </div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 21 }}>
+                {artworkBrief.artwork?.title || 'Artwork required'}
+              </div>
+            </div>
+
+            <div style={{ padding: '20px 28px', overflowY: 'auto', flex: 1, background: '#FFFFFF', color: '#0D1220' }}>
+
+              <div style={{ marginBottom: 18 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#8B1A2E', marginBottom: 6 }}>The question this illustrates</div>
+                <div style={{ fontSize: 13.5, color: '#0D1220', lineHeight: 1.6, background: '#FDFAF4', border: '1px solid #E8E0D0', borderRadius: 8, padding: '12px 14px' }}>
+                  {artworkBrief.questionText}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 18 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#8B1A2E', marginBottom: 6 }}>What the artwork must show</div>
+                <div style={{ fontSize: 13.5, color: '#0D1220', lineHeight: 1.65, whiteSpace: 'pre-wrap' }}>
+                  {artworkBrief.artwork?.description || 'No description was supplied with this request.'}
+                </div>
+              </div>
+
+              {(artworkBrief.artwork?.requirements || []).length > 0 && (
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#8B1A2E', marginBottom: 6 }}>Must include</div>
+                  <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: '#2E3D55', lineHeight: 1.75 }}>
+                    {artworkBrief.artwork.requirements.map((r, i) => <li key={i}>{r}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {artworkBrief.artwork?.aiPrompt && (
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase', color: '#8B1A2E' }}>Prompt for an AI image generator</div>
+                    <button onClick={() => copyPrompt(artworkBrief.artwork.aiPrompt)}
+                      style={{ background: copiedPrompt ? '#DCFCE7' : '#FFF', color: copiedPrompt ? '#15803D' : '#7D1025', border: '1.5px solid ' + (copiedPrompt ? '#86EFAC' : '#E8A4AD'), padding: '4px 10px', borderRadius: 6, fontSize: 11.5, fontWeight: 700, cursor: 'pointer' }}>
+                      {copiedPrompt ? 'Copied' : 'Copy prompt'}
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 12.5, color: '#2E3D55', lineHeight: 1.6, background: '#FDFAF4', border: '1px dashed #C9973A', borderRadius: 8, padding: '12px 14px', whiteSpace: 'pre-wrap', fontFamily: 'JetBrains Mono, monospace' }}>
+                    {artworkBrief.artwork.aiPrompt}
+                  </div>
+                  <div style={{ fontSize: 11.5, color: '#6B7280', marginTop: 6, lineHeight: 1.5 }}>
+                    Check the generated image against the requirements above before uploading. AI generators frequently mislabel diagrams and produce incorrect values.
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={{ padding: '14px 28px', borderTop: '1px solid #E8E0D0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexShrink: 0, background: '#FFFFFF' }}>
+              <button onClick={() => setArtworkBrief(null)} disabled={artworkUploading}
+                style={{ padding: '9px 16px', borderRadius: 7, border: '1.5px solid #E8E0D0', background: '#FFF', color: '#2E3D55', fontSize: 13, fontWeight: 600, cursor: artworkUploading ? 'not-allowed' : 'pointer' }}>
+                Back to queue
+              </button>
+              <label style={{ padding: '10px 20px', borderRadius: 7, border: 'none', background: artworkUploading ? '#C96773' : '#7D1025', color: '#FBFAF5', fontSize: 13, fontWeight: 700, cursor: artworkUploading ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                {artworkUploading ? 'Uploading...' : 'Upload artwork'}
+                <input type="file" accept="image/*" disabled={artworkUploading} style={{ display: 'none' }}
+                  onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; uploadArtwork(artworkBrief, f) }} />
+              </label>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* DETAIL MODAL */}
       {detailQ && (
         <div onClick={() => setDetailQ(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
@@ -1971,7 +2209,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
               <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>{qbTypeMeta[detailQ.type]?.label || 'Question'}</div>
             </div>
             <div style={{ padding: '20px 28px' }}>
-              <div style={{ fontSize: 15, color: 'var(--s900)', lineHeight: 1.6, marginBottom: 14 }}>{detailQ.questionText}</div>
+              <div style={{ fontSize: 15, color: '#0D1220', lineHeight: 1.6, marginBottom: 14 }}>{detailQ.questionText}</div>
               {detailQ.attachments && detailQ.attachments.length > 0 && (
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Attachments</div>
