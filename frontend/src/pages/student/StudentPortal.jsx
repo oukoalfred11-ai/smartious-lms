@@ -12049,6 +12049,8 @@ function StudentLibraryPage({ user, toast }) {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [viewerBook, setViewerBook] = useState(null)
+  const [openFolders, setOpenFolders] = useState({})
+  const toggleFolder = (key) => setOpenFolders(f => ({ ...f, [key]: !f[key] }))
 
   useEffect(() => {
     let cancelled = false
@@ -12080,17 +12082,41 @@ function StudentLibraryPage({ user, toast }) {
     )
   })()
 
-  // Group by subject
+  // Coursebooks: flat grid grouped by subject (papers are handled separately below)
   const grouped = (() => {
-    const SEC = { coursebook: 'Coursebooks', mock: 'Past Papers \u00B7 Mock Exams', past_paper: 'Past Papers \u00B7 Exam Body' }
     const out = {}
     for (const b of filtered) {
-      const k = (SEC[b.section] || 'Coursebooks') + '  \u2014  ' + (b.subjectName || 'Other')
+      if (b.section === 'mock' || b.section === 'past_paper') continue
+      const k = 'Coursebooks  \u2014  ' + (b.subjectName || 'Other')
       if (!out[k]) out[k] = []
       out[k].push(b)
     }
     return out
   })()
+
+  // Paper folders: Section -> Subject -> Year -> [papers sorted Paper 1..6]
+  const paperTree = (() => {
+    const SEC = { past_paper: 'Past Papers \u00B7 Exam Body', mock: 'Mock Exams' }
+    const tree = {}
+    for (const b of filtered) {
+      if (b.section !== 'mock' && b.section !== 'past_paper') continue
+      const sec = SEC[b.section]
+      const subj = b.subjectName || 'Other'
+      const yr = b.examYear ? String(b.examYear) : 'Unsorted'
+      tree[sec] = tree[sec] || {}
+      tree[sec][subj] = tree[sec][subj] || {}
+      tree[sec][subj][yr] = tree[sec][subj][yr] || []
+      tree[sec][subj][yr].push(b)
+    }
+    for (const sec of Object.keys(tree))
+      for (const subj of Object.keys(tree[sec]))
+        for (const yr of Object.keys(tree[sec][subj]))
+          tree[sec][subj][yr].sort((a, b2) => (a.paperNumber || 99) - (b2.paperNumber || 99)
+            || String(a.session || '').localeCompare(String(b2.session || ''))
+            || String(a.title || '').localeCompare(String(b2.title || '')))
+    return tree
+  })()
+  const hasPapers = Object.keys(paperTree).length > 0
 
   return (
     <div>
@@ -12129,10 +12155,7 @@ function StudentLibraryPage({ user, toast }) {
         </div>
       ) : (
         <div style={{ display:'flex', flexDirection:'column', gap: 22 }}>
-          {Object.keys(grouped).sort((a, b2) => {
-            const rank = k => k.startsWith('Coursebooks') ? 0 : k.includes('Mock') ? 1 : 2
-            return rank(a) - rank(b2) || a.localeCompare(b2)
-          }).map(subj => (
+          {Object.keys(grouped).sort().map(subj => (
             <div key={subj}>
               <div style={{
                 fontSize: 11, fontWeight: 700, color: '#7D1025',
@@ -12152,6 +12175,92 @@ function StudentLibraryPage({ user, toast }) {
                 {grouped[subj].map(book => (
                   <StudentBookCard key={book._id} book={book}
                     onOpen={() => setViewerBook(book)}/>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Past papers and mock exams: folder view by Subject, then Year, then Paper 1-6 */}
+          {hasPapers && Object.keys(paperTree).sort().map(sec => (
+            <div key={sec}>
+              <div style={{
+                fontSize: 11, fontWeight: 700, color: '#7D1025',
+                letterSpacing: '.08em', textTransform: 'uppercase',
+                marginBottom: 10, paddingBottom: 6, borderBottom: '1px solid #E8E2D6',
+              }}>
+                {sec}
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap: 14 }}>
+                {Object.keys(paperTree[sec]).sort().map(subj => (
+                  <div key={subj} style={{ background:'#fff', border:'1px solid #E8E2D6', borderRadius: 12, padding: '14px 16px' }}>
+                    <div style={{ fontFamily:'Georgia, serif', fontSize: 15, fontWeight: 700, color:'#1A1A1A', marginBottom: 10 }}>
+                      {subj}
+                    </div>
+                    <div style={{ display:'flex', flexDirection:'column', gap: 8 }}>
+                      {Object.keys(paperTree[sec][subj]).sort((a, b2) => {
+                        if (a === 'Unsorted') return 1
+                        if (b2 === 'Unsorted') return -1
+                        return parseInt(b2, 10) - parseInt(a, 10)
+                      }).map(yr => {
+                        const fkey = sec + '|' + subj + '|' + yr
+                        const open = !!openFolders[fkey]
+                        const papers = paperTree[sec][subj][yr]
+                        return (
+                          <div key={yr} style={{ border:'1px solid #EFE9DD', borderRadius: 9, overflow:'hidden' }}>
+                            <button onClick={() => toggleFolder(fkey)} style={{
+                              width:'100%', display:'flex', alignItems:'center', gap: 10,
+                              background: open ? '#FBF7EC' : '#FDFAF4', border:'none',
+                              padding:'10px 14px', cursor:'pointer', textAlign:'left',
+                            }}>
+                              <span style={{
+                                width: 30, height: 24, borderRadius: 5, flexShrink: 0,
+                                background: 'linear-gradient(135deg, #C9A030, #A8821F)',
+                                display:'flex', alignItems:'center', justifyContent:'center',
+                                color:'#fff', fontSize: 11, fontWeight: 800,
+                              }}>{open ? '\u2212' : '+'}</span>
+                              <span style={{ fontSize: 13.5, fontWeight: 800, color:'#3A2E1E' }}>{yr}</span>
+                              <span style={{ fontSize: 11.5, color:'#9A9A9A', fontWeight: 600 }}>
+                                {papers.length} paper{papers.length === 1 ? '' : 's'}
+                              </span>
+                            </button>
+                            {open && (
+                              <div style={{ padding:'6px 10px 10px', display:'flex', flexDirection:'column', gap: 6 }}>
+                                {papers.map(bk => (
+                                  <div key={bk._id} style={{
+                                    display:'flex', alignItems:'center', gap: 10,
+                                    background:'#fff', border:'1px solid #EFE9DD', borderRadius: 8,
+                                    padding:'8px 12px',
+                                  }}>
+                                    <span style={{
+                                      fontSize: 10, fontWeight: 800, color:'#7D1025',
+                                      background:'#F7E9EC', border:'1px solid #E4C3CB',
+                                      borderRadius: 99, padding:'3px 10px', letterSpacing:'.04em',
+                                      flexShrink: 0, whiteSpace:'nowrap',
+                                    }}>
+                                      {bk.paperNumber ? 'PAPER ' + bk.paperNumber : 'PDF'}
+                                    </span>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{ fontSize: 12.5, fontWeight: 700, color:'#1A1A1A', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                        {bk.title}
+                                      </div>
+                                      {bk.session && (
+                                        <div style={{ fontSize: 10.5, color:'#7D5A0F', fontWeight: 700 }}>{bk.session}</div>
+                                      )}
+                                    </div>
+                                    <button onClick={() => setViewerBook(bk)} style={{
+                                      background:'#7D1025', color:'#fff', border:'none',
+                                      borderRadius: 7, padding:'7px 14px', fontSize: 11.5,
+                                      fontWeight: 700, cursor:'pointer', flexShrink: 0,
+                                    }}>Open</button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
