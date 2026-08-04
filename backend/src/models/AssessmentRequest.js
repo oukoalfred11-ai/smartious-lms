@@ -84,6 +84,9 @@ const assessmentRequestSchema = new mongoose.Schema({
   paystackAuthUrl:      { type: String, default: '' }, // the hosted payment page URL
   paystackAmountKobo:   { type: Number, default: 0  }, // amount in kobo (KES × 100)
   paystackData:         { type: mongoose.Schema.Types.Mixed, default: null },
+  // Assessment fees are invoiced through the standard invoice system.
+  invoiceId:            { type: mongoose.Schema.Types.ObjectId, ref: 'Invoice', default: null },
+  invoiceNo:            { type: String, default: '' },
   invoiceSentAt:        { type: Date, default: null },
   paidAt:               { type: Date, default: null },
 
