@@ -198,6 +198,88 @@ router.get('/', auth, async (req, res) => {
 // ─────────────────────────────────────────────────────────
 // GET /api/questions/:id
 // ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+// GET /api/questions/artwork/pending
+// Questions still waiting for their artwork to be produced.
+// Declared BEFORE '/:id' so 'artwork' is not read as an id.
+// ─────────────────────────────────────────────────────────
+router.get('/artwork/pending', auth, requireRole('teacher', 'admin'), async (req, res) => {
+  try {
+    const { subject, curriculum, grade, kind } = req.query;
+    const filter = { 'artwork.required': true, 'artwork.status': 'pending' };
+    if (subject)    filter.subject    = subject;
+    if (curriculum) filter.curriculum = curriculum;
+    if (grade)      filter.grade      = grade;
+    if (kind)       filter['artwork.kind'] = kind;
+
+    const questions = await Question.find(filter)
+      .select('questionText subject curriculum grade topic type difficulty artwork')
+      .sort({ subject: 1, grade: 1, createdAt: 1 })
+      .limit(500)
+      .lean();
+
+    // Counts per subject let the UI show where the work is concentrated.
+    const bySubject = {};
+    questions.forEach(q => { bySubject[q.subject] = (bySubject[q.subject] || 0) + 1; });
+
+    return res.json({ success: true, total: questions.length, bySubject, questions });
+  } catch (err) {
+    console.error('[questions/artwork/pending]', err.message);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// POST /api/questions/:id/artwork
+// Attach a produced image to a question and close the request.
+// Body: { attachment: { url, publicId, filename, mimeType, sizeBytes } }
+// The file itself is uploaded first via POST /api/questions/upload.
+// ─────────────────────────────────────────────────────────
+router.post('/:id/artwork', auth, requireRole('teacher', 'admin'), async (req, res) => {
+  try {
+    const { attachment } = req.body || {};
+    if (!attachment || !attachment.url)
+      return res.status(400).json({ success: false, message: 'No attachment supplied.' });
+
+    const question = await Question.findById(req.params.id);
+    if (!question)
+      return res.status(404).json({ success: false, message: 'Question not found.' });
+    if (!question.artwork || !question.artwork.required)
+      return res.status(400).json({ success: false, message: 'This question does not have an artwork request.' });
+
+    question.attachments.push(attachment);
+    question.artwork.status     = 'uploaded';
+    question.artwork.uploadedBy = req.user._id;
+    question.artwork.uploadedAt = new Date();
+    await question.save();
+
+    console.log(`[artwork uploaded] question=${question._id} subject=${question.subject} by=${req.user.email || req.user._id}`);
+    return res.json({ success: true, message: 'Artwork attached.', question });
+  } catch (err) {
+    console.error('[questions/:id/artwork]', err.message);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// POST /api/questions/:id/artwork/reopen
+// Reverses an upload — used when the image was wrong.
+// ─────────────────────────────────────────────────────────
+router.post('/:id/artwork/reopen', auth, requireRole('teacher', 'admin'), async (req, res) => {
+  try {
+    const question = await Question.findById(req.params.id);
+    if (!question)
+      return res.status(404).json({ success: false, message: 'Question not found.' });
+    question.artwork.status     = 'pending';
+    question.artwork.uploadedBy = null;
+    question.artwork.uploadedAt = null;
+    await question.save();
+    return res.json({ success: true, message: 'Artwork request reopened.', question });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 router.get('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
