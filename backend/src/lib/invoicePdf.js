@@ -168,8 +168,76 @@ function footerNotes(doc, inv, y, { receipt = false } = {}) {
   const X = 48, W = doc.page.width - 96
   if (!receipt) {
     doc.fillColor(GOLD).font('Helvetica-Bold').fontSize(8).text('PAYMENT DETAILS', X, y, { characterSpacing: 1.2 })
-    doc.fillColor(INK).font('Helvetica').fontSize(9)
-      .text(inv.paymentNote || 'M-Pesa Paybill 745021 (Account: student name)  \u00B7  Bank transfer details available on request.', X, y + 13, { width: W })
+    if (inv.paymentNote) {
+      // Explicit per-invoice override
+      doc.fillColor(INK).font('Helvetica').fontSize(9)
+        .text(inv.paymentNote, X, y + 13, { width: W })
+      y = doc.y + 10
+    } else {
+      // Two clearly separated payment methods, side by side:
+      // M-Pesa (local) on the left, bank transfer (international)
+      // on the right. Values must stay identical to the payment
+      // block in routes/invoices.js buildInvoiceEmailHTML.
+      const ref  = inv.invoiceNo || 'invoice number'
+      const GAP  = 14
+      const COLW = (W - GAP) / 2
+      const LX   = X                 // left column x
+      const RX   = X + COLW + GAP    // right column x
+      const top  = y + 13
+      const BOXH = 108
+
+      // Panel backgrounds
+      doc.roundedRect(LX, top, COLW, BOXH, 6).fill(BONE)
+      doc.roundedRect(RX, top, COLW, BOXH, 6).fill(BONE)
+      doc.roundedRect(LX, top, COLW, BOXH, 6).lineWidth(0.8).strokeColor('#E8E2D6').stroke()
+      doc.roundedRect(RX, top, COLW, BOXH, 6).lineWidth(0.8).strokeColor('#E8E2D6').stroke()
+      // Accent bar on each panel header
+      doc.rect(LX, top, COLW, 3).fill(CRIMSON)
+      doc.rect(RX, top, COLW, 3).fill(GOLD)
+
+      // Renders "Label  Value" rows inside one panel
+      const panel = (px, heading, sub, rows) => {
+        const pad = 10
+        const iw  = COLW - pad * 2
+        let py = top + 11
+        doc.fillColor(INK).font('Helvetica-Bold').fontSize(9)
+          .text(heading, px + pad, py, { width: iw, characterSpacing: 0.6 })
+        py = doc.y + 1
+        doc.fillColor(GREY).font('Helvetica-Oblique').fontSize(7.5)
+          .text(sub, px + pad, py, { width: iw })
+        py = doc.y + 5
+        rows.forEach(([label, value]) => {
+          doc.fillColor(GREY).font('Helvetica').fontSize(7.5)
+            .text(label.toUpperCase(), px + pad, py, { width: iw, characterSpacing: 0.5 })
+          py = doc.y
+          doc.fillColor(INK).font('Helvetica-Bold').fontSize(9.5)
+            .text(value, px + pad, py, { width: iw })
+          py = doc.y + 3
+        })
+      }
+
+      panel(LX, 'M-PESA', 'Paying from Kenya', [
+        ['Paybill',   '247247'],
+        ['Account',   '745021'],
+        ['Reference', ref],
+      ])
+      panel(RX, 'BANK TRANSFER', 'Paying from outside Kenya', [
+        ['Bank',        'Equity Bank Kenya'],
+        ['Account',     '0910186607556'],
+        ['SWIFT / Beneficiary', 'EQBLKENA  \u00B7  Smartious Edtech'],
+      ])
+
+      y = top + BOXH + 10
+    }
+    // ── Issued-by signature ────────────────────────────────
+    const sigName  = inv.issuedByName  || 'Innocent Jabuya'
+    const sigTitle = inv.issuedByTitle || 'Head of Finance'
+    doc.fillColor(GREY).font('Helvetica').fontSize(7.5)
+      .text('ISSUED BY', X, y, { characterSpacing: 1 })
+    doc.fillColor(CRIMSON).font('Helvetica-Bold').fontSize(10)
+      .text(sigName, X, doc.y + 1, { width: W })
+    doc.fillColor(GREY).font('Helvetica').fontSize(8.5)
+      .text(sigTitle + '  \u00B7  Smartious Edtech', X, doc.y + 1, { width: W })
     y = doc.y + 10
   }
   if (inv.notes) {
