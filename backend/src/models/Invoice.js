@@ -57,6 +57,11 @@ const invoiceSchema = new mongoose.Schema({
 
   // ── Meta ─────────────────────────────────────────────────
   issuedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  // Signature shown on the invoice email and PDF. Set from the
+  // creator's role: sales/admissions invoices are signed by the
+  // Head of Admission Team, all others by the Head of Finance.
+  issuedByName:  { type: String, default: '' },
+  issuedByTitle: { type: String, default: '' },
   emailSentTo: { type: String, default: '' },
   emailSentAt: { type: Date, default: null },
 
