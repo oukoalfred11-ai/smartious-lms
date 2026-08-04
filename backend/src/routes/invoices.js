@@ -18,6 +18,17 @@ try {
 }
 
 const ALLOWED = requireRole('admin', 'accountant', 'sales', 'ops_manager')
+// Only the admin may remove an invoice. Invoices are financial
+// records: everyone else can raise and view them, but deletion
+// is restricted to a single accountable role.
+const CAN_DELETE = requireRole('admin')
+
+// Roles that see the whole ledger. Sales users see only the
+// invoices they themselves issued.
+const FULL_LEDGER_ROLES = ['admin', 'accountant', 'ops_manager']
+function ledgerScope(user) {
+  return FULL_LEDGER_ROLES.includes(user.role) ? {} : { issuedBy: user._id }
+}
 
 // ── Invoice signatories ────────────────────────────────────
 // Invoices raised by the admissions/sales team are signed by the
@@ -58,10 +69,14 @@ async function nextInvoiceNo() {
 // ── GET /api/invoices/stats ────────────────────────────────
 router.get('/stats', auth, ALLOWED, async (req, res) => {
   try {
+    // Same scoping as the list: full ledger for admin/accountant/
+    // ops, own invoices only for sales.
+    const scope = ledgerScope(req.user)
     const [byCurrency, countByStatus, recentIssuers] = await Promise.all([
-      Invoice.aggregate([{ $group: { _id:'$currency', total:{ $sum:'$totalDue' }, paid:{ $sum:{ $cond:[{ $eq:['$status','paid'] },'$totalDue',0] } }, count:{ $sum:1 } } }]),
-      Invoice.aggregate([{ $group: { _id:'$status', count:{ $sum:1 } } }]),
+      Invoice.aggregate([{ $match: scope }, { $group: { _id:'$currency', total:{ $sum:'$totalDue' }, paid:{ $sum:{ $cond:[{ $eq:['$status','paid'] },'$totalDue',0] } }, count:{ $sum:1 } } }]),
+      Invoice.aggregate([{ $match: scope }, { $group: { _id:'$status', count:{ $sum:1 } } }]),
       Invoice.aggregate([
+        { $match: scope },
         { $group: { _id:'$issuedBy', count:{ $sum:1 }, total:{ $sum:'$totalDue' } } },
         { $sort: { count:-1 } }, { $limit:5 },
         { $lookup: { from:'users', localField:'_id', foreignField:'_id', as:'user' } },
@@ -185,10 +200,11 @@ router.get('/sales-performance', auth, requireRole('admin','sales','ops_manager'
 router.get('/', auth, ALLOWED, async (req, res) => {
   try {
     const { status, currency, search, page=1, limit=30, issuedBy } = req.query
-    const filter = {}
+    // Admin, accountant and ops see every invoice; sales sees own.
+    const filter = { ...ledgerScope(req.user) }
     if (status && status!=='all') filter.status = status
     if (currency && currency!=='all') filter.currency = currency
-    if (issuedBy) filter.issuedBy = issuedBy
+    if (issuedBy && FULL_LEDGER_ROLES.includes(req.user.role)) filter.issuedBy = issuedBy
     if (search) {
       const re = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i')
       filter.$or = [{ invoiceNo:re },{ billedToName:re },{ billedToEmail:re },{ studentName:re }]
@@ -413,10 +429,15 @@ router.post('/:id/resend', auth, ALLOWED, async (req, res) => {
 })
 
 // ── DELETE /api/invoices/:id ───────────────────────────────
-router.delete('/:id', auth, requireRole('admin','accountant'), async (req, res) => {
+router.delete('/:id', auth, CAN_DELETE, async (req, res) => {
   try {
+    const inv = await Invoice.findById(req.params.id).lean()
+    if (!inv) return res.status(404).json({ success:false, message:'Invoice not found.' })
     await Invoice.findByIdAndDelete(req.params.id)
-    return res.json({ success:true, message:'Invoice deleted.' })
+    // Audit trail: deletions of financial records are logged.
+    console.log(`[invoice deleted] ${inv.invoiceNo} (${inv.currency} ${inv.totalDue}) ` +
+      `billedTo=${inv.billedToName} by admin=${req.user.email || req.user._id} at ${new Date().toISOString()}`)
+    return res.json({ success:true, message:`Invoice ${inv.invoiceNo} deleted.` })
   } catch(e) { return res.status(500).json({ success:false, message:e.message }) }
 })
 
