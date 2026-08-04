@@ -61,6 +61,17 @@ function FrontDeskLeads({ refreshKey, toast }) {
   const [search, setSearch]   = useState('')
   const [selected, setSelected] = useState(null)   // expanded lead
 
+  // Per-lesson coverage widget state (self-contained)
+  const [cov,     setCov]     = useState(null)
+  const [covSubj, setCovSubj] = useState({ subject:'Biology', curriculum:'EdexcelIGCSE' })
+  const CURRICULA = ['EdexcelIGCSE','CambridgeIGCSE','CambridgeALevel','EdexcelALevel','IBPYP','IBMYP','IBDP','KenyaCBC','American','BNC']
+  const loadCoverage = async () => {
+    try {
+      const r = await api.get('/questions/coverage', { params: covSubj })
+      setCov(r.data?.data || null)
+    } catch (e) { toast?.error?.('Could not load coverage.') }
+  }
+
   const load = useCallback(() => {
     setLoading(true)
     api.get('/frontdesk/submissions')
