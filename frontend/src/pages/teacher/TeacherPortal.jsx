@@ -14818,11 +14818,15 @@ function TeacherLibraryTab({ user, toast }) {
     setUpGrades('')
     setUpFile(null)
     setUpCover(null)
+    setUpYear(''); setUpPaper(''); setUpSession('')
     setUploadProgress(0)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const [upSection, setUpSection] = useState('coursebook')
+  const [upYear,    setUpYear]    = useState('')
+  const [upPaper,   setUpPaper]   = useState('')
+  const [upSession, setUpSession] = useState('')
   const [upCover, setUpCover] = useState(null)
   const [editBook, setEditBook] = useState(null)
   const [savingEdit, setSavingEdit] = useState(false)
@@ -14840,7 +14844,10 @@ function TeacherLibraryTab({ user, toast }) {
           coverUrl = cd.publicUrl
         }
       }
-      const payload = { title: editBook.title, author: editBook.author, description: editBook.description, grades: editBook.gradesText, section: editBook.section || 'coursebook' }
+      const payload = { title: editBook.title, author: editBook.author, description: editBook.description, grades: editBook.gradesText, section: editBook.section || 'coursebook',
+        examYear:    (editBook.section || 'coursebook') !== 'coursebook' ? (editBook.examYear    ?? '') : '',
+        paperNumber: (editBook.section || 'coursebook') !== 'coursebook' ? (editBook.paperNumber ?? '') : '',
+        session:     (editBook.section || 'coursebook') !== 'coursebook' ? (editBook.session     ?? '') : '' }
       if (coverUrl) payload.coverUrl = coverUrl
       const { data } = await api.patch('/library/' + editBook._id, payload)
       if (data?.success) { toast?.ok?.('Book updated.'); setEditBook(null); loadBooks() }
@@ -14854,6 +14861,10 @@ function TeacherLibraryTab({ user, toast }) {
     if (!upSubjectId)         { toast?.error?.('Pick a subject.'); return }
     if (!upTitle.trim())      { toast?.error?.('Title is required.'); return }
     if (!upFile)              { toast?.error?.('Choose a PDF file.'); return }
+    if (upSection !== 'coursebook') {
+      if (!upYear)  { toast?.error?.('Select the exam year so the paper is filed in the right folder.'); return }
+      if (!upPaper) { toast?.error?.('Select the paper number (Paper 1 to Paper 6).'); return }
+    }
 
     setUploading(true)
     setUploadProgress(0)
@@ -14891,6 +14902,9 @@ function TeacherLibraryTab({ user, toast }) {
         subjectId: upSubjectId, title: upTitle.trim(),
         description: upDescription.trim(), author: upAuthor.trim(),
         grades: upGrades.trim(), section: upSection,
+        examYear:    upSection !== 'coursebook' ? upYear    : '',
+        paperNumber: upSection !== 'coursebook' ? upPaper   : '',
+        session:     upSection !== 'coursebook' ? upSession : '',
         fileName: upFile.name, fileSize: upFile.size,
         mimeType: upFile.type || 'application/pdf',
       })
@@ -14924,13 +14938,28 @@ function TeacherLibraryTab({ user, toast }) {
     }
   }
 
-  // Group books by subject for display
+  // Group books for display.
+  // Coursebooks: "Subject - Curriculum".
+  // Mocks and past papers: "Section - Subject - Year" folders,
+  // newest year first, papers sorted Paper 1 to Paper 6 inside.
   const booksBySubject = (() => {
+    const SEC_LABEL = { mock: 'Mock Exams', past_paper: 'Past Papers' }
     const groups = {}
     for (const b of books) {
-      const k = b.subjectName + ' · ' + b.curriculum
+      let k
+      if (b.section === 'mock' || b.section === 'past_paper') {
+        const yr = b.examYear ? String(b.examYear) : 'Unsorted'
+        k = SEC_LABEL[b.section] + ' · ' + b.subjectName + ' · ' + yr
+      } else {
+        k = b.subjectName + ' · ' + b.curriculum
+      }
       if (!groups[k]) groups[k] = []
       groups[k].push(b)
+    }
+    for (const k of Object.keys(groups)) {
+      groups[k].sort((a, b2) => (a.paperNumber || 99) - (b2.paperNumber || 99)
+        || String(a.session || '').localeCompare(String(b2.session || ''))
+        || String(a.title || '').localeCompare(String(b2.title || '')))
     }
     return groups
   })()
@@ -15047,6 +15076,51 @@ function TeacherLibraryTab({ user, toast }) {
             </select>
           </div>
 
+          {upSection !== 'coursebook' && (
+            <div style={{ marginBottom: 16, background: '#FBF7EC', border: '1px solid #E8D58F', borderRadius: 8, padding: '12px 14px' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#7D5A0F', letterSpacing: '.06em', textTransform: 'uppercase', marginBottom: 10 }}>
+                Paper folder — groups this file under Year, then Paper 1-6
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                <div>
+                  <label className="fl">Exam year *</label>
+                  <select className="fsel" value={upYear} onChange={e => setUpYear(e.target.value)} disabled={uploading} style={{ marginTop: 4 }}>
+                    <option value="">Select year...</option>
+                    {Array.from({ length: (new Date().getFullYear() + 1) - 2010 + 1 }, (_, i) => (new Date().getFullYear() + 1) - i).map(y => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="fl">Paper *</label>
+                  <select className="fsel" value={upPaper} onChange={e => setUpPaper(e.target.value)} disabled={uploading} style={{ marginTop: 4 }}>
+                    <option value="">Select paper...</option>
+                    {[1,2,3,4,5,6].map(n => <option key={n} value={n}>Paper {n}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="fl">Session (optional)</label>
+                  <select className="fsel" value={upSession} onChange={e => setUpSession(e.target.value)} disabled={uploading} style={{ marginTop: 4 }}>
+                    <option value="">None</option>
+                    {upSection === 'past_paper' ? (
+                      <>
+                        <option value="Feb/March">Feb/March</option>
+                        <option value="May/June">May/June</option>
+                        <option value="Oct/Nov">Oct/Nov</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="Term 1">Term 1</option>
+                        <option value="Term 2">Term 2</option>
+                        <option value="Term 3">Term 3</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div style={{ marginBottom: 16 }}>
             <label className="fl">Cover image (optional)</label>
             <input type="file" accept="image/*"
@@ -15119,7 +15193,21 @@ function TeacherLibraryTab({ user, toast }) {
         </div>
       ) : (
         <div style={{ display:'flex', flexDirection:'column', gap: 22 }}>
-          {Object.keys(booksBySubject).sort().map(groupKey => (
+          {Object.keys(booksBySubject).sort((a, b2) => {
+            const isPaperA = a.startsWith('Mock Exams') || a.startsWith('Past Papers')
+            const isPaperB = b2.startsWith('Mock Exams') || b2.startsWith('Past Papers')
+            if (isPaperA !== isPaperB) return isPaperA ? 1 : -1
+            if (isPaperA && isPaperB) {
+              const ya = parseInt(a.split(' · ').pop(), 10) || 0
+              const yb = parseInt(b2.split(' · ').pop(), 10) || 0
+              const baseA = a.slice(0, a.lastIndexOf(' · '))
+              const baseB = b2.slice(0, b2.lastIndexOf(' · '))
+              const base = baseA.localeCompare(baseB)
+              if (base !== 0) return base
+              return yb - ya
+            }
+            return a.localeCompare(b2)
+          }).map(groupKey => (
             <div key={groupKey}>
               <div style={{
                 fontSize: 11, fontWeight: 700, color: '#7D1025',
@@ -15174,6 +15262,41 @@ function TeacherLibraryTab({ user, toast }) {
                 <option value="past_paper">Past Paper - Exam Body</option>
               </select>
             </div>
+            {(editBook.section || 'coursebook') !== 'coursebook' && (
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10, marginBottom:12 }}>
+                <div>
+                  <div style={{ fontSize:11, fontWeight:700, color:'#7D1025', marginBottom:4 }}>YEAR</div>
+                  <select value={editBook.examYear || ''} onChange={e => setEditBook(b => ({ ...b, examYear: e.target.value }))}
+                    style={{ width:'100%', padding:'9px 8px', border:'1px solid #E8E2D6', borderRadius:8, fontSize:13 }}>
+                    <option value="">None</option>
+                    {Array.from({ length: (new Date().getFullYear() + 1) - 2010 + 1 }, (_, i) => (new Date().getFullYear() + 1) - i).map(y => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <div style={{ fontSize:11, fontWeight:700, color:'#7D1025', marginBottom:4 }}>PAPER</div>
+                  <select value={editBook.paperNumber || ''} onChange={e => setEditBook(b => ({ ...b, paperNumber: e.target.value }))}
+                    style={{ width:'100%', padding:'9px 8px', border:'1px solid #E8E2D6', borderRadius:8, fontSize:13 }}>
+                    <option value="">None</option>
+                    {[1,2,3,4,5,6].map(n => <option key={n} value={n}>Paper {n}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <div style={{ fontSize:11, fontWeight:700, color:'#7D1025', marginBottom:4 }}>SESSION</div>
+                  <select value={editBook.session || ''} onChange={e => setEditBook(b => ({ ...b, session: e.target.value }))}
+                    style={{ width:'100%', padding:'9px 8px', border:'1px solid #E8E2D6', borderRadius:8, fontSize:13 }}>
+                    <option value="">None</option>
+                    <option value="Feb/March">Feb/March</option>
+                    <option value="May/June">May/June</option>
+                    <option value="Oct/Nov">Oct/Nov</option>
+                    <option value="Term 1">Term 1</option>
+                    <option value="Term 2">Term 2</option>
+                    <option value="Term 3">Term 3</option>
+                  </select>
+                </div>
+              </div>
+            )}
             <div style={{ marginBottom:12 }}>
               <div style={{ fontSize:11, fontWeight:700, color:'#7D1025', marginBottom:4 }}>DESCRIPTION</div>
               <textarea value={editBook.description||''} rows={2}
@@ -15251,6 +15374,20 @@ function BookCard({ book, onView, onDelete, onEdit, canDelete }) {
         </div>
       )}
 
+      {(book.paperNumber || book.examYear) && (
+        <div style={{ marginBottom: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {book.paperNumber && (
+            <span style={{ fontSize: 10, fontWeight: 800, color: '#7D1025', background: '#F7E9EC', border: '1px solid #E4C3CB', borderRadius: 99, padding: '2px 9px', letterSpacing: '.04em' }}>
+              PAPER {book.paperNumber}
+            </span>
+          )}
+          {book.examYear && (
+            <span style={{ fontSize: 10, fontWeight: 800, color: '#7D5A0F', background: '#FDF7E2', border: '1px solid #E8D58F', borderRadius: 99, padding: '2px 9px', letterSpacing: '.04em' }}>
+              {book.examYear}{book.session ? ' - ' + book.session.toUpperCase() : ''}
+            </span>
+          )}
+        </div>
+      )}
       <div style={{ fontSize: 10.5, color: '#9A9A9A', marginBottom: 10 }}>
         {sizeMB}
         {book.grades?.length ? ' · ' + book.grades.join(', ') : ''}
