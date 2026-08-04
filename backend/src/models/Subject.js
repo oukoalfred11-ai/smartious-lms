@@ -12,7 +12,12 @@ const subjectSchema = new mongoose.Schema({
       'CambridgePrimary', 'CambridgeLowerSec', 'CambridgeIGCSE', 'CambridgeALevel',
       'EdexcelLowerSec', 'EdexcelIGCSE', 'EdexcelALevel',
       'AQALowerSec', 'AQAGCSE', 'AQAALevel',
-      'IB', 'BNC', 'American', 'Canadian', 'KenyaCBC',
+      'IBPYP', 'IBMYP', 'IBDP',
+      'BNC', 'American', 'Canadian', 'KenyaCBC',
+      // Legacy — pre-2026-08-04 flat IB curriculum. Existing records
+      // are migrated to IBDP by migrate-ib-split.js; kept here so
+      // validation does not break before the migration runs.
+      'IB',
     ],
     required: true,
     trim: true
