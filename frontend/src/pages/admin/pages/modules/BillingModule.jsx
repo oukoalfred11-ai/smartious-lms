@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useStore, api } from '../../../../context/ctx.jsx'
+import { useStore, useAuth, api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { fmtDate, fmtKsh } from '../shared/helpers.js'
 import { PCard, PKpi, PSection } from '../shared/ui.jsx'
@@ -8,6 +8,12 @@ import { StatusBadge } from './CRMModule.jsx'
 
 
 function InvoicesTab({ toast, refreshKey }) {
+  const { user } = useAuth()
+  // Only the admin may delete an invoice; the backend enforces
+  // this too, this just hides the control from everyone else.
+  const isAdmin = user?.role === 'admin'
+  const [deleteModal, setDeleteModal] = useState(null)   // invoice pending deletion
+  const [deleting, setDeleting]       = useState(false)
   const [view, setView]             = useState('list')  // list | create
   const [invoices, setInvoices]     = useState([])
   const [stats, setStats]           = useState({})
@@ -84,6 +90,19 @@ function InvoicesTab({ toast, refreshKey }) {
       const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
       w.location.href = url
     } catch { w.close(); toast?.error?.(failMsg) }
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteModal) return
+    setDeleting(true)
+    try {
+      const { data } = await api.delete('/invoices/'+deleteModal._id)
+      toast?.success?.(data?.message || 'Invoice deleted.')
+      setDeleteModal(null)
+      load()
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not delete invoice.')
+    } finally { setDeleting(false) }
   }
 
   const viewReceipt = (inv) => openPdf('/invoices/'+inv._id+'/receipt-pdf', 'Could not load receipt.')
@@ -199,6 +218,10 @@ function InvoicesTab({ toast, refreshKey }) {
                       {inv.billedToEmail && inv.status !== 'cancelled' && (
                         <button onClick={() => resend(inv)} style={{ fontSize:11, background:TOKENS.cream, color:TOKENS.crimson, border:'1px solid '+TOKENS.line, padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Resend</button>
                       )}
+                      {isAdmin && (
+                        <button onClick={() => setDeleteModal(inv)} title="Delete invoice (admin only)"
+                          style={{ fontSize:11, background:'#fff', color:'#B91C1C', border:'1px solid #FCA5A5', padding:'4px 8px', borderRadius:5, cursor:'pointer', fontWeight:700 }}>Delete</button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -217,6 +240,38 @@ function InvoicesTab({ toast, refreshKey }) {
       )}
 
       {/* Mark Paid modal */}
+      {deleteModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
+          onClick={() => !deleting && setDeleteModal(null)}>
+          <div style={{ background:'#fff', borderRadius:14, padding:26, maxWidth:420, width:'100%', boxShadow:'0 20px 60px rgba(0,0,0,.25)' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize:15, fontWeight:800, color:'#B91C1C', marginBottom:4 }}>Delete this invoice?</div>
+            <div style={{ fontSize:12.5, color:TOKENS.s500, marginBottom:16 }}>
+              {deleteModal.invoiceNo} &middot; {deleteModal.billedToName}
+            </div>
+            <div style={{ background:'#FEF2F2', border:'1px solid #FCA5A5', borderRadius:8, padding:'12px 14px', marginBottom:18 }}>
+              <div style={{ fontSize:13, fontWeight:700, color:'#7F1D1D', marginBottom:4 }}>
+                {deleteModal.currency} {Number(deleteModal.totalDue).toLocaleString('en-US',{minimumFractionDigits:2})}
+              </div>
+              <div style={{ fontSize:12, color:'#7F1D1D', lineHeight:1.5 }}>
+                This permanently removes the invoice from the financial records. It cannot be undone.
+                {deleteModal.status === 'paid' && ' This invoice is marked PAID — deleting it will remove that payment from your reports.'}
+              </div>
+            </div>
+            <div style={{ display:'flex', gap:10 }}>
+              <button onClick={() => setDeleteModal(null)} disabled={deleting}
+                style={{ flex:1, padding:'10px 0', borderRadius:8, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:13, fontWeight:700, color:TOKENS.s700, cursor:deleting?'not-allowed':'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={confirmDelete} disabled={deleting}
+                style={{ flex:1, padding:'10px 0', borderRadius:8, border:'none', background:deleting?'#FCA5A5':'#B91C1C', color:'#fff', fontSize:13, fontWeight:800, cursor:deleting?'not-allowed':'pointer' }}>
+                {deleting ? 'Deleting...' : 'Delete invoice'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {paidModal && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
           onClick={() => setPaidModal(null)}>
