@@ -1,215 +1,433 @@
 /**
- * SEED SCRIPT: Populate Subject Collection
- * Run from backend directory: node src/seeds/seedSubjects.js
+ * routes/seed-subjects.js
+ * One-time endpoint to seed all missing subjects into MongoDB.
+ * POST /api/seed-subjects  (admin only, idempotent - uses upsert)
+ * DELETE this file after seeding is confirmed.
  */
+const express = require('express')
+const router  = express.Router()
+const { auth, requireRole } = require('../middleware/auth')
+const Subject = require('../models/Subject')
 
-require('dotenv').config();
-const mongoose = require('mongoose');
-const Subject = require('../models/Subject');
+const ALL_SUBJECTS = [
+  // ── CambridgeIGCSE ──────────────────────────────────────
+  { curriculum:'CambridgeIGCSE', subjectName:'Mathematics',           category:'Mathematics' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Additional Mathematics',category:'Mathematics' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Further Mathematics',   category:'Mathematics' },
+  { curriculum:'CambridgeIGCSE', subjectName:'English Language',      category:'Languages' },
+  { curriculum:'CambridgeIGCSE', subjectName:'English Literature',    category:'Languages' },
+  { curriculum:'CambridgeIGCSE', subjectName:'English as a Second Language', category:'Languages' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Physics',               category:'Sciences' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Chemistry',             category:'Sciences' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Biology',               category:'Sciences' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Combined Science',      category:'Sciences' },
+  { curriculum:'CambridgeIGCSE', subjectName:'History',               category:'Humanities' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Geography',             category:'Humanities' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Economics',             category:'Business' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Business Studies',      category:'Business' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Accounting',            category:'Business' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Computer Science',      category:'Technology' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Information & Communication Technology', category:'Technology' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Design & Technology',   category:'Technology' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Art & Design',          category:'Arts' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Music',                 category:'Arts' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Drama',                 category:'Arts' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Physical Education',    category:'Physical Education' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Global Perspectives',   category:'Humanities' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Sociology',             category:'Humanities' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Psychology',            category:'Humanities' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Travel & Tourism',      category:'Business' },
+  { curriculum:'CambridgeIGCSE', subjectName:'French',                category:'Languages' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Spanish',               category:'Languages' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Arabic',                category:'Languages' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Swahili',               category:'Languages' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Kiswahili',             category:'Languages' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Religious Studies',     category:'Humanities' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Islamic Studies',       category:'Humanities' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Environmental Management', category:'Sciences' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Marine Science',        category:'Sciences' },
+  { curriculum:'CambridgeIGCSE', subjectName:'Media Studies',         category:'Arts' },
 
-// MongoDB Connection - use .env variable
-const MONGO_URI = process.env.MONGODB_URI;
+  // ── EdexcelIGCSE ────────────────────────────────────────
+  { curriculum:'EdexcelIGCSE', subjectName:'Mathematics',             category:'Mathematics' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Further Pure Mathematics',category:'Mathematics' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Statistics',              category:'Mathematics' },
+  { curriculum:'EdexcelIGCSE', subjectName:'English Language',        category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'English Literature',      category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'English as a Second Language', category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Physics',                 category:'Sciences' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Chemistry',               category:'Sciences' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Biology',                 category:'Sciences' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Double Award Science',    category:'Sciences' },
+  { curriculum:'EdexcelIGCSE', subjectName:'History',                 category:'Humanities' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Geography',               category:'Humanities' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Economics',               category:'Business' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Business Studies',        category:'Business' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Accounting',              category:'Business' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Commerce',                category:'Business' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Computer Science',        category:'Technology' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Information & Communication Technology', category:'Technology' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Design & Technology',     category:'Technology' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Art & Design',            category:'Arts' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Music',                   category:'Arts' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Drama',                   category:'Arts' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Physical Education',      category:'Physical Education' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Religious Studies',       category:'Humanities' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Islamic Studies',         category:'Humanities' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Sociology',               category:'Humanities' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Psychology',              category:'Humanities' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Travel & Tourism',        category:'Business' },
+  { curriculum:'EdexcelIGCSE', subjectName:'French',                  category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Spanish',                 category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Arabic',                  category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Swahili',                 category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'German',                  category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Chinese',                 category:'Languages' },
+  { curriculum:'EdexcelIGCSE', subjectName:'Media Studies',           category:'Arts' },
 
-const subjectsData = [
-  // ============ IGCSE SUBJECTS ============
-  { curriculum: 'IGCSE', subjectName: 'English Language', category: 'Languages' },
-  { curriculum: 'IGCSE', subjectName: 'English Literature', category: 'Languages' },
-  { curriculum: 'IGCSE', subjectName: 'Mathematics', category: 'Mathematics' },
-  { curriculum: 'IGCSE', subjectName: 'Additional Mathematics', category: 'Mathematics' },
-  { curriculum: 'IGCSE', subjectName: 'Physics', category: 'Sciences' },
-  { curriculum: 'IGCSE', subjectName: 'Chemistry', category: 'Sciences' },
-  { curriculum: 'IGCSE', subjectName: 'Biology', category: 'Sciences' },
-  { curriculum: 'IGCSE', subjectName: 'Combined Science', category: 'Sciences' },
-  { curriculum: 'IGCSE', subjectName: 'History', category: 'Humanities' },
-  { curriculum: 'IGCSE', subjectName: 'Geography', category: 'Humanities' },
-  { curriculum: 'IGCSE', subjectName: 'Economics', category: 'Humanities' },
-  { curriculum: 'IGCSE', subjectName: 'Business Studies', category: 'Humanities' },
-  { curriculum: 'IGCSE', subjectName: 'Accounting', category: 'Business' },
-  { curriculum: 'IGCSE', subjectName: 'Islamic Studies', category: 'Religion' },
-  { curriculum: 'IGCSE', subjectName: 'Religious Studies', category: 'Religion' },
-  { curriculum: 'IGCSE', subjectName: 'Art and Design', category: 'Arts' },
-  { curriculum: 'IGCSE', subjectName: 'Music', category: 'Arts' },
-  { curriculum: 'IGCSE', subjectName: 'Physical Education', category: 'Physical Education' },
-  { curriculum: 'IGCSE', subjectName: 'Design and Technology', category: 'Technology' },
-  { curriculum: 'IGCSE', subjectName: 'Computer Science', category: 'Technology' },
-  { curriculum: 'IGCSE', subjectName: 'Information and Communication Technology', category: 'Technology' },
-  { curriculum: 'IGCSE', subjectName: 'Modern Languages (Spanish)', category: 'Languages' },
-  { curriculum: 'IGCSE', subjectName: 'Modern Languages (French)', category: 'Languages' },
-  { curriculum: 'IGCSE', subjectName: 'Modern Languages (German)', category: 'Languages' },
-  { curriculum: 'IGCSE', subjectName: 'Modern Languages (Arabic)', category: 'Languages' },
+  // ── CambridgeALevel ─────────────────────────────────────
+  { curriculum:'CambridgeALevel', subjectName:'Mathematics',          category:'Mathematics' },
+  { curriculum:'CambridgeALevel', subjectName:'Further Mathematics',  category:'Mathematics' },
+  { curriculum:'CambridgeALevel', subjectName:'English Language',     category:'Languages' },
+  { curriculum:'CambridgeALevel', subjectName:'English Literature',   category:'Languages' },
+  { curriculum:'CambridgeALevel', subjectName:'Physics',              category:'Sciences' },
+  { curriculum:'CambridgeALevel', subjectName:'Chemistry',            category:'Sciences' },
+  { curriculum:'CambridgeALevel', subjectName:'Biology',              category:'Sciences' },
+  { curriculum:'CambridgeALevel', subjectName:'History',              category:'Humanities' },
+  { curriculum:'CambridgeALevel', subjectName:'Geography',            category:'Humanities' },
+  { curriculum:'CambridgeALevel', subjectName:'Economics',            category:'Business' },
+  { curriculum:'CambridgeALevel', subjectName:'Business',             category:'Business' },
+  { curriculum:'CambridgeALevel', subjectName:'Accounting',           category:'Business' },
+  { curriculum:'CambridgeALevel', subjectName:'Computer Science',     category:'Technology' },
+  { curriculum:'CambridgeALevel', subjectName:'Information Technology', category:'Technology' },
+  { curriculum:'CambridgeALevel', subjectName:'Psychology',           category:'Humanities' },
+  { curriculum:'CambridgeALevel', subjectName:'Sociology',            category:'Humanities' },
+  { curriculum:'CambridgeALevel', subjectName:'Law',                  category:'Humanities' },
+  { curriculum:'CambridgeALevel', subjectName:'Art & Design',         category:'Arts' },
+  { curriculum:'CambridgeALevel', subjectName:'Music',                category:'Arts' },
+  { curriculum:'CambridgeALevel', subjectName:'Drama',                category:'Arts' },
+  { curriculum:'CambridgeALevel', subjectName:'Physical Education',   category:'Physical Education' },
+  { curriculum:'CambridgeALevel', subjectName:'Global Perspectives & Research', category:'Humanities' },
+  { curriculum:'CambridgeALevel', subjectName:'French',               category:'Languages' },
+  { curriculum:'CambridgeALevel', subjectName:'Spanish',              category:'Languages' },
+  { curriculum:'CambridgeALevel', subjectName:'Arabic',               category:'Languages' },
 
-  // ============ A-LEVEL SUBJECTS ============
-  { curriculum: 'A-Level', subjectName: 'English Language', category: 'Languages' },
-  { curriculum: 'A-Level', subjectName: 'English Literature', category: 'Languages' },
-  { curriculum: 'A-Level', subjectName: 'Mathematics', category: 'Mathematics' },
-  { curriculum: 'A-Level', subjectName: 'Further Mathematics', category: 'Mathematics' },
-  { curriculum: 'A-Level', subjectName: 'Physics', category: 'Sciences' },
-  { curriculum: 'A-Level', subjectName: 'Chemistry', category: 'Sciences' },
-  { curriculum: 'A-Level', subjectName: 'Biology', category: 'Sciences' },
-  { curriculum: 'A-Level', subjectName: 'History', category: 'Humanities' },
-  { curriculum: 'A-Level', subjectName: 'Geography', category: 'Humanities' },
-  { curriculum: 'A-Level', subjectName: 'Economics', category: 'Humanities' },
-  { curriculum: 'A-Level', subjectName: 'Business Studies', category: 'Humanities' },
-  { curriculum: 'A-Level', subjectName: 'Psychology', category: 'Social Sciences' },
-  { curriculum: 'A-Level', subjectName: 'Sociology', category: 'Social Sciences' },
-  { curriculum: 'A-Level', subjectName: 'Government and Politics', category: 'Humanities' },
-  { curriculum: 'A-Level', subjectName: 'Law', category: 'Humanities' },
-  { curriculum: 'A-Level', subjectName: 'Accounting', category: 'Business' },
-  { curriculum: 'A-Level', subjectName: 'Art and Design', category: 'Arts' },
-  { curriculum: 'A-Level', subjectName: 'Music', category: 'Arts' },
-  { curriculum: 'A-Level', subjectName: 'Physical Education', category: 'Physical Education' },
-  { curriculum: 'A-Level', subjectName: 'Design and Technology', category: 'Technology' },
-  { curriculum: 'A-Level', subjectName: 'Computer Science', category: 'Technology' },
-  { curriculum: 'A-Level', subjectName: 'Information Technology', category: 'Technology' },
-  { curriculum: 'A-Level', subjectName: 'Media Studies', category: 'Humanities' },
-  { curriculum: 'A-Level', subjectName: 'Theatre Studies', category: 'Arts' },
-  { curriculum: 'A-Level', subjectName: 'Philosophy', category: 'Humanities' },
-  { curriculum: 'A-Level', subjectName: 'Spanish', category: 'Languages' },
-  { curriculum: 'A-Level', subjectName: 'French', category: 'Languages' },
-  { curriculum: 'A-Level', subjectName: 'German', category: 'Languages' },
-  { curriculum: 'A-Level', subjectName: 'Arabic', category: 'Languages' },
-  { curriculum: 'A-Level', subjectName: 'Environmental Science', category: 'Sciences' },
+  // ── EdexcelALevel ────────────────────────────────────────
+  { curriculum:'EdexcelALevel', subjectName:'Mathematics',            category:'Mathematics' },
+  { curriculum:'EdexcelALevel', subjectName:'Further Mathematics',    category:'Mathematics' },
+  { curriculum:'EdexcelALevel', subjectName:'Statistics',             category:'Mathematics' },
+  { curriculum:'EdexcelALevel', subjectName:'English Language',       category:'Languages' },
+  { curriculum:'EdexcelALevel', subjectName:'English Literature',     category:'Languages' },
+  { curriculum:'EdexcelALevel', subjectName:'English Language & Literature', category:'Languages' },
+  { curriculum:'EdexcelALevel', subjectName:'Physics',                category:'Sciences' },
+  { curriculum:'EdexcelALevel', subjectName:'Chemistry',              category:'Sciences' },
+  { curriculum:'EdexcelALevel', subjectName:'Biology',                category:'Sciences' },
+  { curriculum:'EdexcelALevel', subjectName:'History',                category:'Humanities' },
+  { curriculum:'EdexcelALevel', subjectName:'Geography',              category:'Humanities' },
+  { curriculum:'EdexcelALevel', subjectName:'Economics',              category:'Business' },
+  { curriculum:'EdexcelALevel', subjectName:'Business',               category:'Business' },
+  { curriculum:'EdexcelALevel', subjectName:'Accounting',             category:'Business' },
+  { curriculum:'EdexcelALevel', subjectName:'Computer Science',       category:'Technology' },
+  { curriculum:'EdexcelALevel', subjectName:'Information Technology', category:'Technology' },
+  { curriculum:'EdexcelALevel', subjectName:'Psychology',             category:'Humanities' },
+  { curriculum:'EdexcelALevel', subjectName:'Sociology',              category:'Humanities' },
+  { curriculum:'EdexcelALevel', subjectName:'Law',                    category:'Humanities' },
+  { curriculum:'EdexcelALevel', subjectName:'Politics',               category:'Humanities' },
+  { curriculum:'EdexcelALevel', subjectName:'Art & Design',           category:'Arts' },
+  { curriculum:'EdexcelALevel', subjectName:'Music',                  category:'Arts' },
+  { curriculum:'EdexcelALevel', subjectName:'Drama & Theatre Studies',category:'Arts' },
+  { curriculum:'EdexcelALevel', subjectName:'Physical Education',     category:'Physical Education' },
+  { curriculum:'EdexcelALevel', subjectName:'French',                 category:'Languages' },
+  { curriculum:'EdexcelALevel', subjectName:'Spanish',                category:'Languages' },
+  { curriculum:'EdexcelALevel', subjectName:'German',                 category:'Languages' },
+  { curriculum:'EdexcelALevel', subjectName:'Arabic',                 category:'Languages' },
 
-  // ============ IB DIPLOMA SUBJECTS ============
-  { curriculum: 'IB Diploma', subjectName: 'English Language and Literature', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'English B', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'Spanish A', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'Spanish B', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'French A', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'French B', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'German A', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'German B', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'Mandarin A', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'Mandarin B', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'Arabic A', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'Arabic B', category: 'Languages' },
-  { curriculum: 'IB Diploma', subjectName: 'Mathematics: Analysis and Approaches', category: 'Mathematics' },
-  { curriculum: 'IB Diploma', subjectName: 'Mathematics: Applications and Interpretation', category: 'Mathematics' },
-  { curriculum: 'IB Diploma', subjectName: 'Physics', category: 'Sciences' },
-  { curriculum: 'IB Diploma', subjectName: 'Chemistry', category: 'Sciences' },
-  { curriculum: 'IB Diploma', subjectName: 'Biology', category: 'Sciences' },
-  { curriculum: 'IB Diploma', subjectName: 'Environmental Systems and Societies', category: 'Sciences' },
-  { curriculum: 'IB Diploma', subjectName: 'Design', category: 'Arts' },
-  { curriculum: 'IB Diploma', subjectName: 'Music', category: 'Arts' },
-  { curriculum: 'IB Diploma', subjectName: 'Visual Arts', category: 'Arts' },
-  { curriculum: 'IB Diploma', subjectName: 'Theatre Arts', category: 'Arts' },
-  { curriculum: 'IB Diploma', subjectName: 'Film', category: 'Arts' },
-  { curriculum: 'IB Diploma', subjectName: 'History', category: 'Humanities' },
-  { curriculum: 'IB Diploma', subjectName: 'Geography', category: 'Humanities' },
-  { curriculum: 'IB Diploma', subjectName: 'Economics', category: 'Humanities' },
-  { curriculum: 'IB Diploma', subjectName: 'Business Management', category: 'Business' },
-  { curriculum: 'IB Diploma', subjectName: 'Psychology', category: 'Social Sciences' },
-  { curriculum: 'IB Diploma', subjectName: 'Global Politics', category: 'Humanities' },
-  { curriculum: 'IB Diploma', subjectName: 'Philosophy', category: 'Humanities' },
-  { curriculum: 'IB Diploma', subjectName: 'Anthropology', category: 'Social Sciences' },
-  { curriculum: 'IB Diploma', subjectName: 'Sports, Exercise and Health Science', category: 'Physical Education' },
-  { curriculum: 'IB Diploma', subjectName: 'Computer Science', category: 'Technology' },
-  { curriculum: 'IB Diploma', subjectName: 'Information Technology in a Global Society', category: 'Technology' },
+  // ── CambridgeLowerSec ────────────────────────────────────
+  { curriculum:'CambridgeLowerSec', subjectName:'Mathematics',        category:'Mathematics' },
+  { curriculum:'CambridgeLowerSec', subjectName:'English',            category:'Languages' },
+  { curriculum:'CambridgeLowerSec', subjectName:'Science',            category:'Sciences' },
+  { curriculum:'CambridgeLowerSec', subjectName:'History',            category:'Humanities' },
+  { curriculum:'CambridgeLowerSec', subjectName:'Geography',          category:'Humanities' },
+  { curriculum:'CambridgeLowerSec', subjectName:'Computer Science',   category:'Technology' },
+  { curriculum:'CambridgeLowerSec', subjectName:'Art & Design',       category:'Arts' },
+  { curriculum:'CambridgeLowerSec', subjectName:'Music',              category:'Arts' },
+  { curriculum:'CambridgeLowerSec', subjectName:'Physical Education', category:'Physical Education' },
+  { curriculum:'CambridgeLowerSec', subjectName:'Global Perspectives',category:'Humanities' },
 
-  // ============ IB MYP SUBJECTS ============
-  { curriculum: 'IB MYP', subjectName: 'English', category: 'Languages' },
-  { curriculum: 'IB MYP', subjectName: 'Language Acquisition (Spanish)', category: 'Languages' },
-  { curriculum: 'IB MYP', subjectName: 'Language Acquisition (French)', category: 'Languages' },
-  { curriculum: 'IB MYP', subjectName: 'Language Acquisition (Mandarin)', category: 'Languages' },
-  { curriculum: 'IB MYP', subjectName: 'Mathematics', category: 'Mathematics' },
-  { curriculum: 'IB MYP', subjectName: 'Sciences', category: 'Sciences' },
-  { curriculum: 'IB MYP', subjectName: 'Individuals and Societies', category: 'Humanities' },
-  { curriculum: 'IB MYP', subjectName: 'Physical and Health Education', category: 'Physical Education' },
-  { curriculum: 'IB MYP', subjectName: 'Arts', category: 'Arts' },
-  { curriculum: 'IB MYP', subjectName: 'Design', category: 'Technology' },
-  { curriculum: 'IB MYP', subjectName: 'Technology', category: 'Technology' },
+  // ── EdexcelLowerSec ──────────────────────────────────────
+  { curriculum:'EdexcelLowerSec', subjectName:'Mathematics',          category:'Mathematics' },
+  { curriculum:'EdexcelLowerSec', subjectName:'English',              category:'Languages' },
+  { curriculum:'EdexcelLowerSec', subjectName:'Science',              category:'Sciences' },
+  { curriculum:'EdexcelLowerSec', subjectName:'History',              category:'Humanities' },
+  { curriculum:'EdexcelLowerSec', subjectName:'Geography',            category:'Humanities' },
+  { curriculum:'EdexcelLowerSec', subjectName:'Computer Science',     category:'Technology' },
+  { curriculum:'EdexcelLowerSec', subjectName:'Art & Design',         category:'Arts' },
+  { curriculum:'EdexcelLowerSec', subjectName:'Physical Education',   category:'Physical Education' },
 
-  // ============ KENYA CBC SUBJECTS ============
-  { curriculum: 'Kenya CBC', subjectName: 'English', category: 'Languages' },
-  { curriculum: 'Kenya CBC', subjectName: 'Kiswahili', category: 'Languages' },
-  { curriculum: 'Kenya CBC', subjectName: 'Mathematics', category: 'Mathematics' },
-  { curriculum: 'Kenya CBC', subjectName: 'Science', category: 'Sciences' },
-  { curriculum: 'Kenya CBC', subjectName: 'Social Studies', category: 'Humanities' },
-  { curriculum: 'Kenya CBC', subjectName: 'Islamic Religious Education', category: 'Religion' },
-  { curriculum: 'Kenya CBC', subjectName: 'Christian Religious Education', category: 'Religion' },
-  { curriculum: 'Kenya CBC', subjectName: 'Hindu Religious Education', category: 'Religion' },
-  { curriculum: 'Kenya CBC', subjectName: 'Physical Education', category: 'Physical Education' },
-  { curriculum: 'Kenya CBC', subjectName: 'Music', category: 'Arts' },
-  { curriculum: 'Kenya CBC', subjectName: 'Visual Arts', category: 'Arts' },
-  { curriculum: 'Kenya CBC', subjectName: 'Technology', category: 'Technology' },
-  { curriculum: 'Kenya CBC', subjectName: 'Computer Studies', category: 'Technology' },
+  // ── CambridgePrimary ─────────────────────────────────────
+  { curriculum:'CambridgePrimary', subjectName:'Mathematics',         category:'Mathematics' },
+  { curriculum:'CambridgePrimary', subjectName:'English',             category:'Languages' },
+  { curriculum:'CambridgePrimary', subjectName:'Science',             category:'Sciences' },
+  { curriculum:'CambridgePrimary', subjectName:'Computing',           category:'Technology' },
+  { curriculum:'CambridgePrimary', subjectName:'Global Perspectives', category:'Humanities' },
+  { curriculum:'CambridgePrimary', subjectName:'Art & Design',        category:'Arts' },
+  { curriculum:'CambridgePrimary', subjectName:'Music',               category:'Arts' },
+  { curriculum:'CambridgePrimary', subjectName:'Physical Education',  category:'Physical Education' },
+  { curriculum:'CambridgePrimary', subjectName:'French',              category:'Languages' },
 
-  // ============ BRITISH NATIONAL CURRICULUM (BNC) ============
-  { curriculum: 'BNC', subjectName: 'English', category: 'Languages' },
-  { curriculum: 'BNC', subjectName: 'Mathematics', category: 'Mathematics' },
-  { curriculum: 'BNC', subjectName: 'Science', category: 'Sciences' },
-  { curriculum: 'BNC', subjectName: 'Design and Technology', category: 'Technology' },
-  { curriculum: 'BNC', subjectName: 'Geography', category: 'Humanities' },
-  { curriculum: 'BNC', subjectName: 'History', category: 'Humanities' },
-  { curriculum: 'BNC', subjectName: 'Modern Languages (Spanish)', category: 'Languages' },
-  { curriculum: 'BNC', subjectName: 'Modern Languages (French)', category: 'Languages' },
-  { curriculum: 'BNC', subjectName: 'Modern Languages (German)', category: 'Languages' },
-  { curriculum: 'BNC', subjectName: 'Art and Design', category: 'Arts' },
-  { curriculum: 'BNC', subjectName: 'Music', category: 'Arts' },
-  { curriculum: 'BNC', subjectName: 'Physical Education', category: 'Physical Education' },
-  { curriculum: 'BNC', subjectName: 'Computing', category: 'Technology' },
-  { curriculum: 'BNC', subjectName: 'Citizenship', category: 'Humanities' },
-  { curriculum: 'BNC', subjectName: 'Personal, Social, Health and Economic Education', category: 'Social Studies' },
+  // ── IB Diploma (IBDP) ────────────────────────────────────
+  // Names match the records already live in the database (no
+  // HL/SL suffix). HL/SL is a level, not a separate subject, and
+  // users.subjects stores these strings - do not rename them.
+  { curriculum:'IBDP', subjectName:'Mathematics: Analysis and Approaches',    category:'Mathematics' },
+  { curriculum:'IBDP', subjectName:'Mathematics: Applications and Interpretation', category:'Mathematics' },
+  { curriculum:'IBDP', subjectName:'English A: Language and Literature',      category:'Studies in Language and Literature' },
+  { curriculum:'IBDP', subjectName:'English A: Literature',                   category:'Studies in Language and Literature' },
+  { curriculum:'IBDP', subjectName:'English B',                               category:'Language Acquisition' },
+  { curriculum:'IBDP', subjectName:'French B',                                category:'Language Acquisition' },
+  { curriculum:'IBDP', subjectName:'French ab initio',                        category:'Language Acquisition' },
+  { curriculum:'IBDP', subjectName:'Spanish B',                               category:'Language Acquisition' },
+  { curriculum:'IBDP', subjectName:'Spanish ab initio',                       category:'Language Acquisition' },
+  { curriculum:'IBDP', subjectName:'German B',                                category:'Language Acquisition' },
+  { curriculum:'IBDP', subjectName:'Mandarin B',                              category:'Language Acquisition' },
+  { curriculum:'IBDP', subjectName:'Physics',                                 category:'Sciences' },
+  { curriculum:'IBDP', subjectName:'Chemistry',                               category:'Sciences' },
+  { curriculum:'IBDP', subjectName:'Biology',                                 category:'Sciences' },
+  { curriculum:'IBDP', subjectName:'Computer Science',                        category:'Sciences' },
+  { curriculum:'IBDP', subjectName:'Design Technology',                       category:'Sciences' },
+  { curriculum:'IBDP', subjectName:'Environmental Systems and Societies',     category:'Sciences' },
+  { curriculum:'IBDP', subjectName:'Sports, Exercise and Health Science',     category:'Sciences' },
+  { curriculum:'IBDP', subjectName:'History',                                 category:'Individuals and Societies' },
+  { curriculum:'IBDP', subjectName:'Geography',                               category:'Individuals and Societies' },
+  { curriculum:'IBDP', subjectName:'Economics',                               category:'Individuals and Societies' },
+  { curriculum:'IBDP', subjectName:'Business Management',                     category:'Individuals and Societies' },
+  { curriculum:'IBDP', subjectName:'Psychology',                              category:'Individuals and Societies' },
+  { curriculum:'IBDP', subjectName:'Philosophy',                              category:'Individuals and Societies' },
+  { curriculum:'IBDP', subjectName:'Global Politics',                         category:'Individuals and Societies' },
+  { curriculum:'IBDP', subjectName:'Information Technology in a Global Society', category:'Individuals and Societies' },
+  { curriculum:'IBDP', subjectName:'Visual Arts',                             category:'The Arts' },
+  { curriculum:'IBDP', subjectName:'Music',                                   category:'The Arts' },
+  { curriculum:'IBDP', subjectName:'Theatre',                                 category:'The Arts' },
+  { curriculum:'IBDP', subjectName:'Dance',                                   category:'The Arts' },
+  { curriculum:'IBDP', subjectName:'Film',                                    category:'The Arts' },
+  { curriculum:'IBDP', subjectName:'Literature and Performance',              category:'The Arts' },
+  { curriculum:'IBDP', subjectName:'Theory of Knowledge',                     category:'IB Core' },
+  { curriculum:'IBDP', subjectName:'Extended Essay',                          category:'IB Core' },
+  { curriculum:'IBDP', subjectName:'Creativity, Activity, Service (CAS)',     category:'IB Core' },
 
-  // ============ AMERICAN CURRICULUM ============
-  { curriculum: 'American', subjectName: 'English Language Arts', category: 'Languages' },
-  { curriculum: 'American', subjectName: 'Mathematics', category: 'Mathematics' },
-  { curriculum: 'American', subjectName: 'Science', category: 'Sciences' },
-  { curriculum: 'American', subjectName: 'Social Studies', category: 'Humanities' },
-  { curriculum: 'American', subjectName: 'History', category: 'Humanities' },
-  { curriculum: 'American', subjectName: 'US Government', category: 'Humanities' },
-  { curriculum: 'American', subjectName: 'Economics', category: 'Humanities' },
-  { curriculum: 'American', subjectName: 'Biology', category: 'Sciences' },
-  { curriculum: 'American', subjectName: 'Chemistry', category: 'Sciences' },
-  { curriculum: 'American', subjectName: 'Physics', category: 'Sciences' },
-  { curriculum: 'American', subjectName: 'World Languages (Spanish)', category: 'Languages' },
-  { curriculum: 'American', subjectName: 'World Languages (French)', category: 'Languages' },
-  { curriculum: 'American', subjectName: 'World Languages (Mandarin)', category: 'Languages' },
-  { curriculum: 'American', subjectName: 'Physical Education', category: 'Physical Education' },
-  { curriculum: 'American', subjectName: 'Health Education', category: 'Physical Education' },
-  { curriculum: 'American', subjectName: 'Visual Arts', category: 'Arts' },
-  { curriculum: 'American', subjectName: 'Music', category: 'Arts' },
-  { curriculum: 'American', subjectName: 'Performing Arts', category: 'Arts' },
-  { curriculum: 'American', subjectName: 'Computer Science', category: 'Technology' },
-  { curriculum: 'American', subjectName: 'Technology', category: 'Technology' },
-  { curriculum: 'American', subjectName: 'Engineering', category: 'Technology' },
-  { curriculum: 'American', subjectName: 'Advanced Placement (AP) Computer Science', category: 'Technology' },
-  { curriculum: 'American', subjectName: 'Advanced Placement (AP) Biology', category: 'Sciences' },
-  { curriculum: 'American', subjectName: 'Advanced Placement (AP) Chemistry', category: 'Sciences' },
-  { curriculum: 'American', subjectName: 'Advanced Placement (AP) Physics', category: 'Sciences' },
-  { curriculum: 'American', subjectName: 'Advanced Placement (AP) Calculus', category: 'Mathematics' },
-];
+  // ── IB Middle Years (IBMYP, Grade 6-10) ──────────────────
+  // Names match the records already live in the database.
+  { curriculum:'IBMYP', subjectName:'Language and Literature (English)',      category:'Language and Literature' },
+  { curriculum:'IBMYP', subjectName:'Language Acquisition (French)',          category:'Language Acquisition' },
+  { curriculum:'IBMYP', subjectName:'Language Acquisition (Spanish)',         category:'Language Acquisition' },
+  { curriculum:'IBMYP', subjectName:'Language Acquisition (Mandarin)',        category:'Language Acquisition' },
+  { curriculum:'IBMYP', subjectName:'Individuals and Societies',              category:'Individuals and Societies' },
+  { curriculum:'IBMYP', subjectName:'Sciences',                               category:'Sciences' },
+  { curriculum:'IBMYP', subjectName:'Design',                                 category:'Technology' },
+  { curriculum:'IBMYP', subjectName:'Arts (Visual Arts)',                     category:'The Arts' },
+  { curriculum:'IBMYP', subjectName:'Arts (Music)',                           category:'The Arts' },
+  { curriculum:'IBMYP', subjectName:'Arts (Drama)',                           category:'The Arts' },
+  { curriculum:'IBMYP', subjectName:'Physical and Health Education',          category:'Physical and Health Education' },
 
-async function seedSubjects() {
+  // ── IB Primary Years (IBPYP, Grade 1-5) ──────────────────
+  { curriculum:'IBPYP', subjectName:'PYP Language',                   category:'Language and Literature' },
+  { curriculum:'IBPYP', subjectName:'PYP Mathematics',                category:'Mathematics' },
+  { curriculum:'IBPYP', subjectName:'PYP Science',                    category:'Sciences' },
+  { curriculum:'IBPYP', subjectName:'PYP Social Studies',             category:'Individuals and Societies' },
+  { curriculum:'IBPYP', subjectName:'PYP Arts',                       category:'The Arts' },
+  { curriculum:'IBPYP', subjectName:'PYP Personal, Social & Physical Education', category:'Physical Education' },
+
+  // ── American ─────────────────────────────────────────────
+  { curriculum:'American', subjectName:'Algebra I',                   category:'Mathematics' },
+  { curriculum:'American', subjectName:'Algebra II',                  category:'Mathematics' },
+  { curriculum:'American', subjectName:'Geometry',                    category:'Mathematics' },
+  { curriculum:'American', subjectName:'Pre-Calculus',                category:'Mathematics' },
+  { curriculum:'American', subjectName:'Calculus (AP)',               category:'Mathematics' },
+  { curriculum:'American', subjectName:'Statistics (AP)',             category:'Mathematics' },
+  { curriculum:'American', subjectName:'English Language Arts',       category:'Languages' },
+  { curriculum:'American', subjectName:'AP English Language',         category:'Languages' },
+  { curriculum:'American', subjectName:'AP English Literature',       category:'Languages' },
+  { curriculum:'American', subjectName:'Biology',                     category:'Sciences' },
+  { curriculum:'American', subjectName:'Chemistry',                   category:'Sciences' },
+  { curriculum:'American', subjectName:'Physics',                     category:'Sciences' },
+  { curriculum:'American', subjectName:'AP Biology',                  category:'Sciences' },
+  { curriculum:'American', subjectName:'AP Chemistry',                category:'Sciences' },
+  { curriculum:'American', subjectName:'AP Physics',                  category:'Sciences' },
+  { curriculum:'American', subjectName:'US History',                  category:'Humanities' },
+  { curriculum:'American', subjectName:'World History',               category:'Humanities' },
+  { curriculum:'American', subjectName:'AP World History',            category:'Humanities' },
+  { curriculum:'American', subjectName:'AP US History',               category:'Humanities' },
+  { curriculum:'American', subjectName:'Economics',                   category:'Business' },
+  { curriculum:'American', subjectName:'AP Economics',                category:'Business' },
+  { curriculum:'American', subjectName:'Business',                    category:'Business' },
+  { curriculum:'American', subjectName:'Computer Science',            category:'Technology' },
+  { curriculum:'American', subjectName:'AP Computer Science',         category:'Technology' },
+  { curriculum:'American', subjectName:'Psychology',                  category:'Humanities' },
+  { curriculum:'American', subjectName:'Sociology',                   category:'Humanities' },
+  { curriculum:'American', subjectName:'Art',                         category:'Arts' },
+  { curriculum:'American', subjectName:'Music',                       category:'Arts' },
+  { curriculum:'American', subjectName:'Physical Education',          category:'Physical Education' },
+  { curriculum:'American', subjectName:'Spanish',                     category:'Languages' },
+  { curriculum:'American', subjectName:'French',                      category:'Languages' },
+
+  // ── KenyaCBC ─────────────────────────────────────────────
+  { curriculum:'KenyaCBC', subjectName:'Mathematics',                 category:'Mathematics' },
+  { curriculum:'KenyaCBC', subjectName:'English',                     category:'Languages' },
+  { curriculum:'KenyaCBC', subjectName:'Kiswahili',                   category:'Languages' },
+  { curriculum:'KenyaCBC', subjectName:'Integrated Science',          category:'Sciences' },
+  { curriculum:'KenyaCBC', subjectName:'Biology',                     category:'Sciences' },
+  { curriculum:'KenyaCBC', subjectName:'Chemistry',                   category:'Sciences' },
+  { curriculum:'KenyaCBC', subjectName:'Physics',                     category:'Sciences' },
+  { curriculum:'KenyaCBC', subjectName:'History & Government',        category:'Humanities' },
+  { curriculum:'KenyaCBC', subjectName:'Geography',                   category:'Humanities' },
+  { curriculum:'KenyaCBC', subjectName:'Christian Religious Education', category:'Humanities' },
+  { curriculum:'KenyaCBC', subjectName:'Islamic Religious Education', category:'Humanities' },
+  { curriculum:'KenyaCBC', subjectName:'Business Studies',            category:'Business' },
+  { curriculum:'KenyaCBC', subjectName:'Computer Studies',            category:'Technology' },
+  { curriculum:'KenyaCBC', subjectName:'Agriculture',                 category:'STEM' },
+  { curriculum:'KenyaCBC', subjectName:'Home Science',                category:'Life Skills' },
+  { curriculum:'KenyaCBC', subjectName:'Art & Craft',                 category:'Arts' },
+  { curriculum:'KenyaCBC', subjectName:'Music',                       category:'Arts' },
+  { curriculum:'KenyaCBC', subjectName:'Physical Education',          category:'Physical Education' },
+  { curriculum:'KenyaCBC', subjectName:'Social Studies',              category:'Social Studies' },
+  { curriculum:'KenyaCBC', subjectName:'Creative Arts',               category:'Arts' },
+
+  // ── BNC ──────────────────────────────────────────────────
+  { curriculum:'BNC', subjectName:'Mathematics',                      category:'Core' },
+  { curriculum:'BNC', subjectName:'English',                          category:'English' },
+  { curriculum:'BNC', subjectName:'Science',                          category:'Core' },
+  { curriculum:'BNC', subjectName:'History',                          category:'Humanities' },
+  { curriculum:'BNC', subjectName:'Geography',                        category:'Humanities' },
+  { curriculum:'BNC', subjectName:'Computing',                        category:'Technology' },
+  { curriculum:'BNC', subjectName:'Design & Technology',              category:'Design' },
+  { curriculum:'BNC', subjectName:'Art & Design',                     category:'Arts' },
+  { curriculum:'BNC', subjectName:'Music',                            category:'Arts' },
+  { curriculum:'BNC', subjectName:'Drama',                            category:'Arts' },
+  { curriculum:'BNC', subjectName:'Physical Education',               category:'Physical Education' },
+  { curriculum:'BNC', subjectName:'Religious Education',              category:'Humanities' },
+  { curriculum:'BNC', subjectName:'PSHE',                             category:'Life Skills' },
+  { curriculum:'BNC', subjectName:'Modern Foreign Languages',         category:'Languages' },
+  { curriculum:'BNC', subjectName:'French',                           category:'Languages' },
+  { curriculum:'BNC', subjectName:'Spanish',                          category:'Languages' },
+
+  // ── AQALowerSec ──────────────────────────────────────────
+  { curriculum:'AQALowerSec', subjectName:'Mathematics',              category:'Mathematics' },
+  { curriculum:'AQALowerSec', subjectName:'English',                  category:'Languages' },
+  { curriculum:'AQALowerSec', subjectName:'Science',                  category:'Sciences' },
+  { curriculum:'AQALowerSec', subjectName:'History',                  category:'Humanities' },
+  { curriculum:'AQALowerSec', subjectName:'Geography',                category:'Humanities' },
+  { curriculum:'AQALowerSec', subjectName:'Computing',                category:'Technology' },
+  { curriculum:'AQALowerSec', subjectName:'Art & Design',             category:'Arts' },
+  { curriculum:'AQALowerSec', subjectName:'Physical Education',       category:'Physical Education' },
+
+  // ── AQAGCSE ──────────────────────────────────────────────
+  { curriculum:'AQAGCSE', subjectName:'Mathematics',                  category:'Mathematics' },
+  { curriculum:'AQAGCSE', subjectName:'Further Mathematics',          category:'Mathematics' },
+  { curriculum:'AQAGCSE', subjectName:'English Language',             category:'Languages' },
+  { curriculum:'AQAGCSE', subjectName:'English Literature',           category:'Languages' },
+  { curriculum:'AQAGCSE', subjectName:'Physics',                      category:'Sciences' },
+  { curriculum:'AQAGCSE', subjectName:'Chemistry',                    category:'Sciences' },
+  { curriculum:'AQAGCSE', subjectName:'Biology',                      category:'Sciences' },
+  { curriculum:'AQAGCSE', subjectName:'Combined Science',             category:'Sciences' },
+  { curriculum:'AQAGCSE', subjectName:'History',                      category:'Humanities' },
+  { curriculum:'AQAGCSE', subjectName:'Geography',                    category:'Humanities' },
+  { curriculum:'AQAGCSE', subjectName:'Economics',                    category:'Business' },
+  { curriculum:'AQAGCSE', subjectName:'Business Studies',             category:'Business' },
+  { curriculum:'AQAGCSE', subjectName:'Accounting',                   category:'Business' },
+  { curriculum:'AQAGCSE', subjectName:'Computer Science',             category:'Technology' },
+  { curriculum:'AQAGCSE', subjectName:'Psychology',                   category:'Humanities' },
+  { curriculum:'AQAGCSE', subjectName:'Sociology',                    category:'Humanities' },
+  { curriculum:'AQAGCSE', subjectName:'Art & Design',                 category:'Arts' },
+  { curriculum:'AQAGCSE', subjectName:'Music',                        category:'Arts' },
+  { curriculum:'AQAGCSE', subjectName:'Drama',                        category:'Arts' },
+  { curriculum:'AQAGCSE', subjectName:'Physical Education',           category:'Physical Education' },
+  { curriculum:'AQAGCSE', subjectName:'Religious Studies',            category:'Humanities' },
+  { curriculum:'AQAGCSE', subjectName:'French',                       category:'Languages' },
+  { curriculum:'AQAGCSE', subjectName:'Spanish',                      category:'Languages' },
+  { curriculum:'AQAGCSE', subjectName:'German',                       category:'Languages' },
+
+  // ── AQAALevel ────────────────────────────────────────────
+  { curriculum:'AQAALevel', subjectName:'Mathematics',                category:'Mathematics' },
+  { curriculum:'AQAALevel', subjectName:'Further Mathematics',        category:'Mathematics' },
+  { curriculum:'AQAALevel', subjectName:'English Language',           category:'Languages' },
+  { curriculum:'AQAALevel', subjectName:'English Literature',         category:'Languages' },
+  { curriculum:'AQAALevel', subjectName:'Physics',                    category:'Sciences' },
+  { curriculum:'AQAALevel', subjectName:'Chemistry',                  category:'Sciences' },
+  { curriculum:'AQAALevel', subjectName:'Biology',                    category:'Sciences' },
+  { curriculum:'AQAALevel', subjectName:'History',                    category:'Humanities' },
+  { curriculum:'AQAALevel', subjectName:'Geography',                  category:'Humanities' },
+  { curriculum:'AQAALevel', subjectName:'Economics',                  category:'Business' },
+  { curriculum:'AQAALevel', subjectName:'Business',                   category:'Business' },
+  { curriculum:'AQAALevel', subjectName:'Computer Science',           category:'Technology' },
+  { curriculum:'AQAALevel', subjectName:'Psychology',                 category:'Humanities' },
+  { curriculum:'AQAALevel', subjectName:'Sociology',                  category:'Humanities' },
+  { curriculum:'AQAALevel', subjectName:'Law',                        category:'Humanities' },
+  { curriculum:'AQAALevel', subjectName:'Politics',                   category:'Humanities' },
+  { curriculum:'AQAALevel', subjectName:'Art & Design',               category:'Arts' },
+  { curriculum:'AQAALevel', subjectName:'Music',                      category:'Arts' },
+  { curriculum:'AQAALevel', subjectName:'Physical Education',         category:'Physical Education' },
+  { curriculum:'AQAALevel', subjectName:'French',                     category:'Languages' },
+  { curriculum:'AQAALevel', subjectName:'Spanish',                    category:'Languages' },
+  { curriculum:'AQAALevel', subjectName:'German',                     category:'Languages' },
+
+  // ── Canadian ─────────────────────────────────────────────
+  { curriculum:'Canadian', subjectName:'Mathematics',                 category:'Mathematics' },
+  { curriculum:'Canadian', subjectName:'English Language Arts',       category:'Languages' },
+  { curriculum:'Canadian', subjectName:'Science',                     category:'Sciences' },
+  { curriculum:'Canadian', subjectName:'Biology',                     category:'Sciences' },
+  { curriculum:'Canadian', subjectName:'Chemistry',                   category:'Sciences' },
+  { curriculum:'Canadian', subjectName:'Physics',                     category:'Sciences' },
+  { curriculum:'Canadian', subjectName:'History',                     category:'Humanities' },
+  { curriculum:'Canadian', subjectName:'Geography',                   category:'Humanities' },
+  { curriculum:'Canadian', subjectName:'Economics',                   category:'Business' },
+  { curriculum:'Canadian', subjectName:'Business',                    category:'Business' },
+  { curriculum:'Canadian', subjectName:'Computer Science',            category:'Technology' },
+  { curriculum:'Canadian', subjectName:'Art',                         category:'Arts' },
+  { curriculum:'Canadian', subjectName:'Music',                       category:'Arts' },
+  { curriculum:'Canadian', subjectName:'Physical Education',          category:'Physical Education' },
+  { curriculum:'Canadian', subjectName:'French',                      category:'Languages' },
+]
+
+// POST /api/seed-subjects
+router.post('/', auth, requireRole('admin','ops_manager'), async (req, res) => {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(MONGO_URI);
-    console.log('✓ Connected to MongoDB');
+    let inserted = 0, skipped = 0, errors = []
 
-    // Clear existing subjects
-    await Subject.deleteMany({});
-    console.log('✓ Cleared existing subjects');
-
-    // Insert subjects
-    const result = await Subject.insertMany(subjectsData);
-    console.log(`✓ Successfully seeded ${result.length} subjects`);
-
-    // Log summary by curriculum
-    const curricula = ['IGCSE', 'A-Level', 'IB Diploma', 'IB MYP', 'Kenya CBC', 'BNC', 'American'];
-    for (const curriculum of curricula) {
-      const count = await Subject.countDocuments({ curriculum });
-      console.log(`  - ${curriculum}: ${count} subjects`);
+    for (const s of ALL_SUBJECTS) {
+      try {
+        await Subject.findOneAndUpdate(
+          { curriculum: s.curriculum, subjectName: s.subjectName },
+          { $set: { category: s.category, isActive: true } },
+          { upsert: true, new: true }
+        )
+        inserted++
+      } catch(e) {
+        if (e.code === 11000) { skipped++; continue }
+        errors.push(`${s.curriculum}/${s.subjectName}: ${e.message}`)
+      }
     }
 
-    await mongoose.connection.close();
-    console.log('✓ Seeding complete - connection closed');
-    process.exit(0);
-  } catch (error) {
-    console.error('✗ Error during seeding:', error.message);
-    process.exit(1);
+    return res.json({
+      success: true,
+      message: `Seeded ${inserted} subjects (${skipped} already existed, ${errors.length} errors).`,
+      data: { inserted, skipped, errors: errors.slice(0, 10) }
+    })
+  } catch(e) {
+    return res.status(500).json({ success: false, message: e.message })
   }
-}
+})
 
-// Run the seed
-seedSubjects();
+// GET /api/seed-subjects/count — check counts per curriculum
+router.get('/count', auth, requireRole('admin','ops_manager'), async (req, res) => {
+  try {
+    const counts = await Subject.aggregate([
+      { $group: { _id: '$curriculum', count: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    ])
+    return res.json({ success: true, data: { counts } })
+  } catch(e) {
+    return res.status(500).json({ success: false, message: e.message })
+  }
+})
 
+module.exports = router
