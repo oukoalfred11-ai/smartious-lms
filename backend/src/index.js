@@ -81,6 +81,8 @@ app.use('/api/liveclasses', require('./routes/liveclasses'));
 // /selftest and /spine and fail with "Invalid question ID".
 app.use('/api/questions', require('./routes/question-bank'));
 app.use('/api/questions', require('./routes/questions'));
+
+app.use('/api/ai-review', require('./routes/ai-review'));
 app.use('/api/homework', require('./routes/homework'));
 app.use('/api/curriculum', require('./routes/curriculum'));
 app.use('/api/exams', require('./routes/exams'));
