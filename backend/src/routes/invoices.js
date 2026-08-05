@@ -14,6 +14,7 @@ const {
   issueInvoice, nextInvoiceNo, signatoryForRole, signatoryOf,
   getTransporter, buildInvoiceEmailHTML,
 } = require('../lib/issueInvoice')
+const { sendReminder, reminderKindFor, runDueReminders, studentIsOnBreak } = require('../lib/invoiceReminders')
 
 // Guarded require: if pdfkit is missing, emails still send without PDF
 // attachments instead of crashing the whole API on boot.
@@ -200,6 +201,133 @@ router.get('/', auth, ALLOWED, async (req, res) => {
 })
 
 // ── GET /api/invoices/:id ──────────────────────────────────
+// ── GET /api/invoices/collections ──────────────────────────
+// Everything the accountant needs to answer "who has not paid?"
+router.get('/collections', auth, ALLOWED, async (req, res) => {
+  try {
+    const scope = ledgerScope(req.user)
+    const now = new Date()
+    const soon = new Date(now.getTime() + 7 * 86400000)
+
+    const open = await Invoice.find({ ...scope, status: { $in: ['sent', 'overdue'] } })
+      .select('invoiceNo billedToName billedToEmail studentName currency totalDue paidAmount dueDate servicePeriodStart servicePeriodEnd status lastReminderAt reminderCount autoRemind studentId')
+      .lean()
+
+    const outstandingOf = i => Number(i.totalDue || 0) - Number(i.paidAmount || 0)
+    const isOverdue = i => i.dueDate && new Date(i.dueDate) < now
+    const isDueSoon = i => {
+      const ref = i.dueDate || i.servicePeriodEnd
+      return ref && new Date(ref) >= now && new Date(ref) <= soon
+    }
+
+    const overdue  = open.filter(isOverdue)
+    const dueSoon  = open.filter(i => !isOverdue(i) && isDueSoon(i))
+    const current  = open.filter(i => !isOverdue(i) && !isDueSoon(i))
+
+    // Aging buckets by days past due — the standard receivables view.
+    const buckets = { '0-7': 0, '8-30': 0, '31-60': 0, '60+': 0 }
+    overdue.forEach(i => {
+      const days = Math.floor((now - new Date(i.dueDate)) / 86400000)
+      const key = days <= 7 ? '0-7' : days <= 30 ? '8-30' : days <= 60 ? '31-60' : '60+'
+      buckets[key] += outstandingOf(i)
+    })
+
+    // Collected this calendar month.
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    const paidThisMonth = await Invoice.find({ ...scope, status: 'paid', paidAt: { $gte: monthStart } })
+      .select('paidAmount totalDue currency').lean()
+
+    const sum = arr => arr.reduce((t, i) => t + outstandingOf(i), 0)
+    const collected = paidThisMonth.reduce((t, i) => t + Number(i.paidAmount || i.totalDue || 0), 0)
+
+    // Outstanding split by currency so mixed-currency totals are honest.
+    const byCurrency = {}
+    open.forEach(i => {
+      const c = i.currency || 'USD'
+      byCurrency[c] = (byCurrency[c] || 0) + outstandingOf(i)
+    })
+
+    return res.json({
+      success: true,
+      data: {
+        counts: { open: open.length, overdue: overdue.length, dueSoon: dueSoon.length, current: current.length },
+        totals: {
+          outstanding: sum(open),
+          overdue:     sum(overdue),
+          dueSoon:     sum(dueSoon),
+          collectedThisMonth: collected,
+        },
+        byCurrency,
+        aging: buckets,
+        // The actual list of unpaid accounts, worst first.
+        unpaid: open
+          .map(i => ({
+            ...i,
+            outstanding: outstandingOf(i),
+            daysPastDue: i.dueDate ? Math.floor((now - new Date(i.dueDate)) / 86400000) : null,
+            bucket: isOverdue(i) ? 'overdue' : isDueSoon(i) ? 'dueSoon' : 'current',
+          }))
+          .sort((a, b) => (b.daysPastDue ?? -9999) - (a.daysPastDue ?? -9999)),
+      },
+    })
+  } catch (e) {
+    console.error('[invoices/collections]', e.message)
+    return res.status(500).json({ success: false, message: e.message })
+  }
+})
+
+// ── GET /api/invoices/reminders ────────────────────────────
+// Flat history of every reminder sent, newest first.
+router.get('/reminders', auth, ALLOWED, async (req, res) => {
+  try {
+    const { limit = 100, invoiceId } = req.query
+    const scope = ledgerScope(req.user)
+    const filter = { ...scope, reminderCount: { $gt: 0 } }
+    if (invoiceId) filter._id = invoiceId
+
+    const invoices = await Invoice.find(filter)
+      .select('invoiceNo billedToName billedToEmail studentName currency totalDue paidAmount status dueDate reminders')
+      .populate('reminders.sentBy', 'firstName lastName role')
+      .lean()
+
+    const rows = []
+    invoices.forEach(inv => {
+      (inv.reminders || []).forEach(r => {
+        rows.push({
+          invoiceId:   inv._id,
+          invoiceNo:   inv.invoiceNo,
+          billedToName: inv.billedToName,
+          studentName: inv.studentName,
+          currency:    inv.currency,
+          totalDue:    inv.totalDue,
+          status:      inv.status,
+          sentAt:      r.sentAt,
+          sentTo:      r.sentTo,
+          kind:        r.kind,
+          automatic:   r.automatic,
+          sentByName:  r.sentBy ? `${r.sentBy.firstName || ''} ${r.sentBy.lastName || ''}`.trim() : (r.automatic ? 'Automatic' : ''),
+        })
+      })
+    })
+    rows.sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt))
+
+    return res.json({ success: true, total: rows.length, reminders: rows.slice(0, parseInt(limit) || 100) })
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message })
+  }
+})
+
+// ── POST /api/invoices/reminders/run ───────────────────────
+// Admin-triggered run of the nightly scan. dryRun=true previews.
+router.post('/reminders/run', auth, requireRole('admin', 'accountant'), async (req, res) => {
+  try {
+    const summary = await runDueReminders({ dryRun: !!req.body?.dryRun })
+    return res.json({ success: true, data: summary })
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message })
+  }
+})
+
 router.get('/:id', auth, ALLOWED, async (req, res) => {
   try {
     const inv = await Invoice.findById(req.params.id).populate('issuedBy','firstName lastName role email').lean()
@@ -213,7 +341,8 @@ router.post('/', auth, ALLOWED, async (req, res) => {
   try {
     const { invoiceNo:provided, issueDate, dueDate, billedToName, billedToAddress, billedToEmail,
       studentName, studentGrade, subject, programmeLabel, lineItems, currency,
-      discount, vatPct, notes, paymentNote, sendEmail } = req.body
+      discount, vatPct, notes, paymentNote, sendEmail,
+      studentId, servicePeriodStart, servicePeriodEnd, autoRemind } = req.body
 
     if (!billedToName?.trim()) return res.status(400).json({ success:false, message:'Billed-to name is required.' })
     if (!lineItems?.length)    return res.status(400).json({ success:false, message:'At least one line item is required.' })
@@ -239,6 +368,10 @@ router.post('/', auth, ALLOWED, async (req, res) => {
       status:'sent', issuedBy:req.user._id,
       issuedByName:  signatoryForRole(req.user.role).name,
       issuedByTitle: signatoryForRole(req.user.role).title,
+      studentId: studentId || null,
+      servicePeriodStart: servicePeriodStart || null,
+      servicePeriodEnd:   servicePeriodEnd || null,
+      autoRemind: autoRemind !== undefined ? !!autoRemind : true,
     })
 
     if (sendEmail && billedToEmail) {
@@ -409,6 +542,50 @@ router.post('/:id/resend', auth, ALLOWED, async (req, res) => {
 })
 
 // ── DELETE /api/invoices/:id ───────────────────────────────
+
+
+// ── POST /api/invoices/:id/remind ──────────────────────────
+// Manual send / send again.
+router.post('/:id/remind', auth, ALLOWED, async (req, res) => {
+  try {
+    const inv = await Invoice.findById(req.params.id)
+    if (!inv) return res.status(404).json({ success: false, message: 'Invoice not found.' })
+    if (inv.status === 'paid')      return res.status(400).json({ success: false, message: 'This invoice is already paid.' })
+    if (inv.status === 'cancelled') return res.status(400).json({ success: false, message: 'This invoice is cancelled.' })
+
+    // A manual send overrides the break rule, but the caller is told.
+    const onBreak = await studentIsOnBreak(inv)
+    const kind = req.body?.kind || reminderKindFor(inv, new Date()) || 'manual'
+
+    await sendReminder(inv, { kind, sentBy: req.user._id, automatic: false, note: req.body?.note || '' })
+    return res.json({
+      success: true,
+      message: onBreak
+        ? `Reminder sent to ${inv.billedToEmail}. Note: this student is marked as on a break.`
+        : `Reminder sent to ${inv.billedToEmail}.`,
+      data: { invoice: inv, studentOnBreak: onBreak },
+    })
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message })
+  }
+})
+
+// ── PATCH /api/invoices/:id/auto-remind ────────────────────
+router.patch('/:id/auto-remind', auth, ALLOWED, async (req, res) => {
+  try {
+    const inv = await Invoice.findByIdAndUpdate(
+      req.params.id,
+      { autoRemind: !!req.body.autoRemind },
+      { new: true }
+    )
+    if (!inv) return res.status(404).json({ success: false, message: 'Invoice not found.' })
+    return res.json({ success: true, message: inv.autoRemind ? 'Automatic reminders on.' : 'Automatic reminders paused.', data: { invoice: inv } })
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message })
+  }
+})
+
+
 router.delete('/:id', auth, CAN_DELETE, async (req, res) => {
   try {
     const inv = await Invoice.findById(req.params.id).lean()
