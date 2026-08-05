@@ -18,6 +18,7 @@ import ReportsModule from './modules/ReportsModule.jsx'
 import CommunicationModule from './modules/CommunicationModule.jsx'
 import StudentsManagementModule from './modules/AllocationsModule.jsx'
 import QuestionBankModule from './modules/QuestionBankModule.jsx'
+import MarkingReviewModule from './modules/MarkingReviewModule.jsx'
 import { COOReportOverviewModule, TeacherRatingsModule } from './modules/RatingsModule.jsx'
 import PayrollModule from './modules/PayrollModule.jsx'
 import StudentSessionsModule from './modules/StudentSessionsModule.jsx'
@@ -72,7 +73,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Reports',     items: ['reports'] },
       { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
       { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum'] },
-      { label: 'Question Bank', items: ['questionbank'] },
+      { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
       { label: 'System',      items: ['billing', 'website', 'settings', 'ai', 'suggestions'] },
     ],
     accountant: [
@@ -89,7 +90,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Student Sessions', items: ['sessions'] },
       { label: 'Breaks',        items: ['dosbreaks'] },
       { label: 'Timetables',    items: ['dostimetable'] },
-      { label: 'Question Bank', items: ['questionbank'] },
+      { label: 'Question Bank', items: ['questionbank', 'markingreview'] },
       { label: 'Reports',       items: ['reports'] },
       { label: 'System',        items: ['settings'] },
     ],
@@ -362,11 +363,11 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
   const role = auth?.user?.role || 'admin'
   const ROLE_SECTIONS_MAIN = {
     admin:       [
-      { items: ['dashboard','analytics','users','teachers','allocations','sessions','communication','reports','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','questionbank','cooreports','teacherratings','feecollection','crm','billing','website','settings','ai','suggestions'] },
+      { items: ['dashboard','analytics','users','teachers','allocations','sessions','communication','reports','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','questionbank','markingreview','cooreports','teacherratings','feecollection','crm','billing','website','settings','ai','suggestions'] },
     ],
     accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','sessions','payroll','settings'] }],
     sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
-    dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','sessions','dosbreaks','dostimetable','questionbank','reports','settings'] }],
+    dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','sessions','dosbreaks','dostimetable','questionbank','markingreview','reports','settings'] }],
     ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','teacherratings','crm','frontdesk','assessment','documents','leave','programmes','livelessons','grouprooms','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
@@ -419,6 +420,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'livelessons' && <LiveLessonsModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'grouprooms'  && <GroupRoomsModule refreshKey={refreshKey} toast={toast} />}
         {safePage === 'curriculum'  && <CurriculumModule refreshKey={refreshKey} toast={toast} />}
+        {safePage === 'markingreview' && <MarkingReviewModule toast={toast} />}
         {safePage === 'billing'        && <BillingModule       refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'feecollection' && <FeeCollectionModule refreshKey={refreshKey} toast={toast}/>}
         {safePage === 'website'     && <WebsiteModule    refreshKey={refreshKey} toast={toast} />}
