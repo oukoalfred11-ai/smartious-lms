@@ -130,6 +130,7 @@ app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
 // catches up on wake — the 14-day window absorbs that lag.
 const { startReminderScheduler } = require('./lib/reminderScheduler');
 const { startHomeworkCycle } = require('./services/homeworkCycle');
+const { startTimetableConfirm } = require('./services/timetableConfirm');
 const { promoteUpcomingSessions } = require('./services/timetableSync');
 
 const runTimetablePromotion = () => {
@@ -182,6 +183,10 @@ mongoose.connect(MONGODB_URI)
     // Homework must be submitted, marked, reviewed and released before
     // the next lesson. This warns whoever is holding that up.
     startHomeworkCycle();
+
+    // Confirms provisional timetable slots from lessons actually taught,
+    // and keeps each entry's title pointing at the next lesson.
+    startTimetableConfirm();
 
     // Start the timetable promotion job: first run 60s after boot
     // (let the DB settle), then every 24 hours.
