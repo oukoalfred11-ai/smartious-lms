@@ -19,5 +19,11 @@
 /ca-families             /online-school/canada       301
 /homeschooling-kenya     /online-school/kenya        301
 
+# ─── Kenya city URL consolidation ────────────────────────────────
+# Legacy /homeschooling/<slug> city URLs 301 to the canonical
+# /homeschool-<slug> form (matches every other country pattern and
+# the URLs Google has already crawled from the Kenya hub cards).
+/homeschooling/*         /homeschool-:splat          301
+
 # ─── SPA fallback — MUST be last so it doesn't override above ────
 /*                       /index.html                 200
