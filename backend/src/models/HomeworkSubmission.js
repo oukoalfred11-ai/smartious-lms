@@ -92,6 +92,14 @@ const submissionSchema = new mongoose.Schema({
   // ── Timing ──
   startedAt: { type: Date, default: Date.now },
   submittedAt: { type: Date, default: null },
+  // ── Homework cycle tracking ──
+  // Warnings are keyed by homework + lesson occurrence so a scheduler
+  // running every few minutes cannot send the same warning twice.
+  lastWarningKey:    { type: String, default: '' },   // student, not yet submitted
+  lastWarningAt:     { type: Date, default: null },
+  lastBacklogKey:    { type: String, default: '' },   // teacher, not yet released
+  teacherNotifiedAt: { type: Date, default: null },   // teacher, work arrived
+
   gradedAt: { type: Date, default: null },
   releasedAt: { type: Date, default: null },
   isLate: { type: Boolean, default: false },
