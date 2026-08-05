@@ -27,6 +27,17 @@ function InvoicesTab({ toast, refreshKey }) {
   const [paidDate, setPaidDate]     = useState(new Date().toISOString().split('T')[0])
   const [markingPaid, setMarkingPaid] = useState(false)
 
+  // ── COLLECTIONS + REMINDERS ──
+  // invView: 'invoices' | 'unpaid' | 'reminders'
+  const [invView, setInvView]           = useState('invoices')
+  const [collections, setCollections]   = useState(null)
+  const [collLoading, setCollLoading]   = useState(false)
+  const [bucketF, setBucketF]           = useState('all')   // all | overdue | dueSoon | current
+  const [reminders, setReminders]       = useState([])
+  const [remLoading, setRemLoading]     = useState(false)
+  const [sendingId, setSendingId]       = useState(null)
+  const [runningScan, setRunningScan]   = useState(false)
+
   const load = useCallback(() => {
     setLoading(true)
     const params = { page, limit:30 }
@@ -47,6 +58,62 @@ function InvoicesTab({ toast, refreshKey }) {
   useEffect(() => { setPage(1) }, [statusF, search])
 
   const money = (n, cur='USD') => Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ' + cur
+
+  const loadCollections = useCallback(() => {
+    setCollLoading(true)
+    api.get('/invoices/collections')
+      .then(r => setCollections(r.data?.data || null))
+      .catch(() => toast?.error?.('Could not load collections.'))
+      .finally(() => setCollLoading(false))
+  }, [])
+
+  const loadReminders = useCallback(() => {
+    setRemLoading(true)
+    api.get('/invoices/reminders?limit=150')
+      .then(r => setReminders(r.data?.reminders || []))
+      .catch(() => toast?.error?.('Could not load reminder history.'))
+      .finally(() => setRemLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (invView === 'unpaid')    loadCollections()
+    if (invView === 'reminders') loadReminders()
+  }, [invView, loadCollections, loadReminders, refreshKey])
+
+  const sendReminder = async (inv) => {
+    setSendingId(inv._id)
+    try {
+      const { data } = await api.post('/invoices/' + inv._id + '/remind')
+      toast?.success?.(data?.message || 'Reminder sent.')
+      loadCollections()
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not send the reminder.')
+    } finally { setSendingId(null) }
+  }
+
+  const toggleAutoRemind = async (inv) => {
+    try {
+      const { data } = await api.patch('/invoices/' + inv._id + '/auto-remind', { autoRemind: !inv.autoRemind })
+      toast?.success?.(data?.message || 'Updated.')
+      loadCollections()
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Could not update.')
+    }
+  }
+
+  const runReminderScan = async (dryRun) => {
+    setRunningScan(true)
+    try {
+      const { data } = await api.post('/invoices/reminders/run', { dryRun })
+      const d = data?.data || {}
+      toast?.success?.(dryRun
+        ? `Preview: ${d.details?.filter(x => x.action === 'would send').length || 0} reminder(s) would be sent, ${d.skippedOnBreak || 0} skipped (on break).`
+        : `Sent ${d.sent || 0} reminder(s). ${d.skippedOnBreak || 0} skipped because the student is on a break.`)
+      if (!dryRun) { loadCollections(); loadReminders() }
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || 'Scan failed.')
+    } finally { setRunningScan(false) }
+  }
 
   const STATUS_COLOURS = {
     draft:     { bg:'#F3F4F6', fg:'#374151' },
@@ -121,8 +188,205 @@ function InvoicesTab({ toast, refreshKey }) {
   const byCurrency = stats.byCurrency || []
   const statusMap  = stats.statusMap  || {}
 
+  const fmtD = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
+
   return (
     <>
+      {/* ── SUB-NAVIGATION ── */}
+      <div style={{ display:'flex', gap:6, marginBottom:16, borderBottom:'1px solid '+TOKENS.line, flexWrap:'wrap' }}>
+        {[['invoices','All invoices'],['unpaid','Who has not paid'],['reminders','Reminders sent']].map(([k,l]) => (
+          <button key={k} onClick={()=>setInvView(k)}
+            style={{ background:'none', border:'none', borderBottom:'2.5px solid '+(invView===k?TOKENS.crimson:'transparent'),
+                     padding:'9px 14px', fontSize:13.5, fontWeight:invView===k?700:500,
+                     color:invView===k?TOKENS.crimson:TOKENS.s500, cursor:'pointer', marginBottom:-1 }}>
+            {l}
+            {k==='unpaid' && collections?.counts?.overdue > 0 && (
+              <span style={{ marginLeft:6, background:'#FEE2E2', color:'#991B1B', padding:'1px 7px', borderRadius:99, fontSize:10.5, fontWeight:800 }}>
+                {collections.counts.overdue}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* ── WHO HAS NOT PAID ── */}
+      {invView === 'unpaid' && (
+        <>
+          {collLoading && <div style={{ padding:28, textAlign:'center', color:TOKENS.s500, fontSize:13 }}>Loading collections...</div>}
+
+          {!collLoading && collections && (
+            <>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(170px,1fr))', gap:10, marginBottom:16 }}>
+                {[
+                  ['Outstanding',        collections.totals.outstanding,        collections.counts.open,    TOKENS.crimson],
+                  ['Overdue',            collections.totals.overdue,            collections.counts.overdue, '#991B1B'],
+                  ['Due within 7 days',  collections.totals.dueSoon,            collections.counts.dueSoon, '#B45309'],
+                  ['Collected this month',collections.totals.collectedThisMonth, null,                      '#065F46'],
+                ].map(([label, val, count, colour]) => (
+                  <div key={label} className="card" style={{ padding:'14px 16px' }}>
+                    <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4 }}>{label}</div>
+                    <div style={{ fontSize:19, fontWeight:800, color:colour }}>
+                      {Number(val||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+                    </div>
+                    {count !== null && <div style={{ fontSize:11, color:TOKENS.s500, marginTop:2 }}>{count} invoice{count!==1?'s':''}</div>}
+                  </div>
+                ))}
+              </div>
+
+              {/* Aging */}
+              {collections.totals.overdue > 0 && (
+                <div className="card" style={{ padding:'14px 18px', marginBottom:16 }}>
+                  <div style={{ fontSize:11, fontWeight:700, color:TOKENS.s500, textTransform:'uppercase', letterSpacing:'.06em', marginBottom:10 }}>Overdue by age</div>
+                  <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
+                    {Object.entries(collections.aging).map(([bucket, amt]) => (
+                      <div key={bucket} style={{ flex:'1 1 120px', background: amt>0 ? '#FEF2F2' : TOKENS.bg, border:'1px solid '+(amt>0?'#FCA5A5':TOKENS.line), borderRadius:8, padding:'10px 12px' }}>
+                        <div style={{ fontSize:10.5, color:TOKENS.s500, fontWeight:700 }}>{bucket} days</div>
+                        <div style={{ fontSize:15, fontWeight:800, color: amt>0 ? '#991B1B' : TOKENS.s400 }}>
+                          {Number(amt).toLocaleString('en-US',{maximumFractionDigits:0})}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Filters + scan */}
+              <div style={{ display:'flex', gap:8, marginBottom:12, flexWrap:'wrap', alignItems:'center' }}>
+                {[['all','All unpaid'],['overdue','Overdue'],['dueSoon','Due soon'],['current','Current']].map(([k,l])=>(
+                  <button key={k} onClick={()=>setBucketF(k)}
+                    style={{ padding:'6px 13px', borderRadius:99, fontSize:12.5, fontWeight:700, cursor:'pointer',
+                             border:'1.5px solid '+(bucketF===k?TOKENS.crimson:TOKENS.line),
+                             background:bucketF===k?TOKENS.crimson:'#fff', color:bucketF===k?'#fff':TOKENS.s700 }}>{l}</button>
+                ))}
+                <div style={{ marginLeft:'auto', display:'flex', gap:8 }}>
+                  <button onClick={()=>runReminderScan(true)} disabled={runningScan}
+                    style={{ padding:'7px 14px', borderRadius:7, border:'1.5px solid '+TOKENS.line, background:'#fff', color:TOKENS.s700, fontSize:12.5, fontWeight:700, cursor:runningScan?'not-allowed':'pointer' }}>
+                    Preview reminders
+                  </button>
+                  <button onClick={()=>runReminderScan(false)} disabled={runningScan}
+                    style={{ padding:'7px 14px', borderRadius:7, border:'none', background:runningScan?'#C96773':TOKENS.crimson, color:'#fff', fontSize:12.5, fontWeight:700, cursor:runningScan?'not-allowed':'pointer' }}>
+                    {runningScan ? 'Running...' : 'Send due reminders'}
+                  </button>
+                </div>
+              </div>
+
+              {collections.unpaid.filter(i => bucketF==='all' || i.bucket===bucketF).length === 0 ? (
+                <div className="card" style={{ padding:36, textAlign:'center' }}>
+                  <div style={{ fontSize:14, fontWeight:700, color:TOKENS.s900, marginBottom:4 }}>Nothing outstanding here</div>
+                  <div style={{ fontSize:12.5, color:TOKENS.s500 }}>Every invoice in this group has been settled.</div>
+                </div>
+              ) : (
+                <div className="card" style={{ padding:0, overflow:'hidden' }}>
+                  <table style={{ width:'100%', borderCollapse:'collapse' }}>
+                    <thead>
+                      <tr style={{ background:TOKENS.bg }}>
+                        {['Invoice','Parent / Student','Period ends','Due','Outstanding','Reminders',''].map(h=>(
+                          <th key={h} style={{ padding:'10px 14px', textAlign:'left', fontSize:10.5, fontWeight:700, color:TOKENS.s500, textTransform:'uppercase', letterSpacing:'.05em' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {collections.unpaid.filter(i => bucketF==='all' || i.bucket===bucketF).map(inv => (
+                        <tr key={inv._id} style={{ borderTop:'1px solid '+TOKENS.line, background: inv.bucket==='overdue' ? '#FFFBFB' : '#fff' }}>
+                          <td style={{ padding:'11px 14px', fontFamily:'monospace', fontSize:11.5, fontWeight:700, color:TOKENS.crimson }}>
+                            {inv.invoiceNo}
+                            {inv.autoRemind === false && (
+                              <div style={{ fontSize:9.5, color:TOKENS.s400, fontWeight:600 }}>auto paused</div>
+                            )}
+                          </td>
+                          <td style={{ padding:'11px 14px' }}>
+                            <div style={{ fontSize:13, fontWeight:600, color:TOKENS.s900 }}>{inv.billedToName}</div>
+                            <div style={{ fontSize:11, color:TOKENS.s500 }}>{inv.studentName || '—'}</div>
+                          </td>
+                          <td style={{ padding:'11px 14px', fontSize:12, color:TOKENS.s700 }}>{fmtD(inv.servicePeriodEnd)}</td>
+                          <td style={{ padding:'11px 14px', fontSize:12 }}>
+                            <div style={{ color: inv.bucket==='overdue' ? '#991B1B' : TOKENS.s700, fontWeight: inv.bucket==='overdue'?700:400 }}>{fmtD(inv.dueDate)}</div>
+                            {inv.daysPastDue > 0 && <div style={{ fontSize:10.5, color:'#991B1B', fontWeight:700 }}>{inv.daysPastDue} day{inv.daysPastDue!==1?'s':''} late</div>}
+                          </td>
+                          <td style={{ padding:'11px 14px', fontSize:13, fontWeight:700, color:TOKENS.s900, whiteSpace:'nowrap' }}>
+                            {inv.currency} {Number(inv.outstanding).toLocaleString('en-US',{minimumFractionDigits:2})}
+                          </td>
+                          <td style={{ padding:'11px 14px', fontSize:12, color:TOKENS.s600 }}>
+                            {inv.reminderCount || 0}
+                            {inv.lastReminderAt && <div style={{ fontSize:10, color:TOKENS.s400 }}>last {fmtD(inv.lastReminderAt)}</div>}
+                          </td>
+                          <td style={{ padding:'11px 14px' }}>
+                            <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+                              <button onClick={()=>sendReminder(inv)} disabled={sendingId===inv._id}
+                                style={{ fontSize:11, background:TOKENS.crimson, color:'#fff', border:'none', padding:'5px 10px', borderRadius:5, fontWeight:700, cursor:sendingId===inv._id?'not-allowed':'pointer' }}>
+                                {sendingId===inv._id ? 'Sending...' : (inv.reminderCount ? 'Send again' : 'Send reminder')}
+                              </button>
+                              <button onClick={()=>toggleAutoRemind(inv)}
+                                style={{ fontSize:11, background:'#fff', color:TOKENS.s600, border:'1px solid '+TOKENS.line, padding:'5px 10px', borderRadius:5, fontWeight:600, cursor:'pointer' }}>
+                                {inv.autoRemind === false ? 'Resume auto' : 'Pause auto'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
+
+      {/* ── REMINDERS SENT ── */}
+      {invView === 'reminders' && (
+        <>
+          {remLoading && <div style={{ padding:28, textAlign:'center', color:TOKENS.s500, fontSize:13 }}>Loading reminder history...</div>}
+          {!remLoading && reminders.length === 0 && (
+            <div className="card" style={{ padding:36, textAlign:'center' }}>
+              <div style={{ fontSize:14, fontWeight:700, color:TOKENS.s900, marginBottom:4 }}>No reminders sent yet</div>
+              <div style={{ fontSize:12.5, color:TOKENS.s500 }}>
+                Automatic reminders go out three days before each service period ends, unless the student is marked as on a break.
+              </div>
+            </div>
+          )}
+          {!remLoading && reminders.length > 0 && (
+            <div className="card" style={{ padding:0, overflow:'hidden' }}>
+              <table style={{ width:'100%', borderCollapse:'collapse' }}>
+                <thead>
+                  <tr style={{ background:TOKENS.bg }}>
+                    {['Sent','Invoice','Sent to','Type','By','Status'].map(h=>(
+                      <th key={h} style={{ padding:'10px 14px', textAlign:'left', fontSize:10.5, fontWeight:700, color:TOKENS.s500, textTransform:'uppercase', letterSpacing:'.05em' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {reminders.map((r,i) => (
+                    <tr key={i} style={{ borderTop:'1px solid '+TOKENS.line }}>
+                      <td style={{ padding:'10px 14px', fontSize:12, color:TOKENS.s700, whiteSpace:'nowrap' }}>
+                        {new Date(r.sentAt).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+                      </td>
+                      <td style={{ padding:'10px 14px', fontFamily:'monospace', fontSize:11.5, fontWeight:700, color:TOKENS.crimson }}>
+                        {r.invoiceNo}
+                        <div style={{ fontFamily:'inherit', fontSize:11, color:TOKENS.s500, fontWeight:400 }}>{r.billedToName}</div>
+                      </td>
+                      <td style={{ padding:'10px 14px', fontSize:12, color:TOKENS.s600 }}>{r.sentTo}</td>
+                      <td style={{ padding:'10px 14px' }}>
+                        <span style={{ fontSize:10, fontWeight:800, padding:'2px 8px', borderRadius:99, textTransform:'uppercase',
+                          background: r.kind==='overdue' ? '#FEE2E2' : r.kind==='upcoming' ? '#FEF3C7' : TOKENS.s100,
+                          color:      r.kind==='overdue' ? '#991B1B' : r.kind==='upcoming' ? '#92400E' : TOKENS.s600 }}>{r.kind}</span>
+                      </td>
+                      <td style={{ padding:'10px 14px', fontSize:12, color:TOKENS.s600 }}>{r.sentByName || (r.automatic ? 'Automatic' : '—')}</td>
+                      <td style={{ padding:'10px 14px' }}>
+                        <span style={{ fontSize:10.5, fontWeight:700, color: r.status==='paid' ? '#065F46' : '#991B1B' }}>
+                          {r.status === 'paid' ? 'Paid since' : 'Still unpaid'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+
+      {invView === 'invoices' && (<>
       {/* KPI strip */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))', gap:10, marginBottom:20 }}>
         {byCurrency.map(c => (
@@ -238,8 +502,9 @@ function InvoicesTab({ toast, refreshKey }) {
           <button onClick={()=>setPage(p=>Math.min(totalPages,p+1))} disabled={page>=totalPages} style={{ padding:'6px 13px', borderRadius:6, border:'1.5px solid '+TOKENS.line, background:'#fff', fontSize:12, fontWeight:700, cursor:page>=totalPages?'not-allowed':'pointer', opacity:page>=totalPages?.5:1 }}>›</button>
         </div>
       )}
+      </>)}
 
-      {/* Mark Paid modal */}
+      {/* Modals are shared across all three views */}
       {deleteModal && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
           onClick={() => !deleting && setDeleteModal(null)}>
@@ -795,6 +1060,24 @@ function BillingModule({ refreshKey, toast }) {
   // Revenue derived values
   const totalRevenue   = revSummary?.totalRevenue ?? 0
   const totalConfirmed = revSummary?.totalConfirmed ?? 0
+
+  // Payment-method split computed from the confirmed payments actually
+  // loaded, rather than fixed percentages. Returns [label, pct] pairs
+  // sorted largest first.
+  const methodSplit = React.useMemo(() => {
+    const confirmed = (payments || []).filter(p => (p.status || '').toLowerCase() === 'success' || (p.status || '').toLowerCase() === 'confirmed' || (p.status || '').toLowerCase() === 'paid')
+    const pool = confirmed.length ? confirmed : (payments || [])
+    if (!pool.length) return []
+    const counts = {}
+    pool.forEach(p => {
+      const m = (p.method || 'Other').trim() || 'Other'
+      counts[m] = (counts[m] || 0) + 1
+    })
+    const total = pool.length
+    return Object.entries(counts)
+      .map(([label, n]) => [label, Math.round((n / total) * 100)])
+      .sort((a, b) => b[1] - a[1])
+  }, [payments])
   const monthlyAvg     = monthlyRev.length > 0 ? Math.round(monthlyRev.reduce((s, m) => s + m.total, 0) / monthlyRev.length) : 0
   const lastMonthRev   = monthlyRev.length > 0 ? monthlyRev[monthlyRev.length - 1]?.total ?? 0 : 0
 
@@ -965,7 +1248,11 @@ function BillingModule({ refreshKey, toast }) {
         </PCard>
         <PCard accent={TOKENS.accentEmerald}>
           <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: TOKENS.s900, marginBottom: 14, fontWeight: 600 }}>Payment Methods</h3>
-          {[['M-Pesa', 67], ['Bank Transfer', 21], ['Card (Paystack)', 9], ['Other', 3]].map(([label, pct]) => (
+          {methodSplit.length === 0 ? (
+            <div style={{ fontSize: 13, color: TOKENS.s500, padding: '12px 0' }}>
+              No confirmed payments yet, so there is nothing to break down.
+            </div>
+          ) : methodSplit.map(([label, pct]) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid ' + TOKENS.s100 }}>
               <span style={{ fontSize: 13, color: TOKENS.s700, flex: 1 }}>{label}</span>
               <div style={{ flex: 2, height: 6, background: TOKENS.s100, borderRadius: 99 }}>
