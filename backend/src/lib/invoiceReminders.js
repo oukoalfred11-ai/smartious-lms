@@ -16,6 +16,7 @@
 const Invoice = require('../models/Invoice')
 const User = require('../models/User')
 const { getTransporter } = require('./issueInvoice')
+const { resolveStudentRecipients } = require('./recipients')
 
 // Reminder sent this many days before the service period ends.
 const DAYS_BEFORE_PERIOD_END = 3
@@ -36,7 +37,6 @@ function reminderKindFor(invoice, now = new Date()) {
   if (!invoice) return null
   if (invoice.status === 'paid' || invoice.status === 'cancelled' || invoice.status === 'draft') return null
   if (invoice.autoRemind === false) return null
-  if (!invoice.billedToEmail) return null
 
   // Respect the minimum gap between automatic reminders.
   if (invoice.lastReminderAt && daysBetween(invoice.lastReminderAt, now) < MIN_DAYS_BETWEEN_REMINDERS) return null
@@ -235,25 +235,57 @@ function buildReminderText(inv, kind) {
  * Send one reminder and record it on the invoice.
  * Used by both the scheduler and the manual "Send again" button.
  */
-async function sendReminder(invoice, { kind = 'manual', sentBy = null, automatic = false, note = '' } = {}) {
-  if (!invoice.billedToEmail) throw new Error('This invoice has no email address on file.')
+async function resolveInvoiceRecipients(invoice) {
+  const seen = new Map()
+  const add = (email, source) => {
+    const e = String(email || '').trim().toLowerCase()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) return
+    if (!seen.has(e)) seen.set(e, [])
+    if (!seen.get(e).includes(source)) seen.get(e).push(source)
+  }
 
+  // The person the invoice is addressed to is always included.
+  add(invoice.billedToEmail, 'billed to')
+
+  // Plus the student and any linked parents, so a parent attached only
+  // by portal account still receives the reminder.
+  if (invoice.studentId) {
+    try {
+      const r = await resolveStudentRecipients(invoice.studentId, { includeStudent: true })
+      r.to.forEach(e => (r.sources[e] || ['linked']).forEach(src => add(e, src)))
+    } catch (e) {
+      console.error('[reminders] recipient resolution failed:', e.message)
+    }
+  }
+
+  return { to: [...seen.keys()], sources: Object.fromEntries(seen) }
+}
+
+async function sendReminder(invoice, { kind = 'manual', sentBy = null, automatic = false, note = '' } = {}) {
   const t = getTransporter()
   if (!t) throw new Error('Email is not configured on this server.')
+
+  const { to, sources } = await resolveInvoiceRecipients(invoice)
+  if (!to.length) throw new Error('No valid email address for this invoice, its student, or their parents.')
 
   const from = process.env.EMAIL_FROM || 'Smartious Billing <hellosmartious@gmail.com>'
   const subjectPrefix = kind === 'overdue' ? 'Overdue: ' : kind === 'upcoming' ? 'Reminder: ' : ''
 
+  // One message addressed to everyone, so parent and student see the
+  // same thread and either can reply to the school.
   await t.sendMail({
     from,
-    to: invoice.billedToEmail,
+    to: to.join(', '),
     subject: `${subjectPrefix}Invoice ${invoice.invoiceNo} — Smartious Homeschool Global`,
     html: buildReminderHTML(invoice, kind),
     text: buildReminderText(invoice, kind),
   })
 
+  console.log(`[reminders] ${invoice.invoiceNo} (${kind}) -> ` +
+    to.map(e => `${e} [${(sources[e] || []).join(', ')}]`).join('; '))
+
   invoice.reminders.push({
-    sentAt: new Date(), sentTo: invoice.billedToEmail, kind, sentBy, automatic, note,
+    sentAt: new Date(), sentTo: to.join(', '), kind, sentBy, automatic, note,
   })
   invoice.lastReminderAt = new Date()
   invoice.reminderCount  = (invoice.reminderCount || 0) + 1
@@ -283,7 +315,10 @@ async function runDueReminders({ dryRun = false } = {}) {
     const kind = reminderKindFor(inv, now)
     if (!kind) continue
 
-    if (!inv.billedToEmail) { summary.skippedNoEmail++; continue }
+    // An invoice with no billed-to address may still be deliverable via
+    // the student's linked parents, so check properly rather than assume.
+    const { to } = await resolveInvoiceRecipients(inv)
+    if (!to.length) { summary.skippedNoEmail++; continue }
 
     if (await studentIsOnBreak(inv)) {
       summary.skippedOnBreak++
@@ -312,6 +347,7 @@ async function runDueReminders({ dryRun = false } = {}) {
 
 module.exports = {
   reminderKindFor,
+  resolveInvoiceRecipients,
   studentIsOnBreak,
   sendReminder,
   runDueReminders,
