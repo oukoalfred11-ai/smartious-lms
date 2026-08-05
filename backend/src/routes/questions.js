@@ -198,6 +198,21 @@ router.get('/', auth, async (req, res) => {
 // ─────────────────────────────────────────────────────────
 // GET /api/questions/:id
 // ─────────────────────────────────────────────────────────
+// Returns the subject names a teacher may work on, or null for admins
+// (null meaning "no restriction"). Used by both the artwork queue and
+// the upload endpoint so the listing and the action agree.
+async function allowedSubjectsFor(user) {
+  if (user.role !== 'teacher') return null;
+  const User = require('../models/User');
+  const Subject = require('../models/Subject');
+  const me = await User.findById(user._id).select('teachingSpecialties').lean();
+  const specialties = (me && me.teachingSpecialties) || [];
+  const subjectIds = specialties.map(sp => sp.subjectId).filter(Boolean);
+  if (!subjectIds.length) return [];
+  const docs = await Subject.find({ _id: { $in: subjectIds } }).select('name').lean();
+  return [...new Set(docs.map(d => d.name).filter(Boolean))];
+}
+
 // ─────────────────────────────────────────────────────────
 // GET /api/questions/artwork/pending
 // Questions still waiting for their artwork to be produced.
@@ -212,6 +227,61 @@ router.get('/artwork/pending', auth, requireRole('teacher', 'admin'), async (req
     if (grade)      filter.grade      = grade;
     if (kind)       filter['artwork.kind'] = kind;
 
+    // ── Speciality scoping ──────────────────────────────────
+    // A teacher sees only artwork for the subjects and curricula they
+    // are qualified to teach, so a Biology teacher is not asked to
+    // produce a Computer Science circuit diagram. Admins see everything.
+    let scopeNote = null;
+    if (req.user.role === 'teacher') {
+      const User = require('../models/User');
+      const Subject = require('../models/Subject');
+
+      const me = await User.findById(req.user._id).select('teachingSpecialties').lean();
+      const specialties = (me && me.teachingSpecialties) || [];
+
+      if (!specialties.length) {
+        // No specialities recorded: show nothing rather than everything,
+        // so an unconfigured account cannot alter unrelated questions.
+        return res.json({
+          success: true, total: 0, bySubject: {}, questions: [],
+          scopeNote: 'No teaching specialities are set on your account, so no artwork requests are shown. Ask an administrator to add your subjects.',
+        });
+      }
+
+      // Specialities store subjectId, so resolve them to subject names.
+      const subjectIds = specialties.map(sp => sp.subjectId).filter(Boolean);
+      const subjectDocs = subjectIds.length
+        ? await Subject.find({ _id: { $in: subjectIds } }).select('name curriculum').lean()
+        : [];
+
+      const allowedNames = [...new Set(subjectDocs.map(d => d.name).filter(Boolean))];
+      const allowedCurricula = [...new Set(specialties.map(sp => sp.curriculum).filter(Boolean))];
+
+      if (!allowedNames.length) {
+        return res.json({
+          success: true, total: 0, bySubject: {}, questions: [],
+          scopeNote: 'Your teaching specialities could not be matched to any subject. Ask an administrator to check your profile.',
+        });
+      }
+
+      // Match on subject name, and on curriculum where one is recorded.
+      filter.subject = subject && allowedNames.includes(subject)
+        ? subject
+        : { $in: allowedNames };
+
+      if (allowedCurricula.length && !curriculum) {
+        filter.curriculum = { $in: allowedCurricula };
+      } else if (curriculum && !allowedCurricula.includes(curriculum) && allowedCurricula.length) {
+        // Asked for a curriculum they do not teach.
+        return res.json({
+          success: true, total: 0, bySubject: {}, questions: [],
+          scopeNote: 'You do not teach that curriculum, so no requests are shown.',
+        });
+      }
+
+      scopeNote = `Showing artwork for your subjects: ${allowedNames.join(', ')}.`;
+    }
+
     const questions = await Question.find(filter)
       .select('questionText subject curriculum grade topic type difficulty artwork')
       .sort({ subject: 1, grade: 1, createdAt: 1 })
@@ -222,7 +292,7 @@ router.get('/artwork/pending', auth, requireRole('teacher', 'admin'), async (req
     const bySubject = {};
     questions.forEach(q => { bySubject[q.subject] = (bySubject[q.subject] || 0) + 1; });
 
-    return res.json({ success: true, total: questions.length, bySubject, questions });
+    return res.json({ success: true, total: questions.length, bySubject, questions, scopeNote });
   } catch (err) {
     console.error('[questions/artwork/pending]', err.message);
     return res.status(500).json({ success: false, message: err.message });
@@ -246,6 +316,17 @@ router.post('/:id/artwork', auth, requireRole('teacher', 'admin'), async (req, r
       return res.status(404).json({ success: false, message: 'Question not found.' });
     if (!question.artwork || !question.artwork.required)
       return res.status(400).json({ success: false, message: 'This question does not have an artwork request.' });
+
+    // A teacher may only upload artwork for their own subjects. Without
+    // this check the listing would be scoped but the action would not,
+    // and a crafted request could attach an image to any question.
+    const allowed = await allowedSubjectsFor(req.user);
+    if (allowed !== null && !allowed.includes(question.subject)) {
+      return res.status(403).json({
+        success: false,
+        message: `You are not assigned to ${question.subject}, so you cannot upload artwork for this question.`,
+      });
+    }
 
     question.attachments.push(attachment);
     question.artwork.status     = 'uploaded';
