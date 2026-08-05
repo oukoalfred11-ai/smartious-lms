@@ -103,6 +103,24 @@ const questionSchema = new mongoose.Schema({
     trim: true,
     index: true,
   },
+
+  // ── Multi-class visibility ───────────────────────
+  // A question is authored for one grade but may legitimately be set
+  // to others. Kenya 8-4-4 is the driving case: Form 4 sits the whole
+  // syllabus, so it must see Form 1-3 content without duplicating the
+  // record. Empty means "visible to `grade` only".
+  gradeLevels: { type: [String], default: [], index: true },
+
+  // ── Provenance ───────────────────────────────────
+  // Where the question came from, and what it maps to elsewhere, so a
+  // teacher can pull equivalent material across curricula.
+  sourceForm:      { type: String, default: '', trim: true },
+  syllabus:        { type: String, default: '', trim: true },
+  igcseEquivalent: { type: String, default: '', trim: true },
+  // Figures extracted from a source document, stored as filenames.
+  figures:         { type: [String], default: [] },
+  // Set where the source supplied the question but no mark scheme.
+  needsMarkScheme: { type: Boolean, default: false, index: true },
   topic: {
     type: String,
     trim: true,
