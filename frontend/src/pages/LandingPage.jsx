@@ -2541,6 +2541,15 @@ export default function LandingPage() {
           return
         }
       }
+      // Try Kenya city (bare slug like "thika", "mombasa" — hub cards link /homeschool-<slug>)
+      if (slug) {
+        const kenyaCity = KENYA_CITIES.find(c => c.slug === slug)
+        if (kenyaCity) {
+          setCurrentKenyaCity(slug)
+          setPage('kenya-city')
+          return
+        }
+      }
       // Fall back to US state (slug like "texas", "california", "north-carolina")
       if (slug && US_STATES[slug]) {
         setCurrentStateSlug(slug)
@@ -2552,8 +2561,10 @@ export default function LandingPage() {
         setCurrentProvinceSlug(slug)
         setPage('province-landing')
       } else {
-        // Unknown slug — fall back to /us-families
-        setPage('us-families')
+        // Unknown slug — render home. Never fall back to us-families here:
+        // that page forces canonical /online-school/usa, so every stray
+        // /homeschool-* URL became a USA-page duplicate in Google's index.
+        setPage('home')
       }
       return
     }
@@ -3235,7 +3246,7 @@ export default function LandingPage() {
   // openKenyaCity(slug) — navigate to a Kenya city homeschooling page
   const openKenyaCity = (slug) => {
     if (!slug) return
-    nav('/homeschooling/' + encodeURIComponent(slug))
+    nav('/homeschool-' + encodeURIComponent(slug))
     window.scrollTo(0, 0)
     topRef.current?.scrollIntoView()
   }
@@ -14947,11 +14958,11 @@ export default function LandingPage() {
       })()}
       {/* /online-school/south-africa hub */}
 
-      {page === 'sa-city' && currentSACity && (
+      {page === 'sa-city' && currentSaCity && (
         <CountryCityPage
           country={SOUTH_AFRICA_COUNTRY}
           cities={SOUTH_AFRICA_CITIES}
-          currentCitySlug={currentSACity}
+          currentCitySlug={currentSaCity}
           P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
@@ -15921,7 +15932,7 @@ export default function LandingPage() {
               'itemListElement':[
                 {'@type':'ListItem','position':1,'name':'Home','item':'https://smartioushomeschool.com/'},
                 {'@type':'ListItem','position':2,'name':'Homeschooling Kenya','item':'https://smartioushomeschool.com/online-school/kenya'},
-                {'@type':'ListItem','position':3,'name': city.name,'item':'https://smartioushomeschool.com/homeschooling/' + city.slug},
+                {'@type':'ListItem','position':3,'name': city.name,'item':'https://smartioushomeschool.com/homeschool-' + city.slug},
               ],
             })}}/>
             <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
