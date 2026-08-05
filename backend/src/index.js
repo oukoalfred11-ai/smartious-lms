@@ -126,10 +126,10 @@ app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
 // Best-effort daily interval (not a precise cron). On Render's
 // free tier the timer pauses while the instance sleeps and
 // catches up on wake — the 14-day window absorbs that lag.
+const { startReminderScheduler } = require('./lib/reminderScheduler');
 const { promoteUpcomingSessions } = require('./services/timetableSync');
 
 const runTimetablePromotion = () => {
-const { startReminderScheduler } = require('./lib/reminderScheduler');
   promoteUpcomingSessions(14)
     .then(r => console.log('[timetable promotion]', JSON.stringify(r)))
     .catch(e => console.error('[timetable promotion] failed:', e.message));
