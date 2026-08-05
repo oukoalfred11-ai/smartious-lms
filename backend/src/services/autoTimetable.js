@@ -1,47 +1,141 @@
 /**
  * services/autoTimetable.js
+ * ============================================================
+ * Chooses a weekly slot when a student is allocated to a teacher.
  *
- * Smartious school schedule rules:
- *   Full-time / centre students: 09:00–15:00 Mon–Thu lessons, Fri assessment/activities
- *   Tuition students:            slots built from teacher availability
+ * The rule that governs everything here: a CENTRE student is bound by
+ * when the building is open; a TUITION student is not. Tuition is
+ * mostly online, often to families in the UK, UAE, USA and Canada, and
+ * it happens in evenings and at weekends because that is when those
+ * families are free. The previous version applied the centre timetable
+ * to everyone, so no tuition lesson could ever be placed on a Friday
+ * afternoon, a Saturday or a Sunday.
  *
- * Lunch break 13:00–14:00 is ALWAYS blocked.
- * On reallocation: deactivates the old entry for this student+subject first.
+ * What decides a slot, in order:
+ *   1. Slots BOTH the teacher and student have declared free
+ *   2. Slots one declared, where the other declared nothing
+ *   3. A sensible default window for that student type
+ * Anything that clashes for either party is discarded, never used.
+ *
+ * If nothing survives, this returns created:false with a reason. It
+ * does NOT fall back to a fixed slot: the previous version did, which
+ * silently double-booked whenever a timetable filled up.
  */
 
-const FULL_TIME_SLOTS = [
-  { dayOfWeek:'Mon', startTime:'09:00', endTime:'10:00' },
-  { dayOfWeek:'Mon', startTime:'10:00', endTime:'11:00' },
-  { dayOfWeek:'Mon', startTime:'11:00', endTime:'12:00' },
-  { dayOfWeek:'Mon', startTime:'12:00', endTime:'13:00' },
-  { dayOfWeek:'Mon', startTime:'14:00', endTime:'15:00' },
-  { dayOfWeek:'Tue', startTime:'09:00', endTime:'10:00' },
-  { dayOfWeek:'Tue', startTime:'10:00', endTime:'11:00' },
-  { dayOfWeek:'Tue', startTime:'11:00', endTime:'12:00' },
-  { dayOfWeek:'Tue', startTime:'12:00', endTime:'13:00' },
-  { dayOfWeek:'Tue', startTime:'14:00', endTime:'15:00' },
-  { dayOfWeek:'Wed', startTime:'09:00', endTime:'10:00' },
-  { dayOfWeek:'Wed', startTime:'10:00', endTime:'11:00' },
-  { dayOfWeek:'Wed', startTime:'11:00', endTime:'12:00' },
-  { dayOfWeek:'Wed', startTime:'12:00', endTime:'13:00' },
-  { dayOfWeek:'Wed', startTime:'14:00', endTime:'15:00' },
-  { dayOfWeek:'Thu', startTime:'09:00', endTime:'10:00' },
-  { dayOfWeek:'Thu', startTime:'10:00', endTime:'11:00' },
-  { dayOfWeek:'Thu', startTime:'11:00', endTime:'12:00' },
-  { dayOfWeek:'Thu', startTime:'12:00', endTime:'13:00' },
-  { dayOfWeek:'Thu', startTime:'14:00', endTime:'15:00' },
-  { dayOfWeek:'Fri', startTime:'09:00', endTime:'10:00' },  // Friday = assessment/activities
-  { dayOfWeek:'Fri', startTime:'10:00', endTime:'11:00' },
-  { dayOfWeek:'Fri', startTime:'11:00', endTime:'12:00' },
-]
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
-const toMins  = h => { if (!h) return 0; const [hh,mm] = h.split(':').map(Number); return hh*60+mm }
+// ── Centre timetable: when the building is open ──────────────
+const CENTRE_DAYS  = ['Mon','Tue','Wed','Thu','Fri']
+const CENTRE_START = 9 * 60
+const CENTRE_END   = 15 * 60
+const LUNCH_START  = 13 * 60
+const LUNCH_END    = 14 * 60
+
+// ── Tuition window: every day, morning through evening ───────
+// Weekends and evenings are the point. For a family abroad these are
+// frequently the only workable hours, so they are first-class options.
+const TUITION_START         = 7 * 60    // 07:00
+const TUITION_END           = 21 * 60   // last lesson starts 20:00
+const TUITION_WEEKEND_START = 8 * 60
+
+const SLOT_MINS = 60
+
+const toMins = h => { if (!h) return 0; const [a,b] = h.split(':').map(Number); return a*60 + b }
+const toHHMM = m => String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0')
 const overlaps = (s1,e1,s2,e2) => s1 < e2 && e1 > s2
-const isLunch  = (start,end) => overlaps(toMins(start),toMins(end), 780, 840) // 13:00-14:00
+const isWeekend = d => d === 'Sat' || d === 'Sun'
 
-function isFullTime(student) {
-  const prog = (student?.programme || student?.deliveryMode || '').toLowerCase()
-  return /full.?time|centre|in.?person/.test(prog)
+/** Centre students are on site; everyone else is tuition. */
+function isCentreStudent(student) {
+  const s = `${student?.programme || ''} ${student?.deliveryMode || ''}`.toLowerCase()
+  if (/tuition|online|virtual|remote/.test(s)) return false
+  return /full.?time|centre|center|in.?person|on.?site|day.?school/.test(s)
+}
+
+function centreGrid() {
+  const out = []
+  for (const day of CENTRE_DAYS) {
+    for (let t = CENTRE_START; t + SLOT_MINS <= CENTRE_END; t += SLOT_MINS) {
+      if (overlaps(t, t + SLOT_MINS, LUNCH_START, LUNCH_END)) continue
+      out.push({ dayOfWeek: day, startTime: toHHMM(t), endTime: toHHMM(t + SLOT_MINS) })
+    }
+  }
+  return out
+}
+
+/**
+ * All seven days, early morning to evening. No lunch exclusion: a
+ * 13:00 Saturday lesson is normal, and the old lunch block was a
+ * centre rule wrongly applied to everyone.
+ */
+function tuitionGrid() {
+  const out = []
+  for (const day of DAYS) {
+    const start = isWeekend(day) ? TUITION_WEEKEND_START : TUITION_START
+    for (let t = start; t + SLOT_MINS <= TUITION_END; t += SLOT_MINS) {
+      out.push({ dayOfWeek: day, startTime: toHHMM(t), endTime: toHHMM(t + SLOT_MINS) })
+    }
+  }
+  return out
+}
+
+/** Does a declared availability window cover this whole slot? */
+function covered(slot, windows) {
+  if (!windows || !windows.length) return false
+  const s = toMins(slot.startTime), e = toMins(slot.endTime)
+  return windows.some(w => w.dayOfWeek === slot.dayOfWeek
+    && toMins(w.startTime) <= s && toMins(w.endTime) >= e)
+}
+
+const busyIndex = entries => {
+  const idx = {}
+  for (const e of entries) {
+    (idx[e.dayOfWeek] = idx[e.dayOfWeek] || []).push([toMins(e.startTime), toMins(e.endTime)])
+  }
+  return idx
+}
+const clashes = (slot, idx) => (idx[slot.dayOfWeek] || [])
+  .some(([s,e]) => overlaps(toMins(slot.startTime), toMins(slot.endTime), s, e))
+
+/**
+ * Score a slot; higher is better. Exported so the preference order can
+ * be tested without a database.
+ *
+ * Scoring exists because the old version took the first free slot in a
+ * fixed order, so every enrolment tried Monday 09:00 first and
+ * early-week mornings filled while later slots stayed empty.
+ */
+function scoreSlot(slot, ctx) {
+  const { teacherWindows, studentWindows, teacherBusy, studentBusy, centre } = ctx
+  let score = 0
+
+  const tOK = covered(slot, teacherWindows)
+  const sOK = covered(slot, studentWindows)
+  if (tOK && sOK) score += 100
+  else if (tOK || sOK) score += 40
+  else score += 5
+
+  // Keep a teacher's day compact: adjacent to existing teaching beats
+  // stranding an hour in the middle of a gap.
+  const sameDay = teacherBusy[slot.dayOfWeek] || []
+  const s = toMins(slot.startTime), e = toMins(slot.endTime)
+  if (sameDay.some(([bs,be]) => be === s || bs === e)) score += 12
+  else if (sameDay.length) score += 3
+
+  // Spread a student's subjects across the week.
+  score -= (studentBusy[slot.dayOfWeek] || []).length * 8
+
+  if (centre) {
+    if (slot.dayOfWeek === 'Fri') score -= 25      // assessment and activities
+    if (s < 12 * 60) score += 6                    // mornings for concentration
+  } else {
+    if (s >= 16 * 60) score += 10                  // after school
+    if (isWeekend(slot.dayOfWeek)) score += 8      // weekends are wanted, not tolerated
+    // A weekday morning is usually impossible for a student enrolled
+    // elsewhere, unless they have explicitly said otherwise.
+    if (!isWeekend(slot.dayOfWeek) && s < 14 * 60 && !sOK) score -= 30
+  }
+  return score
 }
 
 async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdBy, canBeGrouped = false }) {
@@ -55,128 +149,116 @@ async function autoGenerateTimetable({ teacherId, studentId, subjectId, createdB
       Subject.findById(subjectId).lean(),
       User.findById(studentId).select('firstName lastName curriculum grade gradeLevel programme deliveryMode availability').lean(),
     ])
+    if (!teacher) return { created:false, reason:'Teacher not found.' }
+    if (!subject) return { created:false, reason:'Subject not found.' }
+    if (!student) return { created:false, reason:'Student not found.' }
 
-    if (!teacher) { console.error('[autoTimetable] Teacher not found:', teacherId); return { created:false, reason:'Teacher not found.' } }
-    if (!subject) { console.error('[autoTimetable] Subject not found:', subjectId); return { created:false, reason:'Subject not found.' } }
-    if (!student) { console.error('[autoTimetable] Student not found:', studentId); return { created:false, reason:'Student not found.' } }
+    const centre = isCentreStudent(student)
+    console.log(`[autoTimetable] ${student.firstName} · ${subject.subjectName} · teacher ${teacher.firstName} · ${centre ? 'CENTRE' : 'TUITION'}`)
 
-    console.log('[autoTimetable]', student.firstName, '-', subject.subjectName, '| teacher:', teacher.firstName, '| fullTime:', isFullTime(student))
-
-    // ── Deactivate old entries for this student+subject ────────
-    const oldEntries = await TimetableEntry.find({ assignedStudents:studentId, subject:subject.subjectName, isActive:true })
-    for (const old of oldEntries) {
-      if (old.assignedStudents.length===1) {
-        old.isActive = false; await old.save()
-        console.log('[autoTimetable] Deactivated old entry:', old._id)
-      } else {
-        old.assignedStudents = old.assignedStudents.filter(id=>String(id)!==String(studentId))
-        await old.save()
+    // ── Release any existing entry for this student and subject ──
+    const old = await TimetableEntry.find({ assignedStudents: studentId, subject: subject.subjectName, isActive: true })
+    for (const o of old) {
+      if (o.assignedStudents.length === 1) { o.isActive = false; await o.save() }
+      else {
+        o.assignedStudents = o.assignedStudents.filter(id => String(id) !== String(studentId))
+        await o.save()
       }
     }
 
-    // ── Try joining existing group ──────────────────────────────
+    // ── Join an existing group where allowed ─────────────────────
     if (canBeGrouped) {
-      const existingGroup = await TimetableEntry.findOne({ teacherId, subject:subject.subjectName, isActive:true, canBeGrouped:true })
-      if (existingGroup) {
-        const alreadyIn = existingGroup.assignedStudents.some(id=>String(id)===String(studentId))
-        if (!alreadyIn) {
-          const stEntries = await TimetableEntry.find({ assignedStudents:studentId, isActive:true }).select('dayOfWeek startTime endTime').lean()
-          const clash = stEntries.some(e=>e.dayOfWeek===existingGroup.dayOfWeek && overlaps(toMins(existingGroup.startTime),toMins(existingGroup.endTime),toMins(e.startTime),toMins(e.endTime)))
-          if (!clash && !isLunch(existingGroup.startTime, existingGroup.endTime)) {
-            existingGroup.assignedStudents.push(studentId)
-            existingGroup.title = subject.subjectName+' — Group ('+existingGroup.assignedStudents.length+' students)'
-            await existingGroup.save()
-            console.log('[autoTimetable] Added to existing group', existingGroup._id)
-            return { created:true, grouped:true, entry:existingGroup }
-          }
+      const group = await TimetableEntry.findOne({ teacherId, subject: subject.subjectName, isActive:true, canBeGrouped:true })
+      if (group && !group.assignedStudents.some(id => String(id) === String(studentId))) {
+        const mine = await TimetableEntry.find({ assignedStudents: studentId, isActive: true })
+          .select('dayOfWeek startTime endTime').lean()
+        const clash = mine.some(e => e.dayOfWeek === group.dayOfWeek
+          && overlaps(toMins(group.startTime), toMins(group.endTime), toMins(e.startTime), toMins(e.endTime)))
+        if (!clash) {
+          group.assignedStudents.push(studentId)
+          group.title = `${subject.subjectName} — Group (${group.assignedStudents.length} students)`
+          await group.save()
+          console.log('[autoTimetable] joined group', group._id)
+          return { created:true, grouped:true, entry:group }
         }
       }
     }
 
-    // ── Determine available slots ───────────────────────────────
-    // Full-time students: use school schedule 09:00-15:00 Mon-Thu + Fri assessment
-    // Tuition students:   use teacher availability (their provided timings)
-    const studentFullTime = isFullTime(student)
-    let availability
+    // ── Candidate slots ──────────────────────────────────────────
+    const grid = centre ? centreGrid() : tuitionGrid()
 
-    if (studentFullTime) {
-      // Full-time: school slots, filtered by teacher availability if teacher has set it
-      availability = (teacher.availability && teacher.availability.length > 0)
-        ? teacher.availability.filter(s => FULL_TIME_SLOTS.some(f => f.dayOfWeek===s.dayOfWeek && f.startTime===s.startTime))
-        : FULL_TIME_SLOTS
-      if (availability.length === 0) availability = FULL_TIME_SLOTS
-      console.log('[autoTimetable] Full-time mode — using school schedule slots')
-    } else {
-      // Tuition: use student's provided availability, fall back to teacher availability
-      const studentSlots = student.availability && student.availability.length > 0 ? student.availability : null
-      availability = studentSlots || (teacher.availability && teacher.availability.length > 0 ? teacher.availability : FULL_TIME_SLOTS)
-      console.log('[autoTimetable] Tuition mode — using', studentSlots ? 'student' : teacher.availability?.length > 0 ? 'teacher' : 'default', 'slots')
-    }
-
-    // Remove lunch slots
-    availability = availability.filter(s => !isLunch(s.startTime, s.endTime))
-
-    // ── Find a free slot ────────────────────────────────────────
-    const [teacherEntries, studentEntries] = await Promise.all([
+    const [tEntries, sEntries] = await Promise.all([
       TimetableEntry.find({ teacherId, isActive:true }).select('dayOfWeek startTime endTime').lean(),
-      TimetableEntry.find({ assignedStudents:studentId, isActive:true }).select('dayOfWeek startTime endTime').lean(),
+      TimetableEntry.find({ assignedStudents: studentId, isActive:true }).select('dayOfWeek startTime endTime').lean(),
     ])
+    const teacherBusy = busyIndex(tEntries)
+    const studentBusy = busyIndex(sEntries)
 
-    const teacherBusy = {}; const studentBusy = {}
-    teacherEntries.forEach(e=>{
-      if (!teacherBusy[e.dayOfWeek]) teacherBusy[e.dayOfWeek]=[]
-      teacherBusy[e.dayOfWeek].push([toMins(e.startTime),toMins(e.endTime)])
-    })
-    studentEntries.forEach(e=>{
-      if (!studentBusy[e.dayOfWeek]) studentBusy[e.dayOfWeek]=[]
-      studentBusy[e.dayOfWeek].push([toMins(e.startTime),toMins(e.endTime)])
-    })
-
-    let chosen = null
-    for (const slot of availability) {
-      const ss=toMins(slot.startTime), se=toMins(slot.endTime), d=slot.dayOfWeek
-      const tBusy=(teacherBusy[d]||[]).some(([s,e])=>overlaps(ss,se,s,e))
-      const sBusy=(studentBusy[d]||[]).some(([s,e])=>overlaps(ss,se,s,e))
-      if (!tBusy && !sBusy) { chosen=slot; break }
+    const ctx = {
+      teacherWindows: teacher.availability || [],
+      studentWindows: student.availability || [],
+      teacherBusy, studentBusy, centre,
     }
 
-    if (!chosen) {
-      // All slots busy — use first available school slot as fallback
-      chosen = studentFullTime ? FULL_TIME_SLOTS[0] : availability[0] || FULL_TIME_SLOTS[0]
-      console.log('[autoTimetable] All slots busy — using fallback:', chosen.dayOfWeek, chosen.startTime)
+    const free = grid
+      .filter(slot => !clashes(slot, teacherBusy) && !clashes(slot, studentBusy))
+      .map(slot => ({ slot, score: scoreSlot(slot, ctx) }))
+      .sort((a,b) => b.score - a.score)
+
+    if (!free.length) {
+      // Deliberately no fallback. The old version dropped the lesson on
+      // Monday 09:00 regardless of clashes, double-booking silently.
+      const reason = `No free slot for ${student.firstName} in ${subject.subjectName}. `
+        + (centre
+            ? 'The centre timetable is full for this student or teacher — schedule manually.'
+            : 'Teacher and student have no overlapping free hour — widen their availability.')
+      console.warn('[autoTimetable]', reason)
+      return { created:false, needsManualScheduling:true, reason }
     }
 
-    // ── Create entry ────────────────────────────────────────────
-    const isFri    = chosen.dayOfWeek === 'Fri'
-    const typeNote = isFri ? ' (Assessment/Activities)' : ''
-    const title    = canBeGrouped
-      ? subject.subjectName+' — Group (1 student)'
-      : subject.subjectName+' — '+student.firstName+' '+student.lastName
+    const chosen = free[0].slot
+    const bothDeclared = covered(chosen, ctx.teacherWindows) && covered(chosen, ctx.studentWindows)
 
     const entry = await TimetableEntry.create({
-      title,
-      subject:         subject.subjectName,
-      curriculum:      subject.curriculum || student.curriculum || '',
-      grade:           student.gradeLevel || student.grade || '',
+      title: canBeGrouped
+        ? `${subject.subjectName} — Group (1 student)`
+        : `${subject.subjectName} — ${student.firstName} ${student.lastName}`,
+      subject:    subject.subjectName,
+      curriculum: subject.curriculum || student.curriculum || '',
+      grade:      student.gradeLevel || student.grade || '',
       subjectId,
-      dayOfWeek:       chosen.dayOfWeek,
-      startTime:       chosen.startTime,
-      endTime:         chosen.endTime,
-      deliveryMode:    studentFullTime ? 'in-person' : 'virtual',
+      dayOfWeek:  chosen.dayOfWeek,
+      startTime:  chosen.startTime,
+      endTime:    chosen.endTime,
+      deliveryMode: centre ? 'in-person' : 'virtual',
       teacherId,
       assignedStudents: [studentId],
-      canBeGrouped:    !!canBeGrouped,
-      isActive:        true,
+      canBeGrouped: !!canBeGrouped,
+      isActive: true,
       createdBy,
     })
 
-    console.log('[autoTimetable] Created entry', entry._id, '-', subject.subjectName, chosen.dayOfWeek, chosen.startTime+'-'+chosen.endTime+typeNote)
-    return { created:true, grouped:false, entry, reason:'Timetable entry auto-generated.' }
+    console.log(`[autoTimetable] created ${entry._id} — ${subject.subjectName} ${chosen.dayOfWeek} `
+      + `${chosen.startTime}-${chosen.endTime} (score ${free[0].score}${bothDeclared ? ', both declared free' : ''})`)
 
-  } catch(err) {
-    console.error('[autoTimetable] Error:', err.message, err.stack)
-    return { created:false, reason:'Auto-timetable error: '+err.message }
+    return {
+      created: true, grouped: false, entry,
+      // Where neither party declared the hour, the slot is a reasonable
+      // guess rather than an agreed time. Surfacing that lets the UI
+      // ask someone to confirm it.
+      confident: bothDeclared,
+      alternatives: free.slice(1, 4).map(f => ({ ...f.slot, score: f.score })),
+      reason: bothDeclared
+        ? 'Slot agreed by both teacher and student availability.'
+        : 'Slot chosen without a declared availability match — worth confirming.',
+    }
+  } catch (err) {
+    console.error('[autoTimetable] error:', err.message)
+    return { created:false, reason:'Auto-timetable error: ' + err.message }
   }
 }
 
-module.exports = { autoGenerateTimetable }
+module.exports = {
+  autoGenerateTimetable,
+  scoreSlot, centreGrid, tuitionGrid, isCentreStudent, covered,
+}
