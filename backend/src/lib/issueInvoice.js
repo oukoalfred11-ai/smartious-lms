@@ -143,6 +143,8 @@ async function issueInvoice(opts = {}) {
     studentName, studentGrade, subject, programmeLabel,
     lineItems = [], currency, discount, vatPct, notes, paymentNote,
     issuedBy, issuedByRole, sendEmail = true,
+    // Service period drives the reminder schedule.
+    studentId, servicePeriodStart, servicePeriodEnd, autoRemind,
   } = opts
 
   if (!billedToName || !String(billedToName).trim())
@@ -180,6 +182,10 @@ async function issueInvoice(opts = {}) {
     subtotal, discount: disc, vatPct: vp, vatAmount: vatAmt, totalDue: total,
     notes:       String(notes || '').trim(),
     paymentNote: String(paymentNote || '').trim(),
+    studentId: studentId || null,
+    servicePeriodStart: servicePeriodStart || null,
+    servicePeriodEnd:   servicePeriodEnd || null,
+    autoRemind: autoRemind !== undefined ? !!autoRemind : true,
     status: 'sent',
     issuedBy: issuedBy || null,
     issuedByName:  sig.name,
