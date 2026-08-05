@@ -88,6 +88,30 @@ const timetableEntrySchema = new mongoose.Schema({
   location:    { type: String, default: '', trim: true },
 
   // ── Ownership ───────────────────────────────────
+  // ── Provisional vs confirmed ─────────────────────
+  // The slot chosen at enrolment is a prediction. It becomes the real
+  // subject time only once a lesson has actually been taught: the
+  // first LiveClass that starts adopts its day and time onto this
+  // entry and confirms it. After that the entry stops moving unless
+  // someone edits it deliberately.
+  confirmed:       { type: Boolean, default: false, index: true },
+  confirmedAt:     { type: Date, default: null },
+  confirmedFrom:   { type: mongoose.Schema.Types.ObjectId, ref: 'LiveClass', default: null },
+  // What the slot was before the first lesson corrected it, kept so a
+  // coordinator can see the prediction was wrong and by how much.
+  provisionalSlot: { type: String, default: '' },
+  // True when the auto-scheduler had no declared availability to work
+  // from, so the slot is a reasonable guess rather than an agreement.
+  needsConfirmation: { type: Boolean, default: false, index: true },
+
+  // ── Next lesson ──────────────────────────────────
+  // Set from the syllabus spine as classes are delivered, so the
+  // timetable reads "Physics — Refraction" rather than a student name.
+  nextLessonCode:  { type: String, default: '' },
+  nextLessonName:  { type: String, default: '' },
+  lastLessonName:  { type: String, default: '' },
+  lessonsDelivered:{ type: Number, default: 0 },
+
   teacherId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
