@@ -163,9 +163,12 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const filter = { isActive: true };
-    if (req.query.curriculum) filter.curriculum = req.query.curriculum;
+    if (req.query.curriculum) filter.$and = [...(filter.$and || []),
+      { $or: [{ curriculum: req.query.curriculum }, { curricula: req.query.curriculum }] }];
     if (req.query.subject)    filter.subject    = req.query.subject;
-    if (req.query.grade)      filter.grade      = req.query.grade;
+    // Match the question's own grade or any grade it is shared with.
+    if (req.query.grade) filter.$and = [...(filter.$and || []),
+      { $or: [{ grade: req.query.grade }, { gradeLevels: req.query.grade }] }];
     if (req.query.topic)      filter.topic      = req.query.topic;
     if (req.query.type)       filter.type       = req.query.type;
     if (req.query.createdBy === 'me') {
@@ -223,8 +226,10 @@ router.get('/artwork/pending', auth, requireRole('teacher', 'admin'), async (req
     const { subject, curriculum, grade, kind } = req.query;
     const filter = { 'artwork.required': true, 'artwork.status': 'pending' };
     if (subject)    filter.subject    = subject;
-    if (curriculum) filter.curriculum = curriculum;
-    if (grade)      filter.grade      = grade;
+    if (curriculum) filter.$and = [...(filter.$and || []),
+      { $or: [{ curriculum }, { curricula: curriculum }] }];
+    if (grade) filter.$and = [...(filter.$and || []),
+      { $or: [{ grade }, { gradeLevels: grade }] }];
     if (kind)       filter['artwork.kind'] = kind;
 
     // ── Speciality scoping ──────────────────────────────────
