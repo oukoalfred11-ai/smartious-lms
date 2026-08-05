@@ -4,6 +4,7 @@ import SuggestionBox from '../../components/SuggestionBox.jsx'
 import { useToast, api } from '../../context/ctx.jsx'
 import { useStore } from '../../context/ctx.jsx'
 import Modal from '../../components/ui/Modal.jsx'
+import MathField, { renderMath } from '../../components/ui/MathField.jsx'
 import {
   NestedQuestionEditor,
   NestedQuestionRenderer,
@@ -1562,10 +1563,31 @@ function QuestionBankTab({ user, store, setPage, toast }) {
     ? (catalog.gradesByCurriculum[filterCurriculum] || [])
     : []
  
+  // ── Subjects that actually have a syllabus spine ──
+  // A question written against no spine cannot be placed on a lesson,
+  // found by topic, or fed to auto-homework, so those subjects are
+  // shown as unavailable rather than silently accepting bad data.
+  const [spineSubjects, setSpineSubjects] = useState(null)   // null = still loading
+  useEffect(() => {
+    api.get('/questions/spine-subjects')
+      .then(r => setSpineSubjects(r.data?.data?.subjects || []))
+      .catch(() => setSpineSubjects([]))
+  }, [])
+
+  const subjectHasSpine = (subjectName) => {
+    if (spineSubjects === null) return true       // do not block while loading
+    const row = spineSubjects.find(x => x.subjectName === subjectName)
+    return !!row?.hasSpine
+  }
+
   // Available subjects/grades for the create form
   const formSubjects = form.curriculum
-    ? catalog.subjects.filter(s =>
-        s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(form.curriculum)))
+    ? catalog.subjects
+        .filter(s => s.availableIn === 'all' || (Array.isArray(s.availableIn) && s.availableIn.includes(form.curriculum)))
+        .map(s => ({ ...s, spineLoaded: subjectHasSpine(s.subjectName) }))
+        // Spine-loaded subjects first, so the usable ones are at the top.
+        .sort((a, b) => Number(b.spineLoaded) - Number(a.spineLoaded)
+                     || String(a.subjectName).localeCompare(String(b.subjectName)))
     : []
   const formGrades = form.curriculum
     ? (catalog.gradesByCurriculum[form.curriculum] || [])
@@ -2029,7 +2051,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)' }}>
                 <div style={{ width: 36, height: 36, borderRadius: 8, background: typeMeta.color + '15', color: typeMeta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{typeMeta.letter}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, color: '#0D1220', marginBottom: 4, fontWeight: 500, lineHeight: 1.5 }}>{q.questionText}</div>
+                  <div style={{ fontSize: 14, color: '#0D1220', marginBottom: 4, fontWeight: 500, lineHeight: 1.5 }}>{renderMath(q.questionText)}</div>
                   <div style={{ fontSize: 11.5, color: '#6B7280', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                     <span>{q.curriculum} · {q.subject} {q.grade ? '· ' + q.grade : ''}</span>
                     {q.topic && <span>· {q.topic}</span>}
@@ -2209,7 +2231,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
               <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>{qbTypeMeta[detailQ.type]?.label || 'Question'}</div>
             </div>
             <div style={{ padding: '20px 28px' }}>
-              <div style={{ fontSize: 15, color: '#0D1220', lineHeight: 1.6, marginBottom: 14 }}>{detailQ.questionText}</div>
+              <div style={{ fontSize: 15, color: '#0D1220', lineHeight: 1.6, marginBottom: 14 }}>{renderMath(detailQ.questionText)}</div>
               {detailQ.attachments && detailQ.attachments.length > 0 && (
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--s500)', marginBottom: 6 }}>Attachments</div>
@@ -2332,7 +2354,11 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                   <label className="fl">Subject *</label>
                   <select className="fsel" value={form.subject} onChange={e => setF('subject', e.target.value)} disabled={!form.curriculum}>
                     <option value="">{form.curriculum ? 'Select subject...' : 'Pick curriculum first'}</option>
-                    {formSubjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                    {formSubjects.map(s => (
+                      <option key={s.id} value={s.name} disabled={s.spineLoaded === false}>
+                        {s.name}{s.spineLoaded === false ? '  — syllabus not uploaded' : ''}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="fg">
@@ -2387,7 +2413,13 @@ function QuestionBankTab({ user, store, setPage, toast }) {
  
               <div className="fg">
                 <label className="fl">Question Text *</label>
-                <textarea className="fi" rows={3} value={form.questionText} onChange={e => setF('questionText', e.target.value)} placeholder="Type your question here..." style={{ resize: 'vertical' }}/>
+                <MathField
+                  rows={4}
+                  value={form.questionText}
+                  onChange={v => setF('questionText', v)}
+                  placeholder="Type your question here. Use Insert formula for mathematics, e.g. $x^2 + 3x$"
+                  hint="Mathematics and chemical formulae go between dollar signs so they render correctly and can be marked accurately."
+                />
               </div>
  
               {/* MCQ-specific options */}
