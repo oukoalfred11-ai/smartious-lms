@@ -31,6 +31,7 @@ export const MODULES = {
   curriculum:  { label: 'Curriculum',   accent: TOKENS.gold,        icon: 'curriculum' },
   billing:      { label: 'Billing',          accent: TOKENS.accentEmerald, icon: 'billing' },
   questionbank:   { label: 'Question Bank',   accent: TOKENS.accentAmber,   icon: 'quiz' },
+  markingreview:  { label: 'Marking Review',  accent: TOKENS.accentEmerald, icon: 'quiz' },
   feecollection:  { label: 'Fee Collection',   accent: TOKENS.accentEmerald, icon: 'billing' },
   cooreports:     { label: 'Report Overview',  accent: TOKENS.accentAmber,   icon: 'reports' },
   teacherratings: { label: 'Teacher Ratings',  accent: TOKENS.accentAmber,   icon: 'payroll' },
