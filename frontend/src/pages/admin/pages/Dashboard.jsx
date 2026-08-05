@@ -72,6 +72,7 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Reports',     items: ['reports'] },
       { label: 'Operations',  items: ['frontdesk', 'assessment', 'documents', 'payroll', 'leave', 'programmes'] },
       { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum'] },
+      { label: 'Question Bank', items: ['questionbank'] },
       { label: 'System',      items: ['billing', 'website', 'settings', 'ai', 'suggestions'] },
     ],
     accountant: [
@@ -105,8 +106,8 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
       { label: 'Reports',     items: ['cooreports', 'reports'] },
       { label: 'Performance', items: ['teacherratings'] },
       { label: 'Operations',  items: ['crm', 'frontdesk', 'assessment', 'documents', 'leave', 'programmes'] },
-      { label: 'Teaching',    items: ['livelessons', 'grouprooms', 'curriculum'] },
-      { label: 'Question Bank', items: ['questionbank'] },
+      // Curriculum and Question Bank moved to the Admin Portal.
+      { label: 'Teaching',    items: ['livelessons', 'grouprooms'] },
       { label: 'System',      items: ['settings', 'ai'] },
     ],
   }
@@ -361,12 +362,12 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
   const role = auth?.user?.role || 'admin'
   const ROLE_SECTIONS_MAIN = {
     admin:       [
-      { items: ['dashboard','analytics','users','teachers','allocations', 'sessions','communication','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','questionbank','cooreports','teacherratings','feecollection','crm','billing','website','settings','ai','suggestions'] },
+      { items: ['dashboard','analytics','users','teachers','allocations','sessions','communication','reports','frontdesk','documents','assessment','payroll','leave','programmes','livelessons','grouprooms','curriculum','questionbank','cooreports','teacherratings','feecollection','crm','billing','website','settings','ai','suggestions'] },
     ],
     accountant:  [{ items: ['checkin','dashboard','analytics','feecollection','billing','sessions','payroll','settings'] }],
     sales:       [{ items: ['checkin','dashboard','salesperf','crm','assessment','frontdesk','communication','documents','settings'] }],
     dos:         [{ items: ['checkin','dosanalytics','exams','doshomework','dosattend','sessions','dosbreaks','dostimetable','questionbank','reports','settings'] }],
-    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','teacherratings','questionbank','crm','frontdesk','assessment','documents','leave','programmes','livelessons','grouprooms','curriculum','settings','ai'] }],
+    ops_manager: [{ items: ['checkin','dashboard','analytics','users','teachers','allocations','sessions','communication','cooreports','reports','teacherratings','crm','frontdesk','assessment','documents','leave','programmes','livelessons','grouprooms','settings','ai'] }],
   }
   const allowedPages = (ROLE_SECTIONS_MAIN[role] || ROLE_SECTIONS_MAIN.admin).flatMap(s => s.items)
   const safePage = allowedPages.includes(page) ? page : 'dashboard'
