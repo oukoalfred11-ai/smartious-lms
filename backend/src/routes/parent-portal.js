@@ -16,6 +16,9 @@ const router     = express.Router()
 const nodemailer = require('nodemailer')
 const { auth, requireRole } = require('../middleware/auth')
 const User           = require('../models/User')
+// Resolves the student plus every parent linked by any of the three
+// methods, validating and de-duplicating the addresses.
+const { resolveStudentRecipients, describeRecipients } = require('../lib/recipients')
 const TimetableEntry = require('../models/TimetableEntry')
 const Attendance     = require('../models/Attendance')
 const Invoice        = require('../models/Invoice')
@@ -382,7 +385,7 @@ async function sendClassReminders() {
   // Find timetable entries starting in 30±2 minutes
   const entries = await TimetableEntry.find({ dayOfWeek:dayName, isActive:true })
     .populate('teacherId','firstName lastName')
-    .populate('assignedStudents','firstName lastName parentEmail linkedParents email parentName onBreak')
+    .populate('assignedStudents','firstName lastName parentEmail linkedParents parentId email parentName onBreak')
     .lean()
 
   const upcoming = entries.filter(e => {
@@ -394,28 +397,44 @@ async function sendClassReminders() {
 
   let sent = 0
   for (const entry of upcoming) {
-    for (const student of (entry.assignedStudents||[])) {
-      if (student.onBreak) continue // paused students receive no class reminders
-      // Collect parent emails: parentEmail field + linked parent accounts
-      const parentEmails = new Set()
-      if (student.parentEmail) parentEmails.add(student.parentEmail)
+    // The same student can appear twice on one entry if the timetable was
+    // edited; without this the family would receive the reminder twice.
+    const seenStudents = new Set()
 
-      // Get linked parent account emails
-      if (student.linkedParents?.length) {
-        const parents = await User.find({ _id:{ $in:student.linkedParents } }).select('email').lean()
-        parents.forEach(p => parentEmails.add(p.email))
+    for (const student of (entry.assignedStudents||[])) {
+      if (!student || !student._id) continue
+      if (seenStudents.has(String(student._id))) continue
+      seenStudents.add(String(student._id))
+
+      if (student.onBreak) continue // paused students receive no class reminders
+
+      // Student AND parents. The previous version collected parent
+      // addresses only, and pushed whatever the linked parent records
+      // held straight into the recipient set — including blanks and
+      // undefined values, which is what produced the empty sends.
+      // resolveStudentRecipients validates each address and de-duplicates
+      // case-insensitively before anything is sent.
+      const resolved = await resolveStudentRecipients(student, { includeStudent: true })
+      if (!resolved.to.length) {
+        console.warn(`[class reminder] ${student.firstName} ${student.lastName}: ` +
+                     'no valid email address on file — skipped')
+        continue
       }
 
-      for (const email of parentEmails) {
-        try {
-          await t.sendMail({
-            from:    process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>',
-            to:      email,
-            subject: `Class reminder — ${entry.subject} starts in 30 minutes`,
-            html:    buildClassReminderEmail(student, entry),
-          })
-          sent++
-        } catch(e) { console.error('[class reminder]', email, e.message) }
+      // One message addressed to the family rather than a separate send
+      // per address, so parent and student see the same thread.
+      try {
+        await t.sendMail({
+          from:    process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>',
+          to:      resolved.to.join(', '),
+          subject: `Class reminder — ${entry.subject} starts in 30 minutes`,
+          html:    buildClassReminderEmail(student, entry),
+        })
+        sent++
+        console.log(`[class reminder] ${entry.subject} \u00B7 ${student.firstName} ${student.lastName} ` +
+                    `\u2192 ${describeRecipients(resolved)}`)
+      } catch(e) {
+        console.error('[class reminder]', resolved.to.join(', '), e.message)
       }
     }
   }
@@ -438,8 +457,11 @@ function buildClassReminderEmail(student, entry) {
   <div style="font-size:13px;color:rgba(255,255,255,.65);margin-top:4px;">${student.firstName} ${student.lastName}</div>
 </td></tr>
 <tr><td style="padding:28px 32px;">
-  <p style="font-size:14px;color:#2c2c2c;margin:0 0 20px;line-height:1.65;">
-    This is a reminder that <strong>${student.firstName}</strong>'s ${typeLabel.toLowerCase()} starts in <strong>30 minutes</strong>.
+  <p style="font-size:14px;color:#2c2c2c;margin:0 0 8px;line-height:1.65;">
+    <strong>${student.firstName}</strong>'s ${typeLabel.toLowerCase()} starts in <strong>30 minutes</strong>.
+  </p>
+  <p style="font-size:12px;color:#6B6B6B;margin:0 0 20px;line-height:1.6;">
+    This reminder has been sent to ${student.firstName} and to their parents.
   </p>
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#FDFAF4;border-radius:8px;border:1px solid #E8E2D6;margin-bottom:24px;">
   <tr><td style="padding:16px 20px;">
