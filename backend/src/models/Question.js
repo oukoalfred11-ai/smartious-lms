@@ -111,6 +111,11 @@ const questionSchema = new mongoose.Schema({
   // record. Empty means "visible to `grade` only".
   gradeLevels: { type: [String], default: [], index: true },
 
+  // Additional curricula this question is valid for. A Kenyan 8-4-4
+  // physics question on refraction is equally an IGCSE question, so it
+  // is shared rather than duplicated.
+  curricula: { type: [String], default: [], index: true },
+
   // ── Provenance ───────────────────────────────────
   // Where the question came from, and what it maps to elsewhere, so a
   // teacher can pull equivalent material across curricula.
@@ -121,6 +126,45 @@ const questionSchema = new mongoose.Schema({
   figures:         { type: [String], default: [] },
   // Set where the source supplied the question but no mark scheme.
   needsMarkScheme: { type: Boolean, default: false, index: true },
+
+  // ── Scheme learning ──────────────────────────────
+  // These questions recur for years, so every teacher correction is
+  // kept. Each time the AI marks a question that has no scheme it
+  // records the marking points it assumed; each time a teacher accepts
+  // or overrides that mark, the agreement is counted. Once a question
+  // has been marked enough times with consistent agreement, its
+  // assumed scheme is worth promoting to a real one — after which the
+  // question moves onto the stronger rubric path automatically.
+  schemeLearning: {
+    timesMarked:     { type: Number, default: 0 },     // schemeless markings
+    teacherAgreed:   { type: Number, default: 0 },     // mark accepted unchanged
+    teacherAdjusted: { type: Number, default: 0 },     // mark overridden
+    marksDelta:      { type: Number, default: 0 },     // net over/under-marking by the AI
+    // The most recent marking points the model constructed, and the
+    // teacher's own notes accumulated from reviews.
+    lastAssumedScheme: { type: String, default: '' },
+    teacherNotes:      { type: [String], default: [] },
+    lastMarkedAt:      { type: Date, default: null },
+    // Set true once a teacher promotes the learned scheme.
+    promoted:          { type: Boolean, default: false },
+  },
+
+  // A generated scheme awaiting teacher review. Kept separate from
+  // markScheme so nothing a model writes is ever used to mark a
+  // student until a person has approved it.
+  draftMarkScheme: {
+    modelAnswer:       { type: String, default: '' },
+    points:            { type: [{ text: String, marks: Number, keywords: [String] }], default: [] },
+    acceptableAnswers: { type: [String], default: [] },
+    commonErrors:      { type: [String], default: [] },
+    generatedAt:       { type: Date, default: null },
+    model:             { type: String, default: '' },
+    confidence:        { type: String, default: '' },
+    balanced:          { type: Boolean, default: false },
+    needsFigure:       { type: Boolean, default: false },
+    approved:          { type: Boolean, default: false },
+    approvedBy:        { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  },
   topic: {
     type: String,
     trim: true,
