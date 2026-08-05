@@ -61,6 +61,25 @@ const submissionSchema = new mongoose.Schema({
     // Teacher's annotated version of the student's drawing/upload.
     // Stored as PNG dataURL so the original attachment is never overwritten.
     teacherAnnotation: { type: String, default: '' },
+
+    // ── AI marking suggestion ──
+    // A suggestion only. marksAwarded above stays null until a teacher
+    // accepts or overrides it, so nothing here can reach a student.
+    aiSuggestion: {
+      marksAwarded:  { type: Number, default: null },
+      feedback:      { type: String, default: '' },
+      confidence:    { type: String, enum: ['high','medium','low',''], default: '' },
+      // True when the question had no mark scheme and the model built
+      // its own. Those marks deserve a closer look.
+      schemeless:    { type: Boolean, default: false },
+      assumedScheme: { type: String, default: '' },
+      model:         { type: String, default: '' },
+      markedAt:      { type: Date, default: null },
+      // Set once a teacher has accepted or overridden it, so the same
+      // answer is not counted twice in the learning figures.
+      reviewed:      { type: Boolean, default: false },
+      teacherAgreed: { type: Boolean, default: null },
+    },
   }],
 
   // ── Status ──
