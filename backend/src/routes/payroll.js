@@ -27,6 +27,12 @@ const { auth, requireRole } = require('../middleware/auth')
 const User     = require('../models/User')
 const Payroll  = require('../models/Payroll')
 
+
+// Branded payslip PDF. Guarded: if pdfkit is unavailable the payroll run
+// must still complete and the email still send, just without the attachment.
+let buildPayslipPdfBuffer = null
+try { ({ buildPayslipPdfBuffer } = require('../lib/payslipPdf')) }
+catch (e) { console.error('[payroll] payslip PDF disabled —', e.message) }
 const ACCT  = requireRole('admin', 'accountant', 'ops_manager')
 const DOS   = requireRole('admin', 'dos', 'accountant', 'ops_manager')
 const ok    = (res, data, msg) => res.json({ success:true, data, message:msg })
@@ -277,15 +283,44 @@ router.post('/:id/mark-paid', auth, ACCT, async (req, res) => {
     try {
       const t = getTransporter()
       if (t) {
+        // Attach the branded payslip PDF so the teacher has a document
+        // to file, not just an email body.
+        let attachments = []
+        if (buildPayslipPdfBuffer) {
+          try {
+            const pdf = await buildPayslipPdfBuffer(record)
+            const safeName = String(record.teacherName || 'payslip')
+              .replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
+            const safePeriod = String(record.periodLabel || '')
+              .replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
+            attachments = [{
+              filename: `Payslip-${safeName}-${safePeriod}.pdf`,
+              content: pdf,
+              contentType: 'application/pdf',
+            }]
+          } catch (pe) {
+            console.error('[payroll] payslip PDF failed:', pe.message)
+          }
+        }
+
+        // Finance keeps a copy of every payslip released, as the audit
+        // record that the teacher was actually notified.
+        const financeCopy = process.env.PAYROLL_BCC || process.env.FINANCE_EMAIL || ''
+
         await t.sendMail({
           from:    process.env.EMAIL_FROM || 'Smartious Finance <hellosmartious@gmail.com>',
           to:      record.teacherEmail,
+          bcc:     financeCopy || undefined,
           subject: `Payslip — ${record.periodLabel} — Smartious Homeschool`,
           html:    buildPayslipEmail(record),
+          attachments,
         })
         record.payslipEmailSentAt = new Date()
         await record.save()
         emailSent = true
+        console.log(`[payroll] payslip emailed — ${record.teacherName}, ${record.periodLabel}, ` +
+                    `${attachments.length ? 'PDF attached' : 'no attachment'}` +
+                    `${financeCopy ? ', finance copied' : ''}`)
       }
     } catch(e) { console.error('[payroll email]', e.message) }
 
@@ -341,6 +376,72 @@ router.get('/:id/payslip-html', auth, async (req, res) => {
       return fail(res,403,'Not allowed.')
     return ok(res, { html: buildPayslipHTML(record) })
   } catch(e) { return fail(res,500,e.message) }
+})
+
+// ── GET /api/payroll/:id/payslip-pdf ──────────────────────
+// Download the branded payslip. A teacher may only fetch their own.
+router.get('/:id/payslip-pdf', auth, async (req, res) => {
+  try {
+    if (!buildPayslipPdfBuffer)
+      return fail(res, 503, 'Payslip PDF generation is unavailable on this server.')
+
+    const record = await Payroll.findById(req.params.id).lean()
+    if (!record) return fail(res, 404, 'Not found.')
+    if (req.user.role === 'teacher' && String(record.teacherId) !== String(req.user._id))
+      return fail(res, 403, 'Not allowed.')
+
+    const pdf = await buildPayslipPdfBuffer(record)
+    const safeName = String(record.teacherName || 'payslip')
+      .replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
+    const safePeriod = String(record.periodLabel || '')
+      .replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
+
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition',
+      `attachment; filename="Payslip-${safeName}-${safePeriod}.pdf"`)
+    return res.send(pdf)
+  } catch (e) { return fail(res, 500, e.message) }
+})
+
+// ── POST /api/payroll/:id/resend-payslip ──────────────────
+// Re-send a payslip that was already released, e.g. after a bounce.
+router.post('/:id/resend-payslip', auth, ACCT, async (req, res) => {
+  try {
+    const record = await Payroll.findById(req.params.id)
+    if (!record) return fail(res, 404, 'Not found.')
+    if (record.status !== 'paid')
+      return fail(res, 400, 'This payroll has not been marked as paid yet.')
+    if (!record.teacherEmail)
+      return fail(res, 400, 'No email address on file for this teacher.')
+
+    const t = getTransporter()
+    if (!t) return fail(res, 503, 'Email is not configured on this server.')
+
+    let attachments = []
+    if (buildPayslipPdfBuffer) {
+      try {
+        const pdf = await buildPayslipPdfBuffer(record)
+        const safeName = String(record.teacherName || 'payslip')
+          .replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
+        const safePeriod = String(record.periodLabel || '')
+          .replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')
+        attachments = [{ filename: `Payslip-${safeName}-${safePeriod}.pdf`, content: pdf, contentType: 'application/pdf' }]
+      } catch (pe) { console.error('[payroll] payslip PDF failed:', pe.message) }
+    }
+
+    await t.sendMail({
+      from:    process.env.EMAIL_FROM || 'Smartious Finance <hellosmartious@gmail.com>',
+      to:      record.teacherEmail,
+      bcc:     process.env.PAYROLL_BCC || process.env.FINANCE_EMAIL || undefined,
+      subject: `Payslip — ${record.periodLabel} — Smartious Homeschool`,
+      html:    buildPayslipEmail(record),
+      attachments,
+    })
+    record.payslipEmailSentAt = new Date()
+    await record.save()
+
+    return ok(res, { record }, `Payslip re-sent to ${record.teacherEmail}.`)
+  } catch (e) { return fail(res, 500, e.message) }
 })
 
 // ── DELETE /api/payroll/:id ───────────────────────────────
@@ -428,40 +529,80 @@ table{width:100%}
 }
 
 function buildPayslipEmail(r) {
-  const cur = r.currency||'KES'
+  const cur = { KES:'KSh ', USD:'$', GBP:'\u00A3', EUR:'\u20AC' }[r.currency] || (r.currency + ' ')
+  const m = n => cur + (Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
+  const d = x => x ? new Date(x).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : '\u2014'
+  const gross = (Number(r.basicSalary)||0) + (Number(r.totalApprovedExtras)||0)
+  const firstName = String(r.teacherName||'').trim().split(/\s+/).filter(w => !/^(mr|mrs|ms|miss|dr|prof)\.?$/i.test(w))[0] || ''
+
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#FDFAF4;font-family:sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px">
-<tr><td align="center"><table width="100%" style="max-width:540px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E8E2D6">
-<tr><td style="background:linear-gradient(135deg,#7D1025,#5A0B1B);padding:24px 32px">
-  <div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:6px">Smartious Homeschool Global · Payroll</div>
-  <div style="font-size:20px;font-weight:800;color:#fff">Salary Processed — ${r.periodLabel}</div>
-  <div style="font-size:13px;color:rgba(255,255,255,.65);margin-top:4px">${r.teacherName}</div>
-</td></tr>
-<tr><td style="padding:28px 32px">
-  <p style="font-size:14px;color:#2c2c2c;margin:0 0 20px;line-height:1.65">
-    Dear ${r.teacherName.split(' ')[0]}, your salary for <strong>${r.periodLabel}</strong> has been processed and is on its way to your account.
-  </p>
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FBFAF5;border-radius:8px;border:1px solid #E8E2D6;margin-bottom:24px">
-  <tr><td style="padding:18px 20px">
-    <table width="100%">
-      <tr><td style="font-size:12px;color:#6B6B6B;padding-bottom:8px">Basic salary</td><td style="text-align:right;font-size:13px;color:#1A0F0E;padding-bottom:8px">${money(r.basicSalary,cur)}</td></tr>
-      ${(r.totalApprovedExtras||0)>0?`<tr><td style="font-size:12px;color:#6B6B6B;padding-bottom:8px">Tuition extras</td><td style="text-align:right;font-size:13px;color:#065F46;padding-bottom:8px">+${money(r.totalApprovedExtras,cur)}</td></tr>`:''}
-      ${(r.totalDeductions||0)>0?`<tr><td style="font-size:12px;color:#6B6B6B;padding-bottom:8px">Deductions</td><td style="text-align:right;font-size:13px;color:#991B1B;padding-bottom:8px">(${money(r.totalDeductions,cur)})</td></tr>`:''}
-      <tr style="border-top:1px solid #E8E2D6"><td style="font-size:13px;font-weight:700;color:#7D1025;padding-top:10px">Net pay</td><td style="text-align:right;font-size:20px;font-weight:800;color:#C9A030;padding-top:10px">${money(r.netPay,cur)}</td></tr>
+<body style="margin:0;padding:0;background:#FDFAF4;font-family:Georgia,'Times New Roman',serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;background:#FDFAF4;">
+<tr><td align="center">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,.07);">
+
+  <tr><td style="background:linear-gradient(135deg,#065F46,#044734);padding:26px 32px;">
+    <div style="font-size:10.5px;font-weight:700;color:#F0CC5A;letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px;">Payslip released</div>
+    <div style="font-size:22px;font-weight:800;color:#ffffff;">${r.periodLabel || ''}</div>
+  </td></tr>
+
+  <tr><td style="padding:26px 32px 8px;">
+    <p style="font-size:14.5px;line-height:1.7;color:#2c2c2c;margin:0 0 14px;">Dear ${firstName || r.teacherName || 'colleague'},</p>
+    <p style="font-size:14.5px;line-height:1.7;color:#2c2c2c;margin:0 0 20px;">
+      Your salary for <strong>${r.periodLabel || 'this period'}</strong> has been released. Your payslip is attached to this email as a PDF for your records.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #ECE4D4;border-radius:9px;overflow:hidden;margin-bottom:18px;">
+      <tr><td style="padding:11px 16px;border-bottom:1px solid #F4EEE2;">
+        <span style="font-size:11px;color:#6B6B6B;text-transform:uppercase;letter-spacing:.05em;">Gross pay</span>
+        <span style="float:right;font-size:13.5px;color:#1a1a1a;font-weight:600;">${m(gross)}</span>
+      </td></tr>
+      <tr><td style="padding:11px 16px;border-bottom:1px solid #F4EEE2;">
+        <span style="font-size:11px;color:#6B6B6B;text-transform:uppercase;letter-spacing:.05em;">Deductions</span>
+        <span style="float:right;font-size:13.5px;color:#8B1A2E;font-weight:600;">- ${m(r.totalDeductions)}</span>
+      </td></tr>
+      <tr><td style="padding:14px 16px;background:#F0FDF4;">
+        <span style="font-size:11px;color:#065F46;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Net pay</span>
+        <span style="float:right;font-size:19px;color:#065F46;font-weight:800;">${m(r.netPay)}</span>
+      </td></tr>
     </table>
-  </td></tr></table>
-  <p style="font-size:13px;color:#6B6B6B;margin:0 0 20px;line-height:1.6">
-    Payment method: <strong>${r.paymentMethod||'Bank transfer'}</strong>${r.paymentRef?' · Ref: '+r.paymentRef:''}<br>
-    Log in to your teacher portal to download your full payslip.
-  </p>
-  <a href="https://smartioushomeschool.com/teacher" style="display:block;background:#7D1025;color:#fff;text-align:center;padding:13px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none">
-    Open my teacher portal
-  </a>
-</td></tr>
-<tr><td style="background:#FBFAF5;padding:14px 32px;border-top:1px solid #E8E2D6">
-  <p style="font-size:11px;color:#999;margin:0">© ${new Date().getFullYear()} Smartious Homeschool Global</p>
-</td></tr>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
+      <tr>
+        <td style="font-size:12.5px;color:#6B6B6B;padding:3px 0;">Payment date</td>
+        <td style="font-size:12.5px;color:#1a1a1a;font-weight:600;text-align:right;padding:3px 0;">${d(r.paymentDate)}</td>
+      </tr>
+      <tr>
+        <td style="font-size:12.5px;color:#6B6B6B;padding:3px 0;">Method</td>
+        <td style="font-size:12.5px;color:#1a1a1a;font-weight:600;text-align:right;padding:3px 0;">${r.paymentMethod || '\u2014'}</td>
+      </tr>
+      ${r.paymentRef ? `<tr>
+        <td style="font-size:12.5px;color:#6B6B6B;padding:3px 0;">Reference</td>
+        <td style="font-size:12.5px;color:#1a1a1a;font-weight:600;text-align:right;padding:3px 0;">${r.paymentRef}</td>
+      </tr>` : ''}
+    </table>
+
+    ${r.paymentNote ? `<table width="100%" cellpadding="0" cellspacing="0" style="background:#FBF6EA;border-left:3px solid #8B1A2E;border-radius:4px;margin-bottom:18px;">
+      <tr><td style="padding:11px 15px;"><p style="margin:0;font-size:12.5px;color:#2c2c2c;line-height:1.6;">${r.paymentNote}</p></td></tr>
+    </table>` : ''}
+
+    <p style="font-size:12.5px;line-height:1.65;color:#6B6B6B;margin:0 0 18px;">
+      Depending on your bank, funds may take up to one working day to appear. If any figure looks wrong, reply to this email within 30 days and the finance office will review it with you.
+    </p>
+
+    <p style="font-size:13.5px;line-height:1.65;color:#2c2c2c;margin:0;">
+      Kind regards,<br>
+      <strong style="color:#065F46;font-size:15px;">Innocent Jabuya</strong><br>
+      Head of Finance<br>Smartious Edtech
+    </p>
+  </td></tr>
+
+  <tr><td style="background:#FDFAF4;padding:16px 32px;border-top:1px solid #ECE4D4;">
+    <p style="font-size:11px;color:#999;margin:0;line-height:1.6;">
+      Smartious Homeschool &amp; eSchool &nbsp;\u00B7&nbsp; Diamond Plaza, Parklands &nbsp;\u00B7&nbsp; Karen Hardy, Nairobi<br>
+      This message is confidential and intended only for the named recipient.
+    </p>
+  </td></tr>
 </table></td></tr></table></body></html>`
 }
 
