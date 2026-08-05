@@ -684,6 +684,115 @@ router.delete('/:id/parent', auth, requireRole('admin', 'ops_manager'), async (r
 });
 
 // UPDATE user (admin only) — demo users cannot be deleted or have role/isDemo changed
+// ═══════════════════════════════════════════════════════════
+// AVAILABILITY
+// ═══════════════════════════════════════════════════════════
+// The weekly hours a teacher can teach, or a student can learn. The
+// auto-timetable scores every candidate slot against these, so a
+// timetable built without them is a guess rather than an agreement.
+// The schema field has existed all along but nothing ever wrote to it.
+
+const DAYS_OK = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+/** Validate, sort and merge a submitted availability array. */
+function cleanAvailability(raw) {
+  if (!Array.isArray(raw)) return { error: 'availability must be an array of slots.' };
+  const out = [];
+  for (const s of raw) {
+    if (!s || !DAYS_OK.includes(s.dayOfWeek))
+      return { error: `Invalid day: ${s?.dayOfWeek}. Use Mon to Sun.` };
+    if (!HHMM.test(s.startTime) || !HHMM.test(s.endTime))
+      return { error: `Invalid time on ${s.dayOfWeek}. Use 24-hour HH:MM.` };
+    const toM = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+    if (toM(s.endTime) <= toM(s.startTime))
+      return { error: `On ${s.dayOfWeek}, the end time must be after the start time.` };
+    out.push({ dayOfWeek: s.dayOfWeek, startTime: s.startTime, endTime: s.endTime });
+  }
+  // Merge windows that touch or overlap on the same day, so two
+  // adjacent entries do not look like a gap to the slot matcher.
+  const toM = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+  const merged = [];
+  for (const day of DAYS_OK) {
+    const win = out.filter(w => w.dayOfWeek === day).sort((a,b) => toM(a.startTime) - toM(b.startTime));
+    for (const w of win) {
+      const last = merged[merged.length - 1];
+      if (last && last.dayOfWeek === day && toM(w.startTime) <= toM(last.endTime)) {
+        if (toM(w.endTime) > toM(last.endTime)) last.endTime = w.endTime;
+      } else merged.push({ ...w });
+    }
+  }
+  return { value: merged };
+}
+
+// ── GET /api/users/me/availability ─────────────────────────
+router.get('/me/availability', auth, async (req, res) => {
+  try {
+    const me = await User.findById(req.user._id).select('availability').lean();
+    return res.json({ success: true, data: { availability: me?.availability || [] } });
+  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+});
+
+// ── PATCH /api/users/me/availability ───────────────────────
+// Anyone sets their own. A teacher declaring Saturday mornings is the
+// single most useful thing they can do for scheduling.
+router.patch('/me/availability', auth, async (req, res) => {
+  try {
+    const { error, value } = cleanAvailability(req.body?.availability);
+    if (error) return res.status(400).json({ success: false, message: error });
+
+    await User.findByIdAndUpdate(req.user._id, { availability: value });
+    const hours = value.reduce((t, w) => {
+      const toM = x => { const [h,m] = x.split(':').map(Number); return h*60+m; };
+      return t + (toM(w.endTime) - toM(w.startTime)) / 60;
+    }, 0);
+    return res.json({
+      success: true,
+      data: { availability: value },
+      message: value.length
+        ? `Saved ${value.length} window${value.length === 1 ? '' : 's'}, ${hours} hours a week.`
+        : 'Availability cleared. Scheduling will fall back to default hours.',
+    });
+  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+});
+
+// ── PATCH /api/users/:id/availability ──────────────────────
+// Staff setting it on someone's behalf, typically for a student at
+// enrolment when the parent gives their preferred times over the phone.
+router.patch('/:id/availability', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
+  try {
+    const { error, value } = cleanAvailability(req.body?.availability);
+    if (error) return res.status(400).json({ success: false, message: error });
+
+    const target = await User.findByIdAndUpdate(req.params.id, { availability: value }, { new: true })
+      .select('firstName lastName availability');
+    if (!target) return res.status(404).json({ success: false, message: 'User not found' });
+
+    return res.json({
+      success: true, data: { availability: target.availability },
+      message: `Availability saved for ${target.firstName} ${target.lastName}.`,
+    });
+  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+});
+
+// ── GET /api/users/availability-gaps ───────────────────────
+// Who has not declared any availability. These are the people whose
+// timetable slots are guesses, so this is the list to work through.
+router.get('/availability-gaps', auth, requireRole('admin','ops_manager','dos'), async (req, res) => {
+  try {
+    const { role } = req.query;
+    const filter = { isActive: { $ne: false }, $or: [{ availability: { $size: 0 } }, { availability: { $exists: false } }] };
+    if (role) filter.role = role;
+    const rows = await User.find(filter).select('firstName lastName role grade programme').limit(300).lean();
+    const byRole = {};
+    rows.forEach(r => { byRole[r.role] = (byRole[r.role] || 0) + 1; });
+    return res.json({ success: true, data: { total: rows.length, byRole, users: rows },
+      message: rows.length
+        ? `${rows.length} people have no availability set, so their timetable slots are guesses.`
+        : 'Everyone has declared their availability.' });
+  } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
+});
+
 router.patch('/:id', auth, requireRole('admin','ops_manager'), async (req, res) => {
   try {
     const target = await User.findById(req.params.id);
