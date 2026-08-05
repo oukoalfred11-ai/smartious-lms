@@ -69,7 +69,17 @@ router.post('/upload', auth, upload.single('file'), async (req, res) => {
       return res.status(400).json({ success: false, message: 'No file uploaded.' });
 
     const safeName = req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const key = `questions/${uuidv4()}_${safeName}`;
+
+    // Filed alongside the subject's library material rather than in a
+    // flat questions/ bucket, so everything for a subject lives under
+    // one prefix and can be found, moved or cleared together.
+    // Falls back to the old layout when no subject is supplied.
+    const clean = v => String(v || '').trim().replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '-');
+    const curriculum = clean(req.body?.curriculum);
+    const subjectName = clean(req.body?.subject);
+    const key = (curriculum && subjectName)
+      ? `library/${curriculum}/${subjectName}/artwork/${uuidv4()}_${safeName}`
+      : `questions/${uuidv4()}_${safeName}`;
     await r2.send(new PutObjectCommand({
       Bucket:      process.env.R2_BUCKET_NAME,
       Key:         key,
@@ -104,11 +114,63 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       questionText, options, correctAnswer, explanation,
       marks, difficulty, attachments,
       parts,   // ── NEW: nested parts array (optional)
+      markScheme, lessonCode,
     } = req.body;
 
     // Validation
     if (!curriculum || !subject || !grade) {
       return res.status(400).json({ success: false, message: 'curriculum, subject and grade are required.' });
+    }
+
+    // ── The subject must have a spine ────────────────────────
+    // Enforced here as well as in the editor, because a question filed
+    // against no spine cannot be placed on a lesson, cannot be found
+    // by topic and cannot feed auto-homework.
+    try {
+      const Subject = require('../models/Subject');
+      const SyllabusTopic = require('../models/SyllabusTopic');
+      const subjDoc = await Subject.findOne({ subjectName: subject, curriculum }).select('_id').lean()
+                   || await Subject.findOne({ subjectName: subject }).select('_id').lean();
+      if (!subjDoc) {
+        return res.status(400).json({ success: false, message: `Subject "${subject}" was not found.` });
+      }
+      const spine = await SyllabusTopic.findOne({
+        subjectId: subjDoc._id, isActive: { $ne: false }, 'subtopics.0': { $exists: true },
+      }).select('_id').lean();
+      if (!spine) {
+        return res.status(400).json({
+          success: false,
+          message: `${subject} has no syllabus spine loaded, so questions cannot be filed against it yet. Ask an administrator to upload the spine first.`,
+        });
+      }
+    } catch (e) {
+      console.error('[questions POST] spine check failed:', e.message);
+    }
+
+    // ── A markable question needs a mark scheme ──────────────
+    // MCQs mark themselves. Everything else is marked by a teacher or
+    // by AI, and neither can mark to nothing. Accepted without one
+    // only if explicitly flagged, in which case it is held inactive.
+    const needsScheme = type && type !== 'mcq';
+    const ms = markScheme || {};
+    const hasScheme = !!(ms.modelAnswer
+      || (Array.isArray(ms.points) && ms.points.length)
+      || (Array.isArray(ms.acceptableAnswers) && ms.acceptableAnswers.length));
+    if (needsScheme && !hasScheme && req.body.allowMissingScheme !== true) {
+      return res.status(400).json({
+        success: false,
+        message: 'A model answer or marking points are required so the question can be marked. '
+               + 'Tick "save without a mark scheme" to store it as a draft instead.',
+      });
+    }
+    if (needsScheme && hasScheme && Array.isArray(ms.points) && ms.points.length) {
+      const sum = ms.points.reduce((t, p) => t + (Number(p.marks) || 0), 0);
+      if (Number(marks) > 0 && sum !== Number(marks)) {
+        return res.status(400).json({
+          success: false,
+          message: `The marking points total ${sum} but the question is worth ${marks}. They must match.`,
+        });
+      }
     }
     if (!questionText || !questionText.trim()) {
       return res.status(400).json({ success: false, message: 'questionText is required.' });
@@ -143,6 +205,15 @@ router.post('/', auth, requireRole('teacher', 'admin'), async (req, res) => {
       difficulty:   difficulty || 'medium',
       attachments:  Array.isArray(attachments) ? attachments : [],
       parts:        isNested ? parts : [],
+      markScheme:   hasScheme ? {
+        modelAnswer:       ms.modelAnswer || '',
+        points:            Array.isArray(ms.points) ? ms.points : [],
+        acceptableAnswers: Array.isArray(ms.acceptableAnswers) ? ms.acceptableAnswers : [],
+        commonErrors:      Array.isArray(ms.commonErrors) ? ms.commonErrors : [],
+      } : undefined,
+      needsMarkScheme: needsScheme && !hasScheme,
+      isActive:     !(needsScheme && !hasScheme),
+      lessonCode:   lessonCode || '',
       createdBy:    req.user._id,
     });
 
@@ -215,6 +286,59 @@ async function allowedSubjectsFor(user) {
   const docs = await Subject.find({ _id: { $in: subjectIds } }).select('name').lean();
   return [...new Set(docs.map(d => d.name).filter(Boolean))];
 }
+
+// ─────────────────────────────────────────────────────────
+// GET /api/questions/spine-subjects
+// Subjects whose syllabus spine has been uploaded. A question written
+// against no spine cannot be filed to a lesson, cannot be found by
+// topic and cannot feed auto-homework, so the question editor offers
+// only these and marks the rest unavailable.
+// ─────────────────────────────────────────────────────────
+router.get('/spine-subjects', auth, async (req, res) => {
+  try {
+    const Subject = require('../models/Subject');
+    const SyllabusTopic = require('../models/SyllabusTopic');
+
+    const subjects = await Subject.find({ isActive: { $ne: false } })
+      .select('subjectName curriculum').lean();
+
+    // One aggregate rather than a query per subject.
+    const counts = await SyllabusTopic.aggregate([
+      { $match: { isActive: { $ne: false } } },
+      { $group: { _id: '$subjectId', topics: { $sum: 1 },
+                  subtopics: { $sum: { $size: { $ifNull: ['$subtopics', []] } } } } },
+    ]);
+    const byId = {};
+    counts.forEach(c => { byId[String(c._id)] = c; });
+
+    const rows = subjects.map(s => {
+      const c = byId[String(s._id)] || { topics: 0, subtopics: 0 };
+      return {
+        _id: s._id,
+        subjectName: s.subjectName,
+        curriculum: s.curriculum,
+        topics: c.topics,
+        subtopics: c.subtopics,
+        // A spine with topics but no subtopics cannot place a question
+        // on a lesson, so it does not count as loaded.
+        hasSpine: c.subtopics > 0,
+      };
+    }).sort((a, b) => Number(b.hasSpine) - Number(a.hasSpine)
+                   || a.subjectName.localeCompare(b.subjectName));
+
+    const ready = rows.filter(r => r.hasSpine);
+    return res.json({
+      success: true,
+      data: { total: rows.length, ready: ready.length, subjects: rows },
+      message: ready.length
+        ? `${ready.length} of ${rows.length} subjects have a spine loaded.`
+        : 'No subject has a syllabus spine yet. Upload one before writing questions.',
+    });
+  } catch (e) {
+    console.error('[questions/spine-subjects]', e.message);
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
 
 // ─────────────────────────────────────────────────────────
 // GET /api/questions/artwork/pending
