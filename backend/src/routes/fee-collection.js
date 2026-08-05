@@ -16,6 +16,10 @@ const router       = express.Router()
 const nodemailer   = require('nodemailer')
 const { auth, requireRole } = require('../middleware/auth')
 const User         = require('../models/User')
+// Parents may be attached by free-text email, by parentId, or through
+// linkedParents. This resolves all three so a parent with a portal
+// account but no text entry still receives fee reminders.
+const { resolveStudentRecipients, describeRecipients } = require('../lib/recipients')
 const Invoice      = require('../models/Invoice')
 
 const ALLOWED = requireRole('admin', 'accountant', 'ops_manager')
@@ -172,12 +176,27 @@ router.patch('/:studentId', auth, ALLOWED, async (req, res) => {
 router.post('/:studentId/remind', auth, ALLOWED, async (req, res) => {
   try {
     const student = await User.findById(req.params.studentId)
-      .select('firstName lastName email agreedFee feeCurrency billingDay nextDueDate billingNote parentEmail curriculum gradeLevel')
+      .select('firstName lastName email agreedFee feeCurrency billingDay nextDueDate billingNote parentEmail parentId linkedParents curriculum gradeLevel')
     if (!student) return res.status(404).json({ success: false, message: 'Student not found.' })
 
+    const resolved = await resolveStudentRecipients(student, { includeStudent: true })
+    if (!resolved.to.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'No valid email address on file for this student or their parents. Add a parent email or link a parent account first.',
+      })
+    }
+
     const sent = await sendReminder(student)
-    await User.findByIdAndUpdate(student._id, { $set: { feeReminderSent: new Date() } })
-    return res.json({ success: true, message: `Reminder sent to ${sent} address(es).`, data: { sent } })
+    if (sent > 0) await User.findByIdAndUpdate(student._id, { $set: { feeReminderSent: new Date() } })
+
+    return res.json({
+      success: sent > 0,
+      message: sent > 0
+        ? `Reminder sent to ${sent} address${sent === 1 ? '' : 'es'}: ${resolved.to.join(', ')}`
+        : 'Could not send to any address. Check the mail server configuration.',
+      data: { sent, recipients: resolved.to, sources: resolved.sources },
+    })
   } catch(e) { return res.status(500).json({ success: false, message: e.message }) }
 })
 
@@ -259,18 +278,34 @@ async function sendReminder(student) {
     ? `Fee overdue — ${student.firstName} ${student.lastName} — Smartious`
     : `Fee due ${days <= 1 ? 'tomorrow' : `in ${days} days`} — ${student.firstName} ${student.lastName}`
 
-  const recipients = [student.email, student.parentEmail].filter(Boolean)
-  let sent = 0
-  for (const email of recipients) {
-    try { await t.sendMail({ from: process.env.EMAIL_FROM || 'Smartious Finance <hellosmartious@gmail.com>', to: email, subject, html }); sent++ }
-    catch(e) { console.error('[fees reminder]', email, e.message) }
+  // Gather the student plus every linked parent, however they were attached.
+  const resolved = await resolveStudentRecipients(student, { includeStudent: true })
+  const recipients = resolved.to
+
+  if (!recipients.length) {
+    console.warn(`[fees reminder] ${student.firstName} ${student.lastName}: no valid email addresses on file`)
+    return 0
   }
+
+  let sent = 0
+  const failures = []
+  for (const email of recipients) {
+    try {
+      await t.sendMail({ from: process.env.EMAIL_FROM || 'Smartious Finance <hellosmartious@gmail.com>', to: email, subject, html })
+      sent++
+    } catch(e) {
+      failures.push(email)
+      console.error('[fees reminder]', email, e.message)
+    }
+  }
+  console.log(`[fees reminder] ${student.firstName} ${student.lastName}: ${describeRecipients(resolved)}` +
+    (failures.length ? ` | failed: ${failures.join(', ')}` : ''))
   return sent
 }
 
 async function sendDueReminders() {
   const students = await User.find({ role: 'student', isActive: true, onBreak: false, agreedFee: { $gt: 0 } })
-    .select('firstName lastName email parentEmail agreedFee feeCurrency billingDay nextDueDate feeReminderSent')
+    .select('firstName lastName email parentEmail parentId linkedParents agreedFee feeCurrency billingDay nextDueDate feeReminderSent')
 
   let sent = 0, skipped = 0
   for (const s of students) {
