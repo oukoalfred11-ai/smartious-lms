@@ -129,6 +129,7 @@ app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
 const { promoteUpcomingSessions } = require('./services/timetableSync');
 
 const runTimetablePromotion = () => {
+const { startReminderScheduler } = require('./lib/reminderScheduler');
   promoteUpcomingSessions(14)
     .then(r => console.log('[timetable promotion]', JSON.stringify(r)))
     .catch(e => console.error('[timetable promotion] failed:', e.message));
@@ -170,6 +171,10 @@ mongoose.connect(MONGODB_URI)
     app.listen(PORT, () =>
       console.log(`API running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`)
     );
+
+    // Invoice reminder scheduler: chases unpaid invoices three days
+    // before each service period ends, skipping students on a break.
+    startReminderScheduler();
 
     // Start the timetable promotion job: first run 60s after boot
     // (let the DB settle), then every 24 hours.
