@@ -129,6 +129,7 @@ app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
 // free tier the timer pauses while the instance sleeps and
 // catches up on wake — the 14-day window absorbs that lag.
 const { startReminderScheduler } = require('./lib/reminderScheduler');
+const { startHomeworkCycle } = require('./services/homeworkCycle');
 const { promoteUpcomingSessions } = require('./services/timetableSync');
 
 const runTimetablePromotion = () => {
@@ -177,6 +178,10 @@ mongoose.connect(MONGODB_URI)
     // Invoice reminder scheduler: chases unpaid invoices three days
     // before each service period ends, skipping students on a break.
     startReminderScheduler();
+
+    // Homework must be submitted, marked, reviewed and released before
+    // the next lesson. This warns whoever is holding that up.
+    startHomeworkCycle();
 
     // Start the timetable promotion job: first run 60s after boot
     // (let the DB settle), then every 24 hours.
