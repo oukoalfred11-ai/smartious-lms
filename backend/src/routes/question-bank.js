@@ -12,6 +12,7 @@ const router   = express.Router()
 const { auth, requireRole } = require('../middleware/auth')
 const Question = require('../models/Question')
 
+const ai = require('../services/aiMarking')
 const ok   = (res,data,msg) => res.json({ success:true, data, message:msg||'' })
 const fail = (res,code,msg) => res.status(code).json({ success:false, message:msg })
 
@@ -22,9 +23,17 @@ router.get('/', auth, async (req, res) => {
     const filter = {}
     if (subject)    filter.subject    = new RegExp(subject,'i')
     if (topic)      filter.topic      = new RegExp(topic,'i')
-    if (curriculum) filter.curriculum = curriculum
+    // A question is valid for its own curriculum and for any listed in
+    // curricula. An 8-4-4 physics question on refraction is equally an
+    // IGCSE question, so it is shared rather than duplicated.
+    if (curriculum) filter.$and = [...(filter.$and || []),
+      { $or: [{ curriculum }, { curricula: curriculum }] }]
     if (difficulty) filter.difficulty = difficulty
-    if (grade)      filter.grade      = grade
+    // A question is visible to its own grade, and to any grade listed in
+    // gradeLevels. Kenya 8-4-4 needs this: Form 4 sits the whole syllabus,
+    // so it must see Form 1-3 content without the record being duplicated.
+    if (grade) filter.$and = [...(filter.$and || []),
+      { $or: [{ grade }, { gradeLevels: grade }] }]
     if (type)       filter.type       = type
     if (search)     filter.$or = [
       { questionText: new RegExp(search,'i') },
@@ -49,7 +58,11 @@ router.get('/topics', auth, async (req, res) => {
     const { subject, curriculum } = req.query
     const filter = {}
     if (subject)    filter.subject    = new RegExp(subject,'i')
-    if (curriculum) filter.curriculum = curriculum
+    // A question is valid for its own curriculum and for any listed in
+    // curricula. An 8-4-4 physics question on refraction is equally an
+    // IGCSE question, so it is shared rather than duplicated.
+    if (curriculum) filter.$and = [...(filter.$and || []),
+      { $or: [{ curriculum }, { curricula: curriculum }] }]
     const topics = await Question.distinct('topic', filter)
     return ok(res, { topics: topics.filter(Boolean).sort() })
   } catch(e) { return fail(res,500,e.message) }
@@ -129,7 +142,8 @@ router.post('/shuffle-options', auth, requireRole('admin','ops_manager','dos'), 
     const crypto2 = require('crypto')
     const filter = { type: 'mcq', isActive: { $ne: false } }
     if (req.body?.subject)    filter.subject    = req.body.subject
-    if (req.body?.curriculum) filter.curriculum = req.body.curriculum
+    if (req.body?.curriculum) filter.$and = [...(filter.$and || []),
+      { $or: [{ curriculum: req.body.curriculum }, { curricula: req.body.curriculum }] }]
 
     const before = { A:0, B:0, C:0, D:0 }
     const after  = { A:0, B:0, C:0, D:0 }
@@ -461,6 +475,186 @@ router.get('/homework-debug', auth, requireRole('admin','ops_manager','dos'), as
 // Optional: topic, subtopic (== spine lesson name), lessonCode,
 // curriculum, grade, difficulty, explanation, marks.
 // Duplicates (same subject + questionText) are skipped, not errored.
+// ── POST /api/questions/:id/draft-scheme ───────────────────
+// Draft a mark scheme for one question. Stored as a DRAFT: the
+// question stays inactive until a teacher approves it, so nothing
+// the model writes can reach a student unreviewed.
+router.post('/:id/draft-scheme', auth, requireRole('admin','dos','teacher'), async (req, res) => {
+  try {
+    if (!ai.isEnabled())
+      return fail(res, 503, 'AI marking is off. Set ANTHROPIC_API_KEY and AI_MARKING_ENABLED=true.')
+
+    const r = await ai.generateMarkScheme(req.params.id)
+    if (!r.ok) return fail(res, 400, r.reason)
+
+    const q = await Question.findByIdAndUpdate(req.params.id, {
+      draftMarkScheme: {
+        ...r.scheme,
+        generatedAt: new Date(),
+        model: ai.CONFIG.schemeModel || ai.CONFIG.model,
+        confidence: r.confidence,
+        balanced: r.balanced,
+        needsFigure: r.needsFigure,
+        approved: false,
+      },
+    }, { new: true }).select('questionText marks draftMarkScheme').lean()
+
+    return ok(res, {
+      question: q, balanced: r.balanced,
+      schemeMarks: r.schemeMarks, questionMarks: r.questionMarks,
+      confidence: r.confidence, needsFigure: r.needsFigure,
+    }, r.balanced
+        ? `Draft scheme written (${r.confidence} confidence). Review and approve it.`
+        : `Draft written but its marks total ${r.schemeMarks} against a tariff of ${r.questionMarks}. Fix before approving.`)
+  } catch (e) { return fail(res, 500, e.message) }
+})
+
+// ── POST /api/questions/:id/review-marking ─────────────────
+// A teacher accepts or overrides an AI mark. This is where the system
+// learns: agreement and disagreement are counted, and any note the
+// teacher adds is kept against the question for whoever writes the
+// scheme later.
+router.post('/:id/review-marking', auth, requireRole('admin','dos','teacher'), async (req, res) => {
+  try {
+    const { aiMarks, finalMarks, note } = req.body || {}
+    if (finalMarks === undefined) return fail(res, 400, 'finalMarks is required.')
+
+    const q = await Question.findById(req.params.id)
+    if (!q) return fail(res, 404, 'Question not found.')
+
+    const ai = Number(aiMarks)
+    const final = Number(finalMarks)
+    const agreed = Number.isFinite(ai) && ai === final
+
+    const inc = { 'schemeLearning.timesMarked': 0 }   // already counted at marking time
+    inc[agreed ? 'schemeLearning.teacherAgreed' : 'schemeLearning.teacherAdjusted'] = 1
+    // Positive means the AI marked high, negative means it marked low.
+    if (Number.isFinite(ai)) inc['schemeLearning.marksDelta'] = ai - final
+
+    const update = { $inc: inc }
+    if (note && String(note).trim()) {
+      update.$push = { 'schemeLearning.teacherNotes': String(note).trim().slice(0, 500) }
+    }
+    await Question.updateOne({ _id: q._id }, update)
+
+    const fresh = await Question.findById(q._id).select('schemeLearning marks').lean()
+    const sl = fresh.schemeLearning || {}
+    const reviews = (sl.teacherAgreed || 0) + (sl.teacherAdjusted || 0)
+    const rate = reviews ? Math.round((sl.teacherAgreed || 0) / reviews * 100) : null
+    // Enough evidence, and consistent enough, to be worth promoting.
+    const readyToPromote = reviews >= 5 && rate >= 80 && !sl.promoted
+
+    return ok(res, {
+      agreed, reviews, agreementRate: rate, readyToPromote,
+      averageDelta: reviews ? Number(((sl.marksDelta || 0) / reviews).toFixed(2)) : 0,
+      schemeLearning: sl,
+    }, agreed ? 'Recorded: mark accepted.' : 'Recorded: mark adjusted. The correction is kept against this question.')
+  } catch (e) { return fail(res, 500, e.message) }
+})
+
+// ── GET /api/questions/scheme-candidates ───────────────────
+// Questions marked often enough, and consistently enough, that their
+// learned scheme is worth a teacher's time to promote. Highest
+// traffic first, so effort goes where it pays.
+router.get('/scheme-candidates', auth, requireRole('admin','dos','teacher'), async (req, res) => {
+  try {
+    const { subject, minReviews = 5, minRate = 80, limit = 50 } = req.query
+    const filter = {
+      needsMarkScheme: true,
+      'schemeLearning.promoted': { $ne: true },
+      'schemeLearning.timesMarked': { $gte: 1 },
+    }
+    if (subject) filter.subject = subject
+
+    const rows = await Question.find(filter)
+      .select('questionText marks subject topic subtopic grade schemeLearning artwork')
+      .sort({ 'schemeLearning.timesMarked': -1 }).limit(Math.min(parseInt(limit) || 50, 200)).lean()
+
+    const scored = rows.map(q => {
+      const sl = q.schemeLearning || {}
+      const reviews = (sl.teacherAgreed || 0) + (sl.teacherAdjusted || 0)
+      const rate = reviews ? Math.round((sl.teacherAgreed || 0) / reviews * 100) : null
+      return {
+        ...q, reviews, agreementRate: rate,
+        averageDelta: reviews ? Number(((sl.marksDelta || 0) / reviews).toFixed(2)) : 0,
+        ready: reviews >= Number(minReviews) && rate !== null && rate >= Number(minRate),
+      }
+    })
+    const ready = scored.filter(r => r.ready)
+
+    return ok(res, { total: scored.length, ready: ready.length, questions: scored },
+      ready.length
+        ? `${ready.length} question(s) have a learned scheme worth promoting.`
+        : 'No question has enough marking history yet.')
+  } catch (e) { return fail(res, 500, e.message) }
+})
+
+// ── POST /api/questions/:id/approve-scheme ─────────────────
+// A teacher accepts the draft (optionally edited). This is the only
+// path by which a generated scheme becomes live, and it is what
+// activates the question.
+router.post('/:id/approve-scheme', auth, requireRole('admin','dos','teacher'), async (req, res) => {
+  try {
+    const q = await Question.findById(req.params.id)
+    if (!q) return fail(res, 404, 'Question not found.')
+
+    const edited = req.body.markScheme
+    const draft = q.draftMarkScheme ? (q.draftMarkScheme.toObject?.() || q.draftMarkScheme) : null
+    // A teacher may promote what the AI has been assuming while marking,
+    // which is usually better evidence than a cold draft: it has been
+    // applied to real answers and corrected by a human each time.
+    const learned = (!edited && !draft?.modelAnswer && q.schemeLearning?.lastAssumedScheme)
+      ? { modelAnswer: q.schemeLearning.lastAssumedScheme, points: [], commonErrors: q.schemeLearning.teacherNotes || [] }
+      : null
+    const scheme = edited || (draft?.modelAnswer || draft?.points?.length ? draft : null) || learned
+    if (!scheme) return fail(res, 400, 'Nothing to approve: no draft, and no scheme learned from marking yet.')
+
+    const points = Array.isArray(scheme.points) ? scheme.points : []
+    const sum = points.reduce((t, p) => t + (Number(p.marks) || 0), 0)
+    if (!scheme.modelAnswer && !points.length)
+      return fail(res, 400, 'A scheme needs a model answer or at least one point.')
+    if (points.length && sum !== q.marks)
+      return fail(res, 400, `Scheme marks total ${sum} but the question is worth ${q.marks}.`)
+
+    q.markScheme = {
+      modelAnswer: scheme.modelAnswer || '',
+      points: points.map(p => ({ text: p.text, marks: Number(p.marks) || 1,
+                                 keywords: Array.isArray(p.keywords) ? p.keywords : [] })),
+      acceptableAnswers: Array.isArray(scheme.acceptableAnswers) ? scheme.acceptableAnswers : [],
+      commonErrors: Array.isArray(scheme.commonErrors) ? scheme.commonErrors : [],
+    }
+    q.needsMarkScheme = false
+    if (q.schemeLearning) q.schemeLearning.promoted = true
+    if (q.draftMarkScheme) { q.draftMarkScheme.approved = true; q.draftMarkScheme.approvedBy = req.user._id }
+    // Still held if it is waiting on a diagram.
+    q.isActive = !(q.artwork?.required || q.imageNeeded)
+    await q.save()
+
+    return ok(res, { question: q }, q.isActive
+      ? 'Scheme approved. The question is now active.'
+      : 'Scheme approved. The question stays inactive until its diagram is attached.')
+  } catch (e) { return fail(res, 500, e.message) }
+})
+
+// ── GET /api/questions/scheme-queue ────────────────────────
+// What still needs a mark scheme, worst first.
+router.get('/scheme-queue', auth, requireRole('admin','dos','teacher'), async (req, res) => {
+  try {
+    const { subject, grade, limit = 50 } = req.query
+    const filter = { needsMarkScheme: true, type: { $ne: 'mcq' } }
+    if (subject) filter.subject = subject
+    if (grade) filter.$or = [{ grade }, { gradeLevels: grade }]
+
+    const total = await Question.countDocuments(filter)
+    const withDraft = await Question.countDocuments({ ...filter, 'draftMarkScheme.modelAnswer': { $ne: '' } })
+    const questions = await Question.find(filter)
+      .select('questionText marks subject topic subtopic grade figures artwork draftMarkScheme')
+      .sort({ subject: 1, topic: 1 }).limit(Math.min(parseInt(limit) || 50, 200)).lean()
+
+    return ok(res, { total, withDraft, awaiting: total - withDraft, questions })
+  } catch (e) { return fail(res, 500, e.message) }
+})
+
 router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), async (req, res) => {
   try {
     // Accepts EITHER shape:
@@ -498,7 +692,7 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
     if (!Array.isArray(items) || !items.length) return fail(res, 400, 'Send { questions: [ ... ] } or { text, defaults }.')
     if (items.length > 2000) return fail(res, 400, 'Maximum 2000 questions per import.')
 
-    let inserted = 0, skipped = 0
+    let inserted = 0, skipped = 0, heldInactive = 0
     const errors = []
     // Opt-in, so the default behaviour for ordinary imports is unchanged.
     const allowMissingScheme = req.body.allowMissingScheme === true
@@ -548,6 +742,11 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
         const exists = await Question.findOne({ contentHash: hash }).select('_id').lean()
         if (exists) { skipped++; continue }
 
+        // Held back from homework until a diagram is attached or a
+        // mark scheme is written.
+        const isActiveNow = !(q.imageNeeded || missingScheme || q.artwork?.required)
+        if (!isActiveNow) heldInactive++
+
         const schemeMarks = Array.isArray(ms.points)
           ? ms.points.reduce((s,p)=>s+(Number(p.marks)||1),0) : 0
 
@@ -566,7 +765,7 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
           // Held back from homework until a diagram is attached or a
           // mark scheme is written. Set once — a second isActive key
           // in this object previously overrode it silently.
-          isActive:         !(q.imageNeeded || missingScheme || q.artwork?.required),
+          isActive:         isActiveNow,
           imageDescription: q.imageDescription || '',
           requiresDrawing: type === 'drawing' || !!q.requiresDrawing,
           subject:      q.subject,
@@ -577,6 +776,7 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
           // built the document field by field and dropped these, so a
           // question authored for Form 3 was invisible to Form 4.
           gradeLevels:     Array.isArray(q.gradeLevels) ? q.gradeLevels : [],
+          curricula:       Array.isArray(q.curricula) ? q.curricula : [],
           sourceForm:      q.sourceForm || '',
           syllabus:        q.syllabus || '',
           igcseEquivalent: q.igcseEquivalent || '',
@@ -607,8 +807,12 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
       }
     }
 
-    return ok(res, { inserted, skipped, failed: errors.length, errors: errors.slice(0, 15) },
-      `Imported ${inserted} questions (${skipped} duplicates skipped, ${errors.length} failed).`)
+    const heldNote = heldInactive
+      ? ` ${heldInactive} held inactive pending a mark scheme or diagram.` : ''
+    const hintNote = (!allowMissingScheme && errors.some(e => e.includes('needs a markScheme')))
+      ? ' Tick "Allow questions with no mark scheme" to import past-paper banks.' : ''
+    return ok(res, { inserted, skipped, failed: errors.length, heldInactive, errors: errors.slice(0, 15) },
+      `Imported ${inserted} questions (${skipped} duplicates skipped, ${errors.length} failed).${heldNote}${hintNote}`)
   } catch(e) { return fail(res, 500, e.message) }
 })
 
