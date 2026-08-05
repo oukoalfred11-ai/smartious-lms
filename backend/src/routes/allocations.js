@@ -461,11 +461,48 @@ router.post('/', auth, requireRole('admin', 'ops_manager'), async (req, res) => 
         subjectId:    subject._id,
         createdBy:    req.user?._id,
         canBeGrouped: !!canBeGrouped,
-      }).then(result => {
+      }).then(async result => {
         if (result.created) {
-          console.log('[allocation] Auto-timetable created for', student.firstName, '-', subject.subjectName);
+          console.log('[allocation] Auto-timetable created for', student.firstName, '-', subject.subjectName,
+            result.confident ? '(both declared free)' : '(no declared availability — needs confirming)');
+          // Where neither party had declared the hour, the slot is a
+          // guess. Flag it so a coordinator confirms it rather than
+          // discovering the clash when nobody turns up.
+          if (result.entry && !result.confident) {
+            try {
+              const TimetableEntry = require('../models/TimetableEntry');
+              await TimetableEntry.updateOne({ _id: result.entry._id }, { needsConfirmation: true });
+            } catch (e) { console.error('[allocation] could not flag entry:', e.message); }
+          }
         } else {
-          console.log('[allocation] Auto-timetable skipped:', result.reason);
+          // The scheduler now refuses rather than double-booking, so a
+          // silent failure would leave the student with no lesson at
+          // all. Somebody has to be told.
+          console.warn('[allocation] NO TIMETABLE SLOT:', result.reason);
+          if (result.needsManualScheduling) {
+            try {
+              const { getTransporter } = require('../lib/issueInvoice');
+              const t = getTransporter();
+              const to = process.env.SCHEDULING_ALERT_EMAIL
+                      || process.env.OPS_EMAIL
+                      || process.env.EMAIL_FROM
+                      || 'hellosmartious@gmail.com';
+              if (t) {
+                await t.sendMail({
+                  from: process.env.EMAIL_FROM || 'Smartious <hellosmartious@gmail.com>',
+                  to,
+                  subject: `Timetable needs manual scheduling — ${student.firstName} ${student.lastName}, ${subject.subjectName}`,
+                  html: `<p>An allocation was created but no timetable slot could be found.</p>
+<p><strong>Student:</strong> ${student.firstName} ${student.lastName}<br>
+<strong>Subject:</strong> ${subject.subjectName}</p>
+<p><strong>Reason:</strong> ${result.reason}</p>
+<p>The lesson will not appear on any timetable, and homework deadline
+warnings depend on that entry, so this needs scheduling by hand.</p>`,
+                });
+                console.log('[allocation] manual-scheduling alert sent to', to);
+              }
+            } catch (e) { console.error('[allocation] alert failed:', e.message); }
+          }
         }
       }).catch(err => console.error('[allocation] Auto-timetable error:', err.message));
     }
