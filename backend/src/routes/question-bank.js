@@ -500,6 +500,9 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
 
     let inserted = 0, skipped = 0
     const errors = []
+    // Opt-in, so the default behaviour for ordinary imports is unchanged.
+    const allowMissingScheme = req.body.allowMissingScheme === true
+                            || req.body.allowMissingScheme === 'true'
 
     for (let i = 0; i < items.length; i++) {
       const q = items[i] || {}
@@ -509,6 +512,7 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
         if (!q.questionText) { errors.push(`${label}: missing questionText`); continue }
 
         const type = ['mcq','short','long','essay','drawing','upload'].includes(q.type) ? q.type : 'mcq'
+        let missingScheme = false
         const opts = Array.isArray(q.options) ? q.options.filter(o => String(o||'').trim()) : []
         const ms   = q.markScheme || {}
 
@@ -518,12 +522,20 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
           if (!opts.includes(q.correctAnswer)) { errors.push(`${label}: correctAnswer is not one of the options`); continue }
         } else {
           // Typed, drawn and essay answers cannot be auto-marked without
-          // a mark scheme, so refuse to import one that has none.
+          // a mark scheme. Previously such questions were refused
+          // outright, which blocked bulk import of past-paper banks
+          // where the source supplies questions but no answers.
+          // They are now accepted but held inactive, so they can be
+          // browsed and assigned by a teacher yet never reach a student
+          // through auto-homework until a mark scheme is written.
           const hasPoints = Array.isArray(ms.points) && ms.points.length > 0
           const hasAccept = Array.isArray(ms.acceptableAnswers) && ms.acceptableAnswers.length > 0
           if (!ms.modelAnswer && !hasPoints && !hasAccept) {
-            errors.push(`${label}: "${type}" question needs a markScheme (modelAnswer, points or acceptableAnswers)`)
-            continue
+            if (!allowMissingScheme) {
+              errors.push(`${label}: "${type}" question needs a markScheme (modelAnswer, points or acceptableAnswers)`)
+              continue
+            }
+            missingScheme = true
           }
         }
 
@@ -551,13 +563,33 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
           imageCaption:    q.imageCaption || '',
           imageNeeded:      !!q.imageNeeded,
           // Held back from homework until a diagram is attached.
-          isActive:         q.imageNeeded ? false : true,
+          // Held back from homework until a diagram is attached or a
+          // mark scheme is written. Set once — a second isActive key
+          // in this object previously overrode it silently.
+          isActive:         !(q.imageNeeded || missingScheme || q.artwork?.required),
           imageDescription: q.imageDescription || '',
           requiresDrawing: type === 'drawing' || !!q.requiresDrawing,
           subject:      q.subject,
           topic:        q.topic || '',
           subtopic:     q.subtopic || '',
           lessonCode:   q.lessonCode || '',
+          // Multi-class visibility and provenance. The route previously
+          // built the document field by field and dropped these, so a
+          // question authored for Form 3 was invisible to Form 4.
+          gradeLevels:     Array.isArray(q.gradeLevels) ? q.gradeLevels : [],
+          sourceForm:      q.sourceForm || '',
+          syllabus:        q.syllabus || '',
+          igcseEquivalent: q.igcseEquivalent || '',
+          figures:         Array.isArray(q.figures) ? q.figures : [],
+          needsMarkScheme: missingScheme,
+          artwork:         q.artwork && q.artwork.required
+                             ? { required: true, status: 'pending',
+                                 kind: q.artwork.kind || 'diagram',
+                                 title: q.artwork.title || '',
+                                 description: q.artwork.description || '',
+                                 aiPrompt: q.artwork.aiPrompt || '',
+                                 requirements: Array.isArray(q.artwork.requirements) ? q.artwork.requirements : [] }
+                             : undefined,
           curriculum:   q.curriculum || 'CambridgeIGCSE',
           grade:        q.grade || 'Year 10',
           difficulty:   ['easy','medium','hard'].includes(q.difficulty) ? q.difficulty : 'medium',
@@ -566,7 +598,6 @@ router.post('/bulk', auth, requireRole('admin','ops_manager','dos','teacher'), a
           correctAnswer:type === 'mcq' ? q.correctAnswer : '',
           explanation:  q.explanation || '',
           marks:        Number(q.marks) > 0 ? Number(q.marks) : (schemeMarks || 1),
-          isActive:     true,
           contentHash:  hash,
           createdBy:    req.user._id,
         })
