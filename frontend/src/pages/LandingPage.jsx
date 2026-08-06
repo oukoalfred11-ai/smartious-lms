@@ -26,6 +26,7 @@ import { MOROCCO_CITIES, MOROCCO_COUNTRY } from '../data/moroccoCities.js'
 import { SOUTH_KOREA_CITIES, SOUTH_KOREA_COUNTRY } from '../data/southKoreaCities.js'
 import { JAPAN_CITIES, JAPAN_COUNTRY } from '../data/japanCities.js'
 import { MALAYSIA_CITIES, MALAYSIA_COUNTRY } from '../data/malaysiaCities.js'
+import { SPAIN_CITIES, SPAIN_COUNTRY } from '../data/spainCities.js'
 import { TURKEY_CITIES, TURKEY_COUNTRY } from '../data/turkeyCities.js'
 import { KUWAIT_CITIES, KUWAIT_COUNTRY } from '../data/kuwaitCities.js'
 import { OMAN_CITIES, OMAN_COUNTRY } from '../data/omanCities.js'
@@ -944,7 +945,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1371,52 +1372,56 @@ const COMPARES = [
 const SITE = 'Smartious Homeschool & eSchool'
 const PAGE_META = {
   home: {
-    title: 'Online School & Homeschool | IGCSE, A-Level, IB & American — Smartious',
+    title: 'Online School, Virtual School & Homeschool | IGCSE, A-Level, IB & American — Smartious',
     desc: 'Accredited online homeschool serving UAE, UK, Canada, Australia, Nigeria and Kenya. Cambridge IGCSE, A-Level, IB Diploma, Edexcel and American curricula. Live classes, qualified teachers, from USD 8/hour for 1-on-1 tuition · from USD 423/month for full homeschool programmes.',
   },
   'homeschooling-malaysia': {
-    title: 'Online School & Homeschool Malaysia | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Malaysian families across Kuala Lumpur, Petaling Jaya, Subang Jaya, Cyberjaya, Johor Bahru + Iskandar Puteri, Penang, Kota Kinabalu. British Council KL + Penang exam centres. From USD 400/month.',
+    title: 'Online School, Virtual School & Homeschool Malaysia | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Malaysian families across Kuala Lumpur, Petaling Jaya, Subang Jaya, Cyberjaya, Johor Bahru + Iskandar Puteri, Penang, Kota Kinabalu. British Council KL + Penang exam centres. From USD 400/month.',
+  },
+  'homeschooling-spain': {
+    title: 'Online School, Virtual School & Homeschool Spain | Cambridge IGCSE, A-Level, IB — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Madrid, Barcelona, Málaga/Costa del Sol, Alicante/Costa Blanca, Valencia, and Palma de Mallorca. Honest guidance on Spain\'s homeschool legal grey area. From USD 400/month.',
   },
   'homeschooling-turkey': {
-    title: 'Online School & Homeschool Türkiye | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Turkish and expat families across Istanbul (Bebek, Etiler, Nişantaşı, Kadıköy, Ataşehir), Ankara (Çankaya, Bilkent), Izmir, Antalya (post-2022 Russian and Ukrainian community), Bursa, Adana. British Council Istanbul + Ankara + BESA exam centres. TRT time zone exactly matching Nairobi teaching hours. From USD 400/month.',
+    title: 'Online School, Virtual School & Homeschool Türkiye | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Turkish and expat families across Istanbul (Bebek, Etiler, Nişantaşı, Kadıköy, Ataşehir), Ankara (Çankaya, Bilkent), Izmir, Antalya (post-2022 Russian and Ukrainian community), Bursa, Adana. British Council Istanbul + Ankara + BESA exam centres. TRT time zone exactly matching Nairobi teaching hours. From USD 400/month.',
   },
   'homeschooling-kuwait': {
-    title: 'Online School & Homeschool Kuwait | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Kuwaiti and expat families across Kuwait City, Salmiya (densest expat district), Hawally (Cambridge English School catchment), Salwa (premium coastal), Bayan (embassy district), and Ahmadi (KOC oil town). British Council Kuwait exam centre. AST time zone exactly matching Nairobi teaching hours. MOHE scholarship pathway alignment. From USD 400/month.',
+    title: 'Online School, Virtual School & Homeschool Kuwait | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Kuwaiti and expat families across Kuwait City, Salmiya (densest expat district), Hawally (Cambridge English School catchment), Salwa (premium coastal), Bayan (embassy district), and Ahmadi (KOC oil town). British Council Kuwait exam centre. AST time zone exactly matching Nairobi teaching hours. MOHE scholarship pathway alignment. From USD 400/month.',
   },
   'homeschooling-oman': {
-    title: 'Online School & Homeschool Oman | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Omani and expat families across Muscat (MSQ, Al Bandar, Al Khuwair — BSM, Cheltenham, TAISM catchment), Seeb (Sultan\'s School, RGSG Muscat, Downe House), Sohar (Al Batinah North industrial, ABIS), Salalah (Dhofar southern coast), Nizwa (interior cultural capital), and Sur (Ash Sharqiyah North coastal). British Council Muscat exam centre. Immediate enrolment — no BSM/ABA waiting list. From USD 400/month.',
+    title: 'Online School, Virtual School & Homeschool Oman | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Omani and expat families across Muscat (MSQ, Al Bandar, Al Khuwair — BSM, Cheltenham, TAISM catchment), Seeb (Sultan\'s School, RGSG Muscat, Downe House), Sohar (Al Batinah North industrial, ABIS), Salalah (Dhofar southern coast), Nizwa (interior cultural capital), and Sur (Ash Sharqiyah North coastal). British Council Muscat exam centre. Immediate enrolment — no BSM/ABA waiting list. From USD 400/month.',
   },
   'homeschooling-taiwan': {
-    title: 'Online School & Homeschool Taiwan | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Taiwanese and expat families across Taipei (Tianmu — TAS catchment, Shilin — TES catchment), New Taipei City (Linkou — Morrison Academy + TCS), Hsinchu (TSMC ecosystem — HAS, IBSH), Taichung (Morrison Academy, Hong Wen IS Cambridge centre), Kaohsiung (KAS, I-Shou IB), and Taoyuan (TYAS). TES Taipei + HWIS Taichung Cambridge exam centres. Serves Taiwanese-national families that Taiwan physical international schools legally cannot accept. From USD 400/month.',
+    title: 'Online School, Virtual School & Homeschool Taiwan | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Taiwanese and expat families across Taipei (Tianmu — TAS catchment, Shilin — TES catchment), New Taipei City (Linkou — Morrison Academy + TCS), Hsinchu (TSMC ecosystem — HAS, IBSH), Taichung (Morrison Academy, Hong Wen IS Cambridge centre), Kaohsiung (KAS, I-Shou IB), and Taoyuan (TYAS). TES Taipei + HWIS Taichung Cambridge exam centres. Serves Taiwanese-national families that Taiwan physical international schools legally cannot accept. From USD 400/month.',
   },
   'homeschooling-ireland': {
-    title: 'Online School & Homeschool Ireland | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Irish and expat families across Dublin (South Dublin D4/6/14/18 — NAISD Leopardstown, SEK Kilternan, St. Andrew\'s catchment plus Silicon Docks Google/Meta/LinkedIn corporate), Cork (Apple European HQ + pharma cluster), Galway (Ireland\'s medtech capital — Medtronic + Boston Scientific), Limerick (Analog Devices, Dell), Waterford (South East biotech), and Kildare (Intel Leixlip Fab 34 semiconductor). Post-Brexit UK family continuity + multinational corporate rotation + Túsla-compatible homeschool. From USD 400/month.',
+    title: 'Online School, Virtual School & Homeschool Ireland | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Irish and expat families across Dublin (South Dublin D4/6/14/18 — NAISD Leopardstown, SEK Kilternan, St. Andrew\'s catchment plus Silicon Docks Google/Meta/LinkedIn corporate), Cork (Apple European HQ + pharma cluster), Galway (Ireland\'s medtech capital — Medtronic + Boston Scientific), Limerick (Analog Devices, Dell), Waterford (South East biotech), and Kildare (Intel Leixlip Fab 34 semiconductor). Post-Brexit UK family continuity + multinational corporate rotation + Túsla-compatible homeschool. From USD 400/month.',
   },
   'homeschooling-united-kingdom': {
-    title: 'Online School & Homeschool UK | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) at USD 400/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 400/month.',
+    title: 'Online School, Virtual School & Homeschool UK | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for UK families across London (all 32 boroughs — Westminster / Eton / Harrow / St. Paul\'s alternative), Manchester (Northern Powerhouse — Manchester Grammar School alternative), Birmingham (HSBC UK HQ + JLR Solihull + King Edward VI alternative), Leeds (Channel 4 Northern HQ + Grammar School at Leeds alternative), Bristol (Airbus UK Filton + Bristol Grammar + Clifton alternative), and Edinburgh (Scotland — Cambridge / A-Level pathway alternative to Scottish CfE). Below Cambridge Home School Online (£10,950/year) at USD 400/month. Elective Home Education, Section 19 alternative provision, SEND-friendly. From USD 400/month.',
   },
   'homeschooling-india': {
-    title: 'Online School & Homeschool India | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs INR 1.8-5.4 lakh/year Smartious (4-11× cheaper). Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 400/month.',
+    title: 'Online School, Virtual School & Homeschool India | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Indian families across Mumbai (DAIS + JBCN + Ecole Mondiale + Oberoi alternative), Delhi NCR (BSD + AES + Pathways + Heritage), Bangalore (TISB + CIS + Indus + Oakridge + Trio), Hyderabad (Chirec + Oakridge Nord Anglia + ISH), Chennai (AISC + Chennai British + Chettinad + MCTM Chettyar), and Pune (Mercedes-Benz + Symbiosis + Pune International + Sanjay Ghodawat). Dramatic fee arbitrage — INR 8-20+ lakh/year premium schools vs INR 1.8-5.4 lakh/year Smartious (4-11× cheaper). Serves NRI returnees + tier-2 city access gap + IT/pharma/automotive corporate rotational families. From USD 400/month.',
   },
   'homeschooling-germany': {
-    title: 'Online School & Homeschool Germany | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Germany-resident families across Berlin (BIS Charlottenburg + BBS + BBIS Kleinmachnow + Berlin Metropolitan School alternative), Munich (MIS Starnberg + BIS Haimhausen + European School alternative), Frankfurt (FIS Oberursel + European School + ISF Wiesbaden alternative), Hamburg (ISH Blankenese alternative), Stuttgart (ISS Sindelfingen alternative), and Düsseldorf (ISD Kaiserswerth alternative). Homeschool is illegal in Germany for German citizen children under Schulpflicht — Smartious serves expat families with foreign passports, Sixth Form 16+ students post-Schulpflicht, supplementary tuition alongside German Gymnasium, and international corporate rotational families. From USD 400/month.',
+    title: 'Online School, Virtual School & Homeschool Germany | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Germany-resident families across Berlin (BIS Charlottenburg + BBS + BBIS Kleinmachnow + Berlin Metropolitan School alternative), Munich (MIS Starnberg + BIS Haimhausen + European School alternative), Frankfurt (FIS Oberursel + European School + ISF Wiesbaden alternative), Hamburg (ISH Blankenese alternative), Stuttgart (ISS Sindelfingen alternative), and Düsseldorf (ISD Kaiserswerth alternative). Homeschool is illegal in Germany for German citizen children under Schulpflicht — Smartious serves expat families with foreign passports, Sixth Form 16+ students post-Schulpflicht, supplementary tuition alongside German Gymnasium, and international corporate rotational families. From USD 400/month.',
   },
   'homeschooling-romania': {
-    title: 'Online School & Homeschool Romania | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Romania-resident families across Bucharest (AISB Pipera + BSB Herăstrău + Cambridge School CSB Voluntari + ISB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School alternative), Iași (Amazon Development Center corporate + International School alternative), Brașov (Continental Automotive + Schaeffler + International British School alternative), and Constanța (Port of Constanța + OMV Petrom). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023. 2-12× fee arbitrage. From USD 400/month.',
+    title: 'Online School, Virtual School & Homeschool Romania | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS partnership) for Romania-resident families across Bucharest (AISB Pipera + BSB Herăstrău + Cambridge School CSB Voluntari + ISB alternative), Cluj-Napoca (Transylvania College + International School Cluj + KEY International alternative), Timișoara (International British School alternative), Iași (Amazon Development Center corporate + International School alternative), Brașov (Continental Automotive + Schaeffler + International British School alternative), and Constanța (Port of Constanța + OMV Petrom). Smartious as Kenya-based accredited online school satisfies Romania\'s legal "umbrella school" pathway for homeschool families under Law 198/2023. 2-12× fee arbitrage. From USD 400/month.',
   },
   'homeschooling-ukraine': {
-    title: 'Online School & Homeschool Ukraine | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
-    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS) for Ukrainian families in-country and diaspora — Kyiv (Grammarly + GitLab + MacPaw + Preply + PSI/KIS/BISU alternative), Lviv (SoftServe HQ + EPAM Ukraine + Intellias + N-iX + Ukrainian Catholic University), Kharkiv (NIX Solutions + GlobalLogic + EPAM tech), Dnipro (Interpipe + Metinvest industrial), Odesa (Luxoft + Port of Odesa maritime), Ivano-Frankivsk (western Ukraine safe haven). Distance learning fully legal under 2020 Law on Complete General Secondary Education. Refugee family discounted rates. From USD 400/month personalized.',
+    title: 'Online School, Virtual School & Homeschool Ukraine | Cambridge IGCSE, A-Level, IB, OSSD — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American AP, and Ontario OSSD (via CCIS) for Ukrainian families in-country and diaspora — Kyiv (Grammarly + GitLab + MacPaw + Preply + PSI/KIS/BISU alternative), Lviv (SoftServe HQ + EPAM Ukraine + Intellias + N-iX + Ukrainian Catholic University), Kharkiv (NIX Solutions + GlobalLogic + EPAM tech), Dnipro (Interpipe + Metinvest industrial), Odesa (Luxoft + Port of Odesa maritime), Ivano-Frankivsk (western Ukraine safe haven). Distance learning fully legal under 2020 Law on Complete General Secondary Education. Refugee family discounted rates. From USD 400/month personalized.',
   },
   assessment: {
     title: 'Book Academic Assessment | Admissions Request — Smartious',
@@ -1838,6 +1843,7 @@ export default function LandingPage() {
   const [currentSouthKoreaCity, setCurrentSouthKoreaCity] = useState(null)
   const [currentJapanCity, setCurrentJapanCity] = useState(null)
   const [currentMalaysiaCity, setCurrentMalaysiaCity] = useState(null)
+  const [currentSpainCity, setCurrentSpainCity] = useState(null)
   const [currentTurkeyCity, setCurrentTurkeyCity] = useState(null)
   const [currentKuwaitCity, setCurrentKuwaitCity] = useState(null)
   const [currentOmanCity, setCurrentOmanCity] = useState(null)
@@ -2480,6 +2486,12 @@ export default function LandingPage() {
           setPage('malaysia-city')
           return
         }
+        const spainCity = SPAIN_CITIES.find(c => c.slug === slug)
+        if (spainCity) {
+          setCurrentSpainCity(slug)
+          setPage('spain-city')
+          return
+        }
         const turkeyCity = TURKEY_CITIES.find(c => c.slug === slug)
         if (turkeyCity) {
           setCurrentTurkeyCity(slug)
@@ -2668,6 +2680,10 @@ export default function LandingPage() {
       }
       if (slug === 'malaysia') {
         setPage('homeschooling-malaysia')
+        return
+      }
+      if (slug === 'spain') {
+        setPage('homeschooling-spain')
         return
       }
       if (slug === 'turkey') {
@@ -2936,182 +2952,188 @@ export default function LandingPage() {
     metaTitle = c.metaTitle || ('Online Homeschool ' + c.name + ' — Live Cambridge IGCSE & A-Level | ' + SITE)
     metaDesc  = c.metaDesc || (c.pitch || '').slice(0, 158)
   } else if (page === 'ca-families') {
-    metaTitle = 'Online Homeschool for Canadian Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Canadian families. UofT, Waterloo, McGill, UBC, McMaster pipeline. Provincial homeschool compliance support. From $245 CAD/month.'
+    metaTitle = 'Online School, Virtual School & Homeschool for Canadian Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Canadian families. UofT, Waterloo, McGill, UBC, McMaster pipeline. Provincial homeschool compliance support. From $245 CAD/month.'
   } else if (page === 'homeschooling-ethiopia') {
-    metaTitle = 'Online Homeschool for Ethiopian Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Ethiopian families across Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar. ICS Addis / Sandford alternative. From USD 400/month.'
+    metaTitle = 'Online School, Virtual School & Homeschool for Ethiopian Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Ethiopian families across Addis Ababa, Dire Dawa, Mekelle, Hawassa, Bahir Dar. ICS Addis / Sandford alternative. From USD 400/month.'
   } else if (page === 'ethiopia-city' && currentEthiopiaCity) {
     const c = ETHIOPIA_CITIES.find(x => x.slug === currentEthiopiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-rwanda') {
-    metaTitle = 'Online Homeschool for Rwandan Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Rwandan families across Kigali, Huye, Musanze, Rubavu. Green Hills Academy / ICS Kigali alternative. Kigali Smart City infrastructure. From USD 400/month.'
+    metaTitle = 'Online School, Virtual School & Homeschool for Rwandan Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Rwandan families across Kigali, Huye, Musanze, Rubavu. Green Hills Academy / ICS Kigali alternative. Kigali Smart City infrastructure. From USD 400/month.'
   } else if (page === 'rwanda-city' && currentRwandaCity) {
     const c = RWANDA_CITIES.find(x => x.slug === currentRwandaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-south-africa') {
-    metaTitle = 'Online Homeschool for South African Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for South African families across Johannesburg, Cape Town, Pretoria, Durban, Gqeberha, Stellenbosch. Lower than Brainline, Cambridge Home School Online. BELA Act 2024 compliant. From USD 400/month (~ZAR 3,400).'
+    metaTitle = 'Online School, Virtual School & Homeschool for South African Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for South African families across Johannesburg, Cape Town, Pretoria, Durban, Gqeberha, Stellenbosch. Lower than Brainline, Cambridge Home School Online. BELA Act 2024 compliant. From USD 400/month (~ZAR 3,400).'
   } else if (page === 'sa-city' && currentSaCity) {
     const c = SOUTH_AFRICA_CITIES.find(x => x.slug === currentSaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-qatar') {
-    metaTitle = 'Online Homeschool for Doha & Qatar Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Qatari families across Doha, Al Wakrah, Al Khor, Lusail. Doha College / ASD / Sherborne Qatar alternative. Immediate enrolment, no waiting lists. From USD 400/month (~QAR 655).'
+    metaTitle = 'Online School, Virtual School & Homeschool for Doha & Qatar Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Qatari families across Doha, Al Wakrah, Al Khor, Lusail. Doha College / ASD / Sherborne Qatar alternative. Immediate enrolment, no waiting lists. From USD 400/month (~QAR 655).'
   } else if (page === 'qatar-city' && currentQatarCity) {
     const c = QATAR_CITIES.find(x => x.slug === currentQatarCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-saudi-arabia') {
-    metaTitle = 'Online Homeschool for Saudi Arabian Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 400/month (~SAR 675).'
+    metaTitle = 'Online School, Virtual School & Homeschool for Saudi Arabian Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Saudi Arabian families across Riyadh, Jeddah, Dhahran, Al Khobar, NEOM. AISR / BISR / Saudi Aramco school alternative. Vision 2030 mega-project family portability. From USD 400/month (~SAR 675).'
   } else if (page === 'saudi-city' && currentSaudiCity) {
     const c = SAUDI_ARABIA_CITIES.find(x => x.slug === currentSaudiCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'homeschooling-uae') {
-    metaTitle = 'Online Homeschool for UAE Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 400/month (~AED 660).'
+    metaTitle = 'Online School, Virtual School & Homeschool for UAE Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for UAE families across Dubai, Abu Dhabi, Sharjah, Ajman, Ras Al Khaimah. Wellington / Dubai College / BSAK / Repton / Brighton College alternative. Immediate enrolment, no KHDA/ADEK waiting lists. From USD 400/month (~AED 660).'
   
   } else if (page === 'homeschooling-egypt') {
-    metaTitle = 'Online Homeschool for Egyptian Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Egyptian families across Cairo, New Cairo, Sheikh Zayed, Alexandria, New Administrative Capital, Sharm El Sheikh. Cairo American College / MES / BISC / NCBIS / Hayah / El Alsson / Schutz alternative. Immediate enrolment. From USD 400/month. USD pricing protects against EGP volatility.'
+    metaTitle = 'Online School, Virtual School & Homeschool for Egyptian Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Egyptian families across Cairo, New Cairo, Sheikh Zayed, Alexandria, New Administrative Capital, Sharm El Sheikh. Cairo American College / MES / BISC / NCBIS / Hayah / El Alsson / Schutz alternative. Immediate enrolment. From USD 400/month. USD pricing protects against EGP volatility.'
   } else if (page === 'homeschooling-morocco') {
-    metaTitle = 'Online Homeschool for Moroccan Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level for Moroccan families across Casablanca, Rabat, Marrakech, Tangier, Fes, Agadir. Casablanca American School / George Washington Academy / BISC / Rabat American School / Lycée Lyautey / Lycée Descartes alternative. Immediate enrolment. CET live classes matching Moroccan school hours. From USD 400/month.'
+    metaTitle = 'Online School, Virtual School & Homeschool for Moroccan Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level for Moroccan families across Casablanca, Rabat, Marrakech, Tangier, Fes, Agadir. Casablanca American School / George Washington Academy / BISC / Rabat American School / Lycée Lyautey / Lycée Descartes alternative. Immediate enrolment. CET live classes matching Moroccan school hours. From USD 400/month.'
   } else if (page === 'homeschooling-south-korea') {
-    metaTitle = 'Online Homeschool for Korean Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Korean families across Seoul, Songdo (Incheon IBD), Busan, Pyeongtaek (USAG Camp Humphreys), Daejeon (KAIST), Jeju (Jeju Global Education City). Seoul Foreign School / KIS / Dwight / Chadwick International / NLCS Jeju alternative. KST afternoon/evening live classes matching Korean post-school and hagwon hours. From USD 400/month.'
+    metaTitle = 'Online School, Virtual School & Homeschool for Korean Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Korean families across Seoul, Songdo (Incheon IBD), Busan, Pyeongtaek (USAG Camp Humphreys), Daejeon (KAIST), Jeju (Jeju Global Education City). Seoul Foreign School / KIS / Dwight / Chadwick International / NLCS Jeju alternative. KST afternoon/evening live classes matching Korean post-school and hagwon hours. From USD 400/month.'
   } else if (page === 'homeschooling-japan') {
-    metaTitle = 'Online Homeschool for Japanese Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Japanese families across Tokyo, Yokohama, Osaka, Kobe, Nagoya (Toyota automotive), Okinawa (USMC + USAF US military bases). ASIJ / BST / KIST / YIS / Saint Maur / Canadian Academy / OIS / NIS alternative. JST afternoon/evening live classes matching Japanese post-school and juku hours. From USD 400/month.'
+    metaTitle = 'Online School, Virtual School & Homeschool for Japanese Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Japanese families across Tokyo, Yokohama, Osaka, Kobe, Nagoya (Toyota automotive), Okinawa (USMC + USAF US military bases). ASIJ / BST / KIST / YIS / Saint Maur / Canadian Academy / OIS / NIS alternative. JST afternoon/evening live classes matching Japanese post-school and juku hours. From USD 400/month.'
   } else if (page === 'homeschooling-vietnam') {
-    metaTitle = 'Online Homeschool for Vietnamese Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Vietnamese families across Ho Chi Minh City (Thao Dien, Phu My Hung), Hanoi (Tay Ho), Da Nang, Bac Ninh (Samsung Vietnam Korean expat hub), Binh Duong (manufacturing), Vung Tau (oil & gas). ISHCMC / BIS HCMC / SSIS / UNIS Hanoi / BIS Hanoi / Concordia alternative. ICT afternoon/evening live classes matching Vietnamese post-school and học thêm hours. From USD 400/month.'
+    metaTitle = 'Online School, Virtual School & Homeschool for Vietnamese Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Vietnamese families across Ho Chi Minh City (Thao Dien, Phu My Hung), Hanoi (Tay Ho), Da Nang, Bac Ninh (Samsung Vietnam Korean expat hub), Binh Duong (manufacturing), Vung Tau (oil & gas). ISHCMC / BIS HCMC / SSIS / UNIS Hanoi / BIS Hanoi / Concordia alternative. ICT afternoon/evening live classes matching Vietnamese post-school and học thêm hours. From USD 400/month.'
   } else if (page === 'homeschooling-thailand') {
-    metaTitle = 'Online Homeschool for Thai Families — Live Cambridge IGCSE & A-Level | Smartious'
-    metaDesc  = 'Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Thai families across Bangkok (Sukhumvit), Chiang Mai (digital nomad capital), Phuket (resort island, marine/yacht industry), Pattaya (Eastern Seaboard Japanese manufacturing hub), Hua Hin (royal seaside), Khon Kaen (Isaan regional). ISB / Bangkok Patana / Harrow / Shrewsbury / NIST / Brighton College / BISP / UWC Thailand / Prem / ISE alternative. ICT afternoon/evening live classes matching Thai post-school and kuad wicha hours. From USD 400/month.'
+    metaTitle = 'Online School, Virtual School & Homeschool for Thai Families — Cambridge IGCSE & A-Level | Smartious'
+    metaDesc  = 'Online, virtual school & homeschool. Live online Cambridge IGCSE and A-Level, IB Diploma, American AP for Thai families across Bangkok (Sukhumvit), Chiang Mai (digital nomad capital), Phuket (resort island, marine/yacht industry), Pattaya (Eastern Seaboard Japanese manufacturing hub), Hua Hin (royal seaside), Khon Kaen (Isaan regional). ISB / Bangkok Patana / Harrow / Shrewsbury / NIST / Brighton College / BISP / UWC Thailand / Prem / ISE alternative. ICT afternoon/evening live classes matching Thai post-school and kuad wicha hours. From USD 400/month.'
   } else if (page === 'uae-city' && currentUaeCity) {
     const c = UAE_CITIES.find(x => x.slug === currentUaeCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   
   } else if (page === 'egypt-city' && currentEgyptCity) {
     const c = EGYPT_CITIES.find(x => x.slug === currentEgyptCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'morocco-city' && currentMoroccoCity) {
     const c = MOROCCO_CITIES.find(x => x.slug === currentMoroccoCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'south-korea-city' && currentSouthKoreaCity) {
     const c = SOUTH_KOREA_CITIES.find(x => x.slug === currentSouthKoreaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'malaysia-city' && currentMalaysiaCity) {
     const c = MALAYSIA_CITIES.find(x => x.slug === currentMalaysiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
+    }
+  } else if (page === 'spain-city' && currentSpainCity) {
+    const c = SPAIN_CITIES.find(x => x.slug === currentSpainCity)
+    if (c) {
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'turkey-city' && currentTurkeyCity) {
     const c = TURKEY_CITIES.find(x => x.slug === currentTurkeyCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'kuwait-city' && currentKuwaitCity) {
     const c = KUWAIT_CITIES.find(x => x.slug === currentKuwaitCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'oman-city' && currentOmanCity) {
     const c = OMAN_CITIES.find(x => x.slug === currentOmanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'taiwan-city' && currentTaiwanCity) {
     const c = TAIWAN_CITIES.find(x => x.slug === currentTaiwanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'ireland-city' && currentIrelandCity) {
     const c = IRELAND_CITIES.find(x => x.slug === currentIrelandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'uk-city' && currentUkCity) {
     const c = UK_CITIES.find(x => x.slug === currentUkCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'india-city' && currentIndiaCity) {
     const c = INDIA_CITIES.find(x => x.slug === currentIndiaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'germany-city' && currentGermanyCity) {
     const c = GERMANY_CITIES.find(x => x.slug === currentGermanyCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'romania-city' && currentRomaniaCity) {
     const c = ROMANIA_CITIES.find(x => x.slug === currentRomaniaCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'ukraine-city' && currentUkraineCity) {
     const c = UKRAINE_CITIES.find(x => x.slug === currentUkraineCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'japan-city' && currentJapanCity) {
     const c = JAPAN_CITIES.find(x => x.slug === currentJapanCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'vietnam-city' && currentVietnamCity) {
     const c = VIETNAM_CITIES.find(x => x.slug === currentVietnamCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (page === 'thailand-city' && currentThailandCity) {
     const c = THAILAND_CITIES.find(x => x.slug === currentThailandCity)
     if (c) {
-      metaTitle = (c.primaryKeyword || c.name) + ' — Live Cambridge IGCSE & A-Level | Smartious'
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
   } else if (PAGE_META[page]) {
@@ -3139,6 +3161,7 @@ export default function LandingPage() {
   if (page === 'homeschooling-south-korea') canonicalOverride = '/online-school/south-korea'
   if (page === 'homeschooling-japan') canonicalOverride = '/online-school/japan'
   if (page === 'homeschooling-malaysia') canonicalOverride = '/online-school/malaysia'
+  if (page === 'homeschooling-spain') canonicalOverride = '/online-school/spain'
   if (page === 'homeschooling-turkey') canonicalOverride = '/online-school/turkey'
   if (page === 'homeschooling-kuwait') canonicalOverride = '/online-school/kuwait'
   if (page === 'homeschooling-oman') canonicalOverride = '/online-school/oman'
@@ -13444,9 +13467,9 @@ export default function LandingPage() {
                 style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                  Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
@@ -13631,7 +13654,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
-                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                    {(() => { const o = country.slug.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % SMARTIOUS_REVIEWS.length; return [...SMARTIOUS_REVIEWS.slice(o), ...SMARTIOUS_REVIEWS.slice(0,o)].slice(0,3) })().map((r, i) => (
                       <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
                         <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
                         <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
@@ -13815,6 +13838,13 @@ export default function LandingPage() {
                 SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
                 GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
             )}
+            {page === 'homeschooling-spain' && (
+              <CountryHub country={SPAIN_COUNTRY} cities={SPAIN_CITIES}
+                setCurrentCity={setCurrentSpainCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
             {page === 'homeschooling-japan' && (
         <CountryHub
           country={JAPAN_COUNTRY}
@@ -13980,6 +14010,14 @@ export default function LandingPage() {
           P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
+      {page === 'spain-city' && currentSpainCity && (
+        <CountryCityPage
+          country={SPAIN_COUNTRY}
+          cities={SPAIN_CITIES}
+          currentCitySlug={currentSpainCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
       {page === 'japan-city' && currentJapanCity && (
         <CountryCityPage
           country={JAPAN_COUNTRY}
@@ -14064,9 +14102,9 @@ export default function LandingPage() {
                 style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                  Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
@@ -14251,7 +14289,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
-                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                    {(() => { const o = country.slug.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % SMARTIOUS_REVIEWS.length; return [...SMARTIOUS_REVIEWS.slice(o), ...SMARTIOUS_REVIEWS.slice(0,o)].slice(0,3) })().map((r, i) => (
                       <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
                         <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
                         <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
@@ -14384,9 +14422,9 @@ export default function LandingPage() {
                 style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                  Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
@@ -14571,7 +14609,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
-                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                    {(() => { const o = country.slug.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % SMARTIOUS_REVIEWS.length; return [...SMARTIOUS_REVIEWS.slice(o), ...SMARTIOUS_REVIEWS.slice(0,o)].slice(0,3) })().map((r, i) => (
                       <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
                         <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
                         <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
@@ -14704,9 +14742,9 @@ export default function LandingPage() {
                 style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                  Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
@@ -14891,7 +14929,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
-                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                    {(() => { const o = country.slug.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % SMARTIOUS_REVIEWS.length; return [...SMARTIOUS_REVIEWS.slice(o), ...SMARTIOUS_REVIEWS.slice(0,o)].slice(0,3) })().map((r, i) => (
                       <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
                         <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
                         <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
@@ -15024,9 +15062,9 @@ export default function LandingPage() {
                 style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                  Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
@@ -15211,7 +15249,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
-                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                    {(() => { const o = country.slug.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % SMARTIOUS_REVIEWS.length; return [...SMARTIOUS_REVIEWS.slice(o), ...SMARTIOUS_REVIEWS.slice(0,o)].slice(0,3) })().map((r, i) => (
                       <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
                         <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
                         <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
@@ -15344,9 +15382,9 @@ export default function LandingPage() {
                 style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                  Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
@@ -15531,7 +15569,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
-                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                    {(() => { const o = country.slug.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % SMARTIOUS_REVIEWS.length; return [...SMARTIOUS_REVIEWS.slice(o), ...SMARTIOUS_REVIEWS.slice(0,o)].slice(0,3) })().map((r, i) => (
                       <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
                         <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
                         <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
@@ -15663,9 +15701,9 @@ export default function LandingPage() {
                 style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow}</div>
+                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
                 <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Homeschooling in the <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
+                  Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
@@ -15850,7 +15888,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
-                    {SMARTIOUS_REVIEWS.map((r, i) => (
+                    {(() => { const o = country.slug.split('').reduce((a,c)=>a+c.charCodeAt(0),0) % SMARTIOUS_REVIEWS.length; return [...SMARTIOUS_REVIEWS.slice(o), ...SMARTIOUS_REVIEWS.slice(0,o)].slice(0,3) })().map((r, i) => (
                       <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
                         <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
                         <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
