@@ -87,6 +87,7 @@ const HREFLANG_MAP = {
   romania:'en-ro',
   ukraine:'en-ua',
   spain:'en-es',
+  denmark:'en-dk',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
