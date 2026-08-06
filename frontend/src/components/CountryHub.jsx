@@ -86,6 +86,7 @@ const HREFLANG_MAP = {
   germany:'en-de',
   romania:'en-ro',
   ukraine:'en-ua',
+  spain:'en-es',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
@@ -129,6 +130,13 @@ function CountryHub({
   GOOGLE_REVIEWS_URL, LEAVE_REVIEW_URL,
 }) {
   useHreflang(country.slug)
+  // Rotate which 3 of the 5 verified reviews display, keyed off the country
+  // slug. Same real reviews everywhere (never fabricated per-country) — this
+  // just avoids every hub page rendering byte-identical review HTML.
+  const reviewOffset = country.slug
+    ? country.slug.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % SMARTIOUS_REVIEWS.length
+    : 0
+  const displayReviews = [...SMARTIOUS_REVIEWS.slice(reviewOffset), ...SMARTIOUS_REVIEWS.slice(0, reviewOffset)].slice(0, 3)
   return (
     <>
       {/* Schema */}
@@ -387,7 +395,7 @@ function CountryHub({
               </div>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:16,marginBottom:24}}>
-              {SMARTIOUS_REVIEWS.map((r, i) => (
+              {displayReviews.map((r, i) => (
                 <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:10}}>
                   <div style={{color:V.gold3,fontSize:15,letterSpacing:'.05em'}}>{'\u2605'.repeat(r.rating)}</div>
                   <p style={{fontSize:13,color:V.ink,lineHeight:1.65,margin:0,flex:1}}>&ldquo;{r.text}&rdquo;</p>
