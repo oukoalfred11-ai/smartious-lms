@@ -1113,4 +1113,37 @@ router.get('/public-teachers', async (req, res) => {
   }
 });
 
+// GET /api/users/:id — single user by id.
+// MUST stay at the bottom of this file: a bare '/:id' pattern would
+// otherwise shadow the single-segment routes above it ('/stats',
+// '/availability-gaps', '/public-teachers').
+//
+// linkedParents and parentId are populated so the admin edit-user screen
+// can show who a student is linked to. Previously this route did not
+// exist at all, so the parent-link panel's lookup 404'd, the error was
+// swallowed as non-fatal, and every student appeared to have no parent
+// linked even immediately after linking one.
+router.get('/:id', auth, requireRole('admin', 'ops_manager', 'dos'), async (req, res) => {
+  try {
+    const mongoose = require('mongoose');
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'Invalid user id.' });
+
+    const user = await User.findById(req.params.id)
+      .select('-password')
+      .populate('linkedParents', 'firstName lastName email phone role')
+      .populate('parentId', 'firstName lastName email phone role')
+      .populate('linkedStudents', 'firstName lastName email admissionNumber role')
+      .populate('subjects', 'subjectName curriculum')
+      .lean();
+
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+
+    res.json({ success: true, user });
+  } catch (e) {
+    console.error('[users get by id]', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 module.exports = router;
