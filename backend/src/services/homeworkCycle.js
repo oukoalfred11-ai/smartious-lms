@@ -144,7 +144,7 @@ async function warnUnsubmitted(now, t, summary) {
 
   for (const hw of homeworks) {
     for (const studentId of (hw.assignedStudents || [])) {
-      const sub = await HomeworkSubmission.findOne({ homeworkId: hw._id, studentId })
+      const sub = await HomeworkSubmission.findOne({ homework: hw._id, student: studentId })
       if (sub && sub.status !== 'in_progress') continue          // already submitted
 
       const next = await nextLessonFor(studentId, hw.subject, from)
@@ -153,7 +153,7 @@ async function warnUnsubmitted(now, t, summary) {
       // Once per homework per lesson.
       const key = `${hw._id}:${next.at.toISOString()}`
       const existing = sub || new HomeworkSubmission({
-        homeworkId: hw._id, studentId, subject: hw.subject, answers: [], status: 'in_progress',
+        homework: hw._id, student: studentId, answers: [], status: 'in_progress',
       })
       if (existing.lastWarningKey === key) continue
 
@@ -188,17 +188,17 @@ async function warnUnsubmitted(now, t, summary) {
 async function notifyNewSubmissions(now, t, summary) {
   const subs = await HomeworkSubmission.find({
     status: 'submitted', teacherNotifiedAt: null,
-  }).populate('studentId', 'firstName lastName').limit(200)
+  }).populate('student', 'firstName lastName').limit(200)
 
   for (const sub of subs) {
-    const hw = await Homework.findById(sub.homeworkId).select('title subject createdBy').lean()
+    const hw = await Homework.findById(sub.homework).select('title subject createdBy').lean()
     if (!hw) continue
     const teacher = await User.findById(hw.createdBy).select('firstName email').lean()
     if (!teacher?.email) { summary.noEmail++; continue }
 
-    const studentName = sub.studentId
-      ? `${sub.studentId.firstName || ''} ${sub.studentId.lastName || ''}`.trim() : 'A student'
-    const next = sub.studentId ? await nextLessonFor(sub.studentId._id, hw.subject, nowEAT(now)) : null
+    const studentName = sub.student
+      ? `${sub.student.firstName || ''} ${sub.student.lastName || ''}`.trim() : 'A student'
+    const next = sub.student ? await nextLessonFor(sub.student._id, hw.subject, nowEAT(now)) : null
 
     try {
       await t.sendMail({
@@ -226,16 +226,16 @@ async function warnUnreleased(now, t, summary) {
 
   const subs = await HomeworkSubmission.find({
     status: { $in: ['submitted', 'graded'] },
-  }).populate('studentId', 'firstName lastName').limit(500)
+  }).populate('student', 'firstName lastName').limit(500)
 
   // Group by teacher + subject + lesson, so one email covers a class.
   const groups = new Map()
   for (const sub of subs) {
-    if (!sub.studentId) continue
-    const hw = await Homework.findById(sub.homeworkId).select('title subject createdBy').lean()
+    if (!sub.student) continue
+    const hw = await Homework.findById(sub.homework).select('title subject createdBy').lean()
     if (!hw) continue
 
-    const next = await nextLessonFor(sub.studentId._id, hw.subject, from)
+    const next = await nextLessonFor(sub.student._id, hw.subject, from)
     if (!next || next.at > cutoff) continue
 
     const key = `${hw.createdBy}:${hw.subject}:${next.at.toISOString()}`
@@ -243,7 +243,7 @@ async function warnUnreleased(now, t, summary) {
 
     if (!groups.has(key)) groups.set(key, { teacherId: hw.createdBy, subject: hw.subject, at: next.at, rows: [], subs: [] })
     groups.get(key).rows.push({
-      student: `${sub.studentId.firstName || ''} ${sub.studentId.lastName || ''}`.trim(),
+      student: `${sub.student.firstName || ''} ${sub.student.lastName || ''}`.trim(),
       state: sub.status === 'submitted' ? 'submitted, not yet marked' : 'marked, not yet released',
     })
     groups.get(key).subs.push(sub)
