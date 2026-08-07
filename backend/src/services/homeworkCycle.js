@@ -98,11 +98,22 @@ const p = t => `<p style="font-size:14.5px;line-height:1.7;color:#2c2c2c;margin:
 const fmtTime = d => d.toLocaleString('en-GB',
   { weekday:'long', hour:'2-digit', minute:'2-digit', timeZone:'UTC' })
 
-function studentWarningEmail(student, hw, lessonAt) {
+function studentWarningEmail(student, hws, lessonAt, subject) {
+  // hws is always an array. One email covers every outstanding piece of
+  // work for this lesson — previously this sent one email per homework,
+  // so a student with a backlog received dozens at once.
+  const list = Array.isArray(hws) ? hws : [hws]
+  const single = list.length === 1
+  const titles = `<ul style="font-size:14px;line-height:1.7;color:#2c2c2c;margin:0 0 16px;padding-left:20px;">` +
+    list.map(h => `<li style="margin-bottom:6px;"><strong>${h.title || 'Homework'}</strong></li>`).join('') +
+    `</ul>`
+
   return shell('linear-gradient(135deg,#8B1A2E,#6E1424)', 'Homework not yet submitted',
-    `${hw.subject} — due before your next lesson`,
+    `${subject} — due before your next lesson`,
     p(`Dear ${student.firstName || 'there'},`) +
-    p(`Your next <strong>${hw.subject}</strong> lesson starts in about ${WARN_HOURS} hours, on <strong>${fmtTime(lessonAt)}</strong>, and <strong>${hw.title || 'your homework'}</strong> has not been submitted yet.`) +
+    (single
+      ? p(`Your next <strong>${subject}</strong> lesson starts in about ${WARN_HOURS} hours, on <strong>${fmtTime(lessonAt)}</strong>, and <strong>${list[0].title || 'your homework'}</strong> has not been submitted yet.`)
+      : p(`Your next <strong>${subject}</strong> lesson starts in about ${WARN_HOURS} hours, on <strong>${fmtTime(lessonAt)}</strong>. The following <strong>${list.length}</strong> pieces of work have not been submitted yet:`) + titles) +
     p('Submitting now gives your teacher time to mark it and go through it with you in the lesson. Work submitted after the lesson has started cannot be discussed in that lesson.') +
     p('If something is stopping you from finishing it, reply to this email and tell your teacher before the lesson rather than after.'))
 }
@@ -142,6 +153,11 @@ async function warnUnsubmitted(now, t, summary) {
     status: 'published', isActive: { $ne: false },
   }).select('title subject assignedStudents createdBy').lean()
 
+  // Collect everything outstanding first, grouped by student + subject +
+  // lesson. One family gets one email per lesson, however many pieces of
+  // work are outstanding for it.
+  const groups = new Map()
+
   for (const hw of homeworks) {
     for (const studentId of (hw.assignedStudents || [])) {
       const sub = await HomeworkSubmission.findOne({ homework: hw._id, student: studentId })
@@ -157,26 +173,43 @@ async function warnUnsubmitted(now, t, summary) {
       })
       if (existing.lastWarningKey === key) continue
 
-      const student = await User.findById(studentId).select('firstName lastName email onBreak parentEmail parentId linkedParents').lean()
-      if (!student || student.onBreak) continue
-
-      const r = await resolveStudentRecipients(student, { includeStudent: true })
-      if (!r.to.length) { summary.noEmail++; continue }
-
-      try {
-        await t.sendMail({
-          from: FROM(), to: r.to.join(', '),
-          subject: `Homework due before your next ${hw.subject} lesson`,
-          html: studentWarningEmail(student, hw, next.at),
+      const groupKey = `${studentId}:${hw.subject}:${next.at.toISOString()}`
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, {
+          studentId, subject: hw.subject, at: next.at, hws: [], subs: [], keys: [],
         })
-        existing.lastWarningKey = key
-        existing.lastWarningAt = new Date()
-        await existing.save()
-        summary.studentWarned++
-      } catch (e) {
-        summary.failed++
-        console.error('[homework-cycle] student warning failed:', e.message)
       }
+      const g = groups.get(groupKey)
+      g.hws.push(hw)
+      g.subs.push(existing)
+      g.keys.push(key)
+    }
+  }
+
+  for (const g of groups.values()) {
+    const student = await User.findById(g.studentId).select('firstName lastName email onBreak parentEmail parentId linkedParents').lean()
+    if (!student || student.onBreak) continue
+
+    const r = await resolveStudentRecipients(student, { includeStudent: true })
+    if (!r.to.length) { summary.noEmail++; continue }
+
+    try {
+      await t.sendMail({
+        from: FROM(), to: r.to.join(', '),
+        subject: `Homework due before your next ${g.subject} lesson`,
+        html: studentWarningEmail(student, g.hws, g.at, g.subject),
+      })
+      // Mark every piece of work covered by this one email.
+      for (let i = 0; i < g.subs.length; i++) {
+        const s = g.subs[i]
+        s.lastWarningKey = g.keys[i]
+        s.lastWarningAt = new Date()
+        await s.save()
+      }
+      summary.studentWarned++
+    } catch (e) {
+      summary.failed++
+      console.error('[homework-cycle] student warning failed:', e.message)
     }
   }
 }
