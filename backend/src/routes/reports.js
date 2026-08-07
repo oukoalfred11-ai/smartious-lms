@@ -783,11 +783,33 @@ async function notifyParentReportReady(report, student) {
   const u = process.env.EMAIL_USER, p = process.env.EMAIL_PASSWORD
   if (!u||!p) return 0
   const t = nodemailer.createTransport({ host:process.env.EMAIL_HOST||'smtp.gmail.com', port:parseInt(process.env.EMAIL_PORT||'587',10), secure:false, auth:{ user:u, pass:p } })
-  const s = student || (report.studentId ? await User.findById(report.studentId).select('parentEmail linkedParents').lean() : null)
+  // Resolve the student. report.studentId may already be a populated user
+  // document (the /:id/publish route populates it), in which case we use it
+  // directly rather than re-querying with an object.
+  let s = student
+  if (!s && report.studentId) {
+    s = (typeof report.studentId === 'object' && report.studentId.parentEmail !== undefined)
+      ? report.studentId
+      : await User.findById(report.studentId).select('parentEmail linkedParents').lean()
+  }
   if (!s) return 0
+
+  // Only ever send to a real address. A linked parent record with a missing
+  // or blank email previously added `undefined` here, which nodemailer
+  // accepted and turned into a blank email alongside the real one.
+  const addEmail = (set, raw) => {
+    const e = String(raw || '').trim().toLowerCase()
+    if (e && e.includes('@')) set.add(e)
+  }
   const emails = new Set()
-  if (s.parentEmail) emails.add(s.parentEmail)
-  if (s.linkedParents?.length) { const pp = await User.find({ _id:{ $in:s.linkedParents } }).select('email').lean(); pp.forEach(p=>emails.add(p.email)) }
+  addEmail(emails, s.parentEmail)
+  if (s.linkedParents?.length) {
+    const pp = await User.find({ _id:{ $in:s.linkedParents } }).select('email').lean()
+    pp.forEach(p => {
+      if (!p.email) console.warn('[report notify] linked parent', String(p._id), 'has no email — skipped')
+      addEmail(emails, p.email)
+    })
+  }
   if (!emails.size) return 0
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#FDFAF4;font-family:sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;"><tr><td align="center"><table width="100%" style="max-width:520px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E8E2D6;"><tr><td style="background:linear-gradient(135deg,#7D1025,#5A0B1B);padding:24px 32px;"><div style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px">Smartious Homeschool · Academic Report</div><div style="font-size:20px;font-weight:800;color:#fff;">New report available</div><div style="font-size:13px;color:rgba(255,255,255,.65);margin-top:4px;">${report.studentName}</div></td></tr><tr><td style="padding:28px 32px;"><p style="font-size:14px;color:#2c2c2c;margin:0 0 20px;line-height:1.65;">A new academic report for <strong>${report.studentName}</strong> has been published — <strong>${report.subject||'General'} · Term ${report.term} · ${report.academicYear}</strong>.</p>${report.overallAverage!==null&&report.overallAverage!==undefined?`<p style="font-size:18px;font-weight:800;color:#7D1025;margin:0 0 20px;">Overall: ${report.overallAverage}% (${report.meanGrade||''})</p>`:''}<a href="https://smartioushomeschool.com/parent" style="display:block;background:#7D1025;color:#fff;text-align:center;padding:13px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;">View & download in parent portal</a></td></tr><tr><td style="background:#FDFAF4;padding:14px 32px;border-top:1px solid #E8E2D6;"><p style="font-size:11px;color:#999;margin:0;">© Smartious Homeschool Global</p></td></tr></table></td></tr></table></body></html>`
   let sent = 0
