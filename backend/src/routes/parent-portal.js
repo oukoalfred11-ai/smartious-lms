@@ -371,6 +371,24 @@ async function assertAccess(reqUser, student) {
 
 // ── Class reminder function ───────────────────────────────
 // Called by cron every minute; sends email 30min before class starts
+//
+// The matching window below is +/-2 minutes, so a given class matches on
+// five consecutive one-minute sweeps. Without a record of what has already
+// gone out, the family received the same reminder five times. This cache
+// remembers which class occurrences have been reminded, keyed by
+// entry + date + start time, and is pruned after 24h so it cannot grow
+// unbounded. It is in-memory by design: a process restart may allow one
+// repeat, which is far safer than adding writes to the timetable on a
+// path that runs every minute.
+const remindedOccurrences = new Map()   // key -> timestamp sent
+
+function pruneRemindedOccurrences(nowMs) {
+  const DAY = 24 * 60 * 60 * 1000
+  for (const [key, at] of remindedOccurrences) {
+    if (nowMs - at > DAY) remindedOccurrences.delete(key)
+  }
+}
+
 async function sendClassReminders() {
   const t = getTransporter()
   if (!t) return 0
@@ -395,6 +413,11 @@ async function sendClassReminders() {
     return Math.abs(slotMins - target) <= 2
   })
 
+  pruneRemindedOccurrences(now.getTime())
+  // Identifies one specific occurrence of a class: this entry, on this
+  // date, at this start time.
+  const occurrenceDate = eat.toISOString().slice(0, 10)
+
   let sent = 0
   for (const entry of upcoming) {
     // The same student can appear twice on one entry if the timetable was
@@ -407,6 +430,12 @@ async function sendClassReminders() {
       seenStudents.add(String(student._id))
 
       if (student.onBreak) continue // paused students receive no class reminders
+
+      // Already reminded for this exact class occurrence? Skip. Recorded
+      // only after a successful send below, so a transient SMTP failure
+      // still gets retried on the next sweep.
+      const occurrenceKey = `${entry._id}:${occurrenceDate}:${entry.startTime}:${student._id}`
+      if (remindedOccurrences.has(occurrenceKey)) continue
 
       // Student AND parents. The previous version collected parent
       // addresses only, and pushed whatever the linked parent records
@@ -430,6 +459,7 @@ async function sendClassReminders() {
           subject: `Class reminder — ${entry.subject} starts in 30 minutes`,
           html:    buildClassReminderEmail(student, entry),
         })
+        remindedOccurrences.set(occurrenceKey, Date.now())
         sent++
         console.log(`[class reminder] ${entry.subject} \u00B7 ${student.firstName} ${student.lastName} ` +
                     `\u2192 ${describeRecipients(resolved)}`)
