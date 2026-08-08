@@ -321,6 +321,13 @@
     <lastmod>2026-08-08</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-pt" href="https://smartioushomeschool.com/online-school/portugal"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/czech-republic</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-cz" href="https://smartioushomeschool.com/online-school/czech-republic"/>
+  </url>
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
        ═══════════════════════════════════════════════════════════ -->
@@ -396,6 +403,24 @@
        ═══════════════════════════════════════════════════════════ -->
   <!-- Europe 2026 articles -->
   <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-czech-republic-age-15</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-czech-prague-fees</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-czech-skoda-families</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-portugal-degree-rule</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
@@ -446,6 +471,43 @@
   <url>
     <loc>https://smartioushomeschool.com/blog/virtual-school-france-2022-rules</loc>
     <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <!-- Czech Republic cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-prague-cz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-brno-cz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-ostrava-cz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-plzen-cz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-olomouc-cz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-mlada-boleslav-cz</loc>
+    <priority>0.8</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-08</lastmod>
   </url>
