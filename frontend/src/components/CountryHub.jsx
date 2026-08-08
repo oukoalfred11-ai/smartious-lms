@@ -91,6 +91,7 @@ const HREFLANG_MAP = {
   france:'en-fr',
   italy:'en-it',
   poland:'en-pl',
+  portugal:'en-pt',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
