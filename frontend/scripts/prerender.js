@@ -73,6 +73,13 @@ const ROUTES_TO_PRERENDER = [
   '/global', '/contact', '/faq', '/enroll', '/consult',
   '/calendar', '/events', '/gallery', '/activities',
   '/blog', '/test-prep', '/languages', '/study-abroad',
+  // Europe 2026 article batch — prerendered so the SEO articles actually index
+  '/blog/homeschooling-europe-2026-compared',
+  '/blog/homeschooling-italy-age-16-rule',
+  '/blog/online-school-poland-cambridge-track',
+  '/blog/online-school-spain-visa-families',
+  '/blog/virtual-school-denmark-guide',
+  '/blog/virtual-school-france-2022-rules',
   '/homeschool', '/tuition', '/tuition-nairobi', '/tuition-uae',
   '/tuition-uk',
   '/iufp', '/pre-university',
