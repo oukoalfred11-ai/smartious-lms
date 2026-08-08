@@ -307,6 +307,13 @@
     <lastmod>2026-08-07</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-it" href="https://smartioushomeschool.com/online-school/italy"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/poland</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-pl" href="https://smartioushomeschool.com/online-school/poland"/>
+  </url>
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
        ═══════════════════════════════════════════════════════════ -->
@@ -380,6 +387,43 @@
   <!-- ═══════════════════════════════════════════════════════════
        CITY PAGES — v2 country hubs
        ═══════════════════════════════════════════════════════════ -->
+  <!-- Poland cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-warsaw-pl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-krakow-pl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-wroclaw-pl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-gdansk-pl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-poznan-pl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-katowice-pl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
   <!-- Italy cities -->
   <url>
     <loc>https://smartioushomeschool.com/homeschool-milan-it</loc>
