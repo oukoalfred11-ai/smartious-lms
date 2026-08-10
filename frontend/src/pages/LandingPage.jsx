@@ -40,6 +40,7 @@ import { NORWAY_CITIES, NORWAY_COUNTRY } from '../data/norwayCities.js'
 import { NZ_CITIES, NZ_COUNTRY } from '../data/nzCities.js'
 import { AUSTRIA_CITIES, AUSTRIA_COUNTRY } from '../data/austriaCities.js'
 import { HUNGARY_CITIES, HUNGARY_COUNTRY } from '../data/hungaryCities.js'
+import { FINLAND_CITIES, FINLAND_COUNTRY } from '../data/finlandCities.js'
 import { TURKEY_CITIES, TURKEY_COUNTRY } from '../data/turkeyCities.js'
 import { KUWAIT_CITIES, KUWAIT_COUNTRY } from '../data/kuwaitCities.js'
 import { OMAN_CITIES, OMAN_COUNTRY } from '../data/omanCities.js'
@@ -958,7 +959,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1399,6 +1400,10 @@ const PAGE_META = {
   'homeschooling-denmark': {
     title: 'Online School, Virtual School & Homeschool Denmark | Cambridge IGCSE, A-Level, IB — Smartious',
     desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Copenhagen, Aarhus, Odense, Aalborg, Esbjerg, and Billund. Denmark\'s home-education law is genuinely permissive — notification-based under Grundloven §76. From USD 400/month.',
+  },
+  'homeschooling-finland': {
+    title: 'Online School, Virtual School & Homeschool Finland | Cambridge IGCSE, A-Level, IB — Smartious',
+    desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Helsinki, Espoo, Tampere, Turku, Oulu, and Lapland. Home education needs no permission in Finland — a notification suffices, with examining-teacher monitoring — and the 2021 extension to 18 is planned honestly. From USD 400/month.',
   },
   'homeschooling-hungary': {
     title: 'Online School, Virtual School & Homeschool Hungary | Cambridge IGCSE, A-Level, IB — Smartious',
@@ -1922,6 +1927,7 @@ export default function LandingPage() {
   const [currentNZCity, setCurrentNZCity] = useState(null)
   const [currentAustriaCity, setCurrentAustriaCity] = useState(null)
   const [currentHungaryCity, setCurrentHungaryCity] = useState(null)
+  const [currentFinlandCity, setCurrentFinlandCity] = useState(null)
   const [currentTurkeyCity, setCurrentTurkeyCity] = useState(null)
   const [currentKuwaitCity, setCurrentKuwaitCity] = useState(null)
   const [currentOmanCity, setCurrentOmanCity] = useState(null)
@@ -2648,6 +2654,12 @@ export default function LandingPage() {
           setPage('hungary-city')
           return
         }
+        const finlandCity = FINLAND_CITIES.find(c => c.slug === slug)
+        if (finlandCity) {
+          setCurrentFinlandCity(slug)
+          setPage('finland-city')
+          return
+        }
         const turkeyCity = TURKEY_CITIES.find(c => c.slug === slug)
         if (turkeyCity) {
           setCurrentTurkeyCity(slug)
@@ -2892,6 +2904,10 @@ export default function LandingPage() {
       }
       if (slug === 'hungary') {
         setPage('homeschooling-hungary')
+        return
+      }
+      if (slug === 'finland') {
+        setPage('homeschooling-finland')
         return
       }
       if (slug === 'turkey') {
@@ -3344,6 +3360,12 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'finland-city' && currentFinlandCity) {
+    const c = FINLAND_CITIES.find(x => x.slug === currentFinlandCity)
+    if (c) {
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
+    }
   } else if (page === 'turkey-city' && currentTurkeyCity) {
     const c = TURKEY_CITIES.find(x => x.slug === currentTurkeyCity)
     if (c) {
@@ -3461,6 +3483,7 @@ export default function LandingPage() {
   if (page === 'homeschooling-new-zealand') canonicalOverride = '/online-school/new-zealand'
   if (page === 'homeschooling-austria') canonicalOverride = '/online-school/austria'
   if (page === 'homeschooling-hungary') canonicalOverride = '/online-school/hungary'
+  if (page === 'homeschooling-finland') canonicalOverride = '/online-school/finland'
   if (page === 'homeschooling-turkey') canonicalOverride = '/online-school/turkey'
   if (page === 'homeschooling-kuwait') canonicalOverride = '/online-school/kuwait'
   if (page === 'homeschooling-oman') canonicalOverride = '/online-school/oman'
@@ -14235,6 +14258,13 @@ export default function LandingPage() {
                 SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
                 GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
             )}
+            {page === 'homeschooling-finland' && (
+              <CountryHub country={FINLAND_COUNTRY} cities={FINLAND_CITIES}
+                setCurrentCity={setCurrentFinlandCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
             {page === 'homeschooling-japan' && (
         <CountryHub
           country={JAPAN_COUNTRY}
@@ -14509,6 +14539,14 @@ export default function LandingPage() {
           country={HUNGARY_COUNTRY}
           cities={HUNGARY_CITIES}
           currentCitySlug={currentHungaryCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
+      {page === 'finland-city' && currentFinlandCity && (
+        <CountryCityPage
+          country={FINLAND_COUNTRY}
+          cities={FINLAND_CITIES}
+          currentCitySlug={currentFinlandCity}
           P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
