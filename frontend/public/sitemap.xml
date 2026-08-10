@@ -342,6 +342,13 @@
     <lastmod>2026-08-08</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-se" href="https://smartioushomeschool.com/online-school/sweden"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/netherlands</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-nl" href="https://smartioushomeschool.com/online-school/netherlands"/>
+  </url>
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
        ═══════════════════════════════════════════════════════════ -->
@@ -523,6 +530,43 @@
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-08</lastmod>
+  </url>
+  <!-- Netherlands cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-amsterdam-nl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-the-hague-nl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-rotterdam-nl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-utrecht-nl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-eindhoven-nl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-groningen-nl</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
   </url>
   <!-- Sweden cities -->
   <url>
