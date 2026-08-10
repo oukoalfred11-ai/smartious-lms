@@ -97,6 +97,7 @@ const HREFLANG_MAP = {
   sweden:'en-se',
   netherlands:'en-nl',
   norway:'en-no',
+  'new-zealand':'en-nz',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
