@@ -356,6 +356,13 @@
     <lastmod>2026-08-10</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-no" href="https://smartioushomeschool.com/online-school/norway"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/new-zealand</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-nz" href="https://smartioushomeschool.com/online-school/new-zealand"/>
+  </url>
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
        ═══════════════════════════════════════════════════════════ -->
@@ -430,6 +437,24 @@
        CITY PAGES — v2 country hubs
        ═══════════════════════════════════════════════════════════ -->
   <!-- Europe 2026 articles -->
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-new-zealand-exemption-guide</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-new-zealand-cambridge-track</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-new-zealand-regions-and-after-16</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
   <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-norway-notification-and-tilsyn</loc>
     <priority>0.7</priority>
@@ -555,6 +580,43 @@
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-08</lastmod>
+  </url>
+  <!-- New Zealand cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-auckland-nz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-wellington-nz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-christchurch-nz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-hamilton-nz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-tauranga-nz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-queenstown-nz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
   </url>
   <!-- Norway cities -->
   <url>
