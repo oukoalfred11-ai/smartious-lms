@@ -349,6 +349,13 @@
     <lastmod>2026-08-10</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-nl" href="https://smartioushomeschool.com/online-school/netherlands"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/norway</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-no" href="https://smartioushomeschool.com/online-school/norway"/>
+  </url>
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
        ═══════════════════════════════════════════════════════════ -->
@@ -423,6 +430,24 @@
        CITY PAGES — v2 country hubs
        ═══════════════════════════════════════════════════════════ -->
   <!-- Europe 2026 articles -->
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-norway-notification-and-tilsyn</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-norway-energy-families</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-norway-two-nordic-answers</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
   <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-sweden-what-is-actually-legal</loc>
     <priority>0.7</priority>
@@ -530,6 +555,43 @@
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-08</lastmod>
+  </url>
+  <!-- Norway cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-oslo-no</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-stavanger-no</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-bergen-no</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-trondheim-no</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-tromso-no</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kristiansand-no</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-10</lastmod>
   </url>
   <!-- Netherlands cities -->
   <url>
