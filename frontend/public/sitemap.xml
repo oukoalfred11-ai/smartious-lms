@@ -328,6 +328,20 @@
     <lastmod>2026-08-08</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-cz" href="https://smartioushomeschool.com/online-school/czech-republic"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/belgium</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-be" href="https://smartioushomeschool.com/online-school/belgium"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/sweden</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-se" href="https://smartioushomeschool.com/online-school/sweden"/>
+  </url>
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
        ═══════════════════════════════════════════════════════════ -->
@@ -403,6 +417,42 @@
        ═══════════════════════════════════════════════════════════ -->
   <!-- Europe 2026 articles -->
   <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-sweden-what-is-actually-legal</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-sweden-after-16</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-sweden-queues-and-supplements</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-belgium-checkpoint-exams</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-belgium-eu-nato-families</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-belgium-status-question</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-czech-republic-age-15</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
@@ -471,6 +521,80 @@
   <url>
     <loc>https://smartioushomeschool.com/blog/virtual-school-france-2022-rules</loc>
     <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <!-- Sweden cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-stockholm-se</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-gothenburg-se</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-malmo-se</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-lund-se</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-uppsala-se</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-lulea-se</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <!-- Belgium cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-brussels-be</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-antwerp-be</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-ghent-be</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-leuven-be</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-waterloo-be</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-08</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-mons-be</loc>
+    <priority>0.8</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-08</lastmod>
   </url>
