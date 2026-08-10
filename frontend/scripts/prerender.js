@@ -147,7 +147,6 @@ const ROUTES_TO_PRERENDER = [
   /* Country detail pages (lighter template, from COUNTRIES list) */
   '/online-school/usa',
   '/online-school/canada',
-  '/online-school/uk',
   '/online-school/australia',
   '/online-school/nigeria',
   '/online-school/tanzania',
