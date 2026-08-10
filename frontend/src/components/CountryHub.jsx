@@ -100,6 +100,7 @@ const HREFLANG_MAP = {
   'new-zealand':'en-nz',
   austria:'en-at',
   hungary:'en-hu',
+  finland:'en-fi',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
