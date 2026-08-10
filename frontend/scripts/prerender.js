@@ -79,6 +79,8 @@ const ROUTES_TO_PRERENDER = [
   '/blog/online-school-poland-cambridge-track',
   '/blog/online-school-spain-visa-families',
   '/blog/virtual-school-denmark-guide',
+  '/blog/homeschooling-denmark-grundlov-guide',
+  '/blog/online-school-denmark-corporate-families',
   '/blog/virtual-school-france-2022-rules',
   '/blog/homeschooling-portugal-degree-rule',
   '/blog/online-school-portugal-cascais-waitlists',
