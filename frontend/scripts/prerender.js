@@ -101,6 +101,9 @@ const ROUTES_TO_PRERENDER = [
   '/blog/homeschooling-austria-three-dates',
   '/blog/online-school-austria-vienna-un-families',
   '/blog/virtual-school-austria-dual-track',
+  '/blog/homeschooling-hungary-egyeni-munkarend',
+  '/blog/online-school-hungary-auto-corridor',
+  '/blog/virtual-school-hungary-after-16',
   '/homeschool', '/tuition', '/tuition-nairobi', '/tuition-uae',
   '/tuition-uk',
   '/iufp', '/pre-university',
@@ -140,6 +143,7 @@ const ROUTES_TO_PRERENDER = [
   '/online-school/norway',
   '/online-school/new-zealand',
   '/online-school/austria',
+  '/online-school/hungary',
   '/online-school/spain',
   '/online-school/denmark',
   '/online-school/france',
@@ -181,7 +185,7 @@ const ROUTES_TO_PRERENDER = [
    US city links each, which would blow past MAX_URLS instantly.
    US/Canada city pages fall back to SPA rendering (Google's JS
    second-pass crawl will still index them via sitemap.xml). */
-const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden|norway|new-zealand|austria)$/
+const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden|norway|new-zealand|austria|hungary)$/
 const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)[a-z0-9-]+$/
 
 /* ────────────────────────────────────────────────────────────────
