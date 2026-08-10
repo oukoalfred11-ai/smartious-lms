@@ -18,6 +18,7 @@
 /us-families             /online-school/usa          301
 /ca-families             /online-school/canada       301
 /homeschooling-kenya     /online-school/kenya        301
+/online-school/uk        /online-school/united-kingdom 301
 
 # ─── Kenya city URL consolidation ────────────────────────────────
 # Legacy /homeschooling/<slug> city URLs 301 to the canonical
