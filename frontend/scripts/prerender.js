@@ -86,6 +86,12 @@ const ROUTES_TO_PRERENDER = [
   '/blog/homeschooling-czech-republic-age-15',
   '/blog/online-school-czech-prague-fees',
   '/blog/virtual-school-czech-skoda-families',
+  '/blog/homeschooling-belgium-checkpoint-exams',
+  '/blog/online-school-belgium-eu-nato-families',
+  '/blog/virtual-school-belgium-status-question',
+  '/blog/homeschooling-sweden-what-is-actually-legal',
+  '/blog/online-school-sweden-after-16',
+  '/blog/virtual-school-sweden-queues-and-supplements',
   '/homeschool', '/tuition', '/tuition-nairobi', '/tuition-uae',
   '/tuition-uk',
   '/iufp', '/pre-university',
@@ -129,6 +135,8 @@ const ROUTES_TO_PRERENDER = [
   '/online-school/poland',
   '/online-school/portugal',
   '/online-school/czech-republic',
+  '/online-school/belgium',
+  '/online-school/sweden',
 
   /* Topical cluster articles (Malaysia — will scale to other countries) */
   '/online-igcse-malaysia',
@@ -162,7 +170,7 @@ const ROUTES_TO_PRERENDER = [
    US city links each, which would blow past MAX_URLS instantly.
    US/Canada city pages fall back to SPA rendering (Google's JS
    second-pass crawl will still index them via sitemap.xml). */
-const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic)$/
+const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden)$/
 const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)[a-z0-9-]+$/
 
 /* ────────────────────────────────────────────────────────────────
