@@ -109,6 +109,7 @@ const HREFLANG_MAP = {
   luxembourg:'en-lu',
   switzerland:'en-ch',
   slovakia:'en-sk',
+  slovenia:'en-si',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
