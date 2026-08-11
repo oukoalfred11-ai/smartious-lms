@@ -66,6 +66,8 @@ import { ALGERIA_CITIES, ALGERIA_COUNTRY } from '../data/algeriaCities.js'
 import { TUNISIA_CITIES, TUNISIA_COUNTRY } from '../data/tunisiaCities.js'
 import { MAURITIUS_CITIES, MAURITIUS_COUNTRY } from '../data/mauritiusCities.js'
 import { GHANA_CITIES, GHANA_COUNTRY } from '../data/ghanaCities.js'
+import { ANGOLA_CITIES, ANGOLA_COUNTRY } from '../data/angolaCities.js'
+import { DRC_CITIES, DRC_COUNTRY } from '../data/drcCities.js'
 import { TURKEY_CITIES, TURKEY_COUNTRY } from '../data/turkeyCities.js'
 import { KUWAIT_CITIES, KUWAIT_COUNTRY } from '../data/kuwaitCities.js'
 import { OMAN_CITIES, OMAN_COUNTRY } from '../data/omanCities.js'
@@ -984,7 +986,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschooling-montenegro','montenegro-city','homeschooling-bosnia','bosnia-city','homeschooling-kosovo','kosovo-city','homeschooling-zambia','zambia-city','homeschooling-zimbabwe','zimbabwe-city','homeschooling-botswana','botswana-city','homeschooling-namibia','namibia-city','homeschooling-algeria','algeria-city','homeschooling-tunisia','tunisia-city','homeschooling-mauritius','mauritius-city','homeschooling-ghana','ghana-city','homeschooling-angola','angola-city','homeschooling-drc','drc-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1441,6 +1443,14 @@ const PAGE_META = {
   'homeschooling-mauritius': {
     title: 'Online School & Cambridge Tutoring Mauritius | IGCSE, A-Level, IB \u2014 Smartious',
     desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Port Louis, Eb\u00e8ne and Grand Baie. Cambridge is already the national system here \u2014 we add live small-group teaching in the subjects a timetable cannot staff. From USD 400/month.',
+  },
+  'homeschooling-angola': {
+    title: 'Online School & International Curriculum Angola | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Luanda, Lobito and Cabinda. Compulsory education covers inicia\u00e7\u00e3o, primary and the I Ciclo \u2014 the II Ciclo years sit outside it. Portuguese kept alongside. From USD 400/month.',
+  },
+  'homeschooling-drc': {
+    title: 'Online School & International Curriculum DR Congo | Cambridge IGCSE, A-Level, IB \u2014 Smartious',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Kinshasa, Lubumbashi and Kolwezi. The loi-cadre\'s parental liberties stated accurately, French kept alongside, and the cobalt belt reached at last. From USD 400/month.',
   },
   'homeschooling-ghana': {
     title: 'Online School & Cambridge Tutoring Ghana | IGCSE, A-Level, IB \u2014 Smartious',
@@ -2078,6 +2088,8 @@ export default function LandingPage() {
   const [currentTunisiaCity, setCurrentTunisiaCity] = useState(null)
   const [currentMauritiusCity, setCurrentMauritiusCity] = useState(null)
   const [currentGhanaCity, setCurrentGhanaCity] = useState(null)
+  const [currentAngolaCity, setCurrentAngolaCity] = useState(null)
+  const [currentDrcCity, setCurrentDrcCity] = useState(null)
   const [currentTurkeyCity, setCurrentTurkeyCity] = useState(null)
   const [currentKuwaitCity, setCurrentKuwaitCity] = useState(null)
   const [currentOmanCity, setCurrentOmanCity] = useState(null)
@@ -2960,6 +2972,18 @@ export default function LandingPage() {
           setPage('ghana-city')
           return
         }
+        const angolaCity = ANGOLA_CITIES.find(c => c.slug === slug)
+        if (angolaCity) {
+          setCurrentAngolaCity(slug)
+          setPage('angola-city')
+          return
+        }
+        const drcCity = DRC_CITIES.find(c => c.slug === slug)
+        if (drcCity) {
+          setCurrentDrcCity(slug)
+          setPage('drc-city')
+          return
+        }
         const turkeyCity = TURKEY_CITIES.find(c => c.slug === slug)
         if (turkeyCity) {
           setCurrentTurkeyCity(slug)
@@ -3308,6 +3332,14 @@ export default function LandingPage() {
       }
       if (slug === 'ghana') {
         setPage('homeschooling-ghana')
+        return
+      }
+      if (slug === 'angola') {
+        setPage('homeschooling-angola')
+        return
+      }
+      if (slug === 'drc') {
+        setPage('homeschooling-drc')
         return
       }
       if (slug === 'turkey') {
@@ -3916,6 +3948,18 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'angola-city' && currentAngolaCity) {
+    const c = ANGOLA_CITIES.find(x => x.slug === currentAngolaCity)
+    if (c) {
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
+    }
+  } else if (page === 'drc-city' && currentDrcCity) {
+    const c = DRC_CITIES.find(x => x.slug === currentDrcCity)
+    if (c) {
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
+    }
   } else if (page === 'turkey-city' && currentTurkeyCity) {
     const c = TURKEY_CITIES.find(x => x.slug === currentTurkeyCity)
     if (c) {
@@ -4059,6 +4103,8 @@ export default function LandingPage() {
   if (page === 'homeschooling-tunisia') canonicalOverride = '/online-school/tunisia'
   if (page === 'homeschooling-mauritius') canonicalOverride = '/online-school/mauritius'
   if (page === 'homeschooling-ghana') canonicalOverride = '/online-school/ghana'
+  if (page === 'homeschooling-angola') canonicalOverride = '/online-school/angola'
+  if (page === 'homeschooling-drc') canonicalOverride = '/online-school/drc'
   if (page === 'homeschooling-turkey') canonicalOverride = '/online-school/turkey'
   if (page === 'homeschooling-kuwait') canonicalOverride = '/online-school/kuwait'
   if (page === 'homeschooling-oman') canonicalOverride = '/online-school/oman'
@@ -15015,6 +15061,20 @@ export default function LandingPage() {
                 SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
                 GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
             )}
+            {page === 'homeschooling-angola' && (
+              <CountryHub country={ANGOLA_COUNTRY} cities={ANGOLA_CITIES}
+                setCurrentCity={setCurrentAngolaCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
+            {page === 'homeschooling-drc' && (
+              <CountryHub country={DRC_COUNTRY} cities={DRC_CITIES}
+                setCurrentCity={setCurrentDrcCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
             {page === 'homeschooling-japan' && (
         <CountryHub
           country={JAPAN_COUNTRY}
@@ -15497,6 +15557,22 @@ export default function LandingPage() {
           country={GHANA_COUNTRY}
           cities={GHANA_CITIES}
           currentCitySlug={currentGhanaCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
+      {page === 'angola-city' && currentAngolaCity && (
+        <CountryCityPage
+          country={ANGOLA_COUNTRY}
+          cities={ANGOLA_CITIES}
+          currentCitySlug={currentAngolaCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
+      {page === 'drc-city' && currentDrcCity && (
+        <CountryCityPage
+          country={DRC_COUNTRY}
+          cities={DRC_CITIES}
+          currentCitySlug={currentDrcCity}
           P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
