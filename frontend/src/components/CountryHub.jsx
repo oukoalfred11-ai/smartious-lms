@@ -120,6 +120,8 @@ const HREFLANG_MAP = {
   kosovo:'en-xk',
   zambia:'en-zm',
   zimbabwe:'en-zw',
+  botswana:'en-bw',
+  namibia:'en-na',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
