@@ -104,6 +104,7 @@ const HREFLANG_MAP = {
   greece:'en-gr',
   azerbaijan:'en-az',
   georgia:'en-ge',
+  pakistan:'en-pk',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
