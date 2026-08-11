@@ -128,6 +128,8 @@ const HREFLANG_MAP = {
   ghana:'en-gh',
   angola:'en-ao',
   drc:'en-cd',
+  mexico:'en-mx',
+  brazil:'en-br',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
