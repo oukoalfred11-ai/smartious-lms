@@ -427,6 +427,13 @@
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-lu" href="https://smartioushomeschool.com/online-school/luxembourg"/>
   </url>
   <url>
+    <loc>https://smartioushomeschool.com/online-school/switzerland</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ch" href="https://smartioushomeschool.com/online-school/switzerland"/>
+  </url>
+  <url>
     <loc>https://smartioushomeschool.com/online-school/bahrain</loc>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
@@ -535,6 +542,24 @@
        CITY PAGES — v2 country hubs
        ═══════════════════════════════════════════════════════════ -->
   <!-- Europe 2026 articles -->
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-switzerland-canton-guide</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-switzerland-fee-gap</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-switzerland-alpine-valleys</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
   <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-luxembourg-authorisation-guide</loc>
     <priority>0.7</priority>
@@ -852,6 +877,43 @@
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-08</lastmod>
+  </url>
+  <!-- Switzerland cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-geneva-ch</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-zurich-ch</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-basel-ch</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-zug-ch</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-lausanne-ch</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-alpine-resorts-ch</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
   </url>
   <!-- Luxembourg cities -->
   <url>
