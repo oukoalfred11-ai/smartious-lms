@@ -157,6 +157,9 @@ const ROUTES_TO_PRERENDER = [
   '/blog/homeschooling-bosnia-fourteen-rulebooks',
   '/blog/online-school-bosnia-regions-and-diaspora',
   '/blog/virtual-school-bosnia-supplementary-and-universities',
+  '/blog/homeschooling-kosovo-what-the-law-allows',
+  '/blog/online-school-kosovo-diaspora-and-regions',
+  '/blog/virtual-school-kosovo-after-grade-nine',
   '/homeschool', '/tuition', '/tuition-nairobi', '/tuition-uae',
   '/tuition-uk',
   '/iufp', '/pre-university',
@@ -232,6 +235,7 @@ const ROUTES_TO_PRERENDER = [
   '/online-school/north-macedonia',
   '/online-school/montenegro',
   '/online-school/bosnia-and-herzegovina',
+  '/online-school/kosovo',
   '/online-school/nigeria',
   '/online-school/tanzania',
   '/online-school/uganda',
@@ -253,7 +257,7 @@ const ROUTES_TO_PRERENDER = [
    US city links each, which would blow past MAX_URLS instantly.
    US/Canada city pages fall back to SPA rendering (Google's JS
    second-pass crawl will still index them via sitemap.xml). */
-const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden|norway|new-zealand|austria|hungary|finland|greece|azerbaijan|georgia|pakistan|australia|luxembourg|switzerland|slovakia|slovenia|croatia|serbia|bulgaria|albania|north-macedonia|montenegro|bosnia-and-herzegovina)$/
+const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden|norway|new-zealand|austria|hungary|finland|greece|azerbaijan|georgia|pakistan|australia|luxembourg|switzerland|slovakia|slovenia|croatia|serbia|bulgaria|albania|north-macedonia|montenegro|bosnia-and-herzegovina|kosovo)$/
 const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)[a-z0-9-]+$/
 
 /* ────────────────────────────────────────────────────────────────
