@@ -53,6 +53,8 @@ import { SLOVENIA_CITIES, SLOVENIA_COUNTRY } from '../data/sloveniaCities.js'
 import { CROATIA_CITIES, CROATIA_COUNTRY } from '../data/croatiaCities.js'
 import { SERBIA_CITIES, SERBIA_COUNTRY } from '../data/serbiaCities.js'
 import { BULGARIA_CITIES, BULGARIA_COUNTRY } from '../data/bulgariaCities.js'
+import { ALBANIA_CITIES, ALBANIA_COUNTRY } from '../data/albaniaCities.js'
+import { NORTH_MACEDONIA_CITIES, NORTH_MACEDONIA_COUNTRY } from '../data/northMacedoniaCities.js'
 import { TURKEY_CITIES, TURKEY_COUNTRY } from '../data/turkeyCities.js'
 import { KUWAIT_CITIES, KUWAIT_COUNTRY } from '../data/kuwaitCities.js'
 import { OMAN_CITIES, OMAN_COUNTRY } from '../data/omanCities.js'
@@ -971,7 +973,7 @@ const styles = `
   }
 `
 
-const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
+const PAGES = ['home','about','curricula','curriculum-detail','services','service-detail','us-families','state-landing','city-landing','ca-families','province-landing','ca-city-landing','ab-funding','bc-funding','sk-funding','pricing','programs','activities','events','calendar','gallery','country-detail','compare-detail','tuition-nairobi','tuition-area','tuition-uae','uae-area','tuition-uk','uk-area','homeschooling-kenya','kenya-city','virtual-school-kenya','virtual-school-ukraine','homeschooling-ethiopia','ethiopia-city','homeschooling-rwanda','rwanda-city','homeschooling-south-africa','sa-city','homeschooling-qatar','qatar-city','homeschooling-saudi-arabia','saudi-city','homeschooling-uae','uae-city','homeschooling-egypt','egypt-city','homeschooling-morocco','morocco-city','homeschooling-south-korea','south-korea-city','homeschooling-japan','japan-city','homeschooling-vietnam','vietnam-city','homeschooling-thailand','thailand-city','homeschooling-malaysia','malaysia-city','homeschooling-turkey','turkey-city','homeschooling-kuwait','kuwait-city','homeschooling-oman','oman-city','homeschooling-taiwan','taiwan-city','homeschooling-ireland','ireland-city','homeschooling-united-kingdom','uk-city','homeschooling-india','india-city','homeschooling-germany','germany-city','homeschooling-romania','romania-city','homeschooling-ukraine','ukraine-city','homeschooling-spain','spain-city','homeschooling-denmark','denmark-city','homeschooling-france','france-city','homeschooling-italy','italy-city','homeschooling-poland','poland-city','homeschooling-portugal','portugal-city','homeschooling-czech-republic','czech-city','homeschooling-belgium','belgium-city','homeschooling-sweden','sweden-city','homeschooling-netherlands','netherlands-city','homeschooling-norway','norway-city','homeschooling-new-zealand','new-zealand-city','homeschooling-austria','austria-city','homeschooling-hungary','hungary-city','homeschooling-finland','finland-city','homeschooling-greece','greece-city','homeschooling-azerbaijan','azerbaijan-city','homeschooling-georgia','georgia-city','homeschooling-pakistan','pakistan-city','homeschooling-australia','australia-city','homeschooling-luxembourg','luxembourg-city-page','homeschooling-switzerland','switzerland-city','homeschooling-slovakia','slovakia-city','homeschooling-slovenia','slovenia-city','homeschooling-croatia','croatia-city','homeschooling-serbia','serbia-city','homeschooling-bulgaria','bulgaria-city','homeschooling-albania','albania-city','homeschooling-north-macedonia','north-macedonia-city','homeschool','tuition','iufp','pre-university','test-prep','test-prep-detail','test-prep-ielts','test-prep-toefl','test-prep-pte','test-prep-gre','test-prep-gmat','test-prep-sat','languages','language-detail','study-abroad','study-abroad-detail','faq','blog','teachers','enroll','login','consult','assessment','contact','privacy','terms','cookies','gdpr','article']
 
 // ─────────────────────────────────────────────────────────────────
 // Google Business Profile reviews — Smartious Homeschool & Tuition
@@ -1412,6 +1414,14 @@ const PAGE_META = {
   'homeschooling-denmark': {
     title: 'Online School, Virtual School & Homeschool Denmark | Cambridge IGCSE, A-Level, IB — Smartious',
     desc: 'Online, virtual school & homeschool. Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Copenhagen, Aarhus, Odense, Aalborg, Esbjerg, and Billund. Denmark\'s home-education law is genuinely permissive — notification-based under Grundloven §76. From USD 400/month.',
+  },
+  'homeschooling-north-macedonia': {
+    title: 'Online School, Virtual School & International Curriculum North Macedonia | Cambridge IGCSE, A-Level, IB — Smartious',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Skopje, Tetovo, Bitola, Ohrid, Kumanovo and Štip. Parental-choice homeschooling is not established in North Macedonian law and compulsory education extends through secondary — so we run supplementary alongside your school, and never claim a window that does not exist. From USD 400/month.',
+  },
+  'homeschooling-albania': {
+    title: 'Online School, Virtual School & International Curriculum Albania | Cambridge IGCSE, A-Level, IB — Smartious',
+    desc: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP for families across Tirana, Durrës, Vlorë, Shkodër, Elbasan and Fier. Albanian law makes basic education compulsory from six to sixteen — stated plainly — with supplementary study alongside your enrolment, and the full pathway after sixteen. From USD 400/month.',
   },
   'homeschooling-bulgaria': {
     title: 'Online School, Virtual School & Homeschool Bulgaria | Cambridge IGCSE, A-Level, IB — Smartious',
@@ -2000,6 +2010,8 @@ export default function LandingPage() {
   const [currentCroatiaCity, setCurrentCroatiaCity] = useState(null)
   const [currentSerbiaCity, setCurrentSerbiaCity] = useState(null)
   const [currentBulgariaCity, setCurrentBulgariaCity] = useState(null)
+  const [currentAlbaniaCity, setCurrentAlbaniaCity] = useState(null)
+  const [currentNorthMacedoniaCity, setCurrentNorthMacedoniaCity] = useState(null)
   const [currentTurkeyCity, setCurrentTurkeyCity] = useState(null)
   const [currentKuwaitCity, setCurrentKuwaitCity] = useState(null)
   const [currentOmanCity, setCurrentOmanCity] = useState(null)
@@ -2804,6 +2816,18 @@ export default function LandingPage() {
           setPage('bulgaria-city')
           return
         }
+        const albaniaCity = ALBANIA_CITIES.find(c => c.slug === slug)
+        if (albaniaCity) {
+          setCurrentAlbaniaCity(slug)
+          setPage('albania-city')
+          return
+        }
+        const northMacedoniaCity = NORTH_MACEDONIA_CITIES.find(c => c.slug === slug)
+        if (northMacedoniaCity) {
+          setCurrentNorthMacedoniaCity(slug)
+          setPage('north-macedonia-city')
+          return
+        }
         const turkeyCity = TURKEY_CITIES.find(c => c.slug === slug)
         if (turkeyCity) {
           setCurrentTurkeyCity(slug)
@@ -3100,6 +3124,14 @@ export default function LandingPage() {
       }
       if (slug === 'bulgaria') {
         setPage('homeschooling-bulgaria')
+        return
+      }
+      if (slug === 'albania') {
+        setPage('homeschooling-albania')
+        return
+      }
+      if (slug === 'north-macedonia') {
+        setPage('homeschooling-north-macedonia')
         return
       }
       if (slug === 'turkey') {
@@ -3630,6 +3662,18 @@ export default function LandingPage() {
       metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
       metaDesc  = c.seoDesc || ''
     }
+  } else if (page === 'albania-city' && currentAlbaniaCity) {
+    const c = ALBANIA_CITIES.find(x => x.slug === currentAlbaniaCity)
+    if (c) {
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
+    }
+  } else if (page === 'north-macedonia-city' && currentNorthMacedoniaCity) {
+    const c = NORTH_MACEDONIA_CITIES.find(x => x.slug === currentNorthMacedoniaCity)
+    if (c) {
+      metaTitle = (c.primaryKeyword || c.name) + ' — Online & Virtual School | Cambridge IGCSE & A-Level | Smartious'
+      metaDesc  = c.seoDesc || ''
+    }
   } else if (page === 'turkey-city' && currentTurkeyCity) {
     const c = TURKEY_CITIES.find(x => x.slug === currentTurkeyCity)
     if (c) {
@@ -3760,6 +3804,8 @@ export default function LandingPage() {
   if (page === 'homeschooling-croatia') canonicalOverride = '/online-school/croatia'
   if (page === 'homeschooling-serbia') canonicalOverride = '/online-school/serbia'
   if (page === 'homeschooling-bulgaria') canonicalOverride = '/online-school/bulgaria'
+  if (page === 'homeschooling-albania') canonicalOverride = '/online-school/albania'
+  if (page === 'homeschooling-north-macedonia') canonicalOverride = '/online-school/north-macedonia'
   if (page === 'homeschooling-turkey') canonicalOverride = '/online-school/turkey'
   if (page === 'homeschooling-kuwait') canonicalOverride = '/online-school/kuwait'
   if (page === 'homeschooling-oman') canonicalOverride = '/online-school/oman'
@@ -14625,6 +14671,20 @@ export default function LandingPage() {
                 SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
                 GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
             )}
+            {page === 'homeschooling-albania' && (
+              <CountryHub country={ALBANIA_COUNTRY} cities={ALBANIA_CITIES}
+                setCurrentCity={setCurrentAlbaniaCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
+            {page === 'homeschooling-north-macedonia' && (
+              <CountryHub country={NORTH_MACEDONIA_COUNTRY} cities={NORTH_MACEDONIA_CITIES}
+                setCurrentCity={setCurrentNorthMacedoniaCity}
+                P={P} V={V} nav={nav}
+                SMARTIOUS_RATING={SMARTIOUS_RATING} SMARTIOUS_REVIEWS={SMARTIOUS_REVIEWS}
+                GOOGLE_REVIEWS_URL={GOOGLE_REVIEWS_URL} LEAVE_REVIEW_URL={LEAVE_REVIEW_URL}/>
+            )}
             {page === 'homeschooling-japan' && (
         <CountryHub
           country={JAPAN_COUNTRY}
@@ -15003,6 +15063,22 @@ export default function LandingPage() {
           country={BULGARIA_COUNTRY}
           cities={BULGARIA_CITIES}
           currentCitySlug={currentBulgariaCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
+      {page === 'albania-city' && currentAlbaniaCity && (
+        <CountryCityPage
+          country={ALBANIA_COUNTRY}
+          cities={ALBANIA_CITIES}
+          currentCitySlug={currentAlbaniaCity}
+          P={P} V={V} nav={nav} Footer={Footer}
+        />
+      )}
+      {page === 'north-macedonia-city' && currentNorthMacedoniaCity && (
+        <CountryCityPage
+          country={NORTH_MACEDONIA_COUNTRY}
+          cities={NORTH_MACEDONIA_CITIES}
+          currentCitySlug={currentNorthMacedoniaCity}
           P={P} V={V} nav={nav} Footer={Footer}
         />
       )}
