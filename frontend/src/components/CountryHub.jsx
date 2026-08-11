@@ -124,6 +124,8 @@ const HREFLANG_MAP = {
   namibia:'en-na',
   algeria:'en-dz',
   tunisia:'en-tn',
+  mauritius:'en-mu',
+  ghana:'en-gh',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
