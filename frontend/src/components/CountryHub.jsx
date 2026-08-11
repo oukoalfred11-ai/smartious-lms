@@ -130,6 +130,10 @@ const HREFLANG_MAP = {
   drc:'en-cd',
   mexico:'en-mx',
   brazil:'en-br',
+  colombia:'en-co',
+  argentina:'en-ar',
+  usa:'en-us',
+  canada:'en-ca',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
