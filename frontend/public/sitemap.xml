@@ -412,6 +412,48 @@
     <lastmod>2026-08-11</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-pk" href="https://smartioushomeschool.com/online-school/pakistan"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/australia</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-au" href="https://smartioushomeschool.com/online-school/australia"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/bahrain</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-bh" href="https://smartioushomeschool.com/online-school/bahrain"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/nigeria</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ng" href="https://smartioushomeschool.com/online-school/nigeria"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/somalia</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-so" href="https://smartioushomeschool.com/online-school/somalia"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/tanzania</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-tz" href="https://smartioushomeschool.com/online-school/tanzania"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/uganda</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ug" href="https://smartioushomeschool.com/online-school/uganda"/>
+  </url>
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
        ═══════════════════════════════════════════════════════════ -->
@@ -486,6 +528,24 @@
        CITY PAGES — v2 country hubs
        ═══════════════════════════════════════════════════════════ -->
   <!-- Europe 2026 articles -->
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-australia-state-by-state</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-australia-diaspora-and-returning-families</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-australia-regional-and-remote</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
   <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-pakistan-legal-and-ibcc-guide</loc>
     <priority>0.7</priority>
@@ -767,6 +827,43 @@
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-08</lastmod>
+  </url>
+  <!-- Australia cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-sydney-au</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-melbourne-au</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-brisbane-au</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-perth-au</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-adelaide-au</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-regional-au</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
   </url>
   <!-- Pakistan cities -->
   <url>
