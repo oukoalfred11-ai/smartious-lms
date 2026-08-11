@@ -532,6 +532,20 @@
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-na" href="https://smartioushomeschool.com/online-school/namibia"/>
   </url>
   <url>
+    <loc>https://smartioushomeschool.com/online-school/algeria</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-dz" href="https://smartioushomeschool.com/online-school/algeria"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/tunisia</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-tn" href="https://smartioushomeschool.com/online-school/tunisia"/>
+  </url>
+  <url>
     <loc>https://smartioushomeschool.com/online-school/bahrain</loc>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
@@ -665,6 +679,30 @@
     <lastmod>2026-08-11</lastmod>
   </url>
   <!-- Europe 2026 articles -->
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-algeria-what-the-law-says</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-algeria-french-system-gap</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-tunisia-what-the-law-says</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-tunisia-sfax-sahel-and-diaspora</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
   <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-botswana-what-the-law-says</loc>
     <priority>0.7</priority>
@@ -1226,6 +1264,44 @@
   </url>
   <url>
     <loc>https://smartioushomeschool.com/homeschool-livingstone-zm</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <!-- Algeria cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-algiers-dz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-oran-dz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-hassi-messaoud-dz</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <!-- Tunisia cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-tunis-tn</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-sfax-tn</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-sousse-tn</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-11</lastmod>
