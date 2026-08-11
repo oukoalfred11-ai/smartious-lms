@@ -398,6 +398,13 @@
     <lastmod>2026-08-10</lastmod>
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-az" href="https://smartioushomeschool.com/online-school/azerbaijan"/>
   </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/georgia</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ge" href="https://smartioushomeschool.com/online-school/georgia"/>
+  </url>
   <!-- ═══════════════════════════════════════════════════════════
        COUNTRY HUBS (v1 depth — country-level, no city pages yet)
        ═══════════════════════════════════════════════════════════ -->
@@ -472,6 +479,24 @@
        CITY PAGES — v2 country hubs
        ═══════════════════════════════════════════════════════════ -->
   <!-- Europe 2026 articles -->
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-georgia-eksternati-guide</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-georgia-relocation-families</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-georgia-after-grade-10</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
   <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-azerbaijan-legal-guide</loc>
     <priority>0.7</priority>
@@ -717,6 +742,43 @@
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-08</lastmod>
+  </url>
+  <!-- Georgia (country) cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-tbilisi-ge</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-batumi-ge</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-kutaisi-ge</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-rustavi-ge</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-gudauri-ge</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-telavi-ge</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
   </url>
   <!-- Azerbaijan cities -->
   <url>
