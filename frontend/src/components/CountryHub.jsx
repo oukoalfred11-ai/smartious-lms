@@ -132,6 +132,8 @@ const HREFLANG_MAP = {
   brazil:'en-br',
   colombia:'en-co',
   argentina:'en-ar',
+  chile:'en-cl',
+  peru:'en-pe',
   usa:'en-us',
   canada:'en-ca',
 }
