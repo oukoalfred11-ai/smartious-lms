@@ -126,6 +126,8 @@ const HREFLANG_MAP = {
   tunisia:'en-tn',
   mauritius:'en-mu',
   ghana:'en-gh',
+  angola:'en-ao',
+  drc:'en-cd',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
