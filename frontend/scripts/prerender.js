@@ -133,6 +133,9 @@ const ROUTES_TO_PRERENDER = [
   '/blog/homeschooling-slovakia-individualne-vzdelavanie',
   '/blog/online-school-slovakia-auto-corridor',
   '/blog/virtual-school-slovakia-after-sixteen',
+  '/blog/homeschooling-slovenia-a-right-and-a-reckoning',
+  '/blog/online-school-slovenia-one-city-tier',
+  '/blog/virtual-school-slovenia-after-basic-school',
   '/homeschool', '/tuition', '/tuition-nairobi', '/tuition-uae',
   '/tuition-uk',
   '/iufp', '/pre-university',
@@ -200,6 +203,7 @@ const ROUTES_TO_PRERENDER = [
   '/online-school/luxembourg',
   '/online-school/switzerland',
   '/online-school/slovakia',
+  '/online-school/slovenia',
   '/online-school/nigeria',
   '/online-school/tanzania',
   '/online-school/uganda',
@@ -221,7 +225,7 @@ const ROUTES_TO_PRERENDER = [
    US city links each, which would blow past MAX_URLS instantly.
    US/Canada city pages fall back to SPA rendering (Google's JS
    second-pass crawl will still index them via sitemap.xml). */
-const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden|norway|new-zealand|austria|hungary|finland|greece|azerbaijan|georgia|pakistan|australia|luxembourg|switzerland|slovakia)$/
+const CRAWL_FROM_HUBS_PATTERN = /^\/online-school\/(kenya|ethiopia|rwanda|south-africa|qatar|saudi-arabia|uae|egypt|morocco|south-korea|japan|vietnam|thailand|malaysia|turkey|kuwait|oman|taiwan|ireland|united-kingdom|india|germany|romania|ukraine|netherlands|spain|denmark|france|italy|poland|portugal|czech-republic|belgium|sweden|norway|new-zealand|austria|hungary|finland|greece|azerbaijan|georgia|pakistan|australia|luxembourg|switzerland|slovakia|slovenia)$/
 const CRAWL_LINK_PATTERN = /^\/(?:homeschool-|homeschooling\/)[a-z0-9-]+$/
 
 /* ────────────────────────────────────────────────────────────────
