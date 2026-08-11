@@ -518,6 +518,20 @@
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-zw" href="https://smartioushomeschool.com/online-school/zimbabwe"/>
   </url>
   <url>
+    <loc>https://smartioushomeschool.com/online-school/botswana</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-bw" href="https://smartioushomeschool.com/online-school/botswana"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/namibia</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-na" href="https://smartioushomeschool.com/online-school/namibia"/>
+  </url>
+  <url>
     <loc>https://smartioushomeschool.com/online-school/bahrain</loc>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
@@ -651,6 +665,30 @@
     <lastmod>2026-08-11</lastmod>
   </url>
   <!-- Europe 2026 articles -->
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-botswana-what-the-law-says</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-botswana-diamond-towns-and-beyond</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-namibia-registered-route</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-namibia-coast-and-north</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
   <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-in-europe-country-by-country</loc>
     <priority>0.9</priority>
@@ -1188,6 +1226,44 @@
   </url>
   <url>
     <loc>https://smartioushomeschool.com/homeschool-livingstone-zm</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <!-- Botswana cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-gaborone-bw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-francistown-bw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-jwaneng-bw</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <!-- Namibia cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-windhoek-na</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-walvis-bay-na</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-oshakati-na</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-11</lastmod>
