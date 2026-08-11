@@ -160,6 +160,7 @@ const ROUTES_TO_PRERENDER = [
   '/blog/homeschooling-kosovo-what-the-law-allows',
   '/blog/online-school-kosovo-diaspora-and-regions',
   '/blog/virtual-school-kosovo-after-grade-nine',
+  '/blog/homeschooling-in-europe-country-by-country',
   '/homeschool', '/tuition', '/tuition-nairobi', '/tuition-uae',
   '/tuition-uk',
   '/iufp', '/pre-university',
