@@ -116,6 +116,7 @@ const HREFLANG_MAP = {
   albania:'en-al',
   'north-macedonia':'en-mk',
   montenegro:'en-me',
+  'bosnia-and-herzegovina':'en-ba',
 }
 
 /* Idempotent hreflang tag injection. Adds one rel=alternate tag for
