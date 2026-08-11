@@ -136,6 +136,8 @@ const HREFLANG_MAP = {
   peru:'en-pe',
   ecuador:'en-ec',
   panama:'en-pa',
+  'costa-rica':'en-cr',
+  'dominican-republic':'en-do',
   usa:'en-us',
   canada:'en-ca',
 }
