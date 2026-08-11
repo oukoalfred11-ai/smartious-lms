@@ -616,6 +616,20 @@
     <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-pe" href="https://smartioushomeschool.com/online-school/peru"/>
   </url>
   <url>
+    <loc>https://smartioushomeschool.com/online-school/ecuador</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-ec" href="https://smartioushomeschool.com/online-school/ecuador"/>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/online-school/panama</loc>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+    <xhtml:link xmlns:xhtml="http://www.w3.org/1999/xhtml" rel="alternate" hreflang="en-pa" href="https://smartioushomeschool.com/online-school/panama"/>
+  </url>
+  <url>
     <loc>https://smartioushomeschool.com/online-school/bahrain</loc>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
@@ -749,6 +763,42 @@
     <lastmod>2026-08-11</lastmod>
   </url>
   <!-- Europe 2026 articles -->
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-ecuador-educacion-en-casa</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-ecuador-abierta-vs-en-casa</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-ecuador-coast-and-amazon</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/homeschooling-panama-what-we-can-verify</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/online-school-panama-beyond-the-capital</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/blog/virtual-school-panama-expat-belts</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
   <url>
     <loc>https://smartioushomeschool.com/blog/homeschooling-chile-examenes-libres</loc>
     <priority>0.7</priority>
@@ -1490,6 +1540,68 @@
   </url>
   <url>
     <loc>https://smartioushomeschool.com/homeschool-livingstone-zm</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <!-- Ecuador cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-quito-ec</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-guayaquil-ec</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-cuenca-ec</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-manta-ec</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-coca-ec</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <!-- Panama cities -->
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-panama-city-pa</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-colon-pa</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-david-pa</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-bocas-del-toro-pa</loc>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <lastmod>2026-08-11</lastmod>
+  </url>
+  <url>
+    <loc>https://smartioushomeschool.com/homeschool-coronado-pa</loc>
     <priority>0.8</priority>
     <changefreq>monthly</changefreq>
     <lastmod>2026-08-11</lastmod>
