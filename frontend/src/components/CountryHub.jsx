@@ -151,6 +151,9 @@ const HREFLANG_MAP = {
   lebanon:'en-lb',
   myanmar:'en-mm',
   maldives:'en-mv',
+  china:'en-hk',
+  bangladesh:'en-bd',
+  nepal:'en-np',
   usa:'en-us',
   canada:'en-ca',
 }
