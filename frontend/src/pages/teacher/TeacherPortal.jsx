@@ -3685,41 +3685,83 @@ function ExamsTab({ user, store, setPage, toast }) {
 
   // True if we relaxed the grade filter on the last load (so we can warn).
   const [bankRelaxed, setBankRelaxed] = useState(false)
+  // Bank-scope filters, independent of the exam's own curriculum/grade.
+  // Default to 'all' so a teacher sees the whole subject bank and narrows
+  // deliberately, rather than starting from an empty list.
+  const [bankCurriculum, setBankCurriculum] = useState('all')
+  const [bankGrade, setBankGrade] = useState('all')
+  const [bankTotal, setBankTotal] = useState(0)
+
+  /**
+   * Download the generated paper or mark scheme.
+   *
+   * NOTE: this must go through axios rather than window.open. Auth is a
+   * Bearer token held in localStorage, not a cookie, so a plain window.open
+   * sends no Authorization header and the request 401s. Fetching as a blob
+   * keeps the interceptor and therefore the token.
+   */
+  const [pdfBusy, setPdfBusy] = useState('')
+  const downloadExamPdf = async (kind) => {
+    const id = selectedExam?._id || selectedExam?.id
+    if (!id) return
+    setPdfBusy(kind)
+    try {
+      const res = await api.get(`/exams/${id}/${kind === 'scheme' ? 'scheme' : 'paper'}.pdf`, { responseType: 'blob' })
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }))
+      const a = document.createElement('a')
+      const safe = String(selectedExam.title || 'paper').replace(/[^a-z0-9]+/gi, '-').toLowerCase()
+      a.href = url
+      a.download = `smartious-${safe}${kind === 'scheme' ? '-mark-scheme' : ''}.pdf`
+      document.body.appendChild(a); a.click(); a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 4000)
+    } catch (e) {
+      // A blob-typed error body has to be read back as text to surface the message.
+      let msg = 'Could not generate the PDF.'
+      try { msg = JSON.parse(await e?.response?.data?.text?.() || '{}').message || msg } catch (_) {}
+      toast?.error?.(msg)
+    } finally { setPdfBusy('') }
+  }
 
   const loadBankQuestions = async () => {
     setBankLoading(true)
     setBankRelaxed(false)
     try {
       // Build the strict query first: curriculum + grade + subject + filters
-      const buildParams = (includeGrade) => {
+      // SUBJECT-LED. Curriculum and grade are optional narrowing filters
+      // defaulting to "all". Previously curriculum was pinned to the exam's
+      // own value with no way to change it, so a teacher whose questions sat
+      // under another curriculum saw an empty bank and assumed the picker
+      // was broken. A Mathematics question is a Mathematics question; the
+      // teacher decides whether it suits the class.
+      const buildParams = (opts = {}) => {
         const p = new URLSearchParams()
-        if (formCurriculum)        p.append('curriculum', formCurriculum)
-        if (includeGrade && formYear) p.append('grade', formYear)
         const subj = bankFilter.subject === 'all' ? formSubject : bankFilter.subject
         if (subj) p.append('subject', subj)
-        if (bankFilter.difficulty && bankFilter.difficulty !== 'all') {
-          p.append('difficulty', bankFilter.difficulty)
-        }
+        if (!opts.anyCurriculum && bankCurriculum && bankCurriculum !== 'all') p.append('curriculum', bankCurriculum)
+        if (!opts.anyGrade && bankGrade && bankGrade !== 'all') p.append('grade', bankGrade)
+        if (bankFilter.difficulty && bankFilter.difficulty !== 'all') p.append('difficulty', bankFilter.difficulty)
         if (bankFilter.search?.trim()) p.append('q', bankFilter.search.trim())
-        p.append('limit', '100')
+        p.append('limit', '200')
         return p
       }
 
-      // Try strict first
-      let { data } = await api.get('/questions?' + buildParams(true).toString())
+      let { data } = await api.get('/questions?' + buildParams().toString())
       let questions = (data?.success ? data.questions : []) || []
+      let total = data?.total || questions.length
 
-      // If empty, retry without the grade filter so teachers can still see
-      // questions tagged with a slightly different grade string.
-      if (questions.length === 0 && formYear) {
-        const retry = await api.get('/questions?' + buildParams(false).toString())
-        const retryQs = (retry?.data?.success ? retry.data.questions : []) || []
-        if (retryQs.length > 0) {
-          questions = retryQs
-          setBankRelaxed(true)
-        }
+      // Widen in steps rather than showing nothing, and say that we did.
+      if (questions.length === 0 && bankGrade !== 'all') {
+        const r = await api.get('/questions?' + buildParams({ anyGrade: true }).toString())
+        const rq = (r?.data?.success ? r.data.questions : []) || []
+        if (rq.length) { questions = rq; total = r.data.total || rq.length; setBankRelaxed('grade') }
+      }
+      if (questions.length === 0 && bankCurriculum !== 'all') {
+        const r = await api.get('/questions?' + buildParams({ anyGrade: true, anyCurriculum: true }).toString())
+        const rq = (r?.data?.success ? r.data.questions : []) || []
+        if (rq.length) { questions = rq; total = r.data.total || rq.length; setBankRelaxed('all') }
       }
 
+      setBankTotal(total)
       setBankQuestions(questions)
     } catch (e) {
       console.error('[exam-bank] load failed:', e?.response?.data?.message || e.message)
@@ -3737,7 +3779,7 @@ function ExamsTab({ user, store, setPage, toast }) {
     const handle = setTimeout(loadBankQuestions, 250)
     return () => clearTimeout(handle)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, createStep, bankFilter.subject, bankFilter.difficulty, bankFilter.search, formSubject, formCurriculum, formYear])
+  }, [view, createStep, bankFilter.subject, bankFilter.difficulty, bankFilter.search, formSubject, bankCurriculum, bankGrade])
 
   // ── Students — loaded from /users?role=student API ──
   const [allStudents, setAllStudents] = useState([])
@@ -3788,6 +3830,9 @@ function ExamsTab({ user, store, setPage, toast }) {
     setExamsLoading(true)
     try {
       const { data } = await api.get('/exams/teacher/list')
+      // teacher/list now returns submissionCounts per exam, so the list
+      // itself shows where work is waiting instead of the teacher having
+      // to open every exam to find out.
       if (data?.success) {
         setExams(data.data?.exams || [])
       } else {
@@ -4113,6 +4158,85 @@ function ExamsTab({ user, store, setPage, toast }) {
   }
 
   // ── RENDER: DETAIL VIEW ─────────────────────────────
+  // ── Cross-exam marking queue ───────────────────────────
+  // Scripts awaiting marking across ALL of this teacher's exams,
+  // oldest first, so nothing sits unmarked because it was set weeks ago
+  // and has fallen down the list.
+  const [markingQueue, setMarkingQueue] = useState(null)
+  useEffect(() => {
+    if (view !== 'list') return
+    let cancelled = false
+    api.get('/exams/teacher/marking-queue')
+      .then(r => { if (!cancelled && r.data?.success) setMarkingQueue(r.data.data) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [view])
+
+  const MarkingQueueBanner = () => {
+    if (!markingQueue || !markingQueue.total) return null
+    const { total, oldestWaitingHrs, flaggedCount, queue } = markingQueue
+    return (
+      <div className="card" style={{ padding: 0, marginBottom: 16, overflow: 'hidden', border: '1.5px solid #7D1025' }}>
+        <div style={{ background: '#7D1025', color: '#FBFAF5', padding: '12px 18px',
+                      display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          <strong style={{ fontSize: 13.5 }}>
+            {total} script{total === 1 ? '' : 's'} waiting to be marked
+          </strong>
+          {oldestWaitingHrs >= 24 && (
+            <span style={{ background: '#FEF3C7', color: '#92400E', fontSize: 11, fontWeight: 700,
+                           padding: '3px 9px', borderRadius: 20 }}>
+              oldest waiting {Math.floor(oldestWaitingHrs / 24)} day{Math.floor(oldestWaitingHrs / 24) === 1 ? '' : 's'}
+            </span>
+          )}
+          {flaggedCount > 0 && (
+            <span style={{ background: '#FEE2E2', color: '#B91C1C', fontSize: 11, fontWeight: 700,
+                           padding: '3px 9px', borderRadius: 20 }}>
+              {flaggedCount} flagged
+            </span>
+          )}
+        </div>
+        <div style={{ maxHeight: 210, overflowY: 'auto' }}>
+          {queue.slice(0, 8).map(item => (
+            <div key={String(item.submissionId)}
+              onClick={() => { const ex = exams.find(e => String(e._id || e.id) === String(item.examId)); if (ex) { setSelectedExam(ex); loadSubmissions(item.examId); setView('submissions') } }}
+              style={{ padding: '10px 18px', borderTop: '1px solid var(--border)', cursor: 'pointer',
+                       display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 180 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--s900)' }}>
+                  {item.student?.name || 'Unknown student'}
+                  {item.student?.admissionNumber ? <span style={{ fontWeight: 400, color: 'var(--muted)' }}> · {item.student.admissionNumber}</span> : null}
+                </div>
+                <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 1 }}>
+                  {item.examTitle} · {item.subject} · {item.answerCount} answer{item.answerCount === 1 ? '' : 's'}
+                </div>
+              </div>
+              {item.flagged && (
+                <span title={item.flagReason} style={{ background: '#FEE2E2', color: '#B91C1C',
+                      fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>FLAGGED</span>
+              )}
+              {item.lateSubmission && (
+                <span style={{ background: '#FEF3C7', color: '#92400E',
+                      fontSize: 10.5, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>LATE</span>
+              )}
+              <span style={{ fontSize: 11, color: 'var(--muted)' }}>
+                {item.waitingHrs < 1 ? 'just now' : item.waitingHrs < 24 ? `${item.waitingHrs}h ago` : `${Math.floor(item.waitingHrs / 24)}d ago`}
+              </span>
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: '#7D1025' }}>Mark &rarr;</span>
+            </div>
+          ))}
+        </div>
+        {total > 8 && (
+          <div style={{ padding: '8px 18px', fontSize: 11.5, color: 'var(--muted)', borderTop: '1px solid var(--border)' }}>
+            and {total - 8} more
+          </div>
+        )}
+      </div>
+    )
+  }
+
   if (view === 'detail' && selectedExam) {
     const status = exComputeStatus(selectedExam)
     const subjCol = exSubjColour(selectedExam.subject)
@@ -4150,6 +4274,39 @@ function ExamsTab({ user, store, setPage, toast }) {
           </svg>
           Back to Exams
         </button>
+
+        {/* ── Paper downloads ────────────────────────────────────
+            One standard Smartious paper, generated server-side, so
+            every assessment looks the same regardless of who set it.
+            Opened in a new tab rather than fetched, so the browser
+            handles the download and the auth cookie still applies. */}
+        <div style={{ display:'flex', gap:10, flexWrap:'wrap', marginBottom:14 }}>
+          <button onClick={() => downloadExamPdf('paper')}
+            style={{
+              background:'#7D1025', color:'#FBFAF5', border:'none', borderRadius:8,
+              padding:'10px 18px', fontSize:12.5, fontWeight:700, cursor:'pointer',
+              display:'flex', alignItems:'center', gap:8,
+            }}>
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            {pdfBusy === 'paper' ? 'Generating\u2026' : 'Download question paper'}
+          </button>
+          <button onClick={() => downloadExamPdf('scheme')}
+            style={{
+              background:'#FFF', color:'#7D1025', border:'1.5px solid #7D1025', borderRadius:8,
+              padding:'10px 18px', fontSize:12.5, fontWeight:700, cursor:'pointer',
+              display:'flex', alignItems:'center', gap:8,
+            }}>
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+            {pdfBusy === 'scheme' ? 'Generating\u2026' : 'Download mark scheme'}
+          </button>
+          <span style={{ fontSize:11.5, color:'var(--muted)', alignSelf:'center' }}>
+            Standard Smartious paper &mdash; print or set online, the questions are identical.
+          </span>
+        </div>
 
         {/* Hero */}
         <div className="card" style={{
@@ -4528,14 +4685,56 @@ function ExamsTab({ user, store, setPage, toast }) {
                 </div>
               ) : (
                 <>
+                  {/* Bank scope — curriculum and grade are OPTIONAL filters.
+                      Defaulting both to "all" means a teacher always sees
+                      their whole subject bank first. */}
+                  <div style={{ display:'flex', gap:8, flexWrap:'wrap', alignItems:'center', marginBottom:10 }}>
+                    <span style={{ fontSize:11, fontWeight:700, color:'var(--muted)', letterSpacing:.3 }}>BANK SCOPE</span>
+                    <select value={bankCurriculum} onChange={e => setBankCurriculum(e.target.value)}
+                      style={{ padding:'6px 10px', borderRadius:6, border:'1px solid var(--border)', fontSize:12, background:'#fff' }}>
+                      <option value="all">All curricula</option>
+                      {['CambridgePrimary','CambridgeLowerSec','CambridgeIGCSE','CambridgeALevel',
+                        'EdexcelLowerSec','EdexcelIGCSE','EdexcelALevel','AQALowerSec','AQAGCSE','AQAALevel',
+                        'IBPYP','IBMYP','IBDP','BNC','American','Canadian','KenyaCBC'].map(c => (
+                        <option key={c} value={c}>{c.replace(/([a-z])([A-Z])/g,'$1 $2')}</option>
+                      ))}
+                    </select>
+                    <select value={bankGrade} onChange={e => setBankGrade(e.target.value)}
+                      style={{ padding:'6px 10px', borderRadius:6, border:'1px solid var(--border)', fontSize:12, background:'#fff' }}>
+                      <option value="all">All year groups</option>
+                      {['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6','Year 7','Year 8','Year 9',
+                        'Year 10','Year 11','Year 12','Year 13','Grade 1','Grade 2','Grade 3','Grade 4',
+                        'Grade 5','Grade 6','Grade 7','Grade 8','Grade 9','Grade 10','Grade 11','Grade 12',
+                        'K','Form 1','Form 2','Form 3','Form 4'].map(g => <option key={g} value={g}>{g}</option>)}
+                    </select>
+                    <span style={{ fontSize:11.5, color:'var(--muted)', marginLeft:'auto' }}>
+                      {bankLoading ? 'Loading\u2026'
+                        : bankTotal > bankQuestions.length
+                          ? `Showing ${bankQuestions.length} of ${bankTotal} matching questions`
+                          : `${bankQuestions.length} question${bankQuestions.length === 1 ? '' : 's'}`}
+                    </span>
+                  </div>
+
                   {bankRelaxed && (
                     <div style={{
                       background: '#FEF3C7', border: '1px solid #D97706',
                       borderRadius: 6, padding: '8px 12px', marginBottom: 10,
                       fontSize: 11.5, color: '#92400E',
                     }}>
-                      <strong>Note:</strong> no questions matched <strong>{formYear}</strong> exactly,
-                      so we're showing all <strong>{formSubject}</strong> questions for {formCurriculum} instead.
+                      <strong>Widened your filters.</strong>{' '}
+                      {bankRelaxed === 'grade'
+                        ? <>Nothing matched <strong>{bankGrade}</strong>, so all year groups are shown.</>
+                        : <>Nothing matched that curriculum and year group, so every <strong>{bankFilter.subject === 'all' ? formSubject : bankFilter.subject}</strong> question is shown.</>}
+                    </div>
+                  )}
+
+                  {!bankLoading && bankQuestions.length === 0 && (
+                    <div style={{
+                      background:'#FBFAF5', border:'1px dashed var(--border)', borderRadius:8,
+                      padding:'18px 16px', marginBottom:10, fontSize:12.5, color:'var(--muted)', lineHeight:1.7,
+                    }}>
+                      No questions in the bank for <strong>{bankFilter.subject === 'all' ? formSubject : bankFilter.subject}</strong> yet.
+                      Ask an administrator to import them under Question Bank, then reopen this step.
                     </div>
                   )}
                   <div style={{ maxHeight: 480, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -5386,6 +5585,8 @@ function ExamsTab({ user, store, setPage, toast }) {
       <div style={{ fontSize: 13, color: 'var(--s500)', marginBottom: 10 }}>
         Showing <strong style={{ color: '#7D1025' }}>{filteredExams.length}</strong> of {stats.total} exams
       </div>
+
+      <MarkingQueueBanner />
 
       {examsLoading ? (
         <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--s500)', fontSize: 13.5 }}>
