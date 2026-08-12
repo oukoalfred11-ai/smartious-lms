@@ -47,12 +47,27 @@ async function recomputeAggregates(exam) {
   return exam;
 }
 
+/**
+ * Remove EVERY answer-bearing field before a question is sent to a
+ * student sitting the paper.
+ *
+ * It is not enough to drop correctAnswer. markScheme carries the model
+ * answer, the award points and the accepted alternatives, and
+ * explanation states the answer in prose. Both were previously sent
+ * intact, so any student who opened the network tab could read the
+ * mark scheme while sitting the exam. Every question in the bank has
+ * an explanation, so this affected the entire question bank.
+ *
+ * Applied recursively, because nested parts carry the same fields.
+ */
+function stripAnswerFields(node) {
+  const { correctAnswer, markScheme, explanation, ...rest } = node || {};
+  return { ...rest, parts: stripCorrectAnswersFromParts(node && node.parts) };
+}
+
 function stripCorrectAnswersFromParts(parts) {
   if (!Array.isArray(parts)) return [];
-  return parts.map(p => {
-    const { correctAnswer, ...rest } = p;
-    return { ...rest, parts: stripCorrectAnswersFromParts(p.parts || []) };
-  });
+  return parts.map(p => stripAnswerFields(p));
 }
 
 // Compute status from raw fields. Use after .lean() because the virtual
@@ -153,7 +168,31 @@ router.get('/teacher/list', auth, requireRole('teacher','admin', 'dos'), async (
   try {
     const exams = await Exam.find({ teacherId: req.user._id })
       .sort({ startAt: -1 }).lean();
-    res.json({ success:true, data: { exams: withComputedStatus(exams) } });
+
+    // Attach submission counts so the exam list itself shows where work
+    // is waiting. Without this a teacher has to open every exam to find
+    // out whether anything needs marking, which is how scripts sit
+    // unmarked for weeks.
+    const ids = exams.map(e => e._id);
+    const counts = await ExamSubmission.aggregate([
+      { $match: { examId: { $in: ids } } },
+      { $group: { _id: { examId: '$examId', status: '$status' }, n: { $sum: 1 } } },
+    ]);
+    const byExam = {};
+    counts.forEach(c => {
+      const k = String(c._id.examId);
+      byExam[k] = byExam[k] || { inProgress: 0, awaitingMarking: 0, graded: 0, total: 0 };
+      if (c._id.status === 'in_progress') byExam[k].inProgress += c.n;
+      if (c._id.status === 'submitted')   byExam[k].awaitingMarking += c.n;
+      if (c._id.status === 'graded' || c._id.status === 'returned') byExam[k].graded += c.n;
+      byExam[k].total += c.n;
+    });
+
+    const withCounts = withComputedStatus(exams).map(e => ({
+      ...e,
+      submissionCounts: byExam[String(e._id)] || { inProgress:0, awaitingMarking:0, graded:0, total:0 },
+    }));
+    res.json({ success:true, data: { exams: withCounts } });
   } catch (e) {
     console.error('[exams teacher/list] failed:', e.message);
     res.status(500).json({ success:false, message:'Failed to load exams.' });
@@ -202,6 +241,67 @@ router.delete('/:id', auth, requireRole('teacher','admin', 'dos'), async (req, r
   } catch (e) {
     console.error('[exams DELETE] failed:', e.message);
     res.status(500).json({ success:false, message:'Failed to delete exam.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+// GET /api/exams/teacher/marking-queue
+// Every script awaiting marking across ALL of this teacher's exams,
+// oldest first. The teacher should not have to remember which exam
+// has work waiting — the work comes to them.
+// ═══════════════════════════════════════════════════════════
+router.get('/teacher/marking-queue', auth, requireRole('teacher','admin','dos'), async (req, res) => {
+  try {
+    const examFilter = req.user.role === 'admin' ? {} : { teacherId: req.user._id };
+    const exams = await Exam.find(examFilter).select('title subject curriculum grade totalMarks startAt').lean();
+    const byId = new Map(exams.map(e => [String(e._id), e]));
+
+    const subs = await ExamSubmission.find({
+      examId: { $in: exams.map(e => e._id) },
+      status: 'submitted',
+    })
+      .populate('studentId', 'firstName lastName email admissionNumber grade')
+      .sort({ submittedAt: 1 })            // oldest waiting first
+      .lean();
+
+    const queue = subs.map(sub => {
+      const exam = byId.get(String(sub.examId)) || {};
+      const waitingHrs = sub.submittedAt
+        ? Math.round((Date.now() - new Date(sub.submittedAt).getTime()) / 3600000)
+        : 0;
+      return {
+        submissionId: sub._id,
+        examId: sub.examId,
+        examTitle: exam.title || 'Untitled exam',
+        subject: exam.subject || '',
+        grade: exam.grade || '',
+        totalMarks: exam.totalMarks || sub.maxScore || 0,
+        student: sub.studentId
+          ? { id: sub.studentId._id,
+              name: [sub.studentId.firstName, sub.studentId.lastName].filter(Boolean).join(' '),
+              admissionNumber: sub.studentId.admissionNumber || '' }
+          : null,
+        submittedAt: sub.submittedAt,
+        waitingHrs,
+        answerCount: (sub.answers || []).length,
+        flagged: !!sub.flagged,
+        flagReason: sub.flagReason || '',
+        lateSubmission: !!sub.lateSubmission,
+      };
+    });
+
+    return res.json({
+      success:true,
+      data: {
+        total: queue.length,
+        oldestWaitingHrs: queue.length ? queue[0].waitingHrs : 0,
+        flaggedCount: queue.filter(q => q.flagged).length,
+        queue,
+      },
+    });
+  } catch (e) {
+    console.error('[exams marking-queue] failed:', e.message);
+    return res.status(500).json({ success:false, message:'Failed to load the marking queue.' });
   }
 });
 
@@ -339,6 +439,78 @@ router.get('/student/list', auth, async (req, res) => {
   }
 });
 
+/**
+ * Normalise a client answers[] payload into the persisted shape.
+ * Shared by /save and /submit so a draft and a final submission are
+ * stored identically and a draft can simply be promoted.
+ */
+function normaliseAnswers(answers) {
+  return (answers || []).map(a => ({
+    questionRef: String(a.questionRef || ''),
+    partPath: Array.isArray(a.partPath)
+      ? a.partPath.map(n => Number.isFinite(Number(n)) ? Number(n) : 0)
+      : [],
+    answerText: String(a.answerText || ''),
+    selectedOption: String(a.selectedOption || ''),
+    isCorrect: null,
+    marksAwarded: 0,
+  })).filter(a => a.questionRef.length > 0);
+}
+
+/**
+ * Server-side deadline. The client reports timeSpentSecs, but a client
+ * can report anything, so the authoritative elapsed time is measured
+ * from the submission's own startedAt. A short grace window absorbs
+ * slow connections and the final save-then-submit round trip.
+ */
+const LATE_GRACE_SECS = 120;
+function deadlineState(exam, submission) {
+  const started = new Date(submission.startedAt || Date.now()).getTime();
+  const elapsed = Math.max(0, Math.round((Date.now() - started) / 1000));
+  const allowed = (Number(exam.durationMins) || 60) * 60;
+  return { elapsed, allowed, late: elapsed > allowed + LATE_GRACE_SECS };
+}
+
+// ═══════════════════════════════════════════════════════════
+// POST /api/exams/:id/save — autosave an in-progress attempt
+//
+// Without this a browser crash, a closed tab or a dropped connection
+// loses the entire paper: answers lived only in React state and the
+// only write was the final submit. Students on intermittent
+// connections would lose whole papers. Idempotent — safe to call
+// every few seconds.
+// ═══════════════════════════════════════════════════════════
+router.post('/:id/save', auth, async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success:false, message:'Invalid exam id.' });
+
+    const submission = await ExamSubmission.findOne({ examId: req.params.id, studentId: req.user._id });
+    if (!submission) return res.status(404).json({ success:false, message:'No active attempt.' });
+    if (submission.status === 'submitted' || submission.status === 'graded')
+      return res.status(409).json({ success:false, message:'Already submitted.' });
+
+    submission.answers = normaliseAnswers(req.body.answers);
+    if (Number.isFinite(Number(req.body.tabSwitches)))
+      submission.tabSwitches = Math.max(submission.tabSwitches || 0, Number(req.body.tabSwitches));
+    if (Number.isFinite(Number(req.body.copyPasteAttempts)))
+      submission.copyPasteAttempts = Math.max(submission.copyPasteAttempts || 0, Number(req.body.copyPasteAttempts));
+    submission.lastSavedAt = new Date();
+    await submission.save();
+
+    const exam = await Exam.findById(req.params.id).select('durationMins').lean();
+    const { elapsed, allowed } = deadlineState(exam || {}, submission);
+    return res.json({
+      success:true,
+      data: { savedAt: submission.lastSavedAt, answersSaved: submission.answers.length,
+              secondsRemaining: Math.max(0, allowed - elapsed) },
+    });
+  } catch (e) {
+    console.error('[exams save] failed:', e.message);
+    return res.status(500).json({ success:false, message:'Failed to save.' });
+  }
+});
+
 router.get('/:id/take', auth, async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
@@ -360,18 +532,15 @@ router.get('/:id/take', auth, async (req, res) => {
     let bankQuestions = [];
     try {
       const Question = require('../models/Question');
+      // Defence in depth: exclude the answer fields in the projection as
+      // well as stripping them below, so a future refactor of the mapper
+      // cannot silently reintroduce the leak.
       const rawBank = await Question.find({ _id: { $in: exam.questionIds || [] } })
-        .select('-__v').lean();
-      bankQuestions = rawBank.map(q => {
-        const { correctAnswer, ...rest } = q;
-        return { ...rest, parts: stripCorrectAnswersFromParts(q.parts || []) };
-      });
+        .select('-__v -markScheme -explanation -correctAnswer').lean();
+      bankQuestions = rawBank.map(q => stripAnswerFields(q));
     } catch {}
 
-    const customQuestions = (exam.customQuestions || []).map(q => {
-      const { correctAnswer, ...rest } = q;
-      return { ...rest, parts: stripCorrectAnswersFromParts(q.parts || []) };
-    });
+    const customQuestions = (exam.customQuestions || []).map(q => stripAnswerFields(q));
 
     let submission = await ExamSubmission.findOne({ examId: exam._id, studentId: req.user._id });
     if (!submission) {
@@ -411,30 +580,34 @@ router.post('/:id/submit', auth, async (req, res) => {
     if (submission.status === 'submitted' || submission.status === 'graded')
       return res.status(409).json({ success:false, message:'Already submitted.' });
 
-    const persistedAnswers = (answers || []).map(a => ({
-      questionRef: String(a.questionRef || ''),
-      partPath: Array.isArray(a.partPath)
-        ? a.partPath.map(n => Number.isFinite(Number(n)) ? Number(n) : 0)
-        : [],
-      answerText: String(a.answerText || ''),
-      selectedOption: String(a.selectedOption || ''),
-      isCorrect: null,
-      marksAwarded: 0,
-    })).filter(a => a.questionRef.length > 0);
+    const persistedAnswers = normaliseAnswers(answers);
 
-    submission.answers = persistedAnswers;
+    // Keep whatever was autosaved if the final payload arrives empty
+    // (a connection that died mid-submit should not wipe the draft).
+    submission.answers = persistedAnswers.length ? persistedAnswers : (submission.answers || []);
     submission.status = 'submitted';
     submission.submittedAt = new Date();
-    submission.timeSpentSecs = Number(timeSpentSecs) || 0;
-    submission.tabSwitches = Number(tabSwitches) || 0;
-    submission.copyPasteAttempts = Number(copyPasteAttempts) || 0;
+
+    // Time is measured server-side from startedAt. The client value is
+    // kept only for comparison — a client can report anything.
+    const dl = deadlineState(exam, submission);
+    submission.timeSpentSecs = dl.elapsed;
+    submission.clientReportedSecs = Number(timeSpentSecs) || 0;
+    submission.lateSubmission = dl.late;
+
+    submission.tabSwitches = Math.max(submission.tabSwitches || 0, Number(tabSwitches) || 0);
+    submission.copyPasteAttempts = Math.max(submission.copyPasteAttempts || 0, Number(copyPasteAttempts) || 0);
     submission.totalScore = 0;
     submission.maxScore = exam.totalMarks;
     submission.percentage = 0;
 
-    if (tabSwitches > 3 || copyPasteAttempts > 0) {
+    const flags = [];
+    if (submission.tabSwitches > 3)       flags.push(`${submission.tabSwitches} tab switches`);
+    if (submission.copyPasteAttempts > 0) flags.push(`${submission.copyPasteAttempts} paste attempts`);
+    if (dl.late) flags.push(`submitted ${Math.round((dl.elapsed - dl.allowed) / 60)} min after the time limit`);
+    if (flags.length) {
       submission.flagged = true;
-      submission.flagReason = `Tab switches: ${tabSwitches}, paste attempts: ${copyPasteAttempts}`;
+      submission.flagReason = flags.join('; ');
     }
     await submission.save();
 
@@ -492,6 +665,76 @@ router.post('/submissions/:subId/grade', auth, requireRole('teacher','admin', 'd
   } catch (e) {
     console.error('[exams grade] failed:', e.message);
     res.status(500).json({ success:false, message:'Failed to grade.' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// PDF PAPER + MARK SCHEME
+//   GET /api/exams/:id/paper.pdf   — the question paper
+//   GET /api/exams/:id/scheme.pdf  — the mark scheme (staff only)
+//
+// One standard Smartious house paper, so no teacher has to lay one
+// out and no two assessments look different. Bank questions and any
+// custom questions are merged in the order the exam stores them.
+// ═══════════════════════════════════════════════════════════════════
+async function loadExamQuestions(exam) {
+  const out = [];
+  if (exam.questionIds && exam.questionIds.length) {
+    const docs = await Question.find({ _id: { $in: exam.questionIds } }).lean();
+    const byId = new Map(docs.map(d => [String(d._id), d]));
+    // Preserve the teacher's chosen order rather than Mongo's.
+    exam.questionIds.forEach(id => { const d = byId.get(String(id)); if (d) out.push(d); });
+  }
+  (exam.customQuestions || []).forEach(q => out.push(q));
+  return out;
+}
+
+router.get('/:id/paper.pdf', auth, async (req, res) => {
+  try {
+    const { buildExamPaperPdf } = require('../lib/examPaperPdf');
+    const exam = await Exam.findById(req.params.id).lean();
+    if (!exam) return res.status(404).json({ success:false, message:'Exam not found.' });
+
+    // Students may only download their own paper once it has started.
+    if (req.user.role === 'student') {
+      const assigned = (exam.assignedStudents || []).map(String).includes(String(req.user._id));
+      if (!assigned) return res.status(403).json({ success:false, message:'Not assigned to you.' });
+      if (exam.startAt && new Date(exam.startAt) > new Date())
+        return res.status(403).json({ success:false, message:'This paper is not available yet.' });
+    }
+
+    const questions = await loadExamQuestions(exam);
+    if (!questions.length) return res.status(400).json({ success:false, message:'This exam has no questions yet.' });
+
+    const pdf = await buildExamPaperPdf(exam, questions, {
+      paperNumber: req.query.paper || 'Paper 1',
+      syllabusRef: req.query.ref || '',
+    });
+    const safe = String(exam.title || 'paper').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="smartious-${safe}.pdf"`);
+    return res.end(pdf);
+  } catch (e) {
+    console.error('[exam paper pdf]', e.message);
+    return res.status(500).json({ success:false, message:'Failed to generate the paper.' });
+  }
+});
+
+router.get('/:id/scheme.pdf', auth, requireRole('teacher','admin','dos','ops_manager'), async (req, res) => {
+  try {
+    const { buildMarkSchemePdf } = require('../lib/examPaperPdf');
+    const exam = await Exam.findById(req.params.id).lean();
+    if (!exam) return res.status(404).json({ success:false, message:'Exam not found.' });
+    const questions = await loadExamQuestions(exam);
+    if (!questions.length) return res.status(400).json({ success:false, message:'This exam has no questions yet.' });
+    const pdf = await buildMarkSchemePdf(exam, questions, { paperNumber: req.query.paper || 'Paper 1' });
+    const safe = String(exam.title || 'paper').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="smartious-${safe}-mark-scheme.pdf"`);
+    return res.end(pdf);
+  } catch (e) {
+    console.error('[exam scheme pdf]', e.message);
+    return res.status(500).json({ success:false, message:'Failed to generate the mark scheme.' });
   }
 });
 
