@@ -23335,7 +23335,7 @@ export default function LandingPage() {
               {a.splash && (
                 <img
                   src={a.splash}
-                  alt=""
+                  alt={a.splashAlt || ''}
                   loading="eager"
                   onError={e => { e.currentTarget.style.display = 'none' }}
                   style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',display:'block',zIndex:0}}
@@ -23388,6 +23388,54 @@ export default function LandingPage() {
                     <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{s.p}</p>
                   </section>
                 ))}
+
+                {/* Country links — pillar articles only. Real <a href> so crawlers follow them. */}
+                {a.countryLinks && a.countryLinks.length > 0 && (
+                  <section style={{marginBottom:44}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
+                      <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
+                      {a.countryLinksHeading || 'Every country we teach in this region'}
+                    </h2>
+                    {a.countryLinksIntro && (
+                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:22,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{a.countryLinksIntro}</p>
+                    )}
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
+                      {a.countryLinks.map(cl => (
+                        <a key={cl.slug} href={'/online-school/' + cl.slug}
+                          style={{display:'block',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'16px 18px',textDecoration:'none',color:'inherit',transition:'all .2s'}}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
+                          <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:5,lineHeight:1.3}}>{cl.name}</div>
+                          <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,margin:0}}>{cl.note}</p>
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Article links — pillar/flagship cross-linking. Real <a href> to /blog/. */}
+                {a.articleLinks && a.articleLinks.length > 0 && (
+                  <section style={{marginBottom:44}}>
+                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
+                      <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
+                      {a.articleLinksHeading || 'Read next'}
+                    </h2>
+                    {a.articleLinksIntro && (
+                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:22,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{a.articleLinksIntro}</p>
+                    )}
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
+                      {a.articleLinks.map(al => (
+                        <a key={al.slug} href={'/blog/' + al.slug}
+                          style={{display:'block',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'16px 18px',textDecoration:'none',color:'inherit',transition:'all .2s'}}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
+                          <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:5,lineHeight:1.3}}>{al.name}</div>
+                          <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,margin:0}}>{al.note}</p>
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+                )}
 
                 {/* Conclusion */}
                 <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 32px',marginTop:48,position:'relative',overflow:'hidden'}}>
