@@ -63,6 +63,16 @@ const examSubmissionSchema = new mongoose.Schema({
     index: true,
   },
 
+  // ── Autosave + integrity (added with the /save endpoint) ──
+  // lastSavedAt lets a teacher see that work was captured even if the
+  // student never pressed submit, so a lost connection is recoverable
+  // rather than a zero.
+  lastSavedAt:        { type: Date, default: null },
+  // Server-measured elapsed time is authoritative; the client value is
+  // kept alongside it so a large discrepancy is visible to the marker.
+  clientReportedSecs: { type: Number, default: 0 },
+  lateSubmission:     { type: Boolean, default: false },
+
   startedAt:     { type: Date, default: Date.now },
   submittedAt:   Date,
   gradedAt:      Date,
