@@ -142,6 +142,9 @@ const HREFLANG_MAP = {
   guatemala:'en-gt',
   paraguay:'en-py',
   bolivia:'en-bo',
+  venezuela:'en-ve',
+  'puerto-rico':'en-pr',
+  israel:'en-il',
   usa:'en-us',
   canada:'en-ca',
 }
